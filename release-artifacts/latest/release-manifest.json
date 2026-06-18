@@ -70,7 +70,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:4969929d2a980f8211c1b5c971cb4e851e3657f20df54db4c75eed7f7f92492f",
+        "sha256": "sha256:c4fbc59b29075fb9f7fb95880b127ede51f265fee6c1bd8a9347e89451914d2e",
         "size_bytes": 65023,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -139,7 +139,7 @@
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:7b8d59c9833066d1a20e964c7ffa8ecca45b3d46de3e8282fd6cd47cd17c8b25",
+      "sha256": "sha256:0708e5b708424f63e99d617154be0c98fb46cdf7da0fe69652ad74f6f5111c41",
       "size_bytes": 8479,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:36f78c99371fd0068eae19bcf7e3af4f1a8fb0a8f5e35b299eea39ff09b7952c",
+      "sha256": "sha256:4bb176964c34b541d36fd7f90be4d0e40fb7fd9313107a7da0d3310fc73ea717",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -189,14 +189,14 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:2ebf0c5e25f19188bf83471abd0ca48e5e4b067a7a34c499d0c10179c6023e8e",
-        "size_bytes": 68499,
+        "sha256": "sha256:098e02f1a88567d5f76e24b1c2cdfdfaf89036f12af6f869df2c99d35e760111",
+        "size_bytes": 72486,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-packet-index.md",
-        "sha256": "sha256:69b625eb538fcab729b58c847b9256e2e38f1db2e8676b44587c1ad2cd3b2f19",
-        "size_bytes": 33768
+        "sha256": "sha256:39561a71a340e6da754dfa672a326fe7d9249b93e474024886499857740daa3a",
+        "size_bytes": 34407
       }
     },
     "release_evidence_live_audit_report_archive": {
@@ -215,7 +215,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:3d156b2f69c889b9fe9da5def42040beb59f3dda1fdd83dc63b12addf152c64b",
+        "sha256": "sha256:9427e6416030cf16950c49243bb50020d96c8abfcfdaea715350b762478d7615",
         "size_bytes": 124433,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -234,13 +234,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:57cb775315b3e9309f99aaccb9864ff1ea292df4097609f92daee8d5f9e06bc5",
+        "sha256": "sha256:65991a003f3e5c95e5cf438f697f264b132dea35a280578c847a15c6d9bf8563",
         "size_bytes": 84750,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:299e6dddc45d480a8666fe53a655e78e5930b81d1728908634652a6914d7a069",
+        "sha256": "sha256:31cd8d813fd2d30b9e3f7e2c903cfc01d6faa075cd879c85b1b937800c2c38c1",
         "size_bytes": 75242
       }
     },
@@ -344,8 +344,8 @@
     "non_local_release_evidence": [
       {
         "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-        "sha256": "sha256:c906de73a31ac3ef10d8b4c696d9dbd29e05eceb69e1e97b12ce8dbf4139399b",
-        "size_bytes": 2211,
+        "sha256": "sha256:8f8f21b736d16e555a751175bf779f024c1e84dd6fb8773b0e4fedf7ad77c2ef",
+        "size_bytes": 2309,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-testnet-ceremony-evidence-fork-evidence",
         "record_type": "evidence",
@@ -363,16 +363,16 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts",
           "retained_path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-          "sha256": "sha256:40f3c1bcbf1fe7f6758f3af6bfc31b7d44ef0477cbe17d8c529df4bfa33d2c3a",
+          "sha256": "sha256:efa997cbc95926a157c3ab01038efa692e0e77de6fc50f04d72e32eb2e53c267",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
-          "owner": "Codex autonomous operator",
-          "reviewer": "CodeRabbit status success on this evidence PR after merge",
+          "owner": "Codex autonomous implementer",
+          "reviewer": "Codex autonomous maintainer second-pass review for PR #552",
           "public_beta_requirement_id": "fork_testnet_ceremony_evidence",
           "source": {
             "repository": "https://github.com/6529-Collections/6529Stream",
             "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
             "source_dirty": false,
-            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; current evidence PR CI"
+            "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge"
           },
           "redaction_policy": {
             "no_secrets": true,
@@ -386,7 +386,7 @@
             ]
           },
           "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-          "operator_notes": "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. Public beta remains blocked on the remaining missing evidence rows."
+          "operator_notes": "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. Public beta remains blocked on the remaining missing evidence rows; PR #552 must have clean latest-head CI and 6529bot review before merge."
         }
       },
       {
@@ -1143,7 +1143,7 @@
       },
       {
         "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json",
-        "sha256": "sha256:d6128a48b0934d763f54d83c6ca10042d18511c36e8a5d35bd1334d747eab246",
+        "sha256": "sha256:9bd3f5142aa515b3e3770ab42d4b77ac67a706490bf0056dac61b758dbc605e8",
         "size_bytes": 1728,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "public-beta-template-fork-testnet-ceremony-evidence",
@@ -1162,7 +1162,7 @@
           "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
           "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
           "retained_path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-          "sha256": "sha256:40f3c1bcbf1fe7f6758f3af6bfc31b7d44ef0477cbe17d8c529df4bfa33d2c3a",
+          "sha256": "sha256:efa997cbc95926a157c3ab01038efa692e0e77de6fc50f04d72e32eb2e53c267",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",

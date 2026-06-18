@@ -70,7 +70,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-          "sha256": "sha256:c906de73a31ac3ef10d8b4c696d9dbd29e05eceb69e1e97b12ce8dbf4139399b"
+          "sha256": "sha256:8f8f21b736d16e555a751175bf779f024c1e84dd6fb8773b0e4fedf7ad77c2ef"
         }
       ],
       "risk_acceptance": null,

@@ -13,7 +13,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; current evidence PR must pass CodeRabbit and CI before merge`
+- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI and 6529bot latest-head review required before merge`
 - Fork/testnet block or reference: `fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001-broadcast`
 
@@ -52,8 +52,8 @@
 
 ## Review
 
-- Operator: `Codex autonomous operator`
-- Reviewer: `CodeRabbit status success on this evidence PR after merge`
+- Operator: `Codex autonomous implementer`
+- Reviewer: `Codex autonomous maintainer second-pass review for PR #552`
 - Review decision: `reviewed`
 
 ## Redaction
@@ -70,7 +70,7 @@
 ```sh
 python scripts/test_fork_ceremony_evidence.py
 python scripts/check_fork_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts" --owner "Codex autonomous operator" --reviewer "CodeRabbit status success on this evidence PR after merge" --review-status reviewed --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; current evidence PR CI" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. Public beta remains blocked on the remaining missing evidence rows."
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts" --owner "Codex autonomous implementer" --reviewer "Codex autonomous maintainer second-pass review for PR #552" --review-status reviewed --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. Public beta remains blocked on the remaining missing evidence rows; PR #552 must have clean latest-head CI and 6529bot review before merge."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check

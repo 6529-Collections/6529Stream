@@ -288,6 +288,52 @@ def seed_repo(root: Path, evidence: dict[str, object] | None = None) -> None:
     )
 
 
+def reviewed_non_local_evidence(
+    root: Path,
+    requirement_id: str,
+    retained_path: Path,
+    *,
+    owner: str = "Evidence owner",
+    reviewer: str = "Evidence reviewer",
+) -> dict[str, object]:
+    """Build reviewed non-local evidence metadata for a packet row."""
+    return {
+        "schema_version": non_local_checker.EVIDENCE_SCHEMA,
+        "evidence_id": f"reviewed-{requirement_id}",
+        "record_type": "evidence",
+        "review_status": "reviewed",
+        "environment": "fork",
+        "chain_id": 1,
+        "block_or_reference": "fork block 123",
+        "command_or_source_system": "reviewed fork evidence source",
+        "retained_path": retained_path.as_posix(),
+        "sha256": non_local_checker.file_sha256(root / retained_path),
+        "redaction_statement": "Reviewed retained evidence contains no secrets.",
+        "owner": owner,
+        "reviewer": reviewer,
+        "public_beta_requirement_id": requirement_id,
+        "source": {
+            "repository": "https://github.com/6529-Collections/6529Stream",
+            "git_commit": "1" * 40,
+            "source_dirty": False,
+            "ci_run": "reviewed evidence CI",
+        },
+        "redaction_policy": {
+            "no_secrets": True,
+            "redacted_fields": [
+                "private_key",
+                "mnemonic",
+                "seed_phrase",
+                "api_key",
+                "rpc_url",
+                "unreleased_drop_payload",
+            ],
+        },
+        "template_notice": "Generated reviewed evidence metadata.",
+        "operator_notes": "Reviewed evidence operator notes.",
+    }
+
+
 class ReleaseEvidencePacketIndexTests(unittest.TestCase):
     """Generator behavior for the release evidence packet index."""
 
@@ -356,6 +402,65 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             self.assertIn("python scripts/generate_release_evidence_packet_index.py --check", row["validation_commands"])
             self.assertIn("blocker_report", row)
             self.assertEqual(packet["policy"]["template_only_can_complete"], False)
+
+    def test_complete_reviewed_row_uses_evidence_reviewer_metadata(self) -> None:
+        """Complete reviewed rows surface evidence reviewer/status, not templates."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+            requirement_id = generator.PUBLIC_BETA_CEREMONY_REQUIREMENT_ID
+            retained_path = generator.PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE
+            evidence_path = Path("release-artifacts/evidence/fork-ceremony/evidence.json")
+            write_json(
+                root / evidence_path,
+                reviewed_non_local_evidence(
+                    root,
+                    requirement_id,
+                    retained_path,
+                    owner="Fork evidence owner",
+                    reviewer="Fork evidence reviewer",
+                ),
+            )
+            evidence = valid_evidence(root)
+            requirement_index = checker.PUBLIC_BETA_REQUIREMENTS.index(requirement_id)
+            evidence["requirements"][requirement_index] = requirement(
+                requirement_id,
+                checker.PUBLIC_BETA_PHASE,
+                "complete",
+                evidence=[
+                    {
+                        "path": evidence_path.as_posix(),
+                        "sha256": checker.file_sha256(root / evidence_path),
+                    }
+                ],
+            )
+            write_valid_evidence(root, evidence)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"] == requirement_id
+            )
+
+            self.assertEqual(row["review_owner"], "Fork evidence owner")
+            self.assertEqual(row["reviewer"], "Fork evidence reviewer")
+            self.assertEqual(row["review_status"], "reviewed")
+            self.assertEqual(row["review_source"], retained_path.as_posix())
+            self.assertIn("evidence owner=Fork evidence owner", row["owner_reviewer_posture"])
+            self.assertNotIn("reviewer=TBD", row["owner_reviewer_posture"])
+            self.assertEqual(
+                row["retained_artifact_expectation"]["operator_notes"],
+                "Reviewed evidence operator notes.",
+            )
 
     def test_external_audit_row_uses_canonical_retained_artifact(self) -> None:
         """External audit tracker rows point at the audit-specific template."""
