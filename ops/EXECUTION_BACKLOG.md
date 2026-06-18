@@ -116,21 +116,22 @@ The important distinction is:
 - Signed release provenance and signed tags are incomplete.
 - Production governance ceremony proof is incomplete.
 - Reviewed signer custody and production signing evidence are incomplete.
-- Public beta remains blocked until external audit evidence, testnet/live
-  deployment evidence, verified addresses, explorer verification, metadata
-  browser evidence, and randomizer operations evidence are retained and
-  reviewed. Production remains blocked until live ceremony evidence, production
-  deployment manifests, production signatures, signed tags, explorer
-  verification, live randomizer evidence, and post-audit remediation are
-  retained and reviewed.
+- Public beta remains blocked until external audit evidence, testnet
+  deployment evidence, verified addresses, and explorer verification are
+  retained and reviewed. Production remains blocked until live ceremony
+  evidence, production deployment manifests, production signatures, signed
+  tags, explorer verification, live randomizer evidence, live marketplace and
+  metadata browser evidence, and post-audit remediation are retained and
+  reviewed.
 - Cross-contract adversarial testing is good but not exhaustive enough for the
   auction/drop/randomizer/admin interaction surface.
 - Integrator documentation now covers frontend, mobile, Electron, indexer,
   wallet, metadata, auction, fixed-price, and operator UI consumers, but typed
   snippets, conformance fixtures, and reference UI code remain follow-up work.
 - Contract-level metadata now exists as a release-tracked
-  `StreamContractMetadata` satellite/read-adapter, but non-local marketplace
-  and indexer discovery evidence remains incomplete.
+  `StreamContractMetadata` satellite/read-adapter, with reviewed fork/testnet
+  marketplace and indexer discovery evidence retained. Live marketplace and
+  indexer evidence remains incomplete.
 - 1/1 collector trust surfaces need a stronger product layer: artist statement,
   certificate/authenticity hash, curation notes, exhibition/history records,
   provenance events or retained evidence, and frozen provenance manifests.
@@ -144,8 +145,9 @@ The important distinction is:
   dependencies, source archive, token output hashes, browser proof, and storage
   guarantees. Art Blocks-style deterministic replayability is the benchmark for
   renderer-dependent output.
-- Marketplace/indexer compatibility needs retained evidence, not just local
-  metadata checks.
+- Marketplace/indexer compatibility now has reviewed fork/testnet retained
+  evidence; live marketplace/indexer evidence is still required before
+  production release claims.
 - `StreamCore` bytecode headroom remains tight, so new feature surfaces should
   prefer satellite contracts, libraries, adapters, or explicit size-budget
   exceptions.
@@ -167,11 +169,11 @@ gap into a bounded issue or evidence artifact.
 | --- | --- | --- |
 | EIP-712 drop authorization, ERC-1271 signer support, replay controls, auction custody, pull credits, ERC-4906, freeze manifests, and randomizer lifecycle are already present on mainline | Gate C/D/F evidence | Preserve through adversarial tests, audit packet traceability, and no-secret release evidence; do not create generic rebuild issues |
 | Production trust evidence is still missing | `EXT`, `GOV`, `REL`, `AUD` | Prioritize reviewed testnet/live artifacts, explorer verification, signed release provenance, production signing/custody evidence, and completed external audit artifacts |
-| Contract-level metadata lacks non-local discovery evidence | `ONE-001`, `INT-006`, `ONE-005` | Preserve the merged ERC-7572-style `StreamContractMetadata` adapter, `ContractURIUpdated`, URI hash semantics, interface/event catalog updates, and marketplace fallback docs; retain marketplace/indexer evidence before release claims |
+| Contract-level metadata needs live discovery evidence | `ONE-001`, `INT-006`, `ONE-005` | Preserve the merged ERC-7572-style `StreamContractMetadata` adapter, `ContractURIUpdated`, URI hash semantics, interface/event catalog updates, marketplace fallback docs, and reviewed fork/testnet marketplace/indexer evidence; retain live marketplace/indexer evidence before production release claims |
 | 1/1 provenance is under-modeled | `ONE-002` | Define collection/token provenance manifests, artist statement, authenticity hash, curation/exhibition history, mutable versus frozen fields, and event/artifact boundaries; use Transient Labs-style story/provenance inscriptions as a benchmark |
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
-| Marketplace/indexer compatibility lacks retained proof | `ONE-005`, `INT-005`, `INT-006` | Retain no-secret evidence for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation |
+| Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
 | `StreamCore` has finite EIP-170 headroom despite the current 2,392-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
@@ -3089,10 +3091,10 @@ Dependencies: dependency artifact manifest, metadata browser sandbox,
 
 ### ONE-005: Retain Marketplace And Indexer Integration Evidence
 
-Status: Merged in PR #425; issue #422 closed completed. MAP-003 issue #528 is
-in progress to harden manifest-aware reviewed evidence validation. Tracker
-issues #423 and #424 remain open for future reviewed public-beta and production
-marketplace/indexer evidence.
+Status: Evidence model merged in PR #425; manifest-aware validation merged in
+PR #529; active issue #423 now retains reviewed fork/testnet
+marketplace/indexer evidence. Tracker issue #424 remains open for future
+reviewed live marketplace/indexer evidence.
 
 Gate: G/E.
 
@@ -3101,8 +3103,9 @@ read contract metadata, refresh token metadata, display animation output,
 surface royalties, replay events, and survive stale/failed/frozen/burned states.
 
 Outcome: The release evidence system has no-secret templates and checkers for
-marketplace/indexer evidence, and future reviewed testnet or fork evidence can
-complete the row without private context.
+marketplace/indexer evidence. Reviewed fork/testnet evidence can complete the
+public-beta row without private context, while live evidence remains required
+for production release.
 
 Files likely touched:
 
@@ -3133,7 +3136,7 @@ Implementation steps:
 3. Add a checker that rejects placeholders in reviewed evidence, secret-shaped
    values, missing contract/version references, and unsupported environments.
 4. Link the evidence row to public-beta/production blocker reports without
-   marking it complete until real reviewed evidence exists.
+   marking it complete until reviewed evidence exists.
 5. Document frontend/indexer expectations and known marketplace caveats.
 6. Require complete marketplace/indexer rows to resolve from the shared release
    evidence manifest to reviewed non-local envelopes, then to retained
@@ -3162,15 +3165,16 @@ Acceptance criteria:
 - Complete marketplace/indexer rows cannot point at template envelopes, wrong
   environments, stale retained-artifact hashes, or retained Markdown that fails
   coverage validation.
-- Public beta or production readiness stays blocked until reviewed external
-  evidence exists.
+- Public beta or production readiness stays blocked until the remaining
+  reviewed external evidence exists.
 
 Evidence artifacts:
 
 - Evidence schema/template/checker.
-- `fork_testnet_marketplace_indexer_evidence` tracker issue #423.
+- Reviewed `fork_testnet_marketplace_indexer_evidence` retained artifact and
+  tracker issue #423.
 - `live_marketplace_indexer_evidence` tracker issue #424.
-- Future reviewed marketplace/indexer retained artifacts.
+- Future reviewed live marketplace/indexer retained artifacts.
 
 Dependencies: testnet/fork addresses, `INT-005`, `ONE-001`.
 
@@ -3386,7 +3390,8 @@ unless an external dependency changes.
 | `EXT-027` | Add metadata browser evidence capture outputs | E/F | Merged in PR #554; issue #218 remains open for real reviewed deployed-contract fork/testnet metadata browser evidence |
 | `EXT-028` | Add metadata browser evidence draft generator | E/F | Merged in PR #556; issue #555 closed completed with a pending-review fork/testnet metadata-browser evidence draft generator, explicit deployed-contract assertion, retained output validation, and local/CI/Windows coverage while #218 remains open until reviewed deployed-contract evidence exists |
 | `EXT-029` | Add live release-evidence issue sync guard | E/G | Merged in PR #558; issue #557 closed completed with an authenticated GitHub issue snapshot fetcher plus live body/closure sync gate for linked release-evidence tracker issues without adding network access to default CI or changing readiness claims |
-| `EXT-030` | Retain reviewed fork metadata browser evidence | E/F | Active PR #559 / issue #218 on branch `codex/fork-metadata-browser-reviewed-evidence`; retain reviewed mainnet-fork metadata browser evidence generated from fork-deployed contracts, link it from `public-beta-evidence.json`, refresh release artifacts, and keep public beta blocked only on remaining missing evidence rows |
+| `EXT-030` | Retain reviewed fork metadata browser evidence | E/F | Merged in PR #559; issue #218 closed completed with reviewed mainnet-fork metadata browser evidence generated from fork-deployed contracts, linked from `public-beta-evidence.json`, refreshed release artifacts, and public beta still blocked only on remaining missing evidence rows |
+| `EXT-031` | Retain reviewed fork marketplace/indexer evidence | E/F | Active branch `codex/fork-marketplace-indexer-evidence` / issue #423; retain reviewed fork/testnet marketplace and indexer evidence, equivalent collector/indexer tooling transcript, reviewed non-local envelope, completed `fork_testnet_marketplace_indexer_evidence` public-beta row, refreshed release artifacts, and keep public beta blocked only on remaining missing evidence rows |
 
 ### Adversarial Testing
 
@@ -3415,11 +3420,11 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | Merged in PR #411; non-local marketplace/indexer evidence remains under `ONE-005` |
+| `ONE-001` | Decide and implement ERC-7572-style contract-level metadata surface | G | Merged in PR #411; fork/testnet marketplace/indexer evidence is retained under `ONE-005`, while live marketplace/indexer evidence remains a production blocker |
 | `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | Merged in PR #413 |
 | `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | Merged in PR #417 |
 | `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | Merged in PR #419 |
-| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | Merged in PR #425; issue #422 closed completed; tracker issues #423 and #424 remain open for future reviewed marketplace/indexer evidence |
+| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | Merged in PR #425 for the evidence model; active issue #423 now retains reviewed fork/testnet marketplace/indexer evidence, and tracker issue #424 remains open for future reviewed live marketplace/indexer evidence |
 | `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | Merged in PR #427; issue #426 closed completed |
 | `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | Merged in PR #483; issue #482 closed completed |
 

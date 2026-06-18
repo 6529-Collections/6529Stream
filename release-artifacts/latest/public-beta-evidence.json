@@ -61,11 +61,16 @@
     {
       "id": "fork_testnet_marketplace_indexer_evidence",
       "phase": "public_beta",
-      "status": "missing",
-      "owner": "TBD",
-      "evidence": [],
+      "status": "complete",
+      "owner": "Codex autonomous implementer",
+      "evidence": [
+        {
+          "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-evidence.json",
+          "sha256": "sha256:63161a9877d00c667abe12b3e7f0458d4a9ba5888d616f031259d37eb47d704f"
+        }
+      ],
       "risk_acceptance": null,
-      "notes": "Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained."
+      "notes": "Reviewed fork/testnet marketplace and indexer evidence is retained: mainnet-fork metadata browser capture, reviewed supplemental retained artifact, equivalent collector/indexer tooling transcript, contract metadata, token metadata refresh, animation rendering, royalty display boundary, transfer/listing/sale or simulated sale path, event replay, cache invalidation, stale/failed/frozen/burned state handling, and no-secret redaction. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "id": "fork_testnet_ceremony_evidence",

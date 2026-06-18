@@ -10,9 +10,9 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:f4f01b343d689e754b76ee77b2aa784c7ab80f8b1f329d57de716a72cb0c9037` |
+| Backlog SHA-256 | `sha256:5e5f220dba5f0b9602925cc4f0d6411bb03e274fd8af63d1bdcc8c4f5d41a908` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
-| Issue links SHA-256 | `sha256:8c83e119fc57eae76a4a9200711055e3e1c1b327be80d3529571327ae085fece` |
+| Issue links SHA-256 | `sha256:b63f126aced285206cdaf866e8bce17cce2ed804caf542aa60d769a1117208e4` |
 
 ## Policy
 
@@ -29,7 +29,6 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | --- | --- | --- | --- | --- |
 | [#215](https://github.com/6529-Collections/6529Stream/issues/215) | `public-beta-external-audit-report` | `missing` | `sha256:681dd09e156b8949ea33717554e80bb2c5518e9504f827bc5a8fe1b7b5551292` | 55 |
 | [#217](https://github.com/6529-Collections/6529Stream/issues/217) | `public-beta-testnet-deployment-rehearsal` | `missing` | `sha256:fb44ad23ca2db58f098e47f38ce6e799375e7ede3e390942ba363fb89572baaf` | 55 |
-| [#423](https://github.com/6529-Collections/6529Stream/issues/423) | `public-beta-fork-testnet-marketplace-indexer-evidence` | `missing` | `sha256:0166f05273548a9f61699b989303fd81aa415e296a598f6271a39a28c8de87f8` | 55 |
 | [#221](https://github.com/6529-Collections/6529Stream/issues/221) | `public-beta-verified-deployed-addresses` | `missing` | `sha256:9ba44c3d5e1dc8c486864f33c45190639ba0b1ed98626c69661fb17eb0df6f91` | 55 |
 | [#222](https://github.com/6529-Collections/6529Stream/issues/222) | `public-beta-explorer-verification-status` | `missing` | `sha256:f66604a772038efde47c0b2dad2ae025fd445df95af956909d39a274a18b6f6a` | 55 |
 | [#223](https://github.com/6529-Collections/6529Stream/issues/223) | `production-release-production-signatures` | `missing` | `sha256:6099d20d4d5336ba46264be96d58b58b643c87a2eea50dbefe126fddc6b75bb9` | 59 |
@@ -149,70 +148,6 @@ Completion policy: this tracker issue can close only after reviewed retained evi
 - `python scripts/test_non_local_release_evidence.py`
 - `python scripts/test_testnet_deployment_rehearsal_evidence.py`
 - `python scripts/check_testnet_deployment_rehearsal_evidence.py`
-- `python scripts/test_public_beta_blocker_report.py`
-- `python scripts/test_production_release_blocker_report.py`
-- `python scripts/generate_public_beta_blocker_report.py --check`
-- `python scripts/check_public_beta_evidence.py`
-- `python scripts/check_non_local_release_evidence.py`
-- `python scripts/generate_release_evidence_packet_index.py --check`
-- `python scripts/generate_release_manifest.py --check`
-- `python scripts/generate_release_checksums.py --check`
-
-## Non-Goals
-
-- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.
-- Do not change public-beta or production-release readiness claims without reviewed retained evidence.
-- Do not use the checked template alone as completion evidence.
-
-## Acceptance Criteria
-
-- Reviewed retained evidence exists and is no-secret or properly redacted.
-- The evidence manifest references the retained evidence path and hash.
-- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.
-- All validation commands above pass.
-```
-
-### #423 public-beta-fork-testnet-marketplace-indexer-evidence
-
-- Issue: https://github.com/6529-Collections/6529Stream/issues/423
-- Body SHA-256: `sha256:0166f05273548a9f61699b989303fd81aa415e296a598f6271a39a28c8de87f8`
-- Source body SHA-256: `sha256:86bdcf03b09c63045cc0282fddb88ea720398e85aee9b4fd6efe60414e89ccdf`
-
-```markdown
-<!-- 6529stream.release-evidence-issue-body-sync.v1 entry_id=public-beta-fork-testnet-marketplace-indexer-evidence issue_number=423 -->
-
-Parent tracker: https://github.com/6529-Collections/6529Stream/issues/214
-Source backlog entry: `release-artifacts/latest/release-evidence-issue-backlog.json` / `public-beta-fork-testnet-marketplace-indexer-evidence`
-Issue-link artifact: `release-artifacts/latest/release-evidence-issue-links.json`
-Completion policy: this tracker issue can close only after reviewed retained evidence is referenced by the shared release evidence status manifest.
-
-## Evidence Requirement
-
-- Phase: `Public Beta`
-- Requirement ID: `fork_testnet_marketplace_indexer_evidence`
-- Current status: `missing`
-- Evidence posture: external/future
-- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template
-
-## Source Links
-
-- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_marketplace_indexer_evidence`
-- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`
-
-## Required Evidence
-
-- Retained artifact expectation: Replace this template with reviewed fork/testnet marketplace and indexer evidence covering contract metadata, token metadata refresh, animation rendering, royalty display, transfer/listing/sale or simulated sale path, event replay, cache invalidation, platform results, redaction status, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-marketplace-indexer-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`. Template-only evidence cannot complete the row.
-- Template-only can complete: `false`
-
-## Validation
-
-- `python scripts/test_release_evidence_packet_index.py`
-- `python scripts/test_public_beta_evidence.py`
-- `python scripts/test_non_local_release_evidence.py`
-- `python scripts/test_marketplace_indexer_evidence.py`
-- `python scripts/check_marketplace_indexer_evidence.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`

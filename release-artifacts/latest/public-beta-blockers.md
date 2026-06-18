@@ -29,7 +29,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | `blocked` | 5 | 0 | 0 | 0 | 0 | 4 | 5 |
+| Public Beta | `blocked` | 4 | 0 | 0 | 0 | 0 | 5 | 4 |
 | Production Release | `blocked` | 11 | 0 | 0 | 0 | 0 | 0 | 11 |
 
 ## Incomplete Public Beta Rows
@@ -38,7 +38,6 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | --- | --- | --- | --- | --- | --- | --- |
 | `external_audit_report` | `missing` | TBD | external/future | 0 | none | A completed external audit report and issue-linked remediation status are not yet retained. |
 | `testnet_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
-| `fork_testnet_marketplace_indexer_evidence` | `missing` | TBD | external/future | 0 | none | Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained. |
 | `verified_deployed_addresses` | `missing` | TBD | external/future | 0 | none | Verified deployed addresses for non-local environments are not yet retained. |
 | `explorer_verification_status` | `missing` | TBD | external/future | 0 | none | Explorer verification submissions or verified-source links for non-local deployments are not yet retained. |
 
@@ -64,6 +63,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | --- | --- | --- | --- | --- |
 | Public Beta | `fork_deployment_rehearsal` | reviewed-external | 1 | Reviewed mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, generated fork address book, and CodeRabbit/CI acceptance evidence from PR #347 and PR #349. Public beta remains blocked on the remaining missing evidence rows. |
 | Public Beta | `fork_testnet_metadata_browser_evidence` | reviewed-external | 1 | Reviewed fork metadata browser evidence is retained: mainnet fork block 25344872, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output with fork/testnet metadata labels, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows. |
+| Public Beta | `fork_testnet_marketplace_indexer_evidence` | reviewed-external | 1 | Reviewed fork/testnet marketplace and indexer evidence is retained: mainnet-fork metadata browser capture, reviewed supplemental retained artifact, equivalent collector/indexer tooling transcript, contract metadata, token metadata refresh, animation rendering, royalty display boundary, transfer/listing/sale or simulated sale path, event replay, cache invalidation, stale/failed/frozen/burned state handling, and no-secret redaction. Public beta remains blocked on the remaining missing evidence rows. |
 | Public Beta | `fork_testnet_ceremony_evidence` | reviewed-external | 1 | Reviewed fork ceremony evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and retained local dry-run ceremony proof for mint, auction, withdrawal, and emergency redeployment. Public beta remains blocked on the remaining missing evidence rows. |
 | Public Beta | `fork_testnet_randomizer_operations_evidence` | reviewed-external | 1 | Reviewed fork randomizer operations evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, redacted provider export, transaction bundle, post-state request views, and retained local lifecycle, adversarial, retry, payment, pause, and emergency-boundary test proof. Public beta remains blocked on the remaining missing evidence rows. |
 
@@ -73,7 +73,6 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | --- | --- | --- | --- |
 | Public Beta | `external_audit_report` | `missing` | A completed external audit report and issue-linked remediation status are not yet retained. |
 | Public Beta | `testnet_deployment_rehearsal` | `missing` | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
-| Public Beta | `fork_testnet_marketplace_indexer_evidence` | `missing` | Fork or testnet marketplace/indexer evidence for contract metadata, token refresh, animation rendering, royalty display, event replay, cache invalidation, and transfer/listing/sale or simulated sale paths is not yet retained. |
 | Public Beta | `verified_deployed_addresses` | `missing` | Verified deployed addresses for non-local environments are not yet retained. |
 | Public Beta | `explorer_verification_status` | `missing` | Explorer verification submissions or verified-source links for non-local deployments are not yet retained. |
 | Production Release | `production_signatures` | `missing` | Production detached signatures over the checksum bundle are not yet retained. |
