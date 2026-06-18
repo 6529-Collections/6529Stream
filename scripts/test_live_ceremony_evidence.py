@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -21,6 +22,16 @@ SPEC.loader.exec_module(checker)
 def write_text(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def artifact_with_field(text: str, label: str, value: str) -> str:
+    """Replace one Markdown bullet field value."""
+    return re.sub(
+        rf"^- {re.escape(label)}: .*$",
+        lambda _match: f"- {label}: `{value}`",
+        text,
+        flags=re.MULTILINE,
+    )
 
 
 def valid_template() -> str:
@@ -159,7 +170,7 @@ def reviewed_artifact() -> str:
 - Safe or multisig export: `release-artifacts/evidence/live-ceremony/safe-export.json`
 - Explorer transaction bundle: `release-artifacts/evidence/live-ceremony/explorer-transactions.json`
 - Post-state views: `release-artifacts/evidence/live-ceremony/post-state.md`
-- Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and SHA256SUMS`
+- Release manifest/checksum digests: `release-artifacts/evidence/live-ceremony/release-digests.md`
 
 ## Review
 
@@ -194,6 +205,45 @@ python scripts/generate_release_checksums.py --check
 """
 
 
+RETAINED_FILE_LABELS = {
+    "Metadata and freeze ceremony": "release-artifacts/evidence/live-ceremony/metadata.md",
+    "Auction ceremony": "release-artifacts/evidence/live-ceremony/auction.md",
+    "Emergency controls ceremony": "release-artifacts/evidence/live-ceremony/emergency.md",
+    "Dry-run mint evidence": "release-artifacts/evidence/live-ceremony/mint.md",
+    "Dry-run auction evidence": "release-artifacts/evidence/live-ceremony/auction-dry-run.md",
+    "Monitoring handoff": "release-artifacts/evidence/live-ceremony/monitoring.md",
+    "Live deployment manifest": "deployments/live/mainnet-6529stream-v0.1.0-001.json",
+    "Live address book": "deployments/address-books/mainnet-6529stream-v0.1.0-001.json",
+    "Safe or multisig export": "release-artifacts/evidence/live-ceremony/safe-export.json",
+    "Explorer transaction bundle": "release-artifacts/evidence/live-ceremony/explorer-transactions.json",
+    "Post-state views": "release-artifacts/evidence/live-ceremony/post-state.md",
+    "Release manifest/checksum digests": "release-artifacts/evidence/live-ceremony/release-digests.md",
+}
+
+
+def seed_reviewed_retained_files(
+    repo_root: Path, overrides: dict[str, str] | None = None
+) -> None:
+    """Create retained files referenced by reviewed_artifact under a root."""
+    values = {
+        "release-artifacts/evidence/live-ceremony/metadata.md": "metadata freeze ceremony retained\n",
+        "release-artifacts/evidence/live-ceremony/auction.md": "auction ceremony retained\n",
+        "release-artifacts/evidence/live-ceremony/emergency.md": "emergency controls retained\n",
+        "release-artifacts/evidence/live-ceremony/mint.md": "dry-run mint retained\n",
+        "release-artifacts/evidence/live-ceremony/auction-dry-run.md": "dry-run auction retained\n",
+        "release-artifacts/evidence/live-ceremony/monitoring.md": "monitoring handoff retained\n",
+        "deployments/live/mainnet-6529stream-v0.1.0-001.json": '{"chain_id":1}\n',
+        "deployments/address-books/mainnet-6529stream-v0.1.0-001.json": '{"chain_id":1}\n',
+        "release-artifacts/evidence/live-ceremony/safe-export.json": '{"safe":"export"}\n',
+        "release-artifacts/evidence/live-ceremony/explorer-transactions.json": '{"txs":[]}\n',
+        "release-artifacts/evidence/live-ceremony/post-state.md": "post-state views retained\n",
+        "release-artifacts/evidence/live-ceremony/release-digests.md": "release manifest/checksum digests retained\n",
+    }
+    values.update(overrides or {})
+    for relative_path, contents in values.items():
+        write_text(repo_root / relative_path, contents)
+
+
 class LiveCeremonyEvidenceTests(unittest.TestCase):
     def test_committed_template_passes(self) -> None:
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
@@ -203,10 +253,290 @@ class LiveCeremonyEvidenceTests(unittest.TestCase):
 
     def test_reviewed_artifact_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed.md"
+            seed_reviewed_retained_files(repo_root)
             write_text(path, reviewed_artifact())
 
-            checker.validate_artifact(path)
+            checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_template_state_does_not_resolve_retained_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "template-missing-retained-files.md"
+            text = valid_template()
+            for label in RETAINED_FILE_LABELS:
+                text = artifact_with_field(text, label, f"missing/{label}.md")
+            write_text(path, text)
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_declared_hash_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "reviewed-hash.md"
+            seed_reviewed_retained_files(repo_root)
+            retained_path = RETAINED_FILE_LABELS["Monitoring handoff"]
+            digest = checker.file_sha256(repo_root / retained_path)
+            text = artifact_with_field(
+                reviewed_artifact(), "Monitoring handoff", f"{retained_path} {digest}"
+            )
+            write_text(path, text)
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_placeholder_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "retained-placeholder.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(reviewed_artifact(), "Monitoring handoff", "TBD")
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError,
+                "must be replaced before non-template review",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_missing_retained_file_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "missing-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(), "Monitoring handoff", "missing/live/monitoring.md"
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "missing retained file"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_parent_path_escape_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "escape-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(), "Monitoring handoff", "../outside.md"
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "must not escape"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_absolute_path_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "absolute-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            absolute_path = str((repo_root / "outside.md").resolve()).replace("\\", "/")
+            text = artifact_with_field(
+                reviewed_artifact(), "Monitoring handoff", absolute_path
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "repo-relative"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_backslash_path_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "backslash-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                "release-artifacts\\evidence\\live-ceremony\\monitoring.md",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "must use forward slashes"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_symlink_file_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "symlink-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            target = repo_root / "release-artifacts/evidence/live-ceremony/target.md"
+            symlink = repo_root / "release-artifacts/evidence/live-ceremony/symlink.md"
+            write_text(target, "retained symlink target\n")
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError):
+                self.skipTest("symlinks are not available in this environment")
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                "release-artifacts/evidence/live-ceremony/symlink.md",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "must not use symlinked"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_whitespace_path_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "whitespace-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                "release-artifacts/evidence/live ceremony/monitoring.md",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "one repo-relative path"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_backtick_path_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "backtick-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                "release-artifacts/evidence/live-ceremony/mon`itoring.md",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "must not contain backticks"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_multiple_hashes_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "multi-hash-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            retained_path = RETAINED_FILE_LABELS["Monitoring handoff"]
+            digest = checker.file_sha256(repo_root / retained_path)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                f"{retained_path} {digest} {digest}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "multiple sha256"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_drift_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "hash-drift-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            retained_path = RETAINED_FILE_LABELS["Monitoring handoff"]
+            wrong_digest = "sha256:" + "0" * 64
+            text = artifact_with_field(
+                reviewed_artifact(), "Monitoring handoff", f"{retained_path} {wrong_digest}"
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "sha256 mismatch"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_without_separator_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "hash-no-separator-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            retained_path = RETAINED_FILE_LABELS["Monitoring handoff"]
+            digest = checker.file_sha256(repo_root / retained_path)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                f"{retained_path}{digest}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "must separate path"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_malformed_hash_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "malformed-hash-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            retained_path = RETAINED_FILE_LABELS["Monitoring handoff"]
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                f"{retained_path} sha256:{'A' * 64}",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "malformed sha256"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_hash_trailing_text_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "hash-trailing-retained.md"
+            seed_reviewed_retained_files(repo_root)
+            retained_path = RETAINED_FILE_LABELS["Monitoring handoff"]
+            digest = checker.file_sha256(repo_root / retained_path)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Monitoring handoff",
+                f"{retained_path} {digest} extra",
+            )
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "trailing text"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_referenced_retained_file_secret_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "referenced-secret.md"
+            seed_reviewed_retained_files(
+                repo_root,
+                {
+                    RETAINED_FILE_LABELS["Monitoring handoff"]:
+                    "Authorization: Bearer abcdefghijklmnop\n"
+                },
+            )
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.LiveCeremonyEvidenceError, "secret-like CLI or URL"
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_bare_64_hex_values_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "bare-hex.md"
+            write_text(path, valid_template() + f"\n{'a' * 64}\n")
+
+            with self.assertRaisesRegex(checker.LiveCeremonyEvidenceError, "bare 64-hex"):
+                checker.validate_artifact(path)
 
     def test_wrong_requirement_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -255,16 +585,18 @@ class LiveCeremonyEvidenceTests(unittest.TestCase):
 
     def test_comparison_angle_text_is_not_placeholder(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "angle.md"
+            repo_root = Path(temp_dir)
+            path = repo_root / "angle.md"
+            seed_reviewed_retained_files(repo_root)
             write_text(
                 path,
                 reviewed_artifact().replace(
-                    "Monitoring handoff: `release-artifacts/evidence/live-ceremony/monitoring.md`",
-                    "Monitoring handoff: `alert threshold < 5 minutes documented`",
+                    "Live block or reference: `mainnet block 23000000`",
+                    "Live block or reference: `finality lag < 5 minutes documented`",
                 ),
             )
 
-            checker.validate_artifact(path)
+            checker.validate_artifact(path, repo_root=repo_root)
 
     def test_secret_like_values_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -279,7 +611,7 @@ class LiveCeremonyEvidenceTests(unittest.TestCase):
             path = Path(temp_dir) / "credential-url.md"
             write_text(path, valid_template() + "\nhttps://user:pass@example.invalid\n")
 
-            with self.assertRaisesRegex(checker.LiveCeremonyEvidenceError, "credentialed URL"):
+            with self.assertRaisesRegex(checker.LiveCeremonyEvidenceError, "secret-like CLI or URL"):
                 checker.validate_artifact(path)
 
 

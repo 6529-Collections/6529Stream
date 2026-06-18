@@ -412,7 +412,14 @@ python scripts/check_live_ceremony_evidence.py
 
 The checker validates retained no-secret ceremony proof only. It does not
 execute live transactions, contact a Safe, call private RPC endpoints, or
-approve a production release by itself.
+approve a production release by itself. Future pending-review or reviewed
+retained ceremony references must be repo-relative files and may include one
+optional `sha256:<64 lowercase hex>` digest. The checker rejects missing files,
+absolute paths, path escapes, Windows backslashes, ambiguous whitespace,
+duplicate or malformed digests, stale declared hashes, credentialed/provider
+URLs, bearer tokens, bare 64-hex values, and secret-shaped content in referenced
+retained files. Symlinked retained files and non-UTF-8 retained files also fail
+closed so the reviewed evidence is the committed text file the path names.
 
 ### Marketplace And Indexer Evidence
 

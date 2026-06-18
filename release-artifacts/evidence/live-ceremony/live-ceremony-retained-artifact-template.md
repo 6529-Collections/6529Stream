@@ -83,3 +83,13 @@ python scripts/generate_release_checksums.py --check
   shared production-release evidence manifest.
 - Do not commit private keys, private RPC URLs, signer-service credentials,
   raw unreleased drop payloads, or private Safe session material.
+- For pending-review or reviewed evidence, ceremony transcript fields and
+  required retained artifact fields must be repo-relative retained files.
+  Absolute paths, `..` escapes, Windows backslashes, ambiguous whitespace in
+  paths, placeholders, missing files, stale hashes, duplicate hashes,
+  provider/API-token-shaped URLs, credentialed URLs, bearer tokens, bare
+  64-hex strings, symlinked files, and non-UTF-8 files fail validation.
+- Retained file references may append one declared digest as
+  `path/to/file sha256:<64 lowercase hex>` or
+  `path/to/file / sha256:<64 lowercase hex>`. Normalize `sha256sum`-style
+  retained digest output to the explicit `sha256:<hex>` form before review.

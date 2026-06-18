@@ -708,7 +708,8 @@ reviewed retained references must be repo-relative files and may include one
 optional `sha256:<64 lowercase hex>` digest; path escapes, missing files, stale
 hashes, duplicate hashes, provider/API-token-shaped URLs, credentialed URLs,
 and bare 64-hex strings fail closed. Normalize any `sha256sum`-style retained
-digest output to the explicit `sha256:<hex>` form before review.
+digest output to the explicit `sha256:<hex>` form before review. Retained
+evidence must be UTF-8 text and must not be symlinked.
 
 Live ceremony evidence has a dedicated no-secret retained artifact template at
 `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`.
@@ -720,7 +721,13 @@ role grant/revoke, signer setup, metadata/freeze, auction, emergency-control,
 dry-run, monitoring handoff, generated live artifact references, reviewer
 metadata, and explicit redaction confirmations before a reviewed artifact can
 pass. The committed file is template-only and keeps production release blocked
-until future reviewed live ceremony evidence is accepted.
+until future reviewed live ceremony evidence is accepted. Pending-review or
+reviewed retained references must be repo-relative files and may include one
+optional `sha256:<64 lowercase hex>` digest; path escapes, missing files, stale
+hashes, duplicate hashes, provider/API-token-shaped URLs, credentialed URLs,
+bearer tokens, and bare 64-hex strings fail closed. Normalize any
+`sha256sum`-style retained digest output to the explicit `sha256:<hex>` form
+before review.
 
 Fork/testnet randomizer operations evidence has a dedicated no-secret retained
 artifact template at

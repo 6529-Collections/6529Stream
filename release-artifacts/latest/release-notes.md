@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added stronger live ceremony retained-artifact validation so future pending or reviewed mainnet ceremony evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match optional declared `sha256:` hashes before issue #228 can be considered for closure.
 - Added stronger live metadata browser retained-artifact validation so future pending or reviewed mainnet evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #473 can be considered for closure.
 - Added stronger testnet deployment rehearsal retained-artifact validation so future pending or reviewed Sepolia evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #217 can be considered for closure.
 - Added a checked fork/testnet randomizer operations retained-artifact template and offline checker for future `fork_testnet_randomizer_operations_evidence`, covering fork/testnet environment and chain IDs, provider configuration, funding, reserve, request-health, lifecycle controls, retained-file and optional declared `sha256:` validation, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.
