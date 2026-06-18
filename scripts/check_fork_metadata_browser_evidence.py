@@ -121,6 +121,7 @@ FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+CHAIN_ID_RE = re.compile(r"^[1-9][0-9]*$")
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
@@ -135,7 +136,7 @@ CLI_SECRET_RE = re.compile(
     r"--rpc-url\b(?:\s+|=)(?!<redacted>|redacted\b)\S+|"
     r"\bAuthorization\s*:\s*Bearer\s+\S+|"
     r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
-    r"https?://[^\s`]*(?:alchemy|infura|quicknode)[^\s`]*|"
+    r"https?://[^\s`]*(?:alchemy|ankr|blastapi|chainstack|infura|quicknode)[^\s`]*|"
     r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
     r")",
     re.IGNORECASE,
@@ -224,6 +225,7 @@ def repo_root_for(path: Path) -> Path:
     try:
         resolved.relative_to(cwd)
     except ValueError:
+        # Standalone --evidence files resolve retained paths beside that artifact.
         return resolved.parent
     return cwd
 
@@ -321,6 +323,10 @@ def require_environment(path: Path, value: str) -> str:
 
 def require_positive_chain_id(path: Path, value: str, label: str = "Chain ID") -> int:
     """Require a positive decimal chain ID."""
+    if not CHAIN_ID_RE.fullmatch(value):
+        raise ForkMetadataBrowserEvidenceError(
+            f"{path} field {label!r} must be a positive integer"
+        )
     try:
         chain_id = int(value, 10)
     except ValueError as exc:

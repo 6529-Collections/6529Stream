@@ -359,6 +359,18 @@ class ForkMetadataBrowserEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_leading_zero_chain_id_fails(self) -> None:
+        """Fork/testnet chain IDs must use canonical positive decimal form."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "leading-zero-chain.md"
+            write_text(path, valid_template().replace("- Chain ID: `1`", "- Chain ID: `01`"))
+
+            with self.assertRaisesRegex(
+                checker.ForkMetadataBrowserEvidenceError,
+                "Chain ID",
+            ):
+                checker.validate_artifact(path)
+
     def test_summary_environment_mismatch_fails(self) -> None:
         """The browser summary environment must match the retained artifact."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -456,6 +468,46 @@ class ForkMetadataBrowserEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.ForkMetadataBrowserEvidenceError,
                 "missing retained file",
+            ):
+                checker.validate_artifact(path)
+
+    def test_retained_parent_path_escape_fails(self) -> None:
+        """Reviewed retained artifact references cannot escape through parents."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-parent-escape.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROWSER_SUMMARY_PATH}`",
+                    "`../browser-summary.json`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkMetadataBrowserEvidenceError,
+                "repo-relative",
+            ):
+                checker.validate_artifact(path)
+
+    def test_retained_absolute_path_escape_fails(self) -> None:
+        """Reviewed retained artifact references cannot be absolute paths."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-absolute-escape.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROWSER_SUMMARY_PATH}`",
+                    f"`{root / 'browser-summary.json'}`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkMetadataBrowserEvidenceError,
+                "repo-relative",
             ):
                 checker.validate_artifact(path)
 
@@ -564,6 +616,22 @@ class ForkMetadataBrowserEvidenceTests(unittest.TestCase):
             write_text(
                 path,
                 valid_template() + "\nhttps://example.invalid/path?token=do-not-commit\n",
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkMetadataBrowserEvidenceError,
+                "secret-like CLI",
+            ):
+                checker.validate_artifact(path)
+
+    def test_provider_rpc_url_fails_secret_scan(self) -> None:
+        """Common private RPC provider URLs fail even without obvious query keys."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "provider-rpc-url.md"
+            write_text(
+                path,
+                valid_template()
+                + "\nhttps://chainstack.example.invalid/mainnet/hidden-credential\n",
             )
 
             with self.assertRaisesRegex(
