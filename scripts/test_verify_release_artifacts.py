@@ -274,6 +274,52 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             ):
                 verifier.verify_release_artifacts(root)
 
+    def test_verifier_requires_nested_release_manifest_checksum_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_checksum_bundle(
+                root,
+                [
+                    "release-artifacts/latest/abi-checksums.json",
+                    "release-artifacts/latest/bytecode-release-proof.json",
+                    "release-artifacts/latest/release-candidate-lockfile.json",
+                    "release-artifacts/latest/release-manifest.json",
+                ],
+            )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                (
+                    "release-manifest.json.deployment_artifacts.manifests\\[0\\] "
+                    "references file not covered by SHA256SUMS"
+                ),
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_checksum_record_rejects_nested_hash_mismatch(self) -> None:
+        with self.assertRaisesRegex(
+            verifier.ReleaseArtifactVerificationError,
+            "checksum hash mismatch for release-artifacts/latest/a.json",
+        ):
+            verifier.require_checksum_record(
+                {"release-artifacts/latest/a.json": "0" * 64},
+                path="release-artifacts/latest/a.json",
+                sha256="sha256:" + "1" * 64,
+                source="release-manifest.json.release_artifacts.a",
+            )
+
+    def test_checksum_record_rejects_bad_sha_marker(self) -> None:
+        with self.assertRaisesRegex(
+            verifier.ReleaseArtifactVerificationError,
+            "sha256 has invalid sha256 marker for release-artifacts/latest/a.json",
+        ):
+            verifier.require_checksum_record(
+                {"release-artifacts/latest/a.json": "0" * 64},
+                path="release-artifacts/latest/a.json",
+                sha256="not-a-prefixed-sha",
+                source="release-manifest.json.release_artifacts.a",
+            )
+
     def test_verifier_rejects_malformed_manifest_sha_marker(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

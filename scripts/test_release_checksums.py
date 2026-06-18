@@ -106,6 +106,19 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)
 
+    def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
+        expected_paths = {
+            Path("CHANGELOG.md"),
+            Path("README.md"),
+            Path("docs/release-policy.md"),
+            Path("docs/public-beta-evidence.md"),
+            Path("docs/integrations/README.md"),
+            Path("docs/integrations/events-and-indexing.md"),
+            Path("docs/tooling.md"),
+            Path("docs/status.md"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
     def test_committed_checksums_cover_permanence_package_artifacts(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         expected_paths = {

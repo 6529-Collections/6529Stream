@@ -841,10 +841,20 @@ def artifact_manifest_record(release_artifacts_dir: Path, repo_root: Path) -> di
     data = require_dict(load_json(path), str(path))
     artifacts = require_dict(data.get("artifacts"), "release-artifact-manifest.artifacts")
     record = file_record(path, repo_root, schema_required=True)
-    record["artifacts"] = {
-        str(name): require_dict(value, f"artifacts.{name}")
-        for name, value in sorted(artifacts.items())
-    }
+    normalized_artifacts: dict[str, Any] = {}
+    for name, value in sorted(artifacts.items()):
+        artifact = dict(require_dict(value, f"artifacts.{name}"))
+        artifact_path = require_string(artifact.get("path"), f"artifacts.{name}.path")
+        if "\\" in artifact_path:
+            raise ReleaseManifestError(f"artifacts.{name}.path must use forward slashes")
+        artifact_relative = Path(artifact_path)
+        if artifact_relative.is_absolute() or ".." in artifact_relative.parts:
+            raise ReleaseManifestError(
+                f"artifacts.{name}.path must stay inside the release artifact directory"
+            )
+        artifact["path"] = normalize_path(release_artifacts_dir / artifact_relative, repo_root)
+        normalized_artifacts[str(name)] = artifact
+    record["artifacts"] = normalized_artifacts
     return record
 
 
