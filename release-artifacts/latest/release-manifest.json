@@ -1862,9 +1862,9 @@
     ],
     "abi_compatibility_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
-      "sha256": "sha256:fad143a5bd27c473f2cfa68fde460f69b97668768a260703284cbebba505aced",
+      "sha256": "sha256:ec45fac71aff94422d2eae83eca9a060d1d1888b08d539c830578d17823ddb45",
       "size_bytes": 454969,
-      "schema_version": "6529stream.abi-surface-baseline.v1"
+      "schema_version": "6529stream.abi-surface-baseline.v2"
     },
     "gas_snapshot_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",

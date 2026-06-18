@@ -1,5 +1,5 @@
 {
-  "schema_version": "6529stream.abi-surface-baseline.v1",
+  "schema_version": "6529stream.abi-surface-baseline.v2",
   "generated_by": "scripts/check_abi_compatibility.py:2",
   "source": {
     "config": "release-artifacts/contracts.json",

@@ -11,7 +11,7 @@ from typing import Any
 import generate_release_artifacts as release_artifacts
 
 
-ABI_SURFACE_SCHEMA = "6529stream.abi-surface-baseline.v1"
+ABI_SURFACE_SCHEMA = "6529stream.abi-surface-baseline.v2"
 GENERATOR_VERSION = "2"
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
@@ -179,18 +179,47 @@ def build_contract_surface(summary: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def configured_artifact_entries(
+    config: dict[str, Any],
+    key: str,
+    *,
+    required: bool = False,
+) -> list[dict[str, Any]]:
+    entries = config.get(key, [])
+    if required and not entries:
+        raise AbiCompatibilityError(f"config {key} list is empty")
+    if not isinstance(entries, list):
+        raise AbiCompatibilityError(f"config {key} must be a list")
+
+    seen: set[str] = set()
+    for index, entry in enumerate(entries):
+        if not isinstance(entry, dict):
+            raise AbiCompatibilityError(f"config {key}[{index}] must be an object")
+        name = entry.get("name")
+        if not isinstance(name, str) or not name:
+            raise AbiCompatibilityError(f"config {key}[{index}] is missing a string name")
+        source = entry.get("source")
+        if not isinstance(source, str) or not source:
+            raise AbiCompatibilityError(f"config {key}[{index}] is missing a string source")
+        if name in seen:
+            raise AbiCompatibilityError(f"config {key} contains duplicate name {name}")
+        seen.add(name)
+
+    return entries
+
+
 def build_abi_surface(
     repo_root: Path,
     config_path: Path,
     foundry_out: Path,
 ) -> dict[str, Any]:
     config = release_artifacts.load_json(config_path)
-    configured_contracts = config.get("production_contracts", [])
-    if not configured_contracts:
-        raise AbiCompatibilityError("config production_contracts list is empty")
-    configured_interfaces = config.get("interfaces", [])
-    if not isinstance(configured_interfaces, list):
-        raise AbiCompatibilityError("config interfaces must be a list")
+    configured_contracts = configured_artifact_entries(
+        config,
+        "production_contracts",
+        required=True,
+    )
+    configured_interfaces = configured_artifact_entries(config, "interfaces")
 
     contracts: dict[str, Any] = {}
     for config_entry in sorted(configured_contracts, key=lambda item: item["name"]):
@@ -273,6 +302,7 @@ def compare_surface_entries(
                 "type": removed_subject_type,
                 "surface": surface,
                 "contract": subject,
+                "subject": subject,
                 "message": f"{subject_kind} {subject} is missing from current surface",
             }
         )
@@ -283,6 +313,7 @@ def compare_surface_entries(
                 "type": added_subject_type,
                 "surface": surface,
                 "contract": subject,
+                "subject": subject,
                 "message": f"{subject_kind} {subject} was added to current surface",
             }
         )
@@ -310,6 +341,7 @@ def compare_surface_entries(
                         "type": "removed_entry",
                         "surface": surface,
                         "contract": subject,
+                        "subject": subject,
                         "category": category,
                         "key": key,
                         "message": f"{subject} removed {category} entry {key}",
@@ -322,6 +354,7 @@ def compare_surface_entries(
                         "type": "added_entry",
                         "surface": surface,
                         "contract": subject,
+                        "subject": subject,
                         "category": category,
                         "key": key,
                         "message": f"{subject} added {category} entry {key}",
@@ -335,6 +368,7 @@ def compare_surface_entries(
                             "type": "changed_entry",
                             "surface": surface,
                             "contract": subject,
+                            "subject": subject,
                             "category": category,
                             "key": key,
                             "message": f"{subject} changed {category} entry {key}",

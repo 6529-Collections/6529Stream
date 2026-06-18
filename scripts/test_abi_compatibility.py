@@ -203,6 +203,7 @@ class AbiCompatibilityTests(unittest.TestCase):
                     "type": "removed_entry",
                     "surface": "contracts",
                     "contract": "Example",
+                    "subject": "Example",
                     "category": "functions",
                     "key": "balanceOf(address)",
                     "message": "Example removed functions entry balanceOf(address)",
@@ -259,6 +260,7 @@ class AbiCompatibilityTests(unittest.TestCase):
             self.assertFalse(report["compatible"])
             self.assertEqual(report["incompatible_changes"][0]["type"], "removed_contract")
             self.assertEqual(report["incompatible_changes"][0]["contract"], "Other")
+            self.assertEqual(report["incompatible_changes"][0]["subject"], "Other")
 
     def test_check_mode_detects_drift_without_rewriting_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -330,6 +332,7 @@ class AbiCompatibilityTests(unittest.TestCase):
             self.assertEqual(report["incompatible_changes"][0]["type"], "removed_interface")
             self.assertEqual(report["incompatible_changes"][0]["surface"], "interfaces")
             self.assertEqual(report["incompatible_changes"][0]["contract"], "IExample")
+            self.assertEqual(report["incompatible_changes"][0]["subject"], "IExample")
 
     def test_removed_interface_entry_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -358,6 +361,7 @@ class AbiCompatibilityTests(unittest.TestCase):
                     "type": "removed_entry",
                     "surface": "interfaces",
                     "contract": "IExample",
+                    "subject": "IExample",
                     "category": "functions",
                     "key": "balanceOf(address)",
                     "message": "IExample removed functions entry balanceOf(address)",
@@ -398,6 +402,7 @@ class AbiCompatibilityTests(unittest.TestCase):
                 if change["type"] == "changed_entry" and change["surface"] == "interfaces"
             ]
             self.assertEqual(changed[0]["contract"], "IExample")
+            self.assertEqual(changed[0]["subject"], "IExample")
             self.assertEqual(changed[0]["key"], "ExampleEvent(address,uint256)")
             self.assertEqual(changed[0]["category"], "events")
 
@@ -436,7 +441,50 @@ class AbiCompatibilityTests(unittest.TestCase):
             ]
             self.assertEqual(interface_additions[0]["type"], "added_entry")
             self.assertEqual(interface_additions[0]["contract"], "IExample")
+            self.assertEqual(interface_additions[0]["subject"], "IExample")
             self.assertEqual(interface_additions[0]["key"], "totalSupply()")
+
+    def test_malformed_contract_config_entry_reports_abi_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            config_path = root / "release-artifacts" / "contracts.json"
+            write_json(
+                config_path,
+                {
+                    "schema_version": "6529stream.release-artifact-contracts.v1",
+                    "production_contracts": [{"source": "smart-contracts/Example.sol"}],
+                    "interfaces": [],
+                },
+            )
+
+            with self.assertRaisesRegex(
+                checker.AbiCompatibilityError,
+                r"config production_contracts\[0\] is missing a string name",
+            ):
+                checker.build_abi_surface(root, config_path, root / "out")
+
+    def test_malformed_interface_config_entry_reports_abi_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            config_path = root / "release-artifacts" / "contracts.json"
+            write_json(
+                config_path,
+                {
+                    "schema_version": "6529stream.release-artifact-contracts.v1",
+                    "production_contracts": [
+                        {"name": "Example", "source": "smart-contracts/Example.sol"}
+                    ],
+                    "interfaces": [{"name": "IExample"}],
+                },
+            )
+
+            with self.assertRaisesRegex(
+                checker.AbiCompatibilityError,
+                r"config interfaces\[0\] is missing a string source",
+            ):
+                checker.build_abi_surface(root, config_path, root / "out")
 
 
 if __name__ == "__main__":
