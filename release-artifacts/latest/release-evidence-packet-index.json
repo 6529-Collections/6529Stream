@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:5756a9ab6226113be98b6329eb41173b7bafeeb6858634d781c41c114cdbea09",
-      "size_bytes": 32566
+      "sha256": "sha256:59107fb9e03bad9e023543bfc6d85db4d807ae54b3913845d69b7e3bac0f204f",
+      "size_bytes": 33156
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -867,7 +867,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:42f4a4eb6e09db4356faeb9c95b200697651d7d26acdf8b6e5e4ad7dc26ce102",
+        "sha256": "sha256:bf14b51dbdd19f35cf17dab928182ecd36940b338dd3d780c9be9387d2168669",
         "block_or_reference": "template-only live provider epoch, request health reference, or deployment version",
         "command_or_source_system": "template-only randomizer provider source, operations transcript, monitoring source, or reviewer source",
         "operator_notes": "Replace this template with provider configuration, funding and reserve status, request health, migration checks, stale or failed request handling, retry evidence, pause and emergency evidence, and reviewer confirmation."

@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f164ab0a2c7cc449ca74a5d0e4e2b67afd4a8ff7206f97f2d27a152f039c8df1",
-      "size_bytes": 60425
+      "sha256": "sha256:113ba6d1526e2a5c9c60ecd85b3b72c3d7822c099c931084e7585b0ddb289b2f",
+      "size_bytes": 60771
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c03a1cac188fb0b8c4ee84f99453c5a297dd506361083e437c04ebdbf7d9644e",
+      "sha256": "sha256:5ebe93348e7a6eb509934cc763969c247089faa27bea7bf37c9a01281568537e",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added stronger live randomizer operations retained-artifact validation so future pending or reviewed mainnet provider operations evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match optional declared `sha256:` hashes before issue #229 can be considered for closure.",
       "Added stronger live ceremony retained-artifact validation so future pending or reviewed mainnet ceremony evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, and match optional declared `sha256:` hashes before issue #228 can be considered for closure.",
       "Added stronger live metadata browser retained-artifact validation so future pending or reviewed mainnet evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #473 can be considered for closure.",
       "Added stronger testnet deployment rehearsal retained-artifact validation so future pending or reviewed Sepolia evidence must reference existing repo-relative retained files, remain no-secret, and match optional declared `sha256:` hashes before issue #217 can be considered for closure.",
