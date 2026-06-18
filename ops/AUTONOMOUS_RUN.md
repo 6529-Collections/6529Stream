@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/marketplace-indexer-manifest-validation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/527` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/528` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/529` |
-| Next issue | Wait for PR #529 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge when clean; then continue with the next substantive release-evidence candidate. |
+| Active PR branch | `codex/fork-metadata-browser-evidence-checker` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/529` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/530` |
+| Active PR | TBD |
+| Next issue | EXT-009 local validation is complete; commit, push, open PR for issue #530, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-17 23:44 UTC` |
+| Last updated | `2026-06-18 00:36 UTC` |
 
 ## Packaging Notes
 
@@ -16207,6 +16207,8 @@ Outcome:
 | 2026-06-17 23:40 | Validate MAP-003 local draft | Added manifest-aware marketplace/indexer evidence validation, focused reviewed-manifest fixture tests, docs/backlog/run-state updates, changelog coverage, and regenerated release evidence artifacts. Local validation passed: `python scripts\test_marketplace_indexer_evidence.py`, `python scripts\check_marketplace_indexer_evidence.py`, packet-index/backlog/body-sync tests and generators, public-beta/non-local evidence checks, release manifest/checksum checks, Python compile, `make release-checksums`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `codex-diff-check`. Known compiler/Foundry warning noise remains unchanged. Next action is to commit, push, open PR for issue #528, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
 | 2026-06-17 23:42 | Open PR #529 for MAP-003 | PR #529 is open at `https://github.com/6529-Collections/6529Stream/pull/529`, closes issue #528, and packages manifest-aware marketplace/indexer reviewed-evidence validation plus docs, backlog, run-state, changelog, and regenerated release artifacts. CodeRabbit was requested in comment `4736474348`. Next action is to push this run-state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-17 23:44 | Address PR #529 bot hardening notes | 6529bot security reported no findings and general review marked PR #529 good to merge with low-risk hardening suggestions. Accepted all three: public-beta marketplace/indexer envelopes now require a positive chain ID, the standalone `--evidence` CLI path documents why default manifest validation is skipped, and tests now reject complete manifest rows with `reviewer: TBD` plus non-positive public-beta chain IDs. Focused marketplace/indexer tests/check, `make release-checksums`, release manifest/checksum checks, and `codex-diff-check` passed. Next action is to commit/push the review-response head and wait for latest CI, CodeRabbit, and bot feedback. |
+| 2026-06-18 00:03 | Start EXT-009 fork/testnet metadata browser evidence checker | PR #529 merged as `083bc8eec37038bbffdfa23dd79b9cb69a6b5e78`, issue #528 closed completed, and local main fast-forwarded to the merge commit. Issue #530 and branch `codex/fork-metadata-browser-evidence-checker` now track a checked fork/testnet metadata-browser retained-artifact template and offline validator for future `fork_testnet_metadata_browser_evidence`. This intentionally keeps the public-beta row missing until reviewed fork or testnet evidence is retained and linked from the evidence manifest. |
+| 2026-06-18 00:36 | Validate EXT-009 local draft | Added the fork/testnet metadata-browser retained-artifact template, offline validator, focused tests, local/CI/Windows gate wiring, release packet/checksum/manifest coverage, docs, changelog, backlog updates, and regenerated release evidence. Local validation passed: focused metadata-browser tests/checker, release packet/backlog/body-sync tests and generators, public-beta/non-local evidence checks, release manifest/checksum checks, Python compile, `make fork-metadata-browser-evidence-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-body-sync-check release-notes-check release-manifest-check release-checksums-check changelog-check`, full `make check`, Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`, and `codex-diff-check`. Known compiler/Foundry warning noise remains unchanged, and `codex-diff-check` only repeated the existing PowerShell LF-to-CRLF warning. |
 
 ## Resume Instructions
 

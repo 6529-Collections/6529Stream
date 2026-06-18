@@ -7,6 +7,13 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked fork/testnet metadata-browser retained-artifact template and
+  offline checker for future `fork_testnet_metadata_browser_evidence`, covering
+  fork/testnet environment and chain IDs, deployed-contract metadata fetches,
+  retained browser summary JSON, sandbox outcomes, no-secret redaction, local,
+  Windows, and CI gate wiring, release-packet mapping, and checksum coverage
+  while preserving the blocked public-beta baseline until reviewed evidence is
+  retained.
 - Added manifest-aware marketplace/indexer evidence validation so complete
   public-beta or production marketplace/indexer rows must reference reviewed
   non-local envelopes whose retained Markdown artifacts pass the detailed

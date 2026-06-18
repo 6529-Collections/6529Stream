@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:080cf7076a73c19a7c113e99b3b0cd57901c34d555fa73ddb121491f4208cf0e",
-      "size_bytes": 57473
+      "sha256": "sha256:4ad1128430918eefbfed039228f91db9104510008dfc5c6aaf654cee18622fd4",
+      "size_bytes": 57957
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:22aa8eae8c4dbcfb95cba40d912e0684407e541b67b48bc95039926d870cdf64",
+      "sha256": "sha256:61b691aa271a86e2a6245c775c9d9cc0aa0f9dc2d6b2b5a3f907fdc3d1a6aed2",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a checked fork/testnet metadata-browser retained-artifact template and offline checker for future `fork_testnet_metadata_browser_evidence`, covering fork/testnet environment and chain IDs, deployed-contract metadata fetches, retained browser summary JSON, sandbox outcomes, no-secret redaction, local, Windows, and CI gate wiring, release-packet mapping, and checksum coverage while preserving the blocked public-beta baseline until reviewed evidence is retained.",
       "Added manifest-aware marketplace/indexer evidence validation so complete public-beta or production marketplace/indexer rows must reference reviewed non-local envelopes whose retained Markdown artifacts pass the detailed coverage, hash, environment, and no-secret checks while templates remain reusable preparation material.",
       "Added `ADV-013` randomizer request-binding parity tests covering VRF and arRNG wrong-collection pending-state preservation, plus nested stale-mark and retry reentry during the external core write without production bytecode changes.",
       "Added `StreamAuctions.minimumNextBid(tokenId)` and `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations, with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and release-artifact coverage.",

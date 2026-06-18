@@ -3364,7 +3364,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `EXT-009` | Retain fork metadata browser evidence from deployed fork contracts | E | fork deployment artifact |
+| `EXT-009` | Add fork/testnet metadata browser evidence checker and retained-artifact template | E/G | In progress on issue #530; future reviewed evidence still required |
 | `EXT-010` | Retain fork ceremony evidence for admin/signer/randomizer/auction operations | E/F | ceremony checker |
 | `EXT-011` | Retain fork randomizer operations evidence | E/F | randomizer operations checker |
 | `EXT-012` | Add production broadcast retention checker | F/G | Merged in PR #469; issue #468 closed completed |

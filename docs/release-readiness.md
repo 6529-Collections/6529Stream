@@ -373,6 +373,11 @@ The current local baseline includes:
   [`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md),
   validated with `python scripts/test_production_verified_addresses.py` and
   `python scripts/check_production_verified_addresses.py`,
+  plus fork/testnet metadata-browser evidence for
+  `fork_testnet_metadata_browser_evidence` under
+  [`release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md),
+  validated offline with `python scripts/test_fork_metadata_browser_evidence.py`
+  and `python scripts/check_fork_metadata_browser_evidence.py`,
   plus live metadata-browser evidence for `live_metadata_browser_evidence`
   under
   [`release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`](../release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md),
