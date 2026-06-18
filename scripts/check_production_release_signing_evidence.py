@@ -14,7 +14,6 @@ from typing import Any
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-REPO_ROOT = SCRIPT_DIR.parents[0]
 REQUIREMENT_ID = "production_release_signing"
 SUPPORTED_REQUIREMENTS = {"production_signatures", "signed_git_tag"}
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -158,6 +157,18 @@ def file_sha256(path: Path) -> str:
     return "sha256:" + hasher.hexdigest()
 
 
+def retained_file_bytes(path: Path) -> bytes:
+    """Read one retained artifact as bytes with checker-specific errors."""
+    try:
+        return path.read_bytes()
+    except FileNotFoundError as exc:
+        raise ProductionReleaseSigningEvidenceError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise ProductionReleaseSigningEvidenceError(
+            f"could not read retained file: {path}: {exc}"
+        ) from exc
+
+
 def repo_root_for(path: Path) -> Path:
     """Return the root used for repo-relative retained artifact paths."""
     cwd = Path.cwd().resolve()
@@ -226,7 +237,6 @@ def is_placeholder(value: str) -> bool:
     return (
         normalized in {"", "tbd", "template", "template-only", "n/a"}
         or normalized.startswith("tbd ")
-        or normalized.startswith("template")
         or bool(ANGLE_PLACEHOLDER_RE.search(value))
     )
 
@@ -345,13 +355,18 @@ def validate_referenced_artifacts(
             raise ProductionReleaseSigningEvidenceError(
                 f"{path} field {label!r} points to missing retained file: {path_text}"
             )
+        content = retained_file_bytes(target)
+        try:
+            retained_text = content.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise ProductionReleaseSigningEvidenceError(f"{target} must be valid UTF-8") from exc
         validate_no_secret_values(
             target,
-            read_text(target),
+            retained_text,
             reject_bare_hex=label != "Checksum bundle",
         )
         if expected_digest is not None:
-            actual_digest = file_sha256(target)
+            actual_digest = "sha256:" + hashlib.sha256(content).hexdigest()
             if actual_digest != expected_digest:
                 raise ProductionReleaseSigningEvidenceError(
                     f"{path} field {label!r} sha256 mismatch for {path_text}: "
@@ -397,10 +412,10 @@ def validate_tag_name(path: Path, tag: str) -> None:
         tag.startswith("/")
         or tag.startswith("-")
         or tag.endswith("/")
-        or tag.endswith(".")
         or "//" in tag
         or "@{" in tag
         or tag == "@"
+        or ".." in tag
     ):
         raise ProductionReleaseSigningEvidenceError(f"{path} signed Git tag is not safe")
     for component in tag.split("/"):
@@ -411,8 +426,6 @@ def validate_tag_name(path: Path, tag: str) -> None:
             or component.endswith(".")
         ):
             raise ProductionReleaseSigningEvidenceError(f"{path} signed Git tag is not safe")
-    if ".." in tag:
-        raise ProductionReleaseSigningEvidenceError(f"{path} signed Git tag is not safe")
 
 
 def validate_release_signature_json(

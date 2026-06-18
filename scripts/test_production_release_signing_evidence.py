@@ -220,6 +220,20 @@ class ProductionReleaseSigningEvidenceTests(unittest.TestCase):
 
             checker.validate_artifact(path)
 
+    def test_reviewed_template_prefix_content_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_reviewed_retained_files(root)
+            text = artifact_with_field(
+                reviewed_artifact(),
+                "Signer custody summary",
+                "Template signer custody policy adopted for this production ceremony",
+            )
+            path = root / "template-prefix-content.md"
+            write_text(path, text)
+
+            checker.validate_artifact(path)
+
     def test_reviewed_declared_hash_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -241,6 +255,31 @@ class ProductionReleaseSigningEvidenceTests(unittest.TestCase):
             write_text(path, template_text())
 
             checker.validate_artifact(path)
+
+    def test_pending_review_rejects_reviewed_decision(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            text = artifact_with_field(reviewed_artifact(), "Review status", "pending_review")
+            text = artifact_with_field(text, "Review decision", "reviewed")
+            path = root / "pending-review-reviewed-decision.md"
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionReleaseSigningEvidenceError, "Review decision"
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_rejects_pending_review_decision(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            text = artifact_with_field(reviewed_artifact(), "Review decision", "pending_review")
+            path = root / "reviewed-pending-review-decision.md"
+            write_text(path, text)
+
+            with self.assertRaisesRegex(
+                checker.ProductionReleaseSigningEvidenceError, "Review decision"
+            ):
+                checker.validate_artifact(path)
 
     def test_reviewed_missing_retained_file_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
