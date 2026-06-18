@@ -380,9 +380,19 @@ at
 Before generating the non-local metadata envelope, run:
 
 ```sh
+python scripts/test_generate_fork_metadata_browser_evidence_draft.py
 python scripts/test_fork_metadata_browser_evidence.py
 python scripts/check_fork_metadata_browser_evidence.py
 ```
+
+If retained capture outputs were produced from deployed fork or testnet
+contracts, `scripts/generate_fork_metadata_browser_evidence_draft.py` can copy
+the browser summary, generated `tokenURI`, and redacted transcript into a
+self-contained pending-review retained artifact bundle. The helper requires an
+explicit `--metadata-fetched-from-deployed-contract` assertion and writes
+`Review status: pending_review`; it is not completion evidence until a reviewer
+accepts it and the shared public-beta evidence manifest links the reviewed
+non-local envelope.
 
 The live metadata-browser row has a dedicated retained-artifact template at
 `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`.

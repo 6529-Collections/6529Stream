@@ -95,6 +95,7 @@ def valid_template() -> str:
 ## Validation Commands
 
 ```sh
+python scripts/test_generate_fork_metadata_browser_evidence_draft.py
 python scripts/test_fork_metadata_browser_evidence.py
 python scripts/check_fork_metadata_browser_evidence.py
 python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json --retained-artifact release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md --output release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork/testnet block, token ID, collection ID, or browser transcript reference>" --command-or-source-system "<metadata browser transcript or CI job>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
@@ -168,6 +169,7 @@ def reviewed_artifact() -> str:
 ## Validation Commands
 
 ```sh
+python scripts/test_generate_fork_metadata_browser_evidence_draft.py
 python scripts/test_fork_metadata_browser_evidence.py
 python scripts/check_fork_metadata_browser_evidence.py
 python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-metadata-browser-evidence-template.json --retained-artifact release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-retained-artifact-template.md --output release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366" --command-or-source-system "metadata browser transcript" --owner release-operator --reviewer release-reviewer --source-git-commit 1234567890abcdef1234567890abcdef12345678 --source-ci-run ci-run-123

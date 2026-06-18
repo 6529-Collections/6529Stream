@@ -733,6 +733,17 @@ bare 64-hex strings fail closed. Normalize any `sha256sum`-style retained
 digest output, including the contents of retained release digest files, to the
 explicit `sha256:<hex>` form before review.
 
+Fork/testnet metadata-browser evidence has a draft generator for retained
+capture outputs. Run
+`python scripts/test_generate_fork_metadata_browser_evidence_draft.py`,
+`python scripts/test_fork_metadata_browser_evidence.py`, and
+`python scripts/check_fork_metadata_browser_evidence.py` before generating or
+reviewing a `fork_testnet_metadata_browser_evidence` retained artifact. The
+generator copies a browser summary, generated `tokenURI`, and redacted
+transcript into a self-contained pending-review bundle, requires an explicit
+deployed-contract assertion, and preserves the blocked public-beta posture until
+reviewed evidence is linked from the public-beta manifest.
+
 Live metadata-browser evidence has a dedicated no-secret retained artifact
 template at
 `release-artifacts/evidence/live-metadata-browser/live-metadata-browser-retained-artifact-template.md`.

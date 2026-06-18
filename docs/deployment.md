@@ -75,6 +75,32 @@ python scripts/check_rehearsal_metadata_browser_sandbox.py \
   --transcript-output /tmp/metadata-browser-transcript.md
 ```
 
+When those capture outputs come from deployed fork or testnet contracts, use
+the draft generator to assemble a checker-compatible pending-review evidence
+bundle. The command requires the operator to assert that the metadata was
+fetched from deployed fork/testnet contracts; it does not close
+`fork_testnet_metadata_browser_evidence`, and the shared public-beta evidence
+manifest remains blocked until the retained draft is reviewed and linked:
+
+```sh
+python scripts/generate_fork_metadata_browser_evidence_draft.py \
+  --capture-summary-json /tmp/metadata-browser-summary.json \
+  --token-uri-output /tmp/metadata-browser-token-uri.txt \
+  --transcript-output /tmp/metadata-browser-transcript.md \
+  --summary-output release-artifacts/evidence/fork-metadata-browser/browser-summary.json \
+  --output release-artifacts/evidence/fork-metadata-browser/metadata-browser-evidence.md \
+  --environment fork \
+  --chain-id 1 \
+  --git-commit <release commit> \
+  --ci-run-or-operator-transcript <ci run or transcript id> \
+  --block-or-reference <fork block or testnet reference> \
+  --deployment-version <deployment version> \
+  --contract StreamCore=<deployed address> \
+  --operator <operator> \
+  --reviewer <reviewer> \
+  --metadata-fetched-from-deployed-contract
+```
+
 `script/RehearseMetadataBrowser.s.sol` builds on the deployment rehearsal by
 deploying the local stack, registering a deterministic metadata dependency,
 minting through the EIP-712 drop authorization path, finalizing token

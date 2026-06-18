@@ -103,6 +103,7 @@ RETAINED_FILE_FIELDS = [
 ]
 
 REQUIRED_COMMANDS = [
+    "python scripts/test_generate_fork_metadata_browser_evidence_draft.py",
     "python scripts/test_fork_metadata_browser_evidence.py",
     "python scripts/check_fork_metadata_browser_evidence.py",
     "python scripts/generate_non_local_release_evidence.py",

@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a fork/testnet metadata-browser evidence draft generator that converts
+  retained browser capture outputs into a checker-compatible pending-review
+  evidence bundle, with no-secret validation, deployed-contract assertion, and
+  local/CI/Windows gate coverage while keeping issue #218 blocked until real
+  reviewed fork/testnet evidence is linked.
 - Added retained-output flags to the local metadata browser rehearsal checker
   so operators can export deterministic browser summary JSON, generated
   `tokenURI`, and redacted transcript artifacts before future fork/testnet
