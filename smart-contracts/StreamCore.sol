@@ -282,19 +282,23 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             _collectionLibrary,
             _collectionScript
         );
-        collectionInfo[newCollectionIndex].collectionName = _collectionName;
-        collectionInfo[newCollectionIndex].collectionArtist = _collectionArtist;
-        collectionInfo[newCollectionIndex].collectionDescription = _collectionDescription;
-        collectionInfo[newCollectionIndex].collectionWebsite = _collectionWebsite;
-        collectionInfo[newCollectionIndex].collectionLicense = _collectionLicense;
-        collectionInfo[newCollectionIndex].collectionBaseURI = _collectionBaseURI;
-        collectionInfo[newCollectionIndex].collectionLibrary = _collectionLibrary;
-        collectionInfo[newCollectionIndex].collectionDependencyScript = _collectionDependencyScript;
-        collectionInfo[newCollectionIndex].collectionScript = _collectionScript;
-        isCollectionCreated[newCollectionIndex] = true;
-        _pinCollectionDependency(newCollectionIndex, _collectionDependencyScript);
-        emit CollectionCreated(newCollectionIndex);
-        newCollectionIndex = newCollectionIndex + 1;
+        uint256 collectionId = newCollectionIndex;
+        collectionInfoStructure storage info = collectionInfo[collectionId];
+        info.collectionName = _collectionName;
+        info.collectionArtist = _collectionArtist;
+        info.collectionDescription = _collectionDescription;
+        info.collectionWebsite = _collectionWebsite;
+        info.collectionLicense = _collectionLicense;
+        info.collectionBaseURI = _collectionBaseURI;
+        info.collectionLibrary = _collectionLibrary;
+        info.collectionDependencyScript = _collectionDependencyScript;
+        info.collectionScript = _collectionScript;
+        isCollectionCreated[collectionId] = true;
+        _pinCollectionDependency(collectionId, _collectionDependencyScript);
+        emit CollectionCreated(collectionId);
+        unchecked {
+            newCollectionIndex = collectionId + 1;
+        }
     }
 
     // function to add/modify the additional data of a collection
@@ -344,7 +348,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             InvalidRandomizerContract.selector
         );
         _requireCollectionNotFrozen(_collectionID);
-        address oldRandomizer = collectionAdditionalData[_collectionID].randomizerContract;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        address oldRandomizer = collectionData.randomizerContract;
         if (oldRandomizer != address(0)) {
             uint256 pendingRequests =
                 StreamMetadataRenderer.pendingRandomnessRequests(oldRandomizer, _collectionID);
@@ -352,14 +358,15 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
                 revert PendingRandomnessRequests(_collectionID, oldRandomizer, pendingRequests);
             }
         }
-        collectionRandomizerEpoch[_collectionID] = collectionRandomizerEpoch[_collectionID] + 1;
-        collectionAdditionalData[_collectionID].randomizerContract = _randomizerContract;
-        collectionAdditionalData[_collectionID].randomizer = IRandomizer(_randomizerContract);
+        uint256 randomizerEpoch;
+        unchecked {
+            randomizerEpoch = collectionRandomizerEpoch[_collectionID] + 1;
+        }
+        collectionRandomizerEpoch[_collectionID] = randomizerEpoch;
+        collectionData.randomizerContract = _randomizerContract;
+        collectionData.randomizer = IRandomizer(_randomizerContract);
         emit CollectionRandomizerUpdated(
-            _collectionID,
-            oldRandomizer,
-            _randomizerContract,
-            collectionRandomizerEpoch[_collectionID]
+            _collectionID, oldRandomizer, _randomizerContract, randomizerEpoch
         );
     }
 
@@ -376,14 +383,18 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         }
         _requireCollectionNotFrozen(_collectionID);
         StreamMetadataRenderer.requireTokenData(_tokenData);
-        collectionAdditionalData[_collectionID].collectionCirculationSupply =
-            collectionAdditionalData[_collectionID].collectionCirculationSupply + 1;
-        if (
-            collectionAdditionalData[_collectionID].collectionTotalSupply
-                >= collectionAdditionalData[_collectionID].collectionCirculationSupply
-        ) {
-            tokensAirdropPerAddress[_collectionID][_recipient] =
-                tokensAirdropPerAddress[_collectionID][_recipient] + 1;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        uint256 nextCirculationSupply;
+        unchecked {
+            nextCirculationSupply = collectionData.collectionCirculationSupply + 1;
+        }
+        collectionData.collectionCirculationSupply = nextCirculationSupply;
+        if (collectionData.collectionTotalSupply >= nextCirculationSupply) {
+            unchecked {
+                tokensAirdropPerAddress[_collectionID][_recipient] =
+                    tokensAirdropPerAddress[_collectionID][_recipient] + 1;
+            }
             _mintProcessing(mintIndex, _recipient, _tokenData, _collectionID, _saltfun_o);
         } else {
             revert CollectionSupplyReached();
@@ -397,9 +408,11 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             "ERC721: caller is not token owner or approved"
         );
         _requireCollectionNotFrozen(_collectionID);
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
         if (
-            _tokenId < collectionAdditionalData[_collectionID].reservedMinTokensIndex
-                || _tokenId > collectionAdditionalData[_collectionID].reservedMaxTokensIndex
+            _tokenId < collectionData.reservedMinTokensIndex
+                || _tokenId > collectionData.reservedMaxTokensIndex
         ) {
             revert TokenOutsideCollectionRange();
         }
@@ -417,8 +430,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             postBurnRandomnessTimestamp: 0
         });
         _burn(_tokenId);
-        _liveTokenSupply = _liveTokenSupply - 1;
-        burnAmount[_collectionID] = burnAmount[_collectionID] + 1;
+        unchecked {
+            _liveTokenSupply = _liveTokenSupply - 1;
+            burnAmount[_collectionID] = burnAmount[_collectionID] + 1;
+        }
         emit TokenBurned(_collectionID, _tokenId, _msgSender(), tokenOwner);
     }
 
@@ -436,7 +451,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         tokenData[_mintIndex] = _tokenData;
         tokenIdsToCollectionIds[_mintIndex] = _collectionID;
         _addLiveTokenMetadataRecord(_collectionID, _mintIndex);
-        _liveTokenSupply = _liveTokenSupply + 1;
+        unchecked {
+            _liveTokenSupply = _liveTokenSupply + 1;
+        }
         _safeMint(_recipient, _mintIndex);
         collectionAdditionalData[_collectionID].randomizer
             .calculateTokenHash(_collectionID, _mintIndex, _saltfun_o);
@@ -460,6 +477,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     ) public FunctionAdminRequired(this.updateCollectionInfo.selector) {
         _requireMetadataMutationNotPaused();
         _requireExistingMutableCollection(_collectionID);
+        collectionInfoStructure storage info = collectionInfo[_collectionID];
         if (_index == _FULL_COLLECTION_UPDATE_INDEX) {
             StreamMetadataRenderer.requireCollectionInfoLimits(
                 _newCollectionName,
@@ -471,23 +489,22 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
                 _newCollectionLibrary,
                 _newCollectionScript
             );
-            collectionInfo[_collectionID].collectionName = _newCollectionName;
-            collectionInfo[_collectionID].collectionArtist = _newCollectionArtist;
-            collectionInfo[_collectionID].collectionDescription = _newCollectionDescription;
-            collectionInfo[_collectionID].collectionWebsite = _newCollectionWebsite;
-            collectionInfo[_collectionID].collectionLicense = _newCollectionLicense;
-            collectionInfo[_collectionID].collectionBaseURI = _newCollectionBaseURI;
-            collectionInfo[_collectionID].collectionLibrary = _newCollectionLibrary;
-            collectionInfo[_collectionID].collectionDependencyScript =
-            _newCollectionDependencyScript;
-            collectionInfo[_collectionID].collectionScript = _newCollectionScript;
+            info.collectionName = _newCollectionName;
+            info.collectionArtist = _newCollectionArtist;
+            info.collectionDescription = _newCollectionDescription;
+            info.collectionWebsite = _newCollectionWebsite;
+            info.collectionLicense = _newCollectionLicense;
+            info.collectionBaseURI = _newCollectionBaseURI;
+            info.collectionLibrary = _newCollectionLibrary;
+            info.collectionDependencyScript = _newCollectionDependencyScript;
+            info.collectionScript = _newCollectionScript;
             _pinCollectionDependency(_collectionID, _newCollectionDependencyScript);
         } else if (_index == _BASE_URI_UPDATE_INDEX) {
             StreamMetadataRenderer.requireCollectionBaseURI(_newCollectionBaseURI);
-            collectionInfo[_collectionID].collectionBaseURI = _newCollectionBaseURI;
+            info.collectionBaseURI = _newCollectionBaseURI;
         } else {
             StreamMetadataRenderer.requireCollectionScriptChunk(_newCollectionScript[0]);
-            collectionInfo[_collectionID].collectionScript[_index] = _newCollectionScript[0];
+            info.collectionScript[_index] = _newCollectionScript[0];
         }
         _emitCollectionMetadataUpdate(_collectionID);
     }
@@ -519,7 +536,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     ) private {
         _requireMetadataMutationNotPaused();
         _requireCollectionNotFrozen(_collectionID);
-        if (_artist != collectionAdditionalData[_collectionID].collectionArtistAddress) {
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        if (_artist != collectionData.collectionArtistAddress) {
             revert ArtistSignatureUnauthorized();
         }
         if (artistApprovalHashes[_collectionID] == _approvalHash) {
@@ -585,11 +604,13 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     {
         _requireMetadataMutationNotPaused();
         _requireFreezeEligible(_collectionID);
-        _finalizeCollectionSupply(_collectionID);
+        _finalizeCollectionSupply(collectionAdditionalData[_collectionID]);
         bytes32 manifestHash = _collectionFreezeManifestHash(_collectionID);
         collectionFreeze[_collectionID] = true;
         collectionFreezeManifestHashes[_collectionID] = manifestHash;
-        frozenCollectionCount = frozenCollectionCount + 1;
+        unchecked {
+            frozenCollectionCount = frozenCollectionCount + 1;
+        }
         emit CollectionFrozen(_collectionID, manifestHash, METADATA_SCHEMA_VERSION, msg.sender);
     }
 
@@ -597,7 +618,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     // Post-burn timestamps are audit evidence only; they do not gate protocol behavior.
     // slither-disable-start timestamp
     function setTokenHash(uint256 _collectionID, uint256 _mintIndex, bytes32 _hash) external {
-        require(msg.sender == collectionAdditionalData[_collectionID].randomizerContract);
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        require(msg.sender == collectionData.randomizerContract);
         bool burnedToken = _isTokenBurned(_mintIndex);
         if (!burnedToken) {
             _requireCollectionNotFrozen(_collectionID);
@@ -606,8 +629,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             revert ZeroTokenHash();
         }
         if (
-            _mintIndex < collectionAdditionalData[_collectionID].reservedMinTokensIndex
-                || _mintIndex > collectionAdditionalData[_collectionID].reservedMaxTokensIndex
+            _mintIndex < collectionData.reservedMinTokensIndex
+                || _mintIndex > collectionData.reservedMaxTokensIndex
         ) {
             revert TokenOutsideCollectionRange();
         }
@@ -648,14 +671,16 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         if (!wereDataAdded[_collectionID]) {
             revert CollectionDataMissing(_collectionID);
         }
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
         if (
             block.timestamp
                 <= IStreamMinter(minterContract).getEndTime(_collectionID)
-                    + collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint
+                    + collectionData.setFinalSupplyTimeAfterMint
         ) {
             revert FinalSupplyTimeNotPassed();
         }
-        _finalizeCollectionSupply(_collectionID);
+        _finalizeCollectionSupply(collectionData);
     }
 
     // function to update the admin, minter or dependency contract
@@ -766,11 +791,13 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
 
     function _emitCollectionMetadataUpdate(uint256 _collectionID) private {
         // Circulation supply is a minted-ever counter; burns are represented by ERC-721 events.
-        uint256 mintedCount = collectionAdditionalData[_collectionID].collectionCirculationSupply;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        uint256 mintedCount = collectionData.collectionCirculationSupply;
         if (mintedCount == 0) {
             return;
         }
-        uint256 firstTokenId = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
+        uint256 firstTokenId = collectionData.reservedMinTokensIndex;
         emit BatchMetadataUpdate(firstTokenId, firstTokenId + mintedCount - 1);
     }
 
@@ -865,8 +892,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         view
         returns (bytes32, uint256, bytes32, address)
     {
+        collectionInfoStructure storage info = collectionInfo[_collectionID];
         return (
-            collectionInfo[_collectionID].collectionDependencyScript,
+            info.collectionDependencyScript,
             collectionDependencyVersions[_collectionID],
             collectionDependencyContentHashes[_collectionID],
             address(collectionDependencyRegistries[_collectionID])
@@ -976,13 +1004,14 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             string memory
         )
     {
+        collectionInfoStructure storage info = collectionInfo[_collectionID];
         return (
-            collectionInfo[_collectionID].collectionName,
-            collectionInfo[_collectionID].collectionArtist,
-            collectionInfo[_collectionID].collectionDescription,
-            collectionInfo[_collectionID].collectionWebsite,
-            collectionInfo[_collectionID].collectionLicense,
-            collectionInfo[_collectionID].collectionBaseURI
+            info.collectionName,
+            info.collectionArtist,
+            info.collectionDescription,
+            info.collectionWebsite,
+            info.collectionLicense,
+            info.collectionBaseURI
         );
     }
 
@@ -992,11 +1021,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         view
         returns (string memory, bytes32, string[] memory)
     {
-        return (
-            collectionInfo[_collectionID].collectionLibrary,
-            collectionInfo[_collectionID].collectionDependencyScript,
-            collectionInfo[_collectionID].collectionScript
-        );
+        collectionInfoStructure storage info = collectionInfo[_collectionID];
+        return (info.collectionLibrary, info.collectionDependencyScript, info.collectionScript);
     }
 
     // function to retrieve the additional data of a Collection
@@ -1005,13 +1031,15 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         view
         returns (address, uint256, uint256, uint256, uint256, address)
     {
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
         return (
-            collectionAdditionalData[_collectionID].collectionArtistAddress,
-            collectionAdditionalData[_collectionID].maxCollectionPurchases,
-            collectionAdditionalData[_collectionID].collectionCirculationSupply,
-            collectionAdditionalData[_collectionID].collectionTotalSupply,
-            collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint,
-            collectionAdditionalData[_collectionID].randomizerContract
+            collectionData.collectionArtistAddress,
+            collectionData.maxCollectionPurchases,
+            collectionData.collectionCirculationSupply,
+            collectionData.collectionTotalSupply,
+            collectionData.setFinalSupplyTimeAfterMint,
+            collectionData.randomizerContract
         );
     }
 
@@ -1025,14 +1053,15 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function retrieveGenerativeScript(uint256 tokenId) public view returns (string memory) {
         _requireMinted(tokenId);
         uint256 collectionId = tokenIdsToCollectionIds[tokenId];
+        collectionInfoStructure storage info = collectionInfo[collectionId];
         return StreamMetadataRenderer.generativeScriptFromSources(
             tokenToHash[tokenId],
             tokenId,
             tokenData[tokenId],
             collectionDependencyRegistries[collectionId],
-            collectionInfo[collectionId].collectionDependencyScript,
+            info.collectionDependencyScript,
             collectionDependencyVersions[collectionId],
-            collectionInfo[collectionId].collectionScript
+            info.collectionScript
         );
     }
 
@@ -1070,13 +1099,14 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             revert CollectionDataMissing(_collectionID);
         }
 
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
         uint256 endTime = IStreamMinter(minterContract).getEndTime(_collectionID);
         if (endTime == 0 || block.timestamp <= endTime) {
             revert CollectionMintWindowActive(_collectionID, block.timestamp, endTime);
         }
 
-        uint256 finalSupplyTimestamp =
-            endTime + collectionAdditionalData[_collectionID].setFinalSupplyTimeAfterMint;
+        uint256 finalSupplyTimestamp = endTime + collectionData.setFinalSupplyTimeAfterMint;
         if (block.timestamp <= finalSupplyTimestamp) {
             revert CollectionFinalSupplyWindowActive(
                 _collectionID, block.timestamp, finalSupplyTimestamp
@@ -1100,8 +1130,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             collectionLiveTokenMetadataAccumulators[_collectionID] ^ uint256(recordHash);
 
         if (tokenToHash[tokenId] == bytes32(0)) {
-            collectionPendingMetadataCounts[_collectionID] =
-                collectionPendingMetadataCounts[_collectionID] + 1;
+            unchecked {
+                collectionPendingMetadataCounts[_collectionID] =
+                    collectionPendingMetadataCounts[_collectionID] + 1;
+            }
         }
     }
 
@@ -1115,8 +1147,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             tokenToHash[tokenId] == bytes32(0)
                 && collectionPendingMetadataCounts[_collectionID] != 0
         ) {
-            collectionPendingMetadataCounts[_collectionID] =
-                collectionPendingMetadataCounts[_collectionID] - 1;
+            unchecked {
+                collectionPendingMetadataCounts[_collectionID] =
+                    collectionPendingMetadataCounts[_collectionID] - 1;
+            }
         }
     }
 
@@ -1129,8 +1163,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             tokenToHash[tokenId] != bytes32(0)
                 && collectionPendingMetadataCounts[_collectionID] != 0
         ) {
-            collectionPendingMetadataCounts[_collectionID] =
-                collectionPendingMetadataCounts[_collectionID] - 1;
+            unchecked {
+                collectionPendingMetadataCounts[_collectionID] =
+                    collectionPendingMetadataCounts[_collectionID] - 1;
+            }
         }
     }
 
@@ -1151,15 +1187,17 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         tokenFreezeMetadataRecordHashes[tokenId] = nextRecordHash;
     }
 
-    function _finalizeCollectionSupply(uint256 _collectionID) private {
-        uint256 finalSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply;
-        uint256 reservedMin = collectionAdditionalData[_collectionID].reservedMinTokensIndex;
+    function _finalizeCollectionSupply(collectionAdditonalDataStructure storage collectionData)
+        private
+    {
+        uint256 finalSupply = collectionData.collectionCirculationSupply;
+        uint256 reservedMin = collectionData.reservedMinTokensIndex;
         uint256 reservedMax;
         unchecked {
             reservedMax = finalSupply == 0 ? reservedMin - 1 : reservedMin + finalSupply - 1;
         }
-        collectionAdditionalData[_collectionID].collectionTotalSupply = finalSupply;
-        collectionAdditionalData[_collectionID].reservedMaxTokensIndex = reservedMax;
+        collectionData.collectionTotalSupply = finalSupply;
+        collectionData.reservedMaxTokensIndex = reservedMax;
     }
 
     function _collectionFreezeManifestHash(uint256 _collectionID) private view returns (bytes32) {
@@ -1210,7 +1248,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     }
 
     function _freezeSupplyStateHash(uint256 _collectionID) private view returns (bytes32) {
-        uint256 finalSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        uint256 finalSupply = collectionData.collectionCirculationSupply;
         bytes32 typehash = _FREEZE_SUPPLY_STATE_TYPEHASH;
         uint256 burnCount = burnAmount[_collectionID];
         bytes32 stateHash;
@@ -1271,8 +1311,12 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function _liveTokenMetadataHash(uint256 _collectionID) private view returns (bytes32) {
         bytes32 typehash = _LIVE_TOKEN_METADATA_AGGREGATE_TYPEHASH;
         bytes32 accumulator = bytes32(collectionLiveTokenMetadataAccumulators[_collectionID]);
-        uint256 liveSupply = collectionAdditionalData[_collectionID].collectionCirculationSupply
-            - burnAmount[_collectionID];
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        uint256 liveSupply;
+        unchecked {
+            liveSupply = collectionData.collectionCirculationSupply - burnAmount[_collectionID];
+        }
         bytes32 stateHash;
         assembly ("memory-safe") {
             let ptr := mload(0x40)
@@ -1307,8 +1351,11 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
 
     // function to retrieve the supply of a collection
     function totalSupplyOfCollection(uint256 _collectionID) public view returns (uint256) {
-        return (collectionAdditionalData[_collectionID].collectionCirculationSupply
-                - burnAmount[_collectionID]);
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[_collectionID];
+        unchecked {
+            return (collectionData.collectionCirculationSupply - burnAmount[_collectionID]);
+        }
     }
 
     // function to retrieve the token image uri and the attributes stored on-chain for a token id.

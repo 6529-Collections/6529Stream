@@ -9,7 +9,7 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:b0b3032b633e4678960aba2e6920677fde50d7b892b5eac417e70754584ac04a",
+      "sha256": "sha256:0cad18db1b618ec825b101f11928595aaa28c22654649a11bc0e4ab04ceb5c99",
       "size_bytes": 10202
     },
     "public_beta_blocker_report": {
@@ -169,7 +169,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:c18ff211593f7164fdc82572393ed7bea636e0702853c137825e0a18bee61935",
+        "sha256": "sha256:25ddcf22a6c3a0156828435b3d0bcf3cb82aa1a8c5bf0c1f3706bc48da89b556",
         "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
         "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
         "operator_notes": "Fork rehearsal retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59; PR #347 retained the sanitized fork broadcast, deployment manifest, and address book with CodeRabbit status success and passing CI, and PR #349 reconciled the live issue body/audit state with CodeRabbit status success and passing CI. Public beta remains blocked on the remaining missing evidence rows."
@@ -332,7 +332,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact.md",
-        "sha256": "sha256:d811350f6f3cd041a4bf6f6376bb0230d9f041523a5ffde745bad31a70bff1dc",
+        "sha256": "sha256:82fde060f23cf10897c3b469983c1360ddf2371db6f53f07d37d2c56c1288aef",
         "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4; token 10000000000; collection 1",
         "command_or_source_system": "mainnet-fork metadata browser capture, event-topic catalog review, integration documentation review, and equivalent collector/indexer tooling transcript retained at release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-query-transcript.md",
         "operator_notes": "Reviewed fork/testnet marketplace/indexer evidence retained for issue #423. The artifact uses committed fork metadata-browser capture outputs, the deployment rehearsal manifest/address book, event-topic catalog, integration docs, and equivalent collector/indexer tooling transcript to cover contract metadata, token refresh, animation rendering, royalty display, transfer/listing/sale path, event replay, cache invalidation, stale/failed/frozen/burned states, and no-secret redaction while public beta remains blocked on other missing evidence rows."
@@ -442,7 +442,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:0cd32e5249c00ed17e21cda74f1b4144c38695d4c0087ed14d04560d76fc9857",
+        "sha256": "sha256:0e97a066fc69307da49b06b12b647127c772d90dd0a058af93600c91a558c67c",
         "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
         "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests",
         "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. Public beta remains blocked on the remaining missing evidence rows."

@@ -70,6 +70,7 @@ def write_tree(
     runtime_size: int = 22_184,
     approved_size: int = 22_184,
     exceptions: list[dict[str, Any]] | None = None,
+    accepted_reductions: list[dict[str, Any]] | None = None,
     include_policy: bool = True,
 ) -> None:
     source = "smart-contracts/StreamCore.sol"
@@ -99,6 +100,7 @@ def write_tree(
             "tracking": "https://example.test/core-bytecode-policy",
             "exceptions": exceptions or [],
             "rejected_experiments": [],
+            "accepted_reductions": accepted_reductions or [],
         }
     write_json(root / "release-artifacts/contracts.json", config)
     (root / "docs").mkdir(parents=True, exist_ok=True)
@@ -140,6 +142,78 @@ class CoreBytecodeSpendPolicyTests(unittest.TestCase):
             )
 
         self.assertEqual(result, 0)
+
+    def test_accepted_reduction_uses_negative_delta(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                runtime_size=22_000,
+                accepted_reductions=[
+                    {
+                        "id": "CORE-REDUCTION-001",
+                        "issue": "https://example.test/issues/2",
+                        "summary": "Recover measured headroom.",
+                        "baseline_runtime_size_bytes": 22_184,
+                        "runtime_size_bytes": 22_000,
+                        "measured_delta_bytes": -184,
+                        "runtime_margin_bytes": 2_576,
+                        "decision": "accepted-headroom-recovery",
+                    }
+                ],
+            )
+
+            result = checker.check_policy(
+                root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT
+            )
+
+        self.assertEqual(result, 0)
+
+    def test_accepted_reduction_rejects_positive_delta(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                runtime_size=22_000,
+                accepted_reductions=[
+                    {
+                        "id": "CORE-REDUCTION-001",
+                        "issue": "https://example.test/issues/2",
+                        "summary": "Recover measured headroom.",
+                        "baseline_runtime_size_bytes": 22_184,
+                        "runtime_size_bytes": 22_000,
+                        "measured_delta_bytes": 184,
+                        "runtime_margin_bytes": 2_576,
+                        "decision": "accepted-headroom-recovery",
+                    }
+                ],
+            )
+
+            with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "measured_delta_bytes"):
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_accepted_reduction_delta_must_match_sizes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(
+                root,
+                runtime_size=22_000,
+                accepted_reductions=[
+                    {
+                        "id": "CORE-REDUCTION-001",
+                        "issue": "https://example.test/issues/2",
+                        "summary": "Recover measured headroom.",
+                        "baseline_runtime_size_bytes": 22_184,
+                        "runtime_size_bytes": 22_000,
+                        "measured_delta_bytes": -183,
+                        "runtime_margin_bytes": 2_576,
+                        "decision": "accepted-headroom-recovery",
+                    }
+                ],
+            )
+
+            with self.assertRaisesRegex(checker.CoreBytecodePolicyError, "-184"):
+                checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
 
     def test_unreviewed_runtime_increase_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

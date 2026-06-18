@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:45f702cf31f03155a9ed11e44854634070e456ebfb38813c9926deba88243f71",
-      "size_bytes": 68051
+      "sha256": "sha256:40dad41fb20de7c152adc79de65b172e4f75cb190e6222fd6bfe07530b5c67f0",
+      "size_bytes": 68498
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:ca622f9fb14f5d87188c7dd407a846ea0fdbeb90071a3f818596b664f9032f08",
+      "sha256": "sha256:87d0553b7b85ade062cc3c458a75ce486ac172a875eb176c926a6968fda2a52b",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -118,7 +118,7 @@
       "Added `StreamEventReconstructability.t.sol`, an indexer-style log reconstruction suite that proves representative fixed-price, auction, minter bridge, and admin-reference flows can be rebuilt from emitted logs plus the documented read-after-event calls.",
       "Added additive `StreamMinter` event coverage for indexers and frontend read models: collection phase updates, fixed-price batch mint ranges, auction mint custody/end-time bridges, minter-side auction end-time edits, and minter contract-reference updates, with focused event tests and integration docs/checker coverage.",
       "Added a generated protocol surface report with `docs/protocol-surface.md`, `release-artifacts/latest/protocol-surface-report.json`, a generator/test pair, local/CI/Windows gate wiring, release-manifest and checksum coverage, and explicit boundaries that the report is deterministic review evidence rather than protocol correctness or production-readiness proof.",
-      "Added a third `StreamCore` headroom recovery slice that moves tokenURI and metadata-state dispatch helpers into the linked `StreamMetadataRenderer` library while preserving exact off-chain/on-chain metadata output behavior; the production via-IR size gate now measures `StreamCore` at 22,184 runtime bytes with 2,392 bytes of EIP-170 headroom, with the gas snapshot refreshed for a -12 gas auction-settlement delta, a -2,569 gas final on-chain `tokenURI` delta, and a +32 gas fixed-price mint delta.",
+      "Added a third `StreamCore` headroom recovery slice that moves tokenURI and metadata-state dispatch helpers into the linked `StreamMetadataRenderer` library while preserving exact off-chain/on-chain metadata output behavior; that slice measured `StreamCore` at 22,184 runtime bytes with 2,392 bytes of EIP-170 headroom, with the gas snapshot refreshed for a -12 gas auction-settlement delta, a -2,569 gas final on-chain `tokenURI` delta, and a +32 gas fixed-price mint delta.",
       "Added a second `StreamCore` headroom recovery slice that moves field-specific metadata validation profiles into the linked `StreamMetadataRenderer` library while preserving public Core size constants, custom-error selectors, and metadata output behavior; the production via-IR size gate now measures `StreamCore` at 22,390 runtime bytes with 2,186 bytes of EIP-170 headroom, with the gas snapshot refreshed for a +45 gas dependency-script read delta, a -24 gas final on-chain `tokenURI` delta, and a +38 gas fixed-price mint delta.",
       "Added a `StreamCore` headroom recovery slice that moves collection and dependency script assembly into the linked `StreamMetadataRenderer` library while preserving the `retrieveGenerativeScript` Core surface; the production via-IR size gate now measures `StreamCore` at 23,159 runtime bytes with 1,417 bytes of EIP-170 headroom, with the gas snapshot refreshed for the small dependency-script read decrease and final metadata/mint read-path increases.",
       "Added ONE-007 warning-disposition coverage with `docs/warning-dispositions.md`, a checker/test pair, local/CI/Windows gate wiring, release-manifest and risk-register coverage, first-party NatSpec header cleanup, and explicit accepted dispositions for solc unused-parameter, pure/view, documentation, linter, vendored, test-only, ABI-compatibility, and `StreamCore` size-tradeoff warning rows.",
@@ -234,6 +234,7 @@
       "Added lifecycle-aware stale and failed randomness metadata states for minted tokens whose hash is still unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures, token state view coverage, fallback-to-pending coverage, and final-hash override coverage.",
       "Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.",
       "Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.",
+      "Recovered 392 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; the current production via-IR runtime is 21,792 bytes with 2,784 bytes of EIP-170 margin while the approved bytecode-spend ceiling remains 22,184 bytes. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.",
       "Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.",
       "Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.",
       "Retired provider and integration files from the prior Solidity formatting exception baseline, so arRNG, VRF, delegation, and randomizer integration interfaces are now enforced by `make fmt-check`.",
