@@ -197,7 +197,9 @@ baseline must add an accepted exception record with an issue, rationale,
 measured delta, maximum approved runtime size, and mitigation before
 `python scripts/check_core_bytecode_spend_policy.py` will pass.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
-2,392 bytes of EIP-170 margin.
+2,392 bytes of EIP-170 margin. The current measured proof is lower:
+`release-artifacts/latest/bytecode-release-proof.json` records 21,780 bytes
+with 2,796 bytes of EIP-170 margin.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the

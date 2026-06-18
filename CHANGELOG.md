@@ -397,7 +397,7 @@ the release policy in `docs/release-policy.md`.
 - Added a third `StreamCore` headroom recovery slice that moves tokenURI and
   metadata-state dispatch helpers into the linked `StreamMetadataRenderer`
   library while preserving exact off-chain/on-chain metadata output behavior;
-  the production via-IR size gate now measures `StreamCore` at 22,184 runtime
+  that slice measured `StreamCore` at 22,184 runtime
   bytes with 2,392 bytes of EIP-170 headroom, with the gas snapshot refreshed
   for a -12 gas auction-settlement delta, a -2,569 gas final on-chain
   `tokenURI` delta, and a +32 gas fixed-price mint delta.
@@ -881,6 +881,14 @@ the release policy in `docs/release-policy.md`.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings
   so dependency artifact source hashes stay deterministic across Windows and
   Linux checkouts.
+
+### Changed
+
+- Recovered 404 bytes of measured `StreamCore` runtime headroom with
+  behavior-preserving storage caching and invariant-bounded unchecked counter
+  arithmetic; the current production via-IR runtime is 21,780 bytes with 2,796
+  bytes of EIP-170 margin while the approved bytecode-spend ceiling remains
+  22,184 bytes.
 
 ### Fixed
 
