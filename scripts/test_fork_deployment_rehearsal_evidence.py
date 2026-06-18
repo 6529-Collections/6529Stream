@@ -26,6 +26,25 @@ def write_text(path: Path, value: str) -> None:
     path.write_text(value, encoding="utf-8", newline="\n")
 
 
+TRANSCRIPT_PATH = "release-artifacts/evidence/fork/transcript.md"
+BROADCAST_PATH = "release-artifacts/evidence/fork/broadcast.json"
+DEPLOYMENT_MANIFEST_PATH = "deployments/examples/fork-6529stream-v0.1.0-001.json"
+ADDRESS_BOOK_PATH = "deployments/address-books/fork-6529stream-v0.1.0-001.json"
+GAS_SUMMARY_PATH = "release-artifacts/evidence/fork/gas-and-invariants.md"
+
+
+def seed_reviewed_retained_files(root: Path, *, secret_text: str | None = None) -> None:
+    """Create retained files referenced by reviewed_artifact under a root."""
+    transcript = "sanitized fork deployment rehearsal transcript\n"
+    if secret_text is not None:
+        transcript += secret_text
+    write_text(root / TRANSCRIPT_PATH, transcript)
+    write_text(root / BROADCAST_PATH, '{"transactions":[],"receipts":[]}\n')
+    write_text(root / DEPLOYMENT_MANIFEST_PATH, '{"deployment":"fork"}\n')
+    write_text(root / ADDRESS_BOOK_PATH, '{"contracts":{}}\n')
+    write_text(root / GAS_SUMMARY_PATH, "estimated_total_gas_used=32521731\n")
+
+
 def valid_template() -> str:
     """Return a valid template artifact."""
     return """# Fork Deployment Rehearsal Retained Artifact
@@ -184,8 +203,27 @@ class ForkDeploymentRehearsalEvidenceTests(unittest.TestCase):
     def test_reviewed_artifact_passes(self) -> None:
         """A filled reviewed artifact can pass before manifest linkage."""
         with tempfile.TemporaryDirectory() as temp_dir:
-            path = Path(temp_dir) / "reviewed.md"
+            root = Path(temp_dir)
+            path = root / "reviewed.md"
+            seed_reviewed_retained_files(root)
             write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path)
+
+    def test_reviewed_artifact_with_declared_hashes_passes(self) -> None:
+        """Declared retained hashes are accepted when they match disk."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-hashed.md"
+            seed_reviewed_retained_files(root)
+            broadcast_hash = checker.file_sha256(root / BROADCAST_PATH)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROADCAST_PATH}`",
+                    f"`{BROADCAST_PATH} / {broadcast_hash}`",
+                ),
+            )
 
             checker.validate_artifact(path)
 
@@ -227,6 +265,147 @@ class ForkDeploymentRehearsalEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.ForkDeploymentRehearsalEvidenceError,
                 "Fork block number",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_missing_retained_file_fails(self) -> None:
+        """Reviewed retained references must point to files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-missing-retained.md"
+            seed_reviewed_retained_files(root)
+            (root / BROADCAST_PATH).unlink()
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "missing retained file",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_parent_path_escape_fails(self) -> None:
+        """Reviewed retained paths cannot escape through parent segments."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-parent-escape.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROADCAST_PATH}`",
+                    "`../broadcast.json`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "repo-relative",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_absolute_path_escape_fails(self) -> None:
+        """Reviewed retained paths cannot be absolute paths."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-absolute-escape.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROADCAST_PATH}`",
+                    f"`{root / BROADCAST_PATH}`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "repo-relative",
+            ):
+                checker.validate_artifact(path)
+
+    def test_referenced_artifact_secret_values_fail(self) -> None:
+        """Referenced retained files are scanned for secret-shaped content."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-referenced-secret.md"
+            seed_reviewed_retained_files(root, secret_text="api_key=do-not-commit\n")
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "secret-like",
+            ):
+                checker.validate_artifact(path)
+
+    def test_referenced_artifact_redacted_rpc_placeholder_passes(self) -> None:
+        """Reviewed retained files can contain explicit redacted RPC placeholders."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-redacted-rpc.md"
+            seed_reviewed_retained_files(
+                root,
+                secret_text="forge script Deploy --rpc-url <redacted local anvil fork>\n",
+            )
+            write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path)
+
+    def test_referenced_artifact_uppercase_redacted_rpc_token_passes(self) -> None:
+        """The committed REDACTED_LOCAL_ANVIL_FORK placeholder stays accepted."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-uppercase-redacted-rpc.md"
+            seed_reviewed_retained_files(
+                root,
+                secret_text=(
+                    "forge script Deploy --rpc-url REDACTED_LOCAL_ANVIL_FORK "
+                    "--broadcast\n"
+                ),
+            )
+            write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path)
+
+    def test_reviewed_retained_multiple_hashes_fail(self) -> None:
+        """A retained reference cannot silently carry multiple digests."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-duplicate-hash.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROADCAST_PATH}`",
+                    (
+                        f"`{BROADCAST_PATH} / sha256:{'a' * 64} "
+                        f"/ sha256:{'b' * 64}`"
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "multiple sha256",
+            ):
+                checker.validate_artifact(path)
+
+    def test_reviewed_retained_hash_drift_fails(self) -> None:
+        """Declared retained hashes must match disk contents."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "reviewed-stale-hash.md"
+            seed_reviewed_retained_files(root)
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    f"`{BROADCAST_PATH}`",
+                    f"`{BROADCAST_PATH} / sha256:{'f' * 64}`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ForkDeploymentRehearsalEvidenceError,
+                "sha256 mismatch",
             ):
                 checker.validate_artifact(path)
 

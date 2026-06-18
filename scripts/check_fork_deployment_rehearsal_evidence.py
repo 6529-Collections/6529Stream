@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -85,6 +86,15 @@ FINAL_VALUE_FIELDS = [
     "Operator",
     "Reviewer",
 ]
+RETAINED_FILE_FIELDS = [
+    "Sanitized command transcript",
+    "Sanitized Foundry broadcast",
+    "Generated deployment manifest",
+    "Generated address book",
+]
+OPTIONAL_PATH_FIELD_LABELS = [
+    "Gas or invariant summary",
+]
 
 REQUIRED_COMMANDS = [
     "python scripts/test_fork_deployment_rehearsal_evidence.py",
@@ -97,11 +107,23 @@ REQUIRED_COMMANDS = [
 ]
 
 FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
+SHA256_RE = re.compile(r"sha256:[0-9a-f]{64}")
 SECRET_VALUE_RE = re.compile(
     r"\b("
     r"private[_ -]?key|mnemonic|seed[_ -]?phrase|secret|rpc[_ -]?url|"
     r"api[_ -]?key|password|unreleased[_ -]?drop[_ -]?payload"
     r")\s*[:=]",
+    re.IGNORECASE,
+)
+CLI_SECRET_RE = re.compile(
+    r"("
+    r"--(?:private-key|mnemonic|seed(?:-phrase)?)\b(?:\s+|=)\S+|"
+    r"--rpc-url\b(?:\s+|=)(?!(?:<redacted(?:\s+[^>]+)?>|redacted(?:[_-][a-z0-9]+)*\b))\S+|"
+    r"\bAuthorization\s*:\s*Bearer\s+\S+|"
+    r"\bBearer\s+[A-Za-z0-9._~+/=-]{12,}|"
+    r"https?://[^\s`]*(?:alchemy|ankr|blastapi|chainstack|infura|quicknode)[^\s`]*|"
+    r"https?://[^\s`]*[?&](?:api[_-]?key|apikey|token|secret)=[^\s`&]+"
+    r")",
     re.IGNORECASE,
 )
 
@@ -132,13 +154,124 @@ def read_text(path: Path) -> str:
         ) from exc
 
 
+def file_sha256(path: Path) -> str:
+    """Return a sha256: digest for one file."""
+    hasher = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                hasher.update(chunk)
+    except FileNotFoundError as exc:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"missing required file: {path}"
+        ) from exc
+    return "sha256:" + hasher.hexdigest()
+
+
 def validate_no_secret_values(path: Path, text: str) -> None:
-    """Reject secret-shaped key/value material."""
+    """Reject secret-shaped key/value, CLI, and provider URL material."""
     match = SECRET_VALUE_RE.search(text)
     if match:
         raise ForkDeploymentRehearsalEvidenceError(
             f"{path} contains secret-like key/value text: {match.group(0)}"
         )
+    match = CLI_SECRET_RE.search(text)
+    if match:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"{path} contains secret-like CLI or URL text: {match.group(0)}"
+        )
+
+
+def repo_root_for(path: Path) -> Path:
+    """Return the root used for repo-relative retained artifact paths."""
+    cwd = Path.cwd().resolve()
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(cwd)
+    except ValueError:
+        # Standalone --evidence files resolve retained paths beside that artifact.
+        return resolved.parent
+    return cwd
+
+
+def resolve_repo_relative_path(root: Path, value: str) -> Path:
+    """Resolve a retained artifact path while rejecting escapes."""
+    candidate = Path(value)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"retained artifact path must be repo-relative: {value}"
+        )
+    resolved = (root / candidate).resolve()
+    try:
+        resolved.relative_to(root.resolve())
+    except ValueError as exc:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"retained artifact path escapes repository: {value}"
+        ) from exc
+    return resolved
+
+
+def split_retained_file_reference(value: str) -> tuple[str, str | None]:
+    """Split a retained file reference into path text and optional digest."""
+    cleaned = value.strip().replace("`", "")
+    matches = list(SHA256_RE.finditer(cleaned))
+    if len(matches) > 1:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"retained artifact reference has multiple sha256 digests: {value}"
+        )
+    match = matches[0] if matches else None
+    digest = match.group(0) if match else None
+    path_text = cleaned[: match.start()] if match else cleaned
+    path_text = path_text.strip().rstrip(" /,;")
+    if not path_text:
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"retained artifact reference is missing a path: {value}"
+        )
+    return path_text, digest
+
+
+def looks_like_path_reference(value: str) -> bool:
+    """Return whether a free-form field value should be validated as a path."""
+    path_text, _digest = split_retained_file_reference(value)
+    if any(marker in path_text for marker in ("/", "\\")):
+        return " " not in path_text and "=" not in path_text
+    return False
+
+
+def validate_retained_file_reference(
+    artifact_path: Path,
+    root: Path,
+    label: str,
+    value: str,
+) -> None:
+    """Validate one referenced retained artifact file."""
+    path_text, expected_digest = split_retained_file_reference(value)
+    target = resolve_repo_relative_path(root, path_text)
+    if not target.is_file():
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"{artifact_path} field {label!r} points to missing retained file: "
+            f"{path_text}"
+        )
+    validate_no_secret_values(target, read_text(target))
+    if expected_digest is not None:
+        actual_digest = file_sha256(target)
+        if actual_digest != expected_digest:
+            raise ForkDeploymentRehearsalEvidenceError(
+                f"{artifact_path} field {label!r} sha256 mismatch for {path_text}: "
+                f"expected {expected_digest}, got {actual_digest}"
+            )
+
+
+def validate_referenced_artifacts(path: Path, fields: dict[str, str]) -> None:
+    """Validate retained file references for non-template evidence."""
+    # Standalone --evidence files outside the repo resolve retained paths beside
+    # that artifact; committed repo-rooted evidence should be checked from repo root.
+    root = repo_root_for(path)
+    for label in RETAINED_FILE_FIELDS:
+        validate_retained_file_reference(path, root, label, fields[label])
+    for label in OPTIONAL_PATH_FIELD_LABELS:
+        if looks_like_path_reference(fields[label]):
+            validate_retained_file_reference(path, root, label, fields[label])
 
 
 def validate_headings(path: Path, text: str) -> None:
@@ -259,6 +392,8 @@ def validate_artifact(path: Path) -> None:
     require_field_value(path, fields, "Environment", "fork")
     require_field_value(path, fields, "Chain ID", "1")
     validate_review_state(path, text, fields)
+    if fields["Review status"] != "template":
+        validate_referenced_artifacts(path, fields)
     validate_commands(path, text)
 
 

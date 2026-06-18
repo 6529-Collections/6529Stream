@@ -10,7 +10,7 @@ This generated artifact contains the exact GitHub issue bodies expected for reta
 | JSON output | `release-artifacts/latest/release-evidence-issue-body-sync.json` |
 | Markdown output | `release-artifacts/latest/release-evidence-issue-body-sync.md` |
 | Backlog | `release-artifacts/latest/release-evidence-issue-backlog.json` |
-| Backlog SHA-256 | `sha256:a3e33eb365ca5e3f53bc04ae5e902824a03c8b90787f2dc7841114acd80f7445` |
+| Backlog SHA-256 | `sha256:77411447557afd707727f6f0721b328672c71b7337d3454f7786297250ff1bd1` |
 | Issue links | `release-artifacts/latest/release-evidence-issue-links.json` |
 | Issue links SHA-256 | `sha256:d12018240b14662926e4dc04df00b5ce02f6eb80e441c65e3f14f59305353a50` |
 

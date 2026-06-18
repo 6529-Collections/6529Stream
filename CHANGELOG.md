@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added fork deployment rehearsal retained-artifact reference validation so
+  reviewed and pending fork rehearsal evidence now proves retained files stay
+  inside the repository, exist on disk, remain no-secret, and match declared
+  `sha256:` hashes; refreshed the reviewed fork broadcast, deployment manifest,
+  address-book, public-beta evidence, release packet, manifest, lockfile, and
+  checksum hashes that the stricter checker surfaced as stale.
 - Added a checked fork/testnet metadata-browser retained-artifact template and
   offline checker for future `fork_testnet_metadata_browser_evidence`, covering
   fork/testnet environment and chain IDs, deployed-contract metadata fetches,
