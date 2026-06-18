@@ -8,7 +8,7 @@
   "block_or_reference": "template-only live deployment version, release commit, or manifest reference",
   "command_or_source_system": "template-only deployment manifest generation command, production input source, or reviewer source",
   "retained_path": "release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md",
-  "sha256": "sha256:56d28b08eb7a3117ed757fddc4f642d65e04b5f9310ff495b714fb70129a2d20",
+  "sha256": "sha256:d4841ca3961635df7c25176749f762d0798a566b8bd1d9747b879402605c20ae",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

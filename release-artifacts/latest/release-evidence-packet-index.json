@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:b394ae4693d041ca69fe0133effcd813a31213dfb70000762184340a3dcf5f72",
-      "size_bytes": 40370
+      "sha256": "sha256:5cd7659d16b61c2b876e1780b00c9755246d3e2a6003814ede1a396cbf371e4a",
+      "size_bytes": 40550
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -819,7 +819,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md",
-        "sha256": "sha256:56d28b08eb7a3117ed757fddc4f642d65e04b5f9310ff495b714fb70129a2d20",
+        "sha256": "sha256:d4841ca3961635df7c25176749f762d0798a566b8bd1d9747b879402605c20ae",
         "block_or_reference": "template-only live deployment version, release commit, or manifest reference",
         "command_or_source_system": "template-only deployment manifest generation command, production input source, or reviewer source",
         "operator_notes": "Replace this template with live deployment manifests generated from production inputs and broadcasts, deployment version, contract addresses, config digest, and reviewer confirmation."

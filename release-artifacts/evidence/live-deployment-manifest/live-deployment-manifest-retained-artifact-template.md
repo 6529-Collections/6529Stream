@@ -73,3 +73,8 @@ python scripts/generate_release_checksums.py --check
   unreleased drop payloads, or unredacted operator logs in this repository.
 - Replace private RPC or provider URLs with `<redacted>` before review; the
   checker fails closed on provider/API-token-shaped URLs.
+- Record transaction hashes with a `0x` prefix and content digests with a
+  `sha256:` prefix. Bare 64-hex strings fail closed because they are
+  indistinguishable from leaked key material.
+- The release digest retained file must explicitly label the release manifest
+  digest and the SHA256SUMS or release-checksums bundle digest.

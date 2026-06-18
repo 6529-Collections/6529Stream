@@ -9,7 +9,7 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:4744b3c4da8639d0ee2d60d8d24a1d952271eec0d2bc93ff7e01875a7d0e0b1b",
+      "sha256": "sha256:0be7a720dd9b2972329ebebc95c7f2c0ddfa7e6b350aeb7debbbe17be7954153",
       "size_bytes": 75680
     }
   },
@@ -554,7 +554,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/live-deployment-manifest/live-deployment-manifest-retained-artifact-template.md",
-        "sha256": "sha256:56d28b08eb7a3117ed757fddc4f642d65e04b5f9310ff495b714fb70129a2d20",
+        "sha256": "sha256:d4841ca3961635df7c25176749f762d0798a566b8bd1d9747b879402605c20ae",
         "block_or_reference": "template-only live deployment version, release commit, or manifest reference",
         "command_or_source_system": "template-only deployment manifest generation command, production input source, or reviewer source",
         "operator_notes": "Replace this template with live deployment manifests generated from production inputs and broadcasts, deployment version, contract addresses, config digest, and reviewer confirmation."

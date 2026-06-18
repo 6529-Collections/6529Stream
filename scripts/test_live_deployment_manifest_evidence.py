@@ -406,6 +406,28 @@ class LiveDeploymentManifestEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path, root)
 
+    def test_release_digests_must_name_manifest_and_checksum_bundle(self) -> None:
+        """Release digest evidence must identify the manifest and checksum bundle."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "weak-release-digests.md"
+            seed_reviewed_retained_files(
+                root,
+                release_digests=(
+                    "unrelated artifact "
+                    "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n"
+                    "another artifact "
+                    "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n"
+                ),
+            )
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.LiveDeploymentManifestEvidenceError,
+                "release manifest sha256",
+            ):
+                checker.validate_artifact(path, root)
+
     def test_manifest_wrong_chain_fails(self) -> None:
         """Reviewed live manifests must be mainnet chain ID 1."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -479,6 +501,52 @@ class LiveDeploymentManifestEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.LiveDeploymentManifestEvidenceError,
                 "zero address",
+            ):
+                checker.validate_artifact(path, root)
+
+    def test_manifest_duplicate_contract_names_fail(self) -> None:
+        """List-form live manifests cannot silently collapse duplicate names."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "duplicate-contract-name.md"
+            seed_reviewed_retained_files(root)
+            manifest_path = (
+                root / "deployments/examples/mainnet-6529stream-v0.1.0-001.json"
+            )
+            first = {
+                "name": "StreamCore",
+                "address": "0x1111111111111111111111111111111111111111",
+                "constructor_args": ["6529 Stream", "STREAM"],
+                "bytecode_hash": (
+                    "sha256:"
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                ),
+            }
+            second = {
+                "name": "StreamCore",
+                "address": "0x2222222222222222222222222222222222222222",
+                "constructor_args": ["0x1111111111111111111111111111111111111111"],
+                "bytecode_hash": (
+                    "sha256:"
+                    "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                ),
+            }
+            write_json(
+                manifest_path,
+                {
+                    "manifest_schema_version": "6529stream.deployment-manifest.v1",
+                    "protocol_version": "0.1.0",
+                    "deployment_version": "mainnet-6529stream-v0.1.0-001",
+                    "lifecycle_state": "Deployed",
+                    "network": {"name": "mainnet", "chain_id": 1},
+                    "contracts": [first, second],
+                },
+            )
+            write_text(path, reviewed_artifact())
+
+            with self.assertRaisesRegex(
+                checker.LiveDeploymentManifestEvidenceError,
+                "duplicates contract name",
             ):
                 checker.validate_artifact(path, root)
 

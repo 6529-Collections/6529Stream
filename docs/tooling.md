@@ -754,7 +754,9 @@ reviewer metadata, and explicit redaction confirmations before a pending-review
 or reviewed artifact can pass. Referenced retained files must be ordinary
 repo-relative UTF-8 files, not symlinks. The committed file is template-only and
 keeps production release blocked until future reviewed live manifest evidence is
-accepted.
+accepted. Normalize transaction hashes to `0x...`, content digests to
+`sha256:<hex>`, and label the release manifest plus SHA256SUMS or
+release-checksums digest lines in the retained release digest file.
 
 Production verified-addresses evidence has a dedicated no-secret retained
 artifact template at

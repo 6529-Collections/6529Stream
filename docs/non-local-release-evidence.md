@@ -343,8 +343,11 @@ tokens or placeholders, CLI secret flags, bare 64-hex values, and secret-shaped
 content in referenced retained files. It also checks the retained deployment
 manifest is mainnet chain ID 1, has nonzero finalized contract addresses,
 retains bytecode hashes and constructor arguments, and agrees with the retained
-live address book. Issue #227 remains open until real reviewed evidence is
-linked from the shared production-release evidence manifest.
+live address book. Record transaction hashes with a `0x` prefix, content
+digests with a `sha256:` prefix, and explicitly label the release manifest plus
+SHA256SUMS or release-checksums digest lines. Issue #227 remains open until real
+reviewed evidence is linked from the shared production-release evidence
+manifest.
 
 Public-beta verified-addresses evidence has a dedicated retained-artifact
 template at

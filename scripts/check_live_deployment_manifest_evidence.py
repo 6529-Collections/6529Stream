@@ -103,6 +103,11 @@ RETAINED_FILE_FIELDS = [
 DEPLOYMENT_MANIFEST_FIELD = "Generated live deployment manifest"
 ADDRESS_BOOK_FIELD = "Generated live address book"
 RELEASE_DIGESTS_FIELD = "Release manifest/checksum digests"
+RELEASE_MANIFEST_LABEL_RE = re.compile(r"\brelease(?:-| )manifest\b", re.IGNORECASE)
+RELEASE_CHECKSUM_LABEL_RE = re.compile(
+    r"\b(?:SHA256SUMS|release(?:-| )checksums?)\b",
+    re.IGNORECASE,
+)
 
 REQUIRED_COMMANDS = [
     "python scripts/test_live_deployment_manifest_evidence.py",
@@ -470,6 +475,10 @@ def contracts_from(value: Any, context: str) -> dict[str, dict[str, Any]]:
                 raise LiveDeploymentManifestEvidenceError(
                     f"{context}[{index}] is missing contract name"
                 )
+            if name in records:
+                raise LiveDeploymentManifestEvidenceError(
+                    f"{context}[{index}] duplicates contract name {name}"
+                )
             records[name] = record
         return records
     raise LiveDeploymentManifestEvidenceError(f"{context} must be an object or array")
@@ -547,9 +556,18 @@ def validate_address_book(path: Path, manifest_contracts: dict[str, dict[str, An
 def validate_release_digests(path: Path) -> None:
     """Require release manifest/checksum digest references to be explicit."""
     text = read_text(path)
-    if len(SHA256_REF_RE.findall(text)) < 2:
+    digest_lines = [line for line in text.splitlines() if SHA256_REF_RE.search(line)]
+    if len(digest_lines) < 2:
         raise LiveDeploymentManifestEvidenceError(
             f"{path} must include at least two sha256 digest references"
+        )
+    if not any(RELEASE_MANIFEST_LABEL_RE.search(line) for line in digest_lines):
+        raise LiveDeploymentManifestEvidenceError(
+            f"{path} must include a release manifest sha256 digest reference"
+        )
+    if not any(RELEASE_CHECKSUM_LABEL_RE.search(line) for line in digest_lines):
+        raise LiveDeploymentManifestEvidenceError(
+            f"{path} must include a release checksum bundle sha256 digest reference"
         )
 
 
