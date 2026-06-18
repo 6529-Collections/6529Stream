@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/live-ceremony-evidence-hardening` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/541` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/542` |
-| Active PR | TBD |
-| Next issue | Finish EXT-020 live ceremony retained-artifact validation hardening, open a PR, request CodeRabbit, resolve CI/bot feedback, merge only when clean, then continue the next substantive unblocked roadmap item. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/543` |
+| Next issue | Wait for PR #543 CI, CodeRabbit, and bot feedback; resolve anything actionable; merge only when clean; then continue the next substantive unblocked roadmap item. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 05:08 UTC` |
+| Last updated | `2026-06-18 05:13 UTC` |
 
 ## Packaging Notes
 
@@ -16233,6 +16233,7 @@ Outcome:
 | 2026-06-18 04:38 | Open PR #541 for EXT-019 | PR #541 is open at `https://github.com/6529-Collections/6529Stream/pull/541`, closes issue #540, supports tracker issue #473 without closing it, and packages live metadata browser retained-artifact validation hardening plus docs, templates, backlog/roadmap/run-state updates, changelog, and regenerated release evidence. Next action is to push this PR-number state update, request CodeRabbit on the latest head, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-18 05:00 | Merge PR #541 and start EXT-020 | PR #541 merged as `3f892b752c8cfef881fca393e37ca5b25e57cccb` after latest-head CI was green (`Windows PowerShell wrapper`, `Foundry smoke`), CodeRabbit status was passing, and 6529bot follow-up reported no new findings; issue #540 closed completed and tracker issue #473 remains open for real reviewed live metadata browser evidence. Issue #542 and branch `codex/live-ceremony-evidence-hardening` now track live ceremony retained-artifact validation hardening for future reviewed `live_ceremony_evidence` without closing tracker issue #228 or changing production-release readiness claims. Initial focused implementation is underway; next action is to finish docs/generated artifact updates, run focused gates, open the PR, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-18 05:08 | Validate EXT-020 local draft | Hardened the live ceremony evidence checker so future pending/reviewed retained artifact rows must use repo-relative retained-file references, reject absolute paths, parent escapes, backslashes, ambiguous whitespace, internal backticks, missing files, multiple `sha256:` digests, malformed digests, missing path/hash separators, trailing hash text, stale declared digests, credentialed URLs, provider/API-token-shaped URLs, bearer credentials, and bare 64-hex secret-shaped values; referenced UTF-8 retained files are scanned for secrets and optional `sha256:<64 lowercase hex>` digests are verified. Updated focused tests, docs, templates, roadmap/backlog/run state, changelog, and regenerated release evidence artifacts. Local validation passed: `python scripts\test_live_ceremony_evidence.py` with 26 tests, `python scripts\check_live_ceremony_evidence.py`, Python compile for the changed checker/tests, `make public-beta-blocker-report production-release-blocker-report release-evidence-packet-index release-evidence-issue-backlog release-evidence-issue-body-sync risk-register release-notes release-manifest release-checksums`, and `make live-ceremony-evidence-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-body-sync-check release-notes-check release-manifest-check release-checksums-check changelog-check`. Known compiler/Foundry warning noise remains unchanged; current `StreamCore` runtime is `22,184` bytes with `2,392` bytes of EIP-170 margin. Next action is to run `codex-diff-check`, commit, push, open PR for issue #542, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-18 05:13 | Open PR #543 for EXT-020 | PR #543 is open at `https://github.com/6529-Collections/6529Stream/pull/543`, closes issue #542, supports tracker issue #228 without closing it, and packages live ceremony retained-artifact validation hardening plus docs, templates, backlog/roadmap/run-state updates, changelog, and regenerated release evidence. Next action is to push this PR-number state update, request CodeRabbit on the latest head, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
