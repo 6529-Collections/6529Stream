@@ -13,6 +13,13 @@ from typing import Any
 
 
 REQUIREMENT_ID = "production_verified_addresses"
+EVIDENCE_KIND = "production verified-addresses"
+EXPECTED_ENVIRONMENT = "live"
+EXPECTED_CHAIN_ID = "1"
+EXPECTED_CHAIN_ID_INT = 1
+CLI_DESCRIPTION = "Validate retained production verified-address evidence artifacts"
+CLI_FAILURE_PREFIX = "production verified-addresses check failed"
+CLI_SUCCESS_MESSAGE = "production verified-addresses evidence is valid"
 DEFAULT_REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_EVIDENCE_RELATIVE = Path(
     "release-artifacts/evidence/production-verified-addresses/"
@@ -97,6 +104,10 @@ RETAINED_FILE_FIELDS = [
     "Bytecode release proof",
     "Release manifest/checksum digests",
 ]
+ADDRESS_BOOK_FIELD = "Generated live address book"
+DEPLOYMENT_MANIFEST_FIELD = "Generated live deployment manifest"
+EXPLORER_EVIDENCE_FIELD = "Explorer verification evidence"
+BYTECODE_PROOF_FIELD = "Bytecode release proof"
 ANGLE_PLACEHOLDER_RE = re.compile(r"<[^>\n]+>")
 ADDRESS_RE = re.compile(r"^0x[0-9a-fA-F]{40}$")
 SHA256_REF_RE = re.compile(r"sha256:[0-9a-f]{64}")
@@ -407,8 +418,13 @@ def validate_address_book_and_manifest(
         deployment_manifest.get("network"),
         f"{deployment_manifest_path}.network",
     )
-    if address_network.get("chain_id") != 1 or manifest_network.get("chain_id") != 1:
-        raise ProductionVerifiedAddressesError("production verified addresses require chain ID 1")
+    if (
+        address_network.get("chain_id") != EXPECTED_CHAIN_ID_INT
+        or manifest_network.get("chain_id") != EXPECTED_CHAIN_ID_INT
+    ):
+        raise ProductionVerifiedAddressesError(
+            f"{EVIDENCE_KIND} require chain ID {EXPECTED_CHAIN_ID_INT}"
+        )
 
     address_contracts = contract_map(address_book, str(address_book_path))
     manifest_contracts = contract_map(deployment_manifest, str(deployment_manifest_path))
@@ -523,10 +539,10 @@ def validate_verified_address_payloads(
     """Validate retained JSON evidence for reviewed/pending verified addresses."""
     targets = referenced_artifact_paths(path, fields, repo_root)
     address_contracts, _ = validate_address_book_and_manifest(
-        targets["Generated live address book"],
-        targets["Generated live deployment manifest"],
+        targets[ADDRESS_BOOK_FIELD],
+        targets[DEPLOYMENT_MANIFEST_FIELD],
     )
-    explorer_records = explorer_contracts(targets["Explorer verification evidence"])
+    explorer_records = explorer_contracts(targets[EXPLORER_EVIDENCE_FIELD])
     missing = sorted(set(address_contracts) - set(explorer_records))
     if missing:
         raise ProductionVerifiedAddressesError(
@@ -540,7 +556,7 @@ def validate_verified_address_payloads(
                 f"explorer address mismatch for {name}: expected "
                 f"{address_record.get('address')}, got {explorer_records[name].get('address')}"
             )
-    validate_bytecode_proof(targets["Bytecode release proof"], address_contracts)
+    validate_bytecode_proof(targets[BYTECODE_PROOF_FIELD], address_contracts)
 
 
 def validate_headings(path: Path, text: str) -> None:
@@ -660,7 +676,7 @@ def validate_commands(path: Path, text: str) -> None:
 
 
 def validate_artifact(path: Path, repo_root: Path | None = None) -> None:
-    """Validate one retained production verified-address artifact."""
+    """Validate one retained verified-address artifact."""
     if repo_root is None:
         repo_root = repo_root_for(path)
     repo_root = repo_root.resolve()
@@ -671,17 +687,15 @@ def validate_artifact(path: Path, repo_root: Path | None = None) -> None:
 
     require_field_value(path, fields, "Requirement ID", REQUIREMENT_ID)
     require_field_value(path, fields, "Readiness claim", "blocked")
-    require_field_value(path, fields, "Environment", "live")
-    require_field_value(path, fields, "Chain ID", "1")
+    require_field_value(path, fields, "Environment", EXPECTED_ENVIRONMENT)
+    require_field_value(path, fields, "Chain ID", EXPECTED_CHAIN_ID)
     validate_review_state(path, text, fields, repo_root)
     validate_commands(path, text)
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     """Parse CLI arguments."""
-    parser = argparse.ArgumentParser(
-        description="Validate retained production verified-address evidence artifacts"
-    )
+    parser = argparse.ArgumentParser(description=CLI_DESCRIPTION)
     parser.add_argument(
         "--evidence",
         type=Path,
@@ -709,9 +723,9 @@ def main(argv: list[str] | None = None) -> int:
         for path in paths:
             validate_artifact(path, repo_root=args.repo_root)
     except ProductionVerifiedAddressesError as exc:
-        print(f"production verified-addresses check failed: {exc}", file=sys.stderr)
+        print(f"{CLI_FAILURE_PREFIX}: {exc}", file=sys.stderr)
         return 1
-    print("production verified-addresses evidence is valid")
+    print(CLI_SUCCESS_MESSAGE)
     return 0
 
 

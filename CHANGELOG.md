@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a checked public-beta verified-addresses retained-artifact template
+  and offline checker for future `verified_deployed_addresses` and
+  `explorer_verification_status` evidence, covering Sepolia address-book,
+  deployment-manifest, explorer verification, bytecode proof, retained file
+  path and optional declared `sha256:` validation, no-secret redaction,
+  local/CI/Windows gate wiring, release-packet mapping, and checksum coverage
+  while keeping issues #221 and #222 open until real reviewed public-beta
+  address evidence is retained.
 - Added a checked production release-signing retained-artifact template and
   offline checker for future `production_signatures` and `signed_git_tag`
   evidence, covering checksum bundle references, detached signature evidence,

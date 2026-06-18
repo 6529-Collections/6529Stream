@@ -8,8 +8,11 @@ They are not completion evidence. Each JSON file uses
 the shared retained-artifact placeholder; rows with dedicated retained
 artifact formats, such as `external_audit_report` and
 `fork_deployment_rehearsal`, point at their requirement-specific Markdown
-templates. Public beta remains blocked until a future operator replaces the
-placeholder/template with reviewed no-secret evidence.
+templates. Public-beta verified address and explorer rows also point at a
+dedicated retained artifact so future reviewed address-book and explorer
+evidence can be validated before those rows move out of missing status. Public
+beta remains blocked until a future operator replaces the placeholder/template
+with reviewed no-secret evidence.
 
 Before using a template for real evidence:
 
@@ -31,6 +34,12 @@ For testnet deployment rehearsal evidence, fill
 `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`
 and run `python scripts/check_testnet_deployment_rehearsal_evidence.py` before
 generating the non-local evidence envelope.
+
+For verified deployed addresses and explorer verification status, fill
+`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
+and run `python scripts/check_public_beta_verified_addresses.py` before
+generating the non-local evidence envelope for `verified_deployed_addresses`
+or `explorer_verification_status`.
 
 For marketplace/indexer evidence, fill
 `release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact-template.md`

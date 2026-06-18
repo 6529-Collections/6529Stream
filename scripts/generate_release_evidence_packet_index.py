@@ -76,6 +76,16 @@ TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/testnet-deployment-rehearsal/"
     "testnet-deployment-rehearsal-retained-artifact-template.md"
 )
+PUBLIC_BETA_VERIFIED_DEPLOYED_ADDRESSES_REQUIREMENT_ID = (
+    "verified_deployed_addresses"
+)
+PUBLIC_BETA_EXPLORER_VERIFICATION_STATUS_REQUIREMENT_ID = (
+    "explorer_verification_status"
+)
+PUBLIC_BETA_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/public-beta-verified-addresses/"
+    "public-beta-verified-addresses-retained-artifact-template.md"
+)
 PUBLIC_BETA_MARKETPLACE_INDEXER_REQUIREMENT_ID = (
     "fork_testnet_marketplace_indexer_evidence"
 )
@@ -158,6 +168,14 @@ ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PUBLIC_BETA_PHASE, TESTNET_DEPLOYMENT_REQUIREMENT_ID): (
         "python scripts/test_testnet_deployment_rehearsal_evidence.py",
         "python scripts/check_testnet_deployment_rehearsal_evidence.py",
+    ),
+    (PUBLIC_BETA_PHASE, PUBLIC_BETA_VERIFIED_DEPLOYED_ADDRESSES_REQUIREMENT_ID): (
+        "python scripts/test_public_beta_verified_addresses.py",
+        "python scripts/check_public_beta_verified_addresses.py",
+    ),
+    (PUBLIC_BETA_PHASE, PUBLIC_BETA_EXPLORER_VERIFICATION_STATUS_REQUIREMENT_ID): (
+        "python scripts/test_public_beta_verified_addresses.py",
+        "python scripts/check_public_beta_verified_addresses.py",
     ),
     (PUBLIC_BETA_PHASE, PUBLIC_BETA_MARKETPLACE_INDEXER_REQUIREMENT_ID): (
         "python scripts/test_marketplace_indexer_evidence.py",
@@ -395,6 +413,19 @@ def retained_artifact_expectation(
     ):
         record = file_record(
             resolve_repo_path(repo_root, TESTNET_DEPLOYMENT_RETAINED_ARTIFACT_TEMPLATE),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif phase == PUBLIC_BETA_PHASE and requirement_id in {
+        PUBLIC_BETA_VERIFIED_DEPLOYED_ADDRESSES_REQUIREMENT_ID,
+        PUBLIC_BETA_EXPLORER_VERIFICATION_STATUS_REQUIREMENT_ID,
+    }:
+        record = file_record(
+            resolve_repo_path(
+                repo_root,
+                PUBLIC_BETA_VERIFIED_ADDRESSES_RETAINED_ARTIFACT_TEMPLATE,
+            ),
             repo_root,
         )
         retained_path = record["path"]

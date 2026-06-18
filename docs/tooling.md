@@ -683,6 +683,23 @@ The Sepolia setup template lives at
 `docs/deployment.md#sepolia-deployment-rehearsal-runbook` and
 `script/RehearseDeployment.s.sol:RehearseDeployment --sig "runSepolia()"`
 when preparing future reviewed testnet evidence.
+Public-beta verified-addresses evidence has a dedicated no-secret retained
+artifact template at
+`release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`.
+Run `python scripts/test_public_beta_verified_addresses.py` and
+`python scripts/check_public_beta_verified_addresses.py` before generating
+non-local evidence envelopes for `verified_deployed_addresses` or
+`explorer_verification_status`. The checker requires Sepolia address-book and
+deployment-manifest agreement, verified explorer rows, runtime bytecode,
+constructor-argument, linked-library, release manifest/checksum, reviewer
+metadata, and explicit redaction confirmations before a reviewed artifact can
+pass. The committed file is template-only and keeps public beta blocked until
+future reviewed testnet address evidence is accepted. Pending-review or
+reviewed retained references must be repo-relative UTF-8 files and may include
+one optional `sha256:<64 lowercase hex>` digest. Path escapes, missing files,
+stale hashes, duplicate hashes, symlinked retained files, provider/API-token
+URLs, credentialed URLs, bearer tokens or placeholders, CLI secret flags, and
+bare 64-hex strings fail closed.
 Production broadcast retention evidence has a dedicated no-secret retained
 artifact template at
 `release-artifacts/evidence/production-broadcast-retention/production-broadcast-retention-retained-artifact-template.md`.

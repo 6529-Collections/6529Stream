@@ -455,7 +455,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
 | Template | `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`; Replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`; Fill the public-beta verified-addresses retained artifact, validate it with scripts/check_public_beta_verified_addresses.py, then replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -473,12 +473,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `verified_deployed_addresses`
 - Evidence template: `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
 
 ## Required Evidence
 
-- Retained artifact expectation: Replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Retained artifact expectation: Fill the public-beta verified-addresses retained artifact, validate it with scripts/check_public_beta_verified_addresses.py, then replace this template with reviewed non-local address-book evidence, deployment manifest references, independent address verification sources, chain ID, contract names, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/verified-deployed-addresses-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -486,6 +486,8 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_public_beta_verified_addresses.py`
+- `python scripts/check_public_beta_verified_addresses.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
@@ -522,7 +524,7 @@ Suggested issue body:
 | Owner/reviewer posture | requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
 | Template | `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` |
-| Retained artifact expectation | `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`; Replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation. |
+| Retained artifact expectation | `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`; Fill the public-beta verified-addresses retained artifact, validate it with scripts/check_public_beta_verified_addresses.py, then replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation. |
 | Template-only can complete | `false` |
 
 Suggested issue body:
@@ -540,12 +542,12 @@ Suggested issue body:
 
 - Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `explorer_verification_status`
 - Evidence template: `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json`
-- Retained artifact placeholder: `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`
+- Retained artifact placeholder: `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`
 
 ## Required Evidence
 
-- Retained artifact expectation: Replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation.
-- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-templates/retained-artifact-template.txt`. Template-only evidence cannot complete the row.
+- Retained artifact expectation: Fill the public-beta verified-addresses retained artifact, validate it with scripts/check_public_beta_verified_addresses.py, then replace this template with explorer verification submissions or verified-source links for non-local contracts, including contract address, chain ID, compiler settings source, verification result, and reviewer confirmation.
+- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/explorer-verification-status-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/public-beta-verified-addresses/public-beta-verified-addresses-retained-artifact-template.md`. Template-only evidence cannot complete the row.
 - Template-only can complete: `false`
 
 ## Validation
@@ -553,6 +555,8 @@ Suggested issue body:
 - `python scripts/test_release_evidence_packet_index.py`
 - `python scripts/test_public_beta_evidence.py`
 - `python scripts/test_non_local_release_evidence.py`
+- `python scripts/test_public_beta_verified_addresses.py`
+- `python scripts/check_public_beta_verified_addresses.py`
 - `python scripts/test_public_beta_blocker_report.py`
 - `python scripts/test_production_release_blocker_report.py`
 - `python scripts/generate_public_beta_blocker_report.py --check`
@@ -1356,6 +1360,7 @@ Suggested issue body:
 | `python scripts/check_production_release_signing_evidence.py` |
 | `python scripts/check_production_verified_addresses.py` |
 | `python scripts/check_public_beta_evidence.py` |
+| `python scripts/check_public_beta_verified_addresses.py` |
 | `python scripts/check_release_signatures.py` |
 | `python scripts/check_signed_release_tag.py` |
 | `python scripts/check_testnet_deployment_rehearsal_evidence.py` |
@@ -1380,6 +1385,7 @@ Suggested issue body:
 | `python scripts/test_production_verified_addresses.py` |
 | `python scripts/test_public_beta_blocker_report.py` |
 | `python scripts/test_public_beta_evidence.py` |
+| `python scripts/test_public_beta_verified_addresses.py` |
 | `python scripts/test_release_evidence_issue_backlog.py` |
 | `python scripts/test_release_evidence_packet_index.py` |
 | `python scripts/test_release_signatures.py` |
