@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/metadata-browser-evidence-draft-generator` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/554` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/555` |
-| Active PR | `TBD` |
-| Next issue | Finish EXT-028 metadata browser evidence draft generator, validate locally, open a PR closing #555 and supporting #218 without closing it, request CodeRabbit, wait for CI and bot feedback, then merge only when clean. Do not mark `fork_testnet_metadata_browser_evidence` complete without reviewed deployed-contract fork/testnet evidence. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/556` |
+| Next issue | Monitor PR #556, wait for CI and CodeRabbit feedback, fix actionable comments, and merge only when clean. Do not mark `fork_testnet_metadata_browser_evidence` complete without reviewed deployed-contract fork/testnet evidence. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-18 10:31 UTC` |
+| Last updated | `2026-06-18 10:32 UTC` |
 
 ## Packaging Notes
 
@@ -16261,6 +16261,7 @@ Outcome:
 | 2026-06-18 09:54 | Merge PR #554 and start EXT-028 | PR #554 merged as `ff66bfed040c07d6610e59ac5d86bdca4513b119` after CodeRabbit, Foundry smoke, Windows wrapper, and 6529bot follow-up reviews were clean on final head `f69f171fbee1b00aeedfb99b68595b83868fd2fc`. Issue #218 remains open because the PR added capture tooling only. Issue #555 and branch `codex/metadata-browser-evidence-draft-generator` now track a draft generator that converts retained capture outputs into a checker-compatible pending-review fork/testnet metadata-browser evidence bundle without changing public-beta readiness. |
 | 2026-06-18 10:01 | Implement EXT-028 local draft | Added `scripts/generate_fork_metadata_browser_evidence_draft.py`, focused tests, Make/Bash/PowerShell/CI wiring, docs, changelog, backlog, and run-state updates. The generator reads PR #554 capture outputs, requires `--metadata-fetched-from-deployed-contract`, writes a self-contained `pending_review` retained bundle, validates no-secret inputs/outputs, and reuses `check_fork_metadata_browser_evidence.py` to prove the generated artifact shape. Next action is to refresh release artifacts, run focused gates, commit, push, open PR closing #555 and supporting #218 without closing it, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-18 10:31 | Validate EXT-028 locally | Refreshed release-evidence issue backlog/body-sync and release manifest/proof/lockfile/notes/checksum artifacts after the new validation command changed retained evidence inventory. Focused generator, fork metadata evidence, issue backlog/body-sync, release manifest/proof/lockfile/notes/checksum, release verifier, changelog, markdown link, and `codex-diff-check` gates pass. Full `make check` and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` pass locally with only existing Solidity/Foundry warnings and the expected Windows LF-to-CRLF notice on `scripts/check.ps1`. Next action is to commit, push, open PR closing #555 and supporting #218 without closing it, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-18 10:32 | Open PR #556 | Pushed commit `4c68dd6406e594502818cc87c1457a49ff866e43` and opened PR #556, `https://github.com/6529-Collections/6529Stream/pull/556`, closing #555 and supporting #218 without closing it. Requested CodeRabbit with `@coderabbitai review`. Next action is to wait for CI and CodeRabbit, fix actionable feedback, and merge only when clean. |
 
 ## Resume Instructions
 
