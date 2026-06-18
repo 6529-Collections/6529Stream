@@ -1,0 +1,72 @@
+{
+  "schema_version": "6529stream.fork-ceremony-post-state-views.v1",
+  "evidence_id": "fork-mainnet-6529stream-v0.1.0-001-post-state",
+  "environment": "fork",
+  "chain_id": 1,
+  "fork_reference": {
+    "block_number": 25316366,
+    "block_hash": "0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7"
+  },
+  "deployment_version": "fork-mainnet-6529stream-v0.1.0-001-broadcast",
+  "source": {
+    "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+    "address_book": "deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
+    "broadcast": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
+    "local_ceremony_evidence": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json"
+  },
+  "contracts": {
+    "StreamAdmins": "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+    "StreamCore": "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+    "StreamContractMetadata": "0x200000000000000000000000000000000000000a",
+    "StreamDrops": "0xba5a97857d9cbc39fd4c9c4e2420953765903aa0",
+    "StreamAuctions": "0x0192b664e3c73416451f23c0c361c4ff1dd385fa",
+    "StreamMinter": "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+    "StreamCuratorsPool": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d",
+    "DependencyRegistry": "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f",
+    "NextGenRandomizerVRF": "0x9e3b3fd0017753ceb467036cf605a94660aae126",
+    "NextGenRandomizerRNG": "0x1e26a8b0cbccbb460bc208799a703a35bf287b67"
+  },
+  "governance_state": {
+    "stream_admins_owner": "0x0000000000000000000000000000000000006529",
+    "stream_core_owner": "0x0000000000000000000000000000000000006529",
+    "temporary_deployer_admin_revoked": true,
+    "safe_placeholder_global_admin": true,
+    "pause_guardian": "0x0000000000000000000000000000000000006530",
+    "unpause_admin": "0x0000000000000000000000000000000000006529",
+    "emergency_recipient": "0x0000000000000000000000000000000000006531"
+  },
+  "signer_state": {
+    "drop_signer": "0x0000000000000000000000000000000000006532",
+    "signer_manager": "0x0000000000000000000000000000000000006529",
+    "signer_lifecycle_target": "StreamDrops"
+  },
+  "metadata_and_collection_state": {
+    "dependency_registered": true,
+    "collection_created": true,
+    "collection_data_set": true,
+    "randomizer_assigned": true,
+    "contract_metadata_adapter_deployed": true,
+    "freeze_execution": "not_executed_in_fork_broadcast_local_freeze_paths_covered_by_tests"
+  },
+  "auction_and_drop_state": {
+    "auction_contract_wired": true,
+    "drop_authorization_surface_deployed": true,
+    "auction_dry_run_source": "script/RehearseAuctionCeremony.s.sol",
+    "auction_dry_run_status": "passed_in_local_ceremony_evidence"
+  },
+  "monitoring_surfaces": [
+    "StreamAdmins role views",
+    "StreamDrops signer epoch and signer lifecycle target",
+    "StreamCore ownership, collection, randomizer, metadata, and freeze views",
+    "StreamAuctions active auction, settlement, and credit views",
+    "StreamMinter phase and credit views",
+    "Randomizer provider, request lifecycle, reserve, stale, failed, and retry views"
+  ],
+  "redaction": {
+    "no_secrets": true,
+    "private_signing_material_retained": false,
+    "private_rpc_urls_retained": false,
+    "unreleased_drop_payloads_retained": false
+  },
+  "operator_notes": "This post-state artifact summarizes committed fork broadcast state and points to retained local ceremony proof for mint, auction, and emergency dry runs. Public beta remains blocked on other evidence rows."
+}

@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:eea5322cb800f07d5936e2c03eb2e6c8688980d04cec5f57859936fd89383c15",
-      "size_bytes": 7945
+      "sha256": "sha256:7b8d59c9833066d1a20e964c7ffa8ecca45b3d46de3e8282fd6cd47cd17c8b25",
+      "size_bytes": 8479
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:047d221c1e1b845fb5aa7d4b5d46dbf0b9f530d05a79c8cf085581a526e3cb2c",
-      "size_bytes": 11504
+      "sha256": "sha256:be215c7a090c04b1a2b3b4323bd67f6ad1a82e21767c5e410e0133c6782622dc",
+      "size_bytes": 11664
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:a419b87cf07a2f5c45cec5061dc008c0c5a766a25658e29151cc05af4432a3f8",
-      "size_bytes": 37491
+      "sha256": "sha256:0c39a234335dd58e0ffe835e8a270accf06697b3c2ea182cef2a076b4c31e820",
+      "size_bytes": 37673
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -47,14 +47,14 @@
       "label": "Public Beta",
       "overall_status": "blocked",
       "counts": {
-        "missing": 8,
+        "missing": 7,
         "pending": 0,
         "blocked": 0,
         "accepted_risk": 0,
         "not_applicable": 0,
-        "complete": 1
+        "complete": 2
       },
-      "incomplete": 8
+      "incomplete": 7
     },
     {
       "phase": "production_release",
@@ -346,15 +346,17 @@
       "phase": "public_beta",
       "phase_label": "Public Beta",
       "requirement_id": "fork_testnet_ceremony_evidence",
-      "status": "missing",
-      "evidence_posture": "external/future",
-      "evidence_count": 0,
-      "evidence_paths": [],
-      "owner": "TBD",
+      "status": "complete",
+      "evidence_posture": "reviewed-external",
+      "evidence_count": 1,
+      "evidence_paths": [
+        "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json"
+      ],
+      "owner": "Codex autonomous operator",
       "template_owner": "TBD",
       "reviewer": "TBD",
       "review_status": "template",
-      "owner_reviewer_posture": "requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template",
       "blocker_report": {
         "path": "release-artifacts/latest/public-beta-blockers.md",
         "section": "Incomplete Public Beta Rows",
@@ -369,7 +371,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-        "sha256": "sha256:93ffb268af196d2aac7520147be5bdc4024b412c91e72b64da8c1d834deea7b0",
+        "sha256": "sha256:40f3c1bcbf1fe7f6758f3af6bfc31b7d44ef0477cbe17d8c529df4bfa33d2c3a",
         "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
         "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
@@ -390,8 +392,8 @@
         "python scripts/generate_release_checksums.py --check"
       ],
       "template_only_can_complete": false,
-      "completion_policy": "reviewed non-local evidence must replace or supplement the template; template-only evidence is preparation material and cannot complete this row",
-      "notes": "Fork or testnet deployment ceremony evidence is not yet retained."
+      "completion_policy": "reviewed retained evidence is recorded in the evidence manifest",
+      "notes": "Reviewed fork ceremony evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and retained local dry-run ceremony proof for mint, auction, withdrawal, and emergency redeployment. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "phase": "public_beta",

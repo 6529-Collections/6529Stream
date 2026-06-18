@@ -422,6 +422,20 @@ class ForkCeremonyEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.ForkCeremonyEvidenceError, "private_key"):
                 checker.validate_artifact(path, repo_root=repo_root)
 
+    def test_reviewed_retained_file_allows_sha256_digest(self) -> None:
+        """Explicit sha256 digests in retained files are not secret-shaped text."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_retained_paths(repo_root)
+            write_text(
+                repo_root / "release-artifacts/evidence/fork-ceremony/post-state.md",
+                "retained digest sha256:" + ("a" * 64) + "\n",
+            )
+            path = repo_root / "digest-retained.md"
+            write_text(path, reviewed_artifact())
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
     def test_missing_validation_command_fails(self) -> None:
         """Validation command coverage is part of the retained artifact."""
         with tempfile.TemporaryDirectory() as temp_dir:

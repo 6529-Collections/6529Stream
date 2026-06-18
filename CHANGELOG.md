@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added reviewed fork ceremony evidence for `fork_testnet_ceremony_evidence`,
+  retaining the mainnet-fork deployment broadcast, fork deployment manifest,
+  fork address book, Safe/admin placeholder export, post-state views, and local
+  mint/auction/emergency dry-run ceremony evidence under the shared public-beta
+  evidence manifest while keeping public beta blocked on the remaining missing
+  evidence rows.
 - Added a checked public-beta verified-addresses retained-artifact template
   and offline checker for future `verified_deployed_addresses` and
   `explorer_verification_status` evidence, covering Sepolia address-book,

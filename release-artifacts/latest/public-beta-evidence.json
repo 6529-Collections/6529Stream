@@ -65,11 +65,16 @@
     {
       "id": "fork_testnet_ceremony_evidence",
       "phase": "public_beta",
-      "status": "missing",
-      "owner": "TBD",
-      "evidence": [],
+      "status": "complete",
+      "owner": "Codex autonomous operator",
+      "evidence": [
+        {
+          "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
+          "sha256": "sha256:c906de73a31ac3ef10d8b4c696d9dbd29e05eceb69e1e97b12ce8dbf4139399b"
+        }
+      ],
       "risk_acceptance": null,
-      "notes": "Fork or testnet deployment ceremony evidence is not yet retained."
+      "notes": "Reviewed fork ceremony evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and retained local dry-run ceremony proof for mint, auction, withdrawal, and emergency redeployment. Public beta remains blocked on the remaining missing evidence rows."
     },
     {
       "id": "fork_testnet_randomizer_operations_evidence",

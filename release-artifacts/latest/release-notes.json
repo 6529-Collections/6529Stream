@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0229edb72733d8f9f538fac75e989c7e205a1be06a67ca8950431aa4bbd3f0a9",
-      "size_bytes": 62358
+      "sha256": "sha256:a876dfa9499e65d8b2921739137556e0c6d349a052bdd7277b8df2d1ca308383",
+      "size_bytes": 62769
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:14f1bd04e45043e958ed31789616febebbfd7c9ade375236fd52b263ff5e7bef",
+      "sha256": "sha256:36f78c99371fd0068eae19bcf7e3af4f1a8fb0a8f5e35b299eea39ff09b7952c",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added reviewed fork ceremony evidence for `fork_testnet_ceremony_evidence`, retaining the mainnet-fork deployment broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and local mint/auction/emergency dry-run ceremony evidence under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",
       "Added a checked public-beta verified-addresses retained-artifact template and offline checker for future `verified_deployed_addresses` and `explorer_verification_status` evidence, covering Sepolia address-book, deployment-manifest, explorer verification, bytecode proof, retained file path and optional declared `sha256:` validation, no-secret redaction, local/CI/Windows gate wiring, release-packet mapping, and checksum coverage while keeping issues #221 and #222 open until real reviewed public-beta address evidence is retained.",
       "Added a checked production release-signing retained-artifact template and offline checker for future `production_signatures` and `signed_git_tag` evidence, covering checksum bundle references, detached signature evidence, signed-tag verification, signer fingerprint/custody/rotation notes, retained file path and optional declared `sha256:` validation, no-secret redaction, local/CI/Windows gate wiring, release-packet mapping, and checksum coverage while keeping issues #223 and #224 open until real reviewed release ceremony evidence is retained.",
       "Added stronger production verified-addresses retained-artifact validation so future pending or reviewed production address-book and live explorer verification evidence must reference existing repo-relative retained UTF-8 files, avoid symlinked evidence, remain no-secret, preserve address-book, deployment-manifest, explorer, and bytecode proof agreement, and match optional declared `sha256:` hashes before issues #225 or #230 can be considered for closure.",
