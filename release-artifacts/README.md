@@ -653,10 +653,10 @@ Release signature evidence uses the same self-referential digest status for
 files cover the signature evidence file.
 
 The generated ABI compatibility baseline under `baselines/` is also tracked.
-It captures the current production contract function, event, custom error,
-constructor, fallback, and receive surface. The check fails on removed or
-changed entries and reports additive entries as compatible for this first
-release baseline.
+It captures the current production contract and published interface function,
+event, custom error, constructor, fallback, and receive surfaces. The check
+fails on removed or changed entries and reports additive entries as compatible
+for this first release baseline.
 
 `contracts.json` also carries the production runtime size budget. The local and
 CI size-budget checker reads the production Foundry artifacts, computes linked

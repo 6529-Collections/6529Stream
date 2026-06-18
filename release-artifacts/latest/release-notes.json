@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b707f9c75f4d129f37ea608181b21ee22ddc05d71e3acd35e57e2d4b82d9d326",
-      "size_bytes": 65890
+      "sha256": "sha256:402c968a49244d31084b8124160d0a84296c715c38bc4fcbbc94f2a6c017623a",
+      "size_bytes": 66174
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:7946ae707018da557e3d46d10c731c3eb2b2683e22ad6696de5b32afffb87d2f",
+      "sha256": "sha256:ad4acae6fabc81248be32b2d683b31525f99b2d345799f428fd1f60d12ae1e37",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Extended ABI compatibility checks and the committed baseline to cover published interface ABIs from `release-artifacts/contracts.json` in addition to production contracts, failing removed or changed interface entries while continuing to report additive entries as compatible.",
       "Strengthened release artifact verification so nested release manifest, bytecode proof, and release-candidate lockfile file records must be covered by `SHA256SUMS` with matching hashes, and expanded the checksum bundle to include release-manifest source docs referenced by those records.",
       "Added an exact linked-issue mode to the release-evidence issue snapshot exporter so retained live audit reports fetch the committed tracker issue map directly instead of relying on paginated `gh issue list` results, then retained and archived a fresh no-secret live audit report after PR #560 while keeping public beta blocked on the remaining missing evidence rows.",
       "Added reviewed fork/testnet marketplace and indexer evidence for `fork_testnet_marketplace_indexer_evidence`, retaining a supplemental reviewed artifact, equivalent collector/indexer tooling transcript, non-local evidence envelope, and release artifact updates under the shared public-beta evidence manifest while keeping public beta blocked on the remaining missing evidence rows.",

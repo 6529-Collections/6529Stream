@@ -108,7 +108,12 @@ class AbiCompatibilityTests(unittest.TestCase):
             },
         )
 
-    def write_config(self, root: Path, names: list[str] | None = None) -> Path:
+    def write_config(
+        self,
+        root: Path,
+        names: list[str] | None = None,
+        interface_names: list[str] | None = None,
+    ) -> Path:
         config_path = root / "release-artifacts" / "contracts.json"
         write_json(
             config_path,
@@ -118,7 +123,10 @@ class AbiCompatibilityTests(unittest.TestCase):
                     {"name": name, "source": f"smart-contracts/{name}.sol"}
                     for name in (names or ["Example"])
                 ],
-                "interfaces": [],
+                "interfaces": [
+                    {"name": name, "source": f"smart-contracts/{name}.sol"}
+                    for name in (interface_names or [])
+                ],
             },
         )
         return config_path
@@ -193,7 +201,9 @@ class AbiCompatibilityTests(unittest.TestCase):
             self.assertIn(
                 {
                     "type": "removed_entry",
+                    "surface": "contracts",
                     "contract": "Example",
+                    "subject": "Example",
                     "category": "functions",
                     "key": "balanceOf(address)",
                     "message": "Example removed functions entry balanceOf(address)",
@@ -250,6 +260,7 @@ class AbiCompatibilityTests(unittest.TestCase):
             self.assertFalse(report["compatible"])
             self.assertEqual(report["incompatible_changes"][0]["type"], "removed_contract")
             self.assertEqual(report["incompatible_changes"][0]["contract"], "Other")
+            self.assertEqual(report["incompatible_changes"][0]["subject"], "Other")
 
     def test_check_mode_detects_drift_without_rewriting_baseline(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -283,6 +294,197 @@ class AbiCompatibilityTests(unittest.TestCase):
 
             self.assertEqual(result, 1)
             self.assertEqual(original_baseline, baseline_path.read_text(encoding="utf-8"))
+
+    def test_baseline_includes_published_interfaces(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            self.write_contract(root, "IExample")
+            config_path = self.write_config(root, interface_names=["IExample"])
+
+            baseline = checker.build_abi_surface(root, config_path, root / "out")
+
+            self.assertIn("Example", baseline["contracts"])
+            self.assertIn("IExample", baseline["interfaces"])
+            self.assertEqual(
+                baseline["interfaces"]["IExample"]["source"],
+                "smart-contracts/IExample.sol",
+            )
+            self.assertEqual(
+                baseline["interfaces"]["IExample"]["entry_counts"]["functions"],
+                1,
+            )
+
+    def test_removed_interface_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            self.write_contract(root, "IExample")
+            baseline_config = self.write_config(root, interface_names=["IExample"])
+            baseline_path = self.write_baseline(root, baseline_config)
+            current_config = self.write_config(root, interface_names=[])
+
+            baseline = checker.load_baseline(baseline_path)
+            current = checker.build_abi_surface(root, current_config, root / "out")
+            report = checker.compare_abi_surfaces(baseline, current)
+
+            self.assertFalse(report["compatible"])
+            self.assertEqual(report["incompatible_changes"][0]["type"], "removed_interface")
+            self.assertEqual(report["incompatible_changes"][0]["surface"], "interfaces")
+            self.assertEqual(report["incompatible_changes"][0]["contract"], "IExample")
+            self.assertEqual(report["incompatible_changes"][0]["subject"], "IExample")
+
+    def test_removed_interface_entry_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            self.write_contract(root, "IExample")
+            config_path = self.write_config(root, interface_names=["IExample"])
+            baseline_path = self.write_baseline(root, config_path)
+
+            self.write_contract(
+                root,
+                "IExample",
+                abi=[
+                    constructor_entry(),
+                    event_entry(),
+                    error_entry(),
+                ],
+            )
+            baseline = checker.load_baseline(baseline_path)
+            current = checker.build_abi_surface(root, config_path, root / "out")
+            report = checker.compare_abi_surfaces(baseline, current)
+
+            self.assertFalse(report["compatible"])
+            self.assertIn(
+                {
+                    "type": "removed_entry",
+                    "surface": "interfaces",
+                    "contract": "IExample",
+                    "subject": "IExample",
+                    "category": "functions",
+                    "key": "balanceOf(address)",
+                    "message": "IExample removed functions entry balanceOf(address)",
+                },
+                report["incompatible_changes"],
+            )
+
+    def test_changed_interface_entry_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            self.write_contract(root, "IExample")
+            config_path = self.write_config(root, interface_names=["IExample"])
+            baseline_path = self.write_baseline(root, config_path)
+
+            self.write_contract(
+                root,
+                "IExample",
+                abi=[
+                    constructor_entry(),
+                    function_entry(
+                        "balanceOf",
+                        inputs=[{"name": "owner", "type": "address"}],
+                        outputs=[{"name": "", "type": "uint256"}],
+                    ),
+                    event_entry(indexed=False),
+                    error_entry(),
+                ],
+            )
+            baseline = checker.load_baseline(baseline_path)
+            current = checker.build_abi_surface(root, config_path, root / "out")
+            report = checker.compare_abi_surfaces(baseline, current)
+
+            self.assertFalse(report["compatible"])
+            changed = [
+                change
+                for change in report["incompatible_changes"]
+                if change["type"] == "changed_entry" and change["surface"] == "interfaces"
+            ]
+            self.assertEqual(changed[0]["contract"], "IExample")
+            self.assertEqual(changed[0]["subject"], "IExample")
+            self.assertEqual(changed[0]["key"], "ExampleEvent(address,uint256)")
+            self.assertEqual(changed[0]["category"], "events")
+
+    def test_additive_interface_entries_are_reported_as_compatible(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            self.write_contract(root, "IExample")
+            config_path = self.write_config(root, interface_names=["IExample"])
+            baseline_path = self.write_baseline(root, config_path)
+
+            self.write_contract(
+                root,
+                "IExample",
+                abi=[
+                    constructor_entry(),
+                    function_entry(
+                        "balanceOf",
+                        inputs=[{"name": "owner", "type": "address"}],
+                        outputs=[{"name": "", "type": "uint256"}],
+                    ),
+                    function_entry("totalSupply", outputs=[{"name": "", "type": "uint256"}]),
+                    event_entry(),
+                    error_entry(),
+                ],
+            )
+            baseline = checker.load_baseline(baseline_path)
+            current = checker.build_abi_surface(root, config_path, root / "out")
+            report = checker.compare_abi_surfaces(baseline, current)
+
+            self.assertTrue(report["compatible"])
+            interface_additions = [
+                change
+                for change in report["additive_changes"]
+                if change["surface"] == "interfaces"
+            ]
+            self.assertEqual(interface_additions[0]["type"], "added_entry")
+            self.assertEqual(interface_additions[0]["contract"], "IExample")
+            self.assertEqual(interface_additions[0]["subject"], "IExample")
+            self.assertEqual(interface_additions[0]["key"], "totalSupply()")
+
+    def test_malformed_contract_config_entry_reports_abi_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            config_path = root / "release-artifacts" / "contracts.json"
+            write_json(
+                config_path,
+                {
+                    "schema_version": "6529stream.release-artifact-contracts.v1",
+                    "production_contracts": [{"source": "smart-contracts/Example.sol"}],
+                    "interfaces": [],
+                },
+            )
+
+            with self.assertRaisesRegex(
+                checker.AbiCompatibilityError,
+                r"config production_contracts\[0\] is missing a string name",
+            ):
+                checker.build_abi_surface(root, config_path, root / "out")
+
+    def test_malformed_interface_config_entry_reports_abi_error(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            config_path = root / "release-artifacts" / "contracts.json"
+            write_json(
+                config_path,
+                {
+                    "schema_version": "6529stream.release-artifact-contracts.v1",
+                    "production_contracts": [
+                        {"name": "Example", "source": "smart-contracts/Example.sol"}
+                    ],
+                    "interfaces": [{"name": "IExample"}],
+                },
+            )
+
+            with self.assertRaisesRegex(
+                checker.AbiCompatibilityError,
+                r"config interfaces\[0\] is missing a string source",
+            ):
+                checker.build_abi_surface(root, config_path, root / "out")
 
 
 if __name__ == "__main__":
