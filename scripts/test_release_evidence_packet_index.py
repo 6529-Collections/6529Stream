@@ -201,6 +201,10 @@ def seed_all_templates(root: Path) -> None:
         "Fork/testnet metadata browser retained artifact template.\n",
     )
     write_text(
+        root / generator.PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE,
+        "Fork/testnet ceremony retained artifact template.\n",
+    )
+    write_text(
         root / generator.LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE,
         "Live marketplace and indexer retained artifact template.\n",
     )
@@ -558,6 +562,46 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
             )
             self.assertIn(
                 "python scripts/check_fork_metadata_browser_evidence.py",
+                row["validation_commands"],
+            )
+
+    def test_fork_ceremony_row_uses_canonical_retained_artifact(self) -> None:
+        """Fork/testnet ceremony rows point at the dedicated template."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_repo(root)
+
+            packet = generator.build_packet(
+                root,
+                checker.DEFAULT_EVIDENCE,
+                generator.DEFAULT_PUBLIC_BETA_BLOCKERS,
+                generator.DEFAULT_PRODUCTION_RELEASE_BLOCKERS,
+                generator.DEFAULT_NON_LOCAL_RUNBOOK,
+                generator.DEFAULT_JSON_OUTPUT,
+                generator.DEFAULT_MARKDOWN_OUTPUT,
+            )
+            row = next(
+                row
+                for row in packet["rows"]
+                if row["requirement_id"] == generator.PUBLIC_BETA_CEREMONY_REQUIREMENT_ID
+            )
+
+            self.assertEqual(
+                row["retained_artifact_expectation"]["path"],
+                generator.PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE.as_posix(),
+            )
+            self.assertEqual(
+                row["retained_artifact_expectation"]["sha256"],
+                checker.file_sha256(
+                    root / generator.PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE
+                ),
+            )
+            self.assertIn(
+                "python scripts/test_fork_ceremony_evidence.py",
+                row["validation_commands"],
+            )
+            self.assertIn(
+                "python scripts/check_fork_ceremony_evidence.py",
                 row["validation_commands"],
             )
 

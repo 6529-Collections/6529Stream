@@ -88,6 +88,11 @@ PUBLIC_BETA_METADATA_BROWSER_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/fork-metadata-browser/"
     "fork-metadata-browser-retained-artifact-template.md"
 )
+PUBLIC_BETA_CEREMONY_REQUIREMENT_ID = "fork_testnet_ceremony_evidence"
+PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE = Path(
+    "release-artifacts/evidence/fork-ceremony/"
+    "fork-ceremony-retained-artifact-template.md"
+)
 LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID = "live_marketplace_indexer_evidence"
 LIVE_MARKETPLACE_INDEXER_RETAINED_ARTIFACT_TEMPLATE = Path(
     "release-artifacts/evidence/marketplace-indexer/"
@@ -148,6 +153,10 @@ ROW_VALIDATION_COMMAND_OVERRIDES = {
     (PUBLIC_BETA_PHASE, PUBLIC_BETA_METADATA_BROWSER_REQUIREMENT_ID): (
         "python scripts/test_fork_metadata_browser_evidence.py",
         "python scripts/check_fork_metadata_browser_evidence.py",
+    ),
+    (PUBLIC_BETA_PHASE, PUBLIC_BETA_CEREMONY_REQUIREMENT_ID): (
+        "python scripts/test_fork_ceremony_evidence.py",
+        "python scripts/check_fork_ceremony_evidence.py",
     ),
     (PRODUCTION_PHASE, LIVE_MARKETPLACE_INDEXER_REQUIREMENT_ID): (
         "python scripts/test_marketplace_indexer_evidence.py",
@@ -379,6 +388,16 @@ def retained_artifact_expectation(
                 repo_root,
                 PUBLIC_BETA_METADATA_BROWSER_RETAINED_ARTIFACT_TEMPLATE,
             ),
+            repo_root,
+        )
+        retained_path = record["path"]
+        retained_sha256 = record["sha256"]
+    elif (
+        phase == PUBLIC_BETA_PHASE
+        and requirement_id == PUBLIC_BETA_CEREMONY_REQUIREMENT_ID
+    ):
+        record = file_record(
+            resolve_repo_path(repo_root, PUBLIC_BETA_CEREMONY_RETAINED_ARTIFACT_TEMPLATE),
             repo_root,
         )
         retained_path = record["path"]
