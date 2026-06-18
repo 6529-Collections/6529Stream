@@ -707,7 +707,8 @@ future reviewed live metadata browser evidence is accepted. Pending-review or
 reviewed retained references must be repo-relative files and may include one
 optional `sha256:<64 lowercase hex>` digest; path escapes, missing files, stale
 hashes, duplicate hashes, provider/API-token-shaped URLs, credentialed URLs,
-and bare 64-hex strings fail closed.
+and bare 64-hex strings fail closed. Normalize any `sha256sum`-style retained
+digest output to the explicit `sha256:<hex>` form before review.
 
 Live ceremony evidence has a dedicated no-secret retained artifact template at
 `release-artifacts/evidence/live-ceremony/live-ceremony-retained-artifact-template.md`.

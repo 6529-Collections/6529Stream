@@ -278,6 +278,29 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
 
+    def test_template_state_does_not_resolve_retained_files(self) -> None:
+        """Template artifacts can keep non-existent retained-file placeholders."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            path = repo_root / "template-missing-retained-files.md"
+            text = valid_template()
+            text = artifact_with_field(
+                text, "Browser summary JSON", "missing/live/browser-summary.json"
+            )
+            text = artifact_with_field(
+                text,
+                "Generated tokenURI or digest",
+                "missing/live/token-output.json",
+            )
+            text = artifact_with_field(
+                text,
+                "Browser transcript or screenshot",
+                "missing/live/transcript.md",
+            )
+            write_text(path, text)
+
+            checker.validate_artifact(path, repo_root=repo_root)
+
     def test_reviewed_artifact_passes(self) -> None:
         """A filled reviewed artifact can pass before manifest linkage."""
         with tempfile.TemporaryDirectory() as temp_dir:

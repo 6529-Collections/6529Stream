@@ -85,4 +85,6 @@ python scripts/generate_release_checksums.py --check
 - Retained file references may append one declared digest as
   `path/to/file sha256:<64 lowercase hex>` or
   `path/to/file / sha256:<64 lowercase hex>`. Stale hashes, duplicate hashes,
-  trailing hash text, and bare 64-hex strings fail closed.
+  trailing hash text, and bare 64-hex strings fail closed. Normalize
+  `sha256sum`-style retained digest output to the explicit `sha256:<hex>` form
+  before review.
