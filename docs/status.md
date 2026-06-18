@@ -110,6 +110,15 @@ The current Gate A smoke baseline proves:
   pending. They also prove `RandomizerNXT` cannot be configured as a
   production randomizer after removal of the concrete weak `XRandoms` helper
   from production source.
+- Randomizer/admin stateful coverage now composes arRNG reserve funding, request
+  costs, unique token requests, fulfillment, stale marking, failed
+  post-processing, retry success/failure, provider and epoch replacement
+  attempts, randomness-request pauses, token-collection drift, and
+  emergency-withdrawal calls in bounded generated sequences while reasserting
+  lifecycle indexes, pending counters, terminal request fields, retry limits,
+  core token hashes, and zero-surplus reserve views. This is local adversarial
+  coverage only; fork/testnet/live provider operations evidence remains future
+  release work.
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output. `StreamDependencyRegistry.t.sol` proves immutable dependency version

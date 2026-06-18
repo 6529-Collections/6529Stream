@@ -143,6 +143,12 @@ the release policy in `docs/release-policy.md`.
   arRNG wrong-collection pending-state preservation, plus nested stale-mark and
   retry reentry during the external core write without production bytecode
   changes.
+- Added `ADV-014` bounded randomizer/admin stateful invariant tests covering
+  arRNG reserve funding, request-cost changes, unique token requests,
+  fulfillment, stale marking, failed post-processing, retry success/failure,
+  provider/epoch replacement attempts, randomness-request pauses, token-binding
+  drift, and emergency-withdrawal reserve views without production bytecode
+  changes.
 - Added `StreamAuctions.minimumNextBid(tokenId)` and
   `retrieveNoBidAuctionClaimant(tokenId)` read views for auction integrations,
   with focused bid-threshold, fail-closed, custody-alias, invariant, docs, and

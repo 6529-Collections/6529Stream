@@ -233,6 +233,16 @@ fulfillment attempts now preserve pending state, zero token hash, zero derived
 seed, zero raw-output hash, and pending counters, and nested stale-mark or retry
 attempts during the external core write fail closed while the outer fulfillment
 or retry stores the canonical seed without creating a new provider request.
+ADV-014 adds bounded randomizer/admin stateful coverage in
+`StreamRandomizerStatefulInvariant.t.sol`: generated sequences compose arRNG
+reserve funding, forced reserve changes, request-cost changes, unique token
+requests, successful fulfillment, empty-word rejection, failed post-processing,
+stale marking, retry success/failure, provider/epoch replacement attempts,
+randomness-request pauses, token-collection drift, and emergency-withdrawal
+calls while reasserting request indexes, pending counters, terminal request
+state fields, retry limits, core token hashes, and the RNG reserve/owed/surplus
+views after every action. This remains local adversarial coverage and does not
+replace fork/testnet/live provider operations evidence.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be

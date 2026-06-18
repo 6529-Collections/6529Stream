@@ -10,11 +10,11 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:7920f56fa142d3f1121fbf39222185bcbced7f510b278f9de2f8e3710fe4195f"
+      "sha256": "sha256:ff953354cec192a41e5a3d5c3a8852f15cb20f4d8a5e7b909d2cd7e15b622562"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:eece968c18b90f92d08d68b96f3569fd94ac3765e849c36064aae5c5288b9462"
+      "sha256": "sha256:6090dfc0a44238c2b843132ba43852188fe17134af9436b9eff477b3d0489ed8"
     },
     {
       "path": "docs/audit-package.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:eece968c18b90f92d08d68b96f3569fd94ac3765e849c36064aae5c5288b9462"
+          "sha256": "sha256:6090dfc0a44238c2b843132ba43852188fe17134af9436b9eff477b3d0489ed8"
         }
       ],
       "risk_acceptance": null
@@ -295,11 +295,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:7920f56fa142d3f1121fbf39222185bcbced7f510b278f9de2f8e3710fe4195f"
+          "sha256": "sha256:ff953354cec192a41e5a3d5c3a8852f15cb20f4d8a5e7b909d2cd7e15b622562"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:eece968c18b90f92d08d68b96f3569fd94ac3765e849c36064aae5c5288b9462"
+          "sha256": "sha256:6090dfc0a44238c2b843132ba43852188fe17134af9436b9eff477b3d0489ed8"
         },
         {
           "path": "docs/metadata.md",
@@ -412,11 +412,11 @@
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:7920f56fa142d3f1121fbf39222185bcbced7f510b278f9de2f8e3710fe4195f"
+          "sha256": "sha256:ff953354cec192a41e5a3d5c3a8852f15cb20f4d8a5e7b909d2cd7e15b622562"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:056fd15b5993d81c7ef74bae3a70802762e1c0f2d10d3bdeac648a13108e7138"
+          "sha256": "sha256:f20cefc20b6a02b4dd008b0127a005dfc54cf0ee80c228d029976527ee3814ef"
         }
       ],
       "risk_acceptance": null
@@ -479,11 +479,11 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:7920f56fa142d3f1121fbf39222185bcbced7f510b278f9de2f8e3710fe4195f"
+          "sha256": "sha256:ff953354cec192a41e5a3d5c3a8852f15cb20f4d8a5e7b909d2cd7e15b622562"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:eece968c18b90f92d08d68b96f3569fd94ac3765e849c36064aae5c5288b9462"
+          "sha256": "sha256:6090dfc0a44238c2b843132ba43852188fe17134af9436b9eff477b3d0489ed8"
         },
         {
           "path": "docs/tooling.md",
