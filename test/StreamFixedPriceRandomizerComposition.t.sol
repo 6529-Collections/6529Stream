@@ -281,6 +281,8 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
 
         vm.prank(RECIPIENT);
         setup.deployed.core.burn(COLLECTION_ID, liveTokenId);
+        // Freeze eligibility is based on live-token metadata state; the
+        // randomizer lifecycle counter still tracks fulfillable burned requests.
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)
             .assertEq(2, "lifecycle pending survives burn");
 
@@ -574,6 +576,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         success.assertFalse("call unexpectedly succeeded");
         // Pin the current nested Error(string) revert surface. If the production
         // path moves to custom errors, update these low-level assertions.
+        require(returnData.length >= 4, "short revert");
         // Casting to bytes4 is safe: an Error(string) payload starts with the selector.
         // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 selector = bytes4(returnData);

@@ -949,6 +949,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         success.assertFalse("call unexpectedly succeeded");
         // Pin the current nested Error(string) revert surface. If the production
         // path moves to custom errors, update these low-level assertions.
+        require(returnData.length >= 4, "short revert");
         // Casting to bytes4 is safe: an Error(string) payload starts with the selector.
         // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 selector = bytes4(returnData);
