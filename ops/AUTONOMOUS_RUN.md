@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/randomizer-request-id-collision` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/598` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/599` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/600` |
 | Next issue | Add post-sale pending-randomness burn/freeze composition tests. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 08:04 UTC` |
+| Last updated | `2026-06-19 08:08 UTC` |
 
 ## Packaging Notes
 
@@ -16340,6 +16340,7 @@ Outcome:
 | 2026-06-19 07:36 | Merge PR #598 and start issue #599 | PR #598 merged as `862c9b99f0eec5dd26404d01f08d54462025a6a5` after CodeRabbit, Foundry smoke, Windows PowerShell wrapper, empty review threads, and latest-head 6529bot feedback were clean. Issue #597 closed completed. Issue #599 and branch `codex/randomizer-request-id-collision` now track ADV-019 for duplicate arRNG request-ID rollback composition tests covering paid fixed-price and auction drop paths without claiming live provider readiness. |
 | 2026-06-19 07:40 | Implement ADV-019 local draft | Added request-ID collision coverage to the fixed-price and auction randomizer composition suites. The new tests force the arRNG controller double to reuse an existing provider request ID, prove the second signed fixed-price or auction drop reverts with `RandomnessRequestAlreadyExists`, and assert the failed attempt does not consume the authorization, mint/register a token, change supply/drop counts, create payment credits or auction state, alter pending request accounting, or disturb the first token's fulfillable request binding. Focused `forge test --match-path test\StreamFixedPriceRandomizerComposition.t.sol -vvv` passed with 4 tests and `forge test --match-path test\StreamAuctionRandomizerComposition.t.sol -vvv` passed with 10 tests, with existing known Solidity warning noise only. Next action is to finish traceability docs/artifacts, run local gates, commit, push, open PR closing #599, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-19 08:04 | Finish ADV-019 local validation | Regenerated release notes, risk register, release manifest, bytecode proof, lockfile, and checksum artifacts after traceability changes. Local validation passed: focused fixed-price composition suite, focused auction composition suite, `forge fmt --check` for both changed test files, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, `codex-diff-check`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; only existing documented Solidity/Foundry warning noise appeared. Next action is to commit, push, open PR closing #599, request CodeRabbit, wait for CI/bot feedback, resolve anything actionable, and merge only when clean. |
+| 2026-06-19 08:08 | Open PR #600 for ADV-019 | PR #600 is open at `https://github.com/6529-Collections/6529Stream/pull/600`, closes issue #599, and packages randomizer request-ID collision rollback composition tests plus roadmap/status/test traceability and regenerated release artifacts. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
