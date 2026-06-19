@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import shutil
 import tempfile
 import unittest
@@ -101,10 +102,12 @@ class SepoliaEvidencePreflightTests(unittest.TestCase):
             secret_env = full_env()
             secret_env["SEPOLIA_RPC_URL"] = "https://sepolia.example/token"
             report_path = repo_root / "tmp" / "preflight.json"
+            stdout = StringIO()
+            stderr = StringIO()
 
             with patch.dict("os.environ", secret_env, clear=True), redirect_stdout(
-                StringIO()
-            ), redirect_stderr(StringIO()):
+                stdout
+            ), redirect_stderr(stderr):
                 result = checker.main(
                     [
                         "--repo-root",
@@ -116,11 +119,13 @@ class SepoliaEvidencePreflightTests(unittest.TestCase):
                 )
 
             text = report_path.read_text(encoding="utf-8")
+            captured_output = stdout.getvalue() + stderr.getvalue()
 
         self.assertEqual(result, 0)
         self.assertNotIn("https://sepolia.example/token", text)
         for value in secret_env.values():
             self.assertNotIn(value, text)
+            self.assertNotIn(value, captured_output)
         report = json.loads(text)
         self.assertFalse(report["redaction"]["environment_values_emitted"])
         self.assertTrue(
@@ -141,6 +146,25 @@ class SepoliaEvidencePreflightTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 checker.SepoliaEvidencePreflightError,
                 "sepolia_config_template",
+            ):
+                checker.validate_preflight(repo_root, env={})
+
+    def test_required_path_symlink_fails(self) -> None:
+        """Committed prerequisite paths must be regular files, not symlinks."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            copy_required_tree(repo_root)
+            config_path = repo_root / checker.CONFIG_PATH
+            real_config_path = config_path.with_name(config_path.name + ".real")
+            config_path.rename(real_config_path)
+            try:
+                os.symlink(real_config_path, config_path)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+
+            with self.assertRaisesRegex(
+                checker.SepoliaEvidencePreflightError,
+                "not a symlink",
             ):
                 checker.validate_preflight(repo_root, env={})
 

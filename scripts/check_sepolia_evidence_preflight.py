@@ -53,18 +53,6 @@ REQUIRED_PATHS = {
     "sepolia_preflight_checker": Path("scripts/check_sepolia_evidence_preflight.py"),
     "sepolia_preflight_tests": Path("scripts/test_sepolia_evidence_preflight.py"),
 }
-REQUIRED_COMMANDS = [
-    "python scripts/test_sepolia_evidence_preflight.py",
-    "python scripts/check_sepolia_evidence_preflight.py",
-    "python scripts/test_testnet_deployment_rehearsal_evidence.py",
-    "python scripts/check_testnet_deployment_rehearsal_evidence.py",
-    "python scripts/test_public_beta_verified_addresses.py",
-    "python scripts/check_public_beta_verified_addresses.py",
-    "python scripts/check_non_local_release_evidence.py",
-    "python scripts/check_public_beta_evidence.py",
-    "python scripts/generate_release_manifest.py --check",
-    "python scripts/generate_release_checksums.py --check",
-]
 REQUIRED_ENV_NAMES = [
     "SEPOLIA_RPC_URL",
     "SEPOLIA_CONTRACT_METADATA_URI",
@@ -80,6 +68,41 @@ REQUIRED_ENV_NAMES = [
     "SEPOLIA_VRF_SUBSCRIPTION_ID",
     "ETHERSCAN_API_KEY",
 ]
+REQUIRED_DEPLOYMENT_PHRASES = [
+    "## Sepolia Deployment Rehearsal Runbook",
+    "SEPOLIA_RPC_URL",
+    "deployments/config/sepolia-6529stream-v0.1.0-001.template.json",
+    "--sig \"runSepolia()\"",
+    "private keys",
+    "API keys",
+    "unreleased drop payloads",
+]
+REQUIRED_RUNBOOK_COMMANDS = {
+    "docs/deployment.md": [
+        "python scripts/test_sepolia_evidence_preflight.py",
+        "python scripts/check_sepolia_evidence_preflight.py",
+        "python scripts/check_testnet_deployment_rehearsal_evidence.py",
+        "python scripts/check_non_local_release_evidence.py",
+        "python scripts/check_public_beta_evidence.py",
+        "python scripts/generate_release_manifest.py --check",
+        "python scripts/generate_release_checksums.py --check",
+    ],
+    "docs/non-local-release-evidence.md": [
+        "python scripts/test_sepolia_evidence_preflight.py",
+        (
+            "python scripts/check_sepolia_evidence_preflight.py "
+            "--require-env --output-json /tmp/sepolia-evidence-preflight.json"
+        ),
+        "python scripts/test_testnet_deployment_rehearsal_evidence.py",
+        "python scripts/check_testnet_deployment_rehearsal_evidence.py",
+        "python scripts/test_public_beta_verified_addresses.py",
+        "python scripts/check_public_beta_verified_addresses.py",
+        "python scripts/check_non_local_release_evidence.py",
+        "python scripts/check_public_beta_evidence.py",
+        "python scripts/generate_release_manifest.py --check",
+        "python scripts/generate_release_checksums.py --check",
+    ],
+}
 
 
 class SepoliaEvidencePreflightError(RuntimeError):
@@ -200,6 +223,11 @@ def validate_required_paths(repo_root: Path) -> list[dict[str, str]]:
             raise SepoliaEvidencePreflightError(
                 f"missing {name}: {relative_path.as_posix()}"
             )
+        if path.is_symlink():
+            raise SepoliaEvidencePreflightError(
+                f"{name} must be a regular tracked file, not a symlink: "
+                f"{relative_path.as_posix()}"
+            )
         rows.append(
             {
                 "name": name,
@@ -214,24 +242,22 @@ def validate_runbooks(repo_root: Path) -> None:
     """Validate that operator docs carry the expected command breadcrumbs."""
     deployment_doc = read_text(repo_root / "docs/deployment.md")
     non_local_doc = read_text(repo_root / "docs/non-local-release-evidence.md")
-    for phrase in [
-        "## Sepolia Deployment Rehearsal Runbook",
-        "SEPOLIA_RPC_URL",
-        "deployments/config/sepolia-6529stream-v0.1.0-001.template.json",
-        "--sig \"runSepolia()\"",
-        "private keys",
-        "API keys",
-        "unreleased drop payloads",
-    ]:
+    docs_by_path = {
+        "docs/deployment.md": deployment_doc,
+        "docs/non-local-release-evidence.md": non_local_doc,
+    }
+    for phrase in REQUIRED_DEPLOYMENT_PHRASES:
         if phrase not in deployment_doc:
             raise SepoliaEvidencePreflightError(
                 f"docs/deployment.md is missing required Sepolia phrase: {phrase}"
             )
-    for command in REQUIRED_COMMANDS:
-        if command not in deployment_doc and command not in non_local_doc:
-            raise SepoliaEvidencePreflightError(
-                f"Sepolia runbooks are missing validation command: {command}"
-            )
+    for doc_path, commands in REQUIRED_RUNBOOK_COMMANDS.items():
+        doc = docs_by_path[doc_path]
+        for command in commands:
+            if command not in doc:
+                raise SepoliaEvidencePreflightError(
+                    f"{doc_path} is missing validation command: {command}"
+                )
 
 
 def env_report(
@@ -243,7 +269,12 @@ def env_report(
             "name": row["name"],
             "retained_value": row["retained_value"],
             "present": row["name"] in env and bool(env[row["name"]]),
-            "value": "<redacted>" if row["retained_value"] == "redacted" else "<not emitted>",
+            # Fixed display labels only; environment values never flow here.
+            "value": (
+                "<redacted>"
+                if row["retained_value"] == "redacted"
+                else "<not emitted>"
+            ),
             "purpose": row["purpose"],
         }
         for row in required_env
@@ -271,9 +302,12 @@ def build_report(
             + ", ".join(missing_env)
         )
 
-    readiness = "ready" if not missing_env else "operator_env_missing"
     if blockers:
         readiness = "blocked"
+    elif missing_env:
+        readiness = "operator_env_missing"
+    else:
+        readiness = "ready"
 
     return {
         "schema_version": SCHEMA_VERSION,
