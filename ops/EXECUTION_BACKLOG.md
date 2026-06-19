@@ -3487,7 +3487,7 @@ unless an external dependency changes.
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
 | `OSS-006` | Add autonomous run-state consistency checker | G | Merged in PR #570; issue #569 closed completed |
 | `OSS-007` | Prevent stale detailed backlog status markers | G | Merged in PR #586; issue #585 closed completed |
-| `OSS-008` | Reject unchecksummed release-artifact extras in offline verifier | G | Active issue #587 on branch `codex/release-artifact-verifier-closure`; harden `scripts/verify_release_artifacts.py` so stray regular files under `release-artifacts/latest` fail consumer-side verification |
+| `OSS-008` | Reject unchecksummed release-artifact extras in offline verifier | G | Active PR #588 / issue #587 on branch `codex/release-artifact-verifier-closure`; harden `scripts/verify_release_artifacts.py` so stray regular files under `release-artifacts/latest` fail consumer-side verification |
 
 ## 6. Dependency Map
 
