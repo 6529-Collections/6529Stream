@@ -23,6 +23,11 @@ the release policy in `docs/release-policy.md`.
   cannot disturb fixed-price credits or pending request bindings, and
   poster/protocol credit withdrawals before arRNG fulfillment do not break later
   fulfillment.
+- Added auction terminal/drop/arRNG composition regressions proving no-bid
+  settlement, contract-poster pending no-bid claims, pre-bid auction
+  cancellation, cancelled signed auction authorizations, and invalid terminal
+  operations preserve auction custody, claimant state, zero-accounting
+  boundaries, pending request bindings, and later arRNG fulfillment.
 - Extended the autonomous run-state consistency checker to reject stale detailed
   execution-backlog `Status:` paragraphs that still claim active work after the
   corresponding issue or PR has closed.

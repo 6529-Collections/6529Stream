@@ -16,6 +16,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
+    using Assertions for string;
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
@@ -27,10 +28,12 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
     address private constant FIRST_BIDDER = address(0x4001);
     address private constant SECOND_BIDDER = address(0x4002);
     address private constant EMERGENCY_RECIPIENT = address(0x5001);
+    address private constant NO_BID_RECIPIENT = address(0x6001);
     bytes32 private constant PAUSE_REASON = keccak256("auction-randomizer-composition");
     bytes32 private constant RANDOMNESS_SEED_TYPEHASH = keccak256(
         "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
     );
+    bytes4 private constant ERROR_STRING_SELECTOR = bytes4(keccak256("Error(string)"));
 
     struct CompositionSetup {
         DeployedStream deployed;
@@ -49,10 +52,14 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         uint256 totalProceedsOwed;
         uint256 totalOwed;
         uint256 balance;
+        address pendingNoBidClaimant;
+        address noBidClaimantAlias;
+        bool auctionClaim;
         uint256 pendingRequests;
         uint256 randomizerEpoch;
         address collectionRandomizer;
         uint256 tokenRequest;
+        bytes32 tokenHash;
     }
 
     struct AuctionAccountingSnapshot {
@@ -158,6 +165,179 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         uint256(setup.auctions.retrieveAuctionStatus(tokenId))
             .assertEq(uint256(StreamAuctions.AuctionStatus.SettledWithBid), "status drift");
         _assertAuctionAccountingSnapshot(setup, beforeFulfillment, "fulfillment");
+    }
+
+    function testAuctionNoBidSettlementBeforeArrngFulfillmentPreservesPosterAndRequestBinding()
+        public
+    {
+        CompositionSetup memory setup = _deployComposition();
+        (
+            StreamDrops.DropAuthorization memory authorization,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        ) = _mintAuctionDrop(setup, "no-bid-before-arrng-fulfillment", 51);
+        uint256 requestId = setup.randomizer.tokenToRequest(tokenId);
+
+        vm.warp(auctionEndTime + 1);
+        setup.auctions.claimAuction(tokenId);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(POSTER, "poster owner");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledNoBid), "settled no bid");
+        setup.auctions.auctionClaim(tokenId).assertTrue("auction claim");
+        setup.auctions.pendingNoBidNftClaimant(tokenId).assertEq(address(0), "pending claimant");
+        setup.auctions.retrieveNoBidAuctionClaimant(tokenId).assertEq(address(0), "claimant alias");
+        _assertZeroAuctionAccounting(setup, tokenId, POSTER, "no-bid settlement");
+        _assertPendingRequest(setup, tokenId, requestId, "no-bid pending");
+        setup.deployed.drops.isDropConsumed(authorization.dropId).assertTrue("consumed drop");
+
+        AuctionSnapshot memory beforeTerminalReverts = _snapshot(setup, tokenId);
+        (bool repeatClaimSuccess,) = _callClaimAuction(setup, tokenId);
+        repeatClaimSuccess.assertFalse("repeat no-bid claim accepted");
+        _callBid(setup, tokenId, FIRST_BIDDER, RESERVE_PRICE)
+            .assertFalse("post-settlement bid accepted");
+        (bool cancelSuccess,) = _callCancelAuctionAs(setup, tokenId, POSTER);
+        cancelSuccess.assertFalse("post-settlement cancel accepted");
+        _assertSnapshot(setup, tokenId, beforeTerminalReverts, "terminal reverts");
+
+        _fulfillRandomnessAndAssertBinding(setup, tokenId, requestId, 1357);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(POSTER, "post-fulfillment owner");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledNoBid), "status drift");
+        setup.auctions.auctionClaim(tokenId).assertTrue("claim drift");
+        _assertZeroAuctionAccounting(setup, tokenId, POSTER, "no-bid fulfillment");
+    }
+
+    function testContractPosterNoBidPendingClaimSurvivesArrngFulfillmentAndCompletes() public {
+        CompositionSetup memory setup = _deployComposition();
+        NoBidContractPoster contractPoster = new NoBidContractPoster();
+        (, uint256 tokenId, uint256 auctionEndTime) = _mintAuctionDropForPoster(
+            setup, address(contractPoster), "contract-poster-no-bid-arrng", 61
+        );
+        uint256 requestId = setup.randomizer.tokenToRequest(tokenId);
+
+        vm.warp(auctionEndTime + 1);
+        setup.auctions.claimAuction(tokenId);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(address(setup.auctions), "escrow owner");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.EndedNoBid), "pending status");
+        setup.auctions.pendingNoBidNftClaimant(tokenId)
+            .assertEq(address(contractPoster), "pending claimant");
+        setup.auctions.retrieveNoBidAuctionClaimant(tokenId)
+            .assertEq(address(contractPoster), "claimant alias");
+        setup.auctions.auctionClaim(tokenId).assertFalse("claim prematurely set");
+        _assertZeroAuctionAccounting(setup, tokenId, address(contractPoster), "pending no bid");
+        _assertPendingRequest(setup, tokenId, requestId, "contract pending");
+
+        _fulfillRandomnessAndAssertBinding(setup, tokenId, requestId, 2468);
+        bytes32 fulfilledHash = setup.deployed.core.retrieveTokenHash(tokenId);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(address(setup.auctions), "held after rng");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.EndedNoBid), "pending status drift");
+        setup.auctions.pendingNoBidNftClaimant(tokenId)
+            .assertEq(address(contractPoster), "claimant drift");
+        setup.auctions.auctionClaim(tokenId).assertFalse("claim drift");
+        _assertZeroAuctionAccounting(setup, tokenId, address(contractPoster), "after rng");
+
+        contractPoster.claimNoBid(setup.auctions, tokenId, NO_BID_RECIPIENT);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(NO_BID_RECIPIENT, "recipient owner");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledNoBid), "settled");
+        setup.auctions.pendingNoBidNftClaimant(tokenId).assertEq(address(0), "pending cleared");
+        setup.auctions.retrieveNoBidAuctionClaimant(tokenId).assertEq(address(0), "alias cleared");
+        setup.auctions.auctionClaim(tokenId).assertTrue("claim set");
+        setup.deployed.core.retrieveTokenHash(tokenId).assertEq(fulfilledHash, "hash drift");
+        _assertZeroAuctionAccounting(setup, tokenId, address(contractPoster), "claim complete");
+    }
+
+    function testAuctionCancellationBeforeArrngFulfillmentPreservesPosterAndRequestBinding()
+        public
+    {
+        CompositionSetup memory setup = _deployComposition();
+        (
+            StreamDrops.DropAuthorization memory authorization,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        ) = _mintAuctionDrop(setup, "cancel-before-arrng-fulfillment", 71);
+        uint256 requestId = setup.randomizer.tokenToRequest(tokenId);
+
+        vm.prank(POSTER);
+        setup.auctions.cancelAuction(tokenId);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(POSTER, "poster owner");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.Cancelled), "cancelled");
+        setup.auctions.auctionClaim(tokenId).assertTrue("auction claim");
+        setup.auctions.retrieveAuctionEndTime(tokenId).assertEq(auctionEndTime, "end time drift");
+        setup.deployed.drops.isDropConsumed(authorization.dropId).assertTrue("consumed drop");
+        setup.deployed.drops.isDropCancelled(authorization.dropId).assertFalse("drop cancelled");
+        _assertZeroAuctionAccounting(setup, tokenId, POSTER, "cancelled");
+        _assertPendingRequest(setup, tokenId, requestId, "cancel pending");
+
+        AuctionSnapshot memory beforeTerminalReverts = _snapshot(setup, tokenId);
+        (bool claimSuccess,) = _callClaimAuction(setup, tokenId);
+        claimSuccess.assertFalse("claim after cancel accepted");
+        (bool repeatCancelSuccess,) = _callCancelAuctionAs(setup, tokenId, POSTER);
+        repeatCancelSuccess.assertFalse("repeat cancel accepted");
+        _callBid(setup, tokenId, FIRST_BIDDER, RESERVE_PRICE)
+            .assertFalse("post-cancel bid accepted");
+        _assertSnapshot(setup, tokenId, beforeTerminalReverts, "cancel terminal reverts");
+
+        NoopRandomizer replacement = new NoopRandomizer();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCore.PendingRandomnessRequests.selector,
+                COLLECTION_ID,
+                address(setup.randomizer),
+                uint256(1)
+            )
+        );
+        setup.deployed.core.addRandomizer(COLLECTION_ID, address(replacement));
+
+        _fulfillRandomnessAndAssertBinding(setup, tokenId, requestId, 9753);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(POSTER, "post-fulfillment owner");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.Cancelled), "status drift");
+        setup.auctions.auctionClaim(tokenId).assertTrue("claim drift");
+        _assertZeroAuctionAccounting(setup, tokenId, POSTER, "cancel fulfillment");
+    }
+
+    function testCancelledAuctionAuthorizationDoesNotMintRegisterAuctionOrRequestRandomness()
+        public
+    {
+        CompositionSetup memory setup = _deployComposition();
+        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
+            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 supplyBefore = setup.deployed.core.totalSupply();
+        uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
+        uint256 nextRequestIdBefore = setup.controller.nextRequestId();
+        (StreamDrops.DropAuthorization memory authorization, bytes memory signature) = _buildSignedAuctionAuthorization(
+            setup, "cancelled-auction-authorization", 81, block.timestamp + 1 days
+        );
+
+        setup.deployed.drops.cancelDrop(authorization.dropId);
+        (bool success, bytes memory returnData) =
+            _callMintDrop(setup, authorization, "cancelled-auction-authorization", signature);
+        _assertRevertedWithMessage(success, returnData, "Drop cancelled");
+
+        setup.deployed.drops.isDropCancelled(authorization.dropId).assertTrue("cancelled drop");
+        setup.deployed.drops.isDropConsumed(authorization.dropId).assertFalse("consumed drop");
+        setup.deployed.drops.retrieveTokenID(authorization.dropId).assertEq(0, "token id");
+        setup.deployed.core.totalSupply().assertEq(supplyBefore, "supply");
+        setup.deployed.core.viewCirSupply(COLLECTION_ID).assertEq(circulationBefore, "circulation");
+        setup.deployed.drops.retrieveDrops().length.assertEq(dropCountBefore, "drop count");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending");
+        setup.randomizer.tokenToRequest(nextTokenId).assertEq(0, "request id");
+        setup.controller.nextRequestId().assertEq(nextRequestIdBefore, "controller request");
+        uint256(setup.auctions.retrieveAuctionStatus(nextTokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.None), "auction status");
+        _assertZeroAuctionAccounting(setup, nextTokenId, POSTER, "cancelled auth");
     }
 
     function testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle() public {
@@ -273,6 +453,23 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             _mintAuctionDropWithSignature(setup, tokenData, nonce);
     }
 
+    function _mintAuctionDropForPoster(
+        CompositionSetup memory setup,
+        address poster,
+        string memory tokenData,
+        uint256 nonce
+    )
+        private
+        returns (
+            StreamDrops.DropAuthorization memory authorization,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        )
+    {
+        (authorization,, tokenId, auctionEndTime) =
+            _mintAuctionDropWithSignatureForPoster(setup, poster, tokenData, nonce);
+    }
+
     function _mintAuctionDropWithSignature(
         CompositionSetup memory setup,
         string memory tokenData,
@@ -286,9 +483,27 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             uint256 auctionEndTime
         )
     {
-        (authorization, signature) = _buildSignedAuctionAuthorization(
-            setup, tokenData, nonce, block.timestamp + 1 days
-        );
+        return _mintAuctionDropWithSignatureForPoster(setup, POSTER, tokenData, nonce);
+    }
+
+    function _mintAuctionDropWithSignatureForPoster(
+        CompositionSetup memory setup,
+        address poster,
+        string memory tokenData,
+        uint256 nonce
+    )
+        private
+        returns (
+            StreamDrops.DropAuthorization memory authorization,
+            bytes memory signature,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        )
+    {
+        (authorization, signature) =
+            _buildSignedAuctionAuthorizationForPoster(
+                setup, poster, tokenData, nonce, block.timestamp + 1 days
+            );
         setup.deployed.drops.mintDrop(authorization, tokenData, signature);
         tokenId = setup.deployed.drops.retrieveTokenID(authorization.dropId);
         auctionEndTime = authorization.auctionEndTime;
@@ -296,7 +511,8 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         setup.deployed.core.ownerOf(tokenId).assertEq(address(setup.auctions), "auction custody");
         uint256(setup.auctions.retrieveAuctionStatus(tokenId))
             .assertEq(uint256(StreamAuctions.AuctionStatus.Active), "auction active");
-        setup.randomizer.tokenToRequest(tokenId).assertEq(1, "request id");
+        setup.randomizer.tokenToRequest(tokenId)
+            .assertEq(setup.controller.lastRequestId(), "request id");
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "pending request");
     }
 
@@ -306,9 +522,21 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         uint256 nonce,
         uint256 auctionEndTime
     ) private returns (StreamDrops.DropAuthorization memory authorization, bytes memory signature) {
+        return _buildSignedAuctionAuthorizationForPoster(
+            setup, POSTER, tokenData, nonce, auctionEndTime
+        );
+    }
+
+    function _buildSignedAuctionAuthorizationForPoster(
+        CompositionSetup memory setup,
+        address poster,
+        string memory tokenData,
+        uint256 nonce,
+        uint256 auctionEndTime
+    ) private returns (StreamDrops.DropAuthorization memory authorization, bytes memory signature) {
         authorization = buildAuctionAuthorization(
             setup.deployed.drops,
-            POSTER,
+            poster,
             address(0),
             tokenData,
             COLLECTION_ID,
@@ -356,11 +584,15 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             totalProceedsOwed: setup.auctions.totalProceedsOwed(),
             totalOwed: setup.auctions.totalOwed(),
             balance: address(setup.auctions).balance,
+            pendingNoBidClaimant: setup.auctions.pendingNoBidNftClaimant(tokenId),
+            noBidClaimantAlias: setup.auctions.retrieveNoBidAuctionClaimant(tokenId),
+            auctionClaim: setup.auctions.auctionClaim(tokenId),
             pendingRequests: setup.randomizer.pendingRandomnessRequests(COLLECTION_ID),
             randomizerEpoch: setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID),
             collectionRandomizer: setup.deployed.core
             .viewCollectionRandomizerContract(COLLECTION_ID),
-            tokenRequest: setup.randomizer.tokenToRequest(tokenId)
+            tokenRequest: setup.randomizer.tokenToRequest(tokenId),
+            tokenHash: setup.deployed.core.retrieveTokenHash(tokenId)
         });
     }
 
@@ -421,6 +653,39 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         address(setup.auctions).balance.assertEq(snapshot.balance, label);
     }
 
+    function _assertZeroAuctionAccounting(
+        CompositionSetup memory setup,
+        uint256 tokenId,
+        address poster,
+        string memory label
+    ) private view {
+        setup.auctions.auctionHighestBid(tokenId).assertEq(0, label);
+        setup.auctions.auctionHighestBidder(tokenId).assertEq(address(0), label);
+        setup.auctions.auctionBidderCredits(FIRST_BIDDER).assertEq(0, label);
+        setup.auctions.auctionBidderCredits(SECOND_BIDDER).assertEq(0, label);
+        setup.auctions.auctionPosterCredits(poster).assertEq(0, label);
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(0, label);
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL).assertEq(0, label);
+        setup.auctions.totalBidderOwed().assertEq(0, label);
+        setup.auctions.totalAuctionBidEscrow().assertEq(0, label);
+        setup.auctions.totalProceedsOwed().assertEq(0, label);
+        setup.auctions.totalOwed().assertEq(0, label);
+        address(setup.auctions).balance.assertEq(0, label);
+    }
+
+    function _assertPendingRequest(
+        CompositionSetup memory setup,
+        uint256 tokenId,
+        uint256 requestId,
+        string memory label
+    ) private view {
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, label);
+        setup.randomizer.tokenToRequest(tokenId).assertEq(requestId, label);
+        uint256(setup.randomizer.randomnessRequestState(requestId))
+            .assertEq(uint256(StreamRandomizerLifecycle.RandomnessRequestState.Pending), label);
+        setup.deployed.core.retrieveTokenHash(tokenId).assertEq(bytes32(0), label);
+    }
+
     function _assertSnapshot(
         CompositionSetup memory setup,
         uint256 tokenId,
@@ -437,6 +702,15 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         setup.auctions.totalProceedsOwed().assertEq(beforeSnapshot.totalProceedsOwed, label);
         setup.auctions.totalOwed().assertEq(beforeSnapshot.totalOwed, label);
         address(setup.auctions).balance.assertEq(beforeSnapshot.balance, label);
+        setup.auctions.pendingNoBidNftClaimant(tokenId)
+            .assertEq(beforeSnapshot.pendingNoBidClaimant, label);
+        setup.auctions.retrieveNoBidAuctionClaimant(tokenId)
+            .assertEq(beforeSnapshot.noBidClaimantAlias, label);
+        if (beforeSnapshot.auctionClaim) {
+            setup.auctions.auctionClaim(tokenId).assertTrue(label);
+        } else {
+            setup.auctions.auctionClaim(tokenId).assertFalse(label);
+        }
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)
             .assertEq(beforeSnapshot.pendingRequests, label);
         setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID)
@@ -444,6 +718,37 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         setup.deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
             .assertEq(beforeSnapshot.collectionRandomizer, label);
         setup.randomizer.tokenToRequest(tokenId).assertEq(beforeSnapshot.tokenRequest, label);
+        setup.deployed.core.retrieveTokenHash(tokenId).assertEq(beforeSnapshot.tokenHash, label);
+    }
+
+    function _callClaimAuction(CompositionSetup memory setup, uint256 tokenId)
+        private
+        returns (bool success, bytes memory returnData)
+    {
+        (success, returnData) = address(setup.auctions)
+            .call(abi.encodeWithSelector(setup.auctions.claimAuction.selector, tokenId));
+    }
+
+    function _callCancelAuctionAs(CompositionSetup memory setup, uint256 tokenId, address caller)
+        private
+        returns (bool success, bytes memory returnData)
+    {
+        vm.prank(caller);
+        (success, returnData) = address(setup.auctions)
+            .call(abi.encodeWithSelector(setup.auctions.cancelAuction.selector, tokenId));
+    }
+
+    function _callBid(
+        CompositionSetup memory setup,
+        uint256 tokenId,
+        address bidder,
+        uint256 amount
+    ) private returns (bool success) {
+        vm.deal(bidder, amount);
+        vm.prank(bidder);
+        (success,) = address(setup.auctions).call{ value: amount }(
+            abi.encodeWithSelector(setup.auctions.participateToAuction.selector, tokenId)
+        );
     }
 
     function _callMintDrop(
@@ -476,11 +781,18 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         success.assertFalse("call unexpectedly succeeded");
         // Pin the current nested Error(string) revert surface. If the production
         // path moves to custom errors, update these low-level assertions.
-        keccak256(returnData)
-            .assertEq(
-                keccak256(abi.encodeWithSignature("Error(string)", expectedMessage)),
-                "unexpected revert"
-            );
+        bytes4 selector = bytes4(returnData);
+        require(selector == ERROR_STRING_SELECTOR, "unexpected revert selector");
+        _decodeErrorString(returnData).assertEq(expectedMessage, "unexpected revert");
+    }
+
+    function _decodeErrorString(bytes memory returnData) private pure returns (string memory) {
+        require(returnData.length >= 4, "short revert");
+        bytes memory encodedReason = new bytes(returnData.length - 4);
+        for (uint256 i = 0; i < encodedReason.length; i++) {
+            encodedReason[i] = returnData[i + 4];
+        }
+        return abi.decode(encodedReason, (string));
     }
 
     function _words(uint256 word) private pure returns (uint256[] memory words) {
@@ -511,15 +823,25 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
 
 contract CompositionArrngController {
     uint256 public nextRequestId = 1;
+    uint256 public lastRequestId;
 
     function requestRandomWords(uint256, address) external payable returns (uint256 requestId) {
         requestId = nextRequestId;
+        lastRequestId = requestId;
         nextRequestId++;
     }
 
+    // Permissionless on purpose: this test double models a cooperative arRNG
+    // controller, not production access control.
     function fulfill(NextGenRandomizerRNG randomizer, uint256 requestId, uint256[] memory words)
         external
     {
         randomizer.receiveRandomness(requestId, words);
+    }
+}
+
+contract NoBidContractPoster {
+    function claimNoBid(StreamAuctions auctions, uint256 tokenId, address recipient) external {
+        auctions.claimNoBidAuctionToken(tokenId, recipient);
     }
 }
