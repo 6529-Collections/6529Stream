@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:32cc37e7d3f8632ea7d8a4aaf3ad802949e56fdee064f6f69c75709f91c08eff",
-      "size_bytes": 72087
+      "sha256": "sha256:7a9adf4baf13b6bb22b39653b2f086770ade99c4736db2c10afebbaede82f052",
+      "size_bytes": 72311
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c4d62aec1efa87510d6550f519611843f41164506f845d4a2c8f5671555e572b",
+      "sha256": "sha256:3e8831e98b7e199a389bb7b0572790bef13bc4e6f55a603b2338b02584c4f046",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Hardened the testnet deployment rehearsal retained-artifact checker to reject symlinked retained transcript, broadcast, manifest, address-book, and gas/invariant files before future reviewed Sepolia evidence can pass.",
       "Added burned pending arRNG composition regressions proving paid fixed-price and settled auction drops can be burned before fulfillment while preserving payment/proceeds accounting, request bindings, burned-token audit randomness, freeze eligibility, and frozen manifest stability.",
       "Added fixed-price and auction arRNG request-ID collision composition regressions proving a reused provider request ID fails with `RandomnessRequestAlreadyExists` while preserving drop authorization state, mint/drop counts, payment or auction accounting, pending request accounting, and the first token's fulfillable request binding.",
       "Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.",
