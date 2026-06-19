@@ -56,12 +56,64 @@ def normalize_path(path: Path, repo_root: Path) -> str:
         return path.as_posix()
 
 
+def require_no_symlink_components(
+    repo_root: Path,
+    relative_path: Path,
+    field: str,
+) -> None:
+    # Callers first reject absolute, escaping, or out-of-checkout paths. This
+    # helper then walks the remaining lexical components before resolution can
+    # redirect any release input through a symlink.
+    current = repo_root.resolve()
+    for part in relative_path.parts:
+        if part in {"", "."}:
+            continue
+        if part == "..":
+            raise ReleaseArtifactVerificationError(f"{field} must stay inside the repository")
+        current = current / part
+        if current.is_symlink():
+            try:
+                display_path = current.relative_to(repo_root.resolve()).as_posix()
+            except ValueError:
+                display_path = current.as_posix()
+            raise ReleaseArtifactVerificationError(
+                f"{field} must not include symlinks: {display_path}"
+            )
+
+
+def require_regular_file(path: Path, source: str) -> None:
+    if path.is_symlink():
+        raise ReleaseArtifactVerificationError(f"{source} must not be a symlink: {path}")
+    if not path.is_file():
+        raise ReleaseArtifactVerificationError(f"{source} references missing file: {path}")
+
+
+def resolve_release_dir(repo_root: Path, release_dir: Path) -> Path:
+    repo_root = repo_root.resolve()
+    candidate = release_dir if release_dir.is_absolute() else repo_root / release_dir
+    resolved = candidate.resolve()
+    try:
+        resolved_relative = resolved.relative_to(repo_root)
+    except ValueError as exc:
+        raise ReleaseArtifactVerificationError(
+            "release directory must stay inside the repository"
+        ) from exc
+
+    try:
+        lexical_relative = candidate.relative_to(repo_root)
+    except ValueError:
+        lexical_relative = resolved_relative
+    require_no_symlink_components(repo_root, lexical_relative, "release directory")
+    return resolved
+
+
 def resolve_release_file(repo_root: Path, relative_path: str, field: str) -> Path:
     if "\\" in relative_path:
         raise ReleaseArtifactVerificationError(f"{field} must use forward slashes")
     candidate = Path(relative_path)
     if candidate.is_absolute() or ".." in candidate.parts:
         raise ReleaseArtifactVerificationError(f"{field} must stay inside the repository")
+    require_no_symlink_components(repo_root, candidate, field)
     resolved = (repo_root / candidate).resolve()
     try:
         resolved.relative_to(repo_root.resolve())
@@ -78,6 +130,8 @@ def sha256_bytes(value: bytes) -> str:
 
 def file_sha256(path: Path) -> str:
     try:
+        if path.is_symlink():
+            raise ReleaseArtifactVerificationError(f"refusing symlinked file: {path}")
         return sha256_bytes(path.read_bytes())
     except FileNotFoundError as exc:
         raise ReleaseArtifactVerificationError(f"missing required file: {path}") from exc
@@ -85,6 +139,8 @@ def file_sha256(path: Path) -> str:
 
 def load_json(path: Path) -> Any:
     try:
+        if path.is_symlink():
+            raise ReleaseArtifactVerificationError(f"refusing symlinked JSON file: {path}")
         return json.loads(path.read_text(encoding="utf-8"))
     except FileNotFoundError as exc:
         raise ReleaseArtifactVerificationError(f"missing required file: {path}") from exc
@@ -157,8 +213,7 @@ def verify_file_record(
     if not SHA256_PREFIX_RE.fullmatch(sha256):
         raise ReleaseArtifactVerificationError(f"{source} has invalid sha256 for {path}")
     resolved = resolve_release_file(repo_root, path, f"{source}.path")
-    if not resolved.is_file():
-        raise ReleaseArtifactVerificationError(f"{source} references missing file: {path}")
+    require_regular_file(resolved, source)
     actual = file_sha256(resolved)
     if actual != sha256:
         raise ReleaseArtifactVerificationError(
@@ -175,6 +230,7 @@ def verify_checksum_file(
     repo_root: Path,
     checksum_path: Path,
 ) -> dict[str, str]:
+    require_regular_file(checksum_path, CHECKSUM_FILE_NAME)
     # SHA256SUMS is LF-pinned by the release policy; the byte-level digest check
     # below still fails if a checkout rewrites it with CRLF line endings.
     checksum_text = checksum_path.read_text(encoding="utf-8")
@@ -186,10 +242,7 @@ def verify_checksum_file(
             relative_path,
             f"{CHECKSUM_FILE_NAME}.{relative_path}",
         )
-        if not resolved.is_file():
-            raise ReleaseArtifactVerificationError(
-                f"{CHECKSUM_FILE_NAME} references missing file: {relative_path}"
-            )
+        require_regular_file(resolved, CHECKSUM_FILE_NAME)
         actual = file_sha256(resolved).removeprefix("sha256:")
         if actual != digest:
             raise ReleaseArtifactVerificationError(
@@ -450,7 +503,7 @@ def verify_release_artifacts(
     release_dir: Path = DEFAULT_RELEASE_DIR,
 ) -> VerificationSummary:
     repo_root = repo_root.resolve()
-    resolved_release_dir = release_dir if release_dir.is_absolute() else repo_root / release_dir
+    resolved_release_dir = resolve_release_dir(repo_root, release_dir)
     checksum_path = resolved_release_dir / CHECKSUM_FILE_NAME
     checksum_manifest_path = resolved_release_dir / CHECKSUM_MANIFEST_NAME
     release_manifest_path = resolved_release_dir / RELEASE_MANIFEST_NAME

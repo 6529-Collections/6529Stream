@@ -14,6 +14,9 @@ the release policy in `docs/release-policy.md`.
   regular files and symlinks under `release-artifacts/latest`, while preserving
   the self-referential checksum bundle exceptions for `SHA256SUMS` and
   `release-checksums.json`.
+- Hardened the offline release artifact verifier to reject symlinked
+  checksum-covered inputs, symlinked release directories, and release
+  directories outside the checkout before accepting matching hashes.
 - Added a deployment rehearsal gate parity checker that locks the aggregate
   suite and standalone deployment, auction, and emergency rehearsal commands
   across Make, Bash, PowerShell, and CI before the scripts execute.

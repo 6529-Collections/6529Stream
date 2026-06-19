@@ -193,7 +193,10 @@ The consumer-facing verifier treats `latest/` as closed over regular files:
 everything below that directory must be listed in `SHA256SUMS`, except
 `SHA256SUMS` itself and `release-checksums.json`, which are checksum-bundle
 index files with self-referential hashing constraints. Symlinks under
-`latest/` are rejected instead of resolved as release payloads.
+`latest/` are rejected instead of resolved as release payloads. Checksum
+entries and nested manifest records are likewise rejected when any path
+component is a symlink, even if the linked target bytes match the expected
+digest.
 
 `latest/protocol-surface-report.json` is generated from the production contract
 set and Foundry artifacts. It records functions, selectors, events, topic0
@@ -650,10 +653,13 @@ verifier checks that `latest/SHA256SUMS`, `latest/release-checksums.json`,
 `latest/release-candidate-lockfile.json` agree with the files on disk; that
 checksum-covered files exist and match their hashes; that canonical manifest,
 proof, and lockfile records match current file hashes and sizes; and that the
-bytecode release proof is bound to the current release manifest hash. It is an
-offline integrity and consistency check only. It does not prove live deployed
-bytecode, explorer verification, production signatures, public-beta readiness,
-or production-release readiness.
+bytecode release proof is bound to the current release manifest hash. It also
+requires the selected release directory to stay inside the checkout and rejects
+symlinked release directories or symlinked checksum-covered path components
+instead of following them to mutable or out-of-tree content. It is an offline
+integrity and consistency check only. It does not prove live deployed bytecode,
+explorer verification, production signatures, public-beta readiness, or
+production-release readiness.
 
 Because the checksum bundle covers `latest/release-manifest.json`, the release
 manifest cannot also embed the final checksum-bundle digests without creating a
