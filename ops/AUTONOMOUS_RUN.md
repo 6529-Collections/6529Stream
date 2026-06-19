@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/aggregate-deployment-rehearsal` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/580` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/581` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/582` |
-| Next issue | Aggregate local deployment rehearsals into one release-gate script while preserving the individual rehearsal scripts for targeted debugging and retained evidence capture. |
+| Active PR branch | `codex/deployment-rehearsal-gate-check` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/582` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/583` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/584` |
+| Next issue | Add a static deployment rehearsal gate parity checker so aggregate and standalone rehearsal entrypoints stay wired across Make, Bash, PowerShell, and CI. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 01:21 UTC` |
+| Last updated | `2026-06-19 02:17 UTC` |
 
 ## Packaging Notes
 
@@ -16309,6 +16309,9 @@ Outcome:
 | 2026-06-18 11:06 | Cover chain-ID fallback note | Final CI/CodeRabbit were green on `349d9d09fd959464820a83045fe175679dc8d1fb`; 6529bot reported no new findings and one optional branch-coverage note. Added `test_uses_capture_chain_id_when_argument_is_omitted` to prove omitted `--chain-id` defaults to the retained capture chain ID. Next action is to run focused generator gates, commit/push, and wait for final checks/review. |
 | 2026-06-19 00:41 | Merge PR #580 and start issue #581 | PR #580 merged as `28b5489fec060d5d407cca79d191503fbd1bc392` after Foundry smoke, Windows wrapper, CodeRabbit status, review threads, and latest-head 6529bot follow-up were clean; issue #579 closed completed. The Sepolia preflight checker confirmed the real Sepolia evidence path is still blocked locally by missing operator environment variables, so issue #581 and branch `codex/aggregate-deployment-rehearsal` now track an unblocked release-gate improvement: aggregate the local deployment, auction ceremony, and emergency redeployment rehearsals into one suite script without removing individual scripts or claiming testnet/live evidence. |
 | 2026-06-19 01:21 | Address PR #582 review feedback | PR #582 opened for issue #581 and CodeRabbit was requested, but CodeRabbit was rate-limited. 6529bot security review reported no findings on the initial head; 6529bot general review requested preserving automated standalone script-entrypoint coverage and strengthening suite-hash tests. In response, the branch now keeps the aggregate suite command while restoring standalone `forge script` coverage in Make/check/CI, hashes the full deployment/auction/emergency result structs, and adds chain-ID plus replay-determinism assertions for the suite result. Next action is to validate, regenerate release artifacts, commit/push, and wait for final CI/bot status. |
+| 2026-06-19 01:52 | Merge PR #582 and start issue #583 | PR #582 merged as `0f5dd7dc0fbeaf1aea6ef728f5b82f3d72f972dc` after Windows wrapper, Foundry smoke, CodeRabbit status, empty review threads, and latest-head 6529bot follow-up were clean; issue #581 closed completed. The next unblocked item is issue #583 on branch `codex/deployment-rehearsal-gate-check`: add a static parity checker so aggregate and standalone deployment rehearsal commands remain wired across Make, Bash, PowerShell, and CI. |
+| 2026-06-19 02:16 | Finish issue #583 local validation | Added the deployment rehearsal gate checker and unit tests, wired it into Make, Bash, PowerShell, and CI before the Forge rehearsal scripts, refreshed docs/changelog/release artifacts, and validated with focused checker tests, Windows wrapper tests, release-manifest/checksum/changelog/autonomous-state/markdown-link gates, `codex-diff-check`, PowerShell wrapper runtime, and full `make check`. Next action is to commit, push, open the PR closing #583, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-19 02:17 | Open PR #584 | PR #584 is open at `https://github.com/6529-Collections/6529Stream/pull/584`, closes issue #583, and packages the static deployment rehearsal gate parity checker plus Make/Bash/PowerShell/CI wiring, docs, changelog, and release artifacts. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 

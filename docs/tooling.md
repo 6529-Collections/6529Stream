@@ -147,11 +147,19 @@ python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/test_changelog_check.py
 python scripts/check_changelog.py
+python scripts/test_deployment_rehearsal_gate.py
+python scripts/check_deployment_rehearsal_gate.py
 forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
 forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
 ```
+
+The deployment rehearsal gate parity step is a static guard over `Makefile`,
+`scripts/check.sh`, `scripts/check.ps1`, and `.github/workflows/ci.yml`. It
+fails if the aggregate suite command, any standalone rehearsal command, or the
+CI retained log names drift out of the local/CI smoke path; it does not replace
+the actual Forge rehearsal scripts that run immediately afterward.
 
 The protocol surface report step checks
 [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json)

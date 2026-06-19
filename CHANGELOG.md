@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a deployment rehearsal gate parity checker that locks the aggregate
+  suite and standalone deployment, auction, and emergency rehearsal commands
+  across Make, Bash, PowerShell, and CI before the scripts execute.
 - Added an aggregate local deployment rehearsal suite that runs the deployment,
   auction ceremony, and emergency redeployment rehearsals through one
   release-gate script while preserving the individual scripts for targeted
