@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-symlink-paths` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/604` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/605` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/606` |
 | Next issue | TBD after issue #605 is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 09:49 UTC` |
+| Last updated | `2026-06-19 10:01 UTC` |
 
 ## Packaging Notes
 
@@ -16352,6 +16352,7 @@ Outcome:
 | 2026-06-19 09:20 | Open PR #604 for issue #603 | PR #604 is open at `https://github.com/6529-Collections/6529Stream/pull/604` to close issue #603. The branch rejects symlinked retained artifact paths in the `testnet_deployment_rehearsal` checker before reading or hashing evidence files, adds focused symlink regression coverage, updates roadmap/status/backlog/run-state traceability, and regenerates release artifacts without claiming real Sepolia evidence or closing tracker issue #217. Local validation passed: focused testnet deployment rehearsal evidence tests/checker, Python compile, `make release-checksums`, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, and `codex-diff-check`. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, fix anything actionable, then merge only when clean. |
 | 2026-06-19 09:28 | Address PR #604 symlink review polish | 6529bot security found no issues and general review marked PR #604 good to merge with two non-blocking readability/coverage suggestions. Added an inline comment explaining that the retained-path walk intentionally rejects symlinked intermediate directories before `resolve()` can follow them, and added a focused regression for a symlinked intermediate directory in a reviewed Sepolia retained-artifact path. Next action is focused validation, release artifact refresh, consistency gates, push, and wait for latest CI/bot feedback. |
 | 2026-06-19 09:49 | Merge PR #604 and start issue #605 | PR #604 merged as `0bec3b5c7d5a70ae6738325522af4686dd808712` after CodeRabbit, Foundry smoke, Windows wrapper, empty review threads, and latest-head 6529bot feedback were clean; issue #603 closed completed. Created issue #605 and branch `codex/release-evidence-symlink-paths` to harden generic non-local release evidence, release-signature evidence, marketplace/indexer evidence, and live deployment-manifest retained path validation against symlinked leaf files and symlinked intermediate directories without claiming real live evidence or closing #424, #227, or other external evidence trackers. Focused local validation passed for the four changed checker/test families and their checker entrypoints. Next action is release artifact refresh, consistency gates, commit, push, open PR closing #605, request CodeRabbit, then wait for CI/bot feedback. |
+| 2026-06-19 10:01 | Open PR #606 for issue #605 | PR #606 is open at `https://github.com/6529-Collections/6529Stream/pull/606`, closes issue #605, and packages generic retained-path symlink hardening for non-local release evidence, release-signature evidence, marketplace/indexer evidence, and live deployment-manifest evidence. Local validation passed: the four focused evidence test scripts, the four checker entrypoints, Python compile, `make release-checksums`, autonomous-state consistency, release artifact verification, changelog coverage, Markdown links, and `codex-diff-check`. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
