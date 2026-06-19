@@ -653,8 +653,8 @@ Dependencies: `EXT-003`, `EXT-004`.
 
 ### EXT-007: Retain Sepolia Auction Ceremony Smoke Evidence
 
-Status: In progress on issue #428. Local PR candidate validated on
-2026-06-16; PR link pending.
+Status: Planned; blocked by reviewed Sepolia deployment evidence from
+`EXT-003` and generated Sepolia manifests/address books from `EXT-004`.
 
 Gate: E.
 
@@ -705,7 +705,8 @@ Dependencies: `EXT-003`, `EXT-004`.
 
 ### EXT-008: Retain Sepolia Randomizer And Metadata Browser Evidence
 
-Status: Active in issue #436.
+Status: Planned; blocked by reviewed Sepolia deployment evidence from
+`EXT-003` and generated Sepolia manifests/address books from `EXT-004`.
 
 Gate: E/D.
 
@@ -758,7 +759,7 @@ Dependencies: `EXT-003`, `EXT-004`.
 
 ### GOV-001: Add Safe/Admin Ceremony Evidence Checker
 
-Status: In progress on issue #362.
+Status: Merged in PR #369; issue #362 closed completed.
 
 Gate: E/F.
 
@@ -1019,8 +1020,7 @@ Dependencies: Current fixture helpers.
 
 ### ADV-002: Add Auction/Drop/Randomizer Adversarial Sequence Tests
 
-Status: In progress on issue #372 and branch
-`codex/adversarial-sequence-tests`.
+Status: Merged in PR #373; issue #372 closed completed.
 
 Gate: D/F.
 
@@ -1227,7 +1227,7 @@ PR: [`#379`](https://github.com/6529-Collections/6529Stream/pull/379).
 
 ### ADV-005: Expand Payment And Forced-ETH Invariants
 
-Status: Local validation complete on issue #380 and branch `codex/payment-forced-eth-invariants`; PR not opened yet.
+Status: Merged in PR #381; issue #380 closed completed.
 
 Gate: D/F.
 
@@ -3092,9 +3092,9 @@ Dependencies: dependency artifact manifest, metadata browser sandbox,
 ### ONE-005: Retain Marketplace And Indexer Integration Evidence
 
 Status: Evidence model merged in PR #425; manifest-aware validation merged in
-PR #529; active issue #423 now retains reviewed fork/testnet
-marketplace/indexer evidence. Tracker issue #424 remains open for future
-reviewed live marketplace/indexer evidence.
+PR #529; reviewed fork/testnet marketplace/indexer evidence retained in
+PR #560 with issue #423 closed completed. Tracker issue #424 remains open for
+future reviewed live marketplace/indexer evidence.
 
 Gate: G/E.
 
@@ -3431,7 +3431,7 @@ unless an external dependency changes.
 | `ONE-002` | Add 1/1 provenance manifest model and collector-facing provenance evidence/events | G/F | Merged in PR #413 |
 | `ONE-003` | Decide royalty philosophy and document/administer ERC-2981 or enforcement strategy | G/F | Merged in PR #417 |
 | `ONE-004` | Add collector-verifiable permanence package for renderer, dependencies, output hashes, and browser proof | G/F | Merged in PR #419 |
-| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | Merged in PR #425 for the evidence model; active issue #423 now retains reviewed fork/testnet marketplace/indexer evidence, and tracker issue #424 remains open for future reviewed live marketplace/indexer evidence |
+| `ONE-005` | Retain marketplace/indexer integration evidence for metadata refresh, contract metadata, royalties, transfers, and event replay | G/E | Merged in PR #425 for the evidence model; issue #423 closed completed with reviewed fork/testnet marketplace/indexer evidence in PR #560, and tracker issue #424 remains open for future reviewed live marketplace/indexer evidence |
 | `ONE-006` | Add satellite-extension architecture policy for new product features while `StreamCore` headroom is finite | G | Merged in PR #427; issue #426 closed completed |
 | `ONE-007` | Burn down release-grade compiler, lint, and NatSpec warnings or add reviewed dispositions | G/F | Merged in PR #483; issue #482 closed completed |
 
@@ -3448,7 +3448,7 @@ unless an external dependency changes.
 | `REL-010` | Extend ABI compatibility checks to published interfaces | G | Merged in PR #566; issue #565 closed completed |
 | `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Merged in PR #568; issue #567 closed completed |
 | `REL-012` | Aggregate local deployment rehearsal gate | E/G | Merged in PR #582; issue #581 closed completed with one aggregate suite-level evidence command, retained standalone script automation, suite-hash replay coverage, and CI/local gates that preserve both aggregate and standalone rehearsal entrypoints |
-| `REL-013` | Add deployment rehearsal gate parity checker | E/G | Active PR #584 / issue #583 on branch `codex/deployment-rehearsal-gate-check`; make aggregate and standalone rehearsal command parity machine-checkable across Make, Bash, PowerShell, and CI so future edits cannot silently drop coverage |
+| `REL-013` | Add deployment rehearsal gate parity checker | E/G | Merged in PR #584; issue #583 closed completed with machine-checkable aggregate and standalone rehearsal command parity across Make, Bash, PowerShell, and CI |
 
 ### Governance And Operations
 
@@ -3486,6 +3486,7 @@ unless an external dependency changes.
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
 | `OSS-006` | Add autonomous run-state consistency checker | G | Merged in PR #570; issue #569 closed completed |
+| `OSS-007` | Prevent stale detailed backlog status markers | G | Active issue #585 on branch `codex/stale-backlog-status-guard`; extend the autonomous-state checker beyond summary rows so stale detailed `Status:` paragraphs cannot misdirect future manager resumes |
 
 ## 6. Dependency Map
 

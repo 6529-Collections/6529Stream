@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/deployment-rehearsal-gate-check` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/582` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/583` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/584` |
-| Next issue | Add a static deployment rehearsal gate parity checker so aggregate and standalone rehearsal entrypoints stay wired across Make, Bash, PowerShell, and CI. |
+| Active PR branch | `codex/stale-backlog-status-guard` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/584` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/585` |
+| Active PR | `TBD` |
+| Next issue | Prevent stale detailed backlog status markers from surviving after the corresponding issues/PRs have closed. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 02:17 UTC` |
+| Last updated | `2026-06-19 02:38 UTC` |
 
 ## Packaging Notes
 
@@ -16312,6 +16312,7 @@ Outcome:
 | 2026-06-19 01:52 | Merge PR #582 and start issue #583 | PR #582 merged as `0f5dd7dc0fbeaf1aea6ef728f5b82f3d72f972dc` after Windows wrapper, Foundry smoke, CodeRabbit status, empty review threads, and latest-head 6529bot follow-up were clean; issue #581 closed completed. The next unblocked item is issue #583 on branch `codex/deployment-rehearsal-gate-check`: add a static parity checker so aggregate and standalone deployment rehearsal commands remain wired across Make, Bash, PowerShell, and CI. |
 | 2026-06-19 02:16 | Finish issue #583 local validation | Added the deployment rehearsal gate checker and unit tests, wired it into Make, Bash, PowerShell, and CI before the Forge rehearsal scripts, refreshed docs/changelog/release artifacts, and validated with focused checker tests, Windows wrapper tests, release-manifest/checksum/changelog/autonomous-state/markdown-link gates, `codex-diff-check`, PowerShell wrapper runtime, and full `make check`. Next action is to commit, push, open the PR closing #583, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-19 02:17 | Open PR #584 | PR #584 is open at `https://github.com/6529-Collections/6529Stream/pull/584`, closes issue #583, and packages the static deployment rehearsal gate parity checker plus Make/Bash/PowerShell/CI wiring, docs, changelog, and release artifacts. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-19 02:38 | Merge PR #584 and start issue #585 | PR #584 merged as `21ede2fe5a11674f902382cf45f41b874d38f156` after Foundry smoke, Windows wrapper, CodeRabbit, empty review threads, and latest-head 6529bot feedback were clean; issue #583 closed completed. Issue #585 and branch `codex/stale-backlog-status-guard` now track an offline autonomous-state checker hardening so detailed backlog `Status:` paragraphs cannot retain stale active-work claims after their issues/PRs close. Subagent scouting also identified the next substantive candidate after #585: harden `scripts/verify_release_artifacts.py` so consumer-side verification rejects unchecksummed extra files in `release-artifacts/latest`. |
 
 ## Resume Instructions
 
