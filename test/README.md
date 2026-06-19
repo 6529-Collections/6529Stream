@@ -256,6 +256,14 @@ coverage: signer-epoch invalidation, signer rotation, consumed-drop cancellation
 attempts, replay attempts, and drop-execution pauses after auction creation do
 not disturb existing auction custody, bid accounting, pending arRNG request
 bindings, settlement, or later arRNG fulfillment.
+ADV-017 adds fixed-price/drop/arRNG composition coverage in
+`StreamFixedPriceRandomizerComposition.t.sol`: paid fixed-price drops are
+executed through the real drop, minter, core, and arRNG contracts while tests
+prove randomness-request pause rollback leaves no consumed authorization,
+payment credits, owed totals, retained ETH, or pending request; post-execution
+signer epoch and rotation controls cannot mutate ownership, credits, or request
+binding; and poster/protocol withdrawals before fulfillment do not break later
+arRNG fulfillment.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be

@@ -17,6 +17,12 @@ the release policy in `docs/release-policy.md`.
   rotation, consumed-drop cancellation attempts, replay attempts, and
   drop-execution pauses cannot disturb existing auction custody, bid
   accounting, pending request bindings, settlement, or later arRNG fulfillment.
+- Added fixed-price/drop/arRNG composition regressions proving randomness-request
+  pauses roll back paid fixed-price drop execution without consuming
+  authorizations or crediting payments, post-execution signer lifecycle controls
+  cannot disturb fixed-price credits or pending request bindings, and
+  poster/protocol credit withdrawals before arRNG fulfillment do not break later
+  fulfillment.
 - Extended the autonomous run-state consistency checker to reject stale detailed
   execution-backlog `Status:` paragraphs that still claim active work after the
   corresponding issue or PR has closed.
