@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:f65c81bbaab0f30b33c80d7efcf62a35dd8b368b8f36131040997680bd5f838d",
-        "size_bytes": 73325,
+        "sha256": "sha256:5d13e4ff0770e8ba9cdfd0a94b0f6fecd4450e6c258d5f13db32e84f4a27c028",
+        "size_bytes": 73686,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:52ed48fcace6fec731b2b3853427503b39095a1d08bb0fb4d353af726240ba26",
-        "size_bytes": 70378
+        "sha256": "sha256:a742072e94bfdd8fb956572983d2fbad80dc5a631e610190bf67fcd6ba200da3",
+        "size_bytes": 70732
       }
     },
     "release_candidate_lockfile": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:999869fd475b3b7ea8085ee33948be32d61c2ced0d3a1b15b9350645dd359ee8",
+      "sha256": "sha256:83dc5193cd47ba9d3415423a74200729330ccaadc2a50daa8c227083b0cdfec5",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2233,8 +2233,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3cf1c3055c5e96894f75c291956155b670d6ae255f6042f10ddedbec232513f9",
-      "size_bytes": 71093
+      "sha256": "sha256:5cc172987910f4f509339a7066a049761f930a3cb8b2939ad63442cf8d0fe4e0",
+      "size_bytes": 71455
     },
     "governance_docs": [
       {
@@ -2510,8 +2510,8 @@
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:2e16ff4d1768b6bcb04221231d1280654ce7a18b1042ff119380c19d1416da31",
-        "size_bytes": 28332
+        "sha256": "sha256:db9012c8e08f735aba32071af7e20dace6708f841a982fcdc399f44eef226d58",
+        "size_bytes": 28849
       }
     ]
   },

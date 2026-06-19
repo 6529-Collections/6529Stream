@@ -256,6 +256,12 @@ coverage: signer-epoch invalidation, signer rotation, consumed-drop cancellation
 attempts, replay attempts, and drop-execution pauses after auction creation do
 not disturb existing auction custody, bid accounting, pending arRNG request
 bindings, settlement, or later arRNG fulfillment.
+ADV-018 extends the same suite with auction terminal composition coverage:
+no-bid settlement before arRNG fulfillment, contract-poster pending no-bid
+claims, pre-bid auction cancellation, cancelled signed auction authorization
+rollback, and rejected terminal repeats preserve custody or claimant state,
+zero-accounting boundaries, pending request bindings, and later arRNG
+fulfillment.
 ADV-017 adds fixed-price/drop/arRNG composition coverage in
 `StreamFixedPriceRandomizerComposition.t.sol`: paid fixed-price drops are
 executed through the real drop, minter, core, and arRNG contracts while tests

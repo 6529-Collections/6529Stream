@@ -136,6 +136,13 @@ The current Gate A smoke baseline proves:
   request bindings, settlement, and later arRNG fulfillment coherent. This
   remains local adversarial coverage and does not replace production signer,
   Safe, or provider operations evidence.
+- The auction/drop/arRNG composition suite now covers no-bid and
+  cancellation-like terminal paths: no-bid settlement before fulfillment,
+  contract-poster pending no-bid claims, pre-bid auction cancellation,
+  cancelled signed auction authorizations, and rejected terminal repeats preserve
+  custody or claimant state, zero-accounting boundaries, pending request
+  bindings, and later arRNG fulfillment. This remains local adversarial coverage
+  and does not replace fork/testnet/live provider operations evidence.
 - Fixed-price/drop/arRNG composition tests now execute paid fixed-price drops
   through the real drop, minter, core, and arRNG contracts, proving
   randomness-request pauses roll back drop execution without consuming the
