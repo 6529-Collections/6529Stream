@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Hardened the testnet deployment rehearsal retained-artifact checker to reject
+  symlinked retained transcript, broadcast, manifest, address-book, and
+  gas/invariant files before future reviewed Sepolia evidence can pass.
 - Added burned pending arRNG composition regressions proving paid fixed-price
   and settled auction drops can be burned before fulfillment while preserving
   payment/proceeds accounting, request bindings, burned-token audit randomness,

@@ -380,6 +380,78 @@ class TestnetDeploymentRehearsalEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path, repo_root=repo_root)
 
+    def test_reviewed_retained_symlink_file_fails(self) -> None:
+        """Retained testnet evidence cannot point at symlinked files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "symlink-retained.md"
+            target = (
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal/target.md"
+            )
+            symlink = (
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal/symlink.md"
+            )
+            write_text(target, "retained symlink target\n")
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError):
+                self.skipTest("symlinks are not available in this environment")
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    (
+                        "release-artifacts/evidence/testnet-deployment-rehearsal/"
+                        "symlink.md"
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "must not use symlinked",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    def test_reviewed_retained_symlink_directory_fails(self) -> None:
+        """Retained testnet evidence cannot cross symlinked directories."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            path = repo_root / "symlink-directory-retained.md"
+            target_dir = repo_root / "release-artifacts/evidence/testnet-symlink-target"
+            symlink_dir = (
+                repo_root
+                / "release-artifacts/evidence/testnet-deployment-rehearsal-symlink"
+            )
+            write_text(target_dir / "transcript.md", "retained symlink target\n")
+            symlink_dir.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except (NotImplementedError, OSError):
+                self.skipTest("directory symlinks are not available in this environment")
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Sanitized command transcript",
+                    (
+                        "release-artifacts/evidence/"
+                        "testnet-deployment-rehearsal-symlink/transcript.md"
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.TestnetDeploymentRehearsalEvidenceError,
+                "must not use symlinked",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
     def test_reviewed_retained_whitespace_path_fails(self) -> None:
         """Retained artifact references must be a single path."""
         with tempfile.TemporaryDirectory() as temp_dir:

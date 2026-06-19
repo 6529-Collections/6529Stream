@@ -97,7 +97,8 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   old/replacement deployment evidence and replacement mint smoke. A
   reviewed mainnet-fork deployment rehearsal broadcast, manifest, address book,
   and non-local evidence envelope are retained for issue #216; a no-secret
-  Sepolia config/runbook and admin ceremony evidence schema/template/checker
+  Sepolia config/runbook, preflight checker, symlink-hardened testnet retained
+  artifact checker, and admin ceremony evidence schema/template/checker
   exist for follow-up evidence retention, while reviewed testnet rehearsals,
   reviewed admin ceremony evidence, production broadcast retention, live
   artifact verification, and fork/testnet/live ceremony evidence contents

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/burned-pending-arrng-composition` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/600` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/601` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/602` |
-| Next issue | TBD after issue #601 is merged. |
+| Active PR branch | `codex/testnet-retained-artifact-symlinks` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/602` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/603` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/604` |
+| Next issue | TBD after issue #603 is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 09:06 UTC` |
+| Last updated | `2026-06-19 09:28 UTC` |
 
 ## Packaging Notes
 
@@ -273,6 +273,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 209 | Add event reconstructability tests from emitted logs | Gate D/G support | Add an indexer-style test harness that consumes emitted logs from representative protocol flows and proves documented state can be reconstructed from events plus documented read-after-event calls | Merged in PR #441 |
 | 210 | Add fork-aware Safe/ERC-1271 signature smoke tests | Gate D/Gate F support | Add no-RPC Safe-shaped ERC-1271 approved-hash threshold smoke coverage for fixed-price and auction drops, wrong-chain rejection, wrong-verifying-contract rejection, wallet docs/checker wiring, and release-state traceability | Merged in PR #443 |
 | 211 | Harden live metadata browser retained artifact validation | Gate F/Gate G support | Add stricter repo-relative retained-path, optional declared `sha256:`, missing-file, no-secret, duplicate/trailing hash, credentialed URL, and bare-64-hex validation for future reviewed live metadata browser evidence without closing tracker issue #473 | Merged in PR #541; issue #540 closed completed |
+| 212 | Reject symlinked testnet deployment retained artifacts | Gate E/Gate G support | Harden the testnet deployment rehearsal retained-artifact checker so future reviewed Sepolia transcripts, broadcasts, manifests, address books, and gas/invariant summaries cannot pass through symlinked retained files | Active PR #604 / issue #603 on branch `codex/testnet-retained-artifact-symlinks` |
 
 ## Current PR Worklog
 
@@ -16346,6 +16347,9 @@ Outcome:
 | 2026-06-19 08:53 | Finish ADV-020 local validation | Local validation passed: `forge fmt --check` for both changed composition suites, focused fixed-price composition suite, focused auction composition suite, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, `codex-diff-check`, `make release-checksums`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`. The first wrapper attempt failed only because it ran in parallel with `make check` and both tried to own `cache\forge-size.log.tmp`; rerunning the wrapper alone passed. Next action is to refresh release artifacts for this state update, commit, push, open PR closing #601, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-19 08:58 | Open PR #602 for ADV-020 | PR #602 is open at `https://github.com/6529-Collections/6529Stream/pull/602`, closes issue #601, and packages burned pending arRNG fixed-price and auction composition regressions plus roadmap/status/test traceability and regenerated release artifacts. Local validation passed immediately before opening the PR: `forge fmt --check` for both changed composition suites, focused fixed-price composition suite, focused auction composition suite, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, `codex-diff-check`, full `make check`, Windows `scripts\check.ps1`, and `make release-checksums`. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 09:06 | Address PR #602 review polish | CodeRabbit reports pass on PR #602; 6529bot security review found no issues and general review marked the PR good to merge with non-blocking readability suggestions. Added a comment clarifying that freeze eligibility is computed from live-token metadata state while the randomizer pending counter still tracks fulfillable burned requests, and added an explicit short-revert payload guard before low-level `Error(string)` selector decoding in both composition suites. Focused `forge fmt --check`, fixed-price composition, and auction composition suites passed after the polish. Next action is to regenerate release artifacts/checksums, run consistency gates, push the follow-up commit, wait for latest-head CI/bot feedback, then merge only when clean. |
+| 2026-06-19 09:18 | Merge PR #602 and start issue #603 | PR #602 merged as `b921a8f0481f01935a9be72b8dd4fd2a4bd97b1d` after CodeRabbit, Foundry smoke, Windows wrapper, empty review threads, and latest-head 6529bot feedback were clean. Created issue #603 and branch `codex/testnet-retained-artifact-symlinks` for the next local-verifiable public-beta evidence hardening slice: reject symlinked retained files in the testnet deployment rehearsal checker without claiming real Sepolia evidence or closing tracker issue #217. |
+| 2026-06-19 09:20 | Open PR #604 for issue #603 | PR #604 is open at `https://github.com/6529-Collections/6529Stream/pull/604` to close issue #603. The branch rejects symlinked retained artifact paths in the `testnet_deployment_rehearsal` checker before reading or hashing evidence files, adds focused symlink regression coverage, updates roadmap/status/backlog/run-state traceability, and regenerates release artifacts without claiming real Sepolia evidence or closing tracker issue #217. Local validation passed: focused testnet deployment rehearsal evidence tests/checker, Python compile, `make release-checksums`, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, and `codex-diff-check`. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, fix anything actionable, then merge only when clean. |
+| 2026-06-19 09:28 | Address PR #604 symlink review polish | 6529bot security found no issues and general review marked PR #604 good to merge with two non-blocking readability/coverage suggestions. Added an inline comment explaining that the retained-path walk intentionally rejects symlinked intermediate directories before `resolve()` can follow them, and added a focused regression for a symlinked intermediate directory in a reviewed Sepolia retained-artifact path. Next action is focused validation, release artifact refresh, consistency gates, push, and wait for latest CI/bot feedback. |
 
 ## Resume Instructions
 

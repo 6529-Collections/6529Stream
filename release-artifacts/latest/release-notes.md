@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Hardened the testnet deployment rehearsal retained-artifact checker to reject symlinked retained transcript, broadcast, manifest, address-book, and gas/invariant files before future reviewed Sepolia evidence can pass.
 - Added burned pending arRNG composition regressions proving paid fixed-price and settled auction drops can be burned before fulfillment while preserving payment/proceeds accounting, request bindings, burned-token audit randomness, freeze eligibility, and frozen manifest stability.
 - Added fixed-price and auction arRNG request-ID collision composition regressions proving a reused provider request ID fails with `RandomnessRequestAlreadyExists` while preserving drop authorization state, mint/drop counts, payment or auction accounting, pending request accounting, and the first token's fulfillable request binding.
 - Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.

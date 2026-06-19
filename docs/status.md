@@ -379,6 +379,12 @@ The current Gate A smoke baseline proves:
   address book, avoid symlinked retained files and secret-shaped content, and
   match optional declared `sha256:` digests. Issue #227 remains open until real
   reviewed live manifest evidence is retained.
+- `scripts/test_testnet_deployment_rehearsal_evidence.py` and
+  `scripts/check_testnet_deployment_rehearsal_evidence.py` fail future
+  pending/reviewed Sepolia deployment rehearsal evidence closed unless retained
+  transcript, broadcast, manifest, address-book, and gas/invariant files are
+  ordinary repo-relative files, not symlinked files, and remain no-secret. Issue
+  #217 remains open until real reviewed testnet deployment evidence is retained.
 - `scripts/test_public_beta_evidence.py` and
   `scripts/check_public_beta_evidence.py` prove the committed no-secret
   public-beta evidence status follows
