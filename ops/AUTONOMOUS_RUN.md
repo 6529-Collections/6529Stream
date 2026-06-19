@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 03:13 UTC` |
+| Last updated | `2026-06-19 03:24 UTC` |
 
 ## Packaging Notes
 
@@ -16318,6 +16318,7 @@ Outcome:
 | 2026-06-19 03:06 | Merge PR #586 and start issue #587 | PR #586 merged as `79344e9228c7868e6ed9ed173f726f93955c8453` after Windows wrapper, Foundry smoke, CodeRabbit, and 6529bot follow-up were clean; issue #585 closed completed. Issue #587 and branch `codex/release-artifact-verifier-closure` now track a release-integrity verifier hardening so offline consumers reject unchecksummed regular files under `release-artifacts/latest` instead of accepting stray release-bundle payloads. |
 | 2026-06-19 03:10 | Open PR #588 for issue #587 | PR #588 is open at `https://github.com/6529-Collections/6529Stream/pull/588`, closes issue #587, and packages the release-artifact verifier closure check, focused stray-file regressions, README/changelog/state updates, and refreshed release artifacts. CodeRabbit was requested in comment `4748170367`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 03:13 | Address PR #588 bot polish | 6529bot marked PR #588 good to merge and noted optional symlink hardening plus a brittle magic-number assertion. The branch now explicitly rejects symlinks under `release-artifacts/latest`, derives the closure-count assertion from parsed checksum entries, documents the symlink policy, and keeps empty directories intentionally out of scope because the verifier is a release-payload closure check. Next action is to regenerate artifacts, rerun focused gates, commit/push, and wait for latest CI/bot feedback. |
+| 2026-06-19 03:24 | Address PR #588 final test clarity note | Latest-head 6529bot follow-up reported no new findings and one low-priority test-clarity note. The closure-count test now derives expected checked paths from parsed checksum entries while subtracting any verifier allowlisted index files if they ever become listed, keeping the assertion tied to `ALLOWED_UNCHECKSUMMED_RELEASE_FILES`. Next action is to regenerate artifacts, rerun focused gates, push, and merge after final CI/bot feedback is clean. |
 
 ## Resume Instructions
 

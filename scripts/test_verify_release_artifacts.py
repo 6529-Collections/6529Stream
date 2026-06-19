@@ -238,8 +238,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 latest / verifier.CHECKSUM_FILE_NAME,
             )
+            allowed_uncovered = {
+                f"release-artifacts/latest/{name}"
+                for name in verifier.ALLOWED_UNCHECKSUMMED_RELEASE_FILES
+            }
             expected_checked = sum(
-                path.startswith("release-artifacts/latest/")
+                path.startswith("release-artifacts/latest/") and path not in allowed_uncovered
                 for path in checksum_entries
             )
 
