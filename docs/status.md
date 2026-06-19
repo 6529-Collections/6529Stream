@@ -350,9 +350,17 @@ The current Gate A smoke baseline proves:
   release signature evidence follows
   `release-artifacts/schema/release-signature-evidence.schema.json`, records
   the self-referential release manifest/checksum bundle boundary, rejects
-  stale retained hashes and secret-like values, and reserves production
-  detached checksum signatures, signed Git tags, signer identity, and
-  verification output for public release ceremonies.
+  stale retained hashes, symlinked evidence refs, and secret-like values, and
+  reserves production detached checksum signatures, signed Git tags, signer
+  identity, and verification output for public release ceremonies.
+- `scripts/test_non_local_release_evidence.py`,
+  `scripts/check_non_local_release_evidence.py`,
+  `scripts/test_marketplace_indexer_evidence.py`, and
+  `scripts/check_marketplace_indexer_evidence.py` fail future reviewed
+  release evidence closed unless generic non-local retained artifacts,
+  marketplace/indexer evidence envelopes, and retained Markdown references are
+  ordinary repo-relative files, not symlinked files or files reached through
+  symlinked directories.
 - `scripts/test_drop_authorization_signing_evidence.py` and
   `scripts/check_drop_authorization_signing_evidence.py` prove the committed
   no-secret drop authorization signing evidence template follows
@@ -376,9 +384,10 @@ The current Gate A smoke baseline proves:
   fail future pending/reviewed evidence closed unless retained manifest files
   are live mainnet chain ID 1, have finalized nonzero contract addresses,
   retain bytecode hashes and constructor arguments, agree with the retained
-  address book, avoid symlinked retained files and secret-shaped content, and
-  match optional declared `sha256:` digests. Issue #227 remains open until real
-  reviewed live manifest evidence is retained.
+  address book, avoid symlinked retained files, avoid symlinked retained-file
+  directories and secret-shaped content, and match optional declared `sha256:`
+  digests. Issue #227 remains open until real reviewed live manifest evidence
+  is retained.
 - `scripts/test_testnet_deployment_rehearsal_evidence.py` and
   `scripts/check_testnet_deployment_rehearsal_evidence.py` fail future
   pending/reviewed Sepolia deployment rehearsal evidence closed unless retained

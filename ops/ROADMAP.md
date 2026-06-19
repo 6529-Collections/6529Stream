@@ -98,11 +98,11 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   reviewed mainnet-fork deployment rehearsal broadcast, manifest, address book,
   and non-local evidence envelope are retained for issue #216; a no-secret
   Sepolia config/runbook, preflight checker, symlink-hardened testnet retained
-  artifact checker, and admin ceremony evidence schema/template/checker
-  exist for follow-up evidence retention, while reviewed testnet rehearsals,
-  reviewed admin ceremony evidence, production broadcast retention, live
-  artifact verification, and fork/testnet/live ceremony evidence contents
-  remain open.
+  artifact checker, symlink-hardened generic release evidence path helpers, and
+  admin ceremony evidence schema/template/checker exist for follow-up evidence
+  retention, while reviewed testnet rehearsals, reviewed admin ceremony
+  evidence, production broadcast retention, live artifact verification, and
+  fork/testnet/live ceremony evidence contents remain open.
   Near-term `StreamCore` bytecode headroom remains a tracked release discipline
   even after the current headroom-recovery pass: the IR-optimized runtime is
   deployable at 21,792 bytes with 2,784 bytes of EIP-170 headroom after moving

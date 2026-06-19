@@ -463,9 +463,19 @@ def resolve_repo_file(repo_root: Path, relative_path: str, path: str) -> Path:
     candidate = Path(relative_path)
     if candidate.is_absolute() or ".." in candidate.parts:
         raise MarketplaceIndexerEvidenceError(f"{path} must stay inside the repository")
-    resolved = (repo_root / candidate).resolve()
+    root = repo_root.resolve()
+    cursor = root
+    for part in candidate.parts:
+        cursor = cursor / part
+        # Reject symlinked directories as well as symlinked leaf files before
+        # resolve() can follow them outside the reviewed evidence tree.
+        if cursor.is_symlink():
+            raise MarketplaceIndexerEvidenceError(
+                f"{path} must not use symlinked marketplace/indexer evidence files"
+            )
+    resolved = (root / candidate).resolve()
     try:
-        resolved.relative_to(repo_root.resolve())
+        resolved.relative_to(root)
     except ValueError as exc:
         raise MarketplaceIndexerEvidenceError(
             f"{path} must stay inside the repository"

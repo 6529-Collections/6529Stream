@@ -381,6 +381,51 @@ class NonLocalReleaseEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, root)
 
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_rejects_symlinked_retained_file(self) -> None:
+        """The retained_path cannot point at a symlinked leaf file."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            target = root / "evidence/log.txt"
+            symlink = root / "evidence/symlink-log.txt"
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            evidence["retained_path"] = "evidence/symlink-log.txt"
+            evidence["sha256"] = checker.file_sha256(target)
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError, "symlinked retained files"
+            ):
+                checker.validate_evidence(path, root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_rejects_symlinked_retained_directory(self) -> None:
+        """The retained_path cannot cross a symlinked directory."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            target_dir = root / "evidence-target"
+            symlink_dir = root / "evidence-link"
+            write_text(target_dir / "log.txt", "sanitized evidence\n")
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            evidence["retained_path"] = "evidence-link/log.txt"
+            evidence["sha256"] = checker.file_sha256(target_dir / "log.txt")
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError, "symlinked retained files"
+            ):
+                checker.validate_evidence(path, root)
+
     def test_rejects_stale_hash(self) -> None:
         """The retained artifact hash must match file content."""
         with tempfile.TemporaryDirectory() as temp_dir:

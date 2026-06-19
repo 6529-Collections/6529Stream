@@ -396,6 +396,167 @@ class MarketplaceIndexerEvidenceTests(unittest.TestCase):
 
             checker.validate_manifest_marketplace_rows(manifest, root)
 
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_manifest_complete_row_rejects_symlinked_envelope_file(self) -> None:
+        """Manifest evidence refs cannot point at symlinked envelope files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, envelope, manifest = write_manifest_bundle(root)
+            symlink = envelope.with_name("reviewed-link.json")
+            try:
+                symlink.symlink_to(envelope)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            write_json(
+                manifest,
+                manifest_with_marketplace_row(
+                    checker.PUBLIC_BETA_REQUIREMENT_ID,
+                    evidence=[
+                        {
+                            "path": (
+                                "release-artifacts/evidence/marketplace-indexer/"
+                                "reviewed-link.json"
+                            ),
+                            "sha256": checker.file_sha256(envelope),
+                        }
+                    ],
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "symlinked marketplace/indexer evidence",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_manifest_complete_row_rejects_symlinked_envelope_directory(self) -> None:
+        """Manifest evidence refs cannot cross symlinked envelope directories."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            retained_relative = "release-artifacts/evidence/marketplace-indexer/reviewed.md"
+            retained = root / retained_relative
+            target_dir = root / "release-artifacts/evidence/marketplace-indexer-target"
+            symlink_dir = root / "release-artifacts/evidence/marketplace-indexer-link"
+            envelope = target_dir / "reviewed.json"
+            manifest = root / "release-artifacts/latest/public-beta-evidence.json"
+            write_text(retained, reviewed_artifact())
+            write_json(
+                envelope,
+                reviewed_envelope(retained, retained_relative),
+            )
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            write_json(
+                manifest,
+                manifest_with_marketplace_row(
+                    checker.PUBLIC_BETA_REQUIREMENT_ID,
+                    evidence=[
+                        {
+                            "path": (
+                                "release-artifacts/evidence/marketplace-indexer-link/"
+                                "reviewed.json"
+                            ),
+                            "sha256": checker.file_sha256(envelope),
+                        }
+                    ],
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "symlinked marketplace/indexer evidence",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_manifest_complete_row_rejects_symlinked_retained_file(self) -> None:
+        """Reviewed envelopes cannot point at symlinked retained Markdown files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            retained, envelope, manifest = write_manifest_bundle(root)
+            symlink = retained.with_name("reviewed-link.md")
+            try:
+                symlink.symlink_to(retained)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            write_json(
+                envelope,
+                reviewed_envelope(
+                    retained,
+                    "release-artifacts/evidence/marketplace-indexer/reviewed-link.md",
+                    retained_sha256=checker.file_sha256(retained),
+                ),
+            )
+            write_json(
+                manifest,
+                manifest_with_marketplace_row(
+                    checker.PUBLIC_BETA_REQUIREMENT_ID,
+                    evidence=[
+                        {
+                            "path": (
+                                "release-artifacts/evidence/marketplace-indexer/"
+                                "reviewed.json"
+                            ),
+                            "sha256": checker.file_sha256(envelope),
+                        }
+                    ],
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "symlinked marketplace/indexer evidence",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_manifest_complete_row_rejects_symlinked_retained_directory(self) -> None:
+        """Reviewed envelopes cannot cross symlinked retained Markdown directories."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            target_dir = root / "release-artifacts/evidence/marketplace-indexer-target"
+            symlink_dir = root / "release-artifacts/evidence/marketplace-indexer-link"
+            retained = target_dir / "reviewed.md"
+            envelope = root / "release-artifacts/evidence/marketplace-indexer/reviewed.json"
+            manifest = root / "release-artifacts/latest/public-beta-evidence.json"
+            write_text(retained, reviewed_artifact())
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            write_json(
+                envelope,
+                reviewed_envelope(
+                    retained,
+                    "release-artifacts/evidence/marketplace-indexer-link/reviewed.md",
+                    retained_sha256=checker.file_sha256(retained),
+                ),
+            )
+            write_json(
+                manifest,
+                manifest_with_marketplace_row(
+                    checker.PUBLIC_BETA_REQUIREMENT_ID,
+                    evidence=[
+                        {
+                            "path": (
+                                "release-artifacts/evidence/marketplace-indexer/"
+                                "reviewed.json"
+                            ),
+                            "sha256": checker.file_sha256(envelope),
+                        }
+                    ],
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "symlinked marketplace/indexer evidence",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
     def test_manifest_complete_production_row_validates_live_artifact(self) -> None:
         """Complete production rows require live marketplace/indexer evidence."""
         with tempfile.TemporaryDirectory() as temp_dir:
