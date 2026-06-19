@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
-"""Shared path-resolution helpers for retained release evidence."""
+"""Shared path-resolution helpers for retained release evidence.
+
+Callers provide their own exception type and messages so diagnostics remain
+specific to each evidence surface:
+
+    resolve_repo_relative_path(
+        repo_root,
+        retained_path,
+        error_type=CheckerError,
+        forward_slash_message="path must use forward slashes",
+        absolute_message="path must be repo-relative",
+        traversal_message="path must stay inside the repository",
+        symlink_message="path must not use symlinked retained files",
+        escape_message="path escapes repository",
+        require_file=True,
+        missing_message="path references missing file",
+    )
+
+The helper rejects backslashes, absolute paths, drive-qualified paths,
+root-qualified paths, parent traversal, symlinked path components, and
+post-resolution escapes before returning either the resolved file path or the
+unresolved in-repo path requested by the caller.
+"""
 
 from __future__ import annotations
 

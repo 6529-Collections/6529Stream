@@ -251,6 +251,26 @@ class ProductionBroadcastRetentionTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    def test_backslash_retained_path_fails(self) -> None:
+        """Reviewed retained artifact paths must use portable separators."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_reviewed_retained_files(root)
+            path = root / "reviewed-backslash-retained-path.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "`release-artifacts/evidence/production-broadcast-retention/transcript.md`",
+                    "`release-artifacts\\evidence\\production-broadcast-retention\\transcript.md`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ProductionBroadcastRetentionError,
+                "forward slashes",
+            ):
+                checker.validate_artifact(path)
+
     def test_missing_heading_fails(self) -> None:
         """Required sections cannot silently disappear."""
         with tempfile.TemporaryDirectory() as temp_dir:
