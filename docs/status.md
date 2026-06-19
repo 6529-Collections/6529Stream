@@ -221,6 +221,12 @@ The current Gate A smoke baseline proves:
   command. The local/CI smoke gate also runs the three standalone `forge script`
   entrypoints, keeping the original script execution contexts automated while
   retaining one combined suite result for release-gate review.
+- `scripts/test_deployment_rehearsal_gate.py` and
+  `scripts/check_deployment_rehearsal_gate.py` statically guard the aggregate
+  suite command, all three standalone rehearsal commands, and the CI retained
+  log names across Make, Bash, PowerShell, and CI before the Forge rehearsal
+  scripts execute. This is wiring-parity evidence for the local gate, not
+  fork, testnet, or live deployment evidence.
 - `scripts/test_release_artifacts.py` and
   `scripts/generate_release_artifacts.py --check` prove the committed
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,

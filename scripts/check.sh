@@ -246,6 +246,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/verify_release_artifacts.py
 "$python_bin" scripts/test_changelog_check.py
 "$python_bin" scripts/check_changelog.py
+"$python_bin" scripts/test_deployment_rehearsal_gate.py
+"$python_bin" scripts/check_deployment_rehearsal_gate.py
 forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
 forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir

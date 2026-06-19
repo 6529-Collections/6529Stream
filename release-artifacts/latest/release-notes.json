@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:facee8c0e7046238edc8be2486d729901e7912842993a97f10464aa77f03bca3",
-      "size_bytes": 69085
+      "sha256": "sha256:be66dce28f9014a69f50395253bb5a2f4f986317a0852099f8399f986a724c1e",
+      "size_bytes": 69306
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:cf06832ba5ce6343b72fe824dde6a5cafd5a2c8fc2da24e5388652a8ed71ce90",
+      "sha256": "sha256:f921b3da9067a146699a8d4528b0f7fd965ed6a45b7a7e7bd849b4f1ca4d96e6",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added a deployment rehearsal gate parity checker that locks the aggregate suite and standalone deployment, auction, and emergency rehearsal commands across Make, Bash, PowerShell, and CI before the scripts execute.",
       "Added an aggregate local deployment rehearsal suite that runs the deployment, auction ceremony, and emergency redeployment rehearsals through one release-gate script while preserving the individual scripts for targeted debugging, retained evidence capture, and automated standalone-entrypoint coverage.",
       "Added a no-secret Sepolia evidence preflight checker that validates committed deployment/evidence prerequisites and optionally checks only operator environment variable presence, never values, before future public-beta evidence runs for issues #217, #221, and #222.",
       "Added a retained exact-linked live release-evidence issue audit after the live deployment manifest checker merge, syncing issue #227 to the dedicated retained-artifact body, proving it remains open, and refreshing archive, release-manifest, and checksum coverage while keeping production release blocked on real reviewed live evidence.",

@@ -15,6 +15,9 @@ The suite runs the local deployment, auction ceremony, and emergency
 redeployment rehearsals as one aggregate evidence command. The broader local
 and CI gates also keep the standalone script entrypoints automated, so the
 aggregate path cannot mask a regression in a standalone `forge script` run. The
+`make deployment-rehearsal-gate-check` target statically proves that the
+aggregate command, standalone commands, and CI retained log names remain wired
+across Make, Bash, PowerShell, and CI before the scripts execute. The
 deployment rehearsal deploys and wires a local stack:
 
 - `StreamAdmins`

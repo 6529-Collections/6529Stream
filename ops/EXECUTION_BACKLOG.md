@@ -3447,7 +3447,8 @@ unless an external dependency changes.
 | `REL-009` | Strengthen release artifact verifier checksum coverage | G | Merged in PR #564; issue #563 closed completed |
 | `REL-010` | Extend ABI compatibility checks to published interfaces | G | Merged in PR #566; issue #565 closed completed |
 | `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Merged in PR #568; issue #567 closed completed |
-| `REL-012` | Aggregate local deployment rehearsal gate | E/G | Active PR #582 / issue #581 on branch `codex/aggregate-deployment-rehearsal`; keeps deployment, auction ceremony, and emergency redeployment rehearsal coverage behind one suite-level release-gate command while preserving individual scripts for targeted debugging and evidence capture |
+| `REL-012` | Aggregate local deployment rehearsal gate | E/G | Merged in PR #582; issue #581 closed completed with one aggregate suite-level evidence command, retained standalone script automation, suite-hash replay coverage, and CI/local gates that preserve both aggregate and standalone rehearsal entrypoints |
+| `REL-013` | Add deployment rehearsal gate parity checker | E/G | Active issue #583 on branch `codex/deployment-rehearsal-gate-check`; make aggregate and standalone rehearsal command parity machine-checkable across Make, Bash, PowerShell, and CI so future edits cannot silently drop coverage |
 
 ### Governance And Operations
 

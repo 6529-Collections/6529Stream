@@ -292,6 +292,8 @@ jobs:
             scripts/test_solidity_formatting.py \
             scripts/test_windows_check_wrapper.py \
             scripts/test_windows_ci_wrapper.py \
+            scripts/check_deployment_rehearsal_gate.py \
+            scripts/test_deployment_rehearsal_gate.py \
             scripts/check_changelog.py \
             scripts/test_changelog_check.py
 
@@ -794,6 +796,14 @@ jobs:
           else
             python3 scripts/check_changelog.py 2>&1 | tee ci-logs/changelog-check.log
           fi
+
+      - name: Deployment rehearsal gate parity
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_deployment_rehearsal_gate.py 2>&1 | tee ci-logs/deployment-rehearsal-gate-tests.log
+          python3 scripts/check_deployment_rehearsal_gate.py 2>&1 | tee ci-logs/deployment-rehearsal-gate-check.log
 
       - name: Deployment rehearsal
         shell: bash
