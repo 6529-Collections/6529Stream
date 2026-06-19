@@ -310,6 +310,26 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             ):
                 verifier.verify_release_artifacts(root)
 
+    def test_verifier_rejects_symlinked_checksum_covered_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            covered_path = root / "deployments" / "examples" / "anvil.json"
+            target_dir = root / "tmp" / "deployment-target"
+            write_text(target_dir / "anvil.json", covered_path.read_text(encoding="utf-8"))
+            covered_path.unlink()
+            covered_path.parent.rmdir()
+            try:
+                covered_path.parent.symlink_to(target_dir, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"directory symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "SHA256SUMS.deployments/examples/anvil.json must not include symlinks",
+            ):
+                verifier.verify_release_artifacts(root)
+
     def test_verifier_rejects_symlinked_release_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

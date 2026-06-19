@@ -61,6 +61,9 @@ def require_no_symlink_components(
     relative_path: Path,
     field: str,
 ) -> None:
+    # Callers first reject absolute, escaping, or out-of-checkout paths. This
+    # helper then walks the remaining lexical components before resolution can
+    # redirect any release input through a symlink.
     current = repo_root.resolve()
     for part in relative_path.parts:
         if part in {"", "."}:
