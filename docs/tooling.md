@@ -147,9 +147,7 @@ python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/test_changelog_check.py
 python scripts/check_changelog.py
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
-forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
-forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
+forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
 ```
 
 The protocol surface report step checks

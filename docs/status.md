@@ -213,13 +213,13 @@ The current Gate A smoke baseline proves:
   old/replacement deployment versions, manifests, drop EIP-712 domains, core,
   drops, and auction addresses, Safe-rooted admin ceremony state on both
   deployments, temporary deployer-admin removal, and a replacement fixed-price
-  mint smoke path.
-- `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
-  and
-  `forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`
-  and
-  `forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`
-  execute as part of the local/CI smoke gate.
+  mint smoke path. The suite-level test proves
+  `script/RehearseDeploymentSuite.s.sol` returns deployment, auction, and
+  emergency result groups plus a combined suite hash.
+- `forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir`
+  executes the three local rehearsal flows as part of the local/CI smoke gate.
+  The individual rehearsal scripts remain available for targeted debugging and
+  retained evidence capture.
 - `scripts/test_release_artifacts.py` and
   `scripts/generate_release_artifacts.py --check` prove the committed
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,
