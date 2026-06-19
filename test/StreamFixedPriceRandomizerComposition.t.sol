@@ -14,6 +14,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
     using Assertions for address;
     using Assertions for bool;
     using Assertions for bytes32;
+    using Assertions for string;
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
@@ -27,6 +28,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
     bytes32 private constant RANDOMNESS_SEED_TYPEHASH = keccak256(
         "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
     );
+    bytes4 private constant ERROR_STRING_SELECTOR = bytes4(keccak256("Error(string)"));
 
     struct CompositionSetup {
         DeployedStream deployed;
@@ -221,7 +223,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         setup.deployed.drops.totalOwed().assertEq(PRICE, label);
         address(setup.deployed.drops).balance.assertEq(PRICE, label);
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, label);
-        setup.randomizer.tokenToRequest(tokenId).assertEq(1, label);
+        setup.randomizer.tokenToRequest(tokenId).assertEq(setup.controller.lastRequestId(), label);
         setup.deployed.core.retrieveTokenHash(tokenId).assertEq(bytes32(0), label);
     }
 
@@ -367,11 +369,18 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         success.assertFalse("call unexpectedly succeeded");
         // Pin the current nested Error(string) revert surface. If the production
         // path moves to custom errors, update these low-level assertions.
-        keccak256(returnData)
-            .assertEq(
-                keccak256(abi.encodeWithSignature("Error(string)", expectedMessage)),
-                "unexpected revert"
-            );
+        bytes4 selector = bytes4(returnData);
+        require(selector == ERROR_STRING_SELECTOR, "unexpected revert selector");
+        _decodeErrorString(returnData).assertEq(expectedMessage, "unexpected revert");
+    }
+
+    function _decodeErrorString(bytes memory returnData) private pure returns (string memory) {
+        require(returnData.length >= 4, "short revert");
+        bytes memory encodedReason = new bytes(returnData.length - 4);
+        for (uint256 i = 0; i < encodedReason.length; i++) {
+            encodedReason[i] = returnData[i + 4];
+        }
+        return abi.decode(encodedReason, (string));
     }
 
     function _words(uint256 word) private pure returns (uint256[] memory words) {
@@ -402,12 +411,16 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
 
 contract FixedPriceArrngController {
     uint256 public nextRequestId = 1;
+    uint256 public lastRequestId;
 
     function requestRandomWords(uint256, address) external payable returns (uint256 requestId) {
         requestId = nextRequestId;
+        lastRequestId = requestId;
         nextRequestId++;
     }
 
+    // Permissionless on purpose: this test double models a cooperative arRNG
+    // controller, not production access control.
     function fulfill(NextGenRandomizerRNG randomizer, uint256 requestId, uint256[] memory words)
         external
     {
