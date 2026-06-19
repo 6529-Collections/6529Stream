@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from release_evidence_paths import resolve_repo_relative_path
+
 
 REQUIREMENT_ID = "live_metadata_browser_evidence"
 EVIDENCE_TYPE = "live_metadata_browser_evidence"
@@ -302,13 +304,16 @@ def resolve_retained_path(
         raise LiveMetadataBrowserEvidenceError(
             f"{artifact_path} field {label!r} must not escape the repository"
         )
-    resolved = (repo_root / retained_path).resolve()
-    try:
-        resolved.relative_to(repo_root)
-    except ValueError as exc:
-        raise LiveMetadataBrowserEvidenceError(
-            f"{artifact_path} field {label!r} must stay inside the repository"
-        ) from exc
+    resolved = resolve_repo_relative_path(
+        repo_root,
+        path_text,
+        error_type=LiveMetadataBrowserEvidenceError,
+        forward_slash_message=f"{artifact_path} field {label!r} must not escape the repository",
+        absolute_message=f"{artifact_path} field {label!r} must be repo-relative",
+        traversal_message=f"{artifact_path} field {label!r} must not escape the repository",
+        symlink_message=f"{artifact_path} field {label!r} must not use symlinked retained files",
+        escape_message=f"{artifact_path} field {label!r} must stay inside the repository",
+    )
     return resolved, path_text, expected_digest
 
 

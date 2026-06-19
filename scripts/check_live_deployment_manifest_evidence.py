@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from release_evidence_paths import resolve_repo_relative_path
+
 
 REQUIREMENT_ID = "live_deployment_manifest"
 EXPECTED_ENVIRONMENT = "live"
@@ -304,24 +306,18 @@ def resolve_retained_path(
         raise LiveDeploymentManifestEvidenceError(
             f"{artifact_path} field {label!r} must not escape the repository"
         )
-    candidate = repo_root / retained_path
-    cursor = repo_root.resolve()
-    for part in retained_path.parts:
-        cursor = cursor / part
-        # Reject symlinked directories as well as symlinked leaf files before
-        # resolve() can follow them outside the reviewed evidence tree.
-        if cursor.is_symlink():
-            raise LiveDeploymentManifestEvidenceError(
-                f"{artifact_path} field {label!r} must not use symlinked retained files"
-            )
-    resolved = candidate.resolve()
-    try:
-        resolved.relative_to(repo_root.resolve())
-    except ValueError as exc:
-        raise LiveDeploymentManifestEvidenceError(
-            f"{artifact_path} field {label!r} escapes repository: {path_text}"
-        ) from exc
-    return candidate, path_text, expected_digest
+    target = resolve_repo_relative_path(
+        repo_root,
+        path_text,
+        error_type=LiveDeploymentManifestEvidenceError,
+        forward_slash_message=f"{artifact_path} field {label!r} must not escape the repository",
+        absolute_message=f"{artifact_path} field {label!r} must be repo-relative",
+        traversal_message=f"{artifact_path} field {label!r} must not escape the repository",
+        symlink_message=f"{artifact_path} field {label!r} must not use symlinked retained files",
+        escape_message=f"{artifact_path} field {label!r} escapes repository: {path_text}",
+        return_resolved=False,
+    )
+    return target, path_text, expected_digest
 
 
 def validate_headings(path: Path, text: str) -> None:

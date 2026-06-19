@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from release_evidence_paths import resolve_repo_relative_path
+
 
 PUBLIC_BETA_REQUIREMENT_ID = "fork_testnet_marketplace_indexer_evidence"
 PRODUCTION_REQUIREMENT_ID = "live_marketplace_indexer_evidence"
@@ -458,33 +460,18 @@ def require_json_string(data: dict[str, object], path: Path, key: str) -> str:
 
 def resolve_repo_file(repo_root: Path, relative_path: str, path: str) -> Path:
     """Resolve a repository-relative path while rejecting traversal."""
-    if "\\" in relative_path:
-        raise MarketplaceIndexerEvidenceError(f"{path} must use forward slashes")
-    candidate = Path(relative_path)
-    if candidate.is_absolute() or ".." in candidate.parts:
-        raise MarketplaceIndexerEvidenceError(f"{path} must stay inside the repository")
-    root = repo_root.resolve()
-    cursor = root
-    for part in candidate.parts:
-        cursor = cursor / part
-        # Reject symlinked directories as well as symlinked leaf files before
-        # resolve() can follow them outside the reviewed evidence tree.
-        if cursor.is_symlink():
-            raise MarketplaceIndexerEvidenceError(
-                f"{path} must not use symlinked marketplace/indexer evidence files"
-            )
-    resolved = (root / candidate).resolve()
-    try:
-        resolved.relative_to(root)
-    except ValueError as exc:
-        raise MarketplaceIndexerEvidenceError(
-            f"{path} must stay inside the repository"
-        ) from exc
-    if not resolved.is_file():
-        raise MarketplaceIndexerEvidenceError(
-            f"{path} references missing file: {relative_path}"
-        )
-    return resolved
+    return resolve_repo_relative_path(
+        repo_root,
+        relative_path,
+        error_type=MarketplaceIndexerEvidenceError,
+        forward_slash_message=f"{path} must use forward slashes",
+        absolute_message=f"{path} must stay inside the repository",
+        traversal_message=f"{path} must stay inside the repository",
+        symlink_message=f"{path} must not use symlinked marketplace/indexer evidence files",
+        escape_message=f"{path} must stay inside the repository",
+        require_file=True,
+        missing_message=f"{path} references missing file: {relative_path}",
+    )
 
 
 def require_dict(value: Any, path: str) -> dict[str, Any]:

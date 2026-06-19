@@ -323,6 +323,69 @@ class ProductionBroadcastRetentionTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path)
 
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_file_fails(self) -> None:
+        """Reviewed retained files must be ordinary files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_reviewed_retained_files(root)
+            symlink = (
+                root
+                / "release-artifacts/evidence/production-broadcast-retention/"
+                "transcript-link.md"
+            )
+            try:
+                symlink.symlink_to(
+                    root
+                    / "release-artifacts/evidence/production-broadcast-retention/"
+                    "transcript.md"
+                )
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            path = root / "reviewed-symlink-retained-file.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "`release-artifacts/evidence/production-broadcast-retention/transcript.md`",
+                    "`release-artifacts/evidence/production-broadcast-retention/transcript-link.md`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ProductionBroadcastRetentionError,
+                "symlinked retained",
+            ):
+                checker.validate_artifact(path)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_directory_fails(self) -> None:
+        """Reviewed retained files cannot cross symlinked directories."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_reviewed_retained_files(root)
+            target_dir = root / "release-artifacts/evidence/production-broadcast-target"
+            target_dir.mkdir(parents=True)
+            write_text(target_dir / "transcript.md", "sanitized transcript\n")
+            symlink_dir = root / "release-artifacts/evidence/production-broadcast-link"
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            path = root / "reviewed-symlink-retained-directory.md"
+            write_text(
+                path,
+                reviewed_artifact().replace(
+                    "`release-artifacts/evidence/production-broadcast-retention/transcript.md`",
+                    "`release-artifacts/evidence/production-broadcast-link/transcript.md`",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.ProductionBroadcastRetentionError,
+                "symlinked retained",
+            ):
+                checker.validate_artifact(path)
+
     def test_missing_validation_command_fails(self) -> None:
         """The template must carry the full validation sequence."""
         with tempfile.TemporaryDirectory() as temp_dir:

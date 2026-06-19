@@ -7,10 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
-- Hardened generic release evidence retained-path validation so non-local
-  release evidence, release-signature evidence, marketplace/indexer evidence,
-  and live deployment-manifest evidence reject symlinked leaf files and
-  symlinked intermediate directories before hashing or artifact validation.
+- Centralized symlink-safe release evidence retained-path validation across
+  non-local release evidence, release-signature evidence, marketplace/indexer
+  evidence, live deployment-manifest evidence, live metadata-browser evidence,
+  and production broadcast retention evidence so symlinked leaf files and
+  symlinked intermediate directories fail before hashing or artifact
+  validation.
 - Hardened the testnet deployment rehearsal retained-artifact checker to reject
   symlinked retained transcript, broadcast, manifest, address-book, and
   gas/invariant files before future reviewed Sepolia evidence can pass.
