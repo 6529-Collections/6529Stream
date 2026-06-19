@@ -251,6 +251,11 @@ authorization, pending arRNG requests block randomizer migration without auction
 custody or payment drift, and auctions can settle before arRNG fulfillment
 while later fulfillment preserves the winner, credits, total owed values, and
 token/request binding.
+ADV-016 extends that composition suite with post-execution signer lifecycle
+coverage: signer-epoch invalidation, signer rotation, consumed-drop cancellation
+attempts, replay attempts, and drop-execution pauses after auction creation do
+not disturb existing auction custody, bid accounting, pending arRNG request
+bindings, settlement, or later arRNG fulfillment.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be

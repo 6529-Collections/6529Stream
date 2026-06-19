@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:12323f8705df31dd788244746136302017b72130c643546d767e21973584973b",
-      "size_bytes": 70327
+      "sha256": "sha256:67d24c2c3920d6a72058663e3dd0363e4c764b3084bf77b39dbd1ccb1b082b40",
+      "size_bytes": 70695
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:036090d6610a7a9ecea1c81795032f05fb035b0821b752ea098e858237b13a9e",
+      "sha256": "sha256:833273cdac9459f2b38ae6153ceeee329e551d65de67b0679eef50fdf2d46be8",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
     "section": "Unreleased",
     "entries": [
       "Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.",
+      "Extended auction/drop/arRNG composition regressions to cover post-execution signer lifecycle controls, proving signer-epoch invalidation, signer rotation, consumed-drop cancellation attempts, replay attempts, and drop-execution pauses cannot disturb existing auction custody, bid accounting, pending request bindings, settlement, or later arRNG fulfillment.",
       "Extended the autonomous run-state consistency checker to reject stale detailed execution-backlog `Status:` paragraphs that still claim active work after the corresponding issue or PR has closed.",
       "Strengthened the offline release artifact verifier to reject unchecksummed regular files and symlinks under `release-artifacts/latest`, while preserving the self-referential checksum bundle exceptions for `SHA256SUMS` and `release-checksums.json`.",
       "Hardened the offline release artifact verifier to reject symlinked checksum-covered inputs, symlinked release directories, and release directories outside the checkout before accepting matching hashes.",

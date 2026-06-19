@@ -160,6 +160,88 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         _assertAuctionAccountingSnapshot(setup, beforeFulfillment, "fulfillment");
     }
 
+    function testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle() public {
+        CompositionSetup memory setup = _deployComposition();
+        (
+            StreamDrops.DropAuthorization memory authorization,
+            bytes memory signature,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        ) = _mintAuctionDropWithSignature(setup, "post-execution-epoch-auction", 31);
+        _bid(setup.auctions, tokenId, FIRST_BIDDER, RESERVE_PRICE);
+        AuctionSnapshot memory beforeControls = _snapshot(setup, tokenId);
+        uint256 signerEpochBefore = setup.deployed.drops.signerEpoch();
+
+        setup.deployed.drops.incrementSignerEpoch();
+        setup.deployed.drops.signerEpoch().assertEq(signerEpochBefore + 1, "signer epoch");
+
+        (bool replaySuccess, bytes memory replayReturnData) =
+            _callMintDrop(setup, authorization, "post-execution-epoch-auction", signature);
+        _assertRevertedWithMessage(replaySuccess, replayReturnData, "Bad epoch");
+        _assertSnapshot(setup, tokenId, beforeControls, "epoch replay");
+
+        (bool cancelSuccess, bytes memory cancelReturnData) =
+            _callCancelDrop(setup, authorization.dropId);
+        _assertRevertedWithMessage(cancelSuccess, cancelReturnData, "Drop consumed");
+        _assertSnapshot(setup, tokenId, beforeControls, "epoch cancel");
+        setup.deployed.drops.isDropConsumed(authorization.dropId).assertTrue("consumed drop");
+        setup.deployed.drops.isDropCancelled(authorization.dropId)
+            .assertFalse("cancelled consumed drop");
+
+        _bid(setup.auctions, tokenId, SECOND_BIDDER, SECOND_BID);
+        vm.warp(auctionEndTime + 1);
+        setup.auctions.claimAuction(tokenId);
+        setup.deployed.core.ownerOf(tokenId).assertEq(SECOND_BIDDER, "winner after epoch");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledWithBid), "settled");
+
+        AuctionAccountingSnapshot memory beforeFulfillment = _snapshotAuctionAccounting(setup);
+        _fulfillRandomnessAndAssertBinding(
+            setup, tokenId, setup.randomizer.tokenToRequest(tokenId), 1234
+        );
+        _assertAuctionAccountingSnapshot(setup, beforeFulfillment, "epoch fulfillment");
+    }
+
+    function testSignerRotationAndDropPauseAfterAuctionDropDoNotBlockExistingLifecycle() public {
+        CompositionSetup memory setup = _deployComposition();
+        (
+            StreamDrops.DropAuthorization memory authorization,
+            bytes memory signature,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        ) = _mintAuctionDropWithSignature(setup, "post-execution-rotation-auction", 41);
+        AuctionSnapshot memory beforeRotation = _snapshot(setup, tokenId);
+
+        setup.deployed.drops.updateTDHsigner(otherSignerAddress());
+        (bool replaySuccess, bytes memory replayReturnData) =
+            _callMintDrop(setup, authorization, "post-execution-rotation-auction", signature);
+        _assertRevertedWithMessage(replaySuccess, replayReturnData, "Wrong signer");
+        _assertSnapshot(setup, tokenId, beforeRotation, "rotation replay");
+
+        _setPaused(setup, StreamPauseDomains.DROP_EXECUTION, true);
+        (bool pausedReplaySuccess, bytes memory pausedReplayReturnData) =
+            _callMintDrop(setup, authorization, "post-execution-rotation-auction", signature);
+        _assertRevertedWithMessage(pausedReplaySuccess, pausedReplayReturnData, "Drop paused");
+        _assertSnapshot(setup, tokenId, beforeRotation, "drop pause replay");
+
+        _bid(setup.auctions, tokenId, FIRST_BIDDER, RESERVE_PRICE);
+        _bid(setup.auctions, tokenId, SECOND_BIDDER, SECOND_BID);
+        vm.warp(auctionEndTime + 1);
+        setup.auctions.claimAuction(tokenId);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(SECOND_BIDDER, "winner after rotation");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledWithBid), "settled");
+
+        AuctionAccountingSnapshot memory beforeFulfillment = _snapshotAuctionAccounting(setup);
+        _fulfillRandomnessAndAssertBinding(
+            setup, tokenId, setup.randomizer.tokenToRequest(tokenId), 5678
+        );
+        setup.deployed.admins.isPaused(StreamPauseDomains.DROP_EXECUTION)
+            .assertTrue("drop pause cleared");
+        _assertAuctionAccountingSnapshot(setup, beforeFulfillment, "rotation fulfillment");
+    }
+
     function _deployComposition() private returns (CompositionSetup memory setup) {
         setup.deployed = deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         setup.deployed.admins.updateEmergencyRecipient(EMERGENCY_RECIPIENT);
@@ -187,9 +269,26 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             uint256 auctionEndTime
         )
     {
-        bytes memory signature;
-        (authorization, signature) =
-            _buildSignedAuctionAuthorization(setup, tokenData, nonce, block.timestamp + 1 days);
+        (authorization,, tokenId, auctionEndTime) =
+            _mintAuctionDropWithSignature(setup, tokenData, nonce);
+    }
+
+    function _mintAuctionDropWithSignature(
+        CompositionSetup memory setup,
+        string memory tokenData,
+        uint256 nonce
+    )
+        private
+        returns (
+            StreamDrops.DropAuthorization memory authorization,
+            bytes memory signature,
+            uint256 tokenId,
+            uint256 auctionEndTime
+        )
+    {
+        (authorization, signature) = _buildSignedAuctionAuthorization(
+            setup, tokenData, nonce, block.timestamp + 1 days
+        );
         setup.deployed.drops.mintDrop(authorization, tokenData, signature);
         tokenId = setup.deployed.drops.retrieveTokenID(authorization.dropId);
         auctionEndTime = authorization.auctionEndTime;
@@ -359,6 +458,14 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
                     setup.deployed.drops.mintDrop.selector, authorization, tokenData, signature
                 )
             );
+    }
+
+    function _callCancelDrop(CompositionSetup memory setup, bytes32 dropId)
+        private
+        returns (bool success, bytes memory returnData)
+    {
+        (success, returnData) = address(setup.deployed.drops)
+            .call(abi.encodeWithSelector(setup.deployed.drops.cancelDrop.selector, dropId));
     }
 
     function _assertRevertedWithMessage(
