@@ -26,7 +26,9 @@ interface Vm {
     function parseJson(string calldata json) external pure returns (bytes memory);
     function pauseGasMetering() external;
     function readFile(string calldata path) external view returns (string memory);
+    function revertToState(uint256 snapshotId) external returns (bool);
     function resumeGasMetering() external;
+    function snapshotState() external returns (uint256);
 }
 
 abstract contract CharacterizationTestBase {

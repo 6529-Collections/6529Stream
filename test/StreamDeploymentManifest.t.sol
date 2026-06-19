@@ -194,6 +194,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
 
     function testAggregateDeploymentSuiteRunsAllRehearsals() public {
         vm.chainId(31_337);
+        uint256 snapshotId = vm.snapshotState();
         RehearseDeploymentSuite suite = new RehearseDeploymentSuite();
 
         RehearseDeploymentSuite.DeploymentSuiteResult memory result = suite.run();
@@ -202,7 +203,18 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             result.suiteKindHash, keccak256(bytes("local-anvil-deployment-suite")), "suite kind"
         );
         Assertions.assertTrue(result.suiteHash != bytes32(0), "suite hash missing");
+        Assertions.assertEq(
+            result.suiteHash,
+            keccak256(
+                abi.encode(
+                    result.suiteKindHash, result.deployment, result.auction, result.emergency
+                )
+            ),
+            "suite hash"
+        );
         Assertions.assertEq(result.deployment.chainId, 31_337, "deployment chain id");
+        Assertions.assertEq(result.auction.chainId, 31_337, "auction chain id");
+        Assertions.assertEq(result.emergency.chainId, 31_337, "emergency chain id");
         Assertions.assertTrue(
             result.deployment.manifestHash != bytes32(0), "deployment manifest missing"
         );
@@ -231,5 +243,11 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
                 != result.emergency.replacementDropDomainSeparator,
             "emergency domain reused"
         );
+
+        Assertions.assertTrue(vm.revertToState(snapshotId), "revert suite snapshot");
+        vm.chainId(31_337);
+        RehearseDeploymentSuite replayedSuite = new RehearseDeploymentSuite();
+        RehearseDeploymentSuite.DeploymentSuiteResult memory replayed = replayedSuite.run();
+        Assertions.assertEq(replayed.suiteHash, result.suiteHash, "suite hash replay");
     }
 }

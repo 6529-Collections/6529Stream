@@ -217,9 +217,10 @@ The current Gate A smoke baseline proves:
   `script/RehearseDeploymentSuite.s.sol` returns deployment, auction, and
   emergency result groups plus a combined suite hash.
 - `forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir`
-  executes the three local rehearsal flows as part of the local/CI smoke gate.
-  The individual rehearsal scripts remain available for targeted debugging and
-  retained evidence capture.
+  executes the three local rehearsal flows as an aggregate suite-level evidence
+  command. The local/CI smoke gate also runs the three standalone `forge script`
+  entrypoints, keeping the original script execution contexts automated while
+  retaining one combined suite result for release-gate review.
 - `scripts/test_release_artifacts.py` and
   `scripts/generate_release_artifacts.py --check` prove the committed
   `release-artifacts/latest/` baseline matches current Foundry ABI/event output,

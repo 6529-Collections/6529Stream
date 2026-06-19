@@ -26,20 +26,7 @@ contract RehearseDeploymentSuite {
 
     function _suiteHash(DeploymentSuiteResult memory result) private pure returns (bytes32) {
         return keccak256(
-            abi.encode(
-                result.suiteKindHash,
-                result.deployment.manifestHash,
-                result.auction.deploymentManifestHash,
-                result.auction.dropId,
-                result.auction.finalOwner,
-                result.auction.totalOwedAfterWithdrawals,
-                result.emergency.oldManifestHash,
-                result.emergency.replacementManifestHash,
-                result.emergency.oldDropDomainSeparator,
-                result.emergency.replacementDropDomainSeparator,
-                result.emergency.replacementTokenOwner,
-                result.emergency.replacementTokenHash
-            )
+            abi.encode(result.suiteKindHash, result.deployment, result.auction, result.emergency)
         );
     }
 }
