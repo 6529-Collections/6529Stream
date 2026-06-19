@@ -270,6 +270,12 @@ payment credits, owed totals, retained ETH, or pending request; post-execution
 signer epoch and rotation controls cannot mutate ownership, credits, or request
 binding; and poster/protocol withdrawals before fulfillment do not break later
 arRNG fulfillment.
+ADV-019 adds request-ID collision composition coverage across the fixed-price
+and auction suites: a reused arRNG provider request ID now fails with
+`RandomnessRequestAlreadyExists`, the failed second drop does not consume its
+authorization, mint/register a token, change supply or drop counts, create
+payment credits or auction state, or change pending request accounting, and the
+first token's request remains fulfillable afterward.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be

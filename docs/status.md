@@ -151,6 +151,14 @@ The current Gate A smoke baseline proves:
   poster/protocol withdrawals before arRNG fulfillment do not break later
   fulfillment. This remains local adversarial coverage and does not replace
   production signer, Safe, or provider operations evidence.
+- Fixed-price and auction arRNG request-ID collision tests now force a reused
+  provider request ID through the public signed-drop paths, proving the second
+  drop reverts with `RandomnessRequestAlreadyExists` without consuming the
+  authorization, minting or registering a token, changing supply or drop
+  counts, creating payment credits or auction state, changing pending request
+  accounting, or breaking fulfillment of the first token's request. This
+  remains local adversarial coverage and does not replace fork/testnet/live
+  provider operations evidence.
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output. `StreamDependencyRegistry.t.sol` proves immutable dependency version
