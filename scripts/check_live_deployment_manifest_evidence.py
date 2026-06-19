@@ -305,6 +305,15 @@ def resolve_retained_path(
             f"{artifact_path} field {label!r} must not escape the repository"
         )
     candidate = repo_root / retained_path
+    cursor = repo_root.resolve()
+    for part in retained_path.parts:
+        cursor = cursor / part
+        # Reject symlinked directories as well as symlinked leaf files before
+        # resolve() can follow them outside the reviewed evidence tree.
+        if cursor.is_symlink():
+            raise LiveDeploymentManifestEvidenceError(
+                f"{artifact_path} field {label!r} must not use symlinked retained files"
+            )
     resolved = candidate.resolve()
     try:
         resolved.relative_to(repo_root.resolve())

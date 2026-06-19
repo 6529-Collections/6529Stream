@@ -386,6 +386,41 @@ class LiveDeploymentManifestEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path, root)
 
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_directory_fails(self) -> None:
+        """Reviewed retained files cannot cross symlinked directories."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "symlink-directory.md"
+            seed_reviewed_retained_files(root)
+            target_dir = root / "release-artifacts/evidence/live-deployment-manifest-target"
+            symlink_dir = root / "release-artifacts/evidence/live-deployment-manifest-link"
+            write_text(
+                target_dir / "release-digests.md",
+                "release manifest sha256 and SHA256SUMS sha256\n",
+            )
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Release manifest/checksum digests",
+                    (
+                        "release-artifacts/evidence/live-deployment-manifest-link/"
+                        "release-digests.md"
+                    ),
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveDeploymentManifestEvidenceError,
+                "symlinked retained",
+            ):
+                checker.validate_artifact(path, root)
+
     def test_bare_hex_secret_shaped_text_fails(self) -> None:
         """Unlabelled 64-hex material is rejected."""
         with tempfile.TemporaryDirectory() as temp_dir:

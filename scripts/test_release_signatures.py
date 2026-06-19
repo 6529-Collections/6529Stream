@@ -165,6 +165,83 @@ class ReleaseSignatureEvidenceTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.ReleaseSignatureEvidenceError, "sha256 mismatch"):
                 checker.validate_evidence(path, root)
 
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_artifact_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            target = (
+                root / "release-artifacts/schema/release-signature-evidence.schema.json"
+            )
+            symlink = (
+                root
+                / "release-artifacts/schema/release-signature-evidence-link.schema.json"
+            )
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            evidence["retained_artifacts"][0]["path"] = (
+                "release-artifacts/schema/release-signature-evidence-link.schema.json"
+            )
+            evidence["retained_artifacts"][0]["sha256"] = checker.file_sha256(target)
+            path = root / "release-artifacts/signatures/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseSignatureEvidenceError, "symlinked release evidence"
+            ):
+                checker.validate_evidence(path, root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_artifact_directory_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            target_dir = root / "release-artifacts/schema-target"
+            symlink_dir = root / "release-artifacts/schema-link"
+            write_text(target_dir / "release-signature-evidence.schema.json", "schema\n")
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            evidence["retained_artifacts"][0]["path"] = (
+                "release-artifacts/schema-link/release-signature-evidence.schema.json"
+            )
+            evidence["retained_artifacts"][0]["sha256"] = checker.file_sha256(
+                target_dir / "release-signature-evidence.schema.json"
+            )
+            path = root / "release-artifacts/signatures/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseSignatureEvidenceError, "symlinked release evidence"
+            ):
+                checker.validate_evidence(path, root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_self_referential_artifact_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            evidence = valid_evidence(root)
+            target = root / "release-artifacts/latest/release-manifest-target.json"
+            symlink = root / "release-artifacts/latest/release-manifest-link.json"
+            write_text(target, "{}\n")
+            try:
+                symlink.symlink_to(target)
+            except (NotImplementedError, OSError) as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            evidence["artifacts"]["release_manifest"] = self_ref(
+                "release-artifacts/latest/release-manifest-link.json"
+            )
+            path = root / "release-artifacts/signatures/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseSignatureEvidenceError, "symlinked release evidence"
+            ):
+                checker.validate_evidence(path, root)
+
     def test_non_local_placeholder_signature_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
