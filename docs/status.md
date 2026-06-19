@@ -136,6 +136,14 @@ The current Gate A smoke baseline proves:
   request bindings, settlement, and later arRNG fulfillment coherent. This
   remains local adversarial coverage and does not replace production signer,
   Safe, or provider operations evidence.
+- Fixed-price/drop/arRNG composition tests now execute paid fixed-price drops
+  through the real drop, minter, core, and arRNG contracts, proving
+  randomness-request pauses roll back drop execution without consuming the
+  authorization or crediting payments, post-execution signer lifecycle controls
+  do not disturb fixed-price credits or pending request bindings, and
+  poster/protocol withdrawals before arRNG fulfillment do not break later
+  fulfillment. This remains local adversarial coverage and does not replace
+  production signer, Safe, or provider operations evidence.
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output. `StreamDependencyRegistry.t.sol` proves immutable dependency version

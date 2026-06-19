@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:67d24c2c3920d6a72058663e3dd0363e4c764b3084bf77b39dbd1ccb1b082b40",
-      "size_bytes": 70695
+      "sha256": "sha256:3cf1c3055c5e96894f75c291956155b670d6ae255f6042f10ddedbec232513f9",
+      "size_bytes": 71093
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:a9c279a297768fa0bc3ee410ae66431b6c1b433f513d645a6ea96fd6186ff83e",
+      "sha256": "sha256:84e852c72fd79606cebdd4e5aec02042dc49f519edd99dfce790c77c179df6ff",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -46,6 +46,7 @@
     "entries": [
       "Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.",
       "Extended auction/drop/arRNG composition regressions to cover post-execution signer lifecycle controls, proving signer-epoch invalidation, signer rotation, consumed-drop cancellation attempts, replay attempts, and drop-execution pauses cannot disturb existing auction custody, bid accounting, pending request bindings, settlement, or later arRNG fulfillment.",
+      "Added fixed-price/drop/arRNG composition regressions proving randomness-request pauses roll back paid fixed-price drop execution without consuming authorizations or crediting payments, post-execution signer lifecycle controls cannot disturb fixed-price credits or pending request bindings, and poster/protocol credit withdrawals before arRNG fulfillment do not break later fulfillment.",
       "Extended the autonomous run-state consistency checker to reject stale detailed execution-backlog `Status:` paragraphs that still claim active work after the corresponding issue or PR has closed.",
       "Strengthened the offline release artifact verifier to reject unchecksummed regular files and symlinks under `release-artifacts/latest`, while preserving the self-referential checksum bundle exceptions for `SHA256SUMS` and `release-checksums.json`.",
       "Hardened the offline release artifact verifier to reject symlinked checksum-covered inputs, symlinked release directories, and release directories outside the checkout before accepting matching hashes.",
