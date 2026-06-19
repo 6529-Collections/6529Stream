@@ -238,7 +238,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             setup, tokenId, setup.randomizer.tokenToRequest(tokenId), 5678
         );
         setup.deployed.admins.isPaused(StreamPauseDomains.DROP_EXECUTION)
-            .assertTrue("drop pause cleared");
+            .assertTrue("drop pause still set");
         _assertAuctionAccountingSnapshot(setup, beforeFulfillment, "rotation fulfillment");
     }
 
