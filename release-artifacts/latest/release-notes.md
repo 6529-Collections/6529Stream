@@ -23,6 +23,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 ## Changelog Entries
 
 - Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.
+- Extended auction/drop/arRNG composition regressions to cover post-execution signer lifecycle controls, proving signer-epoch invalidation, signer rotation, consumed-drop cancellation attempts, replay attempts, and drop-execution pauses cannot disturb existing auction custody, bid accounting, pending request bindings, settlement, or later arRNG fulfillment.
 - Extended the autonomous run-state consistency checker to reject stale detailed execution-backlog `Status:` paragraphs that still claim active work after the corresponding issue or PR has closed.
 - Strengthened the offline release artifact verifier to reject unchecksummed regular files and symlinks under `release-artifacts/latest`, while preserving the self-referential checksum bundle exceptions for `SHA256SUMS` and `release-checksums.json`.
 - Hardened the offline release artifact verifier to reject symlinked checksum-covered inputs, symlinked release directories, and release directories outside the checkout before accepting matching hashes.

@@ -129,6 +129,13 @@ The current Gate A smoke baseline proves:
   values, and token/request binding after later fulfillment. This remains local
   adversarial coverage only; it does not replace fork/testnet/live provider
   operations evidence.
+- The same auction/drop/arRNG composition suite now covers post-execution signer
+  lifecycle controls: signer-epoch invalidation, signer rotation, replay
+  attempts, consumed-drop cancellation attempts, and drop-execution pauses after
+  auction creation leave existing auction custody, bid accounting, pending
+  request bindings, settlement, and later arRNG fulfillment coherent. This
+  remains local adversarial coverage and does not replace production signer,
+  Safe, or provider operations evidence.
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output. `StreamDependencyRegistry.t.sol` proves immutable dependency version

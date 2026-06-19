@@ -12,6 +12,11 @@ the release policy in `docs/release-policy.md`.
   authorizations, pending arRNG requests block randomizer migration without
   auction drift, and auction settlement before fulfillment preserves custody,
   credits, total owed values, and token/request binding.
+- Extended auction/drop/arRNG composition regressions to cover post-execution
+  signer lifecycle controls, proving signer-epoch invalidation, signer
+  rotation, consumed-drop cancellation attempts, replay attempts, and
+  drop-execution pauses cannot disturb existing auction custody, bid
+  accounting, pending request bindings, settlement, or later arRNG fulfillment.
 - Extended the autonomous run-state consistency checker to reject stale detailed
   execution-backlog `Status:` paragraphs that still claim active work after the
   corresponding issue or PR has closed.
