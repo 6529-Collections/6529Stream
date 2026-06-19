@@ -243,6 +243,14 @@ calls while reasserting request indexes, pending counters, terminal request
 state fields, retry limits, core token hashes, and the RNG reserve/owed/surplus
 views after every action. This remains local adversarial coverage and does not
 replace fork/testnet/live provider operations evidence.
+ADV-015 adds focused auction/drop/arRNG composition coverage in
+`StreamAuctionRandomizerComposition.t.sol`: signed auction drops are executed
+through the real drop, auction, core, and arRNG contracts while tests prove
+randomness-request pauses roll back drop execution without consuming the
+authorization, pending arRNG requests block randomizer migration without auction
+custody or payment drift, and auctions can settle before arRNG fulfillment
+while later fulfillment preserves the winner, credits, total owed values, and
+token/request binding.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be

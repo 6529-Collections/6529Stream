@@ -4,7 +4,7 @@
   "source": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:b08e3dbea41555d104c9f7904a9bf00e083982687c61c3eeea96c5d34aa7548a",
+      "sha256": "sha256:a4de69d09113b91b9ae34b5138de17979723b5f77b35d7063c646c21b23a494e",
       "size_bytes": 130343
     },
     "abi_checksums": {

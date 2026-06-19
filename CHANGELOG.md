@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added auction/drop/arRNG composition regressions proving randomness-request
+  pauses roll back signed auction-drop execution without consuming
+  authorizations, pending arRNG requests block randomizer migration without
+  auction drift, and auction settlement before fulfillment preserves custody,
+  credits, total owed values, and token/request binding.
 - Extended the autonomous run-state consistency checker to reject stale detailed
   execution-backlog `Status:` paragraphs that still claim active work after the
   corresponding issue or PR has closed.

@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-verifier-symlink-hardening` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/588` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/589` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/590` |
-| Next issue | Harden the offline release verifier against symlinked release inputs. |
+| Active PR branch | `codex/protocol-composition-adversarial-tests` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/590` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/591` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/592` |
+| Next issue | Add bounded protocol composition adversarial tests. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 03:51 UTC` |
+| Last updated | `2026-06-19 04:38 UTC` |
 
 ## Packaging Notes
 
@@ -16322,6 +16322,10 @@ Outcome:
 | 2026-06-19 03:41 | Merge PR #588 and start issue #589 | PR #588 merged as `a6281cabbb83753a98744959b4bc1550519c447a` after latest-head CI, CodeRabbit, and 6529bot feedback were clean; issue #587 closed completed. Issue #589 and branch `codex/release-verifier-symlink-hardening` now track the next release-integrity hardening: reject symlinked checksum-covered release inputs and release directories that escape or symlink within the checkout, so the offline consumer verifier accepts ordinary in-repo files only. |
 | 2026-06-19 03:49 | Open PR #590 for issue #589 | PR #590 is open at `https://github.com/6529-Collections/6529Stream/pull/590`, closes issue #589, and packages symlink/out-of-checkout hardening for the offline release verifier plus focused negative tests, docs, state updates, changelog, and regenerated release artifacts. Local focused verifier, release artifact, autonomous-state, changelog, Markdown, and checksum gates passed. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 03:51 | Address PR #590 bot nice-to-have | 6529bot general review marked the PR good to merge and security review found no findings on the initial implementation head. Accepted the useful coverage note by documenting that symlink-component checks rely on caller containment validation and adding a regression for a symlinked intermediate directory in a checksum-covered deployment path. Focused verifier, checksum, compile, autonomous-state, and diff gates passed locally. Next action is to commit/push the review-response head, wait for latest CI and bot feedback, then merge only when clean. |
+| 2026-06-19 04:10 | Merge PR #590 and start issue #591 | PR #590 merged as `40219c06ed9a11b63baab5920cce9dc8a4b79926` after CodeRabbit, Foundry smoke, Windows wrapper, and latest-head 6529bot feedback were clean; issue #589 closed completed. Issue #591 and branch `codex/protocol-composition-adversarial-tests` now track the next substantive Gate D slice: bounded auction/drop/arRNG/admin composition tests rather than another checker-only release-evidence PR. |
+| 2026-06-19 04:14 | Implement ADV-015 local draft | Added `test/StreamAuctionRandomizerComposition.t.sol` with real `StreamDrops` auction mints, `StreamAuctions`, `StreamCore`, and `NextGenRandomizerRNG` wired together. The new focused tests prove randomness-request pause rolls back auction-drop minting without consuming the authorization, pending arRNG requests block provider migration without auction drift, and auction settlement before fulfillment preserves custody/credits/request binding after later arRNG fulfillment. Focused `forge test --match-path test\StreamAuctionRandomizerComposition.t.sol -vvv` passed with 3 tests and existing known warning noise only. Next action is to finish traceability docs/artifacts, run required local gates, commit, push, open PR closing #591, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-19 04:37 | Finish ADV-015 local validation | Regenerated risk-register, release-note, release-manifest, bytecode-proof, lockfile, and checksum artifacts after roadmap/status/changelog traceability changed. Local validation passed: focused ADV-015 suite, adjacent randomizer lifecycle/protocol state-machine/auction invariant/randomizer-admin invariant suites, autonomous-state tests/checker, changelog gate, release notes, risk register, release manifest, bytecode proof, lockfile, release checksums, offline release verifier, Markdown links, `codex-diff-check`, full `make check`, and Windows `scripts\check.ps1`; only existing documented Solidity/Foundry warning noise appeared. Next action is to commit, push, open the issue-linked PR for #591, request CodeRabbit, then wait for CI/bot feedback and merge only when clean. |
+| 2026-06-19 04:38 | Open PR #592 for ADV-015 | PR #592 is open at `https://github.com/6529-Collections/6529Stream/pull/592`, closes issue #591, and packages the auction/drop/arRNG/admin composition regressions plus traceability and regenerated release artifacts. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
