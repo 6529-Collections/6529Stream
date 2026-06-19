@@ -3486,7 +3486,7 @@ unless an external dependency changes.
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
 | `OSS-006` | Add autonomous run-state consistency checker | G | Merged in PR #570; issue #569 closed completed |
-| `OSS-007` | Prevent stale detailed backlog status markers | G | Active issue #585 on branch `codex/stale-backlog-status-guard`; extend the autonomous-state checker beyond summary rows so stale detailed `Status:` paragraphs cannot misdirect future manager resumes |
+| `OSS-007` | Prevent stale detailed backlog status markers | G | Active PR #586 / issue #585 on branch `codex/stale-backlog-status-guard`; extend the autonomous-state checker beyond summary rows so stale detailed `Status:` paragraphs cannot misdirect future manager resumes |
 
 ## 6. Dependency Map
 
