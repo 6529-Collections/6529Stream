@@ -3411,7 +3411,7 @@ unless an external dependency changes.
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
 | `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Merged in PR #525; issue #524 closed completed |
 | `ADV-014` | Add bounded randomizer/admin stateful invariant tests | D/F | Merged in PR #572; issue #571 closed completed with local stateful randomizer/admin invariant coverage for composed request, fulfillment, stale, retry, pause, provider/epoch, token binding, forced-balance, emergency-withdrawal, and reserve-accounting sequences without claiming live provider readiness |
-| `ADV-015` | Add auction/drop arRNG/admin composition regressions | D/F | Active issue #591 on branch `codex/protocol-composition-adversarial-tests`; add local adversarial coverage where signed auction drops create pending arRNG requests, randomness pauses roll back drop execution, pending requests block provider migration without auction drift, and settlement before fulfillment preserves custody, credits, and request binding |
+| `ADV-015` | Add auction/drop arRNG/admin composition regressions | D/F | Active PR #592 / issue #591 on branch `codex/protocol-composition-adversarial-tests`; adds local adversarial coverage where signed auction drops create pending arRNG requests, randomness pauses roll back drop execution, pending requests block provider migration without auction drift, and settlement before fulfillment preserves custody, credits, and request binding |
 
 ### Contract/API Hardening
 
