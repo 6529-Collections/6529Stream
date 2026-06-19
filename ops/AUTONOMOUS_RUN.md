@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-evidence-path-helper` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/606` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/607` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/608` |
 | Next issue | TBD after issue #607 is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 10:36 UTC` |
+| Last updated | `2026-06-19 10:37 UTC` |
 
 ## Packaging Notes
 
@@ -275,7 +275,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 211 | Harden live metadata browser retained artifact validation | Gate F/Gate G support | Add stricter repo-relative retained-path, optional declared `sha256:`, missing-file, no-secret, duplicate/trailing hash, credentialed URL, and bare-64-hex validation for future reviewed live metadata browser evidence without closing tracker issue #473 | Merged in PR #541; issue #540 closed completed |
 | 212 | Reject symlinked testnet deployment retained artifacts | Gate E/Gate G support | Harden the testnet deployment rehearsal retained-artifact checker so future reviewed Sepolia transcripts, broadcasts, manifests, address books, and gas/invariant summaries cannot pass through symlinked retained files | Merged in PR #604; issue #603 closed completed |
 | 213 | Reject symlinked release evidence retained paths | Gate E/Gate G support | Harden generic non-local release evidence, release-signature evidence, marketplace/indexer evidence, and live deployment-manifest retained path validation so future reviewed release evidence cannot pass through symlinked files or symlinked intermediate directories | Merged in PR #606; issue #605 closed completed |
-| 214 | Centralize symlink-safe release evidence path resolution | Gate E/Gate G support | Extract the duplicated retained-path symlink walk into a shared Python helper used by non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention checkers while preserving checker-specific errors and coverage | Active issue #607 on branch `codex/release-evidence-path-helper` |
+| 214 | Centralize symlink-safe release evidence path resolution | Gate E/Gate G support | Extract the duplicated retained-path symlink walk into a shared Python helper used by non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention checkers while preserving checker-specific errors and coverage | Active PR #608 / issue #607 on branch `codex/release-evidence-path-helper` |
 
 ## Current PR Worklog
 
@@ -16357,6 +16357,7 @@ Outcome:
 | 2026-06-19 10:16 | Merge PR #606 and select next slice | PR #606 merged as `e7e34d1f191508495fb848c0328b88a3b4b47e55` after CodeRabbit status success, CI success for Windows PowerShell wrapper and Foundry smoke, empty review threads, 6529bot general/security clean review, and latest-head 6529bot follow-up with no new findings; issue #605 closed completed. Local `main` fast-forwarded to the merge commit. Next action is to select the next local-verifiable roadmap slice, create or reuse its issue, create a fresh branch from `main`, and continue the one-PR loop. |
 | 2026-06-19 10:21 | Start issue #607 | Created issue #607 and branch `codex/release-evidence-path-helper` for the reviewer-suggested maintainability hardening: centralize the symlink-safe retained-path resolver used by release evidence checkers so the policy cannot drift across future evidence surfaces. Next action is to implement the shared helper, preserve existing checker semantics, run focused evidence suites and release gates, then open the PR closing #607. |
 | 2026-06-19 10:36 | Validate EXT-038 local draft | Extracted `scripts/release_evidence_paths.py`, migrated non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention checkers to the shared symlink-safe retained-path resolver, added live metadata-browser and production broadcast symlinked file/directory regressions, added the helper to release checksum coverage, updated roadmap/status/backlog/run-state traceability, and regenerated release artifacts. Local validation passed: Python compile for changed scripts/tests, the six focused evidence test scripts, the six checker entrypoints, `make release-checksums`, `python scripts\check_autonomous_state.py`, `python scripts\verify_release_artifacts.py`, `python scripts\check_changelog.py`, `python scripts\check_markdown_links.py`, `python scripts\generate_release_checksums.py --check`, and `codex-diff-check`. Known compiler/Foundry warning noise remains unchanged; current `StreamCore` runtime is 21,792 bytes with 2,784 bytes of EIP-170 headroom. Next action is to commit, push, open PR for issue #607, request CodeRabbit, then wait for CI/bot feedback. |
+| 2026-06-19 10:37 | Open PR #608 for issue #607 | PR #608 is open at `https://github.com/6529-Collections/6529Stream/pull/608`, closes issue #607, and packages the shared symlink-safe retained-path helper, six migrated release evidence checkers, live metadata-browser and production broadcast symlink regressions, release checksum coverage for the helper, refreshed release artifacts, and roadmap/status/backlog/run-state updates. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
