@@ -31,6 +31,10 @@ RELEASE_MANIFEST_NAME = "release-manifest.json"
 BYTECODE_PROOF_NAME = "bytecode-release-proof.json"
 RELEASE_CANDIDATE_LOCKFILE_NAME = "release-candidate-lockfile.json"
 SELF_REFERENTIAL_SHA256_MARKERS = {"not_available_self_referential"}
+ALLOWED_UNCHECKSUMMED_RELEASE_FILES = {
+    CHECKSUM_FILE_NAME,
+    CHECKSUM_MANIFEST_NAME,
+}
 
 
 class ReleaseArtifactVerificationError(RuntimeError):
@@ -194,6 +198,38 @@ def verify_checksum_file(
             )
         digests[relative_path] = digest
     return digests
+
+
+def verify_release_directory_checksum_closure(
+    repo_root: Path,
+    release_dir: Path,
+    checksum_entries: dict[str, str],
+) -> int:
+    if not release_dir.is_dir():
+        raise ReleaseArtifactVerificationError(f"missing release artifact directory: {release_dir}")
+
+    allowed_uncovered = {
+        normalize_path(release_dir / name, repo_root)
+        for name in ALLOWED_UNCHECKSUMMED_RELEASE_FILES
+    }
+    checked_files = 0
+    unchecksummed = []
+    for path in sorted(release_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        relative_path = normalize_path(path, repo_root)
+        if relative_path in allowed_uncovered:
+            continue
+        checked_files += 1
+        if relative_path not in checksum_entries:
+            unchecksummed.append(relative_path)
+
+    if unchecksummed:
+        raise ReleaseArtifactVerificationError(
+            "release artifact directory contains unchecksummed file(s): "
+            + ", ".join(unchecksummed[:5])
+        )
+    return checked_files
 
 
 def verify_checksum_manifest(
@@ -420,6 +456,11 @@ def verify_release_artifacts(
         normalize_path(release_candidate_lockfile_path, repo_root),
     ]
     require_checksum_covered(checksum_entries, required_paths)
+    verify_release_directory_checksum_closure(
+        repo_root,
+        resolved_release_dir,
+        checksum_entries,
+    )
     checksum_manifest_records = verify_checksum_manifest(
         repo_root,
         checksum_manifest_path,

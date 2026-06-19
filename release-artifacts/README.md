@@ -189,6 +189,10 @@ python scripts/verify_release_artifacts.py
 The generated files under `latest/` are intentionally tracked. They give
 deployment manifests stable ABI checksum, bytecode checksum, interface ID, and
 event topic catalog inputs before any live network broadcast exists.
+The consumer-facing verifier treats `latest/` as closed over regular files:
+everything below that directory must be listed in `SHA256SUMS`, except
+`SHA256SUMS` itself and `release-checksums.json`, which are checksum-bundle
+index files with self-referential hashing constraints.
 
 `latest/protocol-surface-report.json` is generated from the production contract
 set and Foundry artifacts. It records functions, selectors, events, topic0

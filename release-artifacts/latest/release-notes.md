@@ -23,6 +23,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 ## Changelog Entries
 
 - Extended the autonomous run-state consistency checker to reject stale detailed execution-backlog `Status:` paragraphs that still claim active work after the corresponding issue or PR has closed.
+- Strengthened the offline release artifact verifier to reject unchecksummed regular files under `release-artifacts/latest`, while preserving the self-referential checksum bundle exceptions for `SHA256SUMS` and `release-checksums.json`.
 - Added a deployment rehearsal gate parity checker that locks the aggregate suite and standalone deployment, auction, and emergency rehearsal commands across Make, Bash, PowerShell, and CI before the scripts execute.
 - Added an aggregate local deployment rehearsal suite that runs the deployment, auction ceremony, and emergency redeployment rehearsals through one release-gate script while preserving the individual scripts for targeted debugging, retained evidence capture, and automated standalone-entrypoint coverage.
 - Added a no-secret Sepolia evidence preflight checker that validates committed deployment/evidence prerequisites and optionally checks only operator environment variable presence, never values, before future public-beta evidence runs for issues #217, #221, and #222.
