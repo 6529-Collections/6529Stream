@@ -299,6 +299,103 @@ class AutonomousStateTests(unittest.TestCase):
 
             checker.validate_state(run_state_path, backlog_path)
 
+    def test_accepts_matching_active_detailed_status_with_repeated_references(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(),
+                backlog_with_detail(
+                    active_row(),
+                    (
+                        "Status: Active PR #124 / issue #123 on branch `codex/example`. "
+                        "Follow-up remains on issue #123 and PR #124."
+                    ),
+                ),
+            )
+
+            checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_active_detailed_status_with_secondary_stale_issue(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog_with_detail(
+                    active_issue_row(),
+                    "Status: Active issue #123; stale tracker issue #999 remains in prose.",
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.AutonomousStateError, "issue reference"):
+                checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_active_detailed_status_with_secondary_stale_pr(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(),
+                backlog_with_detail(
+                    active_row(),
+                    "Status: Active PR #124 / issue #123; superseded stale PR #999 is closed.",
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.AutonomousStateError, "PR reference"):
+                checker.validate_state(run_state_path, backlog_path)
+
+    def test_rejects_active_detailed_status_with_pr_when_state_has_no_active_pr(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog_with_detail(
+                    active_issue_row(),
+                    "Status: Active issue #123; PR #124 will be opened after validation.",
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.AutonomousStateError, "no active PR"):
+                checker.validate_state(run_state_path, backlog_path)
+
+    def test_inactive_detailed_status_does_not_match_incidental_progress_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog_with_detail(
+                    active_issue_row(),
+                    "Status: Planned; no longer in progress on stale issue #999.",
+                ),
+            )
+
+            checker.validate_state(run_state_path, backlog_path)
+
+    def test_detailed_status_parser_ignores_fenced_examples(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            run_state_path, backlog_path = self.write_case(
+                root,
+                run_state(pr="TBD"),
+                backlog_with_detail(
+                    active_issue_row(),
+                    "\n".join(
+                        [
+                            "```text",
+                            "Status: In progress on issue #999.",
+                            "```",
+                            "Status: Active issue #123 on branch `codex/example`.",
+                        ]
+                    ),
+                ),
+            )
+
+            checker.validate_state(run_state_path, backlog_path)
+
     def test_rejects_stale_in_progress_detailed_status(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -311,7 +408,7 @@ class AutonomousStateTests(unittest.TestCase):
                 ),
             )
 
-            with self.assertRaisesRegex(checker.AutonomousStateError, "does not match state issue"):
+            with self.assertRaisesRegex(checker.AutonomousStateError, "issue reference"):
                 checker.validate_state(run_state_path, backlog_path)
 
     def test_rejects_stale_pr_not_opened_detailed_status(self) -> None:
@@ -329,7 +426,7 @@ class AutonomousStateTests(unittest.TestCase):
                 ),
             )
 
-            with self.assertRaisesRegex(checker.AutonomousStateError, "does not match state issue"):
+            with self.assertRaisesRegex(checker.AutonomousStateError, "issue reference"):
                 checker.validate_state(run_state_path, backlog_path)
 
     def test_rejects_active_detailed_status_branch_mismatch(self) -> None:

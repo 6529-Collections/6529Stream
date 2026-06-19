@@ -34,15 +34,16 @@ DETAIL_HEADING_RE = re.compile(r"^###\s+(?P<item>[A-Z]+-\d+):\s*(?P<title>.+?)\s
 ISSUE_NUMBER_RE = re.compile(r"\bissue #(\d+)\b", re.IGNORECASE)
 PR_NUMBER_RE = re.compile(r"\bPR #(\d+)\b", re.IGNORECASE)
 BRANCH_RE = re.compile(r"branch `([^`]+)`")
-ACTIVE_DETAIL_STATUS_MARKERS = [
-    "active in issue",
-    "active issue #",
-    "active pr #",
-    "in progress",
-    "local validation complete",
-    "pr link pending",
-    "pr not opened",
-]
+ACTIVE_DETAIL_STATUS_RE = re.compile(
+    r"^\s*(?:"
+    r"active\s+(?:in\s+)?(?:issue|pr)\s*#"
+    r"|in\s+progress\b"
+    r"|local\s+validation\s+complete\b"
+    r"|pr\s+link\s+pending\b"
+    r"|pr\s+not\s+opened\b"
+    r")",
+    re.IGNORECASE,
+)
 
 
 class AutonomousStateError(Exception):
@@ -64,8 +65,8 @@ class DetailedBacklogStatus:
     item_id: str
     title: str
     status: str
-    pr_number: int | None
-    issue_number: int | None
+    pr_numbers: tuple[int, ...]
+    issue_numbers: tuple[int, ...]
     branch: str | None
     raw: str
 
@@ -153,9 +154,18 @@ def parse_detailed_statuses(backlog_text: str) -> list[DetailedBacklogStatus]:
     current_title = "Unknown detailed backlog item"
     lines = backlog_text.splitlines()
     index = 0
+    in_fenced_block = False
 
     while index < len(lines):
         line = lines[index]
+        if line.strip().startswith("```"):
+            in_fenced_block = not in_fenced_block
+            index += 1
+            continue
+        if in_fenced_block:
+            index += 1
+            continue
+
         heading_match = DETAIL_HEADING_RE.match(line)
         if heading_match:
             current_item = heading_match.group("item")
@@ -183,8 +193,8 @@ def parse_detailed_statuses(backlog_text: str) -> list[DetailedBacklogStatus]:
                 item_id=current_item,
                 title=current_title,
                 status=status,
-                pr_number=pr_matches[0] if pr_matches else None,
-                issue_number=issue_matches[0] if issue_matches else None,
+                pr_numbers=tuple(pr_matches),
+                issue_numbers=tuple(issue_matches),
                 branch=branch_match.group(1) if branch_match else None,
                 raw="\n".join(lines[start_index:index]),
             )
@@ -194,8 +204,7 @@ def parse_detailed_statuses(backlog_text: str) -> list[DetailedBacklogStatus]:
 
 
 def is_active_detail_status(status: str) -> bool:
-    lowered = status.lower()
-    return any(marker in lowered for marker in ACTIVE_DETAIL_STATUS_MARKERS)
+    return ACTIVE_DETAIL_STATUS_RE.search(status) is not None
 
 
 def validate_detailed_statuses(
@@ -214,18 +223,25 @@ def validate_detailed_statuses(
             raise AutonomousStateError(
                 f"{label} claims active work but state has no active issue: {detail.status}"
             )
-        if detail.issue_number is None:
+        if not detail.issue_numbers:
             raise AutonomousStateError(
                 f"{label} claims active work without an issue number: {detail.status}"
             )
-        if detail.issue_number != expected_issue:
+        stale_issues = sorted({issue for issue in detail.issue_numbers if issue != expected_issue})
+        if stale_issues:
             raise AutonomousStateError(
-                f"{label} issue #{detail.issue_number} does not match state issue "
+                f"{label} issue reference(s) {stale_issues} do not match state issue "
                 f"#{expected_issue}: {detail.status}"
             )
-        if detail.pr_number is not None and detail.pr_number != expected_pr:
+        if detail.pr_numbers and expected_pr is None:
             raise AutonomousStateError(
-                f"{label} PR #{detail.pr_number} does not match state PR "
+                f"{label} claims active PR reference(s) {list(detail.pr_numbers)} "
+                f"but state has no active PR: {detail.status}"
+            )
+        stale_prs = sorted({pr for pr in detail.pr_numbers if pr != expected_pr})
+        if stale_prs:
+            raise AutonomousStateError(
+                f"{label} PR reference(s) {stale_prs} do not match state PR "
                 f"{expected_pr}: {detail.status}"
             )
         if detail.branch is not None and detail.branch != expected_branch:
