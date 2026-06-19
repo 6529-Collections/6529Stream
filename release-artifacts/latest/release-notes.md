@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added a no-secret Sepolia evidence preflight checker that validates committed deployment/evidence prerequisites and optionally checks only operator environment variable presence, never values, before future public-beta evidence runs for issues #217, #221, and #222.
 - Added a retained exact-linked live release-evidence issue audit after the live deployment manifest checker merge, syncing issue #227 to the dedicated retained-artifact body, proving it remains open, and refreshing archive, release-manifest, and checksum coverage while keeping production release blocked on real reviewed live evidence.
 - Added portable command-provenance normalization and checker coverage for retained live-audit reports so release evidence does not embed operator-specific absolute Windows paths.
 - Extended ABI compatibility checks and the committed baseline to cover published interface ABIs from `release-artifacts/contracts.json` in addition to production contracts, failing removed or changed interface entries while continuing to report additive entries as compatible.

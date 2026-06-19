@@ -402,6 +402,11 @@ The current local baseline includes:
   [`scripts/test_public_beta_verified_addresses.py`](../scripts/test_public_beta_verified_addresses.py)
   and
   [`scripts/check_public_beta_verified_addresses.py`](../scripts/check_public_beta_verified_addresses.py),
+  plus the Sepolia evidence preflight checker for no-secret public-beta
+  rehearsal prerequisites, validated with
+  [`scripts/test_sepolia_evidence_preflight.py`](../scripts/test_sepolia_evidence_preflight.py)
+  and
+  [`scripts/check_sepolia_evidence_preflight.py`](../scripts/check_sepolia_evidence_preflight.py),
   plus the production verified-addresses checker and production
   verified-addresses retained artifact template under
   [`release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md`](../release-artifacts/evidence/production-verified-addresses/production-verified-addresses-retained-artifact-template.md),
@@ -684,6 +689,8 @@ python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
 python scripts/test_public_beta_verified_addresses.py
 python scripts/check_public_beta_verified_addresses.py
+python scripts/test_sepolia_evidence_preflight.py
+python scripts/check_sepolia_evidence_preflight.py
 python scripts/test_production_verified_addresses.py
 python scripts/check_production_verified_addresses.py
 python scripts/test_signed_release_tag.py

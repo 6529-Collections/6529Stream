@@ -163,7 +163,25 @@ python scripts/generate_release_artifacts.py --check
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_deployment_manifest.py
 python scripts/check_testnet_deployment_rehearsal_evidence.py
+python scripts/test_sepolia_evidence_preflight.py
+python scripts/check_sepolia_evidence_preflight.py
 ```
+
+Before the operator shell spends Sepolia gas, run the same preflight in
+environment-required mode and retain only the redacted report. The checker
+validates committed templates, runbook commands, checker scripts, and presence
+of required environment variable names. It never writes or prints the
+environment variable values:
+
+```sh
+python scripts/check_sepolia_evidence_preflight.py \
+  --require-env \
+  --output-json /tmp/sepolia-evidence-preflight.json
+```
+
+If this command reports `operator_env_missing`, do not broadcast yet. Configure
+the missing variables in the operator shell, keep private values out of the
+repository, and rerun the preflight before recording the deployment transcript.
 
 Broadcast the Sepolia rehearsal from the operator shell:
 

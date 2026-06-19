@@ -3396,6 +3396,7 @@ unless an external dependency changes.
 | `EXT-032` | Retain live release-evidence issue audit after marketplace/indexer evidence | E/G | Merged in PR #562; issue #561 closed completed with exact linked-issue live audit retention after PR #560 |
 | `EXT-033` | Add live deployment manifest evidence validation | F/G | Merged in PR #574; issue #573 closed completed with a dedicated retained-artifact template/checker for future reviewed `live_deployment_manifest` evidence while tracker issue #227 remains open until real reviewed evidence is retained |
 | `EXT-034` | Retain live issue audit after deployment manifest validation | F/G | Merged in PR #576; issue #575 closed completed with exact-linked live issue label/body/closure audit retention after PR #574, while issue #227 remains open for real reviewed live deployment manifest evidence |
+| `EXT-035` | Add Sepolia evidence preflight checker | E/G | Active issue #579 on branch `codex/sepolia-evidence-preflight`; validates committed Sepolia deployment/evidence prerequisites and optional operator environment-variable presence without emitting values, supporting future #217, #221, and #222 evidence runs without closing those trackers |
 
 ### Adversarial Testing
 
@@ -3420,7 +3421,7 @@ unless an external dependency changes.
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
 | `CON-006` | Add NatSpec coverage for public/external protocol surface | F/G | Merged in PR #457; issue #456 closed completed |
 | `CON-007` | Add interface/version views for frontend compatibility | G | Merged in PR #459; issue #458 closed completed |
-| `CON-008` | Recover measured `StreamCore` bytecode headroom with bounded micro-optimizations | D/G | Active PR #578 / issue #577 on branch `codex/streamcore-measured-micro-headroom`; local draft reduces production via-IR `StreamCore` runtime to 21,792 bytes with 2,784 bytes of EIP-170 margin, recovering 392 bytes below the approved 22,184-byte baseline while preserving ABI and release-readiness claims |
+| `CON-008` | Recover measured `StreamCore` bytecode headroom with bounded micro-optimizations | D/G | Merged in PR #578; issue #577 closed completed with production via-IR `StreamCore` runtime at 21,792 bytes, 2,784 bytes of EIP-170 margin, and 392 bytes recovered below the approved 22,184-byte baseline while preserving ABI and release-readiness claims |
 
 ### 1/1 Product Excellence
 
