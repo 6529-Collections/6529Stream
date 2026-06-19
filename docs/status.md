@@ -159,6 +159,12 @@ The current Gate A smoke baseline proves:
   accounting, or breaking fulfillment of the first token's request. This
   remains local adversarial coverage and does not replace fork/testnet/live
   provider operations evidence.
+- Burned pending arRNG composition tests now cover paid fixed-price and settled
+  auction drops that burn before fulfillment, proving payment/proceeds
+  accounting, consumed-drop state, request bindings, burned-token audit
+  randomness, no-metadata-update fulfillment, freeze eligibility, and frozen
+  manifest stability remain coherent. This remains local adversarial coverage
+  and does not replace fork/testnet/live provider operations evidence.
 - Metadata tests now prove dependency chunk boundaries are included in typed
   content hashes while preserving the existing rendered generative script
   output. `StreamDependencyRegistry.t.sol` proves immutable dependency version

@@ -28,6 +28,12 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
     bytes32 private constant RANDOMNESS_SEED_TYPEHASH = keccak256(
         "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
     );
+    bytes32 private constant METADATA_UPDATE_TOPIC = keccak256("MetadataUpdate(uint256)");
+    bytes32 private constant BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC = keccak256(
+        "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)"
+    );
+    bytes32 private constant RANDOMNESS_FULFILLED_TOPIC =
+        keccak256("RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)");
     bytes4 private constant ERROR_STRING_SELECTOR = bytes4(keccak256("Error(string)"));
 
     struct CompositionSetup {
@@ -202,6 +208,101 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
 
         _fulfillRandomnessAndAssertBinding(setup, firstTokenId, requestId, 9012);
         _assertFixedPriceAccountingSnapshot(setup, beforeCollision, "collision fulfillment");
+    }
+
+    function testBurnedPaidFixedPricePendingArrngFulfillmentPreservesCreditsAndFreeze() public {
+        CompositionSetup memory setup = _deployComposition();
+        (,, uint256 tokenId) =
+            _mintFixedPriceDropWithSignature(setup, "burned-fixed-price-pending-arrng", 41);
+        uint256 requestId = setup.randomizer.tokenToRequest(tokenId);
+        FixedPriceSnapshot memory beforeBurn = _snapshot(setup, tokenId);
+
+        vm.prank(RECIPIENT);
+        setup.deployed.core.burn(COLLECTION_ID, tokenId);
+
+        setup.deployed.core.isTokenBurned(tokenId).assertTrue("burned token");
+        setup.randomizer.tokenToRequest(tokenId).assertEq(requestId, "burn request binding");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "burn pending");
+        _assertFixedPriceAccountingSnapshot(setup, beforeBurn, "burn credits");
+        _assertBurnedAudit(setup, tokenId, RECIPIENT, beforeBurn.tokenHash, bytes32(0), false);
+
+        _warpPastFinalSupplyWindow();
+        bytes32 expectedManifest =
+            setup.deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
+        setup.deployed.core.freezeCollection(COLLECTION_ID);
+        setup.deployed.core.collectionFreezeStatus(COLLECTION_ID).assertTrue("frozen");
+        setup.deployed.core.collectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "stored manifest");
+
+        vm.recordLogs();
+        bytes32 fulfilledSeed = _fulfillRandomnessAndAssertBinding(setup, tokenId, requestId, 1122);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "burn fulfillment metadata update");
+        _countTopic(logs, BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC)
+            .assertEq(1, "burn fulfillment audit event");
+        _countTopic(logs, RANDOMNESS_FULFILLED_TOPIC).assertEq(1, "fulfillment event");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
+        _assertBurnedAudit(setup, tokenId, RECIPIENT, fulfilledSeed, fulfilledSeed, true);
+        _assertFixedPriceAccountingSnapshot(setup, beforeBurn, "post-burn fulfillment credits");
+        setup.deployed.core.collectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "stored manifest changed");
+        setup.deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "preview manifest changed");
+    }
+
+    function testFreezeRejectsLivePendingFixedPriceButAllowsBurnedPendingArrngTokens() public {
+        CompositionSetup memory setup = _deployComposition();
+        (,, uint256 burnedTokenId) =
+            _mintFixedPriceDropWithSignature(setup, "burned-pending-freeze-fixed-price", 51);
+        (StreamDrops.DropAuthorization memory liveAuthorization, bytes memory liveSignature) =
+            _buildSignedFixedPriceAuthorization(setup, "live-pending-freeze-fixed-price", 52);
+        vm.deal(address(this), 20 ether);
+        setup.deployed.drops.mintDrop{ value: PRICE }(
+            liveAuthorization, "live-pending-freeze-fixed-price", liveSignature
+        );
+        uint256 liveTokenId = setup.deployed.drops.retrieveTokenID(liveAuthorization.dropId);
+        setup.deployed.core.ownerOf(liveTokenId).assertEq(RECIPIENT, "live owner");
+        setup.deployed.drops.isDropConsumed(liveAuthorization.dropId).assertTrue("live consumed");
+        setup.randomizer.tokenToRequest(liveTokenId)
+            .assertEq(setup.controller.lastRequestId(), "live request");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(2, "two pending");
+
+        vm.prank(RECIPIENT);
+        setup.deployed.core.burn(COLLECTION_ID, burnedTokenId);
+        _warpPastFinalSupplyWindow();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamCore.CollectionHasPendingTokenMetadata.selector, COLLECTION_ID, 1
+            )
+        );
+        setup.deployed.core.freezeCollection(COLLECTION_ID);
+
+        vm.prank(RECIPIENT);
+        setup.deployed.core.burn(COLLECTION_ID, liveTokenId);
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)
+            .assertEq(2, "lifecycle pending survives burn");
+
+        bytes32 expectedManifest =
+            setup.deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
+        setup.deployed.core.freezeCollection(COLLECTION_ID);
+        setup.deployed.core.collectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "frozen burned manifest");
+
+        _fulfillRandomnessAndAssertBinding(
+            setup, burnedTokenId, setup.randomizer.tokenToRequest(burnedTokenId), 3344
+        );
+        _fulfillRandomnessAndAssertBinding(
+            setup, liveTokenId, setup.randomizer.tokenToRequest(liveTokenId), 5566
+        );
+
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)
+            .assertEq(0, "burned fulfill pending cleared");
+        setup.deployed.core.collectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "manifest changed after burned fulfillments");
+        setup.deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "preview changed after burned fulfillments");
     }
 
     function _deployComposition() private returns (CompositionSetup memory setup) {
@@ -384,10 +485,10 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         uint256 tokenId,
         uint256 requestId,
         uint256 word
-    ) private {
+    ) private returns (bytes32 expectedSeed) {
         uint256[] memory words = _words(word);
         uint256 randomizerEpoch = setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID);
-        bytes32 expectedSeed =
+        expectedSeed =
             _expectedSeed(address(setup.randomizer), requestId, tokenId, randomizerEpoch, words);
         bytes32 rawOutputHash = keccak256(abi.encode(words));
         setup.controller.fulfill(setup.randomizer, requestId, words);
@@ -405,7 +506,64 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         request.randomizerEpoch.assertEq(randomizerEpoch, "request epoch");
         request.derivedSeed.assertEq(expectedSeed, "request seed");
         request.rawOutputHash.assertEq(rawOutputHash, "request raw hash");
-        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
+    }
+
+    function _assertBurnedAudit(
+        CompositionSetup memory setup,
+        uint256 tokenId,
+        address owner,
+        bytes32 tokenHash,
+        bytes32 postBurnRandomnessHash,
+        bool postBurnRecorded
+    ) private view {
+        {
+            (
+                bool burned,
+                uint256 collectionId,
+                address auditOwner,
+                address operator,
+                uint256 burnedBlock,
+                uint256 burnedTimestamp,,,,
+            ) = setup.deployed.core.burnedTokenAuditState(tokenId);
+
+            burned.assertTrue("audit burned");
+            collectionId.assertEq(COLLECTION_ID, "audit collection");
+            auditOwner.assertEq(owner, "audit owner");
+            operator.assertEq(owner, "audit operator");
+            (burnedBlock > 0).assertTrue("audit burn block");
+            (burnedTimestamp > 0).assertTrue("audit burn timestamp");
+        }
+        {
+            (
+                ,,,,,,
+                bytes32 auditTokenHash,
+                bytes32 auditPostBurnRandomnessHash,
+                uint256 postBurnRandomnessBlock,
+                uint256 postBurnRandomnessTimestamp
+            ) = setup.deployed.core.burnedTokenAuditState(tokenId);
+
+            auditTokenHash.assertEq(tokenHash, "audit token hash");
+            auditPostBurnRandomnessHash.assertEq(postBurnRandomnessHash, "audit post-burn hash");
+            if (postBurnRecorded) {
+                (postBurnRandomnessBlock > 0).assertTrue("post-burn block");
+                (postBurnRandomnessTimestamp > 0).assertTrue("post-burn timestamp");
+            } else {
+                postBurnRandomnessBlock.assertEq(0, "unexpected post-burn block");
+                postBurnRandomnessTimestamp.assertEq(0, "unexpected post-burn timestamp");
+            }
+        }
+    }
+
+    function _warpPastFinalSupplyWindow() private {
+        vm.warp(block.timestamp + 31 days + 1);
+    }
+
+    function _countTopic(Vm.Log[] memory logs, bytes32 topic) private pure returns (uint256 count) {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].topics.length > 0 && logs[i].topics[0] == topic) {
+                count++;
+            }
+        }
     }
 
     function _assertRevertedWithMessage(
@@ -416,6 +574,8 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         success.assertFalse("call unexpectedly succeeded");
         // Pin the current nested Error(string) revert surface. If the production
         // path moves to custom errors, update these low-level assertions.
+        // Casting to bytes4 is safe: an Error(string) payload starts with the selector.
+        // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 selector = bytes4(returnData);
         require(selector == ERROR_STRING_SELECTOR, "unexpected revert selector");
         _decodeErrorString(returnData).assertEq(expectedMessage, "unexpected revert");

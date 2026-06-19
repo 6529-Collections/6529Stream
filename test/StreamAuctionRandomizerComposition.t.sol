@@ -33,6 +33,12 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
     bytes32 private constant RANDOMNESS_SEED_TYPEHASH = keccak256(
         "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
     );
+    bytes32 private constant METADATA_UPDATE_TOPIC = keccak256("MetadataUpdate(uint256)");
+    bytes32 private constant BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC = keccak256(
+        "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)"
+    );
+    bytes32 private constant RANDOMNESS_FULFILLED_TOPIC =
+        keccak256("RandomnessFulfilled(uint256,uint256,uint256,address,uint256,bytes32,bytes32)");
     bytes4 private constant ERROR_STRING_SELECTOR = bytes4(keccak256("Error(string)"));
 
     struct CompositionSetup {
@@ -393,6 +399,58 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             .assertEq(uint256(StreamAuctions.AuctionStatus.Active), "first auction status");
     }
 
+    function testBurnedSettledAuctionPendingArrngFulfillmentPreservesProceedsAndFreeze() public {
+        CompositionSetup memory setup = _deployComposition();
+        (, uint256 tokenId, uint256 auctionEndTime) =
+            _mintAuctionDrop(setup, "burned-settled-auction-pending-arrng", 101);
+        uint256 requestId = setup.randomizer.tokenToRequest(tokenId);
+
+        _bid(setup.auctions, tokenId, FIRST_BIDDER, RESERVE_PRICE);
+        _bid(setup.auctions, tokenId, SECOND_BIDDER, SECOND_BID);
+        vm.warp(auctionEndTime + 1);
+        setup.auctions.claimAuction(tokenId);
+
+        setup.deployed.core.ownerOf(tokenId).assertEq(SECOND_BIDDER, "winner before burn");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledWithBid), "settled before burn");
+        AuctionAccountingSnapshot memory beforeBurn = _snapshotAuctionAccounting(setup);
+
+        vm.prank(SECOND_BIDDER);
+        setup.deployed.core.burn(COLLECTION_ID, tokenId);
+
+        setup.deployed.core.isTokenBurned(tokenId).assertTrue("burned token");
+        uint256(setup.auctions.retrieveAuctionStatus(tokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.SettledWithBid), "status after burn");
+        setup.auctions.auctionClaim(tokenId).assertTrue("claim after burn");
+        setup.randomizer.tokenToRequest(tokenId).assertEq(requestId, "burn request binding");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(1, "burn pending");
+        _assertAuctionAccountingSnapshot(setup, beforeBurn, "burn proceeds");
+        _assertBurnedAudit(setup, tokenId, SECOND_BIDDER, bytes32(0), bytes32(0), false);
+
+        _warpPastFinalSupplyWindow();
+        bytes32 expectedManifest =
+            setup.deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
+        setup.deployed.core.freezeCollection(COLLECTION_ID);
+        setup.deployed.core.collectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "stored manifest");
+
+        vm.recordLogs();
+        bytes32 fulfilledSeed = _fulfillRandomnessAndAssertBinding(setup, tokenId, requestId, 7788);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "burn fulfillment metadata update");
+        _countTopic(logs, BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC)
+            .assertEq(1, "burn fulfillment audit event");
+        _countTopic(logs, RANDOMNESS_FULFILLED_TOPIC).assertEq(1, "fulfillment event");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
+        _assertBurnedAudit(setup, tokenId, SECOND_BIDDER, fulfilledSeed, fulfilledSeed, true);
+        _assertAuctionAccountingSnapshot(setup, beforeBurn, "post-burn fulfillment proceeds");
+        setup.deployed.core.collectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "stored manifest changed");
+        setup.deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID)
+            .assertEq(expectedManifest, "preview manifest changed");
+    }
+
     function testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle() public {
         CompositionSetup memory setup = _deployComposition();
         (
@@ -669,10 +727,10 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         uint256 tokenId,
         uint256 requestId,
         uint256 word
-    ) private {
+    ) private returns (bytes32 expectedSeed) {
         uint256[] memory words = _words(word);
         uint256 randomizerEpoch = setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID);
-        bytes32 expectedSeed =
+        expectedSeed =
             _expectedSeed(address(setup.randomizer), requestId, tokenId, randomizerEpoch, words);
         bytes32 rawOutputHash = keccak256(abi.encode(words));
         setup.controller.fulfill(setup.randomizer, requestId, words);
@@ -690,7 +748,64 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         request.randomizerEpoch.assertEq(randomizerEpoch, "request epoch");
         request.derivedSeed.assertEq(expectedSeed, "request seed");
         request.rawOutputHash.assertEq(rawOutputHash, "request raw hash");
-        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
+    }
+
+    function _assertBurnedAudit(
+        CompositionSetup memory setup,
+        uint256 tokenId,
+        address owner,
+        bytes32 tokenHash,
+        bytes32 postBurnRandomnessHash,
+        bool postBurnRecorded
+    ) private view {
+        {
+            (
+                bool burned,
+                uint256 collectionId,
+                address auditOwner,
+                address operator,
+                uint256 burnedBlock,
+                uint256 burnedTimestamp,,,,
+            ) = setup.deployed.core.burnedTokenAuditState(tokenId);
+
+            burned.assertTrue("audit burned");
+            collectionId.assertEq(COLLECTION_ID, "audit collection");
+            auditOwner.assertEq(owner, "audit owner");
+            operator.assertEq(owner, "audit operator");
+            (burnedBlock > 0).assertTrue("audit burn block");
+            (burnedTimestamp > 0).assertTrue("audit burn timestamp");
+        }
+        {
+            (
+                ,,,,,,
+                bytes32 auditTokenHash,
+                bytes32 auditPostBurnRandomnessHash,
+                uint256 postBurnRandomnessBlock,
+                uint256 postBurnRandomnessTimestamp
+            ) = setup.deployed.core.burnedTokenAuditState(tokenId);
+
+            auditTokenHash.assertEq(tokenHash, "audit token hash");
+            auditPostBurnRandomnessHash.assertEq(postBurnRandomnessHash, "audit post-burn hash");
+            if (postBurnRecorded) {
+                (postBurnRandomnessBlock > 0).assertTrue("post-burn block");
+                (postBurnRandomnessTimestamp > 0).assertTrue("post-burn timestamp");
+            } else {
+                postBurnRandomnessBlock.assertEq(0, "unexpected post-burn block");
+                postBurnRandomnessTimestamp.assertEq(0, "unexpected post-burn timestamp");
+            }
+        }
+    }
+
+    function _warpPastFinalSupplyWindow() private {
+        vm.warp(block.timestamp + 31 days + 1);
+    }
+
+    function _countTopic(Vm.Log[] memory logs, bytes32 topic) private pure returns (uint256 count) {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].topics.length > 0 && logs[i].topics[0] == topic) {
+                count++;
+            }
+        }
     }
 
     function _assertAuctionAccountingSnapshot(
@@ -834,6 +949,8 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         success.assertFalse("call unexpectedly succeeded");
         // Pin the current nested Error(string) revert surface. If the production
         // path moves to custom errors, update these low-level assertions.
+        // Casting to bytes4 is safe: an Error(string) payload starts with the selector.
+        // forge-lint: disable-next-line(unsafe-typecast)
         bytes4 selector = bytes4(returnData);
         require(selector == ERROR_STRING_SELECTOR, "unexpected revert selector");
         _decodeErrorString(returnData).assertEq(expectedMessage, "unexpected revert");
