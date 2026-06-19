@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/burned-pending-arrng-composition` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/600` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/601` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/602` |
 | Next issue | TBD after issue #601 is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 08:53 UTC` |
+| Last updated | `2026-06-19 08:58 UTC` |
 
 ## Packaging Notes
 
@@ -16344,6 +16344,7 @@ Outcome:
 | 2026-06-19 08:21 | Merge PR #600 and start issue #601 | PR #600 merged as `bae09defd6d0563503d68f82ceff42ac525557f6` after CI, CodeRabbit, empty review threads, and latest-head 6529bot feedback were clean. Issue #601 and branch `codex/burned-pending-arrng-composition` now track the next local-verifiable Gate D slice: fixed-price and auction signed drops with pending arRNG requests that are burned or frozen before fulfillment, preserving payment/custody state, burned-token audit randomness, freeze eligibility, and manifest stability without claiming live provider readiness. |
 | 2026-06-19 08:29 | Implement ADV-020 local draft | Added burned pending arRNG composition coverage to the fixed-price and auction suites. The new tests prove paid fixed-price drops and settled auction drops can burn before fulfillment while preserving fixed-price credits, auction proceeds, consumed-drop state, request bindings, burned-token audit randomness, no-metadata-update fulfillment, freeze eligibility, and frozen manifest stability. Focused `forge test --match-path test\StreamFixedPriceRandomizerComposition.t.sol -vvv` passed with 6 tests and `forge test --match-path test\StreamAuctionRandomizerComposition.t.sol -vvv` passed with 11 tests, with existing known Solidity warning noise only. Next action is to regenerate release artifacts, run local gates, commit, push, open PR closing #601, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-19 08:53 | Finish ADV-020 local validation | Local validation passed: `forge fmt --check` for both changed composition suites, focused fixed-price composition suite, focused auction composition suite, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, `codex-diff-check`, `make release-checksums`, full `make check`, and Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`. The first wrapper attempt failed only because it ran in parallel with `make check` and both tried to own `cache\forge-size.log.tmp`; rerunning the wrapper alone passed. Next action is to refresh release artifacts for this state update, commit, push, open PR closing #601, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-19 08:58 | Open PR #602 for ADV-020 | PR #602 is open at `https://github.com/6529-Collections/6529Stream/pull/602`, closes issue #601, and packages burned pending arRNG fixed-price and auction composition regressions plus roadmap/status/test traceability and regenerated release artifacts. Local validation passed immediately before opening the PR: `forge fmt --check` for both changed composition suites, focused fixed-price composition suite, focused auction composition suite, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, `codex-diff-check`, full `make check`, Windows `scripts\check.ps1`, and `make release-checksums`. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
