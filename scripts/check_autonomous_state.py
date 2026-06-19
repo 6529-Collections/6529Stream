@@ -30,7 +30,20 @@ PR_URL_RE = re.compile(r"github\.com/6529-Collections/6529Stream/pull/(\d+)")
 ISSUE_URL_RE = re.compile(r"github\.com/6529-Collections/6529Stream/issues/(\d+)")
 ACTIVE_PR_WITH_ISSUE_RE = re.compile(r"\bActive PR #(?P<pr>\d+)\s*/\s*issue #(?P<issue>\d+)\b")
 ACTIVE_ISSUE_ONLY_RE = re.compile(r"\bActive issue #(?P<issue>\d+)\b")
+DETAIL_HEADING_RE = re.compile(r"^###\s+(?P<item>[A-Z]+-\d+):\s*(?P<title>.+?)\s*$")
+ISSUE_NUMBER_RE = re.compile(r"\bissue #(\d+)\b", re.IGNORECASE)
+PR_NUMBER_RE = re.compile(r"\bPR #(\d+)\b", re.IGNORECASE)
 BRANCH_RE = re.compile(r"branch `([^`]+)`")
+ACTIVE_DETAIL_STATUS_RE = re.compile(
+    r"^\s*(?:"
+    r"active\s+(?:in\s+)?(?:issue|pr)\s*#"
+    r"|in\s+progress\b"
+    r"|local\s+validation\s+complete\b"
+    r"|pr\s+link\s+pending\b"
+    r"|pr\s+not\s+opened\b"
+    r")",
+    re.IGNORECASE,
+)
 
 
 class AutonomousStateError(Exception):
@@ -43,6 +56,17 @@ class ActiveBacklogRow:
     title: str
     pr_number: int | None
     issue_number: int | None
+    branch: str | None
+    raw: str
+
+
+@dataclass(frozen=True)
+class DetailedBacklogStatus:
+    item_id: str
+    title: str
+    status: str
+    pr_numbers: tuple[int, ...]
+    issue_numbers: tuple[int, ...]
     branch: str | None
     raw: str
 
@@ -124,9 +148,113 @@ def parse_backlog_rows(backlog_text: str) -> list[ActiveBacklogRow]:
     return rows
 
 
+def parse_detailed_statuses(backlog_text: str) -> list[DetailedBacklogStatus]:
+    rows: list[DetailedBacklogStatus] = []
+    current_item = "UNKNOWN"
+    current_title = "Unknown detailed backlog item"
+    lines = backlog_text.splitlines()
+    index = 0
+    in_fenced_block = False
+
+    while index < len(lines):
+        line = lines[index]
+        if line.strip().startswith("```"):
+            in_fenced_block = not in_fenced_block
+            index += 1
+            continue
+        if in_fenced_block:
+            index += 1
+            continue
+
+        heading_match = DETAIL_HEADING_RE.match(line)
+        if heading_match:
+            current_item = heading_match.group("item")
+            current_title = heading_match.group("title")
+            index += 1
+            continue
+
+        if not line.startswith("Status:"):
+            index += 1
+            continue
+
+        start_index = index
+        status_parts = [line[len("Status:") :].strip()]
+        index += 1
+        while index < len(lines) and lines[index].strip() and not lines[index].startswith("#"):
+            status_parts.append(lines[index].strip())
+            index += 1
+
+        status = " ".join(status_parts)
+        pr_matches = [int(match) for match in PR_NUMBER_RE.findall(status)]
+        issue_matches = [int(match) for match in ISSUE_NUMBER_RE.findall(status)]
+        branch_match = BRANCH_RE.search(status)
+        rows.append(
+            DetailedBacklogStatus(
+                item_id=current_item,
+                title=current_title,
+                status=status,
+                pr_numbers=tuple(pr_matches),
+                issue_numbers=tuple(issue_matches),
+                branch=branch_match.group(1) if branch_match else None,
+                raw="\n".join(lines[start_index:index]),
+            )
+        )
+
+    return rows
+
+
+def is_active_detail_status(status: str) -> bool:
+    return ACTIVE_DETAIL_STATUS_RE.search(status) is not None
+
+
+def validate_detailed_statuses(
+    detailed_statuses: list[DetailedBacklogStatus],
+    *,
+    expected_pr: int | None,
+    expected_issue: int | None,
+    expected_branch: str,
+) -> None:
+    for detail in detailed_statuses:
+        if not is_active_detail_status(detail.status):
+            continue
+
+        label = f"{detail.item_id} detailed status"
+        if expected_issue is None:
+            raise AutonomousStateError(
+                f"{label} claims active work but state has no active issue: {detail.status}"
+            )
+        if not detail.issue_numbers:
+            raise AutonomousStateError(
+                f"{label} claims active work without an issue number: {detail.status}"
+            )
+        stale_issues = sorted({issue for issue in detail.issue_numbers if issue != expected_issue})
+        if stale_issues:
+            raise AutonomousStateError(
+                f"{label} issue reference(s) {stale_issues} do not match state issue "
+                f"#{expected_issue}: {detail.status}"
+            )
+        if detail.pr_numbers and expected_pr is None:
+            raise AutonomousStateError(
+                f"{label} claims active PR reference(s) {list(detail.pr_numbers)} "
+                f"but state has no active PR: {detail.status}"
+            )
+        stale_prs = sorted({pr for pr in detail.pr_numbers if pr != expected_pr})
+        if stale_prs:
+            raise AutonomousStateError(
+                f"{label} PR reference(s) {stale_prs} do not match state PR "
+                f"{expected_pr}: {detail.status}"
+            )
+        if detail.branch is not None and detail.branch != expected_branch:
+            raise AutonomousStateError(
+                f"{label} branch {detail.branch!r} does not match state branch "
+                f"{expected_branch!r}: {detail.status}"
+            )
+
+
 def validate_state(run_state_path: Path, backlog_path: Path) -> None:
     state = parse_current_state(run_state_path.read_text(encoding="utf-8"))
-    active_rows = parse_backlog_rows(backlog_path.read_text(encoding="utf-8"))
+    backlog_text = backlog_path.read_text(encoding="utf-8")
+    active_rows = parse_backlog_rows(backlog_text)
 
     active_pr_rows = [row for row in active_rows if row.pr_number is not None]
     active_issue_rows = [row for row in active_rows if row.issue_number is not None]
@@ -140,6 +268,12 @@ def validate_state(run_state_path: Path, backlog_path: Path) -> None:
     expected_pr = number_from_url(state["Active PR"], PR_URL_RE, "Active PR")
     expected_issue = number_from_url(state["Active issue"], ISSUE_URL_RE, "Active issue")
     expected_branch = state["Active PR branch"]
+    validate_detailed_statuses(
+        parse_detailed_statuses(backlog_text),
+        expected_pr=expected_pr,
+        expected_issue=expected_issue,
+        expected_branch=expected_branch,
+    )
 
     if expected_pr is None:
         if active_pr_rows:
