@@ -218,6 +218,16 @@ and
 for the operator command sequence, required Sepolia environment variable names,
 broadcast sanitization, manifest/address-book generation, and no-secret
 redaction requirements before replacing this retained artifact template.
+Before broadcasting, run the checked no-secret preflight in the operator shell:
+
+```sh
+python scripts/test_sepolia_evidence_preflight.py
+python scripts/check_sepolia_evidence_preflight.py --require-env --output-json /tmp/sepolia-evidence-preflight.json
+```
+
+The generated report records only prerequisite presence and redaction status.
+It must not contain RPC endpoint values, private keys, explorer API keys,
+signer-service credentials, raw signatures, or unreleased drop payloads.
 
 The retained artifact is checked separately from the JSON metadata envelope:
 

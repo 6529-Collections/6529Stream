@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a no-secret Sepolia evidence preflight checker that validates committed
+  deployment/evidence prerequisites and optionally checks only operator
+  environment variable presence, never values, before future public-beta
+  evidence runs for issues #217, #221, and #222.
 - Added a retained exact-linked live release-evidence issue audit after the
   live deployment manifest checker merge, syncing issue #227 to the dedicated
   retained-artifact body, proving it remains open, and refreshing archive,
