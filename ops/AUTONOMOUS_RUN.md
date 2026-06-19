@@ -40,7 +40,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 09:20 UTC` |
+| Last updated | `2026-06-19 09:28 UTC` |
 
 ## Packaging Notes
 
@@ -16349,6 +16349,7 @@ Outcome:
 | 2026-06-19 09:06 | Address PR #602 review polish | CodeRabbit reports pass on PR #602; 6529bot security review found no issues and general review marked the PR good to merge with non-blocking readability suggestions. Added a comment clarifying that freeze eligibility is computed from live-token metadata state while the randomizer pending counter still tracks fulfillable burned requests, and added an explicit short-revert payload guard before low-level `Error(string)` selector decoding in both composition suites. Focused `forge fmt --check`, fixed-price composition, and auction composition suites passed after the polish. Next action is to regenerate release artifacts/checksums, run consistency gates, push the follow-up commit, wait for latest-head CI/bot feedback, then merge only when clean. |
 | 2026-06-19 09:18 | Merge PR #602 and start issue #603 | PR #602 merged as `b921a8f0481f01935a9be72b8dd4fd2a4bd97b1d` after CodeRabbit, Foundry smoke, Windows wrapper, empty review threads, and latest-head 6529bot feedback were clean. Created issue #603 and branch `codex/testnet-retained-artifact-symlinks` for the next local-verifiable public-beta evidence hardening slice: reject symlinked retained files in the testnet deployment rehearsal checker without claiming real Sepolia evidence or closing tracker issue #217. |
 | 2026-06-19 09:20 | Open PR #604 for issue #603 | PR #604 is open at `https://github.com/6529-Collections/6529Stream/pull/604` to close issue #603. The branch rejects symlinked retained artifact paths in the `testnet_deployment_rehearsal` checker before reading or hashing evidence files, adds focused symlink regression coverage, updates roadmap/status/backlog/run-state traceability, and regenerates release artifacts without claiming real Sepolia evidence or closing tracker issue #217. Local validation passed: focused testnet deployment rehearsal evidence tests/checker, Python compile, `make release-checksums`, autonomous-state consistency, release artifact verification, changelog gate, Markdown links, and `codex-diff-check`. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, fix anything actionable, then merge only when clean. |
+| 2026-06-19 09:28 | Address PR #604 symlink review polish | 6529bot security found no issues and general review marked PR #604 good to merge with two non-blocking readability/coverage suggestions. Added an inline comment explaining that the retained-path walk intentionally rejects symlinked intermediate directories before `resolve()` can follow them, and added a focused regression for a symlinked intermediate directory in a reviewed Sepolia retained-artifact path. Next action is focused validation, release artifact refresh, consistency gates, push, and wait for latest CI/bot feedback. |
 
 ## Resume Instructions
 
