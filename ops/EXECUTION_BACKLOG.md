@@ -3396,7 +3396,7 @@ unless an external dependency changes.
 | `EXT-032` | Retain live release-evidence issue audit after marketplace/indexer evidence | E/G | Merged in PR #562; issue #561 closed completed with exact linked-issue live audit retention after PR #560 |
 | `EXT-033` | Add live deployment manifest evidence validation | F/G | Merged in PR #574; issue #573 closed completed with a dedicated retained-artifact template/checker for future reviewed `live_deployment_manifest` evidence while tracker issue #227 remains open until real reviewed evidence is retained |
 | `EXT-034` | Retain live issue audit after deployment manifest validation | F/G | Merged in PR #576; issue #575 closed completed with exact-linked live issue label/body/closure audit retention after PR #574, while issue #227 remains open for real reviewed live deployment manifest evidence |
-| `EXT-035` | Add Sepolia evidence preflight checker | E/G | Active issue #579 on branch `codex/sepolia-evidence-preflight`; validates committed Sepolia deployment/evidence prerequisites and optional operator environment-variable presence without emitting values, supporting future #217, #221, and #222 evidence runs without closing those trackers |
+| `EXT-035` | Add Sepolia evidence preflight checker | E/G | Active PR #580 / issue #579 on branch `codex/sepolia-evidence-preflight`; validates committed Sepolia deployment/evidence prerequisites and optional operator environment-variable presence without emitting values, supporting future #217, #221, and #222 evidence runs without closing those trackers |
 
 ### Adversarial Testing
 
