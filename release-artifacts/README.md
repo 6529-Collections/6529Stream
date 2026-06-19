@@ -192,7 +192,8 @@ event topic catalog inputs before any live network broadcast exists.
 The consumer-facing verifier treats `latest/` as closed over regular files:
 everything below that directory must be listed in `SHA256SUMS`, except
 `SHA256SUMS` itself and `release-checksums.json`, which are checksum-bundle
-index files with self-referential hashing constraints.
+index files with self-referential hashing constraints. Symlinks under
+`latest/` are rejected instead of resolved as release payloads.
 
 `latest/protocol-surface-report.json` is generated from the production contract
 set and Foundry artifacts. It records functions, selectors, events, topic0

@@ -215,6 +215,14 @@ def verify_release_directory_checksum_closure(
     checked_files = 0
     unchecksummed = []
     for path in sorted(release_dir.rglob("*")):
+        if path.is_symlink():
+            try:
+                relative_path = path.relative_to(repo_root).as_posix()
+            except ValueError:
+                relative_path = path.as_posix()
+            raise ReleaseArtifactVerificationError(
+                f"release artifact directory contains symlink: {relative_path}"
+            )
         if not path.is_file():
             continue
         relative_path = normalize_path(path, repo_root)

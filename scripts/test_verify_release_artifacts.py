@@ -238,6 +238,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 latest / verifier.CHECKSUM_FILE_NAME,
             )
+            expected_checked = sum(
+                path.startswith("release-artifacts/latest/")
+                for path in checksum_entries
+            )
 
             checked = verifier.verify_release_directory_checksum_closure(
                 root,
@@ -245,7 +249,24 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 checksum_entries,
             )
 
-            self.assertEqual(checked, 4)
+            self.assertEqual(checked, expected_checked)
+
+    def test_verifier_rejects_release_directory_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            link_path = root / "release-artifacts" / "latest" / "unlisted-link.json"
+            target_path = root / "release-artifacts" / "latest" / "abi-checksums.json"
+            try:
+                link_path.symlink_to(target_path)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "contains symlink",
+            ):
+                verifier.verify_release_artifacts(root)
 
     def test_checksum_parser_rejects_duplicate_paths(self) -> None:
         line = "0" * 64 + "  release-artifacts/latest/a.json\n"

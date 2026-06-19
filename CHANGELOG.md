@@ -11,8 +11,8 @@ the release policy in `docs/release-policy.md`.
   execution-backlog `Status:` paragraphs that still claim active work after the
   corresponding issue or PR has closed.
 - Strengthened the offline release artifact verifier to reject unchecksummed
-  regular files under `release-artifacts/latest`, while preserving the
-  self-referential checksum bundle exceptions for `SHA256SUMS` and
+  regular files and symlinks under `release-artifacts/latest`, while preserving
+  the self-referential checksum bundle exceptions for `SHA256SUMS` and
   `release-checksums.json`.
 - Added a deployment rehearsal gate parity checker that locks the aggregate
   suite and standalone deployment, auction, and emergency rehearsal commands
