@@ -272,6 +272,74 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             ):
                 verifier.verify_release_artifacts(root)
 
+    def test_verifier_rejects_symlinked_checksum_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            checksum_path = root / "release-artifacts" / "latest" / "SHA256SUMS"
+            target_path = root / "tmp" / "SHA256SUMS"
+            write_text(target_path, checksum_path.read_text(encoding="utf-8"))
+            checksum_path.unlink()
+            try:
+                checksum_path.symlink_to(target_path)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "SHA256SUMS must not be a symlink",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_symlinked_checksum_covered_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            covered_path = root / "deployments" / "examples" / "anvil.json"
+            target_path = root / "tmp" / "anvil-target.json"
+            write_text(target_path, covered_path.read_text(encoding="utf-8"))
+            covered_path.unlink()
+            try:
+                covered_path.symlink_to(target_path)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "must not include symlinks|must not be a symlink",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_symlinked_release_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            link_path = root / "release-artifacts" / "linked-latest"
+            target_path = root / "release-artifacts" / "latest"
+            try:
+                link_path.symlink_to(target_path, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"directory symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "release directory must not include symlinks",
+            ):
+                verifier.verify_release_artifacts(root, Path("release-artifacts/linked-latest"))
+
+    def test_verifier_rejects_release_directory_outside_repo(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir) / "repo"
+            seed_release_bundle(root)
+            outside = Path(temp_dir) / "outside-latest"
+            outside.mkdir()
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "release directory must stay inside the repository",
+            ):
+                verifier.verify_release_artifacts(root, outside)
+
     def test_checksum_parser_rejects_duplicate_paths(self) -> None:
         line = "0" * 64 + "  release-artifacts/latest/a.json\n"
         with self.assertRaisesRegex(verifier.ReleaseArtifactVerificationError, "duplicate path"):

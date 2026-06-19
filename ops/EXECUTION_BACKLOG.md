@@ -3449,6 +3449,7 @@ unless an external dependency changes.
 | `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Merged in PR #568; issue #567 closed completed |
 | `REL-012` | Aggregate local deployment rehearsal gate | E/G | Merged in PR #582; issue #581 closed completed with one aggregate suite-level evidence command, retained standalone script automation, suite-hash replay coverage, and CI/local gates that preserve both aggregate and standalone rehearsal entrypoints |
 | `REL-013` | Add deployment rehearsal gate parity checker | E/G | Merged in PR #584; issue #583 closed completed with machine-checkable aggregate and standalone rehearsal command parity across Make, Bash, PowerShell, and CI |
+| `REL-014` | Harden offline release verifier against symlinked release inputs | G | Active issue #589 on branch `codex/release-verifier-symlink-hardening`; reject symlinked checksum-covered inputs and escaped or symlinked release directories so third-party verification only accepts ordinary in-repo files |
 
 ### Governance And Operations
 
@@ -3487,7 +3488,7 @@ unless an external dependency changes.
 | `OSS-005` | Add docs link checker or markdown-lint gate | G | Merged in PR #505; issue #504 closed completed |
 | `OSS-006` | Add autonomous run-state consistency checker | G | Merged in PR #570; issue #569 closed completed |
 | `OSS-007` | Prevent stale detailed backlog status markers | G | Merged in PR #586; issue #585 closed completed |
-| `OSS-008` | Reject unchecksummed release-artifact extras in offline verifier | G | Active PR #588 / issue #587 on branch `codex/release-artifact-verifier-closure`; harden `scripts/verify_release_artifacts.py` so stray regular files under `release-artifacts/latest` fail consumer-side verification |
+| `OSS-008` | Reject unchecksummed release-artifact extras in offline verifier | G | Merged in PR #588; issue #587 closed completed |
 
 ## 6. Dependency Map
 
