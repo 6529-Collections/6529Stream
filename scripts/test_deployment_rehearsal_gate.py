@@ -148,7 +148,33 @@ class DeploymentRehearsalGateTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.DeploymentRehearsalGateError,
-                r"\.github/workflows/ci\.yml is missing required CI rehearsal logs",
+                r"\.github/workflows/ci\.yml is missing required CI command/log pairs",
+            ):
+                checker.validate_deployment_rehearsal_gate(root)
+
+    def test_rejects_duplicate_actual_ci_log_target(self) -> None:
+        logs = [log for _, log in checker.CI_REHEARSAL_LOGS]
+        duplicate_logs = [logs[0], logs[0], *logs[2:]]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_gate_tree(root, ci_logs=duplicate_logs)
+
+            with self.assertRaisesRegex(
+                checker.DeploymentRehearsalGateError,
+                "duplicate deployment rehearsal CI log targets",
+            ):
+                checker.validate_deployment_rehearsal_gate(root)
+
+    def test_rejects_swapped_ci_command_log_pair(self) -> None:
+        logs = [log for _, log in checker.CI_REHEARSAL_LOGS]
+        swapped_logs = [logs[1], logs[0], *logs[2:]]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_gate_tree(root, ci_logs=swapped_logs)
+
+            with self.assertRaisesRegex(
+                checker.DeploymentRehearsalGateError,
+                r"\.github/workflows/ci\.yml is missing required CI command/log pairs",
             ):
                 checker.validate_deployment_rehearsal_gate(root)
 

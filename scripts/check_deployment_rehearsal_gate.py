@@ -34,6 +34,11 @@ CI_REHEARSAL_LOGS = [
     ("standalone emergency redeployment", "ci-logs/forge-emergency-redeployment-rehearsal.log"),
 ]
 
+CI_REHEARSAL_COMMAND_LOG_PAIRS = [
+    (command_label, f"{command} 2>&1 | tee {log}")
+    for (command_label, command), (_, log) in zip(REHEARSAL_COMMANDS, CI_REHEARSAL_LOGS)
+]
+
 GATE_FILES = [
     Path("Makefile"),
     Path("scripts/check.sh"),
@@ -129,12 +134,27 @@ def _validate_makefile(repo_root: Path, text: str) -> None:
 def _validate_ci(repo_root: Path, text: str) -> None:
     """Validate CI commands and distinct retained log names."""
     ci_path = repo_root / ".github/workflows/ci.yml"
+    actual_logs = _extract_ci_rehearsal_log_targets(text)
+    if len(actual_logs) != len(set(actual_logs)):
+        raise DeploymentRehearsalGateError(
+            ".github/workflows/ci.yml has duplicate deployment rehearsal CI log targets"
+        )
+
     _require_ordered_entries(
         text=text,
         entries=REHEARSAL_COMMANDS,
         path=ci_path,
         repo_root=repo_root,
     )
+
+    _require_ordered_entries(
+        text=text,
+        entries=CI_REHEARSAL_COMMAND_LOG_PAIRS,
+        path=ci_path,
+        repo_root=repo_root,
+        entry_kind="CI command/log pairs",
+    )
+
     _require_ordered_entries(
         text=text,
         entries=CI_REHEARSAL_LOGS,
@@ -143,9 +163,19 @@ def _validate_ci(repo_root: Path, text: str) -> None:
         entry_kind="CI rehearsal logs",
     )
 
-    log_values = [log for _, log in CI_REHEARSAL_LOGS]
-    if len(set(log_values)) != len(log_values):
-        raise DeploymentRehearsalGateError("CI rehearsal log names must be distinct")
+
+def _extract_ci_rehearsal_log_targets(text: str) -> list[str]:
+    """Extract actual `tee` targets from CI lines that run rehearsal commands."""
+    targets = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if " | tee " not in stripped:
+            continue
+        if not any(command in stripped for _, command in REHEARSAL_COMMANDS):
+            continue
+        target = stripped.rsplit(" | tee ", 1)[1].strip().split()[0]
+        targets.append(target)
+    return targets
 
 
 def validate_deployment_rehearsal_gate(repo_root: Path) -> None:
