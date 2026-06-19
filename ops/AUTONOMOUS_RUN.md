@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/aggregate-deployment-rehearsal` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/580` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/581` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/582` |
 | Next issue | Aggregate local deployment rehearsals into one release-gate script while preserving the individual rehearsal scripts for targeted debugging and retained evidence capture. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 00:50 UTC` |
+| Last updated | `2026-06-19 01:14 UTC` |
 
 ## Packaging Notes
 
