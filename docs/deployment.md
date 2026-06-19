@@ -8,12 +8,14 @@ plan. Deployment manifests are mandatory release artifacts and follow ADR 0007.
 Run the local deployment rehearsal with:
 
 ```sh
-forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
-forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
-forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
+forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
 ```
 
-The script deploys and wires a local stack:
+The suite runs the local deployment, auction ceremony, and emergency
+redeployment rehearsals as one aggregate evidence command. The broader local
+and CI gates also keep the standalone script entrypoints automated, so the
+aggregate path cannot mask a regression in a standalone `forge script` run. The
+deployment rehearsal deploys and wires a local stack:
 
 - `StreamAdmins`
 - `DependencyRegistry`
@@ -35,6 +37,16 @@ revokes the temporary deployment admin, and transfers Ownable control for
 
 The rehearsal is not a production broadcast. It uses non-secret placeholder
 addresses and local-only external dependency addresses.
+
+For targeted debugging, retained evidence capture, and standalone-entrypoint
+coverage, the individual local rehearsal scripts remain runnable and are also
+exercised by the full local/CI check gate:
+
+```sh
+forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
+forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
+forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir
+```
 
 `script/RehearseAuctionCeremony.s.sol` adds the local auction ceremony layer on
 top of the deployed stack. It configures a local deterministic randomizer,

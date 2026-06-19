@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/sepolia-evidence-preflight` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/578` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/579` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/580` |
-| Next issue | Add a no-secret Sepolia evidence preflight checker that supports public-beta tracker issues #217, #221, and #222 without closing them. |
+| Active PR branch | `codex/aggregate-deployment-rehearsal` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/580` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/581` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/582` |
+| Next issue | Aggregate local deployment rehearsals into one release-gate script while preserving the individual rehearsal scripts for targeted debugging and retained evidence capture. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 00:24 UTC` |
+| Last updated | `2026-06-19 01:21 UTC` |
 
 ## Packaging Notes
 
@@ -16307,6 +16307,8 @@ Outcome:
 | 2026-06-18 10:43 | Fix PR #556 CI drift | CodeRabbit completed successfully and Windows wrapper passed, but Foundry smoke failed in the `Public beta evidence` step because `release-artifacts/latest/risk-register.json` still carried the pre-final `ops/EXECUTION_BACKLOG.md` hash. Regenerated the risk register and dependent release manifest/proof/lockfile/checksum artifacts. Local failing segment now passes: `python scripts\test_risk_register.py`, `python scripts\check_risk_register.py`, `python scripts\generate_risk_register.py --check`, public-beta evidence tests/checker, release manifest/proof/lockfile/checksum checks, and release artifact verifier. Next action is to commit/push the CI-fix artifacts and wait for the refreshed checks. |
 | 2026-06-18 10:58 | Address PR #556 bot nice-to-haves | CI and CodeRabbit were green on `598c2f1b32189a2186127916787d5a1e74e1d812`; 6529bot reported good-to-merge/no-security-findings plus non-blocking cleanup suggestions. Accepted them by reading the tokenURI file once, documenting the digest-only retained tokenURI behavior, clarifying `evidence_path_value` resolution modes, and adding positive `sha256:` tokenURI and chain-ID mismatch tests. Focused generator/fork-evidence gates, changelog/docs gates, release manifest/checksum checks, and full `make check` pass locally. Next action is to commit/push the review-response commit and wait for final CI/bot status. |
 | 2026-06-18 11:06 | Cover chain-ID fallback note | Final CI/CodeRabbit were green on `349d9d09fd959464820a83045fe175679dc8d1fb`; 6529bot reported no new findings and one optional branch-coverage note. Added `test_uses_capture_chain_id_when_argument_is_omitted` to prove omitted `--chain-id` defaults to the retained capture chain ID. Next action is to run focused generator gates, commit/push, and wait for final checks/review. |
+| 2026-06-19 00:41 | Merge PR #580 and start issue #581 | PR #580 merged as `28b5489fec060d5d407cca79d191503fbd1bc392` after Foundry smoke, Windows wrapper, CodeRabbit status, review threads, and latest-head 6529bot follow-up were clean; issue #579 closed completed. The Sepolia preflight checker confirmed the real Sepolia evidence path is still blocked locally by missing operator environment variables, so issue #581 and branch `codex/aggregate-deployment-rehearsal` now track an unblocked release-gate improvement: aggregate the local deployment, auction ceremony, and emergency redeployment rehearsals into one suite script without removing individual scripts or claiming testnet/live evidence. |
+| 2026-06-19 01:21 | Address PR #582 review feedback | PR #582 opened for issue #581 and CodeRabbit was requested, but CodeRabbit was rate-limited. 6529bot security review reported no findings on the initial head; 6529bot general review requested preserving automated standalone script-entrypoint coverage and strengthening suite-hash tests. In response, the branch now keeps the aggregate suite command while restoring standalone `forge script` coverage in Make/check/CI, hashes the full deployment/auction/emergency result structs, and adds chain-ID plus replay-determinism assertions for the suite result. Next action is to validate, regenerate release artifacts, commit/push, and wait for final CI/bot status. |
 
 ## Resume Instructions
 

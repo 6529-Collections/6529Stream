@@ -62,6 +62,9 @@ core-bytecode-spend-policy-check: size
 	$(PYTHON) scripts/check_core_bytecode_spend_policy.py
 
 deploy-rehearsal:
+	forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite --sig "run()" --via-ir
+
+deploy-rehearsal-standalone:
 	forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir
 	forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir
 	forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir

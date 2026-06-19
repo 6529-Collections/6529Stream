@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../script/RehearseDeployment.s.sol";
 import "../script/RehearseAuctionCeremony.s.sol";
+import "../script/RehearseDeploymentSuite.s.sol";
 import "../script/RehearseEmergencyRedeployment.s.sol";
 import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/RandomizerRNG.sol";
@@ -189,5 +190,64 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             result.replacementTokenHash != bytes32(0), "replacement token hash missing"
         );
         Assertions.assertEq(result.replacementSignerEpoch, 1, "replacement signer epoch");
+    }
+
+    function testAggregateDeploymentSuiteRunsAllRehearsals() public {
+        vm.chainId(31_337);
+        uint256 snapshotId = vm.snapshotState();
+        RehearseDeploymentSuite suite = new RehearseDeploymentSuite();
+
+        RehearseDeploymentSuite.DeploymentSuiteResult memory result = suite.run();
+
+        Assertions.assertEq(
+            result.suiteKindHash, keccak256(bytes("local-anvil-deployment-suite")), "suite kind"
+        );
+        Assertions.assertTrue(result.suiteHash != bytes32(0), "suite hash missing");
+        Assertions.assertEq(
+            result.suiteHash,
+            keccak256(
+                abi.encode(
+                    result.suiteKindHash, result.deployment, result.auction, result.emergency
+                )
+            ),
+            "suite hash"
+        );
+        Assertions.assertEq(result.deployment.chainId, 31_337, "deployment chain id");
+        Assertions.assertEq(result.auction.chainId, 31_337, "auction chain id");
+        Assertions.assertEq(result.emergency.chainId, 31_337, "emergency chain id");
+        Assertions.assertTrue(
+            result.deployment.manifestHash != bytes32(0), "deployment manifest missing"
+        );
+        Assertions.assertEq(
+            keccak256(bytes(result.auction.evidenceKind)),
+            keccak256(bytes("local-anvil-auction-ceremony")),
+            "auction evidence kind"
+        );
+        Assertions.assertEq(
+            result.auction.finalStatus,
+            uint8(StreamAuctions.AuctionStatus.SettledWithBid),
+            "auction final status"
+        );
+        Assertions.assertEq(result.auction.totalOwedAfterWithdrawals, 0, "auction owed");
+        Assertions.assertEq(
+            result.emergency.evidenceKindHash,
+            keccak256(bytes("local-anvil-emergency-redeployment")),
+            "emergency kind"
+        );
+        Assertions.assertTrue(
+            result.emergency.oldManifestHash != result.emergency.replacementManifestHash,
+            "emergency manifest reused"
+        );
+        Assertions.assertTrue(
+            result.emergency.oldDropDomainSeparator
+                != result.emergency.replacementDropDomainSeparator,
+            "emergency domain reused"
+        );
+
+        Assertions.assertTrue(vm.revertToState(snapshotId), "revert suite snapshot");
+        vm.chainId(31_337);
+        RehearseDeploymentSuite replayedSuite = new RehearseDeploymentSuite();
+        RehearseDeploymentSuite.DeploymentSuiteResult memory replayed = replayedSuite.run();
+        Assertions.assertEq(replayed.suiteHash, result.suiteHash, "suite hash replay");
     }
 }

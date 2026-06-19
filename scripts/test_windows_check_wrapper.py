@@ -44,7 +44,21 @@ class WindowsCheckWrapperTests(unittest.TestCase):
             ),
         )
         self.assertIn("forge build", self.check_content)
-        self.assertIn("forge script script/RehearseDeployment.s.sol:RehearseDeployment", self.check_content)
+        self.assertIn(
+            "forge script script/RehearseDeploymentSuite.s.sol:RehearseDeploymentSuite",
+            self.check_content,
+        )
+        self.assertIn(
+            "forge script script/RehearseDeployment.s.sol:RehearseDeployment", self.check_content
+        )
+        self.assertIn(
+            "forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony",
+            self.check_content,
+        )
+        self.assertIn(
+            "forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment",
+            self.check_content,
+        )
 
     def test_selected_python_is_routed_through_checked_wrapper(self) -> None:
         self.assertIn("$pythonExecutable = $pythonPath", self.check_content)

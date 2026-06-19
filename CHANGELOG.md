@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added an aggregate local deployment rehearsal suite that runs the deployment,
+  auction ceremony, and emergency redeployment rehearsals through one
+  release-gate script while preserving the individual scripts for targeted
+  debugging, retained evidence capture, and automated standalone-entrypoint
+  coverage.
 - Added a no-secret Sepolia evidence preflight checker that validates committed
   deployment/evidence prerequisites and optionally checks only operator
   environment variable presence, never values, before future public-beta
