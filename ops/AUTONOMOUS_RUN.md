@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/signer-auction-randomizer-composition` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/592` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/593` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/594` |
 | Next issue | Add signer lifecycle auction-randomizer composition tests. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 05:24 UTC` |
+| Last updated | `2026-06-19 05:47 UTC` |
 
 ## Packaging Notes
 
@@ -16328,6 +16328,7 @@ Outcome:
 | 2026-06-19 04:38 | Open PR #592 for ADV-015 | PR #592 is open at `https://github.com/6529-Collections/6529Stream/pull/592`, closes issue #591, and packages the auction/drop/arRNG/admin composition regressions plus traceability and regenerated release artifacts. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 05:16 | Merge PR #592 and start issue #593 | PR #592 merged as `11cdaae39d6ee5609b2e2e5d7c2a1ffb1639e013` after CodeRabbit, Foundry smoke, Windows wrapper, empty review threads, and latest-head 6529bot feedback were clean. Issue #593 and branch `codex/signer-auction-randomizer-composition` now track the next Gate D slice: post-execution signer rotation, signer-epoch invalidation, consumed-drop cancellation attempts, replay attempts, and drop-execution pause interactions with already-created auction and pending arRNG state. |
 | 2026-06-19 05:24 | Implement ADV-016 local draft | Extended `test/StreamAuctionRandomizerComposition.t.sol` with two post-execution signer lifecycle composition regressions. The new tests prove signer-epoch invalidation and signer rotation cannot replay or cancel consumed auction drops, those failed control attempts leave auction custody/payment state and pending request bindings unchanged, drop-execution pause after auction creation does not block bids, settlement, or arRNG fulfillment, and settlement/fulfillment remain coherent after the signer lifecycle changes. Focused `forge test --match-path test\StreamAuctionRandomizerComposition.t.sol -vvv` passed with 5 tests and existing known warning noise only. Next action is to finish traceability docs/artifacts, run adjacent and release gates, commit, push, open PR closing #593, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-19 05:47 | Open PR #594 for ADV-016 | PR #594 is open at `https://github.com/6529-Collections/6529Stream/pull/594`, closes issue #593, and packages post-execution signer lifecycle composition tests plus roadmap/status/test traceability and regenerated release artifacts. Local validation passed through focused and adjacent suites, Markdown/link and whitespace hygiene, full `make check`, and Windows `scripts\check.ps1`; only existing documented Solidity/Foundry warning noise appeared. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
