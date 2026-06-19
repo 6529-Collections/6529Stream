@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/fixed-price-randomizer-composition` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/594` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/595` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/596` |
 | Next issue | Add fixed-price randomizer/payment composition tests. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 06:10 UTC` |
+| Last updated | `2026-06-19 06:35 UTC` |
 
 ## Packaging Notes
 
@@ -16332,6 +16332,7 @@ Outcome:
 | 2026-06-19 05:50 | Address PR #594 review cleanup | 6529bot marked PR #594 good to merge and left one actionable nice-to-have: the final `DROP_EXECUTION` pause assertion message said `drop pause cleared` while asserting the pause remained set. Renamed the assertion label to `drop pause still set`. Next action is to rerun the focused composition suite, regenerate release artifacts/checksums, push the cleanup commit, and wait for latest-head CI/bot feedback. |
 | 2026-06-19 06:05 | Merge PR #594 and start issue #595 | PR #594 merged as `6fd93383dd45fa3530fcb0a2daeb0f3bf78a454a` after CodeRabbit, Foundry smoke, Windows wrapper, empty review threads, and latest-head 6529bot feedback were clean. Issue #595 and branch `codex/fixed-price-randomizer-composition` now track the next local-verifiable Gate D slice: paid fixed-price drops composed with real arRNG pending/fulfillment, signer lifecycle controls, rollback behavior, and fixed-price payment credits. Explorer review also identified auction no-bid/cancellation arRNG terminal paths as the next likely follow-up after this fixed-price slice. |
 | 2026-06-19 06:10 | Implement ADV-017 local draft | Added `test/StreamFixedPriceRandomizerComposition.t.sol` with three paid fixed-price/drop/arRNG composition regressions. The new tests prove randomness-request pause rollback leaves no consumed authorization, token, payment credits, owed totals, retained ETH, or pending request; post-execution signer-epoch invalidation, signer rotation, replay attempts, and consumed-drop cancellation attempts preserve recipient ownership, fixed-price credits, owed totals, retained balance, and request binding; and poster/protocol credit withdrawals before arRNG fulfillment do not break later fulfillment. Focused `forge test --match-path test\StreamFixedPriceRandomizerComposition.t.sol -vvv` passed with 3 tests and existing known warning noise only. Next action is to regenerate release artifacts, run adjacent and release gates, commit, push, open PR closing #595, request CodeRabbit, and wait for CI/bot feedback. |
+| 2026-06-19 06:35 | Open PR #596 for ADV-017 | Pushed commit `05eadf7a443e5035c96d3d2d4b9d30754591440e` on branch `codex/fixed-price-randomizer-composition`, opened PR #596 at `https://github.com/6529-Collections/6529Stream/pull/596` to close issue #595, and recorded the active PR in durable state. Local validation passed for `forge fmt --check test\StreamFixedPriceRandomizerComposition.t.sol`, the focused fixed-price composition suite, autonomous-state consistency, release artifact verification, Markdown links, changelog coverage, and cached whitespace. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
