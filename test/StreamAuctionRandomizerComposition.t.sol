@@ -340,6 +340,59 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         _assertZeroAuctionAccounting(setup, nextTokenId, POSTER, "cancelled auth");
     }
 
+    function testDuplicateArrngRequestIdRejectsAuctionDropWithoutConsumingOrRegistering() public {
+        CompositionSetup memory setup = _deployComposition();
+        (, uint256 firstTokenId,) =
+            _mintAuctionDrop(setup, "request-id-collision-auction-first", 91);
+        uint256 requestId = setup.randomizer.tokenToRequest(firstTokenId);
+        AuctionSnapshot memory beforeCollision = _snapshot(setup, firstTokenId);
+        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
+            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 supplyBefore = setup.deployed.core.totalSupply();
+        uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
+        uint256 nextRequestIdBefore = setup.controller.nextRequestId();
+        (StreamDrops.DropAuthorization memory authorization, bytes memory signature) = _buildSignedAuctionAuthorization(
+            setup, "request-id-collision-auction-second", 92, block.timestamp + 1 days
+        );
+
+        setup.controller.forceNextRequestId(requestId);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestAlreadyExists.selector, requestId
+            )
+        );
+        setup.deployed.drops
+            .mintDrop(authorization, "request-id-collision-auction-second", signature);
+
+        setup.deployed.drops.isDropConsumed(authorization.dropId)
+            .assertFalse("collision consumed drop");
+        setup.deployed.drops.retrieveTokenID(authorization.dropId).assertEq(0, "collision token id");
+        setup.deployed.core.totalSupply().assertEq(supplyBefore, "collision supply");
+        setup.deployed.core.viewCirSupply(COLLECTION_ID)
+            .assertEq(circulationBefore, "collision circulation");
+        setup.deployed.drops.retrieveDrops().length.assertEq(dropCountBefore, "collision drop");
+        setup.randomizer.tokenToRequest(nextTokenId).assertEq(0, "collision token request");
+        setup.deployed.core.retrieveTokenHash(nextTokenId).assertEq(bytes32(0), "collision hash");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)
+            .assertEq(beforeCollision.pendingRequests, "collision pending");
+        setup.controller.lastRequestId().assertEq(requestId, "collision last request");
+        setup.controller.nextRequestId().assertEq(nextRequestIdBefore, "collision next request");
+        uint256(setup.auctions.retrieveAuctionStatus(nextTokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.None), "collision auction status");
+        setup.auctions.pendingNoBidNftClaimant(nextTokenId)
+            .assertEq(address(0), "collision pending claimant");
+        setup.auctions.retrieveNoBidAuctionClaimant(nextTokenId)
+            .assertEq(address(0), "collision claimant alias");
+        setup.auctions.auctionClaim(nextTokenId).assertFalse("collision auction claim");
+        _assertZeroAuctionAccounting(setup, nextTokenId, POSTER, "collision accounting");
+        _assertSnapshot(setup, firstTokenId, beforeCollision, "collision first token");
+
+        _fulfillRandomnessAndAssertBinding(setup, firstTokenId, requestId, 3456);
+        uint256(setup.auctions.retrieveAuctionStatus(firstTokenId))
+            .assertEq(uint256(StreamAuctions.AuctionStatus.Active), "first auction status");
+    }
+
     function testPostExecutionSignerEpochCannotReplayCancelOrBreakAuctionLifecycle() public {
         CompositionSetup memory setup = _deployComposition();
         (
@@ -824,11 +877,21 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
 contract CompositionArrngController {
     uint256 public nextRequestId = 1;
     uint256 public lastRequestId;
+    uint256 public forcedRequestId;
+
+    function forceNextRequestId(uint256 requestId) external {
+        forcedRequestId = requestId;
+    }
 
     function requestRandomWords(uint256, address) external payable returns (uint256 requestId) {
-        requestId = nextRequestId;
+        requestId = forcedRequestId;
+        if (requestId == 0) {
+            requestId = nextRequestId;
+            nextRequestId++;
+        } else {
+            forcedRequestId = 0;
+        }
         lastRequestId = requestId;
-        nextRequestId++;
     }
 
     // Permissionless on purpose: this test double models a cooperative arRNG

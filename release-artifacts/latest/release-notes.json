@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:5cc172987910f4f509339a7066a049761f930a3cb8b2939ad63442cf8d0fe4e0",
-      "size_bytes": 71455
+      "sha256": "sha256:0f332fd9f5049f714c5a7c9283091d8f64ccc4b775ae36de295f7cd6f96794e3",
+      "size_bytes": 71798
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:512680df135eeb4a098b0ff7fdf65a4906bd29c26e9a0cd95ad6437ae0eda8f3",
+      "sha256": "sha256:6a53b35bddbd7ca39beb048962c8524d7eda13e761d2901f6691969684a51722",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added fixed-price and auction arRNG request-ID collision composition regressions proving a reused provider request ID fails with `RandomnessRequestAlreadyExists` while preserving drop authorization state, mint/drop counts, payment or auction accounting, pending request accounting, and the first token's fulfillable request binding.",
       "Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.",
       "Extended auction/drop/arRNG composition regressions to cover post-execution signer lifecycle controls, proving signer-epoch invalidation, signer rotation, consumed-drop cancellation attempts, replay attempts, and drop-execution pauses cannot disturb existing auction custody, bid accounting, pending request bindings, settlement, or later arRNG fulfillment.",
       "Added fixed-price/drop/arRNG composition regressions proving randomness-request pauses roll back paid fixed-price drop execution without consuming authorizations or crediting payments, post-execution signer lifecycle controls cannot disturb fixed-price credits or pending request bindings, and poster/protocol credit withdrawals before arRNG fulfillment do not break later fulfillment.",

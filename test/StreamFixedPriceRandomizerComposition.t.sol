@@ -157,6 +157,53 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         _assertFixedPriceAccountingSnapshot(setup, beforeFulfillment, "withdraw fulfillment");
     }
 
+    function testDuplicateArrngRequestIdRejectsPaidFixedPriceDropWithoutConsumingOrCrediting()
+        public
+    {
+        CompositionSetup memory setup = _deployComposition();
+        (,, uint256 firstTokenId) =
+            _mintFixedPriceDropWithSignature(setup, "request-id-collision-first", 31);
+        uint256 requestId = setup.randomizer.tokenToRequest(firstTokenId);
+        FixedPriceSnapshot memory beforeCollision = _snapshot(setup, firstTokenId);
+        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
+            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 supplyBefore = setup.deployed.core.totalSupply();
+        uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
+        uint256 nextRequestIdBefore = setup.controller.nextRequestId();
+        (StreamDrops.DropAuthorization memory authorization, bytes memory signature) =
+            _buildSignedFixedPriceAuthorization(setup, "request-id-collision-second", 32);
+
+        setup.controller.forceNextRequestId(requestId);
+        vm.deal(address(this), 20 ether);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamRandomizerLifecycle.RandomnessRequestAlreadyExists.selector, requestId
+            )
+        );
+        setup.deployed.drops.mintDrop{ value: PRICE }(
+            authorization, "request-id-collision-second", signature
+        );
+
+        setup.deployed.drops.isDropConsumed(authorization.dropId)
+            .assertFalse("collision consumed drop");
+        setup.deployed.drops.retrieveTokenID(authorization.dropId).assertEq(0, "collision token id");
+        setup.deployed.core.totalSupply().assertEq(supplyBefore, "collision supply");
+        setup.deployed.core.viewCirSupply(COLLECTION_ID)
+            .assertEq(circulationBefore, "collision circulation");
+        setup.deployed.drops.retrieveDrops().length.assertEq(dropCountBefore, "collision drop");
+        setup.randomizer.tokenToRequest(nextTokenId).assertEq(0, "collision token request");
+        setup.deployed.core.retrieveTokenHash(nextTokenId).assertEq(bytes32(0), "collision hash");
+        setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)
+            .assertEq(beforeCollision.pendingRequests, "collision pending");
+        setup.controller.lastRequestId().assertEq(requestId, "collision last request");
+        setup.controller.nextRequestId().assertEq(nextRequestIdBefore, "collision next request");
+        _assertSnapshot(setup, firstTokenId, beforeCollision, "collision first token");
+
+        _fulfillRandomnessAndAssertBinding(setup, firstTokenId, requestId, 9012);
+        _assertFixedPriceAccountingSnapshot(setup, beforeCollision, "collision fulfillment");
+    }
+
     function _deployComposition() private returns (CompositionSetup memory setup) {
         setup.deployed = deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         setup.controller = new FixedPriceArrngController();
@@ -412,11 +459,21 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
 contract FixedPriceArrngController {
     uint256 public nextRequestId = 1;
     uint256 public lastRequestId;
+    uint256 public forcedRequestId;
+
+    function forceNextRequestId(uint256 requestId) external {
+        forcedRequestId = requestId;
+    }
 
     function requestRandomWords(uint256, address) external payable returns (uint256 requestId) {
-        requestId = nextRequestId;
+        requestId = forcedRequestId;
+        if (requestId == 0) {
+            requestId = nextRequestId;
+            nextRequestId++;
+        } else {
+            forcedRequestId = 0;
+        }
         lastRequestId = requestId;
-        nextRequestId++;
     }
 
     // Permissionless on purpose: this test double models a cooperative arRNG

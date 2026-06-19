@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added fixed-price and auction arRNG request-ID collision composition regressions proving a reused provider request ID fails with `RandomnessRequestAlreadyExists` while preserving drop authorization state, mint/drop counts, payment or auction accounting, pending request accounting, and the first token's fulfillable request binding.
 - Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.
 - Extended auction/drop/arRNG composition regressions to cover post-execution signer lifecycle controls, proving signer-epoch invalidation, signer rotation, consumed-drop cancellation attempts, replay attempts, and drop-execution pauses cannot disturb existing auction custody, bid accounting, pending request bindings, settlement, or later arRNG fulfillment.
 - Added fixed-price/drop/arRNG composition regressions proving randomness-request pauses roll back paid fixed-price drop execution without consuming authorizations or crediting payments, post-execution signer lifecycle controls cannot disturb fixed-price credits or pending request bindings, and poster/protocol credit withdrawals before arRNG fulfillment do not break later fulfillment.

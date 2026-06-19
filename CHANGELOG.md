@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added fixed-price and auction arRNG request-ID collision composition
+  regressions proving a reused provider request ID fails with
+  `RandomnessRequestAlreadyExists` while preserving drop authorization state,
+  mint/drop counts, payment or auction accounting, pending request accounting,
+  and the first token's fulfillable request binding.
 - Added auction/drop/arRNG composition regressions proving randomness-request
   pauses roll back signed auction-drop execution without consuming
   authorizations, pending arRNG requests block randomizer migration without
