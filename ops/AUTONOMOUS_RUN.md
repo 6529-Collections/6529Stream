@@ -32,15 +32,15 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/fixed-price-randomizer-composition` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/594` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/595` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/596` |
-| Next issue | Add fixed-price randomizer/payment composition tests. |
+| Active PR branch | `codex/auction-terminal-randomizer-composition` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/596` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/597` |
+| Active PR | `TBD` |
+| Next issue | Add auction no-bid/cancellation randomizer composition tests. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 06:42 UTC` |
+| Last updated | `2026-06-19 06:51 UTC` |
 
 ## Packaging Notes
 
@@ -16334,6 +16334,7 @@ Outcome:
 | 2026-06-19 06:10 | Implement ADV-017 local draft | Added `test/StreamFixedPriceRandomizerComposition.t.sol` with three paid fixed-price/drop/arRNG composition regressions. The new tests prove randomness-request pause rollback leaves no consumed authorization, token, payment credits, owed totals, retained ETH, or pending request; post-execution signer-epoch invalidation, signer rotation, replay attempts, and consumed-drop cancellation attempts preserve recipient ownership, fixed-price credits, owed totals, retained balance, and request binding; and poster/protocol credit withdrawals before arRNG fulfillment do not break later fulfillment. Focused `forge test --match-path test\StreamFixedPriceRandomizerComposition.t.sol -vvv` passed with 3 tests and existing known warning noise only. Next action is to regenerate release artifacts, run adjacent and release gates, commit, push, open PR closing #595, request CodeRabbit, and wait for CI/bot feedback. |
 | 2026-06-19 06:35 | Open PR #596 for ADV-017 | Pushed commit `05eadf7a443e5035c96d3d2d4b9d30754591440e` on branch `codex/fixed-price-randomizer-composition`, opened PR #596 at `https://github.com/6529-Collections/6529Stream/pull/596` to close issue #595, and recorded the active PR in durable state. Local validation passed for `forge fmt --check test\StreamFixedPriceRandomizerComposition.t.sol`, the focused fixed-price composition suite, autonomous-state consistency, release artifact verification, Markdown links, changelog coverage, and cached whitespace. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 06:42 | Address PR #596 review cleanup | 6529bot marked the PR good to merge and left non-blocking test-quality suggestions. Updated the new fixed-price composition suite to decode `Error(string)` revert reasons for clearer failures, assert the token/request binding against the mock controller's last issued request ID instead of hardcoding request `1`, and document the permissionless controller as test-only behavior. Focused `forge fmt --check test\StreamFixedPriceRandomizerComposition.t.sol` and `forge test --match-path test\StreamFixedPriceRandomizerComposition.t.sol -vvv` pass locally. Next action is to regenerate release artifacts/checksums, push the cleanup commit, and wait for latest-head CI/bot feedback. |
+| 2026-06-19 06:51 | Merge PR #596 and start issue #597 | PR #596 merged as `4b46d6309e2e364a88201279722e24eb7a2a84ee` after Foundry smoke, Windows PowerShell wrapper, CodeRabbit status, empty review threads, and latest-head 6529bot follow-up feedback were clean. Issue #597 and branch `codex/auction-terminal-randomizer-composition` now track the next local-verifiable Gate D slice: auction no-bid and cancellation-like terminal behavior composed with real signed auction drops, arRNG pending/fulfillment, custody, claimant state, and payment accounting. Next action is to inspect explorer results, implement the focused tests, update traceability/artifacts, validate, push, open the PR closing #597, and repeat the bot/CI loop. |
 
 ## Resume Instructions
 
