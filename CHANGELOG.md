@@ -10,6 +10,10 @@ the release policy in `docs/release-policy.md`.
 - Extended the autonomous run-state consistency checker to reject stale detailed
   execution-backlog `Status:` paragraphs that still claim active work after the
   corresponding issue or PR has closed.
+- Strengthened the offline release artifact verifier to reject unchecksummed
+  regular files and symlinks under `release-artifacts/latest`, while preserving
+  the self-referential checksum bundle exceptions for `SHA256SUMS` and
+  `release-checksums.json`.
 - Added a deployment rehearsal gate parity checker that locks the aggregate
   suite and standalone deployment, auction, and emergency rehearsal commands
   across Make, Bash, PowerShell, and CI before the scripts execute.

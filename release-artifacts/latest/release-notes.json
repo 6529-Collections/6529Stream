@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e4435b03c6a43f5254c4a55b2353a19976f05fd90112567066bdf3094a9d0663",
-      "size_bytes": 69507
+      "sha256": "sha256:02c413aca464d53c6b1ed14216cbbb7f5b4692ee78e80704a7d6cb8d69c2a916",
+      "size_bytes": 69763
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:19e6183f844fbc68d810faac7fd5d19b4b2113fa7ca174ef2cc9d3aed7515328",
+      "sha256": "sha256:d771c97651de0d88db38fe05801ba31485419401f0c6eec03aa48c91301739fc",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
     "section": "Unreleased",
     "entries": [
       "Extended the autonomous run-state consistency checker to reject stale detailed execution-backlog `Status:` paragraphs that still claim active work after the corresponding issue or PR has closed.",
+      "Strengthened the offline release artifact verifier to reject unchecksummed regular files and symlinks under `release-artifacts/latest`, while preserving the self-referential checksum bundle exceptions for `SHA256SUMS` and `release-checksums.json`.",
       "Added a deployment rehearsal gate parity checker that locks the aggregate suite and standalone deployment, auction, and emergency rehearsal commands across Make, Bash, PowerShell, and CI before the scripts execute.",
       "Added an aggregate local deployment rehearsal suite that runs the deployment, auction ceremony, and emergency redeployment rehearsals through one release-gate script while preserving the individual scripts for targeted debugging, retained evidence capture, and automated standalone-entrypoint coverage.",
       "Added a no-secret Sepolia evidence preflight checker that validates committed deployment/evidence prerequisites and optionally checks only operator environment variable presence, never values, before future public-beta evidence runs for issues #217, #221, and #222.",

@@ -204,6 +204,74 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             self.assertEqual(summary.checksum_entries, 5)
             self.assertEqual(summary.checksum_manifest_records, 5)
 
+    def test_verifier_rejects_unchecksummed_extra_release_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_text(root / "release-artifacts" / "latest" / "unlisted.json", "{}\n")
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "unchecksummed file",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_nested_unchecksummed_release_file(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_text(
+                root / "release-artifacts" / "latest" / "nested" / "unlisted.json",
+                "{}\n",
+            )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "release-artifacts/latest/nested/unlisted.json",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_release_directory_closure_allows_checksum_index_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            checksum_entries = verifier.verify_checksum_file(
+                root,
+                latest / verifier.CHECKSUM_FILE_NAME,
+            )
+            allowed_uncovered = {
+                f"release-artifacts/latest/{name}"
+                for name in verifier.ALLOWED_UNCHECKSUMMED_RELEASE_FILES
+            }
+            expected_checked = sum(
+                path.startswith("release-artifacts/latest/") and path not in allowed_uncovered
+                for path in checksum_entries
+            )
+
+            checked = verifier.verify_release_directory_checksum_closure(
+                root,
+                latest,
+                checksum_entries,
+            )
+
+            self.assertEqual(checked, expected_checked)
+
+    def test_verifier_rejects_release_directory_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            link_path = root / "release-artifacts" / "latest" / "unlisted-link.json"
+            target_path = root / "release-artifacts" / "latest" / "abi-checksums.json"
+            try:
+                link_path.symlink_to(target_path)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "contains symlink",
+            ):
+                verifier.verify_release_artifacts(root)
+
     def test_checksum_parser_rejects_duplicate_paths(self) -> None:
         line = "0" * 64 + "  release-artifacts/latest/a.json\n"
         with self.assertRaisesRegex(verifier.ReleaseArtifactVerificationError, "duplicate path"):
