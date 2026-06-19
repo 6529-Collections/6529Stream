@@ -3449,7 +3449,7 @@ unless an external dependency changes.
 | `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Merged in PR #568; issue #567 closed completed |
 | `REL-012` | Aggregate local deployment rehearsal gate | E/G | Merged in PR #582; issue #581 closed completed with one aggregate suite-level evidence command, retained standalone script automation, suite-hash replay coverage, and CI/local gates that preserve both aggregate and standalone rehearsal entrypoints |
 | `REL-013` | Add deployment rehearsal gate parity checker | E/G | Merged in PR #584; issue #583 closed completed with machine-checkable aggregate and standalone rehearsal command parity across Make, Bash, PowerShell, and CI |
-| `REL-014` | Harden offline release verifier against symlinked release inputs | G | Active issue #589 on branch `codex/release-verifier-symlink-hardening`; reject symlinked checksum-covered inputs and escaped or symlinked release directories so third-party verification only accepts ordinary in-repo files |
+| `REL-014` | Harden offline release verifier against symlinked release inputs | G | Active PR #590 / issue #589 on branch `codex/release-verifier-symlink-hardening`; reject symlinked checksum-covered inputs and escaped or symlinked release directories so third-party verification only accepts ordinary in-repo files |
 
 ### Governance And Operations
 

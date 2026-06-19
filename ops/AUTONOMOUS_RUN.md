@@ -35,12 +35,12 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Active PR branch | `codex/release-verifier-symlink-hardening` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/588` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/589` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/590` |
 | Next issue | Harden the offline release verifier against symlinked release inputs. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 03:41 UTC` |
+| Last updated | `2026-06-19 03:49 UTC` |
 
 ## Packaging Notes
 
@@ -16320,6 +16320,7 @@ Outcome:
 | 2026-06-19 03:13 | Address PR #588 bot polish | 6529bot marked PR #588 good to merge and noted optional symlink hardening plus a brittle magic-number assertion. The branch now explicitly rejects symlinks under `release-artifacts/latest`, derives the closure-count assertion from parsed checksum entries, documents the symlink policy, and keeps empty directories intentionally out of scope because the verifier is a release-payload closure check. Next action is to regenerate artifacts, rerun focused gates, commit/push, and wait for latest CI/bot feedback. |
 | 2026-06-19 03:24 | Address PR #588 final test clarity note | Latest-head 6529bot follow-up reported no new findings and one low-priority test-clarity note. The closure-count test now derives expected checked paths from parsed checksum entries while subtracting any verifier allowlisted index files if they ever become listed, keeping the assertion tied to `ALLOWED_UNCHECKSUMMED_RELEASE_FILES`. Next action is to regenerate artifacts, rerun focused gates, push, and merge after final CI/bot feedback is clean. |
 | 2026-06-19 03:41 | Merge PR #588 and start issue #589 | PR #588 merged as `a6281cabbb83753a98744959b4bc1550519c447a` after latest-head CI, CodeRabbit, and 6529bot feedback were clean; issue #587 closed completed. Issue #589 and branch `codex/release-verifier-symlink-hardening` now track the next release-integrity hardening: reject symlinked checksum-covered release inputs and release directories that escape or symlink within the checkout, so the offline consumer verifier accepts ordinary in-repo files only. |
+| 2026-06-19 03:49 | Open PR #590 for issue #589 | PR #590 is open at `https://github.com/6529-Collections/6529Stream/pull/590`, closes issue #589, and packages symlink/out-of-checkout hardening for the offline release verifier plus focused negative tests, docs, state updates, changelog, and regenerated release artifacts. Local focused verifier, release artifact, autonomous-state, changelog, Markdown, and checksum gates passed. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 
