@@ -3411,6 +3411,7 @@ unless an external dependency changes.
 | `ADV-012` | Add mutation-style negative tests for custom errors | D/F | Merged in PR #449; issue #448 closed completed |
 | `ADV-013` | Add randomizer request-binding parity and core-write reentry tests | D/F | Merged in PR #525; issue #524 closed completed |
 | `ADV-014` | Add bounded randomizer/admin stateful invariant tests | D/F | Merged in PR #572; issue #571 closed completed with local stateful randomizer/admin invariant coverage for composed request, fulfillment, stale, retry, pause, provider/epoch, token binding, forced-balance, emergency-withdrawal, and reserve-accounting sequences without claiming live provider readiness |
+| `ADV-015` | Add auction/drop arRNG/admin composition regressions | D/F | Active issue #591 on branch `codex/protocol-composition-adversarial-tests`; add local adversarial coverage where signed auction drops create pending arRNG requests, randomness pauses roll back drop execution, pending requests block provider migration without auction drift, and settlement before fulfillment preserves custody, credits, and request binding |
 
 ### Contract/API Hardening
 
@@ -3449,7 +3450,7 @@ unless an external dependency changes.
 | `REL-011` | Document ABI compatibility diagnostic subject aliases | G | Merged in PR #568; issue #567 closed completed |
 | `REL-012` | Aggregate local deployment rehearsal gate | E/G | Merged in PR #582; issue #581 closed completed with one aggregate suite-level evidence command, retained standalone script automation, suite-hash replay coverage, and CI/local gates that preserve both aggregate and standalone rehearsal entrypoints |
 | `REL-013` | Add deployment rehearsal gate parity checker | E/G | Merged in PR #584; issue #583 closed completed with machine-checkable aggregate and standalone rehearsal command parity across Make, Bash, PowerShell, and CI |
-| `REL-014` | Harden offline release verifier against symlinked release inputs | G | Active PR #590 / issue #589 on branch `codex/release-verifier-symlink-hardening`; reject symlinked checksum-covered inputs and escaped or symlinked release directories so third-party verification only accepts ordinary in-repo files |
+| `REL-014` | Harden offline release verifier against symlinked release inputs | G | Merged in PR #590; issue #589 closed completed; rejects symlinked checksum-covered inputs, symlinked intermediate components, symlinked release directories, and release directories outside the checkout so third-party verification only accepts ordinary in-repo files |
 
 ### Governance And Operations
 

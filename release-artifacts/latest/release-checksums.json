@@ -142,7 +142,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:6a2789f9c01fb926576f95c6ac3a46f86ddbcd0e457c1205b59cca45087b4a9d"
+    "sha256": "sha256:6db96f3607938ce5e5ba827f79ae4569e39f949e41173f33c24f3d31dd69619a"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -186,8 +186,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b32a78c7b9b7c82b933839f7cb2d0941f40fc94abbddd073e24f1f3715e6d981",
-      "size_bytes": 69971
+      "sha256": "sha256:12323f8705df31dd788244746136302017b72130c643546d767e21973584973b",
+      "size_bytes": 70327
     },
     {
       "path": "README.md",
@@ -526,8 +526,8 @@
     },
     {
       "path": "docs/status.md",
-      "sha256": "sha256:2a0a0138975c52e9bdda5214e7c6175a3dbffda9ef8a39ed94a3e15ef70d4b65",
-      "size_bytes": 26673
+      "sha256": "sha256:3d2586ab3f1806353ef8084f4719bd1317ebe19c82ef8b48aa96699b42679df7",
+      "size_bytes": 27248
     },
     {
       "path": "docs/threat-model.md",
@@ -1056,7 +1056,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:c690df095c7691244bf389958dfdfb6b538fbe59ec48e8ca93d07bfcccfd2713",
+      "sha256": "sha256:0a5d139e5eb03372a2c652521884a38acf7344a879e09f12a0d1156e9fd2fd56",
       "size_bytes": 79962
     },
     {
@@ -1121,7 +1121,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:7f39523d200894530b3f9e001a1fe06b2d7614073c7add465de2571017fcc7a3",
+      "sha256": "sha256:ad6096fae280e2a14b14027a51e70ab2d0325a0e62e4d134b10884b8fa532d35",
       "size_bytes": 8839
     },
     {
@@ -1171,22 +1171,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:b08e3dbea41555d104c9f7904a9bf00e083982687c61c3eeea96c5d34aa7548a",
+      "sha256": "sha256:e55b4b8a8bb5ea98c51262f9846ed747f203ab00500b43aea09c241e24f91606",
       "size_bytes": 130343
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:7734dbf31dc50184ccbb1df0c6d42a9a3d74496449dd3cea72c1f71435b273a4",
-      "size_bytes": 72208
+      "sha256": "sha256:26ce8971d2ad9f17e50d1fdf7148b96cad65682f3dd6577dd0c673ee16382e4f",
+      "size_bytes": 72563
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:1289f25854cae61ced4960cf38e73bb70b57c9ad7de2a7646b4bb0a16c7eba99",
-      "size_bytes": 69282
+      "sha256": "sha256:2988433452b0d750fbd1be0c915dab5e715ea465442bb976422c5294831cfd2d",
+      "size_bytes": 69630
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:dec090f42882539e1455465910e03a9dfcb61212900bc2aa841be319f2aa9831",
+      "sha256": "sha256:c53c3a8f171382c101e0bf97811dc076736c73f49b3654a2f2129213051a646c",
       "size_bytes": 22929
     },
     {

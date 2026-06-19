@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:b32a78c7b9b7c82b933839f7cb2d0941f40fc94abbddd073e24f1f3715e6d981",
-      "size_bytes": 69971
+      "sha256": "sha256:12323f8705df31dd788244746136302017b72130c643546d767e21973584973b",
+      "size_bytes": 70327
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:dec090f42882539e1455465910e03a9dfcb61212900bc2aa841be319f2aa9831",
+      "sha256": "sha256:c53c3a8f171382c101e0bf97811dc076736c73f49b3654a2f2129213051a646c",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.",
       "Extended the autonomous run-state consistency checker to reject stale detailed execution-backlog `Status:` paragraphs that still claim active work after the corresponding issue or PR has closed.",
       "Strengthened the offline release artifact verifier to reject unchecksummed regular files and symlinks under `release-artifacts/latest`, while preserving the self-referential checksum bundle exceptions for `SHA256SUMS` and `release-checksums.json`.",
       "Hardened the offline release artifact verifier to reject symlinked checksum-covered inputs, symlinked release directories, and release directories outside the checkout before accepting matching hashes.",
