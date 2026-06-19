@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added burned pending arRNG composition regressions proving paid fixed-price
+  and settled auction drops can be burned before fulfillment while preserving
+  payment/proceeds accounting, request bindings, burned-token audit randomness,
+  freeze eligibility, and frozen manifest stability.
 - Added fixed-price and auction arRNG request-ID collision composition
   regressions proving a reused provider request ID fails with
   `RandomnessRequestAlreadyExists` while preserving drop authorization state,

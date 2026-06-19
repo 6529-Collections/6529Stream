@@ -276,6 +276,11 @@ and auction suites: a reused arRNG provider request ID now fails with
 authorization, mint/register a token, change supply or drop counts, create
 payment credits or auction state, or change pending request accounting, and the
 first token's request remains fulfillable afterward.
+ADV-020 adds burned pending arRNG composition coverage across the same suites:
+paid fixed-price drops and settled auction drops can burn before fulfillment
+while preserving fixed-price credits, auction proceeds, consumed-drop state,
+request bindings, burned-token audit randomness, no-metadata-update fulfillment,
+freeze eligibility, and frozen manifest stability.
 
 Randomizer deterministic retry now has P0-RAND-006 target-state coverage in
 `StreamRandomizerRetry.t.sol`: failed VRF and arRNG post-processing can be
@@ -393,7 +398,10 @@ plus `TokenBurned`, removes ownership and `tokenURI`/`tokenMetadataState`
 availability, excludes burned tokens from live supply while retaining audit
 state, rejects remint attempts for previously burned token IDs, and records
 valid VRF/arRNG post-burn randomness as audit-only state without ERC-4906
-metadata updates or freeze-manifest changes.
+metadata updates or freeze-manifest changes. ADV-020 extends those semantics
+through signed fixed-price and auction drop composition paths where pending
+arRNG tokens are burned before fulfillment and then finalized after collection
+freeze.
 
 Contract-level metadata now has ONE-001 target-state coverage in
 `StreamContractMetadata.t.sol`: the release-tracked adapter exposes
@@ -410,7 +418,9 @@ delay to have elapsed, rejects live tokens whose metadata is still pending,
 stores and exposes a deterministic manifest hash, emits `CollectionFrozen`,
 finalizes collection supply to the minted-ever count, tightens the reserved max
 token ID, blocks dependency-registry swaps while any collection is frozen, and
-rejects current `StreamCore` metadata-significant writes after freeze.
+rejects current `StreamCore` metadata-significant writes after freeze. ADV-020
+also proves freeze continues to reject mixed live pending arRNG metadata while
+allowing collections whose pending randomness belongs only to burned tokens.
 
 Metadata freeze cross-invariants now have ADV-007 coverage in
 `StreamMetadataCrossInvariants.t.sol`: frozen dependency pins survive registry

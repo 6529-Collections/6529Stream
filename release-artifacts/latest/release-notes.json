@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0f332fd9f5049f714c5a7c9283091d8f64ccc4b775ae36de295f7cd6f96794e3",
-      "size_bytes": 71798
+      "sha256": "sha256:32cc37e7d3f8632ea7d8a4aaf3ad802949e56fdee064f6f69c75709f91c08eff",
+      "size_bytes": 72087
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:db8f29ec80ec7c423ff087ea168c224c57f10ee3013296d4f6daacac5f624778",
+      "sha256": "sha256:c4d62aec1efa87510d6550f519611843f41164506f845d4a2c8f5671555e572b",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added burned pending arRNG composition regressions proving paid fixed-price and settled auction drops can be burned before fulfillment while preserving payment/proceeds accounting, request bindings, burned-token audit randomness, freeze eligibility, and frozen manifest stability.",
       "Added fixed-price and auction arRNG request-ID collision composition regressions proving a reused provider request ID fails with `RandomnessRequestAlreadyExists` while preserving drop authorization state, mint/drop counts, payment or auction accounting, pending request accounting, and the first token's fulfillable request binding.",
       "Added auction/drop/arRNG composition regressions proving randomness-request pauses roll back signed auction-drop execution without consuming authorizations, pending arRNG requests block randomizer migration without auction drift, and auction settlement before fulfillment preserves custody, credits, total owed values, and token/request binding.",
       "Extended auction/drop/arRNG composition regressions to cover post-execution signer lifecycle controls, proving signer-epoch invalidation, signer rotation, consumed-drop cancellation attempts, replay attempts, and drop-execution pauses cannot disturb existing auction custody, bid accounting, pending request bindings, settlement, or later arRNG fulfillment.",
