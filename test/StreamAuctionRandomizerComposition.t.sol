@@ -127,7 +127,8 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         _assertSnapshot(setup, tokenId, beforeMigration, "migration");
         setup.deployed.core.viewCollectionRandomizerContract(COLLECTION_ID)
             .assertEq(address(setup.randomizer), "provider changed");
-        setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID).assertEq(2, "epoch changed");
+        setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID)
+            .assertEq(beforeMigration.randomizerEpoch, "epoch changed");
     }
 
     function testAuctionSettlementBeforeArrngFulfillmentPreservesWinnerCreditsAndRequestBinding()
@@ -286,8 +287,9 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         uint256 word
     ) private {
         uint256[] memory words = _words(word);
+        uint256 randomizerEpoch = setup.deployed.core.viewRandomizerEpoch(COLLECTION_ID);
         bytes32 expectedSeed =
-            _expectedSeed(address(setup.randomizer), requestId, tokenId, uint256(2), words);
+            _expectedSeed(address(setup.randomizer), requestId, tokenId, randomizerEpoch, words);
         bytes32 rawOutputHash = keccak256(abi.encode(words));
         setup.controller.fulfill(setup.randomizer, requestId, words);
 
@@ -301,7 +303,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         request.collectionId.assertEq(COLLECTION_ID, "request collection");
         request.tokenId.assertEq(tokenId, "request token");
         request.provider.assertEq(address(setup.randomizer), "request provider");
-        request.randomizerEpoch.assertEq(2, "request epoch");
+        request.randomizerEpoch.assertEq(randomizerEpoch, "request epoch");
         request.derivedSeed.assertEq(expectedSeed, "request seed");
         request.rawOutputHash.assertEq(rawOutputHash, "request raw hash");
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(0, "pending cleared");
@@ -365,6 +367,8 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         string memory expectedMessage
     ) private pure {
         success.assertFalse("call unexpectedly succeeded");
+        // Pin the current nested Error(string) revert surface. If the production
+        // path moves to custom errors, update these low-level assertions.
         keccak256(returnData)
             .assertEq(
                 keccak256(abi.encodeWithSignature("Error(string)", expectedMessage)),
