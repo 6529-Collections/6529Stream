@@ -77,8 +77,8 @@ increase above the approved baseline requires an accepted exception record in
 The current production profile is:
 
 - command: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 21,792 bytes;
-- current EIP-170 margin: 2,784 bytes;
+- current `StreamCore` runtime: 21,831 bytes;
+- current EIP-170 margin: 2,745 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
 - approved baseline EIP-170 margin: 2,392 bytes;
 - minimum release floor: 384-byte minimum runtime margin;
@@ -116,7 +116,7 @@ The default classification for future feature work is:
 | Frontend, mobile, Electron, SDK, analytics, and indexer behavior | Integration docs, generated artifacts, release manifests, and off-chain code | No Core spend |
 | Deployment, ceremony, audit, release, signature, and evidence workflows | Release artifacts, deployment manifests, address books, runbooks, and retained evidence | No Core spend |
 
-This policy is intentionally conservative even with 2,784 bytes of current
+This policy is intentionally conservative even with 2,745 bytes of current
 headroom after moving script assembly, metadata validation profiles,
 tokenURI dispatch helpers into the linked renderer library, and measured
 CON-008 micro-optimizations into `StreamCore`. The approved bytecode-spend
