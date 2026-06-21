@@ -51,13 +51,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:cb405fbfada2483d2de9c1f256055b6434a9a599a780e86f872130cc884959c3",
+      "sha256": "sha256:30bb8bc0539e80356183bc96d5ef4129f42ef11468817778f517aa5b30734229",
       "size_bytes": 130343,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:5db26911b4496443668c7888e8a99dbceb894000ba5ab7e083c23316950bc957",
+      "sha256": "sha256:0621b2052af4c46b2a4bf79d6945dd19999aba4c2d75088146a6f117578eb37c",
       "size_bytes": 79959,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -114,7 +114,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:a85662f6edebcc08cfa4c64639db1e8d77844ef48d76be23df8f5ca9caf2fecf",
+        "sha256": "sha256:2af167c20c595aff75cac9c2b2a0979bb08d42486d3d92e36e9735396722d585",
         "size_bytes": 104621,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -127,13 +127,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:776c0babab674359cdc574394ebd5c2f7191a1a536d0494c76f937eed947dc2b",
+        "sha256": "sha256:0aac09b62cc26f9ee78df60edf93abfab7ff6cb711cd3d26ce8371d68ce52e49",
         "size_bytes": 71166,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:f33b44f52a6205994caffc4d3bdf9492016745b058e2c25f1084ab70af9f3754",
+        "sha256": "sha256:7d6859e55b80f8347844b18fc8ad3240a7ce33c5a80caa6eb9078fec3368868a",
         "size_bytes": 63098
       }
     }
