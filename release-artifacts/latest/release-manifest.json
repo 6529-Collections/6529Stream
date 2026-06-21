@@ -2434,8 +2434,8 @@
       },
       {
         "path": "docs/integrations/events-and-indexing.md",
-        "sha256": "sha256:11f6083b0e8a676fa729194badf71fb644ea1fa37233775473c9649e72ce8e8c",
-        "size_bytes": 35969
+        "sha256": "sha256:963b50df60a39d5827bdff93d96cebf8c36c59a3fa668deb1fd90d00c7f6ae01",
+        "size_bytes": 36736
       },
       {
         "path": "docs/integrations/metadata-rendering.md",

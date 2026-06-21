@@ -206,6 +206,7 @@ emitter contracts. The current catalog includes these high-value event groups:
 | Drop authorization | `DropAuthorizationConsumed`, `DropAuthorizationCancelled`, `SignerEpochChanged`, `DropSignerChanged`, `AuctionContractChanged` | Drop execution, replay/cancellation state, signer lifecycle, auction bridge address |
 | Minter bridge | `CollectionPhasesUpdated`, `MinterTokensMinted`, `MinterAuctionMinted`, `MinterAuctionEndTimeUpdated`, `MinterContractReferenceUpdated` | Public phase windows, fixed-price mint ranges, original auction bridge custody/end time, and minter contract references |
 | Fixed-price credits | `FixedPriceCreditCreated`, `FixedPriceCreditWithdrawn` | Poster, protocol, curator reserve, and withdrawal views |
+| Proceeds split config | `ProceedsSplitUpdated`, `ProceedsSplitCleared` | Contract-default, collection, and token split override state for fixed-price and auction proceeds |
 | Auction lifecycle | `AuctionRegistered`, `AuctionCustodyConfirmed`, `AuctionStatusChanged`, `AuctionExtended`, `AuctionCancelled`, `ClaimAuction`, `NoBidSettlementPending`, `NoBidTokenClaimed` | Auction state, custody, end time, settlement, no-bid claimant |
 | Auction credits | `Participate`, `OutbidCreditCreated`, `BidderCreditWithdrawn`, `AuctionProceedsCreditCreated`, `ProceedsCreditWithdrawn` | Highest bid, bidder refunds, poster/protocol/curator proceeds, withdrawals |
 | Curators | `Reward`, `MerkleRootUpdated`, `CuratorCreditCreated`, `CuratorCreditWithdrawn` | Curator roots, rewards, credits, and withdrawals |
@@ -223,6 +224,15 @@ unchanged references do not emit a phantom reference-update event.
 
 When an event is insufficient to derive the full entity, queue a read-after-event
 task instead of guessing.
+
+`ProceedsSplitUpdated` and `ProceedsSplitCleared` are emitted by both
+`StreamDrops` and `StreamAuctions`. Their `scope` field uses the same encoding
+on both contracts: `0` means the contract-default split and uses `scopeId = 0`,
+`1` means a collection override and uses `scopeId = collectionId`, and `2` means
+a token override and uses `scopeId = tokenId`. Effective split reconstruction
+resolves token override first, then collection override, then contract default;
+the default contract split is `posterBps = 5000`, `protocolBps = 2500`, and
+`curatorBps = 2500` until an admin updates it.
 
 ## Read-After-Event Calls
 
