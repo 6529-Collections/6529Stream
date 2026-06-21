@@ -1879,8 +1879,8 @@
     },
     "natspec_coverage_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
-      "sha256": "sha256:59793f66bc0e0156a079ae283a6bd2e88a9fdfc9aee48ec55acc850b24dfe10e",
-      "size_bytes": 271751,
+      "sha256": "sha256:ca57d970cadcf91d099b75d6b9d96c47509fbd1fb0b488f62fba6374810e4872",
+      "size_bytes": 286132,
       "schema_version": "6529stream.natspec-coverage-baseline.v1"
     }
   },
@@ -2374,8 +2374,8 @@
       },
       {
         "path": "docs/natspec-coverage.md",
-        "sha256": "sha256:397265b2d4fe45061724e01efbd2fbd072bb05588cea36dbc0b76dd67d75e58c",
-        "size_bytes": 3822
+        "sha256": "sha256:3ed25d52fc134929e01cd4c881cf968f166da3fbfb55d9ad282f195b9379ce92",
+        "size_bytes": 3823
       },
       {
         "path": "docs/monitoring.md",

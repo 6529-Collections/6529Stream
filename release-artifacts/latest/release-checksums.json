@@ -143,7 +143,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9171cc90a2717a93aaadec72d1e22f190d216ecbfd3c698d39e2749ec20af69f"
+    "sha256": "sha256:7457a654819a2ce55d3782e1ba4391279d48205e6f99c1812a41e715693f1878"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -462,8 +462,8 @@
     },
     {
       "path": "docs/natspec-coverage.md",
-      "sha256": "sha256:397265b2d4fe45061724e01efbd2fbd072bb05588cea36dbc0b76dd67d75e58c",
-      "size_bytes": 3822
+      "sha256": "sha256:3ed25d52fc134929e01cd4c881cf968f166da3fbfb55d9ad282f195b9379ce92",
+      "size_bytes": 3823
     },
     {
       "path": "docs/non-local-release-evidence.md",
@@ -562,8 +562,8 @@
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/natspec-coverage.json",
-      "sha256": "sha256:59793f66bc0e0156a079ae283a6bd2e88a9fdfc9aee48ec55acc850b24dfe10e",
-      "size_bytes": 271751
+      "sha256": "sha256:ca57d970cadcf91d099b75d6b9d96c47509fbd1fb0b488f62fba6374810e4872",
+      "size_bytes": 286132
     },
     {
       "path": "release-artifacts/contracts.json",
@@ -1057,7 +1057,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:2595c8e291be021ec13d4a096f77b5ff846035f39bcab33bc742f0a5d13aaf57",
+      "sha256": "sha256:8ba7e3290472d378f7fe9c21b22243cf661c12a634fbf1274891fa061102d7c0",
       "size_bytes": 80004
     },
     {
@@ -1122,7 +1122,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:795d71e45ec265a995a428d414610d3a9e8a91289327fd1dd4ebd6a70fddb12c",
+      "sha256": "sha256:fedd78950a04376b9ad3e2e49eb122a671f9112cc27cd19746c38941f7f9af74",
       "size_bytes": 8839
     },
     {
@@ -1172,7 +1172,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:28ce52005a673df44daca2a632f2771c5493297e0b47b55677eb7b1b4628fcf3",
+      "sha256": "sha256:8593b1caf86017f2bc2db74be23ea32e760e0db3a3ed8dcffda302d08e7d4b30",
       "size_bytes": 130343
     },
     {
