@@ -388,6 +388,15 @@ The current Gate A smoke baseline proves:
   directories and secret-shaped content, and match optional declared `sha256:`
   digests. Issue #227 remains open until real reviewed live manifest evidence
   is retained.
+- `scripts/test_live_metadata_browser_evidence.py`,
+  `scripts/check_live_metadata_browser_evidence.py`,
+  `scripts/test_production_broadcast_retention.py`, and
+  `scripts/check_production_broadcast_retention.py` share the retained-path
+  resolver with the other release evidence checkers so future pending/reviewed
+  live metadata-browser and production broadcast retention evidence cannot
+  reference symlinked leaf files or files reached through symlinked
+  directories. Issues #473 and #226 remain open until real reviewed evidence is
+  retained.
 - `scripts/test_testnet_deployment_rehearsal_evidence.py` and
   `scripts/check_testnet_deployment_rehearsal_evidence.py` fail future
   pending/reviewed Sepolia deployment rehearsal evidence closed unless retained

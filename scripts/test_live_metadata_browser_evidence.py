@@ -423,6 +423,66 @@ class LiveMetadataBrowserEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_artifact(path, repo_root=repo_root)
 
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_file_fails(self) -> None:
+        """Reviewed retained files must be ordinary files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            symlink = (
+                repo_root
+                / "release-artifacts/evidence/live-metadata-browser/browser-summary-link.json"
+            )
+            try:
+                symlink.symlink_to(repo_root / BROWSER_SUMMARY_PATH)
+            except OSError as exc:
+                self.skipTest(f"symlink creation unavailable: {exc}")
+            path = repo_root / "reviewed-symlink-retained-file.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    "release-artifacts/evidence/live-metadata-browser/browser-summary-link.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "symlinked retained",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
+    @unittest.skipIf(not hasattr(Path, "symlink_to"), "symlinks unavailable")
+    def test_symlinked_retained_directory_fails(self) -> None:
+        """Reviewed retained files cannot cross symlinked directories."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            seed_reviewed_retained_files(repo_root)
+            target_dir = repo_root / "release-artifacts/evidence/live-metadata-target"
+            target_dir.mkdir(parents=True)
+            write_json(target_dir / "browser-summary.json", browser_summary())
+            symlink_dir = repo_root / "release-artifacts/evidence/live-metadata-link"
+            try:
+                symlink_dir.symlink_to(target_dir, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(f"directory symlink creation unavailable: {exc}")
+            path = repo_root / "reviewed-symlink-retained-directory.md"
+            write_text(
+                path,
+                artifact_with_field(
+                    reviewed_artifact(),
+                    "Browser summary JSON",
+                    "release-artifacts/evidence/live-metadata-link/browser-summary.json",
+                ),
+            )
+
+            with self.assertRaisesRegex(
+                checker.LiveMetadataBrowserEvidenceError,
+                "symlinked retained",
+            ):
+                checker.validate_artifact(path, repo_root=repo_root)
+
     def test_reviewed_artifact_with_declared_hashes_passes(self) -> None:
         """Declared retained hashes are accepted when they match disk."""
         with tempfile.TemporaryDirectory() as temp_dir:

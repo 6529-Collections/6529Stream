@@ -8,6 +8,8 @@ import re
 import sys
 from pathlib import Path
 
+from release_evidence_paths import resolve_repo_relative_path as resolve_shared_repo_relative_path
+
 
 REQUIREMENT_ID = "production_broadcast_retention"
 DEFAULT_EVIDENCE = [
@@ -177,19 +179,16 @@ def repo_root_for(path: Path) -> Path:
 
 def resolve_repo_relative_path(root: Path, value: str) -> Path:
     """Resolve a retained artifact path while rejecting escapes."""
-    candidate = Path(value)
-    if candidate.is_absolute() or ".." in candidate.parts:
-        raise ProductionBroadcastRetentionError(
-            f"retained artifact path must be repo-relative: {value}"
-        )
-    resolved = (root / candidate).resolve()
-    try:
-        resolved.relative_to(root.resolve())
-    except ValueError as exc:
-        raise ProductionBroadcastRetentionError(
-            f"retained artifact path escapes repository: {value}"
-        ) from exc
-    return resolved
+    return resolve_shared_repo_relative_path(
+        root,
+        value,
+        error_type=ProductionBroadcastRetentionError,
+        forward_slash_message=f"retained artifact path must use forward slashes: {value}",
+        absolute_message=f"retained artifact path must be repo-relative: {value}",
+        traversal_message=f"retained artifact path must be repo-relative: {value}",
+        symlink_message=f"retained artifact path must not use symlinked retained files: {value}",
+        escape_message=f"retained artifact path escapes repository: {value}",
+    )
 
 
 def validate_referenced_artifacts(path: Path, fields: dict[str, str]) -> None:

@@ -22,7 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
-- Hardened generic release evidence retained-path validation so non-local release evidence, release-signature evidence, marketplace/indexer evidence, and live deployment-manifest evidence reject symlinked leaf files and symlinked intermediate directories before hashing or artifact validation.
+- Centralized symlink-safe release evidence retained-path validation across non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention evidence so symlinked leaf files and symlinked intermediate directories fail before hashing or artifact validation.
 - Hardened the testnet deployment rehearsal retained-artifact checker to reject symlinked retained transcript, broadcast, manifest, address-book, and gas/invariant files before future reviewed Sepolia evidence can pass.
 - Added burned pending arRNG composition regressions proving paid fixed-price and settled auction drops can be burned before fulfillment while preserving payment/proceeds accounting, request bindings, burned-token audit randomness, freeze eligibility, and frozen manifest stability.
 - Added fixed-price and auction arRNG request-ID collision composition regressions proving a reused provider request ID fails with `RandomnessRequestAlreadyExists` while preserving drop authorization state, mint/drop counts, payment or auction accounting, pending request accounting, and the first token's fulfillable request binding.

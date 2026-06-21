@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import check_public_beta_evidence as public_beta_checker
+from release_evidence_paths import resolve_repo_relative_path
 
 
 EVIDENCE_SCHEMA = "6529stream.non-local-release-evidence.v1"
@@ -180,29 +181,18 @@ def require_git_commit(value: Any, path: str) -> str:
 
 def resolve_repo_file(repo_root: Path, relative_path: str, path: str) -> Path:
     """Resolve a repository-relative file path without allowing escapes."""
-    if "\\" in relative_path:
-        raise NonLocalReleaseEvidenceError(f"{path} must use forward slashes")
-    candidate = Path(relative_path)
-    if candidate.is_absolute() or ".." in candidate.parts:
-        raise NonLocalReleaseEvidenceError(f"{path} must stay inside the repository")
-    root = repo_root.resolve()
-    cursor = root
-    for part in candidate.parts:
-        cursor = cursor / part
-        # Reject symlinked directories as well as symlinked leaf files before
-        # resolve() can follow them outside the reviewed evidence tree.
-        if cursor.is_symlink():
-            raise NonLocalReleaseEvidenceError(
-                f"{path} must not use symlinked retained files"
-            )
-    resolved = (root / candidate).resolve()
-    try:
-        resolved.relative_to(root)
-    except ValueError as exc:
-        raise NonLocalReleaseEvidenceError(f"{path} must stay inside the repository") from exc
-    if not resolved.is_file():
-        raise NonLocalReleaseEvidenceError(f"{path} references missing file: {relative_path}")
-    return resolved
+    return resolve_repo_relative_path(
+        repo_root,
+        relative_path,
+        error_type=NonLocalReleaseEvidenceError,
+        forward_slash_message=f"{path} must use forward slashes",
+        absolute_message=f"{path} must stay inside the repository",
+        traversal_message=f"{path} must stay inside the repository",
+        symlink_message=f"{path} must not use symlinked retained files",
+        escape_message=f"{path} must stay inside the repository",
+        require_file=True,
+        missing_message=f"{path} references missing file: {relative_path}",
+    )
 
 
 def validate_source(value: Any) -> None:

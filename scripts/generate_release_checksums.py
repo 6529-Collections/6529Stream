@@ -29,6 +29,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/baselines"),
     Path("scripts/generate_dependency_provenance_attestation.py"),
     Path("scripts/check_release_mode.py"),
+    Path("scripts/release_evidence_paths.py"),
     Path("scripts/check_production_broadcast_retention.py"),
     Path("scripts/check_production_verified_addresses.py"),
     Path("scripts/check_public_beta_verified_addresses.py"),
