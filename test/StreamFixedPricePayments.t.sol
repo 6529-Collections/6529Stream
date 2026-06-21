@@ -171,6 +171,62 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
         deployed.drops.totalOwed().assertEq(7 wei, "total owed");
     }
 
+    function testFixedPriceContractSplitCanDisableCuratorReserve() public {
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        deployed.drops.updateContractProceedsSplit(5000, 5000, 0);
+        _mintFixedPrice(deployed, POSTER, RECIPIENT, 7 wei, 12);
+
+        deployed.drops.fixedPricePosterCredits(POSTER).assertEq(3 wei, "poster credit");
+        deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(4 wei, "protocol credit");
+        deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)
+            .assertEq(0, "curator reserve credit");
+        deployed.drops.totalFixedPriceOwed().assertEq(7 wei, "fixed-price owed");
+        deployed.drops.totalCuratorReserved().assertEq(0, "curator reserve total");
+    }
+
+    function testFixedPriceCollectionAndTokenSplitsOverrideContractDefault() public {
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        deployed.drops.updateContractProceedsSplit(5000, 5000, 0);
+        deployed.drops.updateCollectionProceedsSplit(1, 4000, 3000, 3000);
+        deployed.drops.updateTokenProceedsSplit(10_000_000_000, 6000, 4000, 0);
+
+        _mintFixedPrice(deployed, POSTER, RECIPIENT, 10_000, 13);
+        deployed.drops.fixedPricePosterCredits(POSTER).assertEq(6000, "token poster credit");
+        deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(4000, "token protocol credit");
+        deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)
+            .assertEq(0, "token curator reserve");
+
+        deployed.drops.clearTokenProceedsSplit(10_000_000_000);
+        _mintFixedPrice(deployed, POSTER, RECIPIENT, 10_000, 14);
+        deployed.drops.fixedPricePosterCredits(POSTER).assertEq(10_000, "poster credit");
+        deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(7000, "protocol credit");
+        deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)
+            .assertEq(3000, "collection curator reserve");
+
+        deployed.drops.clearCollectionProceedsSplit(1);
+        (uint16 posterBps, uint16 protocolBps, uint16 curatorBps) =
+            deployed.drops.proceedsSplitFor(1, 10_000_000_001);
+        uint256(posterBps).assertEq(5000, "contract poster bps");
+        uint256(protocolBps).assertEq(5000, "contract protocol bps");
+        uint256(curatorBps).assertEq(0, "contract curator bps");
+    }
+
+    function testFixedPriceRejectsInvalidProceedsSplit() public {
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+
+        (bool success,) = address(deployed.drops)
+            .call(
+                abi.encodeWithSelector(
+                    deployed.drops.updateContractProceedsSplit.selector, 5000, 5000, 1
+                )
+            );
+
+        success.assertFalse("invalid split accepted");
+    }
+
     function testOneWeiFixedPriceRemainderCreditsOnlyProtocol() public {
         DeployedStream memory deployed =
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
@@ -278,6 +334,24 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
         address(drops).balance.assertEq(0, "contract balance");
     }
 
+    function testFixedPriceCuratorReserveCanBeReleasedToContractPool() public {
+        PassiveFixedPriceCuratorsPool curatorsPool = new PassiveFixedPriceCuratorsPool();
+        DeployedStream memory deployed =
+            deployStreamWithSigner(PAYOUT, address(curatorsPool), signerAddress());
+        _mintFixedPrice(deployed, POSTER, RECIPIENT, 4 ether, 12_001);
+
+        uint256 poolBalanceBefore = address(curatorsPool).balance;
+        vm.expectEmit(true, true, true, true);
+        emit FixedPriceCreditWithdrawn(address(curatorsPool), address(curatorsPool), 2, 1 ether);
+        deployed.drops.releaseFixedPriceCuratorReserveCredit();
+
+        address(curatorsPool).balance.assertEq(poolBalanceBefore + 1 ether, "pool balance");
+        deployed.drops.fixedPriceCuratorReserveCredits(address(curatorsPool))
+            .assertEq(0, "curator reserve credit");
+        deployed.drops.totalFixedPriceCuratorReserveOwed().assertEq(0, "curator reserve owed");
+        deployed.drops.totalOwed().assertEq(3 ether, "poster and protocol remain owed");
+    }
+
     function _mintFixedPrice(
         DeployedStream memory deployed,
         address poster,
@@ -340,6 +414,10 @@ contract RejectingFixedPriceRecipient {
     function withdrawFixedPriceCreditTo(StreamDrops drops, address payable recipient) external {
         drops.withdrawFixedPriceCreditTo(recipient);
     }
+}
+
+contract PassiveFixedPriceCuratorsPool {
+    receive() external payable { }
 }
 
 contract ReentrantFixedPriceRecipient {

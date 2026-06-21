@@ -313,8 +313,8 @@ library StreamMetadataRenderer {
         bool finalMetadata
     ) public pure returns (string memory) {
         return finalMetadata
-            ? string(abi.encodePacked(baseURI, tokenId.toString()))
-            : string(abi.encodePacked(baseURI, metadataState));
+            ? string.concat(baseURI, tokenId.toString())
+            : string.concat(baseURI, metadataState);
     }
 
     function offchainTokenURIForToken(

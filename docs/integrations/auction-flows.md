@@ -335,16 +335,17 @@ With-bid settlement:
 - emits `AuctionStatusChanged(tokenId, SettledWithBid)`; and
 - emits `ClaimAuction(tokenId, highestBid)`.
 
-Credit math for a settled with-bid auction is:
+Default credit math for a settled with-bid auction is:
 
-- poster credit: `highestBid / 2`;
-- protocol credit: `highestBid / 4`; and
-- curator credit: `highestBid - posterCredit - protocolCredit`.
+- poster credit: `highestBid * posterBps / 10000`;
+- curator credit: `highestBid * curatorBps / 10000`; and
+- protocol credit: `highestBid - posterCredit - curatorCredit`.
 
-The integer remainder goes to the curator credit in the current auction
-contract. This differs from fixed-price minting, where the integer remainder
-goes to protocol credit; app copy and accounting views must not reuse the
-fixed-price ratio labels blindly.
+`StreamAuctions` resolves `posterBps`, `protocolBps`, and `curatorBps` from
+token, collection, then contract-default proceeds splits. The default split is
+`5000 / 2500 / 2500`, and `curatorBps = 0` disables curator proceeds for the
+selected scope. Protocol receives integer remainders so every wei is accounted.
+Interfaces can read the resolved split with `proceedsSplitFor(collectionId, tokenId)`.
 
 Settlement is idempotent from an integration perspective: after terminal status
 and `auctionClaim(tokenId)` are set, repeating settlement should fail without
@@ -402,6 +403,12 @@ Auction accounting uses four balance families:
 - protocol proceeds credits: `auctionProtocolCredits`;
 - curator proceeds credits: `auctionCuratorCredits`;
 
+With-bid settlement resolves `posterBps`, `protocolBps`, and `curatorBps` from
+token, collection, then contract-default proceeds splits. The default split is
+`5000 / 2500 / 2500`. Setting `curatorBps` to `0` disables curator proceeds for
+the selected scope, and protocol receives integer remainders so every wei is
+accounted.
+
 Owed and reserve views:
 
 - `totalAuctionBidEscrow` tracks active winning bids still held for unsettled
@@ -430,10 +437,14 @@ Withdraw:
 ```solidity
 StreamAuctions.withdrawBidderCreditTo(recipient)
 StreamAuctions.withdrawAuctionProceedsCreditTo(recipient)
+StreamAuctions.releaseAuctionCuratorCredit()
 ```
 
-Credits belong to `msg.sender`; the `recipient` only receives the ETH. A
-frontend should show credit owner and recipient separately.
+Ordinary credits belong to `msg.sender`; the `recipient` only receives the ETH.
+`releaseAuctionCuratorCredit` is an operator release path for the configured
+curator-pool contract when it cannot call the ordinary withdrawal function.
+A frontend should show this as an operator-controlled action for the configured
+pool.
 
 ## Events And Indexing
 

@@ -60,11 +60,16 @@ fixedPriceProtocolCredits, fixedPriceCuratorReserveCredits, totalFixedPriceOwed,
 totalReserved, surplus, DROP_EXECUTION, wrong chain, wrong domain, expired,
 cancelled, consumed, replay, wrong signer, zero recipient, insufficient payment,
 eth_call simulation, StreamMinter, StreamCore, and failed withdrawals preserve credit.
-Payment ratios are msg.value / 2, msg.value / 4, and
-msg.value - posterCredit - curatorReserveCredit.
+Payment ratios use posterBps, protocolBps, curatorBps, curatorBps = 0,
+msg.value * posterBps / 10000, msg.value * curatorBps / 10000,
+and msg.value - posterCredit - curatorReserveCredit.
+Split reads and operator release use proceedsSplitFor and
+releaseFixedPriceCuratorReserveCredit.
 Ratio tests are testFixedPriceMintCreditsProceedsWithoutPushPayouts,
 testFixedPriceOddWeiRemainderAccruesToProtocolCredit, and
-testOneWeiFixedPriceRemainderCreditsOnlyProtocol.
+testOneWeiFixedPriceRemainderCreditsOnlyProtocol,
+testFixedPriceContractSplitCanDisableCuratorReserve, and
+testFixedPriceCollectionAndTokenSplitsOverrideContractDefault.
 
 ## Source Of Truth
 

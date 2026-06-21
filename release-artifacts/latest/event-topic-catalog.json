@@ -1643,6 +1643,39 @@
       ]
     },
     {
+      "topic0": "0xcc18f2f7bad1ecf6afe76fd1c943cdde2a615816d623d035a2376e7e79ebde7f",
+      "signature": "ProceedsSplitCleared(uint8,uint256,address)",
+      "name": "ProceedsSplitCleared",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "scope",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 1,
+          "name": "scopeId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions",
+        "StreamDrops"
+      ]
+    },
+    {
       "topic0": "0xd2775dd7621cecc5f3799d293e90e8ccde35a11535a788c55d57da0b52f625f8",
       "signature": "AuctionRegistered(bytes32,uint256,uint256,address,address,uint256,uint256)",
       "name": "AuctionRegistered",
@@ -1963,6 +1996,60 @@
       ],
       "emitted_by": [
         "StreamCuratorsPool"
+      ]
+    },
+    {
+      "topic0": "0xf02905f0f9345145383530599a20ef3863e5b438ca906bccb4e3a4770f61b0fb",
+      "signature": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+      "name": "ProceedsSplitUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "scope",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 1,
+          "name": "scopeId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "posterBps",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 3,
+          "name": "protocolBps",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 4,
+          "name": "curatorBps",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 5,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAuctions",
+        "StreamDrops"
       ]
     },
     {
@@ -3935,6 +4022,85 @@
           ]
         },
         {
+          "name": "ProceedsSplitCleared",
+          "signature": "ProceedsSplitCleared(uint8,uint256,address)",
+          "topic0": "0xcc18f2f7bad1ecf6afe76fd1c943cdde2a615816d623d035a2376e7e79ebde7f",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "ProceedsSplitUpdated",
+          "signature": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+          "topic0": "0xf02905f0f9345145383530599a20ef3863e5b438ca906bccb4e3a4770f61b0fb",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "posterBps",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 3,
+              "name": "protocolBps",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 4,
+              "name": "curatorBps",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 5,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
           "name": "Withdraw",
           "signature": "Withdraw(address,bool,uint256)",
           "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
@@ -4733,6 +4899,85 @@
             {
               "index": 1,
               "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "ProceedsSplitCleared",
+          "signature": "ProceedsSplitCleared(uint8,uint256,address)",
+          "topic0": "0xcc18f2f7bad1ecf6afe76fd1c943cdde2a615816d623d035a2376e7e79ebde7f",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "ProceedsSplitUpdated",
+          "signature": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+          "topic0": "0xf02905f0f9345145383530599a20ef3863e5b438ca906bccb4e3a4770f61b0fb",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 1,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "posterBps",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 3,
+              "name": "protocolBps",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 4,
+              "name": "curatorBps",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 5,
+              "name": "admin",
               "type": "address",
               "indexed": true,
               "internal_type": "address"

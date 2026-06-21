@@ -322,8 +322,8 @@ credits are emitted through `AuctionProceedsCreditCreated`. Withdrawals are
 tracked through `BidderCreditWithdrawn` and `ProceedsCreditWithdrawn`, but a
 failed withdrawal must not erase credit; read credit state after failures.
 
-Use the auction flow guide for `highestBid / 2`, `highestBid / 4`, and
-`highestBid - posterCredit - protocolCredit` proceeds splits.
+Use the auction flow guide for `posterBps`, `protocolBps`, `curatorBps`, and
+`highestBid - posterCredit - curatorCredit` proceeds splits.
 
 ## Credit And Payment Reconstruction
 

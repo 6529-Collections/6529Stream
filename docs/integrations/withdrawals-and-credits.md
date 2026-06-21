@@ -53,7 +53,7 @@ recipient.
 | --- | --- | --- | --- |
 | Fixed-price poster | `StreamDrops` | `fixedPricePosterCredits(account)` | `withdrawFixedPriceCredit()` or `withdrawFixedPriceCreditTo(recipient)` |
 | Fixed-price protocol | `StreamDrops` | `fixedPriceProtocolCredits(account)` | `withdrawFixedPriceCredit()` or `withdrawFixedPriceCreditTo(recipient)` |
-| Fixed-price curator reserve | `StreamDrops` | `fixedPriceCuratorReserveCredits(curatorsPoolAddress)` | No direct user withdrawal in `StreamDrops`; show as reserved/owed accounting |
+| Fixed-price curator reserve | `StreamDrops` | `fixedPriceCuratorReserveCredits(account)` | Operator release with `releaseFixedPriceCuratorReserveCredit()` for the configured curator pool; do not show as ordinary user withdrawal |
 | Auction bidder refund | `StreamAuctions` | `auctionBidderCredits(account)` | `withdrawBidderCredit()` or `withdrawBidderCreditTo(recipient)` |
 | Auction poster proceeds | `StreamAuctions` | `auctionPosterCredits(account)` | `withdrawAuctionProceedsCredit()` or `withdrawAuctionProceedsCreditTo(recipient)` |
 | Auction protocol proceeds | `StreamAuctions` | `auctionProtocolCredits(account)` | `withdrawAuctionProceedsCredit()` or `withdrawAuctionProceedsCreditTo(recipient)` |
@@ -63,6 +63,18 @@ recipient.
 Do not collapse these into a single generic wallet balance. Indexer entities
 should preserve contract, credit family, owner, recipient, token/drop
 reference where available, and source event.
+
+Paid fixed-price and with-bid auction proceeds use editable basis-point splits.
+`StreamDrops` and `StreamAuctions` resolve splits in this order:
+
+1. token override;
+2. collection override;
+3. contract default.
+
+The default split is `5000 / 2500 / 2500` for poster, protocol, and curator
+funds. Split basis points must sum to `10000`. Setting `curatorBps` to `0`
+disables curator funding for that scope, and protocol receives integer
+remainders so every wei remains owed.
 
 ## Source Of Truth
 
@@ -97,7 +109,8 @@ For `StreamDrops`:
 
 - `fixedPricePosterCredits(account)`;
 - `fixedPriceProtocolCredits(account)`;
-- `fixedPriceCuratorReserveCredits(curatorsPoolAddress)`;
+- `fixedPriceCuratorReserveCredits(account)`;
+- `proceedsSplitFor(collectionId, tokenId)`;
 - `totalFixedPricePosterOwed()`;
 - `totalFixedPriceProtocolOwed()`;
 - `totalFixedPriceCuratorReserveOwed()`;
@@ -116,6 +129,7 @@ For `StreamAuctions`:
 - `auctionPosterCredits(account)`;
 - `auctionProtocolCredits(account)`;
 - `auctionCuratorCredits(account)`;
+- `proceedsSplitFor(collectionId, tokenId)`;
 - `totalBidderOwed()`;
 - `totalPosterOwed()`;
 - `totalProtocolOwed()`;
@@ -151,16 +165,20 @@ is always the transaction sender.
 | --- | --- | --- | --- |
 | Fixed-price poster/protocol | `StreamDrops.withdrawFixedPriceCredit()` | `msg.sender` | `msg.sender` |
 | Fixed-price poster/protocol | `StreamDrops.withdrawFixedPriceCreditTo(recipient)` | `msg.sender` | `recipient` |
+| Fixed-price curator reserve | `StreamDrops.releaseFixedPriceCuratorReserveCredit()` | function/global admin | configured curator pool |
 | Auction bidder refund | `StreamAuctions.withdrawBidderCredit()` | `msg.sender` | `msg.sender` |
 | Auction bidder refund | `StreamAuctions.withdrawBidderCreditTo(recipient)` | `msg.sender` | `recipient` |
 | Auction poster/protocol/curator proceeds | `StreamAuctions.withdrawAuctionProceedsCredit()` | `msg.sender` | `msg.sender` |
 | Auction poster/protocol/curator proceeds | `StreamAuctions.withdrawAuctionProceedsCreditTo(recipient)` | `msg.sender` | `recipient` |
+| Auction curator proceeds release | `StreamAuctions.releaseAuctionCuratorCredit()` | function/global admin | configured curator pool |
 | Curator reward | `StreamCuratorsPool.withdrawCuratorCredit()` | `msg.sender` | `msg.sender` |
 | Curator reward | `StreamCuratorsPool.withdrawCuratorCreditTo(recipient)` | `msg.sender` | `recipient` |
 
 Validate before submitting:
 
 - the connected account owns non-zero credit in the target family;
+- for operator releases, the configured curator pool owns non-zero curator
+  reserve/proceeds credit and the caller has the required admin permission;
 - `recipient` is non-zero for `...To(recipient)`;
 - the wallet is on the selected chain ID;
 - the selected address book matches the connected chain;

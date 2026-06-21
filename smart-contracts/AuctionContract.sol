@@ -19,6 +19,8 @@ import "./ReentrancyGuard.sol";
 import "./StreamPauseDomains.sol";
 
 contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
+    uint16 private constant BASIS_POINTS = 10_000;
+
     enum AuctionStatus {
         None,
         Created,
@@ -34,6 +36,13 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         Poster,
         Protocol,
         Curator
+    }
+
+    struct ProceedsSplit {
+        uint16 posterBps;
+        uint16 protocolBps;
+        uint16 curatorBps;
+        bool configured;
     }
 
     struct AuctionRecord {
@@ -58,6 +67,9 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     address public curatorsPoolAddress;
     uint256 public incPercent;
     uint256 public extensionTime;
+    ProceedsSplit public contractProceedsSplit;
+    mapping(uint256 => ProceedsSplit) public collectionProceedsSplits;
+    mapping(uint256 => ProceedsSplit) public tokenProceedsSplits;
 
     // certain functions can only be called by a global or function admin
     modifier FunctionAdminRequired(bytes4 _selector) {
@@ -107,6 +119,15 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         uint256 funds,
         uint256 resultingSurplus
     );
+    event ProceedsSplitUpdated(
+        uint8 indexed scope,
+        uint256 indexed scopeId,
+        uint16 posterBps,
+        uint16 protocolBps,
+        uint16 curatorBps,
+        address indexed admin
+    );
+    event ProceedsSplitCleared(uint8 indexed scope, uint256 indexed scopeId, address indexed admin);
 
     // constructor
     constructor(
@@ -125,6 +146,7 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         dropsContract = IStreamDrops(_dropsContract);
         payOutAddress = _payOutAddress;
         curatorsPoolAddress = _curatorsPoolAddress;
+        contractProceedsSplit = ProceedsSplit(5000, 2500, 2500, true);
         incPercent = 5;
         extensionTime = 300;
     }
@@ -329,6 +351,23 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         emit ProceedsCreditWithdrawn(msg.sender, _recipient, credit);
     }
 
+    function releaseAuctionCuratorCredit()
+        public
+        FunctionAdminRequired(this.releaseAuctionCuratorCredit.selector)
+        nonReentrant
+    {
+        address payable recipient = payable(curatorsPoolAddress);
+        uint256 credit = auctionCuratorCredits[recipient];
+        require(credit != 0, "No credit");
+
+        auctionCuratorCredits[recipient] = 0;
+        totalCuratorOwed -= credit;
+
+        (bool success,) = recipient.call{ value: credit }("");
+        require(success, "ETH failed");
+        emit ProceedsCreditWithdrawn(recipient, recipient, credit);
+    }
+
     // claim token after auction end
     function claimAuction(uint256 _tokenid) public nonReentrant {
         require(
@@ -422,20 +461,21 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         record.terminalStatus = AuctionStatus.SettledWithBid;
         auctionClaim[_tokenid] = true;
         totalAuctionBidEscrow -= _highestBid;
-        _creditAuctionProceeds(_tokenid, record.poster, _highestBid);
+        _creditAuctionProceeds(_tokenid, record.collectionId, record.poster, _highestBid);
         IERC721(gencore).safeTransferFrom(address(this), highestBidder, _tokenid);
 
         emit AuctionStatusChanged(_tokenid, uint8(AuctionStatus.SettledWithBid));
         emit ClaimAuction(_tokenid, _highestBid);
     }
 
-    function _creditAuctionProceeds(uint256 _tokenid, address _poster, uint256 _highestBid)
-        private
-    {
-        uint256 posterCredit = _highestBid / 2;
-        uint256 protocolCredit = _highestBid / 4;
-        // Integer remainders accrue to the curator credit so all wei remain owed.
-        uint256 curatorCredit = _highestBid - posterCredit - protocolCredit;
+    function _creditAuctionProceeds(
+        uint256 _tokenid,
+        uint256 _collectionId,
+        address _poster,
+        uint256 _highestBid
+    ) private {
+        (uint256 posterCredit, uint256 protocolCredit, uint256 curatorCredit) =
+            _splitPayment(_collectionId, _tokenid, _highestBid);
 
         auctionPosterCredits[_poster] += posterCredit;
         auctionProtocolCredits[payOutAddress] += protocolCredit;
@@ -453,6 +493,28 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
         );
         emit AuctionProceedsCreditCreated(
             curatorsPoolAddress, _tokenid, uint8(ProceedsCreditType.Curator), curatorCredit
+        );
+    }
+
+    function _splitPayment(uint256 _collectionId, uint256 _tokenId, uint256 _payment)
+        private
+        view
+        returns (uint256 posterCredit, uint256 protocolCredit, uint256 curatorCredit)
+    {
+        (uint16 posterBps,, uint16 curatorBps) = proceedsSplitFor(_collectionId, _tokenId);
+        posterCredit = _payment * uint256(posterBps) / BASIS_POINTS;
+        curatorCredit = _payment * uint256(curatorBps) / BASIS_POINTS;
+        // Protocol receives integer remainders so curator opt-outs remain exact.
+        protocolCredit = _payment - posterCredit - curatorCredit;
+    }
+
+    function _requireValidProceedsSplit(uint16 _posterBps, uint16 _protocolBps, uint16 _curatorBps)
+        private
+        pure
+    {
+        require(
+            uint256(_posterBps) + uint256(_protocolBps) + uint256(_curatorBps) == BASIS_POINTS,
+            "Bad split"
         );
     }
 
@@ -512,6 +574,75 @@ contract StreamAuctions is ReentrancyGuard, IERC721Receiver {
     {
         require(_curatorsPoolAddress != address(0), "Zero curator");
         curatorsPoolAddress = _curatorsPoolAddress;
+    }
+
+    function updateContractProceedsSplit(uint16 _posterBps, uint16 _protocolBps, uint16 _curatorBps)
+        public
+        FunctionAdminRequired(this.updateContractProceedsSplit.selector)
+    {
+        _requireValidProceedsSplit(_posterBps, _protocolBps, _curatorBps);
+        contractProceedsSplit = ProceedsSplit(_posterBps, _protocolBps, _curatorBps, true);
+        emit ProceedsSplitUpdated(0, 0, _posterBps, _protocolBps, _curatorBps, msg.sender);
+    }
+
+    function updateCollectionProceedsSplit(
+        uint256 _collectionId,
+        uint16 _posterBps,
+        uint16 _protocolBps,
+        uint16 _curatorBps
+    ) public FunctionAdminRequired(this.updateCollectionProceedsSplit.selector) {
+        _requireValidProceedsSplit(_posterBps, _protocolBps, _curatorBps);
+        collectionProceedsSplits[_collectionId] =
+            ProceedsSplit(_posterBps, _protocolBps, _curatorBps, true);
+        emit ProceedsSplitUpdated(
+            1, _collectionId, _posterBps, _protocolBps, _curatorBps, msg.sender
+        );
+    }
+
+    function clearCollectionProceedsSplit(uint256 _collectionId)
+        public
+        FunctionAdminRequired(this.clearCollectionProceedsSplit.selector)
+    {
+        delete collectionProceedsSplits[_collectionId];
+        emit ProceedsSplitCleared(1, _collectionId, msg.sender);
+    }
+
+    function updateTokenProceedsSplit(
+        uint256 _tokenId,
+        uint16 _posterBps,
+        uint16 _protocolBps,
+        uint16 _curatorBps
+    ) public FunctionAdminRequired(this.updateTokenProceedsSplit.selector) {
+        _requireValidProceedsSplit(_posterBps, _protocolBps, _curatorBps);
+        tokenProceedsSplits[_tokenId] = ProceedsSplit(_posterBps, _protocolBps, _curatorBps, true);
+        emit ProceedsSplitUpdated(2, _tokenId, _posterBps, _protocolBps, _curatorBps, msg.sender);
+    }
+
+    function clearTokenProceedsSplit(uint256 _tokenId)
+        public
+        FunctionAdminRequired(this.clearTokenProceedsSplit.selector)
+    {
+        delete tokenProceedsSplits[_tokenId];
+        emit ProceedsSplitCleared(2, _tokenId, msg.sender);
+    }
+
+    function proceedsSplitFor(uint256 _collectionId, uint256 _tokenId)
+        public
+        view
+        returns (uint16 posterBps, uint16 protocolBps, uint16 curatorBps)
+    {
+        ProceedsSplit memory split = tokenProceedsSplits[_tokenId];
+        if (split.configured) {
+            return (split.posterBps, split.protocolBps, split.curatorBps);
+        }
+
+        split = collectionProceedsSplits[_collectionId];
+        if (split.configured) {
+            return (split.posterBps, split.protocolBps, split.curatorBps);
+        }
+
+        split = contractProceedsSplit;
+        return (split.posterBps, split.protocolBps, split.curatorBps);
     }
 
     function totalProceedsOwed() public view returns (uint256) {

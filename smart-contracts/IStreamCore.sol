@@ -3,6 +3,8 @@
 pragma solidity ^0.8.19;
 
 interface IStreamCore {
+    function isCoreContract() external view returns (bool);
+
     function retrievewereDataAdded(uint256 _collectionID) external view returns (bool);
 
     function viewTokensIndexMin(uint256 _collectionID) external view returns (uint256);

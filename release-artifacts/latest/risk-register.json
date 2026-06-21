@@ -42,7 +42,7 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:65f3a190564edb3d5d0fda5cc5b4599f901c1d5e1696abed18ca507b2e1e76f6"
+      "sha256": "sha256:d647cb62083b9d24ac3e92bec6358fcdc40f8857b6373d02fb61d07ae872ab13"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -378,7 +378,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:caa13012ccd4a5efc63352c1479e3f8dea1b0a160dc02e456d0adbea1e8b7967"
+          "sha256": "sha256:00c0c3284d8418ef26c81ae103b4470f52e3300ddd242997f9b518c4f5bc22d4"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -442,7 +442,7 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:65f3a190564edb3d5d0fda5cc5b4599f901c1d5e1696abed18ca507b2e1e76f6"
+          "sha256": "sha256:d647cb62083b9d24ac3e92bec6358fcdc40f8857b6373d02fb61d07ae872ab13"
         },
         {
           "path": "docs/slither.md",

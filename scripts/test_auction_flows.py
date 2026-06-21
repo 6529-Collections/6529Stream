@@ -96,8 +96,10 @@ minimumNextBid, and previous bidder refund becomes withdrawable credit are named
 ## Settlement
 
 AUCTION_SETTLEMENT, AuctionSettlement, AuctionProceedsCreditCreated,
-ClaimAuction, highestBid / 2, highestBid / 4, and
-highestBid - posterCredit - protocolCredit are named.
+ClaimAuction, posterBps, protocolBps, curatorBps, curatorBps = 0,
+highestBid * posterBps / 10000, highestBid * curatorBps / 10000,
+highestBid - posterCredit - curatorCredit, proceedsSplitFor, and
+releaseAuctionCuratorCredit are named.
 
 ## No-Bid Claims
 

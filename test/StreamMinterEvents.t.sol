@@ -162,7 +162,9 @@ contract StreamMinterEventsTest is DropAuthTestHelper, StreamFixture {
         );
         StreamAdmins newAdmins = new StreamAdmins(address(this));
         newAdmins.registerAdmin(address(this), true);
-        address newDrops = address(0xD20A5);
+        StreamDrops newDrops = new StreamDrops(
+            signerAddress(), address(deployed.minter), address(newAdmins), PAYOUT, CURATORS_POOL
+        );
 
         vm.expectEmit(true, true, true, true);
         emit MinterContractReferenceUpdated(
@@ -178,23 +180,37 @@ contract StreamMinterEventsTest is DropAuthTestHelper, StreamFixture {
         deployed.minter.updateContracts(2, address(newAdmins));
 
         vm.expectEmit(true, true, true, true);
-        emit MinterContractReferenceUpdated(3, address(deployed.drops), newDrops, address(this));
-        deployed.minter.updateContracts(3, newDrops);
-        deployed.minter.streamDrops().assertEq(newDrops, "drops reference");
+        emit MinterContractReferenceUpdated(
+            3, address(deployed.drops), address(newDrops), address(this)
+        );
+        deployed.minter.updateContracts(3, address(newDrops));
+        deployed.minter.streamDrops().assertEq(address(newDrops), "drops reference");
     }
 
-    function testUpdateContractsSkipsEventsForInvalidAndUnchangedOptions() public {
+    function testUpdateContractsRevertsForInvalidOption() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
-        vm.recordLogs();
+        vm.expectRevert(bytes("Bad option"));
         deployed.minter.updateContracts(99, address(0xBAD));
-        _countTopic(
-                vm.getRecordedLogs(),
-                address(deployed.minter),
-                MINTER_CONTRACT_REFERENCE_UPDATED_TOPIC
-            ).assertEq(0, "invalid option event count");
         address(deployed.minter.gencore()).assertEq(address(deployed.core), "core after invalid");
         deployed.minter.streamDrops().assertEq(address(deployed.drops), "drops after invalid");
+    }
+
+    function testUpdateContractsRejectsInvalidReferences() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
+
+        vm.expectRevert(bytes("Contract required"));
+        deployed.minter.updateContracts(1, address(0xC0DE));
+        vm.expectRevert(bytes("Contract required"));
+        deployed.minter.updateContracts(3, address(0xD20A5));
+        vm.expectRevert(bytes("Contract is not Core"));
+        deployed.minter.updateContracts(1, address(deployed.drops));
+        vm.expectRevert(bytes("Contract is not Drops"));
+        deployed.minter.updateContracts(3, address(deployed.core));
+    }
+
+    function testUpdateContractsSkipsEventsForUnchangedOptions() public {
+        DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
         vm.recordLogs();
         deployed.minter.updateContracts(1, address(deployed.core));

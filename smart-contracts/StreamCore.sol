@@ -767,6 +767,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         }
     }
 
+    function isCoreContract() external pure returns (bool) {
+        return true;
+    }
+
     function royaltyInfo(uint256 tokenId, uint256 salePrice)
         public
         view

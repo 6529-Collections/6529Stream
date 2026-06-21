@@ -9,12 +9,12 @@ positive; this is still not a full security baseline for public launch.
 | Field | Value |
 | --- | --- |
 | Status | High/medium rows triaged; not accepted as a CI gate |
-| Last generated | `2026-06-11 06:13 UTC` |
+| Last generated | `2026-06-21 06:54 UTC` |
 | Slither | `0.11.5` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
 | Command | `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` |
-| Raw JSON | Not committed; regenerate locally when needed |
+| Raw JSON | Not committed; latest local capture was `cache/slither-latest.json` |
 
 Slither returned detector results successfully, but the process exited non-zero
 because findings exist. That is expected until the roadmap accepts a gated
@@ -24,30 +24,33 @@ baseline and lower-impact findings are handled.
 
 | Impact | Count |
 | --- | ---: |
-| High | 4 |
-| Medium | 19 |
-| Low | 93 |
-| Informational | 590 |
-| Optimization | 11 |
-| Total | 717 |
+| High | 22 |
+| Medium | 99 |
+| Low | 243 |
+| Informational | 713 |
+| Optimization | 17 |
+| Total | 1094 |
 
 ## Detector Counts
 
 | Detector | Impact | Count |
 | --- | --- | ---: |
+| `arbitrary-send-eth` | High | 0 |
 | `encode-packed-collision` | High | 0 |
-| `incorrect-exp` | High | 1 |
-| `suicidal` | High | 3 |
+| `incorrect-exp` | High | 2 |
+| `reentrancy-eth` | High | 16 |
+| `suicidal` | High | 4 |
 | `uninitialized-state` | High | 0 |
 | `weak-prng` | High | 0 |
-| `divide-before-multiply` | Medium | 9 |
-| `incorrect-equality` | Medium | 1 |
-| `locked-ether` | Medium | 7 |
-| `uninitialized-local` | Medium | 1 |
-| `unused-return` | Medium | 1 |
-| Low-impact findings | Low | 93 |
-| Informational findings | Informational | 590 |
-| Optimization findings | Optimization | 11 |
+| `divide-before-multiply` | Medium | 11 |
+| `incorrect-equality` | Medium | 20 |
+| `locked-ether` | Medium | 16 |
+| `reentrancy-no-eth` | Medium | 22 |
+| `uninitialized-local` | Medium | 5 |
+| `unused-return` | Medium | 25 |
+| Low-impact findings | Low | 243 |
+| Informational findings | Informational | 713 |
+| Optimization findings | Optimization | 17 |
 
 Dependency-script encoding delta from the previous tracked capture:
 
@@ -125,6 +128,19 @@ Dependency-script encoding delta from the previous tracked capture:
 - Slither still exits non-zero because accepted test-only and vendored
   false-positive rows remain visible, plus lower-impact findings are not yet a
   CI gate.
+- Configurable proceeds split and Slither-remediation delta from the previous
+  tracked capture:
+  - `StreamDrops.releaseFixedPriceCuratorReserveCredit()` and
+    `StreamAuctions.releaseAuctionCuratorCredit()` release only to the
+    configured curator pool, avoiding an admin-selected arbitrary ETH
+    destination while preserving the stranded-pool recovery path.
+  - `StreamMetadataRenderer.offchainTokenURI(...)` now uses `string.concat`
+    instead of packed dynamic-string concatenation.
+  - `arbitrary-send-eth`, `encode-packed-collision`, `weak-prng`, and
+    `uninitialized-state` are all zero current findings.
+  - No non-vendored first-party production high/medium rows remain. Current
+    high/medium rows are 10 accepted vendored OpenZeppelin false positives and
+    111 accepted test/invariant-harness findings.
 
 ## Status Semantics
 

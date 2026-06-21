@@ -480,7 +480,7 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         setup.auctions.totalOwed().assertEq(0, "owed balance after withdrawals");
     }
 
-    function testProceedsRemainderAccruesToCuratorCredit() public {
+    function testProceedsRemainderAccruesToProtocolCredit() public {
         AuctionSetup memory setup = _createAuctionForPosterAndReserve(POSTER, 7 wei);
         vm.deal(FIRST_BIDDER, 1 ether);
 
@@ -490,10 +490,72 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         setup.auctions.claimAuction(setup.tokenId);
 
         setup.auctions.auctionPosterCredits(POSTER).assertEq(3 wei, "poster credit");
-        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(1 wei, "protocol credit");
-        setup.auctions.auctionCuratorCredits(CURATORS_POOL).assertEq(3 wei, "curator credit");
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(3 wei, "protocol credit");
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL).assertEq(1 wei, "curator credit");
         setup.auctions.totalProceedsOwed().assertEq(7 wei, "proceeds owed");
         setup.auctions.totalOwed().assertEq(7 wei, "total owed");
+    }
+
+    function testAuctionContractSplitCanDisableCuratorCredit() public {
+        AuctionSetup memory setup = _createAuctionForPosterAndReserve(POSTER, 7 wei);
+        setup.auctions.updateContractProceedsSplit(5000, 5000, 0);
+        vm.deal(FIRST_BIDDER, 1 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: 7 wei }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        setup.auctions.auctionPosterCredits(POSTER).assertEq(3 wei, "poster credit");
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(4 wei, "protocol credit");
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL).assertEq(0, "curator credit");
+        setup.auctions.totalCuratorOwed().assertEq(0, "curator owed");
+        setup.auctions.totalProceedsOwed().assertEq(7 wei, "proceeds owed");
+    }
+
+    function testAuctionCollectionAndTokenSplitsOverrideContractDefault() public {
+        AuctionSetup memory setup = _createAuctionForPosterAndReserve(POSTER, 10_000);
+        setup.auctions.updateContractProceedsSplit(5000, 5000, 0);
+        setup.auctions.updateCollectionProceedsSplit(1, 4000, 3000, 3000);
+        setup.auctions.updateTokenProceedsSplit(setup.tokenId, 6000, 4000, 0);
+        vm.deal(FIRST_BIDDER, 1 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: 10_000 }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        setup.auctions.auctionPosterCredits(POSTER).assertEq(6000, "token poster credit");
+        setup.auctions.auctionProtocolCredits(PAYOUT).assertEq(4000, "token protocol credit");
+        setup.auctions.auctionCuratorCredits(CURATORS_POOL).assertEq(0, "token curator credit");
+
+        setup.auctions.clearTokenProceedsSplit(setup.tokenId);
+        (uint16 posterBps, uint16 protocolBps, uint16 curatorBps) =
+            setup.auctions.proceedsSplitFor(1, setup.tokenId);
+        uint256(posterBps).assertEq(4000, "collection poster bps");
+        uint256(protocolBps).assertEq(3000, "collection protocol bps");
+        uint256(curatorBps).assertEq(3000, "collection curator bps");
+    }
+
+    function testAuctionCuratorCreditCanBeReleasedToContractPool() public {
+        PassiveAuctionCuratorsPool curatorsPool = new PassiveAuctionCuratorsPool();
+        AuctionSetup memory setup =
+            _createAuctionForPosterReserveAndCurators(POSTER, RESERVE_PRICE, address(curatorsPool));
+        vm.deal(FIRST_BIDDER, 10 ether);
+
+        vm.prank(FIRST_BIDDER);
+        setup.auctions.participateToAuction{ value: RESERVE_PRICE }(setup.tokenId);
+        vm.warp(setup.auctionEndTime + 1);
+        setup.auctions.claimAuction(setup.tokenId);
+
+        uint256 poolBalanceBefore = address(curatorsPool).balance;
+        setup.auctions.releaseAuctionCuratorCredit();
+
+        address(curatorsPool).balance
+            .assertEq(poolBalanceBefore + (RESERVE_PRICE / 4), "pool balance");
+        setup.auctions.auctionCuratorCredits(address(curatorsPool)).assertEq(0, "curator credit");
+        setup.auctions.totalCuratorOwed().assertEq(0, "curator owed");
+        setup.auctions.totalOwed().assertEq(3 * (RESERVE_PRICE / 4), "poster/protocol owed");
     }
 
     function testProceedsWithdrawalFailurePreservesCredit() public {
@@ -539,14 +601,22 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         private
         returns (AuctionSetup memory setup)
     {
-        setup.deployed = deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
+        return _createAuctionForPosterReserveAndCurators(poster, reservePrice, CURATORS_POOL);
+    }
+
+    function _createAuctionForPosterReserveAndCurators(
+        address poster,
+        uint256 reservePrice,
+        address curatorsPool
+    ) private returns (AuctionSetup memory setup) {
+        setup.deployed = deployStreamWithSigner(PAYOUT, curatorsPool, signerAddress());
         setup.auctions = new StreamAuctions(
             address(setup.deployed.minter),
             address(setup.deployed.core),
             address(setup.deployed.admins),
             address(setup.deployed.drops),
             PAYOUT,
-            CURATORS_POOL
+            curatorsPool
         );
         setup.deployed.drops.updateAuctionContract(address(setup.auctions));
         setup.auctionEndTime = block.timestamp + 1 days;
@@ -612,6 +682,10 @@ contract RejectingProceedsRecipient {
     function withdrawProceedsToSelf(StreamAuctions auctions) external {
         auctions.withdrawAuctionProceedsCredit();
     }
+}
+
+contract PassiveAuctionCuratorsPool {
+    receive() external payable { }
 }
 
 contract ForceEth {
