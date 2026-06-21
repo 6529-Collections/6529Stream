@@ -51,32 +51,32 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:8593b1caf86017f2bc2db74be23ea32e760e0db3a3ed8dcffda302d08e7d4b30",
+      "sha256": "sha256:8ae05ddc0de3a6a0379f5eee48471ce84dc2c890dcdc1aaa9717c2b64f8e749d",
       "size_bytes": 130343,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:8ba7e3290472d378f7fe9c21b22243cf661c12a634fbf1274891fa061102d7c0",
+      "sha256": "sha256:00aabea9f35d489625c27f22063b6683dc02d97de084d0a0a719db26705deadf",
       "size_bytes": 80004,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:0cad18db1b618ec825b101f11928595aaa28c22654649a11bc0e4ab04ceb5c99",
+      "sha256": "sha256:8fb4a6223e900f5ab0e7a01fc190f716e5280c3cc1bce57dad9e4cf3bca206ee",
       "size_bytes": 10202,
       "schema_version": "6529stream.public-beta-evidence.v1"
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f1bf3d45636b8339a9f7a3579abaa75d4c15a9be48b2a5c15a773a58d1f0614a",
+      "sha256": "sha256:0a2b8e3413f855a1f21acd38a30b40eace679296565877748c94ce6b87b53491",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:c19ebf1058822fce84383aea6a3817fc22158952ce370205c4f1bc78c4dfd830",
+        "sha256": "sha256:6b4886164edd186140e4bac5a7332108fb38c4271f61b4ad4423e841155dead9",
         "size_bytes": 74932,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -101,7 +101,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:afb0b574d2abb1208663520b7575d6830bc8e91b679d221ea3cf12309bee33e7",
+        "sha256": "sha256:ecca84121888df1a8044349a009b4803cee6044f2874c95b28bbd0bae3183015",
         "size_bytes": 75680,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
