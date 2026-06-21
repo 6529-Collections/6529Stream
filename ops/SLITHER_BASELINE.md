@@ -134,6 +134,9 @@ Dependency-script encoding delta from the previous tracked capture:
     `StreamAuctions.releaseAuctionCuratorCredit()` release only to the
     configured curator pool, avoiding an admin-selected arbitrary ETH
     destination while preserving the stranded-pool recovery path.
+  - Current `reentrancy-eth` and `reentrancy-no-eth` rows do not include the
+    curator-reserve or auction-curator release helpers; those release paths
+    zero the owed pool credit before performing the constrained pool transfer.
   - `StreamMetadataRenderer.offchainTokenURI(...)` now uses `string.concat`
     instead of packed dynamic-string concatenation.
   - `arbitrary-send-eth`, `encode-packed-collision`, `weak-prng`, and

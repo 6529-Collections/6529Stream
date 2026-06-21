@@ -9,7 +9,7 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:8fb4a6223e900f5ab0e7a01fc190f716e5280c3cc1bce57dad9e4cf3bca206ee",
+      "sha256": "sha256:adfe1d2536b370fbece40938240f0dd64985bd21d7adf35ca0a09164ead6869a",
       "size_bytes": 10202
     },
     "public_beta_blocker_report": {
@@ -442,7 +442,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:886bb1971a977751e02213cfe41624f162212489da42360052398cf2ec4f43bf",
+        "sha256": "sha256:c13df9605a426e2b3c0b78021a3e2f2be3b1c4726ed40d25852b9cf23bed0b5b",
         "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
         "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests",
         "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. Public beta remains blocked on the remaining missing evidence rows."

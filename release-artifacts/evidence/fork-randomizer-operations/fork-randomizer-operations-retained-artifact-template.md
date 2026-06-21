@@ -54,9 +54,9 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:6ade5a445204fa033e02b4b73a12df12ddee892e56987fa7781c24c9031743a2`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:aec304b0dcace521f8c16ccc9e7737246f90e24cbc800907b0aaf9e973471f01`
-- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:7a5a112c309bda6fe2d76434682a721a32f901eddea4298edf76e5af9dc174b0`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:e4786faeb12cd6c9f670ad232b1cc06dcb7897de77e8ba9be698d69f129620d3`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:d5c61113c0839a09845ddddcad4891dd09f58859b2127c6f5f9bcf7d65a2d4ef`
+- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:3687773daafb1066c9fde5582b0320387813d059704c1f96144304f2a2714860`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
 - Post-state request views: `release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md / sha256:c306a99d750091e13e9ea25f30bb7735546bf041dfbcb93577d4b354f1663003`

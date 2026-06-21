@@ -42,11 +42,11 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:d647cb62083b9d24ac3e92bec6358fcdc40f8857b6373d02fb61d07ae872ab13"
+      "sha256": "sha256:3474209fcffe4f222bcd6c33b5931d39261cd9fad9eed338e3b162ce16602f23"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:8fb4a6223e900f5ab0e7a01fc190f716e5280c3cc1bce57dad9e4cf3bca206ee"
+      "sha256": "sha256:adfe1d2536b370fbece40938240f0dd64985bd21d7adf35ca0a09164ead6869a"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -171,7 +171,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:8fb4a6223e900f5ab0e7a01fc190f716e5280c3cc1bce57dad9e4cf3bca206ee"
+          "sha256": "sha256:adfe1d2536b370fbece40938240f0dd64985bd21d7adf35ca0a09164ead6869a"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -342,7 +342,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:e74bccff93f751a1f0807d7904106f9cb77e50e79707a7a8cdd7489ba4f751b1"
+          "sha256": "sha256:bed1c2583ecb485956d1ee4c7731c6b752fc0885c4dfebb225aac93b3f1f0ae2"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -378,7 +378,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:0e4790fb6969652d44d2262f63d12565cd4bc4e1f8119506f88eaca530b7a260"
+          "sha256": "sha256:1f8180c8b0565ce07934407202968d2a6a1ff4b42f8f726ab05aee61c4421327"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -442,7 +442,7 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:d647cb62083b9d24ac3e92bec6358fcdc40f8857b6373d02fb61d07ae872ab13"
+          "sha256": "sha256:3474209fcffe4f222bcd6c33b5931d39261cd9fad9eed338e3b162ce16602f23"
         },
         {
           "path": "docs/slither.md",
