@@ -377,13 +377,6 @@ jobs:
           python3 scripts/test_core_bytecode_spend_policy.py 2>&1 | tee ci-logs/core-bytecode-spend-policy-tests.log
           python3 scripts/check_core_bytecode_spend_policy.py 2>&1 | tee ci-logs/core-bytecode-spend-policy-check.log
 
-      - name: Restore default build artifacts
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p ci-logs
-          forge build --force 2>&1 | tee ci-logs/forge-build-default-artifacts.log
-
       - name: Solidity formatting
         shell: bash
         run: |
@@ -456,6 +449,13 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_admin_ceremony_evidence.py 2>&1 | tee ci-logs/admin-ceremony-evidence-tests.log
           python3 scripts/check_admin_ceremony_evidence.py 2>&1 | tee ci-logs/admin-ceremony-evidence-check.log
+
+      - name: Restore default build artifacts
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          forge build --force 2>&1 | tee ci-logs/forge-build-default-artifacts.log
 
       - name: Release artifact catalog
         shell: bash

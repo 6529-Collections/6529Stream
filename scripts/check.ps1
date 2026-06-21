@@ -79,7 +79,6 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 & $pythonPath @pythonArgs "scripts\check_contract_size_budget.py"
 & $pythonPath @pythonArgs "scripts\test_core_bytecode_spend_policy.py"
 & $pythonPath @pythonArgs "scripts\check_core_bytecode_spend_policy.py"
-forge build --force
 & $pythonPath @pythonArgs "scripts\test_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\check_solidity_formatting.py"
 & $pythonPath @pythonArgs "scripts\test_windows_check_wrapper.py"
@@ -103,6 +102,7 @@ forge build --force
 & $pythonPath @pythonArgs "scripts\generate_one_of_one_provenance_manifest.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_admin_ceremony_evidence.py"
 & $pythonPath @pythonArgs "scripts\check_admin_ceremony_evidence.py"
+forge build --force
 & $pythonPath @pythonArgs "scripts\test_release_artifacts.py"
 & $pythonPath @pythonArgs "scripts\generate_release_artifacts.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_protocol_surface_report.py"
