@@ -289,6 +289,7 @@ contract StreamEventReconstructabilityTest is DropAuthTestHelper, StreamFixture 
 
         vm.recordLogs();
         deployed.minter.setCollectionPhases(COLLECTION_ID, newStart, newEnd);
+        vm.expectRevert(bytes("Bad option"));
         deployed.minter.updateContracts(99, address(0xBADC0DE));
         deployed.minter.updateContracts(1, address(deployed.core));
         deployed.minter.updateContracts(1, address(newCore));

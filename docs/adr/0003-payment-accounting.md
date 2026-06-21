@@ -140,7 +140,7 @@ Required credit and reserve categories:
 | `Poster` | Sale or auction proceeds owed to a poster. | Fixed-price mint split, with-bid auction settlement |
 | `Bidder` | Refunds owed to bidders. | Previous highest bidder after an outbid, cancelled pre-bid auction refund if applicable |
 | `Curator` | Rewards owed to individual curator reward addresses. | Valid Merkle reward claim |
-| `CuratorReserve` | Funds reserved for future curator reward claims before an individual reward address is credited. This may be accountless aggregate storage or keyed to the curators pool identity, but it is not withdrawable except through the curator claim process. | Curators-pool share of mint or auction proceeds |
+| `CuratorReserve` | Funds reserved for curator reward claims before an individual reward address is credited. This may be keyed to the curators pool identity and released by an authorized operator to the curator pool, while individual curator reward withdrawal remains gated by the curator claim process. | Curators-pool share of mint proceeds |
 | `Protocol` | Amounts owed to the configured payout, treasury, or protocol recipient. | Payout share of mint or auction proceeds |
 | `AuctionBidEscrow` | Active highest-bid funds held before outbid, cancellation, or settlement. This is reserved balance, not a withdrawable bidder credit. | Highest bid while an auction is active or ended but unsettled |
 | `RandomnessReserve` | Funds reserved for randomness provider requests or callbacks. This is contract-specific reserved balance, not protocol surplus. | `RandomizerRNG` balance needed for arRNG-style requests |
@@ -183,15 +183,19 @@ Fixed-price minting must record credits instead of pushing ETH.
 The received payment must equal the validated fixed-price amount before credits
 are recorded.
 
-For the current 50 / 25 / 25 economics:
+Paid proceeds use an editable basis-point split. `StreamDrops` and
+`StreamAuctions` each have a contract default, optional collection overrides,
+and optional token overrides. The default split is `5000 / 2500 / 2500`
+for poster, protocol, and curator funds. Split basis points must sum to
+`10000`, and setting `curatorBps` to `0` disables curator funding for that
+scope.
 
-- poster credit is `msg.value / 2`
-- curator reserve credit is `msg.value / 4`
+- poster credit is `msg.value * posterBps / 10000`
+- curator reserve credit is `msg.value * curatorBps / 10000`
 - protocol credit is `msg.value - posterCredit - curatorReserveCredit`
 
-The protocol share receives the remainder so the split accounts for every wei.
-Implementation PRs may change the economics only if a later ADR or roadmap
-issue accepts the change and tests the new rounding policy.
+The protocol share receives integer remainders so the split accounts for every
+wei and curator opt-outs remain exact even for one-wei and odd-wei payments.
 
 Fixed-price execution must remain consistent with ADR 0001:
 
@@ -200,9 +204,10 @@ Fixed-price execution must remain consistent with ADR 0001:
 - free fixed-price execution must not create positive payment credits
 - zero-address credit recipients are rejected unless a later ADR defines a burn
   or donation policy
-- the curator reserve amount is accounted and included in owed/reserved totals,
-  but is not an ordinary poster/protocol withdrawal credit until the curator
-  claim workstream defines reserve movement into individual curator credits
+- the curator reserve amount is accounted and included in owed/reserved totals;
+  authorized operators may release a reserve credit with
+  `releaseFixedPriceCuratorReserveCredit()` so the configured curator pool
+  contract without its own `StreamDrops` callback can still receive funds
 
 ### Auction Bidding
 
@@ -226,14 +231,17 @@ Required behavior:
 
 With-bid settlement must create credits instead of pushing final proceeds.
 
-For the current 50 / 25 / 25 economics:
+With-bid auction settlement uses the same editable basis-point split hierarchy
+as fixed-price drops. The default split is `5000 / 2500 / 2500` for poster,
+protocol, and curator proceeds, and `curatorBps = 0` disables curator proceeds
+for the selected contract, collection, or token scope.
 
-- poster credit is `highestBid / 2`
-- protocol credit is `highestBid / 4`
-- curator credit is `highestBid - posterCredit - protocolCredit`
+- poster credit is `highestBid * posterBps / 10000`
+- curator credit is `highestBid * curatorBps / 10000`
+- protocol credit is `highestBid - posterCredit - curatorCredit`
 
 This makes integer rounding explicit: any non-divisible remainder accrues to
-the curator credit, and
+the protocol credit, and
 `posterCredit + protocolCredit + curatorCredit == highestBid` must always hold.
 
 No-bid settlement must not create final payment credits unless the
@@ -275,8 +283,9 @@ P0-PAY-005 implementation status:
   domains.
 - Claims require enough local curator-pool surplus to cover the reward before
   the claim is consumed, so the contract does not create unfunded curator
-  credits. Cross-contract reserve movement into the curator pool remains future
-  shared-ledger work.
+  credits. Fixed-price curator reserve and auction curator credits can now be
+  released explicitly to a curator pool contract, while individual curator
+  reward allocation remains in the curator pool Merkle workflow.
 - Claiming no longer calls the reward address, so a reverting reward recipient
   cannot block claim consumption or credit creation.
 - `withdrawCuratorCredit` and `withdrawCuratorCreditTo` are guarded withdrawal

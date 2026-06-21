@@ -3,6 +3,8 @@
 pragma solidity ^0.8.19;
 
 interface IStreamDrops {
+    function isStreamDropsContract() external view returns (bool);
+
     function retrieveAuctionPoster(uint256 _tokenid) external view returns (address);
 
     function retrieveAuctionPrice(uint256 _tokenid) external view returns (uint256);

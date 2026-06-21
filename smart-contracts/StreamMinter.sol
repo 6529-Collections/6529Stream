@@ -12,6 +12,7 @@ pragma solidity ^0.8.19;
 
 import "./IStreamCore.sol";
 import "./IStreamAdmins.sol";
+import "./IStreamDrops.sol";
 import "./StreamPauseDomains.sol";
 
 contract StreamMinter {
@@ -225,6 +226,9 @@ contract StreamMinter {
         FunctionAdminRequired(this.updateContracts.selector)
     {
         if (_opt == 1) {
+            _requireContractMarker(
+                _newContract, IStreamCore.isCoreContract.selector, "Contract is not Core"
+            );
             address oldContract = address(gencore);
             if (oldContract == _newContract) {
                 return;
@@ -232,7 +236,9 @@ contract StreamMinter {
             gencore = IStreamCore(_newContract);
             emit MinterContractReferenceUpdated(1, oldContract, _newContract, msg.sender);
         } else if (_opt == 2) {
-            require(IStreamAdmins(_newContract).isAdminContract() == true, "Contract is not Admin");
+            _requireContractMarker(
+                _newContract, IStreamAdmins.isAdminContract.selector, "Contract is not Admin"
+            );
             address oldContract = address(adminsContract);
             if (oldContract == _newContract) {
                 return;
@@ -240,13 +246,29 @@ contract StreamMinter {
             adminsContract = IStreamAdmins(_newContract);
             emit MinterContractReferenceUpdated(2, oldContract, _newContract, msg.sender);
         } else if (_opt == 3) {
+            _requireContractMarker(
+                _newContract, IStreamDrops.isStreamDropsContract.selector, "Contract is not Drops"
+            );
             address oldContract = streamDrops;
             if (oldContract == _newContract) {
                 return;
             }
             streamDrops = _newContract;
             emit MinterContractReferenceUpdated(3, oldContract, _newContract, msg.sender);
+        } else {
+            revert("Bad option");
         }
+    }
+
+    function _requireContractMarker(
+        address _target,
+        bytes4 _markerSelector,
+        string memory _errorMessage
+    ) private view {
+        require(_target.code.length != 0, "Contract required");
+        (bool success, bytes memory returnData) =
+            _target.staticcall(abi.encodeWithSelector(_markerSelector));
+        require(success && returnData.length == 32 && abi.decode(returnData, (bool)), _errorMessage);
     }
 
     function totalOwed() public pure returns (uint256) {

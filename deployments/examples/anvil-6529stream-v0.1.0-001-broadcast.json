@@ -38,7 +38,7 @@
         "0x0000000000000000000000000000000000000001"
       ],
       "abi_hash": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-      "bytecode_hash": "sha256:e055eb940464c974865945892adc7102dcb09ab82febd5557076d2d442f19106",
+      "bytecode_hash": "sha256:d3293fe5e1b8a09835b51f8baa2e7d1b506261681c08694c8021625aa93977f7",
       "verification_status": "not_applicable"
     },
     "StreamCore": {
@@ -49,8 +49,8 @@
         "0x0000000000000000000000000000000000000001",
         "0x0000000000000000000000000000000000000002"
       ],
-      "abi_hash": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-      "bytecode_hash": "sha256:0967b1698b4ed113e58b9dbd566c2cde28d002107da8da48cc260800d9b96fcc",
+      "abi_hash": "sha256:500463a781609b5140199d13abc77db8e7cdf6259fbeb5e00a8303869ddd1797",
+      "bytecode_hash": "sha256:be4d95c4cd76d2fa82ca982567c4553cf5fdd616713913afdea44b1c6c8dcb43",
       "verification_status": "not_applicable"
     },
     "StreamContractMetadata": {
@@ -61,7 +61,7 @@
         "ipfs://6529stream-contract-metadata/rehearsal.json"
       ],
       "abi_hash": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
-      "bytecode_hash": "sha256:819712e64bc905c98a7f1832a35f040ccf83d77351344ae534090a6b411e4c0a",
+      "bytecode_hash": "sha256:b22838b27c401b37579f2a7a38adb31a420114563a17dd2636538537eae731f7",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -82,7 +82,7 @@
         "0x0000000000000000000000000000000000000000"
       ],
       "abi_hash": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a",
-      "bytecode_hash": "sha256:80705a3272842c91cbba0f6d8001f26419870db18286ec4059e19c8bc58bc3cb",
+      "bytecode_hash": "sha256:ef531e551ab19e485ceb674476d341733ec77fd27ae49726f0c756c6df68b99d",
       "verification_status": "not_applicable"
     },
     "StreamDrops": {
@@ -94,8 +94,8 @@
         "0x0000000000000000000000000000000000006533",
         "0x0000000000000000000000000000000000000004"
       ],
-      "abi_hash": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
-      "bytecode_hash": "sha256:b614c5165a7e394a0753d24b2565d87028c5bc3528dd712a06c1cdede2fd3e3d",
+      "abi_hash": "sha256:f1c80390332942a1a9bddf38e2afa1d5e1779bcfb8408d4a36f927e8836ac203",
+      "bytecode_hash": "sha256:d48c7a4185e66afc1b657cb5a44042f5b13b7992658411c65d8b3df454437689",
       "verification_status": "not_applicable"
     },
     "StreamAuctions": {
@@ -108,8 +108,8 @@
         "0x0000000000000000000000000000000000006533",
         "0x0000000000000000000000000000000000000004"
       ],
-      "abi_hash": "sha256:7658f974c7d38a46d38cbcceea08ae37cba811fd7a98846ac2c9162ad82b3dd4",
-      "bytecode_hash": "sha256:5466b9cc7bcc8987559de475a6c66b6ca368e9e6fdf7715a1df4a2079a241d3b",
+      "abi_hash": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
+      "bytecode_hash": "sha256:6812796a6082dca6d5174e0377e22f01f654508c82768f7a2de3bb86f38be7e9",
       "verification_status": "not_applicable"
     },
     "NextGenRandomizerVRF": {
@@ -121,7 +121,7 @@
         "0x0000000000000000000000000000000000000001"
       ],
       "abi_hash": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
-      "bytecode_hash": "sha256:c4cc08121a39054191c5809faee4e1f3b5deca09d38b3054b1aad5fff5d0e0bd",
+      "bytecode_hash": "sha256:863307dd71763454ecc6eae4ead586fdca4268c5a23051140883404b969786d1",
       "verification_status": "not_applicable"
     },
     "NextGenRandomizerRNG": {
@@ -132,7 +132,7 @@
         "0x0000000000000000000000000000000000006536"
       ],
       "abi_hash": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
-      "bytecode_hash": "sha256:4e8fdef018b7e583c924b9c358e520b3a42658256ffd7e13da0e7622df146fce",
+      "bytecode_hash": "sha256:7dcc8f6e6a743f12549e11916d7b411dd4145312336cf21f0506bb555ae4998e",
       "verification_status": "not_applicable"
     }
   },
@@ -177,16 +177,16 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:c1242c40440e3c430cb51c1b37e88483fda35dfaa4f5c41bb94b589daf2d436b",
+    "manifest_sha256": "sha256:b3245da2e1b4d10811e05549ed433a7038fbeac468bb18e585148aab47d2db7c",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
-      "StreamCore": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
+      "StreamCore": "sha256:500463a781609b5140199d13abc77db8e7cdf6259fbeb5e00a8303869ddd1797",
       "StreamContractMetadata": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
       "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "StreamMinter": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a",
-      "StreamDrops": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
-      "StreamAuctions": "sha256:7658f974c7d38a46d38cbcceea08ae37cba811fd7a98846ac2c9162ad82b3dd4",
+      "StreamDrops": "sha256:f1c80390332942a1a9bddf38e2afa1d5e1779bcfb8408d4a36f927e8836ac203",
+      "StreamAuctions": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
       "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
       "NextGenRandomizerRNG": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf"
     },

@@ -38,15 +38,15 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:162c1eb408f8420f5ee0c09d0a2f8f5ee2d3e37627ef72fefd77a1cc09e4b9e7"
+      "sha256": "sha256:df3a518d50cb0b028acad4acab7f6ad8639c7587c2a5632ba2195468be6bcfc1"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
-      "sha256": "sha256:65f3a190564edb3d5d0fda5cc5b4599f901c1d5e1696abed18ca507b2e1e76f6"
+      "sha256": "sha256:3474209fcffe4f222bcd6c33b5931d39261cd9fad9eed338e3b162ce16602f23"
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:0cad18db1b618ec825b101f11928595aaa28c22654649a11bc0e4ab04ceb5c99"
+      "sha256": "sha256:9bb808822c33549146f9af586ef11334407d5434bcbbeadf734f51b069af66d5"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -171,7 +171,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:0cad18db1b618ec825b101f11928595aaa28c22654649a11bc0e4ab04ceb5c99"
+          "sha256": "sha256:9bb808822c33549146f9af586ef11334407d5434bcbbeadf734f51b069af66d5"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -342,7 +342,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:c1fc89d98998bd78f69fd3ddacf05f646b88d7624a92546df2df74aa596c10ca"
+          "sha256": "sha256:bed1c2583ecb485956d1ee4c7731c6b752fc0885c4dfebb225aac93b3f1f0ae2"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -378,7 +378,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:caa13012ccd4a5efc63352c1479e3f8dea1b0a160dc02e456d0adbea1e8b7967"
+          "sha256": "sha256:1f8180c8b0565ce07934407202968d2a6a1ff4b42f8f726ab05aee61c4421327"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -408,7 +408,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:162c1eb408f8420f5ee0c09d0a2f8f5ee2d3e37627ef72fefd77a1cc09e4b9e7"
+          "sha256": "sha256:df3a518d50cb0b028acad4acab7f6ad8639c7587c2a5632ba2195468be6bcfc1"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -416,7 +416,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:1604836dd70ea96a5b627fd4cb79b2c1cbd34d77f5ac3d34deb2d11a9aa6c014"
+          "sha256": "sha256:3ffd40305af4e04150fd56396f60f93b20c3eaf4346d2c796fcb8cc576a92df8"
         }
       ],
       "risk_acceptance": null
@@ -442,7 +442,7 @@
       "evidence": [
         {
           "path": "ops/SLITHER_BASELINE.md",
-          "sha256": "sha256:65f3a190564edb3d5d0fda5cc5b4599f901c1d5e1696abed18ca507b2e1e76f6"
+          "sha256": "sha256:3474209fcffe4f222bcd6c33b5931d39261cd9fad9eed338e3b162ce16602f23"
         },
         {
           "path": "docs/slither.md",
@@ -487,7 +487,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:1f4c91f07bffee63d7703da109d21ac033f90f93b4a8350278d64ee9a9b7c32a"
+          "sha256": "sha256:27dc7d6ff8611117f8bde8e08b93b52184cf32610a8b44cc9af3023e5e85dc11"
         },
         {
           "path": "docs/warning-dispositions.md",

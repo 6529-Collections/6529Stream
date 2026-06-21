@@ -210,8 +210,8 @@ Accepted headroom-recovery records use `measured_delta_bytes` as
 negative and bytecode spend positive.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
 2,392 bytes of EIP-170 margin. The current measured proof is lower:
-`release-artifacts/latest/bytecode-release-proof.json` records 21,792 bytes
-with 2,784 bytes of EIP-170 margin.
+`release-artifacts/latest/bytecode-release-proof.json` records 21,831 bytes
+with 2,745 bytes of EIP-170 margin.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the

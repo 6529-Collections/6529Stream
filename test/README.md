@@ -63,9 +63,10 @@ and curators-pool recipients cannot block minting; odd-wei and one-wei prices
 account for every wei; free mints create no positive credits; failed poster or
 protocol withdrawals preserve credits; withdrawal reentrancy cannot overdraw;
 mint failure rolls back credits and consumed drop state; and forced ETH is
-exposed only as `StreamDrops` surplus. Curator reserve remains accounted and
-protected for later curator-claim work rather than ordinary recipient
-withdrawal.
+exposed only as `StreamDrops` surplus. Contract, collection, and token proceeds
+split overrides cover curator opt-outs, and operator release tests prove
+curator reserve can be delivered to a contract pool without making it an
+ordinary recipient withdrawal.
 
 Curator reward claims now have target-state coverage in
 `StreamCuratorsPool.t.sol`: valid Merkle claims create withdrawable curator

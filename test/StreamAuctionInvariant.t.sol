@@ -469,8 +469,8 @@ contract AuctionConsistencyInvariantHandler is DropAuthTestHelper, StreamFixture
 
     function _recordSuccessfulSettlement(AuctionModel storage model) private {
         uint256 posterCredit = model.highestBid / 2;
-        uint256 protocolCredit = model.highestBid / 4;
-        uint256 curatorCredit = model.highestBid - posterCredit - protocolCredit;
+        uint256 curatorCredit = model.highestBid / 4;
+        uint256 protocolCredit = model.highestBid - posterCredit - curatorCredit;
 
         expectedPosterCredits[model.poster] += posterCredit;
         expectedProtocolCredits[PAYOUT] += protocolCredit;

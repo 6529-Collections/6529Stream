@@ -369,8 +369,8 @@ abstract contract ProtocolStateMachine is DropAuthTestHelper, StreamFixture {
 
     function _assertProtocolAuctionCredits(uint256 highestBid) internal view {
         uint256 expectedPoster = highestBid / 2;
-        uint256 expectedProtocol = highestBid / 4;
-        uint256 expectedCurator = highestBid - expectedPoster - expectedProtocol;
+        uint256 expectedCurator = highestBid / 4;
+        uint256 expectedProtocol = highestBid - expectedPoster - expectedCurator;
 
         protocolAuctions.auctionPosterCredits(PROTOCOL_POSTER)
             .assertEq(expectedPoster, "auction poster credit");

@@ -20,8 +20,8 @@
     "IStreamAuctions": "0xb109bb30",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
-    "IStreamCore": "0xbee7d263",
-    "IStreamDrops": "0x0f531c31",
+    "IStreamCore": "0xe02cb7f7",
+    "IStreamDrops": "0xd7c2abe3",
     "IStreamMinter": "0x0f48ec25"
   },
   "interfaces": {
@@ -527,10 +527,10 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:68fec6cff089c778bc15931ed8ef5d0576f1137e6c059827b71b0cb786055067",
-      "interface_id": "0xbee7d263",
+      "abi_sha256": "sha256:43c50531bd57a457e239e26b7ddda45028cd1738fd56838dc7efbcac0987264d",
+      "interface_id": "0xe02cb7f7",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0xbee7d263",
+      "computed_selector_xor": "0xe02cb7f7",
       "function_selectors": [
         {
           "signature": "artistApprovalHashes(uint256)",
@@ -547,6 +547,10 @@
         {
           "signature": "collectionFreezeStatus(uint256)",
           "selector": "0x2ed330f7"
+        },
+        {
+          "signature": "isCoreContract()",
+          "selector": "0x5ecb6594"
         },
         {
           "signature": "isTokenBurned(uint256)",
@@ -609,11 +613,15 @@
     "IStreamDrops": {
       "source": "smart-contracts/IStreamDrops.sol",
       "artifact_path": "out/IStreamDrops.sol/IStreamDrops.json",
-      "abi_sha256": "sha256:5a087ae1f095ff8c9d66babd2aaa2b76453f03c5a7c8791da13c9d33d4e8a416",
-      "interface_id": "0x0f531c31",
+      "abi_sha256": "sha256:481ef1bd67f9a47da7c6e71f095991dd74a3b09664bca7dc6e52df5ba988400e",
+      "interface_id": "0xd7c2abe3",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x0f531c31",
+      "computed_selector_xor": "0xd7c2abe3",
       "function_selectors": [
+        {
+          "signature": "isStreamDropsContract()",
+          "selector": "0xd891b7d2"
+        },
         {
           "signature": "retrieveAuctionPoster(uint256)",
           "selector": "0x73a9542c"

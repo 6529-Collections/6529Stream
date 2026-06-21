@@ -40,6 +40,7 @@ contract StreamDrops is Ownable, ReentrancyGuard {
     uint256 private constant SECP256K1_N_DIV_2 =
         0x7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a0;
     bytes4 private constant ERC1271_MAGIC_VALUE = 0x1626ba7e;
+    uint16 private constant BASIS_POINTS = 10_000;
 
     struct DropAuthorization {
         bytes32 dropId;
@@ -63,6 +64,13 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         Poster,
         Protocol,
         CuratorReserve
+    }
+
+    struct ProceedsSplit {
+        uint16 posterBps;
+        uint16 protocolBps;
+        uint16 curatorBps;
+        bool configured;
     }
 
     // struct that holds a drop's info
@@ -98,6 +106,9 @@ contract StreamDrops is Ownable, ReentrancyGuard {
     uint256 public totalFixedPricePosterOwed;
     uint256 public totalFixedPriceProtocolOwed;
     uint256 public totalFixedPriceCuratorReserveOwed;
+    ProceedsSplit public contractProceedsSplit;
+    mapping(uint256 => ProceedsSplit) public collectionProceedsSplits;
+    mapping(uint256 => ProceedsSplit) public tokenProceedsSplits;
 
     event DropAuthorizationConsumed(
         bytes32 indexed dropId,
@@ -125,6 +136,15 @@ contract StreamDrops is Ownable, ReentrancyGuard {
     event FixedPriceCreditWithdrawn(
         address indexed _add, address indexed _recipient, uint8 indexed creditType, uint256 funds
     );
+    event ProceedsSplitUpdated(
+        uint8 indexed scope,
+        uint256 indexed scopeId,
+        uint16 posterBps,
+        uint16 protocolBps,
+        uint16 curatorBps,
+        address indexed admin
+    );
+    event ProceedsSplitCleared(uint8 indexed scope, uint256 indexed scopeId, address indexed admin);
 
     // certain functions can only be called by a global or function admin
     modifier FunctionAdminRequired(bytes4 _selector) {
@@ -153,6 +173,11 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         adminsContract = IStreamAdmins(_adminsContract);
         payOutAddress = _payOutAddress;
         curatorsPoolAddress = _curatorsPoolAddress;
+        contractProceedsSplit = ProceedsSplit(5000, 2500, 2500, true);
+    }
+
+    function isStreamDropsContract() external pure returns (bool) {
+        return true;
     }
 
     // mint a drop
@@ -233,6 +258,56 @@ contract StreamDrops is Ownable, ReentrancyGuard {
     {
         require(_curatorsPoolAddress != address(0), "Zero curator");
         curatorsPoolAddress = _curatorsPoolAddress;
+    }
+
+    function updateContractProceedsSplit(uint16 _posterBps, uint16 _protocolBps, uint16 _curatorBps)
+        public
+        FunctionAdminRequired(this.updateContractProceedsSplit.selector)
+    {
+        _requireValidProceedsSplit(_posterBps, _protocolBps, _curatorBps);
+        contractProceedsSplit = ProceedsSplit(_posterBps, _protocolBps, _curatorBps, true);
+        emit ProceedsSplitUpdated(0, 0, _posterBps, _protocolBps, _curatorBps, msg.sender);
+    }
+
+    function updateCollectionProceedsSplit(
+        uint256 _collectionId,
+        uint16 _posterBps,
+        uint16 _protocolBps,
+        uint16 _curatorBps
+    ) public FunctionAdminRequired(this.updateCollectionProceedsSplit.selector) {
+        _requireValidProceedsSplit(_posterBps, _protocolBps, _curatorBps);
+        collectionProceedsSplits[_collectionId] =
+            ProceedsSplit(_posterBps, _protocolBps, _curatorBps, true);
+        emit ProceedsSplitUpdated(
+            1, _collectionId, _posterBps, _protocolBps, _curatorBps, msg.sender
+        );
+    }
+
+    function clearCollectionProceedsSplit(uint256 _collectionId)
+        public
+        FunctionAdminRequired(this.clearCollectionProceedsSplit.selector)
+    {
+        delete collectionProceedsSplits[_collectionId];
+        emit ProceedsSplitCleared(1, _collectionId, msg.sender);
+    }
+
+    function updateTokenProceedsSplit(
+        uint256 _tokenId,
+        uint16 _posterBps,
+        uint16 _protocolBps,
+        uint16 _curatorBps
+    ) public FunctionAdminRequired(this.updateTokenProceedsSplit.selector) {
+        _requireValidProceedsSplit(_posterBps, _protocolBps, _curatorBps);
+        tokenProceedsSplits[_tokenId] = ProceedsSplit(_posterBps, _protocolBps, _curatorBps, true);
+        emit ProceedsSplitUpdated(2, _tokenId, _posterBps, _protocolBps, _curatorBps, msg.sender);
+    }
+
+    function clearTokenProceedsSplit(uint256 _tokenId)
+        public
+        FunctionAdminRequired(this.clearTokenProceedsSplit.selector)
+    {
+        delete tokenProceedsSplits[_tokenId];
+        emit ProceedsSplitCleared(2, _tokenId, msg.sender);
     }
 
     function updateAuctionContract(address _auctionContract)
@@ -341,6 +416,25 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         }
     }
 
+    function releaseFixedPriceCuratorReserveCredit()
+        public
+        FunctionAdminRequired(this.releaseFixedPriceCuratorReserveCredit.selector)
+        nonReentrant
+    {
+        address payable recipient = payable(curatorsPoolAddress);
+        uint256 credit = fixedPriceCuratorReserveCredits[recipient];
+        require(credit != 0, "No credit");
+
+        fixedPriceCuratorReserveCredits[recipient] = 0;
+        totalFixedPriceCuratorReserveOwed -= credit;
+
+        (bool success,) = recipient.call{ value: credit }("");
+        require(success, "ETH failed");
+        emit FixedPriceCreditWithdrawn(
+            recipient, recipient, uint8(FixedPriceCreditType.CuratorReserve), credit
+        );
+    }
+
     function totalFixedPriceOwed() public view returns (uint256) {
         return
             totalFixedPricePosterOwed + totalFixedPriceProtocolOwed
@@ -417,6 +511,25 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         return cancelledDropIds[_dropId];
     }
 
+    function proceedsSplitFor(uint256 _collectionId, uint256 _tokenId)
+        public
+        view
+        returns (uint16 posterBps, uint16 protocolBps, uint16 curatorBps)
+    {
+        ProceedsSplit memory split = tokenProceedsSplits[_tokenId];
+        if (split.configured) {
+            return (split.posterBps, split.protocolBps, split.curatorBps);
+        }
+
+        split = collectionProceedsSplits[_collectionId];
+        if (split.configured) {
+            return (split.posterBps, split.protocolBps, split.curatorBps);
+        }
+
+        split = contractProceedsSplit;
+        return (split.posterBps, split.protocolBps, split.curatorBps);
+    }
+
     function _validateAuthorization(
         DropAuthorization calldata _authorization,
         address _signer,
@@ -477,17 +590,29 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         salt[0] = 0;
         num[0] = 1;
         tokenData[0] = _tokenData;
+        uint256 tokenId =
+            minterContract.mint(receiver, tokenData, salt, _authorization.collectionId, num);
         if (msg.value != 0) {
-            _creditFixedPriceProceeds(_authorization.dropId, _authorization.poster, msg.value);
+            _creditFixedPriceProceeds(
+                _authorization.dropId,
+                _authorization.collectionId,
+                tokenId,
+                _authorization.poster,
+                msg.value
+            );
         }
-        return minterContract.mint(receiver, tokenData, salt, _authorization.collectionId, num);
+        return tokenId;
     }
 
-    function _creditFixedPriceProceeds(bytes32 _dropId, address _poster, uint256 _payment) private {
-        uint256 posterCredit = _payment / 2;
-        uint256 curatorReserveCredit = _payment / 4;
-        // Integer remainders accrue to the protocol credit so all wei remain owed.
-        uint256 protocolCredit = _payment - posterCredit - curatorReserveCredit;
+    function _creditFixedPriceProceeds(
+        bytes32 _dropId,
+        uint256 _collectionId,
+        uint256 _tokenId,
+        address _poster,
+        uint256 _payment
+    ) private {
+        (uint256 posterCredit, uint256 protocolCredit, uint256 curatorReserveCredit) =
+            _splitPayment(_collectionId, _tokenId, _payment);
 
         if (posterCredit != 0) {
             fixedPricePosterCredits[_poster] += posterCredit;
@@ -513,6 +638,28 @@ contract StreamDrops is Ownable, ReentrancyGuard {
                 curatorReserveCredit
             );
         }
+    }
+
+    function _splitPayment(uint256 _collectionId, uint256 _tokenId, uint256 _payment)
+        private
+        view
+        returns (uint256 posterCredit, uint256 protocolCredit, uint256 curatorCredit)
+    {
+        (uint16 posterBps,, uint16 curatorBps) = proceedsSplitFor(_collectionId, _tokenId);
+        posterCredit = _payment * uint256(posterBps) / BASIS_POINTS;
+        curatorCredit = _payment * uint256(curatorBps) / BASIS_POINTS;
+        // Protocol receives integer remainders so curator opt-outs remain exact.
+        protocolCredit = _payment - posterCredit - curatorCredit;
+    }
+
+    function _requireValidProceedsSplit(uint16 _posterBps, uint16 _protocolBps, uint16 _curatorBps)
+        private
+        pure
+    {
+        require(
+            uint256(_posterBps) + uint256(_protocolBps) + uint256(_curatorBps) == BASIS_POINTS,
+            "Bad split"
+        );
     }
 
     function _executeAuctionDrop(

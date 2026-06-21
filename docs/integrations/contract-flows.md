@@ -224,15 +224,25 @@ an ERC-4906 final metadata update happened at mint time.
 
 Paid fixed-price mint proceeds are credited as:
 
-- poster credit: `msg.value / 2`;
-- curator reserve credit: `msg.value / 4`;
+- poster credit: `msg.value * posterBps / 10000`;
+- curator reserve credit: `msg.value * curatorBps / 10000`;
 - protocol credit: `msg.value - posterCredit - curatorReserveCredit`.
 
-These ratios are pinned by
+`StreamDrops` resolves `posterBps`, `protocolBps`, and `curatorBps` from token,
+collection, then contract-default proceeds splits. The default split is
+`5000 / 2500 / 2500`, and `curatorBps = 0` disables curator reserve funding for
+the selected scope. Protocol receives integer remainders so every wei is
+accounted and curator opt-outs remain exact.
+
+This behavior is pinned by
 `testFixedPriceMintCreditsProceedsWithoutPushPayouts`,
-`testFixedPriceOddWeiRemainderAccruesToProtocolCredit`, and
-`testOneWeiFixedPriceRemainderCreditsOnlyProtocol` in
+`testFixedPriceOddWeiRemainderAccruesToProtocolCredit`,
+`testOneWeiFixedPriceRemainderCreditsOnlyProtocol`,
+`testFixedPriceContractSplitCanDisableCuratorReserve`, and
+`testFixedPriceCollectionAndTokenSplitsOverrideContractDefault` in
 [`test/StreamFixedPricePayments.t.sol`](../../test/StreamFixedPricePayments.t.sol).
+
+Interfaces can read the resolved split with `proceedsSplitFor(collectionId, tokenId)`.
 
 Poster and protocol recipients use `withdrawFixedPriceCredit()` or
 `withdrawFixedPriceCreditTo(recipient)` for withdrawable credits.
@@ -242,10 +252,12 @@ reverted with the failed ETH transfer.
 
 Curator reserve accounting is different. `fixedPriceCuratorReserveCredits` and
 `totalFixedPriceCuratorReserveOwed` keep curator reserve funds included in
-`totalFixedPriceOwed()`, `totalReserved()`, and `totalOwed()`, but the current
-fixed-price withdrawal function does not directly withdraw curator reserve
-credit. UI should show curator reserve as reserved/owed protocol accounting,
-not as an immediate user withdrawal button.
+`totalFixedPriceOwed()`, `totalReserved()`, and `totalOwed()`. Authorized
+operators can release reserve credits with
+`releaseFixedPriceCuratorReserveCredit()` when the configured curator pool is a
+contract that cannot call `StreamDrops` itself. UI should show curator reserve
+release as an operator-controlled action for the configured pool, not an
+ordinary poster/protocol withdrawal button.
 
 Forced ETH only increases `surplus()` and `emergencyWithdrawable()`. Emergency
 flows must not withdraw owed poster, protocol, or curator reserve funds.
