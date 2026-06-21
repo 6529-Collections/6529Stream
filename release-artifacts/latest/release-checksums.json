@@ -143,7 +143,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:a0e671c82fb66adbfab073f269717b6ea7b7c2d5b812e600eb2830ab2f1cebc7"
+    "sha256": "sha256:1f2e7fd333830ec4093f81190da57e53aa080736d163e5c90df95530339488f4"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1057,7 +1057,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a18de21499f3924e6bdf97bada6d1064bc30457f43896d822780c56e3df965cb",
+      "sha256": "sha256:5b5809119e3ae992581433fbc61f5795d1f8ed728bb0b5a58ee6a9fe1a5f34f9",
       "size_bytes": 79959
     },
     {
@@ -1087,7 +1087,7 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:50641ff169777ce6e1d9f9dc60948635d13ced1316f926f8440283b1d5f86de1",
+      "sha256": "sha256:727d999df464d2e394149af85c3245b407d5922e74318114430fd9672debabbc",
       "size_bytes": 2913
     },
     {
@@ -1122,7 +1122,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:c543a3f18461d1ef30e7924f76c4d60b2d6bc42859cf5840f1182efd7eb9f78c",
+      "sha256": "sha256:7fc76f58605c0e78e95b75e4011a717becb9977f4ba8701977372fcc6dbc3d22",
       "size_bytes": 8839
     },
     {
@@ -1172,7 +1172,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:28249b33c7b5d4bd5b67bc600d6a82119b51c94c7fc5f1d41bc6cad19e6471e7",
+      "sha256": "sha256:7ae5ff55952eead778010de91e4572748a568ce46c91b803ba14f36e5596c51b",
       "size_bytes": 130343
     },
     {
@@ -1202,7 +1202,7 @@
     },
     {
       "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-      "sha256": "sha256:d085b88d0a556529145a4158109196bfaca00dac379a93ee51f2a8df88d10936",
+      "sha256": "sha256:550b7f5ef3cd10dd99b1835c6075eba61a1d649dd43d8b2a73d8da1929e319d6",
       "size_bytes": 8272
     },
     {
