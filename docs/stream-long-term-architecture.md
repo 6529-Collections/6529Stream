@@ -30,7 +30,7 @@ StreamCore
   - ERC-721 ownership, approvals, enumerable supply, burn/mint facts
   - token ID to collection ID truth
   - Core-native ERC-2981 surface
-  - tokenURI and contractURI public surfaces
+  - tokenURI public surface
   - minimal pointers to approved satellites
   - one-way Core-level freeze hooks where product promises require them
 
@@ -166,6 +166,83 @@ Incident revocation must not imply admin sweep rights, hidden migration, or
 silent policy substitution. It should freeze the affected surface until an
 accepted recovery or successor path is published.
 
+Canonical launch registry surface:
+
+```solidity
+enum ModuleRegistryStatus {
+    UNKNOWN,
+    ACTIVE,
+    DEPRECATED,
+    INCIDENT_REVOKED
+}
+
+struct StreamModuleRecord {
+    ModuleRegistryStatus status;
+    bytes32 moduleType;
+    bytes32 moduleVersion;
+    bytes4 interfaceId;
+    bytes32 runtimeCodeHash;
+    bytes32 deploymentManifestHash;
+    bytes32 moduleManifestHash;
+    string moduleManifestURI;
+    uint64 registeredAt;
+    uint64 statusUpdatedAt;
+}
+
+interface IStreamModuleRegistry {
+    function moduleRecord(address module)
+        external
+        view
+        returns (StreamModuleRecord memory);
+
+    function isModuleEligible(
+        address module,
+        bytes32 expectedModuleType,
+        bytes4 expectedInterfaceId
+    ) external view returns (bool);
+
+    function moduleRegistryManifest()
+        external
+        view
+        returns (bytes32 manifestHash, string memory manifestURI);
+}
+
+event StreamModuleRegistered(
+    uint16 schemaVersion,
+    address indexed module,
+    bytes32 indexed moduleType,
+    bytes4 indexed interfaceId,
+    bytes32 moduleVersion,
+    bytes32 runtimeCodeHash,
+    bytes32 deploymentManifestHash,
+    bytes32 moduleManifestHash,
+    string moduleManifestURI
+);
+
+event StreamModuleStatusChanged(
+    uint16 schemaVersion,
+    address indexed module,
+    bytes32 indexed moduleType,
+    ModuleRegistryStatus status,
+    bytes32 reasonHash,
+    string reasonURI
+);
+```
+
+Every launch pointer assignment, module registry check, and frozen-route
+compatibility check must name the registry that supplied eligibility. A pointer
+cannot be considered inspectable if tools can read only the target address and
+must guess which registry, module type, interface, or manifest made that target
+valid.
+If a module registry itself becomes obsolete, unsupported, or unusable while
+governance still functions, replacing it is a delayed pointer/governance action
+with old/new registry manifests and a compatibility-matrix snapshot. Existing
+Core pointer reads keep returning the cached registry status observed at their
+last update until each pointer is revalidated against the successor registry.
+If governance is lost before registry replacement, no hidden registry override
+exists; mutable assignments halt and read-only/degraded mode continues from
+cached pointer facts and frozen manifests.
+
 ## Core Satellite Pointer Policy
 
 The Core pointers to satellites are protocol-critical. A mutable resolver,
@@ -191,25 +268,12 @@ Required pointer lifecycle:
 
 1. New pointer targets must be approved by the relevant registry before they
    can be staged.
-2. Staging uses a two-step operation with an operation ID:
-
-   ```solidity
-   bytes32 operationId = keccak256(abi.encode(
-       STREAM_POINTER_OPERATION_V1,
-       block.chainid,
-       address(core),
-       bytes32(pointerType),
-       address(oldTarget),
-       address(newTarget),
-       bytes32(newTargetCodeHash),
-       bytes32(newTargetManifestHash),
-       uint64(notBefore),
-       bytes32(reasonHash)
-   ));
-   ```
+2. Staging uses the canonical ADR 0004 governance action ID. Pointer-specific
+   fields are encoded into `callHash` and the pointer manifest hash; this
+   document does not define a second pointer operation preimage.
 
 3. Every staged operation emits old target, new target, code hash, manifest
-   hash, earliest execution time, actor, and reason URI/hash.
+   hash, earliest execution time, actor, indexed action ID, and reason URI/hash.
 4. A staged operation can be cancelled before execution by the appropriate
    governance role.
 5. Execution rechecks registry eligibility, code hash, manifest hash, and
@@ -229,36 +293,113 @@ Required pointer lifecycle:
 9. Pointer changes must not alter already-finalized entropy seeds, already
    created split profiles, already credited escrow, or frozen artwork
    manifests.
+10. Pointer replacement for metadata routers, renderers, collection metadata,
+    dependency sources, or entropy coordinators is blocked while any frozen or
+    finalized collection depends on the old target unless one of these is true:
+    the collection is address-pinned and keeps reading the old target; the new
+    target proves it supports the exact frozen route/snapshot; or an executed
+    recovery manifest explicitly supersedes the frozen route.
+
+Frozen-route compatibility is reported through a small read:
+
+```solidity
+interface IStreamFrozenRouteAwareModule {
+    function supportsFrozenRoute(
+        uint256 collectionId,
+        bytes32 finalityRecordHash,
+        bytes32 frozenRouteHash
+    ) external view returns (bool);
+}
+
+interface IStreamFrozenRouteRegistry {
+    function frozenRoute(bytes32 routeType, uint256 collectionId)
+        external
+        view
+        returns (
+            bool pinned,
+            address module,
+            bytes32 routeHash,
+            bytes32 finalityRecordHash
+        );
+}
+
+event FrozenRoutePinned(
+    uint16 schemaVersion,
+    bytes32 indexed routeType,
+    uint256 indexed collectionId,
+    address indexed module,
+    bytes32 routeHash,
+    bytes32 finalityRecordHash
+);
+```
+
+Launch routing model: Core stays small and calls the current global
+`METADATA_ROUTER`. The metadata router, not Core, owns collection-level frozen
+route dispatch. A replacement global router is launch-conformant only if it can
+serve or delegate every pinned frozen route reported by the frozen route
+registry, or if an executed recovery manifest supersedes that route. Core does
+not add arbitrary per-collection router pointers in v1.
 
 Required events:
 
 ```solidity
 event CoreSatellitePointerStaged(
+    uint16 schemaVersion,
     bytes32 indexed pointerType,
-    address indexed oldTarget,
+    bytes32 indexed actionId,
     address indexed newTarget,
-    bytes32 operationId,
+    address oldTarget,
     bytes32 newTargetCodeHash,
     bytes32 newTargetManifestHash,
     uint64 notBefore,
+    bytes32 reasonHash,
     string reasonURI
 );
 
 event CoreSatellitePointerUpdated(
+    uint16 schemaVersion,
     bytes32 indexed pointerType,
-    address indexed oldTarget,
+    bytes32 indexed actionId,
     address indexed newTarget,
-    bytes32 operationId
+    address oldTarget
 );
 
 event CoreSatellitePointerFrozen(
+    uint16 schemaVersion,
     bytes32 indexed pointerType,
-    address indexed target,
-    bytes32 operationId,
-    bytes32 targetCodeHash,
+    bytes32 indexed actionId,
+    address target,
     bytes32 manifestHash
 );
 ```
+
+Core must expose a required pointer read interface from launch:
+
+```solidity
+interface IStreamCorePointerView {
+    function getSatellitePointer(bytes32 pointerType)
+        external
+        view
+        returns (
+            address target,
+            bytes32 codeHash,
+            bool frozen,
+            bytes32 moduleType,
+            bytes4 interfaceId,
+            address registry,
+            ModuleRegistryStatus registryStatus,
+            bytes32 moduleManifestHash,
+            bytes32 deploymentManifestHash
+        );
+}
+```
+
+Finality discovery, the system manifest, monitoring, and indexers depend on
+this interface rather than individual public variable getter names. Core must
+not call the registry from this read. `registryStatus` is the cached status
+observed and stored during the latest successful pointer scheduling/execution
+recheck. If tools need the live registry status, they should call the registry
+directly with their own gas policy and compare it with Core's cached value.
 
 ## Token Identity Model
 
@@ -304,6 +445,13 @@ allocate token IDs from collection ranges.
 Canonical Core read surface:
 
 ```solidity
+enum StreamTokenLifecycle {
+    UNKNOWN,
+    PREPARED_INCOMPLETE,
+    MINTED,
+    BURNED
+}
+
 interface IStreamCoreTokenIdentityView {
     function tokenCollectionIdentity(uint256 tokenId)
         external
@@ -314,6 +462,16 @@ interface IStreamCoreTokenIdentityView {
             uint256 collectionSerial,
             bool burned
         );
+
+    function tokenLifecycle(uint256 tokenId)
+        external
+        view
+        returns (uint8 lifecycle);
+
+    function coordinatorAtMint(uint256 tokenId)
+        external
+        view
+        returns (address);
 }
 ```
 
@@ -326,6 +484,13 @@ nonexistent, or otherwise unmapped token, it returns `(false, 0, 0, false)`.
 Royalties, metadata routing, finality components, indexers, and archival tools
 should use this read surface rather than private mapping names, historical
 `origin/main` helper names, or token ID range inference.
+Prepared-incomplete tokens have authoritative identity for the manager-owned
+operation but are not ordinary minted ERC-721 tokens. Satellites that can be
+called during `PREPARED_MINT` must check `tokenLifecycle(tokenId)` and reject
+or render provisional state as their spec requires.
+The cross-contract ABI returns `uint8`; the numeric values are pinned in the
+Numeric ID Catalog as `UNKNOWN = 0`, `PREPARED_INCOMPLETE = 1`, `MINTED = 2`,
+and `BURNED = 3`.
 
 ## Assignment Hierarchy
 
@@ -398,10 +563,46 @@ router to emit any Core-linked refresh/finality event required by indexers.
 function finalizeCollectionArtwork(
     uint256 collectionId,
     FinalityComponentExpectation[] calldata components,
-    bytes32 finalityManifestHash,
-    string calldata finalityManifestURI
+    bytes32 expectedFinalityRecordHash,
+    FinalityManifestRef calldata manifest
 ) external;
 ```
+
+Access control:
+
+1. `finalizeCollectionArtwork` requires `ROLE_COLLECTION_FINALITY_ADMIN`
+   through ADR 0004 governance. Ordinary metadata, revenue, entropy, or
+   collection admins cannot finalize artwork.
+2. `scheduleFinalityRecovery` and `cancelFinalityRecovery` require
+   `ROLE_COLLECTION_FINALITY_ADMIN`.
+3. `executeFinalityRecovery` is permissionless after the scheduled delay if the
+   recovery record is still `SCHEDULED` and all execution preconditions recheck.
+
+```solidity
+struct FinalityManifestRef {
+    string uri;
+    bytes32 uriHash;
+    bytes32 contentHash;
+    bytes32 schemaId;
+    bytes32 canonicalizationHash;
+}
+
+struct RecoveryManifestRef {
+    string uri;
+    bytes32 uriHash;
+    bytes32 contentHash;
+    bytes32 schemaId;
+    bytes32 canonicalizationHash;
+}
+```
+
+`uriHash = keccak256(bytes(uri))`. `contentHash` is the hash of the canonical
+manifest bytes, not the hash of a URL string. The manifest should be
+canonicalized through the schema named by `schemaId` and
+`canonicalizationHash`, for example RFC 8785/JCS JSON or deterministic CBOR.
+PREMIS, C2PA, IIIF, preservation, recovery, and human-readable reconstruction
+records are bound through `contentHash` when they are part of the finality
+manifest.
 
 Every participating satellite must expose a finality read surface:
 
@@ -410,7 +611,7 @@ struct FinalityComponentState {
     bool frozen;
     bytes32 componentType;
     address component;
-    bytes32 interfaceId;
+    bytes4 interfaceId;
     bytes32 codeHash;
     bytes32 moduleVersion;
     bytes32 manifestHash;
@@ -420,7 +621,7 @@ struct FinalityComponentState {
 struct FinalityComponentExpectation {
     bytes32 componentType;
     address component;
-    bytes32 interfaceId;
+    bytes4 interfaceId;
     bytes32 codeHash;
     bytes32 moduleVersion;
     bytes32 manifestHash;
@@ -433,6 +634,23 @@ interface IStreamFinalityComponent {
         view
         returns (FinalityComponentState memory);
 }
+
+interface IStreamFinalityDiscovery {
+    function finalityComponentCount(uint256 collectionId)
+        external
+        view
+        returns (uint256);
+
+    function finalityComponentAt(uint256 collectionId, uint256 index)
+        external
+        view
+        returns (FinalityComponentExpectation memory);
+
+    function finalityDiscoveryHash(uint256 collectionId)
+        external
+        view
+        returns (bytes32);
+}
 ```
 
 The finality registry stores:
@@ -440,54 +658,149 @@ The finality registry stores:
 ```solidity
 struct CollectionFinalityRecord {
     bool finalized;
-    bytes32 finalityManifestHash;
+    bytes32 finalityRecordHash;
+    bytes32 manifestContentHash;
+    bytes32 manifestURIHash;
     string finalityManifestURI;
     bytes32 componentsHash;
     uint64 finalizedAt;
 }
 
 mapping(uint256 collectionId => CollectionFinalityRecord) finalityRecords;
-mapping(uint256 collectionId => FinalityComponentExpectation[]) finalityComponentExpectations;
+mapping(uint256 collectionId => FinalityComponentExpectation[]) finalityComponents;
 ```
 
-`componentsHash` is `keccak256(abi.encode(components))`. The registry computes
-the finality hash onchain:
+`interfaceId` is the ERC-165-style four-byte interface identifier for the
+component's finality read surface. If a component does not have an ERC-165
+interface, the adapter must expose a Stream-defined `bytes4` interface ID.
+
+`componentsHash` is:
 
 ```solidity
-bytes32 finalityManifestHash = keccak256(abi.encode(
+bytes32 componentsHash = keccak256(abi.encode(
+    STREAM_FINALITY_COMPONENTS_V1,
+    components
+));
+```
+
+The submitted component list must be sorted ascending by `(componentType,
+component, interfaceId, codeHash, moduleVersion, manifestHash, dataHash)` and
+must not contain duplicates by that full identity tuple. Sorting is by
+ABI-encoded field value, with addresses compared as 20-byte values and
+`bytes4` compared as four-byte values. Any unsorted or duplicate list reverts
+before finality is recorded.
+
+`coreCollectionFactsHash` is computed onchain from Core through a small typed
+read, not supplied as an opaque offchain assertion:
+
+```solidity
+struct CoreCollectionFinalityFacts {
+    bool exists;
+    bool hasMaxSupply;
+    uint8 status;
+    uint8 supplyMode;
+    uint64 createdAt;
+    uint64 maxSupply;
+    uint64 mintedSupply;
+    uint64 burnedSupply;
+    uint64 nextCollectionSerial;
+    bytes32 collectionConfigHash;
+}
+
+interface IStreamCoreFinalityFacts {
+    function coreCollectionFinalityFacts(uint256 collectionId)
+        external
+        view
+        returns (CoreCollectionFinalityFacts memory);
+}
+
+bytes32 coreCollectionFactsHash = keccak256(abi.encode(
+    STREAM_CORE_COLLECTION_FACTS_V1,
+    block.chainid,
+    address(core),
+    collectionId,
+    facts.exists,
+    facts.hasMaxSupply,
+    facts.status,
+    facts.supplyMode,
+    facts.createdAt,
+    facts.maxSupply,
+    facts.mintedSupply,
+    facts.burnedSupply,
+    facts.nextCollectionSerial,
+    facts.collectionConfigHash
+));
+```
+
+`collectionConfigHash` is Core's hash of collection-level supply/status fields
+that are not otherwise included above. It must not include mutable display
+metadata, economic assignments, or event-only labels.
+For launch v1, if no additional Core-owned collection config fields affect
+finality beyond the fields explicitly listed in `CoreCollectionFinalityFacts`,
+`collectionConfigHash` is:
+
+```solidity
+bytes32 collectionConfigHash = keccak256(abi.encode(
+    STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1,
+    block.chainid,
+    address(core),
+    collectionId
+));
+```
+
+If implementation adds another Core-owned collection config field that affects
+minting, burning, supply, status, or finality, the launch spec must update this
+preimage before deployment. A generic "whatever Core stores" hash is not
+conformant.
+
+Each component's `dataHash` preimage is component-owned but must be versioned,
+typed, and named in that component's manifest. Launch components must publish
+their `dataHash` schema in the release manifest. A generic "hash whatever the
+module wants" value is not launch-conformant.
+
+The registry computes the finality record hash onchain:
+
+```solidity
+bytes32 finalityRecordHash = keccak256(abi.encode(
     STREAM_FINALITY_V1,
     block.chainid,
     address(core),
     collectionId,
     coreCollectionFactsHash,
     componentsHash,
-    keccak256(bytes(finalityManifestURI))
+    manifest.uriHash,
+    manifest.contentHash,
+    manifest.schemaId,
+    manifest.canonicalizationHash
 ));
 ```
 
-The offchain `finalityManifestURI` must include the same component list and any
-richer human-readable reconstruction data, but onchain verification uses only
-the typed `components` calldata and live component reads. The registry cannot
-and must not try to parse `finalityManifestURI` onchain.
+`finalizeCollectionArtwork` reverts unless `finalityRecordHash ==
+expectedFinalityRecordHash`. The offchain manifest at `manifest.uri` must
+include the same component list, Core facts, preservation/provenance references,
+and any richer human-readable reconstruction data. Onchain verification uses
+the typed `components` calldata, live component reads, and manifest hashes. The
+registry cannot and must not try to parse `manifest.uri` onchain.
 
 Component discovery path:
 
 1. The registry is bound to one Core.
 2. Core exposes current pointers for `COLLECTION_METADATA`,
    `METADATA_ROUTER`, `ENTROPY_COORDINATOR`, and other Core-owned satellites.
-3. The metadata router exposes finality discovery reads for the resolved
+3. The metadata router implements `IStreamFinalityDiscovery` for the resolved
    renderer, dependency source, media/source modules, and any snapshot route for
    `collectionId`.
 4. Each discovered component implements `IStreamFinalityComponent` or is wrapped
    by a small finality adapter that reports the required state.
 5. `finalizeCollectionArtwork` reverts unless the submitted component list
-   exactly matches the discovered components and every live
+   exactly matches the discovered components, the submitted component hash
+   equals `finalityDiscoveryHash(collectionId)`, and every live
    `FinalityComponentState` equals the corresponding expectation with
    `frozen = true`.
 6. After finality, `finalityRecords(collectionId)` and
-   `finalityComponents(collectionId, start, limit)` read from
-   `finalityComponentExpectations` to provide the durable onchain record and
-   allow future tools to check whether live components still match.
+   `finalityComponents(collectionId, start, limit)` provide the durable
+   onchain record and allow future tools to check whether live components still
+   match.
 7. Finality either freezes the relevant collection-scoped Core pointers in the
    same action or records the collection as address-pinned. If a later global
    pointer move occurs, `verifyFinality(collectionId)` must still compare
@@ -497,7 +810,6 @@ Component discovery path:
 Required component types include at least:
 
 ```text
-CORE_FACTS
 COLLECTION_METADATA
 METADATA_ROUTER
 RENDERER
@@ -509,8 +821,10 @@ ENTROPY_COORDINATOR
 OPTIONAL_SNAPSHOT_ROUTE
 ```
 
-Finality is not valid if any required component is merely promised frozen
-offchain.
+Core facts are not a `FinalityComponentExpectation` entry; they are the
+separately computed `coreCollectionFactsHash` or `scopedCoreFactsHash` input to
+the finality record. Finality is not valid if any required satellite component
+is merely promised frozen offchain.
 Launch should cap finality component count and calldata size. Initial limits:
 `MAX_FINALITY_COMPONENTS = 32` and `MAX_FINALITY_CALLDATA_BYTES = 32_768`,
 subject to implementation measurement before deployment.
@@ -539,8 +853,8 @@ Finality requirements:
 1. The action verifies that every participating module reports the required
    frozen state before finality is recorded.
 2. The action emits one Core-originated or Core-linked finality event.
-3. A read function returns the finality manifest hash and whether all component
-   modules still match it.
+3. A read function returns the finality record hash, manifest content hash, and
+   whether all component modules still match it.
 4. Incident recovery cannot silently swap final artwork. It must publish a new
    recovery manifest and preserve the original finality manifest.
 5. Frozen renderers may be deprecated for new collections, but they must keep
@@ -549,15 +863,353 @@ Finality requirements:
    manifest hash covering assembled script bytes, dependency payloads, renderer
    context, metadata root, media hashes, and entropy policy has already been
    recorded in the collection metadata contract.
+7. Collection-level artwork finality that binds `mintedSupply`,
+   `burnedSupply`, and `nextCollectionSerial` requires Core collection status
+   `CLOSED`. For collection-level finality, `CLOSED` must guarantee that
+   `mintedSupply`, `burnedSupply`, and `nextCollectionSerial` are immutable
+   thereafter. `coreCollectionFinalityFacts(collectionId)` must therefore be
+   invariant for a `CLOSED` finalized collection. If Core cannot guarantee
+   this invariant, collection-level finality is forbidden and only scoped
+   token, release, season, or view finality may be used. Collection-scope
+   artwork finality forbids any surviving burn path, because a post-finality
+   burn would mutate `burnedSupply`. Collections that require post-finality
+   burns must use scoped finality only; scoped Core facts intentionally do not
+   bind collection-wide burned supply.
+8. Ongoing open series use token-level, release-level, season-level, or
+   view-level snapshot/finality records rather than collection-level finality
+   for the still-open parent collection.
+
+### Scoped Finality For Open Series
+
+Open-ended collections are a first-class launch target. They need finality for
+individual works, releases, seasons, exhibitions, and archival views without
+pretending the parent collection has a final supply.
+
+Canonical scoped-finality model:
+
+```solidity
+enum FinalityScopeType {
+    COLLECTION,
+    TOKEN,
+    RELEASE,
+    SEASON,
+    VIEW
+}
+
+struct FinalityScope {
+    FinalityScopeType scopeType;
+    uint256 collectionId;
+    uint256 tokenId;
+    bytes32 scopeId;
+}
+
+struct ScopedFinalityRecord {
+    bool finalized;
+    FinalityScope scope;
+    bytes32 finalityRecordHash;
+    bytes32 manifestContentHash;
+    bytes32 manifestURIHash;
+    bytes32 componentsHash;
+    string finalityManifestURI;
+    uint64 finalizedAt;
+}
+
+function finalizeArtworkScope(
+    FinalityScope calldata scope,
+    FinalityComponentExpectation[] calldata components,
+    bytes32 expectedFinalityRecordHash,
+    FinalityManifestRef calldata manifest
+) external;
+
+function artworkScopeFinalityRecord(FinalityScope calldata scope)
+    external
+    view
+    returns (ScopedFinalityRecord memory);
+
+function verifyArtworkScopeFinality(FinalityScope calldata scope)
+    external
+    view
+    returns (
+        bool currentRouteMatches,
+        bytes32 finalityRecordHash,
+        bytes32 componentsHash
+    );
+
+function finalityComponentCountForScope(FinalityScope calldata scope)
+    external
+    view
+    returns (uint256);
+
+function finalityComponentsForScope(
+    FinalityScope calldata scope,
+    uint256 start,
+    uint256 limit
+) external view returns (FinalityComponentExpectation[] memory);
+
+function verifyArtworkScopeFinalityRange(
+    FinalityScope calldata scope,
+    uint256 start,
+    uint256 limit
+) external view returns (
+    bool rangeMatches,
+    bytes32 finalityRecordHash,
+    bytes32 expectedRangeHash,
+    bytes32 observedRangeHash,
+    uint256 nextStart
+);
+
+interface IStreamScopedFinalityComponent {
+    function finalityStateForScope(FinalityScope calldata scope)
+        external
+        view
+        returns (FinalityComponentState memory);
+}
+
+interface IStreamScopedFinalityDiscovery {
+    function finalityComponentCountForScope(FinalityScope calldata scope)
+        external
+        view
+        returns (uint256);
+
+    function finalityComponentAtForScope(
+        FinalityScope calldata scope,
+        uint256 index
+    ) external view returns (FinalityComponentExpectation memory);
+
+    function finalityDiscoveryHashForScope(FinalityScope calldata scope)
+        external
+        view
+        returns (bytes32);
+}
+
+interface IStreamScopedFrozenRouteRegistry {
+    function frozenRouteForScope(bytes32 routeType, FinalityScope calldata scope)
+        external
+        view
+        returns (
+            bool pinned,
+            address module,
+            bytes32 routeHash,
+            bytes32 finalityRecordHash
+        );
+}
+```
+
+Scope rules:
+
+1. `COLLECTION` scope uses `collectionId` and requires `tokenId == 0` and
+   `scopeId == bytes32(0)`.
+2. `TOKEN` scope requires a minted or burned token whose retained Core identity
+   maps to `collectionId`; `scopeId` is zero unless a future token-view schema
+   explicitly defines it.
+3. `RELEASE`, `SEASON`, and `VIEW` scopes require a nonzero `scopeId` whose
+   schema and canonical manifest are published by collection metadata.
+4. A scoped finality record binds the same component identity fields as
+   collection finality, but component `dataHash` may be scoped to the token,
+   release, season, or view.
+5. Frozen-route compatibility keys include
+   `(scopeType, collectionId, tokenId, scopeId, finalityRecordHash)`, not only
+   `collectionId`.
+6. A global router, renderer, collection metadata, or entropy pointer
+   replacement is launch-conformant only if it can serve every pinned scoped
+   route or a delayed recovery manifest supersedes the affected scope.
+7. Scoped finality recovery uses the same status machine as collection finality
+   but its `recoveryId` preimage includes the full `FinalityScope`.
+8. Collection-level finality may coexist with older token, release, season, or
+   view records, but it cannot reinterpret them. Later broader finality records
+   must reference prior scoped record hashes in their manifest when they depend
+   on them.
+
+Scoped finality hashes include the full scope:
+
+```solidity
+bytes32 scopedFinalityRecordHash = keccak256(abi.encode(
+    STREAM_SCOPED_FINALITY_V1,
+    block.chainid,
+    address(core),
+    uint8(scope.scopeType),
+    scope.collectionId,
+    scope.tokenId,
+    scope.scopeId,
+    scopedCoreFactsHash,
+    componentsHash,
+    manifest.uriHash,
+    manifest.contentHash,
+    manifest.schemaId,
+    manifest.canonicalizationHash
+));
+```
+
+Scoped Core facts:
+
+```solidity
+struct ScopedCoreFinalityFacts {
+    bool scopeExists;
+    uint8 scopeType;
+    uint256 collectionId;
+    uint256 tokenId;
+    bytes32 scopeId;
+    bool tokenMappingExists;
+    uint256 collectionSerial;
+    uint8 tokenLifecycle;
+    bool burned;
+    uint8 collectionStatus;
+    uint8 collectionSupplyMode;
+    bytes32 collectionConfigHash;
+    bytes32 scopeManifestHash;
+}
+
+function scopedCoreFinalityFacts(FinalityScope calldata scope)
+    external
+    view
+    returns (ScopedCoreFinalityFacts memory);
+
+bytes32 scopedCoreFactsHash = keccak256(abi.encode(
+    STREAM_SCOPED_CORE_FINALITY_FACTS_V1,
+    block.chainid,
+    address(core),
+    uint8(scope.scopeType),
+    scope.collectionId,
+    scope.tokenId,
+    scope.scopeId,
+    facts.scopeExists,
+    facts.tokenMappingExists,
+    facts.collectionSerial,
+    facts.tokenLifecycle,
+    facts.burned,
+    facts.collectionStatus,
+    facts.collectionSupplyMode,
+    facts.collectionConfigHash,
+    facts.scopeManifestHash
+));
+```
+
+For `TOKEN`, `scopeExists` requires `tokenCollectionIdentity(tokenId)` to map
+to `collectionId`, and `scopeManifestHash` is zero unless token metadata names
+a token-finality manifest. For `RELEASE`, `SEASON`, and `VIEW`, `scopeExists`
+requires collection metadata to publish the `scopeId` and its manifest hash.
+Scoped finality for an open parent collection does not bind `mintedSupply`,
+`burnedSupply`, or `nextCollectionSerial`; it binds only the scoped facts above
+and the component list for that scope.
+
+Scoped recovery mirrors collection recovery:
+
+```solidity
+struct ScopedFinalityRecoveryRecord {
+    FinalityRecoveryStatus status;
+    FinalityScope scope;
+    bytes32 oldFinalityRecordHash;
+    RecoveryManifestRef recoveryManifest;
+    bytes32 recoveryRouteHash;
+    uint64 executeAfter;
+    bool artworkBytesChanged;
+    bytes32 reasonHash;
+    string reasonURI;
+}
+
+function scheduleScopedFinalityRecovery(
+    FinalityScope calldata scope,
+    bytes32 recoveryId,
+    bytes32 expectedOldFinalityRecordHash,
+    RecoveryManifestRef calldata recoveryManifest,
+    bytes32 recoveryRouteHash,
+    uint64 executeAfter,
+    bool artworkBytesChanged,
+    bytes32 reasonHash,
+    string calldata reasonURI
+) external;
+
+function cancelScopedFinalityRecovery(
+    FinalityScope calldata scope,
+    bytes32 recoveryId,
+    bytes32 reasonHash,
+    string calldata reasonURI
+) external;
+
+function executeScopedFinalityRecovery(
+    FinalityScope calldata scope,
+    bytes32 recoveryId
+) external;
+
+function scopedFinalityRecoveryRecord(
+    FinalityScope calldata scope,
+    bytes32 recoveryId
+) external view returns (ScopedFinalityRecoveryRecord memory);
+```
+
+`recoveryId` is `keccak256(abi.encode(STREAM_SCOPED_FINALITY_RECOVERY_V1,
+block.chainid, address(finalityRegistry), uint8(scope.scopeType),
+scope.collectionId, scope.tokenId, scope.scopeId,
+expectedOldFinalityRecordHash, recoveryManifest.contentHash, recoveryRouteHash,
+executeAfter, artworkBytesChanged, reasonHash))`.
+
+Recommended scoped event:
+
+```solidity
+event ArtworkScopeFinalized(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed finalityRecordHash,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 componentsHash,
+    bytes32 manifestContentHash,
+    string finalityManifestURI
+);
+
+event ScopedFinalityRecoveryScheduled(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 oldFinalityRecordHash,
+    bytes32 recoveryManifestContentHash,
+    bytes32 recoveryRouteHash,
+    uint64 executeAfter,
+    bool artworkBytesChanged,
+    bytes32 reasonHash,
+    string reasonURI
+);
+
+event ScopedFinalityRecoveryCancelled(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 reasonHash,
+    string reasonURI
+);
+
+event ScopedFinalityRecoveryExecuted(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 recoveryManifestContentHash,
+    bytes32 recoveryRouteHash,
+    bool artworkBytesChanged,
+    bytes32 reasonHash,
+    string reasonURI
+);
+```
 
 Recommended event:
 
 ```solidity
 event CollectionArtworkFinalized(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
-    bytes32 indexed finalityManifestHash,
+    bytes32 indexed finalityRecordHash,
     address indexed actor,
     bytes32 componentsHash,
+    bytes32 manifestContentHash,
     string finalityManifestURI
 );
 ```
@@ -590,36 +1242,142 @@ function verifyFinality(uint256 collectionId)
     view
     returns (
         bool currentRouteMatches,
-        bytes32 finalityManifestHash,
+        bytes32 finalityRecordHash,
         bytes32 componentsHash
     );
+
+function verifyFinalityRange(
+    uint256 collectionId,
+    uint256 start,
+    uint256 limit
+)
+    external
+    view
+    returns (
+        bool rangeMatches,
+        bytes32 finalityRecordHash,
+        bytes32 expectedRangeHash,
+        bytes32 observedRangeHash,
+        uint256 nextStart
+    );
 ```
+
+`verifyFinality` and `finalityStillMatches` are non-reverting diagnostic reads
+for already-recorded finality. They must use bounded `staticcall` to every
+component, with a launch-measured `FINALITY_COMPONENT_READ_GAS` and a bounded
+returndata copy for the fixed return struct. If any component read reverts,
+runs out of its gas cap, returns malformed data, has no code, or no longer
+matches the expected code hash, the read returns `currentRouteMatches = false`
+or `false` and still returns the stored finality hash. It must not revert merely
+because a historical component became unhealthy.
+The release manifest must publish both per-component and total worst-case
+diagnostic gas for `MAX_FINALITY_COMPONENTS`. If the full `verifyFinality`
+read becomes impractical under future gas schedules, `verifyFinalityRange`
+remains the archival verification primitive. Implementations should expose a
+documented diagnostic status such as `VERIFY_RANGE_REQUIRED` before attempting
+component reads when the published full-read budget is not satisfiable, instead
+of allowing callers to hit an unexplained out-of-gas condition.
+Initial planning target is `FINALITY_COMPONENT_READ_GAS = 30_000` and a full
+diagnostic budget under 1,200,000 gas for 32 components, but launch uses
+measured values plus margin. Operator tooling should prefer
+`verifyFinalityRange` for routine archival checks once a collection has more
+than eight components.
+
+Finality recording is stricter: `finalizeCollectionArtwork` reverts if any
+required component read fails, returns malformed data, reports `frozen = false`,
+or differs from the submitted expectation. `previewFinality(collectionId,
+components)` or equivalent tooling must expose the same comparisons before a
+state-changing finality transaction is sent, and launch operator runbooks must
+require a successful preview artifact hash before execution.
 
 ### Finality Recovery
 
 Artwork-finality recovery is a governed state machine:
 
 ```solidity
+enum FinalityRecoveryStatus {
+    NONE,
+    SCHEDULED,
+    CANCELLED,
+    EXECUTED
+}
+
+struct FinalityRecoveryRecord {
+    FinalityRecoveryStatus status;
+    bytes32 oldFinalityRecordHash;
+    RecoveryManifestRef recoveryManifest;
+    bytes32 recoveryRouteHash;
+    uint64 executeAfter;
+    bool artworkBytesChanged;
+    bytes32 reasonHash;
+    string reasonURI;
+}
+
 event FinalityRecoveryScheduled(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed recoveryId,
-    bytes32 oldFinalityManifestHash,
-    bytes32 newRecoveryManifestHash,
+    bytes32 oldFinalityRecordHash,
+    bytes32 recoveryManifestContentHash,
+    bytes32 recoveryRouteHash,
     uint64 executeAfter,
-    bytes32 reasonHash
+    bool artworkBytesChanged,
+    bytes32 reasonHash,
+    string reasonURI
 );
 
 event FinalityRecoveryCancelled(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed recoveryId,
-    bytes32 reasonHash
+    bytes32 reasonHash,
+    string reasonURI
 );
 
 event FinalityRecoveryExecuted(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed recoveryId,
-    bytes32 newRecoveryManifestHash
+    bytes32 recoveryManifestContentHash,
+    bytes32 recoveryRouteHash,
+    bool artworkBytesChanged,
+    bytes32 reasonHash,
+    string reasonURI
 );
+
+function scheduleFinalityRecovery(
+    uint256 collectionId,
+    bytes32 recoveryId,
+    bytes32 expectedOldFinalityRecordHash,
+    RecoveryManifestRef calldata recoveryManifest,
+    bytes32 recoveryRouteHash,
+    uint64 executeAfter,
+    bool artworkBytesChanged,
+    bytes32 reasonHash,
+    string calldata reasonURI
+) external;
+
+function cancelFinalityRecovery(
+    uint256 collectionId,
+    bytes32 recoveryId,
+    bytes32 reasonHash,
+    string calldata reasonURI
+) external;
+
+function executeFinalityRecovery(
+    uint256 collectionId,
+    bytes32 recoveryId
+) external;
+
+function finalityRecoveryRecord(
+    uint256 collectionId,
+    bytes32 recoveryId
+) external view returns (FinalityRecoveryRecord memory);
+
+function activeFinalityRecoveryRoute(uint256 collectionId)
+    external
+    view
+    returns (bytes32 recoveryRouteHash, bytes32 recoveryId);
 ```
 
 Rules:
@@ -639,6 +1397,13 @@ Rules:
    makes finalized collections whose manifests pinned the old pointer report
    `currentRouteMatches = false` until a recovery manifest supersedes that
    route.
+7. `recoveryId` is `keccak256(abi.encode(STREAM_FINALITY_RECOVERY_V1,
+   block.chainid, address(finalityRegistry), collectionId,
+   expectedOldFinalityRecordHash, recoveryManifest.contentHash, recoveryRouteHash,
+   executeAfter, artworkBytesChanged, reasonHash))`.
+8. `executeFinalityRecovery` rechecks status `SCHEDULED`, delay, old finality
+   record hash, and recovery manifest hash before marking the recovery
+   `EXECUTED`.
 
 ## Governance Staging
 
@@ -687,7 +1452,7 @@ Rules:
 A future indexer, museum, or marketplace needs one deterministic way to discover
 the active Stream system.
 
-Recommended aggregate read:
+Required aggregate read:
 
 ```solidity
 function streamSystemManifest()
@@ -704,12 +1469,35 @@ function streamSystemManifest()
         address mintLedger,
         address streamAdminsOrGovernance,
         address artworkFinalityRegistry,
-        bytes32 eventCatalogHash
+        address moduleRegistry,
+        address stateExportPublisher,
+        bytes32 eventCatalogHash,
+        bytes32 compatibilityMatrixHash,
+        bytes32 numericIdCatalogHash,
+        bytes32 schemaCatalogHash,
+        bytes32 canonicalizationCatalogHash,
+        bytes32 specBundleHash,
+        bytes32 reconstructionClientHash
     );
 ```
 
-The manifest should include module addresses, versions, code hashes, registry
-states, pointer freeze states, event catalog hash, and deployment chain IDs.
+The `streamSystemManifest()` read is hosted on Core and is a required launch
+surface, not an optional convenience. The release manifest records its selector,
+interface ID if one is assigned, return shape, and gas measurement. The
+manifest should include module addresses, versions, code hashes, registry
+states, pointer freeze states, event catalog hash, compatibility matrix hash,
+numeric ID catalog hash, schema catalog hash, canonicalization catalog hash,
+spec bundle hash, reconstruction client hash, and deployment chain IDs.
+`streamSystemManifest()` is a storage-only read. Core stores the manifest hash,
+manifest URI, current Core pointer addresses, the state/export publisher
+address, cached catalog hashes, and cached discovery hashes needed for the
+return tuple. It must not call satellites,
+registries, or offchain resolvers. Pointer updates and catalog updates that
+change any returned field must update the cached system manifest fields in the
+same governed execution and emit the corresponding pointer/catalog event. If a
+catalog publisher needs richer data, it lives in the content-addressed manifest
+named by `manifestURI` and committed by `manifestHash`, not in an external call
+from Core.
 
 Core should also support a non-mutating successor declaration for long-term
 identity continuity:
@@ -719,6 +1507,13 @@ event StreamCoreSuccessorDeclared(
     address indexed successorCore,
     bytes32 indexed successorManifestHash,
     string successorManifestURI
+);
+
+event StreamCoreSuccessorRepudiated(
+    address indexed successorCore,
+    bytes32 indexed successorManifestHash,
+    bytes32 indexed reasonHash,
+    string reasonURI
 );
 
 function declareStreamCoreSuccessor(
@@ -738,11 +1533,26 @@ function streamCoreSuccessorAt(uint256 index)
         string memory successorManifestURI,
         uint64 declaredAt
     );
+
+function coreLifecycleStatus()
+    external
+    view
+    returns (
+        uint8 status,
+        bytes32 latestSuccessorManifestHash
+    );
 ```
 
 A successor declaration does not migrate tokens, transfer ownership, or change
 the old Core. It is a public breadcrumb for future chain migrations, L2
 successors, archival mirrors, or a post-EIP standards replacement.
+Outstanding old-Core signed mint tickets, sale authorizations, nullifiers, and
+future-dated permissions are not honored by a successor Core. A successor
+deployment starts with its own authorization/nullifier ledger and must require
+fresh signatures or an explicit successor authorization scheme.
+A successor Core also deploys or points to its own revenue resolver line. The
+old resolver is bound to the old Core and must not be reused as if assignments
+automatically apply to the successor.
 
 Access control for `declareStreamCoreSuccessor` must use the ADR 0004
 `SUCCESSOR_DECLARATION` governance class with the published delay, staged
@@ -752,12 +1562,24 @@ admin. The function may append to a successor history and expose the latest
 declaration for convenience, but it must not mutate ERC-721 ownership, token
 collection mappings, satellite pointers, royalty behavior, metadata behavior,
 or freeze state.
+When `coreLifecycleStatus().status != ACTIVE`, `streamSystemManifest()` must
+continue returning the old Core's module set and catalog hashes. It must not be
+repurposed to advertise successor module addresses. Successor discovery is
+through the successor declaration history and successor manifest, with
+`coreLifecycleStatus()` as the old Core's lifecycle read.
+
+Emergency incident communication, public state export, monitoring alerts, and
+publication of candidate successor artifacts for a critical Core bug are not
+gated by the 30-day `SUCCESSOR_DECLARATION` delay. The delay gates only the
+onchain canonical successor pointer/declaration execution.
 
 The successor manifest must include old chain ID, old Core, new chain ID, new
 Core, ownership snapshot hash, complete event-history snapshot hash,
 collection-snapshot root, activation statement, and explicit old-Core status:
 `ACTIVE`, `DEPRECATED_QUERYABLE`, or `DEPRECATED_ZERO_ROYALTIES`. Indexers must
-not infer deprecation from the existence of a successor event alone.
+not infer deprecation from the existence of a successor event alone; they should
+read `coreLifecycleStatus()` or the successor manifest status that the read
+hashes.
 
 ## Resolver Safety Invariants
 
@@ -771,6 +1593,12 @@ return malformed data, return excess data, attempt external calls, or recurse
 through another view. Core must return `(address(0), 0)` without reverting
 under every resolver failure mode, and the production resolver implementation
 must be audited against the no-external-call invariant.
+
+`royaltyInfo()` and `tokenURI()` bounded reads are independent marketplace
+entrypoints with independent top-level gas budgets. Launch code must not add a
+combined marketplace read that invokes both the royalty resolver and metadata
+router within one shared `staticcall` frame or derives one gas cap from the
+other.
 
 ## State Export And Archival Operations
 
@@ -799,12 +1627,223 @@ canonical and independently reproducible from chain data. Successor
 declarations should reference the latest state export hash and, for chains
 hosting onchain art, a content-addressed mirror of every finalized assembled
 artwork snapshot.
+
+Discoverable export publication surface:
+
+```solidity
+event StateExportPublished(
+    uint16 schemaVersion,
+    uint256 indexed blockNumber,
+    bytes32 indexed exportHash,
+    bytes32 indexed manifestHash,
+    bytes32 blockHash,
+    string manifestURI
+);
+
+function latestStateExport()
+    external
+    view
+    returns (
+        uint256 blockNumber,
+        bytes32 blockHash,
+        bytes32 exportHash,
+        bytes32 manifestHash,
+        string memory manifestURI
+    );
+```
+
+The event may be emitted by governance, a dedicated archive publisher, or a
+successor/export satellite named in `streamSystemManifest()`. It does not make
+an offchain export magically correct; it makes the claimed export discoverable,
+hash-bound, and challengeable.
+Export roots are computed at a named confirmation depth. If an export's block
+range includes a later-reorged entropy fulfillment, escrow event, governance
+action, or other state-changing event, the old export must be superseded
+through `StateExportSuperseded`; it must not be silently corrected in place.
+
+Challenge and supersession surface:
+
+```solidity
+event StateExportChallenged(
+    uint16 schemaVersion,
+    bytes32 indexed exportHash,
+    bytes32 indexed challengeHash,
+    address indexed challenger,
+    string challengeURI
+);
+
+event StateExportSuperseded(
+    uint16 schemaVersion,
+    bytes32 indexed oldExportHash,
+    bytes32 indexed newExportHash,
+    bytes32 indexed reasonHash,
+    string reasonURI
+);
+```
+
+The same pattern should be available for recovery manifests and archive/fixity
+receipts when a previously published artifact is found incomplete, corrupted,
+or non-canonical. Supersession does not erase the old artifact; it creates a
+public lineage.
+If the state/export publisher becomes obsolete or unavailable, the cached
+`stateExportPublisher` in `streamSystemManifest()` remains historical discovery
+data. While governance works, replacement uses delayed pointer/catalog
+governance. If governance is lost, independent archives can still publish
+unofficial exports and challenges offchain, but old Core cannot bless a new
+publisher; consumers should mark those exports as independently reproduced, not
+Core-published.
+Successor manifests must name the proof posture for the state export: Merkle
+inclusion proofs over the exported roots, a future ZK proof if one is adopted,
+or explicit social/governance attestation when cryptographic continuity is not
+available. The chosen proof posture is part of the successor manifest hash.
+If a declared successor manifest is later found compromised, governance may
+publish `StreamCoreSuccessorRepudiated` under the same
+`SUCCESSOR_DECLARATION` delay class. Repudiation does not erase the old
+declaration; it adds a visible warning and replacement lineage.
 Burned tokens are excluded from ownership roots after burn but included in
 token-to-collection and collection-serial roots when Core retains their mapping.
 Roots should be Merkle roots over sorted `(key, valueHash)` leaves with the leaf
 schema named in the export manifest. The reference exporter can be maintained
 offchain, but no export is canonical unless an independent indexer can reproduce
 the same roots from archived chain data and the published event catalog.
+
+Minimum v1 leaf schemas:
+
+```solidity
+bytes32 tokenCollectionLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1,
+    uint256(tokenId),
+    bool(mappingExists),
+    uint256(collectionId),
+    uint256(collectionSerial),
+    bool(burned)
+));
+
+bytes32 collectionSerialLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1,
+    uint256(collectionId),
+    uint256(collectionSerial),
+    uint256(tokenId),
+    bool(burned)
+));
+
+bytes32 entropyLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_ENTROPY_LEAF_V1,
+    uint256(tokenId),
+    uint8(status),
+    bytes32(seed),
+    address(coordinatorAtMint),
+    address(provider),
+    uint32(providerEpoch),
+    bytes32 requestKey,
+    uint16 requestAttempt
+));
+
+bytes32 finalityLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_FINALITY_LEAF_V1,
+    uint8(scope.scopeType),
+    uint256(scope.collectionId),
+    uint256(scope.tokenId),
+    bytes32(scope.scopeId),
+    bytes32(finalityRecordHash),
+    bytes32(componentsHash),
+    bytes32(manifestContentHash),
+    uint64(finalizedAt)
+));
+
+bytes32 splitProfileLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_SPLIT_PROFILE_LEAF_V1,
+    bytes32(profileId),
+    address(wallet),
+    bytes32(entriesHash),
+    uint16(walletVersion),
+    bytes32(runtimeCodeHash)
+));
+
+bytes32 splitEntryLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_SPLIT_ENTRY_LEAF_V1,
+    bytes32(profileId),
+    uint16(index),
+    address(account),
+    bytes32(labelId),
+    uint32(sharePpm)
+));
+
+bytes32 revenueAssignmentLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_REVENUE_ASSIGNMENT_LEAF_V1,
+    bytes32(revenueClass),
+    uint8(scope),
+    uint256(scopeId),
+    bytes32(profileOrTemplateId),
+    address(wallet),
+    uint16(royaltyBps),
+    uint8(freezeMode),
+    bool(permanentFreeze),
+    bytes32(assignmentHash)
+));
+
+bytes32 escrowCreditLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_ESCROW_CREDIT_LEAF_V1,
+    bytes32(revenueClass),
+    bytes32(profileId),
+    address(wallet),
+    address(asset),
+    uint256(owed),
+    address(storedFactory),
+    bytes32(escrowRuntimeCodeHash)
+));
+
+bytes32 mintCounterLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_MINT_COUNTER_LEAF_V1,
+    bytes32(valueKey),
+    uint64(counterValue),
+    bytes32(policyHash)
+));
+
+bytes32 authorizationLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_AUTHORIZATION_LEAF_V1,
+    bytes32(authorizationOrNullifierId),
+    bool(used),
+    bytes32(policyHash)
+));
+
+bytes32 registryRecordLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_REGISTRY_RECORD_LEAF_V1,
+    address(registry),
+    address(module),
+    uint8(status),
+    bytes32(moduleType),
+    bytes4(interfaceId),
+    bytes32(runtimeCodeHash),
+    bytes32(moduleManifestHash)
+));
+
+bytes32 catalogLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_CATALOG_LEAF_V1,
+    bytes32(catalogType),
+    bytes32(catalogHash),
+    bytes32(schemaId),
+    bytes32(canonicalizationHash)
+));
+
+bytes32 recoveryLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_RECOVERY_LEAF_V1,
+    bytes32(recoveryType),
+    bytes32(recoveryId),
+    uint8(status),
+    bytes32(oldRecordHash),
+    bytes32(recoveryManifestContentHash),
+    uint64(executeAfter)
+));
+```
+
+Leaves are sorted by `(tokenId)` for the token-to-collection root and by
+`(collectionId, collectionSerial, tokenId)` for the collection-serial root.
+Entropy leaves are sorted by `(tokenId)`. Finality leaves are sorted by
+`(scopeType, collectionId, tokenId, scopeId, finalityRecordHash)`.
+Each additional root defines a deterministic sort key in the export manifest;
+the field lists above are minimum v1 leaves and may be extended only by a new
+leaf version.
 
 Render-critical and preservation-critical payloads should be mirrored across at
 least two independent storage families where practical, for example IPFS plus
@@ -817,7 +1856,61 @@ Every Ethereum hard fork, L2 migration, or material gas-schedule change should
 trigger a protocol-parameter review. The review remeasures Core bytecode,
 resolver gas, `SLOAD`/`STATICCALL` assumptions, split-wallet release gas,
 metadata rendering limits, and any SSTORE2 or chunk-read assumptions, then
-publishes a compatibility report hash.
+publishes a compatibility report hash. Periodic reviews should also sample
+marketplace, wallet, indexer, archive-node, and metadata-cache behavior for
+ERC-2981, ERC-4906, tokenURI fallback handling, contract metadata discovery,
+and frozen/recovered collection display.
+If average block time, timestamp behavior, finality assumptions, or block-count
+semantics materially change, the review must re-evaluate entropy
+`requestTimeoutBlocks`, governance delay UX, stale request windows, and any
+block-number-based archival/export policy.
+
+Stream should maintain a minimum archival reconstruction client outside the
+production frontend. At launch it must be able to replay the event catalog,
+reconstruct token-to-collection mappings, split profiles, escrow balances,
+entropy status/seeds, collection metadata snapshots, and finality records from
+archived chain data and content-addressed manifests. Its source archive,
+reproducible build instructions, and test-vector outputs should be mirrored
+with the deployment manifest. Operations should schedule periodic preservation
+drills that independently rebuild these roots, render at least one finalized
+onchain/hybrid collection from archived payloads, and publish the drill report
+hash.
+Those drills must also prove that the reconstruction client still builds from
+archived source, pinned dependencies, and archived build instructions on
+contemporary tooling or in a preserved build container. If it does not, the
+replacement client and migration notes become preservation artifacts with their
+own URI/hash.
+
+Long-term operations also need a funding posture. The deployment runbook should
+name the treasury or funding mechanism for keepers, entropy request payments,
+monitoring, storage pinning/mirroring, domain/ENS renewal, and preservation
+drills, and should document what degrades if funding disappears.
+The specs, ADRs, event catalogs, release manifests, and reconstruction-client
+source archives are themselves preservation objects. Each launch and material
+upgrade should publish a content-addressed spec bundle hash in the deployment
+manifest and mirror it across independent storage families. Governance runbooks
+should also name legal-entity succession and dissolution risks; the contracts do
+not solve legal continuity, but operators should document who can act if the
+original operating entity ceases to exist.
+Event-log and state availability are operational assumptions, not protocol
+guarantees. If EIP-4444-style history expiry, log pruning, state expiry, or RPC
+retention changes make ordinary `eth_getLogs`/archive reads incomplete, Stream
+relies on content-addressed state exports, mirrored event-history snapshots,
+archival reconstruction clients, and independent archive nodes named in the
+operations runbook.
+
+For literally unbounded open series, live per-token mappings are permanent
+state growth. Launch keeps explicit `tokenCollectionIdentity` storage because
+that is the most robust marketplace and royalty surface. A future state-expiry
+or storage-rent era may add a successor deployment line in which cold token
+identity proofs are served from a canonical state-export root, but that is a
+new architecture decision. The launch Core must not silently replace live
+token identity reads with offchain proofs. The same posture applies to durable
+mint ledger counters, authorization/nullifier state, escrow owed balances,
+split release state, finality records, recovery records, and registry/catalog
+state: launch keeps them live where the protocol requires live reads, and any
+future proof-backed cold-storage model is a successor-line decision with state
+export roots and explicit user-facing tradeoffs.
 
 Monitoring operations should define alert routing and escalation for:
 
@@ -837,9 +1930,32 @@ declaration. The old Core's ownership history is not rewritten. Any migration
 or social-canonical successor must carry ownership and event-history snapshot
 hashes plus a clear statement of old-Core status.
 
+Zero-admin and lost-quorum drills must cover the complete satellite set, not
+only Core. The runbook should periodically prove degraded-mode reads and
+operations for metadata router failure, finality verification, pending entropy,
+split-wallet release, escrow flush, state export publication, and event-catalog
+reconstruction. If a degraded-mode item depends on immutable gas assumptions
+that can fail under a future gas schedule, the drill report must say so rather
+than treating the guarantee as absolute.
+
+Read-only museum mode is the explicit posture when all governance is lost.
+Ownership, transfer, approvals, enumerable reads, retained token identity,
+frozen/finalized metadata reads, royalty disclosure as configured, split-wallet
+release, already-deployed-wallet escrow flush, finality verification ranges,
+state-export discovery, and archived reconstruction should continue where their
+immutable dependencies still work. New mint programs, pointer moves, economic
+changes, metadata mutations, provider recovery, registry replacement, and
+economics/artwork-affecting recovery halt unless fully precommitted before
+quorum loss.
+
 ## Hash And Manifest Discipline
 
 Every durable identity must be domain-separated and versioned.
+
+`block.chainid` provides replay protection only. It does not establish fork
+canonicality, because a contentious fork can preserve the same chain ID.
+Canonical deployment and successor resolution are governance- and
+manifest-declared, then observed through contract events and state exports.
 
 Use `abi.encode`, not packed encoding, for:
 
@@ -886,6 +2002,13 @@ Launch should not include a generic `OTHER` hash bucket. New hash algorithms
 must be assigned explicit IDs through the append-only hash/canonicalization
 registry and documented in a release manifest or successor schema.
 
+The hash, canonicalization, schema, and enum ID spaces must have a launch
+governing surface. The minimum acceptable launch posture is a manifest-pinned
+numeric allocation file whose hash is included in `streamSystemManifest()` and
+the release manifest. A stronger posture is an append-only registry satellite
+with explicit IDs, URI/hash, status, and supersession links. Either way, new
+IDs are additions; old IDs are never reinterpreted.
+
 Manifest canonicalization:
 
 1. Onchain identity manifests should prefer typed `abi.encode` structs.
@@ -896,6 +2019,27 @@ Manifest canonicalization:
    or marked as admin-trusted with a stored hash and schema.
 4. Omitted field, null field, empty string, and empty array/object semantics
    must be specified for every manifest family before launch.
+
+Privacy and redaction are part of manifest design. Provenance records may
+include sensitive camera, location, institution, estate, model-release, or
+rights information. Schemas should distinguish public payloads, redacted
+payloads, sealed archive commitments, and finalized artwork bytes. A hidden
+private record must not be required to render or verify a public final artwork
+unless the collection's manifest explicitly accepts that dependency.
+Sealed or redacted archival material needs an offchain custody and succession
+policy: who may access it, rotate keys, attest to fixity, release it to an
+institution or estate, or declare it lost. Onchain records should commit to the
+sealed payload and custody policy hash without exposing secret material.
+
+Signature suites are also time-bounded evidence. EIP-712, ERC-1271, W3C
+Verifiable Credentials, DIDs, C2PA signatures, institutional attestations, and
+archive receipts should record signature suite, public-key material reference,
+verification method, timestamp, and signed payload hash. Old signatures remain
+historical evidence under the suite used when recorded; future post-quantum or
+successor signature suites should be added as new attestations or verification
+bundles rather than rewriting old signatures. Preservation drills should
+periodically re-attest finality-critical records under the current best
+signature suite before an older suite is considered practically broken.
 
 ## Compatibility Matrix
 
@@ -924,6 +2068,27 @@ function supportsStreamModule(
     bytes32 contextVersion
 ) external view returns (bool);
 ```
+
+Each deployment manifest must include a full compatibility-matrix snapshot:
+one canonical hash over every approved module family, version, interface ID,
+runtime code hash, registry status, and approved pair or exclusion. Pairwise
+checks are necessary but not enough; future auditors need a single "these
+versions were jointly blessed" artifact.
+
+Cross-contract authority interfaces whose selectors are part of a release
+manifest should use selector-stable parameter lists: value types, addresses,
+fixed bytes, `bytes`, and `bytes32` commitments where practical. If a struct is
+used in an external interface, the release manifest must pin the full canonical
+signature, selector, ABI encoding, compiler version, and test vector so a
+future compiler or language change cannot silently alter the contract between
+modules.
+
+Every deployed satellite should publish reproducible-build preservation data:
+compiler version, optimizer settings, metadata hash mode, source bundle hash,
+ABI hash, deployed bytecode, constructor arguments, linked libraries, runtime
+code hash, creation code hash, compiler binary or container/Nix lock URI/hash,
+Sourcify/Etherscan or successor verification status, verifier output hash, and
+mirrored source archive URI/hash.
 
 ## Maximum On-Chain Options
 
@@ -1158,6 +2323,7 @@ monitor incident evidence that `royaltyInfo()` itself cannot emit because it is
 
 ```solidity
 event RoyaltyInfoProbed(
+    uint16 schemaVersion,
     uint256 indexed tokenId,
     address indexed receiver,
     uint256 royaltyAmount,
@@ -1166,6 +2332,14 @@ event RoyaltyInfoProbed(
     bytes32 failureReason
 );
 ```
+
+Diagnostics are operational tools, not permanent marketplace surfaces. If a
+diagnostic such as `probeRoyaltyInfo`, full `verifyFinality`, or a catalog
+consistency read becomes impractical under future gas schedules, the successor
+manifest or release manifest must deprecate that diagnostic, point to a range
+or offchain-verifiable replacement, and keep old selectors documented for
+historical deployments. Production `royaltyInfo()` and `tokenURI()` behavior
+must not depend on deprecated diagnostics.
 
 ## Observability
 

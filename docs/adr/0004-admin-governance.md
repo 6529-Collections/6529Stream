@@ -571,6 +571,256 @@ Pointer freeze events must include the pointer ID, frozen target, operation ID
 when the freeze is tied to a staged action, frozen target code hash, and frozen
 manifest hash so indexers can reconstruct the exact frozen state.
 
+### Scheduled Action State
+
+Governance must be inspectable from onchain reads, not only reconstructed from
+logs.
+
+```solidity
+enum GovernanceActionStatus {
+    NONE,
+    SCHEDULED,
+    CANCELLED,
+    EXECUTED,
+    EXPIRED,
+    VETOED
+}
+
+struct GovernanceAction {
+    GovernanceActionStatus status;
+    uint8 actionClass;
+    address target;
+    uint256 value;
+    bytes4 selector;
+    bytes32 callHash;
+    bytes32 scopeHash;
+    bytes32 oldValueHash;
+    bytes32 newValueHash;
+    uint64 notBefore;
+    uint64 expiresAfter;
+    address proposer;
+    address executor;
+    address canceller;
+    address vetoer;
+    bytes32 reasonHash;
+    string reasonURI;
+    bytes32 manifestHash;
+}
+
+function governanceAction(bytes32 actionId)
+    external
+    view
+    returns (GovernanceAction memory);
+
+struct GovernanceActionRequest {
+    uint8 actionClass;
+    address target;
+    uint256 value;
+    bytes4 selector;
+    bytes callData;
+    bytes32 scopeHash;
+    bytes32 oldValueHash;
+    bytes32 newValueHash;
+    uint64 notBefore;
+    uint64 expiresAfter;
+    bytes32 reasonHash;
+    string reasonURI;
+    bytes32 manifestHash;
+}
+
+function governanceNonce() external view returns (uint256);
+
+function minimumDelay(uint8 actionClass) external view returns (uint64);
+
+function scheduleGovernanceAction(GovernanceActionRequest calldata request)
+    external
+    returns (bytes32 actionId);
+
+function cancelGovernanceAction(bytes32 actionId, bytes32 reasonHash) external;
+
+function executeGovernanceAction(bytes32 actionId, bytes calldata callData)
+    external
+    payable;
+
+function materializeExpiredAction(bytes32 actionId) external;
+```
+
+`EXPIRED` may be materialized by a state-changing cleanup call or returned
+virtually by the read when `status == SCHEDULED && block.timestamp >
+expiresAfter`. Expired actions cannot execute. They must be cancelled or
+rescheduled with a new nonce and new action ID.
+
+Execution rules:
+
+1. `scheduleGovernanceAction` allocates the next nonce, computes the canonical
+   action ID, stores the action, and emits `GovernanceActionScheduled`.
+2. `notBefore` must be at least `block.timestamp + minimumDelay(actionClass)`
+   unless the action is `IMMEDIATE_TIGHTENING` and the implementation's
+   tightening classifier proves it cannot loosen policy.
+3. `expiresAfter` must be greater than `notBefore` and within a launch-pinned
+   maximum action lifetime.
+4. The stored `callHash` is `keccak256(callData)`. Execution must require the
+   supplied `callData` hash to equal the stored hash, `msg.value` to equal
+   `value`, `target` to have code unless the action explicitly targets native
+   ETH transfer to an approved governance receiver, and `block.timestamp` to be
+   within `[notBefore, expiresAfter]`.
+   For non-empty calldata, `bytes4(callData[0:4])` must equal the stored
+   `selector`.
+5. Anyone may execute a scheduled action after `notBefore` unless the action
+   class requires a named executor in the manifest. Permission to schedule and
+   cancel remains role-gated.
+6. Execution rechecks every subsystem-specific invariant named in the action
+   manifest, including old value hash, new value hash, pointer code hash,
+   registry eligibility, interface ID, freeze state, owed-funds boundary, and
+   terminal-freeze veto status where applicable.
+7. Execution uses the stored `target`, `value`, `selector`, and `callHash`; it
+   must not execute arbitrary calldata supplied by the caller.
+8. A successful execution stores `EXECUTED`, records `executor`, emits
+   `GovernanceActionExecuted`, and cannot be replayed.
+9. Cancellation is allowed only while `SCHEDULED` and before execution; it
+   stores `CANCELLED`, records `canceller`, and emits
+   `GovernanceActionCancelled`.
+10. `materializeExpiredAction` may be called by anyone after `expiresAfter` to
+    store `EXPIRED` and make the virtual expiry explicit.
+
+Transition table:
+
+```text
+NONE       -> SCHEDULED   schedule valid action
+SCHEDULED  -> EXECUTED    execute after notBefore and before expiresAfter
+SCHEDULED  -> CANCELLED   authorized cancellation before execution
+SCHEDULED  -> VETOED      terminal-freeze guardian veto before deadline
+SCHEDULED  -> EXPIRED     virtual or materialized after expiresAfter
+CANCELLED  -> terminal
+EXECUTED   -> terminal
+EXPIRED    -> terminal
+VETOED     -> terminal
+```
+
+The release manifest must include a machine-readable governance action policy
+catalog. Each protected selector is mapped to role, action class, minimum delay,
+tightening/loosening classifier, old/new value predicate, emergency eligibility,
+and whether permissionless execution after delay is allowed. Governance code
+and CI use this catalog as the conformance target; prose examples are not
+authority.
+
+Terminal freeze actions require an explicit guardian/veto surface:
+
+```solidity
+function terminalFreezeVetoGuardian(bytes32 scopeHash)
+    external
+    view
+    returns (address guardian, uint64 vetoDeadline);
+
+function vetoTerminalFreeze(bytes32 actionId, bytes32 reasonHash) external;
+```
+
+The guardian can only veto while the action is scheduled and before the veto
+deadline. It cannot edit the action, execute a different action, sweep funds,
+or unfreeze an already executed terminal freeze.
+
+### Future Governance Events
+
+Every admin mutation must emit an event. At minimum:
+
+```solidity
+event GovernanceActionScheduled(
+    uint16 schemaVersion,
+    bytes32 indexed actionId,
+    uint8 indexed actionClass,
+    address indexed target,
+    uint256 value,
+    bytes4 selector,
+    bytes32 callHash,
+    bytes32 scopeHash,
+    bytes32 oldValueHash,
+    bytes32 newValueHash,
+    uint64 notBefore,
+    uint64 expiresAfter,
+    uint256 nonce,
+    address proposer,
+    bytes32 reasonHash,
+    string reasonURI,
+    bytes32 manifestHash
+);
+
+event GovernanceActionExecuted(
+    uint16 schemaVersion,
+    bytes32 indexed actionId,
+    uint8 indexed actionClass,
+    address indexed target,
+    uint256 value,
+    bytes4 selector,
+    bytes32 callHash,
+    bytes32 scopeHash,
+    bytes32 oldValueHash,
+    bytes32 newValueHash,
+    address executor,
+    bytes32 manifestHash
+);
+
+event GovernanceActionCancelled(
+    uint16 schemaVersion,
+    bytes32 indexed actionId,
+    uint8 indexed actionClass,
+    address indexed target,
+    bytes4 selector,
+    bytes32 callHash,
+    bytes32 scopeHash,
+    address canceller,
+    bytes32 reasonHash,
+    string reasonURI
+);
+
+event GovernanceActionVetoed(
+    uint16 schemaVersion,
+    bytes32 indexed actionId,
+    uint8 indexed actionClass,
+    address indexed vetoer,
+    bytes32 scopeHash,
+    bytes32 reasonHash
+);
+
+event ProtocolPointerScheduled(
+    uint16 schemaVersion,
+    bytes32 indexed pointerId,
+    bytes32 indexed actionId,
+    address indexed newAddress,
+    address oldAddress,
+    bytes32 newCodeHash,
+    uint64 executeAfter,
+    bytes32 reasonHash
+);
+
+event ProtocolPointerUpdated(
+    uint16 schemaVersion,
+    bytes32 indexed pointerId,
+    bytes32 indexed actionId,
+    address indexed newAddress,
+    address oldAddress,
+    bytes32 newCodeHash
+);
+
+event ProtocolPointerFrozen(
+    uint16 schemaVersion,
+    bytes32 indexed pointerId,
+    bytes32 indexed actionId
+);
+
+event AdminPermissionUpdated(
+    uint16 schemaVersion,
+    address indexed account,
+    bytes4 indexed selector,
+    uint256 indexed collectionId,
+    bool enabled,
+    address actor
+);
+```
+
+Implementation may split events by subsystem, but indexers must be able to
+reconstruct every admin permission, pointer, delay, and freeze change from
+events.
+
 Implementation manifests must map every protected operation to an explicit
 durable role constant or action ID. A cardinality test must fail if unrelated
 protected functions share an authorization key. Selector aliases such as

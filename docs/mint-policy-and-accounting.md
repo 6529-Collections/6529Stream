@@ -29,7 +29,8 @@ StreamMintManager
   - open-vocabulary counter IDs
   - many simultaneous counters per phase
   - phase, collection, and global counter scopes
-  - per-recipient, per-payer, per-profile, and custom counter keys
+  - launch counter keys for recipient, payer, executor, constant, and context
+  - future resolver-backed profile, delegation, and custom counter keys
   - batch quantity limits
   - policy fingerprint computation
   - executor authorization
@@ -59,7 +60,7 @@ Optional Gate/Resolver Contracts
   - Merkle allowlist validation
   - EIP-712 ticket validation
   - ERC-1271 smart-wallet signature validation
-  - 6529 profile/delegation counter-key resolution
+  - future 6529 profile/delegation counter-key resolution
   - privacy-preserving nullifier resolution
 ```
 
@@ -77,7 +78,7 @@ future counter system:
 2. Fixed-size, capped-open, and uncapped-open collection minting.
 3. Explicit recipient and payer binding; no `tx.origin`.
 4. Static phase caps, static counter caps, and static counter deltas.
-5. Counter key modes for recipient, payer, delegated profile, and explicit
+5. Counter key modes for recipient, payer, executor, constant, and explicit
    context hash where needed.
 6. EIP-712/ERC-1271 signed mint tickets.
 7. Module registry with interface and codehash checks for approved gates.
@@ -90,6 +91,9 @@ Non-launch unless separately approved:
 3. Privacy-preserving nullifier systems.
 4. General-purpose custom policy VMs.
 5. ERC-20 primary payment adapters.
+6. Delegated-profile, consolidated-identity, or other resolver-backed counter
+   subjects unless a concrete resolver interface, gas cap, registry status, and
+   test suite are accepted with that launch branch.
 
 ## Current Implementation Baseline
 
@@ -126,8 +130,9 @@ bytecode size; it is correctness, extensibility, and clean contract ownership.
 5. Allow the same collection to have many independent mint phases.
 6. Support many counters per phase from the beginning.
 7. Track consumed allowance by configurable counter keys.
-8. Support wallet, payer, recipient, delegated profile, context, and custom
-   counter-key models.
+8. Support wallet, payer, recipient, and context counter-key models at launch,
+   while leaving resolver-backed delegated profile and custom identity models
+   for explicitly approved extensions.
 9. Support phase-scoped, collection-scoped, and global counters.
 10. Support batch mints without allowing duplicate-recipient or duplicate-key
    bypasses.
@@ -225,7 +230,7 @@ function mintFromManager(
     uint256 collectionId,
     address initialRecipient,
     address beneficiary,
-    bytes calldata tokenData,
+    bytes32 tokenDataHash,
     bytes32 mintCommitment
 ) external returns (uint256 tokenId);
 ```
@@ -246,7 +251,7 @@ Core may expose a manager-only two-step internal launch surface:
 function prepareMintFromManager(
     uint256 collectionId,
     address beneficiary,
-    bytes calldata tokenData,
+    bytes32 tokenDataHash,
     bytes32 mintCommitment
 ) external returns (uint256 tokenId, uint256 collectionSerial);
 
@@ -271,8 +276,9 @@ Prepared-mint safety rules:
    burn, transfer, or second prepare may interleave while a prepared token is
    pending.
 3. Core must bind a prepared token to `msg.sender`, `tokenId`, `collectionId`,
-   `beneficiary`, `tokenData` hash, `mintCommitment`, and an operation ID or
-   equivalent manager-supplied context hash.
+   `beneficiary`, `tokenDataHash`, `mintCommitment`, the batch
+   `mintCommitmentsHash`, and an operation ID or equivalent manager-supplied
+   context hash.
 4. `completePreparedMintFromManager` must verify and clear the pending prepared
    record before `_safeMint` or any external receiver callback.
 5. If any later step in the top-level transaction reverts, the prepared mapping,
@@ -281,17 +287,163 @@ Prepared-mint safety rules:
 6. A prepared token that is not completed in the same top-level manager flow is
    a bug; launch Core must not expose a durable prepared-token or reservation
    state.
+7. `prepareMintFromManager` invokes the same entropy registration boundary as
+   `mintFromManager`, but Core marks the token as prepared-incomplete until
+   `completePreparedMintFromManager` clears the pending record. Public
+   `requestEntropy(tokenId)`, metadata finalization, transfer, burn, and any
+   other token operation outside the manager flow must revert for
+   prepared-incomplete tokens.
+8. The per-token `mintCommitment` supplied to Core must equal the corresponding
+   element already committed by the signed `MintTicket.mintCommitmentsHash` or
+   by the equivalent sale authorization hash. A prepared mint cannot introduce a
+   new commitment after the signed authorization or sale policy was accepted.
+
+Canonical prepared-mint operation boundary:
+
+```solidity
+bytes32 operationId = keccak256(abi.encode(
+    STREAM_PREPARED_MINT_OPERATION_V1,
+    block.chainid,
+    address(mintManager),
+    address(mintLedger),
+    address(core),
+    address(primarySaleAdapter),
+    uint256(collectionId),
+    bytes32(phaseId),
+    address(executor),
+    address(payer),
+    bytes32(initialRecipientsHash),
+    bytes32(beneficiariesHash),
+    bytes32(tokenDataHashesHash),
+    bytes32(mintCommitmentsHash),
+    bytes32(primaryPolicyHash),
+    bytes32(royaltySnapshotPolicyHash),
+    bytes32(policyHash),
+    bytes32(authorizationId),
+    uint256(quantity),
+    uint256(nonce),
+    uint64(deadline)
+));
+
+struct PreparedMintRecord {
+    bool exists;
+    bytes32 operationId;
+    address manager;
+    uint256 collectionId;
+    uint256 collectionSerial;
+    address beneficiary;
+    bytes32 tokenDataHash;
+    bytes32 mintCommitment;
+    bytes32 mintCommitmentsHash;
+    uint64 preparedAt;
+}
+
+function prepareMintFromManager(
+    uint256 collectionId,
+    address beneficiary,
+    bytes32 tokenDataHash,
+    bytes32 mintCommitment,
+    bytes32 mintCommitmentsHash,
+    bytes32 operationId
+) external returns (uint256 tokenId, uint256 collectionSerial);
+
+function completePreparedMintFromManager(
+    uint256 tokenId,
+    address initialRecipient,
+    bytes32 operationId
+) external;
+
+function preparedMint(uint256 tokenId)
+    external
+    view
+    returns (PreparedMintRecord memory);
+
+function executePreparedMint(
+    MintBatch calldata batch,
+    bytes calldata gateData,
+    bytes calldata settlementData
+) external payable returns (uint256[] memory tokenIds, bytes32 operationId);
+```
+
+Every state-changing contract participating in `PREPARED_MINT` must receive or
+derive the same `operationId`: sale adapter, mint manager, ledger, Core
+prepare/complete, revenue resolver snapshot hook, entropy registration
+boundary, and escrow/deposit path. A contract must reject a prepared-mint call
+whose operation ID does not match the operation currently locked by the mint
+manager. The operation lock is non-reentrant and cannot be reused for a
+different token, batch, payer, phase, policy hash, or sale adapter.
+
+Launch control-flow owner: `StreamMintManager`. User-facing sale adapters call
+one manager-owned prepared-mint entrypoint or a sale adapter entrypoint that
+immediately delegates to the manager. Core `prepareMintFromManager` and
+`completePreparedMintFromManager` are restricted to `msg.sender == mintManager`
+and are never independent user flows. The manager calls the restricted
+settlement adapter hook between Core prepare and Core complete. If settlement,
+resolver snapshot, escrow/deposit, entropy registration, or completion fails,
+the whole manager call reverts and no prepared state persists.
+
+The manager's non-reentrant operation lock must be externally verifiable
+through Core state. Core's `PreparedMintRecord.operationId` is the canonical
+shared lock state for each prepared token. Every satellite participating in a
+prepared mint, including resolver snapshot hooks, escrow/deposit paths, and
+entropy registration helpers, must read `preparedMint(tokenId).operationId`
+from Core or receive it from the manager and re-verify against Core. No
+satellite may rely solely on a manager-internal private flag it cannot read.
+
+Operation propagation table:
+
+```text
+Sale adapter          derives operationId from signed sale/mint authorization and rejects payment settlement mismatch
+Mint manager          owns non-reentrant operation lock and rejects nested or different operationId
+Mint ledger           consumes counters/authorization only for the manager-supplied operationId
+Core prepare          stores operationId in PreparedMintRecord for each allocated token
+Resolver snapshot     reads PreparedMintRecord and rejects missing or mismatched operationId
+Entropy registration  records prepared-incomplete state under the same operationId or manager context
+Escrow/deposit path    emits or stores operationId with the payment settlement record where applicable
+Core complete         clears PreparedMintRecord only when operationId matches
+```
+
+Recommended events:
+
+```solidity
+event PreparedMintStarted(
+    uint16 schemaVersion,
+    bytes32 indexed operationId,
+    uint256 indexed tokenId,
+    uint256 indexed collectionId,
+    uint256 collectionSerial,
+    address beneficiary,
+    bytes32 tokenDataHash,
+    bytes32 mintCommitment
+);
+
+event PreparedMintCompleted(
+    uint16 schemaVersion,
+    bytes32 indexed operationId,
+    uint256 indexed tokenId,
+    uint256 indexed collectionId,
+    address initialRecipient
+);
+```
+
+Successful launch transactions leave no persistent prepared state after
+completion: `preparedMint(tokenId).exists` returns false once
+`completePreparedMintFromManager` clears the record. The read exists so other
+contracts in the same top-level operation can prove they are snapshotting the
+same prepared token, not so operators can create durable reservations.
 
 Required Core behavior:
 
 1. Revert unless `msg.sender == mintManager`.
-2. Revert unless the collection exists and data needed for supply exists.
+2. Revert unless the collection exists, is active for minting, is not closed or
+   artwork-finality-blocked for new supply, and data needed for supply exists.
 3. Allocate `tokenId = nextTokenId++` inside Core.
 4. Allocate the next stable collection-local serial inside Core.
 5. Revert if collection supply is exhausted for fixed or capped-open
    collections.
-6. Store token data, token-to-collection identity, collection-local serial, and
-   mapping-existence bit.
+6. Store `tokenDataHash`, token-to-collection identity, collection-local
+   serial, and mapping-existence bit. Core stores no renderer-visible
+   `tokenData` bytes.
 7. Register token entropy state through the entropy subsystem before any
    external receiver callback can observe the token.
 8. Mint to `initialRecipient`.
@@ -469,17 +621,21 @@ prove it reverts before any counter or mint state is written.
 Launch-permitted counter combinations are finite:
 
 ```text
-scope       key mode    key semantic       update mode   cap mode   delta mode
-PHASE       CONSTANT    phase supply       PER_BATCH     STATIC     STATIC
-COLLECTION  CONSTANT    collection supply  PER_BATCH     STATIC     STATIC
-PHASE       RECIPIENT   beneficiary        PER_TOKEN     STATIC     STATIC
-PHASE       PAYER       payer              PER_TOKEN     STATIC     STATIC
-COLLECTION  RECIPIENT   beneficiary        PER_TOKEN     STATIC     STATIC
-PHASE       CONTEXT     context hash       PER_BATCH     STATIC     STATIC
+scope             key mode                  update mode   cap mode   delta mode
+PHASE             CONSTANT                  PER_TOKEN     STATIC     STATIC
+COLLECTION        CONSTANT                  PER_TOKEN     STATIC     STATIC
+PHASE             RECIPIENT                 PER_TOKEN     STATIC     STATIC
+PHASE             PAYER                     PER_TOKEN     STATIC     STATIC
+COLLECTION        RECIPIENT                 PER_TOKEN     STATIC     STATIC
+COLLECTION        PAYER                     PER_TOKEN     STATIC     STATIC
+PHASE             CONTEXT                   PER_BATCH     STATIC     STATIC
+COLLECTION        CONTEXT                   PER_BATCH     STATIC     STATIC
 ```
 
 Any other combination reverts at configuration time unless a later ADR expands
 the allowed set. This table bounds the launch test matrix.
+There is no separate `BENEFICIARY` enum in launch: `RECIPIENT` means the
+intended beneficiary as defined below, not the temporary initial recipient.
 
 Examples:
 
@@ -530,16 +686,18 @@ private claim nullifier
 Allowance accounting must not assume that the recipient address is always the
 right identity. Every counter derives a counter key.
 
-Default address-based counter-key derivation:
+Counter derivation separates the subject from the counter scope. The subject key
+answers "who or what is being counted"; the value key answers "where is that
+subject counted."
+
+Default address-based subject-key derivation:
 
 ```solidity
-bytes32 counterKey = keccak256(abi.encode(
-    COUNTER_KEY_DOMAIN,
+bytes32 subjectKey = keccak256(abi.encode(
+    COUNTER_SUBJECT_DOMAIN,
     uint256(block.chainid),
     address(mintLedger),
-    collectionId,
-    phaseId,
-    counterId,
+    uint8(keyMode),
     accountAddress
 ));
 ```
@@ -547,19 +705,37 @@ bytes32 counterKey = keccak256(abi.encode(
 `CONSTANT` uses a deterministic key for the counter:
 
 ```solidity
-bytes32 constantKey = keccak256(abi.encode(
-    COUNTER_KEY_DOMAIN,
+bytes32 subjectKey = keccak256(abi.encode(
+    COUNTER_SUBJECT_DOMAIN,
     uint256(block.chainid),
     address(mintLedger),
-    collectionId,
-    phaseId,
-    counterId,
+    uint8(CounterKeyMode.CONSTANT),
     "CONSTANT"
 ));
 ```
 
 `CONTEXT` uses `batch.contextHash`. If a context counter is configured, the
 manager must require a nonzero `contextHash`.
+
+The durable ledger value key is scoped separately:
+
+```solidity
+bytes32 valueKey = keccak256(abi.encode(
+    COUNTER_VALUE_DOMAIN,
+    uint256(block.chainid),
+    address(mintLedger),
+    uint8(scope),
+    scope == CounterScope.GLOBAL ? uint256(0) : collectionId,
+    scope == CounterScope.PHASE ? phaseId : bytes32(0),
+    counterId,
+    subjectKey
+));
+```
+
+For `GLOBAL`, both collection and phase are zeroed. For `COLLECTION`, phase is
+zeroed. For `PHASE`, both collection and phase are included. Tests must prove
+GLOBAL counters share across collections/phases and COLLECTION counters share
+across phases within the same collection.
 
 For `CUSTOM_RESOLVER`, the counter points to a resolver:
 
@@ -579,7 +755,7 @@ struct CounterKeyContext {
 }
 
 struct CounterResolution {
-    bytes32 counterKey;
+    bytes32 subjectKey;
     uint64 effectiveCap;
     uint64 increment;
     bytes32 resolutionHash;
@@ -601,7 +777,7 @@ to count the custody address should use `EXECUTOR`, `CONTEXT`, or an explicit
 
 Resolver output rules:
 
-1. `counterKey` must be nonzero.
+1. `subjectKey` must be nonzero.
 2. `effectiveCap` is used only when `capMode == RESOLVER`.
 3. `increment` is used only when `deltaMode == RESOLVER`.
 4. `increment` must be nonzero for every enabled counter consumption.
@@ -620,7 +796,7 @@ Resolver examples:
 8. Privacy-preserving nullifier.
 9. Merkle allocation leaf with a per-subject cap.
 
-Resolvers must be read-only. If a resolver returns `bytes32(0)` as the counter
+Resolvers must be read-only. If a resolver returns `bytes32(0)` as the subject
 key, the manager must revert.
 
 ## Data Model
@@ -681,7 +857,7 @@ keyMode     key derivation method
 updateMode  whether to add quantity or one per batch
 capMode     whether the cap is absent, static, or resolver-provided
 deltaMode   whether increment is static or resolver-provided
-cap         static cap; zero means no cap when capMode is NONE or STATIC
+cap         static cap; ignored when capMode is NONE; exact cap when capMode is STATIC, where zero means zero allowed
 increment   static increment; zero means default one unit
 resolver    required for CUSTOM_RESOLVER, RESOLVER cap, or RESOLVER delta
 configHash  optional hash of offchain/operator config
@@ -703,11 +879,47 @@ mapping(uint256 => mapping(bytes32 => bytes32)) public phasePolicyHashes;
 Primary ledger state:
 
 ```solidity
+struct LedgerCounterPolicy {
+    bool enabled;
+    CounterCapMode capMode;
+    CounterDeltaMode deltaMode;
+    uint64 staticCap;
+    uint64 staticIncrement;
+    bytes32 counterConfigHash;
+}
+
 mapping(address => bool) public ledgerWriters;
+mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => bytes32 policyHash)))
+    public registeredPhasePolicyHashes;
+mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => mapping(bytes32 counterId => LedgerCounterPolicy))))
+    public registeredCounterPolicies;
 mapping(bytes32 => uint64) public counterValues;
 mapping(bytes32 => bool) public authorizationUsed;
 mapping(bytes32 => bool) public nullifierUsed;
 ```
+
+The ledger must not depend on an arbitrary manager callback to "discover" the
+active policy hash during consumption. The manager registers or updates
+`registeredPhasePolicyHashes[manager][collectionId][phaseId]` through an
+authorized configuration path before the phase can mint. During consumption the
+ledger verifies that the supplied `policyHash` equals that registered value and
+then repeats cap checks against `registeredCounterPolicies`. In launch v1, the
+ledger rejects resolver cap/delta modes and verifies supplied `cap` equals
+`staticCap` for `STATIC`, `cap` is ignored for `NONE`, and supplied `increment`
+equals `staticIncrement`. This keeps ledger verification implementable and
+auditable while still ensuring events bind to the active manager policy.
+
+Launch v1 has one active registered policy hash per
+`(manager, collectionId, phaseId)`. Multiple concurrently valid policy hashes
+are not allowed unless a later ADR defines a ticket-transition window. Any
+phase configuration change that changes `policyHash` must update the manager
+state, registered phase hash, and registered counter policies atomically in the
+same governance execution before the new phase can mint. Tightening changes may
+execute through the
+immediate path; loosening changes and ledger replacement are
+`DELAYED_LOOSENING` actions under ADR 0004. Frozen phases cannot move to a
+different ledger, and a ledger replacement cannot reset or bypass counters for
+that frozen policy.
 
 `counterValues` is keyed by:
 
@@ -720,7 +932,7 @@ bytes32 valueKey = keccak256(abi.encode(
     effectiveCollectionId,
     effectivePhaseId,
     counterId,
-    counterKey
+    subjectKey
 ));
 ```
 
@@ -755,7 +967,7 @@ struct CounterConsumption {
     uint256 collectionId;
     bytes32 phaseId;
     bytes32 counterId;
-    bytes32 counterKey;
+    bytes32 subjectKey;
     address payer;
     address recipient;
     address authorizer;
@@ -767,6 +979,15 @@ struct CounterConsumption {
 }
 
 interface IStreamMintLedger {
+    function registerPhasePolicy(
+        address manager,
+        uint256 collectionId,
+        bytes32 phaseId,
+        bytes32 policyHash,
+        bytes32[] calldata counterIds,
+        LedgerCounterPolicy[] calldata counterPolicies
+    ) external;
+
     function consume(
         CounterConsumption[] calldata consumptions,
         bytes32 authorizationId,
@@ -800,7 +1021,7 @@ event MintLedgerCounterConsumed(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 counterId,
-    bytes32 counterKey,
+    bytes32 subjectKey,
     address payer,
     address recipient,
     address authorizer,
@@ -906,6 +1127,22 @@ struct MintBatch {
 }
 ```
 
+Launch token-data ownership decision:
+
+```text
+Core role: HASH_ONLY_CORE_FACT
+Metadata role: renderer-visible tokenData bytes
+```
+
+Core stores only `tokenDataHash = keccak256(abi.encode(tokenData))` or an
+equivalent manager-supplied hash already committed by the signed ticket. It
+does not store renderer-visible token data bytes. If a collection's renderer
+requires token data before the ERC-721 receiver callback can observe the token,
+the `PREPARED_MINT` path must write the bytes or a hash-bound URI/ref into
+`StreamCollectionMetadata` before `completePreparedMintFromManager`. If the
+collection does not require renderer-visible token data at mint, the hash is
+still part of the mint commitment and event trail.
+
 Rules:
 
 1. `beneficiaries.length > 0`.
@@ -924,7 +1161,11 @@ Rules:
 10. `tokenData` is opaque bytes. Renderer/schema code may interpret it as
     UTF-8, JSON, CBOR, or another format, but Core and the mint manager do not
     parse it.
-10. `contextHash` is optional, but should be nonzero for signed/drop/auction
+11. Each `tokenData[i]` must satisfy the collection metadata launch limit
+    `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
+    calldata/gas cap. Oversized token data reverts before ledger consumption,
+    Core prepare, payment settlement, or entropy registration.
+12. `contextHash` is optional, but should be nonzero for signed/drop/auction
    flows that need a stable external reference.
 
 ### Recipient Binding
@@ -1222,13 +1463,17 @@ Canonical state-changing mint sequence:
 13. Aggregate projected increments by `(counterId, valueKey)`.
 14. Check every projected counter value against its cap using current ledger
     values.
-15. Ask `StreamMintLedger` to recompute or verify `policyHash`, consume counter
-    increments, authorization ID, and nullifiers.
-16. For each token, Core writes token identity, collection serial, and
-    mapping-existence status.
+15. Ask `StreamMintLedger` to verify `policyHash` against the ledger's
+    registered hash for `(manager, collectionId, phaseId)`, repeat cap checks,
+    and consume counter increments, authorization ID, and nullifiers.
+16. For each token, Core writes token identity, collection serial,
+    `tokenDataHash`, and mapping-existence status.
 17. Core registers entropy state through the coordinator. This registration
     cannot call external randomness providers.
-18. Core records any required mint-time royalty snapshot.
+18. The authorized mint manager, sale adapter, or resolver hook records any
+    required token-level primary or royalty snapshot after Core has created
+    authoritative token identity and before any untrusted receiver callback.
+    Core stores no revenue assignment or snapshot state.
 19. Core calls `_safeMint(initialRecipient, tokenId)`. This is the first point
     where an untrusted recipient callback can run.
 20. Emit manager mint events with `policyHash`.
@@ -1238,6 +1483,32 @@ reverts, EVM rollback reverts the ledger updates too.
 The invariant is: no external untrusted callback executes before counter
 consumption, identity mapping, entropy registration, and required royalty
 snapshot are complete for that token.
+
+For paid primary mints, launch must use exactly one of the named orchestration
+paths in `docs/revenue-splits-and-royalties.md`:
+
+1. `PRE_REVENUE_SINGLE_STEP`: sale adapter records split-wallet deposit or
+   escrow before calling the mint manager, and token-level primary overrides or
+   required mint-time royalty snapshots are unavailable. If the phase configures
+   a `RECIPIENT`-keyed counter, every `initialRecipient` must equal its
+   corresponding `beneficiary`, or the mint reverts with
+   `MintSingleStepRecipientMismatch`. Custody settlement that needs a differing
+   initial recipient must use `PREPARED_MINT`.
+2. `PREPARED_MINT`: mint manager and ledger validate/consume policy, Core
+   `prepareMintFromManager` allocates token identity without an ERC-721
+   transfer, resolver snapshots required token-level economics, sale adapter
+   deposits or escrows native ETH, and Core `completePreparedMintFromManager`
+   performs `_safeMint`.
+
+No paid mint may call `_safeMint` to an untrusted recipient before ledger
+consumption, Core identity mapping, entropy registration, required assignment
+snapshots for the chosen path, and revenue accounting are complete.
+The mint manager owns the top-level non-reentrant operation lock for
+`PREPARED_MINT`; Core prepare/complete, resolver snapshot hooks, ledger
+consumption, and sale-adapter callbacks must all run under that manager-owned
+operation context or an equivalent shared operation ID that prevents
+interleaving with another mint, transfer, burn, release, escrow flush, or
+snapshot for the prepared token.
 
 Duplicate beneficiaries, duplicate initial recipients, or duplicate counter keys
 in a batch must not bypass caps. Launch implementation must aggregate projected
@@ -1305,7 +1576,7 @@ event MintCounterResolverUpdated(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed counterId,
-    address indexed resolver,
+    address resolver,
     bytes32 policyHash
 );
 
@@ -1329,7 +1600,7 @@ event MintCounterConsumed(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed counterId,
-    bytes32 counterKey,
+    bytes32 subjectKey,
     address payer,
     address recipient,
     address authorizer,
@@ -1382,11 +1653,12 @@ error MintArrayLengthMismatch();
 error MintZeroQuantity();
 error MintZeroRecipient(uint256 index);
 error MintPayerRequired();
+error MintSingleStepRecipientMismatch(uint256 index);
 error MintBatchQuantityLimitExceeded(uint256 requested, uint256 maxAllowed);
 error MintTooManyCounters(uint256 configured, uint256 maxAllowed);
 error MintCounterDoesNotExist(uint256 collectionId, bytes32 phaseId, bytes32 counterId);
-error MintCounterLimitExceeded(bytes32 counterId, bytes32 counterKey, uint256 requestedTotal, uint256 cap);
-error MintInvalidCounterKey(bytes32 counterId);
+error MintCounterLimitExceeded(bytes32 counterId, bytes32 subjectKey, uint256 requestedTotal, uint256 cap);
+error MintInvalidCounterSubject(bytes32 counterId);
 error MintInvalidCounterIncrement(bytes32 counterId);
 error MintContextHashRequired(bytes32 counterId);
 error MintInvalidGate();
@@ -1431,7 +1703,7 @@ function counterValue(
     uint256 collectionId,
     bytes32 phaseId,
     bytes32 counterId,
-    bytes32 counterKey
+    bytes32 subjectKey
 ) external view returns (uint64);
 
 function rawCounterValue(bytes32 valueKey) external view returns (uint64);
@@ -1440,7 +1712,7 @@ function remainingForCounter(
     uint256 collectionId,
     bytes32 phaseId,
     bytes32 counterId,
-    bytes32 counterKey
+    bytes32 subjectKey
 ) external view returns (uint64);
 
 function resolveCounter(CounterKeyContext calldata context)
@@ -1469,7 +1741,7 @@ Preview reads:
 ```solidity
 struct CounterPreview {
     bytes32 counterId;
-    bytes32 counterKey;
+    bytes32 subjectKey;
     bytes32 valueKey;
     uint64 current;
     uint64 increment;
@@ -1563,6 +1835,12 @@ loosening:
    executors, block modules, or freeze policy.
 2. Delayed changes should be required to increase caps, extend windows, add
    executors, loosen gates, change resolver identity, or point at a new ledger.
+   Ledger replacement is always a delayed loosening because it can otherwise
+   reset durable counter values.
+   Any policy change whose strictness is ambiguous, including equal-looking
+   resolver swaps or module replacements, defaults to delayed governance unless
+   the implementation has a formal tightening classifier and emits the before
+   and after `policyHash`.
 3. The delay mechanism should emit schedule and execute events that include the
    before and after `policyHash`.
 4. Collection-scoped admins should not be able to weaken global or cross-phase
@@ -1626,8 +1904,9 @@ phase stricter or permanently closed.
 14. All configured counters must be checked against the complete projected batch
     before minting.
 15. Ledger writes must be restricted to authorized manager contracts.
-16. The ledger must repeat cap checks and verify the active `policyHash` before
-    writing counter values.
+16. The ledger must repeat cap checks and verify the supplied `policyHash`
+    against the ledger-registered `(manager, collectionId, phaseId)` hash
+    before writing counter values.
 17. Policy hashes must be emitted with mint and accounting events.
 18. Signed tickets must include the active policy hash and must fail if it does
     not match.
@@ -1680,10 +1959,10 @@ Target fixed-price flow:
 ```text
 StreamPrimarySale or StreamDrops
   -> validate signer/drop/payment
-  -> settle primary-sale revenue
+  -> execute PRE_REVENUE_SINGLE_STEP or PREPARED_MINT exactly as defined in the revenue spec
   -> StreamMintManager.mint(...)
   -> StreamMintLedger.consume(...)
-  -> StreamCore.mintFromManager(...)
+  -> StreamCore.mintFromManager(...) or prepare/complete pair
 ```
 
 Current auction-start flow:
@@ -1760,11 +2039,12 @@ mint ledger contract for durable accounting.
 Core tests:
 
 1. Only `mintManager` can call `mintFromManager()`.
-2. Core allocates token IDs according to the launch allocation policy and never
-   relies on token ID ranges for collection identity.
-3. Core reverts when collection supply is exhausted.
-4. Core emits `StreamTokenMinted`.
-5. Core stores token-to-collection and token-to-collection-serial mappings.
+2. Core computes global sequential token IDs correctly across collections.
+3. Core reverts when the collection is unknown, paused, closed, not yet active
+   for minting, or artwork-finality-blocked for new supply.
+4. Core reverts when collection supply is exhausted.
+5. Core emits `StreamTokenMinted`.
+6. Core stores token-to-collection and token-to-collection-serial mappings.
 
 Manager tests:
 

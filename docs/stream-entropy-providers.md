@@ -485,7 +485,8 @@ function updateVRFConfig(
 
 Rules:
 
-1. Admin-only through `StreamAdmins`.
+1. Admin-only through ADR 0004 governance/action roles. Legacy selector-map
+   `StreamAdmins` authorization is nonconformant for launch.
 2. Emit `VRFConfigUpdated`.
 3. Existing requests retain the provenance values emitted at request time.
 4. Updates affect only future requests.
@@ -948,23 +949,24 @@ If the instant provider fulfills in the same transaction as `requestEntropy`,
 the coordinator must store active request state before calling the provider.
 This request-time synchronous finality is allowed only after Core mint
 registration has completed. Instant providers must not be called from
-`onTokenMinted` or any Core mint path in v1. If request-time synchronous
-fulfillment creates reentrancy or denial-of-service risk, production instant
-fulfillment should be split into a second transaction.
+`onTokenMinted` or any Core mint path in v1. `instantEntropy` must be a
+`view` read path. CI must fail if any production instant provider reachable
+from `requestEntropy` contains `CALL`, `DELEGATECALL`, `STATICCALL`, `CREATE`,
+or `CREATE2` opcodes, performs state writes, or depends on receiver behavior.
+If request-time synchronous fulfillment cannot satisfy this no-external-call
+posture, production instant fulfillment must be split into a second transaction
+or deferred to a non-instant provider mode.
 
 Recommended event:
 
 ```solidity
 event InstantEntropyProduced(
     bytes32 indexed requestKey,
+    uint256 indexed providerRequestId,
     bytes32 rawRandomness,
-    bytes32 provenanceHash,
     InstantMode mode
 );
 ```
-
-Instant providers have no upstream `providerRequestId`; `requestKey` is the
-durable request identity for this mode.
 
 ### Security Requirements
 
