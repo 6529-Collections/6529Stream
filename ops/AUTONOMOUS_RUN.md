@@ -8,7 +8,9 @@ transient conversation memory.
 
 - Work from `ops/ROADMAP.md` as the canonical roadmap.
 - Keep this file updated before and after each meaningful transition.
-- Open one PR at a time.
+- Open one regular, non-draft PR at a time so review bots trigger on creation.
+- Use draft PRs only when the user explicitly asks or a documented platform
+  constraint requires it.
 - Wait for CI and bot/reviewer comments on each PR.
 - Request CodeRabbit review explicitly with `@coderabbitai review` on each PR
   after opening. Do not request Claude review unless a future user instruction
@@ -40,7 +42,7 @@ tests, security hardening, deployment discipline, and release/audit readiness.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-19 10:42 UTC` |
+| Last updated | `2026-06-22 17:56 UTC` |
 
 ## Packaging Notes
 
