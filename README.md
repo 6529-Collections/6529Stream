@@ -193,6 +193,7 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [docs/tooling.md](docs/tooling.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/threat-model.md](docs/threat-model.md)
+- [docs/revenue-splits-and-royalties.md](docs/revenue-splits-and-royalties.md)
 - [docs/audit-package.md](docs/audit-package.md)
 - [docs/adr/README.md](docs/adr/README.md)
 - [docs/slither.md](docs/slither.md)

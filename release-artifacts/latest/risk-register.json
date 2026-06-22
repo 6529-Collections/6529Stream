@@ -10,7 +10,7 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:84e5b200ddb92d1260226c7b94861aa84020bb6f51d2b6663394ab08d8b1bc20"
+      "sha256": "sha256:c6efddae0cf8b17ea6a587a78380bb93d92ee11bc785dce02471043e9737b52a"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
@@ -30,7 +30,7 @@
     },
     {
       "path": "docs/royalty-policy.md",
-      "sha256": "sha256:541441c734273a619cfbbd50b3f3357256d8ab03f9411bf0d989a7217f0cdefa"
+      "sha256": "sha256:b57fb883d6c99e7c61b13d8aaa3dbf152a24349c77c16078a91fb8ba3c5f83be"
     },
     {
       "path": "docs/warning-dispositions.md",
@@ -295,7 +295,7 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:84e5b200ddb92d1260226c7b94861aa84020bb6f51d2b6663394ab08d8b1bc20"
+          "sha256": "sha256:c6efddae0cf8b17ea6a587a78380bb93d92ee11bc785dce02471043e9737b52a"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -311,7 +311,7 @@
         },
         {
           "path": "docs/royalty-policy.md",
-          "sha256": "sha256:541441c734273a619cfbbd50b3f3357256d8ab03f9411bf0d989a7217f0cdefa"
+          "sha256": "sha256:b57fb883d6c99e7c61b13d8aaa3dbf152a24349c77c16078a91fb8ba3c5f83be"
         }
       ],
       "risk_acceptance": null
@@ -412,7 +412,7 @@
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:84e5b200ddb92d1260226c7b94861aa84020bb6f51d2b6663394ab08d8b1bc20"
+          "sha256": "sha256:c6efddae0cf8b17ea6a587a78380bb93d92ee11bc785dce02471043e9737b52a"
         },
         {
           "path": "docs/status.md",
@@ -479,7 +479,7 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:84e5b200ddb92d1260226c7b94861aa84020bb6f51d2b6663394ab08d8b1bc20"
+          "sha256": "sha256:c6efddae0cf8b17ea6a587a78380bb93d92ee11bc785dce02471043e9737b52a"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",

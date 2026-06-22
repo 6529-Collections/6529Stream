@@ -11,6 +11,10 @@ the release policy in `docs/release-policy.md`.
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay
   guard.
+- Added proposed pre-launch revenue split and royalty resolver specs covering
+  arbitrary labeled split profiles, primary-sale templates, pull-based split
+  wallets, native/ERC-20 release accounting, scoped assignment freezes, and
+  Core-native resolver-backed ERC-2981 as the launch target.
 - Added a root `AGENTS.md` operating guide for automated coding agents,
   covering task startup, scope discipline, validation choices, PR/bot workflow,
   and security boundaries, with markdown-link checker coverage for the new
