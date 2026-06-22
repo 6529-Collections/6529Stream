@@ -42,7 +42,7 @@
     snapshot requirements.
   - Aligned `mint-policy-and-accounting.md` with the entropy-before-safe-mint
     ordering.
-- Ran `codex-diff-check -- docs ops/workstreams/stream-future-proof-specs`;
+- Ran `codex-diff-check -- docs ops\workstreams\stream-future-proof-specs`;
   no whitespace issues reported.
 - Ran OpenRouter review round 3.
   - Opus 4.8 returned `REQUEST_CHANGES` with three blockers:
@@ -104,6 +104,30 @@
   - Added golden interface tests for resolver selector, ERC-2981
     `supportsInterface`, retained burned identity, pending entropy during safe
     receiver callbacks, `INSTANT` finalization, and fulfill rejection cases.
+- Ran a compact metadata/rendering delta closure after tightening the launch
+  stance to omit Core `contractURI()` and keep preservation/provenance profiles
+  out of launch ABI.
+  - Opus 4.8 returned `APPROVE` with non-blocking hardening notes.
+  - GPT 5.5 Pro again consumed output as hidden reasoning only on the first
+    delta packet and needs a smaller retry.
+  - GLM 5.2 also returned no visible final text on the first delta packet and
+    needs a smaller retry.
+- Incorporated Opus metadata-delta hardening:
+  - release manifest records fallback JSON schema hash, router gas/returndata
+    limits, global metadata discovery reads, and `ContractURIUpdated()` emitter;
+  - hash/canonicalization/schema identifiers use append-only registries with
+    reserved governance ranges;
+  - `HashRef.digest` lengths and variable-length validation rules are
+    algorithm-specific and enforced on write;
+  - `STREAM_CONTEXT_V1` serialization is deterministic enough for
+    third-party recomputation;
+  - post-freeze preservation records do not trigger ERC-4906 refresh events for
+    frozen default-tokenURI output;
+  - future record/source/hash families require explicit registry governance and
+    cannot mutate Core identity assumptions.
+- Ran final tiny metadata-delta audit in OpenRouter iteration 8 after those
+  refinements. GPT 5.5 Pro, Opus 4.8, and GLM 5.2 all returned visible
+  `APPROVE` with no blocking issues.
 - Ran OpenRouter review round 2 against GPT-5.5 Pro, Opus 4.8, and GLM 5.2.
   - GPT-5.5 Pro and Opus 4.8 returned mostly hidden/reasoning output, but the
     visible reasoning still flagged mint pointer coverage, mint ticket shape,
@@ -144,5 +168,5 @@
     pre-freeze/finality policy explicitly preserves a safe burn path.
   - Aligned payable entropy providers to exact-payment / reject-excess behavior
     for v1.
-- Ran `codex-diff-check -- docs ops/workstreams/stream-future-proof-specs`;
+- Ran `codex-diff-check -- docs ops\workstreams\stream-future-proof-specs`;
   no whitespace issues reported.

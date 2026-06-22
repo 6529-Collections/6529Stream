@@ -243,6 +243,15 @@ schema-registry contract unless a later implementation ADR explicitly promotes
 one of those surfaces. Use `CollectionRecord` plus `schemaId`, `HashRef`, and
 URI commitments for those records at launch.
 
+Launch ABI must also have a hard function-count ceiling. Before audit handoff,
+the release manifest must publish the external/public function count, interface
+IDs, selectors, and owner subsystem for every selector in
+`StreamCollectionMetadata`. The initial ceiling is 80 external/public
+functions, including inherited views. Exceeding that ceiling requires a new ADR
+that either removes launch surface or moves a responsibility into a companion
+contract. This keeps "world-class metadata" from quietly turning into an
+unauditable monolith.
+
 ## Core Boundary
 
 Core should keep the collection facts required to preserve token behavior:
@@ -352,9 +361,10 @@ Rules:
 3. `maxSupply` cannot be lowered below `mintedEver - burned`.
 4. Fixed collections cannot increase max supply after activation unless the
    collection was explicitly configured as capped-open.
-5. Status transitions are `ACTIVE`, `PAUSED`, and `CLOSED`. Reopening a closed
-   collection requires delayed governance unless the collection was explicitly
-   configured as ongoing/open.
+5. V1 status transitions are `ACTIVE <-> PAUSED`, `ACTIVE -> CLOSED`, and
+   `PAUSED -> CLOSED`. `CLOSED` is terminal and cannot be reopened. Ongoing
+   collections should use `PAUSED` for temporary pauses; a future reopenable
+   state such as `SUSPENDED` requires a later ADR.
 6. Metadata, revenue, mint, and entropy satellites listen to collection events
    but do not create collection identity.
 
@@ -571,7 +581,6 @@ struct CollectionIdentity {
     bytes32 schemaHash;
     string slug;
     string name;
-    string symbol;
     string subtitle;
     string description;
     string category;
@@ -587,13 +596,11 @@ Identity guidance:
 2. `slug` is a human-readable collection slug. It is not a unique security
    primitive unless uniqueness is explicitly enforced.
 3. `name` is the canonical collection display name.
-4. `symbol` is an optional collection-scoped symbol for contract metadata. If it
-   is empty, `contractURI(collectionId)` uses the Core ERC-721 symbol.
-5. `subtitle` is optional short supporting text.
-6. `description` is the canonical collection description.
-7. `category` is display data, not a closed enum. Examples may include art,
+4. `subtitle` is optional short supporting text.
+5. `description` is the canonical collection description.
+6. `category` is display data, not a closed enum. Examples may include art,
    photography, generative, edition, poster, artifact, or experiment.
-8. `tagsURI` and `tagsHash` allow richer tag vocabularies without hardcoding
+7. `tagsURI` and `tagsHash` allow richer tag vocabularies without hardcoding
    them onchain.
 
 ```solidity
@@ -722,8 +729,9 @@ or renderer overrides. Token-level metadata lives in
 Canonical token data passed through minting is opaque `bytes tokenData`. If a
 collection treats it as UTF-8, JSON, CBOR, or another format, the active
 renderer/schema declares that interpretation. In the render context, token data
-is exposed as bytes plus an optional decoded view chosen by the renderer; Core
-does not parse it.
+is exposed as bytes plus an optional decoded view chosen by the renderer. Core
+stores only `tokenDataHash`; `StreamCollectionMetadata` stores renderer-visible
+token data bytes or a hash-bound URI/ref when a collection needs them.
 
 Recommended token-level launch API:
 
@@ -844,8 +852,7 @@ enum PayloadSourceType {
     IPFS,
     ARWEAVE,
     HTTPS,
-    WEB3_CALL,
-    OTHER
+    WEB3_CALL
 }
 ```
 
@@ -854,13 +861,16 @@ Rules:
 1. `INLINE_CHUNKS` is the preferred launch path for collection scripts.
 2. `DEPENDENCY_REGISTRY` is the preferred launch path for shared JavaScript
    dependencies already supported by the protocol.
-3. `IPFS`, `ARWEAVE`, `HTTPS`, and `OTHER` require a hash commitment for
-   payloads that affect rendering, provenance, or collector display.
+3. `IPFS`, `ARWEAVE`, and `HTTPS` require a hash commitment for payloads that
+   affect rendering, provenance, or collector display.
 4. `SSTORE2` and `ETHFS` are not required at launch, but the manifest model
    must be able to represent them.
 5. `WEB3_CALL` leaves room for ERC-4804-style onchain JSON or HTML reads.
 6. Source type additions should be additive. Unknown source types in future
    schemas must not change Core behavior.
+7. Launch v1 should not include an `OTHER` source type because it has no
+   resolution semantics. Future source types must be added through explicit
+   enum values or versioned extension modules with resolver rules.
 
 ## Open Metadata Fields
 
@@ -1370,13 +1380,12 @@ struct CollectionRecord {
 Recommended hash algorithms include:
 
 ```text
-KECCAK256
-SHA256
-BLAKE3
-MULTIHASH
-IPFS_CID
-ARWEAVE_TX
-OTHER
+HASH_KECCAK256
+HASH_SHA256
+HASH_BLAKE3
+HASH_MULTIHASH
+HASH_IPFS_CID
+HASH_ARWEAVE_TX
 ```
 
 `canonicalizationId` identifies how the external payload was serialized before
@@ -1384,6 +1393,22 @@ hashing, such as `ABI_V1`, `RFC8785_JCS`, `DET_CBOR`, `RAW_BYTES`, `PREMIS_XML`,
 `IIIF_JSON`, or `C2PA_MANIFEST`. Protocol identity hashes may still use fixed
 `bytes32 keccak256` fields elsewhere, but preservation-critical records need
 algorithm-tagged fixity.
+
+Launch v1 must define numeric IDs for every hash algorithm and
+canonicalization profile in the release manifest. Unknown hash algorithms are
+not accepted in launch writes; future algorithms require an explicit registry
+or contract version rather than a generic `OTHER` bucket.
+
+Algorithm, canonicalization, record-type, and schema identifiers should be
+allocated through an append-only registry with reserved governance ranges.
+Existing IDs must never be reused with different meaning. Future hash families,
+canonicalization profiles, record families, or schema families require explicit
+new IDs and do not require any change to Core token identity assumptions.
+
+Each `algorithmId` must define expected digest length and validation rules.
+Malformed, empty, or oversized digests revert before storage or event emission.
+Variable-length formats such as multihash must define their maximum byte length
+and inner algorithm validation in the release manifest or schema registry.
 
 Recommended launch write:
 
@@ -1428,6 +1453,12 @@ Rules:
    optional future companion-contract interfaces, not mandatory launch storage.
 7. This keeps the launch metadata contract auditable while preserving the
    50-year knowledge-system model.
+8. `contentHashDigest`, `signatureHashDigest`, and `uri` must respect launch
+   byte limits. Oversized records revert before emitting events.
+9. New record families are admitted through registry governance and explicit
+   authorization policy updates. They cannot change tokenURI, renderer output,
+   royalties, minting, ownership, or Core identity unless a separate versioned
+   module is approved.
 
 ### PREMIS-Inspired Preservation Records
 
@@ -2020,25 +2051,11 @@ function latestAttestationHash(
     address attester
 ) external view returns (bytes32);
 
-function latestArchiveReceiptHash(
+function latestCollectionRecordHash(
     uint256 collectionId,
-    bytes32 archiveType
+    bytes32 recordType,
+    bytes32 subjectId
 ) external view returns (bytes32);
-
-function latestPreservationEventHash(
-    uint256 collectionId,
-    bytes32 eventType
-) external view returns (bytes32);
-
-function latestFixityCheckHash(
-    uint256 collectionId,
-    bytes32 objectId
-) external view returns (bytes32);
-
-function latestC2PAReferenceHash(uint256 collectionId)
-    external
-    view
-    returns (bytes32);
 
 function latestSnapshotHash(uint256 collectionId)
     external
@@ -2051,10 +2068,11 @@ function snapshotHash(uint256 collectionId, bytes32 snapshotId)
     returns (bytes32);
 ```
 
-Launch does not need to expose every historical attestation or receipt in
-storage. Events are the canonical append-only history. Read slots should focus
-on latest hashes, active snapshots, and values renderers or frontends need in a
-single call.
+Launch does not need typed storage reads for every historical attestation,
+archive receipt, preservation event, fixity check, C2PA reference, or media
+relationship. Events are the canonical append-only history. Read slots should
+focus on latest generic record hashes, active snapshots, and values renderers
+or frontends need in a single call.
 
 ## Events
 
@@ -2193,51 +2211,6 @@ event CollectionRecordRecorded(
     uint64 effectiveAt
 );
 
-event CollectionArchiveReceiptRecorded(
-    uint256 indexed collectionId,
-    bytes32 indexed archiveType,
-    bytes32 indexed objectId,
-    bytes32 contentHash,
-    string uri,
-    bytes32 receiptHash,
-    bytes32 agentId,
-    bytes32 schemaId
-);
-
-event CollectionPreservationEventRecorded(
-    uint256 indexed collectionId,
-    bytes32 indexed eventId,
-    bytes32 indexed eventType,
-    bytes32 outcome,
-    bytes32 eventHash,
-    bytes32 agentId
-);
-
-event CollectionFixityCheckRecorded(
-    uint256 indexed collectionId,
-    bytes32 indexed objectId,
-    bytes32 indexed algorithm,
-    bytes32 digest,
-    bytes32 outcome,
-    bytes32 agentId
-);
-
-event CollectionC2PAReferenceRecorded(
-    uint256 indexed collectionId,
-    bytes32 indexed activeManifestId,
-    bytes32 manifestHash,
-    bytes32 claimHash,
-    bytes32 validationStatus
-);
-
-event CollectionMediaRelationshipRecorded(
-    uint256 indexed collectionId,
-    bytes32 indexed subjectId,
-    bytes32 indexed relationshipType,
-    bytes32 objectId,
-    bytes32 relationshipHash
-);
-
 event CollectionSnapshotPublished(
     uint256 indexed collectionId,
     bytes32 indexed snapshotId,
@@ -2281,8 +2254,9 @@ event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
 
 ## Admin And Authorization
 
-Use the existing `StreamAdmins` model rather than inventing a second admin
-system.
+Use ADR 0004 governance/action roles rather than inventing a second admin
+system. Legacy selector-map `StreamAdmins` authorization is nonconformant for
+launch.
 
 Recommended permissions:
 
@@ -2308,6 +2282,26 @@ recordCollectionRecord      preservation/admin/attester according to recordType
 publishCollectionSnapshot   collection metadata admin or global admin
 lockCollectionField         freeze admin or global admin
 ```
+
+Launch `recordCollectionRecord` authorization must be explicit by record type:
+
+```text
+ARTIST_*                  artist address, delegated artist signer, or global admin
+CURATOR_*                 configured curator signer/admin or global admin
+INSTITUTION_*             configured institution signer/admin or global admin
+RIGHTS_*                  rights admin or global admin
+ARCHIVE_*                 preservation admin or global admin
+FIXITY_*                  preservation admin, configured verifier, or global admin
+C2PA_*                    configured provenance verifier/admin or global admin
+IIIF_*                    preservation admin, collection metadata admin, or global admin
+MEDIA_RELATIONSHIP_*      preservation admin or collection metadata admin
+AGENT_*                   agent metadata admin or global admin
+```
+
+No record family is permissionless in launch v1. If a future collection wants
+public collector notes or community annotations, that should be a separate
+moderated module whose records cannot affect tokenURI, renderer output,
+artwork finality, rights, royalties, minting, or ownership.
 
 Every mutation must check:
 
@@ -2412,13 +2406,12 @@ another namespaced object rather than replacing the standard fields. If the
 contract URI is an offchain URI rather than an onchain JSON data URI, the
 metadata contract should store the URI and an optional schema/hash commitment.
 
-Collection contract URI updates should emit collection-specific metadata events
-and should cause the router or Core to emit `ContractURIUpdated()` when the
-global Core `contractURI()` output changes.
-
-If marketplaces need a contract-level `contractURI()` on Core, Core or the
-router can expose a default collection-independent URI separately. That should
-not block collection-level contract metadata.
+Collection contract URI updates should emit collection-specific metadata events.
+Launch v1 does not add `contractURI()` to Core. Router-level global contract
+metadata reads may emit `ContractURIUpdated()` from the router or metadata
+contract that exposes the global read. Collection-level contract metadata
+remains available through `StreamCollectionMetadata.contractURI(collectionId)`
+and token JSON references.
 
 ## Open Series Display
 
@@ -2512,12 +2505,13 @@ MAX_SHORT_STRING_BYTES       1,024
 MAX_URI_BYTES                2,048
 MAX_LONG_TEXT_BYTES         16,384
 MAX_TOKEN_DATA_BYTES        16,384
+MAX_DIGEST_BYTES               128
 MAX_ATTRIBUTES_JSON_BYTES   65,536
 MAX_PROPERTIES_JSON_BYTES   65,536
 MAX_CUSTOM_FIELDS              128
-MAX_SCRIPT_CHUNK_BYTES      24,576
-MAX_SCRIPT_CHUNKS              256
-MAX_TOTAL_SCRIPT_BYTES   1,048,576
+MAX_SCRIPT_CHUNK_BYTES       8,192
+MAX_SCRIPT_CHUNKS               32
+MAX_TOTAL_ONCHAIN_SCRIPT_BYTES  24,576
 MAX_BATCH_MUTATIONS             50
 ```
 
@@ -2525,8 +2519,9 @@ The exact constants can change during implementation if tests prove better
 values, but "unbounded" is not an acceptable v1 policy. Mutation functions
 should revert with specific errors when a write exceeds the relevant limit.
 Admin tooling should dry-run renderer output against
-`MAX_RENDER_JSON_BYTES = 65,536` and `MAX_RENDER_HTML_BYTES = 1,048,576` before
-activation or final artwork freeze.
+`MAX_DEFAULT_TOKEN_URI_BYTES = 24,576` before activation or final artwork
+freeze. Larger archive/raw HTML/raw JSON outputs must use explicit alternate
+views and must not be served through the default marketplace `tokenURI()` path.
 
 Batch mutation limits apply to arrays of field updates, script chunks, custom
 fields, locks, attestations, and snapshot records. Larger updates should be
