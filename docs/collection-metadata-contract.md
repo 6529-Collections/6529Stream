@@ -2252,6 +2252,13 @@ event CollectionCoreStatusObserved(
 event ContractURIUpdated();
 ```
 
+Every launch event that mutates a typed metadata group must emit enough payload
+data for event-only reconstruction. It can do this by emitting all changed
+fields directly, or by emitting a deterministic delta record with schema ID,
+canonicalization ID, URI, and content hash. Hash-only events are acceptable only
+for fields whose full payload is already recoverable from another event in the
+same transaction or from an immutable onchain read named by the event.
+
 `CollectionArchiveReceiptRecorded`, `CollectionPreservationEventRecorded`,
 `CollectionFixityCheckRecorded`, `CollectionC2PAReferenceRecorded`, and
 `CollectionMediaRelationshipRecorded` are useful future typed events or

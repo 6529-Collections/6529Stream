@@ -16,5 +16,5 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0008-revenue-splits-and-royalty-resolver.md`](0008-revenue-splits-and-royalty-resolver.md) | Proposed | Pre-launch design request |
 
 Each ADR should include problem, current behavior, intended behavior,
-alternatives, security impact, migration impact, test plan, rollout plan,
+alternatives, security impact, release impact, test plan, rollout plan,
 non-goals, and accepted risks.

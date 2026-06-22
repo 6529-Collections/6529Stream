@@ -10,6 +10,20 @@ Read this document together with the [threat model](threat-model.md), the
 the [known blockers](known-blockers.md), and the canonical roadmap in
 [`ops/ROADMAP.md`](../ops/ROADMAP.md).
 
+## Pre-Launch Target Specs
+
+This page maps the current local baseline. The intended pre-launch architecture
+for the expanded Stream modules is specified separately:
+
+- [Launch v1 target architecture](launch-v1-target-architecture.md)
+- [Revenue splits and royalties](revenue-splits-and-royalties.md)
+- [Mint policy and accounting](mint-policy-and-accounting.md)
+- [Metadata router and renderer](metadata-router-and-renderer.md)
+- [Collection metadata contract](collection-metadata-contract.md)
+- [Entropy coordinator](stream-entropy-coordinator.md)
+- [Entropy providers](stream-entropy-providers.md)
+- [ADR 0008: revenue splits and royalty resolver](adr/0008-revenue-splits-and-royalty-resolver.md)
+
 ## Maturity And Scope
 
 The current architecture covers the local Anvil baseline only. It includes:

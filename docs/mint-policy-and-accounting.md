@@ -1534,6 +1534,13 @@ event MintPhasePaused(
     bool paused
 );
 
+event MintPhaseFrozen(
+    uint256 indexed collectionId,
+    bytes32 indexed phaseId,
+    bool frozen,
+    bytes32 policyHash
+);
+
 event MintPhaseExecutorUpdated(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
@@ -1870,6 +1877,10 @@ Once frozen:
 10. Cap mode and delta mode cannot be loosened.
 11. Module codehash pins cannot be removed.
 12. Policy cannot move to a different ledger.
+
+Every phase freeze transition must emit `MintPhaseFrozen` with the resulting
+state and the policy hash that was frozen, so event replay can reconstruct when
+the phase became permanently stricter.
 
 Counter values must never be decremented. If an operator needs a different
 policy, the correct answer is a new phase ID or a stricter future counter, not

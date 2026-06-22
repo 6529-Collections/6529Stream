@@ -37,6 +37,17 @@ Start with:
 - [ops/ROADMAP.md](ops/ROADMAP.md)
 - [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md)
 
+Pre-launch target architecture specs:
+
+- [docs/launch-v1-target-architecture.md](docs/launch-v1-target-architecture.md)
+- [docs/revenue-splits-and-royalties.md](docs/revenue-splits-and-royalties.md)
+- [docs/mint-policy-and-accounting.md](docs/mint-policy-and-accounting.md)
+- [docs/metadata-router-and-renderer.md](docs/metadata-router-and-renderer.md)
+- [docs/collection-metadata-contract.md](docs/collection-metadata-contract.md)
+- [docs/stream-entropy-coordinator.md](docs/stream-entropy-coordinator.md)
+- [docs/stream-entropy-providers.md](docs/stream-entropy-providers.md)
+- [docs/adr/0008-revenue-splits-and-royalty-resolver.md](docs/adr/0008-revenue-splits-and-royalty-resolver.md)
+
 ## First 30 Minutes
 
 1. Install Foundry `v1.7.1`, Solidity compiler `0.8.19`, Python 3.8+, and
@@ -193,7 +204,13 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [docs/tooling.md](docs/tooling.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/threat-model.md](docs/threat-model.md)
+- [docs/launch-v1-target-architecture.md](docs/launch-v1-target-architecture.md)
 - [docs/revenue-splits-and-royalties.md](docs/revenue-splits-and-royalties.md)
+- [docs/mint-policy-and-accounting.md](docs/mint-policy-and-accounting.md)
+- [docs/metadata-router-and-renderer.md](docs/metadata-router-and-renderer.md)
+- [docs/collection-metadata-contract.md](docs/collection-metadata-contract.md)
+- [docs/stream-entropy-coordinator.md](docs/stream-entropy-coordinator.md)
+- [docs/stream-entropy-providers.md](docs/stream-entropy-providers.md)
 - [docs/audit-package.md](docs/audit-package.md)
 - [docs/adr/README.md](docs/adr/README.md)
 - [docs/slither.md](docs/slither.md)

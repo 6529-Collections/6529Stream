@@ -429,11 +429,21 @@ Provider adapters should implement:
 ```solidity
 interface IStreamEntropyProvider {
     function isStreamEntropyProvider() external view returns (bool);
+    function streamEntropyProviderFamily() external pure returns (bytes32);
+    function streamEntropyProviderVersion() external pure returns (bytes32);
+    function streamEntropyProviderConfigHash() external view returns (bytes32);
+
+    function quoteRequest(bytes calldata context)
+        external
+        view
+        returns (uint256 fee);
 
     function requestEntropy(bytes32 requestKey, bytes calldata context)
         external
         payable
         returns (uint256 providerRequestId);
+
+    function retryCoordinatorFulfillment(uint256 providerRequestId) external;
 
     function providerResultStatus(uint256 providerRequestId)
         external
