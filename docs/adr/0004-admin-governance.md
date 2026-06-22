@@ -499,6 +499,118 @@ Rejected. Global pause is operationally blunt and can unnecessarily block
 withdrawals, settlement, or randomness fulfillment. Domain-scoped pause gives a
 clearer incident response while preserving user safety.
 
+## Future-Proof Governance Extensions
+
+The accepted P0 admin model is the immediate launch baseline. The broader
+Stream specs also rely on the following long-term governance requirements for
+revenue, metadata, entropy, minting, finality, and successor declarations.
+
+Governance principles:
+
+1. Tightening can be fast; loosening must be delayed.
+2. Terminal freezes are irreversible.
+3. Every admin mutation emits an event.
+4. Pointer changes use two-step staging and timelock.
+5. Collection-scoped admins cannot weaken global invariants.
+6. Emergency powers must preserve owed funds and historical truth.
+7. Governance contracts are part of the protocol surface and must be monitored.
+8. No admin system may rely on a single long-lived EOA.
+9. Immutable contracts are replaced through new deployment lines and explicit
+   pointer governance, not hidden implementation replacement.
+
+Long-term action classes:
+
+```text
+IMMEDIATE_TIGHTENING
+DELAYED_LOOSENING
+TERMINAL_FREEZE
+POINTER_REPLACEMENT
+FUNDS_RECOVERY
+SUCCESSOR_DECLARATION
+```
+
+Launch may simplify this into a two-tier delay model:
+
+```text
+IMMEDIATE tightening actions only, 0 delay
+DELAYED all other material actions, at least 48 hours
+```
+
+Three action families keep explicit longer launch floors even under the
+two-tier model:
+
+```text
+FUNDS_RECOVERY          at least 14 days
+SUCCESSOR_DECLARATION   at least 30 days
+TERMINAL_FREEZE         guardian/veto window or at least 24 hours
+```
+
+Critical pointer changes must be staged with old address, new address, code
+hash, interface evidence where practical, activation time, expiry, and reason
+hash. Required pointer surfaces include:
+
+```text
+StreamCore.metadataRouter         one-way freezable
+StreamCore.collectionMetadata     one-way freezable
+StreamCore.entropyCoordinator     one-way freezable
+StreamCore.mintManager            one-way freezable
+StreamCore.revenueResolver        one-way freezable
+MetadataRouter.defaultRenderer    collection-freeze aware
+MetadataRouter.dependencyRegistry one-way freezable
+RevenueResolver.splitFactory      versioned by factory line
+RevenueResolver.labelRegistry     descriptive only
+MintManager.ledger                phase-freeze aware
+MintManager.moduleRegistry        codehash checked
+```
+
+Pointer operation IDs must be domain-separated by chain ID, governance
+contract, nonce, pointer ID, module type, expected interface ID, old target,
+new target, new code hash, target manifest hash, activation window, and reason
+hash. `reasonURI` is display data; `reasonHash` is the durable commitment.
+Pointer freeze events must include the pointer ID, frozen target, operation ID
+when the freeze is tied to a staged action, frozen target code hash, and frozen
+manifest hash so indexers can reconstruct the exact frozen state.
+
+Implementation manifests must map every protected operation to an explicit
+durable role constant or action ID. A cardinality test must fail if unrelated
+protected functions share an authorization key. Selector aliases such as
+`this.X.selector` must not become durable permission identifiers for unrelated
+functions.
+
+Every admin event either includes a `schemaVersion` field from v1 or has its
+single accepted meaning pinned in the machine-readable event catalog. If a
+future deployment line changes event shapes, indexers must union old and new
+streams rather than reinterpret old events.
+
+Key-management and succession posture:
+
+1. Launch governance is controlled by a Safe or equivalent contract wallet, not
+   by a single EOA.
+2. Genesis artifacts publish role assignments, pointer settings, delay
+   configuration, event catalog hash, and transaction hashes.
+3. No single EOA can execute material actions at genesis.
+4. Signer rotation, signer loss, emergency pause, and terminal freeze runbooks
+   are public where possible without exposing private signer details.
+5. Quorum-degradation simulations prove the system degrades to "frozen but
+   honest": transfers, ownership reads, `royaltyInfo`, `tokenURI` or its
+   documented fallback, split-wallet `release`, and permissionless
+   `flushEscrow` continue without admin intervention.
+6. A successor Core, if ever needed, is declared through
+   `SUCCESSOR_DECLARATION`; it does not mutate old token ownership history.
+7. Successor manifests include old chain ID, old Core, new chain ID, new Core,
+   snapshot URI/hash, ownership snapshot hash, collection snapshot hashes,
+   event-history snapshot hash, old-Core status, and activation statement.
+
+Long-lived funds policy:
+
+1. Owed funds are never emergency surplus.
+2. Rounding dust is not ordinary surplus.
+3. Unsupported ERC-20 assets may be quarantined per asset without blocking
+   native ETH or other approved assets.
+4. Any future decommissioning or recovery path must be delayed,
+   event-complete, optically obvious, and unable to seize balances that remain
+   economically claimable.
+
 ## Non-Goals
 
 - Choosing the final Safe owners, threshold, or signers.
