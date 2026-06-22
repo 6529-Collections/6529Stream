@@ -70,14 +70,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:7782f4234bea186494837fa298e8188612ea0c54f650458ce85d93014eccf051",
-        "size_bytes": 76120,
+        "sha256": "sha256:06139a4945183eb4836bb2f1db65ee7210a26fba2d4c5cbbca3e903c79c8b981",
+        "size_bytes": 76333,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:732ac1d88378a0d00c5fb6cf658d03c127a576d4cdba4055b600230e3a7217c5",
-        "size_bytes": 73103
+        "sha256": "sha256:b62e3ed06ddb6af981c1d983526aa1f6c918759c6051ae756255462732805c1a",
+        "size_bytes": 73309
       }
     },
     "release_candidate_lockfile": {
@@ -2233,14 +2233,14 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:9f01ae435bf53d9278faf875365be74ee7988cd8fee914d5492f1f5caca1958f",
-      "size_bytes": 73880
+      "sha256": "sha256:0d4c54cc57ebb7b8c536538f89627c9a0426699088c0ccb327d7fe95244b877c",
+      "size_bytes": 74090
     },
     "governance_docs": [
       {
         "path": "README.md",
-        "sha256": "sha256:75cded0d697ab0b7691ab9e602831c71bcd672626d157d36e65257c54c0464e7",
-        "size_bytes": 11680
+        "sha256": "sha256:03ae27a9064c45f3614869474e7fcd9b78fec09a74ae296b8b721a2ef707a71f",
+        "size_bytes": 12830
       },
       {
         "path": ".github/PULL_REQUEST_TEMPLATE.md",
@@ -2319,8 +2319,8 @@
       },
       {
         "path": "docs/architecture.md",
-        "sha256": "sha256:8ff51ad8a9e3015d0b638540bfd8ad1c07c5bb1b59e6b5df5c8f1eb61acc2b9a",
-        "size_bytes": 17090
+        "sha256": "sha256:e6d01c5bb6ed7c8f89184909c3270869595d78da63dd3d838f0ce77c267356b2",
+        "size_bytes": 17790
       },
       {
         "path": "docs/threat-model.md",

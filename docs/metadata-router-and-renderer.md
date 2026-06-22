@@ -1362,9 +1362,37 @@ not depend on every future RPC endpoint tolerating maximum-size live rendering.
 The router should emit explicit events for configuration and metadata changes:
 
 ```solidity
-event DefaultMetadataConfigUpdated(address indexed renderer, MetadataMode mode);
-event CollectionMetadataConfigUpdated(uint256 indexed collectionId, address indexed renderer, MetadataMode mode);
-event TokenMetadataConfigUpdated(uint256 indexed tokenId, address indexed renderer, MetadataMode mode);
+event DefaultMetadataConfigUpdated(
+    MetadataMode mode,
+    address indexed renderer,
+    string baseURI,
+    string pendingURI,
+    OffchainURIIdMode offchainURIIdMode,
+    bool frozen,
+    bytes32 configHash
+);
+
+event CollectionMetadataConfigUpdated(
+    uint256 indexed collectionId,
+    MetadataMode mode,
+    address indexed renderer,
+    string baseURI,
+    string pendingURI,
+    OffchainURIIdMode offchainURIIdMode,
+    bool frozen,
+    bytes32 configHash
+);
+
+event TokenMetadataConfigUpdated(
+    uint256 indexed tokenId,
+    MetadataMode mode,
+    address indexed renderer,
+    string baseURI,
+    string pendingURI,
+    OffchainURIIdMode offchainURIIdMode,
+    bool frozen,
+    bytes32 configHash
+);
 
 event CollectionMetadataUpdated(uint256 indexed collectionId);
 event TokenMetadataUpdated(uint256 indexed tokenId);
@@ -1452,9 +1480,10 @@ token freeze               freezes token-specific metadata and renderer override
 ```
 
 If `StreamCore.collectionFreezeStatus(collectionId)` is true, the metadata
-router should reject collection metadata changes unless a narrower token-level
-exception was explicitly allowed before the collection freeze. The simplest
-launch rule is:
+router must reject every mutable collection-scoped metadata path in launch v1.
+Pre-freeze token-level exceptions must not bypass Core collection freeze unless
+a later accepted spec explicitly introduces that narrower behavior. The launch
+rule is:
 
 ```text
 Core collection freeze freezes metadata for that collection.

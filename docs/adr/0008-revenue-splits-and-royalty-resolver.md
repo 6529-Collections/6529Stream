@@ -632,9 +632,9 @@ Required behavior:
   must not substitute active semantics when the asset policy read fails. The
   initial planning target for `ASSET_POLICY_GAS_LIMIT` is 30,000 gas for an
   all-cold lookup, with the deployed value set from measured gas plus margin. If the
-  immutable registry for a wallet line becomes incompatible under a future EVM
-  or gas schedule, the recovery path is a new split-wallet/factory deployment
-  line and governed assignment migration for future receipts, not a hidden
+  immutable registry for a wallet line no longer satisfies future EVM or
+  gas-schedule constraints, the recovery path is a new split-wallet/factory
+  deployment line and governed reassignment for future receipts, not a hidden
   registry pointer change inside deployed wallets. An asset admin can approve a
   standard ERC-20, deprecate approval for future
   receipts, or mark an observed asset unsupported. Asset state is explicit:
@@ -866,13 +866,14 @@ Rules:
 - Dynamic primary assignments use `isTemplate = true`; `splitWallet` is
   `address(0)` at assignment time, and the sale contract materializes a fixed
   profile and wallet during settlement.
-- `royaltyBps` must be less than or equal to the resolver's immutable
-  `maxRoyaltyBps`.
-- The recommended initial `maxRoyaltyBps` is 1000 for a first resolver
-  deployment. Some marketplaces warn on or reject royalties above 1000 bps. A
-  later deployment line may raise or lower the cap through a new resolver and
-  explicit rollout plan, but the cap is immutable within one resolver
-  deployment.
+- `royaltyBps` must be less than or equal to Core's immutable
+  `maxRoyaltyBps`. A resolver may mirror the same cap or choose a lower cap,
+  but it cannot raise the Core ceiling.
+- The recommended initial Core `maxRoyaltyBps` is 1000. Some marketplaces warn
+  on or reject royalties above 1000 bps. The Core cap must not exceed 10,000.
+  Raising that ceiling after launch requires a new Core deployment line and
+  explicit rollout plan; lowering resolver policy can use a new resolver
+  deployment and rollout plan.
 - Assignment setters must validate wallet deployment, `walletFor(profileId)`,
   `wallet.profileId()`, and an active runtime code hash at assignment time.
   Core `royaltyInfo()` must not redo expensive wallet validation on every read.
@@ -1355,15 +1356,19 @@ path.
 
 Resolver-backed Core integration must use a small, fixed read path:
 
+The body below is selector and control-flow pseudocode. Production Core must
+use capped assembly `staticcall` and must not allocate `bytes memory` for
+resolver returndata before enforcing the 64-byte return-size rule.
+
 ```solidity
 interface IStreamRevenueResolver {
-    function royaltyInfoForToken(
+    function royaltyReceiverAndBps(
         address core,
         uint256 tokenId,
         uint256 salePrice,
         uint256 mappedCollectionId,
         bool hasMappedCollection
-    ) external view returns (address receiver, uint256 royaltyAmount);
+    ) external view returns (address receiver, uint16 royaltyBps);
 }
 ```
 
@@ -1371,12 +1376,12 @@ This is the canonical resolver ABI for Core-native ERC-2981. It has no overload
 in v1. Core and resolver implementations must use the exact selector:
 
 ```solidity
-bytes4 constant ROYALTY_INFO_FOR_TOKEN_SELECTOR = 0x3d5d0e9e;
-// royaltyInfoForToken(address,uint256,uint256,uint256,bool)
+bytes4 constant ROYALTY_RECEIVER_AND_BPS_SELECTOR = 0x54f77a09;
+// royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)
 ```
 
 Core calls the resolver with
-`IStreamRevenueResolver.royaltyInfoForToken.selector`. `mappedCollectionId` and
+`IStreamRevenueResolver.royaltyReceiverAndBps.selector`. `mappedCollectionId` and
 `hasMappedCollection` come from Core's authoritative token mapping, not from
 token ID ranges. Core reads `tokenCollectionMappingExists[tokenId]` before the
 staticcall; when it is true, Core passes
@@ -1413,11 +1418,12 @@ mappedCollectionId = hasMappedCollection ? tokenCollectionId[tokenId] : 0
 (ok, data) = resolver.staticcall{gas: royaltyResolverGasLimit}(...)
 if !ok or data.length != 64:
     return (address(0), 0)
-decode(receiver, amount)
-if receiver == address(0) or amount == 0:
+decode(receiver, royaltyBps)
+if receiver == address(0) or royaltyBps == 0:
     return (address(0), 0)
-if amount > salePrice:
+if royaltyBps > maxRoyaltyBps:
     return (address(0), 0)
+amount = mulDiv(salePrice, royaltyBps, 10_000)
 return (receiver, amount)
 ```
 
@@ -1435,19 +1441,19 @@ The Solidity implementation must not allocate unbounded returndata before
 checking its size. Launch Core must use an assembly staticcall pattern that caps
 `returndatacopy` to 64 bytes, requires `returndatasize() == 64`, and returns
 `(address(0), 0)` for malformed, oversized, or undersized returndata. The
-resolver must use checked arithmetic or `mulDiv`-style math for
-`salePrice * royaltyBps / 10_000` and must not rely on overflow reverts for
-ordinary control flow.
+resolver returns only receiver and bps; Core must use checked arithmetic or
+`mulDiv`-style math for `salePrice * royaltyBps / 10_000` and must not rely on
+overflow reverts for ordinary control flow.
 
 The resolver read itself must be O(1): token mapping lookup, collection mapping
-lookup, default lookup, and bps multiplication. Wallet/profile/code-hash checks
+lookup, default lookup, and bps lookup. Wallet/profile/code-hash checks
 belong at assignment time, not in Core's marketplace read path.
 
-Resolver `royaltyInfoForToken` must not make external calls, deploy wallets,
+Resolver `royaltyReceiverAndBps` must not make external calls, deploy wallets,
 call ERC-20 contracts, or depend on receiver behavior. It is storage reads and
-arithmetic only. A resolver that performs external calls in this path is an
-incident and must not be activated as the production pointer.
-Static analysis must fail launch if `royaltyInfoForToken` or any internal
+simple bps return only. A resolver that performs external calls in this path is
+an incident and must not be activated as the production pointer.
+Static analysis must fail launch if `royaltyReceiverAndBps` or any internal
 function reachable only from that path contains `CALL`, `DELEGATECALL`,
 `STATICCALL`, `CREATE`, or `CREATE2` opcodes. The Core staticcall gas cap is
 defense in depth, not the primary proof that the deployed resolver is pure.
@@ -1508,19 +1514,16 @@ Royalty resolution rules:
   for the scope.
 - Resolver-backed `royaltyInfo()` must not revert merely because the external
   resolver is unavailable, consumes its explicit staticcall gas limit, returns
-  malformed data, or returns a zero receiver or zero amount. The safe fallback is
+  malformed data, or returns a zero receiver or zero bps. The safe fallback is
   `(address(0), 0)`. This avoids breaking marketplace sale paths and avoids
   silently paying the wrong receiver.
 - `royaltyInfo()` must be total over every `uint256 salePrice`, including
-  `type(uint256).max`. Resolver arithmetic must use full-precision `mulDiv` or
-  an equivalent overflow-safe computation that cannot fail for
-  `royaltyBps <= 10_000`. Returning `(address(0), 0)` for arithmetic failure is
-  not conformant; fallback-to-zero is reserved for resolver unavailability,
-  malformed return data, zero receiver, zero amount, or explicit no-royalty
-  configuration.
-- If the resolver returns `royaltyAmount > salePrice`, Core returns
-  `(address(0), 0)` and diagnostics report
-  `ROYALTY_AMOUNT_EXCEEDS_SALE_PRICE`.
+  `type(uint256).max`. The resolver never returns the final amount. Core must
+  use full-precision `mulDiv` or an equivalent overflow-safe computation that
+  cannot fail for `royaltyBps <= maxRoyaltyBps`. Returning `(address(0), 0)` for
+  Core arithmetic failure is not conformant; fallback-to-zero is reserved for
+  resolver unavailability, malformed return data, zero receiver, zero bps, bps
+  above `maxRoyaltyBps`, or explicit no-royalty configuration.
 - Monitoring must treat resolver fallback-to-zero as an incident because it can
   suppress royalty display or payment.
 - `royaltyInfo()` is `view` and cannot emit a fallback event. Monitoring should
@@ -1837,17 +1840,17 @@ Add tests for:
 - resolver unavailable, out-of-gas, malformed, excess-return-data, zero return,
   and low-parent-gas fallback to `(address(0), 0)`;
 - resolver external-call attempts, all-gas consumption, too-little data,
-  too-much data, zero receiver, zero amount, and incident-revoked pointer never
+  too-much data, zero receiver, zero bps, and incident-revoked pointer never
   make Core `royaltyInfo()` revert;
 - all-cold deepest-scope resolver gas measured against the immutable cap with
   documented margin;
 - static analysis proves the production resolver royalty path contains no
   external-call or creation opcodes;
 - malicious resolver returning huge returndata cannot make Core OOG;
-- resolver royalty math returns the exact
+- Core royalty math returns the exact
   `floor(salePrice * royaltyBps / 10_000)` for every `uint256 salePrice` and
-  allowed bps using full-precision arithmetic; arithmetic overflow, safe caps,
-  reverts, or fallback-to-zero are not conformant;
+  allowed bps using full-precision arithmetic; arithmetic overflow, truncated
+  arithmetic, reverts, or fallback-to-zero are not conformant;
 - `royaltyInfo()` for nonexistent and premint token IDs never reverts and never
   returns a collection wallet from a heuristic range guess;
 - collection-scope royalty requires

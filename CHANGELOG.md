@@ -7,6 +7,9 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the launch v1 target architecture spec and hardened the payment,
+  royalty, mint, metadata, and entropy specs for Core-native ERC-2981,
+  event-sourced reconstruction, and long-lived module boundaries.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay

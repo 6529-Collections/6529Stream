@@ -396,9 +396,9 @@ Initial planning target for `ASSET_POLICY_GAS_LIMIT` is 30,000 gas for an
 all-cold storage-read policy lookup, with the deployed value set from measured
 gas plus margin.
 Because the factory binds `assetPolicyRegistry` immutably for a wallet line, an
-asset-policy registry that becomes incompatible under a future EVM or gas
-schedule is handled by a new split-wallet/factory deployment line and governed
-assignment migration for future receipts. Existing wallet balances remain in
+asset-policy registry that no longer satisfies future EVM or gas-schedule
+constraints is handled by a new split-wallet/factory deployment line and
+governed reassignment for future receipts. Existing wallet balances remain in
 the old wallet line; there is no hidden mutable registry pointer inside
 deployed wallets.
 
@@ -1277,19 +1277,23 @@ Normative Core posture:
 
 Reference shape:
 
+The body below is selector and control-flow pseudocode. Production Core must
+use capped assembly `staticcall` and must not allocate `bytes memory` for
+resolver returndata before enforcing the 64-byte return-size rule.
+
 ```solidity
 interface IStreamRevenueResolver {
-    function royaltyInfoForToken(
+    function royaltyReceiverAndBps(
         address core,
         uint256 tokenId,
         uint256 salePrice,
         uint256 mappedCollectionId,
         bool hasMappedCollection
-    ) external view returns (address receiver, uint256 royaltyAmount);
+    ) external view returns (address receiver, uint16 royaltyBps);
 }
 
-bytes4 constant ROYALTY_INFO_FOR_TOKEN_SELECTOR = 0x3d5d0e9e;
-// royaltyInfoForToken(address,uint256,uint256,uint256,bool)
+bytes4 constant ROYALTY_RECEIVER_AND_BPS_SELECTOR = 0x54f77a09;
+// royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)
 
 function royaltyInfo(uint256 tokenId, uint256 salePrice)
     external
@@ -1309,28 +1313,35 @@ function royaltyInfo(uint256 tokenId, uint256 salePrice)
     uint256 mappedCollectionId =
         hasMappedCollection ? tokenCollectionId[tokenId] : 0;
 
-    (bool ok, bytes memory data) = resolver.staticcall{gas: ROYALTY_RESOLVER_GAS_LIMIT}(
-        abi.encodeWithSelector(
-            IStreamRevenueResolver.royaltyInfoForToken.selector,
+    // Production implementation uses capped assembly staticcall helper:
+    // - forwards exactly ROYALTY_RESOLVER_GAS_LIMIT
+    // - copies at most 64 bytes
+    // - returns returndata size without allocating unbounded memory
+    (bool ok, bytes32 word0, bytes32 word1, uint256 returnSize) =
+        _staticcallRoyaltyResolver64(
+            resolver,
+            IStreamRevenueResolver.royaltyReceiverAndBps.selector,
             address(this),
             tokenId,
             salePrice,
             mappedCollectionId,
             hasMappedCollection
-        )
-    );
+        );
 
-    if (!ok || data.length != 64) {
+    if (!ok || returnSize != 64) {
         return (address(0), 0);
     }
 
-    (receiver, royaltyAmount) = abi.decode(data, (address, uint256));
-    if (receiver == address(0) || royaltyAmount == 0) {
+    receiver = address(uint160(uint256(word0)));
+    uint16 royaltyBps = uint16(uint256(word1));
+    if (
+        receiver == address(0)
+            || royaltyBps == 0
+            || royaltyBps > MAX_ROYALTY_BPS
+    ) {
         return (address(0), 0);
     }
-    if (royaltyAmount > salePrice) {
-        return (address(0), 0);
-    }
+    royaltyAmount = Math.mulDiv(salePrice, royaltyBps, 10_000);
 }
 ```
 
@@ -1356,22 +1367,19 @@ collectionSerial, burned)`, with burned tokens returning their retained mapping
 and `burned = true`.
 
 If a resolver-backed Core cannot reach the resolver, receives malformed return
-data, or receives a zero receiver or zero amount, it should return
+data, or receives a zero receiver or zero bps, it should return
 `(address(0), 0)` rather than revert. Wallet/code-hash validity is enforced at
 assignment time by the resolver; Core's read path validates only cheap return
 shape and zero-value conditions. Monitoring should treat fallback-to-zero as an
 incident.
 `royaltyInfo()` must be total over every `uint256 salePrice`, including
-`type(uint256).max`, and must not revert because of royalty multiplication. The
-resolver should compute `salePrice * royaltyBps / 10_000` with a full-precision
-`mulDiv` or equivalent overflow-safe arithmetic that cannot fail for
-`royaltyBps <= 10_000`. Returning `(address(0), 0)` for arithmetic failure is
-not conformant; fallback-to-zero is reserved for resolver unavailability,
-malformed return data, zero receiver, zero amount, or explicit no-royalty
-configuration.
-If the resolver returns `royaltyAmount > salePrice`, Core returns
-`(address(0), 0)`. This is malformed economic output, not a valid royalty, and
-diagnostics must report `ROYALTY_AMOUNT_EXCEEDS_SALE_PRICE`.
+`type(uint256).max`, and must not revert because of royalty multiplication.
+The resolver never returns the final amount. Core computes
+`floor(salePrice * royaltyBps / 10_000)` with full-precision checked math or an
+equivalent `mulDiv` implementation after validating the returned bps. Returning
+`(address(0), 0)` for Core arithmetic failure is not conformant; fallback-to-zero
+is reserved for resolver unavailability, malformed return data, zero receiver,
+zero bps, bps above `MAX_ROYALTY_BPS`, or explicit no-royalty configuration.
 Because `royaltyInfo()` is `view`, it cannot emit fallback events. Monitoring
 must use off-chain calls, indexer comparisons, and a non-view diagnostic probe
 in a satellite contract.
@@ -1437,17 +1445,17 @@ The resolver read must be O(1). Wallet deployment, `walletFor(profileId)`,
 `wallet.profileId()`, and runtime-code-hash checks happen when assignments are
 set, not during every marketplace `royaltyInfo()` call.
 
-Resolver `royaltyInfoForToken` must be a storage-read and arithmetic path. It
+Resolver `royaltyReceiverAndBps` must be a storage-read path. It
 must not make external calls, perform wallet deployment, call `balanceOf`, or
 depend on any receiver behavior. A resolver implementation that performs
 external calls in the marketplace royalty path is an incident and must be
 blocked from production pointer activation.
 The resolver is bound to exactly one Core address at deployment. If
-`royaltyInfoForToken(core, ...)` receives any `core` argument other than that
+`royaltyReceiverAndBps(core, ...)` receives any `core` argument other than that
 bound Core, it must revert or return `(address(0), 0)`. A resolver must never
 use a caller-supplied `core` argument to look up another deployment's
 assignments.
-Static analysis must fail launch if `royaltyInfoForToken` or any internal
+Static analysis must fail launch if `royaltyReceiverAndBps` or any internal
 function reachable only from that path contains `CALL`, `DELEGATECALL`,
 `STATICCALL`, `CREATE`, or `CREATE2` opcodes. The Core staticcall gas cap is
 defense in depth, not the primary proof that the deployed resolver is pure.
@@ -1477,9 +1485,9 @@ causes ordinary cold reads to silently return `(address(0), 0)`.
 Launch Core must use capped assembly returndata handling, not a high-level
 `bytes memory` decode that can allocate unbounded returndata. The call copies at
 most 64 bytes, requires `returndatasize() == 64`, and returns `(address(0), 0)`
-for malformed size. The resolver uses checked arithmetic or `mulDiv`-style math
-for `salePrice * royaltyBps / 10_000` and does not rely on overflow reverts for
-normal fallback behavior.
+for malformed size. Core uses checked arithmetic or `mulDiv`-style math for
+`salePrice * royaltyBps / 10_000` after decoding bps from the resolver and does
+not rely on overflow reverts for normal fallback behavior.
 
 `royaltyInfo()` must not require the token to be minted. In the v1
 resolver-backed design, token IDs without `tokenCollectionMappingExists[tokenId]
@@ -1532,10 +1540,10 @@ interface IStreamRevenueResolverContinuity {
         uint256 scopeId
     ) external view returns (bytes32);
 
-    function supportsEconomicStateMigration(
+    function supportsEconomicContinuity(
         address oldResolver,
         bytes32 oldFrozenEconomicStateHash,
-        bytes32 migrationManifestHash
+        bytes32 continuityManifestHash
     ) external view returns (bool);
 }
 ```
@@ -1547,8 +1555,8 @@ Rules:
    update is blocked unless the new resolver proves continuity.
 2. Continuity means the new resolver returns the same
    `frozenEconomicStateHash(core)` and the same `economicRouteHash(...)` for
-   every frozen or snapshotted route named by the migration manifest.
-3. The migration manifest commits to old resolver, new resolver, Core, chain
+   every frozen or snapshotted route named by the continuity manifest.
+3. The continuity manifest commits to old resolver, new resolver, Core, chain
    ID, affected revenue classes, route hashes, assignment hashes, snapshot
    hashes, freeze modes, `maxRoyaltyBps`, URI/hash, schema ID, and
    canonicalization ID.
@@ -1727,7 +1735,8 @@ nonzero.
 
 A global freeze is implicitly `freezeMode = INHERITED` across every default,
 collection, and token scope for the affected revenue class. It blocks set,
-clear, and unfreeze operations for existing assignments in that revenue class.
+clear, and unfreeze operations for any assignment in that revenue class,
+including creation of new assignments after the freeze.
 Whether it also blocks creation of entirely new revenue classes must be an
 explicit release decision; a deployment-wide global freeze should block both.
 
@@ -2046,10 +2055,14 @@ auction nonce. `beneficiary` is the token recipient.
 - Open `bytes32 revenueClass` keys.
 - Separate primary and royalty assignment helpers.
 - Set, clear, freeze, and read functions.
-- Royalty bps cap.
-- Immutable `maxRoyaltyBps`, recommended at 1000 for new resolver deployments
-  unless a future accepted ADR chooses otherwise. Raising or lowering the cap
-  later requires a new resolver deployment and rollout plan.
+- Royalty bps cap mirrored from Core's immutable `maxRoyaltyBps`.
+- Core owns the hard immutable `maxRoyaltyBps`, recommended at 1000 for launch
+  unless a future accepted ADR chooses otherwise before deployment. The Core cap
+  must not exceed 10,000. A resolver may impose the same or a lower cap, but it
+  cannot raise the Core cap.
+  Raising the Core cap after launch requires a new Core deployment line and
+  explicit rollout plan; lowering resolver policy can use a new resolver
+  deployment and rollout plan.
 - Resolver cap rollout runbook: deploy new resolver, register and approve its
   module identity/code hash/manifest hash, stage the Core resolver pointer
   update, replay or intentionally remap default and collection assignments,
@@ -2093,7 +2106,7 @@ Any curator reward or pool contract that can hold owed funds must follow the
 same owed/surplus boundary as the primary splitter architecture. Push payments
 and unrestricted emergency sweeps are not launch-conformant for owed rewards.
 Either rewrite curator rewards to pull accounting with explicit surplus proofs
-or mark the current pool as a legacy/non-launch component outside the Stream
+or mark the current pool as a non-launch component outside the Stream
 payment conformance boundary.
 
 ### StreamCore
@@ -2259,7 +2272,7 @@ Marketplace and indexer integrations should:
   reads return `(address(0), 0)` and are monitorable.
 - Core `royaltyInfo()` returns `(address(0), 0)` and never reverts when the
   resolver consumes all gas, returns too little data, returns too much data,
-  returns a zero receiver, returns zero amount, attempts an external-call path,
+  returns a zero receiver, returns zero bps, attempts an external-call path,
   or is incident-revoked.
 - All-cold deepest-scope resolver gas is measured against the immutable cap with
   documented margin.
@@ -2268,9 +2281,9 @@ Marketplace and indexer integrations should:
 - Core royalty resolver gas limit is deploy-time immutable and fallback
   behavior is deterministic just below and above that limit.
 - Huge resolver returndata cannot make Core OOG.
-- Royalty math returns the exact `floor(salePrice * royaltyBps / 10_000)` for
+- Core royalty math returns the exact `floor(salePrice * royaltyBps / 10_000)` for
   every `uint256 salePrice` and allowed bps using full-precision arithmetic;
-  arithmetic overflow, safe caps, reverts, or fallback-to-zero are not
+  arithmetic overflow, truncated arithmetic, reverts, or fallback-to-zero are not
   conformant.
 - `royaltyInfo()` for premint or nonexistent token IDs does not revert and does
   not return collection receivers from heuristic range guesses.
