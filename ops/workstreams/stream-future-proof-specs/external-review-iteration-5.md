@@ -14,9 +14,7 @@ Packet: final targeted blocker audit over latest changed snippets plus small ori
 
 Response:
 ```json
-```json
 {"verdict":"APPROVE","blockers":[],"non_blocking":["Spec uses high-level bytes memory decode in reference shape but recommends assembly returndatacopy; implementation must use the assembly path to avoid unbounded returndata allocation.","Core bytecode size budget (EIP-170, 22,000-byte CI gate) is a launch gate but cannot be verified from specs alone; implementation must confirm after extracting metadata, randomizer, and royalty storage from Core.","Auction settlement state machine is explicitly not launch-ready; fixed-price primary sales can launch independently, but auctions require the full bid-custody contract to be implemented and tested before activation.","Resolver static-analysis gate (no CALL/DELEGATECALL/STATICCALL/CREATE/CREATE2 reachable from royaltyInfoForToken) requires a CI tool to be configured; the spec constraint is correct but tooling setup is an implementation task."],"approval_conditions":["Core runtime bytecode must be measured below 22,000 bytes after all spec-mandated extractions (OZ ERC2981 removal, metadata/script/randomizer extraction, resolver-backed royaltyInfo).","Resolver royaltyInfoForToken must pass static-analysis CI gate proving no external-call opcodes are reachable from that path.","All-cold resolver gas path must be measured and published, confirming worst-case does not silently trigger fallback-to-zero under the 50,000 gas cap.","FLUSH_GAS_FLOOR must be set to measured worst-case gas plus margin, not the rough planning range, before deployment.","Prepared-mint two-step path, if implemented, must be operation-bound within a single non-reentrant manager transaction with no durable prepared state surviving the transaction."]}
-```
 ```
 
 Usage:
@@ -82,10 +80,7 @@ Usage:
 
 ## GPT-5.5 Pro
 
-Response:
-```json
-
-```
+Response: [No final content returned]
 
 Usage:
 ```json

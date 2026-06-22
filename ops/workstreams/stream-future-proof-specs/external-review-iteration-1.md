@@ -60,7 +60,10 @@ Generated: 2026-06-22T18:05:49.271694+00:00
 
 2. `docs/revenue-splits-and-royalties.md` → **Split Profile Model / Split Wallet**: require paginated reads for entries and unique accounts, e.g. `entryCount`, `entryAt`, `uniqueAccountCount`, `uniqueAccountAt`, to make wallets self-indexable without relying only on events.
 
-3. `docs/revenue-splits
+3. [TRUNCATED] The captured GPT non-blocking item ended at
+   `docs/revenue-splits`; the original complete text was not available in the
+   saved response. Later iterations reran and resolved the revenue-splits
+   feedback with explicit profile reads, label semantics, and resolver gates.
 
 
 ## Opus 4.8

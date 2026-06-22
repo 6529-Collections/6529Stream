@@ -14,9 +14,7 @@ Packet: iteration-4 blocker audit with updated spec excerpts and origin/main con
 
 Response:
 ```json
-```json
 {"verdict":"APPROVE","blockers":[],"non_blocking":["The spec describes a two-step prepareMintFromManager/completePreparedMintFromManager flow for token-level primary policy, but does not specify a reentrancy guard or caller binding between the two steps. An implementation could accidentally allow a different manager transaction to complete a prepared mint. This is an implementation detail to enforce, not a spec contradiction.","The entropy coordinator spec allows INSTANT mode providers to finalize synchronously inside requestEntropy after mint registration completes. While the spec states this is safe because onTokenMinted only registers, an implementation must ensure requestEntropy is not callable from within onTokenMinted's execution context (e.g., via a reentrancy path through Core). The spec implies this but does not explicitly forbid the coordinator from calling requestEntropy during onTokenMinted.","The artwork finality registry spec defines FinalityComponentExpectation with bytes32 interfaceId, but the satellite versioning section uses bytes4 moduleInterfaceId. An adapter or mapping between these is implied but not explicitly specified.","The collection metadata contract spec defines launch limits (MAX_SCRIPT_CHUNKS=256, MAX_TOTAL_SCRIPT_BYTES=1MB) that differ from the current StreamCore constants (MAX_COLLECTION_SCRIPT_CHUNKS=32, MAX_COLLECTION_SCRIPT_CHUNK_BYTES=8192). This is expected since metadata is moving out of Core, but the migration path for existing collections is not specified.","The spec references ADR 0004 for SUCCESSOR_DECLARATION governance class and ADR 0003 for escrow invariants, but these ADRs are not included in the provided excerpts. The spec is self-consistent in referencing them, but implementation readiness depends on those ADRs being complete."],"approval_conditions":["Implement Core-native ERC-2981 royaltyInfo() with bounded staticcall to resolver, capped returndata handling (64 bytes), and (address(0),0) fallback for all resolver failure modes","Implement explicit tokenCollectionMappingExists and tokenCollectionId reads before resolver staticcall, passing hasMappedCollection/mappedCollectionId per spec","Ensure burn does not clear tokenCollectionId, tokenCollectionSerial, or tokenCollectionMappingExists","Implement RoyaltyInfoProbed event and probeRoyaltyInfo diagnostic function in a satellite or Core","Deploy FLUSH_GAS_FLOOR as immutable or manifest-pinned constant","Implement streamSystemManifest() with all specified fields including mintManager, mintLedger, governance, artworkFinalityRegistry, and eventCatalogHash","Ensure onTokenMinted only registers entropy state and does not call external providers or finalize seeds","Implement two-step pointer staging with operationId, registry eligibility recheck, and emergency bypass limited to incident-revoked-to-pre-approved-compatible-target","Verify Core bytecode remains under 22,000 bytes with documented headroom after all extractions and ERC-2981 addition"]}
-```
 ```
 
 Usage:
@@ -82,10 +80,7 @@ Usage:
 
 ## GPT-5.5 Pro
 
-Response:
-```json
-
-```
+Response: [No final content returned]
 
 Usage:
 ```json

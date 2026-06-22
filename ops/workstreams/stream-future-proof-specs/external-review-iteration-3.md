@@ -85,10 +85,7 @@ Usage:
 
 ## GLM 5.2 - iteration 3 compact blocker audit
 
-Response:
-```json
-
-```
+Response: [No final content returned]
 
 Usage:
 ```json
@@ -119,10 +116,7 @@ Usage:
 
 ## GPT-5.5 Pro - iteration 3 compact blocker audit
 
-Response:
-```json
-
-```
+Response: [No final content returned]
 
 Usage:
 ```json
@@ -153,10 +147,7 @@ Usage:
 
 ## GLM 5.2 - iteration 3 retry tiny verdict audit
 
-Response:
-```json
-
-```
+Response: [No final content returned]
 
 Usage:
 ```json
@@ -187,10 +178,7 @@ Usage:
 
 ## GPT-5.5 Pro - iteration 3 retry tiny verdict audit
 
-Response:
-```json
-
-```
+Response: [No final content returned]
 
 Usage:
 ```json

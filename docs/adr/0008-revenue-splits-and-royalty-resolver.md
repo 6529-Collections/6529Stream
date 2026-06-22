@@ -525,6 +525,14 @@ existing wallet when already deployed with the expected profile ID and runtime
 code hash, and revert on wrong code. Unknown profiles and wrong-code predicted
 addresses must use distinct custom errors so operators and indexers can
 distinguish ordinary missing-profile mistakes from address-collision incidents.
+The factory, not an off-chain indexer, is the authoritative profile registry for
+deployment. Profile creation stores the canonical concrete entries, entry count,
+unique-account aggregate data needed for release accounting, entries hash,
+metadata hash, wallet version, and init-code hash under `profileId`.
+`deployWallet(profileId)` reads only that registry record to build the wallet
+initializer payload. Historical `SplitProfileCreated` and `SplitProfileEntry`
+events are reconstruction and audit surfaces, not data dependencies for
+permissionless deployment.
 Wrong code at the deterministic wallet address is
 `ESCROW_ADDRESS_POISONED`. Normal `flushEscrow` must revert with a distinct
 wrong-code error and leave owed credit intact. The intended wallet can never be

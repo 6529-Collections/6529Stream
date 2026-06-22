@@ -788,7 +788,18 @@ hash. Existing wrong code at the predicted address reverts and requires a
 separate incident recovery path, not normal escrow flush.
 Unknown profiles and wrong-code predicted addresses should use distinct custom
 errors so operators and indexers can distinguish missing-profile mistakes from
-address-collision incidents. The future deployment is non-malicious because the
+address-collision incidents.
+
+The factory, not an off-chain indexer, is the authoritative profile registry for
+deployment. Profile creation stores the canonical concrete entries, entry count,
+unique-account aggregate data needed for release accounting, entries hash,
+metadata hash, wallet version, and init-code hash under `profileId`.
+`deployWallet(profileId)` reads only that registry record to build the wallet
+initializer payload. Historical `SplitProfileCreated` and `SplitProfileEntry`
+events are reconstruction and audit surfaces, not data dependencies for
+permissionless deployment.
+
+The future deployment is non-malicious because the
 deterministic address binds the factory address, profile ID salt, and
 factory-controlled init code hash; any different code at that address fails the
 existing-code check.

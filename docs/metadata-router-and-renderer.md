@@ -191,9 +191,28 @@ function tokenURI(uint256 tokenId)
     returns (string memory)
 {
     _requireMinted(tokenId);
-    return metadataRouter.tokenURI(address(this), tokenId);
+    if (address(metadataRouter) == address(0)) {
+        return _fallbackTokenURI(tokenId, "METADATA_ROUTER_UNSET");
+    }
+
+    try metadataRouter.tokenURI(address(this), tokenId) returns (
+        string memory uri
+    ) {
+        if (bytes(uri).length == 0) {
+            return _fallbackTokenURI(tokenId, "METADATA_EMPTY");
+        }
+        return uri;
+    } catch {
+        return _fallbackTokenURI(tokenId, "METADATA_ROUTER_ERROR");
+    }
 }
 ```
+
+`_fallbackTokenURI` is a minimal deterministic JSON data URI that preserves
+token identity, collection identity when known, and a machine-readable
+`properties.stream.render_state = "pending"` or `"error"` value. It is not a
+second metadata source of truth; it is the documented failure envelope for an
+unset, reverting, or malformed router.
 
 If bytecode remains comfortable, Core should also expose ERC-7572-compatible
 contract metadata through minimal forwarding:
@@ -659,6 +678,7 @@ Recommended default:
       "dependency_source_type": "DEPENDENCY_REGISTRY",
       "media_manifest_hash": "0x...",
       "metadata_snapshot_hash": "0x...",
+      "collection_uri": "ipfs://...",
       "view_id": "MARKETPLACE",
       "view_manifest_hash": "0x..."
     }
@@ -1176,6 +1196,14 @@ The metadata system should also support ERC-4906-style events:
 ```solidity
 event MetadataUpdate(uint256 _tokenId);
 event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
+event MetadataRefreshProvenance(
+    uint8 indexed scope,
+    uint256 indexed id,
+    uint256 fromTokenId,
+    uint256 toTokenId,
+    bytes32 reasonCode,
+    bytes32 manifestHash
+);
 ```
 
 Because marketplaces call `tokenURI()` on `StreamCore`, there are two viable
@@ -1197,6 +1225,9 @@ must verify that token IDs or collection ranges are valid for the requested
 refresh, enforce a reasonable batch/range limit, and emit an internal reason or
 manifest hash so indexers can distinguish normal metadata refresh from
 governance or recovery. The helper is not an arbitrary log-spam bridge.
+When the helper emits `MetadataUpdate` or `BatchMetadataUpdate`, it must also
+emit `MetadataRefreshProvenance` in the same transaction with the refresh scope,
+target ID, affected range, reason code, and optional manifest hash.
 Launch `MAX_REFRESH_RANGE` should be no more than 5,000 token IDs per
 `BatchMetadataUpdate` helper call unless a later marketplace/indexer review
 accepts a different limit.

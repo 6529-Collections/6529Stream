@@ -254,6 +254,8 @@ event CoreSatellitePointerUpdated(
 event CoreSatellitePointerFrozen(
     bytes32 indexed pointerType,
     address indexed target,
+    bytes32 operationId,
+    bytes32 targetCodeHash,
     bytes32 manifestHash
 );
 ```
@@ -445,7 +447,7 @@ struct CollectionFinalityRecord {
 }
 
 mapping(uint256 collectionId => CollectionFinalityRecord) finalityRecords;
-mapping(uint256 collectionId => FinalityComponentExpectation[]) finalityComponents;
+mapping(uint256 collectionId => FinalityComponentExpectation[]) finalityComponentExpectations;
 ```
 
 `componentsHash` is `keccak256(abi.encode(components))`. The registry computes
@@ -483,9 +485,9 @@ Component discovery path:
    `FinalityComponentState` equals the corresponding expectation with
    `frozen = true`.
 6. After finality, `finalityRecords(collectionId)` and
-   `finalityComponents(collectionId, start, limit)` provide the durable
-   onchain record and allow future tools to check whether live components still
-   match.
+   `finalityComponents(collectionId, start, limit)` read from
+   `finalityComponentExpectations` to provide the durable onchain record and
+   allow future tools to check whether live components still match.
 7. Finality either freezes the relevant collection-scoped Core pointers in the
    same action or records the collection as address-pinned. If a later global
    pointer move occurs, `verifyFinality(collectionId)` must still compare

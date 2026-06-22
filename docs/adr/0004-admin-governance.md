@@ -567,6 +567,9 @@ Pointer operation IDs must be domain-separated by chain ID, governance
 contract, nonce, pointer ID, module type, expected interface ID, old target,
 new target, new code hash, target manifest hash, activation window, and reason
 hash. `reasonURI` is display data; `reasonHash` is the durable commitment.
+Pointer freeze events must include the pointer ID, frozen target, operation ID
+when the freeze is tied to a staged action, frozen target code hash, and frozen
+manifest hash so indexers can reconstruct the exact frozen state.
 
 Implementation manifests must map every protected operation to an explicit
 durable role constant or action ID. A cardinality test must fail if unrelated

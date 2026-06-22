@@ -42,7 +42,7 @@
     snapshot requirements.
   - Aligned `mint-policy-and-accounting.md` with the entropy-before-safe-mint
     ordering.
-- Ran `codex-diff-check -- docs ops\workstreams\stream-future-proof-specs`;
+- Ran `codex-diff-check -- docs ops/workstreams/stream-future-proof-specs`;
   no whitespace issues reported.
 - Ran OpenRouter review round 3.
   - Opus 4.8 returned `REQUEST_CHANGES` with three blockers:
@@ -144,5 +144,5 @@
     pre-freeze/finality policy explicitly preserves a safe burn path.
   - Aligned payable entropy providers to exact-payment / reject-excess behavior
     for v1.
-- Ran `codex-diff-check -- docs ops\workstreams\stream-future-proof-specs`;
+- Ran `codex-diff-check -- docs ops/workstreams/stream-future-proof-specs`;
   no whitespace issues reported.

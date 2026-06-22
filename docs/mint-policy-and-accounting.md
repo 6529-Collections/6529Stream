@@ -469,13 +469,13 @@ prove it reverts before any counter or mint state is written.
 Launch-permitted counter combinations are finite:
 
 ```text
-scope             key mode                  update mode   cap mode   delta mode
-PHASE             PHASE_ONLY                PER_BATCH     STATIC     STATIC
-COLLECTION        COLLECTION_ONLY           PER_BATCH     STATIC     STATIC
-ACCOUNT           RECIPIENT                 PER_TOKEN     STATIC     STATIC
-ACCOUNT           PAYER                     PER_TOKEN     STATIC     STATIC
-ACCOUNT           BENEFICIARY               PER_TOKEN     STATIC     STATIC
-CONTEXT           CONTEXT_HASH              PER_BATCH     STATIC     STATIC
+scope       key mode    key semantic       update mode   cap mode   delta mode
+PHASE       CONSTANT    phase supply       PER_BATCH     STATIC     STATIC
+COLLECTION  CONSTANT    collection supply  PER_BATCH     STATIC     STATIC
+PHASE       RECIPIENT   beneficiary        PER_TOKEN     STATIC     STATIC
+PHASE       PAYER       payer              PER_TOKEN     STATIC     STATIC
+COLLECTION  RECIPIENT   beneficiary        PER_TOKEN     STATIC     STATIC
+PHASE       CONTEXT     context hash       PER_BATCH     STATIC     STATIC
 ```
 
 Any other combination reverts at configuration time unless a later ADR expands
@@ -1760,7 +1760,8 @@ mint ledger contract for durable accounting.
 Core tests:
 
 1. Only `mintManager` can call `mintFromManager()`.
-2. Core computes global sequential token IDs correctly across collections.
+2. Core allocates token IDs according to the launch allocation policy and never
+   relies on token ID ranges for collection identity.
 3. Core reverts when collection supply is exhausted.
 4. Core emits `StreamTokenMinted`.
 5. Core stores token-to-collection and token-to-collection-serial mappings.

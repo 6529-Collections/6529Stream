@@ -488,7 +488,9 @@ rendering.
 
 `STALE` means the request no longer belongs to an eligible provider epoch or
 collection policy. Stale requests are audit-visible and cannot finalize the
-token unless an explicit recovery policy says otherwise.
+token through normal fulfillment. A late callback for a stale request may be
+accepted only into the stale/audit branch, which emits
+`StaleEntropyFulfillment` and never mutates the canonical seed.
 
 `FAILED` means the active request was declared unrecoverable under the incident
 policy. It does not imply a normal reroll is available.
@@ -644,8 +646,8 @@ Collection provider epochs:
    current provider address.
 5. Replaced providers may fulfill requests from their original epoch only if
    the policy still allows old-epoch fulfillment.
-6. Otherwise, old-epoch callbacks emit `StaleEntropyFulfillment` and do not
-   mutate token seed.
+6. Otherwise, old-epoch callbacks take the stale/audit fulfillment branch,
+   emit `StaleEntropyFulfillment`, and do not mutate token seed.
 
 ## Recommended Launch Provider Policy
 
@@ -993,18 +995,20 @@ Rules:
 
 1. `fulfillEntropy` must use a reentrancy guard or equivalent state lock.
 2. `requestKey` must exist.
-3. Request must be active.
-4. Caller must be the provider stored on the request.
-5. Provider must not be `INCIDENT_REVOKED`.
-6. Token status must be `REQUESTED`.
-7. Token must not already be finalized.
-8. Fulfillment must finalize exactly one canonical seed.
-9. Before any external refresh or notification call, fulfillment must mark the
-   request inactive and set token status `FINALIZED`.
-10. Old request keys after incident recovery must be rejected or emitted as
-   stale.
-11. Wrong provider epoch must emit a stale/audit event and must not finalize.
-12. `fulfillEntropy` cannot call `requestEntropy`; delivery retry calls
+3. Caller must be the provider stored on the request.
+4. Provider must not be `INCIDENT_REVOKED`.
+5. If the request is inactive because an incident recovery already superseded
+   it, or token status is `STALE`, or the recorded provider epoch is no longer
+   eligible, fulfillment enters the stale/audit branch: emit
+   `StaleEntropyFulfillment`, do not derive a seed, do not reactivate the
+   request, and do not change token status.
+6. Otherwise, request must be active.
+7. Otherwise, token status must be `REQUESTED`.
+8. Token must not already be finalized.
+9. Fulfillment must finalize exactly one canonical seed.
+10. Before any external refresh or notification call, fulfillment must mark the
+    request inactive and set token status `FINALIZED`.
+11. `fulfillEntropy` cannot call `requestEntropy`; delivery retry calls
     `fulfillEntropy` again with the same stored raw randomness.
 
 Seed derivation:

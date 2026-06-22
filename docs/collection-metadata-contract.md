@@ -571,6 +571,7 @@ struct CollectionIdentity {
     bytes32 schemaHash;
     string slug;
     string name;
+    string symbol;
     string subtitle;
     string description;
     string category;
@@ -586,11 +587,13 @@ Identity guidance:
 2. `slug` is a human-readable collection slug. It is not a unique security
    primitive unless uniqueness is explicitly enforced.
 3. `name` is the canonical collection display name.
-4. `subtitle` is optional short supporting text.
-5. `description` is the canonical collection description.
-6. `category` is display data, not a closed enum. Examples may include art,
+4. `symbol` is an optional collection-scoped symbol for contract metadata. If it
+   is empty, `contractURI(collectionId)` uses the Core ERC-721 symbol.
+5. `subtitle` is optional short supporting text.
+6. `description` is the canonical collection description.
+7. `category` is display data, not a closed enum. Examples may include art,
    photography, generative, edition, poster, artifact, or experiment.
-7. `tagsURI` and `tagsHash` allow richer tag vocabularies without hardcoding
+8. `tagsURI` and `tagsHash` allow richer tag vocabularies without hardcoding
    them onchain.
 
 ```solidity

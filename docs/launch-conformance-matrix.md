@@ -41,7 +41,7 @@ Production launch contracts must not contain:
 | Primary native ETH settlement | fixed-price sale adapter | no `tx.origin`, policy hash binding, escrow fallback | sale authorization schema |
 | Auction settlement | auction contract | bid custody, pull refunds, settlement CEI | auction state-machine manifest |
 | Collection management | Core collection boundary | create/status/max-supply events and transitions | collection facts schema |
-| Token identity | Core mint boundary, `tokenCollectionIdentity` | global sequential IDs, collection serial mapping, mapping-existence read, burn retained mapping | token identity schema |
+| Token identity | Core mint boundary, `tokenCollectionIdentity` | collection serial mapping, mapping-existence read, burn retained mapping | token identity schema |
 | Token-level metadata | collection metadata satellite | token data/field overrides, token locks, burned archival reads | token metadata schema |
 | Burn | Core burn boundary | owner/approved, mapping retained, finalized burn blocked | burn policy manifest |
 | Mint accounting | mint manager, ledger | duplicate-key aggregation, static caps, signed ticket binding | policy hash schema |

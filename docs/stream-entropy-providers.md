@@ -957,11 +957,14 @@ Recommended event:
 ```solidity
 event InstantEntropyProduced(
     bytes32 indexed requestKey,
-    uint256 indexed providerRequestId,
     bytes32 rawRandomness,
+    bytes32 provenanceHash,
     InstantMode mode
 );
 ```
+
+Instant providers have no upstream `providerRequestId`; `requestKey` is the
+durable request identity for this mode.
 
 ### Security Requirements
 
