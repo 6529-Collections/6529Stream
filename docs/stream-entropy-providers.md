@@ -956,6 +956,12 @@ or `CREATE2` opcodes, performs state writes, or depends on receiver behavior.
 If request-time synchronous fulfillment cannot satisfy this no-external-call
 posture, production instant fulfillment must be split into a second transaction
 or deferred to a non-instant provider mode.
+For synchronous instant fulfillment, `providerRequestId` is the
+coordinator-allocated request identifier stored before the provider `view` call.
+The provider does not choose it. It must be deterministic for
+`(requestKey, requestAttempt, provider, providerEpoch, providerConfigHash)` and
+must match the active request record used by the coordinator to finalize the
+seed.
 
 Recommended event:
 
@@ -964,6 +970,7 @@ event InstantEntropyProduced(
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bytes32 rawRandomness,
+    bytes32 provenanceHash,
     InstantMode mode
 );
 ```

@@ -1660,7 +1660,7 @@ sale amount is either in a split wallet or owed by escrow:
 
 - `PrimaryRevenueDeposited(revenueClass, profileId, wallet, asset, amount,
   collectionId, tokenId, saleKind, saleId, payer, poster, beneficiary,
-  isTemplate, escrowed)`;
+  isTemplate, escrowed, policyDriftObserved)`;
 - `PrimaryTemplateMaterialized(templateId, profileId, wallet, revenueClass,
   scope, scopeId, saleContextHash)`;
 - `EscrowCreditCreated(revenueClass, profileId, wallet, asset, amount,

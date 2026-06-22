@@ -809,9 +809,10 @@ event ProtocolPointerFrozen(
 
 event AdminPermissionUpdated(
     uint16 schemaVersion,
+    bytes32 indexed permissionId,
     address indexed account,
-    bytes4 indexed selector,
     uint256 indexed collectionId,
+    bytes4 selector,
     bool enabled,
     address actor
 );
@@ -820,6 +821,8 @@ event AdminPermissionUpdated(
 Implementation may split events by subsystem, but indexers must be able to
 reconstruct every admin permission, pointer, delay, and freeze change from
 events.
+`permissionId` is the durable role, action, or permission constant. `selector`
+is contextual ABI evidence only and must not be the durable permission key.
 
 Implementation manifests must map every protected operation to an explicit
 durable role constant or action ID. A cardinality test must fail if unrelated
