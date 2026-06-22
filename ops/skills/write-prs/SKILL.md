@@ -57,6 +57,8 @@ description: Write, open, iterate, and optionally merge pull requests with clear
    - Use signed-off or cryptographically signed commits only when the repo or user asks for them.
    - Keep follow-up commits focused and give them clear messages describing the bot/user feedback addressed.
    - Push after each meaningful round of fixes so review bots evaluate the latest head.
+   - Open regular, non-draft PRs by default so review bots and auto-review integrations trigger on creation.
+   - Use draft PRs only when the user explicitly asks or a documented platform constraint requires it.
 
 6. Iterate with available review bots:
    - Discover available bot feedback from PR comments, review comments, review threads, checks, or local repo tools.
