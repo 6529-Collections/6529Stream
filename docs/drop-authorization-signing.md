@@ -196,7 +196,9 @@ Use this flow for a real signing service or an offline ceremony:
 1. Read the deployed `StreamDrops` address, active `tdhSigner`, current
    `signerEpoch`, and target `chainId`.
 2. Allocate a signer-scoped `nonce` and random `salt`; never reuse the same
-   `(signer, signerEpoch, nonce, salt)` tuple.
+   `(signer, signerEpoch, nonce, salt)` tuple. If the active signer is an
+   ERC-1271 ZK authorizer, set `salt = uint256(nullifierHash)` instead of using
+   unrelated entropy, and make the proof bind that nullifier to the digest.
 3. Build `dropId = deriveDropId(signer, signerEpoch, nonce, salt)`.
 4. Hash the exact `tokenData` string as `tokenDataHash`.
 5. Set `deadline` to the last acceptable execution timestamp.
@@ -231,6 +233,31 @@ The failure checklist in each fixture covers wrong signer, wrong domain,
 expired deadline, replay, cancellation, stale signer epoch, bad drop ID, token
 data substitution, and zero address validation. These are also covered by the
 Solidity tests linked above.
+
+## ERC-1271 ZK Nullifier Binding
+
+If the active `tdhSigner` is an ERC-1271 ZK authorizer contract, keep the
+`DropAuthorization` ABI unchanged and use the existing `salt` field as the
+authorization-level nullifier carrier:
+
+```text
+salt = uint256(nullifierHash)
+dropId = deriveDropId(signer, signerEpoch, nonce, salt)
+```
+
+`StreamDrops` calls `isValidSignature(digest, signature)` with `staticcall`, so
+the authorizer cannot mark a nullifier as used during signature validation.
+The authorizer should treat the `signature` bytes as a proof envelope and verify
+that the proof public inputs bind:
+
+- the supplied EIP-712 `digest`;
+- the ZK `nullifierHash`;
+- the `signerEpoch` and signer-scoped `nonce`; and
+- the `dropId` derived from `uint256(nullifierHash)`.
+
+After that read-only approval, `StreamDrops` writes
+`consumedDropIds[dropId] = true` before mint or auction execution. That is the
+stateful one-time-use record for the nullifier-bound authorization.
 
 ## Auction Signing Notes
 

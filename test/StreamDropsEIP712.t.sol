@@ -97,6 +97,60 @@ contract StreamDropsEIP712Test is DropAuthTestHelper {
         drops.isDropConsumed(authorization.dropId).assertTrue("compact signature was not consumed");
     }
 
+    function testNullifierHashHelperBindsToAuthorizationSalt() public {
+        StreamDrops drops = deployDrops();
+        uint256 nonce = 45;
+        bytes32 nullifierHash = keccak256(bytes("zk-nullifier"));
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops,
+            POSTER,
+            RECIPIENT,
+            address(0),
+            "data",
+            1,
+            0,
+            nonce,
+            uint256(nullifierHash),
+            block.timestamp + 1 days
+        );
+
+        bytes32 expectedDropId = drops.deriveDropId(
+            drops.tdhSigner(), authorization.signerEpoch, nonce, uint256(nullifierHash)
+        );
+        drops.deriveDropIdFromNullifierHash(
+                drops.tdhSigner(), authorization.signerEpoch, nonce, nullifierHash
+            ).assertEq(expectedDropId, "nullifier helper mismatch");
+        drops.authorizationNullifierHash(authorization)
+            .assertEq(nullifierHash, "authorization salt did not round-trip");
+        authorization.dropId.assertEq(expectedDropId, "drop ID did not bind nullifier salt");
+    }
+
+    function testChangedNullifierSaltFailsDropIdValidation() public {
+        StreamDrops drops = deployDrops();
+        bytes32 nullifierHash = keccak256(bytes("zk-nullifier"));
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops,
+            POSTER,
+            RECIPIENT,
+            address(0),
+            "data",
+            1,
+            0,
+            47,
+            uint256(nullifierHash),
+            block.timestamp + 1 days
+        );
+        authorization.salt = uint256(keccak256(bytes("other-nullifier")));
+        bytes memory signature = signAuthorization(drops, authorization);
+
+        (bool success,) = address(drops)
+            .call(abi.encodeWithSelector(drops.mintDrop.selector, authorization, "data", signature));
+
+        success.assertFalse("changed nullifier salt minted");
+        drops.isDropConsumed(authorization.dropId)
+            .assertFalse("changed nullifier salt consumed drop");
+    }
+
     function testWrongSignerFails() public {
         StreamDrops drops = deployDrops();
         StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(

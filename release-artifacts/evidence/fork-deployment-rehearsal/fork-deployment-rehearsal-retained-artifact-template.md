@@ -21,8 +21,8 @@
 
 - Sanitized command transcript: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`
 - Sanitized Foundry broadcast: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json` / `sha256:287fa1a9480e61106bfa3e4e1f46333a40b9db7fee13a6c3749a64424b6f8169`
-- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:e4786faeb12cd6c9f670ad232b1cc06dcb7897de77e8ba9be698d69f129620d3`
-- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:d5c61113c0839a09845ddddcad4891dd09f58859b2127c6f5f9bcf7d65a2d4ef`
+- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:46ec91ceb39fd0a45b5c0e99759acedf1b6b73a26c37ded094b3746b41c163d9`
+- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:5d04ac8693be55a9490017489778914be192f1c97a75efede8818dbed236ab3e`
 - Verification status: `not_applicable_for_local_fork; source verification inputs remain retained separately and explorer verification remains a separate public-beta blocker`
 - Gas or invariant summary: `estimated_total_gas_used=32521731; all retained deployment receipts status=0x1; release CI will rerun build, tests, gas snapshot, size, and deployment rehearsal gates`
 - Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and release-artifacts/latest/SHA256SUMS regenerated in this PR`

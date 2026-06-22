@@ -131,6 +131,8 @@ type DropAuthorizationMessage = {
 
 The primary type is `DropAuthorization`. Do not add, remove, reorder, or rename
 fields without a contract change, fixture update, and checker update.
+For ERC-1271 ZK authorizers, keep this shape unchanged and carry the proof
+nullifier through `salt`.
 
 ## Token Data Hash
 
@@ -174,6 +176,15 @@ function deriveDropId(input: {
 }
 ```
 
+For an ERC-1271 ZK authorizer, convert the proof nullifier to `salt` before
+deriving the drop ID:
+
+```ts
+function saltFromNullifierHash(nullifierHash: Hex): bigint {
+  return BigInt(nullifierHash);
+}
+```
+
 This exact field order mirrors
 [`StreamDrops.deriveDropId`](../../../smart-contracts/StreamDrops.sol) and the
 fixture-backed helper in
@@ -186,6 +197,9 @@ The signing service must allocate unique `(signer, signerEpoch, nonce, salt)`
 tuples. The contract enforces uniqueness through derived `dropId`,
 `consumedDropIds`, and `cancelledDropIds`, not through a separate monotonic
 nonce map.
+When `salt` comes from a ZK nullifier, the ERC-1271 signer should verify that
+its proof envelope binds the same `nullifierHash` to the EIP-712 digest; the
+read-only `isValidSignature` call cannot consume nullifier state itself.
 
 ## Fixed-Price Payload
 

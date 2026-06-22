@@ -142,9 +142,12 @@ The public-beta target design is:
 11. `quantity` must equal `1` in the P0 design. The contract must reject any
    authorization with `quantity != 1`. Batch minting or one authorization to
    many tokens requires a later ADR and an EIP-712 version bump.
-12. `salt` is signer/integrator-chosen entropy used only in the signed payload
-   and `dropId` derivation. It is not an EIP-712 domain `salt`, and the contract
-   does not store or validate it separately.
+12. `salt` is signer/integrator-chosen entropy used in the signed payload and
+   `dropId` derivation. When the active signer is an ERC-1271 ZK authorizer,
+   `salt` is also the canonical authorization carrier for the ZK nullifier:
+   encode `salt = uint256(nullifierHash)` and require the proof to bind that
+   nullifier to the EIP-712 digest. It is not an EIP-712 domain `salt`, and the
+   contract does not store or validate it separately.
 13. `nonce` is a signer-allocated opaque unique value within a `signerEpoch`, not
    an on-chain monotonic counter. There is no `signerNonces` storage in the P0
    design. `dropId` is the derived replay identifier, not an independent nonce.
@@ -156,9 +159,9 @@ The public-beta target design is:
    `(signer, signerEpoch, nonce, salt)` tuple.
 14. `dropId` must be globally unique and consumed in storage before any external
    calls that can transfer ETH or invoke receiver hooks. P0 replay and
-   cancellation storage is keyed by `dropId`; no separate per-epoch nonce or
-   salt mapping is required unless a later implementation ADR expands the
-   accounting model.
+   cancellation storage is keyed by `dropId`; no separate per-epoch nonce, salt,
+   or nullifier mapping is required unless a later implementation ADR expands
+   the accounting model.
 15. `deadline` must be enforced against `block.timestamp`.
 16. `signerEpoch` must match current contract state so signer compromise or
     rotation can invalidate outstanding payloads.
@@ -230,6 +233,13 @@ dropId = keccak256(
 domain separator already binds `chainId` and `verifyingContract`; the derived
 `dropId` is only the replay/cancellation identifier for the validated signer,
 epoch, nonce, and salt tuple.
+
+For ERC-1271 ZK authorizers, `salt` should be treated as
+`uint256(nullifierHash)`. The authorizer cannot consume a nullifier inside
+`isValidSignature` because `StreamDrops` calls ERC-1271 with `staticcall`.
+Instead, the authorizer should verify that the proof public inputs bind the
+nullifier hash to the supplied EIP-712 digest, and `StreamDrops` consumes the
+derived `dropId` as the stateful one-time-use record.
 
 The legacy `mintDrop(address,address,string,uint256,uint256,uint256,uint256)`
 path must not be available as a public-beta drop execution path. `P0-AUTH-002`

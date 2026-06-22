@@ -443,8 +443,8 @@
     },
     "smart-contracts/StreamDrops.sol": {
       "path": "smart-contracts/StreamDrops.sol",
-      "sha256": "sha256:0655127147e08287181ba22744afd42bbdbc28b2df2b7762bc007f02919229ab",
-      "solc_keccak256": "0x314384b4152fc0f68e2e2283e9cbc3262d5a97978c29bf84bd9c7de746e329a7",
+      "sha256": "sha256:f2793a5d5c94a32b55b55c70072c92526528d67ccb39aac0d0df9899cd8707b4",
+      "solc_keccak256": "0x353270eb98d6cc0cea4e29a6b7f8c05c7105893819be8ba6536d857ef2e8b07f",
       "license": "MIT",
       "used_by": [
         "StreamDrops"
@@ -689,7 +689,7 @@
       "source_sha256": "sha256:41cc60fe13fdd3e80c1c37671302ba919dcd7d50e7c8795aca38e5494fffaad7",
       "source_solc_keccak256": "0xe317befb192295d051ede6e848c34e2e6c2bb917681ca106931d74eb57251455",
       "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
-      "artifact_sha256": "sha256:24d4434d39487d7cbd5c8132011783edb3ccae3988db1438e3fe6e6c6d44939d",
+      "artifact_sha256": "sha256:e15e93af229abb5dd234ef88d9c98338b53717d8bf5f2cabf45384df3ae8e8e1",
       "compilation_target": "smart-contracts/RandomizerVRF.sol:NextGenRandomizerVRF",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1356,10 +1356,10 @@
     },
     "StreamDrops": {
       "source": "smart-contracts/StreamDrops.sol",
-      "source_sha256": "sha256:0655127147e08287181ba22744afd42bbdbc28b2df2b7762bc007f02919229ab",
-      "source_solc_keccak256": "0x314384b4152fc0f68e2e2283e9cbc3262d5a97978c29bf84bd9c7de746e329a7",
+      "source_sha256": "sha256:f2793a5d5c94a32b55b55c70072c92526528d67ccb39aac0d0df9899cd8707b4",
+      "source_solc_keccak256": "0x353270eb98d6cc0cea4e29a6b7f8c05c7105893819be8ba6536d857ef2e8b07f",
       "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
-      "artifact_sha256": "sha256:46a25684055a16161fc414c83b078b98218797da1b5fc14a79b41cc7489dd9eb",
+      "artifact_sha256": "sha256:55fdb968b88a2e7e1d1e08bfceaf6cca3f797f77c21b0110fa39fe1e337806ff",
       "compilation_target": "smart-contracts/StreamDrops.sol:StreamDrops",
       "compiler_version": "0.8.19+commit.7dd6d404",
       "language": "Solidity",
@@ -1373,19 +1373,19 @@
         "metadata_bytecode_hash": "ipfs",
         "libraries": {}
       },
-      "abi_sha256": "sha256:f1c80390332942a1a9bddf38e2afa1d5e1779bcfb8408d4a36f927e8836ac203",
+      "abi_sha256": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
       "bytecode_hashes": {
         "creation": {
-          "sha256": "sha256:9509d8525a26420924eed43e588466af5060260f94c7b606d69a25d9b1e7ea8f",
+          "sha256": "sha256:94911a52e41df2363c923cdd62c28829093c82097581acb55b93af987fefbf5f",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:9509d8525a26420924eed43e588466af5060260f94c7b606d69a25d9b1e7ea8f"
+          "release_artifact_sha256": "sha256:94911a52e41df2363c923cdd62c28829093c82097581acb55b93af987fefbf5f"
         },
         "runtime": {
-          "sha256": "sha256:d48c7a4185e66afc1b657cb5a44042f5b13b7992658411c65d8b3df454437689",
+          "sha256": "sha256:5906d6eea7b00799d911a574370985b7fc216eaf64d0343eb36d581b17d01fa1",
           "linked": true,
           "hash_mode": "bytes",
-          "release_artifact_sha256": "sha256:d48c7a4185e66afc1b657cb5a44042f5b13b7992658411c65d8b3df454437689"
+          "release_artifact_sha256": "sha256:5906d6eea7b00799d911a574370985b7fc216eaf64d0343eb36d581b17d01fa1"
         }
       },
       "constructor": {

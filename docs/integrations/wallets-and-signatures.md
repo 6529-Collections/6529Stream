@@ -145,6 +145,9 @@ current `signerEpoch`, signer rotation policy, and the on-chain consumed-state
 write before mint or auction execution. There is no separate on-chain monotonic
 nonce map; uniqueness is a signer-service obligation and is
 enforced on chain through the derived `dropId` plus consumed/cancelled storage.
+For ERC-1271 ZK authorizers, `salt` is the ABI-stable nullifier carrier:
+encode `salt = uint256(nullifierHash)` and have the contract signer verify that
+the proof binds the nullifier to the same EIP-712 digest.
 
 The TypeScript EIP-712 payload construction snippets in
 [`docs/integrations/examples/typescript-eip712-drop-authorization.md`](examples/typescript-eip712-drop-authorization.md)
@@ -162,7 +165,7 @@ The app must model these controls as separate state, not as one generic
 | --- | --- | --- |
 | Domain | `domainSeparator()` includes `name`, `version`, `chainId`, and `verifyingContract` | Stop on wrong chain or wrong contract before asking for a transaction |
 | `dropId` | Derived from signer, signer epoch, nonce, and salt | Treat mismatch as payload construction failure |
-| `nonce` / `salt` | Signer-service allocated; no on-chain monotonic nonce map exists | Track uniqueness per signer epoch in the signing service |
+| `nonce` / `salt` | Signer-service allocated; no on-chain monotonic nonce map exists; ERC-1271 ZK authorizers use `salt = uint256(nullifierHash)` | Track uniqueness per signer epoch in the signing service or bind the ZK nullifier into the proof envelope |
 | Consumed storage | `consumedDropIds[dropId]` is written before sale execution | Show replayed or already executed; re-read token/drop state |
 | Cancelled storage | `cancelledDropIds[dropId]` blocks later execution | Show cancelled by operator workflow |
 | Signer epoch | `signerEpoch` must equal current contract state | Request a new payload after signer rotation or compromise response |

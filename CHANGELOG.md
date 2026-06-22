@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added drop-authorization ZK nullifier binding helpers and docs, using
+  `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
+  read-only while `StreamDrops` consumes the derived drop ID as the replay
+  guard.
 - Added a root `AGENTS.md` operating guide for automated coding agents,
   covering task startup, scope discipline, validation choices, PR/bot workflow,
   and security boundaries, with markdown-link checker coverage for the new

@@ -60,6 +60,52 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
         signer.assertEq(address(contractSigner), "contract signer not stored");
     }
 
+    function testZkNullifierContractSignerMintsWhenNullifierMatchesSalt() public {
+        (StreamDrops drops,) = deployNullifierSignerDrops();
+        bytes32 nullifierHash = keccak256(bytes("zk-nullifier"));
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops,
+            POSTER,
+            RECIPIENT,
+            address(0),
+            "data",
+            1,
+            0,
+            25,
+            uint256(nullifierHash),
+            block.timestamp + 1 days
+        );
+
+        drops.mintDrop(authorization, "data", proofSignature(drops, authorization, nullifierHash));
+
+        drops.isDropConsumed(authorization.dropId)
+            .assertTrue("nullifier-backed contract drop was not consumed");
+    }
+
+    function testZkNullifierContractSignerRejectsMismatchedNullifier() public {
+        (StreamDrops drops,) = deployNullifierSignerDrops();
+        bytes32 nullifierHash = keccak256(bytes("zk-nullifier"));
+        StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
+            drops,
+            POSTER,
+            RECIPIENT,
+            address(0),
+            "data",
+            1,
+            0,
+            27,
+            uint256(nullifierHash),
+            block.timestamp + 1 days
+        );
+        bytes memory mismatchedProof =
+            proofSignature(drops, authorization, keccak256(bytes("wrong-nullifier")));
+
+        bool success = callMint(drops, authorization, "data", mismatchedProof);
+
+        success.assertFalse("mismatched nullifier proof minted");
+        drops.isDropConsumed(authorization.dropId).assertFalse("mismatched nullifier consumed drop");
+    }
+
     function testValidContractSignatureCreatesAuction() public {
         (StreamDrops drops, MockERC1271Signer contractSigner) = deployContractSignerDrops();
         StreamDrops.DropAuthorization memory authorization = buildAuctionAuthorization(
@@ -267,6 +313,18 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
         drops.updateAuctionContract(address(auctions));
     }
 
+    function deployNullifierSignerDrops()
+        private
+        returns (StreamDrops drops, MockNullifierERC1271Signer contractSigner)
+    {
+        MockStreamMinter minter = new MockStreamMinter();
+        StreamAdmins admins = new StreamAdmins(address(this));
+        contractSigner = new MockNullifierERC1271Signer();
+        drops = new StreamDrops(
+            address(contractSigner), address(minter), address(admins), PAYOUT, CURATORS_POOL
+        );
+    }
+
     function authorize(
         MockERC1271Signer contractSigner,
         StreamDrops drops,
@@ -289,6 +347,20 @@ contract StreamDropsERC1271Test is DropAuthTestHelper {
                 abi.encodeWithSelector(drops.mintDrop.selector, authorization, tokenData, signature)
             );
         return success;
+    }
+
+    function proofSignature(
+        StreamDrops drops,
+        StreamDrops.DropAuthorization memory authorization,
+        bytes32 nullifierHash
+    ) private view returns (bytes memory) {
+        return abi.encode(
+            drops.hashDropAuthorization(authorization),
+            nullifierHash,
+            authorization.signerEpoch,
+            authorization.nonce,
+            authorization.dropId
+        );
     }
 }
 
@@ -350,5 +422,35 @@ contract MockERC1271Signer {
             return MAGIC_VALUE;
         }
         return INVALID_VALUE;
+    }
+}
+
+contract MockNullifierERC1271Signer {
+    bytes4 private constant MAGIC_VALUE = 0x1626ba7e;
+    bytes4 private constant INVALID_VALUE = 0xffffffff;
+    bytes32 private constant DROP_ID_TYPEHASH =
+        keccak256("DropId(address signer,uint256 signerEpoch,uint256 nonce,uint256 salt)");
+
+    function isValidSignature(bytes32 _hash, bytes calldata _signature)
+        external
+        view
+        returns (bytes4)
+    {
+        (
+            bytes32 authorizedDigest,
+            bytes32 nullifierHash,
+            uint256 signerEpoch,
+            uint256 nonce,
+            bytes32 dropId
+        ) = abi.decode(_signature, (bytes32, bytes32, uint256, uint256, bytes32));
+
+        bytes32 expectedDropId = keccak256(
+            abi.encode(DROP_ID_TYPEHASH, address(this), signerEpoch, nonce, uint256(nullifierHash))
+        );
+        if (_hash != authorizedDigest || dropId != expectedDropId) {
+            return INVALID_VALUE;
+        }
+
+        return MAGIC_VALUE;
     }
 }
