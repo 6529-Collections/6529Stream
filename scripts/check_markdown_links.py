@@ -12,6 +12,7 @@ from urllib.parse import unquote
 
 
 DEFAULT_INCLUDED_ROOTS = [
+    Path("AGENTS.md"),
     Path("README.md"),
     Path("CONTRIBUTING.md"),
     Path("SECURITY.md"),
