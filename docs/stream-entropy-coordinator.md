@@ -287,6 +287,32 @@ through an idempotent request function on the coordinator after token state is
 registered and `mintFromManager` has returned. A safe receiver callback may
 therefore observe `REGISTERED` or pending entropy state; metadata must render
 pending output honestly until a seed is finalized.
+Core calls `onTokenMinted` with a deploy-time immutable
+`ENTROPY_REGISTRATION_GAS_LIMIT` and an EIP-150-aware parent gas precheck.
+Initial planning target is 80,000 gas for all-cold registration, but launch
+must use measured gas plus margin and publish the value in the release
+manifest. If the coordinator call reverts, runs out of its cap, or returns
+malformed success behavior, the mint reverts and all token identity writes
+unwind. Core must not forward all remaining gas to a mutable coordinator.
+
+If Core exposes `prepareMintFromManager`, the prepare step calls
+`onTokenMinted` and writes the same entropy registration state, but Core also
+marks the token prepared-incomplete until `completePreparedMintFromManager`
+clears that record. `requestEntropy(tokenId)` must consult Core's token status
+or receive an equivalent Core-authenticated flag and revert for
+prepared-incomplete tokens. A token cannot request entropy, finalize entropy,
+or produce final metadata between prepare and complete.
+For `PREPARED_MINT`, the first valid public or operator `requestEntropy` window
+opens only after `completePreparedMintFromManager` has finished and the token is
+no longer prepared-incomplete. A sale that needs both token-level economics and
+async entropy must snapshot economics, record revenue, complete `_safeMint`,
+and only then allow entropy request.
+Any entropy registration event emitted during prepare must be explicitly marked
+`preparedIncomplete = true`, or the event must be deferred until completion.
+If the top-level transaction reverts, provisional registration events disappear
+with the revert. `tokenEntropy` reads for a prepared-incomplete token must
+disclose that status so satellites do not confuse it with an ordinary minted
+token.
 
 Coordinator availability is a hard mint prerequisite. Core should not catch and
 ignore a failed `onTokenMinted` call because that would create minted tokens
@@ -445,6 +471,8 @@ provider request.
 ```solidity
 enum EntropyStatus {
     NONE,
+    DISABLED,
+    NOT_REQUIRED,
     REGISTERED,
     REQUESTED,
     FINALIZED,
@@ -478,6 +506,15 @@ enum ProviderResultStatus {
 `NONE` means the coordinator has no token entropy state. Renderers should treat
 this as pending or unsupported depending on collection metadata policy.
 
+`DISABLED` means the collection policy disables entropy for this token.
+
+`NOT_REQUIRED` means the token's render path does not require entropy even
+though the collection or system may support entropy for other tokens.
+
+`DISABLED` and `NOT_REQUIRED` are terminal non-random states. They are never
+represented by a `bytes32(0)` seed sentinel, and `requestEntropy` must revert
+for both.
+
 `REGISTERED` means Core minted the token and the coordinator knows it, but no
 active randomness request exists.
 
@@ -488,9 +525,7 @@ rendering.
 
 `STALE` means the request no longer belongs to an eligible provider epoch or
 collection policy. Stale requests are audit-visible and cannot finalize the
-token through normal fulfillment. A late callback for a stale request may be
-accepted only into the stale/audit branch, which emits
-`StaleEntropyFulfillment` and never mutates the canonical seed.
+token unless an explicit recovery policy says otherwise.
 
 `FAILED` means the active request was declared unrecoverable under the incident
 policy. It does not imply a normal reroll is available.
@@ -609,6 +644,36 @@ mapping(bytes32 policyId => FreshRecoveryPolicy) freshRecoveryPolicies;
 The coordinator must not use `seed == bytes32(0)` as a status check. Status is
 the source of truth.
 
+## Coordinator Replacement And State Continuity
+
+Coordinator pointer replacement is an ADR 0004 `POINTER_REPLACEMENT` action.
+Entropy state must survive pointer changes:
+
+1. Core stores `coordinatorAtMint[tokenId]` when token identity is allocated.
+   This is the authoritative coordinator for that token's entropy reads.
+2. The metadata router reads `tokenSeed(tokenId)` and
+   `tokenEntropy(tokenId)` from `coordinatorAtMint[tokenId]`, not blindly from
+   the current live Core pointer.
+3. The live Core `entropyCoordinator` pointer is used for new token
+   registration and for request/fulfillment routing only for tokens whose
+   `coordinatorAtMint` equals that live pointer.
+4. Coordinator replacement is blocked while any collection has active
+   `REQUESTED` entropy against the current coordinator unless an already-frozen
+   fresh-recovery policy explicitly covers coordinator replacement for that
+   collection.
+5. The old coordinator remains deployed, non-self-destructible, and queryable
+   indefinitely. Incident revocation can block new requests or fulfillments but
+   must not make finalized seeds or request history unreadable.
+6. A successor coordinator must not rederive or refinalize seeds for tokens
+   registered under a previous coordinator.
+7. Safe-mode coordinators write the same `TokenEntropy` shape, with status
+   `REGISTERED` or a terminal non-random status, and expose the same read
+   interface. Transitioning from safe-mode to a full coordinator affects only
+   newly minted tokens unless a frozen recovery policy explicitly moves pending
+   requests.
+8. Deployment manifests list every prior coordinator, its code hash, status,
+   and collections/tokens whose entropy reads remain pinned to it.
+
 ## Provider Registry
 
 The coordinator should maintain provider lifecycle state:
@@ -646,8 +711,8 @@ Collection provider epochs:
    current provider address.
 5. Replaced providers may fulfill requests from their original epoch only if
    the policy still allows old-epoch fulfillment.
-6. Otherwise, old-epoch callbacks take the stale/audit fulfillment branch,
-   emit `StaleEntropyFulfillment`, and do not mutate token seed.
+6. Otherwise, old-epoch callbacks emit `StaleEntropyFulfillment` and do not
+   mutate token seed.
 
 ## Recommended Launch Provider Policy
 
@@ -787,11 +852,11 @@ observe a token that lacks identity mapping and entropy registration.
 1. Caller must be Core.
 2. Token must not already be registered.
 3. Collection config must exist, or a default config must exist.
-4. If config mode is `DISABLED`, the coordinator should record an explicit
-   disabled/no-entropy status or no-op success according to the launch storage
-   layout. Disabled collections must not revert minting because no provider is
-   configured, and renderers must treat the token as intentionally not
-   entropy-backed.
+4. If config mode is `DISABLED` or the render path is `NOT_REQUIRED`, the
+   coordinator must record an explicit terminal token entropy status. Disabled
+   collections must not revert minting because no provider is configured, and
+   renderers must treat the token as intentionally not entropy-backed. A no-op
+   success that leaves no token entropy record is not launch-conformant.
 5. If config mode is `INSTANT`, `onTokenMinted` still records only registered
    state. It does not request entropy or finalize a seed. `INSTANT` means a
    later `requestEntropy` call may finalize synchronously in that request
@@ -826,7 +891,10 @@ Rules:
 
 1. For async VRF-style collections, `mintCommitment` may bind sale, token data,
    buyer, beneficiary, phase, and nonce, but it must be included in the signed
-   mint or sale authorization before mint execution.
+   mint or sale authorization before mint execution. For batch mints, the exact
+   per-token commitment passed to Core must equal the corresponding element
+   committed by `MintTicket.mintCommitmentsHash` or by an equivalent sale
+   authorization hash.
 2. For instant-mode collections, `mintCommitment` must either be fixed before
    any outcome-affecting state is known to the executor or be excluded from the
    final seed derivation.
@@ -840,6 +908,7 @@ Rules:
 ```text
 requestEntropy(tokenId) [nonReentrant]
   verifies token is REGISTERED, or STALE/FAILED with approved incident recovery
+  rejects prepared-incomplete tokens and terminal DISABLED/NOT_REQUIRED tokens
   rejects if token is already REQUESTED or FINALIZED
   resolves collection config and provider
   snapshots provider epoch and provider config hash
@@ -914,7 +983,8 @@ Request transition guards:
 2. The only normal starting status is `REGISTERED`.
 3. `STALE` or `FAILED` can start a new request only through an approved fresh
    recovery path, with `requestAttempt` incremented and a new request key.
-4. `REQUESTED` and `FINALIZED` always revert for ordinary `requestEntropy`.
+4. `DISABLED`, `NOT_REQUIRED`, `REQUESTED`, and `FINALIZED` always revert for
+   ordinary `requestEntropy`.
 5. Before any provider call, the coordinator writes the active `requestKey`,
    request metadata, request attempt, provider epoch, provider config hash, and
    token status `REQUESTED`.
@@ -929,6 +999,9 @@ Request transition guards:
    callback into `fulfillEntropy`. The coordinator finalizes once from the
    returned raw value before `requestEntropy` returns. If the instant read
    fails, the transaction reverts and the pre-call `REQUESTED` state unwinds.
+   The instant provider function must be `view`, and launch static analysis
+   must fail if any reachable instant-provider path contains external calls,
+   contract creation, delegatecall, or state writes.
 
 ## Request Commitment Finality
 
@@ -995,20 +1068,18 @@ Rules:
 
 1. `fulfillEntropy` must use a reentrancy guard or equivalent state lock.
 2. `requestKey` must exist.
-3. Caller must be the provider stored on the request.
-4. Provider must not be `INCIDENT_REVOKED`.
-5. If the request is inactive because an incident recovery already superseded
-   it, or token status is `STALE`, or the recorded provider epoch is no longer
-   eligible, fulfillment enters the stale/audit branch: emit
-   `StaleEntropyFulfillment`, do not derive a seed, do not reactivate the
-   request, and do not change token status.
-6. Otherwise, request must be active.
-7. Otherwise, token status must be `REQUESTED`.
-8. Token must not already be finalized.
-9. Fulfillment must finalize exactly one canonical seed.
-10. Before any external refresh or notification call, fulfillment must mark the
-    request inactive and set token status `FINALIZED`.
-11. `fulfillEntropy` cannot call `requestEntropy`; delivery retry calls
+3. Request must be active.
+4. Caller must be the provider stored on the request.
+5. Provider must not be `INCIDENT_REVOKED`.
+6. Token status must be `REQUESTED`.
+7. Token must not already be finalized.
+8. Fulfillment must finalize exactly one canonical seed.
+9. Before any external refresh or notification call, fulfillment must mark the
+   request inactive and set token status `FINALIZED`.
+10. Old request keys after incident recovery must be rejected or emitted as
+   stale.
+11. Wrong provider epoch must emit a stale/audit event and must not finalize.
+12. `fulfillEntropy` cannot call `requestEntropy`; delivery retry calls
     `fulfillEntropy` again with the same stored raw randomness.
 
 Seed derivation:
@@ -1288,7 +1359,7 @@ included as the precise protocol term.
 Recommended admin roles:
 
 ```text
-global admin             emergency authority through existing StreamAdmins
+global admin             emergency authority through ADR 0004 governance/action roles
 entropy config admin     configure collection entropy before freeze
 provider admin           approve, deprecate, or revoke providers
 request operator         request entropy or trigger delivery retry where allowed
@@ -1351,6 +1422,16 @@ pending state.
 Provider incident revocation can strand pending tokens. Tooling should require a
 documented recovery path before revocation is used. Precommitted fallback
 providers are preferred for long-running high-value collections.
+If the coordinator or provider quorum needed for safe recovery is lost, minting
+for entropy-dependent collections halts as an accepted terminal degradation
+until governance is restored or a precommitted fallback route is executed. The
+system should preserve existing ownership, finalized seeds, pending-state
+truthfulness, and metadata fallback behavior rather than inventing an
+unauthorized randomness source.
+Collection `CLOSED` status does not block fulfillment for already-`REQUESTED`
+tokens or permissionless `requestEntropy` for already-`REGISTERED` tokens whose
+frozen policy allows public requests. Closing stops new minting, not honest
+completion of already-minted entropy lifecycle.
 
 ### Event Provenance
 

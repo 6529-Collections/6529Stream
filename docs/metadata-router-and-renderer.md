@@ -194,6 +194,8 @@ high-level unbounded string forward:
 enum TokenURIReadStatus {
     OK,
     NONEXISTENT,
+    PREPARED_INCOMPLETE,
+    BURNED,
     ROUTER_UNSET,
     ROUTER_NO_CODE,
     ROUTER_REVERTED,
@@ -220,6 +222,11 @@ function tokenURI(uint256 tokenId)
 }
 ```
 
+The cross-contract numeric values are pinned in the Numeric ID Catalog:
+`OK = 0`, `NONEXISTENT = 1`, `PREPARED_INCOMPLETE = 2`, `BURNED = 3`,
+`ROUTER_UNSET = 4`, `ROUTER_NO_CODE = 5`, `ROUTER_REVERTED = 6`,
+`ROUTER_RETURNDATA_OVERSIZED = 7`, and `ROUTER_MALFORMED = 8`.
+
 Launch implementation requirements:
 
 1. `metadataRouter == address(0)` returns the documented fallback JSON data URI
@@ -241,6 +248,14 @@ Launch implementation requirements:
 8. The release manifest records the router gas limit, returndata limit, fallback
    schema hash, and gas measurements for success, revert, malformed return,
    oversized return, no-code router, and unset router cases.
+`METADATA_ROUTER_GAS_LIMIT` must be a deploy-time immutable for a Core release,
+not mutable governance state. A successor Core may choose a different immutable
+gas limit after measuring a new router implementation, but launch Core must not
+include a runtime setter that changes marketplace metadata read behavior.
+The fallback JSON schema must be canonicalized and hash-committed in the
+release manifest. The schema defines exact required fields, optional fields,
+error-code vocabulary, omitted/null semantics, and canonicalization method so
+independent tools can reproduce the fallback schema hash.
 
 Core should also expose a diagnostic read with the same bounded call rules:
 
@@ -261,6 +276,12 @@ If the router itself is unreachable, Core computes the status locally instead
 of depending on a router-side diagnostic. Router-side `tokenURIStatus` remains
 useful for richer renderer and dependency failure reasons after Core has
 successfully reached the router.
+Unlike `tokenURI()`, `tokenURIStatus()` is a diagnostic read and should not
+revert for nonexistent or burned tokens. It returns `NONEXISTENT` for a token
+ID with no authoritative Core identity mapping, and `BURNED` for a token whose
+retained mapping exists but ERC-721 ownership has been removed. The only
+acceptable reverts are ordinary Solidity panics or catastrophic read failures
+outside the launch test envelope.
 
 Core should not expose `contractURI()` in launch v1. Stream is a
 multi-collection ERC-721, and Core bytecode is reserved for ownership,
@@ -287,6 +308,13 @@ bytecode headroom and must point indexers to the Stream-native global and
 collection-scoped metadata reads. A future Core `contractURI()` can be
 reconsidered only after final bytecode measurements and marketplace evidence
 show it is worth the Core surface.
+Marketplace and indexer discovery guidance: read the Core-hosted
+`streamSystemManifest()` to discover the current metadata router and collection
+metadata contract, call `StreamMetadataRouter.contractURIForCore(core)` for
+global Stream contract metadata, and call
+`StreamCollectionMetadata.contractURI(collectionId)` for collection-specific
+contract metadata. Core intentionally has no ERC-7572 `contractURI()` selector
+in launch v1.
 
 Core should emit an event when the router changes:
 
@@ -330,6 +358,7 @@ interface IStreamCoreMetadataView {
             uint256 collectionSerial,
             bool burned
         );
+    function tokenLifecycle(uint256 tokenId) external view returns (uint8);
     function collectionSupplyMode(uint256 collectionId) external view returns (uint8);
     function collectionStatus(uint256 collectionId) external view returns (uint8);
     function collectionHasMaxSupply(uint256 collectionId) external view returns (bool);
@@ -338,7 +367,7 @@ interface IStreamCoreMetadataView {
     function viewCirSupply(uint256 collectionId) external view returns (uint256);
     function totalSupplyOfCollection(uint256 collectionId) external view returns (uint256);
     function collectionFreezeStatus(uint256 collectionId) external view returns (bool);
-    function tokenEntropyCoordinator(uint256 tokenId) external view returns (address);
+    function coordinatorAtMint(uint256 tokenId) external view returns (address);
 }
 ```
 
@@ -354,7 +383,7 @@ facts. Long strings, script chunks, dependency IDs, image URIs, and attributes
 should move to metadata storage rather than remain in Core.
 
 Entropy seeds should not be stored in Core. Core only exposes
-`tokenEntropyCoordinator(tokenId)`, the coordinator pinned when the token was
+`coordinatorAtMint(tokenId)`, the coordinator pinned when the token was
 allocated. The router and renderers should read seed/status from that dedicated
 entropy coordinator, as described in `docs/stream-entropy-coordinator.md`:
 
@@ -366,6 +395,15 @@ interface IStreamEntropyView {
         returns (bytes32 seed, bool finalized);
 }
 ```
+
+The router must treat entropy reads as bounded and fail-safe for minted tokens.
+If the pinned `coordinatorAtMint(tokenId)` has no code, is
+incident-revoked, reverts, runs out of its read gas cap, or returns malformed
+data, the router reports entropy as `PENDING_UNKNOWN` and renders the
+collection's pending/unknown view. It must not revert `tokenURI()` for a minted
+token solely because the pinned coordinator is unhealthy. Finality diagnostics
+may still report that the current entropy route no longer matches the frozen
+record.
 
 ## Metadata Router Responsibilities
 
@@ -1342,6 +1380,16 @@ The metadata system should also support ERC-4906-style events:
 ```solidity
 event MetadataUpdate(uint256 _tokenId);
 event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
+
+interface IStreamCoreMetadataRefresh {
+    function emitMetadataUpdate(uint256 tokenId, bytes32 reasonHash) external;
+
+    function emitBatchMetadataUpdate(
+        uint256 fromTokenId,
+        uint256 toTokenId,
+        bytes32 reasonHash
+    ) external;
+}
 ```
 
 Because marketplaces call `tokenURI()` on `StreamCore`, there are two viable
@@ -1366,6 +1414,13 @@ governance or recovery. The helper is not an arbitrary log-spam bridge.
 Launch `MAX_REFRESH_RANGE` should be no more than 5,000 token IDs per
 `BatchMetadataUpdate` helper call unless a later marketplace/indexer review
 accepts a different limit.
+If an accepted recovery for a finalized scope legitimately affects more than
+`MAX_REFRESH_RANGE` minted tokens, the router must request chunked refreshes.
+Each chunk emits a standard `BatchMetadataUpdate(from, to)` plus the
+Stream-native reason/manifest event or helper input that carries the same
+`reasonHash` and recovery manifest hash for that chunk. A recovery must never
+emit one oversized batch range or silently skip refresh for affected minted
+tokens because the collection is larger than the batch cap.
 
 After Core collection freeze, render-affecting metadata mutations are rejected,
 so the metadata router must not ask Core to emit ERC-4906 refresh events for

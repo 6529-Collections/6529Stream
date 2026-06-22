@@ -247,10 +247,11 @@ Launch ABI must also have a hard function-count ceiling. Before audit handoff,
 the release manifest must publish the external/public function count, interface
 IDs, selectors, and owner subsystem for every selector in
 `StreamCollectionMetadata`. The initial ceiling is 80 external/public
-functions, including inherited views. Exceeding that ceiling requires a new ADR
-that either removes launch surface or moves a responsibility into a companion
-contract. This keeps "world-class metadata" from quietly turning into an
-unauditable monolith.
+functions, including inherited views, with a launch soft target of 60 or fewer.
+Exceeding the soft target requires an audit-scope note; exceeding the hard
+ceiling requires a new ADR that either removes launch surface or moves a
+responsibility into a companion contract. This keeps "world-class metadata"
+from quietly turning into an unauditable monolith.
 
 ## Core Boundary
 
@@ -411,10 +412,14 @@ Rules:
 3. Burn removes ERC-721 ownership and enumerable membership.
 4. Burn retains `tokenCollectionId`, `tokenCollectionSerial`, and the mapping
    existence bit for royalty disclosure, archives, and state exports.
-5. A frozen or artwork-finalized collection is non-burnable unless the
-   collection's pre-finality policy and finality manifest explicitly preserve a
-   burn path and state the archival consequences.
-6. Burn emits `StreamTokenBurned` with collection ID and serial.
+5. A frozen collection is non-burnable unless the collection's pre-freeze
+   policy explicitly preserves a burn path and states the archival
+   consequences.
+6. Collection-scope artwork finality is always non-burnable, because its Core
+   facts bind `burnedSupply`. A collection that needs post-finality burns must
+   use token, release, season, or view scoped finality instead of
+   collection-scope finality.
+7. Burn emits `StreamTokenBurned` with collection ID and serial.
 
 ```solidity
 event StreamTokenBurned(
@@ -467,12 +472,15 @@ Rules:
 8. Metadata may describe a collection as ongoing, seasonal, paused, or complete,
    but Core status is the authoritative mintability state.
 9. Metadata fields must not be used as supply authority.
-10. A frozen or artwork-finalized collection is non-burnable by default. A burn
-    path may survive a freeze only if the pre-freeze policy and finality
-    manifest explicitly preserve it and prove that burning cannot change the
-    promised artwork, supply semantics, entropy interpretation, or
-    revenue/royalty history.
-11. When a burn is allowed, Core removes ERC-721 ownership and enumerable
+10. A frozen collection is non-burnable by default. A burn path may survive a
+    freeze only if the pre-freeze policy explicitly preserves it and proves
+    that burning cannot change the promised artwork, supply semantics, entropy
+    interpretation, or revenue/royalty history.
+11. Collection-scope artwork finality is incompatible with any surviving burn
+    path. Scoped finality is the required model for finalized tokens, releases,
+    seasons, or views that coexist with later burns elsewhere in an open
+    collection.
+12. When a burn is allowed, Core removes ERC-721 ownership and enumerable
     membership but preserves token-to-collection mapping, collection-local
     serial, and mapping-existence state for historical royalty and audit reads.
 
@@ -698,7 +706,9 @@ Rights and provenance guidance:
    enforcement. Operator UX and rights schemas must state that commercial,
    derivative, AI-training, print, exhibition, estate, or attribution metadata
    does not itself compel offchain actors unless a separate legal agreement or
-   future enforcement ADR says so.
+   future enforcement ADR says so. Collections using legal or estate fields
+   should obtain offchain legal review before publication, because immutable
+   notice can outlive changes in law, ownership, or estate administration.
 
 ```solidity
 struct CollectionDisplay {
@@ -775,10 +785,15 @@ Rules:
    seed, or collection identity.
 5. Burned-token archival metadata may remain readable through metadata contract
    views even when Core `tokenURI()` reverts under ERC-721 semantics.
-4. `locale` is a default locale hint for display metadata.
-5. `exhibitionURI` and `exhibitionHash` support collection placement in a show,
-   release, season, or other context without embedding that whole model in
-   Core.
+6. A collection that mints only through `PRE_REVENUE_SINGLE_STEP` must not
+   select a renderer or schema that requires renderer-visible `tokenData` bytes
+   before the ERC-721 receiver callback. Such renderers require
+   `PREPARED_MINT` or a precommitted hash/URI path that is written before the
+   callback. Core stores only `tokenDataHash`; renderers cannot assume Core can
+   supply bytes it deliberately does not store.
+Additional display semantics: `locale` is a default locale hint, and
+`exhibitionURI` plus `exhibitionHash` support collection placement in a show,
+release, season, or other context without embedding that whole model in Core.
 
 Recommended aggregate view:
 
@@ -2468,6 +2483,28 @@ Recommended approach:
 
 This gives the system room to evolve without hardcoding every future metadata
 field in Solidity.
+
+## Launch ABI Partitioning
+
+`StreamCollectionMetadata` is the authoritative collection knowledge system,
+but it does not have to place every long-term feature in one launch ABI. If the
+main metadata contract approaches its function-count, bytecode, or auditability
+ceiling, these responsibilities should move to companion contracts named in the
+system manifest and linked by schema/manifest hashes:
+
+```text
+StreamSchemaRegistry
+StreamCollectionSnapshots
+StreamCollectionAttestations
+StreamCollectionViews
+StreamPreservationRecords
+```
+
+The launch invariant is discoverability and integrity, not monolith size. Core
+does not care which companion serves a snapshot, attestation, or alternate
+view, as long as the collection metadata root, finality manifest, event catalog,
+and system manifest identify the responsible module, interface ID, code hash,
+schema ID, URI, and content hash.
 
 ## Canonical Hash Serialization
 

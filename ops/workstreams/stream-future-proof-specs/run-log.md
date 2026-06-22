@@ -44,6 +44,47 @@
     ordering.
 - Ran `codex-diff-check -- docs ops\workstreams\stream-future-proof-specs`;
   no whitespace issues reported.
+
+## 2026-06-22 Late Review Closure
+
+- Ran additional full OpenRouter review rounds after expanding the payment,
+  royalty, metadata, collection knowledge, minting, entropy, governance,
+  finality, preservation, and state-export specs.
+- Incorporated blocking feedback from GPT-5.5 Pro, Opus 4.8, and GLM 5.2,
+  including:
+  - scoped finality interfaces, scoped Core finality facts, scoped recovery,
+    frozen-route compatibility, and collection-finality burn invariants;
+  - canonical governance action execution ABI, transition table, terminal
+    freeze veto, action policy catalog, and launch two-tier delay clarification;
+  - module registry interface, cached Core pointer reads, storage-only
+    `streamSystemManifest()`, catalog hashes, and state/export publisher
+    discovery;
+  - prepared-mint operation ID, Core `PreparedMintRecord` as shared lock state,
+    single-step custody/counter guard, and snapshot-at-mint adapter gate;
+  - resolver-bound Core, resolver continuity for frozen economics,
+    over-sale-price royalty fallback, and diagnostics outside Core;
+  - escrow recovery manifest refs, best-effort already-deployed wallet flush,
+    explicit gas-floor/lost-quorum terminal-risk disclosure, and asset-policy
+    gas bounds;
+  - entropy registration gas cap, instant-provider no-external-call gate,
+    disabled/not-required terminal entropy state, and pinned coordinator
+    fallback to pending/unknown metadata;
+  - fuller state export leaves, export challenge/supersession, fork/reorg
+    handling, reproducible-build preservation, signature-suite aging, and
+    sealed archive custody posture;
+  - launch-scope controls for optional surfaces, Core surface bytecode budget,
+    event indexed-field CI, numeric ID catalog, lifecycle reconciliation, and
+    minimum launch profile.
+- Final approval state:
+  - GPT-5.5 Pro round 12: `APPROVED_FOR_PR: yes`, no blocking issues.
+  - Opus 4.8 round 12: `APPROVED_FOR_PR: yes`, no blocking issues.
+  - GLM 5.2 full round 12 truncated after one visible blocker; patched that
+    blocker (`METADATA_ROUTER_GAS_LIMIT` immutability) and ran a compact GLM
+    audit, which returned `approved_for_pr: true` with no blocking issues.
+- Local checks after the final patch set:
+  - `codex-diff-check -- docs ops\workstreams\stream-future-proof-specs`
+    reported no whitespace issues.
+  - Event indexed-field lint reported `event indexed-field lint: ok`.
 - Ran OpenRouter review round 3.
   - Opus 4.8 returned `REQUEST_CHANGES` with three blockers:
     `INSTANT` entropy ordering contradicted itself, `royaltyInfo()` token
