@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a production-readiness execution packet for the remote-main release
+  candidate, recording the frozen commit, local gates that passed, local
+  toolchain blockers, and the remaining public-beta and production evidence
+  rows without changing readiness claims.
 - Centralized symlink-safe release evidence retained-path validation across
   non-local release evidence, release-signature evidence, marketplace/indexer
   evidence, live deployment-manifest evidence, live metadata-browser evidence,

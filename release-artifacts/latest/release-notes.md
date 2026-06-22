@@ -22,6 +22,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 ## Changelog Entries
 
+- Added a production-readiness execution packet for the remote-main release candidate, recording the frozen commit, local gates that passed, local toolchain blockers, and the remaining public-beta and production evidence rows without changing readiness claims.
 - Centralized symlink-safe release evidence retained-path validation across non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention evidence so symlinked leaf files and symlinked intermediate directories fail before hashing or artifact validation.
 - Hardened the testnet deployment rehearsal retained-artifact checker to reject symlinked retained transcript, broadcast, manifest, address-book, and gas/invariant files before future reviewed Sepolia evidence can pass.
 - Added burned pending arRNG composition regressions proving paid fixed-price and settled auction drops can be burned before fulfillment while preserving payment/proceeds accounting, request bindings, burned-token audit randomness, freeze eligibility, and frozen manifest stability.
