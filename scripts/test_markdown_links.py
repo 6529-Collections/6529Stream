@@ -28,6 +28,10 @@ def write(path: Path, value: str) -> None:
 
 
 class MarkdownLinkTests(unittest.TestCase):
+    def test_default_roots_include_agents_guide(self) -> None:
+        """The agent operating guide is part of the default checked docs."""
+        self.assertIn(Path("AGENTS.md"), checker.DEFAULT_INCLUDED_ROOTS)
+
     def test_accepts_committed_markdown(self) -> None:
         """The committed Markdown corpus satisfies the checker."""
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
