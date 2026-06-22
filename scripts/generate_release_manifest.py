@@ -105,6 +105,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/natspec-coverage.md"),
     Path("docs/monitoring.md"),
     Path("docs/operator-dashboard-query-model.md"),
+    Path("docs/production-readiness-execution.md"),
     Path("docs/release-readiness.md"),
     Path("docs/protocol-surface.md"),
     Path("docs/custom-errors.md"),

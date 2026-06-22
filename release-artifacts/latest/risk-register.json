@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:42d033d7e115ae172c7ac3ab633971025b9b7dadcffe44fe9199ea206315e9e0"
+      "sha256": "sha256:76a4ffa62b74ae36c70e28d573ef621e02dc7311e9fe78bced65a260a62b2444"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -167,7 +167,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:42d033d7e115ae172c7ac3ab633971025b9b7dadcffe44fe9199ea206315e9e0"
+          "sha256": "sha256:76a4ffa62b74ae36c70e28d573ef621e02dc7311e9fe78bced65a260a62b2444"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -252,7 +252,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:42d033d7e115ae172c7ac3ab633971025b9b7dadcffe44fe9199ea206315e9e0"
+          "sha256": "sha256:76a4ffa62b74ae36c70e28d573ef621e02dc7311e9fe78bced65a260a62b2444"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",

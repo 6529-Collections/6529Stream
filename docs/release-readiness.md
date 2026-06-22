@@ -8,6 +8,10 @@ production release.
 Use this file to answer one question before any release claim: what is already
 proved by committed local evidence, and what still blocks a public beta or
 production release?
+Use [`docs/production-readiness-execution.md`](production-readiness-execution.md)
+for the current remote-main release-candidate execution packet: frozen commit,
+locally executed gates, environment-blocked gates, and the public-beta and
+production evidence rows that still prevent release claims.
 Use [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) as
 the intake runbook for any fork, testnet, live, audit, gas, invariant,
 verification, or signing evidence that updates the public-beta evidence status.
@@ -580,6 +584,7 @@ Core project and governance:
 - [docs/status.md](status.md)
 - [docs/known-blockers.md](known-blockers.md)
 - [docs/release-readiness.md](release-readiness.md)
+- [docs/production-readiness-execution.md](production-readiness-execution.md)
 
 Audit and protocol evidence:
 

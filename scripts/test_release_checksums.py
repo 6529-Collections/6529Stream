@@ -112,6 +112,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("README.md"),
             Path("docs/release-policy.md"),
             Path("docs/public-beta-evidence.md"),
+            Path("docs/production-readiness-execution.md"),
             Path("docs/integrations/README.md"),
             Path("docs/integrations/events-and-indexing.md"),
             Path("docs/tooling.md"),

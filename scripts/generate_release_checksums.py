@@ -141,6 +141,7 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/public-beta-evidence.md"),
     Path("docs/randomizer-operations.md"),
     Path("docs/release-policy.md"),
+    Path("docs/production-readiness-execution.md"),
     Path("docs/release-readiness.md"),
     Path("docs/release-signatures.md"),
     Path("docs/royalty-policy.md"),
