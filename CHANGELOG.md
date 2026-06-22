@@ -11,6 +11,8 @@ the release policy in `docs/release-policy.md`.
   candidate, recording the frozen commit, local gates that passed, local
   toolchain blockers, and the remaining public-beta and production evidence
   rows without changing readiness claims.
+- Added release-manifest and checksum coverage for the production-readiness
+  execution packet so the packet participates in the release integrity chain.
 - Centralized symlink-safe release evidence retained-path validation across
   non-local release evidence, release-signature evidence, marketplace/indexer
   evidence, live deployment-manifest evidence, live metadata-browser evidence,

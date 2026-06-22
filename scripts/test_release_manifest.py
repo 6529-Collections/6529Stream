@@ -179,6 +179,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "royalty-policy.md",
         root / "docs" / "warning-dispositions.md",
         root / "docs" / "natspec-coverage.md",
+        root / "docs" / "production-readiness-execution.md",
         root / "docs" / "release-readiness.md",
         root / "docs" / "protocol-surface.md",
         root / "docs" / "integrations" / "README.md",
