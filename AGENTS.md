@@ -36,16 +36,19 @@ git branch --show-current
 3. If the active checkout contains unrelated changes, use a clean branch or a
    separate worktree from `origin/main` rather than staging mixed local state.
 4. Read the canonical planning files that match the task:
-   - `ops/ROADMAP.md` for gates, maturity status, and long-form issue context.
-   - `ops/EXECUTION_BACKLOG.md` for PR-sized sequencing and readiness lanes.
-   - `ops/AUTONOMOUS_RUN.md` only when continuing the autonomous run or a
-     maintainer asks for durable run-state updates.
-   - `docs/status.md`, `docs/known-blockers.md`, and
-     `docs/release-readiness.md` before changing readiness language.
-   - `docs/tooling.md` before changing commands, CI, release artifacts, or
-     checker behavior.
+   - [ops/ROADMAP.md](ops/ROADMAP.md) for gates, maturity status, and
+     long-form issue context.
+   - [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md) for PR-sized
+     sequencing and readiness lanes.
+   - [ops/AUTONOMOUS_RUN.md](ops/AUTONOMOUS_RUN.md) only when continuing the
+     autonomous run or a maintainer asks for durable run-state updates.
+   - [docs/status.md](docs/status.md), [docs/known-blockers.md](docs/known-blockers.md),
+     and [docs/release-readiness.md](docs/release-readiness.md) before changing
+     readiness language.
+   - [docs/tooling.md](docs/tooling.md) before changing commands, CI, release
+     artifacts, or checker behavior.
 5. If a task touches security-sensitive behavior, read the relevant ADR under
-   `docs/adr/` before changing contracts or tests.
+   [docs/adr/](docs/adr/) before changing contracts or tests.
 
 ## Scope Discipline
 
@@ -53,8 +56,8 @@ git branch --show-current
   formatting churn, release-artifact refreshes, or roadmap reconciliation unless
   they are required for the same change.
 - Do not rewrite vendored OpenZeppelin-style files or legacy interfaces for
-  style-only reasons. Follow `docs/vendored-libraries.md` and the Solidity
-  formatting policy in `docs/tooling.md`.
+  style-only reasons. Follow [docs/vendored-libraries.md](docs/vendored-libraries.md)
+  and the Solidity formatting policy in [docs/tooling.md](docs/tooling.md).
 - Do not edit generated release artifacts by hand. Use the generator scripts and
   commit the deterministic outputs only when the changed inputs require it.
 - Do not mark scaffold, template, or placeholder evidence as reviewed or
@@ -80,17 +83,17 @@ git branch --show-current
 
 ## Documentation Changes
 
-- Keep maturity language honest and consistent with `docs/status.md`,
-  `docs/release-readiness.md`, public-beta blocker reports, and production
-  blocker reports.
+- Keep maturity language honest and consistent with [docs/status.md](docs/status.md),
+  [docs/release-readiness.md](docs/release-readiness.md), public-beta blocker
+  reports, and production blocker reports.
 - Documentation for agents, contributors, auditors, integrators, and operators
   should be written for its specific audience. Do not replace one surface with
   pointers to another when the audiences need different instructions.
 - When moving or renaming docs, update local links and any checker coverage in
   the same PR.
 - Public docs that change setup, validation, integration behavior, release
-  process, or maturity claims may need `CHANGELOG.md` and regenerated release
-  notes, manifest, and checksum artifacts.
+  process, or maturity claims may need [CHANGELOG.md](CHANGELOG.md) and
+  regenerated release notes, manifest, and checksum artifacts.
 
 ## Validation Ladder
 
@@ -129,8 +132,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1
 ```
 
 For release artifacts or evidence changes, follow the generator order in
-`docs/tooling.md`. Regenerate upstream artifacts before release notes, release
-manifest, bytecode proof, and checksum bundles.
+[docs/tooling.md](docs/tooling.md). Regenerate upstream artifacts before
+release notes, release manifest, bytecode proof, and checksum bundles.
 
 ## PR Workflow
 
@@ -155,7 +158,7 @@ manifest, bytecode proof, and checksum bundles.
 ## Security Reports And Secrets
 
 - Do not discuss exploitable vulnerabilities in public issues, PR bodies, or
-  comments. Follow `SECURITY.md`.
+  comments. Follow [SECURITY.md](SECURITY.md).
 - Redact secrets before committing evidence. Redaction must remove values, not
   merely hide them in screenshots or logs.
 - Treat local Anvil, fork, template, and example artifacts as no-secret
