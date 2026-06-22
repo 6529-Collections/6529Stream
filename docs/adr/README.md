@@ -13,6 +13,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0005-randomness.md`](0005-randomness.md) | Accepted | [#14](https://github.com/6529-Collections/6529Stream/issues/14) |
 | [`0006-metadata-freeze.md`](0006-metadata-freeze.md) | Accepted | [#45](https://github.com/6529-Collections/6529Stream/issues/45) |
 | [`0007-upgrade-redeployment.md`](0007-upgrade-redeployment.md) | Accepted | [#53](https://github.com/6529-Collections/6529Stream/issues/53) |
+| [`0008-revenue-splits-and-royalty-resolver.md`](0008-revenue-splits-and-royalty-resolver.md) | Proposed | Pre-launch design request |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, migration impact, test plan, rollout plan,
