@@ -11,11 +11,11 @@ feedback before merge.
 
 ## Current Baseline
 
-- Current branch: `codex/stream-future-proof-specs`.
-- `HEAD` is an ancestor of `origin/main`; staged spec commits should produce a
-  clean PR diff if unrelated local files are left unstaged.
-- Existing revenue/royalty specs have prior OpenRouter approval through
-  iteration 10 in `ops/workstreams/revenue-royalty-specs/`.
+- Current PR branch: `codex/future-proof-metadata-delta`.
+- Branch was created from current `origin/main` to keep the PR diff focused on
+  the post-merge metadata and review-evidence delta.
+- Revenue/royalty feedback from the earlier loop is summarized in this
+  workstream's run log and incorporated into the proposed specs.
 - Entropy specs were recently expanded with NextGen/ADR 0005 lessons, provider
   epochs, stale request handling, and adapter reentrancy requirements.
 
@@ -36,9 +36,9 @@ feedback before merge.
 - External review record from all three requested models is present.
 - All blocking external-review feedback has been addressed.
 - Final external-review state:
-  - GPT-5.5 Pro: `APPROVE` in iteration 6 compact audit.
-  - Opus 4.8: `APPROVE` in iteration 5.
-  - GLM 5.2: `APPROVE` in iteration 5.
+  - GPT-5.5 Pro: `APPROVE` in iteration 8 final tiny metadata-delta audit.
+  - Opus 4.8: `APPROVE` in iteration 8 final tiny metadata-delta audit.
+  - GLM 5.2: `APPROVE` in iteration 8 final tiny metadata-delta audit.
 - Local markdown/sanity checks and `codex-diff-check` clean for touched files.
 - PR diff contains only intended spec/review files.
 

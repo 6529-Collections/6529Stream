@@ -879,8 +879,12 @@ to a different hash algorithm. Content and preservation hashes may be
 algorithm-tagged for long-term agility:
 
 ```text
-hashAlgorithm = KECCAK256 | SHA256 | BLAKE3 | MULTIHASH | OTHER
+hashAlgorithm = HASH_KECCAK256 | HASH_SHA256 | HASH_BLAKE3 | HASH_MULTIHASH
 ```
+
+Launch should not include a generic `OTHER` hash bucket. New hash algorithms
+must be assigned explicit IDs through the append-only hash/canonicalization
+registry and documented in a release manifest or successor schema.
 
 Manifest canonicalization:
 
