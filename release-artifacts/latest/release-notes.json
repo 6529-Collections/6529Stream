@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:2c52f6184a0a1096453478a22100d6e1886e91d5bdce1e8affc9c071428b8cd3",
-      "size_bytes": 73358
+      "sha256": "sha256:8c8a8f0a0f96643c9e06c2037d89ecd64ac3e684c3885aea8f1d074e05b46e06",
+      "size_bytes": 73588
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f355281835430843b0d5512fa2f2792ea394b990520084154f87b4705e471bb1",
+      "sha256": "sha256:f385f259f2725e01ef3cfa6f92b3bc034588fba28b15bd027d3895ba0ca185bd",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -44,6 +44,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.",
       "Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.",
       "Added a production-readiness execution packet for the remote-main release candidate, recording the frozen commit, local gates that passed, local toolchain blockers, and the remaining public-beta and production evidence rows without changing readiness claims.",
       "Added release-manifest and checksum coverage for the production-readiness execution packet so the packet participates in the release integrity chain.",

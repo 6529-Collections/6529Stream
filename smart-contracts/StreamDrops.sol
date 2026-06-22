@@ -494,6 +494,34 @@ contract StreamDrops is Ownable, ReentrancyGuard {
         return keccak256(abi.encode(DROP_ID_TYPEHASH, _signer, _signerEpoch, _nonce, _salt));
     }
 
+    /// @notice Derives a drop ID when the authorization salt carries a ZK nullifier hash.
+    /// @dev Equivalent to `deriveDropId(_signer, _signerEpoch, _nonce, uint256(_nullifierHash))`.
+    /// @param _signer Authorized EOA or ERC-1271 signer contract.
+    /// @param _signerEpoch Signer epoch bound to the authorization.
+    /// @param _nonce Authorization nonce bound to the drop.
+    /// @param _nullifierHash ZK nullifier hash encoded into the authorization salt.
+    /// @return dropId Drop ID consumed by `mintDrop`.
+    function deriveDropIdFromNullifierHash(
+        address _signer,
+        uint256 _signerEpoch,
+        uint256 _nonce,
+        bytes32 _nullifierHash
+    ) public pure returns (bytes32) {
+        return deriveDropId(_signer, _signerEpoch, _nonce, uint256(_nullifierHash));
+    }
+
+    /// @notice Returns the ZK nullifier hash encoded in a drop authorization salt.
+    /// @dev Non-ZK integrations may continue to treat the salt as opaque entropy.
+    /// @param _authorization Drop authorization whose salt may carry a nullifier hash.
+    /// @return nullifierHash Authorization salt interpreted as a bytes32 nullifier hash.
+    function authorizationNullifierHash(DropAuthorization calldata _authorization)
+        public
+        pure
+        returns (bytes32)
+    {
+        return bytes32(_authorization.salt);
+    }
+
     function hashDropAuthorization(DropAuthorization calldata _authorization)
         public
         view

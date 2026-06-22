@@ -4450,12 +4450,12 @@
     "StreamAuctions": {
       "source": "smart-contracts/AuctionContract.sol",
       "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
-      "abi_sha256": "sha256:7658f974c7d38a46d38cbcceea08ae37cba811fd7a98846ac2c9162ad82b3dd4",
-      "abi_entries": 68,
+      "abi_sha256": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
+      "abi_entries": 80,
       "entry_counts": {
         "constructors": 1,
-        "functions": 51,
-        "events": 15,
+        "functions": 61,
+        "events": 17,
         "errors": 1,
         "fallbacks": 0,
         "receives": 0
@@ -4781,6 +4781,102 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "clearCollectionProceedsSplit(uint256)",
+            "kind": "function",
+            "name": "clearCollectionProceedsSplit",
+            "signature": "clearCollectionProceedsSplit(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "clearTokenProceedsSplit(uint256)",
+            "kind": "function",
+            "name": "clearTokenProceedsSplit",
+            "signature": "clearTokenProceedsSplit(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "collectionProceedsSplits(uint256)",
+            "kind": "function",
+            "name": "collectionProceedsSplits",
+            "signature": "collectionProceedsSplits(uint256)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "configured",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contractProceedsSplit()",
+            "kind": "function",
+            "name": "contractProceedsSplit",
+            "signature": "contractProceedsSplit()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "configured",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "curatorsPoolAddress()",
             "kind": "function",
             "name": "curatorsPoolAddress",
@@ -5018,6 +5114,42 @@
             "state_mutability": "view"
           },
           {
+            "key": "proceedsSplitFor(uint256,uint256)",
+            "kind": "function",
+            "name": "proceedsSplitFor",
+            "signature": "proceedsSplitFor(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "registerAuction(bytes32,uint256,uint256,address,uint256,uint256)",
             "kind": "function",
             "name": "registerAuction",
@@ -5054,6 +5186,15 @@
                 "internal_type": "uint256"
               }
             ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "releaseAuctionCuratorCredit()",
+            "kind": "function",
+            "name": "releaseAuctionCuratorCredit",
+            "signature": "releaseAuctionCuratorCredit()",
+            "inputs": [],
             "outputs": [],
             "state_mutability": "nonpayable"
           },
@@ -5131,6 +5272,42 @@
                 "name": "",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenProceedsSplits(uint256)",
+            "kind": "function",
+            "name": "tokenProceedsSplits",
+            "signature": "tokenProceedsSplits(uint256)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "configured",
+                "type": "bool",
+                "internal_type": "bool"
               }
             ],
             "state_mutability": "view"
@@ -5301,6 +5478,61 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "updateCollectionProceedsSplit(uint256,uint16,uint16,uint16)",
+            "kind": "function",
+            "name": "updateCollectionProceedsSplit",
+            "signature": "updateCollectionProceedsSplit(uint256,uint16,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateContractProceedsSplit(uint16,uint16,uint16)",
+            "kind": "function",
+            "name": "updateContractProceedsSplit",
+            "signature": "updateContractProceedsSplit(uint16,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "_posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
             "key": "updateCuratorsPoolAddress(address)",
             "kind": "function",
             "name": "updateCuratorsPoolAddress",
@@ -5375,6 +5607,36 @@
                 "name": "_value",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateTokenProceedsSplit(uint256,uint16,uint16,uint16)",
+            "kind": "function",
+            "name": "updateTokenProceedsSplit",
+            "signature": "updateTokenProceedsSplit(uint256,uint16,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
               }
             ],
             "outputs": [],
@@ -5821,6 +6083,78 @@
             ]
           },
           {
+            "key": "ProceedsSplitCleared(uint8,uint256,address)",
+            "kind": "event",
+            "name": "ProceedsSplitCleared",
+            "signature": "ProceedsSplitCleared(uint8,uint256,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+            "kind": "event",
+            "name": "ProceedsSplitUpdated",
+            "signature": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
             "key": "Withdraw(address,bool,uint256)",
             "kind": "event",
             "name": "Withdraw",
@@ -6208,11 +6542,11 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:9372c5441ad0640f51491c749bb0dd34f173d5fe7249ea1a07304747014e188d",
-      "abi_entries": 122,
+      "abi_sha256": "sha256:500463a781609b5140199d13abc77db8e7cdf6259fbeb5e00a8303869ddd1797",
+      "abi_entries": 123,
       "entry_counts": {
         "constructors": 1,
-        "functions": 76,
+        "functions": 77,
         "events": 11,
         "errors": 34,
         "fallbacks": 0,
@@ -6895,6 +7229,21 @@
               }
             ],
             "state_mutability": "view"
+          },
+          {
+            "key": "isCoreContract()",
+            "kind": "function",
+            "name": "isCoreContract",
+            "signature": "isCoreContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
           },
           {
             "key": "isTokenBurned(uint256)",
@@ -9321,12 +9670,12 @@
     "StreamDrops": {
       "source": "smart-contracts/StreamDrops.sol",
       "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
-      "abi_sha256": "sha256:2314f89858673138e8b9c2e421dd7a727c7e7746d5eb069e58a61699f2f4de6a",
-      "abi_entries": 67,
+      "abi_sha256": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
+      "abi_entries": 82,
       "entry_counts": {
         "constructors": 1,
-        "functions": 57,
-        "events": 8,
+        "functions": 70,
+        "events": 10,
         "errors": 1,
         "fallbacks": 0,
         "receives": 0
@@ -9540,6 +9889,104 @@
             "state_mutability": "view"
           },
           {
+            "key": "authorizationNullifierHash((bytes32,address,address,address,uint256,uint8,bytes32,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))",
+            "kind": "function",
+            "name": "authorizationNullifierHash",
+            "signature": "authorizationNullifierHash((bytes32,address,address,address,uint256,uint8,bytes32,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256))",
+            "inputs": [
+              {
+                "name": "_authorization",
+                "type": "(bytes32,address,address,address,uint256,uint8,bytes32,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)",
+                "internal_type": "struct StreamDrops.DropAuthorization",
+                "components": [
+                  {
+                    "name": "dropId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "recipient",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "tokenDataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "price",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "quantity",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "auctionReservePrice",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "auctionEndTime",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "salt",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "nonce",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "deadline",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "signerEpoch",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
             "key": "cancelDrop(bytes32)",
             "kind": "function",
             "name": "cancelDrop",
@@ -9553,6 +10000,102 @@
             ],
             "outputs": [],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "clearCollectionProceedsSplit(uint256)",
+            "kind": "function",
+            "name": "clearCollectionProceedsSplit",
+            "signature": "clearCollectionProceedsSplit(uint256)",
+            "inputs": [
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "clearTokenProceedsSplit(uint256)",
+            "kind": "function",
+            "name": "clearTokenProceedsSplit",
+            "signature": "clearTokenProceedsSplit(uint256)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "collectionProceedsSplits(uint256)",
+            "kind": "function",
+            "name": "collectionProceedsSplits",
+            "signature": "collectionProceedsSplits(uint256)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "configured",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contractProceedsSplit()",
+            "kind": "function",
+            "name": "contractProceedsSplit",
+            "signature": "contractProceedsSplit()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "configured",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "curatorsPoolAddress()",
@@ -9594,6 +10137,42 @@
                 "name": "_salt",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "deriveDropIdFromNullifierHash(address,uint256,uint256,bytes32)",
+            "kind": "function",
+            "name": "deriveDropIdFromNullifierHash",
+            "signature": "deriveDropIdFromNullifierHash(address,uint256,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "_signer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_signerEpoch",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_nonce",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_nullifierHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
               }
             ],
             "outputs": [
@@ -9848,6 +10427,21 @@
             "state_mutability": "view"
           },
           {
+            "key": "isStreamDropsContract()",
+            "kind": "function",
+            "name": "isStreamDropsContract",
+            "signature": "isStreamDropsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
             "key": "mintDrop((bytes32,address,address,address,uint256,uint8,bytes32,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256),string,bytes)",
             "kind": "function",
             "name": "mintDrop",
@@ -9993,6 +10587,51 @@
               }
             ],
             "state_mutability": "view"
+          },
+          {
+            "key": "proceedsSplitFor(uint256,uint256)",
+            "kind": "function",
+            "name": "proceedsSplitFor",
+            "signature": "proceedsSplitFor(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "releaseFixedPriceCuratorReserveCredit()",
+            "kind": "function",
+            "name": "releaseFixedPriceCuratorReserveCredit",
+            "signature": "releaseFixedPriceCuratorReserveCredit()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
           },
           {
             "key": "renounceOwnership()",
@@ -10220,6 +10859,42 @@
             "state_mutability": "view"
           },
           {
+            "key": "tokenProceedsSplits(uint256)",
+            "kind": "function",
+            "name": "tokenProceedsSplits",
+            "signature": "tokenProceedsSplits(uint256)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "configured",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "totalCuratorReserved()",
             "kind": "function",
             "name": "totalCuratorReserved",
@@ -10400,6 +11075,61 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "updateCollectionProceedsSplit(uint256,uint16,uint16,uint16)",
+            "kind": "function",
+            "name": "updateCollectionProceedsSplit",
+            "signature": "updateCollectionProceedsSplit(uint256,uint16,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "_collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateContractProceedsSplit(uint16,uint16,uint16)",
+            "kind": "function",
+            "name": "updateContractProceedsSplit",
+            "signature": "updateContractProceedsSplit(uint16,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "_posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
             "key": "updateCuratorsPoolAddress(address)",
             "kind": "function",
             "name": "updateCuratorsPoolAddress",
@@ -10454,6 +11184,36 @@
                 "name": "_tsigner",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "updateTokenProceedsSplit(uint256,uint16,uint16,uint16)",
+            "kind": "function",
+            "name": "updateTokenProceedsSplit",
+            "signature": "updateTokenProceedsSplit(uint256,uint16,uint16,uint16)",
+            "inputs": [
+              {
+                "name": "_tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_posterBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "_curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16"
               }
             ],
             "outputs": [],
@@ -10704,6 +11464,78 @@
               },
               {
                 "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ProceedsSplitCleared(uint8,uint256,address)",
+            "kind": "event",
+            "name": "ProceedsSplitCleared",
+            "signature": "ProceedsSplitCleared(uint8,uint256,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+            "kind": "event",
+            "name": "ProceedsSplitUpdated",
+            "signature": "ProceedsSplitUpdated(uint8,uint256,uint16,uint16,uint16,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "posterBps",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "protocolBps",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "curatorBps",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "admin",
                 "type": "address",
                 "internal_type": "address",
                 "indexed": true
@@ -14132,11 +14964,11 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:68fec6cff089c778bc15931ed8ef5d0576f1137e6c059827b71b0cb786055067",
-      "abi_entries": 18,
+      "abi_sha256": "sha256:43c50531bd57a457e239e26b7ddda45028cd1738fd56838dc7efbcac0987264d",
+      "abi_entries": 19,
       "entry_counts": {
         "constructors": 0,
-        "functions": 18,
+        "functions": 19,
         "events": 0,
         "errors": 0,
         "fallbacks": 0,
@@ -14235,6 +15067,21 @@
                 "internal_type": "uint256"
               }
             ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isCoreContract()",
+            "kind": "function",
+            "name": "isCoreContract",
+            "signature": "isCoreContract()",
+            "inputs": [],
             "outputs": [
               {
                 "name": "",
@@ -14566,11 +15413,11 @@
     "IStreamDrops": {
       "source": "smart-contracts/IStreamDrops.sol",
       "artifact_path": "out/IStreamDrops.sol/IStreamDrops.json",
-      "abi_sha256": "sha256:5a087ae1f095ff8c9d66babd2aaa2b76453f03c5a7c8791da13c9d33d4e8a416",
-      "abi_entries": 5,
+      "abi_sha256": "sha256:481ef1bd67f9a47da7c6e71f095991dd74a3b09664bca7dc6e52df5ba988400e",
+      "abi_entries": 6,
       "entry_counts": {
         "constructors": 0,
-        "functions": 5,
+        "functions": 6,
         "events": 0,
         "errors": 0,
         "fallbacks": 0,
@@ -14579,6 +15426,21 @@
       "entries": {
         "constructors": [],
         "functions": [
+          {
+            "key": "isStreamDropsContract()",
+            "kind": "function",
+            "name": "isStreamDropsContract",
+            "signature": "isStreamDropsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
           {
             "key": "retrieveAuctionPoster(uint256)",
             "kind": "function",
