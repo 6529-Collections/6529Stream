@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a root `AGENTS.md` operating guide for automated coding agents,
+  covering task startup, scope discipline, validation choices, PR/bot workflow,
+  and security boundaries, with markdown-link checker coverage for the new
+  guide.
 - Added a production-readiness execution packet for the remote-main release
   candidate, recording the frozen commit, local gates that passed, local
   toolchain blockers, and the remaining public-beta and production evidence
