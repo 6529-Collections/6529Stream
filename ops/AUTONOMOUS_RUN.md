@@ -37,18 +37,21 @@ evidence, and audit/readiness gates.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/v1-outside-core-launch-scope` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/622` |
-| Active issue | No single tracker issue; user-directed v1 contract roadmap run. |
-| Active PR | V1 outside-Core scope PR pending. |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/624 |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/623 |
 | Next issue | Split factory and split wallet skeleton after v1 scope reconciliation. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-23 13:13 UTC` |
+| Last updated | `2026-06-23 13:28 UTC` |
 
 ## Current Run Notes
 
 - User authorized autonomous execution without permission prompts.
 - Use heavy subagents for independent review, sequencing, and verification.
+- The v1 contract roadmap run is user-directed overall. PR #623 now uses issue
+  #624 as its topic tracker so the machine-checked state/backlog pair has a
+  concrete active issue while this scope reconciliation is open.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
 - Current topic branch reconciles the v1-required outside-Core scope for

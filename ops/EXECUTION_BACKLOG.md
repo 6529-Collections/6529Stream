@@ -203,6 +203,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 
 | Order | Item | Gate | Main Blocker | Intended PR |
 | --- | --- | --- | --- | --- |
+| 0 | `MAP-002` | A/G | User-directed v1 launch scope | Active PR #623 / issue #624 on branch `codex/v1-outside-core-launch-scope`; reconcile v1 outside-Core launch requirements before implementation satellites |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -235,6 +236,37 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | 30 | `INT-009` | G | Integration readiness | Add Electron security and wallet integration guide |
 
 ## 4. Detailed PR Items
+
+### MAP-002: Reconcile v1 outside-Core launch scope
+
+| Item | Title | Gate | Status |
+| --- | --- | --- | --- |
+| `MAP-002` | Reconcile v1 outside-Core launch scope | A/G | Active PR #623 / issue #624 on branch `codex/v1-outside-core-launch-scope` |
+
+Status: Active PR #623 / issue #624 on branch
+`codex/v1-outside-core-launch-scope`.
+
+Gate: A/G.
+
+Problem: The maintainer rejected deferring approved-standard ERC-20 primary
+settlement, C2PA/IIIF/PREMIS-style records, richer preservation satellites,
+museum-grade metadata depth, and the entropy fallback decision. The roadmap and
+specs needed one consistent launch target before implementation satellites
+begin.
+
+Outcome: Reconcile the v1 launch architecture, roadmap, conformance matrix,
+revenue/royalty ADR, metadata, preservation, entropy, and release evidence
+language around outside-Core v1 commitments.
+
+Required checks: autonomous-state consistency, Markdown links, changelog gate,
+release artifact generator checks, release artifact verification, and
+`codex-diff-check` over the changed docs, ops, and release artifact paths.
+
+Acceptance criteria: the docs agree that v1 ERC-20 primary settlement is an
+outside-Core adapter/module requirement for approved standard assets; museum
+metadata and preservation records are real v1 surfaces; preservation satellites
+have launch conformance gates; and the entropy fallback decision is a retained
+release-gated decision.
 
 ### MAP-001: Add 10/10 Execution Backlog
 
@@ -3399,7 +3431,7 @@ unless an external dependency changes.
 | `EXT-035` | Add Sepolia evidence preflight checker | E/G | Merged in PR #580; issue #579 closed completed; validates committed Sepolia deployment/evidence prerequisites and optional operator environment-variable presence without emitting values, supporting future #217, #221, and #222 evidence runs without closing those trackers |
 | `EXT-036` | Reject symlinked testnet deployment retained artifacts | E/G | Merged in PR #604; issue #603 closed completed with `testnet_deployment_rehearsal` retained-artifact hardening so future pending/reviewed Sepolia transcripts, broadcasts, manifests, address books, and gas/invariant summaries cannot pass through symlinked files, while keeping issue #217 open until real reviewed testnet evidence exists |
 | `EXT-037` | Reject symlinked release evidence retained paths | E/G | Merged in PR #606; issue #605 closed completed with generic non-local release evidence, release-signature evidence, marketplace/indexer evidence, and live deployment-manifest retained path validation hardened against symlinked files and symlinked intermediate directories, while keeping #424, #227, and other real-evidence trackers open |
-| `EXT-038` | Centralize symlink-safe release evidence path resolution | E/G | Active PR #608 / issue #607 on branch `codex/release-evidence-path-helper`; extracts the shared symlink-safe retained-path helper for non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention evidence while keeping external evidence trackers open until real reviewed evidence exists |
+| `EXT-038` | Centralize symlink-safe release evidence path resolution | E/G | Merged in PR #608; issue #607 closed completed with the shared symlink-safe retained-path helper for non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention evidence while keeping external evidence trackers open until real reviewed evidence exists |
 
 ### Adversarial Testing
 

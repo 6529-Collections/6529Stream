@@ -27,7 +27,10 @@ The current draft makes these launch requirements explicit:
 - Manager skill PR #621 merged.
 - Manager skill follow-up PR #622 merged.
 - Current topic branch: `codex/v1-outside-core-launch-scope`.
-- Current topic branch can now be rebased onto `origin/main`.
+- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/624.
+- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/623.
+- Latest CI follow-up patches durable active-PR state from pending text to the
+  actual PR URL so autonomous-state checks accept the opened PR.
 
 ## Subagent Findings To Carry
 

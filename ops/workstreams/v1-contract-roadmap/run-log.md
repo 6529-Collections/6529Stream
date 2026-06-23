@@ -58,3 +58,19 @@
   - required release checks for the aggregate metadata ABI/bytecode ceiling;
   - clarified that escrow registry failures and inactive/deprecated assets
     revert before owed-credit mutation for new non-native primary revenue.
+- Opened PR #623 at
+  https://github.com/6529-Collections/6529Stream/pull/623 and requested
+  CodeRabbit review.
+- Created tracker issue #624 at
+  https://github.com/6529-Collections/6529Stream/issues/624 and linked PR #623
+  with `Closes #624` so autonomous-state and backlog checks have an issue-backed
+  active PR row.
+- CI caught that `ops/AUTONOMOUS_RUN.md` still recorded the active PR as
+  pending prose after the PR had been opened. Patched the active PR field to the
+  concrete PR URL before rerunning autonomous-state and release evidence checks.
+- Local autonomous-state validation also required an issue-backed active backlog
+  row for the open PR, so `MAP-002` now records PR #623 / issue #624 on the
+  current branch.
+- The same validation pass found stale backlog status for already-merged PR
+  #608. Updated `EXT-038` from active to merged so PR #623 is the only active
+  PR marker.
