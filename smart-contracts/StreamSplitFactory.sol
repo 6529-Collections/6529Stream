@@ -7,17 +7,17 @@ import "./StreamSplitWallet.sol";
 /// @notice Creates immutable split profiles and their deterministic native split wallets.
 contract StreamSplitFactory is IStreamSplitFactory {
     /// @notice Domain separator label for v1 split profile identifiers.
-    bytes32 public constant PROFILE_DOMAIN = keccak256("6529STREAM_SPLIT_PROFILE_V1");
+    bytes32 public constant override PROFILE_DOMAIN = keccak256("6529STREAM_SPLIT_PROFILE_V1");
     /// @notice Split profile schema version used in profile identifiers and events.
-    uint16 public constant SCHEMA_VERSION = 1;
+    uint16 public constant override SCHEMA_VERSION = 1;
     /// @notice Split wallet implementation version used in profile identifiers and events.
-    uint16 public constant WALLET_VERSION = 1;
+    uint16 public constant override WALLET_VERSION = 1;
     /// @notice Maximum canonical split entries accepted by one profile.
-    uint16 public constant MAX_ENTRIES = 64;
+    uint16 public constant override MAX_ENTRIES = 64;
     /// @notice Maximum unique recipient accounts accepted by one profile.
-    uint16 public constant MAX_UNIQUE_ACCOUNTS = 64;
+    uint16 public constant override MAX_UNIQUE_ACCOUNTS = 64;
     /// @notice Parts-per-million denominator for split shares.
-    uint32 public constant SHARE_DENOMINATOR_PPM = 1_000_000;
+    uint32 public constant override SHARE_DENOMINATOR_PPM = 1_000_000;
 
     struct Profile {
         bool exists;
@@ -32,12 +32,12 @@ contract StreamSplitFactory is IStreamSplitFactory {
     mapping(bytes32 => Profile) private _profiles;
 
     /// @notice Returns the creation-code hash used for deterministic wallet addresses.
-    function splitWalletInitCodeHash() public pure returns (bytes32) {
+    function splitWalletInitCodeHash() public pure override returns (bytes32) {
         return keccak256(type(StreamSplitWallet).creationCode);
     }
 
     /// @notice Returns the runtime-code hash accepted for deployed split wallets.
-    function splitWalletRuntimeCodeHash() public pure returns (bytes32) {
+    function splitWalletRuntimeCodeHash() public pure override returns (bytes32) {
         return keccak256(type(StreamSplitWallet).runtimeCode);
     }
 
@@ -45,7 +45,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     function createProfile(
         IStreamSplitWallet.SplitEntry[] calldata entries,
         bytes32 metadataURIHash
-    ) external returns (bytes32 profileId, address wallet) {
+    ) external override returns (bytes32 profileId, address wallet) {
         (
             IStreamSplitWallet.SplitEntry[] memory canonicalEntries,
             address[] memory accounts,
@@ -93,7 +93,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     }
 
     /// @notice Deploys the deterministic wallet for an existing profile if it is not deployed.
-    function deployWallet(bytes32 profileId) external returns (address wallet) {
+    function deployWallet(bytes32 profileId) external override returns (address wallet) {
         if (!_profiles[profileId].exists) {
             revert UnknownProfile(profileId);
         }
@@ -101,22 +101,22 @@ contract StreamSplitFactory is IStreamSplitFactory {
     }
 
     /// @notice Returns whether a split profile has been created by this factory.
-    function profileExists(bytes32 profileId) external view returns (bool) {
+    function profileExists(bytes32 profileId) external view override returns (bool) {
         return _profiles[profileId].exists;
     }
 
     /// @notice Returns the immutable metadata URI hash committed by a split profile.
-    function profileMetadataURIHash(bytes32 profileId) external view returns (bytes32) {
+    function profileMetadataURIHash(bytes32 profileId) external view override returns (bytes32) {
         return _profiles[profileId].metadataURIHash;
     }
 
     /// @notice Returns the canonical entry hash committed by a split profile.
-    function profileEntriesHash(bytes32 profileId) external view returns (bytes32) {
+    function profileEntriesHash(bytes32 profileId) external view override returns (bytes32) {
         return _profiles[profileId].entriesHash;
     }
 
     /// @notice Returns the CREATE2 wallet address for a profile whether or not it is deployed.
-    function walletFor(bytes32 profileId) public view returns (address) {
+    function walletFor(bytes32 profileId) public view override returns (address) {
         return address(
             uint160(
                 uint256(
@@ -134,6 +134,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     function profileIdFor(IStreamSplitWallet.SplitEntry[] calldata entries, bytes32 metadataURIHash)
         external
         view
+        override
         returns (bytes32)
     {
         (,,, bytes32 entriesHash) = _canonicalize(entries);
@@ -141,7 +142,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     }
 
     /// @notice Returns the number of canonical entries stored for a profile.
-    function profileEntryCount(bytes32 profileId) external view returns (uint256) {
+    function profileEntryCount(bytes32 profileId) external view override returns (uint256) {
         return _profiles[profileId].entries.length;
     }
 
@@ -149,6 +150,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     function profileEntry(bytes32 profileId, uint256 index)
         external
         view
+        override
         returns (address account, uint32 sharePpm, bytes32 labelId)
     {
         IStreamSplitWallet.SplitEntry storage splitEntry = _profiles[profileId].entries[index];
@@ -156,7 +158,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     }
 
     /// @notice Returns the number of unique accounts after label-level shares are aggregated.
-    function profileUniqueAccountCount(bytes32 profileId) external view returns (uint256) {
+    function profileUniqueAccountCount(bytes32 profileId) external view override returns (uint256) {
         return _profiles[profileId].accounts.length;
     }
 
@@ -164,6 +166,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
     function profileUniqueAccount(bytes32 profileId, uint256 index)
         external
         view
+        override
         returns (address account, uint32 sharePpm)
     {
         Profile storage profile = _profiles[profileId];

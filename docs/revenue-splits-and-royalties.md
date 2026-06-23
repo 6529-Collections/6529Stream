@@ -1875,7 +1875,7 @@ event SplitProfileCreated(
 
 event SplitProfileEntry(
     bytes32 indexed profileId,
-    uint16 index,
+    uint16 indexed index,
     address indexed account,
     uint32 sharePpm,
     bytes32 labelId

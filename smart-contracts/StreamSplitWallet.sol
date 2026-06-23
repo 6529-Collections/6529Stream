@@ -8,30 +8,30 @@ import "./ReentrancyGuard.sol";
 /// @notice Pull-payment split wallet for one immutable split profile.
 contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     /// @notice Parts-per-million denominator for split shares.
-    uint32 public constant SHARE_DENOMINATOR_PPM = 1_000_000;
+    uint32 public constant override SHARE_DENOMINATOR_PPM = 1_000_000;
     /// @notice Factory that deployed this wallet and is allowed to initialize it once.
-    address public factory;
+    address public override factory;
     /// @notice Whether the factory has initialized the immutable split profile.
-    bool public initialized;
+    bool public override initialized;
     /// @notice Profile identifier that binds wallet code, entries, metadata, chain, and factory.
-    bytes32 public profileId;
+    bytes32 public override profileId;
     /// @notice Canonical hash of the split entries used to initialize this wallet.
-    bytes32 public entriesHash;
+    bytes32 public override entriesHash;
     /// @notice Hash of the off-chain profile metadata URI for catalogue and provenance material.
-    bytes32 public metadataURIHash;
+    bytes32 public override metadataURIHash;
 
     SplitEntry[] private _entries;
     address[] private _uniqueAccounts;
     /// @notice Aggregate parts-per-million share for a unique account across all labels.
-    mapping(address => uint32) public aggregateSharePpm;
+    mapping(address => uint32) public override aggregateSharePpm;
     /// @notice Amount released for an account by asset address.
-    mapping(address => mapping(address => uint256)) public accountReleased;
+    mapping(address => mapping(address => uint256)) public override accountReleased;
     /// @notice Total amount released by asset address.
-    mapping(address => uint256) public totalReleased;
+    mapping(address => uint256) public override totalReleased;
     /// @notice Whether an asset observation has emitted its initialization event.
-    mapping(address => bool) public assetObservationInitialized;
+    mapping(address => bool) public override assetObservationInitialized;
     /// @notice Last observed cumulative receipts value recorded through syncAsset or release.
-    mapping(address => uint256) public lastObservedReceived;
+    mapping(address => uint256) public override lastObservedReceived;
 
     constructor() {
         factory = msg.sender;
@@ -48,7 +48,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         SplitEntry[] calldata entries_,
         address[] calldata accounts_,
         uint32[] calldata aggregateSharePpm_
-    ) external {
+    ) external override {
         if (msg.sender != factory) {
             revert UnauthorizedInitializer(msg.sender);
         }
@@ -107,7 +107,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     }
 
     /// @notice Returns the number of canonical label-level split entries.
-    function entryCount() external view returns (uint256) {
+    function entryCount() external view override returns (uint256) {
         return _entries.length;
     }
 
@@ -115,6 +115,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     function entry(uint256 index)
         external
         view
+        override
         returns (address account, uint32 sharePpm, bytes32 labelId)
     {
         SplitEntry storage splitEntry = _entries[index];
@@ -122,24 +123,29 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     }
 
     /// @notice Returns the number of unique accounts after label shares are aggregated.
-    function uniqueAccountCount() external view returns (uint256) {
+    function uniqueAccountCount() external view override returns (uint256) {
         return _uniqueAccounts.length;
     }
 
     /// @notice Returns one unique account and its aggregate share by sorted account index.
-    function uniqueAccount(uint256 index) external view returns (address account, uint32 sharePpm) {
+    function uniqueAccount(uint256 index)
+        external
+        view
+        override
+        returns (address account, uint32 sharePpm)
+    {
         account = _uniqueAccounts[index];
         sharePpm = aggregateSharePpm[account];
     }
 
     /// @notice Returns cumulative native receipts observed as current balance plus released funds.
-    function observedReceived(address asset) public view returns (uint256) {
+    function observedReceived(address asset) public view override returns (uint256) {
         _requireNativeAsset(asset);
         return address(this).balance + totalReleased[asset];
     }
 
     /// @notice Returns the currently releasable native amount for an account.
-    function releasable(address asset, address account) public view returns (uint256) {
+    function releasable(address asset, address account) public view override returns (uint256) {
         uint32 sharePpm = aggregateSharePpm[account];
         if (sharePpm == 0) {
             _requireNativeAsset(asset);
@@ -155,7 +161,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     }
 
     /// @notice Returns unreleasable native dust caused by integer division rounding.
-    function roundingDust(address asset) external view returns (uint256) {
+    function roundingDust(address asset) external view override returns (uint256) {
         _requireNativeAsset(asset);
         uint256 totalReleasable = 0;
         for (uint256 i = 0; i < _uniqueAccounts.length; i++) {
@@ -168,7 +174,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     }
 
     /// @notice Emits the current cumulative receipt observation for the native asset.
-    function syncAsset(address asset) external nonReentrant returns (uint256 observed) {
+    function syncAsset(address asset) external override nonReentrant returns (uint256 observed) {
         observed = observedReceived(asset);
         _recordObservation(asset, observed);
     }
@@ -176,6 +182,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
     /// @notice Pulls releasable native funds for an account to that account or its chosen recipient.
     function release(address asset, address account, address payable recipient)
         external
+        override
         nonReentrant
         returns (uint256 amount)
     {

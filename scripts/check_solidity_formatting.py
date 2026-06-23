@@ -189,6 +189,18 @@ def format_output_sample(output: str, limit: int = 80) -> str:
     return f"{sample}\n... truncated {len(lines) - limit} additional line(s)"
 
 
+def required_formatting_diff_files(output: str) -> list[str]:
+    parsed_diff_files = parse_fmt_diff_files(output)
+    diff_files = filter_line_ending_only_fmt_diffs(output, parsed_diff_files)
+    if not diff_files and not parsed_diff_files:
+        raise SolidityFormattingError(
+            "formatting-required Solidity files failed forge fmt without "
+            "parseable formatting diffs:\n\n"
+            + format_output_sample(output)
+        )
+    return diff_files
+
+
 def check_solidity_formatting(repo_root: Path, forge_bin: str) -> None:
     repo_root = repo_root.resolve()
     env = forge_environment()
@@ -198,8 +210,7 @@ def check_solidity_formatting(repo_root: Path, forge_bin: str) -> None:
 
     required_result = run_forge_fmt_check(repo_root, forge, required_files, env)
     if required_result.returncode != 0:
-        diff_files = parse_fmt_diff_files(required_result.stdout)
-        diff_files = filter_line_ending_only_fmt_diffs(required_result.stdout, diff_files)
+        diff_files = required_formatting_diff_files(required_result.stdout)
         if not diff_files:
             diff_files = []
         else:

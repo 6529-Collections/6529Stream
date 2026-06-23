@@ -58,6 +58,16 @@ Diff in smart-contracts\\Address.sol:
             ["smart-contracts/StreamSplitWallet.sol"],
         )
 
+    def test_required_formatting_failure_without_parseable_diff_is_reported(self) -> None:
+        output = """Error: failed to parse Solidity source
+not a diff header
+"""
+
+        with self.assertRaisesRegex(
+            checker.SolidityFormattingError, "without parseable formatting diffs"
+        ):
+            checker.required_formatting_diff_files(output)
+
     def test_required_files_exclude_vendored_exemptions(self) -> None:
         files = [
             "smart-contracts/Address.sol",
