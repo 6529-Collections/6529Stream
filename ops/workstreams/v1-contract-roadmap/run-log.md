@@ -74,3 +74,5 @@
 - The same validation pass found stale backlog status for already-merged PR
   #608. Updated `EXT-038` from active to merged so PR #623 is the only active
   PR marker.
+- Addressed CodeRabbit's sole nitpick on PR #623 by rewording the entropy
+  coordinator open-decision list to avoid repeated sentence openings.

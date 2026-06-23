@@ -1642,8 +1642,8 @@ Renderer integration tests:
 3. Whether an instant provider should be included in v1 or deferred.
 4. Whether the v1 fallback decision ships reviewed ARRNG, reviewed Pyth, or a
    reviewed VRF-only launch exception.
-5. Whether Core or Metadata Router should emit the ERC-4906-compatible refresh
-   event after entropy finalization.
+5. Should Core or Metadata Router emit the ERC-4906-compatible refresh event
+   after entropy finalization?
 
 The preferred answers for a high-value launch are: configure and freeze entropy
 before sale start, allow operator/admin requests by default, defer instant
