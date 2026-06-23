@@ -12223,6 +12223,1481 @@
         "fallbacks": [],
         "receives": []
       }
+    },
+    "StreamSplitFactory": {
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+      "abi_sha256": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8",
+      "abi_entries": 30,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 19,
+        "events": 4,
+        "errors": 7,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "MAX_ENTRIES()",
+            "kind": "function",
+            "name": "MAX_ENTRIES",
+            "signature": "MAX_ENTRIES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_UNIQUE_ACCOUNTS()",
+            "kind": "function",
+            "name": "MAX_UNIQUE_ACCOUNTS",
+            "signature": "MAX_UNIQUE_ACCOUNTS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "PROFILE_DOMAIN()",
+            "kind": "function",
+            "name": "PROFILE_DOMAIN",
+            "signature": "PROFILE_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SCHEMA_VERSION()",
+            "kind": "function",
+            "name": "SCHEMA_VERSION",
+            "signature": "SCHEMA_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SHARE_DENOMINATOR_PPM()",
+            "kind": "function",
+            "name": "SHARE_DENOMINATOR_PPM",
+            "signature": "SHARE_DENOMINATOR_PPM()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "WALLET_VERSION()",
+            "kind": "function",
+            "name": "WALLET_VERSION",
+            "signature": "WALLET_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "createProfile((address,uint32,bytes32)[],bytes32)",
+            "kind": "function",
+            "name": "createProfile",
+            "signature": "createProfile((address,uint32,bytes32)[],bytes32)",
+            "inputs": [
+              {
+                "name": "entries",
+                "type": "(address,uint32,bytes32)[]",
+                "internal_type": "struct IStreamSplitWallet.SplitEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "deployWallet(bytes32)",
+            "kind": "function",
+            "name": "deployWallet",
+            "signature": "deployWallet(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "profileEntriesHash(bytes32)",
+            "kind": "function",
+            "name": "profileEntriesHash",
+            "signature": "profileEntriesHash(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileEntry(bytes32,uint256)",
+            "kind": "function",
+            "name": "profileEntry",
+            "signature": "profileEntry(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileEntryCount(bytes32)",
+            "kind": "function",
+            "name": "profileEntryCount",
+            "signature": "profileEntryCount(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileExists(bytes32)",
+            "kind": "function",
+            "name": "profileExists",
+            "signature": "profileExists(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+            "kind": "function",
+            "name": "profileIdFor",
+            "signature": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+            "inputs": [
+              {
+                "name": "entries",
+                "type": "(address,uint32,bytes32)[]",
+                "internal_type": "struct IStreamSplitWallet.SplitEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileMetadataURIHash(bytes32)",
+            "kind": "function",
+            "name": "profileMetadataURIHash",
+            "signature": "profileMetadataURIHash(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileUniqueAccount(bytes32,uint256)",
+            "kind": "function",
+            "name": "profileUniqueAccount",
+            "signature": "profileUniqueAccount(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileUniqueAccountCount(bytes32)",
+            "kind": "function",
+            "name": "profileUniqueAccountCount",
+            "signature": "profileUniqueAccountCount(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "splitWalletInitCodeHash()",
+            "kind": "function",
+            "name": "splitWalletInitCodeHash",
+            "signature": "splitWalletInitCodeHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "splitWalletRuntimeCodeHash()",
+            "kind": "function",
+            "name": "splitWalletRuntimeCodeHash",
+            "signature": "splitWalletRuntimeCodeHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "walletFor(bytes32)",
+            "kind": "function",
+            "name": "walletFor",
+            "signature": "walletFor(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+            "kind": "event",
+            "name": "SplitProfileCreated",
+            "signature": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "walletVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+            "kind": "event",
+            "name": "SplitProfileEntry",
+            "signature": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "index",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+            "kind": "event",
+            "name": "SplitWalletDeployed",
+            "signature": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "walletVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "initCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "runtimeCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+            "kind": "event",
+            "name": "SplitWalletDiscovered",
+            "signature": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "walletVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "initCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "runtimeCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "DuplicateSplitEntry(address,bytes32)",
+            "kind": "error",
+            "name": "DuplicateSplitEntry",
+            "signature": "DuplicateSplitEntry(address,bytes32)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidEntryCount(uint256)",
+            "kind": "error",
+            "name": "InvalidEntryCount",
+            "signature": "InvalidEntryCount(uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitAccount(uint256)",
+            "kind": "error",
+            "name": "InvalidSplitAccount",
+            "signature": "InvalidSplitAccount(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitShare(uint256)",
+            "kind": "error",
+            "name": "InvalidSplitShare",
+            "signature": "InvalidSplitShare(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitTotal(uint256)",
+            "kind": "error",
+            "name": "InvalidSplitTotal",
+            "signature": "InvalidSplitTotal(uint256)",
+            "inputs": [
+              {
+                "name": "totalSharePpm",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "SplitWalletAddressPoisoned(bytes32,address)",
+            "kind": "error",
+            "name": "SplitWalletAddressPoisoned",
+            "signature": "SplitWalletAddressPoisoned(bytes32,address)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnknownProfile(bytes32)",
+            "kind": "error",
+            "name": "UnknownProfile",
+            "signature": "UnknownProfile(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "StreamSplitWallet": {
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "artifact_path": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+      "abi_sha256": "sha256:006c5120df6bf011e4f594cc17aa65bc454ecfc69a7ca0dd44e2f050d745f31a",
+      "abi_entries": 37,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 21,
+        "events": 3,
+        "errors": 11,
+        "fallbacks": 0,
+        "receives": 1
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor()",
+            "kind": "constructor",
+            "signature": "constructor()",
+            "inputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "SHARE_DENOMINATOR_PPM()",
+            "kind": "function",
+            "name": "SHARE_DENOMINATOR_PPM",
+            "signature": "SHARE_DENOMINATOR_PPM()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "accountReleased(address,address)",
+            "kind": "function",
+            "name": "accountReleased",
+            "signature": "accountReleased(address,address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "aggregateSharePpm(address)",
+            "kind": "function",
+            "name": "aggregateSharePpm",
+            "signature": "aggregateSharePpm(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetObservationInitialized(address)",
+            "kind": "function",
+            "name": "assetObservationInitialized",
+            "signature": "assetObservationInitialized(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "entriesHash()",
+            "kind": "function",
+            "name": "entriesHash",
+            "signature": "entriesHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "entry(uint256)",
+            "kind": "function",
+            "name": "entry",
+            "signature": "entry(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "entryCount()",
+            "kind": "function",
+            "name": "entryCount",
+            "signature": "entryCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "factory()",
+            "kind": "function",
+            "name": "factory",
+            "signature": "factory()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])",
+            "kind": "function",
+            "name": "initialize",
+            "signature": "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])",
+            "inputs": [
+              {
+                "name": "profileId_",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "entriesHash_",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "metadataURIHash_",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "entries_",
+                "type": "(address,uint32,bytes32)[]",
+                "internal_type": "struct IStreamSplitWallet.SplitEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "accounts_",
+                "type": "address[]",
+                "internal_type": "address[]"
+              },
+              {
+                "name": "aggregateSharePpm_",
+                "type": "uint32[]",
+                "internal_type": "uint32[]"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "initialized()",
+            "kind": "function",
+            "name": "initialized",
+            "signature": "initialized()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "lastObservedReceived(address)",
+            "kind": "function",
+            "name": "lastObservedReceived",
+            "signature": "lastObservedReceived(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "metadataURIHash()",
+            "kind": "function",
+            "name": "metadataURIHash",
+            "signature": "metadataURIHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "observedReceived(address)",
+            "kind": "function",
+            "name": "observedReceived",
+            "signature": "observedReceived(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileId()",
+            "kind": "function",
+            "name": "profileId",
+            "signature": "profileId()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "releasable(address,address)",
+            "kind": "function",
+            "name": "releasable",
+            "signature": "releasable(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "release(address,address,address)",
+            "kind": "function",
+            "name": "release",
+            "signature": "release(address,address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address payable"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "roundingDust(address)",
+            "kind": "function",
+            "name": "roundingDust",
+            "signature": "roundingDust(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "syncAsset(address)",
+            "kind": "function",
+            "name": "syncAsset",
+            "signature": "syncAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "observed",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "totalReleased(address)",
+            "kind": "function",
+            "name": "totalReleased",
+            "signature": "totalReleased(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "uniqueAccount(uint256)",
+            "kind": "function",
+            "name": "uniqueAccount",
+            "signature": "uniqueAccount(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "uniqueAccountCount()",
+            "kind": "function",
+            "name": "uniqueAccountCount",
+            "signature": "uniqueAccountCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "AssetObservationInitialized(bytes32,address,uint256)",
+            "kind": "event",
+            "name": "AssetObservationInitialized",
+            "signature": "AssetObservationInitialized(bytes32,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "AssetSynced(bytes32,address,uint256,uint256)",
+            "kind": "event",
+            "name": "AssetSynced",
+            "signature": "AssetSynced(bytes32,address,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "previousObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
+            "kind": "event",
+            "name": "NativeReleased",
+            "signature": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "totalReleased",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AlreadyInitialized()",
+            "kind": "error",
+            "name": "AlreadyInitialized",
+            "signature": "AlreadyInitialized()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidInitializationInput()",
+            "kind": "error",
+            "name": "InvalidInitializationInput",
+            "signature": "InvalidInitializationInput()",
+            "inputs": []
+          },
+          {
+            "key": "NativeReceiptInvariantBroken(uint256,uint256)",
+            "kind": "error",
+            "name": "NativeReceiptInvariantBroken",
+            "signature": "NativeReceiptInvariantBroken(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "expectedObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "NativeTransferFailed(address,uint256)",
+            "kind": "error",
+            "name": "NativeTransferFailed",
+            "signature": "NativeTransferFailed(address,uint256)",
+            "inputs": [
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "NoReleasableFunds(address,address)",
+            "kind": "error",
+            "name": "NoReleasableFunds",
+            "signature": "NoReleasableFunds(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ObservedReceiptsDecreased(address,uint256,uint256)",
+            "kind": "error",
+            "name": "ObservedReceiptsDecreased",
+            "signature": "ObservedReceiptsDecreased(address,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "previousObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ReentrancyGuardReentrantCall()",
+            "kind": "error",
+            "name": "ReentrancyGuardReentrantCall",
+            "signature": "ReentrancyGuardReentrantCall()",
+            "inputs": []
+          },
+          {
+            "key": "UnauthorizedInitializer(address)",
+            "kind": "error",
+            "name": "UnauthorizedInitializer",
+            "signature": "UnauthorizedInitializer(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedReleaseRecipient(address,address,address)",
+            "kind": "error",
+            "name": "UnauthorizedReleaseRecipient",
+            "signature": "UnauthorizedReleaseRecipient(address,address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedAsset(address)",
+            "kind": "error",
+            "name": "UnsupportedAsset",
+            "signature": "UnsupportedAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ZeroRecipient()",
+            "kind": "error",
+            "name": "ZeroRecipient",
+            "signature": "ZeroRecipient()",
+            "inputs": []
+          }
+        ],
+        "fallbacks": [],
+        "receives": [
+          {
+            "key": "receive",
+            "kind": "receive",
+            "state_mutability": "payable"
+          }
+        ]
+      }
     }
   },
   "interfaces": {
@@ -15752,6 +17227,1460 @@
         ],
         "events": [],
         "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamSplitFactory": {
+      "source": "smart-contracts/IStreamSplitFactory.sol",
+      "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
+      "abi_sha256": "sha256:8c8a540d78c47583c529952eb05e58a1c3ed5e63edbcd2663e72e6974574fe03",
+      "abi_entries": 30,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 19,
+        "events": 4,
+        "errors": 7,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "MAX_ENTRIES()",
+            "kind": "function",
+            "name": "MAX_ENTRIES",
+            "signature": "MAX_ENTRIES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "MAX_UNIQUE_ACCOUNTS()",
+            "kind": "function",
+            "name": "MAX_UNIQUE_ACCOUNTS",
+            "signature": "MAX_UNIQUE_ACCOUNTS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "PROFILE_DOMAIN()",
+            "kind": "function",
+            "name": "PROFILE_DOMAIN",
+            "signature": "PROFILE_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "SCHEMA_VERSION()",
+            "kind": "function",
+            "name": "SCHEMA_VERSION",
+            "signature": "SCHEMA_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "SHARE_DENOMINATOR_PPM()",
+            "kind": "function",
+            "name": "SHARE_DENOMINATOR_PPM",
+            "signature": "SHARE_DENOMINATOR_PPM()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "WALLET_VERSION()",
+            "kind": "function",
+            "name": "WALLET_VERSION",
+            "signature": "WALLET_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "createProfile((address,uint32,bytes32)[],bytes32)",
+            "kind": "function",
+            "name": "createProfile",
+            "signature": "createProfile((address,uint32,bytes32)[],bytes32)",
+            "inputs": [
+              {
+                "name": "entries",
+                "type": "(address,uint32,bytes32)[]",
+                "internal_type": "struct IStreamSplitWallet.SplitEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "deployWallet(bytes32)",
+            "kind": "function",
+            "name": "deployWallet",
+            "signature": "deployWallet(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "profileEntriesHash(bytes32)",
+            "kind": "function",
+            "name": "profileEntriesHash",
+            "signature": "profileEntriesHash(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileEntry(bytes32,uint256)",
+            "kind": "function",
+            "name": "profileEntry",
+            "signature": "profileEntry(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileEntryCount(bytes32)",
+            "kind": "function",
+            "name": "profileEntryCount",
+            "signature": "profileEntryCount(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileExists(bytes32)",
+            "kind": "function",
+            "name": "profileExists",
+            "signature": "profileExists(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+            "kind": "function",
+            "name": "profileIdFor",
+            "signature": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+            "inputs": [
+              {
+                "name": "entries",
+                "type": "(address,uint32,bytes32)[]",
+                "internal_type": "struct IStreamSplitWallet.SplitEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileMetadataURIHash(bytes32)",
+            "kind": "function",
+            "name": "profileMetadataURIHash",
+            "signature": "profileMetadataURIHash(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileUniqueAccount(bytes32,uint256)",
+            "kind": "function",
+            "name": "profileUniqueAccount",
+            "signature": "profileUniqueAccount(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileUniqueAccountCount(bytes32)",
+            "kind": "function",
+            "name": "profileUniqueAccountCount",
+            "signature": "profileUniqueAccountCount(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "splitWalletInitCodeHash()",
+            "kind": "function",
+            "name": "splitWalletInitCodeHash",
+            "signature": "splitWalletInitCodeHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "splitWalletRuntimeCodeHash()",
+            "kind": "function",
+            "name": "splitWalletRuntimeCodeHash",
+            "signature": "splitWalletRuntimeCodeHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "walletFor(bytes32)",
+            "kind": "function",
+            "name": "walletFor",
+            "signature": "walletFor(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+            "kind": "event",
+            "name": "SplitProfileCreated",
+            "signature": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "walletVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+            "kind": "event",
+            "name": "SplitProfileEntry",
+            "signature": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "index",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+            "kind": "event",
+            "name": "SplitWalletDeployed",
+            "signature": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "walletVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "initCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "runtimeCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+            "kind": "event",
+            "name": "SplitWalletDiscovered",
+            "signature": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "walletVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "initCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "runtimeCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "DuplicateSplitEntry(address,bytes32)",
+            "kind": "error",
+            "name": "DuplicateSplitEntry",
+            "signature": "DuplicateSplitEntry(address,bytes32)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidEntryCount(uint256)",
+            "kind": "error",
+            "name": "InvalidEntryCount",
+            "signature": "InvalidEntryCount(uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitAccount(uint256)",
+            "kind": "error",
+            "name": "InvalidSplitAccount",
+            "signature": "InvalidSplitAccount(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitShare(uint256)",
+            "kind": "error",
+            "name": "InvalidSplitShare",
+            "signature": "InvalidSplitShare(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitTotal(uint256)",
+            "kind": "error",
+            "name": "InvalidSplitTotal",
+            "signature": "InvalidSplitTotal(uint256)",
+            "inputs": [
+              {
+                "name": "totalSharePpm",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "SplitWalletAddressPoisoned(bytes32,address)",
+            "kind": "error",
+            "name": "SplitWalletAddressPoisoned",
+            "signature": "SplitWalletAddressPoisoned(bytes32,address)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnknownProfile(bytes32)",
+            "kind": "error",
+            "name": "UnknownProfile",
+            "signature": "UnknownProfile(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamSplitWallet": {
+      "source": "smart-contracts/IStreamSplitWallet.sol",
+      "artifact_path": "out/IStreamSplitWallet.sol/IStreamSplitWallet.json",
+      "abi_sha256": "sha256:8f87e1429378ce06dc6883bf9f07bef0ed71448822853b630e4ec238dc8e80fd",
+      "abi_entries": 34,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 21,
+        "events": 3,
+        "errors": 10,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "SHARE_DENOMINATOR_PPM()",
+            "kind": "function",
+            "name": "SHARE_DENOMINATOR_PPM",
+            "signature": "SHARE_DENOMINATOR_PPM()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "accountReleased(address,address)",
+            "kind": "function",
+            "name": "accountReleased",
+            "signature": "accountReleased(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "aggregateSharePpm(address)",
+            "kind": "function",
+            "name": "aggregateSharePpm",
+            "signature": "aggregateSharePpm(address)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetObservationInitialized(address)",
+            "kind": "function",
+            "name": "assetObservationInitialized",
+            "signature": "assetObservationInitialized(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "entriesHash()",
+            "kind": "function",
+            "name": "entriesHash",
+            "signature": "entriesHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "entry(uint256)",
+            "kind": "function",
+            "name": "entry",
+            "signature": "entry(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "entryCount()",
+            "kind": "function",
+            "name": "entryCount",
+            "signature": "entryCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "factory()",
+            "kind": "function",
+            "name": "factory",
+            "signature": "factory()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])",
+            "kind": "function",
+            "name": "initialize",
+            "signature": "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])",
+            "inputs": [
+              {
+                "name": "profileId_",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "entriesHash_",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "metadataURIHash_",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "entries_",
+                "type": "(address,uint32,bytes32)[]",
+                "internal_type": "struct IStreamSplitWallet.SplitEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "accounts_",
+                "type": "address[]",
+                "internal_type": "address[]"
+              },
+              {
+                "name": "aggregateSharePpm_",
+                "type": "uint32[]",
+                "internal_type": "uint32[]"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "initialized()",
+            "kind": "function",
+            "name": "initialized",
+            "signature": "initialized()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "lastObservedReceived(address)",
+            "kind": "function",
+            "name": "lastObservedReceived",
+            "signature": "lastObservedReceived(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "metadataURIHash()",
+            "kind": "function",
+            "name": "metadataURIHash",
+            "signature": "metadataURIHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "observedReceived(address)",
+            "kind": "function",
+            "name": "observedReceived",
+            "signature": "observedReceived(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "profileId()",
+            "kind": "function",
+            "name": "profileId",
+            "signature": "profileId()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "releasable(address,address)",
+            "kind": "function",
+            "name": "releasable",
+            "signature": "releasable(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "release(address,address,address)",
+            "kind": "function",
+            "name": "release",
+            "signature": "release(address,address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address payable"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "roundingDust(address)",
+            "kind": "function",
+            "name": "roundingDust",
+            "signature": "roundingDust(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "syncAsset(address)",
+            "kind": "function",
+            "name": "syncAsset",
+            "signature": "syncAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "totalReleased(address)",
+            "kind": "function",
+            "name": "totalReleased",
+            "signature": "totalReleased(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "uniqueAccount(uint256)",
+            "kind": "function",
+            "name": "uniqueAccount",
+            "signature": "uniqueAccount(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "uniqueAccountCount()",
+            "kind": "function",
+            "name": "uniqueAccountCount",
+            "signature": "uniqueAccountCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "AssetObservationInitialized(bytes32,address,uint256)",
+            "kind": "event",
+            "name": "AssetObservationInitialized",
+            "signature": "AssetObservationInitialized(bytes32,address,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "AssetSynced(bytes32,address,uint256,uint256)",
+            "kind": "event",
+            "name": "AssetSynced",
+            "signature": "AssetSynced(bytes32,address,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "previousObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
+            "kind": "event",
+            "name": "NativeReleased",
+            "signature": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "totalReleased",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AlreadyInitialized()",
+            "kind": "error",
+            "name": "AlreadyInitialized",
+            "signature": "AlreadyInitialized()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidInitializationInput()",
+            "kind": "error",
+            "name": "InvalidInitializationInput",
+            "signature": "InvalidInitializationInput()",
+            "inputs": []
+          },
+          {
+            "key": "NativeReceiptInvariantBroken(uint256,uint256)",
+            "kind": "error",
+            "name": "NativeReceiptInvariantBroken",
+            "signature": "NativeReceiptInvariantBroken(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "expectedObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "NativeTransferFailed(address,uint256)",
+            "kind": "error",
+            "name": "NativeTransferFailed",
+            "signature": "NativeTransferFailed(address,uint256)",
+            "inputs": [
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "NoReleasableFunds(address,address)",
+            "kind": "error",
+            "name": "NoReleasableFunds",
+            "signature": "NoReleasableFunds(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ObservedReceiptsDecreased(address,uint256,uint256)",
+            "kind": "error",
+            "name": "ObservedReceiptsDecreased",
+            "signature": "ObservedReceiptsDecreased(address,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "previousObservedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedInitializer(address)",
+            "kind": "error",
+            "name": "UnauthorizedInitializer",
+            "signature": "UnauthorizedInitializer(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedReleaseRecipient(address,address,address)",
+            "kind": "error",
+            "name": "UnauthorizedReleaseRecipient",
+            "signature": "UnauthorizedReleaseRecipient(address,address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedAsset(address)",
+            "kind": "error",
+            "name": "UnsupportedAsset",
+            "signature": "UnsupportedAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ZeroRecipient()",
+            "kind": "error",
+            "name": "ZeroRecipient",
+            "signature": "ZeroRecipient()",
+            "inputs": []
+          }
+        ],
         "fallbacks": [],
         "receives": []
       }

@@ -45,6 +45,7 @@ invariants, release checks, external evidence, and audit review.
 | `metadata_integrity` | Metadata, dependency, freeze, URI, raw attribute, or rendering policy rejected the payload. |
 | `randomness_lifecycle` | Randomizer request, provider, epoch, callback, stale, failed, or retry state rejected the payload. |
 | `auction_payment_safety` | Reentrancy, payment, or accounting safety boundary rejected the call. |
+| `split_payment_safety` | Split profile validation, deterministic wallet deployment, asset policy, or split-release accounting rejected the call. |
 | `supply_minting` | Collection supply, token existence, mint window, burn, or collection-range state rejected the call. |
 | `configuration` | A configured address, parameter, royalty percentage, or other setup value is invalid. |
 

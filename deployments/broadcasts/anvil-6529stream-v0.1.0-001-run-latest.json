@@ -65,6 +65,12 @@
       "hash": "0x0909090909090909090909090909090909090909090909090909090909090909"
     },
     {
+      "transactionType": "CREATE",
+      "contractName": "StreamSplitFactory",
+      "contractAddress": "0x100000000000000000000000000000000000000b",
+      "hash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+    },
+    {
       "transactionType": "CALL",
       "contractName": "",
       "contractAddress": "",
@@ -131,6 +137,12 @@
       "status": "0x1",
       "contractAddress": "0x1000000000000000000000000000000000000009",
       "blockNumber": "0x9"
+    },
+    {
+      "transactionHash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+      "status": "0x1",
+      "contractAddress": "0x100000000000000000000000000000000000000b",
+      "blockNumber": "0xb"
     }
   ]
 }

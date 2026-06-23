@@ -76,3 +76,14 @@
   PR marker.
 - Addressed CodeRabbit's sole nitpick on PR #623 by rewording the entropy
   coordinator open-decision list to avoid repeated sentence openings.
+- PR #623 passed CI and CodeRabbit on head
+  `c4b4278ddfd5b71b3aa740f1d6f814525f6292a1`, then merged as
+  `6217346e60c17af6d3738aed2dd284f91b9c6507`, closing issue #624.
+- Created issue #625 for the split factory and split wallet skeleton, created
+  branch `codex/split-factory-wallet-skeleton` from merged `main`, and spawned
+  parallel explorers for contract architecture, security/test edge cases, and
+  release-state requirements.
+- Implemented the local split skeleton draft with `StreamSplitFactory`,
+  `StreamSplitWallet`, selector-stable interfaces, focused native ETH split
+  tests, release-surface registration, changelog coverage, revenue spec status,
+  event/indexer docs, and cleanup for the stale PR #608 active marker.

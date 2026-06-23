@@ -40,6 +40,15 @@
     {
       "name": "StreamMinter",
       "source": "smart-contracts/StreamMinter.sol"
+    },
+    {
+      "name": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol"
+    },
+    {
+      "name": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "deployment_scope": "factory_spawned"
     }
   ],
   "runtime_size_budget": {
@@ -174,6 +183,14 @@
     {
       "name": "IStreamMinter",
       "source": "smart-contracts/IStreamMinter.sol"
+    },
+    {
+      "name": "IStreamSplitFactory",
+      "source": "smart-contracts/IStreamSplitFactory.sol"
+    },
+    {
+      "name": "IStreamSplitWallet",
+      "source": "smart-contracts/IStreamSplitWallet.sol"
     }
   ]
 }

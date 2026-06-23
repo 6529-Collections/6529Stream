@@ -126,6 +126,12 @@
           "0x0000000000000000000000000000000000006536"
         ],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamSplitFactory",
+        "address": "0x000000000000000000000000000000000000000b",
+        "constructor_args": [],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {

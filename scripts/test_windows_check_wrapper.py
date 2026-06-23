@@ -24,9 +24,12 @@ class WindowsCheckWrapperTests(unittest.TestCase):
 
     def test_native_commands_are_checked_for_nonzero_exit(self) -> None:
         self.assertIn("function Invoke-CheckedNative", self.helper_content)
+        self.assertIn('$previousErrorActionPreference = $ErrorActionPreference', self.helper_content)
+        self.assertIn('$ErrorActionPreference = "Continue"', self.helper_content)
         self.assertIn("& $FilePath @Arguments", self.helper_content)
-        self.assertIn("if ($LASTEXITCODE -ne 0)", self.helper_content)
-        self.assertIn('throw "$FilePath$displayArgs failed with exit code $LASTEXITCODE."', self.helper_content)
+        self.assertIn("$exitCode = $LASTEXITCODE", self.helper_content)
+        self.assertIn("if ($exitCode -ne 0)", self.helper_content)
+        self.assertIn('throw "$FilePath$displayArgs failed with exit code $exitCode."', self.helper_content)
         self.assertIn('. (Join-Path $PSScriptRoot "windows-check-helpers.ps1")', self.check_content)
 
     def test_forge_is_routed_through_checked_wrapper(self) -> None:
@@ -90,6 +93,7 @@ class WindowsCheckWrapperTests(unittest.TestCase):
             2,
         )
         self.assertIn("failed with exit code 7", self.runtime_test_content)
+        self.assertIn("WarningArguments", self.runtime_test_content)
         self.assertIn('& (Join-Path $PSScriptRoot "test_windows_check_helpers.ps1")', self.check_content)
 
 

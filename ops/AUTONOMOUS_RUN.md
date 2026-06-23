@@ -35,29 +35,28 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/v1-outside-core-launch-scope` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/622` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/624 |
-| Active PR | https://github.com/6529-Collections/6529Stream/pull/623 |
-| Next issue | Split factory and split wallet skeleton after v1 scope reconciliation. |
+| Active PR branch | `codex/split-factory-wallet-skeleton` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/623` |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/625 |
+| Active PR | TBD |
+| Next issue | Asset policy registry and ERC-20 split-wallet release/sync after split wallet skeleton. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-23 13:30 UTC` |
+| Last updated | `2026-06-23 13:58 UTC` |
 
 ## Current Run Notes
 
 - User authorized autonomous execution without permission prompts.
 - Use heavy subagents for independent review, sequencing, and verification.
-- The v1 contract roadmap run is user-directed overall. PR #623 now uses issue
-  #624 as its topic tracker so the machine-checked state/backlog pair has a
-  concrete active issue while this scope reconciliation is open.
+- PR #623 merged the v1 outside-Core scope reconciliation. The current topic is
+  issue #625 on branch `codex/split-factory-wallet-skeleton`.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic branch reconciles the v1-required outside-Core scope for
-  approved-standard ERC-20 primary settlement, museum-grade metadata and
-  preservation records, preservation/attestation/view satellites, and the
-  ARRNG/Pyth versus VRF-only fallback decision.
+- Current topic implements the first split factory and split wallet skeleton
+  outside `StreamCore`, focused on immutable fixed split profiles,
+  deterministic deployment/discovery, profile hashing, validation, and native
+  pull-release behavior.
 
 ## Packaging Notes
 
@@ -292,7 +291,7 @@ The queue will evolve as PRs merge and bot feedback arrives.
 | 211 | Harden live metadata browser retained artifact validation | Gate F/Gate G support | Add stricter repo-relative retained-path, optional declared `sha256:`, missing-file, no-secret, duplicate/trailing hash, credentialed URL, and bare-64-hex validation for future reviewed live metadata browser evidence without closing tracker issue #473 | Merged in PR #541; issue #540 closed completed |
 | 212 | Reject symlinked testnet deployment retained artifacts | Gate E/Gate G support | Harden the testnet deployment rehearsal retained-artifact checker so future reviewed Sepolia transcripts, broadcasts, manifests, address books, and gas/invariant summaries cannot pass through symlinked retained files | Merged in PR #604; issue #603 closed completed |
 | 213 | Reject symlinked release evidence retained paths | Gate E/Gate G support | Harden generic non-local release evidence, release-signature evidence, marketplace/indexer evidence, and live deployment-manifest retained path validation so future reviewed release evidence cannot pass through symlinked files or symlinked intermediate directories | Merged in PR #606; issue #605 closed completed |
-| 214 | Centralize symlink-safe release evidence path resolution | Gate E/Gate G support | Extract the duplicated retained-path symlink walk into a shared Python helper used by non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention checkers while preserving checker-specific errors and coverage | Active PR #608 / issue #607 on branch `codex/release-evidence-path-helper` |
+| 214 | Centralize symlink-safe release evidence path resolution | Gate E/Gate G support | Extract the duplicated retained-path symlink walk into a shared Python helper used by non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention checkers while preserving checker-specific errors and coverage | Merged in PR #608; issue #607 closed completed |
 
 ## Current PR Worklog
 

@@ -96,17 +96,34 @@ def load_release_hashes(release_artifacts_dir: Path) -> tuple[dict[str, str], di
     bytecode_hashes = require_dict(
         checksums.get("bytecode_hashes"), "abi-checksums.bytecode_hashes"
     )
+    contract_metadata = checksums.get("contracts")
+    singleton_contracts: set[str] | None = None
+    if isinstance(contract_metadata, dict):
+        singleton_contracts = {
+            str(name)
+            for name, contract in contract_metadata.items()
+            if isinstance(contract, dict)
+            and contract.get("deployment_scope", "singleton") == "singleton"
+        }
 
     runtime_hashes: dict[str, str] = {}
     for name, hashes in bytecode_hashes.items():
+        if singleton_contracts is not None and str(name) not in singleton_contracts:
+            continue
         contract_hashes = require_dict(hashes, f"bytecode_hashes.{name}")
         runtime = require_dict(contract_hashes.get("runtime"), f"bytecode_hashes.{name}.runtime")
         runtime_hashes[name] = require_string(
             runtime.get("sha256"), f"bytecode_hashes.{name}.runtime.sha256"
         )
 
-    return dict(sorted((str(name), str(value)) for name, value in abi_hashes.items())), dict(
-        sorted(runtime_hashes.items())
+    filtered_abi_hashes = {
+        str(name): str(value)
+        for name, value in abi_hashes.items()
+        if singleton_contracts is None or str(name) in singleton_contracts
+    }
+
+    return dict(sorted(filtered_abi_hashes.items())), dict(
+        sorted((str(name), str(value)) for name, value in runtime_hashes.items())
     )
 
 

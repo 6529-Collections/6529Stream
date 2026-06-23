@@ -9,7 +9,7 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:72f3c4089dbec1b2f6f0e27a3fb61e6dbbbe9ad7a19ccdfe457772bc54f0294f",
+      "sha256": "sha256:f3fdddd0d52d96d68d8a3e78b3d4758012d12c670cef6ed728ce9a2827f0e8d5",
       "size_bytes": 75680
     }
   },

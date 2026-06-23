@@ -203,7 +203,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 
 | Order | Item | Gate | Main Blocker | Intended PR |
 | --- | --- | --- | --- | --- |
-| 0 | `MAP-002` | A/G | User-directed v1 launch scope | Active PR #623 / issue #624 on branch `codex/v1-outside-core-launch-scope`; reconcile v1 outside-Core launch requirements before implementation satellites |
+| 0 | `CON-009` | C/G | V1 split settlement foundation | Active issue #625 on branch `codex/split-factory-wallet-skeleton`; implement split factory and split wallet skeleton outside Core |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -241,10 +241,9 @@ follow-up order unless bot feedback or CI forces a safer detour.
 
 | Item | Title | Gate | Status |
 | --- | --- | --- | --- |
-| `MAP-002` | Reconcile v1 outside-Core launch scope | A/G | Active PR #623 / issue #624 on branch `codex/v1-outside-core-launch-scope` |
+| `MAP-002` | Reconcile v1 outside-Core launch scope | A/G | Merged in PR #623; issue #624 closed completed |
 
-Status: Active PR #623 / issue #624 on branch
-`codex/v1-outside-core-launch-scope`.
+Status: Merged in PR #623; issue #624 closed completed.
 
 Gate: A/G.
 
@@ -1308,6 +1307,83 @@ Evidence artifacts: None.
 
 Dependencies: Existing payment invariant baseline.
 Issue: [`#380`](https://github.com/6529-Collections/6529Stream/issues/380).
+
+### CON-009: Implement Split Factory And Split Wallet Skeleton
+
+Status: Active issue #625 on branch `codex/split-factory-wallet-skeleton`; PR
+not opened.
+
+Gate: C/G.
+
+Problem: ADR 0008 and the revenue split spec require immutable split profiles
+and deterministic split wallets before resolver-backed primary settlement,
+royalty assignments, and Core-native ERC-2981 can safely land. The current
+protocol only has fixed three-bucket proceeds splits inside sale contracts.
+
+Outcome: Add the first outside-Core implementation slice for
+`StreamSplitFactory` and `StreamSplitWallet`, keeping `StreamCore` untouched.
+The slice should support immutable fixed split profiles, deterministic
+deployment/discovery, profile hashing, profile-entry events, one-shot
+factory-bound initialization, native ETH receipt/release, and foundational read
+views needed by later resolver and asset-policy work.
+
+Files likely touched:
+
+- `smart-contracts/StreamSplitFactory.sol`
+- `smart-contracts/StreamSplitWallet.sol`
+- `smart-contracts/IStreamSplitFactory.sol`
+- `smart-contracts/IStreamSplitWallet.sol`
+- `test/StreamSplitWallet.t.sol`
+- `docs/revenue-splits-and-royalties.md`
+- `docs/integrations/events-and-indexing.md`
+- `CHANGELOG.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
+- `ops/workstreams/v1-contract-roadmap/active-context.md`
+- `ops/workstreams/v1-contract-roadmap/run-log.md`
+- `release-artifacts/latest/`
+
+Implementation steps:
+
+1. Define compact interfaces and custom errors for the fixed-profile wallet and
+   factory.
+2. Implement deterministic profile ID and wallet address derivation with
+   `abi.encode` preimages that match ADR 0008.
+3. Validate profile entries: non-empty, bounded count, non-zero account,
+   non-zero share, exact `1_000_000` total, canonical ordering, and duplicate
+   `(account, labelId)` rejection.
+4. Derive aggregate account shares and unique account indexes from entries.
+5. Deploy or discover wallets deterministically with `CREATE2`; initialize once
+   in the same transaction; reject direct or second initialization.
+6. Add pull-based native ETH release, release-to recipient, failed-release
+   rollback, reentrancy protection, and owed/releasable/read views.
+7. Emit reconstructable factory/profile/wallet/release events.
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamSplitWallet.t.sol -vvv`
+- `forge build`
+- `python scripts/test_autonomous_state.py`
+- `python scripts/check_autonomous_state.py`
+- `python scripts/test_markdown_links.py`
+- `python scripts/check_markdown_links.py`
+- `python scripts/check_changelog.py`
+- release artifact generator checks when release-covered docs or contracts
+  change
+- `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
+
+Acceptance criteria:
+
+- The split wallet/factory are outside Core and spend no `StreamCore` bytecode.
+- Deterministic profile IDs and wallet addresses are test-covered.
+- Invalid profiles revert before deployment or initialization.
+- Native receipts and releases preserve pull-payment safety, failed-release
+  accounting, and reentrancy resistance.
+- Events and reads allow indexers to reconstruct profile entries, wallet
+  deployment/discovery, and releases.
+- ERC-20 settlement, asset policy, resolver assignments, primary adapters,
+  escrow, and Core-native ERC-2981 remain explicitly out of scope unless a
+  minimal interface is needed for compilation.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3457,6 +3533,7 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
+| `CON-009` | Implement split factory and split wallet skeleton | C/G | Active issue #625 on branch `codex/split-factory-wallet-skeleton`; PR not opened |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

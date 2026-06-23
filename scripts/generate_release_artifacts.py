@@ -57,6 +57,7 @@ DEFAULT_FOUNDRY_OUT = Path("out")
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
+DEPLOYMENT_SCOPES = frozenset({"singleton", "factory_spawned"})
 
 
 class ArtifactError(RuntimeError):
@@ -265,6 +266,10 @@ def artifact_summary(
 ) -> dict[str, Any]:
     name = entry["name"]
     source = entry.get("source")
+    deployment_scope = entry.get("deployment_scope", "singleton")
+    if deployment_scope not in DEPLOYMENT_SCOPES:
+        expected = ", ".join(sorted(DEPLOYMENT_SCOPES))
+        raise ArtifactError(f"{name} deployment_scope must be one of: {expected}")
     artifact_path = find_artifact(foundry_out, name, source)
     artifact = load_json(artifact_path)
     abi = artifact.get("abi")
@@ -277,6 +282,7 @@ def artifact_summary(
     return {
         "name": name,
         "source": source or "",
+        "deployment_scope": deployment_scope,
         "config": entry,
         "artifact_path": normalize_artifact_path(artifact_path, repo_root),
         "artifact": artifact,
@@ -315,6 +321,7 @@ def build_abi_checksums(
         )
         contracts[name] = {
             "source": summary["source"],
+            "deployment_scope": summary["deployment_scope"],
             "artifact_path": summary["artifact_path"],
             "abi_sha256": summary["abi_sha256"],
             "bytecode_sha256": summary["bytecode_hash"]["sha256"],

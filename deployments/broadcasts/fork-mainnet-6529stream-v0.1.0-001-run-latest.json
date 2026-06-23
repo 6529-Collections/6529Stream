@@ -251,6 +251,12 @@
       "isFixedGasLimit": false
     },
     {
+      "transactionType": "CREATE",
+      "contractName": "StreamSplitFactory",
+      "contractAddress": "0x200000000000000000000000000000000000000b",
+      "hash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+    },
+    {
       "hash": "0x775a35fc939361eb2f7dbd6435986e6157efa60a00b1d076a4acf9e8fe1f80be",
       "transactionType": "CALL",
       "contractName": "StreamAdmins",
@@ -1456,6 +1462,12 @@
       "from": "0x0000000000000000000000000000000000006537",
       "to": "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
       "contractAddress": null
+    },
+    {
+      "transactionHash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+      "status": "0x1",
+      "contractAddress": "0x200000000000000000000000000000000000000b",
+      "blockNumber": "0xb"
     }
   ],
   "libraries": [

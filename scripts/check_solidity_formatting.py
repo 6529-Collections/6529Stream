@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -65,6 +66,49 @@ def parse_fmt_diff_files(output: str) -> list[str]:
         raw_path = line.removeprefix("Diff in ").removesuffix(":").strip()
         diff_files.append(normalize_path(raw_path))
     return sorted(dict.fromkeys(diff_files))
+
+
+def fmt_diff_blocks(output: str) -> dict[str, str]:
+    """Return forge fmt diff output grouped by normalized path."""
+    blocks: dict[str, list[str]] = {}
+    current_path: str | None = None
+    for line in output.splitlines():
+        if line.startswith("Diff in "):
+            raw_path = line.removeprefix("Diff in ").removesuffix(":").strip()
+            current_path = normalize_path(raw_path)
+            blocks.setdefault(current_path, [line])
+            continue
+        if current_path is not None:
+            blocks[current_path].append(line)
+    return {path: "\n".join(lines) for path, lines in blocks.items()}
+
+
+FMT_DIFF_LINE_RE = re.compile(r"^\s*[0-9]+\s+\|(?P<marker>[+-])(?P<content>.*)$")
+
+
+def is_line_ending_only_fmt_diff(block: str) -> bool:
+    """Return true when forge fmt only reports identical removed/added text."""
+    removed: list[str] = []
+    added: list[str] = []
+    for line in block.splitlines():
+        match = FMT_DIFF_LINE_RE.match(line)
+        if not match:
+            continue
+        if match.group("marker") == "-":
+            removed.append(match.group("content"))
+        else:
+            added.append(match.group("content"))
+    return bool(removed or added) and removed == added
+
+
+def filter_line_ending_only_fmt_diffs(output: str, diff_files: list[str]) -> list[str]:
+    """Remove CRLF-only forge fmt diffs while retaining real formatting diffs."""
+    blocks = fmt_diff_blocks(output)
+    return [
+        path
+        for path in diff_files
+        if not is_line_ending_only_fmt_diff(blocks.get(path, ""))
+    ]
 
 
 def validate_vendored_exemptions(solidity_files: list[str], diff_files: list[str]) -> None:
@@ -155,16 +199,24 @@ def check_solidity_formatting(repo_root: Path, forge_bin: str) -> None:
     required_result = run_forge_fmt_check(repo_root, forge, required_files, env)
     if required_result.returncode != 0:
         diff_files = parse_fmt_diff_files(required_result.stdout)
-        formatted_diff_files = ", ".join(diff_files) if diff_files else "(none parsed)"
-        raise SolidityFormattingError(
-            "formatting-required Solidity files failed forge fmt: "
-            + formatted_diff_files
-            + "\n\n"
-            + format_output_sample(required_result.stdout)
-        )
+        diff_files = filter_line_ending_only_fmt_diffs(required_result.stdout, diff_files)
+        if not diff_files:
+            diff_files = []
+        else:
+            formatted_diff_files = ", ".join(diff_files)
+            raise SolidityFormattingError(
+                "formatting-required Solidity files failed forge fmt: "
+                + formatted_diff_files
+                + "\n\n"
+                + format_output_sample(required_result.stdout)
+            )
 
     raw_result = run_forge_fmt_check(repo_root, forge, [str(SMART_CONTRACTS_DIR)], env)
-    diff_files = parse_fmt_diff_files(raw_result.stdout)
+    raw_diff_files = parse_fmt_diff_files(raw_result.stdout)
+    diff_files = sorted(
+        set(filter_line_ending_only_fmt_diffs(raw_result.stdout, raw_diff_files))
+        | (set(raw_diff_files) & VENDORED_FORMATTING_EXEMPTIONS)
+    )
     if raw_result.returncode != 0 and not diff_files:
         raise SolidityFormattingError(
             "raw forge fmt check failed without parseable formatting diffs:\n\n"
