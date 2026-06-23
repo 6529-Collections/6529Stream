@@ -16,11 +16,11 @@ optionality:
 | Area | Launch v1 requirement | Future extension posture |
 | --- | --- | --- |
 | Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, and Core-native ERC-2981 | No mutable policy or rendering logic in Core |
-| Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, passive royalty receipt, native-only revenue escrow | ERC-20 primary-sale adapters and special recovery adapters require accepted follow-up specs |
+| Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, approved-standard ERC-20 primary settlement through outside-Core adapters, passive royalty receipt, and native/approved-asset revenue escrow | Non-standard ERC-20 behavior and special recovery adapters require accepted follow-up specs |
 | Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Marketplace registry overrides are integration extras, not the launch path |
 | Minting | `StreamMintManager` policy plus `StreamMintLedger` accounting with many counters, aggregate-only consumption, signed tickets, and module-checked gates/resolvers | New counter resolvers and gates can be added through the registry |
-| Metadata | `StreamMetadataRouter`, `StreamRendererV1`, and `StreamCollectionMetadata` for identity, rights, media, scripts, dependencies, custom fields, locks, schemas, and view references | Museum-grade preservation graphs, C2PA, IIIF, VC/DID, and detailed archive records use custom fields/events or later modules |
-| Entropy | `StreamEntropyCoordinator`, Chainlink VRF provider, and mock provider | Other providers remain future adapters behind the same interface |
+| Metadata | `StreamMetadataRouter`, `StreamRendererV1`, `StreamCollectionMetadata`, and launch preservation/attestation/view satellites for identity, rights, media, scripts, dependencies, custom fields, locks, schemas, C2PA, IIIF, PREMIS-style records, preservation, and museum-grade catalogue material | Additional specialized legal, rights, VC/DID, EAS, or institution-specific modules can extend the same manifest and record model |
+| Entropy | `StreamEntropyCoordinator`, Chainlink VRF provider, mock provider, and a v1 fallback decision for reviewed ARRNG or Pyth versus an explicit VRF-only exception | Other providers remain future adapters behind the same interface |
 
 The launch docs may describe future extension points, but implementation
 requirements must be labeled launch v1 or future module. A future module must
@@ -279,10 +279,24 @@ hashes.
 The following are intentionally not launch v1 requirements:
 
 1. Transfer-restricting royalty enforcement.
-2. ERC-20 primary sale settlement.
-3. General onchain policy VM behavior.
-4. Rich PREMIS, C2PA, IIIF, VC/DID, EAS, or museum graph Solidity structs.
-5. Multi-source entropy mixers, VDFs, timelock reveal, Pyth, drand, Randcast,
-   Supra, Witnet, or API3 provider implementations.
-6. Same-transaction instant entropy fulfillment during mint.
-7. Arbitrary sweep authority over split-wallet or escrow owed funds.
+2. General onchain policy VM behavior.
+3. Transfer of arbitrary museum, rights, legal, VC/DID, EAS, or
+   institution-specific graph logic into `StreamCore`.
+4. Multi-source entropy mixers, VDFs, timelock reveal, drand, Randcast, Supra,
+   Witnet, or API3 provider implementations.
+5. Same-transaction instant entropy fulfillment during mint.
+6. Arbitrary sweep authority over split-wallet or escrow owed funds.
+
+The following are v1 requirements or v1 launch decisions, but they must remain
+outside Core:
+
+1. ERC-20 primary-sale settlement for approved standard assets through a
+   payment adapter or primary-sale settlement module. Non-standard ERC-20
+   behavior remains unsupported unless a separate adapter spec accepts it.
+2. C2PA, IIIF, and PREMIS-style records, richer preservation modules, and
+   museum-grade metadata depth through collection metadata, preservation,
+   attestation, and view satellites.
+3. A reviewed entropy fallback decision: either ship a reviewed ARRNG or Pyth
+   fallback provider, with ARRNG as the lower-complexity initial candidate, or
+   record an explicit reviewed VRF-only launch exception in a checksum-covered
+   `StreamEntropyLaunchDecision` manifest with coordinator failure behavior.

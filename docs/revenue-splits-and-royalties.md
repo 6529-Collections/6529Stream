@@ -50,16 +50,19 @@ Launch scope is deliberately narrower than the long-term design surface:
 
 1. Native ETH primary-sale settlement.
 2. Native ETH ERC-2981 royalty receipts through split wallets.
-3. Approved standard ERC-20 release support inside split wallets.
-4. Default, collection, and token scoped revenue assignments.
-5. Immutable split profiles up to the v1 entry/account limits.
-6. Core-native resolver-backed ERC-2981.
-7. Mint-time token royalty snapshots when a collection policy requires
+3. Approved standard ERC-20 primary-sale settlement through outside-Core
+   payment adapters.
+4. Approved standard ERC-20 release support inside split wallets.
+5. Default, collection, and token scoped revenue assignments.
+6. Immutable split profiles up to the v1 entry/account limits.
+7. Core-native resolver-backed ERC-2981.
+8. Mint-time token royalty snapshots when a collection policy requires
    mint-time economics to persist.
 
 Non-launch unless a later ADR accepts the added risk:
 
-1. ERC-20 primary-sale adapters.
+1. Fee-on-transfer, rebasing, callback, pausable-without-standard-reason, or
+   other non-standard ERC-20 primary-sale adapters.
 2. Merkle/accounting adapters for very large split distributions.
 3. Ordinary dust sweeps or decommission withdrawals.
 4. Royalty enforcement by transfer restriction.
@@ -713,10 +716,25 @@ adapter, manager, ledger, Core prepare/complete, resolver snapshot hook,
 entropy registration boundary, and escrow/deposit path must reject mismatched
 operation IDs.
 
-The v1 primary adapter is native ETH only. ERC-20 primary sales require a later
-asset-specific primary adapter with exact token-transfer accounting and escrow
-flush rules. Split wallets can still release approved standard ERC-20 assets
-received passively or through later adapters.
+The v1 primary settlement surface includes native ETH and approved standard
+ERC-20 assets. ERC-20 settlement must live in a payment adapter or
+primary-sale settlement module outside Core, with exact token-transfer
+accounting, allowance/payment failure handling, and escrow flush rules. Split
+wallets can also release approved standard ERC-20 assets received passively.
+Fee-on-transfer, rebasing, callback, or otherwise non-standard ERC-20 behavior
+is unsupported unless a separate adapter spec accepts it.
+
+ERC-20 primary adapters must read the same deployment-wide
+`IStreamAssetPolicyRegistry` pinned by the split factory and accept new primary
+payments only for `ACTIVE` assets. The adapter must perform safe-transfer
+handling, measure its own asset balance before and after payer transfer, and
+revert unless the received amount exactly equals the expected sale amount.
+Allowance failure, transfer failure, no-op transfer, fee-on-transfer behavior,
+rebasing balance movement, callback-dependent behavior, malformed token return
+data, or an unavailable asset-policy registry all revert before minting or
+revenue recording. Passive split-wallet ERC-20 receipts can be observed and
+released under the split-wallet accounting rules, but they are not primary-sale
+settlement evidence and do not relax the adapter's exact-delta requirement.
 
 The current three-bucket default maps naturally to a primary split template:
 
@@ -961,8 +979,16 @@ later assignment repointing does not move existing escrow credits. Escrow keys
 include `revenueClass` for attribution. `flushEscrow` must be non-reentrant and
 use checks-effects-interactions so reentrant or racing flush attempts cannot
 double-transfer.
-In v1, escrow credits use `asset = address(0)` only. Non-native escrow assets
-revert until an ERC-20 primary adapter ADR is accepted.
+In v1, escrow credits may use `asset = address(0)` for native ETH or an approved
+standard ERC-20 asset address for an accepted primary-sale adapter. Unsupported
+or non-standard assets revert before revenue is recorded.
+For non-native credits, the escrow credit function must independently re-read
+the deployment-wide asset policy and accept new primary credits only when the
+asset is `ACTIVE`, even if the calling adapter already checked the same asset.
+This defense-in-depth check happens before owed-credit mutation. Existing escrow
+credits keep their captured `asset`; later `DEPRECATED` status blocks new
+official primary credits but does not by itself make already-recorded owed funds
+unflushable.
 Escrow credits may only be created for a deployed correct wallet or for an
 undeployed deterministic wallet whose profile was created through the factory,
 whose predicted address has no code, and whose expected runtime code hash is
@@ -1202,7 +1228,9 @@ Minimum auction model:
    ID when the auction settles a pre-allocated or custody-held token,
    seller/beneficiary policy, accepted asset, reserve, start/end time,
    primary revenue class, and expected primary policy hash.
-2. Bids are native ETH in v1. ERC-20 bids require a later adapter.
+2. Bids are native ETH in v1 unless a reviewed auction-specific ERC-20 adapter
+   is accepted. The approved-standard ERC-20 primary settlement launch
+   requirement does not by itself make ERC-20 auction bidding launch-ready.
 3. Losing-bid refunds are pull-based. Outbid funds become refundable credit;
    auction settlement never pushes ETH to losing bidders.
 4. Settlement first marks the auction settled, records the winning payer,
@@ -2095,8 +2123,9 @@ auction nonce. `beneficiary` is the token recipient.
 - Do not ship auction settlement until the full bid-custody, pull-refund, and
   settlement state machine above is implemented. The current drop-side auction
   placeholder is not a launch settlement path.
-- Keep v1 primary settlement native ETH only unless a later ERC-20 primary
-  adapter is accepted.
+- Keep v1 primary settlement limited to native ETH and approved standard ERC-20
+  adapters; non-standard ERC-20 behavior requires a separate accepted adapter
+  spec.
 - Emit source revenue events only after funds are accepted by the split wallet
   or recorded as owed by the revenue escrow.
 
@@ -2308,8 +2337,10 @@ Marketplace and indexer integrations should:
   caller where relevant, never packed string concatenation.
 - Missing or malformed primary assignment reverts before minting or auction
   state changes.
-- V1 primary settlement rejects or excludes ERC-20 payments until an adapter is
-  accepted.
+- V1 primary settlement accepts native ETH and only approved standard ERC-20
+  payments through accepted outside-Core adapters; unsupported assets and
+  non-standard ERC-20 behavior revert unless a separate accepted adapter spec
+  covers them.
 - Auction settlement records settlement state and revenue before external NFT
   recipient callbacks.
 - Fixed-price token-level primary overrides are used only when token ID is known
