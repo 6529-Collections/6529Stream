@@ -70,7 +70,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:bb6dfd98f95c1e8f9f2d6577ea2448feb3fdede205f7d0cfaa913f474ae5280f",
+        "sha256": "sha256:fd099f18d684f309bc7113c39ad82445e987f3e0d4f96fe9e3a55ee0cd4be4d7",
         "size_bytes": 77202,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -127,20 +127,20 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:95e9a9181cc6a773a06d34c5f884ed4d311b969ce62e97afddbd075a686a4474",
+      "sha256": "sha256:988ea66e820566ce9b14a7d84b61a5842fbea2068e089a1e54992ab8d41c6f94",
       "size_bytes": 2177,
       "schema_version": "6529stream.one-of-one-provenance-release-manifest.v1"
     },
     "one_of_one_permanence_manifest": {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:1193073b05568be0d541b3fdb2af54435d778a0f433d3652b94fc8fef3209b47",
+      "sha256": "sha256:e7d65488d84d12d611e649d7ed68aa2749af038e3f4bb069a03906f643d71111",
       "size_bytes": 2913,
       "schema_version": "6529stream.one-of-one-permanence-release-manifest.v1"
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:cf346f109bcd1fab8b14399bf125b4657559ffc162d7b8bdde0ab0fbdf265fe5",
-      "size_bytes": 10440,
+      "sha256": "sha256:0c2e1c51b2116d20c2ac280a029bb5cab36d0b565839535e26ed3df86eb10396",
+      "size_bytes": 10202,
       "schema_version": "6529stream.public-beta-evidence.v1",
       "release_version": "v0.1.0-local",
       "status": {
@@ -154,7 +154,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:7ccb184c283e0610e259ecb9202925eb80428c66061461dc7c71ad33408a5ea4",
+      "sha256": "sha256:b8a68aaffedfa8e1dd73c619495219b2574525c83b597b17436958afc51f6d01",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -189,7 +189,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:f3fdddd0d52d96d68d8a3e78b3d4758012d12c670cef6ed728ce9a2827f0e8d5",
+        "sha256": "sha256:6a12be05191682b5b207997f074af961bf99ea029adf03a4a01eff6719bb8d9f",
         "size_bytes": 75680,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -215,7 +215,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:7a49e34aeeac52903d9d8b19cf575a3316c0a50c08cc37db82bdea385c0d6230",
+        "sha256": "sha256:910a7bdc38a8444cf5aa311e0f8a5c4e0326c9dd4d95cfca06e9384dec16963f",
         "size_bytes": 104621,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -234,13 +234,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:7762ef14717ab1907da98706aa01f73d8b961bdfaddceabc2ea48a5772c55702",
+        "sha256": "sha256:6eedf798baed497d75dad6930f3c8795848d2934e59632cedca74204c84ae94b",
         "size_bytes": 71166,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:53ab55d159920340c78730d8ecbaa8715c04e0c7db6b268ec333a449d12d6bd5",
+        "sha256": "sha256:c736ba8c90198f4f0b47825a87d489014a3e5566eac235c2132fbe95ddf6e53e",
         "size_bytes": 63098
       }
     },
@@ -391,8 +391,8 @@
       },
       {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-        "sha256": "sha256:454c7f685f409995e2329bb06993e41b7668eb4e5bccbce39f0d03ebac1d5a65",
-        "size_bytes": 2117,
+        "sha256": "sha256:fc68349a68fa0bc3e32706a1d74b59c445998187618a07376c56e4d1e1aa69ab",
+        "size_bytes": 2083,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-deployment-rehearsal-fork-evidence",
         "record_type": "evidence",
@@ -410,7 +410,7 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir",
           "retained_path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-          "sha256": "sha256:9d409419f2815d93b759a58b866811ff312e177f267918e3b40a5805c63fc345",
+          "sha256": "sha256:6e445aa2ba38e0abe4b06ec29f7e386a8658aa0c1ad33be6decf6b7437b81f72",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
           "owner": "Codex autonomous operator",
           "reviewer": "CodeRabbit status success on PR #347 and PR #349",
@@ -485,8 +485,8 @@
       },
       {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-        "sha256": "sha256:67ce8da1a80471841b5c434493b794d433759fb3b145b00dadeb035ee9815f38",
-        "size_bytes": 2376,
+        "sha256": "sha256:0bd2da3fabd7d9f8e17a5da5b74afbd52c4c1d6ea0b2e0de6c160beaf071eba8",
+        "size_bytes": 2342,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "fork-testnet-randomizer-operations-evidence-fork-evidence",
         "record_type": "evidence",
@@ -504,7 +504,7 @@
           "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
           "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests",
           "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-          "sha256": "sha256:05ec18fd47249fd086b483fe41677cdfc9f27f09e0952e894305ea0703b0b84f",
+          "sha256": "sha256:37350ca7c1d9d490a0ca9819f66f51e3e4109a0c72c067277f06c648386a15f0",
           "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
           "owner": "Codex autonomous implementer",
           "reviewer": "Codex autonomous maintainer evidence review for issue #220",
@@ -1425,8 +1425,8 @@
       },
       {
         "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
-        "sha256": "sha256:704485277dad016966fe452640951c84ef388c4f5968cb4efe5e0e17957aecb1",
-        "size_bytes": 1830,
+        "sha256": "sha256:b09f132ac218bb615793310606ebde6024c9e40bb6429182b5cb047540de0090",
+        "size_bytes": 1796,
         "schema_version": "6529stream.non-local-release-evidence.v1",
         "evidence_id": "public-beta-template-fork-testnet-randomizer-operations-evidence",
         "record_type": "template",
@@ -1444,7 +1444,7 @@
           "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
           "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
           "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-          "sha256": "sha256:05ec18fd47249fd086b483fe41677cdfc9f27f09e0952e894305ea0703b0b84f",
+          "sha256": "sha256:37350ca7c1d9d490a0ca9819f66f51e3e4109a0c72c067277f06c648386a15f0",
           "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
           "owner": "TBD",
           "reviewer": "TBD",
@@ -2133,8 +2133,8 @@
     "ceremony_evidence": [
       {
         "path": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:b8387a4646dcd89ab4cde7c79e1a9c9e78d39af0deaaa057bef33e1acbea37fb",
-        "size_bytes": 5801,
+        "sha256": "sha256:22bf9be7c90a874ff12c1518c852727f0ce39cc8ae7a49a194ada729182be56d",
+        "size_bytes": 5668,
         "schema_version": "6529stream.deployment-ceremony-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-local",
         "protocol_version": "0.1.0",
@@ -2172,8 +2172,8 @@
     "randomizer_operations": [
       {
         "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-        "sha256": "sha256:08592514be3c31074c9d0e1ff7635ee40de38f5ec5f4dea69756c645af98696f",
-        "size_bytes": 10480,
+        "sha256": "sha256:88b2a6ef8b89522847b1541162849414f343c0519ffde2cf31e608a57b18daef",
+        "size_bytes": 10245,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "anvil-6529stream-v0.1.0-001-randomizer-local",
         "protocol_version": "0.1.0",
@@ -2204,8 +2204,8 @@
       },
       {
         "path": "deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json",
-        "sha256": "sha256:32ae41483ee271b1ac20a39467c3ca2f099ef1d1280e3bdfbd4e5f2f32cb8b8e",
-        "size_bytes": 12152,
+        "sha256": "sha256:f302ab8870e83362901e7f231a70cc3c8389251aa3a4ad05f2c8d543d3295701",
+        "size_bytes": 11892,
         "schema_version": "6529stream.randomizer-operations-evidence.v1",
         "evidence_id": "fork-mainnet-6529stream-v0.1.0-001-randomizer-operations",
         "protocol_version": "0.1.0",
