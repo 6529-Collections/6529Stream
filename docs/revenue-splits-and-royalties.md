@@ -68,6 +68,26 @@ Non-launch unless a later ADR accepts the added risk:
 4. Royalty enforcement by transfer restriction.
 5. Marketplace registry override as the primary royalty path.
 
+## Implementation Status
+
+The first v1 implementation slice adds `StreamSplitFactory` and
+`StreamSplitWallet` as outside-Core satellites. This slice is intentionally
+fixed-profile and native-ETH only:
+
+- `StreamSplitFactory` validates and canonicalizes immutable split entries,
+  computes the ADR 0008 profile ID with `abi.encode`, stores reconstructable
+  profile metadata, and deploys or discovers deterministic wallets with
+  `CREATE2`.
+- `StreamSplitWallet` has factory-bound one-shot initialization, stores
+  immutable entries and aggregate account shares, accepts passive native ETH,
+  computes releasable funds from cumulative observed receipts, and releases
+  native ETH through pull payments.
+- The slice spends no `StreamCore` bytecode and does not wire into fixed-price
+  drops, auctions, revenue resolver assignments, escrow, or ERC-2981.
+- ERC-20 asset policy, ERC-20 observation/release, resolver assignments,
+  primary-sale adapters, escrow, and Core-native resolver-backed ERC-2981
+  remain subsequent launch work.
+
 ## Long-Term Principles
 
 1. The NFT core should preserve ownership and metadata truth, not carry every
@@ -1779,16 +1799,19 @@ interface IStreamSplitFactory {
     function deployWallet(bytes32 profileId) external returns (address wallet);
     function profileExists(bytes32 profileId) external view returns (bool);
     function profileEntriesHash(bytes32 profileId) external view returns (bytes32);
-    function walletRuntimeCodeHash(uint16 walletVersion) external view returns (bytes32);
+    function splitWalletRuntimeCodeHash() external view returns (bytes32);
 }
 
 interface IStreamSplitWallet {
     function profileId() external view returns (bytes32);
-    function release(address asset, address account, address recipient) external;
+    function release(address asset, address account, address payable recipient)
+        external
+        returns (uint256);
     function releasable(address asset, address account) external view returns (uint256);
     function observedReceived(address asset) external view returns (uint256);
-    function totalAccountReleased(address asset, address account) external view returns (uint256);
-    function syncAsset(address asset) external;
+    function accountReleased(address asset, address account) external view returns (uint256);
+    function totalReleased(address asset) external view returns (uint256);
+    function syncAsset(address asset) external returns (uint256);
 }
 
 interface IStreamRevenueEscrow {
@@ -1829,9 +1852,12 @@ interface IStreamRevenueAssignmentView {
 }
 ```
 
-The exact launch signatures and selectors must be pinned in the selector
-manifest. The interfaces above are intentionally value-type heavy; rich display
-metadata stays in manifests and events.
+The implemented first-slice signatures are pinned through
+`IStreamSplitFactory` and `IStreamSplitWallet` in the release artifact surface.
+Later ERC-20, assignment, escrow, and resolver interfaces must remain
+selector-stable when they are promoted from this target sketch into code. The
+interfaces above are intentionally value-type heavy; rich display metadata
+stays in manifests and events.
 
 ## Events
 
@@ -1840,29 +1866,57 @@ The future event surface should be indexer-first. At minimum:
 ```solidity
 event SplitProfileCreated(
     bytes32 indexed profileId,
-    address indexed wallet,
-    bytes32 entriesHash,
-    bytes32 metadataURIHash,
+    bytes32 indexed entriesHash,
+    bytes32 indexed metadataURIHash,
     uint16 schemaVersion,
     uint16 walletVersion,
-    string metadataURI
+    address wallet
 );
 
 event SplitProfileEntry(
     bytes32 indexed profileId,
+    uint16 indexed index,
     address indexed account,
-    bytes32 indexed labelId,
-    uint16 index,
-    uint32 sharePpm
+    uint32 sharePpm,
+    bytes32 labelId
 );
 
 event SplitWalletDeployed(
     bytes32 indexed profileId,
     address indexed wallet,
-    address indexed factory,
-    uint16 walletVersion,
+    uint16 indexed walletVersion,
     bytes32 initCodeHash,
     bytes32 runtimeCodeHash
+);
+
+event SplitWalletDiscovered(
+    bytes32 indexed profileId,
+    address indexed wallet,
+    uint16 indexed walletVersion,
+    bytes32 initCodeHash,
+    bytes32 runtimeCodeHash
+);
+
+event AssetObservationInitialized(
+    bytes32 indexed profileId,
+    address indexed asset,
+    uint256 observedReceived
+);
+
+event AssetSynced(
+    bytes32 indexed profileId,
+    address indexed asset,
+    uint256 previousObservedReceived,
+    uint256 observedReceived
+);
+
+event NativeReleased(
+    bytes32 indexed profileId,
+    address indexed account,
+    address indexed recipient,
+    uint256 amount,
+    uint256 totalReleased,
+    uint256 observedReceived
 );
 
 event RevenueAssignmentSet(

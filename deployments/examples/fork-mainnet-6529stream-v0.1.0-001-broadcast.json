@@ -50,7 +50,7 @@
         "0x0000000000000000000000000000000000000002"
       ],
       "abi_hash": "sha256:500463a781609b5140199d13abc77db8e7cdf6259fbeb5e00a8303869ddd1797",
-      "bytecode_hash": "sha256:be4d95c4cd76d2fa82ca982567c4553cf5fdd616713913afdea44b1c6c8dcb43",
+      "bytecode_hash": "sha256:9f19e1abec14ff43ed29c91292f6620b9410fe7acfac104d4693a25781d5cabe",
       "verification_status": "not_applicable"
     },
     "StreamContractMetadata": {
@@ -134,6 +134,13 @@
       "abi_hash": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
       "bytecode_hash": "sha256:7dcc8f6e6a743f12549e11916d7b411dd4145312336cf21f0506bb555ae4998e",
       "verification_status": "not_applicable"
+    },
+    "StreamSplitFactory": {
+      "address": "0x200000000000000000000000000000000000000b",
+      "constructor_args": [],
+      "abi_hash": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8",
+      "bytecode_hash": "sha256:c8cdd76d62faefe38b5af0ed0d58dd394dd3367375caa41c867a3f5db24d90cf",
+      "verification_status": "not_applicable"
     }
   },
   "admin_ceremony": {
@@ -177,7 +184,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:54415493aeae0555fcb28a3ae057bf3ccff2b75ceea133a94a687460e2418f53",
+    "manifest_sha256": "sha256:9b7f088ee44481db6e8259c6855e8c0ac09e7a457be2a5e5e5233f9bb4947671",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -188,7 +195,8 @@
       "StreamDrops": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
       "StreamAuctions": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
       "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
-      "NextGenRandomizerRNG": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf"
+      "NextGenRandomizerRNG": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
+      "StreamSplitFactory": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8"
     },
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
   },

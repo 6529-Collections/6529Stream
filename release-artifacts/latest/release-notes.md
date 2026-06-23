@@ -24,6 +24,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 - Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.
 - Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.
+- Added the first outside-Core split factory and split wallet skeleton with deterministic fixed-profile wallet deployment, immutable entry validation, native ETH pull-release accounting, and release-artifact surface coverage.
 - Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.
 - Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.
 - Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.
@@ -234,6 +235,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.
 - Recovered 392 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; the current production via-IR runtime is 21,831 bytes with 2,745 bytes of EIP-170 margin while the approved bytecode-spend ceiling remains 22,184 bytes. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.
+- Hardened the Windows checked-native helper so successful commands that write accepted warning output to stderr still pass based on exit code, with runtime harness coverage for stderr-on-success behavior, and taught the Solidity formatting checker to ignore CRLF-only diffs for formatting-required files while preserving the documented vendored exemption set.
 - Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.
 - Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.
 - Retired provider and integration files from the prior Solidity formatting exception baseline, so arRNG, VRF, delegation, and randomizer integration interfaces are now enforced by `make fmt-check`.
@@ -273,7 +275,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 - Bytecode proof local/fork status: `generated_from_committed_artifacts`
 - Bytecode proof production status: `missing_reviewed_live_proof`
-- Contract proof count: `30`
+- Contract proof count: `33`
 - Risk count: `11`
 
 ### Risk Status Counts

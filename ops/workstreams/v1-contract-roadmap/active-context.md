@@ -9,28 +9,29 @@ feedback, merge when clean, then continue.
 
 ## Current Topic
 
-V1 outside-Core launch scope reconciliation.
+Split factory and split wallet skeleton.
 
-The current draft makes these launch requirements explicit:
+The current branch should implement the first outside-Core revenue split slice:
 
-- ERC-20 primary settlement for approved standard assets through payment
-  adapters or primary-sale settlement modules outside `StreamCore`.
-- C2PA, IIIF, PREMIS-style, fixity, archive, and museum-grade metadata records
-  as real v1 metadata/preservation surfaces.
-- Richer preservation satellites such as `StreamPreservationRecords`,
-  `StreamCollectionAttestations`, and `StreamCollectionViews`.
-- A v1 entropy fallback decision: ship a reviewed ARRNG/Pyth fallback provider
-  or explicitly accept a reviewed VRF-only launch exception.
+- `StreamSplitFactory` deterministic deployment/discovery for immutable fixed
+  split profiles.
+- `StreamSplitWallet` one-shot factory-bound initialization, immutable profile
+  storage, native ETH receipt/release, and pull-accounting reads.
+- Profile hashing, entry validation, canonicalization, duplicate handling,
+  aggregate account shares, and reconstructable events.
+- No `StreamCore` bytecode spend in this PR.
+- Resolver assignments, primary-sale adapters, escrow, and Core-native
+  resolver-backed ERC-2981 remain later roadmap topics unless a tiny compile
+  interface is unavoidable.
 
 ## Branch State
 
 - Manager skill PR #621 merged.
 - Manager skill follow-up PR #622 merged.
-- Current topic branch: `codex/v1-outside-core-launch-scope`.
-- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/624.
-- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/623.
-- Latest CI follow-up patches durable active-PR state from pending text to the
-  actual PR URL so autonomous-state checks accept the opened PR.
+- V1 outside-Core scope reconciliation PR #623 merged and closed issue #624.
+- Current topic branch: `codex/split-factory-wallet-skeleton`.
+- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/625.
+- Current topic PR: TBD.
 
 ## Subagent Findings To Carry
 
@@ -41,10 +42,10 @@ The current draft makes these launch requirements explicit:
   requirement does not automatically launch ERC-20 auction bidding.
 - Metadata docs used `StreamPreservationRegistry` while the roadmap standardized
   on `StreamPreservationRecords`.
-- Next substantive implementation should likely be the split factory and split
-  wallet skeleton, followed by asset policy, revenue resolver, mint manager,
-  collection metadata, preservation satellites, entropy fallback decision, and
-  only then minimal Core hooks.
+- After the split factory/wallet skeleton, the likely sequence is asset policy
+  registry plus ERC-20 release/sync, revenue resolver, mint manager, collection
+  metadata, preservation satellites, entropy fallback decision, and only then
+  minimal Core hooks.
 
 ## Validation Bar
 

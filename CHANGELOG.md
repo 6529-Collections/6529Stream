@@ -14,6 +14,9 @@ the release policy in `docs/release-policy.md`.
   primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces,
   richer preservation satellites, and an explicit ARRNG/Pyth fallback versus
   VRF-only entropy decision.
+- Added the first outside-Core split factory and split wallet skeleton with
+  deterministic fixed-profile wallet deployment, immutable entry validation,
+  native ETH pull-release accounting, and release-artifact surface coverage.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay
@@ -979,6 +982,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Hardened the Windows checked-native helper so successful commands that write
+  accepted warning output to stderr still pass based on exit code, with runtime
+  harness coverage for stderr-on-success behavior, and taught the Solidity
+  formatting checker to ignore CRLF-only diffs for formatting-required files
+  while preserving the documented vendored exemption set.
 - Corrected reviewed fork metadata browser evidence so non-local retained
   `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened
   Forge broadcast return parsing to validate decoded field shapes and skip

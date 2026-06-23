@@ -126,6 +126,12 @@
           "0x0000000000000000000000000000000000006536"
         ],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamSplitFactory",
+        "address": "0x200000000000000000000000000000000000000b",
+        "constructor_args": [],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -181,7 +187,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:287fa1a9480e61106bfa3e4e1f46333a40b9db7fee13a6c3749a64424b6f8169",
+    "broadcast_sha256": "sha256:cc0a4964b50f19217bb6c09185c1f36be43ef73f6a38ce9016c91ef57e0f6c29",
     "template_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 1,
@@ -235,6 +241,11 @@
         "contract": "NextGenRandomizerRNG",
         "address": "0x1e26a8b0cbccbb460bc208799a703a35bf287b67",
         "transaction_hash": "0x8b041d0feb7b678dc41e622089c293d779ba9896f1415947ed4600042abe1cb1"
+      },
+      {
+        "contract": "StreamSplitFactory",
+        "address": "0x200000000000000000000000000000000000000b",
+        "transaction_hash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
       }
     ],
     "ignored_deployments": [

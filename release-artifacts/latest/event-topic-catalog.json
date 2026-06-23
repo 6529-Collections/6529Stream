@@ -103,6 +103,52 @@
       ]
     },
     {
+      "topic0": "0x13488f7071c5792218cedfa9fc4f1403234e31d28d19b4c0a4cd445600a50bc0",
+      "signature": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+      "name": "SplitProfileEntry",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "index",
+          "type": "uint16",
+          "indexed": true,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 2,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "sharePpm",
+          "type": "uint32",
+          "indexed": false,
+          "internal_type": "uint32"
+        },
+        {
+          "index": 4,
+          "name": "labelId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitFactory"
+      ]
+    },
+    {
       "topic0": "0x16debb77644999724cf3499d2c3fd8ac65383bc44cc1bf5303185410bc5254ef",
       "signature": "GlobalAdminUpdated(address,bool,address)",
       "name": "GlobalAdminUpdated",
@@ -811,6 +857,52 @@
       ]
     },
     {
+      "topic0": "0x75b3ac33ced35fbcdbdda8f1bc561c07be4c9e33a9e2fc044428b65e3feffc0e",
+      "signature": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+      "name": "SplitWalletDeployed",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "walletVersion",
+          "type": "uint16",
+          "indexed": true,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 3,
+          "name": "initCodeHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "runtimeCodeHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitFactory"
+      ]
+    },
+    {
       "topic0": "0x77c6d21474f6f6813fde8949bd7651f09078a0dd6c1e886847baae6f5c97d717",
       "signature": "PauseUpdated(bytes32,bool,address,bytes32)",
       "name": "PauseUpdated",
@@ -886,6 +978,45 @@
       ],
       "emitted_by": [
         "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x7d7629904e66d7d342440425797f5bbe60d38a0c8e94b297c867ba63437b853e",
+      "signature": "AssetSynced(bytes32,address,uint256,uint256)",
+      "name": "AssetSynced",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "asset",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "previousObservedReceived",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "observedReceived",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitWallet"
       ]
     },
     {
@@ -1242,6 +1373,59 @@
       ]
     },
     {
+      "topic0": "0x999a7d285ef448bf9d1dd1c9e04f3a3ed2328863a843dff773ee0633b5b78ea6",
+      "signature": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
+      "name": "NativeReleased",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "recipient",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 4,
+          "name": "totalReleased",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "observedReceived",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitWallet"
+      ]
+    },
+    {
       "topic0": "0xa0832d6e62676625182a1febdc060aa89f73ed108c5cab3727c80c7b8bb0f2c5",
       "signature": "UnpauseAdminUpdated(address,bool,address)",
       "name": "UnpauseAdminUpdated",
@@ -1433,6 +1617,38 @@
       ],
       "emitted_by": [
         "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0xb37f69e2e9ac520da5eb736ff4b1c3124d3f7c50a9f38a527490ca1d7637576f",
+      "signature": "AssetObservationInitialized(bytes32,address,uint256)",
+      "name": "AssetObservationInitialized",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "asset",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "observedReceived",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitWallet"
       ]
     },
     {
@@ -1673,6 +1889,59 @@
       "emitted_by": [
         "StreamAuctions",
         "StreamDrops"
+      ]
+    },
+    {
+      "topic0": "0xd0cc56d220b90b8f3a282c6ce2a55c2f71bc9be2704271bd6363af177f5287eb",
+      "signature": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+      "name": "SplitProfileCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "entriesHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "metadataURIHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 4,
+          "name": "walletVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 5,
+          "name": "wallet",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitFactory"
       ]
     },
     {
@@ -1996,6 +2265,52 @@
       ],
       "emitted_by": [
         "StreamCuratorsPool"
+      ]
+    },
+    {
+      "topic0": "0xef32f6d51377a47313103be3bc959cd83723c50d21e614e2234f7aba1260a9c7",
+      "signature": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+      "name": "SplitWalletDiscovered",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "walletVersion",
+          "type": "uint16",
+          "indexed": true,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 3,
+          "name": "initCodeHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "runtimeCodeHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitFactory"
       ]
     },
     {
@@ -5281,6 +5596,312 @@
               "name": "funds",
               "type": "uint256",
               "indexed": true,
+              "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamSplitFactory": {
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+      "events": [
+        {
+          "name": "SplitProfileCreated",
+          "signature": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
+          "topic0": "0xd0cc56d220b90b8f3a282c6ce2a55c2f71bc9be2704271bd6363af177f5287eb",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "entriesHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "metadataURIHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 4,
+              "name": "walletVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 5,
+              "name": "wallet",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "SplitProfileEntry",
+          "signature": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
+          "topic0": "0x13488f7071c5792218cedfa9fc4f1403234e31d28d19b4c0a4cd445600a50bc0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint16",
+              "indexed": true,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "sharePpm",
+              "type": "uint32",
+              "indexed": false,
+              "internal_type": "uint32"
+            },
+            {
+              "index": 4,
+              "name": "labelId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "SplitWalletDeployed",
+          "signature": "SplitWalletDeployed(bytes32,address,uint16,bytes32,bytes32)",
+          "topic0": "0x75b3ac33ced35fbcdbdda8f1bc561c07be4c9e33a9e2fc044428b65e3feffc0e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "walletVersion",
+              "type": "uint16",
+              "indexed": true,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 3,
+              "name": "initCodeHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "runtimeCodeHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "SplitWalletDiscovered",
+          "signature": "SplitWalletDiscovered(bytes32,address,uint16,bytes32,bytes32)",
+          "topic0": "0xef32f6d51377a47313103be3bc959cd83723c50d21e614e2234f7aba1260a9c7",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "wallet",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "walletVersion",
+              "type": "uint16",
+              "indexed": true,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 3,
+              "name": "initCodeHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "runtimeCodeHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamSplitWallet": {
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "artifact_path": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+      "events": [
+        {
+          "name": "AssetObservationInitialized",
+          "signature": "AssetObservationInitialized(bytes32,address,uint256)",
+          "topic0": "0xb37f69e2e9ac520da5eb736ff4b1c3124d3f7c50a9f38a527490ca1d7637576f",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "asset",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "observedReceived",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "AssetSynced",
+          "signature": "AssetSynced(bytes32,address,uint256,uint256)",
+          "topic0": "0x7d7629904e66d7d342440425797f5bbe60d38a0c8e94b297c867ba63437b853e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "asset",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "previousObservedReceived",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "observedReceived",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "NativeReleased",
+          "signature": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
+          "topic0": "0x999a7d285ef448bf9d1dd1c9e04f3a3ed2328863a843dff773ee0633b5b78ea6",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "recipient",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 4,
+              "name": "totalReleased",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "observedReceived",
+              "type": "uint256",
+              "indexed": false,
               "internal_type": "uint256"
             }
           ]

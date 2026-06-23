@@ -22,7 +22,9 @@
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0xe02cb7f7",
     "IStreamDrops": "0xd7c2abe3",
-    "IStreamMinter": "0x0f48ec25"
+    "IStreamMinter": "0x0f48ec25",
+    "IStreamSplitFactory": "0xfa42a108",
+    "IStreamSplitWallet": "0xd06f2c19"
   },
   "interfaces": {
     "IDependencyRegistry": {
@@ -679,6 +681,186 @@
         {
           "signature": "updateAuctionEndTime(uint256,uint256)",
           "selector": "0xd9f303a2"
+        }
+      ]
+    },
+    "IStreamSplitFactory": {
+      "source": "smart-contracts/IStreamSplitFactory.sol",
+      "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
+      "abi_sha256": "sha256:8c8a540d78c47583c529952eb05e58a1c3ed5e63edbcd2663e72e6974574fe03",
+      "interface_id": "0xfa42a108",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xfa42a108",
+      "function_selectors": [
+        {
+          "signature": "MAX_ENTRIES()",
+          "selector": "0x7d4cb964"
+        },
+        {
+          "signature": "MAX_UNIQUE_ACCOUNTS()",
+          "selector": "0x65695602"
+        },
+        {
+          "signature": "PROFILE_DOMAIN()",
+          "selector": "0x761751d9"
+        },
+        {
+          "signature": "SCHEMA_VERSION()",
+          "selector": "0x6233b32a"
+        },
+        {
+          "signature": "SHARE_DENOMINATOR_PPM()",
+          "selector": "0x6e41b376"
+        },
+        {
+          "signature": "WALLET_VERSION()",
+          "selector": "0x1127b57e"
+        },
+        {
+          "signature": "createProfile((address,uint32,bytes32)[],bytes32)",
+          "selector": "0x6c539c25"
+        },
+        {
+          "signature": "deployWallet(bytes32)",
+          "selector": "0x6e1a1e9e"
+        },
+        {
+          "signature": "profileEntriesHash(bytes32)",
+          "selector": "0x472f4153"
+        },
+        {
+          "signature": "profileEntry(bytes32,uint256)",
+          "selector": "0x6d9d0dcf"
+        },
+        {
+          "signature": "profileEntryCount(bytes32)",
+          "selector": "0x39e27f9a"
+        },
+        {
+          "signature": "profileExists(bytes32)",
+          "selector": "0x93e9701b"
+        },
+        {
+          "signature": "profileIdFor((address,uint32,bytes32)[],bytes32)",
+          "selector": "0x6bcf174f"
+        },
+        {
+          "signature": "profileMetadataURIHash(bytes32)",
+          "selector": "0x9236fe29"
+        },
+        {
+          "signature": "profileUniqueAccount(bytes32,uint256)",
+          "selector": "0x73f35546"
+        },
+        {
+          "signature": "profileUniqueAccountCount(bytes32)",
+          "selector": "0x30743b1e"
+        },
+        {
+          "signature": "splitWalletInitCodeHash()",
+          "selector": "0x57de32be"
+        },
+        {
+          "signature": "splitWalletRuntimeCodeHash()",
+          "selector": "0x914575a9"
+        },
+        {
+          "signature": "walletFor(bytes32)",
+          "selector": "0x7730ab1a"
+        }
+      ]
+    },
+    "IStreamSplitWallet": {
+      "source": "smart-contracts/IStreamSplitWallet.sol",
+      "artifact_path": "out/IStreamSplitWallet.sol/IStreamSplitWallet.json",
+      "abi_sha256": "sha256:8f87e1429378ce06dc6883bf9f07bef0ed71448822853b630e4ec238dc8e80fd",
+      "interface_id": "0xd06f2c19",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xd06f2c19",
+      "function_selectors": [
+        {
+          "signature": "SHARE_DENOMINATOR_PPM()",
+          "selector": "0x6e41b376"
+        },
+        {
+          "signature": "accountReleased(address,address)",
+          "selector": "0x6a028dd0"
+        },
+        {
+          "signature": "aggregateSharePpm(address)",
+          "selector": "0xd1311021"
+        },
+        {
+          "signature": "assetObservationInitialized(address)",
+          "selector": "0x5caa3696"
+        },
+        {
+          "signature": "entriesHash()",
+          "selector": "0xc8c9c6c5"
+        },
+        {
+          "signature": "entry(uint256)",
+          "selector": "0xe2095c07"
+        },
+        {
+          "signature": "entryCount()",
+          "selector": "0x0cbb0f83"
+        },
+        {
+          "signature": "factory()",
+          "selector": "0xc45a0155"
+        },
+        {
+          "signature": "initialize(bytes32,bytes32,bytes32,(address,uint32,bytes32)[],address[],uint32[])",
+          "selector": "0xd913ec54"
+        },
+        {
+          "signature": "initialized()",
+          "selector": "0x158ef93e"
+        },
+        {
+          "signature": "lastObservedReceived(address)",
+          "selector": "0x2ffcf929"
+        },
+        {
+          "signature": "metadataURIHash()",
+          "selector": "0xb0aa5ff4"
+        },
+        {
+          "signature": "observedReceived(address)",
+          "selector": "0xee11f328"
+        },
+        {
+          "signature": "profileId()",
+          "selector": "0x08386eba"
+        },
+        {
+          "signature": "releasable(address,address)",
+          "selector": "0xc45ac050"
+        },
+        {
+          "signature": "release(address,address,address)",
+          "selector": "0x15dc07d7"
+        },
+        {
+          "signature": "roundingDust(address)",
+          "selector": "0x1c8db92d"
+        },
+        {
+          "signature": "syncAsset(address)",
+          "selector": "0x833a782a"
+        },
+        {
+          "signature": "totalReleased(address)",
+          "selector": "0xd79779b2"
+        },
+        {
+          "signature": "uniqueAccount(uint256)",
+          "selector": "0xa9bdd39a"
+        },
+        {
+          "signature": "uniqueAccountCount()",
+          "selector": "0x3e6f2291"
         }
       ]
     }

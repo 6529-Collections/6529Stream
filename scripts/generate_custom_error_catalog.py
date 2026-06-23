@@ -25,6 +25,7 @@ class CustomErrorCatalogError(RuntimeError):
 
 
 CATEGORY_BY_ERROR_NAME = {
+    "AlreadyInitialized": "split_payment_safety",
     "ArtistSignatureUnauthorized": "access_control",
     "BurnedTokenRemintNotAllowed": "supply_minting",
     "CollectionAlreadyFrozen": "metadata_integrity",
@@ -40,6 +41,7 @@ CATEGORY_BY_ERROR_NAME = {
     "DependencyFieldTooLarge": "metadata_integrity",
     "DependencyKeyReserved": "metadata_integrity",
     "DependencyVersionMissing": "metadata_integrity",
+    "DuplicateSplitEntry": "split_payment_safety",
     "EmptyContractURI": "metadata_integrity",
     "EmptyRandomWords": "randomness_lifecycle",
     "ERC2981InvalidDefaultRoyalty": "configuration",
@@ -52,14 +54,23 @@ CATEGORY_BY_ERROR_NAME = {
     "InvalidAdminContract": "configuration",
     "InvalidCoreContract": "configuration",
     "InvalidDependencyRegistryContract": "configuration",
+    "InvalidEntryCount": "split_payment_safety",
+    "InvalidInitializationInput": "split_payment_safety",
     "InvalidMinterContract": "configuration",
     "InvalidRandomizerContract": "configuration",
+    "InvalidSplitAccount": "split_payment_safety",
+    "InvalidSplitShare": "split_payment_safety",
+    "InvalidSplitTotal": "split_payment_safety",
     "InvalidTokenMetadataInput": "metadata_integrity",
     "MetadataFieldInvalidUTF8": "metadata_integrity",
     "MetadataFieldTooLarge": "metadata_integrity",
     "MetadataFrozen": "metadata_integrity",
     "MetadataMutationPaused": "pause_emergency",
+    "NoReleasableFunds": "split_payment_safety",
+    "NativeReceiptInvariantBroken": "split_payment_safety",
+    "NativeTransferFailed": "split_payment_safety",
     "NotMinterContract": "access_control",
+    "ObservedReceiptsDecreased": "split_payment_safety",
     "OnlyCoordinatorCanFulfill": "access_control",
     "PendingRandomnessRequests": "randomness_lifecycle",
     "RandomizerRequestReentrancy": "randomness_lifecycle",
@@ -69,18 +80,28 @@ CATEGORY_BY_ERROR_NAME = {
     "RandomnessRequestNotFulfilled": "randomness_lifecycle",
     "RandomnessRequestNotPending": "randomness_lifecycle",
     "ReentrancyGuardReentrantCall": "auction_payment_safety",
+    "SplitWalletAddressPoisoned": "split_payment_safety",
     "StaleRandomnessRequest": "randomness_lifecycle",
     "TokenNotMinted": "supply_minting",
     "TokenOutsideCollectionRange": "supply_minting",
     "TokenRandomnessRequestAlreadyExists": "randomness_lifecycle",
+    "UnauthorizedInitializer": "access_control",
+    "UnauthorizedReleaseRecipient": "access_control",
     "UnknownDependency": "metadata_integrity",
+    "UnknownProfile": "split_payment_safety",
     "UnknownRandomnessRequest": "randomness_lifecycle",
     "UnsafeMetadataURI": "metadata_integrity",
     "UnsafeRawAttributes": "metadata_integrity",
+    "UnsupportedAsset": "split_payment_safety",
     "WrongRandomnessProvider": "randomness_lifecycle",
     "WrongRandomnessTokenCollection": "randomness_lifecycle",
     "ZeroDerivedSeed": "randomness_lifecycle",
+    "ZeroRecipient": "split_payment_safety",
     "ZeroTokenHash": "metadata_integrity",
+}
+
+CATEGORY_BY_ERROR_ID = {
+    "StreamSplitWallet:ReentrancyGuardReentrantCall()": "split_payment_safety",
 }
 
 SEVERITY_BY_CATEGORY = {
@@ -89,6 +110,7 @@ SEVERITY_BY_CATEGORY = {
     "metadata_integrity": "high",
     "randomness_lifecycle": "high",
     "auction_payment_safety": "high",
+    "split_payment_safety": "high",
     "supply_minting": "medium",
     "configuration": "medium",
 }
@@ -99,6 +121,7 @@ CALLER_ACTION_BY_CATEGORY = {
     "metadata_integrity": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
     "randomness_lifecycle": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
     "auction_payment_safety": "Treat as a protected accounting or reentrancy boundary; refresh balances/credits and retry only through the documented flow.",
+    "split_payment_safety": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
     "supply_minting": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
     "configuration": "Verify the configured address, percentage, or protocol parameter before retrying.",
 }
@@ -125,6 +148,9 @@ TRACEABILITY_BY_CATEGORY = {
     "auction_payment_safety": [
         "test/StreamPaymentsInvariant.t.sol",
         "test/StreamCustomErrorNegative.t.sol",
+    ],
+    "split_payment_safety": [
+        "test/StreamSplitWallet.t.sol",
     ],
     "supply_minting": [
         "test/StreamCoreCustomErrors.t.sol",
@@ -173,7 +199,10 @@ def require_list(value: Any, path: str) -> list[Any]:
     return value
 
 
-def classify_error(name: str, signature: str) -> str:
+def classify_error(contract_name: str, name: str, signature: str) -> str:
+    category = CATEGORY_BY_ERROR_ID.get(canonical_error_id(contract_name, signature))
+    if category is not None:
+        return category
     try:
         return CATEGORY_BY_ERROR_NAME[name]
     except KeyError as exc:
@@ -199,7 +228,7 @@ def catalog_entry(
     if not SELECTOR_RE.fullmatch(selector):
         raise CustomErrorCatalogError(f"{contract_name}:{signature} has invalid selector {selector!r}")
 
-    category = classify_error(name, signature)
+    category = classify_error(contract_name, name, signature)
     return {
         "id": canonical_error_id(contract_name, signature),
         "contract": contract_name,

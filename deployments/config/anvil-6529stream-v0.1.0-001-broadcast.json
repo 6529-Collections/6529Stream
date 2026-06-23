@@ -126,6 +126,12 @@
           "0x0000000000000000000000000000000000006536"
         ],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamSplitFactory",
+        "address": "0x100000000000000000000000000000000000000b",
+        "constructor_args": [],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -182,7 +188,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:20a2a90f1b0648b8321e4f26d181f5ba47269d725295e013273cc3ed1cda15b6",
+    "broadcast_sha256": "sha256:a96edc1a24f947cb8504982e53ff431631e2cc4543e8935f69c1c987f3f3d749",
     "template_config": "deployments/config/anvil-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 31337,
@@ -236,6 +242,11 @@
         "contract": "NextGenRandomizerRNG",
         "address": "0x1000000000000000000000000000000000000009",
         "transaction_hash": "0x0909090909090909090909090909090909090909090909090909090909090909"
+      },
+      {
+        "contract": "StreamSplitFactory",
+        "address": "0x100000000000000000000000000000000000000b",
+        "transaction_hash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
       }
     ],
     "ignored_deployments": []

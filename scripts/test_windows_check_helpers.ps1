@@ -12,6 +12,7 @@ function Get-NativeExitHarness {
         return [pscustomobject]@{
             FilePath = $cmdPath
             SuccessArguments = @("/d", "/c", "exit", "/b", "0")
+            WarningArguments = @("/d", "/c", "echo native warning 1>&2 & exit /b 0")
             FailureArguments = @("/d", "/c", "exit", "/b", "7")
         }
     }
@@ -20,6 +21,7 @@ function Get-NativeExitHarness {
     return [pscustomobject]@{
         FilePath = $shPath
         SuccessArguments = @("-c", "exit 0")
+        WarningArguments = @("-c", "echo native warning >&2; exit 0")
         FailureArguments = @("-c", "exit 7")
     }
 }
@@ -58,5 +60,6 @@ Assert-ThrowsWithMessage `
     }
 
 Invoke-CheckedNative -FilePath $nativeHarness.FilePath -Arguments $nativeHarness.SuccessArguments
+Invoke-CheckedNative -FilePath $nativeHarness.FilePath -Arguments $nativeHarness.WarningArguments
 
 Write-Output "Windows check helper runtime harness passed."

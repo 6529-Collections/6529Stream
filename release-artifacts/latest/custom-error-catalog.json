@@ -6,20 +6,21 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 73,
-    "contract_count": 8,
+    "custom_error_count": 91,
+    "contract_count": 10,
     "category_counts": {
-      "access_control": 5,
+      "access_control": 7,
       "auction_payment_safety": 3,
       "configuration": 10,
       "metadata_integrity": 17,
       "pause_emergency": 2,
       "randomness_lifecycle": 26,
+      "split_payment_safety": 16,
       "supply_minting": 10
     },
     "severity_counts": {
-      "critical": 5,
-      "high": 48,
+      "critical": 7,
+      "high": 64,
       "medium": 20
     },
     "duplicate_selectors": {
@@ -34,7 +35,8 @@
       "0x3ee5aeb5": [
         "StreamAuctions:ReentrancyGuardReentrantCall()",
         "StreamCuratorsPool:ReentrancyGuardReentrantCall()",
-        "StreamDrops:ReentrancyGuardReentrantCall()"
+        "StreamDrops:ReentrancyGuardReentrantCall()",
+        "StreamSplitWallet:ReentrancyGuardReentrantCall()"
       ],
       "0x490dd684": [
         "NextGenRandomizerRNG:ZeroDerivedSeed(uint256)",
@@ -2213,6 +2215,502 @@
         "tests": [
           "test/StreamPaymentsInvariant.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:DuplicateSplitEntry(address,bytes32)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "DuplicateSplitEntry",
+      "signature": "DuplicateSplitEntry(address,bytes32)",
+      "selector": "0x5c8b9654",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "labelId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:InvalidEntryCount(uint256)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "InvalidEntryCount",
+      "signature": "InvalidEntryCount(uint256)",
+      "selector": "0x22658d16",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "count",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:InvalidSplitAccount(uint256)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "InvalidSplitAccount",
+      "signature": "InvalidSplitAccount(uint256)",
+      "selector": "0x6d4b65f3",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:InvalidSplitShare(uint256)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "InvalidSplitShare",
+      "signature": "InvalidSplitShare(uint256)",
+      "selector": "0x8f954ada",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:InvalidSplitTotal(uint256)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "InvalidSplitTotal",
+      "signature": "InvalidSplitTotal(uint256)",
+      "selector": "0x01527a8a",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "totalSharePpm",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:SplitWalletAddressPoisoned(bytes32,address)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "SplitWalletAddressPoisoned",
+      "signature": "SplitWalletAddressPoisoned(bytes32,address)",
+      "selector": "0xdba25228",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitFactory:UnknownProfile(bytes32)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "UnknownProfile",
+      "signature": "UnknownProfile(bytes32)",
+      "selector": "0x0ef313a6",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:AlreadyInitialized()",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "AlreadyInitialized",
+      "signature": "AlreadyInitialized()",
+      "selector": "0x0dc149f0",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:InvalidInitializationInput()",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "InvalidInitializationInput",
+      "signature": "InvalidInitializationInput()",
+      "selector": "0xa52f77b6",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:NativeReceiptInvariantBroken(uint256,uint256)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "NativeReceiptInvariantBroken",
+      "signature": "NativeReceiptInvariantBroken(uint256,uint256)",
+      "selector": "0x4b360bc7",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "expectedObservedReceived",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "actualObservedReceived",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:NativeTransferFailed(address,uint256)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "NativeTransferFailed",
+      "signature": "NativeTransferFailed(address,uint256)",
+      "selector": "0xa5b05eec",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:NoReleasableFunds(address,address)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "NoReleasableFunds",
+      "signature": "NoReleasableFunds(address,address)",
+      "selector": "0x434d6937",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:ObservedReceiptsDecreased(address,uint256,uint256)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "ObservedReceiptsDecreased",
+      "signature": "ObservedReceiptsDecreased(address,uint256,uint256)",
+      "selector": "0x769b1382",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "previousObservedReceived",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "observedReceived",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:ReentrancyGuardReentrantCall()",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "ReentrancyGuardReentrantCall",
+      "signature": "ReentrancyGuardReentrantCall()",
+      "selector": "0x3ee5aeb5",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:UnauthorizedInitializer(address)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "UnauthorizedInitializer",
+      "signature": "UnauthorizedInitializer(address)",
+      "selector": "0x5e898b91",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:UnauthorizedReleaseRecipient(address,address,address)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "UnauthorizedReleaseRecipient",
+      "signature": "UnauthorizedReleaseRecipient(address,address,address)",
+      "selector": "0x702eac7b",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:UnsupportedAsset(address)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "UnsupportedAsset",
+      "signature": "UnsupportedAsset(address)",
+      "selector": "0xee84f40b",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:ZeroRecipient()",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "ZeroRecipient",
+      "signature": "ZeroRecipient()",
+      "selector": "0xd27b4443",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

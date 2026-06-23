@@ -25,9 +25,9 @@ rerun the full candidate gate and regenerate affected release artifacts.
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Foundry test suite | Passed | `forge test -vvv`; 445 tests passed, 0 failed, 0 skipped |
+| Foundry test suite | Passed | `forge test -vvv`; 480 tests passed, 0 failed, 0 skipped |
 | Production size build | Passed | `forge build --sizes --via-ir --skip test --skip script --force` |
-| `StreamCore` runtime size | Passed | 21,831 bytes runtime, 2,745 bytes EIP-170 margin |
+| `StreamCore` runtime size | Passed | 21,824 bytes runtime, 2,752 bytes EIP-170 margin |
 | Gas snapshot | Passed | `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap`; 12 tests passed |
 | Gas envelope checks | Passed | Direct `python scripts/test_gas_envelopes.py` and `python scripts/check_gas_envelopes.py` runs passed |
 | Slither | Blocked locally | `slither` is not installed in the execution environment; run the pinned `slither-analyzer==0.11.5` toolchain from `requirements-tools.txt` before release approval |

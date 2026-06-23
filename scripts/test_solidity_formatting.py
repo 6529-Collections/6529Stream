@@ -28,6 +28,46 @@ Diff in smart-contracts\\Address.sol:
             ["smart-contracts/Address.sol", "smart-contracts/Math.sol"],
         )
 
+    def test_filters_line_ending_only_forge_fmt_diff(self) -> None:
+        output = """Diff in smart-contracts\\IERC721Enumerable.sol:
+1        |-pragma solidity ^0.8.0;
+2        |-
+3        |-interface IERC721Enumerable {}
+    1    |+pragma solidity ^0.8.0;
+    2    |+
+    3    |+interface IERC721Enumerable {}
+"""
+
+        self.assertEqual(
+            checker.filter_line_ending_only_fmt_diffs(
+                output, ["smart-contracts/IERC721Enumerable.sol"]
+            ),
+            [],
+        )
+
+    def test_retains_real_forge_fmt_diff(self) -> None:
+        output = """Diff in smart-contracts\\StreamSplitWallet.sol:
+1        |-contract StreamSplitWallet{
+    1    |+contract StreamSplitWallet {
+"""
+
+        self.assertEqual(
+            checker.filter_line_ending_only_fmt_diffs(
+                output, ["smart-contracts/StreamSplitWallet.sol"]
+            ),
+            ["smart-contracts/StreamSplitWallet.sol"],
+        )
+
+    def test_required_formatting_failure_without_parseable_diff_is_reported(self) -> None:
+        output = """Error: failed to parse Solidity source
+not a diff header
+"""
+
+        with self.assertRaisesRegex(
+            checker.SolidityFormattingError, "without parseable formatting diffs"
+        ):
+            checker.required_formatting_diff_files(output)
+
     def test_required_files_exclude_vendored_exemptions(self) -> None:
         files = [
             "smart-contracts/Address.sol",

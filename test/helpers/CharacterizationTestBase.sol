@@ -11,6 +11,7 @@ interface Vm {
     function addr(uint256 privateKey) external returns (address);
     function chainId(uint256 newChainId) external;
     function deal(address account, uint256 newBalance) external;
+    function etch(address account, bytes calldata code) external;
     function expectEmit(bool checkTopic1, bool checkTopic2, bool checkTopic3, bool checkData)
         external;
     function prank(address msgSender) external;
