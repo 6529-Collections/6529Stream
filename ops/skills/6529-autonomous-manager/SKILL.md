@@ -149,7 +149,7 @@ For static-analysis, release-artifact, deployment rehearsal, or generated-eviden
 For skill-only changes, validate the skill folder with the available skill-creator validator and check the skills index:
 
 ```bash
-python <skill-creator>/scripts/quick_validate.py ops/skills/<skill-name>
+python ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py ops/skills/<skill-name>
 ```
 
 If a check cannot run, state the command, why it could not run, and the manual review or narrower validation performed instead.
