@@ -731,8 +731,7 @@ VRF adapter:
 
 ```text
 default high-assurance provider   StreamEntropyProviderVRF
-launch fallback                   disabled unless a later launch ADR accepts one
-future reviewed fallback          StreamEntropyProviderARRNG or other adapter
+launch fallback decision          reviewed ARRNG/Pyth fallback or explicit VRF-only exception
 non-default / explicit only       instant or pseudo provider
 future providers                  added as new adapters through registry
 ```
@@ -744,10 +743,24 @@ Recommended policy:
 
 1. High-value fully generative collections should use
    `StreamEntropyProviderVRF` by default.
-2. Launch should use VRF-only for production collections unless a separate ADR
-   accepts a fallback before launch. ARRNG should be used only if the team
-   deliberately chooses it for a collection or precommits it as a reviewed
-   fallback.
+2. Launch must make an explicit fallback decision before public minting:
+   reviewed ARRNG fallback, reviewed Pyth fallback, or a reviewed VRF-only
+   exception. ARRNG is the lower-complexity initial fallback candidate.
+   The decision must be retained in a checksum-covered
+   `StreamEntropyLaunchDecision` manifest, either as
+   `release-artifacts/latest/entropy-launch-decision.json` or as an equivalent
+   release-manifest record, with:
+   - `mode = VRF_ONLY | ARRNG_FALLBACK | PYTH_FALLBACK`;
+   - selected provider addresses, code hashes, policy hashes, and review
+     evidence hashes;
+   - coordinator behavior when the selected provider is unavailable;
+   - the operational monitor and incident-response path for pending requests.
+   In `VRF_ONLY`, no silent fallback is allowed: new entropy requests revert or
+   remain unavailable when the frozen VRF provider is unavailable, while already
+   registered tokens keep truthful pending metadata until governance restores an
+   approved route or executes a separately reviewed recovery. In fallback modes,
+   the coordinator may route only through the precommitted reviewed fallback
+   path recorded in the manifest.
 3. Instant or pseudo providers should be disabled by default and enabled only by
    explicit collection configuration.
 4. Instant or pseudo providers should include clear security assumptions in the
@@ -1432,12 +1445,15 @@ pending state.
 Provider incident revocation can strand pending tokens. Tooling should require a
 documented recovery path before revocation is used. Precommitted fallback
 providers are preferred for long-running high-value collections.
-If the coordinator or provider quorum needed for safe recovery is lost, minting
-for entropy-dependent collections halts as an accepted terminal degradation
-until governance is restored or a precommitted fallback route is executed. The
-system should preserve existing ownership, finalized seeds, pending-state
-truthfulness, and metadata fallback behavior rather than inventing an
-unauthorized randomness source.
+If the coordinator or provider quorum needed for safe recovery is lost, behavior
+must follow the retained `StreamEntropyLaunchDecision`. In `VRF_ONLY`, minting
+for entropy-dependent collections halts or request entrypoints revert as an
+accepted terminal degradation until governance restores the reviewed VRF route
+or accepts a separate recovery. In `ARRNG_FALLBACK` or `PYTH_FALLBACK`, the
+coordinator may use only the precommitted fallback path and policy hash recorded
+in the launch decision manifest. In every mode, the system should preserve
+existing ownership, finalized seeds, pending-state truthfulness, and metadata
+fallback behavior rather than inventing an unauthorized randomness source.
 Collection `CLOSED` status does not block fulfillment for already-`REQUESTED`
 tokens or permissionless `requestEntropy` for already-`REGISTERED` tokens whose
 frozen policy allows public requests. Closing stops new minting, not honest
@@ -1480,8 +1496,9 @@ Core hook and interfaces, but this refactor should still buy about `0.8 KB` to
 
 1. Implement a new `StreamEntropyProviderVRF` adapter using the `requestKey`
    pattern.
-2. Implement a new `StreamEntropyProviderARRNG` adapter using the `requestKey`
-   pattern if ARRNG is still required.
+2. Implement a new `StreamEntropyProviderARRNG` or
+   `StreamEntropyProviderPyth` adapter using the `requestKey` pattern if the v1
+   fallback decision chooses a fallback provider.
 3. Implement or explicitly defer an instant provider.
 4. Add provider-level events and tests.
 5. Do not reuse `NextGenRandomizerNXT`, `NextGenRandomizerRNG`, or
@@ -1623,13 +1640,13 @@ Renderer integration tests:
    allow a global default provider.
 2. Whether public `requestEntropy` should be enabled by default.
 3. Whether an instant provider should be included in v1 or deferred.
-4. Whether fallback providers are needed in v1 or only after the first external
-   provider integration review.
-5. Whether Core or Metadata Router should emit the ERC-4906-compatible refresh
-   event after entropy finalization.
+4. Whether the v1 fallback decision ships reviewed ARRNG, reviewed Pyth, or a
+   reviewed VRF-only launch exception.
+5. Should Core or Metadata Router emit the ERC-4906-compatible refresh event
+   after entropy finalization?
 
 The preferred answers for a high-value launch are: configure and freeze entropy
 before sale start, allow operator/admin requests by default, defer instant
-providers unless strongly needed, use precommitted fallback only if provider
-risk justifies it, and ensure refresh events are emitted from the contract or
+providers unless strongly needed, make the reviewed fallback decision before
+public minting, and ensure refresh events are emitted from the contract or
 surface marketplaces actually monitor.

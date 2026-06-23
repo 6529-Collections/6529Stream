@@ -25,24 +25,39 @@ transient conversation memory.
 
 ## Current Objective
 
-Deliver the roadmap at a world-class open-source level for 6529 NFT drops:
-reproducible setup, honest maturity docs, issue-ready planning, CI/tooling,
-tests, security hardening, deployment discipline, and release/audit readiness.
+Deliver the v1 6529Stream contract roadmap one PR-sized topic at a time:
+outside-Core launch scope, payment and split satellites, metadata and
+preservation satellites, entropy providers, minimal Core hooks, release
+evidence, and audit/readiness gates.
 
 ## Current Repository State
 
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/release-evidence-path-helper` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/606` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/607` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/608` |
-| Next issue | TBD after issue #607 is merged. |
+| Active PR branch | `codex/v1-outside-core-launch-scope` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/622` |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/624 |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/623 |
+| Next issue | Split factory and split wallet skeleton after v1 scope reconciliation. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-22 17:56 UTC` |
+| Last updated | `2026-06-23 13:30 UTC` |
+
+## Current Run Notes
+
+- User authorized autonomous execution without permission prompts.
+- Use heavy subagents for independent review, sequencing, and verification.
+- The v1 contract roadmap run is user-directed overall. PR #623 now uses issue
+  #624 as its topic tracker so the machine-checked state/backlog pair has a
+  concrete active issue while this scope reconciliation is open.
+- For substantive local drafts, request parallel OpenRouter review from Opus
+  4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
+- Current topic branch reconciles the v1-required outside-Core scope for
+  approved-standard ERC-20 primary settlement, museum-grade metadata and
+  preservation records, preservation/attestation/view satellites, and the
+  ARRNG/Pyth versus VRF-only fallback decision.
 
 ## Packaging Notes
 

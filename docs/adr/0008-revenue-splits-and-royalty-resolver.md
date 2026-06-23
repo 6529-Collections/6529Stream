@@ -914,10 +914,19 @@ Future `StreamDrops` and `StreamAuctions` should resolve primary-sale
 assignments through the revenue resolver rather than storing only
 poster/protocol/curator basis points locally.
 
-The v1 primary adapter is native ETH only. ERC-20 primary sales require a later
-asset-specific primary adapter with exact token-transfer accounting, escrow
-flush rules, and tests. Split wallets may still release approved ERC-20 assets
-received passively or through future adapters.
+The v1 primary settlement surface includes native ETH and approved standard
+ERC-20 assets. ERC-20 primary settlement must live in a payment adapter or
+primary-sale settlement module outside Core, with exact token-transfer
+accounting, allowance/payment failure handling, escrow flush rules, and tests.
+Fee-on-transfer, rebasing, callback, or otherwise non-standard ERC-20 behavior
+is unsupported unless a separate accepted adapter spec explicitly covers it.
+ERC-20 primary adapters must read the split-factory-bound
+`IStreamAssetPolicyRegistry` and accept new primary payments only for `ACTIVE`
+assets. The adapter measures its own balance before and after payer transfer and
+reverts unless the received amount exactly equals the expected sale amount.
+Passive split-wallet ERC-20 receipts remain releasable under wallet accounting,
+but they are not primary-sale settlement evidence and do not relax the
+adapter-level exact-delta requirement.
 
 Signed primary-sale authorizations must bind the economic policy being used.
 For fixed-price drops and any signed auction creation path, the signed payload
@@ -1094,9 +1103,17 @@ Revenue escrow lifecycle:
 
 - Escrow credits are keyed by `(revenueClass, profileId, wallet, asset)` and
   can only be created by approved sale or auction contracts.
-- In v1, escrow credits must use `asset = address(0)` because primary
-  settlement is native ETH only. Non-native assets revert until an ERC-20
-  primary adapter ADR is accepted.
+- In v1, escrow credits may use `asset = address(0)` for native ETH or an
+  approved standard ERC-20 asset address for an accepted primary-sale adapter.
+  Unsupported assets revert, and non-standard ERC-20 behavior requires a
+  separate accepted adapter spec.
+- For non-native credits, the escrow credit function independently rechecks the
+  deployment-wide asset policy and accepts new primary credits only while the
+  asset is `ACTIVE`, before any owed-credit mutation. This check is required
+  even when the calling adapter already checked the same asset. Registry
+  unavailability, malformed policy returndata, inactive/deprecated status for
+  new primary revenue, or unsupported status reverts before owed-credit storage
+  changes.
 - The `wallet` in the escrow key is captured at credit time. Repointing a
   revenue assignment later does not move existing escrow credits to a new
   wallet.
@@ -1889,7 +1906,8 @@ Add tests for:
 - open-ended collection tokens without token-level royalty snapshots follow the
   current collection assignment at `royaltyInfo()` time;
 - auction `saleId` is unique per primary auction or includes an auction nonce;
-- v1 primary settlement excludes ERC-20 payments until an adapter is accepted;
+- v1 primary settlement accepts native ETH and only approved standard ERC-20
+  payments through accepted outside-Core adapters;
 - escrow-to-wallet flush is permissionless, idempotent, cannot double-credit,
   and cannot make owed funds emergency-withdrawable;
 - escrow flush tests include reverting deployment/deposit harnesses and prove

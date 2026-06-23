@@ -42,8 +42,8 @@ Production launch contracts must not contain:
 | Gate | Code Surface | Required Tests | Release Artifact |
 |---|---|---|---|
 | Core-native ERC-2981 | `StreamCore.royaltyInfo`, revenue resolver | canonical `0x3d5d0e9e` resolver selector; malformed/OOG/external-call resolver fallback; all-cold gas | Core bytecode size, resolver gas report |
-| Pull split wallets | split factory, split wallet, revenue escrow | conservation fuzz, forced ETH, ERC-20 denial, reentrancy | profile schema, wallet code hashes |
-| Primary native ETH settlement | fixed-price sale adapter | no `tx.origin`, policy hash binding, escrow fallback | sale authorization schema |
+| Pull split wallets | split factory, split wallet, revenue escrow | conservation fuzz, forced ETH, approved-standard ERC-20 release/sync, unsupported ERC-20 denial, reentrancy | profile schema, wallet code hashes |
+| Primary native ETH and approved-standard ERC-20 settlement | fixed-price sale adapter, ERC-20 primary settlement adapter, asset policy registry, revenue escrow | no `tx.origin`, policy hash binding, escrow fallback, adapter and escrow both enforce `ACTIVE` asset policy, exact ERC-20 transfer accounting, allowance/payment failure handling | sale authorization schema, approved asset and adapter manifests |
 | Auction settlement | auction contract | bid custody, pull refunds, settlement CEI | auction state-machine manifest |
 | Collection management | Core collection boundary | create/status/max-supply events and transitions | collection facts schema |
 | Token identity | Core mint boundary, `tokenCollectionIdentity` | global sequential IDs, collection serial mapping, mapping-existence read, burn retained mapping | token identity schema |
@@ -52,7 +52,11 @@ Production launch contracts must not contain:
 | Mint accounting | mint manager, ledger | duplicate-key aggregation, static caps, signed ticket binding | policy hash schema |
 | Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path | entropy policy manifest |
 | Metadata routing | metadata router, renderer | escaping, size limits, router failure behavior, ERC-4906 auth | renderer and context manifests |
-| Collection metadata | metadata contract | typed launch fields, generic records, locks, snapshots | schema and snapshot manifests |
+| Collection metadata | metadata contract plus metadata satellites | typed launch fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling | schema and snapshot manifests, metadata aggregate ABI/bytecode report |
+| Preservation records | `StreamPreservationRecords` | PREMIS-style event/object/agent/right records, fixity hash validation, event reconstruction, post-freeze record behavior | preservation module manifest, schema hashes, code hash |
+| Collection attestations | `StreamCollectionAttestations` | C2PA/EIP-712/ERC-1271-compatible attestations, signer authority, supersession, event reconstruction | attestation module manifest, schema hashes, code hash |
+| Collection views | `StreamCollectionViews` | IIIF/view URI commitments, accessibility/display view references, bounded reads, event reconstruction | view module manifest, schema hashes, code hash |
+| Entropy fallback decision | entropy coordinator, retained provider decision | reviewed ARRNG fallback, reviewed Pyth fallback, or reviewed VRF-only exception; coordinator failure mode matches retained decision | checksum-covered `release-artifacts/latest/entropy-launch-decision.json` or equivalent release-manifest record |
 | Artwork finality | Core plus satellites | typed finality preimage, pointer race, `verifyFinality` | finality manifest |
 | Governance | governance/timelock, role registry | no single EOA, role map cardinality, delays | genesis governance manifest |
 | Events | every subsystem | event reconstruction, supersession map | event catalog hash |
@@ -74,8 +78,13 @@ StreamMintManager
 StreamMintLedger
 StreamMetadataRouter
 StreamCollectionMetadata
+StreamPreservationRecords
+StreamCollectionAttestations
+StreamCollectionViews
 StreamEntropyCoordinator
 At least one approved entropy provider or explicit NOT_REQUIRED entropy mode
+Reviewed ARRNG/Pyth fallback provider or explicit reviewed VRF-only exception
+ERC-20 primary settlement adapter for approved standard assets
 StreamArtworkFinalityRegistry if any collection launches with finality promises
 ```
 
@@ -85,10 +94,10 @@ Schema/future or optional-at-launch surfaces:
 Custom counter resolvers
 Resolver-defined caps/deltas
 Privacy nullifiers
-ERC-20 primary adapters
-Alternate view/attestation/preservation companion contracts
 Scoped release/season/view finality if no launch collection needs it
 CCIP Read and future onchain web adapters
+Non-standard ERC-20 primary adapters
+Additional institution-specific preservation, rights, VC/DID, EAS, or legal modules
 ```
 
 Optional surfaces may be specified and reserved, but launch bytecode should not

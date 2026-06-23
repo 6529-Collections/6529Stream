@@ -18,6 +18,14 @@ Launch adapter scope is intentionally small:
 1. `StreamEntropyProviderVRF` as the default high-assurance production adapter.
 2. `StreamEntropyProviderMock` for local development, tests, and deterministic
    simulations.
+3. A v1 fallback decision: either ship one reviewed
+   `StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth` fallback, with
+   ARRNG as the lower-complexity initial fallback candidate, or record an
+   explicit reviewed VRF-only launch exception. The choice must be retained in a
+   checksum-covered `StreamEntropyLaunchDecision` manifest, either as
+   `release-artifacts/latest/entropy-launch-decision.json` or as an equivalent
+   release-manifest record, that records the mode, selected provider code hashes,
+   policy hashes, review evidence, and coordinator failure behavior.
 
 All other provider families in this document are future research or future
 adapter candidates. They should not be treated as launch implementation scope
@@ -526,9 +534,9 @@ event VRFConfigUpdated(
 
 ## StreamEntropyProviderARRNG
 
-`StreamEntropyProviderARRNG` is a non-launch future adapter candidate. It may
-become an optional reviewed fallback or collection choice after the VRF launch
-adapter is audited. It should be a new Stream-native adapter if retained. The
+`StreamEntropyProviderARRNG` is the lower-complexity initial v1 fallback
+candidate if launch chooses to ship a fallback provider instead of a reviewed
+VRF-only exception. It should be a new Stream-native adapter if retained. The
 current `NextGenRandomizerRNG` can inform the integration, but should not be
 reused as-is.
 
@@ -652,9 +660,10 @@ event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
 
 ## StreamEntropyProviderPyth
 
-`StreamEntropyProviderPyth` is a non-launch future adapter candidate and a
-strong candidate for a second reviewed provider family after the VRF launch
-adapter.
+`StreamEntropyProviderPyth` is an accepted v1 fallback candidate if launch
+chooses a Pyth fallback instead of ARRNG or a reviewed VRF-only exception. It is
+more integration-complex than ARRNG and needs explicit fee, callback, liveness,
+and audit coverage before activation.
 
 Pyth Entropy uses a two-party commit-reveal construction. The provider commits
 to values through a hash chain, the user contract supplies its own contribution,
@@ -1137,12 +1146,22 @@ collections whose art depends on entropy.
 
 Build `StreamEntropyProviderMock` for tests.
 
-Design `StreamEntropyProviderPyth` as the second serious provider candidate.
-Do not launch it until fees, callback semantics, liveness, and audit coverage
-are reviewed.
+Before launch, make and retain one fallback decision:
 
-Build `StreamEntropyProviderARRNG` only if ARRNG remains a desired provider or
-fallback after review.
+1. Build and review `StreamEntropyProviderARRNG` as the lower-complexity
+   fallback provider.
+2. Or build and review `StreamEntropyProviderPyth` if its fee, callback,
+   liveness, and audit requirements are accepted.
+3. Or record an explicit reviewed VRF-only launch exception with operational
+   monitoring and no silent fallback.
+
+The retained `StreamEntropyLaunchDecision` manifest is the release artifact for
+that choice and must be covered by the release manifest, release-candidate
+lockfile, and checksum bundle once a launch candidate chooses a mode. In
+`VRF_ONLY`, unavailable VRF halts or rejects new entropy requests for
+entropy-dependent collections rather than silently substituting another source.
+In fallback modes, the coordinator may use only the reviewed fallback provider
+and policy hash recorded in the manifest.
 
 Track drand, Randcast, Supra, Witnet, and API3 QRNG as future adapters. The
 best 50-year posture is not to guess the permanent winner now, but to keep

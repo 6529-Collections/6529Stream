@@ -2747,6 +2747,24 @@ Before any "best-in-class 1/1" release claim:
 - Extreme stress testing for many auction bids.
 - Extreme stress testing for large metadata and dependency script sizes.
 - Long-term indexer/backfill performance testing.
+- Add v1-required outside-Core launch modules for high-value Stream releases:
+  - ERC-20 primary settlement through a payment adapter or primary-sale
+    settlement module, not `StreamCore`; v1 support is limited to approved
+    standard ERC-20s unless an accepted adapter spec explicitly covers
+    fee-on-transfer, rebasing, callback, or other non-standard assets.
+  - C2PA, IIIF, and PREMIS-style preservation records as real v1 metadata and
+    preservation surfaces, not merely future notes.
+  - Richer preservation satellites such as `StreamPreservationRecords`,
+    `StreamCollectionAttestations`, and `StreamCollectionViews`, with module
+    manifests, code-hash approvals, event reconstruction, and launch evidence.
+  - Museum-grade metadata depth for archival, catalogue, provenance,
+    exhibition, rights, fixity, media-relationship, and preservation material,
+    while keeping default marketplace `tokenURI()` bounded and readable.
+  - A v1 entropy fallback decision: either ship one reviewed
+    `StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth` fallback, with
+    ARRNG as the lower-complexity initial fallback candidate, or record an
+    explicit reviewed VRF-only launch exception in a checksum-covered
+    `StreamEntropyLaunchDecision` manifest.
 
 ## Appendix A: Slither Baseline
 

@@ -60,7 +60,7 @@ Recommended companion responsibilities:
    preservation, C2PA, EAS, VC, EIP-712, and ERC-1271-compatible attestation
    records. This can start inside `StreamCollectionMetadata` and split out if
    it grows.
-4. `StreamPreservationRegistry`: archive receipts, PREMIS-style preservation
+4. `StreamPreservationRecords`: archive receipts, PREMIS-style preservation
    records, fixity checks, storage/migration events, and media-provenance
    references. This should remain outside Core even if implemented at launch.
 
@@ -217,14 +217,15 @@ not live in ERC-721 Core.
 
 The collection metadata architecture is a 50-year knowledge system, but launch
 ABI must stay small enough to audit. The launch contract should implement the
-first column, treat the second column as schema/manifest guidance, and reserve
-the third column for later companion contracts.
+first column, treat the second column as schema/manifest guidance, and use the
+third column as v1 outside-Core companion surface where the main launch ABI would
+become too large.
 
-| Launch ABI | Schema-Only Or Offchain | Future Companion Contract |
+| Launch ABI | Schema/Manifest Guidance | V1 Outside-Core Companion Surface |
 |---|---|---|
 | `CollectionIdentity` | PREMIS object/event/agent/right payload schemas | `StreamSchemaRegistry` |
 | `CollectionPeople` | C2PA assertion, ingredient, action schemas | `StreamCollectionAttestations` |
-| `CollectionMedia` | IIIF Presentation manifests | `StreamPreservationRegistry` |
+| `CollectionMedia` | IIIF Presentation manifests | `StreamPreservationRecords` |
 | `CollectionURIs` | detailed fixity reports | typed C2PA verifier/registry |
 | `CollectionRights` | rights policy text and legal terms | rights-policy resolver, if ever accepted |
 | `CollectionDisplay` | accessibility, gallery, print, AR/VR view documents | specialized view registry |
@@ -237,21 +238,31 @@ the third column for later companion contracts.
 | append-only snapshots | museum/catalogue manifests | snapshot attestation network |
 | revision/events | event catalog JSON | indexer checkpoint service |
 
-Launch must not implement typed PREMIS structs, typed C2PA structs, typed IIIF
-structs, typed fixity structs, typed media-relationship structs, or a separate
-schema-registry contract unless a later implementation ADR explicitly promotes
-one of those surfaces. Use `CollectionRecord` plus `schemaId`, `HashRef`, and
-URI commitments for those records at launch.
+Launch v1 must support C2PA, IIIF, PREMIS-style, fixity,
+media-relationship, archive, and museum/catalogue records as real metadata and
+preservation surfaces. The default implementation path is `CollectionRecord`
+plus `schemaId`, `HashRef`, URI commitments, and launch companion satellites
+such as `StreamPreservationRecords`, `StreamCollectionAttestations`, and
+`StreamCollectionViews`. Typed PREMIS/C2PA/IIIF structs can be promoted into a
+companion ABI when they pass the same function-count, event-reconstruction,
+schema-hash, and audit-scope gates; they must not be embedded in `StreamCore`.
 
-Launch ABI must also have a hard function-count ceiling. Before audit handoff,
-the release manifest must publish the external/public function count, interface
-IDs, selectors, and owner subsystem for every selector in
-`StreamCollectionMetadata`. The initial ceiling is 80 external/public
-functions, including inherited views, with a launch soft target of 60 or fewer.
+Launch metadata surfaces must also have a hard aggregate function-count,
+bytecode, and audit-scope ceiling across `StreamCollectionMetadata` and any v1
+metadata companion satellites. Before audit handoff, the release manifest must
+publish the external/public function count, interface IDs, selectors, owner
+subsystem, runtime bytecode size, module manifest, and code hash for
+`StreamCollectionMetadata`, `StreamPreservationRecords`,
+`StreamCollectionAttestations`, and `StreamCollectionViews`. The initial
+aggregate ceiling is 80 external/public functions across those launch metadata
+surfaces, including inherited views, with a launch soft target of 60 or fewer.
 Exceeding the soft target requires an audit-scope note; exceeding the hard
-ceiling requires a new ADR that either removes launch surface or moves a
-responsibility into a companion contract. This keeps "world-class metadata"
-from quietly turning into an unauditable monolith.
+ceiling requires a new ADR that either removes launch surface or defers a
+responsibility to a later accepted module. This keeps "world-class metadata"
+from quietly turning into an unauditable cluster of monoliths.
+The release checker for the launch candidate must fail if the aggregate
+function count, selector catalog, bytecode report, or code-hash manifest for
+these metadata surfaces is missing or exceeds the accepted ceiling.
 
 ## Core Boundary
 
@@ -2879,11 +2890,14 @@ live in Core.
 6. Add generalized attestations.
 7. Add generic collection records for archive, preservation, fixity, C2PA,
    relationship, rights, and cultural records.
-8. Keep PREMIS/C2PA/IIIF typed structs as schema guidance or future companion
-   interfaces, not launch ABI requirements.
-9. Add IIIF/view manifest conventions.
-10. Add snapshot publication.
-11. Add rich events and metadata refresh hooks.
+8. Add launch companion contracts for preservation records, attestations, and
+   view references when those surfaces would push `StreamCollectionMetadata`
+   past its function-count, bytecode, or auditability ceiling.
+9. Keep PREMIS/C2PA/IIIF typed structs out of Core; represent them through
+   schema/hash commitments or companion ABIs with explicit launch manifests.
+10. Add IIIF/view manifest conventions.
+11. Add snapshot publication.
+12. Add rich events and metadata refresh hooks.
 
 ### Phase 4: Core Cleanup
 
@@ -2978,16 +2992,15 @@ For launch, implement a dedicated `StreamCollectionMetadata` contract rather
 than storing collection metadata inside `StreamMetadataRouter`.
 
 Core should keep `ERC721Enumerable` and token behavior. The metadata contract
-should own the launch ABI listed in `Launch Scope Reduction`: typed collection
-metadata, arbitrary fields, script manifests, dependency manifests, media
-manifests, schema commitments, view manifests, snapshot events, revision
-events, generic collection records, and field locks. PREMIS-style preservation
-records, C2PA references, IIIF manifest references, media relationship records,
-fixity records, artist attestations, and generalized attestations should be
-represented through `CollectionRecord` and schema/hash commitments at launch
-unless a companion contract is explicitly accepted. The metadata router should
-read from the metadata contract and focus on `tokenURI()` routing and renderer
-selection.
+and v1 companion satellites should own the launch ABI listed in `Launch Scope
+Reduction`: typed collection metadata, arbitrary fields, script manifests,
+dependency manifests, media manifests, schema commitments, view manifests,
+snapshot events, revision events, generic collection records, field locks,
+PREMIS-style preservation records, C2PA references, IIIF manifest references,
+media relationship records, fixity records, artist attestations, generalized
+attestations, and museum-grade catalogue material. The metadata router should
+read from those outside-Core surfaces and focus on `tokenURI()` routing and
+renderer selection.
 
 This gives Stream enough room to support Core-native ERC-2981 while making
 collection metadata more durable, explicit, and extensible than the current

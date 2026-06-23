@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:0d4c54cc57ebb7b8c536538f89627c9a0426699088c0ccb327d7fe95244b877c",
-      "size_bytes": 74090
+      "sha256": "sha256:ffbd3f032f2a8febc2be262adfcfe97139c4df490e7a47fca214bfed9a01f444",
+      "size_bytes": 74357
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:b43b617c6a691ecd288eb050f3238f0b52f6b25305f5e423c6f08f3379b0cd9f",
+      "sha256": "sha256:b63ae7f1d021178b72741ca43f6b4151e510b176809c2dae7215c3271e3272bb",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
     "section": "Unreleased",
     "entries": [
       "Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.",
+      "Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.",
       "Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.",
       "Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.",
       "Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.",

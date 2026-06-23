@@ -23,6 +23,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 ## Changelog Entries
 
 - Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.
+- Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.
 - Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.
 - Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.
 - Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.
