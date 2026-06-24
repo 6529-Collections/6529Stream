@@ -6,21 +6,22 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 91,
-    "contract_count": 10,
+    "custom_error_count": 101,
+    "contract_count": 11,
     "category_counts": {
       "access_control": 7,
+      "asset_policy_safety": 7,
       "auction_payment_safety": 3,
       "configuration": 10,
       "metadata_integrity": 17,
       "pause_emergency": 2,
       "randomness_lifecycle": 26,
-      "split_payment_safety": 16,
+      "split_payment_safety": 19,
       "supply_minting": 10
     },
     "severity_counts": {
       "critical": 7,
-      "high": 64,
+      "high": 74,
       "medium": 20
     },
     "duplicate_selectors": {
@@ -1170,6 +1171,134 @@
       }
     },
     {
+      "id": "StreamAssetPolicyRegistry:AssetPolicyUnchanged(address,uint8,bytes32)",
+      "contract": "StreamAssetPolicyRegistry",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "name": "AssetPolicyUnchanged",
+      "signature": "AssetPolicyUnchanged(address,uint8,bytes32)",
+      "selector": "0xd1ccd55e",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamAssetPolicyRegistry:InvalidAsset(address)",
+      "contract": "StreamAssetPolicyRegistry",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "name": "InvalidAsset",
+      "signature": "InvalidAsset(address)",
+      "selector": "0x6f79c78a",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamAssetPolicyRegistry:InvalidAssetPolicyHash(address,uint8,bytes32)",
+      "contract": "StreamAssetPolicyRegistry",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "name": "InvalidAssetPolicyHash",
+      "signature": "InvalidAssetPolicyHash(address,uint8,bytes32)",
+      "selector": "0x0548647a",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "status",
+          "type": "uint8"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "policyHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamAssetPolicyRegistry:InvalidAssetStatus(uint8)",
+      "contract": "StreamAssetPolicyRegistry",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "name": "InvalidAssetStatus",
+      "signature": "InvalidAssetStatus(uint8)",
+      "selector": "0x2fd5f330",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint8",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
       "id": "StreamAuctions:ReentrancyGuardReentrantCall()",
       "contract": "StreamAuctions",
       "source": "smart-contracts/AuctionContract.sol",
@@ -2252,6 +2381,32 @@
       }
     },
     {
+      "id": "StreamSplitFactory:InvalidAssetPolicyRegistry(address)",
+      "contract": "StreamSplitFactory",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "name": "InvalidAssetPolicyRegistry",
+      "signature": "InvalidAssetPolicyRegistry(address)",
+      "selector": "0x0f54b539",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "registry",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
       "id": "StreamSplitFactory:InvalidEntryCount(uint256)",
       "contract": "StreamSplitFactory",
       "source": "smart-contracts/StreamSplitFactory.sol",
@@ -2423,6 +2578,196 @@
       "category": "split_payment_safety",
       "severity": "high",
       "inputs": [],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:AssetNotActive(address,uint8)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "AssetNotActive",
+      "signature": "AssetNotActive(address,uint8)",
+      "selector": "0xa142d392",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:AssetPolicyReadFailed(address,address)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "AssetPolicyReadFailed",
+      "signature": "AssetPolicyReadFailed(address,address)",
+      "selector": "0x9a787919",
+      "category": "asset_policy_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:ERC20BalanceReadFailed(address,address)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "ERC20BalanceReadFailed",
+      "signature": "ERC20BalanceReadFailed(address,address)",
+      "selector": "0x409f04fb",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:ERC20TransferFailed(address,address,uint256)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "ERC20TransferFailed",
+      "signature": "ERC20TransferFailed(address,address,uint256)",
+      "selector": "0x07a1d487",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
+      "traceability": {
+        "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+        "tests": [
+          "test/StreamSplitWallet.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamSplitWallet:ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+      "contract": "StreamSplitWallet",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "name": "ERC20TransferInvariantBroken",
+      "signature": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+      "selector": "0xb73991f1",
+      "category": "split_payment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "expectedWalletBalance",
+          "type": "uint256"
+        },
+        {
+          "index": 3,
+          "internal_type": "uint256",
+          "name": "actualWalletBalance",
+          "type": "uint256"
+        },
+        {
+          "index": 4,
+          "internal_type": "uint256",
+          "name": "expectedRecipientBalance",
+          "type": "uint256"
+        },
+        {
+          "index": 5,
+          "internal_type": "uint256",
+          "name": "actualRecipientBalance",
+          "type": "uint256"
+        }
+      ],
       "caller_action": "Refresh split profile, wallet, and asset state; invalid profiles, unsupported assets, and release precondition failures are terminal unless the submitted state changes.",
       "traceability": {
         "source_artifact": "out/StreamSplitWallet.sol/StreamSplitWallet.json",

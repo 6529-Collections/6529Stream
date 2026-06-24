@@ -87,3 +87,31 @@
   `StreamSplitWallet`, selector-stable interfaces, focused native ETH split
   tests, release-surface registration, changelog coverage, revenue spec status,
   event/indexer docs, and cleanup for the stale PR #608 active marker.
+- Completed PR #626 after local validation, external OpenRouter review
+  approvals from Opus 4.8, GPT-5.5 Pro at high reasoning, and GLM 5.2,
+  CodeRabbit review iteration, green CI, and resolved review threads. Merged
+  the PR as `1fe76b2126875819c579893a7786b4f6668ba832` and closed issue #625
+  completed.
+- Created issue #627 and branch `codex/asset-policy-erc20-splits` for the next
+  outside-Core slice: deployment-wide asset policy registry plus approved
+  standard ERC-20 split-wallet sync/release support.
+- Implemented the local issue #627 draft with a deployment-wide
+  `StreamAssetPolicyRegistry`, split factory registry pinning, approved
+  standard ERC-20 split-wallet sync/release/accounting, docs, deployment
+  config/broadcast manifest updates, tests, and regenerated release artifacts.
+- Ran OpenRouter review for the asset-policy/ERC-20 split-wallet draft. Opus
+  4.8 and GLM 5.2 returned visible non-blocking or test-hardening feedback that
+  was addressed. GPT-5.5 Pro was kept at high/xhigh reasoning per user
+  instruction; the substantive visible response identified bounded-return
+  issues for registry and ERC-20 calls, which were patched with exact 32-byte
+  return handling and focused malformed-return tests. Follow-up GPT-5.5 Pro
+  attempts at high reasoning hit provider/hidden-reasoning transport limits
+  rather than a downgraded-reasoning shortcut.
+- Finished local validation for the issue #627 draft: focused split-wallet
+  tests, production size build, targeted release-artifact checks,
+  `codex-diff-check`, and the full Windows wrapper
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  passed on 2026-06-24.
+- Opened PR #628 at
+  https://github.com/6529-Collections/6529Stream/pull/628 and requested
+  CodeRabbit review.

@@ -135,11 +135,20 @@
       "bytecode_hash": "sha256:7dcc8f6e6a743f12549e11916d7b411dd4145312336cf21f0506bb555ae4998e",
       "verification_status": "not_applicable"
     },
-    "StreamSplitFactory": {
+    "StreamAssetPolicyRegistry": {
       "address": "0x000000000000000000000000000000000000000b",
       "constructor_args": [],
-      "abi_hash": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8",
-      "bytecode_hash": "sha256:c8cdd76d62faefe38b5af0ed0d58dd394dd3367375caa41c867a3f5db24d90cf",
+      "abi_hash": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "bytecode_hash": "sha256:af61d93f924dd6cb5685fddb6269a54520259c226752605dd584418e8a05e49f",
+      "verification_status": "not_applicable"
+    },
+    "StreamSplitFactory": {
+      "address": "0x000000000000000000000000000000000000000c",
+      "constructor_args": [
+        "0x000000000000000000000000000000000000000b"
+      ],
+      "abi_hash": "sha256:15b1ebbb39c54d418ce64da68c7ae3349d8c234a3f5e5a9106a600d0cbbda657",
+      "bytecode_hash": "sha256:e72d47eb7eeac71a175e59936495dab8237187d84f9ceadd28d7939aa69179de",
       "verification_status": "not_applicable"
     }
   },
@@ -168,6 +177,10 @@
       {
         "contract": "StreamCore",
         "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamAssetPolicyRegistry",
+        "new_owner": "0x0000000000000000000000000000000000006529"
       }
     ]
   },
@@ -184,7 +197,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:97d4f7ec0a7057141fd0b55ba8fc7f81c8d143369f437203355c6aa068f22dd7",
+    "manifest_sha256": "sha256:f60aa184e2bce13419b2e30583781c6c030a016f8a3bdfcd1f8d519020ea6866",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -196,7 +209,8 @@
       "StreamAuctions": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
       "NextGenRandomizerVRF": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
       "NextGenRandomizerRNG": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
-      "StreamSplitFactory": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8"
+      "StreamAssetPolicyRegistry": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "StreamSplitFactory": "sha256:15b1ebbb39c54d418ce64da68c7ae3349d8c234a3f5e5a9106a600d0cbbda657"
     },
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
   },

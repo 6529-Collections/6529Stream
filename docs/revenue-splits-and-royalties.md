@@ -29,11 +29,16 @@ StreamRevenueResolver
 StreamSplitFactory
   - deterministic split wallet deployment
   - profile hash and profile ID validation
+  - immutable asset policy registry pin
 
 StreamSplitWallet
   - immutable arbitrary split profile
   - native ETH and ERC-20 pull release
   - passive royalty receipt support
+
+StreamAssetPolicyRegistry
+  - deployment-wide approved ERC-20 asset status
+  - policy evidence hashes and effective timestamps
 
 StreamLabelRegistry
   - optional human-readable label metadata
@@ -70,23 +75,29 @@ Non-launch unless a later ADR accepts the added risk:
 
 ## Implementation Status
 
-The first v1 implementation slice adds `StreamSplitFactory` and
-`StreamSplitWallet` as outside-Core satellites. This slice is intentionally
-fixed-profile and native-ETH only:
+The v1 split implementation adds `StreamSplitFactory`,
+`StreamSplitWallet`, and `StreamAssetPolicyRegistry` as outside-Core
+satellites. The implemented slice is fixed-profile and supports native ETH
+plus approved standard ERC-20 pull release:
 
 - `StreamSplitFactory` validates and canonicalizes immutable split entries,
   computes the ADR 0008 profile ID with `abi.encode`, stores reconstructable
   profile metadata, and deploys or discovers deterministic wallets with
-  `CREATE2`.
+  `CREATE2`. It immutably pins the deployment-wide
+  `StreamAssetPolicyRegistry` and includes that registry address in the
+  `WALLET_VERSION = 2` profile ID preimage.
 - `StreamSplitWallet` has factory-bound one-shot initialization, stores
-  immutable entries and aggregate account shares, accepts passive native ETH,
-  computes releasable funds from cumulative observed receipts, and releases
-  native ETH through pull payments.
+  immutable entries and aggregate account shares, accepts passive native ETH
+  and ERC-20 receipts, computes releasable funds from cumulative observed
+  receipts, and releases native ETH or approved ERC-20 balances through pull
+  payments.
+- `StreamAssetPolicyRegistry` is default-deny, owned by the deployment admin
+  safe after rehearsal, records asset status plus evidence hash, and gives
+  wallets a fail-closed launch surface for approved standard ERC-20s.
 - The slice spends no `StreamCore` bytecode and does not wire into fixed-price
   drops, auctions, revenue resolver assignments, escrow, or ERC-2981.
-- ERC-20 asset policy, ERC-20 observation/release, resolver assignments,
-  primary-sale adapters, escrow, and Core-native resolver-backed ERC-2981
-  remain subsequent launch work.
+- ERC-20 primary-sale adapters, resolver assignments, escrow, and
+  Core-native resolver-backed ERC-2981 remain subsequent launch work.
 
 ## Long-Term Principles
 
@@ -180,6 +191,7 @@ bytes32 profileId = keccak256(abi.encode(
     uint16(walletVersion),
     bytes32(splitWalletInitCodeHash),
     bytes32(splitWalletRuntimeCodeHash),
+    address(assetPolicyRegistry),
     bytes32(entriesHash),
     bytes32(metadataURIHash)
 ));
@@ -384,6 +396,11 @@ during release and `syncAsset`; if
 `currentBalance + totalAccountReleased` falls below the last observed value,
 release and sync for that asset revert as unsupported instead of underflowing
 or reducing entitlements.
+That is a safety freeze for the affected asset, not a sweep or recovery path:
+funds remain in the wallet, native ETH and other active assets remain usable,
+and the asset becomes syncable/releasable again only if the observed cumulative
+balance recovers to the previous high-water mark or a later reviewed
+adapter/recovery spec accepts the non-standard behavior.
 `lastObservedReceived(asset)` is initialized at first detection through
 `syncAsset`, official deposit, or release; operator and recipient tools should
 sync ERC-20 assets before presenting claimable balances.
@@ -393,12 +410,15 @@ balance. If governance later approves that asset and `syncAsset(asset)` first
 observes a positive wallet balance, that observed balance becomes the starting
 cumulative balance for future releases; the wallet cannot prove who funded
 pre-observation transfers or apply historical source attribution before that
-first observation. ERC-20 releases must also prove exact wallet balance deltas:
-the wallet balance must decrease by exactly the released amount. Recipient
-balance-delta checks belong in asset-specific adapters when reliable; they are
-not a generic ERC-20 requirement. No-op transfers, fee-on-transfer behavior,
-rebases, callbacks, and other non-standard behavior are unsupported unless a
-later adapter accepts them.
+first observation. ERC-20 releases must also prove exact wallet and recipient
+balance deltas: the wallet balance must decrease by exactly the released
+amount and the recipient balance must increase by exactly the released amount.
+No-return tokens, no-op transfers, fee-on-transfer behavior, rebases,
+callbacks, and other non-standard behavior are unsupported unless a later
+adapter accepts them.
+This deliberately excludes USDT-style no-return transfer tokens from the v1
+split-wallet ERC-20 path even if their `balanceOf` surface is otherwise
+readable; listing them requires a separate accepted adapter or wallet version.
 
 ERC-20 assets are default-deny. Asset policy is deployment-wide, not per wallet.
 The split factory records the immutable `assetPolicyRegistry` for its wallet
@@ -408,16 +428,13 @@ registry is unavailable or an asset is unknown, non-native sync/release reverts
 safely for that asset only; native ETH and other active assets remain
 unaffected.
 
-The registry read is a bounded external read. The wallet factory must pin
-`ASSET_POLICY_GAS_LIMIT`, `ASSET_POLICY_RETURN_BYTES`, and an
-EIP-150-aware parent gas precheck in the wallet-line manifest. Malformed
-return data, no code at the registry, registry revert, oversized returndata,
-or under-forwarded gas makes the specific non-native `syncAsset` or `release`
-revert before ledger mutation. The wallet must not substitute "active" or
-"native" semantics when the asset policy read fails.
-Initial planning target for `ASSET_POLICY_GAS_LIMIT` is 30,000 gas for an
-all-cold storage-read policy lookup, with the deployed value set from measured
-gas plus margin.
+The registry read is a bounded external read. The launch wallet line uses a
+30,000 gas `staticcall` for the registry `assetStatus(address)` check and
+requires exactly 32 bytes of return data. Malformed return data, no code at
+the registry, registry revert, or under-forwarded gas makes the specific
+non-native `syncAsset` or `release` revert before ledger mutation. The wallet
+must not substitute "active" or "native" semantics when the asset policy read
+fails.
 Because the factory binds `assetPolicyRegistry` immutably for a wallet line, an
 asset-policy registry that no longer satisfies future EVM or gas-schedule
 constraints is handled by a new split-wallet/factory deployment line and
@@ -425,10 +442,12 @@ governed reassignment for future receipts. Existing wallet balances remain in
 the old wallet line; there is no hidden mutable registry pointer inside
 deployed wallets.
 
-Recommended asset policy read:
+Registry policy surface:
 
 ```solidity
 interface IStreamAssetPolicyRegistry {
+    function assetStatus(address asset) external view returns (uint8);
+
     function assetPolicy(address asset)
         external
         view
@@ -440,13 +459,15 @@ interface IStreamAssetPolicyRegistry {
 }
 ```
 
-An asset admin can approve a standard ERC-20, deprecate approval for future
-receipts, or mark an observed asset unsupported. Asset state is explicit:
+An asset admin can approve a standard ERC-20, move an approved asset out of
+active status, or mark an observed asset unsupported. Asset state is explicit,
+but v1 split wallets accept only `ACTIVE` for non-native sync and release:
 
 - `ACTIVE`: official adapters may accept the asset, and sync/release is allowed.
-- `DEPRECATED`: new official adapters should not accept the asset, but existing
-  observed balances and later passive receipts remain syncable and releasable
-  under the same monotonic-token assumption.
+- `INACTIVE`: reviewed or temporarily disabled assets are not accepted by v1
+  split wallets.
+- `DEPRECATED`: previously approved assets are disabled for v1 sync and
+  release.
 - `UNSUPPORTED`: release and sync for that asset are disabled until a later
   adapter or recovery spec accepts the asset. Unsupported marking creates no
   sweep right and blocks no other asset.
@@ -454,13 +475,13 @@ receipts, or mark an observed asset unsupported. Asset state is explicit:
 Moving an ERC-20 asset to `ACTIVE` is an asset-policy decision, not an automatic
 token-interface check. The policy admin should record evidence that the token
 has no transfer fees, rebases, confiscation mechanics, balance-decreasing hooks,
-callback surprises, or no-op transfer behavior that would violate the
-monotonic-balance assumption. Unsupported-asset recoverability is deferred to a
-future state transition or adapter or recovery spec; the v1 unsupported state is
-not a sweep authority.
+callback surprises, no-return transfer semantics, or no-op transfer behavior
+that would violate the monotonic-balance and exact-delta assumptions.
+Unsupported-asset recoverability is deferred to a future state transition or
+adapter or recovery spec; the v1 unsupported state is not a sweep authority.
 
-If an ERC-20 moves `DEPRECATED -> ACTIVE` after a period of unsupported or
-deprecated operation, equality conservation is re-established only after the
+If an ERC-20 moves back to `ACTIVE` after a period of inactive, deprecated, or
+unsupported operation, equality conservation is re-established only after the
 next successful `syncAsset(asset)` observation. Between transitions, the
 required safety property is no over-release; exact equality to external ground
 truth may require indexer/operator reconciliation.
@@ -709,8 +730,9 @@ writes the snapshot before any untrusted receiver callback.
    and entropy registration but no ERC-721 transfer.
 5. Resolver snapshots any required token-level primary or royalty assignment
    from Core's authoritative mapping.
-6. Sale adapter deposits native ETH into the verified split wallet or records
-   escrowed revenue under `(revenueClass, profileId, wallet, asset)`.
+6. Sale adapter deposits the accepted settlement asset into the verified split
+   wallet or records escrowed revenue under
+   `(revenueClass, profileId, wallet, asset)`.
 7. Core executes `completePreparedMintFromManager` and `_safeMint`s to the
    initial recipient.
 
@@ -916,9 +938,10 @@ is not emergency surplus.
 
 When settlement materializes a template, the gas budget includes
 deploy-or-discover work. If deployment cannot fit the bounded settlement path,
-native revenue may be escrowed against the deterministic wallet only after the
-profile preimage has been validated, the profile exists in the factory, the
-predicted wallet has no code, and `wallet == factory.walletFor(profileId)`.
+accepted settlement revenue may be escrowed against the deterministic wallet
+only after the profile preimage has been validated, the profile exists in the
+factory, the predicted wallet has no code, and
+`wallet == factory.walletFor(profileId)`.
 Deployment or discovery can then happen through a permissionless factory path
 before or during a later flush.
 `factory.deployWallet(profileId)` remains permissionless even if the predicted
@@ -1795,6 +1818,7 @@ the payment surface:
 
 ```solidity
 interface IStreamSplitFactory {
+    function assetPolicyRegistry() external view returns (IStreamAssetPolicyRegistry);
     function walletFor(bytes32 profileId) external view returns (address);
     function deployWallet(bytes32 profileId) external returns (address wallet);
     function profileExists(bytes32 profileId) external view returns (bool);
@@ -1804,6 +1828,7 @@ interface IStreamSplitFactory {
 
 interface IStreamSplitWallet {
     function profileId() external view returns (bytes32);
+    function assetPolicyRegistry() external view returns (address);
     function release(address asset, address account, address payable recipient)
         external
         returns (uint256);
@@ -1812,6 +1837,14 @@ interface IStreamSplitWallet {
     function accountReleased(address asset, address account) external view returns (uint256);
     function totalReleased(address asset) external view returns (uint256);
     function syncAsset(address asset) external returns (uint256);
+}
+
+interface IStreamAssetPolicyRegistry {
+    function assetStatus(address asset) external view returns (uint8);
+    function assetPolicyHash(address asset) external view returns (bytes32);
+    function assetPolicyEffectiveAt(address asset) external view returns (uint64);
+    function isAssetActive(address asset) external view returns (bool);
+    function setAssetStatus(address asset, uint8 status, bytes32 policyHash) external;
 }
 
 interface IStreamRevenueEscrow {
@@ -1852,9 +1885,9 @@ interface IStreamRevenueAssignmentView {
 }
 ```
 
-The implemented first-slice signatures are pinned through
-`IStreamSplitFactory` and `IStreamSplitWallet` in the release artifact surface.
-Later ERC-20, assignment, escrow, and resolver interfaces must remain
+The implemented split signatures are pinned through `IStreamSplitFactory`,
+`IStreamSplitWallet`, and `IStreamAssetPolicyRegistry` in the release artifact
+surface. Later assignment, escrow, and resolver interfaces must remain
 selector-stable when they are promoted from this target sketch into code. The
 interfaces above are intentionally value-type heavy; rich display metadata
 stays in manifests and events.
@@ -1917,6 +1950,25 @@ event NativeReleased(
     uint256 amount,
     uint256 totalReleased,
     uint256 observedReceived
+);
+
+event ERC20Released(
+    bytes32 indexed profileId,
+    address indexed asset,
+    address indexed account,
+    address recipient,
+    uint256 amount,
+    uint256 totalReleased,
+    uint256 observedReceived
+);
+
+event AssetPolicyUpdated(
+    address indexed asset,
+    uint8 indexed previousStatus,
+    uint8 indexed status,
+    bytes32 previousPolicyHash,
+    bytes32 policyHash,
+    address admin
 );
 
 event RevenueAssignmentSet(
@@ -2431,8 +2483,9 @@ Marketplace and indexer integrations should:
   sweep.
 - Asset approval, deprecation, unsupported marking, and observation
   initialization events are emitted.
-- Deprecated assets remain syncable and releasable for existing and passive
-  receipts; unsupported assets do not.
+- Only `ACTIVE` ERC-20 assets are syncable and releasable. `UNKNOWN`,
+  `INACTIVE`, `DEPRECATED`, and `UNSUPPORTED` assets fail closed without
+  mutating wallet accounting.
 - ERC-20 activation records evidence for standard monotonic-balance behavior.
 - ERC-20 asset policy is read from the factory-bound deployment-wide asset
   policy registry; registry failure blocks only non-native assets.

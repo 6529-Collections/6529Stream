@@ -5,12 +5,14 @@ import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/DependencyRegistry.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
+import "../smart-contracts/StreamAssetPolicyRegistry.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
+import "../smart-contracts/StreamSplitFactory.sol";
 
 interface ScriptVm {
     function startBroadcast(address broadcaster) external;
@@ -59,6 +61,8 @@ contract RehearseDeployment {
         address auctions;
         address randomizerVrf;
         address randomizerRng;
+        address assetPolicyRegistry;
+        address splitFactory;
         uint256 sampleCollectionId;
         uint256 sampleMintStart;
         uint256 sampleMintEnd;
@@ -133,6 +137,7 @@ contract RehearseDeployment {
         result = _deploymentResult(config, deployed, collectionId, mintStart, mintEnd);
 
         deployed.admins.registerAdmin(config.deployer, false);
+        deployed.assetPolicyRegistry.transferOwnership(config.adminSafe);
         deployed.core.transferOwnership(config.adminSafe);
         deployed.admins.transferOwnership(config.adminSafe);
 
@@ -150,6 +155,8 @@ contract RehearseDeployment {
         StreamAuctions auctions;
         NextGenRandomizerVRF randomizerVrf;
         NextGenRandomizerRNG randomizerRng;
+        StreamAssetPolicyRegistry assetPolicyRegistry;
+        StreamSplitFactory splitFactory;
     }
 
     function _deployContracts(DeploymentConfig memory config)
@@ -180,6 +187,8 @@ contract RehearseDeployment {
         );
         NextGenRandomizerRNG randomizerRng =
             new NextGenRandomizerRNG(address(core), address(admins), config.arrngController);
+        StreamAssetPolicyRegistry assetPolicyRegistry = new StreamAssetPolicyRegistry();
+        StreamSplitFactory splitFactory = new StreamSplitFactory(assetPolicyRegistry);
 
         deployed = DeployedContracts({
             admins: admins,
@@ -191,7 +200,9 @@ contract RehearseDeployment {
             drops: drops,
             auctions: auctions,
             randomizerVrf: randomizerVrf,
-            randomizerRng: randomizerRng
+            randomizerRng: randomizerRng,
+            assetPolicyRegistry: assetPolicyRegistry,
+            splitFactory: splitFactory
         });
     }
 
@@ -262,6 +273,8 @@ contract RehearseDeployment {
             auctions: address(deployed.auctions),
             randomizerVrf: address(deployed.randomizerVrf),
             randomizerRng: address(deployed.randomizerRng),
+            assetPolicyRegistry: address(deployed.assetPolicyRegistry),
+            splitFactory: address(deployed.splitFactory),
             sampleCollectionId: collectionId,
             sampleMintStart: mintStart,
             sampleMintEnd: mintEnd,

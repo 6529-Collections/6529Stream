@@ -39,6 +39,66 @@
       ]
     },
     {
+      "topic0": "0x08d3619b7b7042b0abc676395bb4c030f0ffdc15d2e1ecdd507e6c933fd5a5f1",
+      "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+      "name": "ERC20Released",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "asset",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "recipient",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 5,
+          "name": "totalReleased",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 6,
+          "name": "observedReceived",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitWallet"
+      ]
+    },
+    {
       "topic0": "0x10ac9f0bb365b5d22d7bec500408692f23fdf83eadfec71615ef88b4c1134f0e",
       "signature": "AuctionCancelled(uint256,address)",
       "name": "AuctionCancelled",
@@ -1165,6 +1225,24 @@
       ]
     },
     {
+      "topic0": "0x8770fa6f81b824657a86141db6a40aeb868b774fb86df871f52ce7880cec6c9a",
+      "signature": "AssetPolicyRegistryPinned(address)",
+      "name": "AssetPolicyRegistryPinned",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "registry",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamSplitFactory"
+      ]
+    },
+    {
       "topic0": "0x88e4cc622e8085aee6ea05a4954b24e3bc91085a6b1cc3d037904a1259a43708",
       "signature": "TokenBurned(uint256,uint256,address,address)",
       "name": "TokenBurned",
@@ -1258,6 +1336,7 @@
       ],
       "emitted_by": [
         "StreamAdmins",
+        "StreamAssetPolicyRegistry",
         "StreamCore",
         "StreamDrops"
       ]
@@ -2002,6 +2081,59 @@
       ],
       "emitted_by": [
         "StreamAuctions"
+      ]
+    },
+    {
+      "topic0": "0xd47a9f3b84f5291e19cb6998543f12324e072f6f32456d4585ce2a3e7e7403ab",
+      "signature": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+      "name": "AssetPolicyUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "asset",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "previousStatus",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 2,
+          "name": "status",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 3,
+          "name": "previousPolicyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "policyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamAssetPolicyRegistry"
       ]
     },
     {
@@ -3912,6 +4044,84 @@
         }
       ]
     },
+    "StreamAssetPolicyRegistry": {
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "artifact_path": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+      "events": [
+        {
+          "name": "AssetPolicyUpdated",
+          "signature": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+          "topic0": "0xd47a9f3b84f5291e19cb6998543f12324e072f6f32456d4585ce2a3e7e7403ab",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "asset",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "previousStatus",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "status",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 3,
+              "name": "previousPolicyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "policyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
     "StreamAuctions": {
       "source": "smart-contracts/AuctionContract.sol",
       "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
@@ -5607,6 +5817,21 @@
       "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
       "events": [
         {
+          "name": "AssetPolicyRegistryPinned",
+          "signature": "AssetPolicyRegistryPinned(address)",
+          "topic0": "0x8770fa6f81b824657a86141db6a40aeb868b774fb86df871f52ce7880cec6c9a",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "registry",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
           "name": "SplitProfileCreated",
           "signature": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
           "topic0": "0xd0cc56d220b90b8f3a282c6ce2a55c2f71bc9be2704271bd6363af177f5287eb",
@@ -5849,6 +6074,63 @@
             },
             {
               "index": 3,
+              "name": "observedReceived",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "ERC20Released",
+          "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+          "topic0": "0x08d3619b7b7042b0abc676395bb4c030f0ffdc15d2e1ecdd507e6c933fd5a5f1",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "asset",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "recipient",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 5,
+              "name": "totalReleased",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
               "name": "observedReceived",
               "type": "uint256",
               "indexed": false,

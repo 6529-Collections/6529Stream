@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:62b80e70bc4e8eec5faa58d50f6231136bc549b13a0d3ea685331c0ae25953c7",
-      "size_bytes": 74956
+      "sha256": "sha256:d32c806c0032f574e492e4ed24b2e0dc9db63133b5277a39a3555c6028a893d6",
+      "size_bytes": 75297
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:65b8999667b194e8faa87044658da8f263685b68477bc01bf5a2db642a17e414",
+      "sha256": "sha256:7b89722b18f314db065da00a8e8c9fe91a080d8a14e3a5943fae113906937732",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -32,6 +32,7 @@
     "deployment_versions": [
       "anvil-6529stream-v0.1.0-001",
       "anvil-6529stream-v0.1.0-001-broadcast",
+      "fork-mainnet-6529stream-v0.1.0-001",
       "fork-mainnet-6529stream-v0.1.0-001-broadcast",
       "sepolia-6529stream-v0.1.0-001"
     ]
@@ -47,6 +48,7 @@
       "Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.",
       "Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.",
       "Added the first outside-Core split factory and split wallet skeleton with deterministic fixed-profile wallet deployment, immutable entry validation, native ETH pull-release accounting, and release-artifact surface coverage.",
+      "Added the launch asset policy registry and approved-standard ERC-20 split wallet release/sync surface, with deployment manifest coverage, strict default-deny asset policy, exact ERC-20 transfer invariants, canonical registry status validation, high-water freeze documentation, and fail-closed tests for unsupported token behavior.",
       "Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.",
       "Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.",
       "Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.",
@@ -298,7 +300,7 @@
     "bytecode_release_proof": {
       "local_and_fork": "generated_from_committed_artifacts",
       "production": "missing_reviewed_live_proof",
-      "contract_proof_count": 33
+      "contract_proof_count": 36
     },
     "risk_register": {
       "risk_count": 11,

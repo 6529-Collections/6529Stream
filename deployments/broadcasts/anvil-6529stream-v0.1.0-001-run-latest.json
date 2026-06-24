@@ -66,9 +66,15 @@
     },
     {
       "transactionType": "CREATE",
-      "contractName": "StreamSplitFactory",
+      "contractName": "StreamAssetPolicyRegistry",
       "contractAddress": "0x100000000000000000000000000000000000000b",
       "hash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamSplitFactory",
+      "contractAddress": "0x100000000000000000000000000000000000000c",
+      "hash": "0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"
     },
     {
       "transactionType": "CALL",
@@ -143,6 +149,12 @@
       "status": "0x1",
       "contractAddress": "0x100000000000000000000000000000000000000b",
       "blockNumber": "0xb"
+    },
+    {
+      "transactionHash": "0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c",
+      "status": "0x1",
+      "contractAddress": "0x100000000000000000000000000000000000000c",
+      "blockNumber": "0xc"
     }
   ]
 }

@@ -208,6 +208,20 @@
           "$SEPOLIA_ARRNG_CONTROLLER"
         ],
         "verification_status": "not_started"
+      },
+      {
+        "name": "StreamAssetPolicyRegistry",
+        "address": "0x000000000000000000000000000000000000000b",
+        "constructor_args": [],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamSplitFactory",
+        "address": "0x000000000000000000000000000000000000000c",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_ASSET_POLICY_REGISTRY"
+        ],
+        "verification_status": "not_started"
       }
     ],
     "admin_ceremony": {
@@ -234,6 +248,10 @@
         },
         {
           "contract": "StreamCore",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        },
+        {
+          "contract": "StreamAssetPolicyRegistry",
           "new_owner": "$SEPOLIA_ADMIN_SAFE"
         }
       ]

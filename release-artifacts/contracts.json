@@ -18,6 +18,10 @@
       "source": "smart-contracts/StreamAdmins.sol"
     },
     {
+      "name": "StreamAssetPolicyRegistry",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol"
+    },
+    {
       "name": "StreamAuctions",
       "source": "smart-contracts/AuctionContract.sol"
     },
@@ -159,6 +163,10 @@
     {
       "name": "IStreamAdmins",
       "source": "smart-contracts/IStreamAdmins.sol"
+    },
+    {
+      "name": "IStreamAssetPolicyRegistry",
+      "source": "smart-contracts/IStreamAssetPolicyRegistry.sol"
     },
     {
       "name": "IStreamAuctions",

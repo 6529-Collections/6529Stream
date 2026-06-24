@@ -17,6 +17,11 @@ the release policy in `docs/release-policy.md`.
 - Added the first outside-Core split factory and split wallet skeleton with
   deterministic fixed-profile wallet deployment, immutable entry validation,
   native ETH pull-release accounting, and release-artifact surface coverage.
+- Added the launch asset policy registry and approved-standard ERC-20 split
+  wallet release/sync surface, with deployment manifest coverage, strict
+  default-deny asset policy, exact ERC-20 transfer invariants, canonical
+  registry status validation, high-water freeze documentation, and fail-closed
+  tests for unsupported token behavior.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay

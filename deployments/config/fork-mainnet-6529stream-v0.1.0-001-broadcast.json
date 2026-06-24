@@ -37,7 +37,7 @@
         "name": "DependencyRegistry",
         "address": "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f",
         "constructor_args": [
-          "0x0000000000000000000000000000000000000001"
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f"
         ],
         "verification_status": "not_applicable"
       },
@@ -47,8 +47,8 @@
         "constructor_args": [
           "6529 Stream",
           "STREAM",
-          "0x0000000000000000000000000000000000000001",
-          "0x0000000000000000000000000000000000000002"
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+          "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f"
         ],
         "verification_status": "not_applicable"
       },
@@ -56,8 +56,8 @@
         "name": "StreamContractMetadata",
         "address": "0x200000000000000000000000000000000000000a",
         "constructor_args": [
-          "0x0000000000000000000000000000000000000003",
-          "0x0000000000000000000000000000000000000001",
+          "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
           "ipfs://6529stream-contract-metadata/rehearsal.json"
         ],
         "verification_status": "not_applicable"
@@ -66,7 +66,7 @@
         "name": "StreamCuratorsPool",
         "address": "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d",
         "constructor_args": [
-          "0x0000000000000000000000000000000000000001",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
           "0x0000000000000000000000000000000000006534"
         ],
         "verification_status": "not_applicable"
@@ -75,8 +75,8 @@
         "name": "StreamMinter",
         "address": "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
         "constructor_args": [
-          "0x0000000000000000000000000000000000000003",
-          "0x0000000000000000000000000000000000000001",
+          "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
           "0x0000000000000000000000000000000000000000"
         ],
         "verification_status": "not_applicable"
@@ -86,10 +86,10 @@
         "address": "0xba5a97857d9cbc39fd4c9c4e2420953765903aa0",
         "constructor_args": [
           "0x0000000000000000000000000000000000006532",
-          "0x0000000000000000000000000000000000000005",
-          "0x0000000000000000000000000000000000000001",
+          "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
           "0x0000000000000000000000000000000000006533",
-          "0x0000000000000000000000000000000000000004"
+          "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d"
         ],
         "verification_status": "not_applicable"
       },
@@ -97,12 +97,12 @@
         "name": "StreamAuctions",
         "address": "0x0192b664e3c73416451f23c0c361c4ff1dd385fa",
         "constructor_args": [
-          "0x0000000000000000000000000000000000000005",
-          "0x0000000000000000000000000000000000000003",
-          "0x0000000000000000000000000000000000000001",
-          "0x0000000000000000000000000000000000000006",
+          "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
+          "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
+          "0xba5a97857d9cbc39fd4c9c4e2420953765903aa0",
           "0x0000000000000000000000000000000000006533",
-          "0x0000000000000000000000000000000000000004"
+          "0xb428b2fee79734fc66ccffba969e18f8ff7edd7d"
         ],
         "verification_status": "not_applicable"
       },
@@ -112,8 +112,8 @@
         "constructor_args": [
           6529,
           "0x0000000000000000000000000000000000006535",
-          "0x0000000000000000000000000000000000000003",
-          "0x0000000000000000000000000000000000000001"
+          "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f"
         ],
         "verification_status": "not_applicable"
       },
@@ -121,16 +121,24 @@
         "name": "NextGenRandomizerRNG",
         "address": "0x1e26a8b0cbccbb460bc208799a703a35bf287b67",
         "constructor_args": [
-          "0x0000000000000000000000000000000000000003",
-          "0x0000000000000000000000000000000000000001",
+          "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+          "0x9bb78cb0ab5960e9c0db0d8ac2391d15db3f1f5f",
           "0x0000000000000000000000000000000000006536"
         ],
         "verification_status": "not_applicable"
       },
       {
-        "name": "StreamSplitFactory",
+        "name": "StreamAssetPolicyRegistry",
         "address": "0x200000000000000000000000000000000000000b",
         "constructor_args": [],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamSplitFactory",
+        "address": "0x200000000000000000000000000000000000000c",
+        "constructor_args": [
+          "0x200000000000000000000000000000000000000b"
+        ],
         "verification_status": "not_applicable"
       }
     ],
@@ -158,6 +166,10 @@
         },
         {
           "contract": "StreamCore",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamAssetPolicyRegistry",
           "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]
@@ -187,7 +199,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:cc0a4964b50f19217bb6c09185c1f36be43ef73f6a38ce9016c91ef57e0f6c29",
+    "broadcast_sha256": "sha256:99dbf8971746f6639a4563820e268b65450acc6b0e3635d86cd896e603e24676",
     "template_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 1,
@@ -243,9 +255,14 @@
         "transaction_hash": "0x8b041d0feb7b678dc41e622089c293d779ba9896f1415947ed4600042abe1cb1"
       },
       {
-        "contract": "StreamSplitFactory",
+        "contract": "StreamAssetPolicyRegistry",
         "address": "0x200000000000000000000000000000000000000b",
         "transaction_hash": "0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"
+      },
+      {
+        "contract": "StreamSplitFactory",
+        "address": "0x200000000000000000000000000000000000000c",
+        "transaction_hash": "0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"
       }
     ],
     "ignored_deployments": [

@@ -6,18 +6,22 @@ import "./StreamSplitWallet.sol";
 
 /// @notice Creates immutable split profiles and their deterministic native split wallets.
 contract StreamSplitFactory is IStreamSplitFactory {
+    uint8 private constant _ASSET_STATUS_ACTIVE = 1;
+
     /// @notice Domain separator label for v1 split profile identifiers.
     bytes32 public constant override PROFILE_DOMAIN = keccak256("6529STREAM_SPLIT_PROFILE_V1");
     /// @notice Split profile schema version used in profile identifiers and events.
     uint16 public constant override SCHEMA_VERSION = 1;
     /// @notice Split wallet implementation version used in profile identifiers and events.
-    uint16 public constant override WALLET_VERSION = 1;
+    uint16 public constant override WALLET_VERSION = 2;
     /// @notice Maximum canonical split entries accepted by one profile.
     uint16 public constant override MAX_ENTRIES = 64;
     /// @notice Maximum unique recipient accounts accepted by one profile.
     uint16 public constant override MAX_UNIQUE_ACCOUNTS = 64;
     /// @notice Parts-per-million denominator for split shares.
     uint32 public constant override SHARE_DENOMINATOR_PPM = 1_000_000;
+    /// @notice Deployment-wide registry for approved standard ERC-20 split assets.
+    IStreamAssetPolicyRegistry public immutable override assetPolicyRegistry;
 
     struct Profile {
         bool exists;
@@ -30,6 +34,29 @@ contract StreamSplitFactory is IStreamSplitFactory {
     }
 
     mapping(bytes32 => Profile) private _profiles;
+
+    constructor(IStreamAssetPolicyRegistry assetPolicyRegistry_) {
+        if (address(assetPolicyRegistry_).code.length == 0) {
+            revert InvalidAssetPolicyRegistry(address(assetPolicyRegistry_));
+        }
+        try assetPolicyRegistry_.isStreamAssetPolicyRegistry() returns (bool ok) {
+            if (!ok) {
+                revert InvalidAssetPolicyRegistry(address(assetPolicyRegistry_));
+            }
+        } catch {
+            revert InvalidAssetPolicyRegistry(address(assetPolicyRegistry_));
+        }
+        try assetPolicyRegistry_.ASSET_STATUS_ACTIVE() returns (uint8 activeStatus) {
+            if (activeStatus != _ASSET_STATUS_ACTIVE) {
+                revert InvalidAssetPolicyRegistry(address(assetPolicyRegistry_));
+            }
+        } catch {
+            revert InvalidAssetPolicyRegistry(address(assetPolicyRegistry_));
+        }
+
+        assetPolicyRegistry = assetPolicyRegistry_;
+        emit AssetPolicyRegistryPinned(address(assetPolicyRegistry_));
+    }
 
     /// @notice Returns the creation-code hash used for deterministic wallet addresses.
     function splitWalletInitCodeHash() public pure override returns (bytes32) {
@@ -244,6 +271,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
                 WALLET_VERSION,
                 splitWalletInitCodeHash(),
                 splitWalletRuntimeCodeHash(),
+                address(assetPolicyRegistry),
                 entriesHash,
                 metadataURIHash
             )

@@ -17,14 +17,15 @@
     "IRandomizer": "0xf3eb4f44",
     "IRandomizerLifecycle": "0xaabe1a0d",
     "IStreamAdmins": "0x00ddd221",
+    "IStreamAssetPolicyRegistry": "0x5a37a79e",
     "IStreamAuctions": "0xb109bb30",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0xe02cb7f7",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamMinter": "0x0f48ec25",
-    "IStreamSplitFactory": "0xfa42a108",
-    "IStreamSplitWallet": "0xd06f2c19"
+    "IStreamSplitFactory": "0x24887d3d",
+    "IStreamSplitWallet": "0x0ea5f02c"
   },
   "interfaces": {
     "IDependencyRegistry": {
@@ -432,6 +433,64 @@
         }
       ]
     },
+    "IStreamAssetPolicyRegistry": {
+      "source": "smart-contracts/IStreamAssetPolicyRegistry.sol",
+      "artifact_path": "out/IStreamAssetPolicyRegistry.sol/IStreamAssetPolicyRegistry.json",
+      "abi_sha256": "sha256:cabf2146b13d8746cb2452a20f347b35ffb6e7215d8e29268de72496328f7679",
+      "interface_id": "0x5a37a79e",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x5a37a79e",
+      "function_selectors": [
+        {
+          "signature": "ASSET_STATUS_ACTIVE()",
+          "selector": "0xefb1a4dc"
+        },
+        {
+          "signature": "ASSET_STATUS_DEPRECATED()",
+          "selector": "0x9ae3d73c"
+        },
+        {
+          "signature": "ASSET_STATUS_INACTIVE()",
+          "selector": "0xc4eda4b7"
+        },
+        {
+          "signature": "ASSET_STATUS_UNKNOWN()",
+          "selector": "0xe1472690"
+        },
+        {
+          "signature": "ASSET_STATUS_UNSUPPORTED()",
+          "selector": "0x81524ec8"
+        },
+        {
+          "signature": "assetPolicy(address)",
+          "selector": "0xc9528b36"
+        },
+        {
+          "signature": "assetPolicyEffectiveAt(address)",
+          "selector": "0x2d82f47b"
+        },
+        {
+          "signature": "assetPolicyHash(address)",
+          "selector": "0x6373ab9f"
+        },
+        {
+          "signature": "assetStatus(address)",
+          "selector": "0x76057d1a"
+        },
+        {
+          "signature": "isAssetActive(address)",
+          "selector": "0xa2fa0157"
+        },
+        {
+          "signature": "isStreamAssetPolicyRegistry()",
+          "selector": "0x99ce40d6"
+        },
+        {
+          "signature": "setAssetStatus(address,uint8,bytes32)",
+          "selector": "0x410ff0d8"
+        }
+      ]
+    },
     "IStreamAuctions": {
       "source": "smart-contracts/IStreamAuctions.sol",
       "artifact_path": "out/IStreamAuctions.sol/IStreamAuctions.json",
@@ -687,10 +746,10 @@
     "IStreamSplitFactory": {
       "source": "smart-contracts/IStreamSplitFactory.sol",
       "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
-      "abi_sha256": "sha256:8c8a540d78c47583c529952eb05e58a1c3ed5e63edbcd2663e72e6974574fe03",
-      "interface_id": "0xfa42a108",
+      "abi_sha256": "sha256:06774b407cd200adc830bd6dbee885b0e2cff597758c1520168444a3d5c0cee1",
+      "interface_id": "0x24887d3d",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0xfa42a108",
+      "computed_selector_xor": "0x24887d3d",
       "function_selectors": [
         {
           "signature": "MAX_ENTRIES()",
@@ -715,6 +774,10 @@
         {
           "signature": "WALLET_VERSION()",
           "selector": "0x1127b57e"
+        },
+        {
+          "signature": "assetPolicyRegistry()",
+          "selector": "0xdecadc35"
         },
         {
           "signature": "createProfile((address,uint32,bytes32)[],bytes32)",
@@ -773,10 +836,10 @@
     "IStreamSplitWallet": {
       "source": "smart-contracts/IStreamSplitWallet.sol",
       "artifact_path": "out/IStreamSplitWallet.sol/IStreamSplitWallet.json",
-      "abi_sha256": "sha256:8f87e1429378ce06dc6883bf9f07bef0ed71448822853b630e4ec238dc8e80fd",
-      "interface_id": "0xd06f2c19",
+      "abi_sha256": "sha256:b2882c0159e40effbaeb6cadcb3b343b801bc0adde39ce57402bc7673ff3cb4e",
+      "interface_id": "0x0ea5f02c",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0xd06f2c19",
+      "computed_selector_xor": "0x0ea5f02c",
       "function_selectors": [
         {
           "signature": "SHARE_DENOMINATOR_PPM()",
@@ -793,6 +856,10 @@
         {
           "signature": "assetObservationInitialized(address)",
           "selector": "0x5caa3696"
+        },
+        {
+          "signature": "assetPolicyRegistry()",
+          "selector": "0xdecadc35"
         },
         {
           "signature": "entriesHash()",

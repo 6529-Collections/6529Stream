@@ -128,9 +128,17 @@
         "verification_status": "not_applicable"
       },
       {
-        "name": "StreamSplitFactory",
+        "name": "StreamAssetPolicyRegistry",
         "address": "0x000000000000000000000000000000000000000b",
         "constructor_args": [],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamSplitFactory",
+        "address": "0x000000000000000000000000000000000000000c",
+        "constructor_args": [
+          "0x000000000000000000000000000000000000000b"
+        ],
         "verification_status": "not_applicable"
       }
     ],
@@ -158,6 +166,10 @@
         },
         {
           "contract": "StreamCore",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamAssetPolicyRegistry",
           "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]

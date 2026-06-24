@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-    "deployment_manifest_sha256": "sha256:97d4f7ec0a7057141fd0b55ba8fc7f81c8d143369f437203355c6aa068f22dd7",
+    "deployment_manifest_sha256": "sha256:f60aa184e2bce13419b2e30583781c6c030a016f8a3bdfcd1f8d519020ea6866",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -51,6 +51,14 @@
       "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json",
       "abi_hash": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "runtime_bytecode_hash": "sha256:2286e36a0aecd74f93ddfa9abb4530b236884dd751a8cfbff96b87236047848b",
+      "verification_status": "not_applicable"
+    },
+    "StreamAssetPolicyRegistry": {
+      "address": "0x000000000000000000000000000000000000000b",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "artifact_path": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+      "abi_hash": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "runtime_bytecode_hash": "sha256:af61d93f924dd6cb5685fddb6269a54520259c226752605dd584418e8a05e49f",
       "verification_status": "not_applicable"
     },
     "StreamAuctions": {
@@ -102,11 +110,11 @@
       "verification_status": "not_applicable"
     },
     "StreamSplitFactory": {
-      "address": "0x000000000000000000000000000000000000000b",
+      "address": "0x000000000000000000000000000000000000000c",
       "source": "smart-contracts/StreamSplitFactory.sol",
       "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
-      "abi_hash": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8",
-      "runtime_bytecode_hash": "sha256:c8cdd76d62faefe38b5af0ed0d58dd394dd3367375caa41c867a3f5db24d90cf",
+      "abi_hash": "sha256:15b1ebbb39c54d418ce64da68c7ae3349d8c234a3f5e5a9106a600d0cbbda657",
+      "runtime_bytecode_hash": "sha256:e72d47eb7eeac71a175e59936495dab8237187d84f9ceadd28d7939aa69179de",
       "verification_status": "not_applicable"
     }
   }

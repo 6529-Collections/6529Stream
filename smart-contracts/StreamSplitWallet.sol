@@ -5,8 +5,21 @@ import "./IStreamSplitWallet.sol";
 import "./Math.sol";
 import "./ReentrancyGuard.sol";
 
+interface IERC20SplitAsset {
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address recipient, uint256 amount) external returns (bool);
+}
+
+interface IStreamSplitFactoryAssetPolicy {
+    function assetPolicyRegistry() external view returns (address);
+}
+
 /// @notice Pull-payment split wallet for one immutable split profile.
 contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
+    uint8 private constant _ASSET_STATUS_ACTIVE = 1;
+    uint256 private constant _ASSET_POLICY_GAS_LIMIT = 30_000;
+    uint256 private constant _ASSET_POLICY_PARENT_GAS_MIN = 31_000;
+
     /// @notice Parts-per-million denominator for split shares.
     uint32 public constant override SHARE_DENOMINATOR_PPM = 1_000_000;
     /// @notice Factory that deployed this wallet and is allowed to initialize it once.
@@ -39,6 +52,11 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
 
     /// @notice Accepts native ETH receipts passively for later pull release.
     receive() external payable { }
+
+    /// @notice Returns the deployment-wide asset policy registry pinned by the factory.
+    function assetPolicyRegistry() public view override returns (address registry) {
+        registry = _assetPolicyRegistryOrRevert(address(0));
+    }
 
     /// @notice Initializes the wallet with immutable entries and aggregate account shares.
     function initialize(
@@ -140,15 +158,14 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
 
     /// @notice Returns cumulative native receipts observed as current balance plus released funds.
     function observedReceived(address asset) public view override returns (uint256) {
-        _requireNativeAsset(asset);
-        return address(this).balance + totalReleased[asset];
+        return _currentBalance(asset) + totalReleased[asset];
     }
 
     /// @notice Returns the currently releasable native amount for an account.
     function releasable(address asset, address account) public view override returns (uint256) {
         uint32 sharePpm = aggregateSharePpm[account];
         if (sharePpm == 0) {
-            _requireNativeAsset(asset);
+            _requireSupportedAsset(asset);
             return 0;
         }
 
@@ -162,15 +179,15 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
 
     /// @notice Returns unreleasable native dust caused by integer division rounding.
     function roundingDust(address asset) external view override returns (uint256) {
-        _requireNativeAsset(asset);
         uint256 totalReleasable = 0;
         for (uint256 i = 0; i < _uniqueAccounts.length; i++) {
             totalReleasable += releasable(asset, _uniqueAccounts[i]);
         }
-        if (totalReleasable >= address(this).balance) {
+        uint256 currentBalance = _currentBalance(asset);
+        if (totalReleasable >= currentBalance) {
             return 0;
         }
-        return address(this).balance - totalReleasable;
+        return currentBalance - totalReleasable;
     }
 
     /// @notice Emits the current cumulative receipt observation for the native asset.
@@ -186,7 +203,7 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         nonReentrant
         returns (uint256 amount)
     {
-        _requireNativeAsset(asset);
+        _requireSupportedAsset(asset);
         if (recipient == address(0)) {
             revert ZeroRecipient();
         }
@@ -203,18 +220,34 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         accountReleased[asset][account] += amount;
         totalReleased[asset] += amount;
 
-        (bool success,) = recipient.call{ value: amount }("");
-        if (!success) {
-            revert NativeTransferFailed(recipient, amount);
+        if (asset == address(0)) {
+            (bool success,) = recipient.call{ value: amount }("");
+            if (!success) {
+                revert NativeTransferFailed(recipient, amount);
+            }
+
+            uint256 postTransferObserved = observedReceived(asset);
+            if (postTransferObserved != observed) {
+                revert NativeReceiptInvariantBroken(observed, postTransferObserved);
+            }
+            _recordObservation(asset, observed);
+
+            emit NativeReleased(
+                profileId, account, recipient, amount, totalReleased[asset], observed
+            );
+            return amount;
         }
 
-        uint256 postTransferObserved = observedReceived(asset);
-        if (postTransferObserved != observed) {
-            revert NativeReceiptInvariantBroken(observed, postTransferObserved);
+        _transferERC20(asset, recipient, amount);
+        uint256 postERC20Observed = observedReceived(asset);
+        if (postERC20Observed != observed) {
+            revert ObservedReceiptsDecreased(asset, observed, postERC20Observed);
         }
         _recordObservation(asset, observed);
 
-        emit NativeReleased(profileId, account, recipient, amount, totalReleased[asset], observed);
+        emit ERC20Released(
+            profileId, asset, account, recipient, amount, totalReleased[asset], observed
+        );
     }
 
     function _recordObservation(address asset, uint256 observed) private {
@@ -236,9 +269,128 @@ contract StreamSplitWallet is IStreamSplitWallet, ReentrancyGuard {
         emit AssetSynced(profileId, asset, previous, observed);
     }
 
-    function _requireNativeAsset(address asset) private pure {
-        if (asset != address(0)) {
+    function _requireSupportedAsset(address asset) private view {
+        if (asset == address(0)) {
+            return;
+        }
+        if (asset.code.length == 0) {
             revert UnsupportedAsset(asset);
+        }
+        address registry = _assetPolicyRegistryOrRevert(asset);
+        (bool success, uint256 statusWord) = _readAssetStatusWord(registry, asset);
+        if (!success) {
+            revert AssetPolicyReadFailed(registry, asset);
+        }
+        if (statusWord > type(uint8).max) {
+            revert AssetPolicyReadFailed(registry, asset);
+        }
+        // Safe because statusWord is bounded to uint8 above.
+        // forge-lint: disable-next-line(unsafe-typecast)
+        uint8 status = uint8(statusWord);
+        if (status != _ASSET_STATUS_ACTIVE) {
+            revert AssetNotActive(asset, status);
+        }
+    }
+
+    function _currentBalance(address asset) private view returns (uint256) {
+        _requireSupportedAsset(asset);
+        if (asset == address(0)) {
+            return address(this).balance;
+        }
+        return _erc20BalanceOf(asset, address(this));
+    }
+
+    function _assetPolicyRegistryOrRevert(address asset) private view returns (address registry) {
+        (bool success, bytes memory data) = factory.staticcall(
+            abi.encodeWithSelector(IStreamSplitFactoryAssetPolicy.assetPolicyRegistry.selector)
+        );
+        if (!success || data.length != 32) {
+            revert AssetPolicyReadFailed(factory, asset);
+        }
+        registry = abi.decode(data, (address));
+        if (registry.code.length == 0) {
+            revert AssetPolicyReadFailed(registry, asset);
+        }
+    }
+
+    function _readAssetStatusWord(address registry, address asset)
+        private
+        view
+        returns (bool success, uint256 statusWord)
+    {
+        if (gasleft() < _ASSET_POLICY_PARENT_GAS_MIN) {
+            return (false, 0);
+        }
+        uint256 selector = uint32(bytes4(keccak256("assetStatus(address)")));
+        uint256 gasLimit = _ASSET_POLICY_GAS_LIMIT;
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, shl(224, selector))
+            mstore(add(ptr, 0x04), asset)
+            success := staticcall(gasLimit, registry, ptr, 0x24, 0, 0)
+            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
+            if success {
+                returndatacopy(ptr, 0, 0x20)
+                statusWord := mload(ptr)
+            }
+        }
+    }
+
+    function _erc20BalanceOf(address asset, address account) private view returns (uint256 amount) {
+        bool success;
+        uint256 selector = uint32(IERC20SplitAsset.balanceOf.selector);
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, shl(224, selector))
+            mstore(add(ptr, 0x04), account)
+            success := staticcall(gas(), asset, ptr, 0x24, 0, 0)
+            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
+            if success {
+                returndatacopy(ptr, 0, 0x20)
+                amount := mload(ptr)
+            }
+        }
+        if (!success) {
+            revert ERC20BalanceReadFailed(asset, account);
+        }
+    }
+
+    function _transferERC20(address asset, address payable recipient, uint256 amount) private {
+        uint256 walletBefore = _erc20BalanceOf(asset, address(this));
+        uint256 recipientBefore = _erc20BalanceOf(asset, recipient);
+        uint256 expectedWalletBalance = walletBefore - amount;
+        uint256 expectedRecipientBalance = recipientBefore + amount;
+
+        bool success;
+        uint256 transferResult;
+        uint256 selector = uint32(IERC20SplitAsset.transfer.selector);
+        assembly ("memory-safe") {
+            let ptr := mload(0x40)
+            mstore(ptr, shl(224, selector))
+            mstore(add(ptr, 0x04), recipient)
+            mstore(add(ptr, 0x24), amount)
+            success := call(gas(), asset, 0, ptr, 0x44, 0, 0)
+            if iszero(and(success, eq(returndatasize(), 0x20))) { success := 0 }
+            if success {
+                returndatacopy(ptr, 0, 0x20)
+                transferResult := mload(ptr)
+            }
+        }
+        if (!success || transferResult != 1) {
+            revert ERC20TransferFailed(asset, recipient, amount);
+        }
+
+        uint256 walletAfter = _erc20BalanceOf(asset, address(this));
+        uint256 recipientAfter = _erc20BalanceOf(asset, recipient);
+        if (walletAfter != expectedWalletBalance || recipientAfter != expectedRecipientBalance) {
+            revert ERC20TransferInvariantBroken(
+                asset,
+                recipient,
+                expectedWalletBalance,
+                walletAfter,
+                expectedRecipientBalance,
+                recipientAfter
+            );
         }
     }
 }

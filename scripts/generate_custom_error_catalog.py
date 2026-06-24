@@ -26,6 +26,9 @@ class CustomErrorCatalogError(RuntimeError):
 
 CATEGORY_BY_ERROR_NAME = {
     "AlreadyInitialized": "split_payment_safety",
+    "AssetNotActive": "asset_policy_safety",
+    "AssetPolicyReadFailed": "asset_policy_safety",
+    "AssetPolicyUnchanged": "asset_policy_safety",
     "ArtistSignatureUnauthorized": "access_control",
     "BurnedTokenRemintNotAllowed": "supply_minting",
     "CollectionAlreadyFrozen": "metadata_integrity",
@@ -44,6 +47,9 @@ CATEGORY_BY_ERROR_NAME = {
     "DuplicateSplitEntry": "split_payment_safety",
     "EmptyContractURI": "metadata_integrity",
     "EmptyRandomWords": "randomness_lifecycle",
+    "ERC20BalanceReadFailed": "split_payment_safety",
+    "ERC20TransferFailed": "split_payment_safety",
+    "ERC20TransferInvariantBroken": "split_payment_safety",
     "ERC2981InvalidDefaultRoyalty": "configuration",
     "ERC2981InvalidDefaultRoyaltyReceiver": "configuration",
     "ERC2981InvalidTokenRoyalty": "configuration",
@@ -52,6 +58,10 @@ CATEGORY_BY_ERROR_NAME = {
     "FrozenCollectionDependencyRegistry": "metadata_integrity",
     "FunctionAdminUnauthorized": "access_control",
     "InvalidAdminContract": "configuration",
+    "InvalidAsset": "asset_policy_safety",
+    "InvalidAssetPolicyHash": "asset_policy_safety",
+    "InvalidAssetPolicyRegistry": "asset_policy_safety",
+    "InvalidAssetStatus": "asset_policy_safety",
     "InvalidCoreContract": "configuration",
     "InvalidDependencyRegistryContract": "configuration",
     "InvalidEntryCount": "split_payment_safety",
@@ -106,6 +116,7 @@ CATEGORY_BY_ERROR_ID = {
 
 SEVERITY_BY_CATEGORY = {
     "access_control": "critical",
+    "asset_policy_safety": "high",
     "pause_emergency": "high",
     "metadata_integrity": "high",
     "randomness_lifecycle": "high",
@@ -117,6 +128,7 @@ SEVERITY_BY_CATEGORY = {
 
 CALLER_ACTION_BY_CATEGORY = {
     "access_control": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+    "asset_policy_safety": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
     "pause_emergency": "Do not retry until the relevant pause domain is unpaused by governance or the operator runbook.",
     "metadata_integrity": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
     "randomness_lifecycle": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
@@ -130,6 +142,9 @@ TRACEABILITY_BY_CATEGORY = {
     "access_control": [
         "test/StreamCustomErrorNegative.t.sol",
         "test/StreamCoreCustomErrors.t.sol",
+    ],
+    "asset_policy_safety": [
+        "test/StreamSplitWallet.t.sol",
     ],
     "pause_emergency": [
         "test/StreamPauseControls.t.sol",

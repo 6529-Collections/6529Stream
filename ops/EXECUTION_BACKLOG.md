@@ -203,7 +203,8 @@ follow-up order unless bot feedback or CI forces a safer detour.
 
 | Order | Item | Gate | Main Blocker | Intended PR |
 | --- | --- | --- | --- | --- |
-| 0 | `CON-009` | C/G | V1 split settlement foundation | Active issue #625 on branch `codex/split-factory-wallet-skeleton`; implement split factory and split wallet skeleton outside Core |
+| 0 | `CON-009` | C/G | V1 split settlement foundation | Merged in PR #626; issue #625 closed completed |
+| 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Active PR #628 / issue #627 on branch `codex/asset-policy-erc20-splits`; review and CI pending |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1310,8 +1311,7 @@ Issue: [`#380`](https://github.com/6529-Collections/6529Stream/issues/380).
 
 ### CON-009: Implement Split Factory And Split Wallet Skeleton
 
-Status: Active issue #625 on branch `codex/split-factory-wallet-skeleton`; PR
-not opened.
+Status: Merged in PR #626; issue #625 closed completed.
 
 Gate: C/G.
 
@@ -1384,6 +1384,83 @@ Acceptance criteria:
 - ERC-20 settlement, asset policy, resolver assignments, primary adapters,
   escrow, and Core-native ERC-2981 remain explicitly out of scope unless a
   minimal interface is needed for compilation.
+
+### CON-010: Add Asset Policy Registry And ERC-20 Split-Wallet Release/Sync
+
+Status: Active issue #627 on branch `codex/asset-policy-erc20-splits`; PR not
+opened.
+
+Gate: C/G.
+
+Problem: The split wallet skeleton supports native ETH only, while the v1
+launch target requires approved-standard ERC-20 release support and a
+deployment-wide asset policy before ERC-20 primary-sale adapters or resolver
+integration can safely land.
+
+Outcome: Add an outside-Core asset policy registry plus ERC-20 split-wallet
+observation/release support for explicitly approved standard tokens, preserving
+the native ETH behavior from `CON-009` and rejecting unsupported ERC-20
+semantics.
+
+Files likely touched:
+
+- `smart-contracts/StreamAssetPolicyRegistry.sol`
+- `smart-contracts/IStreamAssetPolicyRegistry.sol`
+- `smart-contracts/StreamSplitFactory.sol`
+- `smart-contracts/StreamSplitWallet.sol`
+- `smart-contracts/IStreamSplitFactory.sol`
+- `smart-contracts/IStreamSplitWallet.sol`
+- `test/StreamSplitWallet.t.sol`
+- `docs/revenue-splits-and-royalties.md`
+- `docs/integrations/events-and-indexing.md`
+- `CHANGELOG.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
+- `ops/workstreams/v1-contract-roadmap/active-context.md`
+- `ops/workstreams/v1-contract-roadmap/run-log.md`
+- `release-artifacts/latest/`
+
+Implementation steps:
+
+1. Define a compact asset policy interface, statuses, events, and admin
+   controls for approved standard ERC-20s.
+2. Pin the asset policy registry through the split factory/wallet deployment
+   surface while keeping `StreamCore` untouched.
+3. Make ERC-20 assets default-deny and fail closed on policy read failure,
+   unknown assets, inactive/deprecated assets, and non-contract assets.
+4. Add explicit ERC-20 `syncAsset`, `observedReceived`, `releasable`,
+   `roundingDust`, and `release` behavior for approved standard tokens.
+5. Prove exact wallet-balance deltas for ERC-20 releases so fee-on-transfer,
+   no-op, rebasing-down, callback, or otherwise non-standard behavior cannot
+   silently mutate owed accounting.
+6. Preserve native ETH behavior and events from the split wallet skeleton.
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamSplitWallet.t.sol -vvv`
+- `forge build`
+- `python scripts/test_autonomous_state.py`
+- `python scripts/check_autonomous_state.py`
+- `python scripts/test_markdown_links.py`
+- `python scripts/check_markdown_links.py`
+- `python scripts/check_changelog.py`
+- release artifact generator checks when release-covered docs or contracts
+  change
+- `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
+
+Acceptance criteria:
+
+- The asset policy registry is outside Core and spends no `StreamCore`
+  bytecode.
+- Approved standard ERC-20 assets can be explicitly synced and released from
+  split wallets.
+- Unknown, inactive, deprecated, failing-registry, and non-contract assets
+  revert before owed-credit mutation.
+- ERC-20 release accounting uses exact pre/post wallet balance deltas and
+  reverts unsupported token behavior.
+- Native ETH split-wallet tests continue to pass.
+- Events and reads allow indexers/frontends to reconstruct policy changes,
+  asset observations, releases, and dust per asset.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3533,7 +3610,8 @@ unless an external dependency changes.
 
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
-| `CON-009` | Implement split factory and split wallet skeleton | C/G | Active issue #625 on branch `codex/split-factory-wallet-skeleton`; PR not opened |
+| `CON-009` | Implement split factory and split wallet skeleton | C/G | Merged in PR #626; issue #625 closed completed |
+| `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Active PR #628 / issue #627 on branch `codex/asset-policy-erc20-splits`; review and CI pending |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
