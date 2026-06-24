@@ -100,6 +100,7 @@ CATEGORY_BY_ERROR_NAME = {
     "PreparedMintAlreadyPending": "supply_minting",
     "PreparedMintMismatch": "supply_minting",
     "PreparedMintNotFound": "supply_minting",
+    "PreparedMintOperationReused": "supply_minting",
     "PrimaryAssignmentFrozen": "revenue_assignment_safety",
     "PrimaryAssignmentMissing": "revenue_assignment_safety",
     "PrimaryPolicyHashMismatch": "primary_settlement_safety",
@@ -223,6 +224,30 @@ TRACEABILITY_BY_CATEGORY = {
     ],
 }
 
+TRACEABILITY_BY_ERROR_NAME = {
+    "InvalidMintManagerContract": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "NotMintManager": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "PreparedMintAlreadyPending": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "PreparedMintMismatch": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "PreparedMintNotFound": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "PreparedMintOperationReused": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "TokenDataHashMismatch": [
+        "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+}
+
 
 def load_json(path: Path) -> Any:
     try:
@@ -290,6 +315,11 @@ def catalog_entry(
         raise CustomErrorCatalogError(f"{contract_name}:{signature} has invalid selector {selector!r}")
 
     category = classify_error(contract_name, name, signature)
+    tests = list(TRACEABILITY_BY_CATEGORY[category])
+    for test_path in TRACEABILITY_BY_ERROR_NAME.get(name, []):
+        if test_path not in tests:
+            tests.append(test_path)
+
     return {
         "id": canonical_error_id(contract_name, signature),
         "contract": contract_name,
@@ -303,7 +333,7 @@ def catalog_entry(
         "caller_action": CALLER_ACTION_BY_CATEGORY[category],
         "traceability": {
             "source_artifact": str(contract.get("artifact_path", "")),
-            "tests": TRACEABILITY_BY_CATEGORY[category],
+            "tests": tests,
             "surface_report": "release-artifacts/latest/protocol-surface-report.json",
         },
     }

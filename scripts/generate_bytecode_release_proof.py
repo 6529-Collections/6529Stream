@@ -500,10 +500,14 @@ def build_proof(
             f"{address_book_path}.source.deployment_manifest",
         )
         manifest_file_hash = file_sha256(manifest_path)
-        expected_release_artifact_manifest_hash = require_sha256(
+        expected_manifest_file_hash = require_sha256(
             source.get("deployment_manifest_sha256"),
             f"{address_book_path}.source.deployment_manifest_sha256",
         )
+        if manifest_file_hash != expected_manifest_file_hash:
+            raise BytecodeReleaseProofError(
+                f"{address_book_path} deployment manifest hash mismatch"
+            )
         if normalize_path(manifest_path, repo_root) not in seen_manifest_paths:
             deployment_manifest_records.append(file_record(manifest_path, repo_root))
             seen_manifest_paths.add(normalize_path(manifest_path, repo_root))
@@ -518,10 +522,6 @@ def build_proof(
             release_artifacts.get("manifest_sha256"),
             f"{manifest_path}.release_artifacts.manifest_sha256",
         )
-        if release_artifact_manifest_hash != expected_release_artifact_manifest_hash:
-            raise BytecodeReleaseProofError(
-                f"{address_book_path} release artifact manifest hash mismatch"
-            )
         deployment_version = require_string(
             address_book.get("deployment_version"),
             f"{address_book_path}.deployment_version",

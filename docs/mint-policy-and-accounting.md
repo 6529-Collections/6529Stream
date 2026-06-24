@@ -416,8 +416,13 @@ immediately delegates to the manager. Core `prepareMintFromManager` and
 and are never independent user flows. The manager calls the restricted
 settlement adapter hook between Core prepare and Core complete. If settlement,
 resolver snapshot, escrow/deposit, the completion-time entropy/randomizer
-boundary, or completion fails, the whole manager call reverts and no prepared
-state persists.
+boundary, or completion fails inside an all-in-one manager transaction, the
+whole transaction reverts and no prepared state persists. If a manager commits
+`prepareMintFromManager` in an earlier transaction, or intentionally pauses
+after prepare for an out-of-band settlement or review step, the prepared record
+persists until the same manager or a replacement manager completes or aborts it.
+The recovery flow below applies only to those already-committed prepared
+records, not to rolled-back all-in-one calls.
 
 The manager's non-reentrant operation lock must be externally verifiable
 through Core state. Core's `PreparedMintRecord.operationId` is the canonical

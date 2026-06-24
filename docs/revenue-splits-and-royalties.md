@@ -1656,9 +1656,10 @@ resolver-backed design, token IDs for which `tokenCollectionIdentity` reports
 `mappingExists == false` always fall back to the default assignment or zero.
 Collection-scope
 royalty resolution requires Core to pass both
-`hasMappedCollection = true` and the stored `tokenCollectionId[tokenId]`. Core
-must not infer a collection receiver for unmapped tokens unless a later ADR
-defines an exact token ID codec and storage-free collection existence gate.
+`hasMappedCollection = tokenCollectionIdentity(tokenId).mappingExists` and
+`mappedCollectionId = tokenCollectionIdentity(tokenId).collectionId`. Core must
+not infer a collection receiver for unmapped tokens unless a later ADR defines
+an exact token ID codec and storage-free collection existence gate.
 The mapping used by `royaltyInfo()` is written only when Core has an
 authoritative token assignment, such as mint, same-transaction allocation, or a
 custody-held token path. Burned tokens retain their last stored mapping for

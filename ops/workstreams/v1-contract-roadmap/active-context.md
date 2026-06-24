@@ -44,7 +44,7 @@ resolver integration remain follow-up topics.
 - Current topic issue: https://github.com/6529-Collections/6529Stream/issues/631.
 - Current topic PR: TBD.
 - Local draft status: implemented locally, subagent blocker fixes applied, Core
-  size proof updated to 24,154 runtime bytes with 422 bytes of EIP-170 margin,
+  size proof updated to 24,172 runtime bytes with 404 bytes of EIP-170 margin,
   full local validation passed, and fresh OpenRouter review is in flight for
   Opus 4.8, GPT-5.5 Pro at max reasoning, and GLM 5.2.
 

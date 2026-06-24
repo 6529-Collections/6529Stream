@@ -92,6 +92,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     error PreparedMintNotFound();
     /// @notice Prepared token state does not match the supplied completion data.
     error PreparedMintMismatch();
+    /// @notice A prepared-mint operation ID has already been consumed.
+    error PreparedMintOperationReused();
     /// @notice Renderer token data does not match the manager commitment.
     error TokenDataHashMismatch();
     error TokenNotMinted();
@@ -222,6 +224,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     }
 
     mapping(uint256 => PreparedMintRecord) private preparedMintRecords;
+    // Operation IDs are one-shot manager commitments, even if the prepared token is aborted.
+    mapping(bytes32 => bool) private usedPreparedOperationIds;
 
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
@@ -461,6 +465,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         _requireNoPreparedMint();
         _requireCollectionNotFrozen(collectionId);
         _requireTokenDataWithHash(_tokenData, tokenDataHash);
+        if (usedPreparedOperationIds[operationId]) {
+            revert PreparedMintOperationReused();
+        }
+        usedPreparedOperationIds[operationId] = true;
         collectionAdditonalDataStructure storage collectionData =
             collectionAdditionalData[collectionId];
         (tokenId, collectionSerial) = _nextTokenForCollection(collectionData);
@@ -497,11 +505,14 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function abortPreparedMintFromManager(uint256 tokenId, bytes32 operationId) external {
         _requireMintManager();
         PreparedMintRecord memory record = _requirePreparedMint(tokenId, operationId);
-        uint256 collectionSerial = _collectionSerialForToken(tokenId, record.collectionId);
         delete preparedMintRecords[tokenId];
         pendingPreparedMintTokenId = 0;
-        collectionAdditionalData[record.collectionId].collectionCirculationSupply =
-            collectionSerial - 1;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[record.collectionId];
+        unchecked {
+            collectionData.collectionCirculationSupply =
+                collectionData.collectionCirculationSupply - 1;
+        }
         delete tokenData[tokenId];
         delete tokenToHash[tokenId];
     }

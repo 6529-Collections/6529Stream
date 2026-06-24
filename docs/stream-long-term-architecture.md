@@ -480,15 +480,18 @@ derives it from live ownership, burned-token audit state, and prepared-mint
 state rather than storing a separate boolean. For a currently minted token, the
 function returns `(true, collectionId, collectionSerial, false)`. For a burned
 token that was once minted, it returns
-`(true, lastCollectionId, lastCollectionSerial, true)`. For a premint,
+`(true, lastCollectionId, lastCollectionSerial, true)`. For a prepared-incomplete
+token, it returns `(true, preparedCollectionId, preparedCollectionSerial, false)`
+while `tokenLifecycle(tokenId)` reports `PREPARED_INCOMPLETE`. For a premint,
 nonexistent, or otherwise unmapped token, it returns `(false, 0, 0, false)`.
 Royalties, metadata routing, finality components, indexers, and archival tools
 should use this read surface rather than private mapping names, historical
 `origin/main` helper names, or token ID range inference.
 Prepared-incomplete tokens have authoritative identity for the manager-owned
 operation but are not ordinary minted ERC-721 tokens. Satellites that can be
-called during `PREPARED_MINT` must check `tokenLifecycle(tokenId)` and reject
-or render provisional state as their spec requires.
+called during `PREPARED_INCOMPLETE` must check `tokenLifecycle(tokenId)` and
+reject or render provisional state as their spec requires rather than falling
+through to the unmapped `(false, 0, 0, false)` branch.
 The cross-contract ABI returns `uint8`; the numeric values are pinned in the
 Numeric ID Catalog as `UNKNOWN = 0`, `PREPARED_INCOMPLETE = 1`, `MINTED = 2`,
 and `BURNED = 3`.

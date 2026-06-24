@@ -174,7 +174,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has finite EIP-170 headroom: the current CON-012 measurement is 24,154 runtime bytes with 422 bytes of EIP-170 margin under an accepted exception | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has finite EIP-170 headroom: the current CON-012 measurement is 24,172 runtime bytes with 404 bytes of EIP-170 margin under an accepted exception | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -1586,8 +1586,8 @@ Implementation steps:
    constrained slice.
 2. Add `mintFromManager(...)` so future manager/sale modules can ask Core to
    allocate the next token for a collection internally.
-3. Add prepared-mint prepare, complete, and read hooks with operation ID and
-   commitment binding.
+3. Add prepared-mint prepare, complete, abort, and read hooks with operation ID
+   replay protection and commitment binding.
 4. Record token collection identity, derive collection serial and
    mapping-exists state, and retain burned/read state for manager and legacy
    mints.
@@ -1617,8 +1617,11 @@ Acceptance criteria:
 - Manager mint writes canonical collection identity and serial while preserving
   existing Core supply, freeze, token data, and randomizer behavior.
 - Prepared mint records identity without ERC-721 ownership, rejects mismatched
-  operation IDs or commitments, and clears pending state before final
-  `_safeMint`.
+  operation IDs, reused operation IDs, or commitments, and clears pending state
+  before final `_safeMint`.
+- Manager-only abort unwinds identity, token data, collection circulation
+  supply, and pending prepared state for committed prepared mints that cannot
+  complete.
 - Token operations cannot successfully operate on incomplete prepared tokens.
 - Reverts after prepare unwind identity, supply counters, and pending state.
 - Safe receiver callbacks cannot observe or exploit an incomplete prepared
@@ -3533,7 +3536,7 @@ Status: Merged in PR #427; issue #426 closed completed.
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom; the
-current CON-012 measurement is 24,154 runtime bytes with 422 bytes of margin
+current CON-012 measurement is 24,172 runtime bytes with 404 bytes of margin
 under accepted exception `CORE-SPEND-2026-06-24-001`, while the approved spend
 ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. Adding
 world-class 1/1 product surfaces directly to Core risks breaking deployment or

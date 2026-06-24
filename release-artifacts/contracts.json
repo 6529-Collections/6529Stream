@@ -90,9 +90,9 @@
         "issue": "https://github.com/6529-Collections/6529Stream/issues/631",
         "status": "accepted",
         "rationale": "Add the Core-owned mint-manager boundary, prepared-mint lock surface, and explicit token identity reads required for launch v1 mint accounting, royalty, metadata, and entropy coordination without relying on token ID range heuristics.",
-        "mitigation": "Keep manager policy, beneficiary/payment evidence, batch commitments, and manager-specific mint events in StreamMintManager, StreamMintLedger, sale adapters, and settlement satellites; keep Core's immediate mint hook minimal; require future roadmap items to recover Core headroom before adding more Core behavior.",
-        "max_runtime_size_bytes": 24154,
-        "measured_delta_bytes": 1970
+        "mitigation": "Keep manager policy, beneficiary/payment evidence, batch commitments, and sale-specific manager events in StreamMintManager, StreamMintLedger, sale adapters, and settlement satellites; limit Core to the manager pointer, immediate mint hook, prepared-mint state, and replay/identity guards required for safe composition; require future roadmap items to recover Core headroom before adding more Core behavior.",
+        "max_runtime_size_bytes": 24172,
+        "measured_delta_bytes": 1988
       }
     ],
     "rejected_experiments": [

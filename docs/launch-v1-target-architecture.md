@@ -111,8 +111,8 @@ The implementation PR must report:
 Current CON-012 implementation proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. New measured `StreamCore` runtime: 24,154 bytes.
-3. EIP-170 margin: 422 bytes.
+2. New measured `StreamCore` runtime: 24,172 bytes.
+3. EIP-170 margin: 404 bytes.
 4. The margin remains above the 384-byte release floor but below the 512-byte
    warning threshold.
 5. The Core hook keeps the immediate manager mint ABI minimal and leaves

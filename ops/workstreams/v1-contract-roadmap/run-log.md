@@ -179,7 +179,7 @@
   ERC-721 approval/transfer paths while prepared state is pending, and slimming
   Core's prepared record so beneficiary/payment/mint-commitment evidence stays
   in manager and settlement satellites. Final measured `StreamCore` runtime is
-  24,154 bytes with 422 bytes of EIP-170 margin under
+  24,172 bytes with 404 bytes of EIP-170 margin under
   `CORE-SPEND-2026-06-24-001`.
 - Completed local validation for the CON-012 draft. Focused Foundry suites,
   full `forge test -vvv` with 530 passing tests, full Windows

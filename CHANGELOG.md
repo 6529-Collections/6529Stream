@@ -34,8 +34,8 @@ the release policy in `docs/release-policy.md`.
   mint-manager replacement left available as the Core recovery path for a
   stranded prepared mint. This uses accepted Core bytecode-spend exception
   `CORE-SPEND-2026-06-24-001` for the final measured `StreamCore` runtime of
-  24,154 bytes, a +1,970-byte delta over the 22,184-byte approved baseline, and
-  422 bytes of EIP-170 margin, which is above the 384-byte release floor but
+  24,172 bytes, a +1,988-byte delta over the 22,184-byte approved baseline, and
+  404 bytes of EIP-170 margin, which is above the 384-byte release floor but
   below the 512-byte warning threshold.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay

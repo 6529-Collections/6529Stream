@@ -282,6 +282,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
     string private constant TOKEN_DATA = "manager-token";
     uint256 private constant SALT = 777;
     bytes32 private constant OPERATION_ID = bytes32(uint256(0x9ABC));
+    bytes32 private constant RETRY_OPERATION_ID = bytes32(uint256(0xBEEF));
 
     function testUpdateContractsSetsValidatedMintManager() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
@@ -295,7 +296,6 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         deployed.core.updateContracts(4, address(0xB0B));
 
         deployed.core.updateContracts(4, address(manager));
-
         deployed.core.mintManager().assertEq(address(manager), "mint manager not stored");
     }
 
@@ -376,6 +376,24 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         collectionId.assertEq(0, "failed mint collection");
         serial.assertEq(0, "failed mint serial");
         burned.assertFalse("failed mint burned");
+    }
+
+    function testPreparedMintRejectsWrongTokenDataHashWithoutCounterDrift() public {
+        (DeployedStream memory deployed, MockMintManager manager) = _deployWithManager();
+        bytes32 wrongHash = bytes32(uint256(0xBAD));
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenDataHashMismatch.selector));
+        manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, wrongHash, OPERATION_ID);
+
+        deployed.core.viewCirSupply(COLLECTION_ID).assertEq(0, "failed prepare advanced supply");
+        deployed.core.pendingPreparedMintTokenId().assertEq(0, "failed prepare set pending");
+        deployed.core.preparedMint(FIRST_TOKEN_ID).exists.assertFalse("failed prepare wrote record");
+        (bool mappingExists, uint256 collectionId, uint256 serial, bool burned) =
+            deployed.core.tokenCollectionIdentity(FIRST_TOKEN_ID);
+        mappingExists.assertFalse("failed prepare wrote identity");
+        collectionId.assertEq(0, "failed prepare collection");
+        serial.assertEq(0, "failed prepare serial");
+        burned.assertFalse("failed prepare burned");
     }
 
     function testManagerHooksRejectFrozenCollection() public {
@@ -522,6 +540,9 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
         vm.prank(address(deployed.randomizer));
         deployed.core.setTokenHash(COLLECTION_ID, tokenId, bytes32(uint256(0xCAFE)));
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintOperationReused.selector));
+        manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, tokenDataHash, OPERATION_ID);
 
         (uint256 remintedTokenId,) =
             manager.mint(COLLECTION_ID, RECIPIENT, TOKEN_DATA, SALT, tokenDataHash);
@@ -694,9 +715,9 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         manager.abort(tokenId, OPERATION_ID);
         deployed.core.addRandomizer(COLLECTION_ID, address(deployed.randomizer));
         (uint256 remintedTokenId,) =
-            manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
+            manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, _tokenDataHash(), RETRY_OPERATION_ID);
         remintedTokenId.assertEq(tokenId, "abort did not release token");
-        manager.complete(remintedTokenId, RECIPIENT, OPERATION_ID, SALT);
+        manager.complete(remintedTokenId, RECIPIENT, RETRY_OPERATION_ID, SALT);
         deployed.core.ownerOf(remintedTokenId).assertEq(RECIPIENT, "retry owner");
     }
 
@@ -710,7 +731,12 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
             manager.prepare(collectionId, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
         tokenId.assertEq(tokenIdBase, "prepared token id");
 
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSignature(
+                "Error(string)",
+                "call to non-contract address 0x0000000000000000000000000000000000000000"
+            )
+        );
         manager.complete(tokenId, RECIPIENT, OPERATION_ID, SALT);
 
         deployed.core.pendingPreparedMintTokenId().assertEq(tokenId, "pending not restored");
@@ -721,9 +747,9 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         manager.abort(tokenId, OPERATION_ID);
         deployed.core.addRandomizer(collectionId, address(deployed.randomizer));
         (uint256 remintedTokenId,) =
-            manager.prepare(collectionId, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
+            manager.prepare(collectionId, TOKEN_DATA, SALT, _tokenDataHash(), RETRY_OPERATION_ID);
         remintedTokenId.assertEq(tokenId, "abort did not free token");
-        manager.complete(remintedTokenId, RECIPIENT, OPERATION_ID, SALT);
+        manager.complete(remintedTokenId, RECIPIENT, RETRY_OPERATION_ID, SALT);
         deployed.core.ownerOf(remintedTokenId).assertEq(RECIPIENT, "retry owner");
         deployed.core.retrieveTokenHash(remintedTokenId)
             .assertEq(_expectedTokenHashFor(collectionId, remintedTokenId, SALT), "retry hash");

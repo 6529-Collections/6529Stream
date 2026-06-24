@@ -64,7 +64,7 @@ evidence, and audit/readiness gates.
   while a prepared mint is pending.
 - The immediate Core hook surface was slimmed so beneficiary, payment evidence,
   batch commitments, and manager-specific events stay outside Core. Final
-  measured `StreamCore` runtime is 24,154 bytes with 422 bytes of EIP-170
+  measured `StreamCore` runtime is 24,172 bytes with 404 bytes of EIP-170
   margin under accepted exception `CORE-SPEND-2026-06-24-001`.
 - Local validation is complete for the current draft: focused Foundry suites,
   full `forge test -vvv`, full Windows `scripts\check.ps1`,

@@ -213,8 +213,8 @@ negative and bytecode spend positive.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
 2,392 bytes of EIP-170 margin. The current measured proof is above that baseline
 under the accepted CON-012 exception:
-`release-artifacts/latest/bytecode-release-proof.json` records 24,154 bytes
-with 422 bytes of EIP-170 margin.
+`release-artifacts/latest/bytecode-release-proof.json` records 24,172 bytes
+with 404 bytes of EIP-170 margin.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
