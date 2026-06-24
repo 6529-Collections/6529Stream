@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/revenue-resolver-primary-adapters` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/628` |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/629 |
-| Active PR | TBD |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/630 |
 | Next issue | Mint manager and prepared-mint hooks after revenue resolver and primary-sale settlement adapters. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-24 07:12 UTC` |
+| Last updated | `2026-06-24 07:16 UTC` |
 
 ## Current Run Notes
 
@@ -78,6 +78,9 @@ evidence, and audit/readiness gates.
   was attempted and exited nonzero on the repo's broad baseline warning set
   plus the reviewed arbitrary native send to a verified split wallet in the
   settlement adapter.
+- PR #630 is open at
+  https://github.com/6529-Collections/6529Stream/pull/630 and CodeRabbit review
+  was requested in comment `4786805627`.
 
 ## Packaging Notes
 

@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:cef1db6b65ce5fcfcf2710cbf177857004579039420a8589d7ba2562e626eaf4",
+      "sha256": "sha256:8ee127e15d38442f9f301423fba424130340847ee292de45f57f95a7b21623f6",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",

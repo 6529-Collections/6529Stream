@@ -42,9 +42,9 @@ minimal compile/test interface is unavoidable.
   completed.
 - Current topic branch: `codex/revenue-resolver-primary-adapters`.
 - Current topic issue: https://github.com/6529-Collections/6529Stream/issues/629.
-- Current topic PR: TBD.
+- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/630.
 - Local draft status: implemented, max-reasoning GPT-5.5 Pro visible feedback
-  addressed, and locally validated; PR not opened yet.
+  addressed, locally validated, and PR opened; CodeRabbit requested.
 
 ## Subagent Findings To Carry
 
