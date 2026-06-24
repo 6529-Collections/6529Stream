@@ -4,7 +4,7 @@ enabled: true
 reviewKinds:
   allowed: [general, followup, wcag, i18n, security, stream-contracts, glm-swarm]
   initial: [general, security, stream-contracts]
-  followup: [followup]
+  followup: [followup, stream-contracts]
 
 commands:
   enabled: true
