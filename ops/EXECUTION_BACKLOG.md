@@ -204,7 +204,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | Order | Item | Gate | Main Blocker | Intended PR |
 | --- | --- | --- | --- | --- |
 | 0 | `CON-009` | C/G | V1 split settlement foundation | Merged in PR #626; issue #625 closed completed |
-| 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Active issue #627 on branch `codex/asset-policy-erc20-splits`; local implementation validated, PR pending |
+| 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Active PR #628 / issue #627 on branch `codex/asset-policy-erc20-splits`; review and CI pending |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -3611,7 +3611,7 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `CON-009` | Implement split factory and split wallet skeleton | C/G | Merged in PR #626; issue #625 closed completed |
-| `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Active issue #627 on branch `codex/asset-policy-erc20-splits`; local implementation validated, PR not opened |
+| `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Active PR #628 / issue #627 on branch `codex/asset-policy-erc20-splits`; review and CI pending |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

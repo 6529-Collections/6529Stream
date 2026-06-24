@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/asset-policy-erc20-splits` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/626` |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/627 |
-| Active PR | TBD |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/628 |
 | Next issue | Revenue resolver and primary-sale settlement adapters after asset policy and ERC-20 split-wallet release/sync. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-24 00:34 UTC` |
+| Last updated | `2026-06-24 00:52 UTC` |
 
 ## Current Run Notes
 
@@ -58,8 +58,8 @@ evidence, and audit/readiness gates.
 - Current topic adds the outside-Core asset policy registry and approved
   standard ERC-20 split-wallet sync/release support, while preserving native
   ETH behavior and excluding non-standard ERC-20 semantics.
-- Local implementation for issue #627 is complete and validated on branch
-  `codex/asset-policy-erc20-splits`; PR publication is the next transition.
+- Local implementation for issue #627 is open as PR #628 on branch
+  `codex/asset-policy-erc20-splits`; CodeRabbit review has been requested.
 - OpenRouter review feedback from Opus 4.8, GLM 5.2, and GPT-5.5 Pro
   high/xhigh reasoning has been incorporated. GPT-5.5 Pro was not rerun at low
   reasoning; provider/hidden-reasoning failures were treated as transport

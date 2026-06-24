@@ -41,7 +41,7 @@ The full Windows validation wrapper passed on 2026-06-24.
   completed.
 - Current topic branch: `codex/asset-policy-erc20-splits`.
 - Current topic issue: https://github.com/6529-Collections/6529Stream/issues/627.
-- Current topic PR: TBD.
+- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/628.
 
 ## Subagent Findings To Carry
 
