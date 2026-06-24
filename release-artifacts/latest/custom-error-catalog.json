@@ -6,22 +6,24 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 101,
-    "contract_count": 11,
+    "custom_error_count": 130,
+    "contract_count": 13,
     "category_counts": {
-      "access_control": 7,
+      "access_control": 8,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
       "configuration": 10,
       "metadata_integrity": 17,
       "pause_emergency": 2,
+      "primary_settlement_safety": 16,
       "randomness_lifecycle": 26,
+      "revenue_assignment_safety": 12,
       "split_payment_safety": 19,
       "supply_minting": 10
     },
     "severity_counts": {
-      "critical": 7,
-      "high": 74,
+      "critical": 8,
+      "high": 102,
       "medium": 20
     },
     "duplicate_selectors": {
@@ -37,7 +39,12 @@
         "StreamAuctions:ReentrancyGuardReentrantCall()",
         "StreamCuratorsPool:ReentrancyGuardReentrantCall()",
         "StreamDrops:ReentrancyGuardReentrantCall()",
+        "StreamPrimarySaleSettlement:ReentrancyGuardReentrantCall()",
         "StreamSplitWallet:ReentrancyGuardReentrantCall()"
+      ],
+      "0x409f04fb": [
+        "StreamPrimarySaleSettlement:ERC20BalanceReadFailed(address,address)",
+        "StreamSplitWallet:ERC20BalanceReadFailed(address,address)"
       ],
       "0x490dd684": [
         "NextGenRandomizerRNG:ZeroDerivedSeed(uint256)",
@@ -63,6 +70,18 @@
         "StreamContractMetadata:FunctionAdminUnauthorized()",
         "StreamCore:FunctionAdminUnauthorized()"
       ],
+      "0x9a787919": [
+        "StreamPrimarySaleSettlement:AssetPolicyReadFailed(address,address)",
+        "StreamSplitWallet:AssetPolicyReadFailed(address,address)"
+      ],
+      "0xa142d392": [
+        "StreamPrimarySaleSettlement:AssetNotActive(address,uint8)",
+        "StreamSplitWallet:AssetNotActive(address,uint8)"
+      ],
+      "0xa5b05eec": [
+        "StreamPrimarySaleSettlement:NativeTransferFailed(address,uint256)",
+        "StreamSplitWallet:NativeTransferFailed(address,uint256)"
+      ],
       "0xa68fbeff": [
         "NextGenRandomizerRNG:TokenRandomnessRequestAlreadyExists(uint256,uint256)",
         "NextGenRandomizerVRF:TokenRandomnessRequestAlreadyExists(uint256,uint256)"
@@ -86,6 +105,10 @@
       "0xd6d556a3": [
         "NextGenRandomizerRNG:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
         "NextGenRandomizerVRF:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)"
+      ],
+      "0xee84f40b": [
+        "StreamPrimarySaleSettlement:UnsupportedAsset(address)",
+        "StreamSplitWallet:UnsupportedAsset(address)"
       ],
       "0xfae276cd": [
         "NextGenRandomizerRNG:RandomnessRequestNotFulfilled(uint256,uint8)",
@@ -2344,6 +2367,885 @@
         "tests": [
           "test/StreamPaymentsInvariant.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:AssetNotActive(address,uint8)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "AssetNotActive",
+      "signature": "AssetNotActive(address,uint8)",
+      "selector": "0xa142d392",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "status",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:AssetPolicyReadFailed(address,address)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "AssetPolicyReadFailed",
+      "signature": "AssetPolicyReadFailed(address,address)",
+      "selector": "0x9a787919",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "registry",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:ERC20BalanceReadFailed(address,address)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "ERC20BalanceReadFailed",
+      "signature": "ERC20BalanceReadFailed(address,address)",
+      "selector": "0x409f04fb",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:ERC20TransferFailed(address,address,address,uint256)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "ERC20TransferFailed",
+      "signature": "ERC20TransferFailed(address,address,address,uint256)",
+      "selector": "0x94e6808a",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "index": 3,
+          "internal_type": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "ERC20TransferInvariantBroken",
+      "signature": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
+      "selector": "0x9a7bc4bc",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "index": 3,
+          "internal_type": "uint256",
+          "name": "expectedFromBalance",
+          "type": "uint256"
+        },
+        {
+          "index": 4,
+          "internal_type": "uint256",
+          "name": "actualFromBalance",
+          "type": "uint256"
+        },
+        {
+          "index": 5,
+          "internal_type": "uint256",
+          "name": "expectedToBalance",
+          "type": "uint256"
+        },
+        {
+          "index": 6,
+          "internal_type": "uint256",
+          "name": "actualToBalance",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:IncorrectNativeValue(uint256,uint256)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "IncorrectNativeValue",
+      "signature": "IncorrectNativeValue(uint256,uint256)",
+      "selector": "0x1da106e1",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "expectedAmount",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "actualAmount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:InvalidPolicyMode(uint8)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "InvalidPolicyMode",
+      "signature": "InvalidPolicyMode(uint8)",
+      "selector": "0xdd42018a",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint8",
+          "name": "policyMode",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:InvalidPrimarySale(bytes32)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "InvalidPrimarySale",
+      "signature": "InvalidPrimarySale(bytes32)",
+      "selector": "0x29e17005",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "settlementId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:InvalidSettlementCaller(address)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "InvalidSettlementCaller",
+      "signature": "InvalidSettlementCaller(address)",
+      "selector": "0xcb671fef",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:NativeTransferFailed(address,uint256)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "NativeTransferFailed",
+      "signature": "NativeTransferFailed(address,uint256)",
+      "selector": "0xa5b05eec",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:PrimaryAssignmentMissing(bytes32,uint256,uint256)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "PrimaryAssignmentMissing",
+      "signature": "PrimaryAssignmentMissing(bytes32,uint256,uint256)",
+      "selector": "0x7a302634",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:PrimaryPolicyHashMismatch(bytes32,bytes32)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "PrimaryPolicyHashMismatch",
+      "signature": "PrimaryPolicyHashMismatch(bytes32,bytes32)",
+      "selector": "0xc4179bcf",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "expectedPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "actualPolicyHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:ReentrancyGuardReentrantCall()",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "ReentrancyGuardReentrantCall",
+      "signature": "ReentrancyGuardReentrantCall()",
+      "selector": "0x3ee5aeb5",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:SettlementAlreadyConsumed(bytes32)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "SettlementAlreadyConsumed",
+      "signature": "SettlementAlreadyConsumed(bytes32)",
+      "selector": "0xf6cbcb00",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "settlementKey",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:UnauthorizedSettlementCaller(address)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "UnauthorizedSettlementCaller",
+      "signature": "UnauthorizedSettlementCaller(address)",
+      "selector": "0x84f10348",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:UnsupportedAsset(address)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "UnsupportedAsset",
+      "signature": "UnsupportedAsset(address)",
+      "selector": "0xee84f40b",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "asset",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPrimarySaleSettlement:UnverifiedSplitWallet(bytes32,address)",
+      "contract": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "name": "UnverifiedSplitWallet",
+      "signature": "UnverifiedSplitWallet(bytes32,address)",
+      "selector": "0x0d8bd514",
+      "category": "primary_settlement_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "wallet",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected primary-sale settlement boundary; refresh sale context, assignment hash, asset policy, replay state, and ERC-20 allowance/balance before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidAssignmentScope(uint8,uint256)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidAssignmentScope",
+      "signature": "InvalidAssignmentScope(uint8,uint256)",
+      "selector": "0x31b6efe6",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidAssignmentType(uint8)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidAssignmentType",
+      "signature": "InvalidAssignmentType(uint8)",
+      "selector": "0x64619be4",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint8",
+          "name": "assignmentType",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidMaterializedAccount(bytes32)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidMaterializedAccount",
+      "signature": "InvalidMaterializedAccount(bytes32)",
+      "selector": "0x6a717330",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "accountSource",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidPrimaryPolicyHash()",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidPrimaryPolicyHash",
+      "signature": "InvalidPrimaryPolicyHash()",
+      "selector": "0x963c043a",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidPrimaryTemplateEntry(uint256)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidPrimaryTemplateEntry",
+      "signature": "InvalidPrimaryTemplateEntry(uint256)",
+      "selector": "0x8c3f5079",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidPrimaryTemplateTotal(uint256)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidPrimaryTemplateTotal",
+      "signature": "InvalidPrimaryTemplateTotal(uint256)",
+      "selector": "0x3be6f55d",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "totalSharePpm",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidRevenueClass(bytes32)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidRevenueClass",
+      "signature": "InvalidRevenueClass(bytes32)",
+      "selector": "0xbda654e9",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "PrimaryAssignmentFrozen",
+      "signature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+      "selector": "0x10c06f4c",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "PrimaryAssignmentMissing",
+      "signature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+      "selector": "0x36f9576d",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "revenueClass",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint8",
+          "name": "scope",
+          "type": "uint8"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "scopeId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:UnknownPrimaryTemplate(bytes32)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "UnknownPrimaryTemplate",
+      "signature": "UnknownPrimaryTemplate(bytes32)",
+      "selector": "0xf2ff63c1",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "templateId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:UnsupportedAccountSource(bytes32)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "UnsupportedAccountSource",
+      "signature": "UnsupportedAccountSource(bytes32)",
+      "selector": "0xa46a80f9",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "accountSource",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:UnverifiedSplitProfile(bytes32)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "UnverifiedSplitProfile",
+      "signature": "UnverifiedSplitProfile(bytes32)",
+      "selector": "0x193fd9f7",
+      "category": "revenue_assignment_safety",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "profileId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Refresh resolver assignment, template, materialized account, and split-wallet state before retrying; unsupported dynamic sources and frozen assignments are terminal unless governance changes configuration.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamPrimarySaleSettlement.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

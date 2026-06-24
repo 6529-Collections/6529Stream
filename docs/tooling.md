@@ -68,6 +68,8 @@ python scripts/generate_broadcast_manifest_input.py --check
 python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
+python scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --check
+python scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/test_address_books.py
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
@@ -181,7 +183,7 @@ The NatSpec coverage step checks
 against the protocol surface report and first-party Solidity sources. It
 requires nearby NatSpec for release-surface functions, public variable getters,
 events, and custom errors unless the current gap is listed with an explicit
-reason. The current baseline has 485 explicit exclusions, so it is a checked
+reason. The current baseline has 648 explicit exclusions, so it is a checked
 burn-down queue rather than proof that API documentation is complete. See
 [`natspec-coverage.md`](natspec-coverage.md).
 
@@ -1085,6 +1087,8 @@ python scripts/check_abi_compatibility.py --check
 python scripts/generate_broadcast_manifest_input.py --check
 python scripts/generate_deployment_manifest.py --check
 python scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
+python scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --check
+python scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check
 python scripts/generate_address_books.py --check
 python scripts/test_ceremony_evidence.py
 python scripts/check_ceremony_evidence.py

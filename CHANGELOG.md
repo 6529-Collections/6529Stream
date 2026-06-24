@@ -22,6 +22,11 @@ the release policy in `docs/release-policy.md`.
   default-deny asset policy, exact ERC-20 transfer invariants, canonical
   registry status validation, high-water freeze documentation, and fail-closed
   tests for unsupported token behavior.
+- Added outside-Core primary revenue resolver and primary-sale settlement
+  satellites, covering deterministic assignment hashes, dynamic `SALE_POSTER`
+  primary templates, verified split-wallet native ETH deposits,
+  approved-standard ERC-20 primary settlement, replay protection, policy drift
+  events, deployment rehearsal wiring, and adversarial settlement tests.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay

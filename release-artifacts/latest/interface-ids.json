@@ -24,7 +24,9 @@
     "IStreamCore": "0xe02cb7f7",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamMinter": "0x0f48ec25",
-    "IStreamSplitFactory": "0x24887d3d",
+    "IStreamPrimarySaleSettlement": "0x53f97e17",
+    "IStreamRevenueResolver": "0x3503c22e",
+    "IStreamSplitFactory": "0x1748deee",
     "IStreamSplitWallet": "0x0ea5f02c"
   },
   "interfaces": {
@@ -743,13 +745,165 @@
         }
       ]
     },
+    "IStreamPrimarySaleSettlement": {
+      "source": "smart-contracts/IStreamPrimarySaleSettlement.sol",
+      "artifact_path": "out/IStreamPrimarySaleSettlement.sol/IStreamPrimarySaleSettlement.json",
+      "abi_sha256": "sha256:91cf0d5dc22763347e5d7a6f8c1bab8bb75b17971866ae38a84fff44e831ad1f",
+      "interface_id": "0x53f97e17",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x53f97e17",
+      "function_selectors": [
+        {
+          "signature": "POLICY_MODE_ALLOW_CURRENT()",
+          "selector": "0x3bd99f40"
+        },
+        {
+          "signature": "POLICY_MODE_STRICT_MATCH()",
+          "selector": "0x727e963c"
+        },
+        {
+          "signature": "PRIMARY_POLICY_DOMAIN()",
+          "selector": "0xb332feb7"
+        },
+        {
+          "signature": "isStreamPrimarySaleSettlement()",
+          "selector": "0xa2422a11"
+        },
+        {
+          "signature": "officialSettled(bytes32,bytes32,address,address)",
+          "selector": "0xabf7c729"
+        },
+        {
+          "signature": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+          "selector": "0xd230c33d"
+        },
+        {
+          "signature": "revenueResolver()",
+          "selector": "0x86624fc7"
+        },
+        {
+          "signature": "setSettlementCaller(address,bool)",
+          "selector": "0xdef83cae"
+        },
+        {
+          "signature": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+          "selector": "0x9e6dc442"
+        },
+        {
+          "signature": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "selector": "0x978cf912"
+        },
+        {
+          "signature": "settlementCaller(address)",
+          "selector": "0x2ae34e97"
+        },
+        {
+          "signature": "settlementConsumed(bytes32)",
+          "selector": "0x37cfadd5"
+        },
+        {
+          "signature": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+          "selector": "0x415db8ef"
+        },
+        {
+          "signature": "totalOfficialSettled(address)",
+          "selector": "0x7fe3b24d"
+        }
+      ]
+    },
+    "IStreamRevenueResolver": {
+      "source": "smart-contracts/IStreamRevenueResolver.sol",
+      "artifact_path": "out/IStreamRevenueResolver.sol/IStreamRevenueResolver.json",
+      "abi_sha256": "sha256:bac7233f0764d26ab7bd20e5a0c49941b90823658016ebcd434fcb7119b30032",
+      "interface_id": "0x3503c22e",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x3503c22e",
+      "function_selectors": [
+        {
+          "signature": "ACCOUNT_SOURCE_SALE_POSTER()",
+          "selector": "0x93197046"
+        },
+        {
+          "signature": "ASSIGNMENT_TYPE_PROFILE()",
+          "selector": "0x32943255"
+        },
+        {
+          "signature": "ASSIGNMENT_TYPE_TEMPLATE()",
+          "selector": "0x94d464e9"
+        },
+        {
+          "signature": "SCOPE_COLLECTION()",
+          "selector": "0x09195c81"
+        },
+        {
+          "signature": "SCOPE_DEFAULT()",
+          "selector": "0x3f1ca966"
+        },
+        {
+          "signature": "SCOPE_TOKEN()",
+          "selector": "0x2571ae1f"
+        },
+        {
+          "signature": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+          "selector": "0xccd963df"
+        },
+        {
+          "signature": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+          "selector": "0x898e4875"
+        },
+        {
+          "signature": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+          "selector": "0x14f0e30d"
+        },
+        {
+          "signature": "isStreamRevenueResolver()",
+          "selector": "0xaf446d7a"
+        },
+        {
+          "signature": "materializePrimaryProfile(bytes32,address)",
+          "selector": "0x0dcd6d8e"
+        },
+        {
+          "signature": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+          "selector": "0x1e39dcdd"
+        },
+        {
+          "signature": "primaryTemplate(bytes32)",
+          "selector": "0x23fb037e"
+        },
+        {
+          "signature": "primaryTemplateEntry(bytes32,uint256)",
+          "selector": "0xe2d1e20a"
+        },
+        {
+          "signature": "primaryTemplateEntryCount(bytes32)",
+          "selector": "0x9ab871eb"
+        },
+        {
+          "signature": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+          "selector": "0xd6938915"
+        },
+        {
+          "signature": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "selector": "0xa68c7f3e"
+        },
+        {
+          "signature": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+          "selector": "0x829477ad"
+        },
+        {
+          "signature": "splitFactory()",
+          "selector": "0x5720babb"
+        }
+      ]
+    },
     "IStreamSplitFactory": {
       "source": "smart-contracts/IStreamSplitFactory.sol",
       "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
-      "abi_sha256": "sha256:06774b407cd200adc830bd6dbee885b0e2cff597758c1520168444a3d5c0cee1",
-      "interface_id": "0x24887d3d",
+      "abi_sha256": "sha256:fe3777a5946ead624d24e0cbb88c6da13833f7d987cece7e4889384fb22894c3",
+      "interface_id": "0x1748deee",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x24887d3d",
+      "computed_selector_xor": "0x1748deee",
       "function_selectors": [
         {
           "signature": "MAX_ENTRIES()",
@@ -818,6 +972,10 @@
         {
           "signature": "profileUniqueAccountCount(bytes32)",
           "selector": "0x30743b1e"
+        },
+        {
+          "signature": "splitWalletExists(bytes32)",
+          "selector": "0x33c0a3d3"
         },
         {
           "signature": "splitWalletInitCodeHash()",

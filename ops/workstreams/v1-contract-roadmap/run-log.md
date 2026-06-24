@@ -115,3 +115,43 @@
 - Opened PR #628 at
   https://github.com/6529-Collections/6529Stream/pull/628 and requested
   CodeRabbit review.
+- PR #628 passed CI and CodeRabbit on head
+  `97b59f9a00af4aa527c1d2aba6f8e581fff762f0`, then merged as
+  `afd3a350474f0b876573d260bd71afe1781470b2`, closing issue #627 completed.
+- Created issue #629 and branch `codex/revenue-resolver-primary-adapters` for
+  the next outside-Core slice: revenue resolver plus native ETH and
+  approved-standard ERC-20 primary-sale settlement adapter foundation.
+- Implemented the local issue #629 draft with `StreamRevenueResolver`,
+  `StreamPrimarySaleSettlement`, resolver and settlement interfaces, split-wallet
+  verification in `StreamSplitFactory`, focused primary settlement tests,
+  deployment rehearsal wiring, docs/indexer notes, and regenerated release
+  artifacts.
+- Addressed OpenRouter and local reviewer feedback before PR publication:
+  assignment hashes now bind resolver/factory/asset-policy/runtime context;
+  non-default scope IDs reject zero; settlement replay keys exclude caller,
+  asset, and policy-mode variants; context/policy companion events support
+  reconstruction; unsupported template account sources fail closed; deprecated
+  ERC-20 assets and non-standard token behavior have focused coverage; and the
+  fork non-broadcast deployment manifest is checked in Windows, Bash, Make, and
+  CI gates.
+- Local validation for the draft passed focused settlement tests, release
+  profile build and generator check-mode gates, `codex-diff-check`, and the full
+  Windows wrapper `powershell -NoProfile -ExecutionPolicy Bypass -File
+  scripts\check.ps1`. Full `slither . --foundry-compile-all` was attempted and
+  exited nonzero on the repo's broad existing finding set plus the reviewed
+  arbitrary-send warning for the native settlement transfer to a verified split
+  wallet.
+- GPT-5.5 Pro was kept at max reasoning per user instruction. Two max-reasoning
+  OpenRouter attempts returned hidden reasoning only with empty visible review
+  content after roughly 4 minutes and 10.6 minutes respectively; a third max
+  retry with hidden reasoning excluded returned visible feedback.
+- Addressed the visible GPT-5.5 Pro feedback by keeping the new source/test
+  files in the intended PR staging set and adding focused coverage for
+  incorrect native value rollback, frozen assignment overwrite rejection,
+  ERC-20-to-ERC-20 replay, second-leg ERC-20 rollback, and template ERC-20
+  event reconstruction.
+- Final local validation for the issue #629 draft passed: focused
+  `StreamPrimarySaleSettlement` suite with 19 tests, `forge build`, full
+  `forge test -vvv` with 516 tests, production `via-ir` build, deployment and
+  release artifact/checksum checks, autonomous-state/docs/changelog gates,
+  `codex-diff-check`, and full Windows `scripts\check.ps1`.

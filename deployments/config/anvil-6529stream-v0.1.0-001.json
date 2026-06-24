@@ -140,6 +140,22 @@
           "0x000000000000000000000000000000000000000b"
         ],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamRevenueResolver",
+        "address": "0x000000000000000000000000000000000000000d",
+        "constructor_args": [
+          "0x000000000000000000000000000000000000000c"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamPrimarySaleSettlement",
+        "address": "0x000000000000000000000000000000000000000e",
+        "constructor_args": [
+          "0x000000000000000000000000000000000000000d"
+        ],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -170,6 +186,14 @@
         },
         {
           "contract": "StreamAssetPolicyRegistry",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamRevenueResolver",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamPrimarySaleSettlement",
           "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]

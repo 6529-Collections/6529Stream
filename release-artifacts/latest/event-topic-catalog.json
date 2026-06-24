@@ -351,6 +351,38 @@
       ]
     },
     {
+      "topic0": "0x1e77a85657976ce31303b0b7c1ff2e0bda4f1d15aac95425f2757a3ff973823c",
+      "signature": "SettlementCallerUpdated(address,bool,address)",
+      "name": "SettlementCallerUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "caller",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "enabled",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamPrimarySaleSettlement"
+      ]
+    },
+    {
       "topic0": "0x25cd81c3ce872bde5f7e7ddd309cd91c6091c1f6a2719c7c25c01b9f55fa1aec",
       "signature": "DependencyVersionPinned(uint256,bytes32,uint256,bytes32,address)",
       "name": "DependencyVersionPinned",
@@ -394,6 +426,59 @@
       ],
       "emitted_by": [
         "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x26e12ec66ef582780cbff95b5bf90760c5c597edc8c997952480c0550f19ff07",
+      "signature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+      "name": "PrimaryTemplateMaterialized",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "templateId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "wallet",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "entriesHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "metadataURIHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "salePoster",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamRevenueResolver"
       ]
     },
     {
@@ -515,6 +600,161 @@
       "emitted_by": [
         "NextGenRandomizerRNG",
         "NextGenRandomizerVRF"
+      ]
+    },
+    {
+      "topic0": "0x309f15b406b3970738e99cdb17fb1c12af7d5c0499c6e78b77f90eb9e7798e35",
+      "signature": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+      "name": "PrimaryRevenueSettled",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "settlementKey",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "revenueClass",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "wallet",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "asset",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 5,
+          "name": "payer",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 6,
+          "name": "amount",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 7,
+          "name": "saleContextHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 8,
+          "name": "policyDrift",
+          "type": "bool",
+          "indexed": false,
+          "internal_type": "bool"
+        },
+        {
+          "index": 9,
+          "name": "assignmentType",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        }
+      ],
+      "emitted_by": [
+        "StreamPrimarySaleSettlement"
+      ]
+    },
+    {
+      "topic0": "0x340e49d8842e86cf1dd9299fe316cab76d929d26ac4482523844ebf6f8d6e8f7",
+      "signature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+      "name": "PrimaryAssignmentSet",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "revenueClass",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "scope",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 2,
+          "name": "scopeId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "assignmentType",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 4,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "templateId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "policyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 7,
+          "name": "assignmentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 8,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamRevenueResolver"
       ]
     },
     {
@@ -703,6 +943,101 @@
       ]
     },
     {
+      "topic0": "0x477196917ca70624bc42331a01abfd1de3b1cdf8f483ca97f9053ce8af515ae5",
+      "signature": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+      "name": "PrimaryRevenueSettlementContext",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "settlementKey",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "revenueClass",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "settlementCaller",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 4,
+          "name": "settlementId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "policyMode",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 6,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 7,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 8,
+          "name": "saleId",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 9,
+          "name": "poster",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 10,
+          "name": "beneficiary",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 11,
+          "name": "templateId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamPrimarySaleSettlement"
+      ]
+    },
+    {
       "topic0": "0x4a48cb98c5be023b78a0b3ec94107a01a0397b2e389d4b5f252aef518e633ec3",
       "signature": "Withdraw(address,bool,uint256)",
       "name": "Withdraw",
@@ -857,6 +1192,59 @@
       ],
       "emitted_by": [
         "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x62095eaabe7eaeb775f525c179d498d50c096cd57cb01bcfb73093f3998a8294",
+      "signature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+      "name": "PrimaryTemplateEntryRecorded",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "templateId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "index",
+          "type": "uint16",
+          "indexed": true,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 2,
+          "name": "account",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "accountSource",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "sharePpm",
+          "type": "uint32",
+          "indexed": false,
+          "internal_type": "uint32"
+        },
+        {
+          "index": 5,
+          "name": "labelId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamRevenueResolver"
       ]
     },
     {
@@ -1282,6 +1670,59 @@
       ]
     },
     {
+      "topic0": "0x89db4c1d868193ff5340fd0ac375cdcc3aa22d0287149012fd1f72438688041d",
+      "signature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+      "name": "PrimaryAssignmentFrozenEvent",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "revenueClass",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "scope",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 2,
+          "name": "scopeId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "previousAssignmentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "frozenAssignmentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamRevenueResolver"
+      ]
+    },
+    {
       "topic0": "0x8b95e28fc0b0046cb36fa662019eae9a1eb5713ee9a99e7de565a74f98e87a1d",
       "signature": "NoBidTokenClaimed(uint256,address,address)",
       "name": "NoBidTokenClaimed",
@@ -1338,7 +1779,9 @@
         "StreamAdmins",
         "StreamAssetPolicyRegistry",
         "StreamCore",
-        "StreamDrops"
+        "StreamDrops",
+        "StreamPrimarySaleSettlement",
+        "StreamRevenueResolver"
       ]
     },
     {
@@ -1620,6 +2063,66 @@
       ]
     },
     {
+      "topic0": "0xab2e0463cd887986aa4dd429b669898a8a8b2621944544fa2dd9b3ade170c64e",
+      "signature": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+      "name": "PrimaryRevenueSettlementPolicy",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "settlementKey",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "revenueClass",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "profileId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "expectedPolicyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "resolvedPolicyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "resolvedAssignmentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "templateId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamPrimarySaleSettlement"
+      ]
+    },
+    {
       "topic0": "0xaf0065c93d2cdea9da65154eb41719040a346336bdf5f16b403067edf22294a0",
       "signature": "RandomnessRequestMarkedStale(uint256,uint256,uint256,address,uint256)",
       "name": "RandomnessRequestMarkedStale",
@@ -1792,6 +2295,52 @@
       ],
       "emitted_by": [
         "StreamCuratorsPool"
+      ]
+    },
+    {
+      "topic0": "0xbca357e7cd064d57d69f9f520883f432e496218f5a792b0dc30c64309da81dfd",
+      "signature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+      "name": "PrimaryAssignmentCleared",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "revenueClass",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "scope",
+          "type": "uint8",
+          "indexed": true,
+          "internal_type": "uint8"
+        },
+        {
+          "index": 2,
+          "name": "scopeId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "previousAssignmentHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamRevenueResolver"
       ]
     },
     {
@@ -2173,6 +2722,52 @@
       ],
       "emitted_by": [
         "DependencyRegistry"
+      ]
+    },
+    {
+      "topic0": "0xd863f5b407f2f1529b2e13232d767a5c062626cbda8476058eb9f86867b23ce0",
+      "signature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+      "name": "PrimaryTemplateCreated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "templateId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 1,
+          "name": "entriesHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "metadataURIHash",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 4,
+          "name": "templateVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        }
+      ],
+      "emitted_by": [
+        "StreamRevenueResolver"
       ]
     },
     {
@@ -5807,6 +6402,625 @@
               "type": "uint256",
               "indexed": true,
               "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamPrimarySaleSettlement": {
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+      "events": [
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryRevenueSettled",
+          "signature": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+          "topic0": "0x309f15b406b3970738e99cdb17fb1c12af7d5c0499c6e78b77f90eb9e7798e35",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "settlementKey",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revenueClass",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "wallet",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "asset",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 5,
+              "name": "payer",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 6,
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "saleContextHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "policyDrift",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 9,
+              "name": "assignmentType",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryRevenueSettlementContext",
+          "signature": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+          "topic0": "0x477196917ca70624bc42331a01abfd1de3b1cdf8f483ca97f9053ce8af515ae5",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "settlementKey",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revenueClass",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "settlementCaller",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 4,
+              "name": "settlementId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "policyMode",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 6,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 7,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 8,
+              "name": "saleId",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 9,
+              "name": "poster",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 10,
+              "name": "beneficiary",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 11,
+              "name": "templateId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryRevenueSettlementPolicy",
+          "signature": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+          "topic0": "0xab2e0463cd887986aa4dd429b669898a8a8b2621944544fa2dd9b3ade170c64e",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "settlementKey",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "revenueClass",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "expectedPolicyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "resolvedPolicyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "resolvedAssignmentHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "templateId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "SettlementCallerUpdated",
+          "signature": "SettlementCallerUpdated(address,bool,address)",
+          "topic0": "0x1e77a85657976ce31303b0b7c1ff2e0bda4f1d15aac95425f2757a3ff973823c",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "caller",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "enabled",
+              "type": "bool",
+              "indexed": false,
+              "internal_type": "bool"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamRevenueResolver": {
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "artifact_path": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+      "events": [
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryAssignmentCleared",
+          "signature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+          "topic0": "0xbca357e7cd064d57d69f9f520883f432e496218f5a792b0dc30c64309da81dfd",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "previousAssignmentHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryAssignmentFrozenEvent",
+          "signature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+          "topic0": "0x89db4c1d868193ff5340fd0ac375cdcc3aa22d0287149012fd1f72438688041d",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "previousAssignmentHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "frozenAssignmentHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryAssignmentSet",
+          "signature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+          "topic0": "0x340e49d8842e86cf1dd9299fe316cab76d929d26ac4482523844ebf6f8d6e8f7",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "revenueClass",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "scope",
+              "type": "uint8",
+              "indexed": true,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 2,
+              "name": "scopeId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "assignmentType",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "uint8"
+            },
+            {
+              "index": 4,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "templateId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "policyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "assignmentHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryTemplateCreated",
+          "signature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+          "topic0": "0xd863f5b407f2f1529b2e13232d767a5c062626cbda8476058eb9f86867b23ce0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "entriesHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "metadataURIHash",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 4,
+              "name": "templateVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryTemplateEntryRecorded",
+          "signature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+          "topic0": "0x62095eaabe7eaeb775f525c179d498d50c096cd57cb01bcfb73093f3998a8294",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "index",
+              "type": "uint16",
+              "indexed": true,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 2,
+              "name": "account",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "accountSource",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "sharePpm",
+              "type": "uint32",
+              "indexed": false,
+              "internal_type": "uint32"
+            },
+            {
+              "index": 5,
+              "name": "labelId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "PrimaryTemplateMaterialized",
+          "signature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+          "topic0": "0x26e12ec66ef582780cbff95b5bf90760c5c597edc8c997952480c0550f19ff07",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "templateId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 1,
+              "name": "profileId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "wallet",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "entriesHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "metadataURIHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "salePoster",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
             }
           ]
         }

@@ -172,12 +172,14 @@ broadcast-manifest-inputs-check:
 deployment-manifests: release-artifacts broadcast-manifest-inputs
 	$(PYTHON) scripts/generate_deployment_manifest.py
 	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json
+	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001.json
 	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json
 
 deployment-manifest-check: broadcast-manifest-inputs-check
 	$(PYTHON) scripts/test_deployment_manifest.py
 	$(PYTHON) scripts/generate_deployment_manifest.py --check
 	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
+	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --check
 	$(PYTHON) scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check
 
 address-books: deployment-manifests

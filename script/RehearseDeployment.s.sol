@@ -12,6 +12,8 @@ import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
+import "../smart-contracts/StreamPrimarySaleSettlement.sol";
+import "../smart-contracts/StreamRevenueResolver.sol";
 import "../smart-contracts/StreamSplitFactory.sol";
 
 interface ScriptVm {
@@ -63,6 +65,8 @@ contract RehearseDeployment {
         address randomizerRng;
         address assetPolicyRegistry;
         address splitFactory;
+        address revenueResolver;
+        address primarySaleSettlement;
         uint256 sampleCollectionId;
         uint256 sampleMintStart;
         uint256 sampleMintEnd;
@@ -138,6 +142,8 @@ contract RehearseDeployment {
 
         deployed.admins.registerAdmin(config.deployer, false);
         deployed.assetPolicyRegistry.transferOwnership(config.adminSafe);
+        deployed.revenueResolver.transferOwnership(config.adminSafe);
+        deployed.primarySaleSettlement.transferOwnership(config.adminSafe);
         deployed.core.transferOwnership(config.adminSafe);
         deployed.admins.transferOwnership(config.adminSafe);
 
@@ -157,6 +163,8 @@ contract RehearseDeployment {
         NextGenRandomizerRNG randomizerRng;
         StreamAssetPolicyRegistry assetPolicyRegistry;
         StreamSplitFactory splitFactory;
+        StreamRevenueResolver revenueResolver;
+        StreamPrimarySaleSettlement primarySaleSettlement;
     }
 
     function _deployContracts(DeploymentConfig memory config)
@@ -189,6 +197,9 @@ contract RehearseDeployment {
             new NextGenRandomizerRNG(address(core), address(admins), config.arrngController);
         StreamAssetPolicyRegistry assetPolicyRegistry = new StreamAssetPolicyRegistry();
         StreamSplitFactory splitFactory = new StreamSplitFactory(assetPolicyRegistry);
+        StreamRevenueResolver revenueResolver = new StreamRevenueResolver(splitFactory);
+        StreamPrimarySaleSettlement primarySaleSettlement =
+            new StreamPrimarySaleSettlement(revenueResolver);
 
         deployed = DeployedContracts({
             admins: admins,
@@ -202,7 +213,9 @@ contract RehearseDeployment {
             randomizerVrf: randomizerVrf,
             randomizerRng: randomizerRng,
             assetPolicyRegistry: assetPolicyRegistry,
-            splitFactory: splitFactory
+            splitFactory: splitFactory,
+            revenueResolver: revenueResolver,
+            primarySaleSettlement: primarySaleSettlement
         });
     }
 
@@ -275,6 +288,8 @@ contract RehearseDeployment {
             randomizerRng: address(deployed.randomizerRng),
             assetPolicyRegistry: address(deployed.assetPolicyRegistry),
             splitFactory: address(deployed.splitFactory),
+            revenueResolver: address(deployed.revenueResolver),
+            primarySaleSettlement: address(deployed.primarySaleSettlement),
             sampleCollectionId: collectionId,
             sampleMintStart: mintStart,
             sampleMintEnd: mintEnd,
@@ -309,11 +324,7 @@ contract RehearseDeployment {
         return keccak256(abi.encode(config.protocolVersion, config.deploymentVersion));
     }
 
-    function _contractMetadataHash(DeploymentConfig memory config)
-        private
-        pure
-        returns (bytes32)
-    {
+    function _contractMetadataHash(DeploymentConfig memory config) private pure returns (bytes32) {
         return keccak256(bytes(config.contractMetadataURI));
     }
 

@@ -45,6 +45,8 @@ invariants, release checks, external evidence, and audit review.
 | `metadata_integrity` | Metadata, dependency, freeze, URI, raw attribute, or rendering policy rejected the payload. |
 | `randomness_lifecycle` | Randomizer request, provider, epoch, callback, stale, failed, or retry state rejected the payload. |
 | `auction_payment_safety` | Reentrancy, payment, or accounting safety boundary rejected the call. |
+| `primary_settlement_safety` | Primary-sale settlement context, replay, policy-hash, native transfer, ERC-20 transfer, or exact-delta boundary rejected the call. |
+| `revenue_assignment_safety` | Revenue resolver assignment, template, materialized dynamic account, frozen scope, or split-profile verification rejected the call. |
 | `split_payment_safety` | Split profile validation, deterministic wallet deployment, asset policy, or split-release accounting rejected the call. |
 | `supply_minting` | Collection supply, token existence, mint window, burn, or collection-range state rejected the call. |
 | `configuration` | A configured address, parameter, royalty percentage, or other setup value is invalid. |
@@ -66,7 +68,7 @@ Wallets and frontends should:
 
 - decode errors from current ABIs instead of string-matching revert text;
 - surface actionable messages for access-control, pause, metadata, randomness,
-  payment, and mint-state categories;
+  revenue assignment, primary settlement, payment, and mint-state categories;
 - treat replay, stale, wrong-domain, wrong-provider, wrong-token, frozen, and
   pause errors as terminal for the submitted payload;
 - refresh release artifacts when selector or ABI compatibility checks change;

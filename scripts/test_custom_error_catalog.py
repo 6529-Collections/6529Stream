@@ -82,6 +82,30 @@ def fixture_surface() -> dict[str, Any]:
                     }
                 ],
             },
+            "ExampleRevenueResolver": {
+                "source": "smart-contracts/ExampleRevenueResolver.sol",
+                "artifact_path": "out/ExampleRevenueResolver.sol/ExampleRevenueResolver.json",
+                "custom_errors": [
+                    {
+                        "name": "InvalidPrimaryTemplateTotal",
+                        "signature": "InvalidPrimaryTemplateTotal(uint256)",
+                        "selector": "0xbbbbbbbb",
+                        "inputs": [],
+                    }
+                ],
+            },
+            "ExamplePrimarySaleSettlement": {
+                "source": "smart-contracts/ExamplePrimarySaleSettlement.sol",
+                "artifact_path": "out/ExamplePrimarySaleSettlement.sol/ExamplePrimarySaleSettlement.json",
+                "custom_errors": [
+                    {
+                        "name": "SettlementAlreadyConsumed",
+                        "signature": "SettlementAlreadyConsumed(bytes32)",
+                        "selector": "0xcccccccc",
+                        "inputs": [],
+                    }
+                ],
+            },
         },
     }
 
@@ -138,6 +162,18 @@ class CustomErrorCatalogTests(unittest.TestCase):
             ]
             self.assertEqual(royalty["category"], "configuration")
             self.assertEqual(royalty["severity"], "medium")
+
+            resolver = entries[
+                "ExampleRevenueResolver:InvalidPrimaryTemplateTotal(uint256)"
+            ]
+            self.assertEqual(resolver["category"], "revenue_assignment_safety")
+            self.assertIn("resolver assignment", resolver["caller_action"])
+
+            settlement = entries[
+                "ExamplePrimarySaleSettlement:SettlementAlreadyConsumed(bytes32)"
+            ]
+            self.assertEqual(settlement["category"], "primary_settlement_safety")
+            self.assertIn("primary-sale settlement", settlement["caller_action"])
 
     def test_catalog_records_duplicate_selectors_for_review(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

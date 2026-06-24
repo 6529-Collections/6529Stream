@@ -77,6 +77,18 @@
       "hash": "0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"
     },
     {
+      "transactionType": "CREATE",
+      "contractName": "StreamRevenueResolver",
+      "contractAddress": "0x100000000000000000000000000000000000000d",
+      "hash": "0x0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamPrimarySaleSettlement",
+      "contractAddress": "0x100000000000000000000000000000000000000e",
+      "hash": "0x0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"
+    },
+    {
       "transactionType": "CALL",
       "contractName": "",
       "contractAddress": "",
@@ -155,6 +167,18 @@
       "status": "0x1",
       "contractAddress": "0x100000000000000000000000000000000000000c",
       "blockNumber": "0xc"
+    },
+    {
+      "transactionHash": "0x0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d",
+      "status": "0x1",
+      "contractAddress": "0x100000000000000000000000000000000000000d",
+      "blockNumber": "0xd"
+    },
+    {
+      "transactionHash": "0x0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e",
+      "status": "0x1",
+      "contractAddress": "0x100000000000000000000000000000000000000e",
+      "blockNumber": "0xe"
     }
   ]
 }

@@ -4447,6 +4447,438 @@
         "receives": []
       }
     },
+    "StreamAssetPolicyRegistry": {
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "artifact_path": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+      "abi_sha256": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
+      "abi_entries": 21,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 15,
+        "events": 2,
+        "errors": 4,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "ASSET_STATUS_ACTIVE()",
+            "kind": "function",
+            "name": "ASSET_STATUS_ACTIVE",
+            "signature": "ASSET_STATUS_ACTIVE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ASSET_STATUS_DEPRECATED()",
+            "kind": "function",
+            "name": "ASSET_STATUS_DEPRECATED",
+            "signature": "ASSET_STATUS_DEPRECATED()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ASSET_STATUS_INACTIVE()",
+            "kind": "function",
+            "name": "ASSET_STATUS_INACTIVE",
+            "signature": "ASSET_STATUS_INACTIVE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ASSET_STATUS_UNKNOWN()",
+            "kind": "function",
+            "name": "ASSET_STATUS_UNKNOWN",
+            "signature": "ASSET_STATUS_UNKNOWN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ASSET_STATUS_UNSUPPORTED()",
+            "kind": "function",
+            "name": "ASSET_STATUS_UNSUPPORTED",
+            "signature": "ASSET_STATUS_UNSUPPORTED()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicy(address)",
+            "kind": "function",
+            "name": "assetPolicy",
+            "signature": "assetPolicy(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "effectiveAt",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyEffectiveAt(address)",
+            "kind": "function",
+            "name": "assetPolicyEffectiveAt",
+            "signature": "assetPolicyEffectiveAt(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyHash(address)",
+            "kind": "function",
+            "name": "assetPolicyHash",
+            "signature": "assetPolicyHash(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetStatus(address)",
+            "kind": "function",
+            "name": "assetStatus",
+            "signature": "assetStatus(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isAssetActive(address)",
+            "kind": "function",
+            "name": "isAssetActive",
+            "signature": "isAssetActive(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamAssetPolicyRegistry()",
+            "kind": "function",
+            "name": "isStreamAssetPolicyRegistry",
+            "signature": "isStreamAssetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "renounceOwnership()",
+            "kind": "function",
+            "name": "renounceOwnership",
+            "signature": "renounceOwnership()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setAssetStatus(address,uint8,bytes32)",
+            "kind": "function",
+            "name": "setAssetStatus",
+            "signature": "setAssetStatus(address,uint8,bytes32)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "transferOwnership(address)",
+            "kind": "function",
+            "name": "transferOwnership",
+            "signature": "transferOwnership(address)",
+            "inputs": [
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "AssetPolicyUpdated",
+            "signature": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "previousStatus",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "previousPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "OwnershipTransferred(address,address)",
+            "kind": "event",
+            "name": "OwnershipTransferred",
+            "signature": "OwnershipTransferred(address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "previousOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AssetPolicyUnchanged(address,uint8,bytes32)",
+            "kind": "error",
+            "name": "AssetPolicyUnchanged",
+            "signature": "AssetPolicyUnchanged(address,uint8,bytes32)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAsset(address)",
+            "kind": "error",
+            "name": "InvalidAsset",
+            "signature": "InvalidAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAssetPolicyHash(address,uint8,bytes32)",
+            "kind": "error",
+            "name": "InvalidAssetPolicyHash",
+            "signature": "InvalidAssetPolicyHash(address,uint8,bytes32)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAssetStatus(uint8)",
+            "kind": "error",
+            "name": "InvalidAssetStatus",
+            "signature": "InvalidAssetStatus(uint8)",
+            "inputs": [
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamAuctions": {
       "source": "smart-contracts/AuctionContract.sol",
       "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
@@ -12224,21 +12656,2410 @@
         "receives": []
       }
     },
-    "StreamSplitFactory": {
-      "source": "smart-contracts/StreamSplitFactory.sol",
-      "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
-      "abi_sha256": "sha256:243a0da331ba23551ce40c683122c2d355de95df620791103afb3629a50169e8",
-      "abi_entries": 30,
+    "StreamPrimarySaleSettlement": {
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+      "abi_sha256": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
+      "abi_entries": 42,
       "entry_counts": {
-        "constructors": 0,
+        "constructors": 1,
         "functions": 19,
-        "events": 4,
-        "errors": 7,
+        "events": 5,
+        "errors": 17,
         "fallbacks": 0,
         "receives": 0
       },
       "entries": {
-        "constructors": [],
+        "constructors": [
+          {
+            "key": "constructor(address)",
+            "kind": "constructor",
+            "signature": "constructor(address)",
+            "inputs": [
+              {
+                "name": "revenueResolver_",
+                "type": "address",
+                "internal_type": "contract IStreamRevenueResolver"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "POLICY_MODE_ALLOW_CURRENT()",
+            "kind": "function",
+            "name": "POLICY_MODE_ALLOW_CURRENT",
+            "signature": "POLICY_MODE_ALLOW_CURRENT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "POLICY_MODE_STRICT_MATCH()",
+            "kind": "function",
+            "name": "POLICY_MODE_STRICT_MATCH",
+            "signature": "POLICY_MODE_STRICT_MATCH()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "PRIMARY_POLICY_DOMAIN()",
+            "kind": "function",
+            "name": "PRIMARY_POLICY_DOMAIN",
+            "signature": "PRIMARY_POLICY_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyRegistry()",
+            "kind": "function",
+            "name": "assetPolicyRegistry",
+            "signature": "assetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamAssetPolicyRegistry"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamPrimarySaleSettlement()",
+            "kind": "function",
+            "name": "isStreamPrimarySaleSettlement",
+            "signature": "isStreamPrimarySaleSettlement()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "officialSettled(bytes32,bytes32,address,address)",
+            "kind": "function",
+            "name": "officialSettled",
+            "signature": "officialSettled(bytes32,bytes32,address,address)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "renounceOwnership()",
+            "kind": "function",
+            "name": "renounceOwnership",
+            "signature": "renounceOwnership()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+            "kind": "function",
+            "name": "resolvedPrimaryPolicyHash",
+            "signature": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "revenueResolver()",
+            "kind": "function",
+            "name": "revenueResolver",
+            "signature": "revenueResolver()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamRevenueResolver"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setSettlementCaller(address,bool)",
+            "kind": "function",
+            "name": "setSettlementCaller",
+            "signature": "setSettlementCaller(address,bool)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+            "kind": "function",
+            "name": "settleERC20PrimarySale",
+            "signature": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+            "inputs": [
+              {
+                "name": "sale",
+                "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)",
+                "internal_type": "struct IStreamPrimarySaleSettlement.PrimarySale",
+                "components": [
+                  {
+                    "name": "settlementId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revenueClass",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "beneficiary",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "key",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "kind": "function",
+            "name": "settleNativePrimarySale",
+            "signature": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "sale",
+                "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)",
+                "internal_type": "struct IStreamPrimarySaleSettlement.PrimarySale",
+                "components": [
+                  {
+                    "name": "settlementId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revenueClass",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "beneficiary",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "key",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "payable"
+          },
+          {
+            "key": "settlementCaller(address)",
+            "kind": "function",
+            "name": "settlementCaller",
+            "signature": "settlementCaller(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "settlementConsumed(bytes32)",
+            "kind": "function",
+            "name": "settlementConsumed",
+            "signature": "settlementConsumed(bytes32)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "kind": "function",
+            "name": "settlementKey",
+            "signature": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "sale",
+                "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)",
+                "internal_type": "struct IStreamPrimarySaleSettlement.PrimarySale",
+                "components": [
+                  {
+                    "name": "settlementId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revenueClass",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "beneficiary",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "splitFactory()",
+            "kind": "function",
+            "name": "splitFactory",
+            "signature": "splitFactory()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamSplitFactory"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "totalOfficialSettled(address)",
+            "kind": "function",
+            "name": "totalOfficialSettled",
+            "signature": "totalOfficialSettled(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "transferOwnership(address)",
+            "kind": "function",
+            "name": "transferOwnership",
+            "signature": "transferOwnership(address)",
+            "inputs": [
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "OwnershipTransferred(address,address)",
+            "kind": "event",
+            "name": "OwnershipTransferred",
+            "signature": "OwnershipTransferred(address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "previousOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+            "kind": "event",
+            "name": "PrimaryRevenueSettled",
+            "signature": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "saleContextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyDrift",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+            "kind": "event",
+            "name": "PrimaryRevenueSettlementContext",
+            "signature": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "settlementCaller",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "settlementId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyMode",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "saleId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "poster",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+            "kind": "event",
+            "name": "PrimaryRevenueSettlementPolicy",
+            "signature": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "expectedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "resolvedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "resolvedAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SettlementCallerUpdated(address,bool,address)",
+            "kind": "event",
+            "name": "SettlementCallerUpdated",
+            "signature": "SettlementCallerUpdated(address,bool,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AssetNotActive(address,uint8)",
+            "kind": "error",
+            "name": "AssetNotActive",
+            "signature": "AssetNotActive(address,uint8)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "AssetPolicyReadFailed(address,address)",
+            "kind": "error",
+            "name": "AssetPolicyReadFailed",
+            "signature": "AssetPolicyReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20BalanceReadFailed(address,address)",
+            "kind": "error",
+            "name": "ERC20BalanceReadFailed",
+            "signature": "ERC20BalanceReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferFailed(address,address,address,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferFailed",
+            "signature": "ERC20TransferFailed(address,address,address,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferInvariantBroken",
+            "signature": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expectedFromBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualFromBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedToBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualToBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "IncorrectNativeValue(uint256,uint256)",
+            "kind": "error",
+            "name": "IncorrectNativeValue",
+            "signature": "IncorrectNativeValue(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "expectedAmount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualAmount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPolicyMode(uint8)",
+            "kind": "error",
+            "name": "InvalidPolicyMode",
+            "signature": "InvalidPolicyMode(uint8)",
+            "inputs": [
+              {
+                "name": "policyMode",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPrimarySale(bytes32)",
+            "kind": "error",
+            "name": "InvalidPrimarySale",
+            "signature": "InvalidPrimarySale(bytes32)",
+            "inputs": [
+              {
+                "name": "settlementId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSettlementCaller(address)",
+            "kind": "error",
+            "name": "InvalidSettlementCaller",
+            "signature": "InvalidSettlementCaller(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "NativeTransferFailed(address,uint256)",
+            "kind": "error",
+            "name": "NativeTransferFailed",
+            "signature": "NativeTransferFailed(address,uint256)",
+            "inputs": [
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentMissing(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "PrimaryAssignmentMissing",
+            "signature": "PrimaryAssignmentMissing(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryPolicyHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "PrimaryPolicyHashMismatch",
+            "signature": "PrimaryPolicyHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ReentrancyGuardReentrantCall()",
+            "kind": "error",
+            "name": "ReentrancyGuardReentrantCall",
+            "signature": "ReentrancyGuardReentrantCall()",
+            "inputs": []
+          },
+          {
+            "key": "SettlementAlreadyConsumed(bytes32)",
+            "kind": "error",
+            "name": "SettlementAlreadyConsumed",
+            "signature": "SettlementAlreadyConsumed(bytes32)",
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedSettlementCaller(address)",
+            "kind": "error",
+            "name": "UnauthorizedSettlementCaller",
+            "signature": "UnauthorizedSettlementCaller(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedAsset(address)",
+            "kind": "error",
+            "name": "UnsupportedAsset",
+            "signature": "UnsupportedAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnverifiedSplitWallet(bytes32,address)",
+            "kind": "error",
+            "name": "UnverifiedSplitWallet",
+            "signature": "UnverifiedSplitWallet(bytes32,address)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "StreamRevenueResolver": {
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "artifact_path": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+      "abi_sha256": "sha256:c8a6df407b7b905f9bc13563150477b588e14cb7c8be8afc5e2fa147d265f554",
+      "abi_entries": 48,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 28,
+        "events": 7,
+        "errors": 12,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address)",
+            "kind": "constructor",
+            "signature": "constructor(address)",
+            "inputs": [
+              {
+                "name": "splitFactory_",
+                "type": "address",
+                "internal_type": "contract IStreamSplitFactory"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "ACCOUNT_SOURCE_SALE_POSTER()",
+            "kind": "function",
+            "name": "ACCOUNT_SOURCE_SALE_POSTER",
+            "signature": "ACCOUNT_SOURCE_SALE_POSTER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ASSIGNMENT_TYPE_PROFILE()",
+            "kind": "function",
+            "name": "ASSIGNMENT_TYPE_PROFILE",
+            "signature": "ASSIGNMENT_TYPE_PROFILE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "ASSIGNMENT_TYPE_TEMPLATE()",
+            "kind": "function",
+            "name": "ASSIGNMENT_TYPE_TEMPLATE",
+            "signature": "ASSIGNMENT_TYPE_TEMPLATE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_DYNAMIC_ACCOUNT_SOURCES()",
+            "kind": "function",
+            "name": "MAX_DYNAMIC_ACCOUNT_SOURCES",
+            "signature": "MAX_DYNAMIC_ACCOUNT_SOURCES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_TEMPLATE_ENTRIES()",
+            "kind": "function",
+            "name": "MAX_TEMPLATE_ENTRIES",
+            "signature": "MAX_TEMPLATE_ENTRIES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SCHEMA_VERSION()",
+            "kind": "function",
+            "name": "SCHEMA_VERSION",
+            "signature": "SCHEMA_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SCOPE_COLLECTION()",
+            "kind": "function",
+            "name": "SCOPE_COLLECTION",
+            "signature": "SCOPE_COLLECTION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SCOPE_DEFAULT()",
+            "kind": "function",
+            "name": "SCOPE_DEFAULT",
+            "signature": "SCOPE_DEFAULT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SCOPE_TOKEN()",
+            "kind": "function",
+            "name": "SCOPE_TOKEN",
+            "signature": "SCOPE_TOKEN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SHARE_DENOMINATOR_PPM()",
+            "kind": "function",
+            "name": "SHARE_DENOMINATOR_PPM",
+            "signature": "SHARE_DENOMINATOR_PPM()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "TEMPLATE_VERSION()",
+            "kind": "function",
+            "name": "TEMPLATE_VERSION",
+            "signature": "TEMPLATE_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+            "kind": "function",
+            "name": "clearPrimaryAssignment",
+            "signature": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+            "kind": "function",
+            "name": "createPrimaryTemplate",
+            "signature": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+            "inputs": [
+              {
+                "name": "entries",
+                "type": "(address,bytes32,uint32,bytes32)[]",
+                "internal_type": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "accountSource",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+            "kind": "function",
+            "name": "freezePrimaryAssignment",
+            "signature": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "frozenAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "isStreamRevenueResolver()",
+            "kind": "function",
+            "name": "isStreamRevenueResolver",
+            "signature": "isStreamRevenueResolver()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "materializePrimaryProfile(bytes32,address)",
+            "kind": "function",
+            "name": "materializePrimaryProfile",
+            "signature": "materializePrimaryProfile(bytes32,address)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "salePoster",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+            "kind": "function",
+            "name": "primaryAssignmentHash",
+            "signature": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "frozen",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryTemplate(bytes32)",
+            "kind": "function",
+            "name": "primaryTemplate",
+            "signature": "primaryTemplate(bytes32)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "exists",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryTemplateEntry(bytes32,uint256)",
+            "kind": "function",
+            "name": "primaryTemplateEntry",
+            "signature": "primaryTemplateEntry(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryTemplateEntryCount(bytes32)",
+            "kind": "function",
+            "name": "primaryTemplateEntryCount",
+            "signature": "primaryTemplateEntryCount(bytes32)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "renounceOwnership()",
+            "kind": "function",
+            "name": "renounceOwnership",
+            "signature": "renounceOwnership()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+            "kind": "function",
+            "name": "resolvePrimaryAssignment",
+            "signature": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "resolved",
+                "type": "(bool,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,bool)",
+                "internal_type": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+                "components": [
+                  {
+                    "name": "exists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "scope",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "assignmentType",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "profileId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "templateId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "assignmentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "frozen",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "setPrimaryProfileAssignment",
+            "signature": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "setPrimaryTemplateAssignment",
+            "signature": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "splitFactory()",
+            "kind": "function",
+            "name": "splitFactory",
+            "signature": "splitFactory()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "splitFactoryContract()",
+            "kind": "function",
+            "name": "splitFactoryContract",
+            "signature": "splitFactoryContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamSplitFactory"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "transferOwnership(address)",
+            "kind": "function",
+            "name": "transferOwnership",
+            "signature": "transferOwnership(address)",
+            "inputs": [
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "OwnershipTransferred(address,address)",
+            "kind": "event",
+            "name": "OwnershipTransferred",
+            "signature": "OwnershipTransferred(address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "previousOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryAssignmentCleared",
+            "signature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "previousAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryAssignmentFrozenEvent",
+            "signature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "previousAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "frozenAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryAssignmentSet",
+            "signature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+            "kind": "event",
+            "name": "PrimaryTemplateCreated",
+            "signature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "templateVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+            "kind": "event",
+            "name": "PrimaryTemplateEntryRecorded",
+            "signature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "index",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryTemplateMaterialized",
+            "signature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "salePoster",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "InvalidAssignmentScope(uint8,uint256)",
+            "kind": "error",
+            "name": "InvalidAssignmentScope",
+            "signature": "InvalidAssignmentScope(uint8,uint256)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAssignmentType(uint8)",
+            "kind": "error",
+            "name": "InvalidAssignmentType",
+            "signature": "InvalidAssignmentType(uint8)",
+            "inputs": [
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMaterializedAccount(bytes32)",
+            "kind": "error",
+            "name": "InvalidMaterializedAccount",
+            "signature": "InvalidMaterializedAccount(bytes32)",
+            "inputs": [
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPrimaryPolicyHash()",
+            "kind": "error",
+            "name": "InvalidPrimaryPolicyHash",
+            "signature": "InvalidPrimaryPolicyHash()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidPrimaryTemplateEntry(uint256)",
+            "kind": "error",
+            "name": "InvalidPrimaryTemplateEntry",
+            "signature": "InvalidPrimaryTemplateEntry(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPrimaryTemplateTotal(uint256)",
+            "kind": "error",
+            "name": "InvalidPrimaryTemplateTotal",
+            "signature": "InvalidPrimaryTemplateTotal(uint256)",
+            "inputs": [
+              {
+                "name": "totalSharePpm",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidRevenueClass(bytes32)",
+            "kind": "error",
+            "name": "InvalidRevenueClass",
+            "signature": "InvalidRevenueClass(bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+            "kind": "error",
+            "name": "PrimaryAssignmentFrozen",
+            "signature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+            "kind": "error",
+            "name": "PrimaryAssignmentMissing",
+            "signature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "UnknownPrimaryTemplate(bytes32)",
+            "kind": "error",
+            "name": "UnknownPrimaryTemplate",
+            "signature": "UnknownPrimaryTemplate(bytes32)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedAccountSource(bytes32)",
+            "kind": "error",
+            "name": "UnsupportedAccountSource",
+            "signature": "UnsupportedAccountSource(bytes32)",
+            "inputs": [
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnverifiedSplitProfile(bytes32)",
+            "kind": "error",
+            "name": "UnverifiedSplitProfile",
+            "signature": "UnverifiedSplitProfile(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "StreamSplitFactory": {
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+      "abi_sha256": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
+      "abi_entries": 35,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 21,
+        "events": 5,
+        "errors": 8,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address)",
+            "kind": "constructor",
+            "signature": "constructor(address)",
+            "inputs": [
+              {
+                "name": "assetPolicyRegistry_",
+                "type": "address",
+                "internal_type": "contract IStreamAssetPolicyRegistry"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
         "functions": [
           {
             "key": "MAX_ENTRIES()",
@@ -12326,6 +15147,21 @@
                 "name": "",
                 "type": "uint16",
                 "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyRegistry()",
+            "kind": "function",
+            "name": "assetPolicyRegistry",
+            "signature": "assetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamAssetPolicyRegistry"
               }
             ],
             "state_mutability": "view"
@@ -12615,6 +15451,27 @@
             "state_mutability": "view"
           },
           {
+            "key": "splitWalletExists(bytes32)",
+            "kind": "function",
+            "name": "splitWalletExists",
+            "signature": "splitWalletExists(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "splitWalletInitCodeHash()",
             "kind": "function",
             "name": "splitWalletInitCodeHash",
@@ -12667,6 +15524,21 @@
           }
         ],
         "events": [
+          {
+            "key": "AssetPolicyRegistryPinned(address)",
+            "kind": "event",
+            "name": "AssetPolicyRegistryPinned",
+            "signature": "AssetPolicyRegistryPinned(address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
           {
             "key": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
             "kind": "event",
@@ -12850,6 +15722,19 @@
             ]
           },
           {
+            "key": "InvalidAssetPolicyRegistry(address)",
+            "kind": "error",
+            "name": "InvalidAssetPolicyRegistry",
+            "signature": "InvalidAssetPolicyRegistry(address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
             "key": "InvalidEntryCount(uint256)",
             "kind": "error",
             "name": "InvalidEntryCount",
@@ -12940,13 +15825,13 @@
     "StreamSplitWallet": {
       "source": "smart-contracts/StreamSplitWallet.sol",
       "artifact_path": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
-      "abi_sha256": "sha256:006c5120df6bf011e4f594cc17aa65bc454ecfc69a7ca0dd44e2f050d745f31a",
-      "abi_entries": 37,
+      "abi_sha256": "sha256:fd1b403e564ffff1b74b72cc5ab65a040f0d85be6d2a591543bc1c8a8869d96b",
+      "abi_entries": 44,
       "entry_counts": {
         "constructors": 1,
-        "functions": 21,
-        "events": 3,
-        "errors": 11,
+        "functions": 22,
+        "events": 4,
+        "errors": 16,
         "fallbacks": 0,
         "receives": 1
       },
@@ -13040,6 +15925,21 @@
                 "name": "",
                 "type": "bool",
                 "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyRegistry()",
+            "kind": "function",
+            "name": "assetPolicyRegistry",
+            "signature": "assetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
               }
             ],
             "state_mutability": "view"
@@ -13488,6 +16388,57 @@
             ]
           },
           {
+            "key": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+            "kind": "event",
+            "name": "ERC20Released",
+            "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "totalReleased",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
             "key": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
             "kind": "event",
             "name": "NativeReleased",
@@ -13540,6 +16491,121 @@
             "name": "AlreadyInitialized",
             "signature": "AlreadyInitialized()",
             "inputs": []
+          },
+          {
+            "key": "AssetNotActive(address,uint8)",
+            "kind": "error",
+            "name": "AssetNotActive",
+            "signature": "AssetNotActive(address,uint8)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "AssetPolicyReadFailed(address,address)",
+            "kind": "error",
+            "name": "AssetPolicyReadFailed",
+            "signature": "AssetPolicyReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20BalanceReadFailed(address,address)",
+            "kind": "error",
+            "name": "ERC20BalanceReadFailed",
+            "signature": "ERC20BalanceReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferFailed(address,address,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferFailed",
+            "signature": "ERC20TransferFailed(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferInvariantBroken",
+            "signature": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expectedWalletBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualWalletBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedRecipientBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualRecipientBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
           },
           {
             "key": "InvalidInitializationInput()",
@@ -16087,6 +19153,378 @@
         "receives": []
       }
     },
+    "IStreamAssetPolicyRegistry": {
+      "source": "smart-contracts/IStreamAssetPolicyRegistry.sol",
+      "artifact_path": "out/IStreamAssetPolicyRegistry.sol/IStreamAssetPolicyRegistry.json",
+      "abi_sha256": "sha256:cabf2146b13d8746cb2452a20f347b35ffb6e7215d8e29268de72496328f7679",
+      "abi_entries": 17,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 12,
+        "events": 1,
+        "errors": 4,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "ASSET_STATUS_ACTIVE()",
+            "kind": "function",
+            "name": "ASSET_STATUS_ACTIVE",
+            "signature": "ASSET_STATUS_ACTIVE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ASSET_STATUS_DEPRECATED()",
+            "kind": "function",
+            "name": "ASSET_STATUS_DEPRECATED",
+            "signature": "ASSET_STATUS_DEPRECATED()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ASSET_STATUS_INACTIVE()",
+            "kind": "function",
+            "name": "ASSET_STATUS_INACTIVE",
+            "signature": "ASSET_STATUS_INACTIVE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ASSET_STATUS_UNKNOWN()",
+            "kind": "function",
+            "name": "ASSET_STATUS_UNKNOWN",
+            "signature": "ASSET_STATUS_UNKNOWN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ASSET_STATUS_UNSUPPORTED()",
+            "kind": "function",
+            "name": "ASSET_STATUS_UNSUPPORTED",
+            "signature": "ASSET_STATUS_UNSUPPORTED()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "assetPolicy(address)",
+            "kind": "function",
+            "name": "assetPolicy",
+            "signature": "assetPolicy(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "effectiveAt",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyEffectiveAt(address)",
+            "kind": "function",
+            "name": "assetPolicyEffectiveAt",
+            "signature": "assetPolicyEffectiveAt(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyHash(address)",
+            "kind": "function",
+            "name": "assetPolicyHash",
+            "signature": "assetPolicyHash(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetStatus(address)",
+            "kind": "function",
+            "name": "assetStatus",
+            "signature": "assetStatus(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isAssetActive(address)",
+            "kind": "function",
+            "name": "isAssetActive",
+            "signature": "isAssetActive(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamAssetPolicyRegistry()",
+            "kind": "function",
+            "name": "isStreamAssetPolicyRegistry",
+            "signature": "isStreamAssetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "setAssetStatus(address,uint8,bytes32)",
+            "kind": "function",
+            "name": "setAssetStatus",
+            "signature": "setAssetStatus(address,uint8,bytes32)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "AssetPolicyUpdated",
+            "signature": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "previousStatus",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "previousPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AssetPolicyUnchanged(address,uint8,bytes32)",
+            "kind": "error",
+            "name": "AssetPolicyUnchanged",
+            "signature": "AssetPolicyUnchanged(address,uint8,bytes32)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAsset(address)",
+            "kind": "error",
+            "name": "InvalidAsset",
+            "signature": "InvalidAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAssetPolicyHash(address,uint8,bytes32)",
+            "kind": "error",
+            "name": "InvalidAssetPolicyHash",
+            "signature": "InvalidAssetPolicyHash(address,uint8,bytes32)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAssetStatus(uint8)",
+            "kind": "error",
+            "name": "InvalidAssetStatus",
+            "signature": "InvalidAssetStatus(uint8)",
+            "inputs": [
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "IStreamAuctions": {
       "source": "smart-contracts/IStreamAuctions.sol",
       "artifact_path": "out/IStreamAuctions.sol/IStreamAuctions.json",
@@ -17231,16 +20669,2116 @@
         "receives": []
       }
     },
-    "IStreamSplitFactory": {
-      "source": "smart-contracts/IStreamSplitFactory.sol",
-      "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
-      "abi_sha256": "sha256:8c8a540d78c47583c529952eb05e58a1c3ed5e63edbcd2663e72e6974574fe03",
-      "abi_entries": 30,
+    "IStreamPrimarySaleSettlement": {
+      "source": "smart-contracts/IStreamPrimarySaleSettlement.sol",
+      "artifact_path": "out/IStreamPrimarySaleSettlement.sol/IStreamPrimarySaleSettlement.json",
+      "abi_sha256": "sha256:91cf0d5dc22763347e5d7a6f8c1bab8bb75b17971866ae38a84fff44e831ad1f",
+      "abi_entries": 34,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 14,
+        "events": 4,
+        "errors": 16,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "POLICY_MODE_ALLOW_CURRENT()",
+            "kind": "function",
+            "name": "POLICY_MODE_ALLOW_CURRENT",
+            "signature": "POLICY_MODE_ALLOW_CURRENT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "POLICY_MODE_STRICT_MATCH()",
+            "kind": "function",
+            "name": "POLICY_MODE_STRICT_MATCH",
+            "signature": "POLICY_MODE_STRICT_MATCH()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "PRIMARY_POLICY_DOMAIN()",
+            "kind": "function",
+            "name": "PRIMARY_POLICY_DOMAIN",
+            "signature": "PRIMARY_POLICY_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "isStreamPrimarySaleSettlement()",
+            "kind": "function",
+            "name": "isStreamPrimarySaleSettlement",
+            "signature": "isStreamPrimarySaleSettlement()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "officialSettled(bytes32,bytes32,address,address)",
+            "kind": "function",
+            "name": "officialSettled",
+            "signature": "officialSettled(bytes32,bytes32,address,address)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+            "kind": "function",
+            "name": "resolvedPrimaryPolicyHash",
+            "signature": "resolvedPrimaryPolicyHash(bytes32,uint256,uint256,bytes32,bytes32,address,bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "revenueResolver()",
+            "kind": "function",
+            "name": "revenueResolver",
+            "signature": "revenueResolver()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamRevenueResolver"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setSettlementCaller(address,bool)",
+            "kind": "function",
+            "name": "setSettlementCaller",
+            "signature": "setSettlementCaller(address,bool)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+            "kind": "function",
+            "name": "settleERC20PrimarySale",
+            "signature": "settleERC20PrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32),address)",
+            "inputs": [
+              {
+                "name": "sale",
+                "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)",
+                "internal_type": "struct IStreamPrimarySaleSettlement.PrimarySale",
+                "components": [
+                  {
+                    "name": "settlementId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revenueClass",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "beneficiary",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "kind": "function",
+            "name": "settleNativePrimarySale",
+            "signature": "settleNativePrimarySale((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "sale",
+                "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)",
+                "internal_type": "struct IStreamPrimarySaleSettlement.PrimarySale",
+                "components": [
+                  {
+                    "name": "settlementId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revenueClass",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "beneficiary",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "payable"
+          },
+          {
+            "key": "settlementCaller(address)",
+            "kind": "function",
+            "name": "settlementCaller",
+            "signature": "settlementCaller(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "settlementConsumed(bytes32)",
+            "kind": "function",
+            "name": "settlementConsumed",
+            "signature": "settlementConsumed(bytes32)",
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "kind": "function",
+            "name": "settlementKey",
+            "signature": "settlementKey((bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "sale",
+                "type": "(bytes32,bytes32,uint8,uint256,uint256,uint256,address,address,address,uint256,bytes32)",
+                "internal_type": "struct IStreamPrimarySaleSettlement.PrimarySale",
+                "components": [
+                  {
+                    "name": "settlementId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revenueClass",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "saleId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "poster",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "beneficiary",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "totalOfficialSettled(address)",
+            "kind": "function",
+            "name": "totalOfficialSettled",
+            "signature": "totalOfficialSettled(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+            "kind": "event",
+            "name": "PrimaryRevenueSettled",
+            "signature": "PrimaryRevenueSettled(bytes32,bytes32,bytes32,address,address,address,uint256,bytes32,bool,uint8)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "saleContextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyDrift",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+            "kind": "event",
+            "name": "PrimaryRevenueSettlementContext",
+            "signature": "PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,address,bytes32,uint8,uint256,uint256,uint256,address,address,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "settlementCaller",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "settlementId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyMode",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "saleId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "poster",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+            "kind": "event",
+            "name": "PrimaryRevenueSettlementPolicy",
+            "signature": "PrimaryRevenueSettlementPolicy(bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "expectedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "resolvedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "resolvedAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SettlementCallerUpdated(address,bool,address)",
+            "kind": "event",
+            "name": "SettlementCallerUpdated",
+            "signature": "SettlementCallerUpdated(address,bool,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AssetNotActive(address,uint8)",
+            "kind": "error",
+            "name": "AssetNotActive",
+            "signature": "AssetNotActive(address,uint8)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "AssetPolicyReadFailed(address,address)",
+            "kind": "error",
+            "name": "AssetPolicyReadFailed",
+            "signature": "AssetPolicyReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20BalanceReadFailed(address,address)",
+            "kind": "error",
+            "name": "ERC20BalanceReadFailed",
+            "signature": "ERC20BalanceReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferFailed(address,address,address,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferFailed",
+            "signature": "ERC20TransferFailed(address,address,address,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferInvariantBroken",
+            "signature": "ERC20TransferInvariantBroken(address,address,address,uint256,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "from",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expectedFromBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualFromBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedToBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualToBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "IncorrectNativeValue(uint256,uint256)",
+            "kind": "error",
+            "name": "IncorrectNativeValue",
+            "signature": "IncorrectNativeValue(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "expectedAmount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualAmount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPolicyMode(uint8)",
+            "kind": "error",
+            "name": "InvalidPolicyMode",
+            "signature": "InvalidPolicyMode(uint8)",
+            "inputs": [
+              {
+                "name": "policyMode",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPrimarySale(bytes32)",
+            "kind": "error",
+            "name": "InvalidPrimarySale",
+            "signature": "InvalidPrimarySale(bytes32)",
+            "inputs": [
+              {
+                "name": "settlementId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSettlementCaller(address)",
+            "kind": "error",
+            "name": "InvalidSettlementCaller",
+            "signature": "InvalidSettlementCaller(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "NativeTransferFailed(address,uint256)",
+            "kind": "error",
+            "name": "NativeTransferFailed",
+            "signature": "NativeTransferFailed(address,uint256)",
+            "inputs": [
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentMissing(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "PrimaryAssignmentMissing",
+            "signature": "PrimaryAssignmentMissing(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryPolicyHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "PrimaryPolicyHashMismatch",
+            "signature": "PrimaryPolicyHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "SettlementAlreadyConsumed(bytes32)",
+            "kind": "error",
+            "name": "SettlementAlreadyConsumed",
+            "signature": "SettlementAlreadyConsumed(bytes32)",
+            "inputs": [
+              {
+                "name": "settlementKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedSettlementCaller(address)",
+            "kind": "error",
+            "name": "UnauthorizedSettlementCaller",
+            "signature": "UnauthorizedSettlementCaller(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedAsset(address)",
+            "kind": "error",
+            "name": "UnsupportedAsset",
+            "signature": "UnsupportedAsset(address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnverifiedSplitWallet(bytes32,address)",
+            "kind": "error",
+            "name": "UnverifiedSplitWallet",
+            "signature": "UnverifiedSplitWallet(bytes32,address)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamRevenueResolver": {
+      "source": "smart-contracts/IStreamRevenueResolver.sol",
+      "artifact_path": "out/IStreamRevenueResolver.sol/IStreamRevenueResolver.json",
+      "abi_sha256": "sha256:bac7233f0764d26ab7bd20e5a0c49941b90823658016ebcd434fcb7119b30032",
+      "abi_entries": 37,
       "entry_counts": {
         "constructors": 0,
         "functions": 19,
-        "events": 4,
-        "errors": 7,
+        "events": 6,
+        "errors": 12,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "ACCOUNT_SOURCE_SALE_POSTER()",
+            "kind": "function",
+            "name": "ACCOUNT_SOURCE_SALE_POSTER",
+            "signature": "ACCOUNT_SOURCE_SALE_POSTER()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ASSIGNMENT_TYPE_PROFILE()",
+            "kind": "function",
+            "name": "ASSIGNMENT_TYPE_PROFILE",
+            "signature": "ASSIGNMENT_TYPE_PROFILE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ASSIGNMENT_TYPE_TEMPLATE()",
+            "kind": "function",
+            "name": "ASSIGNMENT_TYPE_TEMPLATE",
+            "signature": "ASSIGNMENT_TYPE_TEMPLATE()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "SCOPE_COLLECTION()",
+            "kind": "function",
+            "name": "SCOPE_COLLECTION",
+            "signature": "SCOPE_COLLECTION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "SCOPE_DEFAULT()",
+            "kind": "function",
+            "name": "SCOPE_DEFAULT",
+            "signature": "SCOPE_DEFAULT()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "SCOPE_TOKEN()",
+            "kind": "function",
+            "name": "SCOPE_TOKEN",
+            "signature": "SCOPE_TOKEN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+            "kind": "function",
+            "name": "clearPrimaryAssignment",
+            "signature": "clearPrimaryAssignment(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+            "kind": "function",
+            "name": "createPrimaryTemplate",
+            "signature": "createPrimaryTemplate((address,bytes32,uint32,bytes32)[],bytes32)",
+            "inputs": [
+              {
+                "name": "entries",
+                "type": "(address,bytes32,uint32,bytes32)[]",
+                "internal_type": "struct IStreamRevenueResolver.PrimaryTemplateEntry[]",
+                "components": [
+                  {
+                    "name": "account",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "accountSource",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "sharePpm",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "labelId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+            "kind": "function",
+            "name": "freezePrimaryAssignment",
+            "signature": "freezePrimaryAssignment(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "frozenAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "isStreamRevenueResolver()",
+            "kind": "function",
+            "name": "isStreamRevenueResolver",
+            "signature": "isStreamRevenueResolver()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "materializePrimaryProfile(bytes32,address)",
+            "kind": "function",
+            "name": "materializePrimaryProfile",
+            "signature": "materializePrimaryProfile(bytes32,address)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "salePoster",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+            "kind": "function",
+            "name": "primaryAssignmentHash",
+            "signature": "primaryAssignmentHash(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bool)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "frozen",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryTemplate(bytes32)",
+            "kind": "function",
+            "name": "primaryTemplate",
+            "signature": "primaryTemplate(bytes32)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "exists",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryTemplateEntry(bytes32,uint256)",
+            "kind": "function",
+            "name": "primaryTemplateEntry",
+            "signature": "primaryTemplateEntry(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32"
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "primaryTemplateEntryCount(bytes32)",
+            "kind": "function",
+            "name": "primaryTemplateEntryCount",
+            "signature": "primaryTemplateEntryCount(bytes32)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+            "kind": "function",
+            "name": "resolvePrimaryAssignment",
+            "signature": "resolvePrimaryAssignment(uint256,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "assignment",
+                "type": "(bool,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,bool)",
+                "internal_type": "struct IStreamRevenueResolver.ResolvedPrimaryAssignment",
+                "components": [
+                  {
+                    "name": "exists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "scope",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "assignmentType",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "profileId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "templateId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "policyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "assignmentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "frozen",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "setPrimaryProfileAssignment",
+            "signature": "setPrimaryProfileAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "setPrimaryTemplateAssignment",
+            "signature": "setPrimaryTemplateAssignment(bytes32,uint8,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "splitFactory()",
+            "kind": "function",
+            "name": "splitFactory",
+            "signature": "splitFactory()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryAssignmentCleared",
+            "signature": "PrimaryAssignmentCleared(bytes32,uint8,uint256,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "previousAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryAssignmentFrozenEvent",
+            "signature": "PrimaryAssignmentFrozenEvent(bytes32,uint8,uint256,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "previousAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "frozenAssignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryAssignmentSet",
+            "signature": "PrimaryAssignmentSet(bytes32,uint8,uint256,uint8,bytes32,bytes32,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "assignmentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+            "kind": "event",
+            "name": "PrimaryTemplateCreated",
+            "signature": "PrimaryTemplateCreated(bytes32,bytes32,bytes32,uint16,uint16)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "templateVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+            "kind": "event",
+            "name": "PrimaryTemplateEntryRecorded",
+            "signature": "PrimaryTemplateEntryRecorded(bytes32,uint16,address,bytes32,uint32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "index",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "sharePpm",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "labelId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "PrimaryTemplateMaterialized",
+            "signature": "PrimaryTemplateMaterialized(bytes32,bytes32,address,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "wallet",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "entriesHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataURIHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "salePoster",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "InvalidAssignmentScope(uint8,uint256)",
+            "kind": "error",
+            "name": "InvalidAssignmentScope",
+            "signature": "InvalidAssignmentScope(uint8,uint256)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAssignmentType(uint8)",
+            "kind": "error",
+            "name": "InvalidAssignmentType",
+            "signature": "InvalidAssignmentType(uint8)",
+            "inputs": [
+              {
+                "name": "assignmentType",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMaterializedAccount(bytes32)",
+            "kind": "error",
+            "name": "InvalidMaterializedAccount",
+            "signature": "InvalidMaterializedAccount(bytes32)",
+            "inputs": [
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPrimaryPolicyHash()",
+            "kind": "error",
+            "name": "InvalidPrimaryPolicyHash",
+            "signature": "InvalidPrimaryPolicyHash()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidPrimaryTemplateEntry(uint256)",
+            "kind": "error",
+            "name": "InvalidPrimaryTemplateEntry",
+            "signature": "InvalidPrimaryTemplateEntry(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPrimaryTemplateTotal(uint256)",
+            "kind": "error",
+            "name": "InvalidPrimaryTemplateTotal",
+            "signature": "InvalidPrimaryTemplateTotal(uint256)",
+            "inputs": [
+              {
+                "name": "totalSharePpm",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidRevenueClass(bytes32)",
+            "kind": "error",
+            "name": "InvalidRevenueClass",
+            "signature": "InvalidRevenueClass(bytes32)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+            "kind": "error",
+            "name": "PrimaryAssignmentFrozen",
+            "signature": "PrimaryAssignmentFrozen(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+            "kind": "error",
+            "name": "PrimaryAssignmentMissing",
+            "signature": "PrimaryAssignmentMissing(bytes32,uint8,uint256)",
+            "inputs": [
+              {
+                "name": "revenueClass",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scope",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "UnknownPrimaryTemplate(bytes32)",
+            "kind": "error",
+            "name": "UnknownPrimaryTemplate",
+            "signature": "UnknownPrimaryTemplate(bytes32)",
+            "inputs": [
+              {
+                "name": "templateId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedAccountSource(bytes32)",
+            "kind": "error",
+            "name": "UnsupportedAccountSource",
+            "signature": "UnsupportedAccountSource(bytes32)",
+            "inputs": [
+              {
+                "name": "accountSource",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnverifiedSplitProfile(bytes32)",
+            "kind": "error",
+            "name": "UnverifiedSplitProfile",
+            "signature": "UnverifiedSplitProfile(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamSplitFactory": {
+      "source": "smart-contracts/IStreamSplitFactory.sol",
+      "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
+      "abi_sha256": "sha256:fe3777a5946ead624d24e0cbb88c6da13833f7d987cece7e4889384fb22894c3",
+      "abi_entries": 34,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 21,
+        "events": 5,
+        "errors": 8,
         "fallbacks": 0,
         "receives": 0
       },
@@ -17336,6 +22874,21 @@
               }
             ],
             "state_mutability": "pure"
+          },
+          {
+            "key": "assetPolicyRegistry()",
+            "kind": "function",
+            "name": "assetPolicyRegistry",
+            "signature": "assetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamAssetPolicyRegistry"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "createProfile((address,uint32,bytes32)[],bytes32)",
@@ -17622,6 +23175,27 @@
             "state_mutability": "view"
           },
           {
+            "key": "splitWalletExists(bytes32)",
+            "kind": "function",
+            "name": "splitWalletExists",
+            "signature": "splitWalletExists(bytes32)",
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "splitWalletInitCodeHash()",
             "kind": "function",
             "name": "splitWalletInitCodeHash",
@@ -17674,6 +23248,21 @@
           }
         ],
         "events": [
+          {
+            "key": "AssetPolicyRegistryPinned(address)",
+            "kind": "event",
+            "name": "AssetPolicyRegistryPinned",
+            "signature": "AssetPolicyRegistryPinned(address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
           {
             "key": "SplitProfileCreated(bytes32,bytes32,bytes32,uint16,uint16,address)",
             "kind": "event",
@@ -17857,6 +23446,19 @@
             ]
           },
           {
+            "key": "InvalidAssetPolicyRegistry(address)",
+            "kind": "error",
+            "name": "InvalidAssetPolicyRegistry",
+            "signature": "InvalidAssetPolicyRegistry(address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
             "key": "InvalidEntryCount(uint256)",
             "kind": "error",
             "name": "InvalidEntryCount",
@@ -17947,13 +23549,13 @@
     "IStreamSplitWallet": {
       "source": "smart-contracts/IStreamSplitWallet.sol",
       "artifact_path": "out/IStreamSplitWallet.sol/IStreamSplitWallet.json",
-      "abi_sha256": "sha256:8f87e1429378ce06dc6883bf9f07bef0ed71448822853b630e4ec238dc8e80fd",
-      "abi_entries": 34,
+      "abi_sha256": "sha256:b2882c0159e40effbaeb6cadcb3b343b801bc0adde39ce57402bc7673ff3cb4e",
+      "abi_entries": 41,
       "entry_counts": {
         "constructors": 0,
-        "functions": 21,
-        "events": 3,
-        "errors": 10,
+        "functions": 22,
+        "events": 4,
+        "errors": 15,
         "fallbacks": 0,
         "receives": 0
       },
@@ -18039,6 +23641,21 @@
                 "name": "",
                 "type": "bool",
                 "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "assetPolicyRegistry()",
+            "kind": "function",
+            "name": "assetPolicyRegistry",
+            "signature": "assetPolicyRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
               }
             ],
             "state_mutability": "view"
@@ -18487,6 +24104,57 @@
             ]
           },
           {
+            "key": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+            "kind": "event",
+            "name": "ERC20Released",
+            "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "profileId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "totalReleased",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "observedReceived",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
             "key": "NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
             "kind": "event",
             "name": "NativeReleased",
@@ -18539,6 +24207,121 @@
             "name": "AlreadyInitialized",
             "signature": "AlreadyInitialized()",
             "inputs": []
+          },
+          {
+            "key": "AssetNotActive(address,uint8)",
+            "kind": "error",
+            "name": "AssetNotActive",
+            "signature": "AssetNotActive(address,uint8)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "AssetPolicyReadFailed(address,address)",
+            "kind": "error",
+            "name": "AssetPolicyReadFailed",
+            "signature": "AssetPolicyReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20BalanceReadFailed(address,address)",
+            "kind": "error",
+            "name": "ERC20BalanceReadFailed",
+            "signature": "ERC20BalanceReadFailed(address,address)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferFailed(address,address,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferFailed",
+            "signature": "ERC20TransferFailed(address,address,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "amount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+            "kind": "error",
+            "name": "ERC20TransferInvariantBroken",
+            "signature": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "asset",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expectedWalletBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualWalletBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedRecipientBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualRecipientBalance",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
           },
           {
             "key": "InvalidInitializationInput()",

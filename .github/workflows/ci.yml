@@ -508,6 +508,7 @@ jobs:
           python3 scripts/test_deployment_manifest.py 2>&1 | tee ci-logs/deployment-manifest-tests.log
           python3 scripts/generate_deployment_manifest.py --check 2>&1 | tee ci-logs/deployment-manifest-check.log
           python3 scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check 2>&1 | tee ci-logs/deployment-manifest-broadcast-check.log
+          python3 scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --check 2>&1 | tee ci-logs/fork-deployment-manifest-check.log
           python3 scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check 2>&1 | tee ci-logs/fork-deployment-manifest-broadcast-check.log
 
       - name: Address books

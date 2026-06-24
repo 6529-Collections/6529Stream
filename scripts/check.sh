@@ -77,6 +77,7 @@ forge build --force --via-ir --skip test script
 "$python_bin" scripts/test_deployment_manifest.py
 "$python_bin" scripts/generate_deployment_manifest.py --check
 "$python_bin" scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check
+"$python_bin" scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --check
 "$python_bin" scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check
 "$python_bin" scripts/test_address_books.py
 "$python_bin" scripts/generate_address_books.py --check
