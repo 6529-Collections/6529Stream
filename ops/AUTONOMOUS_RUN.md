@@ -35,28 +35,38 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/split-factory-wallet-skeleton` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/623` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/625 |
+| Active PR branch | `codex/asset-policy-erc20-splits` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/626` |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/627 |
 | Active PR | TBD |
-| Next issue | Asset policy registry and ERC-20 split-wallet release/sync after split wallet skeleton. |
+| Next issue | Revenue resolver and primary-sale settlement adapters after asset policy and ERC-20 split-wallet release/sync. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-23 13:58 UTC` |
+| Last updated | `2026-06-24 00:34 UTC` |
 
 ## Current Run Notes
 
 - User authorized autonomous execution without permission prompts.
 - Use heavy subagents for independent review, sequencing, and verification.
-- PR #623 merged the v1 outside-Core scope reconciliation. The current topic is
-  issue #625 on branch `codex/split-factory-wallet-skeleton`.
+- PR #626 merged the split factory and split wallet skeleton and issue #625 is
+  closed completed.
+- The current topic is issue #627 on branch
+  `codex/asset-policy-erc20-splits`.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic implements the first split factory and split wallet skeleton
-  outside `StreamCore`, focused on immutable fixed split profiles,
-  deterministic deployment/discovery, profile hashing, validation, and native
-  pull-release behavior.
+- Current topic adds the outside-Core asset policy registry and approved
+  standard ERC-20 split-wallet sync/release support, while preserving native
+  ETH behavior and excluding non-standard ERC-20 semantics.
+- Local implementation for issue #627 is complete and validated on branch
+  `codex/asset-policy-erc20-splits`; PR publication is the next transition.
+- OpenRouter review feedback from Opus 4.8, GLM 5.2, and GPT-5.5 Pro
+  high/xhigh reasoning has been incorporated. GPT-5.5 Pro was not rerun at low
+  reasoning; provider/hidden-reasoning failures were treated as transport
+  failures after patient high-reasoning attempts.
+- Full local validation passed with
+  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` on
+  2026-06-24.
 
 ## Packaging Notes
 

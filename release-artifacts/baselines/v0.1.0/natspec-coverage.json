@@ -1915,6 +1915,193 @@
       "status": "missing_natspec"
     },
     {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:custom_error:AssetPolicyUnchanged(address,uint8,bytes32)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "AssetPolicyUnchanged(address,uint8,bytes32)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:custom_error:InvalidAsset(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidAsset(address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:custom_error:InvalidAssetPolicyHash(address,uint8,bytes32)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidAssetPolicyHash(address,uint8,bytes32)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:custom_error:InvalidAssetStatus(uint8)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidAssetStatus(uint8)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:event:AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "AssetPolicyUpdated(address,uint8,uint8,bytes32,bytes32,address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:event:OwnershipTransferred(address,address)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "OwnershipTransferred(address,address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:ASSET_STATUS_ACTIVE()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ASSET_STATUS_ACTIVE()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:ASSET_STATUS_DEPRECATED()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ASSET_STATUS_DEPRECATED()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:ASSET_STATUS_INACTIVE()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ASSET_STATUS_INACTIVE()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:ASSET_STATUS_UNKNOWN()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ASSET_STATUS_UNKNOWN()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:ASSET_STATUS_UNSUPPORTED()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ASSET_STATUS_UNSUPPORTED()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:assetPolicyEffectiveAt(address)",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "assetPolicyEffectiveAt(address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:assetPolicyHash(address)",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "assetPolicyHash(address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:assetStatus(address)",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "assetStatus(address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:owner()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "owner()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:renounceOwnership()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "renounceOwnership()",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamAssetPolicyRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamAssetPolicyRegistry:function:transferOwnership(address)",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "transferOwnership(address)",
+      "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
       "contract": "StreamAuctions",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamAuctions:custom_error:ReentrancyGuardReentrantCall()",
@@ -5635,6 +5822,17 @@
     {
       "contract": "StreamSplitFactory",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitFactory:custom_error:InvalidAssetPolicyRegistry(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidAssetPolicyRegistry(address)",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitFactory",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamSplitFactory:custom_error:InvalidEntryCount(uint256)",
       "kind": "custom_error",
       "line": null,
@@ -5695,6 +5893,17 @@
       "line": null,
       "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
       "signature": "UnknownProfile(bytes32)",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitFactory",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitFactory:event:AssetPolicyRegistryPinned(address)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "AssetPolicyRegistryPinned(address)",
       "source": "smart-contracts/StreamSplitFactory.sol",
       "status": "declaration_not_in_source"
     },
@@ -5809,6 +6018,17 @@
       "status": "declaration_not_in_source"
     },
     {
+      "contract": "StreamSplitFactory",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitFactory:function:assetPolicyRegistry()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "assetPolicyRegistry()",
+      "source": "smart-contracts/StreamSplitFactory.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
       "contract": "StreamSplitWallet",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamSplitWallet:custom_error:AlreadyInitialized()",
@@ -5816,6 +6036,61 @@
       "line": null,
       "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
       "signature": "AlreadyInitialized()",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:custom_error:AssetNotActive(address,uint8)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "AssetNotActive(address,uint8)",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:custom_error:AssetPolicyReadFailed(address,address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "AssetPolicyReadFailed(address,address)",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:custom_error:ERC20BalanceReadFailed(address,address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ERC20BalanceReadFailed(address,address)",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:custom_error:ERC20TransferFailed(address,address,uint256)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ERC20TransferFailed(address,address,uint256)",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:custom_error:ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ERC20TransferInvariantBroken(address,address,uint256,uint256,uint256,uint256)",
       "source": "smart-contracts/StreamSplitWallet.sol",
       "status": "declaration_not_in_source"
     },
@@ -5954,6 +6229,17 @@
     {
       "contract": "StreamSplitWallet",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:event:ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamSplitWallet:event:NativeReleased(bytes32,address,address,uint256,uint256,uint256)",
       "kind": "event",
       "line": null,
@@ -6005,6 +6291,17 @@
       "signature": "assetObservationInitialized(address)",
       "source": "smart-contracts/StreamSplitWallet.sol",
       "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamSplitWallet",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamSplitWallet:function:assetPolicyRegistry()",
+      "kind": "function",
+      "line": 14,
+      "reason": "Current first-party release surface lacks nearby NatSpec; keep explicit until the Solidity declaration receives NatSpec.",
+      "signature": "assetPolicyRegistry()",
+      "source": "smart-contracts/StreamSplitWallet.sol",
+      "status": "missing_natspec"
     },
     {
       "contract": "StreamSplitWallet",

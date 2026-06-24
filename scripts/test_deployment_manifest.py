@@ -44,6 +44,8 @@ SEPOLIA_EXPECTED_CONTRACTS = {
     "StreamAuctions",
     "NextGenRandomizerVRF",
     "NextGenRandomizerRNG",
+    "StreamAssetPolicyRegistry",
+    "StreamSplitFactory",
 }
 TEMPLATE_FORBIDDEN_SECRET_RE = re.compile(
     r"("

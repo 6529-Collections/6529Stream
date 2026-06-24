@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamSplitWallet.sol";
+import "./IStreamAssetPolicyRegistry.sol";
 
 /// @notice Interface for creating deterministic split profiles and wallets.
 interface IStreamSplitFactory {
@@ -15,6 +16,8 @@ interface IStreamSplitFactory {
     error InvalidSplitShare(uint256 index);
     /// @notice Reverts when split entry shares do not sum to the denominator.
     error InvalidSplitTotal(uint256 totalSharePpm);
+    /// @notice Reverts when the factory is initialized with an invalid asset policy registry.
+    error InvalidAssetPolicyRegistry(address registry);
     /// @notice Reverts when the deterministic wallet address already has unexpected code.
     error SplitWalletAddressPoisoned(bytes32 profileId, address wallet);
     /// @notice Reverts when a caller asks to deploy a profile that does not exist.
@@ -53,6 +56,8 @@ interface IStreamSplitFactory {
         bytes32 initCodeHash,
         bytes32 runtimeCodeHash
     );
+    /// @notice Emitted once when the factory pins its deployment-wide asset policy registry.
+    event AssetPolicyRegistryPinned(address indexed registry);
 
     /// @notice Domain separator label for profile identifiers.
     function PROFILE_DOMAIN() external pure returns (bytes32);
@@ -66,6 +71,8 @@ interface IStreamSplitFactory {
     function MAX_UNIQUE_ACCOUNTS() external pure returns (uint16);
     /// @notice Parts-per-million share denominator.
     function SHARE_DENOMINATOR_PPM() external pure returns (uint32);
+    /// @notice Deployment-wide asset policy registry pinned for split-wallet ERC-20 support.
+    function assetPolicyRegistry() external view returns (IStreamAssetPolicyRegistry);
     /// @notice Returns the wallet creation-code hash used by CREATE2.
     function splitWalletInitCodeHash() external pure returns (bytes32);
     /// @notice Returns the wallet runtime-code hash accepted after deployment.

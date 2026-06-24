@@ -119,6 +119,36 @@ def normalize_tx_hash(value: Any, path: str) -> str:
     return tx_hash.lower()
 
 
+def replace_constructor_arg_addresses(value: Any, replacements: dict[str, str]) -> Any:
+    if isinstance(value, str):
+        replacement = replacements.get(value.lower())
+        return replacement if replacement is not None else value
+    if isinstance(value, list):
+        return [replace_constructor_arg_addresses(child, replacements) for child in value]
+    if isinstance(value, dict):
+        return {
+            key: replace_constructor_arg_addresses(child, replacements)
+            for key, child in value.items()
+        }
+    return value
+
+
+def collect_address_strings(value: Any, path: str = "$") -> list[tuple[str, str]]:
+    if isinstance(value, str) and ADDRESS_RE.fullmatch(value):
+        return [(path, value.lower())]
+    if isinstance(value, list):
+        found: list[tuple[str, str]] = []
+        for index, child in enumerate(value):
+            found.extend(collect_address_strings(child, f"{path}[{index}]"))
+        return found
+    if isinstance(value, dict):
+        found = []
+        for key, child in value.items():
+            found.extend(collect_address_strings(child, f"{path}.{key}"))
+        return found
+    return []
+
+
 def assert_no_secret_keys(value: Any, path: str = "$") -> None:
     if isinstance(value, dict):
         for key, child in value.items():
@@ -428,9 +458,45 @@ def build_manifest_input(
     )
 
     contracts = require_list(manifest.get("contracts"), "manifest.contracts")
+    address_replacements = {}
+    template_address_owners = {}
     for contract_value in contracts:
         contract = require_dict(contract_value, "manifest.contracts[]")
         name = require_string(contract.get("name"), "contract.name")
+        template_address = normalize_address(contract.get("address"), f"contract.{name}.address")
+        if template_address in template_address_owners:
+            raise BroadcastManifestError(
+                "duplicate template contract address "
+                f"{template_address}: {template_address_owners[template_address]}, {name}"
+            )
+        template_address_owners[template_address] = name
+        address_replacements[template_address] = deployments[name]["address"]
+
+    if "external_dependencies" in manifest:
+        external_dependencies = require_dict(
+            manifest.get("external_dependencies"), "manifest.external_dependencies"
+        )
+        collisions = [
+            f"{path}={address} ({template_address_owners[address]})"
+            for path, address in collect_address_strings(
+                external_dependencies, "manifest.external_dependencies"
+            )
+            if address in template_address_owners
+        ]
+        if collisions:
+            raise BroadcastManifestError(
+                "external dependency address collides with template contract address: "
+                + ", ".join(collisions)
+            )
+
+    for contract_value in contracts:
+        contract = require_dict(contract_value, "manifest.contracts[]")
+        name = require_string(contract.get("name"), "contract.name")
+        if "constructor_args" in contract:
+            contract["constructor_args"] = replace_constructor_arg_addresses(
+                contract["constructor_args"],
+                address_replacements,
+            )
         contract["address"] = deployments[name]["address"]
 
     return generated

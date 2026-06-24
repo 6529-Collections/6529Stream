@@ -14,7 +14,24 @@ interface IStreamSplitWallet {
     error AlreadyInitialized();
     /// @notice Reverts when factory-provided initialization data is inconsistent.
     error InvalidInitializationInput();
-    /// @notice Reverts when cumulative receipt accounting decreases for a supported asset.
+    /// @notice Reverts when the factory-pinned asset policy registry cannot be read.
+    error AssetPolicyReadFailed(address registry, address asset);
+    /// @notice Reverts when an ERC-20 asset is not currently active.
+    error AssetNotActive(address asset, uint8 status);
+    /// @notice Reverts when an ERC-20 balance cannot be read.
+    error ERC20BalanceReadFailed(address asset, address account);
+    /// @notice Reverts when an ERC-20 transfer fails or returns false.
+    error ERC20TransferFailed(address asset, address recipient, uint256 amount);
+    /// @notice Reverts when an ERC-20 release does not debit and credit the exact amount.
+    error ERC20TransferInvariantBroken(
+        address asset,
+        address recipient,
+        uint256 expectedWalletBalance,
+        uint256 actualWalletBalance,
+        uint256 expectedRecipientBalance,
+        uint256 actualRecipientBalance
+    );
+    /// @notice Reverts when cumulative receipts fall below the last observed high-water mark.
     error ObservedReceiptsDecreased(
         address asset, uint256 previousObservedReceived, uint256 observedReceived
     );
@@ -55,11 +72,23 @@ interface IStreamSplitWallet {
         uint256 totalReleased,
         uint256 observedReceived
     );
+    /// @notice Emitted after an approved ERC-20 is released through the pull-payment flow.
+    event ERC20Released(
+        bytes32 indexed profileId,
+        address indexed asset,
+        address indexed account,
+        address recipient,
+        uint256 amount,
+        uint256 totalReleased,
+        uint256 observedReceived
+    );
 
     /// @notice Parts-per-million share denominator.
     function SHARE_DENOMINATOR_PPM() external pure returns (uint32);
     /// @notice Factory that deployed and initialized this wallet.
     function factory() external view returns (address);
+    /// @notice Deployment-wide asset policy registry pinned by the factory.
+    function assetPolicyRegistry() external view returns (address);
     /// @notice Whether the wallet has been initialized.
     function initialized() external view returns (bool);
     /// @notice Split profile identifier bound to this wallet.
@@ -88,6 +117,8 @@ interface IStreamSplitWallet {
     /// @notice Whether an explicit observation has been initialized for an asset.
     function assetObservationInitialized(address asset) external view returns (bool);
     /// @notice Last cumulative receipts value recorded by sync or release.
+    /// @dev For ERC-20s, a decrease means the asset is unsupported until the balance recovers
+    ///      to the high-water mark or a later adapter/recovery path handles that asset.
     function lastObservedReceived(address asset) external view returns (uint256);
     /// @notice Cumulative observed receipts for an asset.
     function observedReceived(address asset) external view returns (uint256);

@@ -44,10 +44,19 @@ def template_config(root: Path) -> Path:
                     {
                         "name": "Alpha",
                         "address": "0x0000000000000000000000000000000000000001",
+                        "constructor_args": [
+                            "0x0000000000000000000000000000000000000002",
+                            ["0x0000000000000000000000000000000000000001"],
+                        ],
                     },
                     {
                         "name": "Beta",
                         "address": "0x0000000000000000000000000000000000000002",
+                        "constructor_args": [
+                            {
+                                "registry": "0x0000000000000000000000000000000000000001",
+                            }
+                        ],
                     },
                 ],
                 "rehearsal": {"notes": "template"},
@@ -127,6 +136,21 @@ class BroadcastManifestInputTests(unittest.TestCase):
             self.assertEqual(
                 generated["manifest"]["contracts"][0]["address"],
                 "0x1000000000000000000000000000000000000001",
+            )
+            self.assertEqual(
+                generated["manifest"]["contracts"][0]["constructor_args"],
+                [
+                    "0x1000000000000000000000000000000000000002",
+                    ["0x1000000000000000000000000000000000000001"],
+                ],
+            )
+            self.assertEqual(
+                generated["manifest"]["contracts"][1]["constructor_args"],
+                [
+                    {
+                        "registry": "0x1000000000000000000000000000000000000001",
+                    }
+                ],
             )
             self.assertEqual(
                 generated["broadcast_evidence"]["broadcast_sha256"],
@@ -362,6 +386,44 @@ class BroadcastManifestInputTests(unittest.TestCase):
             write_json(broadcast, data)
 
             with self.assertRaisesRegex(generator.BroadcastManifestError, "duplicate deployment"):
+                generator.build_manifest_input(
+                    template,
+                    broadcast,
+                    root / "out.json",
+                    root / "manifest.json",
+                )
+
+    def test_generator_rejects_duplicate_template_contract_address(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = template_config(root)
+            template_data = generator.load_json(template)
+            template_data["manifest"]["contracts"][1]["address"] = (
+                template_data["manifest"]["contracts"][0]["address"]
+            )
+            write_json(template, template_data)
+            broadcast = broadcast_file(root)
+
+            with self.assertRaisesRegex(generator.BroadcastManifestError, "duplicate template"):
+                generator.build_manifest_input(
+                    template,
+                    broadcast,
+                    root / "out.json",
+                    root / "manifest.json",
+                )
+
+    def test_generator_rejects_external_dependency_contract_address_collision(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = template_config(root)
+            template_data = generator.load_json(template)
+            template_data["manifest"]["external_dependencies"] = {
+                "delegation_registry": template_data["manifest"]["contracts"][0]["address"]
+            }
+            write_json(template, template_data)
+            broadcast = broadcast_file(root)
+
+            with self.assertRaisesRegex(generator.BroadcastManifestError, "external dependency"):
                 generator.build_manifest_input(
                     template,
                     broadcast,

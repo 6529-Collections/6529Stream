@@ -104,6 +104,9 @@ copies.
 | Randomizer lifecycle | [`smart-contracts/StreamRandomizerLifecycle.sol`](../../smart-contracts/StreamRandomizerLifecycle.sol) | Request, fulfillment, stale, failure, retry, and burned-token randomness events |
 | Curator pool | [`smart-contracts/StreamCuratorsPool.sol`](../../smart-contracts/StreamCuratorsPool.sol) | Merkle roots, curator credits, and curator withdrawals |
 | Dependency registry | [`smart-contracts/DependencyRegistry.sol`](../../smart-contracts/DependencyRegistry.sol) | Dependency version creation/deprecation events |
+| Split factory | [`smart-contracts/StreamSplitFactory.sol`](../../smart-contracts/StreamSplitFactory.sol) | Immutable split profile, deterministic wallet, and asset-policy-registry pin events |
+| Split wallet | [`smart-contracts/StreamSplitWallet.sol`](../../smart-contracts/StreamSplitWallet.sol) | Native and approved ERC-20 receipt observation and pull-release events |
+| Asset policy registry | [`smart-contracts/StreamAssetPolicyRegistry.sol`](../../smart-contracts/StreamAssetPolicyRegistry.sol) | Deployment-wide approved ERC-20 policy status and evidence hashes |
 | ERC-4906 interface | [`smart-contracts/IERC4906.sol`](../../smart-contracts/IERC4906.sol) | Metadata update event interface |
 | ERC-7572-style interface | [`smart-contracts/IERC7572.sol`](../../smart-contracts/IERC7572.sol) | Contract-level metadata interface used by the release-tracked adapter |
 | Metadata event tests | [`test/StreamMetadataEvents.t.sol`](../../test/StreamMetadataEvents.t.sol) | Current metadata event behavior |
@@ -115,6 +118,7 @@ copies.
 | Minter event tests | [`test/StreamMinterEvents.t.sol`](../../test/StreamMinterEvents.t.sol) | Minter bridge event fields and read-after-event behavior |
 | Event reconstructability tests | [`test/StreamEventReconstructability.t.sol`](../../test/StreamEventReconstructability.t.sol) | Indexer-style log reconstruction for fixed-price, auction, minter bridge, and admin-reference flows |
 | Curator tests | [`test/StreamCuratorsPool.t.sol`](../../test/StreamCuratorsPool.t.sol) | Curator credit and root behavior |
+| Split wallet tests | [`test/StreamSplitWallet.t.sol`](../../test/StreamSplitWallet.t.sol) | Split profile, native release, ERC-20 policy gate, ERC-20 release, and adversarial asset behavior |
 | Admin tests | [`test/StreamAdmins.t.sol`](../../test/StreamAdmins.t.sol) | Role event behavior |
 | Pause tests | [`test/StreamPauseControls.t.sol`](../../test/StreamPauseControls.t.sol) | Pause-domain behavior |
 
@@ -185,6 +189,9 @@ Minimum local entities:
 | `RandomnessRequest` | `chainId:randomizerAddress:requestId` | randomizer lifecycle events and reads |
 | `MetadataState` | `chainId:coreAddress:tokenId` or `collectionId` | `MetadataUpdate`, `BatchMetadataUpdate`, freeze/dependency events, metadata reads |
 | `ContractMetadataState` | `chainId:contractMetadataAddress` | `ContractURIUpdated`, adapter reads, release manifest/address book |
+| `SplitProfile` | `chainId:splitFactoryAddress:profileId` | `SplitProfileCreated`, `SplitProfileEntry`, factory reads |
+| `SplitWallet` | `chainId:walletAddress:asset` | `SplitWalletDeployed`, `SplitWalletDiscovered`, `AssetObservationInitialized`, `AssetSynced`, `NativeReleased`, `ERC20Released`, wallet reads |
+| `AssetPolicy` | `chainId:assetPolicyRegistryAddress:asset` | `AssetPolicyUpdated`, registry reads |
 | `ProvenanceManifest` | `chainId:coreAddress:collectionId:tokenId:provenanceId` | `release-artifacts/latest/one-of-one-provenance-manifest.json` and checksum-covered provenance descriptors |
 | `AdminRole` | `chainId:adminsAddress:roleKey:account:target:selector` | role update events and admin reads |
 | `PauseDomain` | `chainId:adminsAddress:domain` | `PauseUpdated` and pause reads |
@@ -209,7 +216,7 @@ emitter contracts. The current catalog includes these high-value event groups:
 | Proceeds split config | `ProceedsSplitUpdated`, `ProceedsSplitCleared` | Contract-default, collection, and token split override state for fixed-price and auction proceeds |
 | Auction lifecycle | `AuctionRegistered`, `AuctionCustodyConfirmed`, `AuctionStatusChanged`, `AuctionExtended`, `AuctionCancelled`, `ClaimAuction`, `NoBidSettlementPending`, `NoBidTokenClaimed` | Auction state, custody, end time, settlement, no-bid claimant |
 | Auction credits | `Participate`, `OutbidCreditCreated`, `BidderCreditWithdrawn`, `AuctionProceedsCreditCreated`, `ProceedsCreditWithdrawn` | Highest bid, bidder refunds, poster/protocol/curator proceeds, withdrawals |
-| Split wallets | `SplitProfileCreated`, `SplitProfileEntry`, `SplitWalletDeployed`, `SplitWalletDiscovered`, `AssetObservationInitialized`, `AssetSynced`, `NativeReleased` | Immutable split profile entries, deterministic wallet deployment/discovery, native receipt observation, and native pull releases |
+| Split wallets | `AssetPolicyRegistryPinned`, `SplitProfileCreated`, `SplitProfileEntry`, `SplitWalletDeployed`, `SplitWalletDiscovered`, `AssetObservationInitialized`, `AssetSynced`, `NativeReleased`, `ERC20Released`, `AssetPolicyUpdated` | Immutable split profile entries, deterministic wallet deployment/discovery, native and approved ERC-20 receipt observation, pull releases, and deployment-wide ERC-20 policy status |
 | Curators | `Reward`, `MerkleRootUpdated`, `CuratorCreditCreated`, `CuratorCreditWithdrawn` | Curator roots, rewards, credits, and withdrawals |
 | Randomizer | `RandomnessRequested`, `RandomnessFulfilled`, `RandomnessRequestMarkedStale`, `RandomnessPostProcessingFailed`, `RandomnessPostProcessingRetried`, `RandomnessPostProcessingRetryFailed`, `BurnedTokenRandomnessRecorded`, provider `RequestFulfilled` | Request state, derived seed, raw output hash, retry count, stale/failure status |
 | Governance | `GlobalAdminUpdated`, `FunctionAdminUpdated`, `PauseGuardianUpdated`, `UnpauseAdminUpdated`, `SignerManagerUpdated`, `SignerLifecycleTargetUpdated`, `PauseUpdated`, `EmergencyRecipientUpdated`, `OwnershipTransferred` | Admin permissions, pause domains, emergency recipient, ownership |
@@ -249,7 +256,7 @@ Required read-after-event calls by surface:
 | Fixed-price credit | `FixedPriceCreditCreated`, `FixedPriceCreditWithdrawn` | poster/protocol/curator reserve credit views, `totalFixedPriceOwed()`, `totalReserved()`, `surplus()` |
 | Auction | `AuctionRegistered`, `AuctionStatusChanged`, `AuctionExtended`, `Participate`, `ClaimAuction`, `AuctionCancelled`, `NoBidTokenClaimed` | `auctionRecords(tokenId)`, `retrieveAuctionStatus(tokenId)`, `retrieveAuctionEndTime(tokenId)`, `minimumNextBid(tokenId)` when active, `auctionHighestBid(tokenId)`, `auctionHighestBidder(tokenId)`, `retrieveNoBidAuctionClaimant(tokenId)` |
 | Auction credit | `OutbidCreditCreated`, `BidderCreditWithdrawn`, `AuctionProceedsCreditCreated`, `ProceedsCreditWithdrawn` | bidder/poster/protocol/curator credit views, `totalAuctionBidEscrow()`, `totalBidderOwed()`, `totalProceedsOwed()`, `totalOwed()`, `totalReserved()`, `surplus()`, `emergencyWithdrawable()` |
-| Split wallet | `SplitProfileCreated`, `SplitProfileEntry`, `SplitWalletDeployed`, `SplitWalletDiscovered`, `NativeReleased`, `AssetObservationInitialized`, `AssetSynced` | factory `profileEntriesHash(profileId)`, `profileEntry(profileId,index)`, `walletFor(profileId)`; wallet `profileId()`, `entry(index)`, `uniqueAccount(index)`, `observedReceived(address(0))`, `releasable(address(0),account)`, `accountReleased(address(0),account)`, `totalReleased(address(0))`, `roundingDust(address(0))` |
+| Split wallet | `AssetPolicyRegistryPinned`, `SplitProfileCreated`, `SplitProfileEntry`, `SplitWalletDeployed`, `SplitWalletDiscovered`, `NativeReleased`, `ERC20Released`, `AssetObservationInitialized`, `AssetSynced`, `AssetPolicyUpdated` | factory `assetPolicyRegistry()`, `profileEntriesHash(profileId)`, `profileEntry(profileId,index)`, `walletFor(profileId)`; wallet `profileId()`, `entry(index)`, `uniqueAccount(index)`, `observedReceived(asset)`, `releasable(asset,account)`, `accountReleased(asset,account)`, `totalReleased(asset)`, `roundingDust(asset)`; registry `assetStatus(asset)`, `assetPolicyHash(asset)`, `assetPolicyEffectiveAt(asset)`, `isAssetActive(asset)`. Indexers must surface ERC-20 balances as claimable or syncable only while `assetStatus(asset) == ACTIVE`; `UNKNOWN`, `INACTIVE`, `DEPRECATED`, and `UNSUPPORTED` statuses fail closed for wallet reads and releases. If `observedReceived(asset)` falls below `lastObservedReceived(asset)`, treat that asset as frozen until the observed value recovers or a later reviewed adapter/recovery spec supersedes the v1 wallet path; do not label USDT-style no-return or other non-standard tokens as v1-standard assets. |
 | Randomizer | randomizer lifecycle events | pending/fulfilled/stale/failure request views where available, token metadata state, burned-token randomness state |
 | Curator | `MerkleRootUpdated`, `Reward`, `CuratorCreditCreated`, `CuratorCreditWithdrawn` | current root epoch/root, curator credit views, total curator owed/reserved views |
 | Admin | role/pause/emergency/ownership events | admin role reads, `isPaused(domain)`, emergency recipient, owner |
