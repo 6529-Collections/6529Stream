@@ -2012,7 +2012,7 @@ The implementation should be tested and reviewed against these invariants:
 10. No external recipient callback executes before the token's identity mapping
     and required royalty snapshot are complete. Entropy-before-callback applies
     only after the entropy-coordinator target is implemented.
-10. A frozen phase cannot be loosened.
+11. A frozen phase cannot be loosened.
 
 ## Interactions With Existing Contracts
 
