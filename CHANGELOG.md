@@ -27,6 +27,16 @@ the release policy in `docs/release-policy.md`.
   primary templates, verified split-wallet native ETH deposits,
   approved-standard ERC-20 primary settlement, replay protection, policy drift
   events, deployment rehearsal wiring, and adversarial settlement tests.
+- Added the Core mint-manager hook surface, including a validated
+  `mintManager` pointer, manager-only mint and prepared-mint calls, canonical
+  `tokenCollectionIdentity` reads, prepared operation binding, and focused
+  rollback/callback coverage for the launch mint-manager migration, with
+  mint-manager replacement left available as the Core recovery path for a
+  stranded prepared mint. This uses accepted Core bytecode-spend exception
+  `CORE-SPEND-2026-06-24-001` for the final measured `StreamCore` runtime of
+  24,154 bytes, a +1,970-byte delta over the 22,184-byte approved baseline, and
+  422 bytes of EIP-170 margin, which is above the 384-byte release floor but
+  below the 512-byte warning threshold.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay

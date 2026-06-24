@@ -91,8 +91,8 @@ increase above the approved baseline requires an accepted exception record in
 The current production profile is:
 
 - command: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 21,824 bytes;
-- current EIP-170 margin: 2,752 bytes;
+- current `StreamCore` runtime: 24,154 bytes;
+- current EIP-170 margin: 422 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
 - approved baseline EIP-170 margin: 2,392 bytes;
 - minimum release floor: 384-byte minimum runtime margin;
@@ -130,14 +130,15 @@ The default classification for future feature work is:
 | Frontend, mobile, Electron, SDK, analytics, and indexer behavior | Integration docs, generated artifacts, release manifests, and off-chain code | No Core spend |
 | Deployment, ceremony, audit, release, signature, and evidence workflows | Release artifacts, deployment manifests, address books, runbooks, and retained evidence | No Core spend |
 
-This policy is intentionally conservative even with 2,752 bytes of current
-headroom after moving script assembly, metadata validation profiles,
-tokenURI dispatch helpers into the linked renderer library, and measured
-CON-008 micro-optimizations into `StreamCore`. The approved bytecode-spend
-baseline remains 22,184 bytes with 2,392 bytes of EIP-170 margin, so future
-Core growth above that ceiling still needs an accepted exception. The goal is to keep
-`StreamCore` deployable, auditable, and stable while allowing world-class 1/1
-drop surfaces to evolve through explicit, versioned extension points.
+This policy is intentionally conservative even when an accepted exception keeps
+the current runtime above the approved baseline. CON-012 spends Core bytecode on
+the mint-manager boundary and explicit token identity reads, leaving 422 bytes
+of current EIP-170 margin; future Core work should recover headroom before
+adding more behavior. The approved bytecode-spend baseline remains 22,184 bytes
+with 2,392 bytes of EIP-170 margin, so future Core growth above that ceiling
+still needs an accepted exception. The goal is to keep `StreamCore` deployable,
+auditable, and stable while allowing world-class 1/1 drop surfaces to evolve
+through explicit, versioned extension points.
 
 ## Actor And Role Boundaries
 

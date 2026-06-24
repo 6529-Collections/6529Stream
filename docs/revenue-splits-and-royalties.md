@@ -547,7 +547,7 @@ explicit mappings:
 ```solidity
 mapping(uint256 tokenId => uint256 collectionId) tokenCollectionId;
 mapping(uint256 tokenId => uint256 collectionSerial) tokenCollectionSerial;
-mapping(uint256 tokenId => bool mappingExists) tokenCollectionMappingExists;
+// `tokenCollectionIdentity` returns mappingExists from live, burned, or prepared state.
 ```
 
 The current namespaced `collectionId * 10_000_000_000 + serial` formula should
@@ -562,12 +562,14 @@ Rules:
 3. Collection-local serials are stable display/accounting facts, not token ID
    codecs.
 4. `royaltyInfo()` uses the explicit mapping when it needs collection-scope
-   resolution.
+   resolution. CON-012 only exposes Core's canonical
+   `tokenCollectionIdentity` read; wiring that read into the resolver-backed
+   `royaltyInfo()` implementation remains future resolver work.
 5. Unmapped token IDs fall back only to default royalty assignment or zero.
 6. Burned tokens keep their last token-to-collection mapping for historical
    royalty disclosure. Burning removes ERC-721 ownership and enumerable
-   membership, but Core must not clear `tokenCollectionId`,
-   `tokenCollectionSerial`, or `tokenCollectionMappingExists`.
+   membership, but Core must not clear retained collection identity or burned
+   audit state.
 
 Rules:
 
@@ -750,8 +752,10 @@ writes the snapshot before any untrusted receiver callback.
    `mintCommitmentsHash`.
 6. Mint ledger verifies the manager-registered policy hash and consumes
    counters, authorization IDs, and nullifiers.
-7. Core executes `mintFromManager`, registers entropy, and `_safeMint`s to the
-   initial recipient.
+7. Core executes `mintFromManager`, writes token identity and `_safeMint`s to
+   the initial recipient. In the current direct-randomizer slice, the token hash
+   boundary is reached after `_safeMint`; pre-callback entropy registration is
+   reserved for the entropy-coordinator target.
 
 `PREPARED_MINT`:
 
@@ -763,36 +767,38 @@ writes the snapshot before any untrusted receiver callback.
 3. Mint ledger verifies the manager-registered policy hash and consumes
    counters, authorization IDs, and nullifiers.
 4. Core executes `prepareMintFromManager`, creating authoritative token identity
-   and entropy registration but no ERC-721 transfer.
+   but no entropy/randomizer request and no ERC-721 transfer.
 5. Resolver snapshots any required token-level primary or royalty assignment
    from Core's authoritative mapping.
 6. Sale adapter deposits the accepted settlement asset into the verified split
    wallet or records escrowed revenue under
    `(revenueClass, profileId, wallet, asset)`.
-7. Core executes `completePreparedMintFromManager` and `_safeMint`s to the
-   initial recipient.
+7. Core executes `completePreparedMintFromManager`, clears the prepared record,
+   `_safeMint`s to the initial recipient while keeping the Core completion
+   sentinel active, and clears that sentinel only after the token's normal
+   entropy/randomizer boundary returns.
 
 Token-level economic snapshots written during `PREPARED_MINT` must be
 derivable solely from Core token identity, collection/default assignment state,
 the signed sale or mint authorization, and the active policy hashes. They must
-not read, branch on, or depend on entropy seed, entropy request status, provider
-result status, or renderer output, because entropy is registered but not
-finalized when the snapshot is written. For a collection using
+   not read, branch on, or depend on entropy seed, entropy request status, provider
+   result status, or renderer output, because entropy is unavailable or not
+   finalized when the snapshot is written. For a collection using
 `ROYALTY_SNAPSHOT_AT_MINT`, the snapshot records the economic policy that was
 authorized for the token; it does not wait for or incorporate randomness.
 
 All steps in either path happen in one top-level transaction. A revert at any
-step reverts ledger consumption, token identity, entropy registration,
-assignment snapshots, and revenue accounting. No untrusted recipient callback,
-randomness provider callback, refund callback, split-wallet release, or
-arbitrary external hook may execute before the path's required ledger
-consumption, token identity mapping, assignment snapshots, and revenue
-accounting are complete.
+step reverts ledger consumption, token identity, assignment snapshots, revenue
+accounting, and any entropy/randomizer state reached during completion. No
+untrusted recipient callback, randomness provider callback, refund callback,
+split-wallet release, or arbitrary external hook may execute before the path's
+required ledger consumption, token identity mapping, assignment snapshots, and
+revenue accounting are complete.
 `PREPARED_MINT` uses the canonical `STREAM_PREPARED_MINT_OPERATION_V1`
 `operationId` defined in `docs/mint-policy-and-accounting.md`; the sale
 adapter, manager, ledger, Core prepare/complete, resolver snapshot hook,
-entropy registration boundary, and escrow/deposit path must reject mismatched
-operation IDs.
+completion-time entropy/randomizer boundary, and escrow/deposit path must
+reject mismatched operation IDs.
 
 The v1 primary settlement surface includes native ETH and approved standard
 ERC-20 assets. ERC-20 settlement must live in a payment adapter or
@@ -1468,9 +1474,8 @@ function royaltyInfo(uint256 tokenId, uint256 salePrice)
         return (address(0), 0);
     }
 
-    bool hasMappedCollection = tokenCollectionMappingExists[tokenId];
-    uint256 mappedCollectionId =
-        hasMappedCollection ? tokenCollectionId[tokenId] : 0;
+    (bool hasMappedCollection, uint256 mappedCollectionId,,) =
+        tokenCollectionIdentity(tokenId);
 
     // Production implementation uses capped assembly staticcall helper:
     // - forwards exactly ROYALTY_RESOLVER_GAS_LIMIT
@@ -1509,17 +1514,15 @@ high-level `bytes memory` decode to avoid unbounded returndata allocation. The
 call copies at most 64 bytes and requires `returndatasize() == 64`.
 
 `mappedCollectionId` and `hasMappedCollection` come from Core's authoritative
-token mapping, not from a token ID range heuristic. Core reads
-`tokenCollectionMappingExists[tokenId]` before the staticcall; when it is true,
-Core passes `mappedCollectionId = tokenCollectionId[tokenId]` and
-`hasMappedCollection = true`; when it is false, Core passes
-`mappedCollectionId = 0` and `hasMappedCollection = false`. For minted,
-same-transaction allocated, custody-held, or burned tokens with retained
-mapping, `hasMappedCollection = true`. For premint or nonexistent tokens
-without an authoritative Core mapping, `hasMappedCollection = false` and
-`mappedCollectionId = 0`; the resolver falls back to default assignment or
-zero. The resolver must not call Core, re-read token mapping, or infer a
-collection from token ID arithmetic.
+token identity read, not from a token ID range heuristic. Core derives
+`mappingExists` from live ownership, burned-token audit state, and
+prepared-mint state, then passes `mappedCollectionId` and
+`hasMappedCollection` into the resolver. For minted, same-transaction allocated,
+custody-held, or burned tokens with retained identity, `hasMappedCollection =
+true`. For premint or nonexistent tokens without authoritative Core identity,
+`hasMappedCollection = false` and `mappedCollectionId = 0`; the resolver falls
+back to default assignment or zero. The resolver must not call Core, re-read
+token mapping, or infer a collection from token ID arithmetic.
 For external diagnostics and satellite reads, the canonical Core read is
 `tokenCollectionIdentity(tokenId) -> (mappingExists, collectionId,
 collectionSerial, burned)`, with burned tokens returning their retained mapping
@@ -1649,8 +1652,9 @@ for malformed size. Core uses checked arithmetic or `mulDiv`-style math for
 not rely on overflow reverts for normal fallback behavior.
 
 `royaltyInfo()` must not require the token to be minted. In the v1
-resolver-backed design, token IDs without `tokenCollectionMappingExists[tokenId]
-== true` always fall back to the default assignment or zero. Collection-scope
+resolver-backed design, token IDs for which `tokenCollectionIdentity` reports
+`mappingExists == false` always fall back to the default assignment or zero.
+Collection-scope
 royalty resolution requires Core to pass both
 `hasMappedCollection = true` and the stored `tokenCollectionId[tokenId]`. Core
 must not infer a collection receiver for unmapped tokens unless a later ADR
@@ -1658,8 +1662,9 @@ defines an exact token ID codec and storage-free collection existence gate.
 The mapping used by `royaltyInfo()` is written only when Core has an
 authoritative token assignment, such as mint, same-transaction allocation, or a
 custody-held token path. Burned tokens retain their last stored mapping for
-royalty disclosure history, with `tokenCollectionMappingExists[tokenId]`
-remaining true after burn. `royaltyInfo()` therefore still resolves token,
+royalty disclosure history, with `tokenCollectionIdentity` deriving
+`mappingExists = true` from burned audit state after burn. `royaltyInfo()`
+therefore still resolves token,
 collection, then default scope for burned tokens, while `tokenURI()` may revert
 under normal ERC-721 metadata semantics. Launch v1 does not define standalone
 premint reservations; premint or nonexistent tokens without the Core mapping
@@ -2345,7 +2350,7 @@ auction nonce. `beneficiary` is the token recipient.
 - Factory view `splitWalletExists(profileId)` that returns true only when the
   deterministic wallet is deployed with the expected profile and active or
   historically eligible runtime code hash.
-- Core-side `tokenCollectionMappingExists[tokenId]` read, passed as
+- Core-side `tokenCollectionIdentity(tokenId).mappingExists` read, passed as
   `hasMappedCollection`, for collection-scope royalty resolution.
 
 ### StreamDrops And StreamAuctions
@@ -2626,7 +2631,7 @@ Marketplace and indexer integrations should:
 - `syncAsset` ordering is initialize, revert on decrease, skip unchanged,
   update on increase.
 - Collection-scope royalty resolution requires
-  `tokenCollectionMappingExists[tokenId] == true`; unmapped tokens return
+  `tokenCollectionIdentity(tokenId).mappingExists == true`; unmapped tokens return
   default or zero.
 - Royalty policy mode is configured and frozen with collection economics before
   public mint when collection economics are promised immutable.

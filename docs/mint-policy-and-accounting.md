@@ -199,11 +199,14 @@ Core should store:
 
 ```solidity
 address public mintManager;
-uint256 private nextTokenId;
-mapping(uint256 tokenId => uint256 collectionId) tokenCollectionId;
-mapping(uint256 tokenId => uint256 collectionSerial) tokenCollectionSerial;
-mapping(uint256 tokenId => bool mappingExists) tokenCollectionMappingExists;
+mapping(uint256 tokenId => uint256 collectionId) tokenCollectionId; // current Core name: tokenIdsToCollectionIds
+mapping(uint256 tokenId => PreparedMintRecord) preparedMintRecords;
 ```
+
+Launch Core derives the collection-local serial from the token ID and the
+collection reserved range instead of storing a separate serial mapping. It also
+derives the canonical mapping-exists read from live ownership, burned-token
+audit state, and prepared-mint state instead of storing a separate boolean.
 
 Core should expose the canonical read shared by royalties, metadata, finality,
 and indexers:
@@ -229,11 +232,29 @@ Core should expose a manager-only mint entrypoint:
 function mintFromManager(
     uint256 collectionId,
     address initialRecipient,
-    address beneficiary,
-    bytes32 tokenDataHash,
-    bytes32 mintCommitment
-) external returns (uint256 tokenId);
+    string calldata tokenData,
+    uint256 saltfunO,
+    bytes32 tokenDataHash
+) external returns (uint256 tokenId, uint256 collectionSerial);
 ```
+
+`tokenDataHash` is a commitment to `keccak256(bytes(tokenData))`. Launch Core
+still stores the renderer-visible `tokenData` string because the current
+metadata renderer consumes it; the hash is the sale/manager commitment that
+prevents a later caller from swapping renderer input after policy acceptance.
+`saltfunO` remains the legacy entropy salt until the entropy coordinator
+replaces the direct randomizer call path.
+
+The immediate single-step hook is intentionally minimal. Beneficiary,
+mint-commitment, operation ID, price, asset, and authorization evidence belong
+to the manager, ledger, sale adapter, and settlement adapter records for that
+path. When another satellite needs a Core-observable operation ID before the
+ERC-721 receiver callback, the manager must use the prepared path below.
+Core enforces collection existence, freeze state, token-data bounds, token-data
+hash binding, and supply exhaustion on the manager path. Phase windows,
+drop/sale pause policy, eligibility, price, asset, settlement, beneficiary, and
+authorization checks are trusted manager responsibilities and must be evidenced
+in the manager, ledger, sale adapter, or settlement adapter records.
 
 Launch should not include persistent standalone token reservations. When another
 spec says a token is "reserved," it means either:
@@ -250,22 +271,32 @@ Core may expose a manager-only two-step internal launch surface:
 ```solidity
 function prepareMintFromManager(
     uint256 collectionId,
-    address beneficiary,
+    string calldata tokenData,
     bytes32 tokenDataHash,
-    bytes32 mintCommitment
+    bytes32 operationId
 ) external returns (uint256 tokenId, uint256 collectionSerial);
 
 function completePreparedMintFromManager(
     uint256 tokenId,
-    address initialRecipient
+    address initialRecipient,
+    bytes32 operationId,
+    uint256 saltfunO
 ) external;
 ```
 
-`prepareMintFromManager` writes identity, serial, existence status, and entropy
-registration but does not emit an ERC-721 transfer or call the recipient.
+`prepareMintFromManager` writes identity, serial, and existence status but does
+not emit an ERC-721 transfer, call the recipient, or reserve entropy/randomizer
+state.
 `completePreparedMintFromManager` must be called by the same manager flow after
-revenue is recorded and before the transaction returns. Persistent prepared
-tokens are forbidden in launch unless the later reservation ADR exists.
+revenue is recorded and before the transaction returns. Completion clears the
+prepared record before minting, keeps the global Core completion sentinel active
+through the ERC-721 receiver callback, then clears that sentinel only after the
+normal mint entropy/randomizer boundary returns for the now-complete token.
+Persistent prepared tokens are forbidden in launch unless the later reservation
+ADR exists. As a recovery escape for a stranded prepared mint, Core allows the
+admin to replace only the `mintManager` pointer while the sentinel is active so
+a reviewed replacement manager can call the existing abort hook; other critical
+contract pointers remain locked.
 
 Prepared-mint safety rules:
 
@@ -275,28 +306,40 @@ Prepared-mint safety rules:
    same non-reentrant manager execution path; no unrelated external Core mint,
    burn, transfer, or second prepare may interleave while a prepared token is
    pending.
-3. Core must bind a prepared token to `msg.sender`, `tokenId`, `collectionId`,
-   `beneficiary`, `tokenDataHash`, `mintCommitment`, the batch
-   `mintCommitmentsHash`, and an operation ID or equivalent manager-supplied
-   context hash.
-4. `completePreparedMintFromManager` must verify and clear the pending prepared
-   record before `_safeMint` or any external receiver callback.
+3. Core must bind a prepared token to `tokenId`, `collectionId`, the verified
+   renderer-visible `tokenData`, and an operation ID or equivalent
+   manager-supplied context hash. Beneficiary, token-data hash,
+   mint-commitment, and batch-level commitment hashes remain manager, ledger,
+   sale adapter, or settlement evidence and should feed the operation ID.
+4. `completePreparedMintFromManager` must verify and clear the
+   `PreparedMintRecord` before `_safeMint` or any external receiver callback,
+    while retaining a Core-level completion sentinel that blocks unrelated Core
+    mint, burn, transfer, approval, admin mutation, and second-prepare paths
+    until the completion-time entropy/randomizer boundary finishes. The only
+    launch recovery exception is mint-manager replacement, which lets a
+    replacement manager abort a stranded prepared mint without changing admin,
+    minter, dependency, randomizer, metadata, or token state.
 5. If any later step in the top-level transaction reverts, the prepared mapping,
-   collection serial, entropy registration, and revenue/royalty snapshot all
-   revert with the transaction.
+   collection serial, revenue/royalty snapshot, and any entropy/randomizer state
+   reached during completion all revert with the transaction.
 6. A prepared token that is not completed in the same top-level manager flow is
    a bug; launch Core must not expose a durable prepared-token or reservation
-   state.
-7. `prepareMintFromManager` invokes the same entropy registration boundary as
-   `mintFromManager`, but Core marks the token as prepared-incomplete until
-   `completePreparedMintFromManager` clears the pending record. Public
-   `requestEntropy(tokenId)`, metadata finalization, transfer, burn, and any
-   other token operation outside the manager flow must revert for
-   prepared-incomplete tokens.
-8. The per-token `mintCommitment` supplied to Core must equal the corresponding
-   element already committed by the signed `MintTicket.mintCommitmentsHash` or
-   by the equivalent sale authorization hash. A prepared mint cannot introduce a
-   new commitment after the signed authorization or sale policy was accepted.
+   state. If a manager bug strands one anyway, replacing the mint manager and
+   aborting through the new manager is an incident-recovery path, not a normal
+   reservation lifecycle.
+7. `prepareMintFromManager` deliberately does not invoke the entropy
+   registration or randomizer request boundary. `completePreparedMintFromManager`
+   invokes that boundary only after the pending record is cleared and the token
+   is no longer prepared-incomplete, but before Core drops the global completion
+   sentinel. Public `requestEntropy(tokenId)`, metadata finalization, transfer,
+   burn, and any other token operation outside the manager flow must revert for
+   prepared-incomplete tokens or a token whose completion sentinel is still
+   active.
+8. The per-token `mintCommitment` recorded by the manager or settlement
+   satellite must equal the corresponding element already committed by the
+   signed `MintTicket.mintCommitmentsHash` or by the equivalent sale
+   authorization hash. A prepared mint cannot introduce a new commitment after
+   the signed authorization or sale policy was accepted.
 
 Canonical prepared-mint operation boundary:
 
@@ -328,29 +371,21 @@ bytes32 operationId = keccak256(abi.encode(
 struct PreparedMintRecord {
     bool exists;
     bytes32 operationId;
-    address manager;
     uint256 collectionId;
-    uint256 collectionSerial;
-    address beneficiary;
-    bytes32 tokenDataHash;
-    bytes32 mintCommitment;
-    bytes32 mintCommitmentsHash;
-    uint64 preparedAt;
 }
 
 function prepareMintFromManager(
     uint256 collectionId,
-    address beneficiary,
+    string calldata tokenData,
     bytes32 tokenDataHash,
-    bytes32 mintCommitment,
-    bytes32 mintCommitmentsHash,
     bytes32 operationId
 ) external returns (uint256 tokenId, uint256 collectionSerial);
 
 function completePreparedMintFromManager(
     uint256 tokenId,
     address initialRecipient,
-    bytes32 operationId
+    bytes32 operationId,
+    uint256 saltfunO
 ) external;
 
 function preparedMint(uint256 tokenId)
@@ -367,8 +402,9 @@ function executePreparedMint(
 
 Every state-changing contract participating in `PREPARED_MINT` must receive or
 derive the same `operationId`: sale adapter, mint manager, ledger, Core
-prepare/complete, revenue resolver snapshot hook, entropy registration
-boundary, and escrow/deposit path. A contract must reject a prepared-mint call
+prepare/complete, revenue resolver snapshot hook, completion-time
+entropy/randomizer boundary, and escrow/deposit path. A contract must reject a
+prepared-mint call
 whose operation ID does not match the operation currently locked by the mint
 manager. The operation lock is non-reentrant and cannot be reused for a
 different token, batch, payer, phase, policy hash, or sale adapter.
@@ -379,15 +415,16 @@ immediately delegates to the manager. Core `prepareMintFromManager` and
 `completePreparedMintFromManager` are restricted to `msg.sender == mintManager`
 and are never independent user flows. The manager calls the restricted
 settlement adapter hook between Core prepare and Core complete. If settlement,
-resolver snapshot, escrow/deposit, entropy registration, or completion fails,
-the whole manager call reverts and no prepared state persists.
+resolver snapshot, escrow/deposit, the completion-time entropy/randomizer
+boundary, or completion fails, the whole manager call reverts and no prepared
+state persists.
 
 The manager's non-reentrant operation lock must be externally verifiable
 through Core state. Core's `PreparedMintRecord.operationId` is the canonical
 shared lock state for each prepared token. Every satellite participating in a
 prepared mint, including resolver snapshot hooks, escrow/deposit paths, and
-entropy registration helpers, must read `preparedMint(tokenId).operationId`
-from Core or receive it from the manager and re-verify against Core. No
+entropy/randomizer helpers, must read `preparedMint(tokenId).operationId` from
+Core or receive it from the manager and re-verify against Core. No
 satellite may rely solely on a manager-internal private flag it cannot read.
 
 Operation propagation table:
@@ -398,12 +435,12 @@ Mint manager          owns non-reentrant operation lock and rejects nested or di
 Mint ledger           consumes counters/authorization only for the manager-supplied operationId
 Core prepare          stores operationId in PreparedMintRecord for each allocated token
 Resolver snapshot     reads PreparedMintRecord and rejects missing or mismatched operationId
-Entropy registration  records prepared-incomplete state under the same operationId or manager context
+Entropy/randomizer     runs only from completion after the prepared record clears
 Escrow/deposit path    emits or stores operationId with the payment settlement record where applicable
-Core complete         clears PreparedMintRecord only when operationId matches
+Core complete         clears PreparedMintRecord only when operationId matches; clears completion sentinel after entropy/randomizer boundary
 ```
 
-Recommended events:
+Recommended manager, ledger, or settlement events:
 
 ```solidity
 event PreparedMintStarted(
@@ -428,7 +465,10 @@ event PreparedMintCompleted(
 
 Successful launch transactions leave no persistent prepared state after
 completion: `preparedMint(tokenId).exists` returns false once
-`completePreparedMintFromManager` clears the record. The read exists so other
+`completePreparedMintFromManager` clears the record. During the receiver
+callback, the token is live and `preparedMint(tokenId).exists == false`, but
+`pendingPreparedMintTokenId` remains set as a completion lock until the
+completion-time entropy/randomizer boundary returns. The read exists so other
 contracts in the same top-level operation can prove they are snapshotting the
 same prepared token, not so operators can create durable reservations.
 
@@ -437,53 +477,60 @@ Required Core behavior:
 1. Revert unless `msg.sender == mintManager`.
 2. Revert unless the collection exists, is active for minting, is not closed or
    artwork-finality-blocked for new supply, and data needed for supply exists.
-3. Allocate `tokenId = nextTokenId++` inside Core.
+3. Allocate the next token ID inside Core from the collection's reserved range
+   and minted-ever counter.
 4. Allocate the next stable collection-local serial inside Core.
 5. Revert if collection supply is exhausted for fixed or capped-open
    collections.
-6. Store `tokenDataHash`, token-to-collection identity, collection-local
-   serial, and mapping-existence bit. Core stores no renderer-visible
-   `tokenData` bytes.
-7. Register token entropy state through the entropy subsystem before any
+6. Store renderer-visible `tokenData`, verify it matches `tokenDataHash`, and
+   store token-to-collection identity. The collection-local serial is returned
+   and remains derivable from the token ID and collection range; mapping
+   existence is derived by `tokenCollectionIdentity`.
+7. In the current direct-randomizer launch slice, reach the legacy
+   randomizer/hash boundary after `_safeMint`. The future entropy-coordinator
+   target registers bounded entropy state before `_safeMint` and before any
    external receiver callback can observe the token.
 8. Mint to `initialRecipient`.
-9. Return the minted token ID.
+9. Return the minted token ID and collection-local serial.
 
-The entropy registration hook must be bounded and must not call external
-randomness providers from the mint path. If safe minting to a contract recipient
-reverts, the full transaction reverts and both Core identity writes and entropy
-registration unwind.
+The future entropy registration hook must be bounded and must not call external
+randomness providers from the mint path. In the current Core hook slice, the
+legacy randomizer call remains after `_safeMint`, so paid flows that require
+token-level economic state before a receiver callback must use `PREPARED_MINT`
+for identity/snapshot ordering and must not depend on entropy state being
+available during the receiver callback.
 
 `initialRecipient` is the address that receives the ERC-721 mint event and the
 first ownership state. `beneficiary` is the intended economic/final recipient
 known to the manager or sale executor. For ordinary direct mints they are the
 same address. For custody-based settlement, `initialRecipient` is the custody or
 settlement contract and `beneficiary` is the buyer, claimant, artist, or other
-intended final owner. Both fields must be nonzero, and custody flows must emit
-the later transfer normally so event consumers can reconstruct the whole path.
+intended final owner. Core does not store `beneficiary` in either manager hook;
+the manager, ledger, and sale adapter must keep beneficiary and payment
+evidence. Custody flows must emit the later transfer normally so event consumers
+can reconstruct the whole path.
 
-Core should emit:
-
-```solidity
-event MintManagerUpdated(address indexed oldManager, address indexed newManager);
-event StreamTokenMinted(
-    uint256 indexed collectionId,
-    uint256 indexed tokenId,
-    address indexed initialRecipient,
-    address operator,
-    address beneficiary
-);
-```
+Core intentionally does not emit manager-specific mint or prepared-mint events
+in the bytecode-constrained launch slice. Indexers can observe ERC-721
+`Transfer`, call `tokenCollectionIdentity`, and consume the richer manager,
+ledger, settlement, and prepared-operation events emitted by the satellites.
 
 The existing `StreamCore.mint(uint256,address,string,uint256,uint256)` entrypoint
 should be replaced by `mintFromManager` before launch.
 
 Burn behavior must preserve the identity mapping used by royalties and audits.
 If a token is burned, Core removes ERC-721 ownership and enumerable membership
-but must not clear `tokenCollectionId`, `tokenCollectionSerial`, or
-`tokenCollectionMappingExists`. Burned-token `tokenURI()` may revert under
+but must not clear `tokenCollectionId` or burned-token audit identity. The
+collection-local serial remains derivable from the retained collection ID and
+the collection range, while `tokenCollectionIdentity` reports mapping existence
+from the burned audit state. Burned-token
+`tokenURI()` may revert under
 normal ERC-721 metadata semantics, while `royaltyInfo()` can still disclose the
 last token, collection, then default royalty policy.
+Launch Core retains the legacy `BurnedTokenRemintNotAllowed(uint256)` selector
+for catalog/ABI continuity and because the optimized build is smaller with the
+selector present; the current burned-remint regression path reverts earlier as
+`TokenOutsideCollectionRange()` through sequential token allocation.
 
 ## Phase IDs
 
@@ -1130,18 +1177,16 @@ struct MintBatch {
 Launch token-data ownership decision:
 
 ```text
-Core role: HASH_ONLY_CORE_FACT
-Metadata role: renderer-visible tokenData bytes
+Core role: renderer-visible tokenData plus hash commitment
+Metadata role: renderer-visible tokenData bytes consumed by the current renderer
 ```
 
-Core stores only `tokenDataHash = keccak256(abi.encode(tokenData))` or an
-equivalent manager-supplied hash already committed by the signed ticket. It
-does not store renderer-visible token data bytes. If a collection's renderer
-requires token data before the ERC-721 receiver callback can observe the token,
-the `PREPARED_MINT` path must write the bytes or a hash-bound URI/ref into
-`StreamCollectionMetadata` before `completePreparedMintFromManager`. If the
-collection does not require renderer-visible token data at mint, the hash is
-still part of the mint commitment and event trail.
+Launch Core stores renderer-visible `tokenData` because the current metadata
+renderer consumes it. Core also verifies
+`tokenDataHash = keccak256(bytes(tokenData))` against the manager or sale
+commitment so a caller cannot swap renderer input after policy acceptance. A
+future hash-only or externalized metadata storage design needs a separate
+accepted migration because it changes renderer and finality assumptions.
 
 Rules:
 
@@ -1164,7 +1209,8 @@ Rules:
 11. Each `tokenData[i]` must satisfy the collection metadata launch limit
     `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
     calldata/gas cap. Oversized token data reverts before ledger consumption,
-    Core prepare, payment settlement, or entropy registration.
+    Core prepare, payment settlement, or the completion-time entropy/randomizer
+    boundary.
 12. `contextHash` is optional, but should be nonzero for signed/drop/auction
    flows that need a stable external reference.
 
@@ -1466,10 +1512,12 @@ Canonical state-changing mint sequence:
 15. Ask `StreamMintLedger` to verify `policyHash` against the ledger's
     registered hash for `(manager, collectionId, phaseId)`, repeat cap checks,
     and consume counter increments, authorization ID, and nullifiers.
-16. For each token, Core writes token identity, collection serial,
-    `tokenDataHash`, and mapping-existence status.
-17. Core registers entropy state through the coordinator. This registration
-    cannot call external randomness providers.
+16. For each token, Core writes token identity, collection serial, and
+    renderer-visible `tokenData` verified against `tokenDataHash`.
+17. The current Core slice reaches the legacy randomizer/hash boundary after
+    `_safeMint`; the future entropy-coordinator target registers bounded
+    entropy state before `_safeMint` without calling external randomness
+    providers.
 18. The authorized mint manager, sale adapter, or resolver hook records any
     required token-level primary or royalty snapshot after Core has created
     authoritative token identity and before any untrusted receiver callback.
@@ -1481,8 +1529,9 @@ Canonical state-changing mint sequence:
 Ledger accounting should happen before the Core mint calls. If any Core mint
 reverts, EVM rollback reverts the ledger updates too.
 The invariant is: no external untrusted callback executes before counter
-consumption, identity mapping, entropy registration, and required royalty
-snapshot are complete for that token.
+consumption, identity mapping, and required royalty snapshot are complete for
+that token. Entropy-before-callback is a future entropy-coordinator invariant,
+not a guarantee of the current direct-randomizer hook.
 
 For paid primary mints, launch must use exactly one of the named orchestration
 paths in `docs/revenue-splits-and-royalties.md`:
@@ -1501,8 +1550,11 @@ paths in `docs/revenue-splits-and-royalties.md`:
    performs `_safeMint`.
 
 No paid mint may call `_safeMint` to an untrusted recipient before ledger
-consumption, Core identity mapping, entropy registration, required assignment
-snapshots for the chosen path, and revenue accounting are complete.
+consumption, Core identity mapping, required assignment snapshots for the chosen
+path, and revenue accounting are complete. Current direct-randomizer entropy
+state is not available before the callback; phases that require pre-callback
+token-level snapshots must use `PREPARED_MINT` and keep snapshots independent of
+randomness.
 The mint manager owns the top-level non-reentrant operation lock for
 `PREPARED_MINT`; Core prepare/complete, resolver snapshot hooks, ledger
 consumption, and sale-adapter callbacks must all run under that manager-owned
@@ -1932,9 +1984,10 @@ phase stricter or permanently closed.
 25. No live mint path should use ERC-2309-style consecutive minting; normal
     per-token ERC-721 transfer events remain the indexer and marketplace
     friendly path.
-26. Recipient reentrancy cannot observe an unregistered token or bypass
-    counters because `_safeMint` happens only after ledger consumption,
-    identity mapping, entropy registration, and required royalty snapshots.
+26. Recipient reentrancy cannot observe a token before ledger consumption,
+    identity mapping, and required royalty snapshots are complete. Current
+    direct-randomizer entropy may still be pending during the callback, so
+    receiver-facing code must not rely on entropy finality at that point.
 
 ## Formal Invariants
 
@@ -1951,8 +2004,9 @@ The implementation should be tested and reviewed against these invariants:
 7. The `policyHash` emitted in mint and ledger events matches the active policy.
 8. A stale signed ticket cannot mint under a materially different policy.
 9. A blocked module cannot be used for state-changing mint execution.
-10. No external recipient callback executes before the token's identity mapping,
-    entropy registration, and required royalty snapshot are complete.
+10. No external recipient callback executes before the token's identity mapping
+    and required royalty snapshot are complete. Entropy-before-callback applies
+    only after the entropy-coordinator target is implemented.
 10. A frozen phase cannot be loosened.
 
 ## Interactions With Existing Contracts
@@ -2050,12 +2104,14 @@ mint ledger contract for durable accounting.
 Core tests:
 
 1. Only `mintManager` can call `mintFromManager()`.
-2. Core computes global sequential token IDs correctly across collections.
+2. Core computes the next token ID and collection-local serial inside the
+   collection's reserved range.
 3. Core reverts when the collection is unknown, paused, closed, not yet active
    for minting, or artwork-finality-blocked for new supply.
 4. Core reverts when collection supply is exhausted.
-5. Core emits `StreamTokenMinted`.
-6. Core stores token-to-collection and token-to-collection-serial mappings.
+5. Core stores token-to-collection identity and returns the collection-local
+   serial through `tokenCollectionIdentity`.
+6. Core retains identity after burn.
 
 Manager tests:
 
@@ -2094,8 +2150,9 @@ Manager tests:
 28. `canMint()` returns counter previews with current, increment, projected, and
     cap values.
 29. A malicious `onERC721Received` recipient cannot observe a token before
-    identity mapping and entropy registration exist, and cannot reenter mint or
-    entropy request paths to bypass counters.
+    identity mapping and required snapshots exist, and cannot reenter mint paths
+    to bypass counters. Entropy request paths remain outside receiver-callback
+    assumptions until the entropy coordinator lands.
 
 Future resolver/nullifier tests:
 

@@ -6,25 +6,25 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 131,
+    "custom_error_count": 137,
     "contract_count": 13,
     "category_counts": {
-      "access_control": 8,
+      "access_control": 9,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 11,
-      "metadata_integrity": 17,
+      "configuration": 12,
+      "metadata_integrity": 18,
       "pause_emergency": 2,
       "primary_settlement_safety": 16,
       "randomness_lifecycle": 26,
       "revenue_assignment_safety": 12,
       "split_payment_safety": 19,
-      "supply_minting": 10
+      "supply_minting": 13
     },
     "severity_counts": {
-      "critical": 8,
-      "high": 102,
-      "medium": 21
+      "critical": 9,
+      "high": 103,
+      "medium": 25
     },
     "duplicate_selectors": {
       "0x1c9aebc3": [
@@ -1957,6 +1957,26 @@
       }
     },
     {
+      "id": "StreamCore:InvalidMintManagerContract()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "InvalidMintManagerContract",
+      "signature": "InvalidMintManagerContract()",
+      "selector": "0xd277ddb5",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
       "id": "StreamCore:InvalidMinterContract()",
       "contract": "StreamCore",
       "source": "smart-contracts/StreamCore.sol",
@@ -2134,6 +2154,26 @@
       }
     },
     {
+      "id": "StreamCore:NotMintManager()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "NotMintManager",
+      "signature": "NotMintManager()",
+      "selector": "0x9a04794d",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
       "id": "StreamCore:NotMinterContract()",
       "contract": "StreamCore",
       "source": "smart-contracts/StreamCore.sol",
@@ -2188,6 +2228,87 @@
         "tests": [
           "test/StreamRandomizerLifecycle.t.sol",
           "test/StreamRandomizerAdversarial.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:PreparedMintAlreadyPending()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "PreparedMintAlreadyPending",
+      "signature": "PreparedMintAlreadyPending()",
+      "selector": "0xa8c1ba13",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:PreparedMintMismatch()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "PreparedMintMismatch",
+      "signature": "PreparedMintMismatch()",
+      "selector": "0x8660201d",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:PreparedMintNotFound()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "PreparedMintNotFound",
+      "signature": "PreparedMintNotFound()",
+      "selector": "0x89beec16",
+      "category": "supply_minting",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Refresh collection/token state before retrying; supply windows, minted state, and burn boundaries are authoritative.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCore:TokenDataHashMismatch()",
+      "contract": "StreamCore",
+      "source": "smart-contracts/StreamCore.sol",
+      "name": "TokenDataHashMismatch",
+      "signature": "TokenDataHashMismatch()",
+      "selector": "0x664acec4",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCore.sol/StreamCore.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"

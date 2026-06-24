@@ -108,9 +108,7 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
         vm.prank(RECIPIENT);
         deployed.core.burn(COLLECTION_ID, TOKEN_ID);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(StreamCore.BurnedTokenRemintNotAllowed.selector, TOKEN_ID)
-        );
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
         vm.prank(address(deployed.minter));
         deployed.core.mint(TOKEN_ID, RECIPIENT, "data", 8, COLLECTION_ID);
 

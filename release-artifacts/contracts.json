@@ -84,7 +84,17 @@
     "baseline_command": "forge build --sizes --via-ir --skip test --skip script --force",
     "tracking": "https://github.com/6529-Collections/6529Stream/issues/478",
     "policy": "Core runtime bytecode may decrease freely. Any increase above the approved runtime baseline requires an accepted exception record before merge, even when the EIP-170 release floor still passes.",
-    "exceptions": [],
+    "exceptions": [
+      {
+        "id": "CORE-SPEND-2026-06-24-001",
+        "issue": "https://github.com/6529-Collections/6529Stream/issues/631",
+        "status": "accepted",
+        "rationale": "Add the Core-owned mint-manager boundary, prepared-mint lock surface, and explicit token identity reads required for launch v1 mint accounting, royalty, metadata, and entropy coordination without relying on token ID range heuristics.",
+        "mitigation": "Keep manager policy, beneficiary/payment evidence, batch commitments, and manager-specific mint events in StreamMintManager, StreamMintLedger, sale adapters, and settlement satellites; keep Core's immediate mint hook minimal; require future roadmap items to recover Core headroom before adding more Core behavior.",
+        "max_runtime_size_bytes": 24154,
+        "measured_delta_bytes": 1970
+      }
+    ],
     "rejected_experiments": [
       {
         "id": "CORE-EXPERIMENT-2026-06-17-001",
@@ -199,6 +209,10 @@
     {
       "name": "IStreamMinter",
       "source": "smart-contracts/IStreamMinter.sol"
+    },
+    {
+      "name": "IStreamMintManager",
+      "source": "smart-contracts/IStreamMintManager.sol"
     },
     {
       "name": "IStreamPrimarySaleSettlement",

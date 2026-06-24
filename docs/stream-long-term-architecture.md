@@ -421,11 +421,11 @@ Normative v1 rule:
    must not be assigned to a collection from a range heuristic.
 5. Burned tokens retain their last authoritative collection mapping for royalty
    disclosure and audit history. Burning removes ERC-721 ownership and
-   enumerable membership, but it must not clear `tokenCollectionId`,
-   `tokenCollectionSerial`, or `tokenCollectionMappingExists`. `royaltyInfo()`
-   therefore continues to resolve token, collection, then default scope for a
-   burned token, while `tokenURI()` may still revert because the token no
-   longer exists for ERC-721 metadata purposes.
+   enumerable membership, but it must not clear retained collection identity or
+   burned-token audit state. `royaltyInfo()` therefore continues to resolve
+   token, collection, then default scope for a burned token through
+   `tokenCollectionIdentity`, while `tokenURI()` may still revert because the
+   token no longer exists for ERC-721 metadata purposes.
 6. Token-level revenue, royalty, metadata, and entropy assignments require an
    authoritative minted or same-transaction allocated token-to-collection
    mapping. They cannot be created for unknown token IDs.
@@ -475,8 +475,9 @@ interface IStreamCoreTokenIdentityView {
 }
 ```
 
-`mappingExists` is the public read equivalent of
-`tokenCollectionMappingExists[tokenId]`. For a currently minted token, the
+`mappingExists` is the public authoritative identity read. Current launch Core
+derives it from live ownership, burned-token audit state, and prepared-mint
+state rather than storing a separate boolean. For a currently minted token, the
 function returns `(true, collectionId, collectionSerial, false)`. For a burned
 token that was once minted, it returns
 `(true, lastCollectionId, lastCollectionSerial, true)`. For a premint,

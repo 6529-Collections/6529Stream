@@ -108,6 +108,17 @@ The implementation PR must report:
 4. Whether the margin remains above the release floor and warning threshold.
 5. Which non-essential Core logic was moved out if the first attempt failed.
 
+Current CON-012 implementation proof:
+
+1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
+2. New measured `StreamCore` runtime: 24,154 bytes.
+3. EIP-170 margin: 422 bytes.
+4. The margin remains above the 384-byte release floor but below the 512-byte
+   warning threshold.
+5. The Core hook keeps the immediate manager mint ABI minimal and leaves
+   beneficiary/payment evidence, batch commitments, operation events, and richer
+   mint policy to the manager, ledger, sale adapter, and settlement satellites.
+
 No launch v1 implementation may drop Core-native ERC-2981 to solve size
 pressure. Refactor metadata, collection metadata, entropy, mint policy, or
 other non-Core behavior out first.

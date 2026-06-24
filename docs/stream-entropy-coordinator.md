@@ -260,7 +260,7 @@ function _mintProcessing(
 ) internal {
     tokenData[tokenId] = tokenData_;
     tokenCollectionId[tokenId] = collectionId;
-    tokenCollectionMappingExists[tokenId] = true;
+    // tokenCollectionIdentity derives mapping existence from live/burned/prepared state.
     entropyCoordinator.onTokenMinted(
         collectionId,
         tokenId,
@@ -295,24 +295,25 @@ manifest. If the coordinator call reverts, runs out of its cap, or returns
 malformed success behavior, the mint reverts and all token identity writes
 unwind. Core must not forward all remaining gas to a mutable coordinator.
 
-If Core exposes `prepareMintFromManager`, the prepare step calls
-`onTokenMinted` and writes the same entropy registration state, but Core also
-marks the token prepared-incomplete until `completePreparedMintFromManager`
-clears that record. `requestEntropy(tokenId)` must consult Core's token status
-or receive an equivalent Core-authenticated flag and revert for
-prepared-incomplete tokens. A token cannot request entropy, finalize entropy,
-or produce final metadata between prepare and complete.
+If Core exposes `prepareMintFromManager`, the prepare step must not call
+`onTokenMinted`, request entropy, or write provider/request state. Prepare only
+allocates Core token identity and marks the token prepared-incomplete until
+`completePreparedMintFromManager` clears that record. Completion invokes the
+normal mint entropy boundary for the now-complete token while the Core
+completion sentinel still blocks unrelated Core mutations. `requestEntropy(tokenId)`
+must consult Core's token status or receive an equivalent Core-authenticated
+flag and revert for prepared-incomplete tokens. A token cannot request entropy,
+finalize entropy, or produce final metadata between prepare and complete.
 For `PREPARED_MINT`, the first valid public or operator `requestEntropy` window
 opens only after `completePreparedMintFromManager` has finished and the token is
 no longer prepared-incomplete. A sale that needs both token-level economics and
 async entropy must snapshot economics, record revenue, complete `_safeMint`,
 and only then allow entropy request.
-Any entropy registration event emitted during prepare must be explicitly marked
-`preparedIncomplete = true`, or the event must be deferred until completion.
-If the top-level transaction reverts, provisional registration events disappear
-with the revert. `tokenEntropy` reads for a prepared-incomplete token must
-disclose that status so satellites do not confuse it with an ordinary minted
-token.
+Any entropy registration event for a prepared mint must be deferred until
+completion. If the top-level transaction reverts, registration and request
+events disappear with the revert. `tokenEntropy` reads for a
+prepared-incomplete token must disclose that status, or revert, so satellites
+do not confuse it with an ordinary minted token.
 
 Coordinator availability is a hard mint prerequisite. Core should not catch and
 ignore a failed `onTokenMinted` call because that would create minted tokens
@@ -856,6 +857,11 @@ Freezing prevents provider, salt, mode, timeout, and recovery policy changes for
 the collection.
 
 ## Token Registration Flow
+
+This is the target flow for the entropy-coordinator PR. The current CON-012
+Core hook slice still uses the legacy direct randomizer boundary after
+`_safeMint`, so it must not be cited as evidence that entropy is observable
+before receiver callbacks.
 
 ```text
 StreamMintManager / authorized settlement adapter

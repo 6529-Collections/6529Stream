@@ -3,6 +3,12 @@
 pragma solidity ^0.8.19;
 
 interface IStreamCore {
+    struct PreparedMintRecord {
+        bool exists;
+        bytes32 operationId;
+        uint256 collectionId;
+    }
+
     function isCoreContract() external view returns (bool);
 
     function retrievewereDataAdded(uint256 _collectionID) external view returns (bool);
@@ -20,6 +26,39 @@ interface IStreamCore {
         uint256 _saltfun_o,
         uint256 _collectionID
     ) external;
+
+    function mintFromManager(
+        uint256 collectionId,
+        address initialRecipient,
+        string calldata _tokenData,
+        uint256 _saltfun_o,
+        bytes32 tokenDataHash
+    ) external returns (uint256 tokenId, uint256 collectionSerial);
+
+    function prepareMintFromManager(
+        uint256 collectionId,
+        string calldata _tokenData,
+        bytes32 tokenDataHash,
+        bytes32 operationId
+    ) external returns (uint256 tokenId, uint256 collectionSerial);
+
+    function completePreparedMintFromManager(
+        uint256 tokenId,
+        address initialRecipient,
+        bytes32 operationId,
+        uint256 _saltfun_o
+    ) external;
+
+    function abortPreparedMintFromManager(uint256 tokenId, bytes32 operationId) external;
+
+    function preparedMint(uint256 tokenId) external view returns (PreparedMintRecord memory);
+
+    function pendingPreparedMintTokenId() external view returns (uint256);
+
+    function tokenCollectionIdentity(uint256 tokenId)
+        external
+        view
+        returns (bool mappingExists, uint256 collectionId, uint256 collectionSerial, bool burned);
 
     function collectionFreezeStatus(uint256 _collectionID) external view returns (bool);
 
