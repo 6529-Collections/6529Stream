@@ -54,13 +54,13 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:ceec373f9d51f20e348ce70d3e4ef699e26f6f89389cc16d30a070a9d71e5012`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:5a46b81744fea23e137275b0b9935461452ec347add97a349be390b80c7a6062`
-- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:9dd3d3408cac89a632b95afd914cac1b77866a12ecf82bf09f6e4bbf5c5fa3a5`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:368ce322a39f4293a7ba1b7a367b8ea228006d424d2d55e5f9eef26b8dded3e2`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:0af164a7adad374fe99f5d665861d730af299a450a55853619573dca4be86aca`
+- Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:4522bfb197b9333e1275faa5d6c2cc53e246d11c2ffdebdc3386c7a23e99b920`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
 - Post-state request views: `release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md / sha256:c306a99d750091e13e9ea25f30bb7735546bf041dfbcb93577d4b354f1663003`
-- Release manifest/checksum digests: `pre-promotion release-manifest sha256:defabd0807268958023917b326e8ec074e4b956806a286356c4c0bbafcb1648f and pre-promotion SHA256SUMS sha256:31d74dcf86f8da0283630179bd827ec59e101c880269d718e649490ff3b5711d`
+- Release manifest/checksum digests: `pre-promotion release-manifest sha256:f2cf794d65ac7eea4909d48b3e06deb63e55bedf6715c8fd752dd395fac5e00d and pre-promotion SHA256SUMS sha256:2aab8f9188bdfe459595b72b34776d98fd7d5d7a16b5b2d75bf412e88dea121d`
 
 ## Review
 

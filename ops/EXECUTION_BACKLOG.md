@@ -174,7 +174,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has finite EIP-170 headroom despite the current 2,784-byte margin | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has finite EIP-170 headroom: the current CON-012 measurement is 24,172 runtime bytes with 404 bytes of EIP-170 margin under an accepted exception | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -205,7 +205,8 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | --- | --- | --- | --- | --- |
 | 0 | `CON-009` | C/G | V1 split settlement foundation | Merged in PR #626; issue #625 closed completed |
 | 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Merged in PR #628; issue #627 closed completed |
-| 0.2 | `CON-011` | C/G | V1 revenue resolver and primary-sale settlement adapters | Active PR #630 / issue #629 on branch `codex/revenue-resolver-primary-adapters`; waiting for CI and review bots |
+| 0.2 | `CON-011` | C/G | V1 revenue resolver and primary-sale settlement adapters | Merged in PR #630; issue #629 closed completed |
+| 0.3 | `CON-012` | C/G | V1 Core mint-manager boundary and prepared-mint hooks | Active issue #631 on branch `codex/mint-manager-core-hooks`; local draft in progress |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1464,10 +1465,7 @@ Acceptance criteria:
 
 ### CON-011: Add Revenue Resolver And Primary-Sale Settlement Adapters
 
-Status: Active issue #629 on branch
-`codex/revenue-resolver-primary-adapters`; local draft implemented,
-max-reasoning GPT-5.5 Pro feedback addressed, full local validation passed, and
-PR #630 opened.
+Status: Merged in PR #630; issue #629 closed completed.
 
 Gate: C/G.
 
@@ -1548,6 +1546,87 @@ Acceptance criteria:
   official primary-sale revenue from passive split-wallet receipts.
 - Replay or duplicate sale IDs cannot create duplicate official settlement
   evidence.
+
+### CON-012: Add Core Mint-Manager Boundary And Prepared-Mint Hooks
+
+Status: Active issue #631 on branch `codex/mint-manager-core-hooks`; local
+draft in progress.
+
+Gate: C/G.
+
+Problem: Revenue resolver and primary-sale settlement adapters now exist
+outside Core, but future mint manager and settlement flows need a Core-owned
+manager mint boundary, prepared-mint operation hooks, and canonical token
+collection identity reads before policy, ledger, metadata, and preservation
+satellites can safely compose.
+
+Outcome: Add the minimal Core hook surface for manager-authorized minting and
+same-flow prepared mints without moving the full Drops/Minter policy engine in
+this PR.
+
+Files likely touched:
+
+- `smart-contracts/StreamCore.sol`
+- `smart-contracts/IStreamCore.sol`
+- optional `smart-contracts/IStreamMintManager.sol`
+- focused Core mint-manager hook tests
+- `docs/mint-policy-and-accounting.md`
+- `docs/launch-v1-target-architecture.md`
+- release artifacts and protocol-surface reports if ABI surfaces change
+- `CHANGELOG.md`
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
+- `ops/workstreams/v1-contract-roadmap/active-context.md`
+- `ops/workstreams/v1-contract-roadmap/run-log.md`
+
+Implementation steps:
+
+1. Add a Core `mintManager` pointer and manager-only authorization for the new
+   mint hooks; manager-specific events remain outside Core for this bytecode
+   constrained slice.
+2. Add `mintFromManager(...)` so future manager/sale modules can ask Core to
+   allocate the next token for a collection internally.
+3. Add prepared-mint prepare, complete, abort, and read hooks with operation ID
+   replay protection and commitment binding.
+4. Record token collection identity, derive collection serial and
+   mapping-exists state, and retain burned/read state for manager and legacy
+   mints.
+5. Preserve the current `StreamDrops -> StreamMinter -> StreamCore` flow until
+   a later PR intentionally routes it through the manager.
+6. Measure and report Core runtime size for the final hook shapes.
+
+Required tests/checks:
+
+- focused Core mint-manager hook tests
+- `forge test --match-path test/StreamMinterValidation.t.sol -vvv`
+- `forge test --match-path test/StreamMintAccounting.t.sol -vvv`
+- `forge test --match-path test/StreamDropsIntegrationCharacterization.t.sol -vvv`
+- `forge test --match-path test/StreamMinterEvents.t.sol -vvv`
+- `forge build`
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- `python scripts/check_contract_size_budget.py`
+- release artifact generator checks when ABI surfaces change
+- `python scripts/check_changelog.py`
+- `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+Acceptance criteria:
+
+- Only the configured `mintManager` can call Core manager mint, prepare, and
+  complete hooks.
+- Manager mint writes canonical collection identity and serial while preserving
+  existing Core supply, freeze, token data, and randomizer behavior.
+- Prepared mint records identity without ERC-721 ownership, rejects mismatched
+  operation IDs, reused operation IDs, or commitments, and clears pending state
+  before final `_safeMint`.
+- Manager-only abort unwinds identity, token data, collection circulation
+  supply, and pending prepared state for committed prepared mints that cannot
+  complete.
+- Token operations cannot successfully operate on incomplete prepared tokens.
+- Reverts after prepare unwind identity, supply counters, and pending state.
+- Safe receiver callbacks cannot observe or exploit an incomplete prepared
+  token.
+- Existing Drops/Minter fixed-price and auction flows continue to pass.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3456,9 +3535,10 @@ Status: Merged in PR #427; issue #426 closed completed.
 
 Gate: G.
 
-Problem: `StreamCore` currently has finite EIP-170 bytecode headroom even after
-the 21,792-byte / 2,784-byte-margin CON-008 measurement, and the approved
-spend ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. Adding
+Problem: `StreamCore` currently has finite EIP-170 bytecode headroom; the
+current CON-012 measurement is 24,172 runtime bytes with 404 bytes of margin
+under accepted exception `CORE-SPEND-2026-06-24-001`, while the approved spend
+ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. Adding
 world-class 1/1 product surfaces directly to Core risks breaking deployment or
 forcing rushed size recovery after feature work is already written.
 
@@ -3699,7 +3779,8 @@ unless an external dependency changes.
 | --- | --- | --- | --- |
 | `CON-009` | Implement split factory and split wallet skeleton | C/G | Merged in PR #626; issue #625 closed completed |
 | `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Merged in PR #628; issue #627 closed completed |
-| `CON-011` | Add revenue resolver and primary-sale settlement adapters | C/G | Active PR #630 / issue #629 on branch `codex/revenue-resolver-primary-adapters`; waiting for CI and review bots |
+| `CON-011` | Add revenue resolver and primary-sale settlement adapters | C/G | Merged in PR #630; issue #629 closed completed |
+| `CON-012` | Add Core mint-manager boundary and prepared-mint hooks | C/G | Active issue #631 on branch `codex/mint-manager-core-hooks`; local draft in progress |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

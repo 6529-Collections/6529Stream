@@ -35,52 +35,46 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/revenue-resolver-primary-adapters` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/628` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/629 |
-| Active PR | https://github.com/6529-Collections/6529Stream/pull/630 |
-| Next issue | Mint manager and prepared-mint hooks after revenue resolver and primary-sale settlement adapters. |
+| Active PR branch | `codex/mint-manager-core-hooks` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/630` |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/631 |
+| Active PR | TBD |
+| Next issue | Full mint manager policy/ledger integration after Core hooks, then collection metadata and preservation satellites. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-24 07:16 UTC` |
+| Last updated | `2026-06-24 13:19 UTC` |
 
 ## Current Run Notes
 
 - User authorized autonomous execution without permission prompts.
 - Use heavy subagents for independent review, sequencing, and verification.
-- PR #628 merged the asset policy registry and ERC-20 split-wallet slice and
-  issue #627 is closed completed.
-- The current topic is issue #629 on branch
-  `codex/revenue-resolver-primary-adapters`.
+- PR #630 merged the revenue resolver and primary-sale settlement adapter slice
+  and issue #629 is closed completed.
+- The current topic is issue #631 on branch
+  `codex/mint-manager-core-hooks`.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic adds the outside-Core revenue resolver and primary-sale
-  settlement adapter foundation for native ETH and approved standard ERC-20
-  assets, building on the merged split wallet and asset policy surfaces.
-- Local implementation and validation are complete for the current topic. The
-  branch includes resolver/settlement contracts, focused tests, deployment
-  wiring, docs/indexer notes, release artifacts, and cross-platform manifest
-  gate parity for the fork non-broadcast deployment manifest.
-- Fresh local reviewers found no current contract blockers; release/docs review
-  found and the branch fixed a CI/Make/Bash deployment-manifest gate asymmetry.
-- GPT-5.5 Pro remained pinned to max reasoning. Two OpenRouter max-reasoning
-  retries returned hidden reasoning only with empty visible content; the third
-  max-reasoning retry returned visible feedback after hidden reasoning was
-  excluded from the response payload.
-- The visible GPT-5.5 Pro feedback flagged untracked new source/test files as a
-  packaging blocker and requested explicit coverage for native value rollback,
-  frozen assignment overwrites, ERC-20-to-ERC-20 replay, second-leg ERC-20
-  rollback, and template ERC-20 event reconstruction. The branch now includes
-  that focused coverage; the untracked-file blocker will be resolved by the
-  normal PR staging step.
-- Full Windows validation passed after the GPT-5.5 Pro follow-up. Full Slither
-  was attempted and exited nonzero on the repo's broad baseline warning set
-  plus the reviewed arbitrary native send to a verified split wallet in the
-  settlement adapter.
-- PR #630 is open at
-  https://github.com/6529-Collections/6529Stream/pull/630 and CodeRabbit review
-  was requested in comment `4786805627`.
+- Current topic adds the Core mint-manager boundary, prepared-mint hooks, and
+  token collection identity reads required before full mint manager policy and
+  ledger integration.
+- Local draft implemented the Core hook slice, then incorporated subagent
+  findings by adding manager-only prepared-mint abort/recovery, stale-randomizer
+  callback rejection after abort, and inherited ERC-721 approval/transfer guards
+  while a prepared mint is pending.
+- The immediate Core hook surface was slimmed so beneficiary, payment evidence,
+  batch commitments, and manager-specific events stay outside Core. Final
+  measured `StreamCore` runtime is 24,172 bytes with 404 bytes of EIP-170
+  margin under accepted exception `CORE-SPEND-2026-06-24-001`.
+- Local validation is complete for the current draft: focused Foundry suites,
+  full `forge test -vvv`, full Windows `scripts\check.ps1`,
+  `codex-diff-check`, and size/spend-policy checks passed. Fresh OpenRouter
+  review packets are now in flight for Opus 4.8, GPT-5.5 Pro at max reasoning,
+  and GLM 5.2.
+- Preserve the existing `StreamDrops -> StreamMinter -> StreamCore` flow unless
+  a later PR intentionally routes it through the new manager boundary.
+- Keep GPT-5.5 Pro on high/max reasoning for OpenRouter reviews. Long waits are
+  expected; do not lower reasoning for speed.
 
 ## Packaging Notes
 

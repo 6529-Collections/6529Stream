@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import hashlib
 import json
 import re
 import sys
@@ -76,6 +77,14 @@ def normalize_path(path: Path, repo_root: Path) -> str:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
 
 
 def require_string(value: Any, path: str) -> str:
@@ -257,10 +266,7 @@ def build_address_book(
     release_artifacts = require_dict(
         manifest.get("release_artifacts"), "manifest.release_artifacts"
     )
-    source_manifest_checksum = require_sha256(
-        release_artifacts.get("manifest_sha256"),
-        "manifest.release_artifacts.manifest_sha256",
-    )
+    source_manifest_checksum = require_sha256(sha256_file(manifest_path), str(manifest_path))
     event_topic_catalog = require_string(
         release_artifacts.get("event_topic_catalog"),
         "manifest.release_artifacts.event_topic_catalog",

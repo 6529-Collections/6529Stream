@@ -9,27 +9,25 @@ feedback, merge when clean, then continue.
 
 ## Current Topic
 
-Revenue resolver and primary-sale settlement adapters.
+Core mint-manager boundary and prepared-mint hooks.
 
-The current branch should implement the next outside-Core primary settlement
-slice:
+The current branch should implement the Core hook slice needed by the v1 mint
+manager and primary settlement roadmap:
 
-- a deployment-tracked revenue resolver surface for primary revenue
-  assignments;
-- native ETH and approved-standard ERC-20 primary-sale settlement adapters or
-  modules outside `StreamCore`;
-- assignment/policy hashes that bind revenue class, profile, wallet/factory,
-  asset, and mutability/freeze state;
-- exact native/token value accounting, fail-closed ERC-20 policy reads, and
-  official-settlement events that indexers can distinguish from passive wallet
-  receipts;
-- focused tests for strict policy-hash matching, replay controls, profile and
-  wallet verification, native settlement, ERC-20 exact-delta settlement, and
-  passive receipt separation.
+- a Core `mintManager` trust pointer with explicit manager-only authorization;
+- `mintFromManager` so future manager/sale modules can ask Core to allocate the
+  next token for a collection internally;
+- same-flow prepared-mint hooks and read surface for token-level policy and
+  settlement flows;
+- token collection identity reads that expose mapping existence, collection ID,
+  collection serial, and burned state;
+- focused tests for authorization, allocation, supply/freeze/data guards,
+  prepared mismatch handling, callback safety, and no counter drift on reverts;
+- measured Core runtime-size proof for the final hook shapes.
 
-Mint-manager/Core prepared-mint hooks, token-level snapshots, ERC-20 auction
-bidding, and royalty resolver integration remain later roadmap topics unless a
-minimal compile/test interface is unavoidable.
+Full mint manager phase policy, mint ledger accounting, routing Drops through
+the manager, token-level revenue snapshots, ERC-20 auction bidding, and royalty
+resolver integration remain follow-up topics.
 
 ## Branch State
 
@@ -40,11 +38,15 @@ minimal compile/test interface is unavoidable.
   completed.
 - Asset policy and ERC-20 split-wallet PR #628 merged and issue #627 is closed
   completed.
-- Current topic branch: `codex/revenue-resolver-primary-adapters`.
-- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/629.
-- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/630.
-- Local draft status: implemented, max-reasoning GPT-5.5 Pro visible feedback
-  addressed, locally validated, and PR opened; CodeRabbit requested.
+- Revenue resolver and primary-sale settlement adapters PR #630 merged and
+  issue #629 is closed completed.
+- Current topic branch: `codex/mint-manager-core-hooks`.
+- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/631.
+- Current topic PR: TBD.
+- Local draft status: implemented locally, subagent blocker fixes applied, Core
+  size proof updated to 24,172 runtime bytes with 404 bytes of EIP-170 margin,
+  full local validation passed, and fresh OpenRouter review is in flight for
+  Opus 4.8, GPT-5.5 Pro at max reasoning, and GLM 5.2.
 
 ## Subagent Findings To Carry
 
@@ -55,10 +57,16 @@ minimal compile/test interface is unavoidable.
   requirement does not automatically launch ERC-20 auction bidding.
 - Metadata docs used `StreamPreservationRegistry` while the roadmap standardized
   on `StreamPreservationRecords`.
-- After the revenue resolver and primary-sale adapter slice, the likely
-  sequence is mint manager, collection metadata,
-  preservation satellites, entropy fallback decision, and only then minimal
-  Core hooks.
+- The Core prepared-mint hook slice should avoid routing existing Drops through
+  the manager until the later policy/ledger PR owns that migration.
+- Local Solidity review for the CON-012 draft found two blockers: durable
+  prepared state needed an abort/recovery path, and inherited ERC-721
+  approval/transfer surfaces needed to reject while a prepared mint is pending.
+  The branch now includes manager-only abort, stale-callback rejection after
+  abort, and approval/transfer guards.
+- Local docs/release review for the CON-012 draft required an explicit
+  size-budget exception note and current run-state wording before PR; the
+  branch now carries both, with full local validation passing afterward.
 
 ## Validation Bar
 
@@ -68,9 +76,8 @@ minimal compile/test interface is unavoidable.
   and the review loop is repeated.
 - PR review bots have no unresolved blocking findings, or deferrals are
   documented with rationale.
-- Current local validation includes 19 focused primary-settlement tests,
-  `forge build`, `forge test -vvv`, production `via-ir` release artifact
-  regeneration/checks, `codex-diff-check`, and the full Windows
-  `scripts\check.ps1` wrapper. Full Slither was attempted and exited nonzero on
-  the repo's broad baseline warning set plus the reviewed arbitrary native-send
-  warning for the settlement adapter's verified split-wallet transfer.
+- Current local validation target includes focused Core mint-manager hook tests,
+  current StreamMinter/Drops regression tests, `forge build`, `forge test -vvv`,
+  production `via-ir` size build, `python scripts/check_contract_size_budget.py`,
+  release artifact checks when ABI surfaces change, `codex-diff-check`, and the
+  full Windows `scripts\check.ps1` wrapper.

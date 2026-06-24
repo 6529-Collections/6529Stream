@@ -160,3 +160,36 @@
   then requested CodeRabbit review in comment `4786805627`. Next action is to
   wait for CI and review-bot feedback, resolve anything actionable, and merge
   only when clean.
+- Addressed PR #630 review feedback by moving settlement replay checks before
+  resolver/template side effects, verifying materialized split-wallet
+  identities against the split factory, adding rollback/replay coverage, and
+  refreshing release artifacts and readiness evidence.
+- PR #630 passed CI and CodeRabbit, then merged as
+  `68af8a885eda4cd74ec885a49beaf6ca6be388b8`, closing issue #629 completed.
+- Created issue #631 and branch `codex/mint-manager-core-hooks` for `CON-012`:
+  the Core mint-manager boundary, prepared-mint hooks, token collection identity
+  reads, focused tests, and measured Core size proof required before the full
+  mint manager policy/ledger migration.
+- Implemented the local CON-012 Core hook draft on
+  `codex/mint-manager-core-hooks`: validated `mintManager` pointer,
+  manager-only immediate and prepared mint hooks, `tokenCollectionIdentity`,
+  retained burn identity, and focused authorization/revert/callback coverage.
+- Addressed subagent review blockers by adding manager-only prepared-mint abort
+  recovery, rejecting stale randomizer callbacks after abort, guarding inherited
+  ERC-721 approval/transfer paths while prepared state is pending, and slimming
+  Core's prepared record so beneficiary/payment/mint-commitment evidence stays
+  in manager and settlement satellites. Final measured `StreamCore` runtime is
+  24,172 bytes with 404 bytes of EIP-170 margin under
+  `CORE-SPEND-2026-06-24-001`.
+- Completed local validation for the CON-012 draft. Focused Foundry suites,
+  full `forge test -vvv` with 530 passing tests, full Windows
+  `scripts\check.ps1`, `codex-diff-check`, and size/spend-policy checks passed.
+  During validation, refreshed NatSpec summary counts and retained evidence
+  hashes for local/fork deployment and randomizer artifacts, then regenerated
+  downstream release manifests, evidence packet indexes, lockfile, bytecode
+  proof, and checksum bundles.
+- Launched fresh parallel OpenRouter reviews from the current validated packet:
+  Opus 4.8 with max reasoning, GPT-5.5 Pro with max reasoning and a 90-minute
+  client timeout, and GLM 5.2 with xhigh reasoning. The packet includes the
+  current Solidity/interface/test contents, focused and full diffs, validation
+  evidence, Core size risk, and the explicit abort-sentinel design question.

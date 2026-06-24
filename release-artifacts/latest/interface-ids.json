@@ -21,8 +21,9 @@
     "IStreamAuctions": "0xb109bb30",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
-    "IStreamCore": "0xe02cb7f7",
+    "IStreamCore": "0x4ac5cdd3",
     "IStreamDrops": "0xd7c2abe3",
+    "IStreamMintManager": "0x47588f68",
     "IStreamMinter": "0x0f48ec25",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
     "IStreamRevenueResolver": "0x3503c22e",
@@ -590,11 +591,15 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:43c50531bd57a457e239e26b7ddda45028cd1738fd56838dc7efbcac0987264d",
-      "interface_id": "0xe02cb7f7",
+      "abi_sha256": "sha256:aafef7d9d43ebafc04e2df730b0b3852bf4f54d676aca5e9a2526da9b46b46f4",
+      "interface_id": "0x4ac5cdd3",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0xe02cb7f7",
+      "computed_selector_xor": "0x4ac5cdd3",
       "function_selectors": [
+        {
+          "signature": "abortPreparedMintFromManager(uint256,bytes32)",
+          "selector": "0xd9251657"
+        },
         {
           "signature": "artistApprovalHashes(uint256)",
           "selector": "0xe1ffc36f"
@@ -612,6 +617,10 @@
           "selector": "0x2ed330f7"
         },
         {
+          "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)",
+          "selector": "0xe3bd589a"
+        },
+        {
           "signature": "isCoreContract()",
           "selector": "0x5ecb6594"
         },
@@ -622,6 +631,22 @@
         {
           "signature": "mint(uint256,address,string,uint256,uint256)",
           "selector": "0xdabb57ca"
+        },
+        {
+          "signature": "mintFromManager(uint256,address,string,uint256,bytes32)",
+          "selector": "0x070e140e"
+        },
+        {
+          "signature": "pendingPreparedMintTokenId()",
+          "selector": "0xa767d50e"
+        },
+        {
+          "signature": "prepareMintFromManager(uint256,string,bytes32,bytes32)",
+          "selector": "0x907c9d45"
+        },
+        {
+          "signature": "preparedMint(uint256)",
+          "selector": "0x06d25065"
         },
         {
           "signature": "previewCollectionFreezeManifestHash(uint256)",
@@ -642,6 +667,10 @@
         {
           "signature": "setTokenHash(uint256,uint256,bytes32)",
           "selector": "0x9cac0f1f"
+        },
+        {
+          "signature": "tokenCollectionIdentity(uint256)",
+          "selector": "0xa6b638c9"
         },
         {
           "signature": "viewCirSupply(uint256)",
@@ -704,6 +733,20 @@
         {
           "signature": "retrieveTokenID(bytes32)",
           "selector": "0x4098fff1"
+        }
+      ]
+    },
+    "IStreamMintManager": {
+      "source": "smart-contracts/IStreamMintManager.sol",
+      "artifact_path": "out/IStreamMintManager.sol/IStreamMintManager.json",
+      "abi_sha256": "sha256:6dbabf48133e84ee616ff5689502bc5a1f229a9253e3240a887a16babf3d397b",
+      "interface_id": "0x47588f68",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x47588f68",
+      "function_selectors": [
+        {
+          "signature": "isStreamMintManager()",
+          "selector": "0x47588f68"
         }
       ]
     },

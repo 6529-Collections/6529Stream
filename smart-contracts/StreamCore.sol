@@ -14,6 +14,7 @@ import "./ERC721.sol";
 import "./IRandomizer.sol";
 import "./IStreamAdmins.sol";
 import "./IStreamMinter.sol";
+import "./IStreamMintManager.sol";
 import "./IERC2981.sol";
 import "./Ownable.sol";
 import "./IDependencyRegistry.sol";
@@ -66,10 +67,13 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     );
     error CollectionNotCreated(uint256 collectionId);
     error ArtistSignatureUnauthorized();
+    /// @notice Legacy burned-remint selector retained; current path reverts earlier.
     error BurnedTokenRemintNotAllowed(uint256 tokenId);
     error FunctionAdminUnauthorized();
     error InvalidAdminContract();
     error InvalidDependencyRegistryContract();
+    /// @notice The configured mint manager does not expose the expected marker.
+    error InvalidMintManagerContract();
     error InvalidMinterContract();
     error InvalidRandomizerContract();
     error InvalidTokenMetadataInput();
@@ -79,7 +83,19 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     error MetadataFieldTooLarge(bytes32 field, uint256 actual, uint256 maximum);
     error MetadataFieldInvalidUTF8(bytes32 field);
     error MetadataFrozen(uint256 collectionId);
+    /// @notice Caller is not the configured mint manager.
+    error NotMintManager();
     error NotMinterContract();
+    /// @notice A manager-prepared mint is pending completion.
+    error PreparedMintAlreadyPending();
+    /// @notice The requested prepared token does not exist.
+    error PreparedMintNotFound();
+    /// @notice Prepared token state does not match the supplied completion data.
+    error PreparedMintMismatch();
+    /// @notice A prepared-mint operation ID has already been consumed.
+    error PreparedMintOperationReused();
+    /// @notice Renderer token data does not match the manager commitment.
+    error TokenDataHashMismatch();
     error TokenNotMinted();
     error TokenOutsideCollectionRange();
     error UnsafeMetadataURI();
@@ -198,6 +214,18 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     mapping(uint256 => BurnedTokenAudit) private burnedTokenAuditRecords;
 
     uint256 private _liveTokenSupply;
+    /// @notice Token ID of the currently pending prepared mint, or zero when none is pending.
+    uint256 public pendingPreparedMintTokenId;
+
+    struct PreparedMintRecord {
+        bool exists;
+        bytes32 operationId;
+        uint256 collectionId;
+    }
+
+    mapping(uint256 => PreparedMintRecord) private preparedMintRecords;
+    // Operation IDs are one-shot manager commitments, even if the prepared token is aborted.
+    mapping(bytes32 => bool) private usedPreparedOperationIds;
 
     // count of frozen collections; used to block global dependency registry swaps
     uint256 private frozenCollectionCount;
@@ -207,6 +235,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     IStreamAdmins private adminsContract;
     IDependencyRegistry private dependencyRegistry;
     address public minterContract;
+    /// @notice Manager authorized to allocate Core-owned token identity and mint.
+    address public mintManager;
 
     // events
     event CollectionCreated(uint256 indexed _collectionID);
@@ -310,6 +340,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         uint256 _collectionTotalSupply,
         uint256 _setFinalSupplyTimeAfterMint
     ) public FunctionAdminRequired(this.setCollectionData.selector) {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         _requireExistingMutableCollection(_collectionID);
         if (_collectionTotalSupply > _COLLECTION_TOKEN_RANGE) {
@@ -342,6 +373,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         public
         FunctionAdminRequired(this.addRandomizer.selector)
     {
+        _requireNoPreparedMint();
         StreamMetadataRenderer.requireContractMarker(
             _randomizerContract,
             IRandomizer.isRandomizerContract.selector,
@@ -381,28 +413,140 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         if (msg.sender != minterContract) {
             revert NotMinterContract();
         }
+        _requireNoPreparedMint();
         _requireCollectionNotFrozen(_collectionID);
         StreamMetadataRenderer.requireTokenData(_tokenData);
         collectionAdditonalDataStructure storage collectionData =
             collectionAdditionalData[_collectionID];
-        uint256 nextCirculationSupply;
+        (uint256 expectedTokenId, uint256 collectionSerial) =
+            _nextTokenForCollection(collectionData);
+        if (mintIndex != expectedTokenId) {
+            revert TokenOutsideCollectionRange();
+        }
+        collectionData.collectionCirculationSupply = collectionSerial;
         unchecked {
-            nextCirculationSupply = collectionData.collectionCirculationSupply + 1;
+            tokensAirdropPerAddress[_collectionID][_recipient] =
+                tokensAirdropPerAddress[_collectionID][_recipient] + 1;
         }
-        collectionData.collectionCirculationSupply = nextCirculationSupply;
-        if (collectionData.collectionTotalSupply >= nextCirculationSupply) {
-            unchecked {
-                tokensAirdropPerAddress[_collectionID][_recipient] =
-                    tokensAirdropPerAddress[_collectionID][_recipient] + 1;
-            }
-            _mintProcessing(mintIndex, _recipient, _tokenData, _collectionID, _saltfun_o);
+        _mintProcessing(mintIndex, _recipient, _tokenData, _collectionID, _saltfun_o);
+    }
+
+    /// @notice Mints the next token for a collection through the configured manager.
+    /// @return tokenId Allocated token ID.
+    /// @return collectionSerial Stable collection-local serial.
+    function mintFromManager(
+        uint256 collectionId,
+        address initialRecipient,
+        string calldata _tokenData,
+        uint256 _saltfun_o,
+        bytes32 tokenDataHash
+    ) external returns (uint256 tokenId, uint256 collectionSerial) {
+        _requireMintManager();
+        _requireNoPreparedMint();
+        _requireCollectionNotFrozen(collectionId);
+        _requireTokenDataWithHash(_tokenData, tokenDataHash);
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[collectionId];
+        (tokenId, collectionSerial) = _nextTokenForCollection(collectionData);
+        collectionData.collectionCirculationSupply = collectionSerial;
+        _mintProcessing(tokenId, initialRecipient, _tokenData, collectionId, _saltfun_o);
+    }
+
+    /// @notice Prepares the next token for same-transaction manager settlement.
+    /// @return tokenId Allocated token ID.
+    /// @return collectionSerial Stable collection-local serial.
+    function prepareMintFromManager(
+        uint256 collectionId,
+        string calldata _tokenData,
+        bytes32 tokenDataHash,
+        bytes32 operationId
+    ) external returns (uint256 tokenId, uint256 collectionSerial) {
+        _requireMintManager();
+        _requireNoPreparedMint();
+        _requireCollectionNotFrozen(collectionId);
+        _requireTokenDataWithHash(_tokenData, tokenDataHash);
+        if (usedPreparedOperationIds[operationId]) {
+            revert PreparedMintOperationReused();
+        }
+        usedPreparedOperationIds[operationId] = true;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[collectionId];
+        (tokenId, collectionSerial) = _nextTokenForCollection(collectionData);
+        collectionData.collectionCirculationSupply = collectionSerial;
+        tokenData[tokenId] = _tokenData;
+        _recordTokenCollectionIdentity(tokenId, collectionId);
+        preparedMintRecords[tokenId] = PreparedMintRecord({
+            exists: true, operationId: operationId, collectionId: collectionId
+        });
+        pendingPreparedMintTokenId = tokenId;
+    }
+
+    /// @notice Completes a manager-prepared token after settlement records are written.
+    function completePreparedMintFromManager(
+        uint256 tokenId,
+        address initialRecipient,
+        bytes32 operationId,
+        uint256 _saltfun_o
+    ) external {
+        _requireMintManager();
+        PreparedMintRecord memory record = _requirePreparedMint(tokenId, operationId);
+        delete preparedMintRecords[tokenId];
+        _addLiveTokenMetadataRecord(record.collectionId, tokenId);
+        unchecked {
+            _liveTokenSupply = _liveTokenSupply + 1;
+        }
+        _safeMint(initialRecipient, tokenId);
+        collectionAdditionalData[record.collectionId].randomizer
+            .calculateTokenHash(record.collectionId, tokenId, _saltfun_o);
+        pendingPreparedMintTokenId = 0;
+    }
+
+    /// @notice Clears a manager-prepared token that cannot be completed.
+    function abortPreparedMintFromManager(uint256 tokenId, bytes32 operationId) external {
+        _requireMintManager();
+        PreparedMintRecord memory record = _requirePreparedMint(tokenId, operationId);
+        delete preparedMintRecords[tokenId];
+        pendingPreparedMintTokenId = 0;
+        collectionAdditonalDataStructure storage collectionData =
+            collectionAdditionalData[record.collectionId];
+        unchecked {
+            collectionData.collectionCirculationSupply =
+                collectionData.collectionCirculationSupply - 1;
+        }
+        delete tokenData[tokenId];
+        delete tokenToHash[tokenId];
+    }
+
+    /// @notice Returns pending prepared-mint state for a token, if any.
+    function preparedMint(uint256 tokenId) external view returns (PreparedMintRecord memory) {
+        return preparedMintRecords[tokenId];
+    }
+
+    /// @notice Returns authoritative collection identity retained across burns.
+    function tokenCollectionIdentity(uint256 tokenId)
+        external
+        view
+        returns (bool mappingExists, uint256 collectionId, uint256 collectionSerial, bool burned)
+    {
+        burned = burnedTokenAuditRecords[tokenId].burned;
+        PreparedMintRecord storage prepared = preparedMintRecords[tokenId];
+        mappingExists = _exists(tokenId) || burned || prepared.exists;
+        if (!mappingExists) {
+            return (false, 0, 0, burned);
+        }
+        if (prepared.exists) {
+            collectionId = prepared.collectionId;
+        } else if (burned) {
+            collectionId = burnedTokenAuditRecords[tokenId].collectionId;
         } else {
-            revert CollectionSupplyReached();
+            collectionId = tokenIdsToCollectionIds[tokenId];
         }
+        collectionSerial = _collectionSerialForToken(tokenId, collectionId);
     }
 
     // burn function
     function burn(uint256 _collectionID, uint256 _tokenId) public {
+        _requireNoPreparedMint();
         require(
             _isApprovedOrOwner(_msgSender(), _tokenId),
             "ERC721: caller is not token owner or approved"
@@ -445,11 +589,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         uint256 _collectionID,
         uint256 _saltfun_o
     ) internal {
-        if (burnedTokenAuditRecords[_mintIndex].burned) {
-            revert BurnedTokenRemintNotAllowed(_mintIndex);
-        }
         tokenData[_mintIndex] = _tokenData;
-        tokenIdsToCollectionIds[_mintIndex] = _collectionID;
+        _recordTokenCollectionIdentity(_mintIndex, _collectionID);
         _addLiveTokenMetadataRecord(_collectionID, _mintIndex);
         unchecked {
             _liveTokenSupply = _liveTokenSupply + 1;
@@ -475,6 +616,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         uint256 _index,
         string[] memory _newCollectionScript
     ) public FunctionAdminRequired(this.updateCollectionInfo.selector) {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         _requireExistingMutableCollection(_collectionID);
         collectionInfoStructure storage info = collectionInfo[_collectionID];
@@ -534,6 +676,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         string memory _signature,
         bytes32 _approvalHash
     ) private {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         _requireCollectionNotFrozen(_collectionID);
         collectionAdditonalDataStructure storage collectionData =
@@ -553,6 +696,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         public
         FunctionAdminRequired(this.changeMetadataView.selector)
     {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         _requireExistingMutableCollection(_collectionID);
         onchainMetadata[_collectionID] = _status;
@@ -564,6 +708,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         public
         FunctionAdminRequired(this.changeTokenData.selector)
     {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         uint256 collectionId = tokenIdsToCollectionIds[_tokenId];
         _requireCollectionNotFrozen(collectionId);
@@ -580,6 +725,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         string[] memory _images,
         string[] memory _attributes
     ) public FunctionAdminRequired(this.updateImagesAndAttributes.selector) {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         if (_tokenId.length != _images.length || _images.length != _attributes.length) {
             revert InvalidTokenMetadataInput();
@@ -602,6 +748,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         public
         FunctionAdminRequired(this.freezeCollection.selector)
     {
+        _requireNoPreparedMint();
         _requireMetadataMutationNotPaused();
         _requireFreezeEligible(_collectionID);
         _finalizeCollectionSupply(collectionAdditionalData[_collectionID]);
@@ -645,6 +792,10 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
             if (audit.collectionId != _collectionID) {
                 revert TokenOutsideCollectionRange();
             }
+        } else if (tokenIdsToCollectionIds[_mintIndex] == _collectionID) {
+            revert TokenOutsideCollectionRange();
+        } else {
+            // Preserve the legacy premint randomizer path for unmapped tokens.
         }
         tokenToHash[_mintIndex] = _hash;
         // Record pre-mint callbacks, but only live tokens announce metadata changes.
@@ -667,6 +818,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         public
         FunctionAdminRequired(this.setFinalSupply.selector)
     {
+        _requireNoPreparedMint();
         _requireExistingMutableCollection(_collectionID);
         if (!wereDataAdded[_collectionID]) {
             revert CollectionDataMissing(_collectionID);
@@ -683,12 +835,15 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         _finalizeCollectionSupply(collectionData);
     }
 
-    // function to update the admin, minter or dependency contract
-    // 1. admin contract 2. minter contract 3. dependency registry contract
+    // function to update the admin, minter, dependency or mint-manager contract
+    // 1. admin contract 2. minter contract 3. dependency registry contract 4. mint manager
     function updateContracts(uint8 _opt, address _newContract)
         public
         FunctionAdminRequired(this.updateContracts.selector)
     {
+        if (_opt != 4) {
+            _requireNoPreparedMint();
+        }
         if (_opt == 1) {
             StreamMetadataRenderer.requireContractMarker(
                 _newContract, IStreamAdmins.isAdminContract.selector, InvalidAdminContract.selector
@@ -709,6 +864,13 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
                 revert InvalidDependencyRegistryContract();
             }
             dependencyRegistry = IDependencyRegistry(_newContract);
+        } else if (_opt == 4) {
+            StreamMetadataRenderer.requireContractMarker(
+                _newContract,
+                IStreamMintManager.isStreamMintManager.selector,
+                InvalidMintManagerContract.selector
+            );
+            mintManager = _newContract;
         }
     }
 
@@ -769,6 +931,21 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
 
     function isCoreContract() external pure returns (bool) {
         return true;
+    }
+
+    function _approve(address to, uint256 tokenId) internal override {
+        _requireNoPreparedMint();
+        super._approve(to, tokenId);
+    }
+
+    function _setApprovalForAll(address owner, address operator, bool approved) internal override {
+        _requireNoPreparedMint();
+        super._setApprovalForAll(owner, operator, approved);
+    }
+
+    function _transfer(address from, address to, uint256 tokenId) internal override {
+        _requireNoPreparedMint();
+        super._transfer(from, to, tokenId);
     }
 
     function royaltyInfo(uint256 tokenId, uint256 salePrice)
@@ -906,6 +1083,8 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     }
 
     // function to return the collection id given a token id
+    /// @dev Legacy lookup; may retain a stale collection ID after a prepared mint aborts.
+    ///      Use tokenCollectionIdentity for the authoritative mapping-exists result.
     function viewColIDforTokenID(uint256 _tokenid) public view returns (uint256) {
         return (tokenIdsToCollectionIds[_tokenid]);
     }
@@ -1082,6 +1261,74 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function _requireCollectionNotFrozen(uint256 _collectionID) private view {
         if (collectionFreeze[_collectionID]) {
             revert MetadataFrozen(_collectionID);
+        }
+    }
+
+    function _requireMintManager() private view {
+        if (msg.sender != mintManager) {
+            revert NotMintManager();
+        }
+    }
+
+    function _requireNoPreparedMint() private view {
+        uint256 tokenId = pendingPreparedMintTokenId;
+        if (tokenId != 0) {
+            revert PreparedMintAlreadyPending();
+        }
+    }
+
+    function _requirePreparedMint(uint256 tokenId, bytes32 operationId)
+        private
+        view
+        returns (PreparedMintRecord memory record)
+    {
+        record = preparedMintRecords[tokenId];
+        if (!record.exists) {
+            revert PreparedMintNotFound();
+        }
+        if (record.operationId != operationId || pendingPreparedMintTokenId != tokenId) {
+            revert PreparedMintMismatch();
+        }
+    }
+
+    function _requireTokenDataWithHash(string memory _tokenData, bytes32 tokenDataHash)
+        private
+        pure
+    {
+        StreamMetadataRenderer.requireTokenData(_tokenData);
+        bytes32 actualHash = keccak256(bytes(_tokenData));
+        if (actualHash != tokenDataHash) {
+            revert TokenDataHashMismatch();
+        }
+    }
+
+    function _nextTokenForCollection(collectionAdditonalDataStructure storage collectionData)
+        private
+        view
+        returns (uint256 tokenId, uint256 collectionSerial)
+    {
+        unchecked {
+            collectionSerial = collectionData.collectionCirculationSupply + 1;
+        }
+        if (collectionData.collectionTotalSupply < collectionSerial) {
+            revert CollectionSupplyReached();
+        }
+        unchecked {
+            tokenId = collectionData.reservedMinTokensIndex + collectionSerial - 1;
+        }
+    }
+
+    function _recordTokenCollectionIdentity(uint256 tokenId, uint256 collectionId) private {
+        tokenIdsToCollectionIds[tokenId] = collectionId;
+    }
+
+    function _collectionSerialForToken(uint256 tokenId, uint256 collectionId)
+        private
+        view
+        returns (uint256 serial)
+    {
+        unchecked {
+            serial = tokenId - collectionAdditionalData[collectionId].reservedMinTokensIndex + 1;
         }
     }
 

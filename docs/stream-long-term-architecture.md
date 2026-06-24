@@ -421,11 +421,11 @@ Normative v1 rule:
    must not be assigned to a collection from a range heuristic.
 5. Burned tokens retain their last authoritative collection mapping for royalty
    disclosure and audit history. Burning removes ERC-721 ownership and
-   enumerable membership, but it must not clear `tokenCollectionId`,
-   `tokenCollectionSerial`, or `tokenCollectionMappingExists`. `royaltyInfo()`
-   therefore continues to resolve token, collection, then default scope for a
-   burned token, while `tokenURI()` may still revert because the token no
-   longer exists for ERC-721 metadata purposes.
+   enumerable membership, but it must not clear retained collection identity or
+   burned-token audit state. `royaltyInfo()` therefore continues to resolve
+   token, collection, then default scope for a burned token through
+   `tokenCollectionIdentity`, while `tokenURI()` may still revert because the
+   token no longer exists for ERC-721 metadata purposes.
 6. Token-level revenue, royalty, metadata, and entropy assignments require an
    authoritative minted or same-transaction allocated token-to-collection
    mapping. They cannot be created for unknown token IDs.
@@ -475,19 +475,23 @@ interface IStreamCoreTokenIdentityView {
 }
 ```
 
-`mappingExists` is the public read equivalent of
-`tokenCollectionMappingExists[tokenId]`. For a currently minted token, the
+`mappingExists` is the public authoritative identity read. Current launch Core
+derives it from live ownership, burned-token audit state, and prepared-mint
+state rather than storing a separate boolean. For a currently minted token, the
 function returns `(true, collectionId, collectionSerial, false)`. For a burned
 token that was once minted, it returns
-`(true, lastCollectionId, lastCollectionSerial, true)`. For a premint,
+`(true, lastCollectionId, lastCollectionSerial, true)`. For a prepared-incomplete
+token, it returns `(true, preparedCollectionId, preparedCollectionSerial, false)`
+while `tokenLifecycle(tokenId)` reports `PREPARED_INCOMPLETE`. For a premint,
 nonexistent, or otherwise unmapped token, it returns `(false, 0, 0, false)`.
 Royalties, metadata routing, finality components, indexers, and archival tools
 should use this read surface rather than private mapping names, historical
 `origin/main` helper names, or token ID range inference.
 Prepared-incomplete tokens have authoritative identity for the manager-owned
 operation but are not ordinary minted ERC-721 tokens. Satellites that can be
-called during `PREPARED_MINT` must check `tokenLifecycle(tokenId)` and reject
-or render provisional state as their spec requires.
+called during `PREPARED_INCOMPLETE` must check `tokenLifecycle(tokenId)` and
+reject or render provisional state as their spec requires rather than falling
+through to the unmapped `(false, 0, 0, false)` branch.
 The cross-contract ABI returns `uint8`; the numeric values are pinned in the
 Numeric ID Catalog as `UNKNOWN = 0`, `PREPARED_INCOMPLETE = 1`, `MINTED = 2`,
 and `BURNED = 3`.

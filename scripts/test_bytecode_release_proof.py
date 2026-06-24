@@ -116,6 +116,7 @@ def write_minimal_tree(root: Path) -> dict[str, Path]:
     write_json(abi_path, abi_checksums)
     write_json(source_path, source_verification)
     write_json(manifest_path, deployment_manifest)
+    deployment_manifest_hash = proof.file_sha256(manifest_path)
 
     release_manifest = {
         "schema_version": "6529stream.release-manifest.v1",
@@ -142,7 +143,7 @@ def write_minimal_tree(root: Path) -> dict[str, Path]:
         "schema_version": "6529stream.address-book.v1",
         "source": {
             "deployment_manifest": "deployments/examples/example.json",
-            "deployment_manifest_sha256": RELEASE_ARTIFACT_MANIFEST_HASH,
+            "deployment_manifest_sha256": deployment_manifest_hash,
         },
         "protocol_version": "0.1.0",
         "deployment_version": "example",
@@ -252,7 +253,7 @@ class BytecodeReleaseProofTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 proof.BytecodeReleaseProofError,
-                "network.chain_id mismatch",
+                "deployment manifest hash mismatch",
             ):
                 proof.build_proof(root, address_book_dir=Path("deployments/address-books"))
 

@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:e6e6502448947f40bc55586aea3901c650f8c517ab37531f2776e5e872138418",
-      "size_bytes": 75665
+      "sha256": "sha256:5d8e3b1823c14565f0bdb8aae1c4c310d2cb72e5cf1d3ace9dfc505f7d6e23ef",
+      "size_bytes": 76380
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:de0ca3b4934dbac2e5ed5f4647b8be2cf8522b5ca11375fd068e5ca56765184a",
+      "sha256": "sha256:e671082cb44d3132989a20fee340b1d0502b39653b2de3c74747b42cd37fa6ae",
       "size_bytes": 22929
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -50,6 +50,7 @@
       "Added the first outside-Core split factory and split wallet skeleton with deterministic fixed-profile wallet deployment, immutable entry validation, native ETH pull-release accounting, and release-artifact surface coverage.",
       "Added the launch asset policy registry and approved-standard ERC-20 split wallet release/sync surface, with deployment manifest coverage, strict default-deny asset policy, exact ERC-20 transfer invariants, canonical registry status validation, high-water freeze documentation, and fail-closed tests for unsupported token behavior.",
       "Added outside-Core primary revenue resolver and primary-sale settlement satellites, covering deterministic assignment hashes, dynamic `SALE_POSTER` primary templates, verified split-wallet native ETH deposits, approved-standard ERC-20 primary settlement, replay protection, policy drift events, deployment rehearsal wiring, and adversarial settlement tests.",
+      "Added the Core mint-manager hook surface, including a validated `mintManager` pointer, manager-only mint and prepared-mint calls, canonical `tokenCollectionIdentity` reads, prepared operation binding, and focused rollback/callback coverage for the launch mint-manager migration, with mint-manager replacement left available as the Core recovery path for a stranded prepared mint. This uses accepted Core bytecode-spend exception `CORE-SPEND-2026-06-24-001` for the final measured `StreamCore` runtime of 24,172 bytes, a +1,988-byte delta over the 22,184-byte approved baseline, and 404 bytes of EIP-170 margin, which is above the 384-byte release floor but below the 512-byte warning threshold.",
       "Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.",
       "Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.",
       "Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.",
