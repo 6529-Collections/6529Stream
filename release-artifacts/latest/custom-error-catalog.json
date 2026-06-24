@@ -6,13 +6,13 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 130,
+    "custom_error_count": 131,
     "contract_count": 13,
     "category_counts": {
       "access_control": 8,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 10,
+      "configuration": 11,
       "metadata_integrity": 17,
       "pause_emergency": 2,
       "primary_settlement_safety": 16,
@@ -24,7 +24,7 @@
     "severity_counts": {
       "critical": 8,
       "high": 102,
-      "medium": 20
+      "medium": 21
     },
     "duplicate_selectors": {
       "0x1c9aebc3": [
@@ -3092,6 +3092,33 @@
         "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
         "tests": [
           "test/StreamPrimarySaleSettlement.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamRevenueResolver:InvalidSplitFactory(address)",
+      "contract": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "name": "InvalidSplitFactory",
+      "signature": "InvalidSplitFactory(address)",
+      "selector": "0x8ff489f6",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "splitFactory",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

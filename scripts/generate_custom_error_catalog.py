@@ -78,6 +78,7 @@ CATEGORY_BY_ERROR_NAME = {
     "InvalidRandomizerContract": "configuration",
     "InvalidRevenueClass": "revenue_assignment_safety",
     "InvalidSettlementCaller": "primary_settlement_safety",
+    "InvalidSplitFactory": "configuration",
     "InvalidSplitAccount": "split_payment_safety",
     "InvalidSplitShare": "split_payment_safety",
     "InvalidSplitTotal": "split_payment_safety",

@@ -35,6 +35,8 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
     bytes32 private constant REVENUE_SPECIAL = keccak256("primary-special");
     bytes32 private constant PROFILE_METADATA = keccak256("ipfs://primary-split");
     bytes32 private constant TEMPLATE_METADATA = keccak256("ipfs://primary-template");
+    bytes32 private constant MATERIALIZED_PROFILE_METADATA_DOMAIN =
+        keccak256("6529STREAM_MATERIALIZED_PRIMARY_PROFILE_METADATA_V1");
     bytes32 private constant POLICY_EVIDENCE = keccak256("policy-evidence");
     bytes32 private constant ERC20_POLICY_EVIDENCE = keccak256("standard-erc20-policy");
     bytes32 private constant MISSING_PROFILE = keccak256("missing-profile");
@@ -51,6 +53,8 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
     bytes32 private constant SETTLEMENT_ERC20 = keccak256("erc20-sale");
     bytes32 private constant SETTLEMENT_ERC20_TEMPLATE = keccak256("erc20-template-sale");
     bytes32 private constant SETTLEMENT_ERC20_REPLAY = keccak256("erc20-replay");
+    bytes32 private constant SETTLEMENT_TEMPLATE_REPLAY_PRECHECK =
+        keccak256("template-replay-precheck");
     bytes32 private constant SETTLEMENT_ERC20_SECOND_LEG = keccak256("erc20-second-leg");
     bytes32 private constant SETTLEMENT_ZERO_POSTER = keccak256("zero-poster-template");
     bytes32 private constant SETTLEMENT_ERC20_BAD = keccak256("erc20-bad");
@@ -838,6 +842,81 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
         settlement.totalOfficialSettled(address(secondToken)).assertEq(0, "second total untouched");
     }
 
+    function testConsumedSaleRejectsBeforeTemplateMaterializationAcrossAssets() public {
+        (bytes32 initialProfile, address initialWallet, bytes32 initialAssignmentHash) =
+            _createProfile(ARTIST, 1_000_000, LABEL_ARTIST);
+        initialAssignmentHash = resolver.setPrimaryProfileAssignment(
+            REVENUE_SPECIAL, resolver.SCOPE_COLLECTION(), 77, initialProfile, POLICY_EVIDENCE
+        );
+        bytes32 initialPolicyHash = _expectedPolicyHash(
+            REVENUE_SPECIAL, 77, 0, bytes32(0), initialProfile, initialWallet, initialAssignmentHash
+        );
+        IStreamPrimarySaleSettlement.PrimarySale memory initialSale = _sale(
+            SETTLEMENT_TEMPLATE_REPLAY_PRECHECK,
+            REVENUE_SPECIAL,
+            77,
+            0,
+            1,
+            2 ether,
+            initialPolicyHash
+        );
+        bytes32 key = settlement.settlementKey(initialSale);
+
+        vm.deal(SETTLEMENT_CALLER, 6 ether);
+        vm.prank(SETTLEMENT_CALLER);
+        settlement.settleNativePrimarySale{ value: 2 ether }(initialSale);
+        settlement.settlementConsumed(key).assertTrue("setup key consumed");
+
+        IStreamRevenueResolver.PrimaryTemplateEntry[] memory templateEntries =
+            new IStreamRevenueResolver.PrimaryTemplateEntry[](2);
+        templateEntries[0] = IStreamRevenueResolver.PrimaryTemplateEntry({
+            account: address(0),
+            accountSource: resolver.ACCOUNT_SOURCE_SALE_POSTER(),
+            sharePpm: 700_000,
+            labelId: LABEL_ARTIST
+        });
+        templateEntries[1] = IStreamRevenueResolver.PrimaryTemplateEntry({
+            account: PROTOCOL, accountSource: bytes32(0), sharePpm: 300_000, labelId: LABEL_PROTOCOL
+        });
+        bytes32 templateId = resolver.createPrimaryTemplate(templateEntries, TEMPLATE_METADATA);
+        resolver.setPrimaryTemplateAssignment(
+            REVENUE_SPECIAL, resolver.SCOPE_COLLECTION(), 77, templateId, POLICY_EVIDENCE
+        );
+        (bytes32 templateProfile, address templateWallet) =
+            _predictedSalePosterTemplateProfile(templateId);
+        factory.profileExists(templateProfile).assertFalse("template profile starts missing");
+        factory.splitWalletExists(templateProfile).assertFalse("template wallet starts missing");
+
+        IStreamPrimarySaleSettlement.PrimarySale memory staleSale = initialSale;
+        staleSale.expectedPolicyHash = initialPolicyHash;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamPrimarySaleSettlement.SettlementAlreadyConsumed.selector, key
+            )
+        );
+        vm.prank(SETTLEMENT_CALLER);
+        settlement.settleNativePrimarySale{ value: 2 ether }(staleSale);
+        factory.profileExists(templateProfile).assertFalse("native replay did not materialize");
+        templateWallet.balance.assertEq(0, "native replay wallet untouched");
+        settlement.officialSettled(REVENUE_SPECIAL, templateProfile, templateWallet, address(0))
+            .assertEq(0, "native replay not official");
+
+        PrimarySettlementERC20Mock token = new PrimarySettlementERC20Mock();
+        _fundApprovedAsset(token, 2 ether);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamPrimarySaleSettlement.SettlementAlreadyConsumed.selector, key
+            )
+        );
+        vm.prank(SETTLEMENT_CALLER);
+        settlement.settleERC20PrimarySale(staleSale, address(token));
+        factory.profileExists(templateProfile).assertFalse("erc20 replay did not materialize");
+        token.balanceOf(PAYER).assertEq(2 ether, "erc20 replay payer untouched");
+        token.balanceOf(templateWallet).assertEq(0, "erc20 replay wallet untouched");
+        settlement.officialSettled(REVENUE_SPECIAL, templateProfile, templateWallet, address(token))
+            .assertEq(0, "erc20 replay not official");
+    }
+
     function testERC20SettlementRejectsUnsupportedAndNonStandardTokens() public {
         (, address wallet, bytes32 assignmentHash) =
             _assignedSingleAccountProfile(REVENUE_PRIMARY, ARTIST);
@@ -1098,6 +1177,29 @@ contract StreamPrimarySaleSettlementTest is CharacterizationTestBase {
         return settlement.resolvedPrimaryPolicyHash(
             revenueClass, collectionId, tokenId, templateId, profileId, wallet, assignmentHash
         );
+    }
+
+    function _predictedSalePosterTemplateProfile(bytes32 templateId)
+        private
+        view
+        returns (bytes32 profileId, address wallet)
+    {
+        IStreamSplitWallet.SplitEntry[] memory concreteEntries =
+            new IStreamSplitWallet.SplitEntry[](2);
+        concreteEntries[0] = IStreamSplitWallet.SplitEntry(PROTOCOL, 300_000, LABEL_PROTOCOL);
+        concreteEntries[1] = IStreamSplitWallet.SplitEntry(SALE_POSTER, 700_000, LABEL_ARTIST);
+        bytes32 entriesHash = keccak256(abi.encode(concreteEntries));
+        bytes32 metadataURIHash = keccak256(
+            abi.encode(
+                MATERIALIZED_PROFILE_METADATA_DOMAIN,
+                uint256(block.chainid),
+                address(resolver),
+                templateId,
+                entriesHash
+            )
+        );
+        profileId = factory.profileIdFor(concreteEntries, metadataURIHash);
+        wallet = factory.walletFor(profileId);
     }
 
     function _sale(

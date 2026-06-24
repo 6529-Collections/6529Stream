@@ -65,6 +65,7 @@ REQUIRED_FIELDS = {
 
 REVIEW_STATUSES = {"template", "pending_review", "reviewed"}
 REVIEW_DECISIONS = {"template", "pending_review", "reviewed", "changes_requested"}
+READINESS_CLAIMS = {"blocked", "complete"}
 FINAL_VALUE_FIELDS = [
     "Git commit",
     "CI run or operator transcript",
@@ -343,18 +344,29 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
             f"{path} field 'Review decision' must be one of: {expected}"
         )
 
+    readiness_claim = fields["Readiness claim"]
+    if readiness_claim not in READINESS_CLAIMS:
+        expected = ", ".join(sorted(READINESS_CLAIMS))
+        raise ForkDeploymentRehearsalEvidenceError(
+            f"{path} field 'Readiness claim' must be one of: {expected}"
+        )
+
     if review_status == "template":
         if "Template only. This file is not completion evidence." not in text:
             raise ForkDeploymentRehearsalEvidenceError(
                 f"{path} template evidence must include the template-only notice"
             )
         require_field_value(path, fields, "Review decision", "template")
+        require_field_value(path, fields, "Readiness claim", "blocked")
         return
 
     if "Template only. This file is not completion evidence." in text:
         raise ForkDeploymentRehearsalEvidenceError(
             f"{path} non-template evidence must remove the template-only notice"
         )
+
+    if review_status == "pending_review":
+        require_field_value(path, fields, "Readiness claim", "blocked")
 
     for label in FINAL_VALUE_FIELDS:
         if is_placeholder(fields[label]):
@@ -369,6 +381,7 @@ def validate_review_state(path: Path, text: str, fields: dict[str, str]) -> None
 
     if review_status == "reviewed":
         require_field_value(path, fields, "Review decision", "reviewed")
+        require_field_value(path, fields, "Readiness claim", "complete")
 
 
 def validate_commands(path: Path, text: str) -> None:
@@ -388,7 +401,6 @@ def validate_artifact(path: Path) -> None:
     fields = field_map(path, text)
 
     require_field_value(path, fields, "Requirement ID", REQUIREMENT_ID)
-    require_field_value(path, fields, "Readiness claim", "blocked")
     require_field_value(path, fields, "Environment", "fork")
     require_field_value(path, fields, "Chain ID", "1")
     validate_review_state(path, text, fields)

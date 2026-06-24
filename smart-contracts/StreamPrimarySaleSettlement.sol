@@ -106,8 +106,10 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
         if (msg.value != sale.amount) {
             revert IncorrectNativeValue(sale.amount, msg.value);
         }
+        key = _settlementKey(sale);
+        _requireSettlementUnconsumed(key);
         SaleResolution memory resolution = _resolveSale(sale);
-        key = _consumeSettlement(sale);
+        _consumeSettlementKey(key);
         profileId = resolution.profileId;
         wallet = resolution.wallet;
 
@@ -129,8 +131,10 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
         _requireSettlementCaller();
         _validateSale(sale);
         _requireActiveAsset(asset);
+        key = _settlementKey(sale);
+        _requireSettlementUnconsumed(key);
         SaleResolution memory resolution = _resolveSale(sale);
-        key = _consumeSettlement(sale);
+        _consumeSettlementKey(key);
         profileId = resolution.profileId;
         wallet = resolution.wallet;
 
@@ -192,11 +196,13 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
         }
     }
 
-    function _consumeSettlement(PrimarySale calldata sale) private returns (bytes32 key) {
-        key = _settlementKey(sale);
+    function _requireSettlementUnconsumed(bytes32 key) private view {
         if (settlementConsumed[key]) {
             revert SettlementAlreadyConsumed(key);
         }
+    }
+
+    function _consumeSettlementKey(bytes32 key) private {
         settlementConsumed[key] = true;
     }
 
@@ -222,7 +228,11 @@ contract StreamPrimarySaleSettlement is IStreamPrimarySaleSettlement, Ownable, R
             (resolution.profileId, resolution.wallet,) =
                 revenueResolver.materializePrimaryProfile(assignment.templateId, sale.poster);
             resolution.templateId = assignment.templateId;
-            if (!splitFactory.splitWalletExists(resolution.profileId)) {
+            address expectedWallet = splitFactory.walletFor(resolution.profileId);
+            if (
+                resolution.wallet != expectedWallet
+                    || !splitFactory.splitWalletExists(resolution.profileId)
+            ) {
                 revert UnverifiedSplitWallet(resolution.profileId, resolution.wallet);
             }
         } else {

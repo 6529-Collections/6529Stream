@@ -40,6 +40,9 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
     IStreamAssetPolicyRegistry private immutable _assetPolicyRegistry;
     bytes32 private immutable _splitWalletRuntimeCodeHash;
 
+    /// @notice Reverts when the configured split factory cannot support resolver invariants.
+    error InvalidSplitFactory(address splitFactory);
+
     struct PrimaryTemplate {
         bool exists;
         bytes32 entriesHash;
@@ -72,32 +75,32 @@ contract StreamRevenueResolver is IStreamRevenueResolver, Ownable {
 
     constructor(IStreamSplitFactory splitFactory_) {
         if (address(splitFactory_).code.length == 0) {
-            revert UnverifiedSplitProfile(bytes32(0));
+            revert InvalidSplitFactory(address(splitFactory_));
         }
         try splitFactory_.SHARE_DENOMINATOR_PPM() returns (uint32 denominator) {
             if (denominator != SHARE_DENOMINATOR_PPM) {
-                revert UnverifiedSplitProfile(bytes32(0));
+                revert InvalidSplitFactory(address(splitFactory_));
             }
         } catch {
-            revert UnverifiedSplitProfile(bytes32(0));
+            revert InvalidSplitFactory(address(splitFactory_));
         }
         IStreamAssetPolicyRegistry registry;
         try splitFactory_.assetPolicyRegistry() returns (IStreamAssetPolicyRegistry registry_) {
             registry = registry_;
             if (address(registry).code.length == 0) {
-                revert UnverifiedSplitProfile(bytes32(0));
+                revert InvalidSplitFactory(address(splitFactory_));
             }
         } catch {
-            revert UnverifiedSplitProfile(bytes32(0));
+            revert InvalidSplitFactory(address(splitFactory_));
         }
         bytes32 runtimeCodeHash;
         try splitFactory_.splitWalletRuntimeCodeHash() returns (bytes32 runtimeCodeHash_) {
             runtimeCodeHash = runtimeCodeHash_;
             if (runtimeCodeHash == bytes32(0)) {
-                revert UnverifiedSplitProfile(bytes32(0));
+                revert InvalidSplitFactory(address(splitFactory_));
             }
         } catch {
-            revert UnverifiedSplitProfile(bytes32(0));
+            revert InvalidSplitFactory(address(splitFactory_));
         }
         splitFactoryContract = splitFactory_;
         _assetPolicyRegistry = registry;

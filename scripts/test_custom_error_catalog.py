@@ -167,13 +167,23 @@ class CustomErrorCatalogTests(unittest.TestCase):
                 "ExampleRevenueResolver:InvalidPrimaryTemplateTotal(uint256)"
             ]
             self.assertEqual(resolver["category"], "revenue_assignment_safety")
+            self.assertEqual(resolver["severity"], "high")
             self.assertIn("resolver assignment", resolver["caller_action"])
+            self.assertIn(
+                "test/StreamPrimarySaleSettlement.t.sol",
+                resolver["traceability"]["tests"],
+            )
 
             settlement = entries[
                 "ExamplePrimarySaleSettlement:SettlementAlreadyConsumed(bytes32)"
             ]
             self.assertEqual(settlement["category"], "primary_settlement_safety")
+            self.assertEqual(settlement["severity"], "high")
             self.assertIn("primary-sale settlement", settlement["caller_action"])
+            self.assertIn(
+                "test/StreamPrimarySaleSettlement.t.sol",
+                settlement["traceability"]["tests"],
+            )
 
     def test_catalog_records_duplicate_selectors_for_review(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

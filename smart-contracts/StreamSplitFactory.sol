@@ -138,44 +138,7 @@ contract StreamSplitFactory is IStreamSplitFactory {
         if (!profile.exists) {
             return false;
         }
-        address wallet = walletFor(profileId);
-        if (wallet.code.length == 0 || wallet.codehash != splitWalletRuntimeCodeHash()) {
-            return false;
-        }
-        IStreamSplitWallet splitWallet = IStreamSplitWallet(wallet);
-        try splitWallet.factory() returns (address walletFactory) {
-            if (walletFactory != address(this)) {
-                return false;
-            }
-        } catch {
-            return false;
-        }
-        try splitWallet.initialized() returns (bool walletInitialized) {
-            if (!walletInitialized) {
-                return false;
-            }
-        } catch {
-            return false;
-        }
-        try splitWallet.profileId() returns (bytes32 walletProfileId) {
-            if (walletProfileId != profileId) {
-                return false;
-            }
-        } catch {
-            return false;
-        }
-        try splitWallet.entriesHash() returns (bytes32 walletEntriesHash) {
-            if (walletEntriesHash != profile.entriesHash) {
-                return false;
-            }
-        } catch {
-            return false;
-        }
-        try splitWallet.metadataURIHash() returns (bytes32 walletMetadataURIHash) {
-            return walletMetadataURIHash == profile.metadataURIHash;
-        } catch {
-            return false;
-        }
+        return _walletMatchesProfile(profileId, walletFor(profileId), profile);
     }
 
     /// @notice Returns the immutable metadata URI hash committed by a split profile.
@@ -292,14 +255,52 @@ contract StreamSplitFactory is IStreamSplitFactory {
         private
         view
     {
-        IStreamSplitWallet splitWallet = IStreamSplitWallet(wallet);
-        if (
-            splitWallet.factory() != address(this) || !splitWallet.initialized()
-                || splitWallet.profileId() != profileId
-                || splitWallet.entriesHash() != profile.entriesHash
-                || splitWallet.metadataURIHash() != profile.metadataURIHash
-        ) {
+        if (!_walletMatchesProfile(profileId, wallet, profile)) {
             revert SplitWalletAddressPoisoned(profileId, wallet);
+        }
+    }
+
+    function _walletMatchesProfile(bytes32 profileId, address wallet, Profile storage profile)
+        private
+        view
+        returns (bool)
+    {
+        if (wallet.code.length == 0 || wallet.codehash != splitWalletRuntimeCodeHash()) {
+            return false;
+        }
+        IStreamSplitWallet splitWallet = IStreamSplitWallet(wallet);
+        try splitWallet.factory() returns (address walletFactory) {
+            if (walletFactory != address(this)) {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+        try splitWallet.initialized() returns (bool walletInitialized) {
+            if (!walletInitialized) {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+        try splitWallet.profileId() returns (bytes32 walletProfileId) {
+            if (walletProfileId != profileId) {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+        try splitWallet.entriesHash() returns (bytes32 walletEntriesHash) {
+            if (walletEntriesHash != profile.entriesHash) {
+                return false;
+            }
+        } catch {
+            return false;
+        }
+        try splitWallet.metadataURIHash() returns (bytes32 walletMetadataURIHash) {
+            return walletMetadataURIHash == profile.metadataURIHash;
+        } catch {
+            return false;
         }
     }
 
