@@ -46,6 +46,14 @@
       "source": "smart-contracts/StreamMinter.sol"
     },
     {
+      "name": "StreamPrimarySaleSettlement",
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol"
+    },
+    {
+      "name": "StreamRevenueResolver",
+      "source": "smart-contracts/StreamRevenueResolver.sol"
+    },
+    {
       "name": "StreamSplitFactory",
       "source": "smart-contracts/StreamSplitFactory.sol"
     },
@@ -191,6 +199,14 @@
     {
       "name": "IStreamMinter",
       "source": "smart-contracts/IStreamMinter.sol"
+    },
+    {
+      "name": "IStreamPrimarySaleSettlement",
+      "source": "smart-contracts/IStreamPrimarySaleSettlement.sol"
+    },
+    {
+      "name": "IStreamRevenueResolver",
+      "source": "smart-contracts/IStreamRevenueResolver.sol"
     },
     {
       "name": "IStreamSplitFactory",

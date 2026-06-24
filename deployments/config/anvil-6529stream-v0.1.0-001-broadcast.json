@@ -140,6 +140,22 @@
           "0x100000000000000000000000000000000000000b"
         ],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamRevenueResolver",
+        "address": "0x100000000000000000000000000000000000000d",
+        "constructor_args": [
+          "0x100000000000000000000000000000000000000c"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamPrimarySaleSettlement",
+        "address": "0x100000000000000000000000000000000000000e",
+        "constructor_args": [
+          "0x100000000000000000000000000000000000000d"
+        ],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -171,6 +187,14 @@
         {
           "contract": "StreamAssetPolicyRegistry",
           "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamRevenueResolver",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamPrimarySaleSettlement",
+          "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]
     },
@@ -200,7 +224,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:6e6ea684ed5cca73bf471bab9adfd4c711396dfe4458b15f29ce06dc10b71121",
+    "broadcast_sha256": "sha256:56c6709f3727b2e785a54627bd88d142f9122bdeae7806c01ae66dfb18249219",
     "template_config": "deployments/config/anvil-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 31337,
@@ -264,6 +288,16 @@
         "contract": "StreamSplitFactory",
         "address": "0x100000000000000000000000000000000000000c",
         "transaction_hash": "0x0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c0c"
+      },
+      {
+        "contract": "StreamRevenueResolver",
+        "address": "0x100000000000000000000000000000000000000d",
+        "transaction_hash": "0x0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d0d"
+      },
+      {
+        "contract": "StreamPrimarySaleSettlement",
+        "address": "0x100000000000000000000000000000000000000e",
+        "transaction_hash": "0x0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"
       }
     ],
     "ignored_deployments": []

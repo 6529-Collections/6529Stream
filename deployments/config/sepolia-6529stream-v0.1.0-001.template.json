@@ -222,6 +222,22 @@
           "$DEPLOYED_STREAM_ASSET_POLICY_REGISTRY"
         ],
         "verification_status": "not_started"
+      },
+      {
+        "name": "StreamRevenueResolver",
+        "address": "0x000000000000000000000000000000000000000d",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_SPLIT_FACTORY"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamPrimarySaleSettlement",
+        "address": "0x000000000000000000000000000000000000000e",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_REVENUE_RESOLVER"
+        ],
+        "verification_status": "not_started"
       }
     ],
     "admin_ceremony": {
@@ -252,6 +268,14 @@
         },
         {
           "contract": "StreamAssetPolicyRegistry",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        },
+        {
+          "contract": "StreamRevenueResolver",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        },
+        {
+          "contract": "StreamPrimarySaleSettlement",
           "new_owner": "$SEPOLIA_ADMIN_SAFE"
         }
       ]

@@ -17,7 +17,9 @@
     "StreamCuratorsPool": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
     "StreamDrops": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
     "StreamMinter": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a",
-    "StreamSplitFactory": "sha256:15b1ebbb39c54d418ce64da68c7ae3349d8c234a3f5e5a9106a600d0cbbda657",
+    "StreamPrimarySaleSettlement": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
+    "StreamRevenueResolver": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
+    "StreamSplitFactory": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
     "StreamSplitWallet": "sha256:fd1b403e564ffff1b74b72cc5ab65a040f0d85be6d2a591543bc1c8a8869d96b"
   },
   "bytecode_hashes": {
@@ -175,18 +177,46 @@
         "size_bytes": 7037
       }
     },
-    "StreamSplitFactory": {
+    "StreamPrimarySaleSettlement": {
       "creation": {
-        "sha256": "sha256:f38d0ac6bf80c4ed1c2e28a03d1426a92c416d2acbae932199a4dccacee82add",
+        "sha256": "sha256:2eb4aebd1daa733c467083b748c3a42da48a6cc687591cbdad47365e2ceb5eea",
         "linked": true,
         "hash_mode": "bytes",
-        "size_bytes": 17287
+        "size_bytes": 9003
       },
       "runtime": {
-        "sha256": "sha256:e72d47eb7eeac71a175e59936495dab8237187d84f9ceadd28d7939aa69179de",
+        "sha256": "sha256:b81138d34d93a7d28ae231bc1c2d83b1f28c8530a92a3da2d162d72cdf0eb351",
         "linked": true,
         "hash_mode": "bytes",
-        "size_bytes": 16721
+        "size_bytes": 7909
+      }
+    },
+    "StreamRevenueResolver": {
+      "creation": {
+        "sha256": "sha256:9cd1006c300935e14f3f184ff22bcc1d3466db2bcf61263c520662bcc4d54e77",
+        "linked": true,
+        "hash_mode": "bytes",
+        "size_bytes": 12583
+      },
+      "runtime": {
+        "sha256": "sha256:28d1d3dc139a6856975d9e9fb11a0c8bcfdfb12917c0fc74c362de560b48bd09",
+        "linked": true,
+        "hash_mode": "bytes",
+        "size_bytes": 11690
+      }
+    },
+    "StreamSplitFactory": {
+      "creation": {
+        "sha256": "sha256:4eda3fc1f86edf025266f569d0c141a551a5e9a418b1dc5e0d9e59d2e6b648b8",
+        "linked": true,
+        "hash_mode": "bytes",
+        "size_bytes": 17418
+      },
+      "runtime": {
+        "sha256": "sha256:4562bfa178fd4b9b3b6837f4c5c5e1cd9a1cbe0a09f9d0691e9da2d1e9ef9a65",
+        "linked": true,
+        "hash_mode": "bytes",
+        "size_bytes": 16852
       }
     },
     "StreamSplitWallet": {
@@ -425,23 +455,63 @@
       "event_count": 7,
       "constructor_count": 1
     },
+    "StreamPrimarySaleSettlement": {
+      "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "deployment_scope": "singleton",
+      "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+      "abi_sha256": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
+      "bytecode_sha256": "sha256:2eb4aebd1daa733c467083b748c3a42da48a6cc687591cbdad47365e2ceb5eea",
+      "bytecode_linked": true,
+      "bytecode_hash_mode": "bytes",
+      "bytecode_size_bytes": 9003,
+      "deployed_bytecode_sha256": "sha256:b81138d34d93a7d28ae231bc1c2d83b1f28c8530a92a3da2d162d72cdf0eb351",
+      "deployed_bytecode_linked": true,
+      "deployed_bytecode_hash_mode": "bytes",
+      "deployed_bytecode_size_bytes": 7909,
+      "eip170_runtime_limit_bytes": 24576,
+      "deployed_runtime_margin_bytes": 16667,
+      "abi_entries": 42,
+      "function_count": 19,
+      "event_count": 5,
+      "constructor_count": 1
+    },
+    "StreamRevenueResolver": {
+      "source": "smart-contracts/StreamRevenueResolver.sol",
+      "deployment_scope": "singleton",
+      "artifact_path": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+      "abi_sha256": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
+      "bytecode_sha256": "sha256:9cd1006c300935e14f3f184ff22bcc1d3466db2bcf61263c520662bcc4d54e77",
+      "bytecode_linked": true,
+      "bytecode_hash_mode": "bytes",
+      "bytecode_size_bytes": 12583,
+      "deployed_bytecode_sha256": "sha256:28d1d3dc139a6856975d9e9fb11a0c8bcfdfb12917c0fc74c362de560b48bd09",
+      "deployed_bytecode_linked": true,
+      "deployed_bytecode_hash_mode": "bytes",
+      "deployed_bytecode_size_bytes": 11690,
+      "eip170_runtime_limit_bytes": 24576,
+      "deployed_runtime_margin_bytes": 12886,
+      "abi_entries": 49,
+      "function_count": 28,
+      "event_count": 7,
+      "constructor_count": 1
+    },
     "StreamSplitFactory": {
       "source": "smart-contracts/StreamSplitFactory.sol",
       "deployment_scope": "singleton",
       "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
-      "abi_sha256": "sha256:15b1ebbb39c54d418ce64da68c7ae3349d8c234a3f5e5a9106a600d0cbbda657",
-      "bytecode_sha256": "sha256:f38d0ac6bf80c4ed1c2e28a03d1426a92c416d2acbae932199a4dccacee82add",
+      "abi_sha256": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
+      "bytecode_sha256": "sha256:4eda3fc1f86edf025266f569d0c141a551a5e9a418b1dc5e0d9e59d2e6b648b8",
       "bytecode_linked": true,
       "bytecode_hash_mode": "bytes",
-      "bytecode_size_bytes": 17287,
-      "deployed_bytecode_sha256": "sha256:e72d47eb7eeac71a175e59936495dab8237187d84f9ceadd28d7939aa69179de",
+      "bytecode_size_bytes": 17418,
+      "deployed_bytecode_sha256": "sha256:4562bfa178fd4b9b3b6837f4c5c5e1cd9a1cbe0a09f9d0691e9da2d1e9ef9a65",
       "deployed_bytecode_linked": true,
       "deployed_bytecode_hash_mode": "bytes",
-      "deployed_bytecode_size_bytes": 16721,
+      "deployed_bytecode_size_bytes": 16852,
       "eip170_runtime_limit_bytes": 24576,
-      "deployed_runtime_margin_bytes": 7855,
-      "abi_entries": 34,
-      "function_count": 20,
+      "deployed_runtime_margin_bytes": 7724,
+      "abi_entries": 35,
+      "function_count": 21,
       "event_count": 5,
       "constructor_count": 1
     },

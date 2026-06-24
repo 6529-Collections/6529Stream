@@ -4,7 +4,7 @@
 
 - Requirement ID: `fork_deployment_rehearsal`
 - Review status: `reviewed`
-- Readiness claim: `blocked`
+- Readiness claim: `complete`
 - Environment: `fork`
 - Chain ID: `1`
 
@@ -20,9 +20,9 @@
 ## Required Retained Artifacts
 
 - Sanitized command transcript: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`
-- Sanitized Foundry broadcast: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json` / `sha256:99dbf8971746f6639a4563820e268b65450acc6b0e3635d86cd896e603e24676`
-- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:a97e963753656a116f9d6d2519400399ab3603148f26cce0c18cd905b2039158`
-- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:51c61a1c05d6da5bf0209826b23b2d6774beb8d3e603cf92ee1c62d52f4e98f8`
+- Sanitized Foundry broadcast: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json` / `sha256:70e9340770d0bebafa4420523fc82ba258ed2c98461daf603a904019e36a6357`
+- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:ceec373f9d51f20e348ce70d3e4ef699e26f6f89389cc16d30a070a9d71e5012`
+- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:5a46b81744fea23e137275b0b9935461452ec347add97a349be390b80c7a6062`
 - Verification status: `not_applicable_for_local_fork; source verification inputs remain retained separately and explorer verification remains a separate public-beta blocker`
 - Gas or invariant summary: `estimated_total_gas_used=32521731; all retained deployment receipts status=0x1; release CI will rerun build, tests, gas snapshot, size, and deployment rehearsal gates`
 - Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and release-artifacts/latest/SHA256SUMS regenerated in this PR`

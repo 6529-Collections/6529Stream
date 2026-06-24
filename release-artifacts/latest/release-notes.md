@@ -27,6 +27,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.
 - Added the first outside-Core split factory and split wallet skeleton with deterministic fixed-profile wallet deployment, immutable entry validation, native ETH pull-release accounting, and release-artifact surface coverage.
 - Added the launch asset policy registry and approved-standard ERC-20 split wallet release/sync surface, with deployment manifest coverage, strict default-deny asset policy, exact ERC-20 transfer invariants, canonical registry status validation, high-water freeze documentation, and fail-closed tests for unsupported token behavior.
+- Added outside-Core primary revenue resolver and primary-sale settlement satellites, covering deterministic assignment hashes, dynamic `SALE_POSTER` primary templates, verified split-wallet native ETH deposits, approved-standard ERC-20 primary settlement, replay protection, policy drift events, deployment rehearsal wiring, and adversarial settlement tests.
 - Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.
 - Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.
 - Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.
@@ -277,7 +278,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 - Bytecode proof local/fork status: `generated_from_committed_artifacts`
 - Bytecode proof production status: `missing_reviewed_live_proof`
-- Contract proof count: `36`
+- Contract proof count: `42`
 - Risk count: `11`
 
 ### Risk Status Counts

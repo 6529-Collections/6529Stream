@@ -24,16 +24,16 @@
   "artifacts": {
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:22f6d87523bba0b5fa557f32edd6598182a3355e258bea724057e9b1e8b60e45"
+      "sha256": "sha256:95882f66d8b2d74869f7ae66920028b932a92bcb367b40e66b806910bdd0befb"
     },
-    "deployment_manifest_canonical_sha256": "sha256:591d928405b76e397f1de39469032835e110ab45f166e59ce793a977e888a535",
+    "deployment_manifest_canonical_sha256": "sha256:31aa9ef870d3eecbd6ce7ab1d470cc93d337a7adb56ed5a81d34be4e889e5488",
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:6c21228d5795853a43faae2b205634cc2bede3defd6b0531072e385374c173e6"
+      "sha256": "sha256:6c46d4e3807dff1d389cb48056ea3f4d316e671debf7792d79e008d908821460"
     },
     "abi_checksums": {
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:992fc4a2c12507b9a4eef4a3742a6f9b39af96b4ec8eac20510f95562643dcea"
+      "sha256": "sha256:1679fdeb690889a3574ba26891aa657dcaae13c9f8f4b38782e0b43aae5f14f4"
     },
     "release_checksum_bundle": {
       "path": "release-artifacts/latest/SHA256SUMS",
@@ -48,7 +48,7 @@
       "evidence": [
         {
           "path": "script/RehearseDeployment.s.sol",
-          "sha256": "sha256:82118e7d418fe9c77ed14e8ccf85062478eba1f830a5b7fcce20d598e0b78e25"
+          "sha256": "sha256:db2bec705f1e7106e5136d76a27b75be14cc393fea0f9445ef70902b005d017b"
         }
       ],
       "notes": "Local Anvil rehearsal transfers StreamAdmins and StreamCore ownership to the Safe placeholder and removes the temporary deployer global admin."
@@ -58,7 +58,7 @@
       "evidence": [
         {
           "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-          "sha256": "sha256:22f6d87523bba0b5fa557f32edd6598182a3355e258bea724057e9b1e8b60e45"
+          "sha256": "sha256:95882f66d8b2d74869f7ae66920028b932a92bcb367b40e66b806910bdd0befb"
         }
       ],
       "notes": "The local manifest records the drop signer placeholder and signer-manager Safe placeholder."
@@ -106,17 +106,17 @@
     {
       "category": "deployment_manifest",
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:22f6d87523bba0b5fa557f32edd6598182a3355e258bea724057e9b1e8b60e45"
+      "sha256": "sha256:95882f66d8b2d74869f7ae66920028b932a92bcb367b40e66b806910bdd0befb"
     },
     {
       "category": "address_book",
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:6c21228d5795853a43faae2b205634cc2bede3defd6b0531072e385374c173e6"
+      "sha256": "sha256:6c46d4e3807dff1d389cb48056ea3f4d316e671debf7792d79e008d908821460"
     },
     {
       "category": "abi_checksums",
       "path": "release-artifacts/latest/abi-checksums.json",
-      "sha256": "sha256:992fc4a2c12507b9a4eef4a3742a6f9b39af96b4ec8eac20510f95562643dcea"
+      "sha256": "sha256:1679fdeb690889a3574ba26891aa657dcaae13c9f8f4b38782e0b43aae5f14f4"
     }
   ],
   "redaction_policy": {

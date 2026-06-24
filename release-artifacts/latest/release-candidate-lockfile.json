@@ -51,39 +51,39 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:14bb0e23ebeb0b1338268d9a645f5569268434b165ea811c620714671757d659",
-      "size_bytes": 132033,
+      "sha256": "sha256:f1541d7e2a68a897400fd99947d26fbe84db9d3ca4cd4bfadd0795ca60bcbb17",
+      "size_bytes": 132566,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:df3af8c7a2796dbdea06dcfce7f6945ac1473dab6bb7c26b77458cc92f4e6c41",
-      "size_bytes": 95600,
+      "sha256": "sha256:8c4ba03d4b464ef0517353a05025540dda75ca27e16ab84a58e076edb21af0c3",
+      "size_bytes": 111272,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:148bac672816d216cacee2123118fe6784d67f698d4269b433b264b1db1c6067",
+      "sha256": "sha256:f5fc52cb8391a87106b6be18ef524b888ec9e1a57837223bedf59ad6e155e43a",
       "size_bytes": 10202,
       "schema_version": "6529stream.public-beta-evidence.v1"
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:7b89722b18f314db065da00a8e8c9fe91a080d8a14e3a5943fae113906937732",
+      "sha256": "sha256:de0ca3b4934dbac2e5ed5f4647b8be2cf8522b5ca11375fd068e5ca56765184a",
       "size_bytes": 22929,
       "schema_version": "6529stream.risk-register.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:8a4a7aef722f9ea3fdaab89ad41af750640deada8c7b069ff9d1ffa00b15f737",
-        "size_bytes": 77586,
+        "sha256": "sha256:c68a35807032d38dc6caef497700d78d8480716035fb709085ba114597451763",
+        "size_bytes": 77953,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:5ffafd720b86478f0b19ff58a2803848024a7b85a7defa3ec9810f1a4b8072d2",
-        "size_bytes": 74529
+        "sha256": "sha256:d77c6b5fef06bc39296a8161713cd99aae22d7ed0e5249adabf9003076392a61",
+        "size_bytes": 74889
       }
     },
     "blocker_reports": {
@@ -101,7 +101,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:d28653d6d7e9eb08e2cb417528713db1bf63754e18da714f815e4513ee84b9f8",
+        "sha256": "sha256:aabd492a4ef4416da1dce14dc3906087f9ab27f71819ed39a61f2a8dc65087c0",
         "size_bytes": 75680,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -114,7 +114,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:67df42995b57c7f5c03e876c171027edce02bfd9c4cd4d5bc52b2e916ab34aa8",
+        "sha256": "sha256:fddb529a2707a4b38c70a1e813844c3e94eb791a50161e2eca4ecd78309fbd1f",
         "size_bytes": 104621,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -127,13 +127,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:60d07ccf32b364492adc17b09c507c5549efc4b7b263095c2277ac34a6289eee",
+        "sha256": "sha256:09c2e263c915b597154e008ce8511b3c631409d4539f3d520ce14f635c67e1d2",
         "size_bytes": 71166,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:7a555056f3990c9dbc8ae59490768beea9e7e1c78c433a038db331fd8c42ef59",
+        "sha256": "sha256:11eb0444ccb4a48e75418c29b12185d49a98000cdd1f790accfc8bb47d70134a",
         "size_bytes": 63098
       }
     }

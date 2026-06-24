@@ -9,10 +9,13 @@ import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamAdmins.sol";
+import "../smart-contracts/StreamAssetPolicyRegistry.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
+import "../smart-contracts/StreamPrimarySaleSettlement.sol";
+import "../smart-contracts/StreamRevenueResolver.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 
@@ -32,9 +35,23 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         StreamContractMetadata metadata = StreamContractMetadata(result.contractMetadata);
         StreamDrops drops = StreamDrops(result.drops);
         StreamMinter minter = StreamMinter(result.minter);
+        StreamAssetPolicyRegistry assetPolicyRegistry =
+            StreamAssetPolicyRegistry(result.assetPolicyRegistry);
+        StreamRevenueResolver revenueResolver = StreamRevenueResolver(result.revenueResolver);
+        StreamPrimarySaleSettlement primarySaleSettlement =
+            StreamPrimarySaleSettlement(result.primarySaleSettlement);
 
         Assertions.assertEq(admins.owner(), config.adminSafe, "admin owner not safe");
         Assertions.assertEq(core.owner(), config.adminSafe, "core owner not safe");
+        Assertions.assertEq(
+            assetPolicyRegistry.owner(), config.adminSafe, "asset policy owner not safe"
+        );
+        Assertions.assertEq(
+            revenueResolver.owner(), config.adminSafe, "revenue resolver owner not safe"
+        );
+        Assertions.assertEq(
+            primarySaleSettlement.owner(), config.adminSafe, "primary settlement owner not safe"
+        );
         Assertions.assertTrue(admins.retrieveGlobalAdmin(config.adminSafe), "safe not admin");
         Assertions.assertFalse(admins.retrieveGlobalAdmin(config.deployer), "temp admin kept");
         Assertions.assertTrue(
@@ -67,6 +84,23 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         Assertions.assertEq(drops.auctionContract(), result.auctions, "drops auction");
         Assertions.assertEq(drops.payOutAddress(), config.payout, "drops payout");
         Assertions.assertEq(drops.curatorsPoolAddress(), result.curatorsPool, "drops curators pool");
+        Assertions.assertTrue(revenueResolver.isStreamRevenueResolver(), "revenue resolver marker");
+        Assertions.assertEq(
+            revenueResolver.splitFactory(), result.splitFactory, "resolver split factory"
+        );
+        Assertions.assertTrue(
+            primarySaleSettlement.isStreamPrimarySaleSettlement(), "primary settlement marker"
+        );
+        Assertions.assertEq(
+            address(primarySaleSettlement.revenueResolver()),
+            result.revenueResolver,
+            "settlement resolver"
+        );
+        Assertions.assertEq(
+            address(primarySaleSettlement.assetPolicyRegistry()),
+            result.assetPolicyRegistry,
+            "settlement asset policy"
+        );
 
         (uint256 startTime, uint256 endTime) =
             minter.retrieveCollectionPhases(result.sampleCollectionId);

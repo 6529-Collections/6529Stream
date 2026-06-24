@@ -127,7 +127,7 @@ def reviewed_artifact() -> str:
 
 - Requirement ID: `fork_deployment_rehearsal`
 - Review status: `reviewed`
-- Readiness claim: `blocked`
+- Readiness claim: `complete`
 - Environment: `fork`
 - Chain ID: `1`
 
@@ -185,7 +185,7 @@ python scripts/generate_release_checksums.py --check
 
 ## Operator Notes
 
-- Reviewed retained evidence remains blocked until linked from the shared
+- Reviewed retained evidence can complete this row once linked from the shared
   public-beta evidence manifest.
 """
 

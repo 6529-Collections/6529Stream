@@ -86,6 +86,8 @@ interface IStreamSplitFactory {
     function deployWallet(bytes32 profileId) external returns (address wallet);
     /// @notice Returns true when a profile exists.
     function profileExists(bytes32 profileId) external view returns (bool);
+    /// @notice Returns true when the profile wallet is deployed with expected code and metadata.
+    function splitWalletExists(bytes32 profileId) external view returns (bool);
     /// @notice Returns the metadata URI hash committed by a profile.
     function profileMetadataURIHash(bytes32 profileId) external view returns (bytes32);
     /// @notice Returns the canonical entries hash committed by a profile.

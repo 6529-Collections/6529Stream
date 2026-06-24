@@ -204,7 +204,8 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | Order | Item | Gate | Main Blocker | Intended PR |
 | --- | --- | --- | --- | --- |
 | 0 | `CON-009` | C/G | V1 split settlement foundation | Merged in PR #626; issue #625 closed completed |
-| 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Active PR #628 / issue #627 on branch `codex/asset-policy-erc20-splits`; review and CI pending |
+| 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Merged in PR #628; issue #627 closed completed |
+| 0.2 | `CON-011` | C/G | V1 revenue resolver and primary-sale settlement adapters | Active PR #630 / issue #629 on branch `codex/revenue-resolver-primary-adapters`; waiting for CI and review bots |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1387,8 +1388,7 @@ Acceptance criteria:
 
 ### CON-010: Add Asset Policy Registry And ERC-20 Split-Wallet Release/Sync
 
-Status: Active issue #627 on branch `codex/asset-policy-erc20-splits`; PR not
-opened.
+Status: Merged in PR #628; issue #627 closed completed.
 
 Gate: C/G.
 
@@ -1461,6 +1461,93 @@ Acceptance criteria:
 - Native ETH split-wallet tests continue to pass.
 - Events and reads allow indexers/frontends to reconstruct policy changes,
   asset observations, releases, and dust per asset.
+
+### CON-011: Add Revenue Resolver And Primary-Sale Settlement Adapters
+
+Status: Active issue #629 on branch
+`codex/revenue-resolver-primary-adapters`; local draft implemented,
+max-reasoning GPT-5.5 Pro feedback addressed, full local validation passed, and
+PR #630 opened.
+
+Gate: C/G.
+
+Problem: Split profiles, split wallets, and asset policy now exist, but
+official primary-sale revenue still lacks an outside-Core resolver and adapter
+surface that binds sale economics, verified split wallets, and approved
+settlement assets before mint-manager integration lands.
+
+Outcome: Add a minimal outside-Core revenue resolver and primary-sale
+settlement adapter foundation for native ETH and approved standard ERC-20
+assets, with deterministic assignment hashes, exact value accounting,
+fail-closed ERC-20 policy reads, official settlement events, and no
+`StreamCore` bytecode spend.
+
+Files likely touched:
+
+- `smart-contracts/IStreamRevenueResolver.sol`
+- `smart-contracts/StreamRevenueResolver.sol`
+- `smart-contracts/IStreamPrimarySaleSettlement.sol`
+- `smart-contracts/StreamPrimarySaleSettlement.sol`
+- `smart-contracts/StreamSplitFactory.sol`
+- `smart-contracts/IStreamSplitFactory.sol`
+- `test/StreamPrimarySaleSettlement.t.sol`
+- `docs/revenue-splits-and-royalties.md`
+- `docs/integrations/events-and-indexing.md`
+- `CHANGELOG.md`
+- `script/RehearseDeployment.s.sol`
+- deployment configs, manifests, address books, source verification inputs, and
+  generated release artifacts
+- `ops/AUTONOMOUS_RUN.md`
+- `ops/EXECUTION_BACKLOG.md`
+- `ops/workstreams/v1-contract-roadmap/active-context.md`
+- `ops/workstreams/v1-contract-roadmap/run-log.md`
+
+Implementation steps:
+
+1. Define deterministic resolver assignment structs, hashes, events, and
+   default/collection primary revenue resolution.
+2. Add primary-settlement adapter functions for native ETH and approved
+   standard ERC-20 assets that verify policy hashes before recording official
+   settlement evidence.
+3. Reuse `StreamSplitFactory` profile existence, wallet derivation, and wallet
+   deployment/discovery checks before accepting official primary revenue.
+4. Measure exact native and ERC-20 value deltas, reject unsupported token
+   behavior, and distinguish official primary deposits from passive wallet
+   receipts.
+5. Add replay or sale-id consumption controls for adapter-level settlement
+   calls that represent accepted sale authorizations.
+6. Keep mint manager, Core prepared mint, token-level snapshots, ERC-20 auction
+   bidding, and royalty resolver integration out of scope unless a minimal
+   compile/test interface is unavoidable.
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamPrimarySaleSettlement.t.sol -vvv`
+- `forge test --match-path test/StreamSplitWallet.t.sol -vvv`
+- `forge build`
+- `forge build --sizes --via-ir --skip test --skip script --force`
+- `python scripts/test_autonomous_state.py`
+- `python scripts/check_autonomous_state.py`
+- release artifact generator checks when release-covered docs or contracts
+  change
+- `python scripts/check_changelog.py`
+- `codex-diff-check -- smart-contracts test docs ops release-artifacts/latest`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+
+Acceptance criteria:
+
+- Resolver assignment hashes are deterministic and bind revenue class, scope,
+  profile, wallet/factory, asset, mutability/freeze state, and active policy.
+- Native ETH settlement proves exact `msg.value` and records official primary
+  revenue for the verified split wallet/profile without push refunds.
+- ERC-20 settlement accepts only `ACTIVE` approved standard assets, measures
+  exact adapter balance deltas, and rejects malformed, no-return, no-op,
+  fee-on-transfer, rebasing, or callback-dependent token behavior before
+  revenue recording.
+- Official settlement events expose enough fields for indexers to distinguish
+  official primary-sale revenue from passive split-wallet receipts.
+- Replay or duplicate sale IDs cannot create duplicate official settlement
+  evidence.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3611,7 +3698,8 @@ unless an external dependency changes.
 | Item | Intended PR | Gate | Dependency |
 | --- | --- | --- | --- |
 | `CON-009` | Implement split factory and split wallet skeleton | C/G | Merged in PR #626; issue #625 closed completed |
-| `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Active PR #628 / issue #627 on branch `codex/asset-policy-erc20-splits`; review and CI pending |
+| `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Merged in PR #628; issue #627 closed completed |
+| `CON-011` | Add revenue resolver and primary-sale settlement adapters | C/G | Active PR #630 / issue #629 on branch `codex/revenue-resolver-primary-adapters`; waiting for CI and review bots |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

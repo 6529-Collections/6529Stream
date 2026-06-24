@@ -24,7 +24,13 @@ StreamCore
 StreamRevenueResolver
   - default, collection, and token assignment resolution
   - primary sale profile resolution
+  - primary sale templates with SALE_POSTER materialization
   - royalty profile and bps resolution
+
+StreamPrimarySaleSettlement
+  - authorized primary-sale settlement evidence
+  - native ETH and approved-standard ERC-20 deposits
+  - official revenue counters distinct from passive wallet receipts
 
 StreamSplitFactory
   - deterministic split wallet deployment
@@ -75,10 +81,12 @@ Non-launch unless a later ADR accepts the added risk:
 
 ## Implementation Status
 
-The v1 split implementation adds `StreamSplitFactory`,
-`StreamSplitWallet`, and `StreamAssetPolicyRegistry` as outside-Core
-satellites. The implemented slice is fixed-profile and supports native ETH
-plus approved standard ERC-20 pull release:
+The v1 split and primary-settlement implementation adds `StreamSplitFactory`,
+`StreamSplitWallet`, `StreamAssetPolicyRegistry`, `StreamRevenueResolver`, and
+`StreamPrimarySaleSettlement` as outside-Core satellites. The implemented slice
+supports fixed split profiles, dynamic primary-sale templates, native ETH
+primary deposits, approved standard ERC-20 primary deposits, and native/ERC-20
+pull release from split wallets:
 
 - `StreamSplitFactory` validates and canonicalizes immutable split entries,
   computes the ADR 0008 profile ID with `abi.encode`, stores reconstructable
@@ -94,10 +102,25 @@ plus approved standard ERC-20 pull release:
 - `StreamAssetPolicyRegistry` is default-deny, owned by the deployment admin
   safe after rehearsal, records asset status plus evidence hash, and gives
   wallets a fail-closed launch surface for approved standard ERC-20s.
+- `StreamRevenueResolver` records deterministic default, collection, and token
+  scoped primary assignments. Assignments point to an already verified split
+  profile or to a primary split template. Template materialization currently
+  supports the `SALE_POSTER` dynamic source and creates deterministic fixed
+  split profiles through the split factory. The current resolver implements
+  exact-key assignment freezes only; inherited freezes, global freezes, and
+  descendant override counters remain launch-target resolver work before
+  product-level permanent economics can be promised.
+- `StreamPrimarySaleSettlement` accepts calls only from owner-authorized sale
+  adapters, verifies the resolved primary policy hash under strict or
+  allow-current policy mode, deposits exact native ETH or approved-standard
+  ERC-20 value into the verified split wallet, records official primary
+  settlement counters, and emits reconstruction events. ERC-20 settlement uses
+  the factory-pinned asset policy registry, rejects inactive or malformed
+  assets, and requires exact transfer deltas.
 - The slice spends no `StreamCore` bytecode and does not wire into fixed-price
-  drops, auctions, revenue resolver assignments, escrow, or ERC-2981.
-- ERC-20 primary-sale adapters, resolver assignments, escrow, and
-  Core-native resolver-backed ERC-2981 remain subsequent launch work.
+  drops, auctions, escrow, or ERC-2981.
+- Fixed-price adapter integration, auction adapter integration, escrow fallback,
+  and Core-native resolver-backed ERC-2981 remain subsequent launch work.
 
 ## Long-Term Principles
 
@@ -656,8 +679,10 @@ executor
 saleId or authorization nonce
 ```
 
-`expectedPrimaryPolicyHash` is the resolver's hash of the assignment or
-template expected by the signer at authorization time. `primaryPolicyMode`
+`expectedPrimaryPolicyHash` is the resolved primary policy hash expected by the
+signer at authorization time. It binds the resolver, revenue class,
+collection/token context, template/profile, verified wallet, and resolver
+assignment hash. `primaryPolicyMode`
 should be one of:
 
 ```text
@@ -670,16 +695,27 @@ Launch default should be `STRICT_MATCH` for economically material sales.
 be visible in the signed payload and settlement event. This prevents governance
 or operators from changing primary-sale economics between signature and
 settlement without the signer having opted into that mutability.
+The current `StreamPrimarySaleSettlement` foundation adapter does not verify an
+EIP-712 or ERC-1271 sale authorization itself. It trusts enabled settlement
+callers to supply the `expectedPrimaryPolicyHash` that came from the upstream
+sale authorization or custody flow. Therefore `STRICT_MATCH` is a resolver-drift
+check against the caller-supplied expected hash; it is not payer intent,
+signature, permit, price, quantity, deadline, or nonce enforcement at the
+adapter boundary. Any production sale path that uses the adapter must bind those
+fields before calling settlement and should prefer one-time or tightly scoped
+allowances for ERC-20 payment flows.
 If a scope freezes between signature and settlement, `ALLOW_CURRENT` resolves
 the then-current frozen assignment. That is acceptable only because the signer
 explicitly chose current-policy drift; `STRICT_MATCH` remains the default for
 economically material sales.
 Settlement events must expose whether drift was observed between the signed
 `expectedPrimaryPolicyHash` and the resolved settlement policy.
-The resolved primary policy hash includes `freezeMode` and `permanentFreeze`.
-Therefore a freeze between signature and settlement changes the hash and makes
-`STRICT_MATCH` revert unless the signer authorized the frozen policy hash.
-`ALLOW_CURRENT` is the explicit opt-in to that drift.
+The launch-target resolved primary policy hash includes `freezeMode` and
+`permanentFreeze`. The current foundation adapter binds the resolver assignment
+hash, and that assignment hash changes when its exact-key frozen bit changes.
+Therefore a freeze between signature and settlement changes the resolved policy
+hash and makes `STRICT_MATCH` revert unless the upstream authorization supplied
+the frozen policy hash. `ALLOW_CURRENT` is the explicit opt-in to that drift.
 
 No production sale path may use `tx.origin` as payer, recipient, executor, or
 authorizer. The current `StreamDrops` authorization model must be rewritten
@@ -771,6 +807,12 @@ ERC-20 primary adapters must read the same deployment-wide
 payments only for `ACTIVE` assets. The adapter must perform safe-transfer
 handling, measure its own asset balance before and after payer transfer, and
 revert unless the received amount exactly equals the expected sale amount.
+Authorized settlement callers are a strong trust boundary: once enabled, they
+can stamp native payments as official primary-sale evidence, and ERC-20 callers
+can pull approved payer allowances into verified split wallets as official
+primary-sale evidence. Operators must keep the caller set minimal and bind sale
+authorizations or upstream custody/permit flows so broad token approvals cannot
+be used outside the intended sale path.
 Allowance failure, transfer failure, no-op transfer, fee-on-transfer behavior,
 rebasing balance movement, callback-dependent behavior, malformed token return
 data, or an unavailable asset-policy registry all revert before minting or
@@ -850,24 +892,62 @@ not include `saleId`, `tokenId`, payer, beneficiary, amount, or
 `saleContextHash`; otherwise repeated sales with identical concrete recipients
 would create unnecessary wallets.
 
+The consumed settlement key is the canonical replay domain for official primary
+revenue settlement:
+
+```solidity
+bytes32 settlementKey = keccak256(abi.encode(
+    keccak256("6529STREAM_PRIMARY_SETTLEMENT_KEY_V1"),
+    uint256(block.chainid),
+    address(settlementContract),
+    bytes32(settlementId),
+    bytes32(revenueClass),
+    uint256(collectionId),
+    uint256(tokenId),
+    uint256(saleId),
+    address(payer),
+    address(poster),
+    address(beneficiary),
+    uint256(amount)
+));
+```
+
+`primaryPolicyMode`, `expectedPrimaryPolicyHash`, resolved policy evidence,
+settlement caller, and asset address are deliberately excluded from
+`settlementKey`; they are validation inputs and emitted evidence, not alternate
+replay domains for the same sale.
+
 Sale context is emitted for reconstruction only:
 
 ```solidity
 bytes32 saleContextHash = keccak256(abi.encode(
-    PRIMARY_SALE_CONTEXT_DOMAIN,
-    uint16(saleContextVersion),
+    keccak256("6529STREAM_PRIMARY_SALE_CONTEXT_V1"),
     uint256(block.chainid),
     address(settlementContract),
-    bytes32(saleKind),
-    uint256(saleId),
-    uint256(collectionId),
-    uint256(tokenId),
-    address(payer),
-    address(poster),
-    address(beneficiary),
+    bytes32(revenueClass),
+    keccak256(abi.encode(
+        bytes32(settlementId),
+        uint256(collectionId),
+        uint256(tokenId),
+        uint256(saleId)
+    )),
+    keccak256(abi.encode(
+        address(settlementCaller),
+        address(payer),
+        address(poster),
+        address(beneficiary)
+    )),
     address(asset),
     uint256(amount),
-    bytes32(templateId)
+    keccak256(abi.encode(
+        uint8(primaryPolicyMode),
+        bytes32(expectedPrimaryPolicyHash),
+        bytes32(resolvedPrimaryPolicyHash),
+        bytes32(resolvedAssignmentHash)
+    )),
+    bytes32(templateId),
+    bytes32(profileId),
+    address(wallet)
 ));
 ```
 
@@ -875,6 +955,9 @@ bytes32 saleContextHash = keccak256(abi.encode(
 on-chain payment authority. Consumers should verify the emitted sale fields and
 chain state; they must not treat arbitrary off-chain context as authenticated
 merely because it hashes to the emitted value.
+If a later sale adapter needs a `saleKind` or additional signed fields in this
+hash, it must use a new versioned context domain instead of reusing the v1
+preimage.
 Likewise, event fields such as `poster`, `payer`, and `beneficiary` are
 informational for reconstruction and UX. The actual payee set is the fixed
 profile entry materialized from supported account sources such as
@@ -885,6 +968,11 @@ Materialization resolves all dynamic sources before mint or settlement state
 changes. Zero or unsupported dynamic accounts revert. Entries that materialize
 to the same `(account, labelId)` pair are aggregated before fixed-profile
 validation; same-account entries under different labels remain separate.
+Template materialization is a public deterministic cache: any caller can
+materialize a template for a concrete poster, but `PrimaryTemplateMaterialized`
+is resolver state evidence only. It is not official sale settlement evidence
+unless paired with a same-key `PrimaryRevenueSettled` event from the settlement
+adapter.
 Materialization gas must be bounded independently of the resolved account
 values. Zero or unsupported account sources revert before any mint, escrow, or
 settlement write. Materialization must deploy-or-discover the deterministic
@@ -1054,7 +1142,7 @@ walletObservedReceived(asset) =
   walletCurrentBalance(asset) + walletTotalAccountReleased(asset)
 
 escrowOwed(revenueClass, profileId, wallet, asset) =
-  native ETH owed by protocol escrow but not yet deposited into wallet
+  settlement-asset value owed by protocol escrow but not yet deposited into wallet
 ```
 
 The wallet must not include escrow-pending funds in `observedReceived`.
@@ -1678,28 +1766,63 @@ Resolution order:
 token -> collection -> default
 ```
 
-Canonical assignment hashes:
+Canonical v1 primary assignment hashes:
 
 ```solidity
-bytes32 assignmentHash = keccak256(abi.encode(
-    STREAM_REVENUE_ASSIGNMENT_V1,
-    block.chainid,
+bytes32 resolverContextHash = keccak256(abi.encode(
+    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1"),
     address(resolver),
+    address(splitFactory),
+    address(assetPolicyRegistry),
+    bytes32(splitWalletRuntimeCodeHash)
+));
+
+bytes32 scopeContextHash = keccak256(abi.encode(
+    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1"),
     bytes32(revenueClass),
     uint8(scope),
     uint256(scopeId),
+    uint8(assignmentType)
+));
+
+bytes32 profileContextHash = assignmentType == ASSIGNMENT_TYPE_PROFILE
+    ? keccak256(abi.encode(
+        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_V1"),
+        address(splitWallet),
+        bytes32(profileEntriesHash),
+        bytes32(profileMetadataURIHash)
+    ))
+    : bytes32(0);
+
+bytes32 templateContextHash = assignmentType == ASSIGNMENT_TYPE_TEMPLATE
+    ? keccak256(abi.encode(
+        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_V1"),
+        bytes32(templateEntriesHash),
+        bytes32(templateMetadataURIHash)
+    ))
+    : bytes32(0);
+
+bytes32 pointerContextHash = keccak256(abi.encode(
+    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1"),
     bytes32(profileId),
-    address(splitWallet),
-    uint16(royaltyBps),
-    uint8(assignmentKind),
-    uint8(freezeMode),
-    bool(permanentFreeze),
-    bytes32(metadataHash)
+    bytes32(profileContextHash),
+    bytes32(templateId),
+    bytes32(templateContextHash)
+));
+
+bytes32 assignmentHash = keccak256(abi.encode(
+    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_V1"),
+    uint256(block.chainid),
+    bytes32(resolverContextHash),
+    bytes32(scopeContextHash),
+    bytes32(pointerContextHash),
+    bytes32(policyHash),
+    bool(frozen)
 ));
 
 bytes32 resolvedPrimaryPolicyHash = keccak256(abi.encode(
-    STREAM_PRIMARY_POLICY_V1,
-    block.chainid,
+    keccak256("STREAM_PRIMARY_POLICY_V1"),
+    uint256(block.chainid),
     address(resolver),
     bytes32(revenueClass),
     uint256(collectionId),
@@ -1709,22 +1832,10 @@ bytes32 resolvedPrimaryPolicyHash = keccak256(abi.encode(
     address(splitWallet),
     bytes32(assignmentHash)
 ));
-
-bytes32 royaltyAssignmentHash = keccak256(abi.encode(
-    STREAM_ROYALTY_POLICY_V1,
-    block.chainid,
-    address(resolver),
-    uint256(collectionId),
-    uint256(tokenId),
-    bytes32(profileId),
-    address(splitWallet),
-    uint16(royaltyBps),
-    bytes32(assignmentHash)
-));
 ```
 
-`expectedPrimaryPolicyHash`, mint-time royalty snapshots, resolver probes, and
-assignment events must all use these preimages or a later versioned replacement.
+`expectedPrimaryPolicyHash`, primary resolver probes, and assignment events must
+all use these preimages or a later versioned replacement.
 Event-only display fields, human labels, and mutable URIs are excluded from
 economic authority unless their hashes are explicitly included above.
 
@@ -1885,12 +1996,13 @@ interface IStreamRevenueAssignmentView {
 }
 ```
 
-The implemented split signatures are pinned through `IStreamSplitFactory`,
-`IStreamSplitWallet`, and `IStreamAssetPolicyRegistry` in the release artifact
-surface. Later assignment, escrow, and resolver interfaces must remain
-selector-stable when they are promoted from this target sketch into code. The
-interfaces above are intentionally value-type heavy; rich display metadata
-stays in manifests and events.
+The implemented split and primary-settlement signatures are pinned through
+`IStreamSplitFactory`, `IStreamSplitWallet`, `IStreamAssetPolicyRegistry`,
+`IStreamRevenueResolver`, and `IStreamPrimarySaleSettlement` in the release
+artifact surface. Later royalty, escrow, and fixed-price or auction adapter
+interfaces must remain selector-stable when they are promoted from this target
+sketch into code. The interfaces above are intentionally value-type heavy; rich
+display metadata stays in manifests and events.
 
 ## Events
 
@@ -2004,32 +2116,51 @@ event RevenueAssignmentFrozen(
     uint8 freezeMode
 );
 
-event PrimaryRevenueDeposited(
+event PrimaryRevenueSettled(
+    bytes32 indexed settlementKey,
     bytes32 indexed revenueClass,
     bytes32 indexed profileId,
-    address indexed wallet,
+    address wallet,
     address asset,
+    address payer,
     uint256 amount,
+    bytes32 saleContextHash,
+    bool policyDrift,
+    uint8 assignmentType
+);
+
+event PrimaryRevenueSettlementContext(
+    bytes32 indexed settlementKey,
+    bytes32 indexed revenueClass,
+    bytes32 indexed profileId,
+    address settlementCaller,
+    bytes32 settlementId,
+    uint8 policyMode,
     uint256 collectionId,
     uint256 tokenId,
-    bytes32 saleKind,
     uint256 saleId,
-    address payer,
     address poster,
     address beneficiary,
-    bool isTemplate,
-    bool escrowed,
-    bool policyDriftObserved
+    bytes32 templateId
+);
+
+event PrimaryRevenueSettlementPolicy(
+    bytes32 indexed settlementKey,
+    bytes32 indexed revenueClass,
+    bytes32 indexed profileId,
+    bytes32 expectedPrimaryPolicyHash,
+    bytes32 resolvedPrimaryPolicyHash,
+    bytes32 resolvedAssignmentHash,
+    bytes32 templateId
 );
 
 event PrimaryTemplateMaterialized(
     bytes32 indexed templateId,
     bytes32 indexed profileId,
     address indexed wallet,
-    bytes32 revenueClass,
-    uint8 scope,
-    uint256 scopeId,
-    bytes32 saleContextHash
+    bytes32 entriesHash,
+    bytes32 metadataURIHash,
+    address salePoster
 );
 
 event EscrowCreditCreated(

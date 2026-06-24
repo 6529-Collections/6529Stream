@@ -124,6 +124,7 @@ forge build --force --via-ir --skip test script
 & $pythonPath @pythonArgs "scripts\generate_broadcast_manifest_input.py" "--template" "deployments\config\fork-mainnet-6529stream-v0.1.0-001.json" "--broadcast" "deployments\broadcasts\fork-mainnet-6529stream-v0.1.0-001-run-latest.json" "--output" "deployments\config\fork-mainnet-6529stream-v0.1.0-001-broadcast.json" "--manifest-output" "deployments\examples\fork-mainnet-6529stream-v0.1.0-001-broadcast.json" "--check"
 & $pythonPath @pythonArgs "scripts\test_deployment_manifest.py"
 & $pythonPath @pythonArgs "scripts\generate_deployment_manifest.py" "--check"
+& $pythonPath @pythonArgs "scripts\generate_deployment_manifest.py" "--config" "deployments\config\fork-mainnet-6529stream-v0.1.0-001.json" "--check"
 & $pythonPath @pythonArgs "scripts\generate_deployment_manifest.py" "--config" "deployments\config\anvil-6529stream-v0.1.0-001-broadcast.json" "--check"
 & $pythonPath @pythonArgs "scripts\generate_deployment_manifest.py" "--config" "deployments\config\fork-mainnet-6529stream-v0.1.0-001-broadcast.json" "--check"
 & $pythonPath @pythonArgs "scripts\test_address_books.py"

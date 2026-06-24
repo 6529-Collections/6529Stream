@@ -35,38 +35,52 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/asset-policy-erc20-splits` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/626` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/627 |
-| Active PR | https://github.com/6529-Collections/6529Stream/pull/628 |
-| Next issue | Revenue resolver and primary-sale settlement adapters after asset policy and ERC-20 split-wallet release/sync. |
+| Active PR branch | `codex/revenue-resolver-primary-adapters` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/628` |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/629 |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/630 |
+| Next issue | Mint manager and prepared-mint hooks after revenue resolver and primary-sale settlement adapters. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-24 00:52 UTC` |
+| Last updated | `2026-06-24 07:16 UTC` |
 
 ## Current Run Notes
 
 - User authorized autonomous execution without permission prompts.
 - Use heavy subagents for independent review, sequencing, and verification.
-- PR #626 merged the split factory and split wallet skeleton and issue #625 is
-  closed completed.
-- The current topic is issue #627 on branch
-  `codex/asset-policy-erc20-splits`.
+- PR #628 merged the asset policy registry and ERC-20 split-wallet slice and
+  issue #627 is closed completed.
+- The current topic is issue #629 on branch
+  `codex/revenue-resolver-primary-adapters`.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic adds the outside-Core asset policy registry and approved
-  standard ERC-20 split-wallet sync/release support, while preserving native
-  ETH behavior and excluding non-standard ERC-20 semantics.
-- Local implementation for issue #627 is open as PR #628 on branch
-  `codex/asset-policy-erc20-splits`; CodeRabbit review has been requested.
-- OpenRouter review feedback from Opus 4.8, GLM 5.2, and GPT-5.5 Pro
-  high/xhigh reasoning has been incorporated. GPT-5.5 Pro was not rerun at low
-  reasoning; provider/hidden-reasoning failures were treated as transport
-  failures after patient high-reasoning attempts.
-- Full local validation passed with
-  `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` on
-  2026-06-24.
+- Current topic adds the outside-Core revenue resolver and primary-sale
+  settlement adapter foundation for native ETH and approved standard ERC-20
+  assets, building on the merged split wallet and asset policy surfaces.
+- Local implementation and validation are complete for the current topic. The
+  branch includes resolver/settlement contracts, focused tests, deployment
+  wiring, docs/indexer notes, release artifacts, and cross-platform manifest
+  gate parity for the fork non-broadcast deployment manifest.
+- Fresh local reviewers found no current contract blockers; release/docs review
+  found and the branch fixed a CI/Make/Bash deployment-manifest gate asymmetry.
+- GPT-5.5 Pro remained pinned to max reasoning. Two OpenRouter max-reasoning
+  retries returned hidden reasoning only with empty visible content; the third
+  max-reasoning retry returned visible feedback after hidden reasoning was
+  excluded from the response payload.
+- The visible GPT-5.5 Pro feedback flagged untracked new source/test files as a
+  packaging blocker and requested explicit coverage for native value rollback,
+  frozen assignment overwrites, ERC-20-to-ERC-20 replay, second-leg ERC-20
+  rollback, and template ERC-20 event reconstruction. The branch now includes
+  that focused coverage; the untracked-file blocker will be resolved by the
+  normal PR staging step.
+- Full Windows validation passed after the GPT-5.5 Pro follow-up. Full Slither
+  was attempted and exited nonzero on the repo's broad baseline warning set
+  plus the reviewed arbitrary native send to a verified split wallet in the
+  settlement adapter.
+- PR #630 is open at
+  https://github.com/6529-Collections/6529Stream/pull/630 and CodeRabbit review
+  was requested in comment `4786805627`.
 
 ## Packaging Notes
 
