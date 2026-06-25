@@ -9,25 +9,23 @@ feedback, merge when clean, then continue.
 
 ## Current Topic
 
-`StreamMintLedger` static counter accounting foundation.
+`StreamMintManager` phase policy and execution integration.
 
-The current branch should implement the first outside-Core durable mint
-accounting slice needed by the v1 mint manager roadmap:
+The current branch should implement the manager-side policy and execution layer
+that builds on the merged Core hook and ledger foundations:
 
-- `IStreamMintLedger` and `StreamMintLedger`;
-- owner-managed authorized deployed-contract ledger writers;
-- one active registered `policyHash` per `(manager, collectionId, phaseId)`;
-- launch-safe static counter policies only;
-- cap-checked monotonic counter consumption;
-- authorization replay protection;
-- reconstructable writer, policy, counter, context, and authorization events;
-- focused tests for writer auth, policy registration, unsupported future modes,
-  duplicate-key cap safety, replay, and rollback-before-mutation behavior.
+- phase policy/configuration surfaces in `StreamMintManager`;
+- manager-side binding to `StreamMintLedger` policy registration and
+  consumption;
+- launch-safe static counter execution only;
+- canonical counter value-key derivation;
+- replay, cap, rollback, and prepared-mint interaction coverage;
+- focused tests that prove failed manager execution does not consume
+  authorizations or mutate ledger counters.
 
-Full mint manager phase policy, Core mint integration, routing Drops through the
-manager, token-level revenue snapshots, ERC-20 auction bidding, custom gates,
-resolver modes, callable nullifiers, and royalty resolver integration remain
-follow-up topics.
+Token-level revenue snapshots, ERC-20 auction bidding, custom gates, resolver
+modes, callable nullifiers, and royalty resolver integration remain follow-up
+topics unless a smaller reviewed boundary is needed for this manager slice.
 
 ## Branch State
 
@@ -41,17 +39,12 @@ follow-up topics.
 - Revenue resolver and primary-sale settlement adapters PR #630 merged and
   issue #629 is closed completed.
 - Core mint-manager hooks PR #633 merged and issue #631 is closed completed.
-- Current topic branch: `codex/mint-manager-ledger-foundation`.
-- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/634.
-- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/635.
-- Current PR status: PR #635 is open for the ledger contract, interface,
-  focused tests, deployment rehearsal wiring, release artifacts, and
-  review-driven fixes. Opus, GPT-5.5 Pro, and GLM all returned visible review
-  content with no P0/P1 blockers for the ledger-only static phase-counter
-  scope. Final local validation passed with focused `StreamMintLedger` tests,
-  `forge build`, full `forge test -vvv`, production via-IR size build, full
-  Windows `scripts\check.ps1`, and `codex-diff-check`. CI and CodeRabbit review
-  are in progress.
+- Ledger foundation PR #635 merged and issue #634 is closed completed.
+- Current topic branch: `codex/mint-manager-phase-execution`.
+- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/636.
+- Current topic PR: TBD.
+- Current draft status: starting from merged `main`; implementation not yet
+  drafted.
 
 ## Subagent Findings To Carry
 
@@ -81,8 +74,8 @@ follow-up topics.
   and the review loop is repeated.
 - PR review bots have no unresolved blocking findings, or deferrals are
   documented with rationale.
-- Current local validation target includes focused `StreamMintLedger` tests,
-  `forge build`, `forge test -vvv`, production `via-ir` size build,
-  deployment rehearsal, release/deployment artifact checks,
-  `python scripts/check_contract_size_budget.py`, `codex-diff-check`, and the
-  full Windows `scripts\check.ps1` wrapper before PR/merge.
+- Current local validation target includes focused `StreamMintManager` and
+  ledger integration tests, `forge build`, `forge test -vvv`, production
+  `via-ir` size build, deployment rehearsal, release/deployment artifact
+  checks, `python scripts/check_contract_size_budget.py`, `codex-diff-check`,
+  and the full Windows `scripts\check.ps1` wrapper before PR/merge.

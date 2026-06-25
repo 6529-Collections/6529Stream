@@ -43,6 +43,9 @@ the release policy in `docs/release-policy.md`.
   authorization replay protection, and focused ledger tests, without adding
   Core bytecode or routing existing sale/drop/auction flows through the mint
   manager yet.
+- Started the `StreamMintManager` phase policy and ledger execution integration
+  slice in roadmap/run-state tracking, with regenerated risk, release manifest,
+  lockfile, proof, and checksum artifacts for the new active issue.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay

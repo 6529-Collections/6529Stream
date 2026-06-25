@@ -235,3 +235,9 @@
   `4797239196`; CI run `28156747763` is in progress. Next action is to push
   this PR-number state update, keep CodeRabbit enabled, wait for CI/bot
   feedback, resolve anything actionable, then merge only when clean.
+- PR #635 merged as `a2c6a6c1bb15fa59fc72ef2ac2519bdc0d94b27d`, closing issue
+  #634 completed after latest-head CI and CodeRabbit were clean. Local `main`
+  fast-forwarded to the merge commit. Created issue #636 and branch
+  `codex/mint-manager-phase-execution` for `CON-014`: full
+  `StreamMintManager` phase policy and ledger execution integration on top of
+  the merged Core hook and static ledger foundations.
