@@ -9,13 +9,13 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:d925f3af7c4f212943e6da03623d1aa59f0b4206a35ad1b2bb72a056b1482e0c",
-      "size_bytes": 10168
+      "sha256": "sha256:5f9da993ac0b2d92a9eabddca8803028ad96af0f8d366d6df0982dd65b039c5f",
+      "size_bytes": 10165
     },
     "public_beta_blocker_report": {
       "path": "release-artifacts/latest/public-beta-blockers.md",
-      "sha256": "sha256:e8e27ec2c0588ae2f7516f99e01026e5fca275ed247059bac48451c2d09d2215",
-      "size_bytes": 11992
+      "sha256": "sha256:33333943c550154d6547bd657507c71e8fda86904402f7d9b72fdc8d3943d470",
+      "size_bytes": 11989
     },
     "production_release_blocker_report": {
       "path": "release-artifacts/latest/production-release-blockers.md",
@@ -421,13 +421,13 @@
       "evidence_paths": [
         "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json"
       ],
-      "owner": "Codex autonomous implementer",
+      "owner": "Codex autonomous operator",
       "template_owner": "TBD",
       "review_owner": "TBD",
       "reviewer": "TBD",
       "review_status": "template",
       "review_source": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
-      "owner_reviewer_posture": "requirement owner=Codex autonomous implementer; template owner=TBD; reviewer=TBD; review_status=template",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template",
       "blocker_report": {
         "path": "release-artifacts/latest/public-beta-blockers.md",
         "section": "Incomplete Public Beta Rows",

@@ -90,7 +90,7 @@
       "id": "fork_testnet_randomizer_operations_evidence",
       "phase": "public_beta",
       "status": "pending",
-      "owner": "Codex autonomous implementer",
+      "owner": "Codex autonomous operator",
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",

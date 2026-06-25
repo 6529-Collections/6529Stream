@@ -314,7 +314,7 @@ Suggested issue body:
 | Status | `pending` |
 | Evidence posture | retained-incomplete |
 | Suggested labels | `release`, `evidence`, `roadmap`, `public-beta` |
-| Owner/reviewer posture | requirement owner=Codex autonomous implementer; template owner=TBD; reviewer=TBD; review_status=template |
+| Owner/reviewer posture | requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template |
 | Blocker report | `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows |
 | Template | `release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json` |
 | Retained artifact expectation | `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`; Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation. |
@@ -329,7 +329,7 @@ Suggested issue body:
 - Requirement ID: `fork_testnet_randomizer_operations_evidence`
 - Current status: `pending`
 - Evidence posture: retained-incomplete
-- Owner/reviewer posture: requirement owner=Codex autonomous implementer; template owner=TBD; reviewer=TBD; review_status=template
+- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template
 
 ## Source Links
 

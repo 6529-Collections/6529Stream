@@ -34,8 +34,8 @@ the release policy in `docs/release-policy.md`.
   mint-manager replacement left available as the Core recovery path for a
   stranded prepared mint. This uses accepted Core bytecode-spend exception
   `CORE-SPEND-2026-06-24-001` for the measured `StreamCore` runtime of
-  24,157 bytes, a +1,973-byte delta over the 22,184-byte approved baseline, and
-  419 bytes of EIP-170 margin, which is above the 384-byte release floor but
+  24,150 bytes, a +1,966-byte delta over the 22,184-byte approved baseline, and
+  426 bytes of EIP-170 margin, which is above the 384-byte release floor but
   below the 512-byte warning threshold.
 - Added the `StreamMintLedger` static counter accounting foundation, with
   deployed-contract ledger writers, registered phase policy hashes,
