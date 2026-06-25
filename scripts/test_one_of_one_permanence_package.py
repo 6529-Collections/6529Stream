@@ -336,6 +336,24 @@ class OneOfOnePermanencePackageTests(unittest.TestCase):
                 record["replay"]["deterministic_replay_status"], "reviewed_replayable"
             )
 
+    def test_descriptor_file_record_uses_lf_normalized_text(self) -> None:
+        """Descriptor file records are stable across CRLF and LF checkouts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            descriptor_dir, output = seed_descriptor_tree(root)
+            descriptor = descriptor_dir / "test-1-of-1.permanence.json"
+
+            lf_record = json.loads(
+                generator.build_output_text(root, descriptor_dir, output)
+            )["packages"][0]["descriptor"]
+            crlf_text = descriptor.read_text(encoding="utf-8").replace("\n", "\r\n")
+            descriptor.write_text(crlf_text, encoding="utf-8", newline="")
+            crlf_record = json.loads(
+                generator.build_output_text(root, descriptor_dir, output)
+            )["packages"][0]["descriptor"]
+
+            self.assertEqual(crlf_record, lf_record)
+
     def test_check_mode_accepts_current_manifest(self) -> None:
         """Check mode accepts a current generated manifest."""
         with tempfile.TemporaryDirectory() as temp_dir:

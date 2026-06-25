@@ -119,6 +119,8 @@ python scripts/test_release_evidence_issue_closure.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/test_architecture_threat_model.py
 python scripts/check_architecture_threat_model.py
+python scripts/test_mint_manager_domain_constants.py
+python scripts/check_mint_manager_domain_constants.py
 python scripts/test_audit_package.py
 python scripts/check_audit_package.py
 python scripts/test_audit_finding_workflow.py
@@ -213,8 +215,18 @@ negative and bytecode spend positive.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
 2,392 bytes of EIP-170 margin. The current measured proof is above that baseline
 under the accepted CON-012 exception:
-`release-artifacts/latest/bytecode-release-proof.json` records 24,165 bytes
-with 411 bytes of EIP-170 margin.
+`release-artifacts/latest/bytecode-release-proof.json` records 24,150 bytes
+with 426 bytes of EIP-170 margin.
+This CON-014 branch also refreshes via-IR bytecode hashes for contracts whose
+source files are otherwise unchanged in the diff. `StreamCore` changes because
+its imported `IStreamMintManager` source expands from the prior marker-only
+interface to the full launch manager ABI while preserving Core's external ABI
+method identifiers; Core storage changes include the prepared-mint manager
+tracking added for this slice. `StreamPrimarySaleSettlement` has
+unchanged source, ABI method identifiers, and storage layout; the regenerated
+proof refreshes the stale prior via-IR release artifact baseline to the current
+compiled output. These changes are release-evidence changes, not hidden source
+edits to those contracts.
 
 The deployment rehearsal step is the first Gate E local ceremony gate. It uses
 non-secret placeholder addresses, deploys the current contract stack, wires the
@@ -277,7 +289,8 @@ The broadcast manifest input step parses the sanitized Foundry fixtures under
 missing-contract, unexpected-contract, duplicate, invalid-address, and
 secret-like-key inputs, and checks the generated broadcast-derived configs
 under `deployments/config/`. The default check covers both the local Anvil
-fixture and the reviewed mainnet-fork rehearsal fixture for issue #216.
+fixture and the current mainnet-fork rehearsal fixture for issue #216, whose
+changed CON-014 artifact set is pending PR review.
 If a broadcast contains a linked library or helper deployment that is not part
 of the public release contract set, list it explicitly in
 `broadcast_evidence.ignored_deployments`; the generator records those ignored
@@ -300,7 +313,7 @@ full ceremony and constructor-argument details from deployment manifests. They
 follow `deployments/schema/address-book.schema.json`, normalize addresses to
 lowercase, and are regenerated with `python scripts/generate_address_books.py`.
 The default drift check includes the Anvil placeholder, Anvil broadcast-derived,
-and reviewed fork-mainnet broadcast-derived address books.
+and current fork-mainnet broadcast-derived address books.
 
 The bytecode-to-release proof step writes
 `release-artifacts/latest/bytecode-release-proof.json` after release manifest
@@ -372,6 +385,12 @@ The architecture/threat-model step validates [`architecture.md`](architecture.md
 and [`threat-model.md`](threat-model.md), the auditor-facing map of system
 components, trust boundaries, value/custody flows, threat categories, residual
 risks, and evidence links.
+
+The mint-manager domain constants step validates the checked
+[`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+`StreamMintManager` domain table against `StreamMintManager.sol` and recomputes
+each listed `keccak256` preimage with `cast`, failing on source, spec, or hash
+drift.
 
 The audit-package step validates [`audit-package.md`](audit-package.md), the
 single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
@@ -703,12 +722,12 @@ artifact path at
 `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`.
 Run `python scripts/test_fork_deployment_rehearsal_evidence.py` and
 `python scripts/check_fork_deployment_rehearsal_evidence.py` before generating
-the metadata envelope. The committed file now contains reviewed
-mainnet-fork rehearsal evidence captured at fork block `25316366`, with
-private RPC details redacted and public-beta readiness still blocked. Issue
-#216 closed completed after review accepted the retained artifact, non-local
-evidence envelope, public-beta evidence row, and generated
-manifest/address-book references.
+the metadata envelope. The committed file contains mainnet-fork rehearsal
+evidence captured at fork block `25316366`, with private RPC details redacted.
+The CON-014 manager branch changed the retained deployment artifact set, so the
+shared public-beta evidence row is currently `pending` and issue #216 is back
+in the release-evidence issue-link set until this PR's updated artifact set is
+reviewed. Public-beta readiness remains blocked.
 Testnet deployment rehearsal evidence for issue #217 has its own Markdown
 retained artifact path at
 `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`.
@@ -855,9 +874,11 @@ checker requires fork or testnet provider configuration, funding status,
 reserve status, request health, lifecycle controls, monitoring handoff,
 repo-relative retained artifact references, optional declared `sha256:`
 hashes, reviewer metadata, and explicit redaction confirmations before a
-pending-review or reviewed artifact can pass. The committed file is
-template-only and keeps public beta blocked until future reviewed fork/testnet
-randomizer operations evidence is accepted.
+pending-review or reviewed artifact can pass. The committed file contains fork
+randomizer operations evidence, but the CON-014 manager branch changed the
+retained artifact set, so the shared public-beta evidence row is currently
+`pending` and issue #220 is back in the release-evidence issue-link set until
+this PR's updated artifact set is reviewed. Public beta remains blocked.
 
 Live randomizer operations evidence has a dedicated no-secret retained artifact
 template at
@@ -884,7 +905,8 @@ The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 artifact, public-beta evidence, release evidence issue backlog, release
 evidence issue-link map, release evidence issue body sync, deployment manifest,
 address-book, schema, ceremony evidence, release-manifest, bytecode proof, and
-release-candidate lockfile outputs. This
+release-candidate lockfile outputs, plus the checked mint-manager domain
+constant spec and checker. This
 gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
@@ -1052,6 +1074,7 @@ python scripts/generate_release_evidence_issue_body_sync.py
 python scripts/check_release_evidence_issue_bodies.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
+python scripts/check_mint_manager_domain_constants.py
 python scripts/check_audit_package.py
 python scripts/test_natspec_coverage.py
 python scripts/check_natspec_coverage.py
@@ -1128,6 +1151,7 @@ python scripts/check_release_evidence_issue_bodies.py
 python scripts/test_release_evidence_issue_closure.py
 python scripts/check_release_evidence_issue_closure.py
 python scripts/check_architecture_threat_model.py
+python scripts/check_mint_manager_domain_constants.py
 python scripts/check_audit_package.py
 python scripts/test_natspec_coverage.py
 python scripts/check_natspec_coverage.py

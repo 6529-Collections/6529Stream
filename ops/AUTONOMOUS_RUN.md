@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/mint-manager-ledger-foundation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/633` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/634 |
-| Active PR | https://github.com/6529-Collections/6529Stream/pull/635 |
-| Next issue | Full `StreamMintManager` phase policy/execution integration after the ledger foundation, then collection metadata and preservation satellites. |
+| Active PR branch | `codex/mint-manager-phase-execution` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/635` |
+| Active issue | https://github.com/6529-Collections/6529Stream/issues/636 |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/637 |
+| Next issue | Collection metadata and preservation satellites after the manager phase/execution integration. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-25 08:20 UTC` |
+| Last updated | `2026-06-25 21:55 UTC` |
 
 ## Current Run Notes
 
@@ -51,26 +51,48 @@ evidence, and audit/readiness gates.
 - Use heavy subagents for independent review, sequencing, and verification.
 - PR #633 merged the Core mint-manager hook slice and issue #631 is closed
   completed.
-- The current topic is issue #634 on branch
-  `codex/mint-manager-ledger-foundation`.
+- PR #635 merged the `StreamMintLedger` static counter accounting foundation
+  and issue #634 is closed completed.
+- The current topic is issue #636 on branch
+  `codex/mint-manager-phase-execution`.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic adds the `StreamMintLedger` static counter accounting
-  foundation required before the full manager policy/execution layer.
-- The ledger-only slice intentionally keeps `StreamCore`, `StreamDrops`,
-  auctions, settlement adapters, custom gates, resolver modes, nullifiers, and
-  payment movement out of scope.
-- Final local validation for the current draft passed: focused
-  `StreamMintLedger` tests, `forge build`, full `forge test -vvv` with 574
-  tests, production via-IR size build, generated deployment/release evidence
-  checks, full Windows `scripts\check.ps1`, and `codex-diff-check`.
-- OpenRouter review status: Opus 4.8, GPT-5.5 Pro, and GLM 5.2 all returned
-  visible content. None reported P0/P1 blockers for the ledger-only static
-  phase-counter scope. GPT and GLM flagged release-scope/documentation
-  consistency plus writer-authorization hardening; those fixes were applied
-  before opening PR #635.
-- PR #635 is open for issue #634. CodeRabbit was requested, and CI is in
-  progress on the pushed branch.
+- Current topic adds the full `StreamMintManager` phase policy and execution
+  integration on top of the merged Core hook and ledger foundations.
+- Local CON-014 draft implements `StreamMintManager` phase configuration,
+  executor allowlists, phase pause/window guards, launch-static ledger
+  consumption, stale-policy and replay protection, and Core prepare/complete
+  execution. The read-only local verifier returned no blockers; its optional
+  coverage suggestions have been folded into the focused manager suite, which
+  now passes 36 tests, including context batch counters, second-token receiver
+  rollback, receiver/admin reentrancy, policy-hash event payloads, exact max
+  launch batch, Core supply-exhaustion rollback, and executor-cap overflow
+  immutability. Deployment/release wiring, evidence hash refreshes, checked
+  manager hash-domain coverage, generated artifacts, `codex-diff-check`, and
+  the full Windows `scripts\check.ps1` wrapper are complete. The latest full
+  wrapper pass is `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`;
+  it reached the deployment-suite, standalone deployment, auction ceremony, and
+  emergency redeployment rehearsal scripts successfully. Current production
+  `via-ir` size output records `StreamCore` at 24,150 bytes with 426 bytes of
+  EIP-170 margin and `StreamMintManager` at 16,812 bytes. The changed fork
+  deployment, fork ceremony, and fork randomizer evidence rows are pending with
+  #216/#219/#220 restored in the issue-link set until this PR's updated
+  artifacts are reviewed. Final post-fix OpenRouter review passed with Opus
+  4.8, GLM 5.2, and GPT-5.5 Pro at high reasoning; all three approve after the
+  stale size-prose blocker was fixed. PR #637 is open. A first CI follow-up
+  stabilized one-of-one provenance/permanence descriptor hashes across Windows
+  and Linux checkouts; the current local follow-up normalizes risk-register
+  text-file references the same way after Linux CI found the matching drift.
+  Focused risk-register, blocker-report, release-evidence, release manifest,
+  bytecode proof, lockfile, checksum, release artifact, and whitespace gates
+  pass locally. Next transition: commit and push the risk-register CI fix, wait
+  for latest-head CI, and request a fresh CodeRabbit pass when the temporary
+  rate limit clears.
+- The manager integration slice should keep product policy outside Core,
+  consume only launch-static ledger counters, and defer resolver modes,
+  callable nullifiers, custom gates, ERC-20 auction bidding, and royalty
+  resolver integration unless the implementation proves a smaller reviewed
+  boundary is needed.
 - Preserve the existing `StreamDrops -> StreamMinter -> StreamCore` flow unless
   a later PR intentionally routes it through the new manager boundary.
 - Keep GPT-5.5 Pro on high/max reasoning for OpenRouter reviews. Long waits are

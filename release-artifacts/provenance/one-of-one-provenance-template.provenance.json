@@ -67,8 +67,8 @@
         {
           "label": "release binding evidence placeholder",
           "uri": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-          "sha256": "sha256:5df43bf19ed6eabcdfce2f8738e4581f15bb9b72ab8ff7b3fe9f33d388f652e0",
-          "notes": "The generated catalog is checksum-covered but is not release completion evidence."
+          "sha256": "not_available_self_referential",
+          "notes": "The generated catalog includes this descriptor, so its digest is recorded through the release checksum bundle rather than embedded here."
         }
       ]
     }
@@ -94,12 +94,12 @@
     },
     "deployment_manifest": {
       "path": "deployments/examples/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:ce612f31d357263c2dba512e8fcaf861c674f5988b6430bb9e96e3dbefa2c6cd",
+      "sha256": "sha256:06bee7e5a3d1ff3eafe0e07e22751543fd216ace92682f02087dee522ad5b2b3",
       "status": "template"
     },
     "address_book": {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001.json",
-      "sha256": "sha256:692bee0982585f5ca88a8cac52613f490e19f900bb8f31ba668006ceae06bdb2",
+      "sha256": "sha256:47e96cf4c21c735521c375e38fa593e0d2074550a57a284c7e08d7ea04928cc3",
       "status": "template"
     },
     "contract_uri_hash_source": "StreamContractMetadata.contractURIHash(); zero value is template-only.",

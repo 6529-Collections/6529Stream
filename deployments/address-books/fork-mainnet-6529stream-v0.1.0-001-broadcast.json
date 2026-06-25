@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:1d1b79b4d4f1ad771ef845c33d2f5ab0834caa22934ab0828d256025512dba6e",
+    "deployment_manifest_sha256": "sha256:b75d7a207fbf2fa7b4fceae1f45fe418d536c30a476f760a9c165a3ebfc58ba8",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -82,7 +82,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:be80dc77a6d763a644780b4d70b353ec4f35f890e1b66a6a7a4a00ebeb2c063b",
-      "runtime_bytecode_hash": "sha256:98a0da2c9e4f078883e635132537d05d0078952c136470240ffb5f4e4de95c6e",
+      "runtime_bytecode_hash": "sha256:05152aef17b9511818909d685c8b1e292c19705cc0c8ed05723d6d467c84a82e",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -109,6 +109,14 @@
       "runtime_bytecode_hash": "sha256:c5730bc4ecf04bff2d180b2ba463707dff7da3de89c0b3ffe21eb29d11acee27",
       "verification_status": "not_applicable"
     },
+    "StreamMintManager": {
+      "address": "0x2000000000000000000000000000000000000010",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "artifact_path": "out/StreamMintManager.sol/StreamMintManager.json",
+      "abi_hash": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377",
+      "runtime_bytecode_hash": "sha256:6e382fd0b2b81a82f2ea2e0647b7b7f1fc8263b912b185bc090b654fc8242718",
+      "verification_status": "not_applicable"
+    },
     "StreamMinter": {
       "address": "0x00ea87e5acca4e9921b64bbb488fa5017a986301",
       "source": "smart-contracts/StreamMinter.sol",
@@ -122,7 +130,7 @@
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
       "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
       "abi_hash": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
-      "runtime_bytecode_hash": "sha256:b81138d34d93a7d28ae231bc1c2d83b1f28c8530a92a3da2d162d72cdf0eb351",
+      "runtime_bytecode_hash": "sha256:313d07b6439f44a23dc4753526f900eb1ca0b94265c3bdb6bc9843767f7ecc84",
       "verification_status": "not_applicable"
     },
     "StreamRevenueResolver": {

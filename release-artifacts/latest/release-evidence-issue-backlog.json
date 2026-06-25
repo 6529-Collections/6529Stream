@@ -9,8 +9,8 @@
   "source": {
     "packet_index": {
       "path": "release-artifacts/latest/release-evidence-packet-index.json",
-      "sha256": "sha256:2d3cc6c43a194b559511e3819b403a695f5bb2770fd3fa2872edc96d49ff3662",
-      "size_bytes": 75680
+      "sha256": "sha256:184b48277abfeacf2821163252aeea7044c665d53033e50e0def810f77d0b573",
+      "size_bytes": 74393
     }
   },
   "release_version": "v0.1.0-local",
@@ -34,10 +34,10 @@
     {
       "phase": "public_beta",
       "label": "Public Beta",
-      "entry_count": 4,
+      "entry_count": 7,
       "counts": {
         "missing": 4,
-        "pending": 0,
+        "pending": 3,
         "blocked": 0,
         "accepted_risk": 0,
         "not_applicable": 0,
@@ -117,6 +117,63 @@
       "issue_body": "## Evidence Requirement\n\n- Phase: `Public Beta`\n- Requirement ID: `external_audit_report`\n- Current status: `missing`\n- Evidence posture: external/future\n- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `external_audit_report`\n- Evidence template: `release-artifacts/evidence/public-beta-templates/external-audit-report-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace the dedicated retained artifact template with the final external audit report or public report reference, scope, audited commit, finding IDs, remediation links, accepted-risk references, retest status, and reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/external-audit-report-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_external_audit_report_evidence.py`\n- `python scripts/check_external_audit_report_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_public_beta_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass."
     },
     {
+      "entry_id": "public-beta-fork-deployment-rehearsal",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_deployment_rehearsal",
+      "status": "pending",
+      "evidence_posture": "retained-incomplete",
+      "title": "Retain public beta evidence: fork_deployment_rehearsal",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "owner": "Codex autonomous operator",
+      "template_owner": "TBD",
+      "reviewer": "TBD",
+      "review_status": "template",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template",
+      "blocker_report": {
+        "path": "release-artifacts/latest/public-beta-blockers.md",
+        "section": "Incomplete Public Beta Rows",
+        "requirement_marker": "`fork_deployment_rehearsal`"
+      },
+      "template": {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json",
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-deployment-rehearsal",
+        "record_type": "template",
+        "review_status": "template"
+      },
+      "retained_artifact_expectation": {
+        "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
+        "sha256": "sha256:877952fe3bf07d729b23a6c15673f94c73add66a904ec49595508fe2489c4488",
+        "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
+        "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
+        "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
+      },
+      "validation_commands": [
+        "python scripts/test_release_evidence_packet_index.py",
+        "python scripts/test_public_beta_evidence.py",
+        "python scripts/test_non_local_release_evidence.py",
+        "python scripts/test_fork_deployment_rehearsal_evidence.py",
+        "python scripts/check_fork_deployment_rehearsal_evidence.py",
+        "python scripts/test_public_beta_blocker_report.py",
+        "python scripts/test_production_release_blocker_report.py",
+        "python scripts/generate_public_beta_blocker_report.py --check",
+        "python scripts/check_public_beta_evidence.py",
+        "python scripts/check_non_local_release_evidence.py",
+        "python scripts/generate_release_evidence_packet_index.py --check",
+        "python scripts/generate_release_manifest.py --check",
+        "python scripts/generate_release_checksums.py --check"
+      ],
+      "template_only_can_complete": false,
+      "completion_gate": "This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`. Template-only evidence cannot complete the row.",
+      "issue_body": "## Evidence Requirement\n\n- Phase: `Public Beta`\n- Requirement ID: `fork_deployment_rehearsal`\n- Current status: `pending`\n- Evidence posture: retained-incomplete\n- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_deployment_rehearsal`\n- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_fork_deployment_rehearsal_evidence.py`\n- `python scripts/check_fork_deployment_rehearsal_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_public_beta_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass."
+    },
+    {
       "entry_id": "public-beta-testnet-deployment-rehearsal",
       "phase": "public_beta",
       "phase_label": "Public Beta",
@@ -172,6 +229,120 @@
       "template_only_can_complete": false,
       "completion_gate": "This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`. Template-only evidence cannot complete the row.",
       "issue_body": "## Evidence Requirement\n\n- Phase: `Public Beta`\n- Requirement ID: `testnet_deployment_rehearsal`\n- Current status: `missing`\n- Evidence posture: external/future\n- Owner/reviewer posture: requirement owner=TBD; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `testnet_deployment_rehearsal`\n- Evidence template: `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace the dedicated retained artifact template with testnet deployment transcript, chain ID, transaction references, sanitized broadcast, generated manifest, address book, explorer verification status, and reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/testnet-deployment-rehearsal-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/testnet-deployment-rehearsal/testnet-deployment-rehearsal-retained-artifact-template.md`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_testnet_deployment_rehearsal_evidence.py`\n- `python scripts/check_testnet_deployment_rehearsal_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_public_beta_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass."
+    },
+    {
+      "entry_id": "public-beta-fork-testnet-ceremony-evidence",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_testnet_ceremony_evidence",
+      "status": "pending",
+      "evidence_posture": "retained-incomplete",
+      "title": "Retain public beta evidence: fork_testnet_ceremony_evidence",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "owner": "Codex autonomous operator",
+      "template_owner": "TBD",
+      "reviewer": "TBD",
+      "review_status": "template",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template",
+      "blocker_report": {
+        "path": "release-artifacts/latest/public-beta-blockers.md",
+        "section": "Incomplete Public Beta Rows",
+        "requirement_marker": "`fork_testnet_ceremony_evidence`"
+      },
+      "template": {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json",
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-testnet-ceremony-evidence",
+        "record_type": "template",
+        "review_status": "template"
+      },
+      "retained_artifact_expectation": {
+        "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
+        "sha256": "sha256:3c5efb77f81885998314c8098258d50b970661ce5d0a2166e1e110472679a042",
+        "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
+        "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
+        "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
+      },
+      "validation_commands": [
+        "python scripts/test_release_evidence_packet_index.py",
+        "python scripts/test_public_beta_evidence.py",
+        "python scripts/test_non_local_release_evidence.py",
+        "python scripts/test_fork_ceremony_evidence.py",
+        "python scripts/check_fork_ceremony_evidence.py",
+        "python scripts/test_public_beta_blocker_report.py",
+        "python scripts/test_production_release_blocker_report.py",
+        "python scripts/generate_public_beta_blocker_report.py --check",
+        "python scripts/check_public_beta_evidence.py",
+        "python scripts/check_non_local_release_evidence.py",
+        "python scripts/generate_release_evidence_packet_index.py --check",
+        "python scripts/generate_release_manifest.py --check",
+        "python scripts/generate_release_checksums.py --check"
+      ],
+      "template_only_can_complete": false,
+      "completion_gate": "This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`. Template-only evidence cannot complete the row.",
+      "issue_body": "## Evidence Requirement\n\n- Phase: `Public Beta`\n- Requirement ID: `fork_testnet_ceremony_evidence`\n- Current status: `pending`\n- Evidence posture: retained-incomplete\n- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_ceremony_evidence`\n- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_fork_ceremony_evidence.py`\n- `python scripts/check_fork_ceremony_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_public_beta_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass."
+    },
+    {
+      "entry_id": "public-beta-fork-testnet-randomizer-operations-evidence",
+      "phase": "public_beta",
+      "phase_label": "Public Beta",
+      "requirement_id": "fork_testnet_randomizer_operations_evidence",
+      "status": "pending",
+      "evidence_posture": "retained-incomplete",
+      "title": "Retain public beta evidence: fork_testnet_randomizer_operations_evidence",
+      "suggested_labels": [
+        "release",
+        "evidence",
+        "roadmap",
+        "public-beta"
+      ],
+      "owner": "Codex autonomous operator",
+      "template_owner": "TBD",
+      "reviewer": "TBD",
+      "review_status": "template",
+      "owner_reviewer_posture": "requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template",
+      "blocker_report": {
+        "path": "release-artifacts/latest/public-beta-blockers.md",
+        "section": "Incomplete Public Beta Rows",
+        "requirement_marker": "`fork_testnet_randomizer_operations_evidence`"
+      },
+      "template": {
+        "path": "release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json",
+        "schema_version": "6529stream.non-local-release-evidence.v1",
+        "evidence_id": "public-beta-template-fork-testnet-randomizer-operations-evidence",
+        "record_type": "template",
+        "review_status": "template"
+      },
+      "retained_artifact_expectation": {
+        "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
+        "sha256": "sha256:f76b8ca73cee41b445c38976f0b9a4094b6c0da3a3de1d805be1ad6d2da1913e",
+        "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
+        "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
+        "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."
+      },
+      "validation_commands": [
+        "python scripts/test_release_evidence_packet_index.py",
+        "python scripts/test_public_beta_evidence.py",
+        "python scripts/test_non_local_release_evidence.py",
+        "python scripts/test_fork_randomizer_operations_evidence.py",
+        "python scripts/check_fork_randomizer_operations_evidence.py",
+        "python scripts/test_public_beta_blocker_report.py",
+        "python scripts/test_production_release_blocker_report.py",
+        "python scripts/generate_public_beta_blocker_report.py --check",
+        "python scripts/check_public_beta_evidence.py",
+        "python scripts/check_non_local_release_evidence.py",
+        "python scripts/generate_release_evidence_packet_index.py --check",
+        "python scripts/generate_release_manifest.py --check",
+        "python scripts/generate_release_checksums.py --check"
+      ],
+      "template_only_can_complete": false,
+      "completion_gate": "This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`. Template-only evidence cannot complete the row.",
+      "issue_body": "## Evidence Requirement\n\n- Phase: `Public Beta`\n- Requirement ID: `fork_testnet_randomizer_operations_evidence`\n- Current status: `pending`\n- Evidence posture: retained-incomplete\n- Owner/reviewer posture: requirement owner=Codex autonomous operator; template owner=TBD; reviewer=TBD; review_status=template\n\n## Source Links\n\n- Blocker report: `release-artifacts/latest/public-beta-blockers.md` / Incomplete Public Beta Rows / `fork_testnet_randomizer_operations_evidence`\n- Evidence template: `release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json`\n- Retained artifact placeholder: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`\n\n## Required Evidence\n\n- Retained artifact expectation: Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation.\n- Completion gate: This issue can close only after reviewed retained evidence replaces or supplements `release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json` and is referenced from the shared release evidence status manifest `release-artifacts/latest/public-beta-evidence.json`. The retained artifact expectation is `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`. Template-only evidence cannot complete the row.\n- Template-only can complete: `false`\n\n## Validation\n\n- `python scripts/test_release_evidence_packet_index.py`\n- `python scripts/test_public_beta_evidence.py`\n- `python scripts/test_non_local_release_evidence.py`\n- `python scripts/test_fork_randomizer_operations_evidence.py`\n- `python scripts/check_fork_randomizer_operations_evidence.py`\n- `python scripts/test_public_beta_blocker_report.py`\n- `python scripts/test_production_release_blocker_report.py`\n- `python scripts/generate_public_beta_blocker_report.py --check`\n- `python scripts/check_public_beta_evidence.py`\n- `python scripts/check_non_local_release_evidence.py`\n- `python scripts/generate_release_evidence_packet_index.py --check`\n- `python scripts/generate_release_manifest.py --check`\n- `python scripts/generate_release_checksums.py --check`\n\n## Non-Goals\n\n- Do not commit private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads.\n- Do not change public-beta or production-release readiness claims without reviewed retained evidence.\n- Do not use the checked template alone as completion evidence.\n\n## Acceptance Criteria\n\n- Reviewed retained evidence exists and is no-secret or properly redacted.\n- The evidence manifest references the retained evidence path and hash.\n- The blocker report no longer lists this row as incomplete, or the remaining status is explicitly risk-accepted.\n- All validation commands above pass."
     },
     {
       "entry_id": "public-beta-verified-deployed-addresses",
@@ -923,6 +1094,9 @@
   ],
   "validation_commands": [
     "python scripts/check_external_audit_report_evidence.py",
+    "python scripts/check_fork_ceremony_evidence.py",
+    "python scripts/check_fork_deployment_rehearsal_evidence.py",
+    "python scripts/check_fork_randomizer_operations_evidence.py",
     "python scripts/check_live_ceremony_evidence.py",
     "python scripts/check_live_deployment_manifest_evidence.py",
     "python scripts/check_live_metadata_browser_evidence.py",
@@ -944,6 +1118,9 @@
     "python scripts/generate_release_evidence_packet_index.py --check",
     "python scripts/generate_release_manifest.py --check",
     "python scripts/test_external_audit_report_evidence.py",
+    "python scripts/test_fork_ceremony_evidence.py",
+    "python scripts/test_fork_deployment_rehearsal_evidence.py",
+    "python scripts/test_fork_randomizer_operations_evidence.py",
     "python scripts/test_live_ceremony_evidence.py",
     "python scripts/test_live_deployment_manifest_evidence.py",
     "python scripts/test_live_metadata_browser_evidence.py",

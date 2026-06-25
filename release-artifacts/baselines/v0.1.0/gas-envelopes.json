@@ -79,6 +79,12 @@
       "flow": "fixed_price_mint",
       "max_gas": 700000,
       "rationale": "Fixed-price signed mint execution is a primary drop path and should stay within the documented envelope."
+    },
+    {
+      "test": "StreamGasSnapshotTest:testGasMintManagerMaxLaunchBatch()",
+      "flow": "mint_manager_max_launch_batch",
+      "max_gas": 7500000,
+      "rationale": "The launch mint manager max-batch path intentionally covers 10 prepared mints with 16 static counters each, and the ceiling documents that bounded administrative/executor path."
     }
   ]
 }

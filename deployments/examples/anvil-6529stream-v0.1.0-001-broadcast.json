@@ -50,7 +50,7 @@
         "0x1000000000000000000000000000000000000002"
       ],
       "abi_hash": "sha256:be80dc77a6d763a644780b4d70b353ec4f35f890e1b66a6a7a4a00ebeb2c063b",
-      "bytecode_hash": "sha256:98a0da2c9e4f078883e635132537d05d0078952c136470240ffb5f4e4de95c6e",
+      "bytecode_hash": "sha256:05152aef17b9511818909d685c8b1e292c19705cc0c8ed05723d6d467c84a82e",
       "verification_status": "not_applicable"
     },
     "StreamContractMetadata": {
@@ -166,7 +166,7 @@
         "0x100000000000000000000000000000000000000d"
       ],
       "abi_hash": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
-      "bytecode_hash": "sha256:b81138d34d93a7d28ae231bc1c2d83b1f28c8530a92a3da2d162d72cdf0eb351",
+      "bytecode_hash": "sha256:313d07b6439f44a23dc4753526f900eb1ca0b94265c3bdb6bc9843767f7ecc84",
       "verification_status": "not_applicable"
     },
     "StreamMintLedger": {
@@ -174,6 +174,16 @@
       "constructor_args": [],
       "abi_hash": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
       "bytecode_hash": "sha256:c5730bc4ecf04bff2d180b2ba463707dff7da3de89c0b3ffe21eb29d11acee27",
+      "verification_status": "not_applicable"
+    },
+    "StreamMintManager": {
+      "address": "0x1000000000000000000000000000000000000010",
+      "constructor_args": [
+        "0x1000000000000000000000000000000000000003",
+        "0x100000000000000000000000000000000000000f"
+      ],
+      "abi_hash": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377",
+      "bytecode_hash": "sha256:6e382fd0b2b81a82f2ea2e0647b7b7f1fc8263b912b185bc090b654fc8242718",
       "verification_status": "not_applicable"
     }
   },
@@ -218,6 +228,10 @@
       {
         "contract": "StreamMintLedger",
         "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
+        "contract": "StreamMintManager",
+        "new_owner": "0x0000000000000000000000000000000000006529"
       }
     ]
   },
@@ -234,7 +248,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:7ec56e0de4d9f04fcd091849831c1c23a12308c50bed10306176be5114dfd335",
+    "manifest_sha256": "sha256:39ebf7b2c2d9c7472296b2f9bfd7a96b5b1de8dd69d0583c9d15c7133824fb27",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -250,7 +264,8 @@
       "StreamSplitFactory": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
       "StreamRevenueResolver": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
       "StreamPrimarySaleSettlement": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
-      "StreamMintLedger": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed"
+      "StreamMintLedger": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
+      "StreamMintManager": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377"
     },
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
   },

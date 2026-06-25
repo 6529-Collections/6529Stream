@@ -42,6 +42,14 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("scripts/generate_dependency_provenance_attestation.py"),
             generator.DEFAULT_COVERED_PATHS,
         )
+        self.assertIn(
+            Path("scripts/check_mint_manager_domain_constants.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("scripts/test_mint_manager_domain_constants.py"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("scripts/generate_release_notes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/verify_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("docs/first-30-minutes.md"), generator.DEFAULT_COVERED_PATHS)
@@ -111,6 +119,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("CHANGELOG.md"),
             Path("README.md"),
             Path("docs/release-policy.md"),
+            Path("docs/launch-v1-target-architecture.md"),
             Path("docs/public-beta-evidence.md"),
             Path("docs/production-readiness-execution.md"),
             Path("docs/integrations/README.md"),

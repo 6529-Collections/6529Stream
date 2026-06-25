@@ -162,6 +162,15 @@
         "address": "0x200000000000000000000000000000000000000f",
         "constructor_args": [],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamMintManager",
+        "address": "0x2000000000000000000000000000000000000010",
+        "constructor_args": [
+          "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
+          "0x200000000000000000000000000000000000000f"
+        ],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -205,6 +214,10 @@
         {
           "contract": "StreamMintLedger",
           "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamMintManager",
+          "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]
     },
@@ -233,7 +246,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:f8803e0fc5412f6a72e286498d63013814823e2cd16cf9f172c02a110d886161",
+    "broadcast_sha256": "sha256:a9a04e7770b59b4cf4b94921040684b48f3735e997adf07a9edb4e418925bf33",
     "template_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 1,
@@ -312,6 +325,11 @@
         "contract": "StreamMintLedger",
         "address": "0x200000000000000000000000000000000000000f",
         "transaction_hash": "0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
+      },
+      {
+        "contract": "StreamMintManager",
+        "address": "0x2000000000000000000000000000000000000010",
+        "transaction_hash": "0x1010101010101010101010101010101010101010101010101010101010101010"
       }
     ],
     "ignored_deployments": [

@@ -6,15 +6,16 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 152,
-    "contract_count": 14,
+    "custom_error_count": 177,
+    "contract_count": 15,
     "category_counts": {
-      "access_control": 9,
+      "access_control": 10,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 12,
+      "configuration": 14,
       "metadata_integrity": 18,
       "mint_ledger_accounting": 14,
+      "mint_manager_policy": 22,
       "pause_emergency": 2,
       "primary_settlement_safety": 16,
       "randomness_lifecycle": 26,
@@ -23,9 +24,9 @@
       "supply_minting": 14
     },
     "severity_counts": {
-      "critical": 9,
-      "high": 117,
-      "medium": 26
+      "critical": 10,
+      "high": 139,
+      "medium": 28
     },
     "duplicate_selectors": {
       "0x1c9aebc3": [
@@ -40,6 +41,7 @@
         "StreamAuctions:ReentrancyGuardReentrantCall()",
         "StreamCuratorsPool:ReentrancyGuardReentrantCall()",
         "StreamDrops:ReentrancyGuardReentrantCall()",
+        "StreamMintManager:ReentrancyGuardReentrantCall()",
         "StreamPrimarySaleSettlement:ReentrancyGuardReentrantCall()",
         "StreamSplitWallet:ReentrancyGuardReentrantCall()"
       ],
@@ -1418,7 +1420,8 @@
         "source_artifact": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
         "tests": [
           "test/StreamRoyalty.t.sol",
-          "test/StreamCustomErrorNegative.t.sol"
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamMintManager.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -2927,6 +2930,779 @@
         "source_artifact": "out/StreamMintLedger.sol/StreamMintLedger.json",
         "tests": [
           "test/StreamMintLedger.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:DuplicateMintCounter(bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "DuplicateMintCounter",
+      "signature": "DuplicateMintCounter(bytes32)",
+      "selector": "0x1cc5fd11",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidCoreContract(address)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidCoreContract",
+      "signature": "InvalidCoreContract(address)",
+      "selector": "0xd666e879",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "core",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidMintBatchLimit(uint256,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidMintBatchLimit",
+      "signature": "InvalidMintBatchLimit(uint256,uint256)",
+      "selector": "0x4d54173b",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "maxBatchQuantity",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maxBatchHardLimit",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidMintCounter(bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidMintCounter",
+      "signature": "InvalidMintCounter(bytes32)",
+      "selector": "0x0c26d1d4",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidMintExecutor(address)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidMintExecutor",
+      "signature": "InvalidMintExecutor(address)",
+      "selector": "0xd73c1507",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "executor",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidMintLedgerContract(address)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidMintLedgerContract",
+      "signature": "InvalidMintLedgerContract(address)",
+      "selector": "0xcddcda49",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "mintLedger",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidMintPhase(uint256,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidMintPhase",
+      "signature": "InvalidMintPhase(uint256,bytes32)",
+      "selector": "0x8618418d",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:InvalidMintRecipient(uint256,address,address)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "InvalidMintRecipient",
+      "signature": "InvalidMintRecipient(uint256,address,address)",
+      "selector": "0xc7f7068c",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "index",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "address",
+          "name": "initialRecipient",
+          "type": "address"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "beneficiary",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintArrayLengthMismatch()",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintArrayLengthMismatch",
+      "signature": "MintArrayLengthMismatch()",
+      "selector": "0x3757dfe5",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintAuthorizationRequired(uint256,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintAuthorizationRequired",
+      "signature": "MintAuthorizationRequired(uint256,bytes32)",
+      "selector": "0x8bad6e46",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintBatchQuantityLimitExceeded(uint256,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintBatchQuantityLimitExceeded",
+      "signature": "MintBatchQuantityLimitExceeded(uint256,uint256)",
+      "selector": "0x11662916",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "quantity",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maxBatchQuantity",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintCounterCapExceeded(bytes32,uint256,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintCounterCapExceeded",
+      "signature": "MintCounterCapExceeded(bytes32,uint256,uint256)",
+      "selector": "0x77f94e67",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "valueKey",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "projectedValue",
+          "type": "uint256"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "cap",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintCounterCountLimitExceeded(uint256,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintCounterCountLimitExceeded",
+      "signature": "MintCounterCountLimitExceeded(uint256,uint256)",
+      "selector": "0x554ab6ea",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "counterCount",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maxCounterCount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintCounterSubjectMissing(bytes32,uint8)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintCounterSubjectMissing",
+      "signature": "MintCounterSubjectMissing(bytes32,uint8)",
+      "selector": "0xb57f553b",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "enum IStreamMintManager.CounterKeyMode",
+          "name": "keyMode",
+          "type": "uint8"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintExecutorCountLimitExceeded(uint256,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintExecutorCountLimitExceeded",
+      "signature": "MintExecutorCountLimitExceeded(uint256,uint256)",
+      "selector": "0x444c5839",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "executorCount",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maxExecutorCount",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPhaseAlreadyConfigured(uint256,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPhaseAlreadyConfigured",
+      "signature": "MintPhaseAlreadyConfigured(uint256,bytes32)",
+      "selector": "0x2e5f06bd",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPhaseDoesNotExist(uint256,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPhaseDoesNotExist",
+      "signature": "MintPhaseDoesNotExist(uint256,bytes32)",
+      "selector": "0x696c1e95",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPhaseEnded(uint256,bytes32,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPhaseEnded",
+      "signature": "MintPhaseEnded(uint256,bytes32,uint256)",
+      "selector": "0xac5a2a7d",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPhaseNotStarted(uint256,bytes32,uint256)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPhaseNotStarted",
+      "signature": "MintPhaseNotStarted(uint256,bytes32,uint256)",
+      "selector": "0xc8f7bde0",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPhasePaused(uint256,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPhasePaused",
+      "signature": "MintPhasePaused(uint256,bytes32)",
+      "selector": "0x84e3035d",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPolicyHashMismatch(bytes32,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPolicyHashMismatch",
+      "signature": "MintPolicyHashMismatch(bytes32,bytes32)",
+      "selector": "0x4fdd1265",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "expectedPolicyHash",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "activePolicyHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:MintPolicyHashRequired(uint256,bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "MintPolicyHashRequired",
+      "signature": "MintPolicyHashRequired(uint256,bytes32)",
+      "selector": "0x26d18337",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:ReentrancyGuardReentrantCall()",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "ReentrancyGuardReentrantCall",
+      "signature": "ReentrancyGuardReentrantCall()",
+      "selector": "0x3ee5aeb5",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:UnauthorizedMintExecutor(uint256,bytes32,address)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "UnauthorizedMintExecutor",
+      "signature": "UnauthorizedMintExecutor(uint256,bytes32,address)",
+      "selector": "0x50f3ebfd",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "phaseId",
+          "type": "bytes32"
+        },
+        {
+          "index": 2,
+          "internal_type": "address",
+          "name": "executor",
+          "type": "address"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamMintManager:UnsupportedMintCounterMode(bytes32)",
+      "contract": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "name": "UnsupportedMintCounterMode",
+      "signature": "UnsupportedMintCounterMode(bytes32)",
+      "selector": "0x176274ae",
+      "category": "mint_manager_policy",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "counterId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
+        "tests": [
+          "test/StreamMintManager.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

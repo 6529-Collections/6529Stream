@@ -169,6 +169,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "public-beta-evidence.md",
         root / "docs" / "non-local-release-evidence.md",
         root / "docs" / "architecture.md",
+        root / "docs" / "launch-v1-target-architecture.md",
         root / "docs" / "threat-model.md",
         root / "docs" / "audit-package.md",
         root / "docs" / "incident-response.md",

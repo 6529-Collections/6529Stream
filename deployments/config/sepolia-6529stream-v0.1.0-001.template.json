@@ -244,6 +244,15 @@
         "address": "0x000000000000000000000000000000000000000f",
         "constructor_args": [],
         "verification_status": "not_started"
+      },
+      {
+        "name": "StreamMintManager",
+        "address": "0x0000000000000000000000000000000000000010",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_MINT_LEDGER"
+        ],
+        "verification_status": "not_started"
       }
     ],
     "admin_ceremony": {
@@ -286,6 +295,10 @@
         },
         {
           "contract": "StreamMintLedger",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        },
+        {
+          "contract": "StreamMintManager",
           "new_owner": "$SEPOLIA_ADMIN_SAFE"
         }
       ]

@@ -323,18 +323,20 @@ Prepared-mint safety rules:
    burn, transfer, or second prepare may interleave while a prepared token is
    pending.
 3. Core must bind a prepared token to `tokenId`, `collectionId`, the verified
-   renderer-visible `tokenData`, and an operation ID or equivalent
-   manager-supplied context hash. Beneficiary, token-data hash,
-   mint-commitment, and batch-level commitment hashes remain manager, ledger,
-   sale adapter, or settlement evidence and should feed the operation ID.
+   renderer-visible `tokenData`, an operation ID or equivalent manager-supplied
+   context hash, and the manager address that prepared it. The manager address
+   may be retained as private pending Core state rather than exposed through the
+   public prepared-record view. Beneficiary, token-data hash, mint-commitment,
+   and batch-level commitment hashes remain manager, ledger, sale adapter, or
+   settlement evidence and should feed the operation ID.
 4. `completePreparedMintFromManager` must verify and clear the
    `PreparedMintRecord` before `_safeMint` or any external receiver callback,
-    while retaining a Core-level completion sentinel that blocks unrelated Core
-    mint, burn, transfer, approval, admin mutation, and second-prepare paths
-    until the completion-time entropy/randomizer boundary finishes. The only
-    launch recovery exception is mint-manager replacement, which lets a
-    replacement manager abort a stranded prepared mint without changing admin,
-    minter, dependency, randomizer, metadata, or token state.
+   while retaining a Core-level completion sentinel that blocks unrelated Core
+   mint, burn, transfer, approval, admin mutation, and second-prepare paths
+   until the completion-time entropy/randomizer boundary finishes. The only
+   launch recovery exception is mint-manager replacement, which lets a
+   replacement manager abort a stranded prepared mint without changing admin,
+   minter, dependency, randomizer, metadata, or token state.
 5. If any later step in the top-level transaction reverts, the prepared mapping,
    collection serial, revenue/royalty snapshot, and any entropy/randomizer state
    reached during completion all revert with the transaction.
@@ -429,14 +431,17 @@ Launch control-flow owner: `StreamMintManager`. User-facing sale adapters call
 one manager-owned prepared-mint entrypoint or a sale adapter entrypoint that
 immediately delegates to the manager. Core `prepareMintFromManager` and
 `completePreparedMintFromManager` are restricted to `msg.sender == mintManager`
-and are never independent user flows. The manager calls the restricted
+and are never independent user flows. Completion must come from the same manager
+address that prepared the token; a replacement manager may abort a stranded
+prepared mint but cannot redirect completion. The manager calls the restricted
 settlement adapter hook between Core prepare and Core complete. If settlement,
 resolver snapshot, escrow/deposit, the completion-time entropy/randomizer
 boundary, or completion fails inside an all-in-one manager transaction, the
 whole transaction reverts and no prepared state persists. If a manager commits
 `prepareMintFromManager` in an earlier transaction, or intentionally pauses
 after prepare for an out-of-band settlement or review step, the prepared record
-persists until the same manager or a replacement manager completes or aborts it.
+persists until the preparing manager completes it or the active manager aborts
+it.
 The recovery flow below applies only to those already-committed prepared
 records, not to rolled-back all-in-one calls.
 
@@ -770,7 +775,7 @@ bytes32 subjectKey = keccak256(abi.encode(
 ));
 ```
 
-`CONSTANT` uses a deterministic key for the counter:
+`CONSTANT` uses a deterministic key for the collection, phase, and counter:
 
 ```solidity
 bytes32 subjectKey = keccak256(abi.encode(
@@ -778,32 +783,36 @@ bytes32 subjectKey = keccak256(abi.encode(
     uint256(block.chainid),
     address(mintLedger),
     uint8(CounterKeyMode.CONSTANT),
-    "CONSTANT"
+    collectionId,
+    phaseId,
+    counterId
 ));
 ```
 
 `CONTEXT` uses `batch.contextHash`. If a context counter is configured, the
-manager must require a nonzero `contextHash`.
+manager must require a nonzero `contextHash`. Launch `CONTEXT` counters are
+batch-scoped: one prepared mint request consumes the configured static
+increment once for that context, even when the request mints multiple tokens.
+The ledger context event should therefore be treated as batch evidence rather
+than recipient-specific evidence for this key mode.
 
-The durable ledger value key is scoped separately:
+The durable ledger value key is scoped separately. For the CON-013 launch
+ledger, the canonical key is manager-scoped and uses the resolved phase/counter
+subject:
 
 ```solidity
 bytes32 valueKey = keccak256(abi.encode(
-    COUNTER_VALUE_DOMAIN,
-    uint256(block.chainid),
-    address(mintLedger),
-    uint8(scope),
-    scope == CounterScope.GLOBAL ? uint256(0) : collectionId,
-    scope == CounterScope.PHASE ? phaseId : bytes32(0),
+    manager,
+    collectionId,
+    phaseId,
     counterId,
     subjectKey
 ));
 ```
 
-For `GLOBAL`, both collection and phase are zeroed. For `COLLECTION`, phase is
-zeroed. For `PHASE`, both collection and phase are included. Tests must prove
-GLOBAL counters share across collections/phases and COLLECTION counters share
-across phases within the same collection.
+Cross-collection or cross-phase sharing must therefore be explicit in the
+subject resolver or in a future reviewed ledger design rather than inferred from
+zeroed collection/phase fields.
 
 For `CUSTOM_RESOLVER`, the counter points to a resolver:
 
@@ -892,8 +901,8 @@ paused             admin pause for this phase
 startTime          zero means no lower time bound
 endTime            zero means no upper time bound
 gate               optional validation module
-maxBatchQuantity   zero means no per-call cap
-maxCounters        maximum enabled counters this phase may evaluate
+maxBatchQuantity   nonzero per-call cap; launch managers must also enforce a reviewed hard maximum
+maxCounters        maximum enabled counters this phase may evaluate; launch managers may enforce this through a reviewed hard maximum constant
 configHash         optional hash of offchain/operator config
 ```
 
@@ -1102,9 +1111,22 @@ authorizationId)` when checking replay state. The shorter
 `isAuthorizationUsed(authorizationId)` helper is caller-relative and only
 answers for `msg.sender`.
 
-The manager computes projected counter values before calling the ledger. The
-ledger repeats the final cap checks before writing so that the durable
-accounting contract is not a blind event recorder.
+The manager builds bounded counter consumptions before calling the ledger. The
+ledger owns the final cap checks and writes, so counter accounting has a single
+durable enforcement point and any later revert rolls the whole transaction
+back.
+
+The CON-014 launch manager implements this static path as
+`StreamMintManager`: owners configure phase policy and ordered static counters,
+grant per-phase executors, optionally pause phases, register each active
+`policyHash` with `StreamMintLedger`, build bounded batch counter consumptions,
+enforce named launch hard caps for batch size and counter count, require callers
+to bind the active `policyHash`, consume a nonzero authorization ID with the
+ledger, derive operation roots from the static request commitment, then execute
+Core's prepared mint pair atomically. The launch manager intentionally does not
+yet
+route existing `StreamDrops` or auction flows, execute payment settlement,
+consult gates, resolve dynamic caps/deltas, or use callable nullifiers.
 
 Ledger events:
 
@@ -1268,10 +1290,12 @@ Rules:
     UTF-8, JSON, CBOR, or another format, but Core and the mint manager do not
     parse it.
 11. Each `tokenData[i]` must satisfy the collection metadata launch limit
-    `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
-    calldata/gas cap. Oversized token data reverts before ledger consumption,
-    Core prepare, payment settlement, or the completion-time entropy/randomizer
-    boundary.
+     `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
+     calldata/gas cap. In the mint-manager path, Core validates token data after
+     manager ledger consumption and before prepared mint state, payment
+     settlement, or the completion-time entropy/randomizer boundary; an
+     oversized token-data revert rolls back the whole transaction, including
+     ledger counters and authorization usage.
 12. `contextHash` is optional, but should be nonzero for signed/drop/auction
    flows that need a stable external reference.
 
@@ -1599,11 +1623,12 @@ paths in `docs/revenue-splits-and-royalties.md`:
 
 1. `PRE_REVENUE_SINGLE_STEP`: sale adapter records split-wallet deposit or
    escrow before calling the mint manager, and token-level primary overrides or
-   required mint-time royalty snapshots are unavailable. If the phase configures
-   a `RECIPIENT`-keyed counter, every `initialRecipient` must equal its
-   corresponding `beneficiary`, or the mint reverts with
-   `MintSingleStepRecipientMismatch`. Custody settlement that needs a differing
-   initial recipient must use `PREPARED_MINT`.
+   required mint-time royalty snapshots are unavailable. In launch manager
+   accounting, a `RECIPIENT`-keyed counter is keyed to `beneficiary`, not the
+   temporary `initialRecipient`. A sale adapter or allowlisted executor that
+   needs recipient-owner equality must enforce it in its own sale policy before
+   calling the manager. Custody settlement that needs richer token-level
+   snapshots must use `PREPARED_MINT`.
 2. `PREPARED_MINT`: mint manager and ledger validate/consume policy, Core
    `prepareMintFromManager` allocates token identity without an ERC-721
    transfer, resolver snapshots required token-level economics, sale adapter
@@ -1641,10 +1666,12 @@ event MintPhaseConfigured(
     bytes32 policyHash
 );
 
-event MintPhasePaused(
+event MintPhasePausedEvent(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
-    bool paused
+    bool paused,
+    bytes32 policyHash,
+    address admin
 );
 
 event MintPhaseFrozen(
@@ -1658,7 +1685,9 @@ event MintPhaseExecutorUpdated(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     address indexed executor,
-    bool allowed
+    bool allowed,
+    bytes32 policyHash,
+    address admin
 );
 
 event MintPhaseGateUpdated(
@@ -1907,27 +1936,34 @@ Admin writes:
 function configurePhase(
     uint256 collectionId,
     bytes32 phaseId,
-    MintPhaseConfig calldata config
+    MintPhaseConfig calldata config,
+    bytes32[] calldata counterIds,
+    MintCounterConfig[] calldata counterConfigs
 ) external;
 
-function configureCounter(
+function setPhaseExecutor(
     uint256 collectionId,
     bytes32 phaseId,
-    bytes32 counterId,
-    MintCounterConfig calldata config
-) external;
-
-function setCounterEnabled(
-    uint256 collectionId,
-    bytes32 phaseId,
-    bytes32 counterId,
-    bool enabled
+    address executor,
+    bool allowed
 ) external;
 
 function setPhasePaused(
     uint256 collectionId,
     bytes32 phaseId,
     bool paused
+) external;
+```
+
+Later mutable-manager versions may add separate counter, metadata, ledger, or
+registry administration:
+
+```solidity
+function configureCounter(
+    uint256 collectionId,
+    bytes32 phaseId,
+    bytes32 counterId,
+    MintCounterConfig calldata config
 ) external;
 
 function setPhaseMetadata(
@@ -2126,18 +2162,42 @@ mint ledger contract for durable accounting.
 
 ### Phase 2: Manager Policy And Accounting
 
-1. Implement `StreamMintLedger`.
-2. Implement `StreamMintManager`.
-3. Add phase configuration.
-4. Add executor authorization.
-5. Add generic counter configuration.
-6. Add phase, collection, and global counter scopes.
-7. Add counter-key derivation modes.
-8. Add static caps.
-9. Add static increments.
-10. Add canonical `policyHash` computation.
-11. Add direct read APIs.
-12. Add typed errors and events.
+Status: CON-013 and CON-014 implement the launch-static foundation:
+
+1. `StreamMintLedger` owns deployed manager writers, phase policy hashes,
+   launch-static counter policies, counter values, and authorization replay
+   state.
+2. `StreamMintManager` owns phase configuration, executor authorization,
+   pause/window guards, canonical `policyHash` computation, counter subject
+   derivation, batch cap validation, ledger consumption, and Core
+   prepare/complete execution.
+3. The implemented manager supports static counter increments, static or
+   uncapped counters, and subject modes for constant, payer, recipient,
+   executor, authorizer, and context-derived keys.
+4. `mintPrepared` requires a nonzero `expectedPolicyHash` and nonzero
+   `authorizationId` so launch execution cannot bypass stale-policy detection
+   or ledger replay protection. `authorizationId` is a replay key supplied by
+   the allowlisted executor; it is not, by itself, cryptographic signature
+   verification. A buggy or compromised allowlisted executor can choose the
+   request contents for any unused `authorizationId`, so untrusted sale, drop,
+   or gate flows must bind `authorizationId` to their own reviewed signed
+   commitment before they receive executor rights.
+5. Dynamic resolver caps/deltas, broader global scopes, gates, callable
+   nullifiers, payment settlement, and sale/auction routing remain follow-up
+   topics.
+
+`configurePhase` is initial-only in the launch manager. Reconfiguration that
+changes a phase's counter set must use a new phase ID or a later explicit
+reconfiguration path with reviewed migration semantics. Executor-set changes
+and pause changes are intentionally folded into `policyHash`; they refresh the
+registered ledger policy and invalidate in-flight requests bound to the prior
+`expectedPolicyHash`. Returning to the same executor set and pause/config state
+may restore the same deterministic hash, but replay protection still comes from
+the ledger-scoped `authorizationId`. Phase pause is therefore an operational
+stop switch, not durable revocation for an unused authorization; durable
+revocation requires consuming or refusing that authorization, removing the
+executor until it is safe to restore, or moving the flow to a new reviewed phase
+ID/policy.
 
 ### Phase 3: Gates And Counter Resolvers
 

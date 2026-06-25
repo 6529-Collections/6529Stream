@@ -6,12 +6,11 @@ import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamFixture.sol";
 import "../smart-contracts/IERC721Receiver.sol";
 import "../smart-contracts/IRandomizer.sol";
-import "../smart-contracts/IStreamMintManager.sol";
 import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamRandomizerLifecycle.sol";
 
-contract MockMintManager is IStreamMintManager {
+contract MockMintManager {
     error ManagerReverted();
 
     StreamCore private immutable core;
@@ -650,6 +649,9 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.NotMintManager.selector));
         manager.abort(preparedTokenId, OPERATION_ID);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintMismatch.selector));
+        replacement.complete(preparedTokenId, address(0xB0B), OPERATION_ID, SALT);
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         deployed.core.addRandomizer(COLLECTION_ID, address(deployed.randomizer));

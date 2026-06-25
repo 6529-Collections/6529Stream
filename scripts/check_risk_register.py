@@ -128,10 +128,14 @@ def sha256_bytes(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
 
 
+def normalized_text_bytes(path: Path) -> bytes:
+    """Read a text evidence file with repository-stable line endings."""
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
 def file_sha256(path: Path) -> str:
-    """Hash a file using the release digest format."""
-    with path.open("rb") as handle:
-        return sha256_bytes(handle.read())
+    """Hash a risk-register file reference using repository-stable line endings."""
+    return sha256_bytes(normalized_text_bytes(path))
 
 
 def require_dict(value: Any, path: str) -> dict[str, Any]:

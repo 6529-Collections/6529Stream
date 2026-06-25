@@ -179,7 +179,7 @@
   ERC-721 approval/transfer paths while prepared state is pending, and slimming
   Core's prepared record so beneficiary/payment/mint-commitment evidence stays
   in manager and settlement satellites. Final measured `StreamCore` runtime is
-  24,172 bytes with 404 bytes of EIP-170 margin under
+  24,157 bytes with 419 bytes of EIP-170 margin under
   `CORE-SPEND-2026-06-24-001`.
 - Completed local validation for the CON-012 draft. Focused Foundry suites,
   full `forge test -vvv` with 530 passing tests, full Windows
@@ -235,3 +235,118 @@
   `4797239196`; CI run `28156747763` is in progress. Next action is to push
   this PR-number state update, keep CodeRabbit enabled, wait for CI/bot
   feedback, resolve anything actionable, then merge only when clean.
+- PR #635 merged as `a2c6a6c1bb15fa59fc72ef2ac2519bdc0d94b27d`, closing issue
+  #634 completed after latest-head CI and CodeRabbit were clean. Local `main`
+  fast-forwarded to the merge commit. Created issue #636 and branch
+  `codex/mint-manager-phase-execution` for `CON-014`: full
+  `StreamMintManager` phase policy and ledger execution integration on top of
+  the merged Core hook and static ledger foundations.
+- Implemented the local CON-014 manager draft on
+  `codex/mint-manager-phase-execution`: `StreamMintManager` now validates Core
+  and ledger dependencies, configures launch-static phase policies, registers
+  active policy hashes with `StreamMintLedger`, maintains per-phase executor
+  sets and pause/window guards, preflights duplicate batch counter keys,
+  consumes ledger counters and authorization IDs, and atomically executes Core
+  prepare/complete minting with rollback and reentrancy coverage.
+- Refreshed the first deployment/release surfaces for the CON-014 draft:
+  `RehearseDeployment` now deploys and wires `StreamMintManager`, grants it
+  ledger-writer authority, and transfers ownership; release contract catalog,
+  placeholder deployment configs, Sepolia expected contract tests, changelog,
+  warning dispositions, and mint-policy docs now include the manager.
+- Completed local validation for the CON-014 manager draft. Focused
+  `StreamMintManager` tests pass, `forge build --sizes --via-ir --skip test
+  --skip script --force` reports `StreamCore` at 24,157 bytes with 419 bytes of
+  EIP-170 margin and `StreamMintManager` at 15,155 bytes, full Windows
+  `scripts\check.ps1` passed, and `codex-diff-check` passed. During validation,
+  refreshed NatSpec baseline debt after documenting manager public getters,
+  updated retained local/fork evidence hashes affected by the new manager
+  deployment, and regenerated release notes, release manifest, lockfile,
+  bytecode proof, risk register, public-beta evidence indexes, and checksum
+  bundles.
+- Addressed the local CON-014 release-review blockers. The changed
+  `fork_deployment_rehearsal` and
+  `fork_testnet_randomizer_operations_evidence` rows now stay `pending` until
+  this PR's updated retained artifact set is reviewed, and
+  `release-evidence-issue-links.json` again tracks #216 and #220 while the rows
+  are incomplete. Added a checked `StreamMintManager` domain constants table to
+  `docs/launch-v1-target-architecture.md`, plus
+  `scripts/check_mint_manager_domain_constants.py`, focused tests, wrapper
+  wiring, release manifest coverage, and checksum coverage. Regenerated the
+  public-beta blocker report, evidence packet, backlog, body sync, risk
+  register, release notes, release manifest, bytecode proof, lockfile, and
+  checksums. Focused artifact/domain checks, focused manager tests, `forge
+  build --skip test`, production via-IR size build, `python
+  scripts/check_contract_size_budget.py`, full Windows `scripts\check.ps1`, and
+  `codex-diff-check` all passed.
+- Addressed the final local verifier finding for the CON-014 draft. Updated the
+  human-facing readiness/runbook docs so #216 and #220 no longer read as
+  reviewed complete after this branch's retained artifact set changed; the fork
+  deployment and fork randomizer rows now consistently read as pending
+  re-review until this PR's artifacts are accepted. Regenerated the dependent
+  risk register, release notes, release manifest, and checksum bundle. Focused
+  checks now pass: markdown links, release notes check, release manifest check,
+  release checksums check, public-beta evidence check, release-readiness check,
+  and `codex-diff-check`.
+- Addressed OpenRouter round-4 CON-014 feedback. The branch now marks
+  `fork_testnet_ceremony_evidence` pending with issue #219 restored, documents
+  the Core/settlement bytecode-hash evidence reconciliation, guards
+  `configurePhase` with `MintPhaseAlreadyConfigured`, adds focused tests for
+  phase reconfiguration rejection, executor removal, uncapped counters,
+  unlimited batch size, and beneficiary-keyed recipient counters, and documents
+  `authorizationId` as a replay key supplied by an allowlisted executor rather
+  than manager-side signature verification.
+- Regenerated release artifacts after the OpenRouter fixes. Current production
+  `via-ir` size output reports `StreamCore` at 24,157 bytes with 419 bytes of
+  EIP-170 margin and `StreamMintManager` at 15,155 bytes. Refreshed local
+  ceremony and randomizer evidence hashes, NatSpec baseline counts, release
+  notes, risk register, manifest, bytecode proof, release-candidate lockfile,
+  and checksum bundle. Targeted checks pass, including focused manager tests,
+  domain constants checks, size/spend policy, release/deployment artifact
+  checks, evidence checks, release readiness, changelog, and `codex-diff-check`.
+- Launched OpenRouter round 7 from the refreshed packet: Opus 4.8, GPT-5.5 Pro,
+  and GLM 5.2 at high reasoning, with GPT-5.5 Pro kept off low/minimal
+  reasoning per user instruction. A read-only local verifier also reviewed the
+  refreshed working tree.
+- Addressed the read-only local verifier's optional CON-014 coverage
+  suggestions by adding focused manager tests for exact max launch batch
+  minting with a repeated recipient, manager-level Core collection-supply
+  exhaustion rollback after ledger consumption, and executor-cap overflow
+  immutability of policy state. Focused
+  `forge test --match-path test\StreamMintManager.t.sol -vvv` now passes 33
+  tests, and `codex-diff-check` remains clean aside from expected Windows
+  line-ending warnings.
+- Reran the full Windows wrapper after the optional test hardening and state
+  updates. `powershell -NoProfile -ExecutionPolicy Bypass -File
+  scripts\check.ps1` passed through the full validation ladder, ending with the
+  deployment-suite, standalone deployment, auction ceremony, and emergency
+  redeployment rehearsal scripts all running successfully. The OpenRouter
+  round-7 reviews remain in-flight at high reasoning.
+- Reconciled the final local CON-014 validation state after additional event,
+  context-counter, rollback, and reentrancy hardening. Focused
+  `StreamMintManager` tests now pass 36 cases, including context counters
+  consuming once per batch, second-token receiver rollback, receiver/admin
+  reentrancy protection, policy-hash event payloads, exact max launch batch,
+  Core supply-exhaustion rollback after ledger consumption, and executor-cap
+  overflow immutability. Regenerated dependent release evidence, release notes,
+  manifest, bytecode proof, lockfile, and checksum artifacts after evidence and
+  size-doc hash drift. Current production `via-ir` size output records
+  `StreamCore` at 24,150 bytes with 426 bytes of EIP-170 margin and
+  `StreamMintManager` at 16,812 bytes. `codex-diff-check` passes with expected
+  Windows line-ending warnings, and the full Windows wrapper passed at
+  `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`.
+  Next action is the final high/max-reasoning OpenRouter review pass with Opus
+  4.8, GPT-5.5 Pro, and GLM 5.2 before PR publication.
+- Ran the final post-fix OpenRouter review pass at high reasoning. Opus 4.8
+  and GLM 5.2 first found one P1 release-evidence blocker: stale
+  `StreamCore` size prose in `docs/tooling.md` and
+  `docs/launch-v1-target-architecture.md` still said 24,157 bytes / 419-byte
+  margin while the regenerated bytecode proof and other guarded docs said
+  24,150 bytes / 426-byte margin. Fixed those docs, regenerated dependent
+  release artifacts, and reran targeted architecture, domain-constant,
+  release-manifest, bytecode-proof, checksum, release-verifier, and
+  `codex-diff-check` gates successfully. The post-fix reviewer pass returned
+  `APPROVE` from Opus 4.8, `APPROVE` from GLM 5.2, and visible `APPROVE` from
+  GPT-5.5 Pro at high reasoning after disabling reasoning echo without reducing
+  reasoning effort. Remaining reviewer notes are non-blocking follow-ups.
+  Next action is a final full Windows wrapper rerun after this state update,
+  then PR publication if clean.

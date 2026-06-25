@@ -104,6 +104,7 @@ REQUIRED_PHRASES = [
     "LINT-BLOCK-TIMESTAMP-CORE",
     "LINT-BLOCK-TIMESTAMP-DROPS",
     "LINT-BLOCK-TIMESTAMP-MINTER",
+    "LINT-BLOCK-TIMESTAMP-MINT-MANAGER",
     "LINT-BLOCK-TIMESTAMP-TEST-HELPER",
     "accepted-abi-compatibility",
     "accepted-size-tradeoff",
@@ -152,6 +153,7 @@ REQUIRED_LINK_TARGETS = [
     "smart-contracts/StreamCuratorsPool.sol",
     "smart-contracts/StreamDrops.sol",
     "smart-contracts/StreamMinter.sol",
+    "smart-contracts/StreamMintManager.sol",
     "smart-contracts/StreamMetadataRenderer.sol",
     "smart-contracts/VRFConsumerBaseV2.sol",
     "smart-contracts/SignedMath.sol",
@@ -194,6 +196,7 @@ SOURCE_MARKERS = {
         "function isMinterContract() external view returns (bool)",
         "block.timestamp",
     ],
+    "smart-contracts/StreamMintManager.sol": ["block.timestamp"],
     "smart-contracts/VRFConsumerBaseV2.sol": [
         "constructor(<other arguments>, address _vrfCoordinator, address _link)",
         "<initialization with other arguments goes here>",

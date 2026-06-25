@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../smart-contracts/AuctionContract.sol";
 import "../smart-contracts/DependencyRegistry.sol";
+import "../smart-contracts/IStreamCore.sol";
 import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamAssetPolicyRegistry.sol";
@@ -13,6 +14,7 @@ import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
 import "../smart-contracts/StreamMintLedger.sol";
+import "../smart-contracts/StreamMintManager.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
 import "../smart-contracts/StreamSplitFactory.sol";
@@ -69,6 +71,7 @@ contract RehearseDeployment {
         address revenueResolver;
         address primarySaleSettlement;
         address mintLedger;
+        address mintManager;
         uint256 sampleCollectionId;
         uint256 sampleMintStart;
         uint256 sampleMintEnd;
@@ -147,6 +150,7 @@ contract RehearseDeployment {
         deployed.revenueResolver.transferOwnership(config.adminSafe);
         deployed.primarySaleSettlement.transferOwnership(config.adminSafe);
         deployed.mintLedger.transferOwnership(config.adminSafe);
+        deployed.mintManager.transferOwnership(config.adminSafe);
         deployed.core.transferOwnership(config.adminSafe);
         deployed.admins.transferOwnership(config.adminSafe);
 
@@ -169,6 +173,7 @@ contract RehearseDeployment {
         StreamRevenueResolver revenueResolver;
         StreamPrimarySaleSettlement primarySaleSettlement;
         StreamMintLedger mintLedger;
+        StreamMintManager mintManager;
     }
 
     function _deployContracts(DeploymentConfig memory config)
@@ -215,6 +220,8 @@ contract RehearseDeployment {
         deployed.revenueResolver = new StreamRevenueResolver(deployed.splitFactory);
         deployed.primarySaleSettlement = new StreamPrimarySaleSettlement(deployed.revenueResolver);
         deployed.mintLedger = new StreamMintLedger();
+        deployed.mintManager =
+            new StreamMintManager(IStreamCore(address(deployed.core)), deployed.mintLedger);
     }
 
     function _configureAdminCeremony(StreamAdmins admins, DeploymentConfig memory config) private {
@@ -228,8 +235,10 @@ contract RehearseDeployment {
 
     function _wireContracts(DeployedContracts memory deployed) private {
         deployed.core.updateContracts(2, address(deployed.minter));
+        deployed.core.updateContracts(4, address(deployed.mintManager));
         deployed.minter.updateContracts(3, address(deployed.drops));
         deployed.drops.updateAuctionContract(address(deployed.auctions));
+        deployed.mintLedger.setLedgerWriter(address(deployed.mintManager), true);
         deployed.admins.registerSignerLifecycleTarget(address(deployed.drops), true);
     }
 
@@ -289,6 +298,7 @@ contract RehearseDeployment {
             revenueResolver: address(deployed.revenueResolver),
             primarySaleSettlement: address(deployed.primarySaleSettlement),
             mintLedger: address(deployed.mintLedger),
+            mintManager: address(deployed.mintManager),
             sampleCollectionId: collectionId,
             sampleMintStart: mintStart,
             sampleMintEnd: mintEnd,

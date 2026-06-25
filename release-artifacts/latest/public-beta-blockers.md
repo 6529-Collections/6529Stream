@@ -29,7 +29,7 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Overall Status | Missing | Pending | Blocked | Accepted Risk | Not Applicable | Complete | Incomplete |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Public Beta | `blocked` | 4 | 0 | 0 | 0 | 0 | 5 | 4 |
+| Public Beta | `blocked` | 4 | 3 | 0 | 0 | 0 | 2 | 7 |
 | Production Release | `blocked` | 11 | 0 | 0 | 0 | 0 | 0 | 11 |
 
 ## Incomplete Public Beta Rows
@@ -37,7 +37,10 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 | Requirement | Status | Owner | Evidence Posture | Evidence Count | Risk Acceptance | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
 | `external_audit_report` | `missing` | TBD | external/future | 0 | none | A completed external audit report and issue-linked remediation status are not yet retained. |
+| `fork_deployment_rehearsal` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork deployment rehearsal artifact set now binds the CON-014 StreamMintManager deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked. |
 | `testnet_deployment_rehearsal` | `missing` | TBD | external/future | 0 | none | A testnet deployment rehearsal transcript, manifest, address book, and retained broadcast output are not yet retained. |
+| `fork_testnet_ceremony_evidence` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the CON-014 StreamMintManager deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked. |
+| `fork_testnet_randomizer_operations_evidence` | `pending` | Codex autonomous operator | retained-incomplete | 1 | none | The retained fork randomizer operations artifact set now binds the CON-014 StreamMintManager deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked. |
 | `verified_deployed_addresses` | `missing` | TBD | external/future | 0 | none | Verified deployed addresses for non-local environments are not yet retained. |
 | `explorer_verification_status` | `missing` | TBD | external/future | 0 | none | Explorer verification submissions or verified-source links for non-local deployments are not yet retained. |
 
@@ -61,11 +64,8 @@ Rows are incomplete when their status is any value other than `complete`. The ev
 
 | Phase | Requirement | Evidence Posture | Evidence Count | Notes |
 | --- | --- | --- | --- | --- |
-| Public Beta | `fork_deployment_rehearsal` | reviewed-external | 1 | Reviewed mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, generated fork address book, and CodeRabbit/CI acceptance evidence from PR #347 and PR #349. Public beta remains blocked on the remaining missing evidence rows. |
 | Public Beta | `fork_testnet_metadata_browser_evidence` | reviewed-external | 1 | Reviewed fork metadata browser evidence is retained: mainnet fork block 25344872, fork-deployed StreamCore/StreamDrops/DependencyRegistry/contract-metadata/randomizer addresses, generated tokenURI output with fork/testnet metadata labels, browser summary JSON, and redacted transcript proving sandbox execution, expected dependency loading, parent-frame isolation, and no console/page/unexpected-request errors. Public beta remains blocked on the remaining missing evidence rows. |
 | Public Beta | `fork_testnet_marketplace_indexer_evidence` | reviewed-external | 1 | Reviewed fork/testnet marketplace and indexer evidence is retained: mainnet-fork metadata browser capture, reviewed supplemental retained artifact, equivalent collector/indexer tooling transcript, contract metadata, token metadata refresh, animation rendering, royalty display boundary, transfer/listing/sale or simulated sale path, event replay, cache invalidation, stale/failed/frozen/burned state handling, and no-secret redaction. Public beta remains blocked on the remaining missing evidence rows. |
-| Public Beta | `fork_testnet_ceremony_evidence` | reviewed-external | 1 | Reviewed fork ceremony evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and retained local dry-run ceremony proof for mint, auction, withdrawal, and emergency redeployment. Public beta remains blocked on the remaining missing evidence rows. |
-| Public Beta | `fork_testnet_randomizer_operations_evidence` | reviewed-external | 1 | Reviewed fork randomizer operations evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, redacted provider export, transaction bundle, post-state request views, and retained local lifecycle, adversarial, retry, payment, pause, and emergency-boundary test proof. Public beta remains blocked on the remaining missing evidence rows. |
 
 ## External Evidence Still Required
 

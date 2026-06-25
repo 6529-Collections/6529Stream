@@ -52,6 +52,9 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_drop_authorization_signing_evidence.py
 "$python_bin" scripts/test_signer_custody_readiness.py
 "$python_bin" scripts/check_signer_custody_readiness.py
+"$python_bin" scripts/test_one_of_one_provenance_manifest.py
+"$python_bin" scripts/check_one_of_one_provenance_manifest.py
+"$python_bin" scripts/generate_one_of_one_provenance_manifest.py --check
 "$python_bin" scripts/test_admin_ceremony_evidence.py
 "$python_bin" scripts/check_admin_ceremony_evidence.py
 forge build --force --via-ir --skip test script
@@ -170,6 +173,8 @@ forge build --force --via-ir --skip test script
 "$python_bin" scripts/generate_release_evidence_live_audit_archive.py --check
 "$python_bin" scripts/test_architecture_threat_model.py
 "$python_bin" scripts/check_architecture_threat_model.py
+"$python_bin" scripts/test_mint_manager_domain_constants.py
+"$python_bin" scripts/check_mint_manager_domain_constants.py
 "$python_bin" scripts/test_audit_package.py
 "$python_bin" scripts/check_audit_package.py
 "$python_bin" scripts/test_audit_finding_workflow.py

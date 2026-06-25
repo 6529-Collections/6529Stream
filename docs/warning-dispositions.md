@@ -53,7 +53,7 @@ this baseline:
 | Solc unused-parameter warnings | Accepted local baseline where removing names would churn integration-facing ABI metadata or interface readability without security benefit | protocol | `forge build --sizes --via-ir --skip test --skip script --force` |
 | Solc pure/view suggestions | Accepted ABI compatibility baseline because changing `view` to `pure` changes ABI `stateMutability` for externally consumed functions | protocol | ABI compatibility and release artifacts remain stable |
 | Solc test-only `selfdestruct` deprecation warnings | Accepted test-only baseline for forced-ETH helpers that prove surplus and reserve accounting cannot be broken by direct ETH transfers | protocol | `forge build` and payment/randomizer tests |
-| Foundry linter block-timestamp warnings | Accepted protocol baseline for deadline, auction, mint-window, and final-supply time checks that are tested and documented as time-window logic | security | Auction, mint, drop, and metadata tests plus ADRs |
+| Foundry linter block-timestamp warnings | Accepted protocol baseline for deadline, auction, manager phase-window, mint-window, and final-supply time checks that are tested and documented as time-window logic | security | Auction, mint-manager, mint, drop, and metadata tests plus ADRs |
 | Vendored utility linter warnings | Accepted vendored/provenance baseline for retained math/delegation/provider sources | oss | [`docs/vendored-libraries.md`](vendored-libraries.md) and Slither baseline review |
 | mdBook HTML warnings from Chainlink VRF prose | Accepted vendored documentation baseline; the comments contain placeholder angle-bracket examples and do not affect bytecode | oss | `forge doc --build` |
 
@@ -86,10 +86,18 @@ Source files covered by this cleanup:
 - [`smart-contracts/StreamCuratorsPool.sol`](../smart-contracts/StreamCuratorsPool.sol)
 - [`smart-contracts/StreamDrops.sol`](../smart-contracts/StreamDrops.sol)
 - [`smart-contracts/StreamMinter.sol`](../smart-contracts/StreamMinter.sol)
+- [`smart-contracts/StreamMintManager.sol`](../smart-contracts/StreamMintManager.sol)
 
 This changes source comments, compiler metadata/source hashes, and therefore
-release bytecode-proof hashes. It does not change runtime bytecode size, ABI
-function selectors, event topics, executable protocol logic, or storage layout.
+release bytecode-proof hashes. It does not change ABI function selectors, event
+topics, or executable protocol logic for the otherwise unchanged contracts. In
+the current CON-014 artifact refresh, `StreamCore` runtime/hash changes are
+additionally attributable to the expanded imported `IStreamMintManager` source
+and Core prepared-mint manager storage changes, including
+`pendingPreparedMintManager`; Core's external ABI method identifiers remain
+unchanged. `StreamPrimarySaleSettlement` has unchanged source, ABI method
+identifiers, and storage layout; the regenerated proof refreshes the stale
+prior via-IR release artifact baseline to the current compiled output.
 
 ## Accepted Solc Warning Dispositions
 
@@ -117,6 +125,7 @@ function selectors, event topics, executable protocol logic, or storage layout.
 | `LINT-BLOCK-TIMESTAMP-CORE` | `block-timestamp` | [`smart-contracts/StreamCore.sol`](../smart-contracts/StreamCore.sol) | Mint/final-supply/freeze windows use block time | `accepted-protocol-time-window` because collection windows and freeze delays are explicit protocol state | Keep tests for mint windows, final-supply tightening, and freeze timing |
 | `LINT-BLOCK-TIMESTAMP-DROPS` | `block-timestamp` | [`smart-contracts/StreamDrops.sol`](../smart-contracts/StreamDrops.sol) | Drop execution uses block time | `accepted-protocol-time-window` because drop deadlines are part of EIP-712 authorization and replay safety | Keep expired and deadline-bound drop authorization tests |
 | `LINT-BLOCK-TIMESTAMP-MINTER` | `block-timestamp` | [`smart-contracts/StreamMinter.sol`](../smart-contracts/StreamMinter.sol) | Minting path checks collection and drop time windows | `accepted-protocol-time-window` because time gates are required external behavior | Keep mint-window and drop-window regression tests |
+| `LINT-BLOCK-TIMESTAMP-MINT-MANAGER` | `block-timestamp` | [`smart-contracts/StreamMintManager.sol`](../smart-contracts/StreamMintManager.sol) | Manager phase execution checks configured start and end windows | `accepted-protocol-time-window` because phase windows are explicit launch policy state outside Core | Keep phase not-started, ended, pause, and executor regression tests |
 | `LINT-BLOCK-TIMESTAMP-TEST-HELPER` | `block-timestamp` | [`test/helpers/ProtocolStateMachine.sol`](../test/helpers/ProtocolStateMachine.sol) | Stateful test helper compares block time | `accepted-test-only` because this code is not a production artifact | Keep production build skipping `test` and `script` paths |
 
 ## Size And ABI Policy

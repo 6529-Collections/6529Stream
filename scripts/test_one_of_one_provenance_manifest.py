@@ -293,6 +293,24 @@ class OneOfOneProvenanceManifestTests(unittest.TestCase):
             self.assertEqual(record["provenance_id"], "test-1-of-1")
             self.assertEqual(record["scope"]["collection_id"], 1)
 
+    def test_descriptor_file_record_uses_lf_normalized_text(self) -> None:
+        """Descriptor file records are stable across CRLF and LF checkouts."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            descriptor_dir, output = seed_descriptor_tree(root)
+            descriptor = descriptor_dir / "test-1-of-1.provenance.json"
+
+            lf_record = json.loads(
+                generator.build_output_text(root, descriptor_dir, output)
+            )["manifests"][0]["descriptor"]
+            crlf_text = descriptor.read_text(encoding="utf-8").replace("\n", "\r\n")
+            descriptor.write_text(crlf_text, encoding="utf-8", newline="")
+            crlf_record = json.loads(
+                generator.build_output_text(root, descriptor_dir, output)
+            )["manifests"][0]["descriptor"]
+
+            self.assertEqual(crlf_record, lf_record)
+
     def test_check_mode_accepts_current_manifest(self) -> None:
         """Check mode accepts a current generated manifest."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -354,6 +372,35 @@ class OneOfOneProvenanceManifestTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 checker.ProvenanceManifestError, "certificate_sha256"
+            ):
+                checker.validate_manifest(path, root)
+
+    def test_accepts_template_self_referential_release_catalog(self) -> None:
+        """Template release-binding refs may point at their generated catalog."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = valid_manifest(root, review_status="template")
+            release_ref = data["provenance_entries"][1]["evidence_refs"][0]
+            release_ref["uri"] = checker.SELF_REFERENTIAL_PROVENANCE_MANIFEST_URI
+            release_ref["sha256"] = checker.SELF_REFERENTIAL_STATUS
+            path = root / "release-artifacts/provenance/template.provenance.json"
+            write_json(path, data)
+
+            checker.validate_manifest(path, root)
+
+    def test_rejects_reviewed_self_referential_release_catalog(self) -> None:
+        """Reviewed provenance evidence refs need concrete retained hashes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = valid_manifest(root)
+            release_ref = data["provenance_entries"][1]["evidence_refs"][0]
+            release_ref["uri"] = checker.SELF_REFERENTIAL_PROVENANCE_MANIFEST_URI
+            release_ref["sha256"] = checker.SELF_REFERENTIAL_STATUS
+            path = root / "release-artifacts/provenance/reviewed.provenance.json"
+            write_json(path, data)
+
+            with self.assertRaisesRegex(
+                checker.ProvenanceManifestError, "reviewed provenance evidence refs"
             ):
                 checker.validate_manifest(path, root)
 

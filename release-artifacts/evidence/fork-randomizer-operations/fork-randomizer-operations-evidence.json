@@ -2,22 +2,22 @@
   "schema_version": "6529stream.non-local-release-evidence.v1",
   "evidence_id": "fork-testnet-randomizer-operations-evidence-fork-evidence",
   "record_type": "evidence",
-  "review_status": "reviewed",
+  "review_status": "pending_review",
   "environment": "fork",
   "chain_id": 1,
   "block_or_reference": "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7",
   "command_or_source_system": "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig run() --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests",
   "retained_path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-  "sha256": "sha256:b4e23a17b7eacba8b2a20e8d99e2c28e29f8b3dc20d7c566a0e4530335e4ee85",
+  "sha256": "sha256:f76b8ca73cee41b445c38976f0b9a4094b6c0da3a3de1d805be1ad6d2da1913e",
   "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
   "owner": "Codex autonomous implementer",
-  "reviewer": "Codex autonomous maintainer evidence review for issue #220",
+  "reviewer": "pending StreamMintManager PR review; historical Codex autonomous maintainer evidence review for issue #220",
   "public_beta_requirement_id": "fork_testnet_randomizer_operations_evidence",
   "source": {
     "repository": "https://github.com/6529-Collections/6529Stream",
     "git_commit": "a35c24a4f3bcbf61db73c78f2e98822f09d17d59",
     "source_dirty": false,
-    "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR"
+    "ci_run": "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; StreamMintManager PR review pending"
   },
   "redaction_policy": {
     "no_secrets": true,
@@ -31,5 +31,5 @@
     ]
   },
   "template_notice": "Generated evidence metadata. This file is not completion evidence until it is reviewed and linked from public-beta evidence.",
-  "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. Public beta remains blocked on the remaining missing evidence rows."
+  "operator_notes": "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The CON-014 StreamMintManager branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 }
