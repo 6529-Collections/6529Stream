@@ -111,13 +111,26 @@ The implementation PR must report:
 Current CON-012 implementation proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. New measured `StreamCore` runtime: 24,172 bytes.
-3. EIP-170 margin: 404 bytes.
+2. New measured `StreamCore` runtime: 24,165 bytes.
+3. EIP-170 margin: 411 bytes.
 4. The margin remains above the 384-byte release floor but below the 512-byte
    warning threshold.
 5. The Core hook keeps the immediate manager mint ABI minimal and leaves
    beneficiary/payment evidence, batch commitments, operation events, and richer
    mint policy to the manager, ledger, sale adapter, and settlement satellites.
+
+Current CON-013 implementation proof:
+
+1. `StreamMintLedger` is release-tracked as the first outside-Core durable mint
+   accounting satellite.
+2. The ledger supports owner-authorized deployed-contract writers, one active
+   registered `policyHash` per `(manager, collectionId, phaseId)`, launch-safe
+   static counter policies, canonical manager-scoped value-key derivation,
+   cap-checked counter consumption, durable values across policy
+   re-registration, and manager-scoped authorization replay protection.
+3. Resolver caps/deltas, custom gates, callable nullifier systems, sale/drop
+   routing, payment collection, and Core mint execution remain outside this
+   ledger-only slice.
 
 No launch v1 implementation may drop Core-native ERC-2981 to solve size
 pressure. Refactor metadata, collection metadata, entropy, mint policy, or

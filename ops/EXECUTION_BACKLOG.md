@@ -206,7 +206,8 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | 0 | `CON-009` | C/G | V1 split settlement foundation | Merged in PR #626; issue #625 closed completed |
 | 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Merged in PR #628; issue #627 closed completed |
 | 0.2 | `CON-011` | C/G | V1 revenue resolver and primary-sale settlement adapters | Merged in PR #630; issue #629 closed completed |
-| 0.3 | `CON-012` | C/G | V1 Core mint-manager boundary and prepared-mint hooks | Active issue #631 on branch `codex/mint-manager-core-hooks`; local draft in progress |
+| 0.3 | `CON-012` | C/G | V1 Core mint-manager boundary and prepared-mint hooks | Merged in PR #633; issue #631 closed completed |
+| 0.4 | `CON-013` | C/G | V1 static mint ledger accounting foundation | Active PR #635 / issue #634 on branch `codex/mint-manager-ledger-foundation`; CI/bot review in progress |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1549,8 +1550,7 @@ Acceptance criteria:
 
 ### CON-012: Add Core Mint-Manager Boundary And Prepared-Mint Hooks
 
-Status: Active issue #631 on branch `codex/mint-manager-core-hooks`; local
-draft in progress.
+Status: Merged in PR #633; issue #631 closed completed.
 
 Gate: C/G.
 
@@ -1627,6 +1627,56 @@ Acceptance criteria:
 - Safe receiver callbacks cannot observe or exploit an incomplete prepared
   token.
 - Existing Drops/Minter fixed-price and auction flows continue to pass.
+
+### CON-013: Add StreamMintLedger Static Counter Accounting Foundation
+
+Status: Active PR #635 / issue #634 on branch
+`codex/mint-manager-ledger-foundation`; CI/bot review in progress.
+
+Gate: C/G.
+
+Problem: CON-012 gave Core a safe manager hook boundary, but the launch mint
+roadmap still needs an outside-Core durable accounting contract before the full
+`StreamMintManager` can consume phase/counter allowance and route future sale,
+drop, or auction executors through a reviewed ledger.
+
+Outcome: Add `StreamMintLedger` as a small satellite with authorized writers,
+registered phase policy hashes, launch-static counter policies, monotonic
+counter values, authorization replay protection, reconstructable events, and
+focused tests. The slice deliberately leaves manager phase execution, Core mint
+calls, payment settlement, custom gates, resolver modes, nullifiers, and legacy
+flow migration for later PRs.
+
+Files likely touched:
+
+- `smart-contracts/IStreamMintLedger.sol`
+- `smart-contracts/StreamMintLedger.sol`
+- `test/StreamMintLedger.t.sol`
+- release artifacts generated from `release-artifacts/contracts.json`
+- mint/accounting, launch, roadmap, backlog, and run-state docs
+
+Required tests/checks:
+
+- `forge test --match-path test/StreamMintLedger.t.sol -vvv`
+- `forge build`
+- production size and release-artifact generator checks
+- changelog and Markdown checks
+- `codex-diff-check`
+- full Windows `scripts\check.ps1` before merge
+
+Acceptance criteria:
+
+- Only authorized deployed-contract ledger writers can register policies and
+  consume ledger state.
+- Policy registration rejects invalid hashes, length mismatches, duplicate
+  counter IDs, and unsupported future modes.
+- Consumption verifies registered policy hashes and static counter policy before
+  writing.
+- Duplicate canonical value keys cannot bypass caps, and non-canonical supplied
+  value keys are rejected.
+- Authorization IDs are one-shot per manager; nullifiers remain explicitly unsupported.
+- Existing Core, Minter, Drops, revenue, royalty, and preservation behavior is
+  unchanged.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3780,7 +3830,8 @@ unless an external dependency changes.
 | `CON-009` | Implement split factory and split wallet skeleton | C/G | Merged in PR #626; issue #625 closed completed |
 | `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Merged in PR #628; issue #627 closed completed |
 | `CON-011` | Add revenue resolver and primary-sale settlement adapters | C/G | Merged in PR #630; issue #629 closed completed |
-| `CON-012` | Add Core mint-manager boundary and prepared-mint hooks | C/G | Active issue #631 on branch `codex/mint-manager-core-hooks`; local draft in progress |
+| `CON-012` | Add Core mint-manager boundary and prepared-mint hooks | C/G | Merged in PR #633; issue #631 closed completed |
+| `CON-013` | Add StreamMintLedger static counter accounting foundation | C/G | Active PR #635 / issue #634 on branch `codex/mint-manager-ledger-foundation`; CI/bot review in progress |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

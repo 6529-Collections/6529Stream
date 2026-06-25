@@ -48,6 +48,7 @@ SEPOLIA_EXPECTED_CONTRACTS = {
     "StreamSplitFactory",
     "StreamRevenueResolver",
     "StreamPrimarySaleSettlement",
+    "StreamMintLedger",
 }
 TEMPLATE_FORBIDDEN_SECRET_RE = re.compile(
     r"("

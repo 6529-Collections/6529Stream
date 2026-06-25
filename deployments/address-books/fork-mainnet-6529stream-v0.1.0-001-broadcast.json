@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:368ce322a39f4293a7ba1b7a367b8ea228006d424d2d55e5f9eef26b8dded3e2",
+    "deployment_manifest_sha256": "sha256:1d1b79b4d4f1ad771ef845c33d2f5ab0834caa22934ab0828d256025512dba6e",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -82,7 +82,7 @@
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
       "abi_hash": "sha256:be80dc77a6d763a644780b4d70b353ec4f35f890e1b66a6a7a4a00ebeb2c063b",
-      "runtime_bytecode_hash": "sha256:a7ce091753a619420a5f0520fec45e75174cf185a6a27c2251a7f7c4015244e1",
+      "runtime_bytecode_hash": "sha256:98a0da2c9e4f078883e635132537d05d0078952c136470240ffb5f4e4de95c6e",
       "verification_status": "not_applicable"
     },
     "StreamCuratorsPool": {
@@ -99,6 +99,14 @@
       "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
       "abi_hash": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
       "runtime_bytecode_hash": "sha256:5906d6eea7b00799d911a574370985b7fc216eaf64d0343eb36d581b17d01fa1",
+      "verification_status": "not_applicable"
+    },
+    "StreamMintLedger": {
+      "address": "0x200000000000000000000000000000000000000f",
+      "source": "smart-contracts/StreamMintLedger.sol",
+      "artifact_path": "out/StreamMintLedger.sol/StreamMintLedger.json",
+      "abi_hash": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
+      "runtime_bytecode_hash": "sha256:c5730bc4ecf04bff2d180b2ba463707dff7da3de89c0b3ffe21eb29d11acee27",
       "verification_status": "not_applicable"
     },
     "StreamMinter": {

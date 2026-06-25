@@ -23,6 +23,7 @@
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0x4ac5cdd3",
     "IStreamDrops": "0xd7c2abe3",
+    "IStreamMintLedger": "0x79bc7192",
     "IStreamMintManager": "0x47588f68",
     "IStreamMinter": "0x0f48ec25",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
@@ -733,6 +734,64 @@
         {
           "signature": "retrieveTokenID(bytes32)",
           "selector": "0x4098fff1"
+        }
+      ]
+    },
+    "IStreamMintLedger": {
+      "source": "smart-contracts/IStreamMintLedger.sol",
+      "artifact_path": "out/IStreamMintLedger.sol/IStreamMintLedger.json",
+      "abi_sha256": "sha256:0ad44fc08e116d4b741d39b07f335eb34a3048bf0be71a468e217f9a63ed5149",
+      "interface_id": "0x79bc7192",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x79bc7192",
+      "function_selectors": [
+        {
+          "signature": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+          "selector": "0xa6ad4f24"
+        },
+        {
+          "signature": "counterValue(bytes32)",
+          "selector": "0x4c310e09"
+        },
+        {
+          "signature": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+          "selector": "0x7d9d849b"
+        },
+        {
+          "signature": "isAuthorizationUsed(bytes32)",
+          "selector": "0x14335b8d"
+        },
+        {
+          "signature": "isManagerAuthorizationUsed(address,bytes32)",
+          "selector": "0x867137d3"
+        },
+        {
+          "signature": "isNullifierUsed(bytes32)",
+          "selector": "0x22dc7b4c"
+        },
+        {
+          "signature": "isStreamMintLedger()",
+          "selector": "0x35329e20"
+        },
+        {
+          "signature": "ledgerWriter(address)",
+          "selector": "0xe05ac6da"
+        },
+        {
+          "signature": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+          "selector": "0x82873943"
+        },
+        {
+          "signature": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+          "selector": "0x93623d24"
+        },
+        {
+          "signature": "registeredPhasePolicyHash(address,uint256,bytes32)",
+          "selector": "0x194dba81"
+        },
+        {
+          "signature": "setLedgerWriter(address,bool)",
+          "selector": "0x83e3452a"
         }
       ]
     },

@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:a177a9b3276590ddbab2b295774692a8f92fa4cc61b085cfdf7e4733e4e91a5c"
+      "sha256": "sha256:59bb9cda2e6bf6d703164cbad9a1b9e260105621fcfc47e009b5716731502d47"
     },
     {
       "path": "docs/audit-package.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:0c2670cf1c09edfdc3ed9924c53c49cf8e56604a52bb47013e4272d3fba64545"
+      "sha256": "sha256:183fd3acadde3575f6c09b173c5e5df9c633e2db0b1959c74538d6e000b02fe1"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -46,7 +46,7 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:a3e749a56828a9249c2e7e7a6f19754133ec951dfbba2123733aed5f5799197f"
+      "sha256": "sha256:b1befccbdebc1bce41d81ab223f7a7e13f9de65bf072c9f3af2c56af61a4c4e7"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:a177a9b3276590ddbab2b295774692a8f92fa4cc61b085cfdf7e4733e4e91a5c"
+          "sha256": "sha256:59bb9cda2e6bf6d703164cbad9a1b9e260105621fcfc47e009b5716731502d47"
         }
       ],
       "risk_acceptance": null
@@ -171,7 +171,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:a3e749a56828a9249c2e7e7a6f19754133ec951dfbba2123733aed5f5799197f"
+          "sha256": "sha256:b1befccbdebc1bce41d81ab223f7a7e13f9de65bf072c9f3af2c56af61a4c4e7"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:a177a9b3276590ddbab2b295774692a8f92fa4cc61b085cfdf7e4733e4e91a5c"
+          "sha256": "sha256:59bb9cda2e6bf6d703164cbad9a1b9e260105621fcfc47e009b5716731502d47"
         },
         {
           "path": "docs/metadata.md",
@@ -342,7 +342,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:84c6933481e8e89f4c65ad717f6c8b81cdbd1f1cbecead970015f62dcd0f975e"
+          "sha256": "sha256:443ea0c5f3156d9492e759ec693c9a3769eb8f8003c6f978fb8470f1823cb68b"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -378,7 +378,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:2ce79c5736d23485c3e705510073b4c09e628b500902744bfe0f6777ab7332ff"
+          "sha256": "sha256:ef4b9edc959b414fa85b860c6561a40fee72515d854d007e5ae7002bdf39662a"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -408,7 +408,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:0c2670cf1c09edfdc3ed9924c53c49cf8e56604a52bb47013e4272d3fba64545"
+          "sha256": "sha256:183fd3acadde3575f6c09b173c5e5df9c633e2db0b1959c74538d6e000b02fe1"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -416,7 +416,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:5fc5f6cf8d4ccec2d1b5cab0351112b59f893bda2194a49463f52c71f3871a46"
+          "sha256": "sha256:342179196845a138c5349e3f70bf142c85d5a18b689cdce4dd1862a26fa265b6"
         }
       ],
       "risk_acceptance": null
@@ -483,11 +483,11 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:a177a9b3276590ddbab2b295774692a8f92fa4cc61b085cfdf7e4733e4e91a5c"
+          "sha256": "sha256:59bb9cda2e6bf6d703164cbad9a1b9e260105621fcfc47e009b5716731502d47"
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:b3a8a4185dd44b23d4a5e6c9695bf238d31d7f023e3e11165c283c16c58cb6c9"
+          "sha256": "sha256:0acce8aab6bde424f9f3e7c66311ddf7da4091f34eba0fc2810ef9b17ea68d59"
         },
         {
           "path": "docs/warning-dispositions.md",

@@ -54,13 +54,13 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:368ce322a39f4293a7ba1b7a367b8ea228006d424d2d55e5f9eef26b8dded3e2`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:0af164a7adad374fe99f5d665861d730af299a450a55853619573dca4be86aca`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:1d1b79b4d4f1ad771ef845c33d2f5ab0834caa22934ab0828d256025512dba6e`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:170891ff16e67f391842e245707870e39da81e46edabb2e839093f4d037c04ab`
 - Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:4522bfb197b9333e1275faa5d6c2cc53e246d11c2ffdebdc3386c7a23e99b920`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
 - Post-state request views: `release-artifacts/evidence/fork-randomizer-operations/post-state-requests.md / sha256:c306a99d750091e13e9ea25f30bb7735546bf041dfbcb93577d4b354f1663003`
-- Release manifest/checksum digests: `pre-promotion release-manifest sha256:f2cf794d65ac7eea4909d48b3e06deb63e55bedf6715c8fd752dd395fac5e00d and pre-promotion SHA256SUMS sha256:2aab8f9188bdfe459595b72b34776d98fd7d5d7a16b5b2d75bf412e88dea121d`
+- Release manifest/checksum digests: `pre-promotion release-manifest sha256:97195f94d57e42f90309968dfaadbca3f4c620d86459cf5ccd3e4052391595bb and pre-promotion SHA256SUMS sha256:8b72a631a7f2c7c2a5f0e7fc4448cd4aed82085029b31a26307b9f17d9561033`
 
 ## Review
 
