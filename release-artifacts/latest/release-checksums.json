@@ -147,7 +147,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9bfe1a30e8d61e428287478e0921ff8d970ea64b8c478ebdfcf46f7f51fc316f"
+    "sha256": "sha256:4ab398a28bdd12d2adcdf065a9d6e0f35f27cc78696bec3d26927a59696793b2"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1076,7 +1076,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:8313822cdf85eca6e50c61e890360254e58ebc17a82cf89cb2294e2581bbab6b",
+      "sha256": "sha256:330754b814ceea66ceb20555b9db691a9f8a3853e005374256ad9647cb9c2f8e",
       "size_bytes": 126716
     },
     {
@@ -1106,12 +1106,12 @@
     },
     {
       "path": "release-artifacts/latest/one-of-one-permanence-manifest.json",
-      "sha256": "sha256:d89264edf027e3df9191308ff4579ab483ee2339cad652bd46ff5125aea07bbd",
+      "sha256": "sha256:23e9058545bdb54d5c083f6ad84d6b4d7239eb55413a158ace89a77031da3c9c",
       "size_bytes": 2913
     },
     {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:7dc63ccfdf3b76f45300e7cf5f5cef95115925ac4740e40f86f5732bb99c438f",
+      "sha256": "sha256:b91db47ece973847a52fe15b728f5f2054e11e6d2920d8a7df90e544b103443d",
       "size_bytes": 2177
     },
     {
@@ -1141,7 +1141,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:eb3c98e43c75c8da83f12661e44d9e9c1d4b21833b641be4a3d548aa766ed53a",
+      "sha256": "sha256:a8d2e99b6e40a91a55e77b473523b24448fe865d590a9ce7717d1e63b2d90ae1",
       "size_bytes": 8996
     },
     {
@@ -1191,7 +1191,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:42f4c98a259b5a8151f039c592d3222a8cc624b05607547809ea949bc8605c13",
+      "sha256": "sha256:2ee360aa4802a1e3df1bebe40a8c2d4709ab9ff9df8d082b41073cf029e5240e",
       "size_bytes": 133800
     },
     {
@@ -1221,7 +1221,7 @@
     },
     {
       "path": "release-artifacts/permanence/one-of-one-permanence-template.permanence.json",
-      "sha256": "sha256:6f7f8e9f518376d0b64cb208957fab10e2b11324472e14b97b8a7a343ad1da9f",
+      "sha256": "sha256:97a7b76ddcbd29917b34b6a2b42e885337f2966978929ec2af6bdd311c44d726",
       "size_bytes": 8469
     },
     {

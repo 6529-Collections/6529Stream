@@ -227,6 +227,16 @@ def file_sha256(path: Path) -> str:
         return sha256_bytes(handle.read())
 
 
+def normalized_text_bytes(path: Path) -> bytes:
+    """Return text bytes with repository-stable LF line endings."""
+    return path.read_bytes().replace(b"\r\n", b"\n")
+
+
+def normalized_text_sha256(path: Path) -> str:
+    """Hash text using repository-stable LF line endings."""
+    return sha256_bytes(normalized_text_bytes(path))
+
+
 def normalize_path(path: Path, repo_root: Path) -> str:
     """Return a repository-relative POSIX path."""
     try:
@@ -239,10 +249,11 @@ def file_record(path: Path, repo_root: Path, *, schema_required: bool = False) -
     """Return a deterministic file record."""
     if not path.is_file():
         raise PermanencePackageError(f"missing required file: {path}")
+    record_bytes = normalized_text_bytes(path)
     record: dict[str, Any] = {
         "path": normalize_path(path, repo_root),
-        "sha256": file_sha256(path),
-        "size_bytes": path.stat().st_size,
+        "sha256": sha256_bytes(record_bytes),
+        "size_bytes": len(record_bytes),
     }
     if path.suffix == ".json" or schema_required:
         data = load_json(path)
