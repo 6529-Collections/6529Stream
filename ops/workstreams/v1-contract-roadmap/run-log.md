@@ -229,3 +229,9 @@
   fork deployment rehearsal and fork randomizer operations, then regenerated
   public-beta evidence, evidence packet/backlog/body-sync artifacts, release
   manifest, lockfile, bytecode proof, and checksums.
+- Opened PR #635 at
+  https://github.com/6529-Collections/6529Stream/pull/635 to close issue #634
+  and package the ledger foundation. Requested CodeRabbit in comment
+  `4797239196`; CI run `28156747763` is in progress. Next action is to push
+  this PR-number state update, keep CodeRabbit enabled, wait for CI/bot
+  feedback, resolve anything actionable, then merge only when clean.

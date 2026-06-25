@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/mint-manager-ledger-foundation` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/633` |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/634 |
-| Active PR | TBD |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/635 |
 | Next issue | Full `StreamMintManager` phase policy/execution integration after the ledger foundation, then collection metadata and preservation satellites. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-25 07:55 UTC` |
+| Last updated | `2026-06-25 08:20 UTC` |
 
 ## Current Run Notes
 
@@ -67,8 +67,10 @@ evidence, and audit/readiness gates.
 - OpenRouter review status: Opus 4.8, GPT-5.5 Pro, and GLM 5.2 all returned
   visible content. None reported P0/P1 blockers for the ledger-only static
   phase-counter scope. GPT and GLM flagged release-scope/documentation
-  consistency plus writer-authorization hardening; those fixes are being
-  applied locally before PR.
+  consistency plus writer-authorization hardening; those fixes were applied
+  before opening PR #635.
+- PR #635 is open for issue #634. CodeRabbit was requested, and CI is in
+  progress on the pushed branch.
 - Preserve the existing `StreamDrops -> StreamMinter -> StreamCore` flow unless
   a later PR intentionally routes it through the new manager boundary.
 - Keep GPT-5.5 Pro on high/max reasoning for OpenRouter reviews. Long waits are

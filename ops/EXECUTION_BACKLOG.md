@@ -207,7 +207,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | 0.1 | `CON-010` | C/G | V1 approved-standard ERC-20 split settlement foundation | Merged in PR #628; issue #627 closed completed |
 | 0.2 | `CON-011` | C/G | V1 revenue resolver and primary-sale settlement adapters | Merged in PR #630; issue #629 closed completed |
 | 0.3 | `CON-012` | C/G | V1 Core mint-manager boundary and prepared-mint hooks | Merged in PR #633; issue #631 closed completed |
-| 0.4 | `CON-013` | C/G | V1 static mint ledger accounting foundation | Active issue #634 on branch `codex/mint-manager-ledger-foundation`; local draft in progress |
+| 0.4 | `CON-013` | C/G | V1 static mint ledger accounting foundation | Active PR #635 / issue #634 on branch `codex/mint-manager-ledger-foundation`; CI/bot review in progress |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1630,8 +1630,8 @@ Acceptance criteria:
 
 ### CON-013: Add StreamMintLedger Static Counter Accounting Foundation
 
-Status: Active issue #634 on branch `codex/mint-manager-ledger-foundation`;
-local draft in progress.
+Status: Active PR #635 / issue #634 on branch
+`codex/mint-manager-ledger-foundation`; CI/bot review in progress.
 
 Gate: C/G.
 
@@ -3831,7 +3831,7 @@ unless an external dependency changes.
 | `CON-010` | Add asset policy registry and ERC-20 split-wallet release/sync | C/G | Merged in PR #628; issue #627 closed completed |
 | `CON-011` | Add revenue resolver and primary-sale settlement adapters | C/G | Merged in PR #630; issue #629 closed completed |
 | `CON-012` | Add Core mint-manager boundary and prepared-mint hooks | C/G | Merged in PR #633; issue #631 closed completed |
-| `CON-013` | Add StreamMintLedger static counter accounting foundation | C/G | Active issue #634 on branch `codex/mint-manager-ledger-foundation`; local draft in progress |
+| `CON-013` | Add StreamMintLedger static counter accounting foundation | C/G | Active PR #635 / issue #634 on branch `codex/mint-manager-ledger-foundation`; CI/bot review in progress |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

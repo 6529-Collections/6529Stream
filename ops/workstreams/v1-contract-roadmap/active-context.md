@@ -43,14 +43,15 @@ follow-up topics.
 - Core mint-manager hooks PR #633 merged and issue #631 is closed completed.
 - Current topic branch: `codex/mint-manager-ledger-foundation`.
 - Current topic issue: https://github.com/6529-Collections/6529Stream/issues/634.
-- Current topic PR: TBD.
-- Local draft status: ledger contract, interface, focused tests, deployment
-  rehearsal wiring, release artifacts, and review-driven fixes are implemented
-  locally. Opus, GPT-5.5 Pro, and GLM all returned visible review content with
-  no P0/P1 blockers for the ledger-only static phase-counter scope. Final
-  local validation passed with focused `StreamMintLedger` tests, `forge build`,
-  full `forge test -vvv`, production via-IR size build, full Windows
-  `scripts\check.ps1`, and `codex-diff-check`.
+- Current topic PR: https://github.com/6529-Collections/6529Stream/pull/635.
+- Current PR status: PR #635 is open for the ledger contract, interface,
+  focused tests, deployment rehearsal wiring, release artifacts, and
+  review-driven fixes. Opus, GPT-5.5 Pro, and GLM all returned visible review
+  content with no P0/P1 blockers for the ledger-only static phase-counter
+  scope. Final local validation passed with focused `StreamMintLedger` tests,
+  `forge build`, full `forge test -vvv`, production via-IR size build, full
+  Windows `scripts\check.ps1`, and `codex-diff-check`. CI and CodeRabbit review
+  are in progress.
 
 ## Subagent Findings To Carry
 
