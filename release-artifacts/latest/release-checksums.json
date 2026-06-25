@@ -147,7 +147,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:2d300f28dbcc2b6e0a5d847354d2add8c711a1c773cc44141a1016341eb7c614"
+    "sha256": "sha256:ddd65a631208244eebbe4142d70950ab197e276319108adf6330f93afebbaa0b"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -236,8 +236,8 @@
     },
     {
       "path": "deployments/ceremony-evidence/anvil-6529stream-v0.1.0-001-local.json",
-      "sha256": "sha256:073eabf365306a2355494edd4028ae760a8d6f75f1f17df7551189561a48c3b3",
-      "size_bytes": 5789
+      "sha256": "sha256:840f79a01d50f34c1ba545af3883b1e14b47b4052a768c9418fac8966ac8b9c1",
+      "size_bytes": 5668
     },
     {
       "path": "deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -286,8 +286,8 @@
     },
     {
       "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-      "sha256": "sha256:e4a63a99a68d0c659231e5eecc921647ddc6eff53808509cf27e218b4281fabf",
-      "size_bytes": 10467
+      "sha256": "sha256:ef90d3157a1e758a43633e7f3fbfaab0cb5a6f653387e07e701ce5650259c10c",
+      "size_bytes": 10245
     },
     {
       "path": "deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json",
@@ -1076,7 +1076,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a0d83cada48db721346b090df7607311c33e59d008c5e6b4bdf735c6fd45245a",
+      "sha256": "sha256:10e91731aa7a91cf11d05a5d9a4e6922b13b5664697c1f77318ecc77e056e745",
       "size_bytes": 126716
     },
     {
@@ -1141,7 +1141,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:7145c78ec01b51d6939d9f8745e1cc85be9e0c4ca71073cd65cfc0768e702660",
+      "sha256": "sha256:f4bf72cf4a57454338ce1369787f7cc8f2ccf209f73547c4ed55c8783a25e525",
       "size_bytes": 8996
     },
     {
@@ -1191,7 +1191,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:3548fdd80b71b13fe512baf6338a0cdf01b495e7864110cea700d9aa9122398d",
+      "sha256": "sha256:5a04155e24c8d38bf2dde5a04e113050997c881d546e9d635633c9dc32e19196",
       "size_bytes": 133800
     },
     {
