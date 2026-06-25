@@ -357,6 +357,35 @@ class OneOfOneProvenanceManifestTests(unittest.TestCase):
             ):
                 checker.validate_manifest(path, root)
 
+    def test_accepts_template_self_referential_release_catalog(self) -> None:
+        """Template release-binding refs may point at their generated catalog."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = valid_manifest(root, review_status="template")
+            release_ref = data["provenance_entries"][1]["evidence_refs"][0]
+            release_ref["uri"] = checker.SELF_REFERENTIAL_PROVENANCE_MANIFEST_URI
+            release_ref["sha256"] = checker.SELF_REFERENTIAL_STATUS
+            path = root / "release-artifacts/provenance/template.provenance.json"
+            write_json(path, data)
+
+            checker.validate_manifest(path, root)
+
+    def test_rejects_reviewed_self_referential_release_catalog(self) -> None:
+        """Reviewed provenance evidence refs need concrete retained hashes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            data = valid_manifest(root)
+            release_ref = data["provenance_entries"][1]["evidence_refs"][0]
+            release_ref["uri"] = checker.SELF_REFERENTIAL_PROVENANCE_MANIFEST_URI
+            release_ref["sha256"] = checker.SELF_REFERENTIAL_STATUS
+            path = root / "release-artifacts/provenance/reviewed.provenance.json"
+            write_json(path, data)
+
+            with self.assertRaisesRegex(
+                checker.ProvenanceManifestError, "reviewed provenance evidence refs"
+            ):
+                checker.validate_manifest(path, root)
+
     def test_rejects_stale_retained_hash(self) -> None:
         """Retained artifact hashes must match file contents."""
         with tempfile.TemporaryDirectory() as temp_dir:

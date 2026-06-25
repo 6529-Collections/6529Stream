@@ -173,16 +173,19 @@ sanitized deployment transcript, sanitized broadcast, generated manifest,
 address book, verification status, gas or invariant summary, redaction
 confirmation, and reviewer decision.
 
-The committed file currently contains reviewed mainnet-fork rehearsal evidence
-captured at block `25316366` with fork hash
+The committed file currently contains mainnet-fork rehearsal evidence captured
+at block `25316366` with fork hash
 `0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`.
 It is linked to
 [`release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json`](../release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json),
 which records the retained artifact digest for the public-beta evidence row.
-The row is `complete`; public beta remains blocked by the remaining missing
-evidence rows, including external audit, testnet rehearsal, verified deployed
-addresses, explorer verification, and fork/testnet ceremony, metadata browser,
-and randomizer operations evidence.
+The CON-014 manager branch changed the retained artifact set, so the shared
+public-beta evidence row is currently `pending` and issue #216 is back in the
+release-evidence issue-link set until this PR's updated artifact set is
+reviewed. Public beta remains blocked by the remaining missing and pending
+evidence rows, including external audit, the current fork deployment review,
+testnet rehearsal, fork randomizer review, verified deployed addresses, and
+explorer verification.
 
 The retained artifact is checked separately from the JSON metadata envelope:
 
@@ -192,10 +195,10 @@ python scripts/check_fork_deployment_rehearsal_evidence.py
 ```
 
 The retained artifact can remain in `pending_review` only while a PR review is
-in progress. Issue #216 can close only after the review decision is accepted,
-the generated non-local evidence envelope remains in sync, and
-`release-artifacts/latest/public-beta-evidence.json` is updated consistently
-with the accepted retained artifact.
+in progress. Issue #216 can close or return to historical completion only after
+the review decision is accepted, the generated non-local evidence envelope
+remains in sync, and `release-artifacts/latest/public-beta-evidence.json` is
+updated consistently with the accepted retained artifact.
 
 ### Testnet Deployment Retained Artifact
 
@@ -478,12 +481,15 @@ Retain:
 Map fork/testnet evidence to `fork_testnet_ceremony_evidence` and live evidence
 to `live_ceremony_evidence`.
 
-The fork/testnet ceremony row has reviewed fork evidence retained at
+The fork/testnet ceremony row has fork evidence retained at
 `release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`.
 The file name is retained for compatibility with the packet-index expectation,
-but the current content is reviewed fork ceremony evidence rather than
-template-only material. Before regenerating or replacing the non-local ceremony
-envelope, run:
+but the current content is fork ceremony evidence rather than template-only
+material. The CON-014 manager branch changed the fork deployment manifest and
+address book referenced by this retained artifact, so the shared public-beta
+evidence row is currently `pending` and issue #219 is back in the
+release-evidence issue-link set until this PR's updated artifact set is
+reviewed. Before regenerating or replacing the non-local ceremony envelope, run:
 
 ```sh
 python scripts/test_fork_ceremony_evidence.py
@@ -615,8 +621,10 @@ chain IDs, provider configuration, funding, reserve, request-health,
 lifecycle-control, monitoring, retained file references, optional declared
 `sha256:` hashes, reviewer state, and no-secret redaction before any
 pending-review or reviewed artifact can pass. The committed file is
-template-only and keeps public beta blocked until future reviewed evidence is
-accepted and linked from the shared evidence manifest.
+retained fork evidence, but the CON-014 manager branch changed the retained
+artifact set, so the shared public-beta evidence row is currently `pending` and
+issue #220 is back in the release-evidence issue-link set until this PR's
+updated artifact set is reviewed.
 
 The live randomizer operations row has a dedicated retained-artifact template at
 `release-artifacts/evidence/live-randomizer-operations/live-randomizer-operations-retained-artifact-template.md`.

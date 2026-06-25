@@ -173,11 +173,13 @@ bodies and closure state against the committed release evidence artifacts.
 Current maturity:
 
 - Repository status: pre-audit and not production-ready.
-- Evidence status: local baseline plus reviewed mainnet-fork deployment
-  rehearsal evidence.
-- Public beta status: blocked by missing external audit, testnet/live evidence,
-  verified deployed addresses, explorer verification, and fork/testnet metadata
-  browser and randomizer operations evidence.
+- Evidence status: local baseline plus reviewed fork metadata and marketplace
+  evidence; current CON-014 fork deployment, fork ceremony, and fork randomizer
+  artifacts are pending re-review after deployment/release artifacts changed.
+- Public beta status: blocked by missing external audit, pending fork
+  deployment review, missing testnet deployment evidence, pending fork ceremony
+  review, pending fork randomizer review, verified deployed addresses, and
+  explorer verification.
 - Production release status: blocked by missing production signatures, signed
   Git tags, verified deployed addresses, explorer verification, non-local
   retained evidence, and post-audit remediation evidence.
@@ -201,7 +203,7 @@ readiness, so a production run validates both phases.
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
-| Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; reviewed mainnet-fork deployment rehearsal evidence is retained; reviewed fork ceremony evidence is retained; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Reviewed testnet/live evidence, reviewed admin ceremony evidence, verified deployed addresses, explorer verification, and fork/testnet randomizer/metadata-browser evidence missing | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
+| Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-014 artifact set; fork ceremony evidence is retained but pending re-review for the CON-014 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-014 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-014 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
 | Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, production release-signing checker and retained artifact, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, public-beta verified-addresses checker and retained artifact, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
 | Static analysis and tests | Slither baseline, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Testnet/live invariant and gas evidence missing, and NatSpec baseline remains a burn-down queue | External audit and production evidence missing |
 
@@ -425,7 +427,8 @@ The current local baseline includes:
   under
   [`release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md`](../release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md),
   validated offline with `python scripts/test_fork_ceremony_evidence.py` and
-  `python scripts/check_fork_ceremony_evidence.py`,
+  `python scripts/check_fork_ceremony_evidence.py`; the current CON-014
+  artifact set is pending re-review before this row can return to complete,
   plus fork/testnet randomizer operations evidence for
   `fork_testnet_randomizer_operations_evidence` under
   [`release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md`](../release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md),

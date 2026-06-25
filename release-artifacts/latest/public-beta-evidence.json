@@ -24,16 +24,16 @@
     {
       "id": "fork_deployment_rehearsal",
       "phase": "public_beta",
-      "status": "complete",
+      "status": "pending",
       "owner": "Codex autonomous operator",
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:6475b66ac9fa5792060468fe8ddb55424eb277248e5e2fc2beaab78c1c0fc80d"
+          "sha256": "sha256:812c55c6cb7326187976609f085dc393c13b5f24fcf50dbfa939a73a70096718"
         }
       ],
       "risk_acceptance": null,
-      "notes": "Reviewed mainnet fork deployment rehearsal evidence is retained: local Anvil fork at block 25316366, sanitized Foundry broadcast, generated fork deployment manifest, generated fork address book, and CodeRabbit/CI acceptance evidence from PR #347 and PR #349. Public beta remains blocked on the remaining missing evidence rows."
+      "notes": "The retained fork deployment rehearsal artifact set now binds the CON-014 StreamMintManager deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "testnet_deployment_rehearsal",
@@ -66,7 +66,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-evidence.json",
-          "sha256": "sha256:4fdef2f209e9157cbf657d907e245b502eca0a824aa73b396d5eaeaf31959b14"
+          "sha256": "sha256:fb52a8c7203307aa72251860d7c4cb4fbbc1985b2998e5f22bb3488259b5df5b"
         }
       ],
       "risk_acceptance": null,
@@ -75,30 +75,30 @@
     {
       "id": "fork_testnet_ceremony_evidence",
       "phase": "public_beta",
-      "status": "complete",
+      "status": "pending",
       "owner": "Codex autonomous operator",
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-          "sha256": "sha256:8f8f21b736d16e555a751175bf779f024c1e84dd6fb8773b0e4fedf7ad77c2ef"
+          "sha256": "sha256:d8166526a697d9bedf3bc711d66ae42b32548301c4d5454fb1538de7695afe08"
         }
       ],
       "risk_acceptance": null,
-      "notes": "Reviewed fork ceremony evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, Safe/admin placeholder export, post-state views, and retained local dry-run ceremony proof for mint, auction, withdrawal, and emergency redeployment. Public beta remains blocked on the remaining missing evidence rows."
+      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the CON-014 StreamMintManager deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "fork_testnet_randomizer_operations_evidence",
       "phase": "public_beta",
-      "status": "complete",
+      "status": "pending",
       "owner": "Codex autonomous implementer",
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-          "sha256": "sha256:f269b3d874c7d9fc74a705ca0e5c5750dde8334dd2513ab2903b111a8ce91483"
+          "sha256": "sha256:c45499a028a2977c735616cc20014059ee59b581df3b9da78778d695c0ad3969"
         }
       ],
       "risk_acceptance": null,
-      "notes": "Reviewed fork randomizer operations evidence is retained: mainnet fork block 25316366, sanitized Foundry broadcast, fork deployment manifest, fork address book, redacted provider export, transaction bundle, post-state request views, and retained local lifecycle, adversarial, retry, payment, pause, and emergency-boundary test proof. Public beta remains blocked on the remaining missing evidence rows."
+      "notes": "The retained fork randomizer operations artifact set now binds the CON-014 StreamMintManager deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "verified_deployed_addresses",

@@ -108,11 +108,11 @@ The implementation PR must report:
 4. Whether the margin remains above the release floor and warning threshold.
 5. Which non-essential Core logic was moved out if the first attempt failed.
 
-Current CON-012 implementation proof:
+Current launch hook implementation proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
-2. New measured `StreamCore` runtime: 24,165 bytes.
-3. EIP-170 margin: 411 bytes.
+2. New measured `StreamCore` runtime: 24,150 bytes.
+3. EIP-170 margin: 426 bytes.
 4. The margin remains above the 384-byte release floor but below the 512-byte
    warning threshold.
 5. The Core hook keeps the immediate manager mint ABI minimal and leaves
@@ -131,6 +131,19 @@ Current CON-013 implementation proof:
 3. Resolver caps/deltas, custom gates, callable nullifier systems, sale/drop
    routing, payment collection, and Core mint execution remain outside this
    ledger-only slice.
+
+Current CON-014 implementation proof:
+
+1. `StreamMintManager` is release-tracked as the outside-Core phase policy and
+   prepared-mint execution surface paired with `StreamMintLedger`.
+2. The manager supports owner-configured launch-static phase policies, ordered
+   counters, executor allowlists, pause/start/end guards, active `policyHash`
+   registration in the ledger, bounded batch counter consumption construction,
+   ledger cap enforcement with nonzero authorization IDs, stale-policy rejection
+   through a required expected policy hash, and Core prepare/complete execution.
+3. Dynamic resolver counters, custom gates, callable nullifiers, primary-sale
+   settlement routing, existing drop/auction routing, and royalty resolver
+   integration remain follow-up slices.
 
 No launch v1 implementation may drop Core-native ERC-2981 to solve size
 pressure. Refactor metadata, collection metadata, entropy, mint policy, or
@@ -259,6 +272,23 @@ selectors, and module capability selectors.
 CI must include a checked test that recomputes every listed `keccak256`
 preimage and fails on drift between Solidity constants, docs, and release
 artifacts.
+
+### StreamMintManager Domain Constants
+
+The CON-014 manager slice records these launch-static phase policy domains in
+this checked spec table. `operationId` values are derived from
+`OPERATION_DOMAIN` through `operationRoot` and then bind
+`operationRoot`, `operationNonce`, `tokenIndex`, `tokenDataHash`, and `salt`.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `POLICY_DOMAIN` | `6529STREAM_MINT_MANAGER_POLICY_V1` | `0xc3928662f6dd05b602479c5be22fc277fb478ed810da87911760b8087dee9ddd` | `StreamMintManager` | `1` | `POLICY_DOMAIN; uint256(block.chainid); address(this); address(mintLedger); SCHEMA_VERSION; collectionId; phaseId; _phaseConfigHash(config); _orderedCounterConfigHash(collectionId, phaseId); _executorSetHash(collectionId, phaseId)` |
+| `PHASE_CONFIG_DOMAIN` | `6529STREAM_MINT_MANAGER_PHASE_CONFIG_V1` | `0x1c5e8dc70f273da26541082173dc2bd209ef4595e274f79551a7d9087fb7bef1` | `StreamMintManager` | `1` | `PHASE_CONFIG_DOMAIN; config.paused; config.startTime; config.endTime; config.maxBatchQuantity; config.configHash; config.metadataHash` |
+| `COUNTER_CONFIG_DOMAIN` | `6529STREAM_MINT_MANAGER_COUNTER_CONFIG_V1` | `0x3d47766144eb889472dec1a66a3ddf3da1b3025f01a572a61f342c3730bd6577` | `StreamMintManager` | `1` | `COUNTER_CONFIG_DOMAIN; counterId; config.enabled; config.keyMode; config.capMode; config.deltaMode; config.staticCap; config.staticIncrement; config.counterConfigHash` |
+| `EXECUTOR_SET_DOMAIN` | `6529STREAM_MINT_MANAGER_EXECUTOR_SET_V1` | `0x4dad062b9c5507613f6c9369756e27d94df429cf5650fe9b9d375032d1d5397a` | `StreamMintManager` | `1` | `EXECUTOR_SET_DOMAIN; sorted phase executor addresses` |
+| `SUBJECT_DOMAIN` | `6529STREAM_MINT_COUNTER_SUBJECT_V1` | `0x5028c63429e55461bc7922fe859628bd9266f6b029ad3e4124268a4877151a05` | `StreamMintManager` | `1` | `SUBJECT_DOMAIN; uint256(block.chainid); address(mintLedger); keyMode; constant mode: collectionId, phaseId, counterId; address modes: account; context mode: contextHash` |
+| `RESOLUTION_DOMAIN` | `6529STREAM_MINT_COUNTER_RESOLUTION_V1` | `0x3503c231385e25d95f9119b4e72118f42b0c7c1e7854b990a249a44c64f6a196` | `StreamMintManager` | `1` | `RESOLUTION_DOMAIN; uint256(block.chainid); address(this); address(mintLedger); collectionId; phaseId; counterId; subjectKey; tokenIndex; counterConfigHash` |
+| `OPERATION_DOMAIN` | `6529STREAM_PREPARED_MINT_OPERATION_V1` | `0x7ae97476527ee55636a9869c4580294d9b3d15d19fa357df5e2e41301584d0d9` | `StreamMintManager` | `1` | `OPERATION_DOMAIN; uint256(block.chainid); address(this); address(core); address(mintLedger); collectionId; phaseId; policyHash; authorizationId; requestCommitmentHash(payer, authorizer, initialRecipientsHash, beneficiariesHash, tokenDataHash, saltsHash); contextHash; msg.sender; operationNonce; quantity` |
 
 ## Event Reconstruction
 

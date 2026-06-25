@@ -50,6 +50,10 @@
       "source": "smart-contracts/StreamMintLedger.sol"
     },
     {
+      "name": "StreamMintManager",
+      "source": "smart-contracts/StreamMintManager.sol"
+    },
+    {
       "name": "StreamPrimarySaleSettlement",
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol"
     },

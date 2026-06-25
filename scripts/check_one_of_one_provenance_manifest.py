@@ -20,6 +20,9 @@ SELF_REFERENTIAL_STATUS = "not_available_self_referential"
 
 DEFAULT_DESCRIPTOR_DIR = Path("release-artifacts/provenance")
 DESCRIPTOR_GLOB = "*.provenance.json"
+SELF_REFERENTIAL_PROVENANCE_MANIFEST_URI = (
+    "release-artifacts/latest/one-of-one-provenance-manifest.json"
+)
 
 TOP_LEVEL_FIELDS = frozenset(
     {
@@ -621,7 +624,7 @@ def validate_provenance_entries(value: Any, review_status: str) -> list[dict[str
                 ref.get("uri"),
                 f"provenance_entries[{index}].evidence_refs[{ref_index}].uri",
             )
-            digest = require_sha256_or_placeholder(
+            digest = require_sha256_or_self_ref(
                 ref.get("sha256"),
                 f"provenance_entries[{index}].evidence_refs[{ref_index}].sha256",
             )
@@ -629,6 +632,16 @@ def validate_provenance_entries(value: Any, review_status: str) -> list[dict[str
                 ref.get("notes"),
                 f"provenance_entries[{index}].evidence_refs[{ref_index}].notes",
             )
+            if digest == SELF_REFERENTIAL_STATUS:
+                if review_status == "reviewed":
+                    raise ProvenanceManifestError(
+                        "reviewed provenance evidence refs require hash evidence"
+                    )
+                if entry_type != "release_binding" or ref.get("uri") != SELF_REFERENTIAL_PROVENANCE_MANIFEST_URI:
+                    raise ProvenanceManifestError(
+                        "self-referential provenance evidence refs are only allowed "
+                        "for the generated release-binding manifest"
+                    )
             if review_status == "reviewed" and digest == LOCAL_PLACEHOLDER_STATUS:
                 raise ProvenanceManifestError(
                     "reviewed provenance evidence refs require hash evidence"

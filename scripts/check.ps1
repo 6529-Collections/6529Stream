@@ -218,6 +218,8 @@ forge build --force --via-ir --skip test script
 & $pythonPath @pythonArgs "scripts\generate_release_evidence_live_audit_archive.py" "--check"
 & $pythonPath @pythonArgs "scripts\test_architecture_threat_model.py"
 & $pythonPath @pythonArgs "scripts\check_architecture_threat_model.py"
+& $pythonPath @pythonArgs "scripts\test_mint_manager_domain_constants.py"
+& $pythonPath @pythonArgs "scripts\check_mint_manager_domain_constants.py"
 & $pythonPath @pythonArgs "scripts\test_audit_package.py"
 & $pythonPath @pythonArgs "scripts\check_audit_package.py"
 & $pythonPath @pythonArgs "scripts\test_audit_finding_workflow.py"

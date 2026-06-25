@@ -33,6 +33,8 @@ python scripts/check_production_release_signing_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_mint_manager_domain_constants.py
+python scripts/check_mint_manager_domain_constants.py
 python scripts/generate_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_permanence_manifest.py
 python scripts/check_public_beta_evidence.py
@@ -77,6 +79,8 @@ python scripts/generate_release_artifacts.py --check
 python scripts/test_protocol_surface_report.py
 python scripts/generate_protocol_surface_report.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+python scripts/test_mint_manager_domain_constants.py
+python scripts/check_mint_manager_domain_constants.py
 python scripts/test_source_verification_inputs.py
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_dependency_artifact_manifest.py
@@ -722,6 +726,8 @@ python scripts/check_production_release_signing_evidence.py
 python scripts/check_non_local_release_evidence.py
 python scripts/check_drop_authorization_signing_evidence.py
 python scripts/check_signer_custody_readiness.py
+python scripts/test_mint_manager_domain_constants.py
+python scripts/check_mint_manager_domain_constants.py
 python scripts/generate_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_permanence_manifest.py
 python scripts/check_public_beta_evidence.py

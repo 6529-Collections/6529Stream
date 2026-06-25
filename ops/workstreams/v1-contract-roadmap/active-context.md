@@ -43,8 +43,28 @@ topics unless a smaller reviewed boundary is needed for this manager slice.
 - Current topic branch: `codex/mint-manager-phase-execution`.
 - Current topic issue: https://github.com/6529-Collections/6529Stream/issues/636.
 - Current topic PR: TBD.
-- Current draft status: starting from merged `main`; implementation not yet
-  drafted.
+- Current draft status: local `StreamMintManager` implementation,
+  deployment/release artifact wiring, docs, evidence hash refreshes, checked
+  hash-domain coverage, focused validation, full Windows `scripts\check.ps1`,
+  and `codex-diff-check` are complete. The changed fork deployment, fork
+  ceremony, and fork randomizer evidence rows are marked `pending` with issue
+  links #216/#219/#220 restored until this PR's updated artifact set is
+  reviewed. Opus/GLM round-4 findings have been addressed: phase configuration
+  is initial-only, executor removal/uncapped/unlimited batch/beneficiary-keyed
+  counter tests were added, bytecode evidence prose was reconciled, and
+  authorization/policy-hash trust boundaries were documented. The read-only
+  local verifier returned no blockers and its optional hardening suggestions are
+  now covered in the focused manager suite, which passes 36 tests. The latest
+  full Windows wrapper pass is
+  `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`
+  and it reached the deployment-suite, standalone deployment, auction ceremony,
+  and emergency redeployment rehearsal scripts successfully. Current production
+  `via-ir` size output records `StreamCore` at 24,150 bytes with 426 bytes of
+  EIP-170 margin and `StreamMintManager` at 16,812 bytes. Final post-fix
+  OpenRouter review passed with Opus 4.8, GLM 5.2, and GPT-5.5 Pro at high
+  reasoning; all three approve after the stale size-prose blocker was fixed.
+  Next transition: rerun the final full Windows wrapper after this state update,
+  then publish the PR if clean.
 
 ## Subagent Findings To Carry
 
@@ -65,6 +85,24 @@ topics unless a smaller reviewed boundary is needed for this manager slice.
 - Local docs/release review for the CON-012 draft required an explicit
   size-budget exception note and current run-state wording before PR; the
   branch now carries both, with full local validation passing afterward.
+- Local docs/release review for the CON-014 draft found stale completed
+  public-beta evidence claims after deployment artifacts changed and missing
+  checked coverage for the new manager hash domains. The branch now marks the
+  changed fork deployment and fork randomizer rows pending, restores issue-link
+  tracking for #216/#220, adds the checked `StreamMintManager` domain constants
+  table and checker, and has full local validation passing afterward.
+- Final local verifier review for the CON-014 draft found stale human-facing
+  #216/#220 readiness wording after the pending-row fix. The docs now state that
+  the changed fork deployment and fork randomizer evidence rows are pending
+  re-review for this PR's artifact set, and focused docs/evidence checks pass
+  after regenerating the dependent risk register, release notes, manifest, and
+  checksum bundle.
+- OpenRouter round 4 found release-evidence and manager-policy issues. The
+  branch now also marks `fork_testnet_ceremony_evidence` pending with #219
+  restored, guards `configurePhase` with `MintPhaseAlreadyConfigured`, adds the
+  requested tests for executor removal, uncapped counters, unlimited batch
+  quantity, and beneficiary-keyed recipient counters, and documents
+  authorization IDs as replay keys supplied by allowlisted executors.
 
 ## Validation Bar
 

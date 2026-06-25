@@ -71,6 +71,13 @@ CATEGORY_BY_ERROR_NAME = {
     "InvalidMaterializedAccount": "revenue_assignment_safety",
     "InvalidMinterContract": "configuration",
     "InvalidMintManagerContract": "configuration",
+    "InvalidMintLedgerContract": "configuration",
+    "InvalidMintCounter": "mint_manager_policy",
+    "InvalidMintExecutor": "mint_manager_policy",
+    "InvalidMintBatchLimit": "mint_manager_policy",
+    "MintExecutorCountLimitExceeded": "mint_manager_policy",
+    "InvalidMintPhase": "mint_manager_policy",
+    "InvalidMintRecipient": "mint_manager_policy",
     "InvalidPolicyMode": "primary_settlement_safety",
     "InvalidPrimaryPolicyHash": "revenue_assignment_safety",
     "InvalidPrimarySale": "primary_settlement_safety",
@@ -98,11 +105,26 @@ CATEGORY_BY_ERROR_NAME = {
     "CounterValueOverflow": "mint_ledger_accounting",
     "CounterValueKeyMismatch": "mint_ledger_accounting",
     "DuplicateCounterPolicy": "mint_ledger_accounting",
+    "DuplicateMintCounter": "mint_manager_policy",
     "EmptyCounterConsumption": "mint_ledger_accounting",
     "InvalidCounterPolicy": "mint_ledger_accounting",
     "InvalidLedgerWriter": "mint_ledger_accounting",
     "InvalidPhasePolicy": "mint_ledger_accounting",
     "NullifiersUnsupported": "mint_ledger_accounting",
+    "UnsupportedMintCounterMode": "mint_manager_policy",
+    "MintArrayLengthMismatch": "mint_manager_policy",
+    "MintAuthorizationRequired": "mint_manager_policy",
+    "MintBatchQuantityLimitExceeded": "mint_manager_policy",
+    "MintCounterCapExceeded": "mint_manager_policy",
+    "MintCounterCountLimitExceeded": "mint_manager_policy",
+    "MintCounterSubjectMissing": "mint_manager_policy",
+    "MintPhaseAlreadyConfigured": "mint_manager_policy",
+    "MintPhaseDoesNotExist": "mint_manager_policy",
+    "MintPhaseEnded": "mint_manager_policy",
+    "MintPhaseNotStarted": "mint_manager_policy",
+    "MintPhasePaused": "mint_manager_policy",
+    "MintPolicyHashMismatch": "mint_manager_policy",
+    "MintPolicyHashRequired": "mint_manager_policy",
     "NativeReceiptInvariantBroken": "split_payment_safety",
     "NativeTransferFailed": "split_payment_safety",
     "NotMintManager": "access_control",
@@ -133,6 +155,7 @@ CATEGORY_BY_ERROR_NAME = {
     "TokenRandomnessRequestAlreadyExists": "randomness_lifecycle",
     "UnauthorizedInitializer": "access_control",
     "UnauthorizedLedgerWriter": "mint_ledger_accounting",
+    "UnauthorizedMintExecutor": "access_control",
     "UnauthorizedReleaseRecipient": "access_control",
     "UnauthorizedSettlementCaller": "access_control",
     "UnknownDependency": "metadata_integrity",
@@ -153,6 +176,7 @@ CATEGORY_BY_ERROR_NAME = {
 }
 
 CATEGORY_BY_ERROR_ID = {
+    "StreamMintManager:ReentrancyGuardReentrantCall()": "mint_manager_policy",
     "StreamPrimarySaleSettlement:AssetNotActive(address,uint8)": "primary_settlement_safety",
     "StreamPrimarySaleSettlement:AssetPolicyReadFailed(address,address)": "primary_settlement_safety",
     "StreamPrimarySaleSettlement:ERC20BalanceReadFailed(address,address)": "primary_settlement_safety",
@@ -168,6 +192,7 @@ CATEGORY_BY_ERROR_ID = {
 SEVERITY_BY_CATEGORY = {
     "access_control": "critical",
     "asset_policy_safety": "high",
+    "mint_manager_policy": "high",
     "pause_emergency": "high",
     "metadata_integrity": "high",
     "randomness_lifecycle": "high",
@@ -183,6 +208,7 @@ SEVERITY_BY_CATEGORY = {
 CALLER_ACTION_BY_CATEGORY = {
     "access_control": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
     "asset_policy_safety": "Refresh the asset policy registry and token standard review before retrying; inactive, unsupported, malformed, or unapproved assets are terminal until governance updates the policy.",
+    "mint_manager_policy": "Treat as a protected mint policy boundary; refresh phase config, executor authorization, active policy hash, recipients, counter subjects, and batch limits before retrying.",
     "pause_emergency": "Do not retry until the relevant pause domain is unpaused by governance or the operator runbook.",
     "metadata_integrity": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
     "randomness_lifecycle": "Refresh request state and provider epoch before retrying; stale, duplicate, wrong-provider, and wrong-token callbacks are terminal for that payload.",
@@ -224,6 +250,9 @@ TRACEABILITY_BY_CATEGORY = {
     "mint_ledger_accounting": [
         "test/StreamMintLedger.t.sol",
     ],
+    "mint_manager_policy": [
+        "test/StreamMintManager.t.sol",
+    ],
     "primary_settlement_safety": [
         "test/StreamPrimarySaleSettlement.t.sol",
     ],
@@ -244,6 +273,12 @@ TRACEABILITY_BY_CATEGORY = {
 }
 
 TRACEABILITY_BY_ERROR_NAME = {
+    "InvalidCoreContract": [
+        "test/StreamMintManager.t.sol",
+    ],
+    "InvalidMintLedgerContract": [
+        "test/StreamMintManager.t.sol",
+    ],
     "InvalidMintManagerContract": [
         "test/StreamMintManagerCoreHooks.t.sol",
     ],

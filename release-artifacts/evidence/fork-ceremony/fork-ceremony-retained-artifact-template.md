@@ -4,7 +4,7 @@
 
 - Requirement ID: `fork_testnet_ceremony_evidence`
 - Evidence type: `fork_testnet_ceremony_evidence`
-- Review status: `reviewed`
+- Review status: `pending_review`
 - Readiness claim: `blocked`
 - Environment: `fork`
 - Chain ID: `1`
@@ -13,7 +13,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI and 6529bot latest-head review required before merge`
+- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI and 6529bot latest-head review required before merge; StreamMintManager PR review pending for changed CON-014 artifacts`
 - Fork/testnet block or reference: `fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001-broadcast`
 
@@ -53,8 +53,8 @@
 ## Review
 
 - Operator: `Codex autonomous implementer`
-- Reviewer: `Codex autonomous maintainer second-pass review for PR #552`
-- Review decision: `reviewed`
+- Reviewer: `pending StreamMintManager PR review; historical Codex autonomous maintainer second-pass review for PR #552`
+- Review decision: `pending_review`
 
 ## Redaction
 
@@ -70,7 +70,7 @@
 ```sh
 python scripts/test_fork_ceremony_evidence.py
 python scripts/check_fork_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts" --owner "Codex autonomous implementer" --reviewer "Codex autonomous maintainer second-pass review for PR #552" --review-status reviewed --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. Public beta remains blocked on the remaining missing evidence rows; PR #552 must have clean latest-head CI and 6529bot review before merge."
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts" --owner "Codex autonomous implementer" --reviewer "pending StreamMintManager PR review; historical Codex autonomous maintainer second-pass review for PR #552" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge; StreamMintManager PR review pending" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The CON-014 StreamMintManager branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -79,16 +79,17 @@ python scripts/generate_release_checksums.py --check
 
 ## Operator Notes
 
-- This retained artifact completes the `fork_testnet_ceremony_evidence` row
-  using the committed no-secret mainnet fork broadcast from block `25316366`
-  plus retained local dry-run ceremony evidence for mint, auction, withdrawal,
-  and emergency redeployment.
+- This retained artifact is pending StreamMintManager PR review for the
+  `fork_testnet_ceremony_evidence` row because the CON-014 branch changes the
+  deployment manifest and address book it references. It still uses the
+  committed no-secret mainnet fork broadcast from block `25316366` plus retained
+  local dry-run ceremony evidence for mint, auction, withdrawal, and emergency
+  redeployment.
 - The public RPC endpoint, local Anvil endpoint, and any signing material used
   to run the fork rehearsal are intentionally absent from the repository.
 - The Safe/multisig export is a placeholder-address governance export for the
   fork rehearsal only. It is not a production Safe export and must not be used
   as live custody evidence.
-- Public beta remains blocked until the remaining audit, testnet deployment,
-  metadata/browser, marketplace/indexer, randomizer operations, verified
-  address, and explorer verification evidence rows are also complete or
-  explicitly risk-accepted.
+- Public beta remains blocked on the incomplete rows listed in the generated
+  public-beta blocker report, including external audit, deployment/testnet
+  rehearsal review, verified address, and explorer verification evidence.

@@ -2,10 +2,15 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/AuctionContract.sol";
+import "../smart-contracts/IStreamCore.sol";
+import "../smart-contracts/IStreamMintLedger.sol";
+import "../smart-contracts/IStreamMintManager.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
+import "../smart-contracts/StreamMintLedger.sol";
+import "../smart-contracts/StreamMintManager.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";
 
@@ -17,6 +22,7 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
     address private constant BIDDER = address(0x4004);
     address private constant SECOND_BIDDER = address(0x4005);
     address private constant CURATOR = address(0x7007);
+    address private constant MINT_MANAGER_EXECUTOR = address(0x9009);
     address payable private constant WITHDRAW_RECIPIENT = payable(address(0x8008));
 
     uint256 private constant COLLECTION_ID = 1;
@@ -25,6 +31,8 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
     uint256 private constant RESERVE_PRICE = 5 ether;
     uint256 private constant SECOND_BID = 6 ether;
     uint256 private constant REWARD_AMOUNT = 3 ether;
+    bytes32 private constant GAS_PHASE_ID = keccak256("gas-phase");
+    bytes32 private constant GAS_AUTHORIZATION_ID = keccak256("gas-authorization");
 
     function testGasFixedPriceMint() public {
         vm.pauseGasMetering();
@@ -179,6 +187,22 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         deployed.core.retrieveGenerativeScript(TOKEN_ID);
     }
 
+    function testGasMintManagerMaxLaunchBatch() public {
+        vm.pauseGasMetering();
+        DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
+        StreamMintLedger ledger = new StreamMintLedger();
+        StreamMintManager manager =
+            new StreamMintManager(IStreamCore(address(deployed.core)), ledger);
+        ledger.setLedgerWriter(address(manager), true);
+        deployed.core.updateContracts(4, address(manager));
+        _configureMaxLaunchBatchPhase(manager);
+        IStreamMintManager.MintRequest memory request = _maxLaunchBatchRequest(manager);
+
+        vm.resumeGasMetering();
+        vm.prank(MINT_MANAGER_EXECUTOR);
+        manager.mintPrepared(request);
+    }
+
     struct AuctionSetup {
         DeployedStream deployed;
         StreamAuctions auctions;
@@ -287,6 +311,66 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         attributes[0] = "{\"trait_type\":\"Gas\",\"value\":\"Snapshot\"}";
 
         core.updateImagesAndAttributes(tokenIds, images, attributes);
+    }
+
+    function _configureMaxLaunchBatchPhase(StreamMintManager manager) private {
+        uint256 counterCount = manager.MAX_PHASE_COUNTERS();
+        bytes32[] memory counterIds = new bytes32[](counterCount);
+        IStreamMintManager.MintCounterConfig[] memory counterConfigs =
+            new IStreamMintManager.MintCounterConfig[](counterCount);
+        for (uint256 i = 0; i < counterCount; i++) {
+            counterIds[i] = keccak256(abi.encode("gas-counter", i));
+            counterConfigs[i] = IStreamMintManager.MintCounterConfig({
+                enabled: true,
+                keyMode: IStreamMintManager.CounterKeyMode.CONSTANT,
+                capMode: IStreamMintLedger.CounterCapMode.STATIC,
+                deltaMode: IStreamMintLedger.CounterDeltaMode.STATIC,
+                staticCap: uint64(manager.MAX_PHASE_BATCH_QUANTITY()),
+                staticIncrement: 1,
+                counterConfigHash: keccak256(abi.encode("gas-counter-config", i))
+            });
+        }
+        IStreamMintManager.MintPhaseConfig memory config = IStreamMintManager.MintPhaseConfig({
+            paused: false,
+            startTime: 0,
+            endTime: 0,
+            maxBatchQuantity: manager.MAX_PHASE_BATCH_QUANTITY(),
+            configHash: keccak256("gas-phase-config"),
+            metadataHash: keccak256("gas-phase-metadata")
+        });
+        manager.configurePhase(COLLECTION_ID, GAS_PHASE_ID, config, counterIds, counterConfigs);
+        manager.setPhaseExecutor(COLLECTION_ID, GAS_PHASE_ID, MINT_MANAGER_EXECUTOR, true);
+    }
+
+    function _maxLaunchBatchRequest(StreamMintManager manager)
+        private
+        view
+        returns (IStreamMintManager.MintRequest memory request)
+    {
+        uint256 quantity = manager.MAX_PHASE_BATCH_QUANTITY();
+        address[] memory initialRecipients = new address[](quantity);
+        address[] memory beneficiaries = new address[](quantity);
+        string[] memory tokenData = new string[](quantity);
+        uint256[] memory salts = new uint256[](quantity);
+        for (uint256 i = 0; i < quantity; i++) {
+            initialRecipients[i] = RECIPIENT;
+            beneficiaries[i] = RECIPIENT;
+            tokenData[i] = "gas-manager-token";
+            salts[i] = 10_000 + i;
+        }
+        request = IStreamMintManager.MintRequest({
+            collectionId: COLLECTION_ID,
+            phaseId: GAS_PHASE_ID,
+            payer: address(this),
+            authorizer: address(0),
+            initialRecipients: initialRecipients,
+            beneficiaries: beneficiaries,
+            tokenData: tokenData,
+            salts: salts,
+            authorizationId: GAS_AUTHORIZATION_ID,
+            contextHash: bytes32(0),
+            expectedPolicyHash: manager.phasePolicyHash(COLLECTION_ID, GAS_PHASE_ID)
+        });
     }
 }
 

@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-25 08:44 UTC` |
+| Last updated | `2026-06-25 21:10 UTC` |
 
 ## Current Run Notes
 
@@ -59,6 +59,28 @@ evidence, and audit/readiness gates.
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
 - Current topic adds the full `StreamMintManager` phase policy and execution
   integration on top of the merged Core hook and ledger foundations.
+- Local CON-014 draft implements `StreamMintManager` phase configuration,
+  executor allowlists, phase pause/window guards, launch-static ledger
+  consumption, stale-policy and replay protection, and Core prepare/complete
+  execution. The read-only local verifier returned no blockers; its optional
+  coverage suggestions have been folded into the focused manager suite, which
+  now passes 36 tests, including context batch counters, second-token receiver
+  rollback, receiver/admin reentrancy, policy-hash event payloads, exact max
+  launch batch, Core supply-exhaustion rollback, and executor-cap overflow
+  immutability. Deployment/release wiring, evidence hash refreshes, checked
+  manager hash-domain coverage, generated artifacts, `codex-diff-check`, and
+  the full Windows `scripts\check.ps1` wrapper are complete. The latest full
+  wrapper pass is `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`;
+  it reached the deployment-suite, standalone deployment, auction ceremony, and
+  emergency redeployment rehearsal scripts successfully. Current production
+  `via-ir` size output records `StreamCore` at 24,150 bytes with 426 bytes of
+  EIP-170 margin and `StreamMintManager` at 16,812 bytes. The changed fork
+  deployment, fork ceremony, and fork randomizer evidence rows are pending with
+  #216/#219/#220 restored in the issue-link set until this PR's updated
+  artifacts are reviewed. Final post-fix OpenRouter review passed with Opus
+  4.8, GLM 5.2, and GPT-5.5 Pro at high reasoning; all three approve after the
+  stale size-prose blocker was fixed. Next transition: rerun the final full
+  Windows wrapper after this state update, then publish the PR if clean.
 - The manager integration slice should keep product policy outside Core,
   consume only launch-static ledger counters, and defer resolver modes,
   callable nullifiers, custom gates, ERC-20 auction bidding, and royalty

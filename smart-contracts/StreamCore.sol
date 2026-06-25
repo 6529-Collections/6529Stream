@@ -224,6 +224,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     }
 
     mapping(uint256 => PreparedMintRecord) private preparedMintRecords;
+    address private pendingPreparedMintManager;
     // Operation IDs are one-shot manager commitments, even if the prepared token is aborted.
     mapping(bytes32 => bool) private usedPreparedOperationIds;
 
@@ -478,6 +479,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         preparedMintRecords[tokenId] = PreparedMintRecord({
             exists: true, operationId: operationId, collectionId: collectionId
         });
+        pendingPreparedMintManager = msg.sender;
         pendingPreparedMintTokenId = tokenId;
     }
 
@@ -489,26 +491,33 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         uint256 _saltfun_o
     ) external {
         _requireMintManager();
-        PreparedMintRecord memory record = _requirePreparedMint(tokenId, operationId);
+        PreparedMintRecord storage record = _requirePreparedMint(tokenId, operationId);
+        if (pendingPreparedMintManager != msg.sender) {
+            revert PreparedMintMismatch();
+        }
+        uint256 collectionId = record.collectionId;
         delete preparedMintRecords[tokenId];
-        _addLiveTokenMetadataRecord(record.collectionId, tokenId);
+        pendingPreparedMintManager = address(0);
+        _addLiveTokenMetadataRecord(collectionId, tokenId);
         unchecked {
             _liveTokenSupply = _liveTokenSupply + 1;
         }
         _safeMint(initialRecipient, tokenId);
-        collectionAdditionalData[record.collectionId].randomizer
-            .calculateTokenHash(record.collectionId, tokenId, _saltfun_o);
+        collectionAdditionalData[collectionId].randomizer
+            .calculateTokenHash(collectionId, tokenId, _saltfun_o);
         pendingPreparedMintTokenId = 0;
     }
 
     /// @notice Clears a manager-prepared token that cannot be completed.
     function abortPreparedMintFromManager(uint256 tokenId, bytes32 operationId) external {
         _requireMintManager();
-        PreparedMintRecord memory record = _requirePreparedMint(tokenId, operationId);
+        PreparedMintRecord storage record = _requirePreparedMint(tokenId, operationId);
+        uint256 collectionId = record.collectionId;
         delete preparedMintRecords[tokenId];
+        pendingPreparedMintManager = address(0);
         pendingPreparedMintTokenId = 0;
         collectionAdditonalDataStructure storage collectionData =
-            collectionAdditionalData[record.collectionId];
+            collectionAdditionalData[collectionId];
         unchecked {
             collectionData.collectionCirculationSupply =
                 collectionData.collectionCirculationSupply - 1;
@@ -1271,8 +1280,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     }
 
     function _requireNoPreparedMint() private view {
-        uint256 tokenId = pendingPreparedMintTokenId;
-        if (tokenId != 0) {
+        if (pendingPreparedMintTokenId != 0) {
             revert PreparedMintAlreadyPending();
         }
     }
@@ -1280,7 +1288,7 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
     function _requirePreparedMint(uint256 tokenId, bytes32 operationId)
         private
         view
-        returns (PreparedMintRecord memory record)
+        returns (PreparedMintRecord storage record)
     {
         record = preparedMintRecords[tokenId];
         if (!record.exists) {

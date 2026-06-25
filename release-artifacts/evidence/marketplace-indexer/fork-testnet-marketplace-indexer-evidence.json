@@ -8,7 +8,7 @@
   "block_or_reference": "fork block 25344872 / 0x7a9a84994a33d6fca15111b924faae8e1c21d29bcc7e4102d6cd44f5b82420d4; token 10000000000; collection 1",
   "command_or_source_system": "mainnet-fork metadata browser capture, event-topic catalog review, integration documentation review, and equivalent collector/indexer tooling transcript retained at release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-query-transcript.md",
   "retained_path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-retained-artifact.md",
-  "sha256": "sha256:82fde060f23cf10897c3b469983c1360ddf2371db6f53f07d37d2c56c1288aef",
+  "sha256": "sha256:09fea796f6ae0c9c765c75634faeb192a4968ca23dd6ee7631ad5cf2c7097052",
   "redaction_statement": "Retained artifact was reviewed for the no-secret boundary; secrets and unreleased drop payloads were removed or were never present.",
   "owner": "Codex autonomous implementer",
   "reviewer": "Codex autonomous maintainer review for branch codex/fork-marketplace-indexer-evidence",

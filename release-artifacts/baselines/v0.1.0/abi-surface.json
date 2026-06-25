@@ -6974,13 +6974,13 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:500463a781609b5140199d13abc77db8e7cdf6259fbeb5e00a8303869ddd1797",
-      "abi_entries": 123,
+      "abi_sha256": "sha256:be80dc77a6d763a644780b4d70b353ec4f35f890e1b66a6a7a4a00ebeb2c063b",
+      "abi_entries": 138,
       "entry_counts": {
         "constructors": 1,
-        "functions": 77,
+        "functions": 85,
         "events": 11,
-        "errors": 34,
+        "errors": 41,
         "fallbacks": 0,
         "receives": 0
       },
@@ -7150,6 +7150,26 @@
               }
             ],
             "state_mutability": "view"
+          },
+          {
+            "key": "abortPreparedMintFromManager(uint256,bytes32)",
+            "kind": "function",
+            "name": "abortPreparedMintFromManager",
+            "signature": "abortPreparedMintFromManager(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
           },
           {
             "key": "addRandomizer(uint256,address)",
@@ -7546,6 +7566,36 @@
             "state_mutability": "view"
           },
           {
+            "key": "completePreparedMintFromManager(uint256,address,bytes32,uint256)",
+            "kind": "function",
+            "name": "completePreparedMintFromManager",
+            "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
             "key": "createCollection(string,string,string,string,string,string,string,bytes32,string[])",
             "kind": "function",
             "name": "createCollection",
@@ -7749,6 +7799,67 @@
             "state_mutability": "nonpayable"
           },
           {
+            "key": "mintFromManager(uint256,address,string,uint256,bytes32)",
+            "kind": "function",
+            "name": "mintFromManager",
+            "signature": "mintFromManager(uint256,address,string,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "mintManager()",
+            "kind": "function",
+            "name": "mintManager",
+            "signature": "mintManager()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
             "key": "minterContract()",
             "kind": "function",
             "name": "minterContract",
@@ -7846,6 +7957,100 @@
                 "name": "",
                 "type": "address",
                 "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "pendingPreparedMintTokenId()",
+            "kind": "function",
+            "name": "pendingPreparedMintTokenId",
+            "signature": "pendingPreparedMintTokenId()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "prepareMintFromManager(uint256,string,bytes32,bytes32)",
+            "kind": "function",
+            "name": "prepareMintFromManager",
+            "signature": "prepareMintFromManager(uint256,string,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "tokenDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "preparedMint(uint256)",
+            "kind": "function",
+            "name": "preparedMint",
+            "signature": "preparedMint(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,bytes32,uint256)",
+                "internal_type": "struct StreamCore.PreparedMintRecord",
+                "components": [
+                  {
+                    "name": "exists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "operationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  }
+                ]
               }
             ],
             "state_mutability": "view"
@@ -8373,6 +8578,42 @@
                 "name": "",
                 "type": "string",
                 "internal_type": "string"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "tokenCollectionIdentity(uint256)",
+            "kind": "function",
+            "name": "tokenCollectionIdentity",
+            "signature": "tokenCollectionIdentity(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "mappingExists",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "burned",
+                "type": "bool",
+                "internal_type": "bool"
               }
             ],
             "state_mutability": "view"
@@ -9313,6 +9554,13 @@
             "inputs": []
           },
           {
+            "key": "InvalidMintManagerContract()",
+            "kind": "error",
+            "name": "InvalidMintManagerContract",
+            "signature": "InvalidMintManagerContract()",
+            "inputs": []
+          },
+          {
             "key": "InvalidMinterContract()",
             "kind": "error",
             "name": "InvalidMinterContract",
@@ -9390,6 +9638,13 @@
             "inputs": []
           },
           {
+            "key": "NotMintManager()",
+            "kind": "error",
+            "name": "NotMintManager",
+            "signature": "NotMintManager()",
+            "inputs": []
+          },
+          {
             "key": "NotMinterContract()",
             "kind": "error",
             "name": "NotMinterContract",
@@ -9418,6 +9673,41 @@
                 "internal_type": "uint256"
               }
             ]
+          },
+          {
+            "key": "PreparedMintAlreadyPending()",
+            "kind": "error",
+            "name": "PreparedMintAlreadyPending",
+            "signature": "PreparedMintAlreadyPending()",
+            "inputs": []
+          },
+          {
+            "key": "PreparedMintMismatch()",
+            "kind": "error",
+            "name": "PreparedMintMismatch",
+            "signature": "PreparedMintMismatch()",
+            "inputs": []
+          },
+          {
+            "key": "PreparedMintNotFound()",
+            "kind": "error",
+            "name": "PreparedMintNotFound",
+            "signature": "PreparedMintNotFound()",
+            "inputs": []
+          },
+          {
+            "key": "PreparedMintOperationReused()",
+            "kind": "error",
+            "name": "PreparedMintOperationReused",
+            "signature": "PreparedMintOperationReused()",
+            "inputs": []
+          },
+          {
+            "key": "TokenDataHashMismatch()",
+            "kind": "error",
+            "name": "TokenDataHashMismatch",
+            "signature": "TokenDataHashMismatch()",
+            "inputs": []
           },
           {
             "key": "TokenNotMinted()",
@@ -12009,6 +12299,2722 @@
         "receives": []
       }
     },
+    "StreamMintLedger": {
+      "source": "smart-contracts/StreamMintLedger.sol",
+      "artifact_path": "out/StreamMintLedger.sol/StreamMintLedger.json",
+      "abi_sha256": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
+      "abi_entries": 37,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 15,
+        "events": 8,
+        "errors": 14,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+            "kind": "function",
+            "name": "consume",
+            "signature": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+            "inputs": [
+              {
+                "name": "consumptions",
+                "type": "(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[]",
+                "internal_type": "struct IStreamMintLedger.CounterConsumption[]",
+                "components": [
+                  {
+                    "name": "valueKey",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "phaseId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "counterId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectKey",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "recipient",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "authorizer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "executor",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "increment",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "cap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "contextHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "resolutionHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "nullifiers",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "counterValue(bytes32)",
+            "kind": "function",
+            "name": "counterValue",
+            "signature": "counterValue(bytes32)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+            "kind": "function",
+            "name": "deriveCounterValueKey",
+            "signature": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "isAuthorizationUsed(bytes32)",
+            "kind": "function",
+            "name": "isAuthorizationUsed",
+            "signature": "isAuthorizationUsed(bytes32)",
+            "inputs": [
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isManagerAuthorizationUsed(address,bytes32)",
+            "kind": "function",
+            "name": "isManagerAuthorizationUsed",
+            "signature": "isManagerAuthorizationUsed(address,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isNullifierUsed(bytes32)",
+            "kind": "function",
+            "name": "isNullifierUsed",
+            "signature": "isNullifierUsed(bytes32)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "isStreamMintLedger()",
+            "kind": "function",
+            "name": "isStreamMintLedger",
+            "signature": "isStreamMintLedger()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ledgerWriter(address)",
+            "kind": "function",
+            "name": "ledgerWriter",
+            "signature": "ledgerWriter(address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+            "kind": "function",
+            "name": "registerPhasePolicy",
+            "signature": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterIds",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "counterPolicies",
+                "type": "(bool,uint8,uint8,uint64,uint64,bytes32)[]",
+                "internal_type": "struct IStreamMintLedger.LedgerCounterPolicy[]",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "registeredCounterPolicy",
+            "signature": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,uint8,uint8,uint64,uint64,bytes32)",
+                "internal_type": "struct IStreamMintLedger.LedgerCounterPolicy",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "registeredPhasePolicyHash(address,uint256,bytes32)",
+            "kind": "function",
+            "name": "registeredPhasePolicyHash",
+            "signature": "registeredPhasePolicyHash(address,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "renounceOwnership()",
+            "kind": "function",
+            "name": "renounceOwnership",
+            "signature": "renounceOwnership()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setLedgerWriter(address,bool)",
+            "kind": "function",
+            "name": "setLedgerWriter",
+            "signature": "setLedgerWriter(address,bool)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "transferOwnership(address)",
+            "kind": "function",
+            "name": "transferOwnership",
+            "signature": "transferOwnership(address)",
+            "inputs": [
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "MintLedgerAuthorizationConsumed",
+            "signature": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerCounterConsumed",
+            "signature": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "increment",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "newValue",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "cap",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerCounterConsumptionContext",
+            "signature": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "resolutionHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerCounterPolicyRegistered",
+            "signature": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "capMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterCapMode",
+                "indexed": false
+              },
+              {
+                "name": "deltaMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterDeltaMode",
+                "indexed": false
+              },
+              {
+                "name": "staticCap",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "staticIncrement",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "counterConfigHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerNullifierConsumed",
+            "signature": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerPhasePolicyRegistered",
+            "signature": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerWriterUpdated(address,bool)",
+            "kind": "event",
+            "name": "MintLedgerWriterUpdated",
+            "signature": "MintLedgerWriterUpdated(address,bool)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "OwnershipTransferred(address,address)",
+            "kind": "event",
+            "name": "OwnershipTransferred",
+            "signature": "OwnershipTransferred(address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "previousOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AuthorizationAlreadyConsumed(bytes32)",
+            "kind": "error",
+            "name": "AuthorizationAlreadyConsumed",
+            "signature": "AuthorizationAlreadyConsumed(bytes32)",
+            "inputs": [
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterCapExceeded(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "CounterCapExceeded",
+            "signature": "CounterCapExceeded(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "projectedValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CounterPolicyLengthMismatch(uint256,uint256)",
+            "kind": "error",
+            "name": "CounterPolicyLengthMismatch",
+            "signature": "CounterPolicyLengthMismatch(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "counterIds",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "counterPolicies",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CounterPolicyMismatch(bytes32)",
+            "kind": "error",
+            "name": "CounterPolicyMismatch",
+            "signature": "CounterPolicyMismatch(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
+            "kind": "error",
+            "name": "CounterPolicyNotRegistered",
+            "signature": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterValueKeyMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "CounterValueKeyMismatch",
+            "signature": "CounterValueKeyMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "suppliedValueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedValueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterValueOverflow(bytes32)",
+            "kind": "error",
+            "name": "CounterValueOverflow",
+            "signature": "CounterValueOverflow(bytes32)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "DuplicateCounterPolicy(bytes32)",
+            "kind": "error",
+            "name": "DuplicateCounterPolicy",
+            "signature": "DuplicateCounterPolicy(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "EmptyCounterConsumption()",
+            "kind": "error",
+            "name": "EmptyCounterConsumption",
+            "signature": "EmptyCounterConsumption()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCounterPolicy(bytes32)",
+            "kind": "error",
+            "name": "InvalidCounterPolicy",
+            "signature": "InvalidCounterPolicy(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidLedgerWriter(address)",
+            "kind": "error",
+            "name": "InvalidLedgerWriter",
+            "signature": "InvalidLedgerWriter(address)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPhasePolicy(address,uint256,bytes32)",
+            "kind": "error",
+            "name": "InvalidPhasePolicy",
+            "signature": "InvalidPhasePolicy(address,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "NullifiersUnsupported(bytes32)",
+            "kind": "error",
+            "name": "NullifiersUnsupported",
+            "signature": "NullifiersUnsupported(bytes32)",
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedLedgerWriter(address)",
+            "kind": "error",
+            "name": "UnauthorizedLedgerWriter",
+            "signature": "UnauthorizedLedgerWriter(address)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "StreamMintManager": {
+      "source": "smart-contracts/StreamMintManager.sol",
+      "artifact_path": "out/StreamMintManager.sol/StreamMintManager.json",
+      "abi_sha256": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377",
+      "abi_entries": 62,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 29,
+        "events": 7,
+        "errors": 25,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address,address)",
+            "kind": "constructor",
+            "signature": "constructor(address,address)",
+            "inputs": [
+              {
+                "name": "core_",
+                "type": "address",
+                "internal_type": "contract IStreamCore"
+              },
+              {
+                "name": "mintLedger_",
+                "type": "address",
+                "internal_type": "contract IStreamMintLedger"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "COUNTER_CONFIG_DOMAIN()",
+            "kind": "function",
+            "name": "COUNTER_CONFIG_DOMAIN",
+            "signature": "COUNTER_CONFIG_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "EXECUTOR_SET_DOMAIN()",
+            "kind": "function",
+            "name": "EXECUTOR_SET_DOMAIN",
+            "signature": "EXECUTOR_SET_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_PHASE_BATCH_QUANTITY()",
+            "kind": "function",
+            "name": "MAX_PHASE_BATCH_QUANTITY",
+            "signature": "MAX_PHASE_BATCH_QUANTITY()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint32",
+                "internal_type": "uint32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_PHASE_COUNTERS()",
+            "kind": "function",
+            "name": "MAX_PHASE_COUNTERS",
+            "signature": "MAX_PHASE_COUNTERS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_PHASE_EXECUTORS()",
+            "kind": "function",
+            "name": "MAX_PHASE_EXECUTORS",
+            "signature": "MAX_PHASE_EXECUTORS()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "OPERATION_DOMAIN()",
+            "kind": "function",
+            "name": "OPERATION_DOMAIN",
+            "signature": "OPERATION_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "PHASE_CONFIG_DOMAIN()",
+            "kind": "function",
+            "name": "PHASE_CONFIG_DOMAIN",
+            "signature": "PHASE_CONFIG_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "POLICY_DOMAIN()",
+            "kind": "function",
+            "name": "POLICY_DOMAIN",
+            "signature": "POLICY_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "RESOLUTION_DOMAIN()",
+            "kind": "function",
+            "name": "RESOLUTION_DOMAIN",
+            "signature": "RESOLUTION_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SCHEMA_VERSION()",
+            "kind": "function",
+            "name": "SCHEMA_VERSION",
+            "signature": "SCHEMA_VERSION()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "SUBJECT_DOMAIN()",
+            "kind": "function",
+            "name": "SUBJECT_DOMAIN",
+            "signature": "SUBJECT_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "kind": "function",
+            "name": "configurePhase",
+            "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "config",
+                "type": "(bool,uint64,uint64,uint32,bytes32,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintPhaseConfig",
+                "components": [
+                  {
+                    "name": "paused",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "startTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "endTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "maxBatchQuantity",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "configHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "counterIds",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "counterConfigs",
+                "type": "(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[]",
+                "internal_type": "struct IStreamMintManager.MintCounterConfig[]",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "keyMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintManager.CounterKeyMode"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "core()",
+            "kind": "function",
+            "name": "core",
+            "signature": "core()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamCore"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "counterConfig(uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "counterConfig",
+            "signature": "counterConfig(uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,uint8,uint8,uint8,uint64,uint64,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintCounterConfig",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "keyMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintManager.CounterKeyMode"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamMintManager()",
+            "kind": "function",
+            "name": "isStreamMintManager",
+            "signature": "isStreamMintManager()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "mintLedger()",
+            "kind": "function",
+            "name": "mintLedger",
+            "signature": "mintLedger()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamMintLedger"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "kind": "function",
+            "name": "mintPrepared",
+            "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "inputs": [
+              {
+                "name": "request",
+                "type": "(uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintRequest",
+                "components": [
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "phaseId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "authorizer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "initialRecipients",
+                    "type": "address[]",
+                    "internal_type": "address[]"
+                  },
+                  {
+                    "name": "beneficiaries",
+                    "type": "address[]",
+                    "internal_type": "address[]"
+                  },
+                  {
+                    "name": "tokenData",
+                    "type": "string[]",
+                    "internal_type": "string[]"
+                  },
+                  {
+                    "name": "salts",
+                    "type": "uint256[]",
+                    "internal_type": "uint256[]"
+                  },
+                  {
+                    "name": "authorizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contextHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "firstTokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "lastTokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "nextOperationNonce()",
+            "kind": "function",
+            "name": "nextOperationNonce",
+            "signature": "nextOperationNonce()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phase(uint256,bytes32)",
+            "kind": "function",
+            "name": "phase",
+            "signature": "phase(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "exists",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "config",
+                "type": "(bool,uint64,uint64,uint32,bytes32,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintPhaseConfig",
+                "components": [
+                  {
+                    "name": "paused",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "startTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "endTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "maxBatchQuantity",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "configHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phaseCounterIds(uint256,bytes32)",
+            "kind": "function",
+            "name": "phaseCounterIds",
+            "signature": "phaseCounterIds(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phaseExecutor(uint256,bytes32,address)",
+            "kind": "function",
+            "name": "phaseExecutor",
+            "signature": "phaseExecutor(uint256,bytes32,address)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phasePolicyHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "phasePolicyHash",
+            "signature": "phasePolicyHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)",
+            "kind": "function",
+            "name": "previewCounterValueKey",
+            "signature": "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)",
+            "kind": "function",
+            "name": "previewSubjectKey",
+            "signature": "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)",
+            "inputs": [
+              {
+                "name": "keyMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintManager.CounterKeyMode"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "renounceOwnership()",
+            "kind": "function",
+            "name": "renounceOwnership",
+            "signature": "renounceOwnership()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setPhaseExecutor(uint256,bytes32,address,bool)",
+            "kind": "function",
+            "name": "setPhaseExecutor",
+            "signature": "setPhaseExecutor(uint256,bytes32,address,bool)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setPhasePaused(uint256,bytes32,bool)",
+            "kind": "function",
+            "name": "setPhasePaused",
+            "signature": "setPhasePaused(uint256,bytes32,bool)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "paused",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "transferOwnership(address)",
+            "kind": "function",
+            "name": "transferOwnership",
+            "signature": "transferOwnership(address)",
+            "inputs": [
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "MintCounterConfigured(uint256,bytes32,bytes32,uint8,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintCounterConfigured",
+            "signature": "MintCounterConfigured(uint256,bytes32,bytes32,uint8,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "keyMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintManager.CounterKeyMode",
+                "indexed": false
+              },
+              {
+                "name": "capMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterCapMode",
+                "indexed": false
+              },
+              {
+                "name": "deltaMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterDeltaMode",
+                "indexed": false
+              },
+              {
+                "name": "staticCap",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "staticIncrement",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "counterConfigHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "MintPhaseConfigured",
+            "signature": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "startTime",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "endTime",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "maxBatchQuantity",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "configHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)",
+            "kind": "event",
+            "name": "MintPhaseExecutorUpdated",
+            "signature": "MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhasePausedEvent(uint256,bytes32,bool,bytes32,address)",
+            "kind": "event",
+            "name": "MintPhasePausedEvent",
+            "signature": "MintPhasePausedEvent(uint256,bytes32,bool,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "paused",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPreparedBatchExecuted(bytes32,uint256,bytes32,bytes32,bytes32,address,uint256,bytes32)",
+            "kind": "event",
+            "name": "MintPreparedBatchExecuted",
+            "signature": "MintPreparedBatchExecuted(bytes32,uint256,bytes32,bytes32,bytes32,address,uint256,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "operationRoot",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPreparedTokenExecuted(bytes32,uint256,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintPreparedTokenExecuted",
+            "signature": "MintPreparedTokenExecuted(bytes32,uint256,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "tokenDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "OwnershipTransferred(address,address)",
+            "kind": "event",
+            "name": "OwnershipTransferred",
+            "signature": "OwnershipTransferred(address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "previousOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "DuplicateMintCounter(bytes32)",
+            "kind": "error",
+            "name": "DuplicateMintCounter",
+            "signature": "DuplicateMintCounter(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidCoreContract(address)",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract(address)",
+            "inputs": [
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintBatchLimit(uint256,uint256)",
+            "kind": "error",
+            "name": "InvalidMintBatchLimit",
+            "signature": "InvalidMintBatchLimit(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "maxBatchQuantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxBatchHardLimit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintCounter(bytes32)",
+            "kind": "error",
+            "name": "InvalidMintCounter",
+            "signature": "InvalidMintCounter(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintExecutor(address)",
+            "kind": "error",
+            "name": "InvalidMintExecutor",
+            "signature": "InvalidMintExecutor(address)",
+            "inputs": [
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintLedgerContract(address)",
+            "kind": "error",
+            "name": "InvalidMintLedgerContract",
+            "signature": "InvalidMintLedgerContract(address)",
+            "inputs": [
+              {
+                "name": "mintLedger",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintPhase(uint256,bytes32)",
+            "kind": "error",
+            "name": "InvalidMintPhase",
+            "signature": "InvalidMintPhase(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintRecipient(uint256,address,address)",
+            "kind": "error",
+            "name": "InvalidMintRecipient",
+            "signature": "InvalidMintRecipient(uint256,address,address)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintArrayLengthMismatch()",
+            "kind": "error",
+            "name": "MintArrayLengthMismatch",
+            "signature": "MintArrayLengthMismatch()",
+            "inputs": []
+          },
+          {
+            "key": "MintAuthorizationRequired(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintAuthorizationRequired",
+            "signature": "MintAuthorizationRequired(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintBatchQuantityLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintBatchQuantityLimitExceeded",
+            "signature": "MintBatchQuantityLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxBatchQuantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintCounterCapExceeded(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "MintCounterCapExceeded",
+            "signature": "MintCounterCapExceeded(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "projectedValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintCounterCountLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintCounterCountLimitExceeded",
+            "signature": "MintCounterCountLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "counterCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxCounterCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintCounterSubjectMissing(bytes32,uint8)",
+            "kind": "error",
+            "name": "MintCounterSubjectMissing",
+            "signature": "MintCounterSubjectMissing(bytes32,uint8)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "keyMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintManager.CounterKeyMode"
+              }
+            ]
+          },
+          {
+            "key": "MintExecutorCountLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintExecutorCountLimitExceeded",
+            "signature": "MintExecutorCountLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "executorCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxExecutorCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseAlreadyConfigured(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPhaseAlreadyConfigured",
+            "signature": "MintPhaseAlreadyConfigured(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseDoesNotExist(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPhaseDoesNotExist",
+            "signature": "MintPhaseDoesNotExist(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseEnded(uint256,bytes32,uint256)",
+            "kind": "error",
+            "name": "MintPhaseEnded",
+            "signature": "MintPhaseEnded(uint256,bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "timestamp",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseNotStarted(uint256,bytes32,uint256)",
+            "kind": "error",
+            "name": "MintPhaseNotStarted",
+            "signature": "MintPhaseNotStarted(uint256,bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "timestamp",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintPhasePaused(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPhasePaused",
+            "signature": "MintPhasePaused(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPolicyHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintPolicyHashMismatch",
+            "signature": "MintPolicyHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "activePolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPolicyHashRequired(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPolicyHashRequired",
+            "signature": "MintPolicyHashRequired(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ReentrancyGuardReentrantCall()",
+            "kind": "error",
+            "name": "ReentrancyGuardReentrantCall",
+            "signature": "ReentrancyGuardReentrantCall()",
+            "inputs": []
+          },
+          {
+            "key": "UnauthorizedMintExecutor(uint256,bytes32,address)",
+            "kind": "error",
+            "name": "UnauthorizedMintExecutor",
+            "signature": "UnauthorizedMintExecutor(uint256,bytes32,address)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedMintCounterMode(bytes32)",
+            "kind": "error",
+            "name": "UnsupportedMintCounterMode",
+            "signature": "UnsupportedMintCounterMode(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamMinter": {
       "source": "smart-contracts/StreamMinter.sol",
       "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
@@ -13825,13 +16831,13 @@
     "StreamRevenueResolver": {
       "source": "smart-contracts/StreamRevenueResolver.sol",
       "artifact_path": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
-      "abi_sha256": "sha256:c8a6df407b7b905f9bc13563150477b588e14cb7c8be8afc5e2fa147d265f554",
-      "abi_entries": 48,
+      "abi_sha256": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
+      "abi_entries": 49,
       "entry_counts": {
         "constructors": 1,
         "functions": 28,
         "events": 7,
-        "errors": 12,
+        "errors": 13,
         "fallbacks": 0,
         "receives": 0
       },
@@ -14938,6 +17944,19 @@
                 "name": "revenueClass",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSplitFactory(address)",
+            "kind": "error",
+            "name": "InvalidSplitFactory",
+            "signature": "InvalidSplitFactory(address)",
+            "inputs": [
+              {
+                "name": "splitFactory",
+                "type": "address",
+                "internal_type": "address"
               }
             ]
           },
@@ -19877,11 +22896,11 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:43c50531bd57a457e239e26b7ddda45028cd1738fd56838dc7efbcac0987264d",
-      "abi_entries": 19,
+      "abi_sha256": "sha256:aafef7d9d43ebafc04e2df730b0b3852bf4f54d676aca5e9a2526da9b46b46f4",
+      "abi_entries": 26,
       "entry_counts": {
         "constructors": 0,
-        "functions": 19,
+        "functions": 26,
         "events": 0,
         "errors": 0,
         "fallbacks": 0,
@@ -19890,6 +22909,26 @@
       "entries": {
         "constructors": [],
         "functions": [
+          {
+            "key": "abortPreparedMintFromManager(uint256,bytes32)",
+            "kind": "function",
+            "name": "abortPreparedMintFromManager",
+            "signature": "abortPreparedMintFromManager(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
           {
             "key": "artistApprovalHashes(uint256)",
             "kind": "function",
@@ -19990,6 +23029,36 @@
             "state_mutability": "view"
           },
           {
+            "key": "completePreparedMintFromManager(uint256,address,bytes32,uint256)",
+            "kind": "function",
+            "name": "completePreparedMintFromManager",
+            "signature": "completePreparedMintFromManager(uint256,address,bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
             "key": "isCoreContract()",
             "kind": "function",
             "name": "isCoreContract",
@@ -20059,6 +23128,146 @@
             ],
             "outputs": [],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "mintFromManager(uint256,address,string,uint256,bytes32)",
+            "kind": "function",
+            "name": "mintFromManager",
+            "signature": "mintFromManager(uint256,address,string,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "_saltfun_o",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "tokenDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "pendingPreparedMintTokenId()",
+            "kind": "function",
+            "name": "pendingPreparedMintTokenId",
+            "signature": "pendingPreparedMintTokenId()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "prepareMintFromManager(uint256,string,bytes32,bytes32)",
+            "kind": "function",
+            "name": "prepareMintFromManager",
+            "signature": "prepareMintFromManager(uint256,string,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "_tokenData",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "tokenDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "preparedMint(uint256)",
+            "kind": "function",
+            "name": "preparedMint",
+            "signature": "preparedMint(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,bytes32,uint256)",
+                "internal_type": "struct IStreamCore.PreparedMintRecord",
+                "components": [
+                  {
+                    "name": "exists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "operationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "previewCollectionFreezeManifestHash(uint256)",
@@ -20168,6 +23377,42 @@
             ],
             "outputs": [],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "tokenCollectionIdentity(uint256)",
+            "kind": "function",
+            "name": "tokenCollectionIdentity",
+            "signature": "tokenCollectionIdentity(uint256)",
+            "inputs": [
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "mappingExists",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "burned",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "viewCirSupply(uint256)",
@@ -20462,6 +23707,2366 @@
         ],
         "events": [],
         "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamMintLedger": {
+      "source": "smart-contracts/IStreamMintLedger.sol",
+      "artifact_path": "out/IStreamMintLedger.sol/IStreamMintLedger.json",
+      "abi_sha256": "sha256:0ad44fc08e116d4b741d39b07f335eb34a3048bf0be71a468e217f9a63ed5149",
+      "abi_entries": 33,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 12,
+        "events": 7,
+        "errors": 14,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+            "kind": "function",
+            "name": "consume",
+            "signature": "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32)",
+            "inputs": [
+              {
+                "name": "consumptions",
+                "type": "(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[]",
+                "internal_type": "struct IStreamMintLedger.CounterConsumption[]",
+                "components": [
+                  {
+                    "name": "valueKey",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "phaseId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "counterId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectKey",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "recipient",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "authorizer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "executor",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "increment",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "cap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "contextHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "resolutionHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "nullifiers",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "counterValue(bytes32)",
+            "kind": "function",
+            "name": "counterValue",
+            "signature": "counterValue(bytes32)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+            "kind": "function",
+            "name": "deriveCounterValueKey",
+            "signature": "deriveCounterValueKey(address,uint256,bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "isAuthorizationUsed(bytes32)",
+            "kind": "function",
+            "name": "isAuthorizationUsed",
+            "signature": "isAuthorizationUsed(bytes32)",
+            "inputs": [
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isManagerAuthorizationUsed(address,bytes32)",
+            "kind": "function",
+            "name": "isManagerAuthorizationUsed",
+            "signature": "isManagerAuthorizationUsed(address,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isNullifierUsed(bytes32)",
+            "kind": "function",
+            "name": "isNullifierUsed",
+            "signature": "isNullifierUsed(bytes32)",
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamMintLedger()",
+            "kind": "function",
+            "name": "isStreamMintLedger",
+            "signature": "isStreamMintLedger()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "ledgerWriter(address)",
+            "kind": "function",
+            "name": "ledgerWriter",
+            "signature": "ledgerWriter(address)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+            "kind": "function",
+            "name": "registerPhasePolicy",
+            "signature": "registerPhasePolicy(address,uint256,bytes32,bytes32,bytes32[],(bool,uint8,uint8,uint64,uint64,bytes32)[])",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterIds",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "counterPolicies",
+                "type": "(bool,uint8,uint8,uint64,uint64,bytes32)[]",
+                "internal_type": "struct IStreamMintLedger.LedgerCounterPolicy[]",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "registeredCounterPolicy",
+            "signature": "registeredCounterPolicy(address,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,uint8,uint8,uint64,uint64,bytes32)",
+                "internal_type": "struct IStreamMintLedger.LedgerCounterPolicy",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "registeredPhasePolicyHash(address,uint256,bytes32)",
+            "kind": "function",
+            "name": "registeredPhasePolicyHash",
+            "signature": "registeredPhasePolicyHash(address,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setLedgerWriter(address,bool)",
+            "kind": "function",
+            "name": "setLedgerWriter",
+            "signature": "setLedgerWriter(address,bool)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "MintLedgerAuthorizationConsumed",
+            "signature": "MintLedgerAuthorizationConsumed(bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerCounterConsumed",
+            "signature": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "increment",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "newValue",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "cap",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerCounterConsumptionContext",
+            "signature": "MintLedgerCounterConsumptionContext(bytes32,bytes32,bytes32,address,address,address,address,address,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "resolutionHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerCounterPolicyRegistered",
+            "signature": "MintLedgerCounterPolicyRegistered(address,uint256,bytes32,bytes32,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "capMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterCapMode",
+                "indexed": false
+              },
+              {
+                "name": "deltaMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterDeltaMode",
+                "indexed": false
+              },
+              {
+                "name": "staticCap",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "staticIncrement",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "counterConfigHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerNullifierConsumed",
+            "signature": "MintLedgerNullifierConsumed(bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintLedgerPhasePolicyRegistered",
+            "signature": "MintLedgerPhasePolicyRegistered(address,uint256,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintLedgerWriterUpdated(address,bool)",
+            "kind": "event",
+            "name": "MintLedgerWriterUpdated",
+            "signature": "MintLedgerWriterUpdated(address,bool)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "AuthorizationAlreadyConsumed(bytes32)",
+            "kind": "error",
+            "name": "AuthorizationAlreadyConsumed",
+            "signature": "AuthorizationAlreadyConsumed(bytes32)",
+            "inputs": [
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterCapExceeded(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "CounterCapExceeded",
+            "signature": "CounterCapExceeded(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "projectedValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CounterPolicyLengthMismatch(uint256,uint256)",
+            "kind": "error",
+            "name": "CounterPolicyLengthMismatch",
+            "signature": "CounterPolicyLengthMismatch(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "counterIds",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "counterPolicies",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CounterPolicyMismatch(bytes32)",
+            "kind": "error",
+            "name": "CounterPolicyMismatch",
+            "signature": "CounterPolicyMismatch(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
+            "kind": "error",
+            "name": "CounterPolicyNotRegistered",
+            "signature": "CounterPolicyNotRegistered(address,uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterValueKeyMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "CounterValueKeyMismatch",
+            "signature": "CounterValueKeyMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "suppliedValueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedValueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CounterValueOverflow(bytes32)",
+            "kind": "error",
+            "name": "CounterValueOverflow",
+            "signature": "CounterValueOverflow(bytes32)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "DuplicateCounterPolicy(bytes32)",
+            "kind": "error",
+            "name": "DuplicateCounterPolicy",
+            "signature": "DuplicateCounterPolicy(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "EmptyCounterConsumption()",
+            "kind": "error",
+            "name": "EmptyCounterConsumption",
+            "signature": "EmptyCounterConsumption()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCounterPolicy(bytes32)",
+            "kind": "error",
+            "name": "InvalidCounterPolicy",
+            "signature": "InvalidCounterPolicy(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidLedgerWriter(address)",
+            "kind": "error",
+            "name": "InvalidLedgerWriter",
+            "signature": "InvalidLedgerWriter(address)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidPhasePolicy(address,uint256,bytes32)",
+            "kind": "error",
+            "name": "InvalidPhasePolicy",
+            "signature": "InvalidPhasePolicy(address,uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "NullifiersUnsupported(bytes32)",
+            "kind": "error",
+            "name": "NullifiersUnsupported",
+            "signature": "NullifiersUnsupported(bytes32)",
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedLedgerWriter(address)",
+            "kind": "error",
+            "name": "UnauthorizedLedgerWriter",
+            "signature": "UnauthorizedLedgerWriter(address)",
+            "inputs": [
+              {
+                "name": "writer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamMintManager": {
+      "source": "smart-contracts/IStreamMintManager.sol",
+      "artifact_path": "out/IStreamMintManager.sol/IStreamMintManager.json",
+      "abi_sha256": "sha256:51a85fbbe1ad4afbc59d7f1c41632345b2e08bb0ab6e90024690e2472dc079b1",
+      "abi_entries": 42,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 12,
+        "events": 6,
+        "errors": 24,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "kind": "function",
+            "name": "configurePhase",
+            "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "config",
+                "type": "(bool,uint64,uint64,uint32,bytes32,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintPhaseConfig",
+                "components": [
+                  {
+                    "name": "paused",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "startTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "endTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "maxBatchQuantity",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "configHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "counterIds",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "counterConfigs",
+                "type": "(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[]",
+                "internal_type": "struct IStreamMintManager.MintCounterConfig[]",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "keyMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintManager.CounterKeyMode"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "counterConfig(uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "counterConfig",
+            "signature": "counterConfig(uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,uint8,uint8,uint8,uint64,uint64,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintCounterConfig",
+                "components": [
+                  {
+                    "name": "enabled",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "keyMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintManager.CounterKeyMode"
+                  },
+                  {
+                    "name": "capMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterCapMode"
+                  },
+                  {
+                    "name": "deltaMode",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintLedger.CounterDeltaMode"
+                  },
+                  {
+                    "name": "staticCap",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "staticIncrement",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "counterConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamMintManager()",
+            "kind": "function",
+            "name": "isStreamMintManager",
+            "signature": "isStreamMintManager()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "kind": "function",
+            "name": "mintPrepared",
+            "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "inputs": [
+              {
+                "name": "request",
+                "type": "(uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintRequest",
+                "components": [
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "phaseId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "payer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "authorizer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "initialRecipients",
+                    "type": "address[]",
+                    "internal_type": "address[]"
+                  },
+                  {
+                    "name": "beneficiaries",
+                    "type": "address[]",
+                    "internal_type": "address[]"
+                  },
+                  {
+                    "name": "tokenData",
+                    "type": "string[]",
+                    "internal_type": "string[]"
+                  },
+                  {
+                    "name": "salts",
+                    "type": "uint256[]",
+                    "internal_type": "uint256[]"
+                  },
+                  {
+                    "name": "authorizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contextHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedPolicyHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "firstTokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "lastTokenId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "phase(uint256,bytes32)",
+            "kind": "function",
+            "name": "phase",
+            "signature": "phase(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "exists",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "config",
+                "type": "(bool,uint64,uint64,uint32,bytes32,bytes32)",
+                "internal_type": "struct IStreamMintManager.MintPhaseConfig",
+                "components": [
+                  {
+                    "name": "paused",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "startTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "endTime",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "maxBatchQuantity",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "configHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phaseCounterIds(uint256,bytes32)",
+            "kind": "function",
+            "name": "phaseCounterIds",
+            "signature": "phaseCounterIds(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phaseExecutor(uint256,bytes32,address)",
+            "kind": "function",
+            "name": "phaseExecutor",
+            "signature": "phaseExecutor(uint256,bytes32,address)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phasePolicyHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "phasePolicyHash",
+            "signature": "phasePolicyHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)",
+            "kind": "function",
+            "name": "previewCounterValueKey",
+            "signature": "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)",
+            "kind": "function",
+            "name": "previewSubjectKey",
+            "signature": "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)",
+            "inputs": [
+              {
+                "name": "keyMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintManager.CounterKeyMode"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setPhaseExecutor(uint256,bytes32,address,bool)",
+            "kind": "function",
+            "name": "setPhaseExecutor",
+            "signature": "setPhaseExecutor(uint256,bytes32,address,bool)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setPhasePaused(uint256,bytes32,bool)",
+            "kind": "function",
+            "name": "setPhasePaused",
+            "signature": "setPhasePaused(uint256,bytes32,bool)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "paused",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "MintCounterConfigured(uint256,bytes32,bytes32,uint8,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintCounterConfigured",
+            "signature": "MintCounterConfigured(uint256,bytes32,bytes32,uint8,uint8,uint8,uint64,uint64,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "keyMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintManager.CounterKeyMode",
+                "indexed": false
+              },
+              {
+                "name": "capMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterCapMode",
+                "indexed": false
+              },
+              {
+                "name": "deltaMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintLedger.CounterDeltaMode",
+                "indexed": false
+              },
+              {
+                "name": "staticCap",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "staticIncrement",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "counterConfigHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "MintPhaseConfigured",
+            "signature": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "startTime",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "endTime",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "maxBatchQuantity",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "configHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)",
+            "kind": "event",
+            "name": "MintPhaseExecutorUpdated",
+            "signature": "MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "allowed",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhasePausedEvent(uint256,bytes32,bool,bytes32,address)",
+            "kind": "event",
+            "name": "MintPhasePausedEvent",
+            "signature": "MintPhasePausedEvent(uint256,bytes32,bool,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "paused",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPreparedBatchExecuted(bytes32,uint256,bytes32,bytes32,bytes32,address,uint256,bytes32)",
+            "kind": "event",
+            "name": "MintPreparedBatchExecuted",
+            "signature": "MintPreparedBatchExecuted(bytes32,uint256,bytes32,bytes32,bytes32,address,uint256,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "operationRoot",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPreparedTokenExecuted(bytes32,uint256,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintPreparedTokenExecuted",
+            "signature": "MintPreparedTokenExecuted(bytes32,uint256,uint256,bytes32,uint256,address,address,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "operationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "collectionSerial",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "tokenDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "DuplicateMintCounter(bytes32)",
+            "kind": "error",
+            "name": "DuplicateMintCounter",
+            "signature": "DuplicateMintCounter(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidCoreContract(address)",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract(address)",
+            "inputs": [
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintBatchLimit(uint256,uint256)",
+            "kind": "error",
+            "name": "InvalidMintBatchLimit",
+            "signature": "InvalidMintBatchLimit(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "maxBatchQuantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxBatchHardLimit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintCounter(bytes32)",
+            "kind": "error",
+            "name": "InvalidMintCounter",
+            "signature": "InvalidMintCounter(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintExecutor(address)",
+            "kind": "error",
+            "name": "InvalidMintExecutor",
+            "signature": "InvalidMintExecutor(address)",
+            "inputs": [
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintLedgerContract(address)",
+            "kind": "error",
+            "name": "InvalidMintLedgerContract",
+            "signature": "InvalidMintLedgerContract(address)",
+            "inputs": [
+              {
+                "name": "mintLedger",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintPhase(uint256,bytes32)",
+            "kind": "error",
+            "name": "InvalidMintPhase",
+            "signature": "InvalidMintPhase(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintRecipient(uint256,address,address)",
+            "kind": "error",
+            "name": "InvalidMintRecipient",
+            "signature": "InvalidMintRecipient(uint256,address,address)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "initialRecipient",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintArrayLengthMismatch()",
+            "kind": "error",
+            "name": "MintArrayLengthMismatch",
+            "signature": "MintArrayLengthMismatch()",
+            "inputs": []
+          },
+          {
+            "key": "MintAuthorizationRequired(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintAuthorizationRequired",
+            "signature": "MintAuthorizationRequired(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintBatchQuantityLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintBatchQuantityLimitExceeded",
+            "signature": "MintBatchQuantityLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxBatchQuantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintCounterCapExceeded(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "MintCounterCapExceeded",
+            "signature": "MintCounterCapExceeded(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "valueKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "projectedValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintCounterCountLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintCounterCountLimitExceeded",
+            "signature": "MintCounterCountLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "counterCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxCounterCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintCounterSubjectMissing(bytes32,uint8)",
+            "kind": "error",
+            "name": "MintCounterSubjectMissing",
+            "signature": "MintCounterSubjectMissing(bytes32,uint8)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "keyMode",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintManager.CounterKeyMode"
+              }
+            ]
+          },
+          {
+            "key": "MintExecutorCountLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintExecutorCountLimitExceeded",
+            "signature": "MintExecutorCountLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "executorCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxExecutorCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseAlreadyConfigured(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPhaseAlreadyConfigured",
+            "signature": "MintPhaseAlreadyConfigured(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseDoesNotExist(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPhaseDoesNotExist",
+            "signature": "MintPhaseDoesNotExist(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseEnded(uint256,bytes32,uint256)",
+            "kind": "error",
+            "name": "MintPhaseEnded",
+            "signature": "MintPhaseEnded(uint256,bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "timestamp",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseNotStarted(uint256,bytes32,uint256)",
+            "kind": "error",
+            "name": "MintPhaseNotStarted",
+            "signature": "MintPhaseNotStarted(uint256,bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "timestamp",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintPhasePaused(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPhasePaused",
+            "signature": "MintPhasePaused(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPolicyHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintPolicyHashMismatch",
+            "signature": "MintPolicyHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedPolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "activePolicyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintPolicyHashRequired(uint256,bytes32)",
+            "kind": "error",
+            "name": "MintPolicyHashRequired",
+            "signature": "MintPolicyHashRequired(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "UnauthorizedMintExecutor(uint256,bytes32,address)",
+            "kind": "error",
+            "name": "UnauthorizedMintExecutor",
+            "signature": "UnauthorizedMintExecutor(uint256,bytes32,address)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "UnsupportedMintCounterMode(bytes32)",
+            "kind": "error",
+            "name": "UnsupportedMintCounterMode",
+            "signature": "UnsupportedMintCounterMode(bytes32)",
+            "inputs": [
+              {
+                "name": "counterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
         "fallbacks": [],
         "receives": []
       }

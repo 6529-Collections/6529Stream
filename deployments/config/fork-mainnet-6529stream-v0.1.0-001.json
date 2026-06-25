@@ -162,6 +162,15 @@
         "address": "0x000000000000000000000000000000000000000f",
         "constructor_args": [],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamMintManager",
+        "address": "0x0000000000000000000000000000000000000010",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x000000000000000000000000000000000000000f"
+        ],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -204,6 +213,10 @@
         },
         {
           "contract": "StreamMintLedger",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamMintManager",
           "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]

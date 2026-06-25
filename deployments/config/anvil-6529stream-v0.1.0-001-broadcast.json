@@ -162,6 +162,15 @@
         "address": "0x100000000000000000000000000000000000000f",
         "constructor_args": [],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamMintManager",
+        "address": "0x1000000000000000000000000000000000000010",
+        "constructor_args": [
+          "0x1000000000000000000000000000000000000003",
+          "0x100000000000000000000000000000000000000f"
+        ],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -205,6 +214,10 @@
         {
           "contract": "StreamMintLedger",
           "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamMintManager",
+          "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]
     },
@@ -234,7 +247,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:dba3e9d71177bb276b2d07cebf565a431b8ba1b9852e89e4c56fc38c9713fd02",
+    "broadcast_sha256": "sha256:9cbd922af8adb640aed3924a90e4bab1e0760d3ab8ee4764f73201551470eec7",
     "template_config": "deployments/config/anvil-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 31337,
@@ -313,6 +326,11 @@
         "contract": "StreamMintLedger",
         "address": "0x100000000000000000000000000000000000000f",
         "transaction_hash": "0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
+      },
+      {
+        "contract": "StreamMintManager",
+        "address": "0x1000000000000000000000000000000000000010",
+        "transaction_hash": "0x1010101010101010101010101010101010101010101010101010101010101010"
       }
     ],
     "ignored_deployments": []

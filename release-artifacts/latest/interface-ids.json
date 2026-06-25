@@ -24,7 +24,7 @@
     "IStreamCore": "0x4ac5cdd3",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamMintLedger": "0x79bc7192",
-    "IStreamMintManager": "0x47588f68",
+    "IStreamMintManager": "0x6bd9f3cb",
     "IStreamMinter": "0x0f48ec25",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
     "IStreamRevenueResolver": "0x3503c22e",
@@ -798,14 +798,58 @@
     "IStreamMintManager": {
       "source": "smart-contracts/IStreamMintManager.sol",
       "artifact_path": "out/IStreamMintManager.sol/IStreamMintManager.json",
-      "abi_sha256": "sha256:6dbabf48133e84ee616ff5689502bc5a1f229a9253e3240a887a16babf3d397b",
-      "interface_id": "0x47588f68",
+      "abi_sha256": "sha256:51a85fbbe1ad4afbc59d7f1c41632345b2e08bb0ab6e90024690e2472dc079b1",
+      "interface_id": "0x6bd9f3cb",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x47588f68",
+      "computed_selector_xor": "0x6bd9f3cb",
       "function_selectors": [
+        {
+          "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+          "selector": "0xf6c40160"
+        },
+        {
+          "signature": "counterConfig(uint256,bytes32,bytes32)",
+          "selector": "0x2e19907b"
+        },
         {
           "signature": "isStreamMintManager()",
           "selector": "0x47588f68"
+        },
+        {
+          "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+          "selector": "0x2cfccbc6"
+        },
+        {
+          "signature": "phase(uint256,bytes32)",
+          "selector": "0x0bce32df"
+        },
+        {
+          "signature": "phaseCounterIds(uint256,bytes32)",
+          "selector": "0x489a0ae5"
+        },
+        {
+          "signature": "phaseExecutor(uint256,bytes32,address)",
+          "selector": "0x84fd1d05"
+        },
+        {
+          "signature": "phasePolicyHash(uint256,bytes32)",
+          "selector": "0xd3285f9c"
+        },
+        {
+          "signature": "previewCounterValueKey(uint256,bytes32,bytes32,bytes32)",
+          "selector": "0x37315649"
+        },
+        {
+          "signature": "previewSubjectKey(uint8,uint256,bytes32,bytes32,address,address,address,address,bytes32)",
+          "selector": "0xbb08032d"
+        },
+        {
+          "signature": "setPhaseExecutor(uint256,bytes32,address,bool)",
+          "selector": "0xc473ba18"
+        },
+        {
+          "signature": "setPhasePaused(uint256,bytes32,bool)",
+          "selector": "0x846bb3a1"
         }
       ]
     },
