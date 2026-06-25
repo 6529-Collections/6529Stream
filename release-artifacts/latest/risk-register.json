@@ -14,7 +14,7 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:fc7bcb856455f45682b0b8e209dfb881323bb09ac6f10b4a9b91fdbab04ccd7b"
+      "sha256": "sha256:77deeec5c8c7524694b4dd896aa7440964729f424dedc3478673ee8810cb0c9f"
     },
     {
       "path": "docs/audit-package.md",
@@ -138,7 +138,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:fc7bcb856455f45682b0b8e209dfb881323bb09ac6f10b4a9b91fdbab04ccd7b"
+          "sha256": "sha256:77deeec5c8c7524694b4dd896aa7440964729f424dedc3478673ee8810cb0c9f"
         }
       ],
       "risk_acceptance": null
@@ -299,7 +299,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:fc7bcb856455f45682b0b8e209dfb881323bb09ac6f10b4a9b91fdbab04ccd7b"
+          "sha256": "sha256:77deeec5c8c7524694b4dd896aa7440964729f424dedc3478673ee8810cb0c9f"
         },
         {
           "path": "docs/metadata.md",
@@ -342,7 +342,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:e4a63a99a68d0c659231e5eecc921647ddc6eff53808509cf27e218b4281fabf"
+          "sha256": "sha256:ef90d3157a1e758a43633e7f3fbfaab0cb5a6f653387e07e701ce5650259c10c"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -483,7 +483,7 @@
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
-          "sha256": "sha256:fc7bcb856455f45682b0b8e209dfb881323bb09ac6f10b4a9b91fdbab04ccd7b"
+          "sha256": "sha256:77deeec5c8c7524694b4dd896aa7440964729f424dedc3478673ee8810cb0c9f"
         },
         {
           "path": "docs/tooling.md",

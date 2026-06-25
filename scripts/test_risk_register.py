@@ -116,6 +116,19 @@ class RiskRegisterTests(unittest.TestCase):
 
             checker.validate_risk_register(root, register_path)
 
+    def test_file_refs_are_stable_across_checkout_line_endings(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / "docs/evidence.md"
+            write_text(path, "line one\nline two\n")
+            lf_ref = generator.file_ref(root, "docs/evidence.md")
+
+            path.write_bytes(b"line one\r\nline two\r\n")
+            crlf_ref = generator.file_ref(root, "docs/evidence.md")
+
+            self.assertEqual(lf_ref, crlf_ref)
+            checker.validate_file_ref(crlf_ref, root, "evidence")
+
     def test_rejects_missing_aud_002_row(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

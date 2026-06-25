@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/mint-manager-phase-execution` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/635` |
 | Active issue | https://github.com/6529-Collections/6529Stream/issues/636 |
-| Active PR | TBD |
+| Active PR | https://github.com/6529-Collections/6529Stream/pull/637 |
 | Next issue | Collection metadata and preservation satellites after the manager phase/execution integration. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-25 21:10 UTC` |
+| Last updated | `2026-06-25 21:55 UTC` |
 
 ## Current Run Notes
 
@@ -79,8 +79,15 @@ evidence, and audit/readiness gates.
   #216/#219/#220 restored in the issue-link set until this PR's updated
   artifacts are reviewed. Final post-fix OpenRouter review passed with Opus
   4.8, GLM 5.2, and GPT-5.5 Pro at high reasoning; all three approve after the
-  stale size-prose blocker was fixed. Next transition: rerun the final full
-  Windows wrapper after this state update, then publish the PR if clean.
+  stale size-prose blocker was fixed. PR #637 is open. A first CI follow-up
+  stabilized one-of-one provenance/permanence descriptor hashes across Windows
+  and Linux checkouts; the current local follow-up normalizes risk-register
+  text-file references the same way after Linux CI found the matching drift.
+  Focused risk-register, blocker-report, release-evidence, release manifest,
+  bytecode proof, lockfile, checksum, release artifact, and whitespace gates
+  pass locally. Next transition: commit and push the risk-register CI fix, wait
+  for latest-head CI, and request a fresh CodeRabbit pass when the temporary
+  rate limit clears.
 - The manager integration slice should keep product policy outside Core,
   consume only launch-static ledger counters, and defer resolver modes,
   callable nullifiers, custom gates, ERC-20 auction bidding, and royalty
