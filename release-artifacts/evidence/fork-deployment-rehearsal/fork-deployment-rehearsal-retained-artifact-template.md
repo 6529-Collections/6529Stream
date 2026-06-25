@@ -20,9 +20,9 @@
 ## Required Retained Artifacts
 
 - Sanitized command transcript: `release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md`
-- Sanitized Foundry broadcast: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json` / `sha256:70e9340770d0bebafa4420523fc82ba258ed2c98461daf603a904019e36a6357`
-- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:368ce322a39f4293a7ba1b7a367b8ea228006d424d2d55e5f9eef26b8dded3e2`
-- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:0af164a7adad374fe99f5d665861d730af299a450a55853619573dca4be86aca`
+- Sanitized Foundry broadcast: `deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json` / `sha256:f8803e0fc5412f6a72e286498d63013814823e2cd16cf9f172c02a110d886161`
+- Generated deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:1d1b79b4d4f1ad771ef845c33d2f5ab0834caa22934ab0828d256025512dba6e`
+- Generated address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` / `sha256:170891ff16e67f391842e245707870e39da81e46edabb2e839093f4d037c04ab`
 - Verification status: `not_applicable_for_local_fork; source verification inputs remain retained separately and explorer verification remains a separate public-beta blocker`
 - Gas or invariant summary: `estimated_total_gas_used=32521731; all retained deployment receipts status=0x1; release CI will rerun build, tests, gas snapshot, size, and deployment rehearsal gates`
 - Release manifest/checksum digests: `release-artifacts/latest/release-manifest.json and release-artifacts/latest/SHA256SUMS regenerated in this PR`

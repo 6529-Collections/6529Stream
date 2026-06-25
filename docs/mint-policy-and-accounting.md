@@ -97,6 +97,22 @@ Non-launch unless separately approved:
 
 ## Current Implementation Baseline
 
+The first outside-Core implementation slices now exist:
+
+- CON-012 added Core's `mintManager` pointer, manager-only immediate and
+  prepared mint hooks, prepared abort/recovery, and `tokenCollectionIdentity`
+  reads in PR #633.
+- CON-013 adds `StreamMintLedger` as a static launch counter and authorization
+  replay ledger. It records one active policy hash per
+  `(manager, collectionId, phaseId)`, owner-authorized ledger writers,
+  launch-safe static counter policies, monotonic counter values, and
+  authorization consumption. It intentionally does not execute phase policy,
+  call Core, route `StreamDrops`, collect payment, validate custom gates, or
+  support resolver caps/deltas/nullifiers yet. Until the concrete
+  `StreamMintManager` lands, writer authorization is owner-managed and limited
+  to deployed contracts; the manager integration PR should add the reviewed
+  manager capability check.
+
 Today `StreamCore` stores three per-address counters:
 
 ```solidity
@@ -909,7 +925,7 @@ keyMode     key derivation method
 updateMode  whether to add quantity or one per batch
 capMode     whether the cap is absent, static, or resolver-provided
 deltaMode   whether increment is static or resolver-provided
-cap         static cap; ignored when capMode is NONE; exact cap when capMode is STATIC, where zero means zero allowed
+cap         must be zero when capMode is NONE; exact cap when capMode is STATIC, where zero means zero allowed
 increment   static increment; zero means default one unit
 resolver    required for CUSTOM_RESOLVER, RESOLVER cap, or RESOLVER delta
 configHash  optional hash of offchain/operator config
@@ -946,7 +962,7 @@ mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phase
 mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => mapping(bytes32 counterId => LedgerCounterPolicy))))
     public registeredCounterPolicies;
 mapping(bytes32 => uint64) public counterValues;
-mapping(bytes32 => bool) public authorizationUsed;
+mapping(address manager => mapping(bytes32 authorizationId => bool)) public authorizationUsed;
 mapping(bytes32 => bool) public nullifierUsed;
 ```
 
@@ -957,8 +973,8 @@ authorized configuration path before the phase can mint. During consumption the
 ledger verifies that the supplied `policyHash` equals that registered value and
 then repeats cap checks against `registeredCounterPolicies`. In launch v1, the
 ledger rejects resolver cap/delta modes and verifies supplied `cap` equals
-`staticCap` for `STATIC`, `cap` is ignored for `NONE`, and supplied `increment`
-equals `staticIncrement`. This keeps ledger verification implementable and
+`staticCap` for `STATIC`, supplied `cap` is zero for `NONE`, and supplied
+`increment` equals `staticIncrement`. This keeps ledger verification implementable and
 auditable while still ensuring events bind to the active manager policy.
 
 Launch v1 has one active registered policy hash per
@@ -973,26 +989,32 @@ immediate path; loosening changes and ledger replacement are
 different ledger, and a ledger replacement cannot reset or bypass counters for
 that frozen policy.
 
-`counterValues` is keyed by:
+`counterValues` are durable and are not reset when a phase policy is
+re-registered. For the CON-013 launch ledger, the canonical value key is keyed
+by the authorized manager and the resolved phase/counter subject:
 
 ```solidity
 bytes32 valueKey = keccak256(abi.encode(
-    COUNTER_VALUE_DOMAIN,
-    uint256(block.chainid),
-    address(mintLedger),
-    counterScope,
-    effectiveCollectionId,
-    effectivePhaseId,
+    manager,
+    collectionId,
+    phaseId,
     counterId,
     subjectKey
 ));
 ```
 
-For `GLOBAL`, `effectiveCollectionId` and `effectivePhaseId` are zero. For
-`COLLECTION`, `effectivePhaseId` is zero. For `PHASE`, both are included.
+The ledger exposes `deriveCounterValueKey` and rejects any supplied `valueKey`
+that does not match this derivation. Future manager-level scopes such as
+`GLOBAL`, `COLLECTION`, and resolver-backed subjects must resolve to the
+effective `(collectionId, phaseId, counterId, subjectKey)` tuple before calling
+the ledger.
 
 `authorizationUsed` is for signed tickets, drop IDs, or other external mint
-authorizations returned by a gate.
+authorizations returned by a gate. The CON-013 launch ledger scopes consumed
+authorization IDs by manager so two authorized managers cannot collide on the
+same raw replay ID. Managers should still domain-separate authorization IDs by
+chain, ledger, manager, and signed payload so replay evidence remains portable
+across deployments and indexers.
 
 `nullifierUsed` is for privacy-preserving or commitment-based claim systems
 where replay protection should not depend on a public recipient address.
@@ -1005,10 +1027,11 @@ they share an internal storage pattern.
 accounting facts and little else:
 
 1. Counter values are monotonic.
-2. Authorization IDs are consumed at most once.
+2. Authorization IDs are consumed at most once per manager.
 3. Nullifiers are consumed at most once.
 4. Only authorized manager contracts can write.
-5. Every write emits enough data for indexers to reconstruct the accounting
+5. Supplied counter value keys match the ledger's canonical key derivation.
+6. Every write emits enough data for indexers to reconstruct the accounting
    trail.
 
 Recommended ledger interface:
@@ -1049,7 +1072,20 @@ interface IStreamMintLedger {
 
     function counterValue(bytes32 valueKey) external view returns (uint64);
 
+    function deriveCounterValueKey(
+        address manager,
+        uint256 collectionId,
+        bytes32 phaseId,
+        bytes32 counterId,
+        bytes32 subjectKey
+    ) external pure returns (bytes32);
+
     function isAuthorizationUsed(bytes32 authorizationId)
+        external
+        view
+        returns (bool);
+
+    function isManagerAuthorizationUsed(address manager, bytes32 authorizationId)
         external
         view
         returns (bool);
@@ -1060,6 +1096,11 @@ interface IStreamMintLedger {
         returns (bool);
 }
 ```
+
+External tools should prefer `isManagerAuthorizationUsed(manager,
+authorizationId)` when checking replay state. The shorter
+`isAuthorizationUsed(authorizationId)` helper is caller-relative and only
+answers for `msg.sender`.
 
 The manager computes projected counter values before calling the ledger. The
 ledger repeats the final cap checks before writing so that the durable
@@ -1072,23 +1113,32 @@ event MintLedgerCounterConsumed(
     bytes32 indexed valueKey,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
+    address manager,
     bytes32 counterId,
     bytes32 subjectKey,
+    uint64 increment,
+    uint64 newValue,
+    uint64 cap,
+    bytes32 policyHash
+);
+
+event MintLedgerCounterConsumptionContext(
+    bytes32 indexed valueKey,
+    bytes32 indexed counterId,
+    bytes32 indexed subjectKey,
+    address manager,
     address payer,
     address recipient,
     address authorizer,
     address executor,
-    uint64 increment,
-    uint64 newValue,
-    uint64 cap,
     bytes32 contextHash,
-    bytes32 resolutionHash,
-    bytes32 policyHash
+    bytes32 resolutionHash
 );
 
 event MintLedgerAuthorizationConsumed(
     bytes32 indexed authorizationId,
-    bytes32 indexed policyHash
+    bytes32 indexed policyHash,
+    address indexed manager
 );
 
 event MintLedgerNullifierConsumed(
@@ -1098,6 +1148,12 @@ event MintLedgerNullifierConsumed(
 
 event MintLedgerWriterUpdated(address indexed writer, bool allowed);
 ```
+
+Indexers reconstruct one consumption from the adjacent primary and context
+events in the same transaction. `MintLedgerCounterConsumed` carries the
+`policyHash` and cap/accounting values; `MintLedgerCounterConsumptionContext`
+carries payer, recipient, authorizer, executor, and context hashes under the
+same `valueKey`, `counterId`, and `subjectKey`.
 
 The ledger should not know about ETH, ERC-721 ownership, sale prices, display
 labels, or UI metadata.
@@ -1967,8 +2023,11 @@ phase stricter or permanently closed.
     so long-running open collections are not artificially constrained by small
     integer widths.
 12. All arithmetic should be checked by Solidity 0.8+.
-13. Counter storage keys must be domain-separated by chain ID and ledger
-    address.
+13. Full manager-level counter storage keys should be domain-separated by chain
+    ID and ledger address. The CON-013 launch ledger intentionally uses a
+    phase-scoped in-ledger key derived from manager, collection ID, phase ID,
+    counter ID, and subject key; managers must still bind chain ID and ledger
+    address into policy hashes and authorization IDs.
 14. All configured counters must be checked against the complete projected batch
     before minting.
 15. Ledger writes must be restricted to authorized manager contracts.
@@ -2172,12 +2231,13 @@ Future resolver/nullifier tests:
 
 Ledger tests:
 
-1. Only authorized ledger writers can consume counters.
+1. Only authorized manager contracts can consume counters.
 2. Counter values never decrease.
 3. Ledger rejects any projected value above cap.
 4. Authorization IDs cannot be reused.
 5. Nullifiers cannot be reused.
-6. Ledger events include `policyHash`.
+6. Primary counter and authorization ledger events include `policyHash`; context
+   events are correlated by indexed key topics in the same transaction.
 7. Multiple consumptions for the same value key aggregate correctly.
 8. Ledger verifies the active `policyHash` before writing consumption.
 

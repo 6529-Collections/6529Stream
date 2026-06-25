@@ -193,3 +193,39 @@
   client timeout, and GLM 5.2 with xhigh reasoning. The packet includes the
   current Solidity/interface/test contents, focused and full diffs, validation
   evidence, Core size risk, and the explicit abort-sentinel design question.
+- PR #633 passed CI and CodeRabbit, then merged as
+  `901df0180d1a50c29454e72b399365ba6305b4f1`, closing issue #631 completed.
+- Fast-forwarded local `main` to `origin/main` and deleted the merged local
+  `codex/mint-manager-core-hooks` branch.
+- Created issue #634 and branch `codex/mint-manager-ledger-foundation` for
+  `CON-013`: the `StreamMintLedger` static counter accounting foundation.
+- Narrowed #634 from a manager-plus-ledger slice to a ledger-only slice after
+  subagent review flagged Core headroom risk and PR-scope risk. The follow-up
+  manager phase/execution PR should build on the reviewed ledger.
+- Implemented the local ledger draft with `IStreamMintLedger`,
+  `StreamMintLedger`, release contract catalog wiring, and focused ledger tests
+  covering writer authorization, phase policy registration, unsupported future
+  modes, counter consumption, event reconstruction, cap safety, authorization
+  replay, and nullifier rejection.
+- Applied OpenRouter review feedback to enforce canonical manager-scoped
+  counter value keys, reject empty phase-policy registrations, document durable
+  counter values, scope authorization replay per manager, and add focused
+  coverage for registration events, same-hash re-registration, multi-counter
+  batches, mid-batch rollback, writer revocation, cross-manager auth IDs, and
+  counter drop/re-add durability. Focused ledger suite now passes 25 tests.
+- Final high-reasoning GPT-5.5 Pro and GLM second-pass reviews returned visible
+  content with no P0/P1 blockers for the ledger-only static phase-counter
+  slice. Follow-up local fixes tightened `setLedgerWriter` so enabled writers
+  must be deployed contracts, aligned `docs/mint-policy-and-accounting.md` with
+  the implemented two-event consumption ABI and `CounterCapMode.NONE` requiring
+  zero supplied cap, added focused rollback/exact-cap/zero-key tests, and
+  updated the Sepolia deployment-manifest self-test to include
+  `StreamMintLedger`.
+- Final local validation for the CON-013 draft passed: focused
+  `StreamMintLedger` suite, `forge build`, full `forge test -vvv` with 574
+  tests, production via-IR size build, generated deployment/release artifacts
+  and evidence gates, full Windows `scripts\check.ps1`, and
+  `codex-diff-check`. During validation, refreshed retained evidence hashes for
+  fork deployment rehearsal and fork randomizer operations, then regenerated
+  public-beta evidence, evidence packet/backlog/body-sync artifacts, release
+  manifest, lockfile, bytecode proof, and checksums.

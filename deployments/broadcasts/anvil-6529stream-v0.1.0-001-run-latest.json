@@ -89,6 +89,12 @@
       "hash": "0x0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e0e"
     },
     {
+      "transactionType": "CREATE",
+      "contractName": "StreamMintLedger",
+      "contractAddress": "0x100000000000000000000000000000000000000f",
+      "hash": "0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
+    },
+    {
       "transactionType": "CALL",
       "contractName": "",
       "contractAddress": "",
@@ -179,6 +185,12 @@
       "status": "0x1",
       "contractAddress": "0x100000000000000000000000000000000000000e",
       "blockNumber": "0xe"
+    },
+    {
+      "transactionHash": "0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f",
+      "status": "0x1",
+      "contractAddress": "0x100000000000000000000000000000000000000f",
+      "blockNumber": "0xf"
     }
   ]
 }

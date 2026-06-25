@@ -238,6 +238,12 @@
           "$DEPLOYED_STREAM_REVENUE_RESOLVER"
         ],
         "verification_status": "not_started"
+      },
+      {
+        "name": "StreamMintLedger",
+        "address": "0x000000000000000000000000000000000000000f",
+        "constructor_args": [],
+        "verification_status": "not_started"
       }
     ],
     "admin_ceremony": {
@@ -276,6 +282,10 @@
         },
         {
           "contract": "StreamPrimarySaleSettlement",
+          "new_owner": "$SEPOLIA_ADMIN_SAFE"
+        },
+        {
+          "contract": "StreamMintLedger",
           "new_owner": "$SEPOLIA_ADMIN_SAFE"
         }
       ]

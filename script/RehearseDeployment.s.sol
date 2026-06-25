@@ -12,6 +12,7 @@ import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
+import "../smart-contracts/StreamMintLedger.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
 import "../smart-contracts/StreamSplitFactory.sol";
@@ -67,6 +68,7 @@ contract RehearseDeployment {
         address splitFactory;
         address revenueResolver;
         address primarySaleSettlement;
+        address mintLedger;
         uint256 sampleCollectionId;
         uint256 sampleMintStart;
         uint256 sampleMintEnd;
@@ -144,6 +146,7 @@ contract RehearseDeployment {
         deployed.assetPolicyRegistry.transferOwnership(config.adminSafe);
         deployed.revenueResolver.transferOwnership(config.adminSafe);
         deployed.primarySaleSettlement.transferOwnership(config.adminSafe);
+        deployed.mintLedger.transferOwnership(config.adminSafe);
         deployed.core.transferOwnership(config.adminSafe);
         deployed.admins.transferOwnership(config.adminSafe);
 
@@ -165,58 +168,53 @@ contract RehearseDeployment {
         StreamSplitFactory splitFactory;
         StreamRevenueResolver revenueResolver;
         StreamPrimarySaleSettlement primarySaleSettlement;
+        StreamMintLedger mintLedger;
     }
 
     function _deployContracts(DeploymentConfig memory config)
         private
         returns (DeployedContracts memory deployed)
     {
-        StreamAdmins admins = new StreamAdmins(config.tdhSigner);
-        DependencyRegistry dependencyRegistry = new DependencyRegistry(address(admins));
-        StreamCore core =
-            new StreamCore("6529 Stream", "STREAM", address(admins), address(dependencyRegistry));
-        StreamContractMetadata contractMetadata =
-            new StreamContractMetadata(address(core), address(admins), config.contractMetadataURI);
-        StreamCuratorsPool curatorsPool = new StreamCuratorsPool(address(admins), config.delegation);
-        StreamMinter minter = new StreamMinter(address(core), address(admins), address(0));
-        StreamDrops drops = new StreamDrops(
-            config.tdhSigner, address(minter), address(admins), config.payout, address(curatorsPool)
+        deployed.admins = new StreamAdmins(config.tdhSigner);
+        deployed.dependencyRegistry = new DependencyRegistry(address(deployed.admins));
+        deployed.core = new StreamCore(
+            "6529 Stream", "STREAM", address(deployed.admins), address(deployed.dependencyRegistry)
         );
-        StreamAuctions auctions = new StreamAuctions(
-            address(minter),
-            address(core),
-            address(admins),
-            address(drops),
+        deployed.contractMetadata = new StreamContractMetadata(
+            address(deployed.core), address(deployed.admins), config.contractMetadataURI
+        );
+        deployed.curatorsPool = new StreamCuratorsPool(address(deployed.admins), config.delegation);
+        deployed.minter =
+            new StreamMinter(address(deployed.core), address(deployed.admins), address(0));
+        deployed.drops = new StreamDrops(
+            config.tdhSigner,
+            address(deployed.minter),
+            address(deployed.admins),
             config.payout,
-            address(curatorsPool)
+            address(deployed.curatorsPool)
         );
-        NextGenRandomizerVRF randomizerVrf = new NextGenRandomizerVRF(
-            config.vrfSubscriptionId, config.vrfCoordinator, address(core), address(admins)
+        deployed.auctions = new StreamAuctions(
+            address(deployed.minter),
+            address(deployed.core),
+            address(deployed.admins),
+            address(deployed.drops),
+            config.payout,
+            address(deployed.curatorsPool)
         );
-        NextGenRandomizerRNG randomizerRng =
-            new NextGenRandomizerRNG(address(core), address(admins), config.arrngController);
-        StreamAssetPolicyRegistry assetPolicyRegistry = new StreamAssetPolicyRegistry();
-        StreamSplitFactory splitFactory = new StreamSplitFactory(assetPolicyRegistry);
-        StreamRevenueResolver revenueResolver = new StreamRevenueResolver(splitFactory);
-        StreamPrimarySaleSettlement primarySaleSettlement =
-            new StreamPrimarySaleSettlement(revenueResolver);
-
-        deployed = DeployedContracts({
-            admins: admins,
-            dependencyRegistry: dependencyRegistry,
-            core: core,
-            contractMetadata: contractMetadata,
-            curatorsPool: curatorsPool,
-            minter: minter,
-            drops: drops,
-            auctions: auctions,
-            randomizerVrf: randomizerVrf,
-            randomizerRng: randomizerRng,
-            assetPolicyRegistry: assetPolicyRegistry,
-            splitFactory: splitFactory,
-            revenueResolver: revenueResolver,
-            primarySaleSettlement: primarySaleSettlement
-        });
+        deployed.randomizerVrf = new NextGenRandomizerVRF(
+            config.vrfSubscriptionId,
+            config.vrfCoordinator,
+            address(deployed.core),
+            address(deployed.admins)
+        );
+        deployed.randomizerRng = new NextGenRandomizerRNG(
+            address(deployed.core), address(deployed.admins), config.arrngController
+        );
+        deployed.assetPolicyRegistry = new StreamAssetPolicyRegistry();
+        deployed.splitFactory = new StreamSplitFactory(deployed.assetPolicyRegistry);
+        deployed.revenueResolver = new StreamRevenueResolver(deployed.splitFactory);
+        deployed.primarySaleSettlement = new StreamPrimarySaleSettlement(deployed.revenueResolver);
+        deployed.mintLedger = new StreamMintLedger();
     }
 
     function _configureAdminCeremony(StreamAdmins admins, DeploymentConfig memory config) private {
@@ -290,6 +288,7 @@ contract RehearseDeployment {
             splitFactory: address(deployed.splitFactory),
             revenueResolver: address(deployed.revenueResolver),
             primarySaleSettlement: address(deployed.primarySaleSettlement),
+            mintLedger: address(deployed.mintLedger),
             sampleCollectionId: collectionId,
             sampleMintStart: mintStart,
             sampleMintEnd: mintEnd,

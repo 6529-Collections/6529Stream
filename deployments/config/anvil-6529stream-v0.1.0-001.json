@@ -156,6 +156,12 @@
           "0x000000000000000000000000000000000000000d"
         ],
         "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamMintLedger",
+        "address": "0x000000000000000000000000000000000000000f",
+        "constructor_args": [],
+        "verification_status": "not_applicable"
       }
     ],
     "admin_ceremony": {
@@ -194,6 +200,10 @@
         },
         {
           "contract": "StreamPrimarySaleSettlement",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamMintLedger",
           "new_owner": "0x0000000000000000000000000000000000006529"
         }
       ]
