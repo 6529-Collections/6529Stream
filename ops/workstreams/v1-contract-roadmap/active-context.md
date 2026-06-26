@@ -47,7 +47,7 @@ smaller reviewed boundary is needed for this metadata/preservation slice.
   completed.
 - Current topic branch: `codex/collection-metadata-preservation`.
 - Current topic issue: #638.
-- Current topic PR: TBD.
+- Current topic PR: #639.
 - Current draft status: local `StreamCollectionMetadata` and
   `StreamPreservationRecords` implementation, focused tests, rehearsal
   deployment wiring, release/deployment artifact refreshes, changelog, backlog,
@@ -58,9 +58,9 @@ smaller reviewed boundary is needed for this metadata/preservation slice.
   `StreamPreservationRecords` at 7,734 bytes. Opus 4.8 and GLM 5.2 returned
   no P0/P1 issues. GPT-5.5 Pro ran at high/max reasoning, found one P2 in the
   deployment manifest identity binding, and closed that finding after the
-  follow-up fix bound satellite dependency-pointer state. Next transition:
-  regenerate affected artifacts, rerun focused and broad local validation, then
-  create the issue and PR if clean.
+  follow-up fix bound satellite dependency-pointer state. PR #639 is open and
+  CodeRabbit has been requested. Next transition: wait for CI and review-bot
+  feedback, resolve actionable findings, then merge if clean.
 
 ## Subagent Findings To Carry
 

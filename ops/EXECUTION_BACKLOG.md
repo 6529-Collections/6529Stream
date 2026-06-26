@@ -209,7 +209,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | 0.3 | `CON-012` | C/G | V1 Core mint-manager boundary and prepared-mint hooks | Merged in PR #633; issue #631 closed completed |
 | 0.4 | `CON-013` | C/G | V1 static mint ledger accounting foundation | Merged in PR #635; issue #634 closed completed |
 | 0.5 | `CON-014` | C/G | V1 `StreamMintManager` phase policy and execution integration | Merged in PR #637; issue #636 closed completed |
-| 0.6 | `CON-015` | C/G | V1 collection metadata and preservation record satellites | Active issue #638 on branch `codex/collection-metadata-preservation`; PR pending |
+| 0.6 | `CON-015` | C/G | V1 collection metadata and preservation record satellites | Active PR #639 / issue #638 on branch `codex/collection-metadata-preservation` |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1711,8 +1711,8 @@ Drops/Auctions routing as follow-up slices.
 
 ### CON-015: Add Collection Metadata And Preservation Record Satellites
 
-Status: Active issue #638 on branch `codex/collection-metadata-preservation`;
-PR pending.
+Status: Active PR #639 / issue #638 on branch
+`codex/collection-metadata-preservation`.
 
 Gate: C/G.
 
@@ -3894,7 +3894,7 @@ unless an external dependency changes.
 | `CON-012` | Add Core mint-manager boundary and prepared-mint hooks | C/G | Merged in PR #633; issue #631 closed completed |
 | `CON-013` | Add StreamMintLedger static counter accounting foundation | C/G | Merged in PR #635; issue #634 closed completed |
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
-| `CON-015` | Add collection metadata and preservation record satellites | C/G | Active issue #638 on branch `codex/collection-metadata-preservation`; PR pending |
+| `CON-015` | Add collection metadata and preservation record satellites | C/G | Active PR #639 / issue #638 on branch `codex/collection-metadata-preservation` |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
