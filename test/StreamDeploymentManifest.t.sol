@@ -165,12 +165,12 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         Assertions.assertTrue(vm.parseJson(schema).length > 0, "schema json invalid");
         Assertions.assertTrue(vm.parseJson(example).length > 0, "example json invalid");
         Assertions.assertTrue(
-            _contains(bytes(example), bytes('"StreamCollectionMetadata"')),
-            "missing collection metadata"
+            vm.parseJson(example, ".contracts.StreamCollectionMetadata").length > 0,
+            "missing collection metadata contract entry"
         );
         Assertions.assertTrue(
-            _contains(bytes(example), bytes('"StreamPreservationRecords"')),
-            "missing preservation records"
+            vm.parseJson(example, ".contracts.StreamPreservationRecords").length > 0,
+            "missing preservation records contract entry"
         );
     }
 

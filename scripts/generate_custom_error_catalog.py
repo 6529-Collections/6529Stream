@@ -451,16 +451,17 @@ def catalog_entry(
         raise CustomErrorCatalogError(f"{contract_name}:{signature} has invalid selector {selector!r}")
 
     category = classify_error(contract_name, name, signature)
+    error_id = canonical_error_id(contract_name, signature)
     tests = list(TRACEABILITY_BY_CATEGORY[category])
-    for test_path in TRACEABILITY_BY_ERROR_NAME.get(name, []):
-        if test_path not in tests:
-            tests.append(test_path)
-    for test_path in TRACEABILITY_BY_ERROR_ID.get(canonical_error_id(contract_name, signature), []):
+    error_tests = TRACEABILITY_BY_ERROR_ID.get(error_id)
+    if error_tests is None:
+        error_tests = TRACEABILITY_BY_ERROR_NAME.get(name, [])
+    for test_path in error_tests:
         if test_path not in tests:
             tests.append(test_path)
 
     return {
-        "id": canonical_error_id(contract_name, signature),
+        "id": error_id,
         "contract": contract_name,
         "source": str(contract.get("source", "")),
         "name": name,

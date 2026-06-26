@@ -78,6 +78,17 @@ contract StreamPreservationRecordsTest is CharacterizationTestBase, StreamFixtur
         stored.uri.assertEq(record.uri, "stored uri");
 
         logs.length.assertEq(1, "record log count");
+        logs[0].emitter.assertEq(address(records), "record log emitter");
+        logs[0].topics.length.assertEq(4, "record log topic count");
+        logs[0].topics[0].assertEq(
+            keccak256(
+                "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)"
+            ),
+            "record event signature"
+        );
+        logs[0].topics[1].assertEq(bytes32(COLLECTION_ID), "event collection topic");
+        logs[0].topics[2].assertEq(RECORD_TYPE, "event record type topic");
+        logs[0].topics[3].assertEq(SUBJECT_ID, "event subject topic");
         (IStreamPreservationRecords.CollectionRecord memory eventRecord, bytes32 eventHash,) = abi.decode(
             logs[0].data, (IStreamPreservationRecords.CollectionRecord, bytes32, address)
         );

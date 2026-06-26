@@ -1732,10 +1732,14 @@ Acceptance criteria:
 3. Both satellites validate Core/Admin dependencies, use existing admin and
    metadata-mutation pause controls, expose module markers, support ERC-165,
    and keep all product metadata outside Core bytecode.
-4. Focused tests cover happy paths, admin gates, pause gates, missing
+4. Launch-v1 writer permissions for mutating selectors are whole-module
+   grants, not record-family delegation. The PR must document that custody
+   model while keeping Core/Admin validation, pause controls, ERC-165 markers,
+   and metadata-outside-Core constraints intact.
+5. Focused tests cover happy paths, admin gates, pause gates, missing
    collections, freeze behavior, duplicate/revision/lock behavior, URI/hash
    validation, and event reconstruction.
-5. Rehearsal deployment, deployment manifests, address books, release
+6. Rehearsal deployment, deployment manifests, address books, release
    artifacts, changelog, and autonomous run state include the new satellites
    without claiming production readiness.
 

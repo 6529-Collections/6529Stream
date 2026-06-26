@@ -1843,6 +1843,11 @@ Rules:
 7. In the launch generic metadata satellite, locking an ordinary `recordType`
    also blocks snapshots that declare the same `recordType`. `SNAPSHOTS` and
    `METADATA_ALL` block snapshot publication across all record families.
+8. After Core collection freeze, the launch generic satellite still permits
+   ordinary `recordType` locks so an operator can seal the specific final
+   metadata family that was just snapshotted. Broad `SNAPSHOTS` and
+   `METADATA_ALL` locks are freeze-specific terminal controls and must be set
+   before Core freeze if the collection policy requires them.
 
 ## Mutation API
 
@@ -2318,10 +2323,15 @@ lockCollectionField         freeze admin or global admin
 The launch v1 generic metadata and preservation satellites use selector-level
 writer authorization. Their `setCollectionRecord`,
 `setCollectionRecordWithRevision`, `publishCollectionSnapshot`, and
-`recordCollectionRecord` selectors are whole-module safe-operator grants, not
-record-family-limited delegation. Operators must grant those selectors only to
-trusted metadata/preservation roles that are allowed to write every record type
-accepted by the target module. Record-family-specific authorization remains a
+`recordCollectionRecord` selectors are whole-module safe-operator grants and a
+CON-015 launch-v1 exception to ADR-0004's nonconformant selector-map guidance,
+not record-family-limited delegation. The exception applies only when operators
+choose the launch generic satellites under Safe/operator custody. Operators
+must grant those selectors only to global admins or fully trusted
+metadata/preservation roles that are allowed to write every record type accepted
+by the target module. Other launch paths remain governed by the earlier
+nonconformant selector-map guidance unless this specific operator-custody model
+is explicitly in effect. Record-family-specific authorization remains a
 requirement for future typed companion modules or attestation workflows that
 delegate to artists, curators, institutions, rights administrators, provenance
 verifiers, or archive verifiers.
@@ -2690,8 +2700,9 @@ Rules:
 5. `latestSnapshotId` and `latestSnapshotHash` are append-only history pointers,
    not a token rendering authority. If a Core-frozen collection needs
    collector-facing finality, operators must publish the final display snapshot
-   before finality and then lock `SNAPSHOTS`, `METADATA_ALL`, or the relevant
-   `recordType` under the collection policy.
+   before finality and then lock `SNAPSHOTS` or `METADATA_ALL` before Core
+   freeze, or lock the relevant ordinary `recordType` after the final snapshot
+   under the collection policy.
 6. `CollectionFieldRevision` should be emitted for field changes where the old
    hash is known. Reason codes should be open `bytes32` values such as
    `TYPO_FIX`, `ARTIST_UPDATE`, `RIGHTS_UPDATE`, `ARCHIVE_UPDATE`,

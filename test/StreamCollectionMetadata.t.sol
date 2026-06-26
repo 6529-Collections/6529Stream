@@ -399,31 +399,34 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
 
         metadata.latestCollectionSnapshotHash(COLLECTION_ID)
             .assertEq(snapshotHash, "post-freeze snapshot missing");
+
+        metadata.lockCollectionRecord(COLLECTION_ID, RECORD_RIGHTS);
+        metadata.isLocked(COLLECTION_ID, RECORD_RIGHTS)
+            .assertTrue("post-freeze record lock missing");
+        metadata.lockCollectionRecord(COLLECTION_ID, snapshot.recordType);
+        metadata.isLocked(COLLECTION_ID, snapshot.recordType)
+            .assertTrue("post-freeze snapshot type lock missing");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamCollectionMetadata.CollectionMetadataLocked.selector,
+                COLLECTION_ID,
+                snapshot.recordType
+            )
+        );
+        metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID_2, snapshot);
+
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionMetadata.CollectionMetadataFrozen.selector, COLLECTION_ID
             )
         );
-        metadata.lockCollectionRecord(COLLECTION_ID, RECORD_RIGHTS);
-
         metadata.lockCollectionRecord(COLLECTION_ID, LOCK_SNAPSHOTS);
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamCollectionMetadata.CollectionMetadataLocked.selector,
-                COLLECTION_ID,
-                LOCK_SNAPSHOTS
+                IStreamCollectionMetadata.CollectionMetadataFrozen.selector, COLLECTION_ID
             )
         );
-        metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID_2, snapshot);
         metadata.lockCollectionRecord(COLLECTION_ID, LOCK_METADATA_ALL);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamCollectionMetadata.CollectionMetadataLocked.selector,
-                COLLECTION_ID,
-                LOCK_METADATA_ALL
-            )
-        );
-        metadata.publishCollectionSnapshot(COLLECTION_ID, SNAPSHOT_ID_2, snapshot);
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamCollectionMetadata.CollectionMetadataFrozen.selector, COLLECTION_ID
@@ -540,6 +543,17 @@ contract StreamCollectionMetadataTest is CharacterizationTestBase, StreamFixture
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         logs.length.assertEq(1, "record log count");
+        logs[0].emitter.assertEq(address(metadata), "record log emitter");
+        logs[0].topics.length.assertEq(4, "record log topic count");
+        logs[0].topics[0].assertEq(
+            keccak256(
+                "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)"
+            ),
+            "record event signature"
+        );
+        logs[0].topics[1].assertEq(bytes32(COLLECTION_ID), "event collection topic");
+        logs[0].topics[2].assertEq(RECORD_IIIF_VIEW, "event record type topic");
+        logs[0].topics[3].assertEq(SCHEMA_ID, "event schema topic");
         (
             IStreamCollectionMetadata.CollectionMetadataRecord memory eventRecord,
             bytes32 eventHash,

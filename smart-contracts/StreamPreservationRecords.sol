@@ -32,7 +32,6 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
 
     mapping(bytes32 => CollectionRecordSummary) private _records;
     mapping(bytes32 => CollectionRecord) private _recordPayloads;
-    mapping(bytes32 => bool) private _recordExists;
     mapping(uint256 => mapping(bytes32 => mapping(bytes32 => bytes32))) private _latestRecordHash;
 
     modifier FunctionAdminRequired(bytes4 selector) {
@@ -99,7 +98,9 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
         _requireKnownCollection(collectionId);
         _validateRecord(record);
         recordHash = _deriveCollectionRecordHash(collectionId, record);
-        if (_recordExists[recordHash]) revert CollectionRecordAlreadyExists(recordHash);
+        if (_records[recordHash].collectionId != 0) {
+            revert CollectionRecordAlreadyExists(recordHash);
+        }
 
         CollectionRecordSummary memory summary = CollectionRecordSummary({
             collectionId: collectionId,
@@ -120,7 +121,6 @@ contract StreamPreservationRecords is ERC165, IStreamPreservationRecords {
             recorder: msg.sender,
             recordedAt: uint64(block.timestamp)
         });
-        _recordExists[recordHash] = true;
         _records[recordHash] = summary;
         _recordPayloads[recordHash] = record;
         _latestRecordHash[collectionId][record.recordType][record.subjectId] = recordHash;

@@ -146,7 +146,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:215f9e5fda14bcc70d599054362b897cf0e3774ab602c60c7c5203c2bb741f5b",
+      "sha256": "sha256:5c2cbe818df6a696714b22967a492ac16af38d10206f9b98624d7ab5e7114449",
       "status": "template"
     }
   },
@@ -187,7 +187,7 @@
     {
       "category": "provenance_manifest",
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:215f9e5fda14bcc70d599054362b897cf0e3774ab602c60c7c5203c2bb741f5b"
+      "sha256": "sha256:5c2cbe818df6a696714b22967a492ac16af38d10206f9b98624d7ab5e7114449"
     }
   ],
   "redaction_policy": {

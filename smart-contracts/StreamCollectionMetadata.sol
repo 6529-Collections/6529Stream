@@ -347,10 +347,11 @@ contract StreamCollectionMetadata is ERC165, IStreamCollectionMetadata {
         _requireMetadataMutationNotPaused();
         _requireKnownCollection(collectionId);
         _requireUnlocked(collectionId, recordType);
-        if (IStreamCore(streamCore).collectionFreezeStatus(collectionId)) {
-            if (recordType != _LOCK_METADATA_ALL && recordType != _LOCK_SNAPSHOTS) {
-                revert CollectionMetadataFrozen(collectionId);
-            }
+        if (
+            IStreamCore(streamCore).collectionFreezeStatus(collectionId)
+                && _isReservedLock(recordType)
+        ) {
+            revert CollectionMetadataFrozen(collectionId);
         }
         if (recordType != _LOCK_METADATA_ALL) _requireUnlocked(collectionId, _LOCK_METADATA_ALL);
     }

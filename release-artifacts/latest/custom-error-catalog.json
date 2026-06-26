@@ -1560,7 +1560,6 @@
         "tests": [
           "test/StreamRoyalty.t.sol",
           "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManager.t.sol",
           "test/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
@@ -4301,7 +4300,6 @@
         "tests": [
           "test/StreamRoyalty.t.sol",
           "test/StreamCustomErrorNegative.t.sol",
-          "test/StreamMintManager.t.sol",
           "test/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
