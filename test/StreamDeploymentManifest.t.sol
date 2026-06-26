@@ -194,17 +194,21 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             "preservation records address reused"
         );
         Assertions.assertTrue(first.manifestHash != second.manifestHash, "manifest hash not bound");
+        StreamCollectionMetadata reboundCollection =
+            new StreamCollectionMetadata(first.core, first.admins, address(0));
         Assertions.assertTrue(
             _expectedManifestHashWithSatellites(
-                config, first, second.collectionMetadata, first.preservationRecords
+                config, first, address(reboundCollection), first.preservationRecords
             ) != first.manifestHash,
-            "collection metadata satellite not bound"
+            "collection metadata identity not bound"
         );
+        StreamPreservationRecords reboundPreservation =
+            new StreamPreservationRecords(first.core, first.admins, address(0));
         Assertions.assertTrue(
             _expectedManifestHashWithSatellites(
-                config, first, first.collectionMetadata, second.preservationRecords
+                config, first, first.collectionMetadata, address(reboundPreservation)
             ) != first.manifestHash,
-            "preservation records satellite not bound"
+            "preservation records identity not bound"
         );
         Assertions.assertTrue(
             _expectedManifestHashWithSatellites(config, first, address(0), address(0))
