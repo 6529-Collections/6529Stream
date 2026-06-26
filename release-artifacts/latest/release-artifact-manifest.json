@@ -8,15 +8,15 @@
   "artifacts": {
     "abi-checksums.json": {
       "path": "abi-checksums.json",
-      "sha256": "sha256:9fed889457edaeaa986e2a34bb4b25c18817395286504707c88a0b1968da0f80"
+      "sha256": "sha256:e168e09b04faa26a151f2a13c889e4888ff85cdfc5a9193b1dfa9cd884eb64d0"
     },
     "event-topic-catalog.json": {
       "path": "event-topic-catalog.json",
-      "sha256": "sha256:0c7c572e0a9831ed67327822fe168522a6de881809ff7fd70c88a6f34ea1ce16"
+      "sha256": "sha256:56ea6ff62bd6c91933ce80cd99ebb08ab88a0d6d99a68f54e332910176fd6bae"
     },
     "interface-ids.json": {
       "path": "interface-ids.json",
-      "sha256": "sha256:6c51e2d64536bec30aa192b5544c7dd199e5d1fd2949b73f152a710900b5efb9"
+      "sha256": "sha256:1fb3170fda9ecbabf2bd6a291065f256ce6970585e85c38fca4d398aad2b4251"
     }
   }
 }

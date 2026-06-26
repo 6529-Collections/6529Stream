@@ -174,6 +174,40 @@ class ProtocolSurfaceReportTests(unittest.TestCase):
 
         self.assertEqual(report["summary"], totals)
 
+    def test_metadata_satellites_are_covered_by_release_artifacts(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        latest = root / "release-artifacts" / "latest"
+        metadata_contracts = ["StreamCollectionMetadata", "StreamPreservationRecords"]
+        metadata_interfaces = ["IStreamCollectionMetadata", "IStreamPreservationRecords"]
+
+        report = json.loads((latest / "protocol-surface-report.json").read_text(encoding="utf-8"))
+        abi_checksums = json.loads((latest / "abi-checksums.json").read_text(encoding="utf-8"))
+        interface_ids = json.loads((latest / "interface-ids.json").read_text(encoding="utf-8"))
+        event_topics = json.loads((latest / "event-topic-catalog.json").read_text(encoding="utf-8"))
+        bytecode_proof = json.loads((latest / "bytecode-release-proof.json").read_text(encoding="utf-8"))
+        source_inputs = json.loads(
+            (latest / "source-verification-inputs.json").read_text(encoding="utf-8")
+        )
+
+        aggregate_functions = 0
+        proof_contracts = {
+            proof["contract"]["name"] for proof in bytecode_proof["contract_proofs"]
+        }
+        for contract in metadata_contracts:
+            self.assertIn(contract, report["contracts"])
+            aggregate_functions += report["contracts"][contract]["summary"]["function_count"]
+            self.assertIn(contract, abi_checksums["abi_hashes"])
+            self.assertIn(contract, abi_checksums["bytecode_hashes"])
+            self.assertIn(contract, event_topics["contracts"])
+            self.assertIn(contract, proof_contracts)
+            self.assertIn(contract, source_inputs["contracts"])
+
+        for interface_name in metadata_interfaces:
+            self.assertIn(interface_name, interface_ids["interface_ids"])
+            self.assertIn(interface_name, interface_ids["interfaces"])
+
+        self.assertLessEqual(aggregate_functions, 80)
+
     def test_report_contains_functions_events_and_custom_errors(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir, patched_cast():
             root = Path(temp_dir)

@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/mint-manager-phase-execution` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/635` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/636 |
-| Active PR | https://github.com/6529-Collections/6529Stream/pull/637 |
-| Next issue | Collection metadata and preservation satellites after the manager phase/execution integration. |
+| Active PR branch | `codex/collection-metadata-preservation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/637` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/638` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/639` |
+| Next issue | Collection attestations and collection view/reference satellites after the metadata/preservation slice. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-25 21:55 UTC` |
+| Last updated | `2026-06-26 07:17 UTC` |
 
 ## Current Run Notes
 
@@ -53,48 +53,36 @@ evidence, and audit/readiness gates.
   completed.
 - PR #635 merged the `StreamMintLedger` static counter accounting foundation
   and issue #634 is closed completed.
-- The current topic is issue #636 on branch
-  `codex/mint-manager-phase-execution`.
+- PR #637 merged the `StreamMintManager` phase policy and prepared-mint
+  execution slice, and issue #636 is closed completed.
+- The current topic is CON-015 on branch
+  `codex/collection-metadata-preservation`; PR #639 is open for issue #638 and
+  CodeRabbit has been requested.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic adds the full `StreamMintManager` phase policy and execution
-  integration on top of the merged Core hook and ledger foundations.
-- Local CON-014 draft implements `StreamMintManager` phase configuration,
-  executor allowlists, phase pause/window guards, launch-static ledger
-  consumption, stale-policy and replay protection, and Core prepare/complete
-  execution. The read-only local verifier returned no blockers; its optional
-  coverage suggestions have been folded into the focused manager suite, which
-  now passes 36 tests, including context batch counters, second-token receiver
-  rollback, receiver/admin reentrancy, policy-hash event payloads, exact max
-  launch batch, Core supply-exhaustion rollback, and executor-cap overflow
-  immutability. Deployment/release wiring, evidence hash refreshes, checked
-  manager hash-domain coverage, generated artifacts, `codex-diff-check`, and
-  the full Windows `scripts\check.ps1` wrapper are complete. The latest full
-  wrapper pass is `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`;
-  it reached the deployment-suite, standalone deployment, auction ceremony, and
-  emergency redeployment rehearsal scripts successfully. Current production
-  `via-ir` size output records `StreamCore` at 24,150 bytes with 426 bytes of
-  EIP-170 margin and `StreamMintManager` at 16,812 bytes. The changed fork
-  deployment, fork ceremony, and fork randomizer evidence rows are pending with
-  #216/#219/#220 restored in the issue-link set until this PR's updated
-  artifacts are reviewed. Final post-fix OpenRouter review passed with Opus
-  4.8, GLM 5.2, and GPT-5.5 Pro at high reasoning; all three approve after the
-  stale size-prose blocker was fixed. PR #637 is open. A first CI follow-up
-  stabilized one-of-one provenance/permanence descriptor hashes across Windows
-  and Linux checkouts; the current local follow-up normalizes risk-register
-  text-file references the same way after Linux CI found the matching drift.
-  Focused risk-register, blocker-report, release-evidence, release manifest,
-  bytecode proof, lockfile, checksum, release artifact, and whitespace gates
-  pass locally. Next transition: commit and push the risk-register CI fix, wait
-  for latest-head CI, and request a fresh CodeRabbit pass when the temporary
-  rate limit clears.
-- The manager integration slice should keep product policy outside Core,
-  consume only launch-static ledger counters, and defer resolver modes,
-  callable nullifiers, custom gates, ERC-20 auction bidding, and royalty
-  resolver integration unless the implementation proves a smaller reviewed
-  boundary is needed.
-- Preserve the existing `StreamDrops -> StreamMinter -> StreamCore` flow unless
-  a later PR intentionally routes it through the new manager boundary.
+- Current topic adds launch v1 `StreamCollectionMetadata` and
+  `StreamPreservationRecords` as outside-Core satellites. The local draft uses
+  compact schema-bound generic metadata records for typed launch groups,
+  immutable snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation
+  records with tagged hash references, event reconstruction, deployment
+  rehearsal wiring, and release artifact coverage. Focused
+  `StreamCollectionMetadata`, `StreamPreservationRecords`, and
+  `StreamDeploymentManifest` tests pass locally after the snapshot hash was
+  domain-separated by `snapshotId`. Production via-IR size output records
+  `StreamCore` at 24,150 bytes with 426 bytes of EIP-170 margin,
+  `StreamCollectionMetadata` at 10,166 bytes, and
+  `StreamPreservationRecords` at 7,734 bytes.
+- Current local review status for CON-015: Opus 4.8 and GLM 5.2 returned no
+  P0/P1 issues. GPT-5.5 Pro ran at high/max reasoning, found one P2 in the
+  deployment manifest identity binding, and closed that finding after the
+  follow-up fix bound satellite `streamCore`, `adminsContract`, and
+  `streamModuleSupersedes` state.
+- Remaining CON-015 work: wait for CI, CodeRabbit, and any bot or human review
+  feedback on PR #639; resolve actionable findings before merge.
+- Keep attestations, collection view/reference satellites, typed
+  PREMIS/C2PA/IIIF companion ABIs, custom gates, ERC-20 auction bidding, and
+  royalty resolver integration as follow-up slices unless the current review
+  cycle proves one is required for this PR.
 - Keep GPT-5.5 Pro on high/max reasoning for OpenRouter reviews. Long waits are
   expected; do not lower reasoning for speed.
 
@@ -16415,6 +16403,7 @@ Outcome:
 | 2026-06-19 10:36 | Validate EXT-038 local draft | Extracted `scripts/release_evidence_paths.py`, migrated non-local release evidence, release-signature evidence, marketplace/indexer evidence, live deployment-manifest evidence, live metadata-browser evidence, and production broadcast retention checkers to the shared symlink-safe retained-path resolver, added live metadata-browser and production broadcast symlinked file/directory regressions, added the helper to release checksum coverage, updated roadmap/status/backlog/run-state traceability, and regenerated release artifacts. Local validation passed: Python compile for changed scripts/tests, the six focused evidence test scripts, the six checker entrypoints, `make release-checksums`, `python scripts\check_autonomous_state.py`, `python scripts\verify_release_artifacts.py`, `python scripts\check_changelog.py`, `python scripts\check_markdown_links.py`, `python scripts\generate_release_checksums.py --check`, and `codex-diff-check`. Known compiler/Foundry warning noise remains unchanged; current `StreamCore` runtime is 21,792 bytes with 2,784 bytes of EIP-170 headroom. Next action is to commit, push, open PR for issue #607, request CodeRabbit, then wait for CI/bot feedback. |
 | 2026-06-19 10:37 | Open PR #608 for issue #607 | PR #608 is open at `https://github.com/6529-Collections/6529Stream/pull/608`, closes issue #607, and packages the shared symlink-safe retained-path helper, six migrated release evidence checkers, live metadata-browser and production broadcast symlink regressions, release checksum coverage for the helper, refreshed release artifacts, and roadmap/status/backlog/run-state updates. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 10:42 | Address PR #608 bot polish | 6529bot security reported no findings and general review marked PR #608 good to merge with non-blocking polish. Accepted the useful suggestions by documenting the helper's drive/root/backslash/symlink/escape policy and intended keyword call shape, adding a production broadcast retained-path backslash rejection regression, confirming no committed production broadcast evidence references use backslashes, and regenerating release checksums. Focused validation passed: Python compile for the helper/production broadcast checker/tests, `python scripts\test_production_broadcast_retention.py` with 16 tests, `python scripts\check_production_broadcast_retention.py`, `make release-checksums`, `python scripts\check_autonomous_state.py`, `python scripts\verify_release_artifacts.py`, `python scripts\check_changelog.py`, `python scripts\check_markdown_links.py`, `python scripts\generate_release_checksums.py --check`, and `codex-diff-check`. Next action is to commit/push the review-response head, wait for latest CI/CodeRabbit/6529bot feedback, then merge only when clean. |
+| 2026-06-26 07:17 | Open PR #639 for CON-015 | PR #639 is open at `https://github.com/6529-Collections/6529Stream/pull/639`, closes issue #638, and packages launch v1 `StreamCollectionMetadata` and `StreamPreservationRecords` satellites, deployment/release artifact wiring, docs, risk-register coverage, and focused tests. Local validation passed through focused metadata, preservation, and deployment manifest suites, release generator checks, ceremony/autonomous/Markdown checks, `codex-diff-check`, and Windows `scripts\check.ps1`. OpenRouter review used Opus 4.8, GLM 5.2, and GPT-5.5 Pro at high/max reasoning; GPT's manifest identity-binding P2 was fixed and closed. CodeRabbit was requested in comment `4807234292`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 
 ## Resume Instructions
 

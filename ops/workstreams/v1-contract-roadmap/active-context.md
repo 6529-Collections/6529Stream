@@ -9,23 +9,26 @@ feedback, merge when clean, then continue.
 
 ## Current Topic
 
-`StreamMintManager` phase policy and execution integration.
+Collection metadata and preservation record satellites.
 
-The current branch should implement the manager-side policy and execution layer
-that builds on the merged Core hook and ledger foundations:
+The current branch should implement the first outside-Core museum metadata and
+preservation slice on top of the merged payment, ledger, and manager
+foundations:
 
-- phase policy/configuration surfaces in `StreamMintManager`;
-- manager-side binding to `StreamMintLedger` policy registration and
-  consumption;
-- launch-safe static counter execution only;
-- canonical counter value-key derivation;
-- replay, cap, rollback, and prepared-mint interaction coverage;
-- focused tests that prove failed manager execution does not consume
-  authorizations or mutate ledger counters.
+- compact schema-bound records in `StreamCollectionMetadata` for typed launch
+  metadata groups;
+- immutable collection snapshot publication and latest-hash reads;
+- PREMIS/C2PA/IIIF/fixity-ready append-only records in
+  `StreamPreservationRecords`;
+- admin/pause, missing-collection, freeze, revision, lock, URI/hash, and event
+  reconstruction coverage;
+- deployment, address-book, release-artifact, changelog, and run-state wiring
+  without adding Core bytecode.
 
-Token-level revenue snapshots, ERC-20 auction bidding, custom gates, resolver
-modes, callable nullifiers, and royalty resolver integration remain follow-up
-topics unless a smaller reviewed boundary is needed for this manager slice.
+Collection attestations, collection view/reference satellites, typed
+PREMIS/C2PA/IIIF companion ABIs, custom gates, ERC-20 auction bidding, callable
+nullifiers, and royalty resolver integration remain follow-up topics unless a
+smaller reviewed boundary is needed for this metadata/preservation slice.
 
 ## Branch State
 
@@ -40,31 +43,24 @@ topics unless a smaller reviewed boundary is needed for this manager slice.
   issue #629 is closed completed.
 - Core mint-manager hooks PR #633 merged and issue #631 is closed completed.
 - Ledger foundation PR #635 merged and issue #634 is closed completed.
-- Current topic branch: `codex/mint-manager-phase-execution`.
-- Current topic issue: https://github.com/6529-Collections/6529Stream/issues/636.
-- Current topic PR: TBD.
-- Current draft status: local `StreamMintManager` implementation,
-  deployment/release artifact wiring, docs, evidence hash refreshes, checked
-  hash-domain coverage, focused validation, full Windows `scripts\check.ps1`,
-  and `codex-diff-check` are complete. The changed fork deployment, fork
-  ceremony, and fork randomizer evidence rows are marked `pending` with issue
-  links #216/#219/#220 restored until this PR's updated artifact set is
-  reviewed. Opus/GLM round-4 findings have been addressed: phase configuration
-  is initial-only, executor removal/uncapped/unlimited batch/beneficiary-keyed
-  counter tests were added, bytecode evidence prose was reconciled, and
-  authorization/policy-hash trust boundaries were documented. The read-only
-  local verifier returned no blockers and its optional hardening suggestions are
-  now covered in the focused manager suite, which passes 36 tests. The latest
-  full Windows wrapper pass is
-  `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`
-  and it reached the deployment-suite, standalone deployment, auction ceremony,
-  and emergency redeployment rehearsal scripts successfully. Current production
-  `via-ir` size output records `StreamCore` at 24,150 bytes with 426 bytes of
-  EIP-170 margin and `StreamMintManager` at 16,812 bytes. Final post-fix
-  OpenRouter review passed with Opus 4.8, GLM 5.2, and GPT-5.5 Pro at high
-  reasoning; all three approve after the stale size-prose blocker was fixed.
-  Next transition: rerun the final full Windows wrapper after this state update,
-  then publish the PR if clean.
+- Mint manager phase/execution PR #637 merged and issue #636 is closed
+  completed.
+- Current topic branch: `codex/collection-metadata-preservation`.
+- Current topic issue: #638.
+- Current topic PR: #639.
+- Current draft status: local `StreamCollectionMetadata` and
+  `StreamPreservationRecords` implementation, focused tests, rehearsal
+  deployment wiring, release/deployment artifact refreshes, changelog, backlog,
+  and run-state updates are in progress. Focused metadata, preservation, and
+  deployment manifest tests pass. Production via-IR size output records
+  `StreamCore` at 24,150 bytes with 426 bytes of EIP-170 margin,
+  `StreamCollectionMetadata` at 10,166 bytes, and
+  `StreamPreservationRecords` at 7,734 bytes. Opus 4.8 and GLM 5.2 returned
+  no P0/P1 issues. GPT-5.5 Pro ran at high/max reasoning, found one P2 in the
+  deployment manifest identity binding, and closed that finding after the
+  follow-up fix bound satellite dependency-pointer state. PR #639 is open and
+  CodeRabbit has been requested. Next transition: wait for CI and review-bot
+  feedback, resolve actionable findings, then merge if clean.
 
 ## Subagent Findings To Carry
 
@@ -112,8 +108,8 @@ topics unless a smaller reviewed boundary is needed for this manager slice.
   and the review loop is repeated.
 - PR review bots have no unresolved blocking findings, or deferrals are
   documented with rationale.
-- Current local validation target includes focused `StreamMintManager` and
-  ledger integration tests, `forge build`, `forge test -vvv`, production
-  `via-ir` size build, deployment rehearsal, release/deployment artifact
-  checks, `python scripts/check_contract_size_budget.py`, `codex-diff-check`,
-  and the full Windows `scripts\check.ps1` wrapper before PR/merge.
+- Current local validation target includes focused metadata/preservation tests,
+  `forge build`, `forge test -vvv`, production `via-ir` size build, deployment
+  rehearsal, release/deployment artifact checks,
+  `python scripts/check_contract_size_budget.py`, `codex-diff-check`, and the
+  full Windows `scripts\check.ps1` wrapper before PR/merge.

@@ -67,6 +67,12 @@ Deployment manifests should reference those outputs, then replace any unlinked
 placeholder-bytecode hashes with broadcast or verification hashes once a live
 deployment exists.
 
+`RehearseDeployment.s.sol` also emits a Solidity `manifestHash` for rehearsal
+tests. That hash binds the deployed contract addresses and code hashes, plus
+the `streamCore()`, `adminsContract()`, and `streamModuleSupersedes()` values
+for the collection metadata and preservation satellites, so dependency-pointer
+drift changes the rehearsal identity hash.
+
 Broadcast-derived manifest input generation reads a sanitized Foundry
 `run-latest.json`, validates the expected contract set, chain ID, transaction
 hashes, receipt success, deployed addresses, duplicates, and missing or

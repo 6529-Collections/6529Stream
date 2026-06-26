@@ -322,6 +322,12 @@ example is generated from
 `deployments/config/anvil-6529stream-v0.1.0-001.json` into
 `deployments/examples/anvil-6529stream-v0.1.0-001.json`.
 
+The local rehearsal script also returns a Solidity `manifestHash` for the
+deployed stack. Its preimage binds each deployed contract address and code hash;
+for `StreamCollectionMetadata` and `StreamPreservationRecords`, it additionally
+binds `streamCore()`, `adminsContract()`, and `streamModuleSupersedes()` so a
+satellite dependency-pointer change alters the rehearsal manifest hash.
+
 The first broadcast-ingestion baseline is generated from the sanitized Foundry
 fixture at `deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json`.
 `scripts/generate_broadcast_manifest_input.py` validates the fixture chain ID,
@@ -538,6 +544,13 @@ Before a deployment can become public-beta eligible:
 - Confirm the deployer address.
 - Confirm the Safe/multisig address.
 - Configure global admin and function-admin policy.
+- Confirm that `StreamCollectionMetadata` writer grants for
+  `setCollectionRecord`, `setCollectionRecordWithRevision`, and
+  `publishCollectionSnapshot`, plus `StreamPreservationRecords`
+  `recordCollectionRecord`, are intentionally whole-module grants for trusted
+  metadata or preservation operators in launch v1. Treat those grants as
+  custody-sensitive: a compromised writer can publish any accepted metadata,
+  preservation, C2PA/PREMIS, rights, or snapshot record in the target module.
 - Configure pause guardians and unpause admins.
 - Configure emergency recipient.
 - Configure signer manager and drop signer.

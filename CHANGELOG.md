@@ -50,6 +50,13 @@ the release policy in `docs/release-policy.md`.
   execution, deployment rehearsal wiring, release-artifact coverage, and focused
   rollback/reentrancy tests while keeping gates, resolver counters, callable
   nullifiers, and existing Drops/Auctions routing as follow-up slices.
+- Added launch v1 `StreamCollectionMetadata` and `StreamPreservationRecords`
+  satellites, with schema-bound collection metadata records, immutable
+  snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation records,
+  tagged hash references, post-freeze append-only preservation behavior,
+  deployment rehearsal wiring, release-artifact coverage, and focused
+  event-reconstruction/admin/freeze tests while keeping attestations and view
+  references as follow-up satellites.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay
@@ -1008,10 +1015,12 @@ the release policy in `docs/release-policy.md`.
 
 - Recovered 392 bytes of measured `StreamCore` runtime headroom with
   behavior-preserving storage caching and invariant-bounded unchecked counter
-  arithmetic; the current production via-IR runtime is 21,831 bytes with 2,745
-  bytes of EIP-170 margin while the approved bytecode-spend ceiling remains
-  22,184 bytes. Added explicit mint/burn/final-supply counter regressions and
-  a checked negative-delta convention for accepted headroom-recovery records.
+  arithmetic; that release step measured production via-IR runtime at 21,831
+  bytes with 2,745 bytes of EIP-170 margin under the then-current 22,184-byte
+  approved ceiling. Later Core mint-manager hook work supersedes the current
+  runtime measurement and approved exception ceiling in the Unreleased section.
+  Added explicit mint/burn/final-supply counter regressions and a checked
+  negative-delta convention for accepted headroom-recovery records.
 
 ### Fixed
 

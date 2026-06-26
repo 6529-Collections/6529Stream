@@ -683,6 +683,26 @@ class MarketplaceIndexerEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_manifest_marketplace_rows(manifest, root)
 
+    def test_manifest_complete_row_rejects_placeholder_operator_notes(self) -> None:
+        """Reviewed envelopes cannot keep generator placeholder notes."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _retained, _envelope, manifest = write_manifest_bundle(
+                root,
+                envelope_updates={
+                    "operator_notes": (
+                        "Generated from a template; replace with operator and reviewer "
+                        "notes before marking the requirement complete."
+                    )
+                },
+            )
+
+            with self.assertRaisesRegex(
+                checker.MarketplaceIndexerEvidenceError,
+                "operator_notes",
+            ):
+                checker.validate_manifest_marketplace_rows(manifest, root)
+
     def test_manifest_complete_row_rejects_invalid_retained_markdown(self) -> None:
         """Reviewed envelopes must point at Markdown that passes the artifact checker."""
         with tempfile.TemporaryDirectory() as temp_dir:

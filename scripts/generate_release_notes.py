@@ -141,6 +141,14 @@ def status_counts(rows: list[Any], field: str) -> dict[str, int]:
     return dict(sorted(counter.items()))
 
 
+def require_count_total(total: int, counts: dict[str, int], label: str) -> None:
+    counted = sum(counts.values())
+    if counted != total:
+        raise ReleaseNotesError(
+            f"{label} counts sum to {counted}, expected risk count {total}"
+        )
+
+
 def build_notes(
     repo_root: Path,
     json_output: Path,
@@ -173,6 +181,11 @@ def build_notes(
     )
     proof_status = require_dict(bytecode_proof.get("proof_status"), "bytecode-proof.proof_status")
     risks = require_list(risk_register.get("risks"), "risk-register.risks")
+    risk_count = len(risks)
+    risk_by_status = status_counts(risks, "status")
+    risk_by_area = status_counts(risks, "area")
+    require_count_total(risk_count, risk_by_status, "risk status")
+    require_count_total(risk_count, risk_by_area, "risk area")
     contract_proofs = require_list(
         bytecode_proof.get("contract_proofs"),
         "bytecode-proof.contract_proofs",
@@ -240,9 +253,9 @@ def build_notes(
                 "contract_proof_count": len(contract_proofs),
             },
             "risk_register": {
-                "risk_count": len(risks),
-                "by_status": status_counts(risks, "status"),
-                "by_area": status_counts(risks, "area"),
+                "risk_count": risk_count,
+                "by_status": risk_by_status,
+                "by_area": risk_by_area,
             },
             "validation_commands": [
                 "python scripts/generate_release_notes.py --check",

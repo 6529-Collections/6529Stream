@@ -30,6 +30,10 @@
       "source": "smart-contracts/StreamContractMetadata.sol"
     },
     {
+      "name": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol"
+    },
+    {
       "name": "StreamCore",
       "source": "smart-contracts/StreamCore.sol"
     },
@@ -56,6 +60,10 @@
     {
       "name": "StreamPrimarySaleSettlement",
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol"
+    },
+    {
+      "name": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol"
     },
     {
       "name": "StreamRevenueResolver",
@@ -207,6 +215,10 @@
       "source": "smart-contracts/IStreamContractMetadata.sol"
     },
     {
+      "name": "IStreamCollectionMetadata",
+      "source": "smart-contracts/IStreamCollectionMetadata.sol"
+    },
+    {
       "name": "IStreamCore",
       "source": "smart-contracts/IStreamCore.sol"
     },
@@ -229,6 +241,10 @@
     {
       "name": "IStreamPrimarySaleSettlement",
       "source": "smart-contracts/IStreamPrimarySaleSettlement.sol"
+    },
+    {
+      "name": "IStreamPreservationRecords",
+      "source": "smart-contracts/IStreamPreservationRecords.sol"
     },
     {
       "name": "IStreamRevenueResolver",

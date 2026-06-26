@@ -19,13 +19,15 @@
     "IStreamAdmins": "0x00ddd221",
     "IStreamAssetPolicyRegistry": "0x5a37a79e",
     "IStreamAuctions": "0xb109bb30",
+    "IStreamCollectionMetadata": "0x6e0fb84e",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
-    "IStreamCore": "0x4ac5cdd3",
+    "IStreamCore": "0x2cfff1d3",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamMintLedger": "0x79bc7192",
     "IStreamMintManager": "0x6bd9f3cb",
     "IStreamMinter": "0x0f48ec25",
+    "IStreamPreservationRecords": "0xad590280",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
     "IStreamRevenueResolver": "0x3503c22e",
     "IStreamSplitFactory": "0x1748deee",
@@ -513,6 +515,108 @@
         }
       ]
     },
+    "IStreamCollectionMetadata": {
+      "source": "smart-contracts/IStreamCollectionMetadata.sol",
+      "artifact_path": "out/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
+      "abi_sha256": "sha256:a62f6c3524655d3421d1c465dea83c4300ebb93116817d8da6d96da37fe90f8f",
+      "interface_id": "0x6e0fb84e",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x6e0fb84e",
+      "function_selectors": [
+        {
+          "signature": "adminsContract()",
+          "selector": "0x7e3c9be7"
+        },
+        {
+          "signature": "collectionRecord(uint256,bytes32)",
+          "selector": "0x00d488aa"
+        },
+        {
+          "signature": "collectionRecordTypeAt(uint256,uint256)",
+          "selector": "0xe4fe0862"
+        },
+        {
+          "signature": "collectionRecordTypeCount(uint256)",
+          "selector": "0x38418ce3"
+        },
+        {
+          "signature": "collectionSnapshot(uint256,bytes32)",
+          "selector": "0x506a40db"
+        },
+        {
+          "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+          "selector": "0x37cf2f68"
+        },
+        {
+          "signature": "isLocked(uint256,bytes32)",
+          "selector": "0x7f25f2e2"
+        },
+        {
+          "signature": "isStreamCollectionMetadata()",
+          "selector": "0x1d1fc992"
+        },
+        {
+          "signature": "latestCollectionRecordHash(uint256,bytes32)",
+          "selector": "0xa4e52e7d"
+        },
+        {
+          "signature": "latestCollectionSnapshotHash(uint256)",
+          "selector": "0x5895bdd8"
+        },
+        {
+          "signature": "latestCollectionSnapshotId(uint256)",
+          "selector": "0x9c86f09e"
+        },
+        {
+          "signature": "lockCollectionRecord(uint256,bytes32)",
+          "selector": "0xe4c05429"
+        },
+        {
+          "signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+          "selector": "0xf2d67fbd"
+        },
+        {
+          "signature": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+          "selector": "0xcf51f66a"
+        },
+        {
+          "signature": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+          "selector": "0x0dd00ba6"
+        },
+        {
+          "signature": "snapshotHash(uint256,bytes32)",
+          "selector": "0xb5bcfdc4"
+        },
+        {
+          "signature": "streamCore()",
+          "selector": "0x5f59b4d2"
+        },
+        {
+          "signature": "streamModuleFamily()",
+          "selector": "0xc4628276"
+        },
+        {
+          "signature": "streamModuleSchemaHash()",
+          "selector": "0xdbff3398"
+        },
+        {
+          "signature": "streamModuleSupersedes()",
+          "selector": "0x28746186"
+        },
+        {
+          "signature": "streamModuleVersion()",
+          "selector": "0x99d8b2df"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "updateAdminContract(address)",
+          "selector": "0x388d2c24"
+        }
+      ]
+    },
     "IStreamCompatibility": {
       "source": "smart-contracts/IStreamCompatibility.sol",
       "artifact_path": "out/IStreamCompatibility.sol/IStreamCompatibility.json",
@@ -592,10 +696,10 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:aafef7d9d43ebafc04e2df730b0b3852bf4f54d676aca5e9a2526da9b46b46f4",
-      "interface_id": "0x4ac5cdd3",
+      "abi_sha256": "sha256:ddfd53045cf443235a2dfa1f38cd16b476bb306438c9640ab435c72d23590604",
+      "interface_id": "0x2cfff1d3",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x4ac5cdd3",
+      "computed_selector_xor": "0x2cfff1d3",
       "function_selectors": [
         {
           "signature": "abortPreparedMintFromManager(uint256,bytes32)",
@@ -636,6 +740,10 @@
         {
           "signature": "mintFromManager(uint256,address,string,uint256,bytes32)",
           "selector": "0x070e140e"
+        },
+        {
+          "signature": "newCollectionIndex()",
+          "selector": "0x663a3c00"
         },
         {
           "signature": "pendingPreparedMintTokenId()",
@@ -888,6 +996,72 @@
         {
           "signature": "updateAuctionEndTime(uint256,uint256)",
           "selector": "0xd9f303a2"
+        }
+      ]
+    },
+    "IStreamPreservationRecords": {
+      "source": "smart-contracts/IStreamPreservationRecords.sol",
+      "artifact_path": "out/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
+      "abi_sha256": "sha256:cb7d4208b6eec8dc934c494c46837e55a7719c2ac260b83a7458fc1ada6227ab",
+      "interface_id": "0xad590280",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xad590280",
+      "function_selectors": [
+        {
+          "signature": "adminsContract()",
+          "selector": "0x7e3c9be7"
+        },
+        {
+          "signature": "collectionRecord(bytes32)",
+          "selector": "0x59e28051"
+        },
+        {
+          "signature": "collectionRecordSummary(bytes32)",
+          "selector": "0x2cf021cb"
+        },
+        {
+          "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "selector": "0x18cd4aad"
+        },
+        {
+          "signature": "isStreamPreservationRecords()",
+          "selector": "0x3efe1a5d"
+        },
+        {
+          "signature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+          "selector": "0x8b1d1ed9"
+        },
+        {
+          "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+          "selector": "0xc3434532"
+        },
+        {
+          "signature": "streamCore()",
+          "selector": "0x5f59b4d2"
+        },
+        {
+          "signature": "streamModuleFamily()",
+          "selector": "0xc4628276"
+        },
+        {
+          "signature": "streamModuleSchemaHash()",
+          "selector": "0xdbff3398"
+        },
+        {
+          "signature": "streamModuleSupersedes()",
+          "selector": "0x28746186"
+        },
+        {
+          "signature": "streamModuleVersion()",
+          "selector": "0x99d8b2df"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "updateAdminContract(address)",
+          "selector": "0x388d2c24"
         }
       ]
     },

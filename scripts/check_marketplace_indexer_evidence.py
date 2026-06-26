@@ -191,6 +191,11 @@ REQUIRED_COMMANDS = [
     "python scripts/generate_release_manifest.py --check",
     "python scripts/generate_release_checksums.py --check",
 ]
+REVIEWED_ENVELOPE_PLACEHOLDER_PHRASES = [
+    "replace with operator and reviewer notes",
+    "replace this template",
+    "template-only",
+]
 
 FIELD_RE = re.compile(r"^- (?P<label>[^:]+): (?P<value>.*)$")
 SECRET_VALUE_RE = re.compile(
@@ -554,6 +559,16 @@ def validate_reviewed_evidence_envelope(
             f"{envelope_path}.reviewer must be set before completion"
         )
     require_json_text(data.get("owner"), f"{envelope_path}.owner")
+    operator_notes = require_json_text(
+        data.get("operator_notes"), f"{envelope_path}.operator_notes"
+    )
+    normalized_notes = " ".join(operator_notes.lower().split())
+    for phrase in REVIEWED_ENVELOPE_PLACEHOLDER_PHRASES:
+        if phrase in normalized_notes:
+            raise MarketplaceIndexerEvidenceError(
+                f"{envelope_path}.operator_notes must be reviewed evidence notes, "
+                "not template placeholder text"
+            )
 
     retained_path = require_json_text(
         data.get("retained_path"),

@@ -247,6 +247,16 @@ such as `StreamPreservationRecords`, `StreamCollectionAttestations`, and
 companion ABI when they pass the same function-count, event-reconstruction,
 schema-hash, and audit-scope gates; they must not be embedded in `StreamCore`.
 
+The first launch implementation slice should keep the audited onchain ABI
+compact by storing schema-bound generic records instead of one setter per
+museum field. In that shape, `recordType` identifies typed launch groups such
+as identity, rights, IIIF views, C2PA references, catalogue records, script or
+media manifests, and custom-gate metadata; `schemaId`, URI, content hash,
+auxiliary hash, revision, snapshot, and event payloads provide the stable
+reconstruction surface. Field-specific ABIs remain candidates for companion
+satellites only after they clear the aggregate function-count and audit-scope
+ceiling.
+
 Launch metadata surfaces must also have a hard aggregate function-count,
 bytecode, and audit-scope ceiling across `StreamCollectionMetadata` and any v1
 metadata companion satellites. Before audit handoff, the release manifest must
@@ -1452,16 +1462,9 @@ event CollectionRecordRecorded(
     uint256 indexed collectionId,
     bytes32 indexed recordType,
     bytes32 indexed subjectId,
-    uint16 contentHashAlgorithm,
-    bytes contentHashDigest,
-    bytes32 contentHashCanonicalizationId,
-    string uri,
-    bytes32 schemaId,
-    bytes32 signatureScheme,
-    uint16 signatureHashAlgorithm,
-    bytes signatureHashDigest,
-    bytes32 signatureHashCanonicalizationId,
-    uint64 effectiveAt
+    CollectionRecord record,
+    bytes32 recordHash,
+    address recorder
 );
 ```
 
@@ -1837,6 +1840,14 @@ Rules:
    collection freeze.
 6. Preservation receipts may remain appendable after display metadata is frozen
    if the collection policy wants ongoing archive maintenance.
+7. In the launch generic metadata satellite, locking an ordinary `recordType`
+   also blocks snapshots that declare the same `recordType`. `SNAPSHOTS` and
+   `METADATA_ALL` block snapshot publication across all record families.
+8. After Core collection freeze, the launch generic satellite still permits
+   ordinary `recordType` locks so an operator can seal the specific final
+   metadata family that was just snapshotted. Broad `SNAPSHOTS` and
+   `METADATA_ALL` locks are freeze-specific terminal controls and must be set
+   before Core freeze if the collection policy requires them.
 
 ## Mutation API
 
@@ -2225,16 +2236,9 @@ event CollectionRecordRecorded(
     uint256 indexed collectionId,
     bytes32 indexed recordType,
     bytes32 indexed subjectId,
-    uint16 contentHashAlgorithm,
-    bytes contentHashDigest,
-    bytes32 contentHashCanonicalizationId,
-    string uri,
-    bytes32 schemaId,
-    bytes32 signatureScheme,
-    uint16 signatureHashAlgorithm,
-    bytes signatureHashDigest,
-    bytes32 signatureHashCanonicalizationId,
-    uint64 effectiveAt
+    CollectionRecord record,
+    bytes32 recordHash,
+    address recorder
 );
 
 event CollectionSnapshotPublished(
@@ -2311,12 +2315,35 @@ setScriptChunk              script admin or global admin
 setDependencyManifest       script admin or global admin
 submitArtistAttestation     artist address or delegated artist signer
 recordCollectionAttestation attester, collection metadata admin, or global admin
-recordCollectionRecord      preservation/admin/attester according to recordType
+recordCollectionRecord      preservation safe-operator or global admin
 publishCollectionSnapshot   collection metadata admin or global admin
 lockCollectionField         freeze admin or global admin
 ```
 
-Launch `recordCollectionRecord` authorization must be explicit by record type:
+The launch v1 generic metadata and preservation satellites use selector-level
+writer authorization. Their `setCollectionRecord`,
+`setCollectionRecordWithRevision`, `publishCollectionSnapshot`, and
+`recordCollectionRecord` selectors are whole-module safe-operator grants and a
+CON-015 launch-v1 exception to ADR-0004's nonconformant selector-map guidance,
+not record-family-limited delegation. The exception applies only when operators
+choose the launch generic satellites under Safe/operator custody. Operators
+must grant those selectors only to global admins or fully trusted
+metadata/preservation roles that are allowed to write every record type accepted
+by the target module. Other launch paths remain governed by the earlier
+nonconformant selector-map guidance unless this specific operator-custody model
+is explicitly in effect. Record-family-specific authorization remains a
+requirement for future typed companion modules or attestation workflows that
+delegate to artists, curators, institutions, rights administrators, provenance
+verifiers, or archive verifiers.
+
+This is an operator-custody risk, not just a UX detail. A compromised launch
+generic writer can publish identity, rights, C2PA/PREMIS, snapshot, and archive
+records for any collection in the module. Public-beta ceremony evidence must
+show that those writer selectors are granted only to fully trusted operational
+roles, and the risk register carries the narrower future-module mitigation.
+
+When record-family-specific modules are introduced, their authorization must be
+explicit by record type:
 
 ```text
 ARTIST_*                  artist address, delegated artist signer, or global admin
@@ -2339,7 +2366,8 @@ artwork finality, rights, royalties, minting, or ownership.
 Every mutation must check:
 
 1. The collection exists in Core.
-2. The caller has authority.
+2. The caller has whole-module authority for the launch generic satellite, or
+   record-family authority for a future typed module.
 3. The relevant lock is not active.
 4. The input is structurally valid.
 
@@ -2669,13 +2697,19 @@ Rules:
 4. Snapshot manifests should include typed metadata, custom fields, script and
    dependency manifests, media manifests, rights data, attestation references,
    archive receipts, and active view manifests.
-5. `CollectionFieldRevision` should be emitted for field changes where the old
+5. `latestSnapshotId` and `latestSnapshotHash` are append-only history pointers,
+   not a token rendering authority. If a Core-frozen collection needs
+   collector-facing finality, operators must publish the final display snapshot
+   before finality and then lock `SNAPSHOTS` or `METADATA_ALL` before Core
+   freeze, or lock the relevant ordinary `recordType` after the final snapshot
+   under the collection policy.
+6. `CollectionFieldRevision` should be emitted for field changes where the old
    hash is known. Reason codes should be open `bytes32` values such as
    `TYPO_FIX`, `ARTIST_UPDATE`, `RIGHTS_UPDATE`, `ARCHIVE_UPDATE`,
    `SCHEMA_MIGRATION`, or `ADMIN_CORRECTION`.
-6. `effectiveAt` should be explicit. It may equal the block timestamp, but the
+7. `effectiveAt` should be explicit. It may equal the block timestamp, but the
    event should not force indexers to infer the intended effective time.
-7. Freezing metadata should not erase the revision trail. It should make future
+8. Freezing metadata should not erase the revision trail. It should make future
    unauthorized revisions impossible.
 
 ## Artwork Finality Inputs
@@ -2920,6 +2954,11 @@ Core integration tests:
 
 Metadata write tests:
 
+The first launch implementation exercises typed launch groups through generic
+schema-bound records. The field-specific tests below apply directly to any
+future typed ABI promotion and indirectly to v1 records by mapping each field
+group to a `recordType`/`schemaId` pair.
+
 1. Admin can set collection identity.
 2. Admin can set collection people.
 3. Admin can set collection media.
@@ -2993,14 +3032,14 @@ than storing collection metadata inside `StreamMetadataRouter`.
 
 Core should keep `ERC721Enumerable` and token behavior. The metadata contract
 and v1 companion satellites should own the launch ABI listed in `Launch Scope
-Reduction`: typed collection metadata, arbitrary fields, script manifests,
-dependency manifests, media manifests, schema commitments, view manifests,
-snapshot events, revision events, generic collection records, field locks,
-PREMIS-style preservation records, C2PA references, IIIF manifest references,
-media relationship records, fixity records, artist attestations, generalized
-attestations, and museum-grade catalogue material. The metadata router should
-read from those outside-Core surfaces and focus on `tokenURI()` routing and
-renderer selection.
+Reduction`: compact schema-bound collection records for typed metadata groups,
+script/dependency/media manifest commitments, schema commitments, view
+manifests, snapshot events, revision events, generic collection records, field
+locks, PREMIS-style preservation records, C2PA references, IIIF manifest
+references, media relationship records, fixity records, artist attestations,
+generalized attestations, and museum-grade catalogue material. The metadata
+router should read from those outside-Core surfaces and focus on `tokenURI()`
+routing and renderer selection.
 
 This gives Stream enough room to support Core-native ERC-2981 while making
 collection metadata more durable, explicit, and extensible than the current

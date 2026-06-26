@@ -233,6 +233,70 @@ class ReleaseNotesTests(unittest.TestCase):
                     Path("release-artifacts/latest/risk-register.json"),
                 )
 
+    def test_generator_rejects_risk_area_count_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_notes_tree(root)
+            write_json(
+                root / "release-artifacts/latest/risk-register.json",
+                {
+                    "schema_version": "6529stream.risk-register.v1",
+                    "risks": [
+                        {
+                            "id": "RISK-001",
+                            "area": "release_evidence",
+                            "status": "open_blocker",
+                        },
+                        {
+                            "id": "RISK-002",
+                            "status": "accepted_local_baseline",
+                        },
+                    ],
+                },
+            )
+            with self.assertRaisesRegex(generator.ReleaseNotesError, "risk area counts"):
+                generator.build_notes(
+                    root,
+                    Path("release-artifacts/latest/release-notes.json"),
+                    Path("release-artifacts/latest/release-notes.md"),
+                    Path("CHANGELOG.md"),
+                    Path("release-artifacts/latest/release-manifest.json"),
+                    Path("release-artifacts/latest/bytecode-release-proof.json"),
+                    Path("release-artifacts/latest/risk-register.json"),
+                )
+
+    def test_generator_rejects_risk_status_count_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_notes_tree(root)
+            write_json(
+                root / "release-artifacts/latest/risk-register.json",
+                {
+                    "schema_version": "6529stream.risk-register.v1",
+                    "risks": [
+                        {
+                            "id": "RISK-001",
+                            "area": "release_evidence",
+                            "status": "open_blocker",
+                        },
+                        {
+                            "id": "RISK-002",
+                            "area": "audit_boundary",
+                        },
+                    ],
+                },
+            )
+            with self.assertRaisesRegex(generator.ReleaseNotesError, "risk status counts"):
+                generator.build_notes(
+                    root,
+                    Path("release-artifacts/latest/release-notes.json"),
+                    Path("release-artifacts/latest/release-notes.md"),
+                    Path("CHANGELOG.md"),
+                    Path("release-artifacts/latest/release-manifest.json"),
+                    Path("release-artifacts/latest/bytecode-release-proof.json"),
+                    Path("release-artifacts/latest/risk-register.json"),
+                )
+
     def test_generator_rejects_secret_shaped_changelog_entry(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
