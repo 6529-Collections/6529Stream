@@ -11,6 +11,8 @@ interface IStreamCore {
 
     function isCoreContract() external view returns (bool);
 
+    function newCollectionIndex() external view returns (uint256);
+
     function retrievewereDataAdded(uint256 _collectionID) external view returns (bool);
 
     function viewTokensIndexMin(uint256 _collectionID) external view returns (uint256);

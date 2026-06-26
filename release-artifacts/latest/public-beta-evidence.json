@@ -29,11 +29,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:812c55c6cb7326187976609f085dc393c13b5f24fcf50dbfa939a73a70096718"
+          "sha256": "sha256:4f87c97229c256793285cb14ce2426bd18113f13d1f663de5301323e0844ef33"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork deployment rehearsal artifact set now binds the CON-014 StreamMintManager deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork deployment rehearsal artifact set now binds the CON-015 collection metadata/preservation deployment and release-artifact changes. Prior PR #347 and PR #349 review evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "testnet_deployment_rehearsal",
@@ -66,7 +66,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/marketplace-indexer/fork-testnet-marketplace-indexer-evidence.json",
-          "sha256": "sha256:fb52a8c7203307aa72251860d7c4cb4fbbc1985b2998e5f22bb3488259b5df5b"
+          "sha256": "sha256:7f2c4119d73f14a72fd2a99166b9c89b9d6bc5488fe16635927c65972c2e3260"
         }
       ],
       "risk_acceptance": null,
@@ -80,11 +80,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json",
-          "sha256": "sha256:d8166526a697d9bedf3bc711d66ae42b32548301c4d5454fb1538de7695afe08"
+          "sha256": "sha256:8b91f2d2164071ab8dbc377121199119b8fe2706b0334820e93c86a54ce3ef3b"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the CON-014 StreamMintManager deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork ceremony artifact set references the fork deployment manifest and address book changed by the CON-015 collection metadata/preservation deployment and release-artifact updates. Prior reviewed issue #219 and PR #552 evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "fork_testnet_randomizer_operations_evidence",
@@ -94,11 +94,11 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-          "sha256": "sha256:c45499a028a2977c735616cc20014059ee59b581df3b9da78778d695c0ad3969"
+          "sha256": "sha256:8e3a1a4c68cf6570e919a5309cb39c3769e9e6916455fb0abb0488b9bba6a9c9"
         }
       ],
       "risk_acceptance": null,
-      "notes": "The retained fork randomizer operations artifact set now binds the CON-014 StreamMintManager deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the StreamMintManager PR before the row can return to complete. Public beta remains blocked."
+      "notes": "The retained fork randomizer operations artifact set now binds the CON-015 collection metadata/preservation deployment and release-artifact changes. Prior reviewed issue and PR evidence remains historical, but this changed artifact set is pending review in the collection metadata/preservation PR before the row can return to complete. Public beta remains blocked."
     },
     {
       "id": "verified_deployed_addresses",

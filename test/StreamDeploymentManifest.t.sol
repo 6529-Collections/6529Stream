@@ -10,16 +10,20 @@ import "../smart-contracts/RandomizerRNG.sol";
 import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamAssetPolicyRegistry.sol";
+import "../smart-contracts/StreamCollectionMetadata.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
+import "../smart-contracts/StreamPreservationRecords.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 
 contract StreamDeploymentManifestTest is CharacterizationTestBase {
+    string private constant MANIFEST_SCHEMA_VERSION = "6529stream.deployment-manifest.v1";
+
     function testLocalDeploymentRehearsalWiresStackAndCeremony() public {
         vm.chainId(31_337);
         RehearseDeployment rehearsor = new RehearseDeployment();
@@ -80,6 +84,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             "metadata uri hash"
         );
         Assertions.assertTrue(metadata.isStreamContractMetadata(), "metadata marker");
+        _assertMetadataSatellites(result);
         Assertions.assertEq(minter.streamDrops(), result.drops, "minter drops");
         Assertions.assertEq(drops.auctionContract(), result.auctions, "drops auction");
         Assertions.assertEq(drops.payOutAddress(), config.payout, "drops payout");
@@ -124,12 +129,121 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         );
     }
 
+    function _assertMetadataSatellites(RehearseDeployment.DeploymentResult memory result)
+        private
+        view
+    {
+        StreamCollectionMetadata collectionMetadata =
+            StreamCollectionMetadata(result.collectionMetadata);
+        StreamPreservationRecords preservationRecords =
+            StreamPreservationRecords(result.preservationRecords);
+
+        Assertions.assertEq(
+            collectionMetadata.streamCore(), result.core, "collection metadata core"
+        );
+        Assertions.assertEq(
+            collectionMetadata.adminsContract(), result.admins, "collection metadata admins"
+        );
+        Assertions.assertTrue(
+            collectionMetadata.isStreamCollectionMetadata(), "collection metadata marker"
+        );
+        Assertions.assertEq(
+            preservationRecords.streamCore(), result.core, "preservation records core"
+        );
+        Assertions.assertEq(
+            preservationRecords.adminsContract(), result.admins, "preservation records admins"
+        );
+        Assertions.assertTrue(
+            preservationRecords.isStreamPreservationRecords(), "preservation records marker"
+        );
+    }
+
     function testDeploymentManifestJsonArtifactsParse() public view {
         string memory schema = vm.readFile("deployments/schema/deployment-manifest.schema.json");
         string memory example = vm.readFile("deployments/examples/anvil-6529stream-v0.1.0-001.json");
 
         Assertions.assertTrue(vm.parseJson(schema).length > 0, "schema json invalid");
         Assertions.assertTrue(vm.parseJson(example).length > 0, "example json invalid");
+        Assertions.assertTrue(
+            _contains(bytes(example), bytes('"StreamCollectionMetadata"')),
+            "missing collection metadata"
+        );
+        Assertions.assertTrue(
+            _contains(bytes(example), bytes('"StreamPreservationRecords"')),
+            "missing preservation records"
+        );
+    }
+
+    function testDeploymentManifestHashBindsSatelliteDeployments() public {
+        vm.chainId(31_337);
+        RehearseDeployment rehearsor = new RehearseDeployment();
+        RehearseDeployment.DeploymentConfig memory config = rehearsor.defaultLocalConfig();
+
+        RehearseDeployment.DeploymentResult memory first = rehearsor.deployLocal(config);
+        RehearseDeployment.DeploymentResult memory second = rehearsor.deployLocal(config);
+
+        Assertions.assertEq(
+            first.manifestHash, _expectedManifestHash(config, first), "manifest hash reconstruction"
+        );
+        Assertions.assertTrue(
+            first.collectionMetadata != second.collectionMetadata,
+            "collection metadata address reused"
+        );
+        Assertions.assertTrue(
+            first.preservationRecords != second.preservationRecords,
+            "preservation records address reused"
+        );
+        Assertions.assertTrue(first.manifestHash != second.manifestHash, "manifest hash not bound");
+        Assertions.assertTrue(
+            _expectedManifestHashWithSatellites(
+                config, first, second.collectionMetadata, first.preservationRecords
+            ) != first.manifestHash,
+            "collection metadata satellite not bound"
+        );
+        Assertions.assertTrue(
+            _expectedManifestHashWithSatellites(
+                config, first, first.collectionMetadata, second.preservationRecords
+            ) != first.manifestHash,
+            "preservation records satellite not bound"
+        );
+        Assertions.assertTrue(
+            _expectedManifestHashWithSatellites(config, first, address(0), address(0))
+                != first.manifestHash,
+            "omitted metadata satellites not bound"
+        );
+    }
+
+    function testDeploymentManifestHashBindsSatelliteAdminDependencies() public {
+        vm.chainId(31_337);
+        RehearseDeployment rehearsor = new RehearseDeployment();
+        RehearseDeployment.DeploymentConfig memory config = rehearsor.defaultLocalConfig();
+
+        RehearseDeployment.DeploymentResult memory collectionResult = rehearsor.deployLocal(config);
+        bytes32 originalCollectionHash = _expectedManifestHash(config, collectionResult);
+        StreamAdmins alternateCollectionAdmins = new StreamAdmins(config.tdhSigner);
+
+        vm.prank(config.adminSafe);
+        StreamCollectionMetadata(collectionResult.collectionMetadata)
+            .updateAdminContract(address(alternateCollectionAdmins));
+
+        Assertions.assertTrue(
+            _expectedManifestHash(config, collectionResult) != originalCollectionHash,
+            "collection metadata admin binding not bound"
+        );
+
+        RehearseDeployment.DeploymentResult memory preservationResult =
+            rehearsor.deployLocal(config);
+        bytes32 originalPreservationHash = _expectedManifestHash(config, preservationResult);
+        StreamAdmins alternatePreservationAdmins = new StreamAdmins(config.tdhSigner);
+
+        vm.prank(config.adminSafe);
+        StreamPreservationRecords(preservationResult.preservationRecords)
+            .updateAdminContract(address(alternatePreservationAdmins));
+
+        Assertions.assertTrue(
+            _expectedManifestHash(config, preservationResult) != originalPreservationHash,
+            "preservation records admin binding not bound"
+        );
     }
 
     function testLocalAuctionCeremonyRehearsalSettlesAndWithdrawsProceeds() public {
@@ -229,9 +343,11 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
     function testAggregateDeploymentSuiteRunsAllRehearsals() public {
         vm.chainId(31_337);
         uint256 snapshotId = vm.snapshotState();
+        vm.pauseGasMetering();
         RehearseDeploymentSuite suite = new RehearseDeploymentSuite();
 
         RehearseDeploymentSuite.DeploymentSuiteResult memory result = suite.run();
+        vm.resumeGasMetering();
 
         Assertions.assertEq(
             result.suiteKindHash, keccak256(bytes("local-anvil-deployment-suite")), "suite kind"
@@ -280,8 +396,213 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
 
         Assertions.assertTrue(vm.revertToState(snapshotId), "revert suite snapshot");
         vm.chainId(31_337);
+        vm.pauseGasMetering();
         RehearseDeploymentSuite replayedSuite = new RehearseDeploymentSuite();
         RehearseDeploymentSuite.DeploymentSuiteResult memory replayed = replayedSuite.run();
+        vm.resumeGasMetering();
         Assertions.assertEq(replayed.suiteHash, result.suiteHash, "suite hash replay");
+    }
+
+    function _expectedManifestHash(
+        RehearseDeployment.DeploymentConfig memory config,
+        RehearseDeployment.DeploymentResult memory result
+    ) private view returns (bytes32) {
+        return _expectedManifestHashWithSatellites(
+            config, result, result.collectionMetadata, result.preservationRecords
+        );
+    }
+
+    function _expectedManifestHashWithSatellites(
+        RehearseDeployment.DeploymentConfig memory config,
+        RehearseDeployment.DeploymentResult memory result,
+        address collectionMetadata,
+        address preservationRecords
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                MANIFEST_SCHEMA_VERSION,
+                _versionHash(config),
+                _adminHash(config),
+                _contractMetadataHash(config),
+                _externalDependencyHash(config),
+                _deployedContractsHash(result, collectionMetadata, preservationRecords),
+                result.chainId,
+                result.sampleCollectionId,
+                result.sampleMintStart,
+                result.sampleMintEnd
+            )
+        );
+    }
+
+    function _deployedContractsHash(
+        RehearseDeployment.DeploymentResult memory result,
+        address collectionMetadata,
+        address preservationRecords
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _deploymentIdentityHash(result, collectionMetadata, preservationRecords),
+                _metadataCommerceHash(result),
+                _mintRandomizerHash(result)
+            )
+        );
+    }
+
+    function _deploymentIdentityHash(
+        RehearseDeployment.DeploymentResult memory result,
+        address collectionMetadata,
+        address preservationRecords
+    ) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _contractBinding(result.admins),
+                _contractBinding(result.dependencyRegistry),
+                _contractBinding(result.core),
+                _contractBinding(result.contractMetadata),
+                _collectionMetadataBinding(collectionMetadata),
+                _preservationRecordsBinding(preservationRecords)
+            )
+        );
+    }
+
+    function _collectionMetadataBinding(address collectionMetadata) private view returns (bytes32) {
+        if (collectionMetadata.code.length == 0) {
+            return keccak256(
+                abi.encode(_contractBinding(collectionMetadata), address(0), address(0), address(0))
+            );
+        }
+        StreamCollectionMetadata metadata = StreamCollectionMetadata(collectionMetadata);
+        return keccak256(
+            abi.encode(
+                _contractBinding(collectionMetadata),
+                metadata.streamCore(),
+                metadata.adminsContract(),
+                metadata.streamModuleSupersedes()
+            )
+        );
+    }
+
+    function _preservationRecordsBinding(address preservationRecords)
+        private
+        view
+        returns (bytes32)
+    {
+        if (preservationRecords.code.length == 0) {
+            return keccak256(
+                abi.encode(
+                    _contractBinding(preservationRecords), address(0), address(0), address(0)
+                )
+            );
+        }
+        StreamPreservationRecords records = StreamPreservationRecords(preservationRecords);
+        return keccak256(
+            abi.encode(
+                _contractBinding(preservationRecords),
+                records.streamCore(),
+                records.adminsContract(),
+                records.streamModuleSupersedes()
+            )
+        );
+    }
+
+    function _metadataCommerceHash(RehearseDeployment.DeploymentResult memory result)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _contractBinding(result.curatorsPool),
+                _contractBinding(result.drops),
+                _contractBinding(result.auctions),
+                _contractBinding(result.assetPolicyRegistry),
+                _contractBinding(result.splitFactory),
+                _contractBinding(result.revenueResolver),
+                _contractBinding(result.primarySaleSettlement)
+            )
+        );
+    }
+
+    function _mintRandomizerHash(RehearseDeployment.DeploymentResult memory result)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _contractBinding(result.minter),
+                _contractBinding(result.mintLedger),
+                _contractBinding(result.mintManager),
+                _contractBinding(result.randomizerVrf),
+                _contractBinding(result.randomizerRng)
+            )
+        );
+    }
+
+    function _contractBinding(address target) private view returns (bytes32) {
+        return keccak256(abi.encode(target, target.codehash));
+    }
+
+    function _contains(bytes memory input, bytes memory needle) private pure returns (bool) {
+        if (needle.length == 0 || needle.length > input.length) return false;
+        for (uint256 i = 0; i <= input.length - needle.length; i++) {
+            bool matched = true;
+            for (uint256 j = 0; j < needle.length; j++) {
+                if (input[i + j] != needle[j]) {
+                    matched = false;
+                    break;
+                }
+            }
+            if (matched) return true;
+        }
+        return false;
+    }
+
+    function _versionHash(RehearseDeployment.DeploymentConfig memory config)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(config.protocolVersion, config.deploymentVersion));
+    }
+
+    function _contractMetadataHash(RehearseDeployment.DeploymentConfig memory config)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(bytes(config.contractMetadataURI));
+    }
+
+    function _adminHash(RehearseDeployment.DeploymentConfig memory config)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                config.deployer,
+                config.adminSafe,
+                config.pauseGuardian,
+                config.emergencyRecipient,
+                config.tdhSigner,
+                config.payout
+            )
+        );
+    }
+
+    function _externalDependencyHash(RehearseDeployment.DeploymentConfig memory config)
+        private
+        pure
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                config.delegation,
+                config.vrfCoordinator,
+                config.arrngController,
+                config.vrfSubscriptionId
+            )
+        );
     }
 }

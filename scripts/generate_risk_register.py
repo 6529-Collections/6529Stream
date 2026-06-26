@@ -168,6 +168,37 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         "tracking": ["https://github.com/6529-Collections/6529Stream/issues/362"],
     },
     {
+        "id": "RISK-GOV-002",
+        "title": "Metadata satellite writer grants are whole-module",
+        "area": "governance",
+        "severity": "high",
+        "status": "planned_mitigation",
+        "owner": "protocol",
+        "target_gate": "Gate E",
+        "source": "CON-015 launch metadata and preservation authorization model",
+        "mitigation": (
+            "Grant launch generic metadata and preservation writer selectors only "
+            "to fully trusted safe-operator roles, retain ceremony evidence for "
+            "those grants, and move artist, curator, institution, rights, provenance, "
+            "and archive-specific delegation into future typed companion modules."
+        ),
+        "residual_risk": (
+            "A compromised or over-broad metadata/preservation writer can publish "
+            "records for every record family accepted by the target launch module."
+        ),
+        "evidence_paths": [
+            "docs/collection-metadata-contract.md",
+            "docs/deployment.md",
+            "ops/EXECUTION_BACKLOG.md",
+        ],
+        "checks": [
+            "forge test --match-path test/StreamCollectionMetadata.t.sol -vvv",
+            "forge test --match-path test/StreamPreservationRecords.t.sol -vvv",
+            "python scripts/check_risk_register.py",
+        ],
+        "tracking": ["ops/EXECUTION_BACKLOG.md"],
+    },
+    {
         "id": "RISK-META-001",
         "title": "Marketplace, indexer, and metadata browser evidence is incomplete",
         "area": "metadata_marketplace",

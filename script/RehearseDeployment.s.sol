@@ -9,6 +9,7 @@ import "../smart-contracts/RandomizerVRF.sol";
 import "../smart-contracts/StreamAssetPolicyRegistry.sol";
 import "../smart-contracts/StreamAdmins.sol";
 import "../smart-contracts/StreamContractMetadata.sol";
+import "../smart-contracts/StreamCollectionMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
@@ -16,6 +17,7 @@ import "../smart-contracts/StreamMinter.sol";
 import "../smart-contracts/StreamMintLedger.sol";
 import "../smart-contracts/StreamMintManager.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
+import "../smart-contracts/StreamPreservationRecords.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
 import "../smart-contracts/StreamSplitFactory.sol";
 
@@ -60,6 +62,8 @@ contract RehearseDeployment {
         address dependencyRegistry;
         address core;
         address contractMetadata;
+        address collectionMetadata;
+        address preservationRecords;
         address curatorsPool;
         address minter;
         address drops;
@@ -162,6 +166,8 @@ contract RehearseDeployment {
         DependencyRegistry dependencyRegistry;
         StreamCore core;
         StreamContractMetadata contractMetadata;
+        StreamCollectionMetadata collectionMetadata;
+        StreamPreservationRecords preservationRecords;
         StreamCuratorsPool curatorsPool;
         StreamMinter minter;
         StreamDrops drops;
@@ -187,6 +193,12 @@ contract RehearseDeployment {
         );
         deployed.contractMetadata = new StreamContractMetadata(
             address(deployed.core), address(deployed.admins), config.contractMetadataURI
+        );
+        deployed.collectionMetadata = new StreamCollectionMetadata(
+            address(deployed.core), address(deployed.admins), address(0)
+        );
+        deployed.preservationRecords = new StreamPreservationRecords(
+            address(deployed.core), address(deployed.admins), address(0)
         );
         deployed.curatorsPool = new StreamCuratorsPool(address(deployed.admins), config.delegation);
         deployed.minter =
@@ -287,6 +299,8 @@ contract RehearseDeployment {
             dependencyRegistry: address(deployed.dependencyRegistry),
             core: address(deployed.core),
             contractMetadata: address(deployed.contractMetadata),
+            collectionMetadata: address(deployed.collectionMetadata),
+            preservationRecords: address(deployed.preservationRecords),
             curatorsPool: address(deployed.curatorsPool),
             minter: address(deployed.minter),
             drops: address(deployed.drops),
@@ -303,17 +317,20 @@ contract RehearseDeployment {
             sampleMintStart: mintStart,
             sampleMintEnd: mintEnd,
             chainId: block.chainid,
-            manifestHash: _manifestHash(config, block.chainid, collectionId, mintStart, mintEnd)
+            manifestHash: _manifestHash(
+                config, deployed, block.chainid, collectionId, mintStart, mintEnd
+            )
         });
     }
 
     function _manifestHash(
         DeploymentConfig memory config,
+        DeployedContracts memory deployed,
         uint256 chainId,
         uint256 collectionId,
         uint256 mintStart,
         uint256 mintEnd
-    ) private pure returns (bytes32) {
+    ) private view returns (bytes32) {
         return keccak256(
             abi.encode(
                 MANIFEST_SCHEMA_VERSION,
@@ -321,12 +338,108 @@ contract RehearseDeployment {
                 _adminHash(config),
                 _contractMetadataHash(config),
                 _externalDependencyHash(config),
+                _deployedContractsHash(deployed),
                 chainId,
                 collectionId,
                 mintStart,
                 mintEnd
             )
         );
+    }
+
+    function _deployedContractsHash(DeployedContracts memory deployed)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _deploymentIdentityHash(deployed),
+                _metadataCommerceHash(deployed),
+                _mintRandomizerHash(deployed)
+            )
+        );
+    }
+
+    function _deploymentIdentityHash(DeployedContracts memory deployed)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _contractBinding(address(deployed.admins)),
+                _contractBinding(address(deployed.dependencyRegistry)),
+                _contractBinding(address(deployed.core)),
+                _contractBinding(address(deployed.contractMetadata)),
+                _collectionMetadataBinding(deployed.collectionMetadata),
+                _preservationRecordsBinding(deployed.preservationRecords)
+            )
+        );
+    }
+
+    function _collectionMetadataBinding(StreamCollectionMetadata collectionMetadata)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _contractBinding(address(collectionMetadata)),
+                collectionMetadata.streamCore(),
+                collectionMetadata.adminsContract(),
+                collectionMetadata.streamModuleSupersedes()
+            )
+        );
+    }
+
+    function _preservationRecordsBinding(StreamPreservationRecords preservationRecords)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _contractBinding(address(preservationRecords)),
+                preservationRecords.streamCore(),
+                preservationRecords.adminsContract(),
+                preservationRecords.streamModuleSupersedes()
+            )
+        );
+    }
+
+    function _metadataCommerceHash(DeployedContracts memory deployed)
+        private
+        view
+        returns (bytes32)
+    {
+        return keccak256(
+            abi.encode(
+                _contractBinding(address(deployed.curatorsPool)),
+                _contractBinding(address(deployed.drops)),
+                _contractBinding(address(deployed.auctions)),
+                _contractBinding(address(deployed.assetPolicyRegistry)),
+                _contractBinding(address(deployed.splitFactory)),
+                _contractBinding(address(deployed.revenueResolver)),
+                _contractBinding(address(deployed.primarySaleSettlement))
+            )
+        );
+    }
+
+    function _mintRandomizerHash(DeployedContracts memory deployed) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                _contractBinding(address(deployed.minter)),
+                _contractBinding(address(deployed.mintLedger)),
+                _contractBinding(address(deployed.mintManager)),
+                _contractBinding(address(deployed.randomizerVrf)),
+                _contractBinding(address(deployed.randomizerRng))
+            )
+        );
+    }
+
+    function _contractBinding(address target) private view returns (bytes32) {
+        return keccak256(abi.encode(target, target.codehash));
     }
 
     function _versionHash(DeploymentConfig memory config) private pure returns (bytes32) {

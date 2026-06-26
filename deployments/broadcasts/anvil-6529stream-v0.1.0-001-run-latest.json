@@ -30,6 +30,18 @@
     },
     {
       "transactionType": "CREATE",
+      "contractName": "StreamCollectionMetadata",
+      "contractAddress": "0x1000000000000000000000000000000000000011",
+      "hash": "0x1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "transactionType": "CREATE",
+      "contractName": "StreamPreservationRecords",
+      "contractAddress": "0x1000000000000000000000000000000000000012",
+      "hash": "0x1212121212121212121212121212121212121212121212121212121212121212"
+    },
+    {
+      "transactionType": "CREATE",
       "contractName": "StreamCuratorsPool",
       "contractAddress": "0x1000000000000000000000000000000000000004",
       "hash": "0x0404040404040404040404040404040404040404040404040404040404040404"
@@ -131,6 +143,18 @@
       "status": "0x1",
       "contractAddress": "0x100000000000000000000000000000000000000a",
       "blockNumber": "0xa"
+    },
+    {
+      "transactionHash": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000011",
+      "blockNumber": "0x11"
+    },
+    {
+      "transactionHash": "0x1212121212121212121212121212121212121212121212121212121212121212",
+      "status": "0x1",
+      "contractAddress": "0x1000000000000000000000000000000000000012",
+      "blockNumber": "0x12"
     },
     {
       "transactionHash": "0x0404040404040404040404040404040404040404040404040404040404040404",

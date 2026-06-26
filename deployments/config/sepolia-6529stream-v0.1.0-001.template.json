@@ -145,6 +145,26 @@
         "verification_status": "not_started"
       },
       {
+        "name": "StreamCollectionMetadata",
+        "address": "0x0000000000000000000000000000000000000011",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_started"
+      },
+      {
+        "name": "StreamPreservationRecords",
+        "address": "0x0000000000000000000000000000000000000012",
+        "constructor_args": [
+          "$DEPLOYED_STREAM_CORE",
+          "$DEPLOYED_STREAM_ADMINS",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_started"
+      },
+      {
         "name": "StreamCuratorsPool",
         "address": "0x0000000000000000000000000000000000000004",
         "constructor_args": [

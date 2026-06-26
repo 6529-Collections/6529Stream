@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/mint-manager-phase-execution` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/635` |
-| Active issue | https://github.com/6529-Collections/6529Stream/issues/636 |
-| Active PR | https://github.com/6529-Collections/6529Stream/pull/637 |
-| Next issue | Collection metadata and preservation satellites after the manager phase/execution integration. |
+| Active PR branch | `codex/collection-metadata-preservation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/637` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/638` |
+| Active PR | TBD |
+| Next issue | Collection attestations and collection view/reference satellites after the metadata/preservation slice. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-25 21:55 UTC` |
+| Last updated | `2026-06-26 07:13 UTC` |
 
 ## Current Run Notes
 
@@ -53,48 +53,38 @@ evidence, and audit/readiness gates.
   completed.
 - PR #635 merged the `StreamMintLedger` static counter accounting foundation
   and issue #634 is closed completed.
-- The current topic is issue #636 on branch
-  `codex/mint-manager-phase-execution`.
+- PR #637 merged the `StreamMintManager` phase policy and prepared-mint
+  execution slice, and issue #636 is closed completed.
+- The current topic is CON-015 on branch
+  `codex/collection-metadata-preservation`; issue #638 is open and PR creation
+  is pending after final local packaging.
 - For substantive local drafts, request parallel OpenRouter review from Opus
   4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic adds the full `StreamMintManager` phase policy and execution
-  integration on top of the merged Core hook and ledger foundations.
-- Local CON-014 draft implements `StreamMintManager` phase configuration,
-  executor allowlists, phase pause/window guards, launch-static ledger
-  consumption, stale-policy and replay protection, and Core prepare/complete
-  execution. The read-only local verifier returned no blockers; its optional
-  coverage suggestions have been folded into the focused manager suite, which
-  now passes 36 tests, including context batch counters, second-token receiver
-  rollback, receiver/admin reentrancy, policy-hash event payloads, exact max
-  launch batch, Core supply-exhaustion rollback, and executor-cap overflow
-  immutability. Deployment/release wiring, evidence hash refreshes, checked
-  manager hash-domain coverage, generated artifacts, `codex-diff-check`, and
-  the full Windows `scripts\check.ps1` wrapper are complete. The latest full
-  wrapper pass is `C:\Users\Administrator\AppData\Local\Temp\6529stream-check-20260625-200854.log`;
-  it reached the deployment-suite, standalone deployment, auction ceremony, and
-  emergency redeployment rehearsal scripts successfully. Current production
-  `via-ir` size output records `StreamCore` at 24,150 bytes with 426 bytes of
-  EIP-170 margin and `StreamMintManager` at 16,812 bytes. The changed fork
-  deployment, fork ceremony, and fork randomizer evidence rows are pending with
-  #216/#219/#220 restored in the issue-link set until this PR's updated
-  artifacts are reviewed. Final post-fix OpenRouter review passed with Opus
-  4.8, GLM 5.2, and GPT-5.5 Pro at high reasoning; all three approve after the
-  stale size-prose blocker was fixed. PR #637 is open. A first CI follow-up
-  stabilized one-of-one provenance/permanence descriptor hashes across Windows
-  and Linux checkouts; the current local follow-up normalizes risk-register
-  text-file references the same way after Linux CI found the matching drift.
-  Focused risk-register, blocker-report, release-evidence, release manifest,
-  bytecode proof, lockfile, checksum, release artifact, and whitespace gates
-  pass locally. Next transition: commit and push the risk-register CI fix, wait
-  for latest-head CI, and request a fresh CodeRabbit pass when the temporary
-  rate limit clears.
-- The manager integration slice should keep product policy outside Core,
-  consume only launch-static ledger counters, and defer resolver modes,
-  callable nullifiers, custom gates, ERC-20 auction bidding, and royalty
-  resolver integration unless the implementation proves a smaller reviewed
-  boundary is needed.
-- Preserve the existing `StreamDrops -> StreamMinter -> StreamCore` flow unless
-  a later PR intentionally routes it through the new manager boundary.
+- Current topic adds launch v1 `StreamCollectionMetadata` and
+  `StreamPreservationRecords` as outside-Core satellites. The local draft uses
+  compact schema-bound generic metadata records for typed launch groups,
+  immutable snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation
+  records with tagged hash references, event reconstruction, deployment
+  rehearsal wiring, and release artifact coverage. Focused
+  `StreamCollectionMetadata`, `StreamPreservationRecords`, and
+  `StreamDeploymentManifest` tests pass locally after the snapshot hash was
+  domain-separated by `snapshotId`. Production via-IR size output records
+  `StreamCore` at 24,150 bytes with 426 bytes of EIP-170 margin,
+  `StreamCollectionMetadata` at 10,166 bytes, and
+  `StreamPreservationRecords` at 7,734 bytes.
+- Current local review status for CON-015: Opus 4.8 and GLM 5.2 returned no
+  P0/P1 issues. GPT-5.5 Pro ran at high/max reasoning, found one P2 in the
+  deployment manifest identity binding, and closed that finding after the
+  follow-up fix bound satellite `streamCore`, `adminsContract`, and
+  `streamModuleSupersedes` state.
+- Remaining local work before opening CON-015: finish the retained-evidence and
+  manifest-preimage documentation cleanup, regenerate affected release
+  artifacts, rerun focused and broad validation, then open the PR for issue
+  #638.
+- Keep attestations, collection view/reference satellites, typed
+  PREMIS/C2PA/IIIF companion ABIs, custom gates, ERC-20 auction bidding, and
+  royalty resolver integration as follow-up slices unless the current review
+  cycle proves one is required for this PR.
 - Keep GPT-5.5 Pro on high/max reasoning for OpenRouter reviews. Long waits are
   expected; do not lower reasoning for speed.
 

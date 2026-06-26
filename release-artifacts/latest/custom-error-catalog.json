@@ -6,17 +6,17 @@
     "output": "release-artifacts/latest/custom-error-catalog.json"
   },
   "summary": {
-    "custom_error_count": 177,
-    "contract_count": 15,
+    "custom_error_count": 199,
+    "contract_count": 17,
     "category_counts": {
-      "access_control": 10,
+      "access_control": 12,
       "asset_policy_safety": 7,
       "auction_payment_safety": 3,
-      "configuration": 14,
-      "metadata_integrity": 18,
+      "configuration": 18,
+      "metadata_integrity": 32,
       "mint_ledger_accounting": 14,
       "mint_manager_policy": 22,
-      "pause_emergency": 2,
+      "pause_emergency": 4,
       "primary_settlement_safety": 16,
       "randomness_lifecycle": 26,
       "revenue_assignment_safety": 12,
@@ -24,18 +24,26 @@
       "supply_minting": 14
     },
     "severity_counts": {
-      "critical": 10,
-      "high": 139,
-      "medium": 28
+      "critical": 12,
+      "high": 155,
+      "medium": 32
     },
     "duplicate_selectors": {
       "0x1c9aebc3": [
+        "StreamCollectionMetadata:MetadataMutationPaused()",
         "StreamContractMetadata:MetadataMutationPaused()",
-        "StreamCore:MetadataMutationPaused()"
+        "StreamCore:MetadataMutationPaused()",
+        "StreamPreservationRecords:MetadataMutationPaused()"
       ],
       "0x313ee3c2": [
+        "StreamCollectionMetadata:InvalidAdminContract()",
         "StreamContractMetadata:InvalidAdminContract()",
-        "StreamCore:InvalidAdminContract()"
+        "StreamCore:InvalidAdminContract()",
+        "StreamPreservationRecords:InvalidAdminContract()"
+      ],
+      "0x32f74e98": [
+        "StreamCollectionMetadata:CollectionDoesNotExist(uint256)",
+        "StreamPreservationRecords:CollectionDoesNotExist(uint256)"
       ],
       "0x3ee5aeb5": [
         "StreamAuctions:ReentrancyGuardReentrantCall()",
@@ -105,6 +113,10 @@
         "NextGenRandomizerRNG:EmptyRandomWords(uint256)",
         "NextGenRandomizerVRF:EmptyRandomWords(uint256)"
       ],
+      "0xc5e92023": [
+        "StreamCollectionMetadata:FunctionAdminUnauthorized(address,bytes4)",
+        "StreamPreservationRecords:FunctionAdminUnauthorized(address,bytes4)"
+      ],
       "0xd6d556a3": [
         "NextGenRandomizerRNG:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)",
         "NextGenRandomizerVRF:WrongRandomnessTokenCollection(uint256,uint256,uint256,uint256)"
@@ -112,6 +124,11 @@
       "0xee84f40b": [
         "StreamPrimarySaleSettlement:UnsupportedAsset(address)",
         "StreamSplitWallet:UnsupportedAsset(address)"
+      ],
+      "0xf48e6f72": [
+        "StreamCollectionMetadata:InvalidCoreContract()",
+        "StreamContractMetadata:InvalidCoreContract()",
+        "StreamPreservationRecords:InvalidCoreContract()"
       ],
       "0xfae276cd": [
         "NextGenRandomizerRNG:RandomnessRequestNotFulfilled(uint256,uint8)",
@@ -1340,6 +1357,413 @@
         "tests": [
           "test/StreamPaymentsInvariant.t.sol",
           "test/StreamCustomErrorNegative.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:CollectionDoesNotExist(uint256)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "CollectionDoesNotExist",
+      "signature": "CollectionDoesNotExist(uint256)",
+      "selector": "0x32f74e98",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:CollectionMetadataFrozen(uint256)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "CollectionMetadataFrozen",
+      "signature": "CollectionMetadataFrozen(uint256)",
+      "selector": "0xc727a46d",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:CollectionMetadataLocked(uint256,bytes32)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "CollectionMetadataLocked",
+      "signature": "CollectionMetadataLocked(uint256,bytes32)",
+      "selector": "0xe479c13f",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "recordType",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:CollectionSnapshotAlreadyPublished(uint256,bytes32)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "CollectionSnapshotAlreadyPublished",
+      "signature": "CollectionSnapshotAlreadyPublished(uint256,bytes32)",
+      "selector": "0x6abe154a",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "snapshotId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:FunctionAdminUnauthorized(address,bytes4)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "FunctionAdminUnauthorized",
+      "signature": "FunctionAdminUnauthorized(address,bytes4)",
+      "selector": "0xc5e92023",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:InvalidAdminContract()",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "InvalidAdminContract",
+      "signature": "InvalidAdminContract()",
+      "selector": "0x313ee3c2",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:InvalidCoreContract()",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "InvalidCoreContract",
+      "signature": "InvalidCoreContract()",
+      "selector": "0xf48e6f72",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamMintManager.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:InvalidMetadataRecord(bytes32,bytes32,bytes32)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "InvalidMetadataRecord",
+      "signature": "InvalidMetadataRecord(bytes32,bytes32,bytes32)",
+      "selector": "0x95d3a198",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recordType",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "schemaId",
+          "type": "bytes32"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "dataHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:InvalidSnapshotId(bytes32)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "InvalidSnapshotId",
+      "signature": "InvalidSnapshotId(bytes32)",
+      "selector": "0xe8bdc90d",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "snapshotId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:MetadataMutationPaused()",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "MetadataMutationPaused",
+      "signature": "MetadataMutationPaused()",
+      "selector": "0x1c9aebc3",
+      "category": "pause_emergency",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Do not retry until the relevant pause domain is unpaused by governance or the operator runbook.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamPauseControls.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:MetadataRecordTypeLimitExceeded(uint256,uint256)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "MetadataRecordTypeLimitExceeded",
+      "signature": "MetadataRecordTypeLimitExceeded(uint256,uint256)",
+      "selector": "0x23f3c54c",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "count",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maximum",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:MetadataRevisionMismatch(bytes32,uint64,uint64)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "MetadataRevisionMismatch",
+      "signature": "MetadataRevisionMismatch(bytes32,uint64,uint64)",
+      "selector": "0xd8f1cf15",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recordType",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint64",
+          "name": "expected",
+          "type": "uint64"
+        },
+        {
+          "index": 2,
+          "internal_type": "uint64",
+          "name": "actual",
+          "type": "uint64"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamCollectionMetadata:MetadataURITooLarge(uint256,uint256)",
+      "contract": "StreamCollectionMetadata",
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "name": "MetadataURITooLarge",
+      "signature": "MetadataURITooLarge(uint256,uint256)",
+      "selector": "0xbf37f79e",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maximum",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCollectionMetadata.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }
@@ -3703,6 +4127,273 @@
         "source_artifact": "out/StreamMintManager.sol/StreamMintManager.json",
         "tests": [
           "test/StreamMintManager.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:CollectionDoesNotExist(uint256)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "CollectionDoesNotExist",
+      "signature": "CollectionDoesNotExist(uint256)",
+      "selector": "0x32f74e98",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "collectionId",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:CollectionRecordAlreadyExists(bytes32)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "CollectionRecordAlreadyExists",
+      "signature": "CollectionRecordAlreadyExists(bytes32)",
+      "selector": "0x37610c08",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recordHash",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:FunctionAdminUnauthorized(address,bytes4)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "FunctionAdminUnauthorized",
+      "signature": "FunctionAdminUnauthorized(address,bytes4)",
+      "selector": "0xc5e92023",
+      "category": "access_control",
+      "severity": "critical",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "address",
+          "name": "caller",
+          "type": "address"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes4",
+          "name": "selector",
+          "type": "bytes4"
+        }
+      ],
+      "caller_action": "Do not retry unchanged; verify caller role, signer, coordinator, or authorized contract address.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamCoreCustomErrors.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:InvalidAdminContract()",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "InvalidAdminContract",
+      "signature": "InvalidAdminContract()",
+      "selector": "0x313ee3c2",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "InvalidCollectionRecord",
+      "signature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+      "selector": "0xa9359e59",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "bytes32",
+          "name": "recordType",
+          "type": "bytes32"
+        },
+        {
+          "index": 1,
+          "internal_type": "bytes32",
+          "name": "subjectId",
+          "type": "bytes32"
+        },
+        {
+          "index": 2,
+          "internal_type": "bytes32",
+          "name": "schemaId",
+          "type": "bytes32"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:InvalidCoreContract()",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "InvalidCoreContract",
+      "signature": "InvalidCoreContract()",
+      "selector": "0xf48e6f72",
+      "category": "configuration",
+      "severity": "medium",
+      "inputs": [],
+      "caller_action": "Verify the configured address, percentage, or protocol parameter before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamRoyalty.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamMintManager.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:InvalidHashRef(uint16,uint256)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "InvalidHashRef",
+      "signature": "InvalidHashRef(uint16,uint256)",
+      "selector": "0x60a92160",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint16",
+          "name": "algorithm",
+          "type": "uint16"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "digestLength",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:MetadataMutationPaused()",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "MetadataMutationPaused",
+      "signature": "MetadataMutationPaused()",
+      "selector": "0x1c9aebc3",
+      "category": "pause_emergency",
+      "severity": "high",
+      "inputs": [],
+      "caller_action": "Do not retry until the relevant pause domain is unpaused by governance or the operator runbook.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamPauseControls.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
+        ],
+        "surface_report": "release-artifacts/latest/protocol-surface-report.json"
+      }
+    },
+    {
+      "id": "StreamPreservationRecords:PreservationURITooLarge(uint256,uint256)",
+      "contract": "StreamPreservationRecords",
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "name": "PreservationURITooLarge",
+      "signature": "PreservationURITooLarge(uint256,uint256)",
+      "selector": "0x502ad1b0",
+      "category": "metadata_integrity",
+      "severity": "high",
+      "inputs": [
+        {
+          "index": 0,
+          "internal_type": "uint256",
+          "name": "actual",
+          "type": "uint256"
+        },
+        {
+          "index": 1,
+          "internal_type": "uint256",
+          "name": "maximum",
+          "type": "uint256"
+        }
+      ],
+      "caller_action": "Treat as terminal for the submitted metadata/dependency payload; refresh release artifacts and validate field policy before retrying.",
+      "traceability": {
+        "source_artifact": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+        "tests": [
+          "test/StreamMetadataCrossInvariants.t.sol",
+          "test/StreamMetadataUtf8.t.sol",
+          "test/StreamCustomErrorNegative.t.sol",
+          "test/StreamPreservationRecords.t.sol"
         ],
         "surface_report": "release-artifacts/latest/protocol-surface-report.json"
       }

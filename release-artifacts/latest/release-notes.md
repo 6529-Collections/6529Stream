@@ -31,6 +31,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Added the Core mint-manager hook surface, including a validated `mintManager` pointer, manager-only mint and prepared-mint calls, canonical `tokenCollectionIdentity` reads, prepared operation binding, and focused rollback/callback coverage for the launch mint-manager migration, with mint-manager replacement left available as the Core recovery path for a stranded prepared mint. This uses accepted Core bytecode-spend exception `CORE-SPEND-2026-06-24-001` for the measured `StreamCore` runtime of 24,150 bytes, a +1,966-byte delta over the 22,184-byte approved baseline, and 426 bytes of EIP-170 margin, which is above the 384-byte release floor but below the 512-byte warning threshold.
 - Added the `StreamMintLedger` static counter accounting foundation, with deployed-contract ledger writers, registered phase policy hashes, launch-safe static counter policies, cap-checked counter consumption, authorization replay protection, and focused ledger tests, without adding Core bytecode or routing existing sale/drop/auction flows through the mint manager yet.
 - Added the `StreamMintManager` phase policy and prepared-mint execution surface, with launch-static counter policy registration, executor allowlists, phase pause/window guards, bounded ledger consumption construction, stale-policy and authorization replay protection, Core prepare/complete execution, deployment rehearsal wiring, release-artifact coverage, and focused rollback/reentrancy tests while keeping gates, resolver counters, callable nullifiers, and existing Drops/Auctions routing as follow-up slices.
+- Added launch v1 `StreamCollectionMetadata` and `StreamPreservationRecords` satellites, with schema-bound collection metadata records, immutable snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation records, tagged hash references, post-freeze append-only preservation behavior, deployment rehearsal wiring, release-artifact coverage, and focused event-reconstruction/admin/freeze tests while keeping attestations and view references as follow-up satellites.
 - Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.
 - Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.
 - Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.
@@ -240,7 +241,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Added lifecycle-aware stale and failed randomness metadata states for minted tokens whose hash is still unset, with off-chain URI fixtures, schema-v1 on-chain JSON fixtures, token state view coverage, fallback-to-pending coverage, and final-hash override coverage.
 - Added focused randomizer migration regressions proving unsupported lifecycle providers do not block migration while lifecycle-aware providers with failed pending-request probes still block replacement.
 - Pinned release-artifact, JavaScript, and Python text files to LF line endings so dependency artifact source hashes stay deterministic across Windows and Linux checkouts.
-- Recovered 392 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; the current production via-IR runtime is 21,831 bytes with 2,745 bytes of EIP-170 margin while the approved bytecode-spend ceiling remains 22,184 bytes. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.
+- Recovered 392 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; that release step measured production via-IR runtime at 21,831 bytes with 2,745 bytes of EIP-170 margin under the then-current 22,184-byte approved ceiling. Later Core mint-manager hook work supersedes the current runtime measurement and approved exception ceiling in the Unreleased section. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.
 - Hardened the Windows checked-native helper so successful commands that write accepted warning output to stderr still pass based on exit code, with runtime harness coverage for stderr-on-success behavior, and taught the Solidity formatting checker to ignore CRLF-only diffs for formatting-required files while preserving the documented vendored exemption set.
 - Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.
 - Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.
@@ -281,15 +282,15 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 - Bytecode proof local/fork status: `generated_from_committed_artifacts`
 - Bytecode proof production status: `missing_reviewed_live_proof`
-- Contract proof count: `48`
-- Risk count: `11`
+- Contract proof count: `54`
+- Risk count: `12`
 
 ### Risk Status Counts
 
 - `accepted_local_baseline`: 2
 - `mitigated_local`: 2
 - `open_blocker`: 6
-- `planned_mitigation`: 1
+- `planned_mitigation`: 2
 
 ### Risk Area Counts
 
@@ -297,7 +298,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - `audit_boundary`: 1
 - `core_size`: 1
 - `external_evidence`: 1
-- `governance`: 1
+- `governance`: 2
 - `metadata_marketplace`: 1
 - `one_of_one_product`: 1
 - `randomizer_operations`: 1

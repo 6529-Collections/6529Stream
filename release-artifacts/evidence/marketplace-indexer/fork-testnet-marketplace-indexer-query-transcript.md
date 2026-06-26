@@ -20,9 +20,9 @@ live marketplace proof and not release readiness proof.
 | `release-artifacts/evidence/fork-metadata-browser/token-uri.txt` | `sha256:012fb045321c07f79d98e57dd15c0126912e5dd25bdf8836033336fc07c60c5f` |
 | `release-artifacts/evidence/fork-metadata-browser/browser-transcript.md` | `sha256:e890afb15afc48c740401894477183901a821d386af5211ae558be97e3c70487` |
 | `release-artifacts/evidence/fork-metadata-browser/fork-metadata-browser-evidence.json` | `sha256:1b74ef25cb3bf52a7dcc4bd91afee3ce559b3e044b0bfb0ca73eaeed286d6fb3` |
-| `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` | `sha256:b75d7a207fbf2fa7b4fceae1f45fe418d536c30a476f760a9c165a3ebfc58ba8` |
-| `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` | `sha256:f27a73fe36514a539b6528813d877232bcc4b3c31e8bc242a26647013caa104b` |
-| `release-artifacts/latest/event-topic-catalog.json` | `sha256:6c5ceb13e21bf9c43239f9bd802d5f7f76424519e1a3777a1c6eabe065e63907` |
+| `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` | `sha256:a4455adbb7a605638c44167dc02006703da77deaa616dd7992494eab6484a2e7` |
+| `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json` | `sha256:7cdd24c3270e13f091b68d731f0bf04fba8cd50dc94c03bf0cb78a6bf996e38e` |
+| `release-artifacts/latest/event-topic-catalog.json` | `sha256:56ea6ff62bd6c91933ce80cd99ebb08ab88a0d6d99a68f54e332910176fd6bae` |
 
 ## Environment
 

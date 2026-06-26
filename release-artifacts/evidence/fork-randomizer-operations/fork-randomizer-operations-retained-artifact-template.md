@@ -13,7 +13,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI passed before this evidence PR; StreamMintManager PR review pending for changed CON-014 artifacts`
+- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI passed before this evidence PR; collection metadata/preservation PR review pending for changed CON-015 artifacts`
 - Fork/testnet block or reference: `fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001-broadcast`
 
@@ -54,8 +54,8 @@
 
 ## Required Retained Artifacts
 
-- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:b75d7a207fbf2fa7b4fceae1f45fe418d536c30a476f760a9c165a3ebfc58ba8`
-- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:f27a73fe36514a539b6528813d877232bcc4b3c31e8bc242a26647013caa104b`
+- Deployment manifest: `deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:a7cabbd6083101d9caa24fc7d461e69b4c4db2812dc06b7f1c6d32411d0a3d4e`
+- Address book: `deployments/address-books/fork-mainnet-6529stream-v0.1.0-001-broadcast.json / sha256:af97c1fa54de4624ff38eedecf3514585f159356a30cf30e848dc814e5e25ad1`
 - Randomizer operations JSON: `deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json / sha256:4522bfb197b9333e1275faa5d6c2cc53e246d11c2ffdebdc3386c7a23e99b920`
 - Provider dashboard or export: `release-artifacts/evidence/fork-randomizer-operations/provider-dashboard-redacted.md / sha256:b253124b0ab64b3803c75eed22c92d39b99441b9b3a10ee2013e1ca9f8b491fa`
 - Explorer or fork transaction bundle: `release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-transactions.json / sha256:00764ea45f11fc209b984b794e3c2d7f60eb4892c503c48c1a917f887b6d1a56`
@@ -65,7 +65,7 @@
 ## Review
 
 - Operator: `Codex autonomous implementer`
-- Reviewer: `pending StreamMintManager PR review; historical Codex autonomous maintainer evidence review for issue #220`
+- Reviewer: `pending collection metadata/preservation PR review; historical Codex autonomous maintainer evidence review for issue #220`
 - Review decision: `pending_review`
 
 ## Redaction
@@ -84,7 +84,7 @@
 python scripts/test_fork_randomizer_operations_evidence.py
 python scripts/check_fork_randomizer_operations_evidence.py
 python scripts/check_randomizer_operations.py deployments/randomizer-operations/fork-mainnet-6529stream-v0.1.0-001.json
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests" --owner "Codex autonomous implementer" --reviewer "pending StreamMintManager PR review; historical Codex autonomous maintainer evidence review for issue #220" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; StreamMintManager PR review pending" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The CON-014 StreamMintManager branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests" --owner "Codex autonomous implementer" --reviewer "pending collection metadata/preservation PR review; historical Codex autonomous maintainer evidence review for issue #220" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 CI passed before this evidence PR; collection metadata/preservation PR review pending" --operator-notes "Fork randomizer operations evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast proves adapter deployment, provider wiring, and collection randomizer assignment; retained local lifecycle, adversarial, retry, payment, pause, and emergency tests prove callback binding, stale and failed handling, retry behavior, reserve accounting, pause scope, and emergency boundaries. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -93,9 +93,9 @@ python scripts/generate_release_checksums.py --check
 
 ## Operator Notes
 
-- This retained artifact is pending StreamMintManager PR review for the
-  `fork_testnet_randomizer_operations_evidence` row because the CON-014 branch
-  changes the deployment manifest and address book it references. It still uses
+- This retained artifact is pending collection metadata/preservation PR review
+  for the `fork_testnet_randomizer_operations_evidence` row because the CON-015
+  branch changes the deployment manifest and address book it references. It still uses
   the committed no-secret mainnet fork broadcast from block `25316366` plus
   retained local tests for request lifecycle, callback binding, stale and failed
   handling, retry behavior, reserve accounting, pause scope, and emergency

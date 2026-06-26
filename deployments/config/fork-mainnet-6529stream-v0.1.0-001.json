@@ -63,6 +63,26 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamCollectionMetadata",
+        "address": "0x0000000000000000000000000000000000000011",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamPreservationRecords",
+        "address": "0x0000000000000000000000000000000000000012",
+        "constructor_args": [
+          "0x0000000000000000000000000000000000000003",
+          "0x0000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamCuratorsPool",
         "address": "0x0000000000000000000000000000000000000004",
         "constructor_args": [

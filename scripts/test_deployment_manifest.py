@@ -38,6 +38,8 @@ SEPOLIA_EXPECTED_CONTRACTS = {
     "DependencyRegistry",
     "StreamCore",
     "StreamContractMetadata",
+    "StreamCollectionMetadata",
+    "StreamPreservationRecords",
     "StreamCuratorsPool",
     "StreamMinter",
     "StreamDrops",

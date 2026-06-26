@@ -163,6 +163,59 @@
       ]
     },
     {
+      "topic0": "0x13322d9d5005930f00daaa828d458dc34561bb2664a7daa1dfca20cf949fd830",
+      "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+      "name": "CollectionMetadataSnapshotPublished",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "snapshotId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "schemaId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "record",
+          "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+          "indexed": false,
+          "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
+        },
+        {
+          "index": 4,
+          "name": "snapshotHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0x13488f7071c5792218cedfa9fc4f1403234e31d28d19b4c0a4cd445600a50bc0",
       "signature": "SplitProfileEntry(bytes32,uint16,address,uint32,bytes32)",
       "name": "SplitProfileEntry",
@@ -1133,6 +1186,38 @@
       ]
     },
     {
+      "topic0": "0x3afeeaf431a5d15f72a27546faa57418b4c9ad6017cae5305f1703f4259a5909",
+      "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+      "name": "CollectionMetadataLockedEvent",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
+      ]
+    },
+    {
       "topic0": "0x3bba831784668765a4bf4d687020f37a478866bd644c140557d4ddac9227fbfe",
       "signature": "SignerEpochChanged(uint256,uint256)",
       "name": "SignerEpochChanged",
@@ -1573,6 +1658,59 @@
       ],
       "emitted_by": [
         "StreamMintLedger"
+      ]
+    },
+    {
+      "topic0": "0x699d8af8514c4abc46b269575774769601ee506c7623256d1243352353674a72",
+      "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+      "name": "CollectionRecordRecorded",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "subjectId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "record",
+          "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+          "indexed": false,
+          "internal_type": "struct IStreamPreservationRecords.CollectionRecord"
+        },
+        {
+          "index": 4,
+          "name": "recordHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "recorder",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamPreservationRecords"
       ]
     },
     {
@@ -3532,6 +3670,38 @@
       ]
     },
     {
+      "topic0": "0xdad559b0337ff66a6992e5c580b7bce04ca0aff3293062dab723e68c1fc1f478",
+      "signature": "PreservationAdminContractUpdated(address,address,address)",
+      "name": "PreservationAdminContractUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "oldAdminContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "newAdminContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamPreservationRecords"
+      ]
+    },
+    {
       "topic0": "0xdcdb9a658a53bd78a90653ac5ee29db1e12f35a1c4a28f060b53b6615ad85d21",
       "signature": "SignerLifecycleTargetUpdated(address,bool,address)",
       "name": "SignerLifecycleTargetUpdated",
@@ -3721,6 +3891,66 @@
       ],
       "emitted_by": [
         "DependencyRegistry"
+      ]
+    },
+    {
+      "topic0": "0xecb5b842c93eca3427bdca25dc93520cb3668649e99bb79f3383832a3b519d2f",
+      "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+      "name": "CollectionMetadataRecordSet",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "recordType",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "schemaId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 3,
+          "name": "record",
+          "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+          "indexed": false,
+          "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
+        },
+        {
+          "index": 4,
+          "name": "recordHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "revision",
+          "type": "uint64",
+          "indexed": false,
+          "internal_type": "uint64"
+        },
+        {
+          "index": 6,
+          "name": "admin",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -3938,6 +4168,38 @@
       ],
       "emitted_by": [
         "StreamMinter"
+      ]
+    },
+    {
+      "topic0": "0xf39df0758155b2b243e7fcebbb58d527951f0c388145b4290c13e3b00e01ccbc",
+      "signature": "CollectionMetadataAdminContractUpdated(address,address,address)",
+      "name": "CollectionMetadataAdminContractUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "oldAdminContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "newAdminContract",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 2,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamCollectionMetadata"
       ]
     },
     {
@@ -6012,6 +6274,177 @@
         }
       ]
     },
+    "StreamCollectionMetadata": {
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "artifact_path": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+      "events": [
+        {
+          "name": "CollectionMetadataAdminContractUpdated",
+          "signature": "CollectionMetadataAdminContractUpdated(address,address,address)",
+          "topic0": "0xf39df0758155b2b243e7fcebbb58d527951f0c388145b4290c13e3b00e01ccbc",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldAdminContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newAdminContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "CollectionMetadataLockedEvent",
+          "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+          "topic0": "0x3afeeaf431a5d15f72a27546faa57418b4c9ad6017cae5305f1703f4259a5909",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "CollectionMetadataRecordSet",
+          "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+          "topic0": "0xecb5b842c93eca3427bdca25dc93520cb3668649e99bb79f3383832a3b519d2f",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "schemaId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "record",
+              "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+              "indexed": false,
+              "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
+            },
+            {
+              "index": 4,
+              "name": "recordHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "revision",
+              "type": "uint64",
+              "indexed": false,
+              "internal_type": "uint64"
+            },
+            {
+              "index": 6,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "CollectionMetadataSnapshotPublished",
+          "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+          "topic0": "0x13322d9d5005930f00daaa828d458dc34561bb2664a7daa1dfca20cf949fd830",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "snapshotId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "schemaId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "record",
+              "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+              "indexed": false,
+              "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord"
+            },
+            {
+              "index": 4,
+              "name": "snapshotHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "admin",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
     "StreamContractMetadata": {
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
@@ -7939,6 +8372,91 @@
               "type": "uint256",
               "indexed": true,
               "internal_type": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamPreservationRecords": {
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "artifact_path": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+      "events": [
+        {
+          "name": "CollectionRecordRecorded",
+          "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+          "topic0": "0x699d8af8514c4abc46b269575774769601ee506c7623256d1243352353674a72",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "recordType",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "subjectId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 3,
+              "name": "record",
+              "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+              "indexed": false,
+              "internal_type": "struct IStreamPreservationRecords.CollectionRecord"
+            },
+            {
+              "index": 4,
+              "name": "recordHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "recorder",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "PreservationAdminContractUpdated",
+          "signature": "PreservationAdminContractUpdated(address,address,address)",
+          "topic0": "0xdad559b0337ff66a6992e5c580b7bce04ca0aff3293062dab723e68c1fc1f478",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "oldAdminContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newAdminContract",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 2,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
             }
           ]
         }

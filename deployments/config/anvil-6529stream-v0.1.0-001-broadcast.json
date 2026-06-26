@@ -63,6 +63,26 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamCollectionMetadata",
+        "address": "0x1000000000000000000000000000000000000011",
+        "constructor_args": [
+          "0x1000000000000000000000000000000000000003",
+          "0x1000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
+        "name": "StreamPreservationRecords",
+        "address": "0x1000000000000000000000000000000000000012",
+        "constructor_args": [
+          "0x1000000000000000000000000000000000000003",
+          "0x1000000000000000000000000000000000000001",
+          "0x0000000000000000000000000000000000000000"
+        ],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamCuratorsPool",
         "address": "0x1000000000000000000000000000000000000004",
         "constructor_args": [
@@ -247,7 +267,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/anvil-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:9cbd922af8adb640aed3924a90e4bab1e0760d3ab8ee4764f73201551470eec7",
+    "broadcast_sha256": "sha256:392c84fa6ddabec96724b1e54ae0227f9b10333d776ada6b66d958c23a6966ca",
     "template_config": "deployments/config/anvil-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 31337,
@@ -271,6 +291,16 @@
         "contract": "StreamContractMetadata",
         "address": "0x100000000000000000000000000000000000000a",
         "transaction_hash": "0x0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a0a"
+      },
+      {
+        "contract": "StreamCollectionMetadata",
+        "address": "0x1000000000000000000000000000000000000011",
+        "transaction_hash": "0x1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      {
+        "contract": "StreamPreservationRecords",
+        "address": "0x1000000000000000000000000000000000000012",
+        "transaction_hash": "0x1212121212121212121212121212121212121212121212121212121212121212"
       },
       {
         "contract": "StreamCuratorsPool",

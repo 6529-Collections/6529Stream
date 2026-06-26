@@ -13,7 +13,7 @@
 
 - Repository: `https://github.com/6529-Collections/6529Stream`
 - Git commit: `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`
-- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI and 6529bot latest-head review required before merge; StreamMintManager PR review pending for changed CON-014 artifacts`
+- CI run or operator transcript: `PR #347 CI run 27503447725 passed; PR #349 CI run 27504228132 passed; PR #552 CI and 6529bot latest-head review required before merge; collection metadata/preservation PR review pending for changed CON-015 artifacts`
 - Fork/testnet block or reference: `fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001-broadcast`
 
@@ -53,7 +53,7 @@
 ## Review
 
 - Operator: `Codex autonomous implementer`
-- Reviewer: `pending StreamMintManager PR review; historical Codex autonomous maintainer second-pass review for PR #552`
+- Reviewer: `pending collection metadata/preservation PR review; historical Codex autonomous maintainer second-pass review for PR #552`
 - Review decision: `pending_review`
 
 ## Redaction
@@ -70,7 +70,7 @@
 ```sh
 python scripts/test_fork_ceremony_evidence.py
 python scripts/check_fork_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts" --owner "Codex autonomous implementer" --reviewer "pending StreamMintManager PR review; historical Codex autonomous maintainer second-pass review for PR #552" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge; StreamMintManager PR review pending" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The CON-014 StreamMintManager branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366 / 0xb7c7a456e0f1246fa4ee52de6fca99cc16628ce1eafd85b65b0f3d22f3933ee7" --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig \"run()\" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts" --owner "Codex autonomous implementer" --reviewer "pending collection metadata/preservation PR review; historical Codex autonomous maintainer second-pass review for PR #552" --review-status pending_review --source-git-commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59 --source-ci-run "PR #347 CI run 27503447725; PR #349 CI run 27504228132; PR #552 latest-head CI required before merge; collection metadata/preservation PR review pending" --operator-notes "Fork ceremony evidence retained from source commit a35c24a4f3bcbf61db73c78f2e98822f09d17d59. The committed fork broadcast, deployment manifest, address book, Safe/admin export, and post-state views prove deployment, role, signer, emergency, metadata, ownership, and monitoring handoff state; local retained ceremony evidence supplies the mint, auction, and emergency dry-run proofs. The CON-015 collection metadata/preservation branch changes the retained deployment manifest and address book, so this artifact is pending review before the row can return to complete. Public beta remains blocked."
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -79,9 +79,9 @@ python scripts/generate_release_checksums.py --check
 
 ## Operator Notes
 
-- This retained artifact is pending StreamMintManager PR review for the
-  `fork_testnet_ceremony_evidence` row because the CON-014 branch changes the
-  deployment manifest and address book it references. It still uses the
+- This retained artifact is pending collection metadata/preservation PR review
+  for the `fork_testnet_ceremony_evidence` row because the CON-015 branch
+  changes the deployment manifest and address book it references. It still uses the
   committed no-secret mainnet fork broadcast from block `25316366` plus retained
   local dry-run ceremony evidence for mint, auction, withdrawal, and emergency
   redeployment.

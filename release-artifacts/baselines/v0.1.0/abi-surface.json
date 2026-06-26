@@ -6627,6 +6627,1236 @@
         "receives": []
       }
     },
+    "StreamCollectionMetadata": {
+      "source": "smart-contracts/StreamCollectionMetadata.sol",
+      "artifact_path": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+      "abi_sha256": "sha256:0ce856dd9d298ad115754dc7e78eb3d3eca9b5d2d173f682069ff41bd3a25c44",
+      "abi_entries": 43,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 25,
+        "events": 4,
+        "errors": 13,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address,address,address)",
+            "kind": "constructor",
+            "signature": "constructor(address,address,address)",
+            "inputs": [
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "admins",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "supersedes",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "MAX_RECORD_TYPES()",
+            "kind": "function",
+            "name": "MAX_RECORD_TYPES",
+            "signature": "MAX_RECORD_TYPES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_URI_BYTES()",
+            "kind": "function",
+            "name": "MAX_URI_BYTES",
+            "signature": "MAX_URI_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecord(uint256,bytes32)",
+            "kind": "function",
+            "name": "collectionRecord",
+            "signature": "collectionRecord(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "recordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revision",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "writer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "locked",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecordTypeAt(uint256,uint256)",
+            "kind": "function",
+            "name": "collectionRecordTypeAt",
+            "signature": "collectionRecordTypeAt(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecordTypeCount(uint256)",
+            "kind": "function",
+            "name": "collectionRecordTypeCount",
+            "signature": "collectionRecordTypeCount(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionSnapshot(uint256,bytes32)",
+            "kind": "function",
+            "name": "collectionSnapshot",
+            "signature": "collectionSnapshot(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "recordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revision",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "writer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "locked",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "kind": "function",
+            "name": "deriveCollectionRecordHash",
+            "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isLocked(uint256,bytes32)",
+            "kind": "function",
+            "name": "isLocked",
+            "signature": "isLocked(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamCollectionMetadata()",
+            "kind": "function",
+            "name": "isStreamCollectionMetadata",
+            "signature": "isStreamCollectionMetadata()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "latestCollectionRecordHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "latestCollectionRecordHash",
+            "signature": "latestCollectionRecordHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestCollectionSnapshotHash(uint256)",
+            "kind": "function",
+            "name": "latestCollectionSnapshotHash",
+            "signature": "latestCollectionSnapshotHash(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestCollectionSnapshotId(uint256)",
+            "kind": "function",
+            "name": "latestCollectionSnapshotId",
+            "signature": "latestCollectionSnapshotId(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "lockCollectionRecord(uint256,bytes32)",
+            "kind": "function",
+            "name": "lockCollectionRecord",
+            "signature": "lockCollectionRecord(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "kind": "function",
+            "name": "publishCollectionSnapshot",
+            "signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "snapshot",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "hash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "kind": "function",
+            "name": "setCollectionRecord",
+            "signature": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "kind": "function",
+            "name": "setCollectionRecordWithRevision",
+            "signature": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "expectedRevision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "snapshotHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "snapshotHash",
+            "signature": "snapshotHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamCore()",
+            "kind": "function",
+            "name": "streamCore",
+            "signature": "streamCore()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleFamily()",
+            "kind": "function",
+            "name": "streamModuleFamily",
+            "signature": "streamModuleFamily()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamModuleSchemaHash()",
+            "kind": "function",
+            "name": "streamModuleSchemaHash",
+            "signature": "streamModuleSchemaHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamModuleSupersedes()",
+            "kind": "function",
+            "name": "streamModuleSupersedes",
+            "signature": "streamModuleSupersedes()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleVersion()",
+            "kind": "function",
+            "name": "streamModuleVersion",
+            "signature": "streamModuleVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "updateAdminContract(address)",
+            "kind": "function",
+            "name": "updateAdminContract",
+            "signature": "updateAdminContract(address)",
+            "inputs": [
+              {
+                "name": "newAdminsContract",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "CollectionMetadataAdminContractUpdated(address,address,address)",
+            "kind": "event",
+            "name": "CollectionMetadataAdminContractUpdated",
+            "signature": "CollectionMetadataAdminContractUpdated(address,address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "oldAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "kind": "event",
+            "name": "CollectionMetadataLockedEvent",
+            "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "kind": "event",
+            "name": "CollectionMetadataRecordSet",
+            "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "indexed": false,
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "kind": "event",
+            "name": "CollectionMetadataSnapshotPublished",
+            "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "indexed": false,
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "snapshotHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "CollectionDoesNotExist(uint256)",
+            "kind": "error",
+            "name": "CollectionDoesNotExist",
+            "signature": "CollectionDoesNotExist(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataFrozen(uint256)",
+            "kind": "error",
+            "name": "CollectionMetadataFrozen",
+            "signature": "CollectionMetadataFrozen(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataLocked(uint256,bytes32)",
+            "kind": "error",
+            "name": "CollectionMetadataLocked",
+            "signature": "CollectionMetadataLocked(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CollectionSnapshotAlreadyPublished(uint256,bytes32)",
+            "kind": "error",
+            "name": "CollectionSnapshotAlreadyPublished",
+            "signature": "CollectionSnapshotAlreadyPublished(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FunctionAdminUnauthorized(address,bytes4)",
+            "kind": "error",
+            "name": "FunctionAdminUnauthorized",
+            "signature": "FunctionAdminUnauthorized(address,bytes4)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAdminContract()",
+            "kind": "error",
+            "name": "InvalidAdminContract",
+            "signature": "InvalidAdminContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCoreContract()",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidMetadataRecord(bytes32,bytes32,bytes32)",
+            "kind": "error",
+            "name": "InvalidMetadataRecord",
+            "signature": "InvalidMetadataRecord(bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "dataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSnapshotId(bytes32)",
+            "kind": "error",
+            "name": "InvalidSnapshotId",
+            "signature": "InvalidSnapshotId(bytes32)",
+            "inputs": [
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MetadataMutationPaused()",
+            "kind": "error",
+            "name": "MetadataMutationPaused",
+            "signature": "MetadataMutationPaused()",
+            "inputs": []
+          },
+          {
+            "key": "MetadataRecordTypeLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MetadataRecordTypeLimitExceeded",
+            "signature": "MetadataRecordTypeLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MetadataRevisionMismatch(bytes32,uint64,uint64)",
+            "kind": "error",
+            "name": "MetadataRevisionMismatch",
+            "signature": "MetadataRevisionMismatch(bytes32,uint64,uint64)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expected",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "actual",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "MetadataURITooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "MetadataURITooLarge",
+            "signature": "MetadataURITooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "actual",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamContractMetadata": {
       "source": "smart-contracts/StreamContractMetadata.sol",
       "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
@@ -15662,6 +16892,1028 @@
         "receives": []
       }
     },
+    "StreamPreservationRecords": {
+      "source": "smart-contracts/StreamPreservationRecords.sol",
+      "artifact_path": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+      "abi_sha256": "sha256:f89faa370ddd0e771063a3213ff758029cc94843b13b1b402b26d4450f03afae",
+      "abi_entries": 34,
+      "entry_counts": {
+        "constructors": 1,
+        "functions": 22,
+        "events": 2,
+        "errors": 9,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [
+          {
+            "key": "constructor(address,address,address)",
+            "kind": "constructor",
+            "signature": "constructor(address,address,address)",
+            "inputs": [
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "admins",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "supersedes",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "functions": [
+          {
+            "key": "HASH_ARWEAVE_TX()",
+            "kind": "function",
+            "name": "HASH_ARWEAVE_TX",
+            "signature": "HASH_ARWEAVE_TX()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "HASH_BLAKE3()",
+            "kind": "function",
+            "name": "HASH_BLAKE3",
+            "signature": "HASH_BLAKE3()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "HASH_IPFS_CID()",
+            "kind": "function",
+            "name": "HASH_IPFS_CID",
+            "signature": "HASH_IPFS_CID()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "HASH_KECCAK256()",
+            "kind": "function",
+            "name": "HASH_KECCAK256",
+            "signature": "HASH_KECCAK256()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "HASH_MULTIHASH()",
+            "kind": "function",
+            "name": "HASH_MULTIHASH",
+            "signature": "HASH_MULTIHASH()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "HASH_SHA256()",
+            "kind": "function",
+            "name": "HASH_SHA256",
+            "signature": "HASH_SHA256()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint16",
+                "internal_type": "uint16"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_DIGEST_BYTES()",
+            "kind": "function",
+            "name": "MAX_DIGEST_BYTES",
+            "signature": "MAX_DIGEST_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "MAX_URI_BYTES()",
+            "kind": "function",
+            "name": "MAX_URI_BYTES",
+            "signature": "MAX_URI_BYTES()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecord(bytes32)",
+            "kind": "function",
+            "name": "collectionRecord",
+            "signature": "collectionRecord(bytes32)",
+            "inputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecordSummary(bytes32)",
+            "kind": "function",
+            "name": "collectionRecordSummary",
+            "signature": "collectionRecordSummary(bytes32)",
+            "inputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecordSummary",
+                "components": [
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "recordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHashAlgorithm",
+                    "type": "uint16",
+                    "internal_type": "uint16"
+                  },
+                  {
+                    "name": "contentHashDigestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHashCanonicalizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "uriHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHashAlgorithm",
+                    "type": "uint16",
+                    "internal_type": "uint16"
+                  },
+                  {
+                    "name": "signatureHashDigestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHashCanonicalizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "recorder",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "recordedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "kind": "function",
+            "name": "deriveCollectionRecordHash",
+            "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamPreservationRecords()",
+            "kind": "function",
+            "name": "isStreamPreservationRecords",
+            "signature": "isStreamPreservationRecords()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "latestCollectionRecordHash",
+            "signature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "kind": "function",
+            "name": "recordCollectionRecord",
+            "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "streamCore()",
+            "kind": "function",
+            "name": "streamCore",
+            "signature": "streamCore()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleFamily()",
+            "kind": "function",
+            "name": "streamModuleFamily",
+            "signature": "streamModuleFamily()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamModuleSchemaHash()",
+            "kind": "function",
+            "name": "streamModuleSchemaHash",
+            "signature": "streamModuleSchemaHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamModuleSupersedes()",
+            "kind": "function",
+            "name": "streamModuleSupersedes",
+            "signature": "streamModuleSupersedes()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleVersion()",
+            "kind": "function",
+            "name": "streamModuleVersion",
+            "signature": "streamModuleVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "updateAdminContract(address)",
+            "kind": "function",
+            "name": "updateAdminContract",
+            "signature": "updateAdminContract(address)",
+            "inputs": [
+              {
+                "name": "newAdminsContract",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "kind": "event",
+            "name": "CollectionRecordRecorded",
+            "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "indexed": false,
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PreservationAdminContractUpdated(address,address,address)",
+            "kind": "event",
+            "name": "PreservationAdminContractUpdated",
+            "signature": "PreservationAdminContractUpdated(address,address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "oldAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "CollectionDoesNotExist(uint256)",
+            "kind": "error",
+            "name": "CollectionDoesNotExist",
+            "signature": "CollectionDoesNotExist(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CollectionRecordAlreadyExists(bytes32)",
+            "kind": "error",
+            "name": "CollectionRecordAlreadyExists",
+            "signature": "CollectionRecordAlreadyExists(bytes32)",
+            "inputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FunctionAdminUnauthorized(address,bytes4)",
+            "kind": "error",
+            "name": "FunctionAdminUnauthorized",
+            "signature": "FunctionAdminUnauthorized(address,bytes4)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAdminContract()",
+            "kind": "error",
+            "name": "InvalidAdminContract",
+            "signature": "InvalidAdminContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+            "kind": "error",
+            "name": "InvalidCollectionRecord",
+            "signature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidCoreContract()",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidHashRef(uint16,uint256)",
+            "kind": "error",
+            "name": "InvalidHashRef",
+            "signature": "InvalidHashRef(uint16,uint256)",
+            "inputs": [
+              {
+                "name": "algorithm",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "digestLength",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MetadataMutationPaused()",
+            "kind": "error",
+            "name": "MetadataMutationPaused",
+            "signature": "MetadataMutationPaused()",
+            "inputs": []
+          },
+          {
+            "key": "PreservationURITooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "PreservationURITooLarge",
+            "signature": "PreservationURITooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "actual",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "StreamPrimarySaleSettlement": {
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
       "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
@@ -22622,6 +24874,1182 @@
         "receives": []
       }
     },
+    "IStreamCollectionMetadata": {
+      "source": "smart-contracts/IStreamCollectionMetadata.sol",
+      "artifact_path": "out/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
+      "abi_sha256": "sha256:a62f6c3524655d3421d1c465dea83c4300ebb93116817d8da6d96da37fe90f8f",
+      "abi_entries": 40,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 23,
+        "events": 4,
+        "errors": 13,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecord(uint256,bytes32)",
+            "kind": "function",
+            "name": "collectionRecord",
+            "signature": "collectionRecord(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "recordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revision",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "writer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "locked",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecordTypeAt(uint256,uint256)",
+            "kind": "function",
+            "name": "collectionRecordTypeAt",
+            "signature": "collectionRecordTypeAt(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecordTypeCount(uint256)",
+            "kind": "function",
+            "name": "collectionRecordTypeCount",
+            "signature": "collectionRecordTypeCount(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionSnapshot(uint256,bytes32)",
+            "kind": "function",
+            "name": "collectionSnapshot",
+            "signature": "collectionSnapshot(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,bytes32,uint64,uint64,address,uint64,bool)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecordView",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "recordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "revision",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "writer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "locked",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "kind": "function",
+            "name": "deriveCollectionRecordHash",
+            "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isLocked(uint256,bytes32)",
+            "kind": "function",
+            "name": "isLocked",
+            "signature": "isLocked(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamCollectionMetadata()",
+            "kind": "function",
+            "name": "isStreamCollectionMetadata",
+            "signature": "isStreamCollectionMetadata()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "latestCollectionRecordHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "latestCollectionRecordHash",
+            "signature": "latestCollectionRecordHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestCollectionSnapshotHash(uint256)",
+            "kind": "function",
+            "name": "latestCollectionSnapshotHash",
+            "signature": "latestCollectionSnapshotHash(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "latestCollectionSnapshotId(uint256)",
+            "kind": "function",
+            "name": "latestCollectionSnapshotId",
+            "signature": "latestCollectionSnapshotId(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "lockCollectionRecord(uint256,bytes32)",
+            "kind": "function",
+            "name": "lockCollectionRecord",
+            "signature": "lockCollectionRecord(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "kind": "function",
+            "name": "publishCollectionSnapshot",
+            "signature": "publishCollectionSnapshot(uint256,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "snapshot",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "snapshotHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "kind": "function",
+            "name": "setCollectionRecord",
+            "signature": "setCollectionRecord(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "kind": "function",
+            "name": "setCollectionRecordWithRevision",
+            "signature": "setCollectionRecordWithRevision(uint256,(bytes32,bytes32,string,bytes32,bytes32,uint64),uint64)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "expectedRevision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "snapshotHash(uint256,bytes32)",
+            "kind": "function",
+            "name": "snapshotHash",
+            "signature": "snapshotHash(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamCore()",
+            "kind": "function",
+            "name": "streamCore",
+            "signature": "streamCore()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleFamily()",
+            "kind": "function",
+            "name": "streamModuleFamily",
+            "signature": "streamModuleFamily()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamModuleSchemaHash()",
+            "kind": "function",
+            "name": "streamModuleSchemaHash",
+            "signature": "streamModuleSchemaHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleSupersedes()",
+            "kind": "function",
+            "name": "streamModuleSupersedes",
+            "signature": "streamModuleSupersedes()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleVersion()",
+            "kind": "function",
+            "name": "streamModuleVersion",
+            "signature": "streamModuleVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "updateAdminContract(address)",
+            "kind": "function",
+            "name": "updateAdminContract",
+            "signature": "updateAdminContract(address)",
+            "inputs": [
+              {
+                "name": "newAdminsContract",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "CollectionMetadataAdminContractUpdated(address,address,address)",
+            "kind": "event",
+            "name": "CollectionMetadataAdminContractUpdated",
+            "signature": "CollectionMetadataAdminContractUpdated(address,address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "oldAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "kind": "event",
+            "name": "CollectionMetadataLockedEvent",
+            "signature": "CollectionMetadataLockedEvent(uint256,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "kind": "event",
+            "name": "CollectionMetadataRecordSet",
+            "signature": "CollectionMetadataRecordSet(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,uint64,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "indexed": false,
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "kind": "event",
+            "name": "CollectionMetadataSnapshotPublished",
+            "signature": "CollectionMetadataSnapshotPublished(uint256,bytes32,bytes32,(bytes32,bytes32,string,bytes32,bytes32,uint64),bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,string,bytes32,bytes32,uint64)",
+                "internal_type": "struct IStreamCollectionMetadata.CollectionMetadataRecord",
+                "indexed": false,
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "auxiliaryHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "snapshotHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "CollectionDoesNotExist(uint256)",
+            "kind": "error",
+            "name": "CollectionDoesNotExist",
+            "signature": "CollectionDoesNotExist(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataFrozen(uint256)",
+            "kind": "error",
+            "name": "CollectionMetadataFrozen",
+            "signature": "CollectionMetadataFrozen(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CollectionMetadataLocked(uint256,bytes32)",
+            "kind": "error",
+            "name": "CollectionMetadataLocked",
+            "signature": "CollectionMetadataLocked(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CollectionSnapshotAlreadyPublished(uint256,bytes32)",
+            "kind": "error",
+            "name": "CollectionSnapshotAlreadyPublished",
+            "signature": "CollectionSnapshotAlreadyPublished(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FunctionAdminUnauthorized(address,bytes4)",
+            "kind": "error",
+            "name": "FunctionAdminUnauthorized",
+            "signature": "FunctionAdminUnauthorized(address,bytes4)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAdminContract()",
+            "kind": "error",
+            "name": "InvalidAdminContract",
+            "signature": "InvalidAdminContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCoreContract()",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidMetadataRecord(bytes32,bytes32,bytes32)",
+            "kind": "error",
+            "name": "InvalidMetadataRecord",
+            "signature": "InvalidMetadataRecord(bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "dataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSnapshotId(bytes32)",
+            "kind": "error",
+            "name": "InvalidSnapshotId",
+            "signature": "InvalidSnapshotId(bytes32)",
+            "inputs": [
+              {
+                "name": "snapshotId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MetadataMutationPaused()",
+            "kind": "error",
+            "name": "MetadataMutationPaused",
+            "signature": "MetadataMutationPaused()",
+            "inputs": []
+          },
+          {
+            "key": "MetadataRecordTypeLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MetadataRecordTypeLimitExceeded",
+            "signature": "MetadataRecordTypeLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MetadataRevisionMismatch(bytes32,uint64,uint64)",
+            "kind": "error",
+            "name": "MetadataRevisionMismatch",
+            "signature": "MetadataRevisionMismatch(bytes32,uint64,uint64)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expected",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "actual",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "MetadataURITooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "MetadataURITooLarge",
+            "signature": "MetadataURITooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "actual",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "IStreamCompatibility": {
       "source": "smart-contracts/IStreamCompatibility.sol",
       "artifact_path": "out/IStreamCompatibility.sol/IStreamCompatibility.json",
@@ -22896,11 +26324,11 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:aafef7d9d43ebafc04e2df730b0b3852bf4f54d676aca5e9a2526da9b46b46f4",
-      "abi_entries": 26,
+      "abi_sha256": "sha256:ddfd53045cf443235a2dfa1f38cd16b476bb306438c9640ab435c72d23590604",
+      "abi_entries": 27,
       "entry_counts": {
         "constructors": 0,
-        "functions": 26,
+        "functions": 27,
         "events": 0,
         "errors": 0,
         "fallbacks": 0,
@@ -23174,6 +26602,21 @@
               }
             ],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "newCollectionIndex()",
+            "kind": "function",
+            "name": "newCollectionIndex",
+            "signature": "newCollectionIndex()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "pendingPreparedMintTokenId()",
@@ -26270,6 +29713,884 @@
         ],
         "events": [],
         "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamPreservationRecords": {
+      "source": "smart-contracts/IStreamPreservationRecords.sol",
+      "artifact_path": "out/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
+      "abi_sha256": "sha256:cb7d4208b6eec8dc934c494c46837e55a7719c2ac260b83a7458fc1ada6227ab",
+      "abi_entries": 25,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 14,
+        "events": 2,
+        "errors": 9,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "adminsContract()",
+            "kind": "function",
+            "name": "adminsContract",
+            "signature": "adminsContract()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecord(bytes32)",
+            "kind": "function",
+            "name": "collectionRecord",
+            "signature": "collectionRecord(bytes32)",
+            "inputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "collectionRecordSummary(bytes32)",
+            "kind": "function",
+            "name": "collectionRecordSummary",
+            "signature": "collectionRecordSummary(bytes32)",
+            "inputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint256,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,string,bytes32,bytes32,bytes32,uint16,bytes32,bytes32,uint64,address,uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecordSummary",
+                "components": [
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "recordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHashAlgorithm",
+                    "type": "uint16",
+                    "internal_type": "uint16"
+                  },
+                  {
+                    "name": "contentHashDigestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHashCanonicalizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "uriHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHashAlgorithm",
+                    "type": "uint16",
+                    "internal_type": "uint16"
+                  },
+                  {
+                    "name": "signatureHashDigestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHashCanonicalizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "recorder",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "recordedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "kind": "function",
+            "name": "deriveCollectionRecordHash",
+            "signature": "deriveCollectionRecordHash(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamPreservationRecords()",
+            "kind": "function",
+            "name": "isStreamPreservationRecords",
+            "signature": "isStreamPreservationRecords()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+            "kind": "function",
+            "name": "latestCollectionRecordHash",
+            "signature": "latestCollectionRecordHash(uint256,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "kind": "function",
+            "name": "recordCollectionRecord",
+            "signature": "recordCollectionRecord(uint256,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "streamCore()",
+            "kind": "function",
+            "name": "streamCore",
+            "signature": "streamCore()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleFamily()",
+            "kind": "function",
+            "name": "streamModuleFamily",
+            "signature": "streamModuleFamily()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "streamModuleSchemaHash()",
+            "kind": "function",
+            "name": "streamModuleSchemaHash",
+            "signature": "streamModuleSchemaHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleSupersedes()",
+            "kind": "function",
+            "name": "streamModuleSupersedes",
+            "signature": "streamModuleSupersedes()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "streamModuleVersion()",
+            "kind": "function",
+            "name": "streamModuleVersion",
+            "signature": "streamModuleVersion()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "updateAdminContract(address)",
+            "kind": "function",
+            "name": "updateAdminContract",
+            "signature": "updateAdminContract(address)",
+            "inputs": [
+              {
+                "name": "newAdminsContract",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "kind": "event",
+            "name": "CollectionRecordRecorded",
+            "signature": "CollectionRecordRecorded(uint256,bytes32,bytes32,(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64),bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "record",
+                "type": "(bytes32,bytes32,(uint16,bytes,bytes32),string,bytes32,bytes32,(uint16,bytes,bytes32),uint64)",
+                "internal_type": "struct IStreamPreservationRecords.CollectionRecord",
+                "indexed": false,
+                "components": [
+                  {
+                    "name": "recordType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "subjectId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureScheme",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "signatureHash",
+                    "type": "(uint16,bytes,bytes32)",
+                    "internal_type": "struct IStreamPreservationRecords.HashRef",
+                    "components": [
+                      {
+                        "name": "algorithm",
+                        "type": "uint16",
+                        "internal_type": "uint16"
+                      },
+                      {
+                        "name": "digest",
+                        "type": "bytes",
+                        "internal_type": "bytes"
+                      },
+                      {
+                        "name": "canonicalizationId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "effectiveAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              },
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "recorder",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "PreservationAdminContractUpdated(address,address,address)",
+            "kind": "event",
+            "name": "PreservationAdminContractUpdated",
+            "signature": "PreservationAdminContractUpdated(address,address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "oldAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newAdminContract",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "CollectionDoesNotExist(uint256)",
+            "kind": "error",
+            "name": "CollectionDoesNotExist",
+            "signature": "CollectionDoesNotExist(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CollectionRecordAlreadyExists(bytes32)",
+            "kind": "error",
+            "name": "CollectionRecordAlreadyExists",
+            "signature": "CollectionRecordAlreadyExists(bytes32)",
+            "inputs": [
+              {
+                "name": "recordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FunctionAdminUnauthorized(address,bytes4)",
+            "kind": "error",
+            "name": "FunctionAdminUnauthorized",
+            "signature": "FunctionAdminUnauthorized(address,bytes4)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "InvalidAdminContract()",
+            "kind": "error",
+            "name": "InvalidAdminContract",
+            "signature": "InvalidAdminContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+            "kind": "error",
+            "name": "InvalidCollectionRecord",
+            "signature": "InvalidCollectionRecord(bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "recordType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "subjectId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "InvalidCoreContract()",
+            "kind": "error",
+            "name": "InvalidCoreContract",
+            "signature": "InvalidCoreContract()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidHashRef(uint16,uint256)",
+            "kind": "error",
+            "name": "InvalidHashRef",
+            "signature": "InvalidHashRef(uint16,uint256)",
+            "inputs": [
+              {
+                "name": "algorithm",
+                "type": "uint16",
+                "internal_type": "uint16"
+              },
+              {
+                "name": "digestLength",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MetadataMutationPaused()",
+            "kind": "error",
+            "name": "MetadataMutationPaused",
+            "signature": "MetadataMutationPaused()",
+            "inputs": []
+          },
+          {
+            "key": "PreservationURITooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "PreservationURITooLarge",
+            "signature": "PreservationURITooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "actual",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maximum",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          }
+        ],
         "fallbacks": [],
         "receives": []
       }

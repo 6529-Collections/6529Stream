@@ -35,8 +35,13 @@ CATEGORY_BY_ERROR_NAME = {
     "CollectionDataMissing": "supply_minting",
     "CollectionFinalSupplyWindowActive": "supply_minting",
     "CollectionHasPendingTokenMetadata": "metadata_integrity",
+    "CollectionDoesNotExist": "metadata_integrity",
+    "CollectionMetadataFrozen": "metadata_integrity",
+    "CollectionMetadataLocked": "metadata_integrity",
     "CollectionMintWindowActive": "supply_minting",
     "CollectionNotCreated": "supply_minting",
+    "CollectionRecordAlreadyExists": "metadata_integrity",
+    "CollectionSnapshotAlreadyPublished": "metadata_integrity",
     "CollectionSupplyReached": "supply_minting",
     "CollectionSupplyTooLarge": "supply_minting",
     "DependencyChunkIndexOutOfBounds": "metadata_integrity",
@@ -78,6 +83,10 @@ CATEGORY_BY_ERROR_NAME = {
     "MintExecutorCountLimitExceeded": "mint_manager_policy",
     "InvalidMintPhase": "mint_manager_policy",
     "InvalidMintRecipient": "mint_manager_policy",
+    "InvalidCollectionRecord": "metadata_integrity",
+    "InvalidHashRef": "metadata_integrity",
+    "InvalidMetadataRecord": "metadata_integrity",
+    "InvalidSnapshotId": "metadata_integrity",
     "InvalidPolicyMode": "primary_settlement_safety",
     "InvalidPrimaryPolicyHash": "revenue_assignment_safety",
     "InvalidPrimarySale": "primary_settlement_safety",
@@ -95,6 +104,9 @@ CATEGORY_BY_ERROR_NAME = {
     "MetadataFieldTooLarge": "metadata_integrity",
     "MetadataFrozen": "metadata_integrity",
     "MetadataMutationPaused": "pause_emergency",
+    "MetadataRecordTypeLimitExceeded": "metadata_integrity",
+    "MetadataRevisionMismatch": "metadata_integrity",
+    "MetadataURITooLarge": "metadata_integrity",
     "NoReleasableFunds": "split_payment_safety",
     "IncorrectNativeValue": "primary_settlement_safety",
     "AuthorizationAlreadyConsumed": "mint_ledger_accounting",
@@ -136,6 +148,7 @@ CATEGORY_BY_ERROR_NAME = {
     "PreparedMintMismatch": "supply_minting",
     "PreparedMintNotFound": "supply_minting",
     "PreparedMintOperationReused": "supply_minting",
+    "PreservationURITooLarge": "metadata_integrity",
     "PrimaryAssignmentFrozen": "revenue_assignment_safety",
     "PrimaryAssignmentMissing": "revenue_assignment_safety",
     "PrimaryPolicyHashMismatch": "primary_settlement_safety",
@@ -273,14 +286,47 @@ TRACEABILITY_BY_CATEGORY = {
 }
 
 TRACEABILITY_BY_ERROR_NAME = {
+    "CollectionMetadataFrozen": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "CollectionMetadataLocked": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "CollectionRecordAlreadyExists": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
+    "CollectionSnapshotAlreadyPublished": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "InvalidCollectionRecord": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
     "InvalidCoreContract": [
         "test/StreamMintManager.t.sol",
+    ],
+    "InvalidHashRef": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
+    "InvalidMetadataRecord": [
+        "test/StreamCollectionMetadata.t.sol",
     ],
     "InvalidMintLedgerContract": [
         "test/StreamMintManager.t.sol",
     ],
     "InvalidMintManagerContract": [
         "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+    "InvalidSnapshotId": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "MetadataRecordTypeLimitExceeded": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "MetadataRevisionMismatch": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "MetadataURITooLarge": [
+        "test/StreamCollectionMetadata.t.sol",
     ],
     "NotMintManager": [
         "test/StreamMintManagerCoreHooks.t.sol",
@@ -297,8 +343,44 @@ TRACEABILITY_BY_ERROR_NAME = {
     "PreparedMintOperationReused": [
         "test/StreamMintManagerCoreHooks.t.sol",
     ],
+    "PreservationURITooLarge": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
     "TokenDataHashMismatch": [
         "test/StreamMintManagerCoreHooks.t.sol",
+    ],
+}
+
+TRACEABILITY_BY_ERROR_ID = {
+    "StreamCollectionMetadata:CollectionDoesNotExist(uint256)": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "StreamCollectionMetadata:FunctionAdminUnauthorized(address,bytes4)": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "StreamCollectionMetadata:InvalidAdminContract()": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "StreamCollectionMetadata:InvalidCoreContract()": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "StreamCollectionMetadata:MetadataMutationPaused()": [
+        "test/StreamCollectionMetadata.t.sol",
+    ],
+    "StreamPreservationRecords:CollectionDoesNotExist(uint256)": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
+    "StreamPreservationRecords:FunctionAdminUnauthorized(address,bytes4)": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
+    "StreamPreservationRecords:InvalidAdminContract()": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
+    "StreamPreservationRecords:InvalidCoreContract()": [
+        "test/StreamPreservationRecords.t.sol",
+    ],
+    "StreamPreservationRecords:MetadataMutationPaused()": [
+        "test/StreamPreservationRecords.t.sol",
     ],
 }
 
@@ -371,6 +453,9 @@ def catalog_entry(
     category = classify_error(contract_name, name, signature)
     tests = list(TRACEABILITY_BY_CATEGORY[category])
     for test_path in TRACEABILITY_BY_ERROR_NAME.get(name, []):
+        if test_path not in tests:
+            tests.append(test_path)
+    for test_path in TRACEABILITY_BY_ERROR_ID.get(canonical_error_id(contract_name, signature), []):
         if test_path not in tests:
             tests.append(test_path)
 
