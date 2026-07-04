@@ -71,6 +71,10 @@ Provider adapters must not write to `StreamCore`, must not expose
 `setTokenHash`-style callbacks, and must not define the final artist-facing
 token hash.
 
+The coordinator's token-keyed and scope-keyed request kinds (ADR 0011
+decision R8) share this one adapter boundary: adapters serve both
+identically and never distinguish them [EP-CONTEXT].
+
 The current `NextGenRandomizerNXT`, `NextGenRandomizerRNG`, and
 `NextGenRandomizerVRF` contracts are reference material only. The production
 target is a new set of Stream-native adapters.
@@ -225,14 +229,34 @@ abi.encode(
 )
 ```
 
-Adapters may decode the context for events, request metadata, or source-specific
-payloads. They must not use decoded context as authority in place of the
-coordinator request key.
+Context handling requirements [EP-CONTEXT]:
+
+1. The version prefix is the leading `uint16`. Schema version 1 is the
+   token-request context above; schema version 2 is the scope-request
+   context, carrying the coordinator `scopeId` in place of a token ID.
+   Both encodings are owned by the coordinator spec
+   ([`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+   Request Flow and [EC-SCOPE]; ADR 0011 decision R8).
+2. Adapters must treat `requestKey` and `context` as opaque: token-keyed
+   and scope-keyed requests are indistinguishable at the adapter boundary
+   and flow through identical request, callback, storage, retry, and
+   status-probe paths.
+3. Adapters may decode context versions they recognize for events,
+   request metadata, or source-specific payloads. They must not use
+   decoded context as authority in place of the coordinator request key,
+   and they must not reject or special-case a request because its
+   context schema version is unrecognized.
 
 `providerResultStatus` is the shared audit and recovery probe. It must remain
 queryable after delivery, stale marking, failed delivery, or incident handling.
 Fresh entropy recovery for a token is forbidden when the old adapter reports
-`rawRandomnessReceived = true`, even if coordinator delivery failed.
+`rawRandomnessReceived = true`, even if coordinator delivery failed. The
+probe is one-directional evidence: a `true` report blocks fresh recovery
+absolutely, while a `false` report alone never licenses it — the
+coordinator corroborates a negative report against its own request state
+and requires an independent-evidence commitment before any fresh draw
+([`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+[EC-INCIDENT] rule 3; ADR 0011 decision R12).
 
 ## Common Adapter Requirements
 
@@ -426,6 +450,7 @@ mirrors these rows. Release tooling computes and pins the hash values.
 | `STREAM_PYTH_RAW_V1` | `6529STREAM_PYTH_RAW_V1` | 0x904dfcae5221db62594fb78af05341a66a4e8d649ec151a90cee174eecf6e246 | `StreamEntropyProviderPyth` | `1` | genesis if selected fallback |
 | `STREAM_DRAND_RAW_V1` | `6529STREAM_DRAND_RAW_V1` | 0x81d2ca2a7da654d7cfe760fac3c357e03fc212d4790b5277459b5717b3f46201 | `StreamEntropyProviderDrand` | `1` | extension |
 | `STREAM_MULTI_SOURCE_RAW_V1` | `6529STREAM_MULTI_SOURCE_RAW_V1` | 0x94257c55589ad53441c332497f043fbe4820fe5089152303939a0aaba1f8f4f0 | multi-source mixer adapters | `1` | extension |
+| `GGP_VRF_CALLBACK_GAS_LIMIT` | `6529STREAM_GGP_VRF_CALLBACK_GAS_LIMIT` | 0xb54bc37de6ab63d94434a3fb47e0b24ad67118105c91c59db7b1c58d482f5491 | provider adapters | `1` | genesis (Governed Gas Parameter identifier per [LTA-GGP]; [EP-VRF-CONFIG]) |
 
 ## Callback Delivery Discipline
 
@@ -1359,6 +1384,10 @@ Common provider tests:
     [EP-CUSTODY].
 20. `REJECTED_PROVIDER_REVOKED` outcomes never mark a stored result
     terminal; the result remains queryable as recovery evidence.
+21. Token-keyed (context schema version 1) and scope-keyed (schema
+    version 2) requests flow through identical adapter paths, and an
+    unrecognized context schema version is accepted and treated opaquely
+    [EP-CONTEXT].
 
 VRF tests:
 

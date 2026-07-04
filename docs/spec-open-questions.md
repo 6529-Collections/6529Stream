@@ -33,7 +33,16 @@ heuristic is gone by design, and nothing standard replaced it.
   indexer-facing collection registry read plus documented integration
   guidance; (d) marketplace-standard sub-collection metadata in token JSON
   (`properties.stream.collection`) plus outreach to major marketplaces.
-- Recommendation: none recorded — reserved to the protocol owner.
+- Recommendation: none recorded — reserved to the protocol owner. For the
+  owner's consideration, the round-2 best-in-world reviewer proposed a
+  layered resolution: (a) commit the per-collection ERC-7572 `contractURI`
+  read plus `properties.stream.collection` fields as the normative signal;
+  (b) pursue a standards-track EIP for sub-collection identity with named
+  marketplace co-sponsors; (c) evaluate a thin immutable per-collection
+  ERC-721 facade line (address-per-series fronting Core identity) as an
+  extension profile; (d) convert the display-evidence gate into named,
+  signed integration commitments from at least two major
+  marketplaces/indexers before public sale.
 - Decision owner: protocol owner.
 
 All 25 other questions raised by the permanence reframe were resolved on

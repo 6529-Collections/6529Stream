@@ -147,7 +147,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:e6b32e59640287669792394005ccff3abd77f10bce62556dd93584323fabdaaa"
+    "sha256": "sha256:d65651bd66a0ea022b0b198ebee90d6c2a0af293943d2a83b8c2bce32e85499b"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -191,8 +191,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:7d2a90297fbc4303b9508045867803c1fc8c898edb0db70f9cbc63419c182aee",
-      "size_bytes": 82500
+      "sha256": "sha256:3adac0d302f70159db0c8ca2ec71e2ea8d3e801630ae49deac4948636a79262b",
+      "size_bytes": 84154
     },
     {
       "path": "README.md",
@@ -466,8 +466,8 @@
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:b0432eddc916bbff72331154c5d9142cb2b164b2d177450b0cbd8dafa386e096",
-      "size_bytes": 68011
+      "sha256": "sha256:7030bdffba5870091af0e0a5a2f1c9da8fabb9c25334574caa584949037e554d",
+      "size_bytes": 89291
     },
     {
       "path": "docs/monitoring.md",
@@ -1076,7 +1076,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:b0eb93da205e7fd801af9f496b32aeef86d57910fb98452647f0f77768507eb9",
+      "sha256": "sha256:e7a569cb69f9662db1730a5122b6188084c5182dcbb825d1f63475341fa490fd",
       "size_bytes": 150235
     },
     {
@@ -1141,7 +1141,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:01da95783ca27e87765778cd88ee40e0d27c48d98a5b48675d0a82718a73c329",
+      "sha256": "sha256:6b65baaa7c7a433bc20809c61db2b37256caab3e75f863272c1af6c13654b6b3",
       "size_bytes": 8996
     },
     {
@@ -1191,22 +1191,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:caad092c7d431b5ffab22ddd23c4f234fcc7d0046dd4a6807de5822a186e9edd",
+      "sha256": "sha256:f9105cb9baa0238d4f4979a2f5627334053e657747e013ffe40e3e0035c5a0d1",
       "size_bytes": 134618
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:6ceea2bfb9f2645fe034118d22e4299044ce9e914cd9f4159434b1f36390cc51",
-      "size_bytes": 84664
+      "sha256": "sha256:e4fd4154f8632195b7919f831927df9c807d2a96d7f9ad7b37c867e53ef3ac2f",
+      "size_bytes": 86279
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:7a8ab6a9492ccf2db4aa3317631cfbccc7fc6d2a92c4f289b21203aacf034728",
-      "size_bytes": 81544
+      "sha256": "sha256:dcf0428d56c20fa873ec723bd67a3670bdc95bd7c275c3d8fc7073d1db39133f",
+      "size_bytes": 83152
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:bd29dc3ef656150c370fbe0c17f07ab87a5e2f003fad1b6955dd3202049e1a1a",
+      "sha256": "sha256:52a8fedcf3b5357c002b5b6b35e5d572af8d44d6d4130f6c52f26aba162de54e",
       "size_bytes": 24573
     },
     {
@@ -1351,8 +1351,8 @@
     },
     {
       "path": "scripts/check_mint_manager_domain_constants.py",
-      "sha256": "sha256:c23d2391f7bef2fa929937c29748694bd80b115988ae57bfba93d93527b1121f",
-      "size_bytes": 10051
+      "sha256": "sha256:b018299cb7cd3292c118a5b9bd94a3f4cbe9e8869093c648e646e05befea2490",
+      "size_bytes": 12315
     },
     {
       "path": "scripts/check_monitoring_spec.py",

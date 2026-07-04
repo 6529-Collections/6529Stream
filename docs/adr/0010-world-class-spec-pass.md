@@ -39,10 +39,14 @@ Decision numbers below are cited from the specs as "(ADR 0010 decision N)".
    floors, and any future cap) is a **Governed Gas Parameter**: a storage
    value with an immutable per-parameter FLOOR set at deployment from
    measured need plus margin.
-2. Raising a GGP is a low-risk service-restoring action: staged governance
-   with a short delay class (raise-only emergency path permitted). Lowering
-   a GGP requires the normal delay class plus a passing health-probe run at
-   the proposed value, and can never go below the floor.
+2. Raising a GGP is a service-restoring action: staged governance with a
+   raise-only emergency path permitted. Lowering a GGP requires the
+   normal delay class plus a passing health-probe run at the proposed
+   value, and can never go below the floor. [Superseded in part by
+   ADR 0011 decision R5: staged raises use the normal delay class with a
+   2x per-action bound, and the emergency path is health-probe-gated;
+   the current model is the [LTA-GGP] home in
+   [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md).]
 3. GGP values are Operational-layer: they are excluded from finality
    manifests and frozen-route identity, so retuning gas never touches
    artwork identity. Frozen collections keep working because the cap can

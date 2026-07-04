@@ -1020,6 +1020,30 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Applied the nine-lens round-2 resolutions through accepted
+  `docs/adr/0011-world-class-pass-round-2.md`: onchain bytes now means
+  contract storage or SSTORE2 (event data demoted to discovery pointers);
+  offchain-mode collections bind per-token content hashes at mint/sale time;
+  execution environments are archived as runnable artifacts with pinned
+  per-work re-render acceptance modes; archival receipts require a
+  cryptographically verifiable class and one pay-once endowed family;
+  Governed Gas Parameter raises are 2x-bounded with named probe contracts
+  and permissionless pre-approved conditional raises for lost governance;
+  escrow-holding sale modes bind drift envelopes so buyer funds can never
+  strand (Dutch purchases pay max-price with pull-credit excess; phase
+  pause moves out of the policy hash via the V2 phase-config preimage);
+  artist identity gains rotation contest windows, guardian sets,
+  platform-independent estate activation, pre-finality content veto, and
+  post-finality recovery signatures; sale-scoped randomness, reveal-owner
+  SLOs, SaleKind vocabulary growth, zero-price/PWYW/custody-inventory
+  kinds, and deposit-bonded sealed bids join the sales spec; nonces are
+  per-signer everywhere; museum registrar/conservation/rights schemas are
+  pinned with a PREMIS mapping and an operator-independent attestor lane;
+  mirrors now carry every governance and GGP domain; and 51 further
+  minor-tier refinements land across the set.
+  `scripts/check_mint_manager_domain_constants.py` additionally enforces the
+  revenue-layer `6529STREAM_` domain-namespace rule across the home table
+  and its protocol v1 mirror.
 - Hardened the full specification set through accepted
   `docs/adr/0010-world-class-spec-pass.md`, resolving all 112 findings of a
   nine-lens independent review (permanence, artist provenance, Safe/TDH

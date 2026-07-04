@@ -96,33 +96,78 @@ matrix.
 | Core-native ERC-2981 | `StreamCore.royaltyInfo`, revenue resolver | canonical `0x54f77a09` resolver selector; malformed/OOG/external-call resolver fallback; all-cold gas; precheck and staticcall read current `ROYALTY_RESOLVER_GAS_LIMIT` GGP value ([RSR-2981-GAS]) | Core bytecode size, resolver gas report | mandatory |
 | Pull split wallets | split factory, split wallet, revenue escrow | conservation fuzz, forced ETH, approved-standard ERC-20 release/sync, unsupported ERC-20 denial, reentrancy, `DEPRECATED` release-under-grace ([RSR-ASSET-POLICY]); ERC-1271 named-class verification — heaviest legitimate wallet class passes within the `ERC_1271_GAS_LIMIT` GGP, malicious wallet rejected ([RSR-1271]) | profile schema, wallet code hashes | mandatory |
 | Primary native ETH and approved-standard ERC-20 settlement | fixed-price sale adapter, ERC-20 primary settlement adapter, `StreamPrimarySaleSettlement`, asset policy registry, revenue escrow | no `tx.origin`, policy hash binding, escrow fallback, adapter and escrow both enforce `ACTIVE` asset policy, exact ERC-20 transfer accounting, allowance/payment failure handling; payer-signed `PaymentIntent` verified before any allowance pull with expired/replayed/revoked/over-cap negative tests ([RSR-PAYMENT-INTENT]) | sale authorization schema, approved asset and adapter manifests | mandatory |
-| Sales and auctions | genesis sale adapters and gate modules per [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) | the full [SSA-GATES] suite: English auction (reserve, increment floor, anti-snipe extension and cap, CEI, idempotent settlement, pull refunds), Dutch (schedule determinism, clearing, rebate conservation), refund-window custody, burn-to-mint (retained-identity proof, manager-scoped nullifiers, finality interaction refusals), delegate gate, content selection, registry governance, ERC-4337 + paymaster end-to-end run, custody-held settlement ordering (`CUSTODY_SETTLEMENT_TRANSFER`, [RSR-SETTLEMENT-BOUNDARY]), event reconstruction | sale/auction state-machine manifests, adapter registry manifest | mandatory |
+| Sales and auctions | genesis sale adapters and gate modules per [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) | the full fifteen-suite [SSA-GATES] set: English auction (reserve, increment floor, anti-snipe extension and cap, CEI, idempotent settlement, pull refunds, first-bid-starts, mint-at-settlement custody branch), Dutch (schedule determinism, clearing, rebate conservation, maximum-price purchase with pull-credited excess), refund-window custody with drift-envelope refund unlock ([SSA-ENVELOPE]; ADR 0011 decision R6), burn-to-mint (retained-identity proof, manager-scoped nullifiers, finality interaction refusals), delegate gate, content selection (commit-reveal default), ERC-4337 + paymaster end-to-end run, registry governance, static analysis, gas budget, event reconstruction, pause tolling and no-confiscation, price kinds (zero-price, pay-what-you-want, custody inventory with `CUSTODY_SETTLEMENT_TRANSFER` ordering, [RSR-SETTLEMENT-BOUNDARY]), reveal fees, and replay locus (ADR 0011 decision R9) | sale/auction state-machine manifests, adapter registry manifest | mandatory |
 | Collection management | Core collection boundary | create/status/max-supply events and transitions | collection facts schema | mandatory |
-| Token identity | Core mint boundary, `tokenCollectionIdentity` | Core-owned token allocation, collection serial mapping, mapping-existence read, prepared-incomplete identity read, burn retained mapping; `TokenCollectionRegistered` emitted at identity write and event-only replay rebuilds the full mapping (ADR 0010 decision D10.1; protocol v1 [PV1-RECON].9) | token identity schema | mandatory |
+| Token identity | Core mint boundary, `tokenCollectionIdentity` | Core-owned token allocation, collection serial mapping, mapping-existence read, prepared-incomplete identity read, burn retained mapping; `TokenCollectionRegistered` — schemaVersioned, production signature pinned at its home [MPA-CORE-ABI] (ADR 0011 decision R12) — emitted at identity write and event-only replay rebuilds the full mapping (ADR 0010 decision D10.1; protocol v1 [PV1-RECON].9) | token identity schema | mandatory |
 | Token-level metadata | collection metadata satellite | token data/field overrides, token locks, burned archival reads | token metadata schema | mandatory |
 | Burn | Core burn boundary | owner/approved, mapping retained, finalized burn blocked, one-way collection burn block readable for finality ([CMC-BURN]; ADR 0010 decision D10.5) | burn policy manifest | mandatory |
 | Mint accounting | mint manager, ledger, `StreamMintTicketGate` | duplicate-key aggregation, static caps, signed ticket binding; reentrancy guard on `mint()` and prepared entrypoints; `registerPhasePolicy` binds `msg.sender` to its manager argument; gate calls forward `max(gateGasLimit, MINT_GATE_GAS_LIMIT)` with returndata/nullifier bounds ([MPA-GATES]); `AuthorizerKind` enforcement with zero-`ecrecover` and non-canonical-signature negatives ([MPA-AUTHZ]); zero-increment rejection; manager-scoped nullifiers; Merkle allowlist cap mode ([MPA-MERKLE]); `GLOBAL` counter scope with reserved-constant `(0, 0)` derivation goldens ([MPA-SCOPES]); counter-continuity import ([MPA-CONTINUITY]); policy grace windows ([MPA-GRACE]); ticket revocation | policy hash schema | mandatory |
-| Artist authority | `StreamArtistRegistry` plus consuming satellites | the nine [AA-GATES] suites: two-sided binding, sanction-required finality, consent modes, economics consent and royalty freeze, signature verification (ERC-1271, GGP probes), key lifecycle (rotation/succession/dormancy), disputes, attribution display, record-family write authority | artist registry manifest, consent/sanction schema hashes | mandatory |
-| Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path; `ENTROPY_REGISTRATION_GAS_LIMIT` GGP semantics ([EC-REGGAS]); `maxFeeWei` binding with pull-credit refunds ([EC-FEEBIND]); callback persistence and retry ([EP-CALLBACK]); `INSTANT` restricted to declared `LOW_SECURITY` collections; lifecycle mapping matches [EC-LIFECYCLE] | entropy policy manifest; measured `fulfillEntropy` gas envelope with callback margin and `VRF_CALLBACK_GAS_FLOOR` record | mandatory |
-| Metadata routing | metadata router, renderer | escaping, size limits, router failure behavior, ERC-4906 auth; renderer determinism static gate and pinned golden render vectors ([MRR-DETERMINISM]); full-view and paged-chunk byte identity ([MRR-FULL-VIEW]) | renderer and context manifests, golden render vector artifact | mandatory |
+| Artist authority | `StreamArtistRegistry` plus consuming satellites | the thirteen [AA-GATES] suites: two-sided binding, sanction-required finality, consent modes (including signature-free pause in every attribution state, ADR 0011 decision R6), economics consent and royalty freeze, signature verification (ERC-1271, GGP probes, per-identity unordered nonces), key lifecycle (rotation contest windows, guardians, identity recovery, permissionless estate activation, dormancy), disputes and platform-works contests, attribution display, record-family write authority, identity archival, content authority, recovery approval, and ceremony tooling — the ceremony-tooling suite (gate 13) is verified through the Artist ceremony rehearsal gate row below | artist registry manifest, consent/sanction schema hashes | mandatory |
+| Artist ceremony rehearsal | artist signing tool and rehearsal deployment over `StreamArtistRegistry` plus consuming satellites | the full [AA-TOOLING] suite (ADR 0011 decisions R7.7 and R12): named signing tool renders a human-readable summary of every typed payload family before signature; rehearsed end-to-end onboarding through mint and finality sanction with total ceremony count and per-ceremony signing latency recorded; consent-churn drift detection and stale-ceremony invalidation; independent operator-free hash recomputation tool; estate/dormancy paths exercised to staging; plus the artist's recorded acknowledgment of the disclosure-only royalty term (protocol v1 [PV1-EXCL] item 1) captured during rehearsal | checksum-covered artist ceremony rehearsal artifact per [AA-TOOLING]: tool name, version, and build hash; payload summaries; ceremony-count and latency measurements; acknowledgment record | mandatory |
+| Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path; `ENTROPY_REGISTRATION_GAS_LIMIT` GGP semantics ([EC-REGGAS]); `maxFeeWei` binding with pull-credit refunds ([EC-FEEBIND]); callback persistence and retry ([EP-CALLBACK]); `INSTANT` restricted to declared `LOW_SECURITY` collections; lifecycle mapping matches [EC-LIFECYCLE]; the scope-request suite ([EC-SCOPE]: registration, async-only lifecycle parity, incident recovery, commitment finality) and the reveal suite ([EC-REVEAL]: mandatory `ASYNC` reveal policy at freeze, `AT_MINT` attempt-and-catch never unwinding a mint, SLO-lapse permissionless fallback, escrow-first fee draw) per ADR 0011 decision R8; incident evidence gate ([EC-INCIDENT] rule 3 three-part check) | entropy policy manifest; measured `fulfillEntropy` gas envelope with callback margin and `VRF_CALLBACK_GAS_FLOOR` record; reveal operations manifest (owner, float, exhaustion alarms, keeper obligation, latency target, rehearsal evidence) | mandatory |
+| Metadata routing | metadata router, renderer | escaping, size limits, router failure behavior, ERC-4906 auth; renderer determinism static gate against each renderer version's declared read set — `STATIC` default or declared `DYNAMIC` class — and pinned golden render vectors ([MRR-DETERMINISM]; ADR 0011 decision R3); full-view and paged-chunk byte identity ([MRR-FULL-VIEW]); attribution-mirror checker — the rendered `properties.provenance.attribution` object matches the [AA-DISPLAY] home field-for-field through the [MRR-ATTRIBUTION] citation mirror, retired flat fields absent (ADR 0011 decision R7.6); offchain-mode pre-sale content binding and the `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` coverage-deadline monitored gate ([MRR-OFFCHAIN-BINDING]; ADR 0011 decision R2) | renderer and context manifests, golden render vector artifact | mandatory |
 | Contract metadata | Core `contractURI()` delegation, contract-metadata satellite | ERC-7572 `contractURI()` bounded delegated read, satellite pointer, failure fallback, `ContractURIUpdated()` emitter auth (ADR 0009 decision 4) | contract-metadata manifest, selector test | mandatory |
-| Marketplace collection display | collection discovery machine path ([MRR-COLLECTION-DISCOVERY]) | retained evidence that each artist series resolves as its own collection on the major marketplaces/indexers targeted at launch, exercised through the published machine path; the standards-track signal remains reserved as OQ-X8 in [`docs/spec-open-questions.md`](spec-open-questions.md) and this gate does not resolve it | marketplace/indexer display evidence bundle | mandatory |
-| Collection metadata | metadata contract plus metadata satellites | typed v1 fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling; token content roots publishable and verified pre-finality ([CMC-CONTENT-ROOT]); per-lane record-chain accumulators ([CMC-RECORD-CHAIN]) | schema and snapshot manifests, metadata aggregate ABI/bytecode report | mandatory |
+| Marketplace collection display | collection discovery machine path ([MRR-COLLECTION-DISCOVERY]) | evidence bundle validates against [LCM-MARKETPLACE]: one schema-valid entry per pinned target per launch artist series, each demonstrating own-collection resolution (rule 3) through the published machine path; any missing pair or mismatched entry fails the gate (ADR 0011 decision R12); the standards-track signal remains reserved as OQ-X8 in [`docs/spec-open-questions.md`](spec-open-questions.md) and this gate does not resolve it | checksum-covered marketplace-target manifest and display evidence bundle ([LCM-MARKETPLACE]) | mandatory |
+| Marketplace royalty resolution | Core-native ERC-2981 read path plus per-target royalty plumbing ([LCM-MARKETPLACE] rule 4) | per pinned target per launch artist series: hash-pinned evidence that the target's resolved receiver and bps match a live `royaltyInfo()` read at capture time; the shared royalty-registry entry is recorded (address and registration transaction) for targets that resolve shared contracts through it, and per-marketplace royalty configuration state is recorded for targets that do not (ADR 0011 decision R12) | royalty-resolution entries in the marketplace evidence bundle ([LCM-MARKETPLACE]) | mandatory |
+| Collection metadata | metadata contract plus metadata satellites | typed v1 fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling; token content roots publishable and verified pre-finality ([CMC-CONTENT-ROOT]); per-lane record-chain accumulators ([CMC-RECORD-CHAIN]); the fourteen pinned genesis schemas present with matching IDs and hashes, worked examples validating ([CMC-GENESIS-SCHEMAS]; ADR 0011 decision R11); PREMIS crosswalk export round-trip ([CMC-PREMIS-PROFILE]); artist content-consent and content-freeze enforcement on content-affecting families ([CMC-ARTIST-CONTENT-VETO]; ADR 0011 decision R7.2) | schema and snapshot manifests, metadata aggregate ABI/bytecode report | mandatory |
 | Owner records | `StreamOwnerRecords` | ownerOf-gated, signature-verified, append-only owner families (`ACCESSION`, `CONDITION_REPORT`, `EXHIBITION`, `LOAN`, `DEACCESSION`, `CITATION`), `TITLE_BINDING` schema, firewalled from render/finality/economics ([CMC-OWNER-RECORDS]); record-family grant-set verification across all genesis satellites — the CON-015 whole-module writer exception is retired ([CMC-AUTHZ], [AA-RECORDS]; ADR 0010 decision D2.8) | owner-records module manifest, grant map artifact | mandatory |
 | Preservation records | `StreamPreservationRecords` | PREMIS-style event/object/agent/right records, fixity hash validation, event reconstruction, post-freeze record behavior | preservation module manifest, schema hashes, code hash | mandatory |
-| Collection attestations | `StreamCollectionAttestations` | C2PA/EIP-712/ERC-1271-compatible attestations, onchain verification at write for signer-verified classes, signer authority, supersession, event reconstruction ([CMC-ATTESTATIONS]) | attestation module manifest, schema hashes, code hash | mandatory |
+| Collection attestations | `StreamCollectionAttestations` | C2PA/EIP-712/ERC-1271-compatible attestations, onchain verification at write for signer-verified classes, signer authority, supersession, event reconstruction ([CMC-ATTESTATIONS]); artist-attestation surface field inventory matches the [AA-ATTEST] home through the [CMC-ARTIST-ATTESTATION] checker row; independent-attestor lanes — permissionless entry, signer-verified writes under `STREAM_INDEPENDENT_PRESERVATION_TYPEHASH`, firewall, unblockability with locks/freezes/finality present ([CMC-INDEPENDENT-ATTESTOR]; ADR 0011 decision R11); `METADATA_ERC1271_VERIFY_GAS` floor/raise/lower/probe tests on every verifying metadata satellite ([CMC-SIGVER-GGP]; ADR 0011 decision R10) | attestation module manifest, schema hashes, code hash | mandatory |
 | Collection views | `StreamCollectionViews` | IIIF/view URI commitments, accessibility/display view references, bounded reads, event reconstruction | view module manifest, schema hashes, code hash | mandatory |
 | Entropy fallback provider | entropy coordinator, reviewed fallback provider | reviewed ARRNG or Pyth fallback provider shipped alongside VRF (ADR 0009 decision 21); VRF-only deployment fails this gate; coordinator failure mode matches the retained decision manifest | checksum-covered `release-artifacts/latest/entropy-launch-decision.json` or equivalent release-manifest record | mandatory |
-| Artwork finality | Core plus satellites | typed finality preimage, pointer race, `verifyFinality`; token content root recorded before any finality in every metadata mode ([CMC-CONTENT-ROOT]); `REFERENCE_RENDER` component with capture-environment manifest for script-based works ([MRR-FINALITY]); `ARTIST_SANCTION` or `PLATFORM_WORKS_DECLARATION` component verified ([AA-SANCTION], [AA-PLATFORM]); artist intent record or recorded waiver ([CMC-ARTIST-INTENT]); dual-family archival receipts plus passing per-family fixity records for every finality-referenced offchain payload ([LTA-ARCHIVE]); collection scope requires `CLOSED` plus the one-way burn block (ADR 0010 decision D10.5) | finality manifest | mandatory |
-| Governed gas parameters | every GGP host (Core, factories, coordinator, router, registries) | per parameter: immutable floor enforced; staged raise plus raise-only emergency path; lower requires a recorded passing health probe at the proposed value and can never cross the floor; change events with old/new values; excluded from finality manifests, frozen-route identity, and economic preimages — all per the pattern home ([LTA-GGP]; ADR 0010 decision D1) and its full inventory | GGP inventory with genesis values and floors in the release manifest, repricing review checklist | mandatory |
-| Governance | governance/timelock, role registry | no single EOA, role map cardinality, delays; canonical action ID and atomic batch execution ([GOV-ACTION-ID], [GOV-BATCH]); window floors and dedicated unpause role ([GOV-WINDOWS]); long-lived authorities are role references resolved through the admin registry, not raw addresses (ADR 0010 decision D7.4); entropy-provider operational authorities contract-held with rehearsed rotation ([EP-CUSTODY]) | genesis governance manifest, governance action policy catalog | mandatory |
-| Collector gas budget | both paid mint paths, genesis sale adapters | measured all-cold end-to-end collector transaction gas for `PRE_REVENUE_SINGLE_STEP` and `PREPARED_MINT` (single and batch of 10), free allowlisted mint, fixed-price and Dutch purchases, each inside its stated envelope ([MPA-GAS-BUDGET]; ADR 0010 decision D5.10); measured ERC-721 enumerable per-mint and per-transfer overhead recorded per [LTA-TRADEOFFS] item 2 (ADR 0010 decision D9.3) | checksum-covered gas budget artifact | mandatory |
+| Artwork finality | Core plus satellites | typed finality preimage, pointer race, `verifyFinality`; token content root recorded before any finality in every metadata mode ([CMC-CONTENT-ROOT]); `REFERENCE_RENDER` component for script-based works with capture-environment manifest, archived runnable execution-environment artifact under dual-family fixity coverage, and exactly one pinned acceptance mode — `BYTE_EXACT` only with pinned software rasterization, `DYNAMIC`-class renderers excluded from `BYTE_EXACT` ([LTA-FINALITY] requirement 12, [CMC-FINALITY-INPUTS], [MRR-FINALITY]; ADR 0011 decision R3); `ARTIST_SANCTION` or `PLATFORM_WORKS_DECLARATION` component verified ([AA-SANCTION], [AA-PLATFORM]); artist intent record with interview reference or recorded waiver ([CMC-ARTIST-INTENT]; ADR 0011 decision R11); rights record present for artist-bound collections ([CMC-RIGHTS-SCHEMA]; ADR 0011 decision R11); dual-family archival receipts with schema-valid evidence classes — at least one cryptographically verifiable receipt per payload, operator assertion alone rejected, at least one `ENDOWED` family per render-critical payload — plus passing per-family fixity records from a verifier distinct from the writer ([LTA-ARCHIVE], [CMC-RECEIPTS]; ADR 0011 decision R4); collection scope requires `CLOSED` plus the one-way burn block (ADR 0010 decision D10.5) | finality manifest | mandatory |
+| Governed gas parameters | every GGP host (Core, factories, coordinator, router, registries, satellites) | per parameter, the [LTA-GGP] requirement 9 suite (ADR 0011 decision R5): immutable floor enforced; staged raise on the normal delay class with the 2x per-action raise bound rejected above it; emergency raise probe-gated (healthy probe record blocks, recorded failing run at the current value admits); lower requires a recorded passing probe run at exactly the proposed value within `probeMaxAgeBlocks` through the named probe contract and can never cross the floor; permissionless conditional raise executed with no governance signer; change events with old/new values; excluded from finality manifests, frozen-route identity, and economic preimages — all per the pattern home ([LTA-GGP]; ADR 0010 decision D1) and its full inventory | GGP inventory with genesis values, floors, named probe contracts, `probeMaxAgeBlocks`, failure-direction classes (`FORWARDING_CAP`/`FAIL_CLOSED_PRECHECK`/`MIN_GAS_GATE`), and conditional-raise registrations in the release manifest; repricing review checklist | mandatory |
+| Governance | governance/timelock, role registry | no single EOA, role map cardinality, delays; canonical action ID and atomic batch execution ([GOV-ACTION-ID], [GOV-BATCH]); material-action holder classes with the time-boxed EOA bootstrap sunset recorded in ceremony evidence ([GOV-MATERIAL]; ADR 0011 decision R10); window floors, the 72-hour terminal-freeze veto floor, and dedicated unpause role ([GOV-WINDOWS]); long-lived authorities are role references resolved through the admin registry, not raw addresses (ADR 0010 decision D7.4); entropy-provider operational authorities contract-held with rehearsed rotation ([EP-CUSTODY]); at least one registry-`ACTIVE` pre-approved fallback target registered per critical pointer family at genesis with a rehearsed permissionless move recorded as release evidence ([LTA-POINTERS] rule 11; ADR 0011 decision R10) | genesis governance manifest, governance action policy catalog, fallback-target inventory | mandatory |
+| Collector gas budget | both paid mint paths, genesis sale adapters | measured all-cold end-to-end collector transaction gas for `PRE_REVENUE_SINGLE_STEP` and `PREPARED_MINT` (single and batch of 10), free allowlisted mint, fixed-price and Dutch purchases, each at or below the normative not-to-exceed ceiling pinned per path in [MPA-GAS-BUDGET] (ADR 0011 decision R12; ADR 0010 decision D5.10) — the ceilings are spec values, not report values, so exceedance forces path slimming before deployment and is never remediable by editing the report; side-by-side measured comparison against the named competitor mint paths listed in [MPA-GAS-BUDGET] recorded in the artifact; measured ERC-721 enumerable per-mint and per-transfer overhead recorded per [LTA-TRADEOFFS] item 2 (ADR 0010 decision D9.3) | checksum-covered gas budget artifact with per-path ceiling compliance and competitor comparison | mandatory |
 | Fixity program | preservation records, operations | mandated fixity schedule (annual full sweep, quarterly sampling), `FIXITY_CYCLE_COMPLETED`/`FIXITY_FAILURE` records, repair-from-mirror and escalation policy ([CMC-FIXITY-PROGRAM]; ADR 0010 decision D6.3) | deployment-gated fixity operations manifest | mandatory |
 | Reconstruction client | archival reconstruction client | client exists at genesis and rebuilds every [PV1-RECON] item from events alone; source-archive hash matches `streamSystemManifest().reconstructionClientHash`; replay test vectors pass in CI; reproducible-build instructions verified (ADR 0010 decision D4.8) | client source archive hash, replay vector artifact, drill cadence in ops runbook hashes | mandatory |
-| Funding manifest | operations | published funding/endowment manifest naming the source, coverage horizon, and exhaustion alarms for keepers, entropy fees, storage mirrors, fixity cycles, and drills; each recurring obligation names its funded operational owner (ADR 0010 decision D4.8) | checksum-covered funding manifest | mandatory |
-| Claim aggregation | claim router periphery | permissionless `claimMany`/`syncAndClaimMany`, release-to-self only, continue-on-failure mode, one-transaction aggregated claiming across at least 20 wallets ([RSR-CLAIM-ROUTER]; ADR 0010 decision D10.6) | claim router manifest | mandatory |
+| Funding manifest | operations | published funding/endowment manifest naming the source, coverage horizon, and exhaustion alarms for keepers, entropy fees, storage mirrors, fixity cycles, and drills; each recurring obligation names its funded operational owner (ADR 0010 decision D4.8); every storage family carries its economics class (`ENDOWED`/`RENEWAL_FUNDED`) and the gate fails if any render-critical payload has no `ENDOWED` family ([LTA-FUNDING] rule 1, [LTA-ARCHIVE] requirement 3; ADR 0011 decision R4); the protocol-endowment decision is stated explicitly either way ([LTA-FUNDING] rule 3); the entitlement-indexer operator for recipient claim discovery is named ([RSR-CLAIM-ROUTER] rule 6) | checksum-covered funding manifest | mandatory |
+| Claim aggregation | claim router periphery | permissionless `claimMany`/`syncAndClaimMany`, release-to-self only, continue-on-failure mode, one-transaction aggregated claiming across at least 20 wallets ([RSR-CLAIM-ROUTER]; ADR 0010 decision D10.6); rehearsed end-to-end recipient claim flow recorded as release evidence — event-only entitlement discovery, `syncAsset`, and the 20-wallet `claimMany` run ([RSR-CLAIM-ROUTER] rule 6; ADR 0011 decision R12) | claim router manifest, recipient claim rehearsal artifact | mandatory |
 | Events | every subsystem | event reconstruction, supersession map | event catalog hash | mandatory |
-| Operations | monitoring/export/storage | degraded-admin test, state export with metadata/record-chain roots, storage redundancy, export cadence per the umbrella schedule | ops runbook hashes | mandatory |
+| Operations | monitoring/export/storage | degraded-admin test, state export with metadata/record-chain roots, storage redundancy, export cadence per the umbrella schedule; recurring-obligation staleness monitoring computes latest export age from `latestStateExport()` ([LTA-EXPORT]) and latest fixity-cycle age from `FIXITY_CYCLE_COMPLETED` records ([CMC-FIXITY-PROGRAM]), and the published missed-cadence policy declares a monitored incident on any exceeded maximum staleness ([LCM-GENESIS] recurring obligations; ADR 0011 decision R12) | ops runbook hashes, missed-cadence policy hash | mandatory |
+
+### Marketplace Evidence Requirements [LCM-MARKETPLACE]
+
+The marketplace collection display and marketplace royalty resolution
+gates are falsifiable against this section, never against reviewer
+judgment (ADR 0011 decision R12):
+
+1. The release manifest must include a checksum-covered marketplace-target
+   manifest pinning the launch marketplace/indexer set before the
+   deployment ceremony: at least three named targets, including the two
+   highest-volume general-purpose Ethereum NFT marketplaces (measured by
+   trailing-90-day secondary volume at pinning time) and at least one
+   major independent NFT indexer/API, each with the resolution mechanism
+   the evidence must exercise (contract-metadata read, registry read, or
+   marketplace API).
+   Changing the pinned target set is a reviewed release-artifact change,
+   never a gate-time substitution.
+2. Evidence entries follow a pinned schema, one entry per
+   (target, launch artist series): `{targetId, collectionId,
+   captureTimestamp, captureToolVersion, screenshotHash,
+   apiResponseHash, resolutionKind}`, canonicalized with RFC 8785/JCS
+   and checksum-covered in the evidence bundle.
+3. "Resolves as its own collection" means, concretely: the target
+   displays the series as a distinct collection object whose displayed
+   name matches the pinned series name, whose item set corresponds to
+   the series token list (the entry records a spot check of the first
+   and last collection serials), and which is not merged with any other
+   Stream series; the hashed API response must demonstrate that
+   grouping.
+4. Royalty-resolution evidence, per target and series: the hashed API
+   response or settlement-configuration state showing the resolved
+   receiver and bps matching a live `royaltyInfo()` read at capture
+   time; for targets that resolve shared-contract royalties through the
+   shared community royalty registry, the bundle records the registry
+   entry (registry address and registration transaction hash); for
+   targets that use per-marketplace royalty configuration, the bundle
+   records that configuration state.
+5. Either gate fails on any missing (target, series) pair, any
+   schema-invalid entry, or any mismatch between an entry and its pinned
+   expectation. The standards-track collection-identity signal remains
+   reserved as OQ-X8 in
+   [`docs/spec-open-questions.md`](spec-open-questions.md); this section
+   pins evidence, not the signal.
 
 ## Genesis Deployment Profile
 
@@ -138,9 +183,13 @@ is absent from this list, is a matrix violation. This inventory is
 exhaustive: 33 deployable production contracts, plus per-collection split
 wallets created on demand by `CREATE2` through the factory. Governed Gas
 Parameter stores are storage surfaces of the listed contracts (Core and
-the split factory parameter store), not separate deployments; the mock
-entropy provider exists only in local validation and never deploys to
-production.
+the split factory parameter store), not separate deployments; the
+per-parameter GGP probe contracts are diagnostics/operator-tooling
+deployments named in the release manifest ([LTA-GGP] definition item 6)
+that hold no protocol authority, no pointer, and no funds, and sit
+outside this production inventory exactly like the deployer factory; the
+mock entropy provider exists only in local validation and never deploys
+to production.
 
 Mandatory genesis contracts:
 
@@ -195,13 +244,48 @@ The auction contracts are inside the genesis conformance boundary: no
 deployment may defer them, and no auction may run anywhere except through
 the gate-covered genesis adapters.
 
+Genesis deployment is deterministic (ADR 0011 decision R10; home
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+[LTA-DEPLOY]): every contract in the inventory above deploys through the
+deterministic deployment factory named in the deployment manifest, with
+the factory address, per-contract `CREATE2` salts, and init-code hashes
+recorded so every genesis address is recomputable from the release
+manifest alone. The deployer factory holds no protocol authority, no
+pointer, and no funds, and is therefore outside the 33-contract
+production inventory; every identity preimage continues to bind deployed
+addresses and code hashes, so determinism is an auditability property of
+the ceremony and of successor-line address planning, never an identity
+dependency.
+
 Genesis audit plan (ADR 0010 decision D9.1): the release manifest must
 include a published subsystem-by-subsystem audit plan artifact covering
 every contract above — per-subsystem scope, audit ordering, auditor
 identity or class, and completion evidence — and the deployment ceremony
-fails while any subsystem lacks recorded audit completion. Recurring
-operational obligations (fixity cycles, state exports, drills, funding)
-each name their funded operational owner in the funding manifest gate.
+fails while any subsystem lacks recorded audit completion. The audit
+plan must include a critical-path launch schedule: the audit dependency
+graph, the parallelism plan, and the ordered ceremony steps from final
+audit to public sale. Every gate in this matrix stays launch-blocking —
+the owner-ratified posture accepts shipping later over shipping unproven
+(ADR 0010 decision D5.10) — and the critical-path schedule is how that
+shipping risk is managed, never a mechanism to defer or downgrade gates.
+
+Recurring post-launch obligations have teeth (ADR 0011 decision R12).
+Fixity cycles, state exports, preservation and reconstruction drills,
+and funding-manifest renewals each declare a cadence and a maximum
+staleness in their gated manifests, and each names its funded
+operational owner in the funding manifest gate. Exceeding a declared
+maximum staleness is a monitored incident, not a lapsed intention:
+monitoring must alert, the incident must be declared and recorded in the
+preservation record lane naming the missed obligation and its recovery
+plan, and the hash-committed missed-cadence policy in the operations
+runbook names the escalation path and the response owner. Obligation
+ages are verifiable without operator testimony: latest export age reads
+from `latestStateExport()` ([LTA-EXPORT]) and latest fixity-cycle age
+reads from `FIXITY_CYCLE_COMPLETED` records ([CMC-FIXITY-PROGRAM]), so
+any third party can compute staleness from chain state alone; the
+Operations gate verifies that monitoring computes these ages from those
+onchain reads. The deployment gate is the floor of the obligation, never
+the whole of it.
 
 Specified but optional-at-genesis surfaces (the only `conditional`
 surfaces; each activates its own gate rows through its accepted ADR):
@@ -235,36 +319,65 @@ covered by a golden interface test. If Core cannot fit with Core-native
 ERC-2981 and enumerable, move mutable policy to satellites rather than
 expanding Core.
 
-Core planning budget before implementation:
+Core planning budget before implementation. The upper bound of each range
+is a binding per-group allocation, not an estimate (ADR 0011 decision
+R12): the allocations sum to 22,500 runtime bytes, 76 bytes below the
+22,576-byte ceiling the governing headroom rule implies (EIP-170's 24,576
+bytes minus the 2,000-byte deployment-gate margin, ADR 0009 decision 2),
+so meeting every per-group allocation satisfies the gate by arithmetic
+rather than by hope:
 
 ```text
-Function group                                      priority    planning runtime bytes
-ERC-721 ownership/approval/metadata/enumerable      permanent   7,000-9,000
-Mint/burn/token identity/collection serials         permanent   3,000-4,500
-Collection facts/status/supply reads and writes     permanent   2,000-3,000
-Core-native ERC-2981 resolver read                  permanent     700-1,200
-Bounded tokenURI router read/fallback/status        permanent   1,400-2,400
-Bounded contractURI delegated read (ERC-7572)       permanent     300-600
-Satellite pointer cached reads and governance hooks permanent   1,200-2,000
-Core finality fact reads and lifecycle reads        permanent     700-1,200
-Core-originated ERC-4906 refresh emitters           permanent     300-700
-streamSystemManifest storage-only read              permanent     500-1,000
-Successor declaration history                       medium        500-1,000
-latestStateExport storage-only read                 medium        300-700
-Prepared mint prepare/complete                      permanent     900-1,800
+Function group                                      priority    planning allocation bytes
+ERC-721 ownership/approval/metadata/enumerable      permanent   7,000-7,900
+Mint/burn/token identity/collection serials         permanent   3,000-3,600
+Collection facts/status/supply reads and writes     permanent   2,000-2,400
+Core-native ERC-2981 resolver read                  permanent     700-900
+Bounded tokenURI router read/fallback/status        permanent   1,400-1,600
+Bounded contractURI delegated read (ERC-7572)       permanent     300-400
+Satellite pointer cached reads and governance hooks permanent   1,200-1,500
+Core finality fact and lifecycle view assembly      medium        700-900
+Core-originated ERC-4906 refresh emitters           permanent     300-400
+streamSystemManifest storage-only read              permanent     500-600
+Successor declaration history                       medium        500-600
+latestStateExport storage-only read                 medium        300-400
+Prepared mint prepare/complete                      permanent     900-1,300
 ```
 
 The 2,000-byte headroom target above is the governing deployment rule
 (ADR 0009 decision 2); the bytecode-spend baseline and exception ledger in
 `release-artifacts/contracts.json` remain the pre-deployment development
 control, and interim exceptions cannot survive to the deployment gate.
+A group that cannot fit its allocation sheds bytes through the named
+compression strategies first — custom errors replacing revert strings,
+packed token-identity and collection-facts storage records, shared
+guard/read helpers, and satellite-side assembly of aggregate views —
+before any relocation is considered.
 
-If the measured build loses the 2,000-byte headroom, the priority order is:
-every `permanent` row stays in Core — including `streamSystemManifest()` and
-the prepared-mint pair, which are never relocation candidates (ADR 0010
-decision D10.6; [MPA-CORE-ABI]) — then successor history and state export
-publication move into a thin immutable discovery satellite that Core points
-to through the same cached pointer policy.
+If the measured build still loses the 2,000-byte headroom, the
+pre-authorized relocation order is decided now, not at the deployment
+gate (ADR 0011 decision R12): first, successor declaration history and
+state-export publication (`latestStateExport`) move into a thin
+immutable discovery satellite that Core points to through the same
+cached pointer policy; second, the aggregated finality-fact and
+lifecycle view assembly moves into the same satellite, with Core
+permanently retaining the granular collection facts, supply, status,
+burn-block, and token-identity storage reads those views are assembled
+from. Every `permanent` row stays in Core — including
+`streamSystemManifest()` and the prepared-mint pair, which are never
+relocation candidates (ADR 0010 decision D10.6; [MPA-CORE-ABI]). A
+measured build that exceeds the ceiling after both relocations and the
+named compression strategies is a design failure that blocks deployment;
+editing the allocation table is a spec amendment through the normal
+process, never a gate-time remediation.
+
+Non-normative reconciliation note: the CON-012 measured baseline (24,150
+runtime bytes; protocol v1 [PV1-HOOKS] implementation evidence) exceeds
+the allocation total by 1,650 bytes and the ceiling by 1,574 bytes; the
+pre-authorized relocations above bound up to 1,900 bytes of relief
+before compression strategies are counted, so the budget is reachable
+through the decided path — the measurement evidences work remaining, not
+an unachievable rule.
 
 Additional paid-mint/finality/escrow deployment tests:
 
@@ -337,11 +450,16 @@ CI must fail if any production contract violates these checks:
 12. The renderer or router `tokenURI` path contains environment or context
     opcodes — `TIMESTAMP`, `NUMBER`, `PREVRANDAO`, `BLOCKHASH`,
     `COINBASE`, `BASEFEE`, `GASLIMIT`, `GASPRICE`, `BALANCE`,
-    `SELFBALANCE` — or any external read outside the pinned allowlist of
-    Core identity, entropy view, and metadata storage reads
-    ([MRR-DETERMINISM]; ADR 0010 decision D4.3). Renderer output must be a
-    pure function of contract state and the render request; the pinned
-    golden render vectors re-verify this at every preservation drill.
+    `SELFBALANCE` — or any external read outside the renderer version's
+    declared read set pinned by [MRR-DETERMINISM] (ADR 0010 decision
+    D4.3; ADR 0011 decision R3): for the default `STATIC` class that set
+    is Core identity, entropy view, and metadata storage reads; a
+    declared `DYNAMIC`-class renderer version extends it only with its
+    own declared, per-version-frozen external reads, and the gate re-runs
+    against the declared set. Renderer output must be a pure function of
+    contract state, the render request, and (for `DYNAMIC`) the declared
+    reads; the pinned golden render vectors re-verify this at every
+    preservation drill.
 
 ## Golden Interface Tests
 
@@ -392,7 +510,10 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
     authority-critical interfaces.
 14. The deployment manifest contains `compatibilityMatrixHash`, event catalog
     hash, numeric ID allocation hash, and reproducible-build artifact hashes for
-    every deployed satellite.
+    every deployed satellite, plus the deterministic-deployment record —
+    deployer factory address, per-contract `CREATE2` salts, and init-code
+    hashes sufficient to recompute every genesis address from the manifest
+    alone (ADR 0011 decision R10).
 15. A collection on a single-step-only mint path cannot select a renderer that
     requires renderer-visible `tokenData` bytes before the recipient callback.
 16. `PRE_REVENUE_SINGLE_STEP` with any `RECIPIENT`-keyed counter requires
@@ -422,8 +543,10 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
     `indexed` fields, matching the Solidity log topic limit.
 21. Golden tests assert numeric enum values for `TokenURIReadStatus`,
     `StreamTokenLifecycle`, `EntropyStatus`, `EntropyFulfillmentOutcome`,
-    `EntropySecurityClass`, `ProviderResultStatus`,
-    `ModuleRegistryStatus`, `AuthorizerKind`, asset policy statuses,
+    `EntropySecurityClass`, `EntropyScopeKind`, `RevealRequestMode`,
+    `ProviderResultStatus`,
+    `ModuleRegistryStatus`, `AuthorizerKind`, `CodehashPinMode`, asset
+    policy statuses,
     `AttributionState`, `ArtistConsentMode`, `ArtistAuthorityClass`,
     `CollabPolicyMode`, `SaleKind`, `DutchDecayKind`, finality scope
     types, and recovery statuses match the manifest-pinned Numeric ID
@@ -504,12 +627,30 @@ New events either include `uint16 schemaVersion` or have immutable v1 semantics
 pinned in this catalog. Event replacements must use `supersedes` and
 `replacedBy`; old events remain in the catalog forever with `status: archived`
 and are never reinterpreted.
+
+One fact, one owning event (ADR 0011 decision R12). This is the
+genesis-wide event policy that the subsystem specs apply: every
+production fact is emitted by exactly one owning event, and
+implementation-optional duplicate or mirror emissions are banned at
+genesis — an optional mirror is a conformance defect, not a convenience.
+Where a spec requires a same-execution mirror (for example the router's
+required `MetadataRouterUpdated` mirror, [MRR-ROUTER-EVENTS], or a
+parameter-named GGP alias event, [LTA-GGP] requirement 4), the catalog
+must tag the mirror as a member of its fact family so indexers
+reconstruct each fact from exactly one declared event set; an emission
+that is neither the owner nor a catalog-tagged required mirror fails the
+Events gate.
 The v1 catalog must explicitly list standard-event exemptions where the event
 signature cannot include `schemaVersion`, including ERC-721 `Transfer`,
 `Approval`, `ApprovalForAll`,
 ERC-4906 `MetadataUpdate` / `BatchMetadataUpdate` if emitted with their
 standard signatures, and ERC-7572 `ContractURIUpdated()` (ADR 0010
 decision D10.6).
+`TokenCollectionRegistered` is not exempt: its production signature
+carries `uint16 schemaVersion`, pinned once at its home
+([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+[MPA-CORE-ABI]; ADR 0011 decision R12), and any snippet without it is
+shorthand under the rule below.
 Any non-standard event snippet elsewhere in the specs that omits
 `schemaVersion` is shorthand, not permission to omit it from the production ABI. The
 event catalog and golden event tests are authoritative.
@@ -527,9 +668,18 @@ statuses, entropy fulfillment outcomes (including
 (`HIGH_ASSURANCE = 0`, `LOW_SECURITY = 1`), provider result statuses,
 asset policy statuses (`UNKNOWN = 0`, `ACTIVE = 1`, `INACTIVE = 2`,
 `DEPRECATED = 3`, `UNSUPPORTED = 4`, home [RSR-ASSET-POLICY]),
-authorizer kinds ([MPA-AUTHZ]), sale and Dutch-decay kinds (sales spec),
+authorizer kinds ([MPA-AUTHZ]), sale and Dutch-decay kinds (sales spec;
+`SaleKind` is an append-only catalog vocabulary whose genesis values
+`0`–`14` — including the reserved extension values — are pinned at
+[SSA-IDENTITY] and never renumbered, with new kinds allocated append-only
+from `15`, ADR 0011 decision R9),
 English-auction lifecycle states and refund-window purchase states
 (sales spec [SSA-ENGLISH] state machine and [SSA-REFUND]),
+codehash pin modes (`CodehashPinMode`; enum home the mint spec Data
+Model with its pin rules at [MPA-REGISTRY] rule 5, ADR 0011 decision
+R12), entropy scope kinds and reveal request modes
+(`EntropyScopeKind`, `RevealRequestMode`; homes [EC-SCOPE] and
+[EC-REVEAL], ADR 0011 decision R8),
 attribution states, artist consent modes, artist authority classes, and
 collaborator policy modes
 ([`docs/stream-artist-authority.md`](stream-artist-authority.md)),

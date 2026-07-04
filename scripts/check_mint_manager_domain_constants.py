@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Validate StreamMintManager hash domain constants against the checked spec."""
+"""Validate StreamMintManager hash domain constants against the checked spec.
+
+Also enforces the revenue-layer domain-string namespace rule
+([RSR-DOMAINS] rule 4, ADR 0011 decision R12): every revenue-layer domain
+string preimage in the revenue home table and its protocol v1 mirror must
+start with ``6529STREAM_``.
+"""
 
 from __future__ import annotations
 
@@ -251,10 +257,54 @@ def validate_documents(
                 )
 
 
+REVENUE_DOC_PATH = Path("docs/revenue-splits-and-royalties.md")
+REVENUE_NAMESPACE_PREFIX = "6529STREAM_"
+REVENUE_SECTION_MARKERS: tuple[tuple[Path, str, str], ...] = (
+    (REVENUE_DOC_PATH, "Requirements [RSR-DOMAINS]:", "\n## "),
+    (DOC_PATH, "### Revenue Mirror Rows", "\n### "),
+)
+
+
+def _extract_marked_section(markdown: str, start_marker: str, end_marker: str) -> str:
+    start = markdown.find(start_marker)
+    if start == -1:
+        raise MintManagerDomainError(f"missing section marker: {start_marker}")
+    end = markdown.find(end_marker, start + len(start_marker))
+    return markdown[start:] if end == -1 else markdown[start:end]
+
+
+def validate_revenue_domain_prefixes(repo_root: Path) -> None:
+    """Reject revenue-layer domain string preimages outside the 6529STREAM_ namespace."""
+    for doc_path, start_marker, end_marker in REVENUE_SECTION_MARKERS:
+        text = (repo_root / doc_path).read_text(encoding="utf-8")
+        section = _extract_marked_section(text, start_marker, end_marker)
+        headers: list[str] | None = None
+        for raw_line in section.splitlines():
+            line = raw_line.strip()
+            if not line.startswith("|") or not line.endswith("|"):
+                continue
+            cells = [normalize_cell(cell) for cell in line.strip("|").split("|")]
+            if set(cells) <= {"---"}:
+                continue
+            if headers is None or "String preimage" not in headers:
+                headers = cells
+                continue
+            row = dict(zip(headers, cells))
+            preimage = row.get("String preimage", "")
+            if re.fullmatch(r"[A-Z0-9_]+", preimage) and not preimage.startswith(
+                REVENUE_NAMESPACE_PREFIX
+            ):
+                raise MintManagerDomainError(
+                    f"revenue-layer domain string {preimage!r} in {doc_path} lacks the "
+                    f"{REVENUE_NAMESPACE_PREFIX} namespace prefix ([RSR-DOMAINS] rule 4)"
+                )
+
+
 def validate_repo(repo_root: Path) -> None:
     docs_text = (repo_root / DOC_PATH).read_text(encoding="utf-8")
     source_text = (repo_root / SOURCE_PATH).read_text(encoding="utf-8")
     validate_documents(docs_text, source_text)
+    validate_revenue_domain_prefixes(repo_root)
 
 
 def parse_args() -> argparse.Namespace:

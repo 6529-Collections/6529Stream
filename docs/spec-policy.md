@@ -112,9 +112,17 @@ not a second home.
 If two documents conflict, the owning home wins and the conflict is a
 defect to repair, never an interpretation choice. ADRs are decision
 records: the specs they amend are the homes, and ADR text that drifts from
-its spec is corrected to cite the spec. Event snippets inside spec prose
-are illustrative; the machine-readable event catalog and its golden tests
-are the authoritative event signatures.
+its spec is corrected to cite the spec. One ADR is itself a designated
+home, by owner decision (ADR 0010 decision D3.4; ADR 0011 decision R10):
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md) owns
+the governance surfaces its bracketed anchors name — the canonical
+governance action identity and batch domains ([GOV-ACTION-ID],
+[GOV-BATCH]), the window floors ([GOV-WINDOWS]), the material-action
+holder classes ([GOV-MATERIAL]), the `ROLE_*` vocabulary ([GOV-ROLES]),
+and the supported ERC-1271 wallet class ([GOV-1271-CLASS]) — and every
+spec cites those sections instead of restating them. Event snippets
+inside spec prose are illustrative; the machine-readable event catalog
+and its golden tests are the authoritative event signatures.
 
 ## Requirement Anchors
 
@@ -124,6 +132,12 @@ numbered inside the section so gates, tests, reviews, and other documents
 can cite a requirement precisely and durably. New and edited normative
 sections must carry anchors; full backfill across the older documents is a
 Review-entry condition tracked by the conformance matrix.
+
+## Decision Citation Format
+
+Decisions are cited uniformly as `(ADR <number> decision <id>)` — for
+example `(ADR 0010 decision D2.3)` or `(ADR 0011 decision R6)`. No other
+citation shape is conformant; mixed formats are defects.
 
 ## Amendment Process
 

@@ -198,28 +198,25 @@ stale-result handling) are obligated but not defined.
 25. OQ-EP1 — Stale-result signal: `fulfillEntropy` returns a pinned
     outcome code instead of reverting on benign rejection, so provider
     callbacks (including VRF callbacks that must not revert) receive a
-    machine-readable verdict:
+    machine-readable verdict through
+    `fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness) returns
+    (uint8 outcome)`.
 
-    ```solidity
-    enum EntropyFulfillmentOutcome {
-        FINALIZED,
-        REJECTED_STALE_EPOCH,
-        REJECTED_INACTIVE_REQUEST,
-        REJECTED_ALREADY_FINALIZED,
-        REJECTED_UNKNOWN_REQUEST
-    }
-
-    function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness)
-        external
-        returns (uint8 outcome);
-    ```
+    Errata (ADR 0011 decision R12): the `EntropyFulfillmentOutcome`
+    member list originally restated inline here is owned by its
+    normative home, the coordinator enum block in
+    [`docs/stream-entropy-coordinator.md`](../stream-entropy-coordinator.md)
+    (Fulfillment Flow), which pins the numeric values. This decision
+    ratified the original five members; ADR 0010 decision D8.1 appended
+    `REJECTED_PROVIDER_REVOKED = 5`. Cite the home, not this record, for
+    the member set.
 
     Hard violations (unauthorized provider, reentrancy) still revert with
     typed errors. Adapters may mark a delivered result `TERMINAL_STALE`
     only on `REJECTED_STALE_EPOCH` or `REJECTED_INACTIVE_REQUEST`, or on
     the equivalent comparison through the coordinator's request-status
     read (stored epoch/attempt no longer active). The outcome values are
-    pinned in the Numeric ID Catalog.
+    pinned in the Numeric ID Catalog as an exact mirror of the home.
 
 ## Alternatives Considered
 

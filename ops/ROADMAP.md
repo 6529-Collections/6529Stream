@@ -2908,6 +2908,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0008 Revenue splits and royalty resolver | Protocol design request | Accepted | `docs/adr/0008-revenue-splits-and-royalty-resolver.md` | Revenue split wallet and Core-native ERC-2981 implementation planning |
 | 0009 Protocol v1 open-question resolutions | Protocol design request | Accepted | `docs/adr/0009-protocol-v1-open-question-resolutions.md` | Spec finalization; conformance-matrix gate updates |
 | 0010 World-class spec pass | Protocol design request | Accepted | `docs/adr/0010-world-class-spec-pass.md` | Nine-lens review resolutions; spec hardening |
+| 0011 World-class pass round 2 | Protocol design request | Accepted | `docs/adr/0011-world-class-pass-round-2.md` | Nine-lens round-2 resolutions |
 
 ## Appendix D: Issue Template
 

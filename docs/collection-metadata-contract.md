@@ -10,7 +10,14 @@ authorization replaces the CON-015 whole-module exception, the museum
 object dossier (pinned subject identity, owner records, fixity program,
 artist intent, C2PA binding, IIIF profile, citation profile) enters
 genesis, and permanence hardening adds token content roots, record-chain
-accumulators, onchain catalog bytes, and SSTORE2 script scale.
+accumulators, onchain catalog bytes, and SSTORE2 script scale. It is
+further amended by
+[ADR 0011](adr/0011-world-class-pass-round-2.md): onchain bytes mean
+contract storage, execution environments are archived artifacts with
+pinned re-render acceptance modes, museum schemas are pinned (registrar
+records, PREMIS crosswalk, rights, interviews), an operator-independent
+preservation lane and a metadata ERC-1271 gas parameter enter genesis,
+and artists hold a standing content veto between mint and finality.
 
 This document specifies moving collection metadata storage out of
 `StreamCore` into a dedicated `StreamCollectionMetadata` contract.
@@ -74,8 +81,9 @@ Recommended companion responsibilities:
    not necessarily a separate genesis contract.
 3. `StreamCollectionAttestations`: artist, curator, estate, institution,
    preservation, C2PA, EAS, VC, EIP-712, and ERC-1271-compatible attestation
-   records. This can start inside `StreamCollectionMetadata` and split out if
-   it grows.
+   records, including the operator-independent preservation lane
+   [CMC-INDEPENDENT-ATTESTOR]. This can start inside
+   `StreamCollectionMetadata` and split out if it grows.
 4. `StreamPreservationRecords`: archive receipts, PREMIS-style preservation
    records, fixity checks, storage/migration events, and media-provenance
    references. This should remain outside Core even if implemented at genesis.
@@ -488,7 +496,14 @@ Burn rules [CMC-BURN]:
    never through token ID range arithmetic.
 3. Burn removes ERC-721 ownership and enumerable membership.
 4. Burn retains `tokenCollectionId`, `tokenCollectionSerial`, and the mapping
-   existence bit for royalty disclosure, archives, and state exports.
+   existence bit for royalty disclosure, archives, and state exports. Core
+   also retains the token's renderer-visible `tokenData` bytes after burn
+   (ADR 0011 decision R12): burn never deletes them, the burned token's
+   archival metadata read stays reproducible from state, and the retained
+   bytes are exported through the `STREAM_EXPORT_TOKEN_DATA_LEAF_V1`
+   state-export leaf. The token-data ownership and retention home is
+   [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+   [MPA-CORE-ABI]; this rule is its burn-boundary application.
 5. A frozen collection is non-burnable unless the collection's pre-freeze
    policy explicitly preserves a burn path and states the archival
    consequences.
@@ -727,8 +742,11 @@ People guidance [CMC-PEOPLE]:
    through a stored address in this contract — so key rotation, estate
    succession, and dormancy transitions defined there apply automatically.
 2. Until the binding is accepted, every rendering surface must present the
-   attribution as unverified (`attribution_status = "claimed"` in token
-   JSON), and no artist-gated write is possible for the collection.
+   attribution as unverified
+   (`properties.provenance.attribution.state = "claimed"` in token JSON,
+   per the attribution schema home cited by [MRR-ATTRIBUTION] in
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)),
+   and no artist-gated write is possible for the collection.
 3. `artistDisplayName`, `artistProfileURI`, `artistWebsiteURI`, and
    `artistENS` are display fields only. Writing display fields that
    contradict the registry binding is an operator error surfaced by
@@ -823,6 +841,16 @@ Rights and provenance guidance:
    or estate fields should obtain offchain legal review before publication,
    because immutable notice can outlive changes in law, ownership, or estate
    administration.
+7. The machine-readable rights baseline beneath these URI fields is the
+   pinned `STREAM_RIGHTS_V1` record schema [CMC-RIGHTS-SCHEMA]
+   (ADR 0011 decision R11); bare URI-plus-hash pairs are a display
+   supplement, never the rights record a registrar catalogues.
+8. Moral-rights posture, stated explicitly alongside attribution: the
+   protocol records attribution, integrity, and artist-intent claims as
+   permanent cryptographic notice; it neither waives, transfers, nor
+   enforces moral rights, which remain jurisdiction-dependent offchain
+   law. Integrity disputes route through the attribution dispute and
+   artist content veto surfaces, not through rights fields.
 
 ```solidity
 struct CollectionDisplay {
@@ -1354,56 +1382,63 @@ ERC-721 ownership. It moves into this contract as a state-bound,
 signature-verified record family — strictly stronger than the baseline it
 replaces, never weaker (ADR 0010 decision 2).
 
-Recommended storage model:
+Recommended storage model (a pure storage mirror of the [AA-ATTEST]
+payload; the field inventory is owned there and drift is a checker-gated
+defect):
 
 ```solidity
 struct ArtistAttestation {
-    uint8 subjectKind;
+    uint8 subjectKind;          // AttestationSubjectKind [AA-ATTEST]
     bytes32 subjectId;
-    address signer;
-    bytes32 attestedDigest;
-    bytes32 boundStateHash;
+    bytes32 subjectStateHash;   // the exact state the artist approved
     bytes32 statementHash;
+    bytes32 statementURIHash;
     bytes32 schemaId;
+    address signer;
+    uint8 authorityClass;       // ArtistAuthorityClass [AA-ROLES]
     uint64 signedAt;
-    bool delegated;
 }
 ```
 
 Attestation rules [CMC-ARTIST-ATTESTATION]:
 
-1. An artist attestation is a typed EIP-712 payload, not a bare string. The
-   `StreamArtistAttestation` type — pinned typehash string, full field
-   inventory, and domain separator — is owned by
-   [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010 decisions 2 and 3). It binds
-   at least: chain ID, this metadata contract address, `collectionId`,
-   attestation scope (collection, token, release, or season), the relevant
-   bound state hash (latest snapshot hash, script and media manifest
-   hashes, or finality record hash), `statementHash`, and `schemaId`. An
-   attestation that does not commit to what was approved proves only that
-   an address once published a string.
+1. An artist attestation is a typed EIP-712 payload, not a bare string.
+   The `StreamArtistAttestation` type — pinned typehash string, full field
+   inventory (`core`, `collectionId`, `subjectKind`, `subjectId`,
+   `subjectStateHash`, `schemaId`, `statementHash`, `statementURIHash`,
+   `nonce`, `signedAt`), and the artist registry's EIP-712 domain — is
+   owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-ATTEST] and [AA-DOMAINS] (ADR 0010 decisions 2 and 3): the payload
+   binds `address core` under the registry as `verifyingContract`, never
+   this metadata contract's address. This contract stores and events the
+   record; it defines no second payload shape, and a conformance checker
+   row asserts this document's attestation field inventory matches
+   [AA-ATTEST], failing on drift (ADR 0011 decision R7).
 2. Submission verifies the signature onchain at write time — EIP-712
    recovery for EOAs with a nonzero, exact-match recovered address, and
-   ERC-1271 for contract signers, under the GGP-governed verification gas
-   model (ADR 0010 decisions 1 and 2). Committed-but-unverified signatures
-   are nonconformant for this family. There is no deferred "when signature
-   verification is added" state.
+   ERC-1271 for contract signers under the metadata verification gas
+   parameter [CMC-SIGVER-GGP] (ADR 0010 decisions 1 and 2). Committed-but
+   -unverified signatures are nonconformant for this family. There is no
+   deferred "when signature verification is added" state.
 3. The eligible signer set is resolved through the artist authority
    registry at submission time: the accepted artist, an accepted
    collaborator authorized under the collection's declared threshold
    policy, an artist-granted delegated signer, or the recorded estate
    successor. Delegated-signer grant, scope, expiry, and revocation are
    artist-signed actions defined in [`docs/stream-artist-authority.md`](stream-artist-authority.md) —
-   never admin-granted. `delegated` records which path signed. Both direct
-   (`msg.sender` is the signer) and relayed (anyone submits the signed
-   payload) submission are supported, so Safe- and estate-held artist
-   identities can attest without self-executing.
+   never admin-granted. `authorityClass` records the acting
+   `ArtistAuthorityClass` ([AA-ROLES]) in storage and events, so
+   artist-signed, delegated, estate, and steward attestations stay
+   permanently distinguishable; a single boolean is nonconformant. Both
+   direct (`msg.sender` is the signer) and relayed (anyone submits the
+   signed payload) submission are supported, so Safe- and estate-held
+   artist identities can attest without self-executing.
 4. Staleness is first-class: `artistAttestationCurrent(collectionId)`
-   returns whether the latest attestation's `boundStateHash` still matches
-   current collection state. Any render-affecting metadata, script,
-   dependency, or media mutation after an attestation makes it stale; the
-   renderer reports `ATTESTED_STALE` and surfaces the mismatch rather than
-   presenting the attestation as current.
+   returns whether the latest attestation's `subjectStateHash` still
+   matches current collection state. Any render-affecting metadata,
+   script, dependency, or media mutation after an attestation makes it
+   stale; the renderer reports it stale and surfaces the mismatch rather
+   than presenting the attestation as current.
 5. Artist attestations are append-only or one-time depending on collection
    policy; a one-time attestation is lockable forever through
    `ARTIST_ATTESTATION`.
@@ -1411,8 +1446,8 @@ Attestation rules [CMC-ARTIST-ATTESTATION]:
    preserved under the signature-bundle rule of [CMC-ATTESTATIONS] rule 10,
    so verification never decays to trust in a URI host.
 
-Events must make artist attestations easy to index, including the attested
-digest, bound state hash, and delegation flag.
+Events must make artist attestations easy to index, including the subject
+kind, subject state hash, and authority class.
 
 ### Artist Intent Records [CMC-ARTIST-INTENT]
 
@@ -1423,13 +1458,18 @@ what may vary, what must not — while the artist can still say so
 
 1. `ARTIST_INTENT` records are artist-scoped writes (signed by the accepted
    artist, collaborator threshold, delegate, or estate per
-   [CMC-ARTIST-ATTESTATION] rule 3) using a Variable Media
-   Questionnaire-derived schema registered in the schema registry:
-   acceptable display parameters (scale, timing, color, interaction,
-   motion, frame rate), variability tolerances, dependency-aging
-   preferences (migration versus emulation versus reinterpretation),
-   significant properties, and artist interview references — each as
-   URI-plus-`HashRef` entries with small canonical payloads onchain.
+   [CMC-ARTIST-ATTESTATION] rule 3) using the pinned Variable Media
+   Questionnaire-derived schema `STREAM_ARTIST_INTENT_V1` of
+   [CMC-GENESIS-SCHEMAS], covering: acceptable display parameters (scale,
+   timing, color, interaction, motion, frame rate), variability tolerances,
+   dependency-aging preferences (migration versus emulation versus
+   reinterpretation), significant properties, and the artist interview
+   entry — each as URI-plus-`HashRef` entries with small canonical
+   payloads onchain. The interview entry is a named schema field, not an
+   optional attachment: it carries either an archived, dual-family
+   mirrored interview reference or an explicit `interview_waived`
+   statement, so its absence is always a visible, deliberate choice
+   (ADR 0011 decision R11).
 2. Finality for a collection with a bound artist requires either a recorded
    `ARTIST_INTENT` record or an explicit artist-signed
    `ARTIST_INTENT_WAIVER` record; `finalizeCollectionArtwork` and scoped
@@ -1445,6 +1485,11 @@ what may vary, what must not — while the artist can still say so
    `ARTIST_INTENT` records lock or the artist's authority passes to an
    estate, estate-signed additions are recorded as estate statements,
    never as retroactive artist intent.
+5. Pre-finality tooling must warn distinctly — separately from the
+   missing-intent warning — when an artist-bound script-based collection
+   approaches finality with `interview_waived` or with no interview entry,
+   because fifty years out the interview is usually the only document that
+   explains why the tolerances are what they are (ADR 0011 decision R11).
 
 ### Attribution Disputes [CMC-ATTRIBUTION-DISPUTES]
 
@@ -1462,8 +1507,11 @@ decision 2). This contract's side:
    platform — can delete an attribution narrative, only supersede it with
    linked evidence.
 3. Renderers must surface dispute state through
-   `properties.provenance.attribution_status`
-   (`disputed`/`revoked` per the pinned vocabulary in
+   `properties.provenance.attribution.state`
+   (`disputed`/`revoked` per the attribution JSON schema whose normative
+   home is [AA-DISPLAY] in
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md), cited
+   by [MRR-ATTRIBUTION] in
    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md));
    a standing dispute is never hidden from the default token JSON.
 
@@ -1513,10 +1561,10 @@ Attestation rules [CMC-ATTESTATIONS]:
    `ARTIST_STATEMENT`, `ESTATE_VERIFICATION`, and
    `INSTITUTIONAL_VERIFICATION` at genesis — verify EIP-712 (nonzero,
    exact-match `ecrecover`) or ERC-1271 signatures onchain at write time
-   under GGP-governed verification gas. `OPERATOR_ASSERTED` types record an
-   authorized writer's claim without cryptographic verification of a
-   third-party signer. There is no deferred verification state in this
-   specification.
+   under the metadata verification gas parameter [CMC-SIGVER-GGP].
+   `OPERATOR_ASSERTED` types record an authorized writer's claim without
+   cryptographic verification of a third-party signer. There is no
+   deferred verification state in this specification.
 4. The release manifest must state, for every attestation type and record
    family, whether it is `SIGNER_VERIFIED` or `OPERATOR_ASSERTED`, so
    future consumers can weight evidence correctly without reading Solidity.
@@ -1537,13 +1585,18 @@ Attestation rules [CMC-ATTESTATIONS]:
 10. A hash whose preimage is lost proves nothing, so signature bundles are
     never hash-only-and-hope (ADR 0010 decision 2). Any attestation whose
     `signatureHash` is recorded onchain must either (a) store the canonical
-    signed payload and signature bytes onchain — event-embedded or in
-    storage, within `MAX_SIGNATURE_BUNDLE_BYTES` — which is the required
-    path for EIP-712/ERC-1271 bundles, or (b) for bundle classes that
-    cannot fit onchain (VC, C2PA, EAS exports), be bound into a
-    preservation record covered by the dual-family archival mirroring rule
-    and included in finality manifests and state exports. A conformance
-    gate enforces this; it is not optional operational practice.
+    signed payload and signature bytes in contract storage or an SSTORE2
+    blob — state-trie bytes, within `MAX_SIGNATURE_BUNDLE_BYTES` — which
+    is the required path for EIP-712/ERC-1271 bundles, or (b) for bundle
+    classes that cannot fit onchain (VC, C2PA, EAS exports), be bound into
+    a preservation record covered by the dual-family archival mirroring
+    rule and included in finality manifests and state exports. Event data
+    is never the only carrier for a bundle: EIP-4444-class history expiry
+    can remove logs from serving nodes while state survives, so an
+    event-embedded-only bundle would decay verification back to mirror
+    trust exactly when operators are gone (ADR 0011 decision R1). Events
+    remain discovery pointers to the stored bytes. A conformance gate
+    enforces this; it is not optional operational practice.
 
 The genesis implementation stores the latest attestation hash per type plus
 append-only events carrying the payload commitments above. Full onchain
@@ -1554,9 +1607,14 @@ surface.
 ## Preservation Receipts
 
 Collections that matter for 50 years need preservation records, not just
-current display URLs.
+current display URLs. This section is the delegated home for archive
+receipt shapes, the receipt evidence-class vocabulary, and the
+family-identifier validation rules consumed by the dual-family archival
+rule ([LTA-ARCHIVE] requirement 2 in
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md);
+ADR 0011 decision R4).
 
-Recommended model:
+Receipt model:
 
 ```solidity
 struct ArchiveReceipt {
@@ -1567,6 +1625,7 @@ struct ArchiveReceipt {
     bytes32 receiptHash;
     bytes32 agentId;
     bytes32 schemaId;
+    bytes32 evidenceClass;
     uint64 recordedAt;
 }
 ```
@@ -1594,6 +1653,34 @@ Rules:
 4. Archive receipts should survive metadata freezes when the collection policy
    wants ongoing preservation updates. If a final archive lock is desired, it
    should use an explicit preservation lock.
+
+Evidence classes and validation requirements [CMC-RECEIPTS] (ADR 0011
+decision R4):
+
+1. `evidenceClass` is mandatory on every archive receipt and takes one
+   pinned value (`keccak256` of the ASCII name; this vocabulary is
+   append-only through spec amendment):
+   `CONTENT_ADDRESSED_INCLUSION` — the receipt binds the storage
+   identifier to the committed bytes cryptographically;
+   `ATTESTED_POSSESSION` — a possession proof signed by the storing
+   agent, auditable by the fixity program [CMC-FIXITY-PROGRAM];
+   `OPERATOR_ASSERTED` — an operator claim with no independent proof.
+2. Family-identifier validation is schema-enforced per `archiveType`
+   before a receipt can satisfy any preservation-coverage or finality
+   precondition: an IPFS-family `CONTENT_ADDRESSED_INCLUSION` receipt
+   must carry a CID whose digest equals the committed content hash; an
+   Arweave-class receipt must carry the transaction identifier and the
+   data-root inclusion path; an `ATTESTED_POSSESSION` receipt must carry
+   the storing agent's signature reference and the fixity-audit record
+   it is audited under. A receipt whose identifier fields fail its
+   family schema is invalid evidence.
+3. Of the two families required for any render-critical or
+   preservation-critical payload, at least one receipt must be
+   `CONTENT_ADDRESSED_INCLUSION` or `ATTESTED_POSSESSION`;
+   `OPERATOR_ASSERTED` receipts alone never satisfy the dual-family rule
+   ([LTA-ARCHIVE] requirement 2), and fixity records for finality
+   preconditions must be produced by a verifier distinct from the
+   receipt writer ([LTA-FINALITY] requirement 11).
 
 ## Stream Preservation And Provenance Profile
 
@@ -1687,14 +1774,14 @@ function recordCollectionRecord(
 Every accepted record emits `CollectionRecordRecorded`, whose schema —
 carrying the record, `recordHash`, `recordChainHash`, `recorder`,
 `authorizationClass`, and `schemaVersion` — is defined once in the
-[Events](#events) section of this document.
+[Events](#events-cmc-events) section of this document.
 
 `recorder` and `authorizationClass` (the record-family authority under which
 the write was accepted: `ARTIST_SIGNER`, `OWNER_SIGNER`, `CURATOR_SIGNER`,
-`INSTITUTION_SIGNER`, `PRESERVATION_ADMIN`, `METADATA_ADMIN`,
-`GLOBAL_ADMIN`) are mandatory in every record event so consumers can
-permanently distinguish artist-authored, owner-authored, and
-operator-authored provenance (ADR 0010 decision 2).
+`INSTITUTION_SIGNER`, `INDEPENDENT_ATTESTOR`, `PRESERVATION_ADMIN`,
+`METADATA_ADMIN`, `GLOBAL_ADMIN`) are mandatory in every record event so
+consumers can permanently distinguish artist-authored, owner-authored,
+independent, and operator-authored provenance (ADR 0010 decision 2).
 
 #### Subject Identity [CMC-SUBJECT-ID]
 
@@ -1951,6 +2038,48 @@ Rules:
    preservation depends on behavior, color profile, dimensions, timing,
    interaction, dependency versions, or execution environment.
 
+#### PREMIS Data-Dictionary Mapping [CMC-PREMIS-PROFILE]
+
+"PREMIS-inspired" shapes that cannot round-trip into a real preservation
+system are a permanent translation burden on every acquiring institution.
+The crosswalk to actual PREMIS is therefore pinned (ADR 0011 decision
+R11):
+
+1. `STREAM_PREMIS_V3_PROFILE` is a genesis schema registered with onchain
+   document bytes [CMC-GENESIS-SCHEMAS] [CMC-SCHEMA-REGISTRY]. It defines
+   the complete field-level crosswalk from `CollectionRecord`,
+   `PreservationObjectRef`, `PreservationEventRef`, `PreservationAgentRef`,
+   `PreservationRightsRef`, and `FixityCheckRef` — and from the Stream
+   event-type and outcome vocabularies — to PREMIS v3 semantic units and
+   the Library of Congress preservation vocabularies. The table below is
+   the normative skeleton; the registered profile document carries the
+   full unit-by-unit crosswalk, including declared profile-local terms
+   with `skos:closeMatch` links where no LoC term exists.
+
+   | Stream surface | PREMIS v3 semantic unit |
+   | --- | --- |
+   | `PreservationObjectRef.objectId` (subject derivation) | `objectIdentifier` (type `6529STREAM_SUBJECT`) |
+   | `PreservationObjectRef.contentHash` | `objectCharacteristics/fixity` (`messageDigestAlgorithm`, `messageDigest`) |
+   | `PreservationObjectRef.byteSize` | `objectCharacteristics/size` |
+   | `PreservationObjectRef.formatId`/`mimeType` | `objectCharacteristics/format` |
+   | `objectRole` values | `significantProperties` plus structural `relationship`, per the profile enumeration |
+   | `PreservationEventRef.eventId`/`eventTime` | `eventIdentifier`, `eventDateTime` |
+   | `eventType` values | LoC `preservationEventType`: `INGEST` → `ingestion`, `FIXITY_CHECK` → `fixity check`, `REPLICATION` → `replication`, `MIGRATION` → `migration`, `NORMALIZATION` → `normalization`, `VALIDATION` → `validation`, `MEDIA_DERIVATION` → `creation`, `C2PA_VALIDATION` → `digital signature validation`, `SCHEMA_MIGRATION` → `metadata modification`, `RIGHTS_REVIEW` → `policy assignment`, `REDACTION` → `redaction`, `DEACCESSION_REFERENCE` → `deaccession`, `CONSERVATION_NOTE` → profile-local term |
+   | `outcome` values | `eventOutcomeInformation/eventOutcome`: `SUCCESS` → `success`, `WARNING` → `warning`, `FAILED` → `fail`; `INCONCLUSIVE`, `SUPERSEDED`, `REDACTED` → profile-local outcomes with `eventOutcomeDetail` |
+   | `PreservationAgentRef.agentId`/`account`/`did`/`uri` | `agentIdentifier`; `agentRole` → `linkingAgentRole`; person/organization/software classes → LoC `agentType` |
+   | `PreservationRightsRef` | `rightsStatement`: `rightsBasis` → `rightsBasis`, `validFrom`/`validUntil` → `startDate`/`endDate`, `rightsURI`/`rightsHash` → `rightsStatementIdentifier` and `licenseDocumentationIdentifier` |
+   | `FixityCheckRef` | `fixity` inside `objectCharacteristics` plus a `fixity check` event |
+
+2. Dossier export tooling ([CMC-OBJECT-DOSSIER]) and the `STATE_EXPORT`
+   preservation surfaces must be able to emit valid PREMIS v3 (XML or
+   JSON serialization) from Stream records through this profile, so an
+   OAIS-modeled repository ingests the dossier without bespoke
+   translation. Round-trip validation — Stream records to PREMIS export
+   to a PREMIS validator — is a conformance gate.
+3. Every "PREMIS-style" claim in the spec set means conformance to this
+   profile; the protocol v1 scope table cites it (mirror note in
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)).
+
 ### Fixity Profile
 
 Fixity checks should be first-class because they answer whether a preserved
@@ -2130,6 +2259,23 @@ C2PA rules [CMC-C2PA]:
 10. Certificate-chain aging is handled by re-attestation: a fresh validation
     record with a current validator class supersedes (never rewrites) an
     older one, preserving the original binding evidence.
+11. C2PA authorship must reconcile with registry attribution
+    (ADR 0011 decision R7). When a C2PA manifest carries authorship
+    assertions for an artist-bound collection, the artist identity record
+    ([AA-IDENTITY] in
+    [`docs/stream-artist-authority.md`](stream-artist-authority.md))
+    should enumerate the artist's C2PA signing credentials in its
+    public-key history references, and validation must verify the claim
+    signer against that credential set and the registry's attribution
+    state and key history. A mismatch never coexists silently as `VALID`
+    provenance: it is recorded as a `C2PA_ATTRIBUTION_DIVERGENCE` record
+    (append-only, evidence-hashed, superseding-aware) and surfaced through
+    the token JSON attribution disclosure
+    (`properties.provenance.c2pa_attribution_divergence`,
+    [MRR-ATTRIBUTION] rule 6 in
+    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)).
+    Divergence resolution routes through the attribution dispute surface
+    [CMC-ATTRIBUTION-DISPUTES]; the C2PA record itself is never rewritten.
 
 ### Media Relationships
 
@@ -2226,6 +2372,19 @@ IIIF rules [CMC-IIIF]:
    contracts.
 6. The default marketplace `tokenURI()` should only reference IIIF data; it
    should not inline large IIIF manifests.
+7. The profile is deliberately dual (ADR 0011 decision R11): the pinned
+   archival profile above is the permanence surface, and a live-service
+   companion keeps it usable by the working IIIF ecosystem without
+   fragmenting the record. An institution serving Mirador/Universal
+   Viewer-class stacks records an `IIIF_SERVICE_MANIFEST` companion — an
+   operational HTTPS/IIIF-Image-API rendition manifest, recorded as a
+   supersedable record whose payload must cross-reference the conformant
+   archival manifest's hash — so the exhibition-usable manifest and the
+   permanence-grade manifest stay provably linked. Service manifests are
+   non-normative Operational-layer guidance outside the permanence claim
+   (rule 5), never a substitute for the archival profile, and never a
+   finality input; a stale or dead service manifest is superseded, and
+   the archival manifest stands.
 
 ## Owner Records And The Object Dossier
 
@@ -2304,9 +2463,11 @@ Owner record rules:
    configuration, no platform role. The direct path requires
    `msg.sender == ownerOf(tokenId)`; the relayed path verifies the EIP-712
    signature (nonzero, exact-match recovery) or ERC-1271 approval of
-   `owner`, requires `owner == ownerOf(tokenId)`, consumes the nonce, and
-   enforces the deadline — so Safe-held and estate-held institutional
-   custody can document works without self-executing transactions.
+   `owner` under the metadata verification gas parameter
+   [CMC-SIGVER-GGP], requires `owner == ownerOf(tokenId)`, consumes the
+   nonce, and enforces the deadline — so Safe-held and estate-held
+   institutional custody can document works without self-executing
+   transactions.
 2. `recordType` is one of the pinned owner families — `ACCESSION`,
    `CONDITION_REPORT`, `EXHIBITION`, `LOAN`, `DEACCESSION`, `CITATION`
    (each the keccak256 of its name, catalogued in the record-type catalog)
@@ -2340,15 +2501,98 @@ Owner record rules:
    `to`), and the instrument's custodian reference — binding paper title to
    a single onchain custody event.
 
-Operational guidance (acquisition packet): a registrar completing an
-acquisition should retain and verify the citation string, the token subject
-ID, the finality record and content-root proofs for the token, the entropy
-provenance record, the current record-chain heads for the token's lanes, the
-artist binding and attestation state, and the instrument hash it recorded in
-`ACCESSION`. Institutional key custody, Safe configuration, succession, and
-owner key-loss handling are Operational guidance in
+Acquisition packet [CMC-ACQUISITION-PACKET]: acquisition due diligence is
+a pinned artifact, not a prose checklist (ADR 0011 decision R11). The
+`STREAM_ACQUISITION_PACKET_V1` schema [CMC-GENESIS-SCHEMAS] defines the
+schema-identified, hash-committed packet a registrar verifies at closing:
+
+1. the canonical citation string with its record-state qualifier at
+   examination time [CMC-CITATION];
+2. the token subject ID [CMC-SUBJECT-ID];
+3. the finality record (or explicit not-finalized status) and the token
+   content-root proof [CMC-CONTENT-ROOT];
+4. the entropy provenance record;
+5. the current record-chain heads for the token's lanes
+   [CMC-RECORD-CHAIN];
+6. the attribution state — binding generation, attestation status, and
+   sanction record where one exists;
+7. the collection's rights record under `STREAM_RIGHTS_V1`
+   [CMC-RIGHTS-SCHEMA];
+8. the latest fixity-cycle status covering the token's payloads
+   [CMC-FIXITY-PROGRAM]; and
+9. the legal instrument hash recorded (or to be recorded) in `ACCESSION`.
+
+Dossier tooling [CMC-OBJECT-DOSSIER] emits the packet, a registrar can
+regenerate and verify it against chain state with no operator involvement,
+and the owner-records conformance gate references it. Institutional key
+custody, Safe configuration, succession, and owner key-loss handling are
+Operational guidance in
 [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
 (ADR 0010 decision 6).
+
+### Independent Preservation Lane [CMC-INDEPENDENT-ATTESTOR]
+
+Long-term stewardship transfers to institutions precisely when platforms
+die, so preservation evidence must be recordable without any platform role
+(ADR 0011 decision R11). The `INDEPENDENT_ATTESTOR` class gives any
+institution — owner or not — its own onchain preservation and fixity lane
+that needs no operator configuration, no registry admission, and no live
+governance, so the onchain preservation history of a work never terminates
+at operator death.
+
+1. Hosting and entry: `StreamCollectionAttestations` hosts the lane. Any
+   address may write append-only `INDEPENDENT_FIXITY` and
+   `INDEPENDENT_PRESERVATION_EVENT` records (record types catalogued in
+   the record-type catalog) against any token, media, or collection
+   subject derived per [CMC-SUBJECT-ID]. Entry is permissionless by
+   design: no role grant, allowlist, collection policy, lock, freeze, or
+   finality state can block the lane, and it keeps working in read-only
+   museum mode with governance gone.
+2. Every write is `SIGNER_VERIFIED` in the attestor's own name: a direct
+   call (`attestor == msg.sender`) or a relayed submission verifying the
+   named attestor's EIP-712 signature (nonzero, exact-match recovery) or
+   ERC-1271 approval under [CMC-SIGVER-GGP], with a per-attestor nonce
+   and deadline. The pinned relayed typehash is:
+
+   ```solidity
+   bytes32 constant STREAM_INDEPENDENT_PRESERVATION_TYPEHASH =
+       0xcb13914f7a4c90b3e2d3d1513c3009284117ccab71b2a60935a620486947c768;
+       // keccak256("StreamIndependentPreservationRecord(address attestor,
+       //   uint256 scopeKey,bytes32 subjectId,bytes32 recordType,
+       //   bytes32 schemaId,uint16 algorithmId,bytes digest,
+       //   bytes32 canonicalizationId,string uri,bytes payload,
+       //   uint64 effectiveAt,uint256 nonce,uint64 deadline)")
+       // (typehash string contains no whitespace or line breaks)
+   ```
+
+   The EIP-712 domain is `name = "6529StreamCollectionAttestations"`,
+   `version = "1"`, the chain ID, and the hosting satellite address as
+   `verifyingContract`; the typehash, domain, and a CI recomputation test
+   enter the protocol v1 domain-constants table.
+3. Attribution and weighting: each record is emitted through
+   `IndependentPreservationRecordRecorded` (schemaVersioned, at most three
+   indexed fields, carrying the record, record hash, chain hash, attestor
+   address, and `authorizationClass = INDEPENDENT_ATTESTOR`). The payload
+   carries the attestor's own identity evidence (institution record, DID,
+   or key references). Consumers weight independent evidence by attestor
+   identity; it is never operator-vouched truth, and no quality gate
+   exists by design — filtering is a consumer concern, spam costs gas and
+   affects nothing.
+4. Payload schemas: fixity payloads use the fixity profile shape
+   (`FixityCheckRef` semantics); preservation events use the PREMIS
+   profile [CMC-PREMIS-PROFILE], so a museum running its own fixity
+   program on mirrored payloads has a protocol home for the results and
+   the evidence round-trips into OAIS-modeled repositories.
+5. Firewall: independent records are firewalled exactly like owner records
+   ([CMC-OWNER-RECORDS] rule 4) — they cannot change default `tokenURI()`
+   output, renderer resolution, artwork finality, royalties, minting,
+   transfers, or ownership, and no renderer read set serving the default
+   view may include them.
+6. Completeness: independent lanes maintain `STREAM_RECORD_CHAIN_V1`
+   accumulators per subject scope key and record type in the hosting
+   satellite [CMC-RECORD-CHAIN], their heads join the `STATE_EXPORT` leaf
+   set, and the object dossier export includes independent records keyed
+   by the token's subject ID [CMC-OBJECT-DOSSIER].
 
 ### Exhibition And Loan Records [CMC-EXHIBITION-LOAN]
 
@@ -2374,6 +2618,31 @@ authorization, no custody transfer, no return enforcement.
    referencing the loan record's hash, giving both sides durable evidence
    that outlives either institution.
 
+### Mementos And Attendance Artifacts [CMC-MEMENTO]
+
+Soulbound and lockable tokens are successor-line-only, so exhibition
+mementos, attendance artifacts, and wallet-bound artist proofs have one
+blessed in-ecosystem pattern instead of improvised external contracts
+(ADR 0011 decision R9): they are attestation records, not transfers.
+
+1. Exhibition and attendance mementos are `StreamCollectionAttestations`
+   records (or owner-record `EXHIBITION` entries where the owner writes
+   them) against the existing token, collection, or exhibition scope
+   subject, carrying the recipient address, occasion reference, and
+   artifact payload hash — inside the event catalog, record-chain, export,
+   and preservation guarantees every other record enjoys.
+2. Wallet-bound artist proofs are artist-signed attestations naming the
+   honored address, written under artist authority per
+   [CMC-ARTIST-ATTESTATION]; they bind identity by signature, not by a
+   non-transferable token.
+3. The pattern is documentation-plus-records at the Operational layer: it
+   mints nothing, transfers nothing, and cannot affect `tokenURI()`,
+   finality, royalties, or ownership. A future memento token contract, if
+   ever wanted, is a separate accepted non-Core module spec; its absence
+   at genesis is intentional
+   ([`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+   exclusions).
+
 ### Object Dossier Export [CMC-OBJECT-DOSSIER]
 
 The per-object dossier is exportable without bespoke tooling: the
@@ -2397,10 +2666,16 @@ Scholarly and registrar reference needs one blessed citation form
    `eip155:<chainId>/erc721:<coreAddress>/<tokenId>`, with `coreAddress`
    in lowercase hex and both numbers in decimal. Example:
    `eip155:1/erc721:0xabc...def/123`.
-2. A record-state citation appends `@` plus a hex `bytes32`: the finality
-   record hash for finalized state, a snapshot manifest hash for a
-   snapshot state, or a record-chain head for a record lane state.
-   Example: `eip155:1/erc721:0xabc...def/123@0x5e4d...`.
+2. A record-state citation appends `@` plus a pinned type prefix plus a
+   hex `bytes32`, so a future reader resolves the hash in one namespace
+   instead of searching three (ADR 0011 decision R11): `@fin:0x...` is a
+   finality record hash, `@snap:0x...` a snapshot manifest hash, and
+   `@chain:0x...` a record-chain head. Example:
+   `eip155:1/erc721:0xabc...def/123@fin:0x5e4d...`. The three prefixes
+   are the closed v1 qualifier vocabulary; an untyped `@0x...` qualifier
+   is nonconformant. The qualifier is mirrored in
+   `properties.stream.citation` and covered by the renderer citation test
+   ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)).
 3. Successor declarations never re-identify works: the original
    `chainId:core:tokenId` triple remains the permanent citation forever,
    and successor lines carry a cross-reference from the successor back to
@@ -2414,7 +2689,91 @@ Scholarly and registrar reference needs one blessed citation form
    ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)),
    and the spec bundle republishes this profile for offline use.
 
-## Lock Model
+## Genesis Museum Schema Set [CMC-GENESIS-SCHEMAS]
+
+The registrar surface is only as durable as its schemas: two institutions
+writing against unpinned families produce mutually unintelligible dossiers,
+and a 2075 archivist must inherit a data dictionary, not a list of family
+names. Every named museum record family therefore ships pinned
+(ADR 0011 decision R11):
+
+1. For each family below, genesis pins: a schema ID (the `keccak256` of
+   the listed name string, entering the record-type and numeric ID
+   catalogs), the canonical JSON Schema document (RFC 8785 canonicalized,
+   registered as onchain document bytes in the schema registry
+   [CMC-SCHEMA-REGISTRY]), and at least one worked example in the spec
+   bundle. A family whose genesis schema document is missing cannot be
+   written ([CMC-AUTHZ] rule 6 applies), and a conformance-matrix row
+   verifies the presence and document hashes of the full set at genesis.
+2. The genesis set and each schema's minimal required fields:
+
+   | Schema name | Minimal required fields (home) |
+   | --- | --- |
+   | `STREAM_ACCESSION_V1` | accession identifier, acquiring-institution reference, and the `TITLE_BINDING` instrument binding of [CMC-OWNER-RECORDS] rule 8 |
+   | `STREAM_CONDITION_REPORT_V1` | the protocol-verifiable condition core of rule 3 below |
+   | `STREAM_EXHIBITION_V1` | the exhibition fields of [CMC-EXHIBITION-LOAN] rule 1 |
+   | `STREAM_LOAN_V1` | the loan fields of [CMC-EXHIBITION-LOAN] rule 2, including outbound and return `CONDITION_REPORT` references |
+   | `STREAM_DEACCESSION_V1` | deaccession reason class, disposition reference, and the `TITLE_BINDING` instrument binding |
+   | `STREAM_CITATION_RECORD_V1` | the cited work's canonical citation with typed record-state qualifier [CMC-CITATION], citing-work reference, and context note |
+   | `STREAM_ARTIST_INTENT_V1` | the intent fields of [CMC-ARTIST-INTENT] rule 1, including the interview entry |
+   | `STREAM_ARTIST_INTENT_WAIVER_V1` | waiver statement hash and scope, per [CMC-ARTIST-INTENT] rule 2 |
+   | `STREAM_OBJECT_DOSSIER_V1` | the dossier bundle of [CMC-OBJECT-DOSSIER] |
+   | `STREAM_ACQUISITION_PACKET_V1` | the packet contents of [CMC-ACQUISITION-PACKET] |
+   | `STREAM_RIGHTS_V1` | the rights record of [CMC-RIGHTS-SCHEMA] |
+   | `STREAM_PREMIS_V3_PROFILE` | the crosswalk of [CMC-PREMIS-PROFILE] |
+   | `STREAM_REFERENCE_RENDER_V1` | the reference-render record of [CMC-FINALITY-INPUTS] rule 5: captures, execution-environment manifest, archived environment artifact references, and the pinned acceptance mode |
+   | `STREAM_IIIF_P3_MIN_V1` | the archival IIIF profile of [CMC-IIIF] |
+
+3. `STREAM_CONDITION_REPORT_V1` anchors every condition report to
+   reproducible protocol state, so outbound and return condition records
+   are comparable across institutions and usable in a dispute
+   (ADR 0011 decision R11). Required fields: examination date and
+   examiner reference; the work citation with its record-state qualifier
+   at examination time; the `verifyFinality`/route-match result at
+   examination; the latest fixity-cycle status covering the token's
+   payloads [CMC-FIXITY-PROGRAM]; the render-verification outcome and
+   method under the work's pinned acceptance mode
+   ([CMC-FINALITY-INPUTS] rule 5), or an explicit not-verified statement;
+   and the free-text condition narrative. A digital condition report that
+   omits the verifiable state is a free-text opinion, not a conformant
+   record.
+4. Schema documents are versioned and superseded through the schema
+   registry lineage rules; a revised family is a new schema ID, and old
+   payloads keep verifying under the schema they named.
+
+### Rights Records [CMC-RIGHTS-SCHEMA]
+
+Reproduction and publication rights are a mandatory line on every
+acquisition checklist and loan agreement; a registrar cannot catalogue
+"see licenseURI" as a rights status. `STREAM_RIGHTS_V1` is the pinned,
+machine-readable genesis rights schema (ADR 0011 decision R11), written as
+`RIGHTS_STATEMENT` records through the record primitive under the
+`RIGHTS_*` authority family [CMC-AUTHZ]:
+
+1. Required fields: a rights basis from the closed vocabulary
+   `copyright | license | statute | public_domain | contract |
+   unspecified`; a licensor identity reference (artist ID, estate,
+   institution, or address, with instrument reference); one grant entry
+   per use class for each of `reproduction`, `publication`, `exhibition`,
+   `print`, `derivative`, and `ai_training`; effective dates; and the
+   legal instrument URI plus `HashRef` where an instrument exists.
+2. Each per-use-class grant carries a value from the closed vocabulary
+   `granted | granted_with_conditions | denied | unspecified`, an optional
+   conditions text or URI-plus-hash, and optional free-text extensions.
+   The `AI_TRAINING_PERMISSION` custom field, where used, must carry the
+   same closed vocabulary; prose-only values are nonconformant.
+3. Finality existence rule: finality for an artist-bound collection — the
+   museum-grade class — requires a recorded `RIGHTS_STATEMENT` under this
+   schema for the finality scope ([CMC-FINALITY-INPUTS] rule 11). A
+   record declaring every grant `unspecified` satisfies the rule: the
+   requirement makes reserved rights an explicit, dated declaration
+   rather than an absence a 2075 estate must litigate around.
+4. Rights records are notice and evidence, never onchain enforcement; the
+   posture and moral-rights statement of the Rights And Provenance
+   guidance apply unchanged, and material changes publish superseding
+   records with snapshot coverage rather than overwrites.
+
+## Lock Model [CMC-LOCKS]
 
 The current single `collectionFreeze` is too broad for a 50-year metadata
 system. `StreamCollectionMetadata` should support one-way locks by key.
@@ -2477,13 +2836,74 @@ Rules:
    pre-transition attestations; posthumous estate statements are recorded
    as estate statements, never as retroactive artist acts.
 10. No collection lock — including `METADATA_ALL` — blocks the owner-record
-    surface of [CMC-OWNER-RECORDS] or the artist authority registry's own
-    lifecycle: operators cannot lock owners out of their object files or
-    artists out of their identity records.
+    surface of [CMC-OWNER-RECORDS], the independent preservation lane
+    [CMC-INDEPENDENT-ATTESTOR], or the artist authority registry's own
+    lifecycle: operators cannot lock owners out of their object files,
+    institutions out of their preservation lanes, or artists out of their
+    identity records.
+11. Content locks are not operator-exclusive: the bound artist holds the
+    content freeze of [CMC-ARTIST-CONTENT-VETO], which applies the
+    `SCRIPT`, `DEPENDENCIES`, and `MEDIA_MANIFEST` locks under artist
+    authority.
 
-## Mutation API
+### Artist Content Veto [CMC-ARTIST-CONTENT-VETO]
 
-Avoid magic indexes. Use explicit functions.
+Between mint and finality the artwork's bytes must not be
+operator-mutable against the artist's will: policy consent binds
+mintability, and this section binds content (ADR 0011 decision R7). Who
+can change the art is answered "not the platform alone" for every
+artist-bound collection.
+
+1. Scope: the content-affecting surfaces of an artist-bound collection are
+   the script manifest and chunks, the dependency manifest, the media
+   manifest and render-affecting media fields, render-affecting view
+   manifests, and — on the router side — renderer assignment, metadata
+   mode, and render-context selection
+   ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   [MRR-ADMIN]).
+2. Standing co-signature, per consent mode: from the first mint of the
+   collection (or of the affected scope) until executed finality,
+   content-affecting mutations for an `ARTIST_SIGNED_POLICY` collection
+   require a verified artist co-signature — a state-bound authorization
+   over the exact resulting content state, verified through the artist
+   authority registry under the authority chain and collaborator policy
+   of [`docs/stream-artist-authority.md`](stream-artist-authority.md);
+   operator-only mutation of these surfaces is nonconformant. For
+   `ARTIST_DELEGATED` collections the co-signature may come from an
+   active delegation with the content capability; the standing freeze
+   right of rule 3 applies in both modes. Before first mint, operator
+   iteration remains free: nothing sold can yet be rewritten, and the
+   artist's attestation staleness and refusal levers already cover the
+   pre-sale window.
+3. Artist content freeze: the artist authority may unilaterally seal their
+   collection's content at any time after binding acceptance — the
+   defensive analog of the royalty freeze. A verified artist-signed
+   content-freeze authorization (typed payload and authority chain owned
+   by [`docs/stream-artist-authority.md`](stream-artist-authority.md))
+   is relayable by any caller to this contract, which must verify it
+   against the registry and apply the `SCRIPT`, `DEPENDENCIES`, and
+   `MEDIA_MANIFEST` locks, recording the freeze with the artist's
+   authority class. The right is freeze-only: it cannot unfreeze, cannot
+   alter content, and cannot touch other collections.
+4. Firewall and precedence: the veto never blocks non-content surfaces —
+   preservation records, owner records, attestations, rights records, and
+   the independent lane continue under their own rules — and it never
+   blocks a hash-bound recovery executed under a public recovery manifest,
+   which for artist-bound collections requires artist or estate
+   participation per the recovery rules of the umbrella spec. Locks
+   applied under this section are ordinary one-way locks of this Lock
+   Model.
+5. Every veto surface is evented: co-signed mutations record the artist
+   authorization reference in the mutation event, and artist-applied
+   locks emit `CollectionMetadataLocked` with the artist's authority
+   class, so a 2075 reader can distinguish operator-sealed from
+   artist-sealed content.
+
+## Mutation API [CMC-MUTATIONS]
+
+Avoid magic indexes. Use explicit functions. For artist-bound collections,
+content-affecting writes in this ABI are additionally subject to the
+artist content veto [CMC-ARTIST-CONTENT-VETO].
 
 ```solidity
 function setCollectionIdentity(
@@ -2571,18 +2991,22 @@ function setDependencyManifest(
 
 function submitArtistAttestation(
     uint256 collectionId,
-    bytes32 attestedDigest,
-    bytes32 boundStateHash,
+    uint8 subjectKind,
+    bytes32 subjectId,
+    bytes32 subjectStateHash,
     bytes32 statementHash,
+    bytes32 statementURIHash,
     bytes32 schemaId,
     bytes calldata statement
 ) external;
 
 function submitArtistAttestationFor(
     uint256 collectionId,
-    bytes32 attestedDigest,
-    bytes32 boundStateHash,
+    uint8 subjectKind,
+    bytes32 subjectId,
+    bytes32 subjectStateHash,
     bytes32 statementHash,
+    bytes32 statementURIHash,
     bytes32 schemaId,
     bytes calldata statement,
     address signer,
@@ -2787,7 +3211,11 @@ function recordChainHash(uint256 collectionId, bytes32 recordType)
 function artistAttestationCurrent(uint256 collectionId)
     external
     view
-    returns (bool current, bytes32 attestedDigest, bytes32 boundStateHash);
+    returns (
+        bool current,
+        bytes32 attestationRecordHash,
+        bytes32 attestedSubjectStateHash
+    );
 
 function tokenContentRoot(uint256 collectionId, bytes32 scopeSubject)
     external
@@ -2803,10 +3231,14 @@ provably complete against state. Read slots should focus on latest generic
 record hashes, chain heads, active snapshots, and values renderers or
 frontends need in a single call.
 
-## Events
+## Events [CMC-EVENTS]
 
 Events are part of the product surface. They let frontends and indexers track
-metadata over decades.
+metadata over decades. Exactly one event exists per fact; optional mirror
+events are banned at genesis under the matrix-owned event policy
+([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+[LCM-EVENTS]; ADR 0011 decision R12), and every mirror relationship is
+mandatory and tagged in the event catalog.
 
 Recommended events:
 
@@ -2909,11 +3341,13 @@ event CollectionDependencyManifestSet(
 event ArtistAttestationSubmitted(
     uint256 indexed collectionId,
     address indexed signer,
-    bytes32 indexed attestedDigest,
-    bytes32 boundStateHash,
+    uint8 indexed subjectKind,
+    bytes32 subjectId,
+    bytes32 subjectStateHash,
     bytes32 statementHash,
+    bytes32 statementURIHash,
     bytes32 schemaId,
-    bool delegated,
+    uint8 authorityClass,
     bool relayed,
     uint16 schemaVersion
 );
@@ -2976,9 +3410,14 @@ event CollectionCoreStatusObserved(
     uint256 maxSupply,
     uint256 mintedEver
 );
-
-event ContractURIUpdated();
 ```
+
+The global `ContractURIUpdated()` is emitted by Core only, through the
+restricted emitter posture of
+[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+[MRR-EVENTS]; this contract emits no duplicate of that fact
+(ADR 0011 decision R12). Collection-scoped contract metadata changes emit
+`CollectionURIsSet`.
 
 Event-only reconstruction rules [CMC-RECONSTRUCTION]:
 
@@ -2990,19 +3429,31 @@ Event-only reconstruction rules [CMC-RECONSTRUCTION]:
    (ADR 0010 decision 4): identity- and render-affecting record families —
    collection identity, people, script manifests, dependency manifests,
    rights notices, view manifests, artist attestations and their signature
-   bundles, and content-root manifest references — must place the full
-   canonical payload bytes on chain, in event data or storage (SSTORE2
-   included), within the v1 byte limits. A hash of a collection's meaning
-   is not the meaning; with operators gone and mirrors decayed, the chain
-   itself must still carry it.
+   bundles, and the content-root reference record (root, leaf count,
+   schema ID, manifest URI, manifest hash) — must place the full canonical
+   payload bytes in contract storage or SSTORE2 blobs (state-trie bytes),
+   within the v1 byte limits; event-embedded copies never satisfy this
+   rule, because EIP-4444-class history expiry can remove log data from
+   serving nodes while state survives (ADR 0011 decision R1). Events
+   remain the discovery pointers to the stored bytes. A hash of a
+   collection's meaning is not the meaning; with operators gone and
+   mirrors decayed, the state trie itself must still carry it. The
+   per-token leaf-listing manifest behind a content root is not in this
+   class: its home is [CMC-CONTENT-ROOT] rule 4 (dual-family archival),
+   and it is recomputable from onchain per-token hashes wherever all leaf
+   fields are onchain.
 3. Hash-plus-URI-only records remain acceptable solely for payload classes
    that cannot fit on chain — media masters, archive packages,
    high-resolution captures — which must instead satisfy the dual-family
    archival mirroring rule before any finality that references them.
 4. The recoverability condition applies to every emission form, including
-   delta records: a hash-only or delta emission is conformant only when the
-   full payload is recoverable from another event in the same transaction
-   or from an immutable onchain read named by the event.
+   delta records: a hash-only or delta emission for a meaning-bearing
+   family is conformant only when the full payload is recoverable from an
+   immutable onchain read (contract storage or SSTORE2) named by the
+   event (ADR 0011 decision R1). Same-transaction event copies are
+   indexer convenience, never the conformance carrier: "recoverable from
+   an immutable onchain read" means state, the only carrier the
+   with-operators-gone guarantee may cite.
 5. Every record lane's completeness is provable against the
    [CMC-RECORD-CHAIN] accumulator, so reconstruction can prove it missed
    nothing.
@@ -3014,8 +3465,10 @@ companion modules under separate accepted specs. The genesis metadata
 contract can emit only `CollectionRecordRecorded` for those record families
 and still preserve the same offchain schema semantics through `recordType`,
 `subjectId`, and `schemaId`. `OwnerRecordRecorded` is emitted by
-`StreamOwnerRecords` [CMC-OWNER-RECORDS], and `CollectionBurnsBlocked` by
-Core [CMC-BURN]; both join the event catalog.
+`StreamOwnerRecords` [CMC-OWNER-RECORDS],
+`IndependentPreservationRecordRecorded` by the independent-lane host
+[CMC-INDEPENDENT-ATTESTOR], and `CollectionBurnsBlocked` by Core
+[CMC-BURN]; all three join the event catalog.
 
 The metadata router or Core should also emit ERC-4906-style events where token
 metadata may change:
@@ -3083,6 +3536,10 @@ ARTIST_*                  accepted artist, authorized collaborator threshold,
                           admins are rejected
 OWNER_*                   current token owner (ownerOf-gated,
                           signature-verified); admins are rejected
+INDEPENDENT_*             any attestor writing in its own name
+                          (permissionless entry, SIGNER_VERIFIED,
+                          attestor-attributed) [CMC-INDEPENDENT-ATTESTOR];
+                          no role can block or impersonate the lane
 CURATOR_*                 configured curator signer/admin or global admin
 INSTITUTION_*             configured institution signer (SIGNER_VERIFIED)
 RIGHTS_*                  rights admin or global admin
@@ -3103,29 +3560,40 @@ Authorization rules:
    including the global admin: artist-scoped writes verify the signer
    through the artist authority registry
    ([`docs/stream-artist-authority.md`](stream-artist-authority.md)), and owner-scoped writes verify
-   `ownerOf` [CMC-OWNER-RECORDS]. Operator compromise can therefore never
-   fabricate artist- or owner-authored provenance — the append-only corpus
-   stays classifiable by authority even under a hostile writer.
-2. Snapshot publication over a record family requires write authority over
+   `ownerOf` [CMC-OWNER-RECORDS]. `INDEPENDENT_*` writes verify the named
+   attestor's own signature [CMC-INDEPENDENT-ATTESTOR]. Operator
+   compromise can therefore never fabricate artist-, owner-, or
+   independent-authored provenance — the append-only corpus stays
+   classifiable by authority even under a hostile writer.
+2. Content-affecting families and writes for artist-bound collections are
+   additionally subject to the artist content veto between first mint and
+   executed finality [CMC-ARTIST-CONTENT-VETO] (ADR 0011 decision R7):
+   holding a script, media, or metadata admin role is necessary but not
+   sufficient on those surfaces.
+3. Snapshot publication over a record family requires write authority over
    that family, because snapshots feed finality `dataHash` inputs; there is
    no snapshot super-role.
-3. Every record event carries `recorder` and `authorizationClass` so
+4. Every record event carries `recorder` and `authorizationClass` so
    consumers can permanently weight each record by who could have written
    it, and the release manifest states per family whether records are
    `SIGNER_VERIFIED` or `OPERATOR_ASSERTED` [CMC-ATTESTATIONS].
-4. The record-family permission map is deployment configuration verified by
+5. The record-family permission map is deployment configuration verified by
    a conformance gate: the ceremony evidence enumerates each family's
    granted signers, and drift between the map and this table fails the
    gate.
-5. New record families are admitted through registry governance with their
+6. New record families are admitted through registry governance with their
    authority class declared at admission; a family without a declared
    class cannot be written.
 
-No record family is permissionless in protocol v1 — `OWNER_*` is
-owner-permissioned, not open. If a collection later wants public collector
-notes or community annotations, that should be a separate moderated module,
-under its own accepted spec, whose records cannot affect tokenURI, renderer
-output, artwork finality, rights, royalties, minting, or ownership.
+No record family is writable without verified authority in protocol v1 —
+`OWNER_*` is owner-permissioned, not open, and the independent
+preservation lane is open-entry but strictly attestor-attributed and
+signer-verified: nobody writes in anyone else's name, and no independent
+record can affect consensus surfaces [CMC-INDEPENDENT-ATTESTOR]. If a
+collection later wants public collector notes or community annotations,
+that should be a separate moderated module, under its own accepted spec,
+whose records cannot affect tokenURI, renderer output, artwork finality,
+rights, royalties, minting, or ownership.
 
 Every mutation must check:
 
@@ -3134,6 +3602,55 @@ Every mutation must check:
    table above (whole-module authority does not exist).
 3. The relevant lock is not active.
 4. The input is structurally valid.
+
+### Metadata Signature Verification Gas [CMC-SIGVER-GGP]
+
+`StreamCollectionMetadata`, `StreamCollectionAttestations`, and
+`StreamOwnerRecords` verify ERC-1271 signatures onchain at write time
+(artist attestations, `SIGNER_VERIFIED` attestation families, relayed
+owner records, the independent lane). Sibling subsystems each instantiate
+a named verification-gas parameter; the metadata satellites instantiate
+theirs here (ADR 0011 decision R10), so the repricing checklist and the
+matrix GGP gate cover this surface instead of leaving it to a hard-coded
+cap:
+
+1. `METADATA_ERC1271_VERIFY_GAS` is a Governed Gas Parameter under the
+   model home,
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   [LTA-GGP] (ADR 0010 decision D1): floors, raise/lower classes, probes,
+   change events, release-manifest recording, repricing-checklist
+   membership, and the Operational-layer exclusion follow the home
+   unchanged. Each verifying metadata satellite hosts its own
+   storage-backed value of the parameter; the shared immutable floor is
+   `METADATA_ERC1271_VERIFY_GAS_FLOOR`.
+2. The floor and genesis value are sized from the measured supported
+   wallet class — the one home for that class is
+   [GOV-1271-CLASS] in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md);
+   this document defines no wallet class of its own. Initial planning
+   values match the artist registry's measured Safe n-of-m class: a
+   90,000-gas floor and a 150,000-gas genesis value, with deployment
+   recording measured values per host in the release manifest.
+3. Every ERC-1271 verification in these satellites uses the EIP-150 63/64
+   parent-gas precheck against the current parameter value, capped
+   returndata copying (32 bytes), and exact magic-value comparison;
+   failure, out-of-gas, malformed returndata, or a wrong magic value
+   reverts the submission before any state change. EOA verification
+   (`ecrecover`, nonzero exact-match) does not consume the parameter.
+4. The health probe for lowering is a recorded verification sweep over
+   the heaviest named wallet classes at the proposed value, per host.
+5. The parameter identifier follows [LTA-GGP]:
+
+   ```solidity
+   bytes32 constant GGP_METADATA_ERC1271_VERIFY_GAS_ID =
+       0x3ca324ef8262b1ff4cb8753a082cd8780e50f754c1a323a433e0e7665a5ec9f9;
+       // keccak256("6529STREAM_GGP_METADATA_ERC1271_VERIFY_GAS")
+   ```
+
+   The parameter joins the [LTA-GGP] inventory (hosts: the three
+   verifying metadata satellites; normative home: this section) and the
+   protocol v1 domain-constants mirror table, and the matrix GGP gate's
+   floor/raise/lower/probe tests run against every host.
 
 ## Validation
 
@@ -3181,6 +3698,15 @@ Recommended v1 validations:
     hash is checked by the attestation gate [CMC-C2PA].
 24. Snapshot publication reverts when `manifestData` is empty or does not
     match `manifestHash` under the declared v1 algorithm.
+25. Independent-lane writes verify the named attestor (direct call or
+    relayed signature under [CMC-SIGVER-GGP]), consume the attestor
+    nonce, and enforce the deadline [CMC-INDEPENDENT-ATTESTOR].
+26. `RIGHTS_STATEMENT` records must carry the closed rights-basis and
+    grant vocabularies of [CMC-RIGHTS-SCHEMA]; unknown vocabulary values
+    revert.
+27. Content-affecting writes for artist-bound collections enforce the
+    artist content veto between first mint and executed finality
+    [CMC-ARTIST-CONTENT-VETO].
 
 JSON and JavaScript escaping should happen in the renderer, not in this storage
 contract. This contract should store canonical values.
@@ -3411,11 +3937,13 @@ Registry architecture [CMC-SCHEMA-REGISTRY]:
    social mirroring.
 2. Interpretation-critical catalog payloads — schema documents,
    canonicalization profile definitions, and the record-type catalog used
-   by this specification — are stored as onchain bytes (SSTORE2 blobs or
-   event-embedded payloads) referenced from the registry and from
-   `streamSystemManifest()`; hash-plus-URI alone is nonconformant for these
-   catalogs. The numeric ID and event catalogs follow the same onchain-bytes
-   rule under their homes in
+   by this specification — are stored as onchain bytes in contract storage
+   or SSTORE2 blobs (state-trie bytes, never only event data — EIP-4444
+   history expiry can remove logs while state survives; ADR 0011 decision
+   R1), referenced from the registry and from `streamSystemManifest()`;
+   hash-plus-URI alone is nonconformant for these catalogs, and events are
+   discovery pointers only. The numeric ID and event catalogs follow the
+   same onchain-bytes rule under their homes in
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
    and the conformance matrix.
 3. Collections additionally store schema URI/hash in collection metadata for
@@ -3591,10 +4119,15 @@ Content root requirements [CMC-CONTENT-ROOT]:
        returns (bytes32 contentRoot, uint64 leafCount, bytes32 schemaId);
    ```
 
-   The manifest (URI plus hash, canonical bytes preserved under the
-   dual-family archival rule) lists every leaf's field values so any tool
-   can recompute the root; `leafCount` must equal the token count of the
-   scope at finality execution.
+   The onchain-bytes item for reconstruction is the content-root
+   reference record itself — root, leaf count, schema ID, manifest URI,
+   manifest hash — per [CMC-RECONSTRUCTION] rule 2. The leaf-listing
+   manifest (URI plus hash, canonical bytes preserved under the
+   dual-family archival rule; this rule is its home) lists every leaf's
+   field values so any tool can recompute the root, and it is
+   recomputable from onchain per-token hashes wherever all leaf fields
+   are onchain; `leafCount` must equal the token count of the scope at
+   finality execution.
 5. Content roots are append-only per scope subject: a corrected root for a
    not-yet-final scope supersedes with lineage; the root bound by an
    executed finality record is immutable, and the finality registry
@@ -3604,6 +4137,15 @@ Content root requirements [CMC-CONTENT-ROOT]:
    of the collection resolves through mutable transport without a content
    hash bound in the root — hash-committing the URI string alone does not
    satisfy this rule.
+7. Roots may be committed incrementally, well before any finality
+   ceremony: an `OFFCHAIN`-mode collection selling while open publishes
+   superseding roots (rule 5 lineage) so that every minted token is
+   covered by the latest root at sale time, satisfying the mint-time
+   binding rule of [MRR-OFFCHAIN-BINDING] in
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   (ADR 0011 decision R2). Token-level `HashRef`s under
+   [CMC-TOKEN-METADATA] are the per-token alternative carrier for the
+   same commitment.
 
 ## Artwork Finality Inputs
 
@@ -3647,14 +4189,51 @@ Finality rules [CMC-FINALITY-INPUTS]:
    token content root of [CMC-CONTENT-ROOT] covering the scope's tokens;
    the finality registry verifies root and leaf count at execution.
 5. Script-based works (`ONCHAIN` and hybrid) require a recorded
-   `REFERENCE_RENDER` record before finality (ADR 0010 decision 6): at
-   least one hash-committed reference output capture per pinned token
-   sample (or all tokens), with capture-environment metadata — renderer
-   build, render context version, browser/engine version, viewport, device
-   pixel ratio, color space, capture toolchain — mirrored across two
-   storage families. The preservation drill compares re-renders against
-   these captures; for `OFFCHAIN` collections the record is
-   tooling-warned, not required.
+   `REFERENCE_RENDER` record — pinned schema `STREAM_REFERENCE_RENDER_V1`
+   [CMC-GENESIS-SCHEMAS] — before finality (ADR 0010 decision 6;
+   ADR 0011 decision R3). The record binds four things:
+
+   (a) Captures: at least one hash-committed reference output capture per
+   pinned token sample (or all tokens), mirrored across two storage
+   families.
+
+   (b) Execution-environment manifest: renderer build, render context
+   version, browser/engine version, viewport, device pixel ratio, color
+   space, and capture toolchain.
+
+   (c) Archived environment artifact: the manifest must reference a
+   hash-committed, runnable execution-environment archive — a container
+   image or the browser/engine build plus capture toolchain it names —
+   recorded as a preservation object with fixity coverage and mirrored
+   under the dual-family archival rule. A version string without a
+   preserved binary is a citation, not an environment: re-render
+   verification and the emulation strategies contemplated by
+   `ARTIST_INTENT` depend on obtaining the named runtime decades out.
+
+   (d) Acceptance mode: exactly one per-work re-render acceptance mode,
+   pinned at finality, drawn from the acceptance-mode vocabulary whose
+   home is [LTA-FINALITY] requirement 12 in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   (ADR 0011 decision R3) — `BYTE_EXACT`, `PERCEPTUAL_TOLERANCE`, or
+   `CURATED_EQUIVALENCE`. The record stores the mode plus its
+   parameters: the named perceptual/structural metric and threshold for
+   `PERCEPTUAL_TOLERANCE`, and the conservator-attestation reference
+   against the `ARTIST_INTENT` significant properties for
+   `CURATED_EQUIVALENCE`. Mode semantics — including the pinned
+   software-rasterization precondition for `BYTE_EXACT` and the
+   `DYNAMIC`-renderer-class exclusion from `BYTE_EXACT`
+   ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   [MRR-DETERMINISM]) — are owned by [LTA-FINALITY] requirement 12 and
+   are not restated here; a record violating them is rejected at
+   finality.
+
+   Preservation drills verify re-renders under the pinned mode and
+   classify each outcome `MATCH`, `TOLERABLE_VARIANCE`, or `DIVERGENT`
+   per the drill-outcome vocabulary of [LTA-RECON] requirement 4 —
+   never bare pass/fail on bytes — and at least one drill step must boot
+   an archived environment artifact and reproduce a reference capture.
+   For `OFFCHAIN` collections the record is tooling-warned, not
+   required.
 6. Collections with a bound artist require the `ARTIST_SANCTION` finality
    component defined in [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010
    decision 2) and an `ARTIST_INTENT` record or artist-signed waiver
@@ -3669,8 +4248,15 @@ Finality rules [CMC-FINALITY-INPUTS]:
    collections. They must not reinterpret historical snapshot hashes.
 10. Preservation-only records may remain appendable after finality if the
     finality manifest explicitly allows that surface and those records cannot
-    change artwork bytes; owner records remain appendable regardless
-    [CMC-OWNER-RECORDS].
+    change artwork bytes; owner records and the independent preservation
+    lane remain appendable regardless [CMC-OWNER-RECORDS]
+    [CMC-INDEPENDENT-ATTESTOR].
+11. Finality for an artist-bound collection — the museum-grade class —
+    requires a recorded `RIGHTS_STATEMENT` record under the pinned
+    `STREAM_RIGHTS_V1` schema for the finality scope
+    [CMC-RIGHTS-SCHEMA] (ADR 0011 decision R11). A record declaring every
+    grant `unspecified` satisfies the requirement; absence blocks
+    finality, so rights status is always an explicit dated declaration.
 
 ## Multiple Canonical Views
 
@@ -3733,18 +4319,24 @@ institutional custody.
 
 Recommended approach:
 
-1. Keep the stable typed fields in `CollectionRights`.
+1. Keep the stable typed fields in `CollectionRights`, and record the
+   machine-readable rights baseline as `RIGHTS_STATEMENT` records under
+   the pinned `STREAM_RIGHTS_V1` schema [CMC-RIGHTS-SCHEMA]
+   (ADR 0011 decision R11).
 2. Use custom fields for policy surfaces likely to evolve:
    `COMMERCIAL_RIGHTS_URI`, `AI_TRAINING_PERMISSION`,
    `DERIVATIVE_RIGHTS_URI`, `PRINT_RIGHTS_URI`, `EXHIBITION_RIGHTS_URI`,
    `ATTRIBUTION_REQUIREMENTS_URI`, `ESTATE_CONTACT_URI`, and related future
-   keys.
+   keys — as display supplements to the schema'd record, with
+   `AI_TRAINING_PERMISSION` carrying the closed grant vocabulary of
+   [CMC-RIGHTS-SCHEMA] rule 2.
 3. Require hashes for policy documents that materially affect collectors,
    artists, licenses, or institutional usage.
 4. Use snapshots when a rights policy materially changes so older policy states
    remain inspectable.
 5. Treat rights fields as metadata and notice, not as a full legal enforcement
-   engine.
+   engine; the moral-rights posture is stated in the Rights And Provenance
+   guidance.
 6. Allow collection policies to freeze rights fields independently from archive
    receipts, so preserved facts can continue to accumulate without rewriting the
    license.
@@ -3961,6 +4553,32 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
     evented pointer serves them back byte-identically.
 42. `ARTIST_INTENT`: finality for artist-bound collections reverts without
     an intent record or signed waiver [CMC-ARTIST-INTENT].
+43. Independent lane: any address writes fixity and preservation-event
+    records in its own name, direct and relayed; impersonation reverts;
+    no lock, freeze, finality state, or admin role blocks or forges the
+    lane; lane chain heads replay [CMC-INDEPENDENT-ATTESTOR].
+44. Rights: finality for an artist-bound collection reverts without a
+    `STREAM_RIGHTS_V1` record; closed-vocabulary validation rejects
+    unknown grant values [CMC-RIGHTS-SCHEMA].
+45. Reference render: finality reverts without the archived
+    execution-environment artifact and a pinned acceptance mode;
+    `BYTE_EXACT` without pinned software rasterization is rejected;
+    `DYNAMIC`-class works cannot pin `BYTE_EXACT`; the drill artifact
+    classifies outcomes `MATCH`/`TOLERABLE_VARIANCE`/`DIVERGENT` and
+    boots an archived environment [CMC-FINALITY-INPUTS].
+46. Genesis schema set: every schema named in [CMC-GENESIS-SCHEMAS]
+    resolves to registered onchain document bytes whose hashes match the
+    release manifest (schema-pinning golden test).
+47. Artist content veto: post-first-mint content-affecting writes for an
+    `ARTIST_SIGNED_POLICY` collection revert without verified artist
+    co-signature; the relayed artist content freeze applies the `SCRIPT`,
+    `DEPENDENCIES`, and `MEDIA_MANIFEST` locks and records the artist
+    authority class [CMC-ARTIST-CONTENT-VETO].
+48. Attestation mirror: the checker row comparing this document's artist
+    attestation field inventory against [AA-ATTEST] passes, and the
+    metadata GGP tests (floor/raise/lower/probe) run for
+    `METADATA_ERC1271_VERIFY_GAS` on every hosting satellite
+    [CMC-SIGVER-GGP].
 
 Renderer integration tests:
 
@@ -3998,12 +4616,16 @@ script/dependency/media manifest commitments, schema commitments, view
 manifests, snapshot events with onchain manifest bytes, revision events,
 generic collection records with record-family authorization and record-chain
 accumulators, token content roots, field locks, PREMIS-style preservation
-records, the fixity program, media-hash-bound C2PA references, the pinned
-IIIF profile, media relationship records, owner records and the object
-dossier, state-bound artist attestations and intent records, generalized
-attestations, and museum-grade catalogue material. The metadata router
-should read from those outside-Core surfaces and focus on `tokenURI()`
-routing and renderer selection.
+records under the pinned PREMIS profile, the fixity program,
+media-hash-bound C2PA references with attribution reconciliation, the
+pinned IIIF profiles, media relationship records, owner records and the
+object dossier, the independent preservation lane, the genesis museum
+schema set with pinned rights records, state-bound artist attestations
+and intent records with interview coverage, the artist content veto,
+generalized attestations under the metadata verification gas parameter,
+and museum-grade catalogue material. The metadata router should read from
+those outside-Core surfaces and focus on `tokenURI()` routing and renderer
+selection.
 
 This gives Stream enough room to support Core-native ERC-2981 while making
 collection metadata more durable, explicit, and extensible than the current

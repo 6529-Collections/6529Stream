@@ -698,6 +698,29 @@ bytes32 actionId = keccak256(abi.encode(
 ));
 ```
 
+Explicit batch ABI (ADR 0011 decision R10):
+
+```solidity
+function scheduleGovernanceBatch(
+    uint8 actionClass,
+    GovernanceCall[] calldata calls,
+    bytes32 scopeHash,
+    bytes32 oldValueHash,
+    bytes32 newValueHash,
+    uint64 notBefore,
+    uint64 expiresAfter,
+    bytes32 reasonHash,
+    string calldata reasonURI,
+    bytes32 manifestHash
+) external returns (bytes32 actionId);
+
+function executeGovernanceBatch(
+    bytes32 actionId,
+    GovernanceCall[] calldata calls,
+    bytes[] calldata callDatas
+) external payable;
+```
+
 Batch rules [GOV-BATCH]:
 
 1. Execution supplies the full ordered `GovernanceCall[]` plus each call's
@@ -713,6 +736,30 @@ Batch rules [GOV-BATCH]:
    `scopeHash`/`newValueHash` and this one preimage; defining a second
    staged-operation preimage is nonconformant (ADR 0010 decision D3.4).
 
+### Material Actions And Holder Classes [GOV-MATERIAL]
+
+Amended by ADR 0011 (decision R10). "Material actions" are: any staged
+governance action class; Core satellite pointer moves; registry lifecycle
+changes; GGP changes; freeze, finality, and recovery operations; asset
+policy transitions; role grants and revocations; successor declarations;
+and treasury or endowment movements. Material actions must be executable
+by Safe multisigs and governor contracts. EOA-class holders may hold
+material-action roles only during a time-boxed deployment bootstrap whose
+sunset (transfer of every material role to Safe or governor holders) is a
+deployment gate recorded in the ceremony evidence.
+
+### ERC-1271 Wallet Class [GOV-1271-CLASS]
+
+Amended by ADR 0011 (decision R10). The supported contract-wallet class,
+cited by every layer that verifies signatures (mint tickets, sale
+authorizations, payment intents, release authorizations, artist and
+attestation flows, owner records): any wallet whose `isValidSignature`
+completes within the verifying layer's Governed Gas Parameter, with each
+verifier's genesis value and floor sized from the measured heaviest named
+class — nested Safe n-of-m, pure-Solidity P-256/WebAuthn verifiers, and
+governor contracts — and recorded in the release manifest. Verifying
+layers cite this class; none defines its own.
+
 ### Governance Window Floors And Unpause [GOV-WINDOWS]
 
 Amended by ADR 0010 (decisions D7.2). Windows are sized for multisig and
@@ -722,7 +769,9 @@ governor-contract latency, not for fast single signers:
    (`expiresAfter - notBefore`) of at least 7 days.
 2. Emergency classes must be executable by role-redundant holders and
    assume at least 4 hours of coordination latency; no emergency path may
-   presume a single hot key.
+   presume a single hot key. The terminal-freeze veto window floor is 72
+   hours (ADR 0011 decision R10) so governor-contract holders can
+   realistically exercise it.
 3. Unpause is a dedicated operational class: a distinct `ROLE_UNPAUSE`
    (grantable to a Safe or governor contract) executes unpause with no
    timelock and an evented reason. Pause guardians cannot unpause; unpause
@@ -818,6 +867,7 @@ Safe/multisig or governance contract per the Role Model above.
 | `ROLE_COLLECTION_FINALITY_ADMIN` | Executes `finalizeCollectionArtwork` / scoped finality subject to component verification | root | [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) (Artwork Finality Freeze [LTA-FINALITY]) |
 | `ROLE_TERMINAL_FREEZE_VETO` | Per-scope terminal-freeze veto guardian resolved through `terminalFreezeVetoGuardian`; independent of scheduling roles | root | this ADR ([GOV-WINDOWS] veto surface); [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) [LTA-FREEZE] rule 4 |
 | `ROLE_ENTROPY_INCIDENT_DECLARER` | Declares entropy requests unrecoverable under the fresh-recovery policy | operational | [`docs/stream-entropy-coordinator.md`](../stream-entropy-coordinator.md) [EC-INCIDENT-ROLE] |
+| `ROLE_ENTROPY_REVEAL_OWNER` | Holds the declared reveal-request obligation for `ASYNC` collections within the reveal SLO (ADR 0011 decision R8) | operational | [`docs/stream-entropy-coordinator.md`](../stream-entropy-coordinator.md) [EC-REVEAL] |
 | `ROLE_ARTIST_REGISTRY_ADMIN` | Proposes artist bindings, declares platform works, withdraws unaccepted proposals | operational | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-ROLES] |
 | `ROLE_ATTRIBUTION_ARBITER` | Governed arbiter for attribution disputes and post-revocation rebinding approval | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DISPUTE] |
 | `ROLE_ARTIST_DORMANCY_ADMIN` | Initiates and completes the governed artist-dormancy procedure | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DORMANCY] |

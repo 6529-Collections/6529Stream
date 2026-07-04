@@ -35,8 +35,10 @@ StreamEntropyCoordinator
   - collection entropy configuration
   - provider approval and lifecycle
   - token entropy registration
+  - sale/collection scope entropy requests
   - request and fulfillment state machine
   - canonical seed derivation
+  - reveal ownership, SLO fallback, and reveal-fee escrow
   - delivery retry and recovery policy
   - entropy provenance events
 
@@ -223,6 +225,12 @@ Required lessons to preserve:
 12. Give metadata rendering a stable seed/status read interface.
 13. Support long-lived collections where provider infrastructure may change
     over decades.
+14. Give sale-, phase-, and collection-scoped mechanics — raffles, random
+    assignment, reveal offsets — a first-party randomness surface that
+    inherits the same anti-reroll lifecycle as token seeds (ADR 0011
+    decision R8).
+15. Make reveal completion an owned, funded, measured obligation rather
+    than an unowned side effect of minting (ADR 0011 decision R8).
 
 ## Non-Goals
 
@@ -234,6 +242,10 @@ Required lessons to preserve:
 5. The entropy coordinator does not enforce marketplace behavior.
 6. The entropy coordinator does not use upgradeable proxy mutability as its
    default safety mechanism.
+7. The entropy coordinator does not select raffle winners, assign tokens,
+   or compute reveal offsets. It finalizes scope seeds [EC-SCOPE];
+   consuming adapters resolve outcomes from those seeds under their own
+   accepted specs.
 
 ## Core Contract Changes
 
@@ -301,7 +313,10 @@ whole transaction reverts and the entropy registration is unwound with it.
 not call the configured provider, request randomness, finalize a seed, or depend
 on external randomness provider uptime. Actual randomness requests happen only
 through an idempotent request function on the coordinator after token state is
-registered and `mintFromManager` has returned. A safe receiver callback may
+registered and `mintFromManager` has returned. Who requests, when, with
+what funding, and what happens on lapse is not left unowned: the
+collection's declared reveal policy governs it [EC-REVEAL] (ADR 0011
+decision R8). A safe receiver callback may
 therefore observe `REGISTERED` or pending entropy state; metadata must render
 pending output honestly until a seed is finalized.
 Core calls `onTokenMinted` with a bounded gas stipend and an EIP-150-aware
@@ -450,6 +465,17 @@ interface IStreamEntropyCoordinator {
         payable
         returns (bytes32 requestKey, uint256 providerRequestId);
 
+    function registerEntropyScope(
+        uint256 collectionId,
+        uint8 scopeKind,
+        bytes32 scopeRef
+    ) external returns (bytes32 scopeId);
+
+    function requestScopeEntropy(bytes32 scopeId, bytes32 scopeInputsHash)
+        external
+        payable
+        returns (bytes32 requestKey, uint256 providerRequestId);
+
     function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness)
         external
         returns (uint8 outcome);
@@ -458,12 +484,21 @@ interface IStreamEntropyCoordinator {
 
 `onTokenMinted` is callable only by Core.
 
-`requestEntropy` is callable by the minter path, entropy admins, and global
-admins. Anyone may call it only for collections that explicitly enable
-public requests: public requests are opt-in per collection, never a default
-(ADR 0009 decision 22). `requestEntropy` is payable; `msg.value` is the
-caller's maximum fee bound with pull-credit refund of excess [EC-FEEBIND]
-(ADR 0010 decision D8.7).
+`requestEntropy` is callable by the minter path, entropy admins, global
+admins, and the collection's reveal owner role [EC-REVEAL]. Anyone may call
+it only for collections that explicitly enable public requests — public
+requests are opt-in per collection, never a default (ADR 0009 decision
+22) — or, for collections with a declared reveal policy, for a token whose
+reveal request window has lapsed: the permissionless reveal fallback
+[EC-REVEAL] (ADR 0011 decision R8). `requestEntropy` is payable;
+`msg.value` is the caller's maximum fee bound with pull-credit refund of
+excess [EC-FEEBIND] (ADR 0010 decision D8.7).
+
+`registerEntropyScope` and `requestScopeEntropy` are the
+sale/collection-scoped request kind [EC-SCOPE] (ADR 0011 decision R8).
+They are callable by the minter path and entropy admins, never by the
+public, and `requestScopeEntropy` is payable under the same [EC-FEEBIND]
+fee binding.
 
 `fulfillEntropy` is callable only by the provider currently assigned to the
 active request key.
@@ -484,8 +519,18 @@ enum EntropyFulfillmentOutcome {
 
 Benign rejections return an outcome and do not revert, because provider
 callbacks — including VRF callbacks — must not revert. Hard violations
-(unauthorized provider, reentrancy) still revert with typed errors. The
-outcome values are pinned in the Numeric ID Catalog.
+(unauthorized provider, reentrancy) still revert with typed errors.
+
+This enum definition is the normative home of `EntropyFulfillmentOutcome`
+(ADR 0010 decision D3.1). The pinned numeric values are `FINALIZED = 0`,
+`REJECTED_STALE_EPOCH = 1`, `REJECTED_INACTIVE_REQUEST = 2`,
+`REJECTED_ALREADY_FINALIZED = 3`, `REJECTED_UNKNOWN_REQUEST = 4`, and
+`REJECTED_PROVIDER_REVOKED = 5`; the Numeric ID Catalog mirrors exactly
+these six members. The first five members were pinned by ADR 0009
+decision 25; `REJECTED_PROVIDER_REVOKED = 5` was appended by ADR 0010
+decision D8.1. Decision-record or derived text that restates the
+pre-extension five-member enum is drift and is corrected to cite this
+home (ADR 0011 decision R12).
 
 `REJECTED_PROVIDER_REVOKED` is returned when the caller is the request's
 bound provider but that provider is `INCIDENT_REVOKED` at fulfillment time
@@ -521,6 +566,16 @@ interface IStreamEntropyView {
         external
         view
         returns (EntropyStatus status);
+
+    function scopeEntropy(bytes32 scopeId)
+        external
+        view
+        returns (ScopeEntropy memory);
+
+    function scopeSeed(bytes32 scopeId)
+        external
+        view
+        returns (bytes32 seed, bool finalized);
 
     function collectionEntropyConfig(uint256 collectionId)
         external
@@ -608,7 +663,9 @@ safety. The coordinator and operator tooling must be able to distinguish "the
 provider never accepted or never produced randomness" from "the provider
 received raw randomness but delivery failed." Fresh entropy recovery cannot
 proceed if the adapter reports that raw randomness was received for the old
-provider request.
+provider request; a negative report is necessary but never sufficient on
+its own — the coordinator-state and independent-evidence requirements of
+[EC-INCIDENT] rule 3 must also hold (ADR 0011 decision R12).
 
 ## Enums
 
@@ -650,6 +707,17 @@ enum EntropySecurityClass {
     HIGH_ASSURANCE,
     LOW_SECURITY
 }
+
+enum EntropyScopeKind {
+    SALE,
+    PHASE,
+    COLLECTION
+}
+
+enum RevealRequestMode {
+    AT_MINT,
+    OWNER_WINDOW
+}
 ```
 
 `NONE` means the coordinator has no token entropy state. Renderers should treat
@@ -685,9 +753,30 @@ means only reviewed async verifiable randomness may finalize seeds for the
 collection. `LOW_SECURITY` means the collection explicitly accepts
 manipulable-entropy exposure — block-derived instant modes and their
 structural request-timing grinding — and must disclose that acceptance in
-collection provenance and metadata notes. `INSTANT` mode is configurable
-only for `LOW_SECURITY` collections [EC-CONFIG]. The class values are
-pinned in the Numeric ID Catalog.
+collection provenance and metadata notes and machine-readably in every
+default token JSON: the renderer must emit the declared class as
+`properties.stream.entropy_security_class` with exactly the pinned values
+`HIGH_ASSURANCE` or `LOW_SECURITY`, in pending-state and finalized JSON
+alike, so the class reaches marketplaces and collectors without relying on
+prose disclosure (ADR 0011 decision R12). The token-JSON field pinning and
+the renderer conformance test covering both classes are owned by
+[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md);
+this document owns the class semantics being disclosed. `INSTANT` mode is
+configurable only for `LOW_SECURITY` collections [EC-CONFIG]. The class
+values are pinned in the Numeric ID Catalog.
+
+`EntropyScopeKind` names the subject class of a scope entropy request
+[EC-SCOPE] (ADR 0011 decision R8): `SALE = 0` (the subject is a sales-spec
+sale), `PHASE = 1` (a mint phase), `COLLECTION = 2` (a collection-wide
+purpose such as a reveal offset). The kind values are pinned in the
+Numeric ID Catalog as an append-only vocabulary: later accepted specs may
+append kinds; existing values are never reinterpreted.
+
+`RevealRequestMode` is the collection's declared reveal-request posture
+[EC-REVEAL] (ADR 0011 decision R8): `AT_MINT = 0` (the mint path attempts
+the entropy request in the mint transaction) or `OWNER_WINDOW = 1` (the
+reveal owner requests within the SLO window). The mode values are pinned
+in the Numeric ID Catalog.
 
 ## Domain Constants
 
@@ -703,6 +792,16 @@ mirrors these rows, and release tooling computes and pins the hash values.
 | `STREAM_ENTROPY_REQUEST_V1` | `6529STREAM_ENTROPY_REQUEST_V1` | 0xf8ea7ebca4196e280c0b42e55e16736c8e836382a8859d151eb826edbecb7106 | `StreamEntropyCoordinator` | `1` | [Request Flow](#request-flow) |
 | `STREAM_ENTROPY_SEED_V1` | `6529STREAM_ENTROPY_SEED_V1` | 0x88e816cf6b63abe50b33fdfd5033b9e0f12b8e8ba3925c57c3954ecf8caca69f | `StreamEntropyCoordinator` | `1` | [Fulfillment Flow](#fulfillment-flow) |
 | `FRESH_RECOVERY_POLICY_DOMAIN` | `6529STREAM_ENTROPY_FRESH_RECOVERY_POLICY_V1` | 0x903ca537e686c7d615b886dbd8d81e240e58123e9918bc89ccabb64f2fe9a327 | `StreamEntropyCoordinator` | `1` | [Storage Model](#storage-model) |
+| `STREAM_ENTROPY_SCOPE_SUBJECT_V1` | `6529STREAM_ENTROPY_SCOPE_SUBJECT_V1` | 0xef9a2afab4bd9a15841ca37c46b3cdb891a47121a1bfab0201f386d0a7b77490 | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
+| `STREAM_ENTROPY_SCOPE_REQUEST_V1` | `6529STREAM_ENTROPY_SCOPE_REQUEST_V1` | 0xda5ba2e7e598a368f9e05c751fa0bbce4620c6fe030d47737c9eeb15099a3b81 | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
+| `STREAM_ENTROPY_SCOPE_SEED_V1` | `6529STREAM_ENTROPY_SCOPE_SEED_V1` | 0x6111edc8a4ae25589e49af170892e9083107d07df6b48b7201458e32ba38365b | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
+| `GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | 0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17 | `StreamCore` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-REGGAS] |
+| `GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | 0xaf00713aa70c259c23836c61245814e6e3b5fab1fe61b8879c0bd5450f23537c | `StreamEntropyCoordinator` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-INCIDENT-ROLE] |
+
+The three scope-request rows (ADR 0011 decision R8) carry values pinned
+from exactly the string preimages shown; the rows join the checked mirror
+table like every other
+coordinator domain.
 
 Provider-side raw randomness compression domains are owned by
 [`docs/stream-entropy-providers.md`](stream-entropy-providers.md).
@@ -853,9 +952,9 @@ Entropy state must survive pointer changes:
    registration and for request/fulfillment routing only for tokens whose
    `coordinatorAtMint` equals that live pointer.
 4. Coordinator replacement is blocked while any collection has active
-   `REQUESTED` entropy against the current coordinator unless an already-frozen
-   fresh-recovery policy explicitly covers coordinator replacement for that
-   collection.
+   `REQUESTED` entropy — token-keyed or scope-keyed [EC-SCOPE] — against
+   the current coordinator unless an already-frozen fresh-recovery policy
+   explicitly covers coordinator replacement for that collection.
 5. The old coordinator remains deployed, non-self-destructible, and queryable
    indefinitely. Incident revocation can block new requests or fulfillments but
    must not make finalized seeds or request history unreadable.
@@ -871,7 +970,8 @@ Entropy state must survive pointer changes:
    minted tokens unless a frozen recovery policy explicitly moves pending
    requests.
 8. Deployment manifests list every prior coordinator, its code hash, status,
-   and collections/tokens whose entropy reads remain pinned to it.
+   and collections, tokens, and scope subjects whose entropy reads remain
+   pinned to it.
 9. The raisable registration cap [EC-REGGAS] plus this replaceable pointer
    are the explicit never-brick recovery chain for the mint path (ADR 0010
    decision D1.5): no gas repricing short of block-gas-limit scale can
@@ -1052,14 +1152,23 @@ Rules [EC-CONFIG]:
     `securityClass == LOW_SECURITY` (ADR 0010 decision D8.8). The declared
     class freezes with the config, is disclosed by
     `collectionEntropyConfig`, and must be surfaced in collection
-    provenance and metadata notes. `HIGH_ASSURANCE` is the default and
-    forbids instant mode.
+    provenance and metadata notes and in default token JSON as
+    `properties.stream.entropy_security_class`, in pending-state and
+    finalized JSON alike (ADR 0011 decision R12); the token-JSON field
+    pinning and renderer conformance test are owned by
+    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md).
+    `HIGH_ASSURANCE` is the default and forbids instant mode.
 12. Gas-limit-class values are never part of collection entropy identity:
     provider config hashes exclude Operational-layer parameters per
     [`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
     [EP-CONFIGHASH], so retuning gas, funding, or custody never increments
     `providerEpoch` and never disturbs a frozen collection (ADR 0010
     decision D1.3).
+13. Collections with `mode == ASYNC` must declare a collection reveal
+    policy [EC-REVEAL] before public mint, and `freezeCollectionEntropy`
+    must reject an `ASYNC` collection whose reveal policy is undeclared
+    (ADR 0011 decision R8). The reveal policy freezes with the entropy
+    config.
 
 Freeze:
 
@@ -1067,8 +1176,8 @@ Freeze:
 function freezeCollectionEntropy(uint256 collectionId) external;
 ```
 
-Freezing prevents provider, salt, mode, timeout, and recovery policy changes for
-the collection.
+Freezing prevents provider, salt, mode, timeout, recovery policy, and
+reveal policy changes for the collection.
 
 ## Token Registration Flow
 
@@ -1162,7 +1271,9 @@ requestEntropy(tokenId) [nonReentrant, payable]
   builds requestKey
   stores active request and marks token REQUESTED before any provider call
   quotes fee = provider.quoteRequest(context) in the same transaction
-  requires msg.value >= fee and credits any excess to the payer [EC-FEEBIND]
+  draws the fee from the reveal escrow first where declared [EC-REVEAL],
+    requires msg.value to cover any shortfall, and credits msg.value
+    excess to the payer [EC-FEEBIND]
   calls provider.requestEntropy{value: fee}(requestKey, context)
   stores providerRequestId
   emits EntropyRequested
@@ -1225,13 +1336,14 @@ Requirements [EC-FEEBIND]:
 
 1. `requestEntropy` may be payable for providers that need native ETH.
    `msg.value` is the caller-supplied `maxFeeWei`: the binding upper bound
-   on what the request may pay.
+   on the caller-funded portion of what the request may pay.
 2. The coordinator must obtain the required fee by calling
    `provider.quoteRequest(context)` in the same transaction, before the
    provider request call [EP-QUOTE]. Offchain or prior-block quotes are
    never binding.
-3. If `msg.value` is less than the quoted fee, `requestEntropy` must
-   revert with a typed error carrying the quoted fee.
+3. If the available funding — `msg.value`, plus the reveal-escrow draw
+   where rule 9 applies — is less than the quoted fee, `requestEntropy`
+   must revert with a typed error carrying the quoted fee.
 4. The coordinator must forward exactly the quoted fee to the provider.
    Adapters keep exact-payment discipline at their boundary; the
    coordinator, never the adapter, absorbs caller overpayment.
@@ -1243,12 +1355,19 @@ Requirements [EC-FEEBIND]:
    on a failed transfer. Only the credited payer can claim, to a
    destination it names.
 7. The coordinator must not become a general ETH custody contract: tracked
-   refund credits are the only balances it may hold across transactions.
+   refund credits and the tracked per-collection reveal-fee escrows
+   [EC-REVEAL] are the only balances it may hold across transactions.
    Accidental or forced ETH recovery, if included, must be admin-only,
    evented, sent to the protocol treasury, and provably unable to reduce
-   the aggregate of tracked refund credits.
-8. Fee credits are Operational balances: excluded from entropy identity,
-   policy manifests, and seed derivation.
+   the aggregate of tracked refund credits and reveal-fee escrows.
+8. Fee credits and reveal-fee escrows are Operational balances: excluded
+   from entropy identity, policy manifests, and seed derivation.
+9. For tokens of a collection with a declared reveal policy, the quoted
+   fee is drawn from the collection's reveal-fee escrow first and from
+   `msg.value` only for any shortfall [EC-REVEAL]; the pull-credit rules
+   above apply to the `msg.value` portion, and the undrawn escrow
+   remainder stays in escrow. Scope requests [EC-SCOPE] are always
+   caller-funded and never draw from the reveal escrow.
 
 Refund credit surface:
 
@@ -1346,6 +1465,370 @@ dangerous reroll:
   token asks a provider or fallback provider for a fresh random value
 ```
 
+These commitment rules apply verbatim to scope entropy requests [EC-SCOPE]:
+a scope subject is one commitment, exactly like a token.
+
+## Scope Entropy Requests
+
+Token-keyed requests cover per-token seeds. Some mechanics need one
+verifiable random value for a subject that is not a token: raffle winner
+selection for an oversubscribed drop, duplicate-free random assignment of
+a curated set, and collection-wide reveal offsets. The coordinator
+therefore supports a second, sale/collection-scoped request kind with its
+own request-key domain (ADR 0011 decision R8). Scope requests reuse the
+token request lifecycle wholesale — the frozen provider interface,
+provider epochs, timeout, delivery retry, stale handling, incident
+recovery, and the Request Commitment Finality rules — so a raffle or
+assignment adapter inherits this spec's anti-reroll hardening instead of
+integrating a randomness provider on its own.
+
+A scope subject is identified by a domain-separated scope ID:
+
+```solidity
+bytes32 scopeId = keccak256(abi.encode(
+    STREAM_ENTROPY_SCOPE_SUBJECT_V1,
+    block.chainid,
+    address(this),
+    streamCore,
+    collectionId,
+    uint8(scopeKind),
+    scopeRef
+));
+```
+
+`scopeKind` is an `EntropyScopeKind` value; `scopeRef` names the subject
+inside that kind: the sales-spec `saleId` for `SALE`
+([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) owns
+`saleId` semantics), the phase policy hash for `PHASE`, and a documented
+collection-scoped purpose constant for `COLLECTION`.
+
+Recommended scope state:
+
+```solidity
+struct ScopeEntropy {
+    EntropyStatus status;
+    uint256 collectionId;
+    uint8 scopeKind;
+    bytes32 scopeRef;
+    address provider;
+    uint32 providerEpoch;
+    bytes32 requestKey;
+    uint256 providerRequestId;
+    bytes32 scopeInputsHash;
+    bytes32 rawRandomness;
+    bytes32 seed;
+    uint64 registeredAtBlock;
+    uint64 requestedAtBlock;
+    uint64 finalizedAtBlock;
+    uint16 requestAttempt;
+}
+
+mapping(bytes32 scopeId => ScopeEntropy) scopeEntropies;
+```
+
+Scope request keys and scope seeds use the scope domains, never the token
+domains:
+
+```solidity
+bytes32 requestKey = keccak256(abi.encode(
+    STREAM_ENTROPY_SCOPE_REQUEST_V1,
+    block.chainid,
+    address(this),
+    streamCore,
+    collectionId,
+    scopeId,
+    provider,
+    providerEpoch,
+    providerConfigHash,
+    scopeInputsHash,
+    requestAttempt
+));
+
+bytes32 seed = keccak256(abi.encode(
+    STREAM_ENTROPY_SCOPE_SEED_V1,
+    block.chainid,
+    address(this),
+    streamCore,
+    collectionId,
+    scopeId,
+    provider,
+    providerEpoch,
+    providerConfigHash,
+    requestKey,
+    providerRequestId,
+    rawRandomness,
+    collectionSalt,
+    scopeInputsHash
+));
+```
+
+The request context passed to providers uses context schema version 2,
+carrying the scope ID where the token context carries a token ID:
+
+```solidity
+bytes memory context = abi.encode(
+    uint16(2),          // context schema version: scope request
+    streamCore,
+    collectionId,
+    scopeId,
+    providerEpoch,
+    providerConfigHash,
+    requestAttempt
+);
+```
+
+Requirements [EC-SCOPE]:
+
+1. The scope request surface is a Permanent coordinator interface shipped
+   at genesis. Consumers — raffle adapters, random-assignment gates,
+   reveal tooling — are Replaceable modules with their own accepted specs.
+   Onchain raffle and random-allocation sale mechanics are extension
+   profiles that must consume this surface rather than integrate a
+   randomness provider directly; the sale-side profile home is
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   Instant entropy finalization inside sale settlement remains forbidden
+   ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+   [LCM-FORBIDDEN] item 11).
+2. `registerEntropyScope` is callable by the minter path and entropy
+   admins for a collection whose entropy config exists. A scope subject
+   registers exactly once; a duplicate `scopeId` reverts. Registration
+   writes status `REGISTERED` and emits `EntropyScopeRegistered`. For
+   `SALE` scopes, the scope should be registered before the sale's entry
+   window opens, so the drawing mechanism is committed before anyone
+   enters.
+3. Scope requests use the collection's frozen entropy config: provider,
+   provider epoch, provider config hash, `collectionSalt`,
+   `requestTimeoutBlocks`, and fresh-recovery policy. The collection's
+   `mode` must be `ASYNC`: scope entropy is async-only, and no instant
+   path may finalize a scope seed for any security class.
+   `requestScopeEntropy` must satisfy the [EC-REQUEST-GUARDS] reentrancy
+   guard and write-active-state-before-any-provider-call ordering.
+4. `scopeInputsHash` commits to the complete subject set the seed will
+   resolve over — the closed entry list root for a raffle, the assignment
+   manifest hash for a curated set, the declared offset target for a
+   reveal. It must be fixed and published before the request. The
+   coordinator stores it on the first request, binds it into the request
+   key and seed, and every recovery re-request must reuse the stored
+   value: no path can bind a different subject set to an
+   already-requested scope. Entry-set closing rules for `SALE` scopes are
+   owned by the sales spec.
+5. Scope status reuses the `EntropyStatus` vocabulary: `NONE`
+   (unregistered), `REGISTERED`, `REQUESTED`, `FINALIZED`, `STALE`, and
+   `FAILED`. `DISABLED` and `NOT_REQUIRED` are token-only and unreachable
+   for scopes. Scope records are not rows in the token lifecycle
+   reconciliation matrix [EC-LIFECYCLE], which maps token conditions only.
+6. One seed per scope subject, forever. `FINALIZED` is terminal; a
+   finalized, stale, or failed scope retains its request binding, cannot
+   be re-registered, and cannot receive a quiet second output. Fresh
+   recovery follows [EC-INCIDENT] — including its coordinator-state and
+   evidence requirements — through scope-keyed equivalents:
+   `markScopeEntropyRequestUnrecoverable(scopeId, reasonURI,
+   evidenceHash)`, `ScopeEntropyRequestFailed`, and
+   `StaleScopeEntropyFulfillment` mirror the token functions and events
+   with `scopeId` in place of `tokenId`.
+7. Fulfillment is shared: providers fulfill scope requests through the
+   unchanged `fulfillEntropy(requestKey, rawRandomness)` under all
+   [EC-FULFILL] rules and `EntropyFulfillmentOutcome` codes. Adapters
+   cannot and need not distinguish token from scope requests; request
+   keys and context are opaque at the adapter boundary
+   ([`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+   [EP-CONTEXT]).
+8. Scope finalization emits `ScopeEntropyFinalized` and must not call the
+   restricted Core ERC-4906 refresh emitter: there is no token subject to
+   refresh. Consumers index the scope events.
+9. Scope requests are caller-funded under [EC-FEEBIND]: `msg.value` is
+   the caller's `maxFeeWei` and excess is a pull credit. They never draw
+   from the reveal-fee escrow [EC-REVEAL].
+10. Scope reads are bounded like token reads [EC-VIEWREAD]: `scopeSeed`
+    returns exactly 64 bytes and `scopeEntropy` a fixed 480-byte struct
+    tuple; both are O(1) storage reads with no external calls. Scope
+    records stay pinned to, and readable from, the coordinator that
+    registered them under the coordinator replacement rules.
+11. Consumers must resolve outcomes from the finalized scope seed and the
+    committed inputs deterministically — for example, ranking entries by
+    `keccak256(abi.encode(seed, entryIndex))` — with the exact derivation
+    pinned in the consuming spec so any party can recompute the result.
+    Consumers must not mix a scope seed with inputs chosen after the
+    request.
+
+Events:
+
+```solidity
+event EntropyScopeRegistered(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed scopeId,
+    uint8 scopeKind,
+    bytes32 scopeRef
+);
+
+event ScopeEntropyRequested(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed scopeId,
+    address indexed provider,
+    bytes32 requestKey,
+    uint256 providerRequestId,
+    uint32 providerEpoch,
+    bytes32 providerConfigHash,
+    bytes32 scopeInputsHash,
+    uint16 requestAttempt
+);
+
+event ScopeEntropyFinalized(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed scopeId,
+    address indexed provider,
+    bytes32 requestKey,
+    uint256 providerRequestId,
+    bytes32 seed,
+    bytes32 rawRandomness
+);
+```
+
+## Reveal Ownership And Funding
+
+Registration at mint is not a reveal. For async collections the visible
+collector experience is the gap between mint and `FINALIZED`, and that
+gap must not be unowned: a named party is responsible for requesting, a
+funded path exists for the provider fee, and a lapse remedy engages
+without permission. Reveal operations are owned (ADR 0011 decision R8):
+collections declare a reveal owner with an SLO, sales escrow a per-mint
+reveal fee that funds the requests, and a permissionless request fallback
+engages after the SLO lapses.
+
+Recommended policy state and surface:
+
+```solidity
+struct CollectionRevealPolicy {
+    bool declared;
+    RevealRequestMode requestMode;
+    bytes32 revealOwnerRole;
+    uint64 requestSLOBlocks;
+    uint256 revealFeePerTokenWei;
+}
+
+mapping(uint256 collectionId => CollectionRevealPolicy) revealPolicies;
+mapping(uint256 collectionId => uint256 escrowWei) revealFeeEscrows;
+
+function configureCollectionRevealPolicy(
+    uint256 collectionId,
+    RevealRequestMode requestMode,
+    bytes32 revealOwnerRole,
+    uint64 requestSLOBlocks,
+    uint256 revealFeePerTokenWei
+) external;
+
+function fundRevealFeeEscrow(uint256 collectionId) external payable;
+```
+
+Requirements [EC-REVEAL]:
+
+1. Every collection configured with `mode == ASYNC` must declare a reveal
+   policy before public mint; the policy freezes with the collection
+   entropy config [EC-CONFIG] rule 13. `revealOwnerRole` is an ADR 0004
+   role identifier resolved through the registry at call time, never a
+   raw address, under the same discipline as [EC-INCIDENT-ROLE]; the
+   genesis vocabulary entry is `ROLE_ENTROPY_REVEAL_OWNER`, owned by
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   [GOV-ROLES]. Role holders satisfy the protocol custody bar (ADR 0010
+   decision D7.5).
+2. `AT_MINT` mode: the minter path attempts `requestEntropy(tokenId)` in
+   the mint transaction, after `mintFromManager` has returned and
+   registration is complete. A failed attempt must not unwind the mint:
+   the token remains `REGISTERED`, enters the SLO window, and the reveal
+   owner or fallback completes the request. This preserves the
+   never-brick posture — mint success never depends on provider uptime.
+   Sale-adapter conformance for the attempt-and-catch call shape is
+   owned by
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   `AT_MINT` is the default posture for priced sales of `ASYNC`
+   collections; declaring `OWNER_WINDOW` instead requires a recorded
+   rationale in the reveal operations manifest.
+3. `OWNER_WINDOW` mode: the reveal owner must request entropy for each
+   registered token within `requestSLOBlocks` of that token's
+   `registeredAtBlock`. `requestSLOBlocks` must be nonzero in every
+   declared policy.
+4. Permissionless fallback: once `block.number` exceeds
+   `registeredAtBlock + requestSLOBlocks` for a token that is still
+   `REGISTERED`, anyone may call `requestEntropy(tokenId)` for it,
+   regardless of `publicRequestsEnabled`. This time-gated lapse remedy is
+   the decided exception to opt-in public requests (ADR 0011 decision
+   R8); ADR 0009 decision 22 continues to govern the pre-lapse window.
+   The fallback pays the provider fee from the reveal-fee escrow
+   [EC-FEEBIND] rule 9, so a lapsed reveal costs the fallback caller only
+   gas.
+5. Funding: for priced sale kinds, the sale layer escrows
+   `revealFeePerTokenWei` per minted token into the coordinator's
+   per-collection reveal-fee escrow through `fundRevealFeeEscrow`; the
+   priced line item, its interaction with exact-payment rules, and
+   settlement ordering are owned by
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   Escrow funding flows from the settlement adapter directly to the
+   coordinator, keeping the mint manager non-payable
+   ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)).
+   `fundRevealFeeEscrow` accepts permissionless top-ups; more funding is
+   never a hazard because spends are rule-bound.
+6. The genesis funding default is the operator-funded provider
+   subscription (ADR 0011 decision R8): the VRF-class adapter quotes a
+   zero request fee [EP-QUOTE], so `revealFeePerTokenWei` may be zero.
+   Where the configured provider quotes a nonzero native fee, the
+   declared `revealFeePerTokenWei` must cover the provider's quoted fee
+   at configuration time. In both postures the reveal operations manifest
+   names the funding source.
+7. Escrow discipline: escrow draws never exceed the same-transaction
+   provider quote, every draw is evented, and escrow balances are
+   Operational — excluded from entropy identity, policy manifests, and
+   seed derivation [EC-FEEBIND] rules 7–9. Residual escrow is
+   withdrawable only by admin action, evented, to the protocol treasury,
+   and only when the collection has no non-terminal token entropy
+   records.
+8. The reveal operations manifest is a checked release artifact recording
+   the reveal owner role and holder, the declared request mode and
+   `requestSLOBlocks`, the target mint-to-`FINALIZED` latency, the keeper
+   obligation and monitoring alerts (tokens `REGISTERED` past the SLO;
+   requests `REQUESTED` beyond provider norms; escrow or subscription
+   float below the exhaustion threshold), the funded float, and a
+   rehearsed end-to-end reveal run as release evidence. A missed SLO or
+   exhausted float is a monitored incident (ADR 0011 decision R12).
+
+Events:
+
+```solidity
+event RevealPolicyConfigured(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    uint8 requestMode,
+    bytes32 revealOwnerRole,
+    uint64 requestSLOBlocks,
+    uint256 revealFeePerTokenWei
+);
+
+event RevealFeeEscrowFunded(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    address indexed funder,
+    uint256 amountWei,
+    uint256 escrowWei
+);
+
+event RevealFeeEscrowSpent(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    uint256 indexed tokenId,
+    uint256 amountWei,
+    uint256 escrowWei
+);
+
+event RevealFeeEscrowWithdrawn(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    address indexed to,
+    uint256 amountWei
+);
+```
+
 ## Reorg Safety
 
 Entropy finalization is final only in canonical chain history. If a fulfillment
@@ -1440,6 +1923,12 @@ bytes32 seed = keccak256(abi.encode(
 The seed, not provider-specific raw randomness, is the canonical artist-facing
 token hash. Metadata renderers should expose this as `hash` or `seed`.
 
+Scope requests fulfill through the same `fulfillEntropy` function under
+the same [EC-FULFILL] rules and outcome codes; their request keys and
+seeds derive from the scope domains [EC-SCOPE], and their finalization
+emits `ScopeEntropyFinalized` with no ERC-4906 refresh, because no token
+subject exists.
+
 Event:
 
 ```solidity
@@ -1523,8 +2012,10 @@ A complete fresh-recovery policy is represented by the frozen
 5. the incident declarer role reference [EC-INCIDENT-ROLE];
 6. the required reason URI/hash;
 7. whether late fulfillment from the original provider is accepted or stale;
-8. adapter result-status proof that no raw randomness was received for the
-   abandoned request.
+8. the complete no-reroll evidence rule [EC-INCIDENT] rule 3: the
+   coordinator's own no-result state, the adapter result-status probe,
+   and the independent provider-evidence commitment (ADR 0011 decision
+   R12).
 
 If any of those facts were not frozen onchain before mint, the safe v1 answer
 is no fresh recovery and `maxFreshRecoveryAttempts` must be zero. Operational
@@ -1536,7 +2027,8 @@ Recommended function:
 ```solidity
 function markEntropyRequestUnrecoverable(
     uint256 tokenId,
-    string calldata reasonURI
+    string calldata reasonURI,
+    bytes32 evidenceHash
 ) external;
 ```
 
@@ -1546,20 +2038,42 @@ Rules [EC-INCIDENT]:
 2. `block.number` must be greater than
    `requestedAtBlock + requestTimeoutBlocks`, unless a provider is
    `INCIDENT_REVOKED`.
-3. The provider adapter's `providerResultStatus` must prove that no valid
-   raw randomness was received for the old provider request. The
-   coordinator must call this status probe as a bounded staticcall under
-   `ENTROPY_RESULT_PROBE_GAS_LIMIT` — a coordinator Governed Gas Parameter
-   with immutable floor `ENTROPY_RESULT_PROBE_GAS_FLOOR`, governed,
-   monitored, and manifest-recorded exactly as [EC-REGGAS] items 2, 4, 5,
-   7, and 8 prescribe (ADR 0010 decision D1.1) — and treat failure,
-   malformed data, or out-of-gas as "not safe to recover."
+3. No-reroll proof is coordinator-state evidence first, adapter testimony
+   second (ADR 0011 decision R12). All three parts are required:
+   1. Coordinator-state check: the coordinator must verify from its own
+      storage that the request produced no result — the token is not
+      `FINALIZED`, no seed was written, and the stored request being
+      abandoned is the token's active request. The failed adapter can
+      neither forge nor erase this state.
+   2. Adapter probe: the provider adapter's `providerResultStatus` must
+      report that no valid raw randomness was received for the old
+      provider request. The coordinator must call this status probe as a
+      bounded staticcall under `ENTROPY_RESULT_PROBE_GAS_LIMIT` — a
+      coordinator Governed Gas Parameter with immutable floor
+      `ENTROPY_RESULT_PROBE_GAS_FLOOR`, governed, monitored, and
+      manifest-recorded exactly as [EC-REGGAS] items 2, 4, 5, 7, and 8
+      prescribe (ADR 0010 decision D1.1) — and treat failure, malformed
+      data, or out-of-gas as "not safe to recover." A
+      `rawRandomnessReceived = true` report blocks recovery absolutely.
+   3. Independent evidence commitment: the declaration's `evidenceHash`
+      must be nonzero and must commit to the incident evidence bundle.
+      Where the upstream source is independently observable — for
+      VRF-class providers, the upstream coordinator's onchain
+      request/fulfillment state and fulfillment logs for the provider
+      request ID — the bundle must include that corroboration that no
+      upstream fulfillment occurred. Where no independent upstream
+      evidence exists for the provider family, the recovery manifest
+      must record why the adapter's negative report was trusted.
+   A negative adapter report alone never licenses a fresh draw: the
+   adapter is the failed — and possibly compromised — component, and the
+   decisive bit must not be adversary-controlled state.
 4. The caller must hold the collection policy's frozen
    `incidentDeclarerRole`, resolved through the ADR 0004 registry at call
    time; for collections without a fresh-recovery policy the caller must
    hold `ROLE_ENTROPY_INCIDENT_DECLARER` [EC-INCIDENT-ROLE]. Raw-address
    authority is nonconformant (ADR 0010 decision D7.4).
-5. The action must emit a human-readable or content-addressed incident reason.
+5. The action must emit a human-readable or content-addressed incident
+   reason and the `evidenceHash`.
 6. Token status becomes `FAILED`.
 7. The active request is closed only as an incident action.
 8. A later fresh request, if allowed, must be emitted as recovery and counted
@@ -1568,21 +2082,27 @@ Rules [EC-INCIDENT]:
    frozen before mint.
 10. Admin-selected fallback after seeing partial outcomes is a manipulation
     risk.
+11. Scope entropy incidents follow every rule above through the
+    scope-keyed equivalents [EC-SCOPE], with the same coordinator-state,
+    probe, and evidence requirements.
 
 Event:
 
 ```solidity
 event EntropyRequestFailed(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     uint256 indexed tokenId,
     address indexed provider,
     bytes32 requestKey,
     uint32 providerEpoch,
     uint16 requestAttempt,
-    string reasonURI
+    string reasonURI,
+    bytes32 evidenceHash
 );
 
 event EntropyRecoveryRequested(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     uint256 indexed tokenId,
     address indexed oldProvider,
@@ -1591,7 +2111,8 @@ event EntropyRecoveryRequested(
     bytes32 newRequestKey,
     uint32 oldProviderEpoch,
     uint32 newProviderEpoch,
-    string reasonURI
+    string reasonURI,
+    bytes32 evidenceHash
 );
 ```
 
@@ -1690,9 +2211,12 @@ The ARRNG adapter should follow the same `requestKey` pattern:
 Additional providers should be added as new Replaceable-layer adapters
 behind the frozen provider interface and activated through provider epochs
 and registry approval, each with its own separately accepted spec. The
-request lifecycle, seed derivation, epoch semantics, and stale, failed, and
-recovery semantics defined here are final in v1; only the provider catalog
-grows. Existing Core contracts should not need changes.
+request lifecycle — the token-keyed and scope-keyed request kinds alike
+(ADR 0011 decision R8) — seed derivation, epoch semantics, and stale,
+failed, and recovery semantics defined here are final in v1; only the
+provider catalog grows, and scope-consuming mechanics such as raffle
+adapters grow as Replaceable consumers of the frozen [EC-SCOPE] surface.
+Existing Core contracts should not need changes.
 
 ## Metadata Integration
 
@@ -1711,11 +2235,12 @@ Read-boundary requirements [EC-VIEWREAD]:
    home, floor, and manifest pinning are defined in
    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md);
    this document guarantees the coordinator side stated below.
-2. Returndata bounds are fixed by the read interface: `tokenSeed` returns
-   exactly 64 bytes, `tokenEntropyStatus` exactly 32 bytes, and
-   `tokenEntropy` a fixed 256-byte tuple. Consumers must cap the
-   returndata copy at the expected size and treat oversized or malformed
-   returndata as a failed read.
+2. Returndata bounds are fixed by the read interface: `tokenSeed` and
+   `scopeSeed` return exactly 64 bytes, `tokenEntropyStatus` exactly 32
+   bytes, `tokenEntropy` a fixed 256-byte tuple, and `scopeEntropy` a
+   fixed 480-byte struct tuple. Consumers must cap the returndata copy at
+   the expected size and treat oversized or malformed returndata as a
+   failed read.
 3. Coordinator view functions must be O(1) storage reads with no external
    calls and no loops over token or request counts, so a manifest-pinned
    read cap stays sufficient across the system's life. They must not
@@ -1765,6 +2290,8 @@ metadata refresh admin   coordinate refresh events if required
 gas parameter admin      stage GGP raises/lowers through ADR 0004 action classes
 incident declarer        declare entropy incidents through the frozen role
                          reference [EC-INCIDENT-ROLE]
+reveal owner             request entropy for reveal-declared collections
+                         through the frozen role reference [EC-REVEAL]
 ```
 
 All admin actions should emit events and should include a reason URI where
@@ -1791,8 +2318,12 @@ practical.
 15. Delivery retry cannot change raw randomness, provider request ID, request
     key, provider epoch, or request attempt.
 16. Fresh entropy recovery is an incident path and must be visible in events.
-17. Fresh entropy recovery cannot proceed unless adapter status proves no raw
-    randomness was received for the old request.
+17. Fresh entropy recovery cannot proceed unless the coordinator's own
+    request state shows no finalized result, the bounded adapter probe
+    reports no raw randomness received, and the declaration commits to
+    independent provider evidence where such evidence exists; adapter
+    testimony alone never licenses a fresh draw [EC-INCIDENT] (ADR 0011
+    decision R12).
 18. Mint registration happens before any `_safeMint` receiver callback can
     observe the token.
 19. Every entropy-path gas cap is a Governed Gas Parameter at or above its
@@ -1808,6 +2339,18 @@ practical.
 23. A revoked bound provider's fulfillment attempt cannot finalize, cannot
     revert the callback frame, and cannot erase the adapter's stored
     result (ADR 0010 decision D8.1).
+24. A scope subject registers once and can receive at most one finalized
+    seed; scope request keys and seeds derive from the scope domains,
+    never the token domains [EC-SCOPE] (ADR 0011 decision R8).
+25. Recovery re-requests for a scope reuse the stored `scopeInputsHash`;
+    no path can bind a different subject set to an already-requested
+    scope [EC-SCOPE].
+26. Reveal-fee escrow draws never exceed the same-transaction provider
+    quote, and forced ETH recovery can reduce neither tracked refund
+    credits nor tracked reveal-fee escrows [EC-REVEAL].
+27. The permissionless reveal fallback is reachable for a token only
+    after that token's declared SLO window has lapsed [EC-REVEAL]
+    (ADR 0011 decision R8).
 
 ## Security Considerations
 
@@ -1833,6 +2376,12 @@ be prevented behind the frozen instant interface; it is disclosed and
 restricted to `LOW_SECURITY` collections instead of papered over
 (ADR 0010 decision D8.8) [EP-INSTANT-TIMING].
 
+Scope entropy adds a subject-set grinding surface: choosing or reordering
+the entry set after partial information leaks. The committed
+`scopeInputsHash`, its immutability across recovery re-requests, and the
+async-only rule close it — a scope request cannot start until the subject
+set is fixed, and no instant path can finalize a scope seed [EC-SCOPE].
+
 ### Zero Values
 
 `bytes32(0)` is a valid theoretical hash output. It must not be used to infer
@@ -1857,8 +2406,9 @@ ownership, finalized seeds, pending-state truthfulness, and metadata
 fallback behavior rather than inventing an unauthorized randomness source.
 Collection `CLOSED` status does not block fulfillment for already-`REQUESTED`
 tokens or permissionless `requestEntropy` for already-`REGISTERED` tokens whose
-frozen policy allows public requests. Closing stops new minting, not honest
-completion of already-minted entropy lifecycle.
+frozen policy allows public requests or whose reveal SLO has lapsed
+[EC-REVEAL]. Closing stops new minting, not honest completion of
+already-minted entropy lifecycle.
 
 ### Event Provenance
 
@@ -1871,7 +2421,11 @@ Collectors and auditors should be able to reconstruct:
 5. raw randomness;
 6. final seed;
 7. delivery retry and recovery history;
-8. final metadata refresh trigger.
+8. final metadata refresh trigger;
+9. scope registration, request, inputs commitment, and finalization
+   history [EC-SCOPE];
+10. reveal policy, escrow funding, escrow draws, and fallback engagement
+    [EC-REVEAL].
 
 ## Bytecode Impact
 
@@ -1896,6 +2450,8 @@ Core hook and interfaces, but this refactor should still buy about `0.8 KB` to
 4. Add collection config and freeze functions.
 5. Add token registration, request, fulfillment, failure, delivery retry, and
    recovery logic.
+6. Add scope registration and request logic [EC-SCOPE] plus reveal
+   policy, reveal-fee escrow, and lapse-fallback logic [EC-REVEAL].
 
 ### Phase 2: Provider Adapters
 
@@ -1933,8 +2489,11 @@ Core hook and interfaces, but this refactor should still buy about `0.8 KB` to
 ### Phase 5: Tooling And Monitoring
 
 1. Add admin tools for collection entropy config inspection.
-2. Add dashboards for pending, requested, failed, and finalized tokens.
-3. Add keeper or operator scripts for public-request collections.
+2. Add dashboards for pending, requested, failed, and finalized tokens and
+   scopes, including tokens `REGISTERED` past their reveal SLO.
+3. Add keeper or operator scripts for reveal-owned and public-request
+   collections [EC-REVEAL], with the rehearsal run retained as release
+   evidence.
 4. Add runbooks for provider deprecation and incident revocation.
 
 ## Required Tests
@@ -1950,10 +2509,13 @@ Core integration tests:
 7. If `onTokenMinted` reverts, the whole mint reverts and no token is minted.
 8. Emergency switch to a pre-approved safe-mode coordinator preserves
    registration semantics.
-9. `ENTROPY_REGISTRATION_GAS_LIMIT` behaves per [EC-REGGAS]: raise through
-   the short delay class, lower only with a passing health probe, floor
-   rejection below `ENTROPY_REGISTRATION_GAS_FLOOR`, and change events
-   with old and new values.
+9. `ENTROPY_REGISTRATION_GAS_LIMIT` behaves per [EC-REGGAS] and
+   [LTA-GGP] requirements 1–2 (ADR 0011 decision R5): staged raises on
+   the normal delay class bounded to 2x per action, the raise-only
+   probe-gated emergency path, lower only with a recorded passing probe
+   run at the proposed value, floor rejection below
+   `ENTROPY_REGISTRATION_GAS_FLOOR`, and change events with old and new
+   values.
 10. The EIP-150 parent precheck is exercised at, below, and above the
     threshold and reads the live parameter value after a raise.
 11. Gas parameter values appear in no finality manifest, frozen-route
@@ -2060,6 +2622,64 @@ Incident recovery tests:
 12. The adapter result probe runs under `ENTROPY_RESULT_PROBE_GAS_LIMIT`
     and treats out-of-gas, revert, and malformed returndata as unsafe to
     recover.
+13. Recovery is rejected when the coordinator's own state shows a
+    finalized seed or an inactive stored request, even when the adapter
+    reports no randomness received [EC-INCIDENT] rule 3 (ADR 0011
+    decision R12).
+14. Incident declaration with a zero `evidenceHash` reverts, and the
+    emitted failure and recovery events carry the evidence hash.
+15. With a false-negative adapter — one that reports
+    `rawRandomnessReceived = false` after receiving randomness — the late
+    original callback remains a stale, audit-visible event that cannot
+    finalize, and the declared evidence commitment is retained for
+    incident review.
+
+Scope entropy tests:
+
+1. Scope registration derives `scopeId` with the subject domain, writes
+   `REGISTERED`, and rejects duplicate registration.
+2. Scope requests require the collection's frozen `ASYNC` config;
+   `INSTANT`-mode and `DISABLED` collections cannot request scope
+   entropy.
+3. Scope request keys and seeds use the scope domains; token and scope
+   requests over the same collection can never collide.
+4. `scopeInputsHash` is stored on first request, bound into request key
+   and seed, and recovery re-requests with a different inputs hash
+   revert.
+5. Providers fulfill scope requests through the unchanged
+   `fulfillEntropy` path; context schema version 2 flows opaquely
+   through request, callback, and retry [EP-CONTEXT].
+6. A finalized scope cannot be re-registered, re-requested, or
+   refinalized; stale and wrong-epoch scope callbacks emit
+   `StaleScopeEntropyFulfillment` and return their outcome codes.
+7. Scope incident recovery enforces the full [EC-INCIDENT] rule 3
+   evidence set through the scope-keyed functions.
+8. Scope finalization emits `ScopeEntropyFinalized` and never calls the
+   restricted Core refresh emitter.
+9. Scope requests are caller-funded under [EC-FEEBIND] and never draw
+   from the reveal-fee escrow.
+
+Reveal operation tests:
+
+1. `freezeCollectionEntropy` rejects an `ASYNC` collection without a
+   declared reveal policy; declared policies freeze with the config.
+2. In `AT_MINT` mode, a failed at-mint request attempt does not unwind
+   the mint: the token stays `REGISTERED` and enters the SLO window.
+3. Before SLO lapse, public callers are rejected unless
+   `publicRequestsEnabled`; after lapse, anyone can request and the
+   escrow pays the quoted fee.
+4. Fee draw order: escrow first, `msg.value` shortfall second; excess
+   `msg.value` is credited per [EC-FEEBIND]; every escrow draw is
+   evented.
+5. Residual escrow withdrawal succeeds only when the collection has no
+   non-terminal token entropy records, pays only the protocol treasury,
+   and is evented; forced ETH cannot reduce the escrow or credit
+   aggregates.
+6. The reveal owner role resolves through ADR 0004 at call time, and
+   holder rotation requires no policy change.
+7. The reveal operations manifest — SLO target, keeper obligation,
+   monitoring thresholds, funded float, rehearsal evidence — is present
+   and checksum-covered in the release artifacts.
 
 Provider adapter tests:
 
@@ -2085,6 +2705,11 @@ Renderer integration tests:
 3. Render context includes canonical seed.
 4. Render context includes entropy status and provider.
 5. Metadata output does not depend on Core `tokenToHash`.
+6. Default token JSON discloses
+   `properties.stream.entropy_security_class` for both declared classes,
+   in pending-state and finalized JSON alike (ADR 0011 decision R12); the
+   field pinning and full conformance test are owned by
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md).
 
 ## Resolved Design Decisions
 
@@ -2093,7 +2718,10 @@ Renderer integration tests:
    coordinator-level global default provider (ADR 0009 decision 23).
 2. Public `requestEntropy` is not enabled by default: `requestEntropy` is
    callable by the minter path, entropy admins, and global admins, and
-   public requests are opt-in per collection (ADR 0009 decision 22).
+   public requests are opt-in per collection (ADR 0009 decision 22). The
+   reveal-lapse fallback [EC-REVEAL] is the single decided exception:
+   after a reveal-declared collection's request SLO lapses for a token,
+   anyone may request for that token (ADR 0011 decision R8).
 3. No instant provider ships at genesis; the `IStreamInstantEntropyProvider`
    interface is Permanent and frozen, so a reviewed instant provider can be
    added later as a Replaceable module if a collection needs one
@@ -2130,6 +2758,32 @@ Renderer integration tests:
     provider callbacks persist randomness and deliver through try/catch
     so a coordinator revert can never lose provider randomness (ADR 0010
     decision D8.1).
+12. The coordinator carries a sale/collection-scoped request kind with
+    its own request-key and seed domains, reusing the token lifecycle —
+    epochs, timeout, delivery retry, stale handling, incident recovery,
+    and commitment finality — so raffles, random assignment, and reveal
+    offsets consume this surface instead of integrating providers
+    directly [EC-SCOPE] (ADR 0011 decision R8).
+13. Reveal operations are owned: `ASYNC` collections declare a reveal
+    owner role and request SLO before public mint, sales escrow a
+    per-mint reveal fee into the coordinator's per-collection escrow, and
+    a permissionless, escrow-funded request fallback engages after the
+    SLO lapses [EC-REVEAL] (ADR 0011 decision R8).
+14. Fresh-recovery no-reroll proof is coordinator-state evidence first:
+    the coordinator's own no-result state, the bounded adapter probe, and
+    a nonzero independent-evidence commitment are all required, and
+    adapter testimony alone never licenses a fresh draw [EC-INCIDENT]
+    (ADR 0011 decision R12).
+15. The declared entropy security class is disclosed machine-readably in
+    default token JSON as `properties.stream.entropy_security_class`,
+    pending and finalized alike, with the field pinning and renderer
+    conformance test owned by
+    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+    (ADR 0011 decision R12).
+16. `EntropyFulfillmentOutcome` numeric values 0–5 are pinned in this
+    home, including `REJECTED_PROVIDER_REVOKED = 5` (ADR 0010 decision
+    D8.1); decision-record text restating the five-member pre-extension
+    enum is corrected to cite this home (ADR 0011 decision R12).
 
 These resolutions are normative; the requirements in the body of this
 document already state each decided behavior.

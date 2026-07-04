@@ -3,8 +3,10 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and
-[ADR 0010](adr/0010-world-class-spec-pass.md) and recorded in
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
+[ADR 0010](adr/0010-world-class-spec-pass.md), and
+[ADR 0011](adr/0011-world-class-pass-round-2.md) (decisions R6, R9, and
+R12 amend this document) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -325,16 +327,40 @@ Requirements [MPA-CORE-ABI]:
    the sale/manager commitment that prevents a later caller from swapping
    renderer input after policy acceptance. A hash-only or externalized
    token-data storage design needs a separate accepted migration spec
-   because it changes renderer and finality assumptions.
+   because it changes renderer and finality assumptions. Stored
+   `tokenData` bytes are permanent artwork input: Core must retain them
+   for the life of the deployment, including for burned tokens — burn
+   clears ownership and enumeration, never renderer input (ADR 0011
+   decision R12). No event carries the bytes (mint surfaces emit only
+   `tokenDataHash`), so `tokenData` is a state-recovered surface, not an
+   event-recovered one: the protocol v1 reconstruction rule
+   ([`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+   [PV1-RECON]) documents it as state-recovered, and the `STATE_EXPORT`
+   profile
+   ([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md))
+   carries a per-token artwork-input leaf keyed by `tokenId` with the
+   `tokenData` byte hash so exports attest the renderer input for live
+   and burned tokens alike.
 3. `mintCommitment` is the typed per-token entropy/mint salt defined by
    the entropy coordinator spec. It replaces the legacy `saltfunO`
    parameter everywhere; no Core mint surface takes `saltfunO`.
 4. Core must not take or store `beneficiary` in any mint hook (rule
    restated below); the superseded `mintNext` shape with a beneficiary
    parameter is invalid.
-5. Core must emit `TokenCollectionRegistered(tokenId, collectionId,
-   serial)` at identity write so event-only identity reconstruction is
-   normative (ADR 0010 decision D10.1).
+5. Core must emit `TokenCollectionRegistered` at identity write so
+   event-only identity reconstruction is normative (ADR 0010 decision
+   D10.1). The pinned production signature carries `schemaVersion` per
+   the event-catalog policy (ADR 0011 decision R12) — the permanence-
+   critical identity event is not signature-ambiguous:
+
+   ```solidity
+   event TokenCollectionRegistered(
+       uint16 schemaVersion,
+       uint256 indexed tokenId,
+       uint256 indexed collectionId,
+       uint256 collectionSerial
+   );
+   ```
 
 The immediate single-step hook is intentionally minimal. Beneficiary,
 mint-commitment, operation ID, price, asset, and authorization evidence belong
@@ -347,14 +373,18 @@ drop/sale pause policy, eligibility, price, asset, settlement, beneficiary, and
 authorization checks are trusted manager responsibilities and must be evidenced
 in the manager, ledger, sale adapter, or settlement adapter records.
 
-Protocol v1 should not include persistent standalone token reservations. When
-another spec says a token is "reserved," it means either:
-
-1. the token identity is prepared and completed inside the same top-level
-   transaction by the mint manager, so any later failure reverts the mapping and
-   serial allocation; or
-2. a separate accepted reservation ADR has defined expiry, cancellation,
-   serial-gap, revenue, and royalty-snapshot rules.
+This Core line has no persistent standalone token reservations. When
+another spec says a token is "reserved," it means exactly one thing: the
+token identity is prepared and completed inside the same top-level
+transaction by the mint manager, so any later failure reverts the mapping
+and serial allocation. Durable reservations — and every capability that
+needs them, such as serial-number or token-ID selection — are
+successor-line-only: v1 Core exposes no durable prepared-token or
+reservation state, so no module spec or ADR can add them against this
+Core (ADR 0011 decision R9). This statement is the single home for the
+reservation posture; the sales spec's serial-selection exclusion
+([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+`[SSA-CONTENT]`) cites it.
 
 Same-transaction prepared mints carry token-level primary policy, and the
 capability is required at genesis: Core must expose the manager-only
@@ -387,8 +417,9 @@ revenue is recorded and before the transaction returns. Completion clears the
 prepared record before minting, keeps the global Core completion sentinel active
 through the ERC-721 receiver callback, then clears that sentinel only after the
 normal mint entropy/randomizer boundary returns for the now-complete token.
-Persistent prepared tokens are forbidden in protocol v1 unless the separate
-reservation ADR above is accepted. As a recovery escape for a stranded
+Persistent prepared tokens are forbidden on this Core line (durable
+reservations are successor-line-only, ADR 0011 decision R9). As a
+recovery escape for a stranded
 prepared mint, Core allows the
 admin to replace only the `mintManager` pointer while the sentinel is active so
 a reviewed replacement manager can call the existing abort hook; other critical
@@ -450,7 +481,10 @@ and pins the domain's string preimage and hash.
 
 ```solidity
 // Level 1: the static request commitment binds the request contents.
+// REQUEST_COMMITMENT_DOMAIN =
+//     keccak256("6529STREAM_PREPARED_MINT_REQUEST_COMMITMENT_V1")
 bytes32 requestCommitmentHash = keccak256(abi.encode(
+    REQUEST_COMMITMENT_DOMAIN,
     address(payer),
     address(authorizer),
     bytes32(initialRecipientsHash),
@@ -517,6 +551,18 @@ Requirements [MPA-OPERATION]:
    `tokenIndex`. The per-token `mintCommitment` is the value the protocol
    v1 mirror table's inputs column labels `salt`, and
    `mintCommitmentsHash` is the value it labels `saltsHash`.
+   `requestCommitmentHash` carries its own versioned domain,
+   `REQUEST_COMMITMENT_DOMAIN`, because every named composite hash is
+   domain-separated even when it is only consumed inside a domained
+   outer preimage (ADR 0011 decision R12); it remains an interior value —
+   never a standalone key, event topic, or signed field.
+
+   Implementation evidence (non-normative). The CON-014 slice computes
+   the request commitment without the leading domain, and the
+   checker-pinned `OPERATION_DOMAIN` mirror row describes that as-built
+   interior shape. Deployment requires the domained form above; the
+   mirror row and manager constant re-pin together at implementation
+   alignment.
 2. Deadline, sale adapter identity, price, asset, and the primary/royalty
    policy hashes are bound transitively, not restated at the root: they
    are inside the signed payload from which `authorizationId` must be
@@ -1124,17 +1170,18 @@ key, the manager must revert.
 ## Data Model
 
 Recommended phase configuration. The struct fields align one-for-one with
-the hashed `PHASE_CONFIG_DOMAIN` and `GATE_CONFIG_DOMAIN` preimages in
-`Policy Fingerprints` (ADR 0010 decision D3.6): the gate lives in its own
-hashed config struct, phase metadata is a real config field, and the
-per-phase counter-count bound is the reviewed manager constant
-`MAX_PHASE_COUNTERS` rather than per-phase state (the ordered counter set
-is already fully committed by the policy hash).
+the hashed `PHASE_CONFIG_DOMAIN_V2` and `GATE_CONFIG_DOMAIN_V2` preimages
+in `Policy Fingerprints` (ADR 0010 decision D3.6; ADR 0011 decision R6):
+the gate lives in its own hashed config struct, phase metadata is a real
+config field, and the per-phase counter-count bound is the reviewed
+manager constant `MAX_PHASE_COUNTERS` rather than per-phase state (the
+ordered counter set is already fully committed by the policy hash). Phase
+pause state is deliberately not a config field: it is a separate
+Operational flag outside policy identity (ADR 0011 decision R6).
 
 ```solidity
 struct MintPhaseConfig {
     bool exists;
-    bool paused;
     uint64 startTime;
     uint64 endTime;
     uint32 maxBatchQuantity;
@@ -1142,33 +1189,64 @@ struct MintPhaseConfig {
     bytes32 metadataHash;
 }
 
+enum CodehashPinMode {
+    PINNED,   // 0: codehash must be nonzero and is verified
+    UNPINNED  // 1: codehash must be zero; no runtime verification
+}
+
 struct MintGateConfig {
     address gate;
     bytes32 gateConfigHash;
     bytes32 gateCodehash;
+    uint8 gateCodehashPinMode; // CodehashPinMode
     bytes32 gateMetadataHash;
     uint32 gateSemanticVersion;
     uint32 gateGasLimit;
 }
+
+mapping(uint256 => mapping(bytes32 => bool)) public phasePaused;
 ```
 
 Field semantics:
 
 ```text
 exists             phase has been configured
-paused             admin pause for this phase
-startTime          zero means no lower time bound
-endTime            zero means no upper time bound
+startTime          zero means no lower time bound (documented value
+                   convention, see below)
+endTime            zero means no upper time bound (documented value
+                   convention, see below)
 maxBatchQuantity   nonzero per-call cap; v1 managers must also enforce a reviewed hard maximum
 configHash         hash of offchain/operator config (allowlist file, sale terms); zero when unused
 metadataHash       phase display metadata commitment (see MintPhaseMetadata)
 gate               optional validation module; address(0) disables gating
 gateConfigHash     gate-specific policy commitment (roots, source sets, terms)
-gateCodehash       pinned gate codehash; zero skips the pin
+gateCodehash       gate codehash under gateCodehashPinMode
+gateCodehashPinMode explicit pin state; no zero-value sentinel exists
 gateMetadataHash   gate display metadata commitment
 gateSemanticVersion registry semantic version expected at configuration
 gateGasLimit       minimum gas forwarded to the gate call; see [MPA-GATES]
+phasePaused        Operational pause flag; never hashed into policyHash
 ```
+
+Codehash pinning is an explicit enum, never a zero sentinel (ADR 0011
+decision R12, retiring the round-1 "zero skips the pin" convention the
+same way ADR 0010 decisions D8.3/D8.4 retired the authorizer and
+increment sentinels): `PINNED` requires a nonzero codehash that matches
+the module's registry `runtimeCodeHash` at configuration and is verified
+while minting; `UNPINNED` requires a zero codehash, is valid only when
+the module's registry record itself carries no `runtimeCodeHash` pin
+(`[MPA-REGISTRY]` rule 5), and remains a visible signed choice because
+the pin mode is hashed into the gate and counter component preimages — a
+signer can always distinguish "pinned to hash X" from "pinning disabled"
+without decoding any sentinel. Inconsistent pairs revert at
+configuration. When `gate == address(0)`, gating is disabled and every
+other `MintGateConfig` field must be zero — the all-zero struct is the
+canonical no-gate value, and no pin semantics exist. The
+`startTime`/`endTime` zero conventions are different in kind: zero reads
+as "no bound" on the face of the value with no hidden verification side
+effect, so they remain documented value conventions recorded alongside
+the reserved constants in the protocol v1 domain-constants table inputs
+and covered by golden tests.
 
 Recommended counter configuration:
 
@@ -1184,6 +1262,7 @@ struct MintCounterConfig {
     uint64 cap;
     uint64 increment;
     address resolver;
+    uint8 resolverCodehashPinMode; // CodehashPinMode
     bytes32 capRoot;
     bytes32 configHash;
 }
@@ -1205,6 +1284,10 @@ cap         must be zero when capMode is NONE; exact cap when STATIC, where
 increment   static increment; must be >= 1 for every enabled counter; zero
             is invalid and reverts at configuration (ADR 0010 decision D8.4)
 resolver    required for CUSTOM_RESOLVER, RESOLVER cap, or RESOLVER delta
+resolverCodehashPinMode  explicit pin state for the resolver codehash read
+            from the registry record, under the CodehashPinMode rules
+            above; with resolver == address(0) every resolver field is
+            zero and no pin semantics exist
 capRoot     required nonzero for MERKLE_STATIC; zero otherwise
 configHash  optional hash of offchain/operator config
 ```
@@ -1405,17 +1488,7 @@ interface IStreamMintLedger {
         bytes32 phaseId
     ) external view returns (bytes32 previousPolicyHash, uint64 graceUntil);
 
-    function isAuthorizationUsed(bytes32 authorizationId)
-        external
-        view
-        returns (bool);
-
     function isManagerAuthorizationUsed(address manager, bytes32 authorizationId)
-        external
-        view
-        returns (bool);
-
-    function isNullifierUsed(bytes32 nullifier)
         external
         view
         returns (bool);
@@ -1445,10 +1518,15 @@ Requirements [MPA-LEDGER]:
 4. Voiding an already-consumed or already-voided ID reverts; voiding is
    one-way and permanent.
 
-External tools should prefer the manager-scoped reads
-(`isManagerAuthorizationUsed`, `isManagerNullifierUsed`) when checking
-replay state. The shorter helpers are caller-relative and only answer for
-`msg.sender`.
+Replay-state reads take an explicit manager parameter and nothing else
+(ADR 0011 decision R12): the round-1 caller-relative helpers
+(`isAuthorizationUsed(bytes32)`, `isNullifierUsed(bytes32)` answering for
+`msg.sender`) are removed from the ledger interface, because a view whose
+answer depends on the caller silently reports `unused` for consumed
+replay keys when queried offchain with a default zero `from` address —
+a false negative on exactly the reads incident response depends on.
+`isManagerAuthorizationUsed` and `isManagerNullifierUsed` return the same
+answer to every caller.
 
 The manager builds bounded counter consumptions before calling the ledger. The
 ledger owns the final cap checks and writes, so counter accounting has a single
@@ -1705,13 +1783,19 @@ bytes32 policyHash = keccak256(abi.encode(
 
 Component domains, each hashed with `abi.encode`, explicit field order, and
 explicit type widths (packed encodings and JSON/string concatenation are
-never valid for authority hashes):
+never valid for authority hashes). The phase-config, gate-config, and
+counter-binding components are V2 preimages, required at deployment: V2
+removes `paused` from policy identity (ADR 0011 decision R6) and adds the
+explicit codehash pin modes (ADR 0011 decision R12), and a changed
+preimage shape always takes a new versioned domain:
 
 ```solidity
-// PHASE_CONFIG_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_PHASE_CONFIG_V1")
+// PHASE_CONFIG_DOMAIN_V2 =
+//     keccak256("6529STREAM_MINT_MANAGER_PHASE_CONFIG_V2")
+// Pause state is deliberately absent: pause is an Operational flag,
+// never policy identity (ADR 0011 decision R6).
 bytes32 phaseConfigHash = keccak256(abi.encode(
-    PHASE_CONFIG_DOMAIN,
-    config.paused,
+    PHASE_CONFIG_DOMAIN_V2,
     config.startTime,
     config.endTime,
     config.maxBatchQuantity,
@@ -1719,12 +1803,14 @@ bytes32 phaseConfigHash = keccak256(abi.encode(
     config.metadataHash
 ));
 
-// GATE_CONFIG_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_GATE_CONFIG_V1")
+// GATE_CONFIG_DOMAIN_V2 =
+//     keccak256("6529STREAM_MINT_MANAGER_GATE_CONFIG_V2")
 bytes32 gateConfigHash = keccak256(abi.encode(
-    GATE_CONFIG_DOMAIN,
+    GATE_CONFIG_DOMAIN_V2,
     gateConfig.gate,
     gateConfig.gateConfigHash,
     gateConfig.gateCodehash,
+    uint8(gateConfig.gateCodehashPinMode),
     gateConfig.gateMetadataHash,
     gateConfig.gateSemanticVersion,
     gateConfig.gateGasLimit
@@ -1743,22 +1829,28 @@ bytes32 counterConfigLeaf = keccak256(abi.encode(
     config.counterConfigHash
 ));
 
-// COUNTER_BINDING_DOMAIN = keccak256("6529STREAM_MINT_COUNTER_BINDING_V1")
+// COUNTER_BINDING_DOMAIN_V2 =
+//     keccak256("6529STREAM_MINT_COUNTER_BINDING_V2")
 // counterConfigHash is a mandatory binding commitment, not optional
 // operator data: it commits the remaining policy-relevant counter fields.
 bytes32 counterConfigHash = keccak256(abi.encode(
-    COUNTER_BINDING_DOMAIN,
+    COUNTER_BINDING_DOMAIN_V2,
     uint8(config.scope),
     uint8(config.updateMode),
     address(config.resolver),
-    bytes32(resolverCodehash), // pinned registry codehash; zero when unpinned
+    bytes32(resolverCodehash), // registry codehash under the pin mode
+    uint8(config.resolverCodehashPinMode),
     bytes32(config.capRoot),
     bytes32(config.configHash) // operator/offchain config commitment
 ));
 
+// COUNTER_SET_DOMAIN =
+//     keccak256("6529STREAM_MINT_MANAGER_COUNTER_SET_V1")
 // orderedCounterConfigHash commits the exact enabled counter order:
-bytes32 orderedCounterConfigHash =
-    keccak256(abi.encode(counterConfigLeaves)); // bytes32[] in phase order
+bytes32 orderedCounterConfigHash = keccak256(abi.encode(
+    COUNTER_SET_DOMAIN,
+    counterConfigLeaves // bytes32[] in phase order
+));
 
 // EXECUTOR_SET_DOMAIN = keccak256("6529STREAM_MINT_MANAGER_EXECUTOR_SET_V1")
 bytes32 executorSetHash = keccak256(abi.encode(
@@ -1766,6 +1858,30 @@ bytes32 executorSetHash = keccak256(abi.encode(
     sortedExecutorAddresses // ascending, deduplicated
 ));
 ```
+
+Implementation evidence (non-normative). The CON-014 manager slice
+implements the V1 component shapes — `paused` hashed inside
+`6529STREAM_MINT_MANAGER_PHASE_CONFIG_V1`, the sentinel-style
+`6529STREAM_MINT_MANAGER_GATE_CONFIG_V1` and
+`6529STREAM_MINT_COUNTER_BINDING_V1` preimages, and an undomained
+ordered-counter hash — and the checker-pinned StreamMintManager domain
+table rows record exactly that as-built state. Those V1 rows remain
+untouched as as-built evidence; deployment requires the V2 preimages
+above, and the manager constants, mirror rows, and checker expectations
+re-pin together at implementation alignment. The V2 and `COUNTER_SET`
+domain hashes are pinned in the protocol v1 mirror from the string
+preimages above before this document leaves Draft.
+
+The mint-layer Governed Gas Parameter identifiers follow [LTA-GGP]
+definition item 5 (`keccak256("6529STREAM_GGP_" || <constant name>)`) and
+are recorded here as this subsystem's domain-table entries, mirrored in
+the protocol v1 GGP identifier table:
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `GGP_MINT_GATE_GAS_LIMIT` | `6529STREAM_GGP_MINT_GATE_GAS_LIMIT` | 0xf896db78d4fb703c92d45856189181cb6daa113dada9718f74206095d4fbf817 | `StreamMintManager` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-GATES]` |
+| `GGP_TICKET_ERC1271_GAS_LIMIT` | `6529STREAM_GGP_TICKET_ERC1271_GAS_LIMIT` | 0x6a05447612b16e61c6b274125ccdfb6545e058d195b5d82128b41a7205e4a5b6 | `StreamMintTicketGate` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-TICKET]` |
+| `GGP_ARTIST_AUTHORITY_GAS_LIMIT` | `6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT` | 0x194fce9f57e4e64ea539858df133e20abf69979b77fd4c2556f7c185ac391fe3 | `StreamMintManager` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-CONSENT]` |
 
 Requirements (continued):
 
@@ -1780,6 +1896,13 @@ Requirements (continued):
 4. A signed ticket issued against an older hash must be rejected by the
    state-changing mint unless that older hash is the registered
    grace-window predecessor under `[MPA-GRACE]`.
+5. Phase pause state is never an input to `policyHash` (ADR 0011 decision
+   R6): pausing and unpausing are Operational transitions that stop and
+   restore serving without rotating policy identity, re-registering the
+   ledger policy, invalidating outstanding tickets or sale
+   authorizations, or requiring any consent ceremony. The emergency stop
+   switch is therefore always reachable — see `[MPA-CONSENT]` rule 7 for
+   the artist-consent carve-out.
 
 Policy hashes make long-lived operation easier because users, artists, operators,
 indexers, and auditors can tie a mint to the exact policy that was active at the
@@ -1895,14 +2018,34 @@ Signed or drop-authorized mints must bind initial recipients and beneficiaries
 through canonical hashes. `tokenDataArrayHash` is the batch-level hash;
 the per-token commitment `keccak256(tokenData[i])` keeps the singular
 `tokenDataHash` name — the two are distinct values and must never be
-conflated:
+conflated. Each batch hash carries its own versioned domain (ADR 0011
+decision R12): `initialRecipients` and `beneficiaries` are both
+`address[]`, so undomained encodings of the two arrays would alias, and
+domain separation must never rest on field-shape coincidence:
 
 ```solidity
-bytes32 initialRecipientsHash = keccak256(abi.encode(batch.initialRecipients));
-bytes32 beneficiariesHash = keccak256(abi.encode(batch.beneficiaries));
-bytes32 tokenDataArrayHash = keccak256(abi.encode(batch.tokenData));
-bytes32 mintCommitmentsHash = keccak256(abi.encode(batch.mintCommitments));
+// BATCH_RECIPIENTS_DOMAIN =
+//     keccak256("6529STREAM_MINT_BATCH_RECIPIENTS_V1")
+// BATCH_BENEFICIARIES_DOMAIN =
+//     keccak256("6529STREAM_MINT_BATCH_BENEFICIARIES_V1")
+// BATCH_TOKEN_DATA_DOMAIN =
+//     keccak256("6529STREAM_MINT_BATCH_TOKEN_DATA_V1")
+// BATCH_COMMITMENTS_DOMAIN =
+//     keccak256("6529STREAM_MINT_BATCH_COMMITMENTS_V1")
+bytes32 initialRecipientsHash =
+    keccak256(abi.encode(BATCH_RECIPIENTS_DOMAIN, batch.initialRecipients));
+bytes32 beneficiariesHash =
+    keccak256(abi.encode(BATCH_BENEFICIARIES_DOMAIN, batch.beneficiaries));
+bytes32 tokenDataArrayHash =
+    keccak256(abi.encode(BATCH_TOKEN_DATA_DOMAIN, batch.tokenData));
+bytes32 mintCommitmentsHash =
+    keccak256(abi.encode(BATCH_COMMITMENTS_DOMAIN, batch.mintCommitments));
 ```
+
+The four batch hashes are interior values consumed by the signed
+`MintTicket`, the sale authorization, and `requestCommitmentHash`; they
+are never standalone keys or event topics. Ticket signers and adapters
+compute them exactly as above.
 
 ### Authorizer Kinds
 
@@ -1984,9 +2127,16 @@ Requirements [MPA-TICKET] (pinned EIP-712 surface, ADR 0010 decision D3.5):
    version = "1", chainId, verifyingContract = ticket gate)`, exposed
    through ERC-5267. The genesis ticket-gate deployment is named
    `StreamMintTicketGate`; every inventory, mirror-table, and gate-row
-   reference to the signed mint-ticket gate contract uses that name. The
-   in-struct `chainId`, `manager`, and `ledger` fields are deliberate
-   defense-in-depth duplication of domain material.
+   reference to the signed mint-ticket gate contract uses that name.
+   Only the in-struct `chainId` is defense-in-depth duplication of
+   domain material. The `manager` and `ledger` fields are load-bearing
+   bindings, not redundancy: the domain binds the verifying gate, and
+   nothing else ties the ticket to one manager/ledger pairing. The
+   verifying gate and manager must require `ticket.manager` to equal the
+   executing manager and `ticket.ledger` to equal that manager's
+   configured ledger, reverting on mismatch (ADR 0011 decision R12);
+   both mismatches are golden negative tests in the mint-accounting
+   gate.
 3. The state-changing mint recomputes every hash from calldata and chain
    state; a ticket is invalid if any field — including `authorizerKind`
    — differs from the signed payload, if `deadline` has passed, or if
@@ -2257,8 +2407,14 @@ Consumption requirements:
    action allows that module for a named phase.
 4. `INCIDENT_REVOKED` modules must not be configured, and state-changing
    mints must revert while a referenced module holds that status.
-5. If `StreamModuleRecord.runtimeCodeHash` is nonzero, the manager must
-   verify the module codehash when configuring policy and while minting.
+5. Codehash verification follows the explicit pin modes of the Data
+   Model (ADR 0011 decision R12): under `PINNED`, the configured
+   codehash must be nonzero, must equal the registry record's
+   `runtimeCodeHash` at configuration, and the manager must verify the
+   live module codehash while minting; `UNPINNED` configuration is valid
+   only when the registry record itself carries no `runtimeCodeHash`
+   pin. A registry record with a nonzero `runtimeCodeHash` can therefore
+   never be consumed with verification silently disabled.
 6. `moduleManifestURI` is event/UI data; `moduleManifestHash`,
    `interfaceId`, `status`, and `runtimeCodeHash` are the durable security
    signals.
@@ -2335,7 +2491,21 @@ Requirements [MPA-CONSENT]:
 6. Artist standing over live phases follows the artist authority spec's
    pause/dispute surfaces; nothing in the mint path may bypass a
    registry-recorded `DISPUTED` or `REVOKED` state for consent-bound
-   configuration.
+   configuration. The serve-time consent cadence is owned by the artist
+   authority spec ([AA-CONSENT] rule 6); the manager mirrors it as a
+   mint-path requirement.
+7. Emergency pause is consent-exempt (ADR 0011 decision R6): because
+   pause state lives outside `policyHash` (`[MPA-POLICY-HASH]` rule 5),
+   `setPhasePaused` is not a policy re-registration and rule 1 does not
+   apply to it. Pause must execute for any attribution state — including
+   `DISPUTED` and `REVOKED` — and while the artist authority registry is
+   unavailable: the rule 2 fail-closed read applies only to consent-bound
+   configuration, never to pause. Unpause restores serving under the
+   same consented, unchanged `policyHash` through the dedicated
+   `ROLE_UNPAUSE` class (ADR 0004 [GOV-ROLES]) and is likewise
+   consent-exempt. Incident response on an artist-bound phase never
+   waits for an artist signature, and a dispute can never hold the stop
+   switch hostage.
 
 ## Mint Execution Order
 
@@ -2530,29 +2700,27 @@ event MintModuleRegistryUpdated(
 );
 ```
 
-Mint events:
+Pause transitions are Operational: `MintPhasePausedEvent` records the
+flag change, and its `policyHash` field carries the active — unchanged —
+policy hash (`[MPA-POLICY-HASH]` rule 5), so indexers can bind the pause
+to the policy it interrupted without inferring any identity rotation.
+
+Mint events. Optional event mirrors are banned (ADR 0011 decision R12)
+under the genesis-wide one-fact-one-event policy owned by the
+conformance-matrix event catalog schema
+([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+[LCM-EVENTS]) and applied here: counter
+consumption is emitted exactly once, by the ledger
+(`MintLedgerCounterConsumed` plus its correlated context event), and the
+round-1 optional `MintCounterConsumed` manager mirror is deleted —
+optional duplicate emissions make the golden event catalog conditional
+on implementation choices. Every event below is mandatory and carries a
+distinct fact: `MintBatchExecuted` is the manager's batch-execution
+fact, and `MintAuthorizationConsumed` is the manager's phase-context
+authorization fact, correlated with — never a substitute for — the
+ledger's scoped consumption event:
 
 ```solidity
-// Optional mirror if the implementation emits consumption from the manager in
-// addition to the ledger event.
-event MintCounterConsumed(
-    uint256 indexed collectionId,
-    bytes32 indexed phaseId,
-    bytes32 indexed counterId,
-    bytes32 subjectKey,
-    address payer,
-    address recipient,
-    address authorizer,
-    address executor,
-    uint256 tokenId,
-    uint64 increment,
-    uint64 newValue,
-    uint64 cap,
-    bytes32 contextHash,
-    bytes32 resolutionHash,
-    bytes32 policyHash
-);
-
 event MintBatchExecuted(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
@@ -2692,6 +2860,12 @@ function phasePolicyGrace(uint256 collectionId, bytes32 phaseId)
     returns (bytes32 previousPolicyHash, uint64 graceUntil);
 ```
 
+The manager's `isAuthorizationUsed` and `isNullifierUsed` reads answer
+for the manager's own ledger scope — they forward to the ledger's
+explicit-manager views with the manager's address — so they return the
+same answer to every caller. No caller-relative replay view exists
+anywhere in the mint subsystem (ADR 0011 decision R12).
+
 Preview reads:
 
 ```solidity
@@ -2797,7 +2971,11 @@ For long-lived operation, admin changes should distinguish tightening from
 loosening:
 
 1. Immediate changes may pause a phase, reduce caps, shorten end times, remove
-   executors, block modules, or freeze policy.
+   executors, block modules, or freeze policy. Pause and unpause never
+   rotate `policyHash` and never require artist consent
+   (`[MPA-POLICY-HASH]` rule 5, `[MPA-CONSENT]` rule 7); unpause executes
+   through the dedicated no-timelock `ROLE_UNPAUSE` class, disjoint from
+   pause guardians (ADR 0004 [GOV-ROLES]).
 2. Delayed changes should be required to increase caps, extend windows, add
    executors, loosen gates, change resolver identity, or point at a new ledger.
    Ledger replacement is always a delayed loosening because it can otherwise
@@ -2832,7 +3010,9 @@ Once frozen:
 6. Time windows cannot be extended.
 7. Gate cannot be loosened.
 8. Executors cannot be added.
-9. Pause may still be allowed if the product wants emergency stops.
+9. Pause remains available: it is an Operational flag outside policy
+   identity (`[MPA-POLICY-HASH]` rule 5), so freezing a phase never
+   disables its emergency stop.
 10. Cap mode and delta mode cannot be loosened.
 11. Module codehash pins cannot be removed.
 12. Policy cannot move to a different ledger.
@@ -3024,12 +3204,18 @@ Status: CON-013 and CON-014 implement the static v1 foundation:
 `configurePhase` is initial-only in the genesis manager. Reconfiguration that
 changes a phase's counter set must use a new phase ID or a separately accepted
 explicit reconfiguration path with reviewed migration semantics. Executor-set
-changes and pause changes are intentionally folded into `policyHash`; they
-refresh the registered ledger policy and invalidate in-flight requests bound
-to the prior `expectedPolicyHash`. Returning to the same executor set and
-pause/config state may restore the same deterministic hash, but replay
-protection still comes from the ledger-scoped `authorizationId`. Phase pause
-is therefore an operational stop switch, not durable revocation for an
+changes are intentionally folded into `policyHash`; they refresh the
+registered ledger policy and invalidate in-flight requests bound to the
+prior `expectedPolicyHash`. Returning to the same executor set and config
+state may restore the same deterministic hash, but replay protection
+still comes from the ledger-scoped `authorizationId`. Pause changes are
+deliberately not folded: under the deployment-required V2 phase-config
+preimage, pause is an Operational flag outside `policyHash`
+(`[MPA-POLICY-HASH]` rule 5, ADR 0011 decision R6), so pausing halts
+serving without churning policy or ledger registration. (Implementation
+evidence, non-normative: the CON-014 slice still folds pause into the
+as-built V1 hash; see the evidence note in Policy Fingerprints.) Phase
+pause is an operational stop switch, not durable revocation for an
 unused authorization; durable revocation is the signer-side
 `voidAuthorization` surface (`[MPA-LEDGER]` rule 3 and `[MPA-TICKET]`
 rule 5), which burns exactly the bad replay key without churning policy
@@ -3075,10 +3261,31 @@ Requirements [MPA-GAS-BUDGET]:
    purchase, and the Dutch standard purchase
    ([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
    gate 10).
-2. The report states an acceptable envelope per path; the deployment gate
-   fails if a measured path exceeds its envelope, and envelope changes are
-   reviewed release-artifact changes.
-3. The measurement harness is reproducible from the repository (foundry
+2. Normative not-to-exceed ceilings are pinned in this specification, not
+   in the report (ADR 0011 decision R12): an envelope stated after
+   measurement can never fail on absolute cost, so the following
+   reviewed named constants are the deployment gate, measured all-cold
+   on the rehearsal deployment:
+
+   ```text
+   MAX_COLLECTOR_GAS_SINGLE_STEP   = 500_000   single paid PRE_REVENUE_SINGLE_STEP mint
+   MAX_COLLECTOR_GAS_PREPARED      = 700_000   single paid PREPARED_MINT mint
+   MAX_COLLECTOR_GAS_FREE_ALLOWLIST = 350_000  free allowlisted mint
+   MAX_COLLECTOR_GAS_BATCH_MARGINAL = 150_000  marginal per-token cost in a batch of 10
+   MAX_TRANSFER_GAS                = 140_000   all-cold StreamCore ERC-721 transferFrom
+   ```
+
+   A measured path above its ceiling is a design failure that forces
+   path slimming before deployment — never an envelope edit. Raising a
+   ceiling is a spec amendment through the ADR process, not a
+   release-artifact change; the report may state tighter per-path
+   envelopes inside the ceilings for regression tracking.
+3. The report must include side-by-side measured comparisons against
+   named competitor primary-mint paths (at minimum one Manifold, one
+   Zora, and one Art Blocks mint) and the measured `ERC721Enumerable`
+   transfer overhead, so the platform's cost position is owned and
+   published, not discovered by competitors.
+4. The measurement harness is reproducible from the repository (foundry
    gas snapshots over the rehearsal deployment) and the artifact is
    checksum-covered like every other release manifest entry.
 
@@ -3096,6 +3303,8 @@ Core tests:
 5. Core stores token-to-collection identity and returns the collection-local
    serial through `tokenCollectionIdentity`.
 6. Core retains identity after burn.
+7. Core retains `tokenData` bytes after burn — burn clears ownership and
+   enumeration, never renderer input (ADR 0011 decision R12).
 
 Manager tests:
 
@@ -3127,7 +3336,9 @@ Manager tests:
 23. Mint rejects a signed ticket with a stale policy hash.
 24. Mint rejects a signed ticket when initial recipients, beneficiaries, payer,
     executor, authorizer, token data, mint commitments, quantity, context hash,
-    or policy hash differ.
+    or policy hash differ, and when `ticket.manager` is not the executing
+    manager or `ticket.ledger` is not its configured ledger
+    (load-bearing-binding negative tests, ADR 0011 decision R12).
 25. ERC-1271 ticket signatures are accepted when valid.
 26. Blocked modules cannot be used.
 27. Module codehash pins are enforced.
@@ -3158,6 +3369,16 @@ Manager tests:
 36. Consent-bound collections: phase configuration without valid artist
     authorization over the resulting `policyHash` reverts; consent
     evidence events reconstruct the sanction chain.
+37. Pause-then-resume on an `ARTIST_SIGNED_POLICY` collection executes
+    with no artist signature, with attribution `DISPUTED`, and with the
+    artist registry unavailable; `policyHash` is byte-identical before,
+    during, and after, and no ledger re-registration occurs (golden
+    test, ADR 0011 decision R6).
+38. Codehash pin modes: `PINNED` with a zero codehash, `PINNED` with a
+    codehash differing from the registry record, `UNPINNED` with a
+    nonzero codehash, and `UNPINNED` against a registry record carrying
+    a `runtimeCodeHash` pin all revert at configuration; a nonzero-pin
+    module never mints unverified (ADR 0011 decision R12).
 
 Resolver/nullifier extension tests:
 
@@ -3255,6 +3476,9 @@ Integration tests:
 25. Counter values and consumed nullifiers survive manager and ledger
     succession through the governed Merkle import path.
 26. Artist-bound collections cannot gain or change phases without
-    verifiable artist authorization over the exact policy hash.
+    verifiable artist authorization over the exact policy hash, while
+    emergency pause and unpause execute with no artist signature and no
+    policy-hash rotation.
 27. The release manifest carries the measured end-to-end collector mint
-    gas budget within its stated envelope.
+    gas budget, and every measured path is at or under its pinned
+    normative ceiling ([MPA-GAS-BUDGET] rule 2).

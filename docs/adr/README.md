@@ -24,6 +24,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0008-revenue-splits-and-royalty-resolver.md`](0008-revenue-splits-and-royalty-resolver.md) | Accepted | Protocol design request |
 | [`0009-protocol-v1-open-question-resolutions.md`](0009-protocol-v1-open-question-resolutions.md) | Accepted | Protocol v1 open-question resolutions |
 | [`0010-world-class-spec-pass.md`](0010-world-class-spec-pass.md) | Accepted | Nine-lens review resolutions |
+| [`0011-world-class-pass-round-2.md`](0011-world-class-pass-round-2.md) | Accepted | Nine-lens round-2 resolutions |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

@@ -383,6 +383,21 @@ Required pointer lifecycle:
     the collection is address-pinned and keeps reading the old target; the new
     target proves it supports the exact frozen route/snapshot; or an executed
     recovery manifest explicitly supersedes the frozen route.
+11. Pre-approved fallback targets must exist before the incident
+    (ADR 0011 decision R10). For every critical pointer family — at
+    minimum `ENTROPY_COORDINATOR` and `MINT_MANAGER`, with the
+    deployment manifest recording the full critical-family list —
+    genesis requires at least one registry-`ACTIVE`, pre-approved
+    compatible fallback target (for example a safe-mode coordinator or
+    replacement mint manager) deployed and named in the
+    conformance-matrix genesis deployment profile. Without a standing
+    fallback, the rule 6 emergency bypass and the permissionless
+    emergency move of [LTA-GOV] rule 7 decay into a multi-day
+    `DELAYED_LOOSENING` registration cycle at the worst moment — a Safe
+    cannot conjure a reviewed fallback inside a 4-hour emergency window.
+    A rehearsed permissionless emergency move to each fallback is
+    release evidence, and the conformance matrix gates the fallback
+    inventory.
 
 Frozen-route compatibility is reported through a small read:
 
@@ -514,17 +529,67 @@ A Governed Gas Parameter is:
    Export And Archival Operations);
 5. identified by
    `parameterId = keccak256("6529STREAM_GGP_" || <constant name>)`,
-   recorded in the owning subsystem's domain table.
+   recorded in the owning subsystem's domain table;
+6. paired with a named probe contract — a diagnostics satellite or
+   operator-tooling contract recorded per parameter in the release
+   manifest, never a production read path — that anyone can call to
+   execute the guarded path (or a faithful equivalent of it) at a
+   candidate value and record the outcome onchain. The probe record is
+   the verification locus for probe-gated lowering, emergency raising,
+   and the permissionless conditional raise (requirements 1–2 and 11;
+   ADR 0011 decision R5).
+
+The probe surface is canonical so that a Safe, an autonomous governor,
+and a 2075 archivist verify the same onchain evidence:
+
+```solidity
+event GasParameterProbed(
+    uint16 schemaVersion,
+    bytes32 indexed parameterId,
+    bytes32 indexed probeRunId,
+    bool passed,
+    uint256 probedValue,
+    bytes32 evidenceHash
+);
+
+function lastProbeRun(bytes32 parameterId, uint256 probedValue)
+    external
+    view
+    returns (bytes32 probeRunId, bool passed, uint64 probedAtBlock);
+```
+
+A probe run must execute the guarded operation itself, or a faithful
+equivalent measured on the production path, at `probedValue`;
+`evidenceHash` commits to the run's measurement artifact. Each
+parameter's release-manifest entry records its probe contract and the
+probe recency bound `probeMaxAgeBlocks` consumed by the execution
+rechecks below.
 
 Requirements:
 
-1. Raising a GGP is a low-risk service-restoring action: it uses the
-   short-delay governance class, and a raise-only emergency path is
-   permitted (ADR 0010 decision D1.2).
-2. Lowering a GGP must use the normal delay class, must carry a recorded
-   passing health-probe run at the proposed value, and must revert below
-   the immutable floor. Probe variants that execute at a candidate value
-   live in diagnostics satellites or operator tooling, never in production
+1. Raising a GGP is a service-restoring action with a bounded blast
+   radius (ADR 0011 decision R5). Every raise — staged, emergency, or
+   conditional — is bounded per action to at most 2x the parameter's
+   current value; the host enforces the bound, and larger moves take
+   multiple actions. Staged raises use the normal delay class. The
+   emergency raise path is raise-only and health-probe-gated: it
+   executes only while the parameter's named probe has recorded, within
+   `probeMaxAgeBlocks`, a failing run at the current value — proof that
+   the guarded path is actually degraded — and it may repeat, one
+   bounded step at a time, while fresh probe runs keep proving failure.
+   An emergency path that could raise a healthy parameter is
+   nonconformant; requirement 10 states why the raise direction needs
+   this guard.
+2. Lowering a GGP must use the normal delay class, must revert below the
+   immutable floor, and is probe-gated at the named locus: the lower's
+   execution recheck must verify, through the parameter's named probe
+   contract, a recorded passing run at exactly the proposed value no
+   older than `probeMaxAgeBlocks` (ADR 0011 decision R5). The probe
+   record is onchain evidence — a lower whose probe obligation is
+   satisfiable only by an offchain artifact is nonconformant, because an
+   autonomous governor could not verify it and a Safe could not prove
+   it. Probe variants that execute at a candidate value live in
+   diagnostics satellites or operator tooling, never in production
    read paths.
 3. GGP values are Operational-layer. They must be excluded from finality
    manifests, frozen-route identity, policy hashes, assignment hashes, and
@@ -565,8 +630,10 @@ Requirements:
    operational incident, never a permanent outage.
 8. The mint-path never-brick chain is explicit (ADR 0010 decision D1.5):
    entropy registration failure cannot permanently brick minting, because
-   `ENTROPY_REGISTRATION_GAS_LIMIT` is raisable without limit above its
-   floor ([EC-REGGAS] in
+   `ENTROPY_REGISTRATION_GAS_LIMIT` has no ceiling above its floor — any
+   needed value is reachable in bounded 2x-per-action steps, and the
+   emergency and conditional raise paths stay available while the probe
+   proves failure (requirements 1 and 11) — ([EC-REGGAS] in
    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md))
    and the `ENTROPY_COORDINATOR` pointer is replaceable under the Core
    Satellite Pointer Policy. The same two-step recovery chain — raise the
@@ -574,11 +641,58 @@ Requirements:
    read.
 9. GGP floor/raise/lower/probe behavior is conformance-gated: the matrix
    governance gates must include a floor-rejection test, a raise-path
-   test, a probe-gated lower test, and change-event assertions for every
-   deployed GGP.
+   test with a per-action raise-bound rejection, an emergency-raise
+   probe-gate test (a healthy probe record blocks; a failing record
+   admits), a probe-gated lower test, a permissionless conditional-raise
+   test executed with no governance signer (requirement 11), and
+   change-event assertions for every deployed GGP.
+10. Raise direction is not uniformly safe, and each parameter says so
+    (ADR 0011 decision R5). Every release-manifest GGP entry records the
+    parameter's failure-direction class: `FORWARDING_CAP` (bounds gas
+    forwarded to a fail-safe read; raising restores service),
+    `FAIL_CLOSED_PRECHECK` (consumed by an EIP-150 63/64 parent-gas
+    precheck on a fail-closed path, such as
+    `ENTROPY_REGISTRATION_GAS_LIMIT` and `MINT_GATE_GAS_LIMIT`; a raise
+    beyond what parent transactions can supply halts the guarded
+    operation at every call), or `MIN_GAS_GATE` (a minimum-gasleft
+    admission gate such as `FLUSH_GAS_FLOOR`; an excessive raise blocks
+    the gated operation). The anti-brick asymmetry — raising is
+    service-restoring — holds only for `FORWARDING_CAP` parameters. For
+    the other two classes the raise direction is itself a
+    denial-of-service lever, which is exactly why every raise is bounded
+    per action, staged raises take the normal delay class with staging
+    events and cancellation, and the emergency path cannot fire while
+    the probe reports the guarded path healthy (requirement 1). The
+    probe for a `FAIL_CLOSED_PRECHECK` or `MIN_GAS_GATE` parameter must
+    prove the guarded operation itself succeeds at the probed value — a
+    registration completes, a flush is admitted — never merely that a
+    read returns, and the staging artifact for any raise of such a
+    parameter must record the proposed value as a fraction of the
+    current block gas limit so reviewers see the halt threshold
+    approaching.
+11. Lost-governance survivability: permissionless conditional raises
+    (ADR 0011 decision R5). Each GGP host must register at deployment a
+    pre-approved conditional-raise action — a standing guardian action
+    in the sense of [LTA-GOV] rule 7 — executable by anyone, with no
+    live governance signer, when the parameter's named probe has
+    recorded a failing run at the current value within
+    `probeMaxAgeBlocks`. A conditional raise takes the same bounded
+    per-action step as every other raise, may repeat while fresh probe
+    runs keep proving failure, can never lower a value or touch any
+    other parameter or pointer, and emits the canonical change event
+    carrying the pre-registered action ID. Because probe runs are
+    themselves permissionless, a gas repricing that degrades
+    `tokenURI()`/`royaltyInfo()` for frozen collections after total
+    governance loss is recoverable by anyone: run the probe, execute the
+    conditional raise, and repeat until the probe passes. Read-only
+    museum mode (State Export And Archival Operations) lists this as a
+    surviving mechanism, and the museum-mode drills exercise it.
 
 GGP inventory. The model is instantiated by the parameters below; each
-home owns host, genesis value, floor sizing, and probe definition:
+home owns host, genesis value, floor sizing, and probe definition. For
+every row the release manifest records the probe contract,
+`probeMaxAgeBlocks`, failure-direction class, and conditional-raise
+registration (requirements 10–11):
 
 | Parameter | Host | Normative home |
 | --- | --- | --- |
@@ -599,6 +713,7 @@ home owns host, genesis value, floor sizing, and probe definition:
 | `ENTROPY_RESULT_PROBE_GAS_LIMIT` | entropy coordinator | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-INCIDENT-ROLE] |
 | `VRF_CALLBACK_GAS_LIMIT` | provider adapters | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) [EP-VRF-CONFIG] |
 | `ARTIST_ERC1271_VERIFY_GAS` | artist registry | [`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-SIGVER] |
+| `METADATA_ERC1271_VERIFY_GAS` | verifying metadata satellites (owner records, attestations, artist-attestation host) | [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-SIGVER-GGP] |
 | `FINALITY_COMPONENT_READ_GAS` | finality registry | this document (Artwork Finality Freeze) |
 
 A future guarded path that is not in this inventory must still be a GGP;
@@ -854,6 +969,11 @@ Access control:
    `ROLE_COLLECTION_FINALITY_ADMIN`.
 4. `executeFinalityRecovery` is permissionless after the scheduled delay if the
    recovery record is still `SCHEDULED` and all execution preconditions recheck.
+5. For artist-bound collections, a recovery with
+   `artworkBytesChanged = true` additionally requires the artist-side
+   approval or recorded-unavailability path of Finality Recovery rule 9;
+   the platform finality role alone is never sufficient to change which
+   bytes are served for a sanctioned work (ADR 0011 decision R7.3).
 
 ```solidity
 struct FinalityManifestRef {
@@ -1141,11 +1261,13 @@ The finality manifest must bind:
    finality scope
    ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
    [CMC-CONTENT-ROOT]).
-10. For script-based works: the reference render captures and the
+10. For script-based works: the reference render captures, the
     execution-environment manifest (renderer build, render context
     version, browser/engine build, viewport, color space, capture
-    toolchain) bound through the `REFERENCE_RENDER` component
-    (ADR 0010 decision D4.2).
+    toolchain), the archived execution-environment artifact references,
+    and the pinned re-render acceptance mode, bound through the
+    `REFERENCE_RENDER` component (ADR 0010 decision D4.2; ADR 0011
+    decision R3).
 11. The artist sanction record hash, or the platform-works declaration
     hash, and — for artist-bound collections — the `ARTIST_INTENT` record
     hash or its recorded artist-signed waiver
@@ -1228,29 +1350,74 @@ Finality requirements:
     [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
     (Preservation Receipts, [CMC-FIXITY-PROGRAM]); this requirement makes
     them a finality precondition, gated by the conformance matrix and
-    checked by finality preview tooling. Hash commitments without enforced
-    replicas verify in 2075 and recover nothing.
+    checked by finality preview tooling. At least one receipt per payload
+    must carry a cryptographically verifiable evidence class, and the
+    finality preview/ceremony must independently retrieve and hash-verify
+    every receipt named by the finality manifest, recorded as a fixity
+    record by a verifier distinct from the receipt writer ([LTA-ARCHIVE]
+    requirement 2; ADR 0011 decision R4). Hash commitments without
+    enforced replicas verify in 2075 and recover nothing.
 12. Script-based works (`ONCHAIN` and hybrid) require the
     `REFERENCE_RENDER` component before finality: hash-committed reference
-    output captures for a pinned token sample or all tokens, plus the
-    execution-environment manifest, so a future re-render is verifiable
-    against recorded ground truth (ADR 0010 decision D4.2;
+    output captures for a pinned token sample or all tokens, the
+    execution-environment manifest, the archived execution-environment
+    artifact, and a pinned re-render acceptance mode, so a future
+    re-render is both producible and verifiable against recorded ground
+    truth (ADR 0010 decision D4.2; ADR 0011 decision R3;
     [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
     [MRR-FINALITY];
     [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-    [CMC-FINALITY-INPUTS]). The preservation drill's acceptance criterion
-    is byte-hash comparison against these captures.
+    [CMC-FINALITY-INPUTS]).
+
+    The execution environment is an artifact, never only a citation: the
+    browser/engine build and capture toolchain named by the manifest
+    must be archived as a runnable container image or equivalent
+    environment archive, recorded as an `EXECUTION_ENVIRONMENT`
+    preservation object with fixity coverage and mirrored under the
+    dual-family archival rule [LTA-ARCHIVE] before finality. Version
+    strings without preserved binaries are how software-dependent art
+    becomes unrenderable — in 2060 a browser version string is a
+    citation, not an environment — and both the re-render verification
+    and any future emulation strategy contemplated by the
+    `ARTIST_INTENT` record depend on the preserved substrate. Naming an
+    environment without archiving the artifact is nonconformant.
+
+    Every `REFERENCE_RENDER` pins exactly one acceptance mode for its
+    scope, matching variable-media conservation practice:
+
+    - `BYTE_EXACT`: a re-render must reproduce the capture byte-hashes
+      exactly. Permitted only when the archived capture toolchain pins
+      deterministic software rasterization (GPU-independent, pinned
+      engine build) in the execution-environment manifest; raster
+      output of GPU-dependent browser rendering must not be promised
+      byte-stable across decades of hardware.
+    - `PERCEPTUAL_TOLERANCE`: comparison uses a named perceptual or
+      structural-difference metric with a pinned threshold recorded in
+      the `REFERENCE_RENDER` record.
+    - `CURATED_EQUIVALENCE`: acceptance is a conservator attestation
+      against the significant properties of the `ARTIST_INTENT` record,
+      recorded as an attestation.
+
+    A renderer that declares the `DYNAMIC` class (declared, per-version
+    frozen external reads;
+    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+    [MRR-DETERMINISM]) must not pin `BYTE_EXACT`. The acceptance mode,
+    metric, threshold, and environment-artifact references are fields of
+    the `REFERENCE_RENDER` record schema owned by [CMC-FINALITY-INPUTS];
+    preservation drills compare re-renders under the pinned mode
+    ([LTA-RECON] requirement 4).
 13. A renderer version may participate in finality only if it passed the
     renderer determinism static-analysis gate and its golden input/output
     vectors are pinned in the release manifest
     ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
     [MRR-DETERMINISM]; ADR 0010 decision D4.3).
 14. The canonical bytes of the finality manifest (and of every snapshot
-    manifest it binds) must be stored onchain — SSTORE2 blob or
-    event-embedded payload — at or before finality execution, with the
-    pointer evented (ADR 0010 decision D4.5). `manifest.uri` remains
-    display and mirroring data; the onchain bytes are the recoverable
-    truth.
+    manifest it binds) must be stored onchain in contract storage or an
+    SSTORE2 blob — a state-trie carrier, never only event data
+    ([LTA-CATALOGS] rule 6; ADR 0011 decision R1) — at or before
+    finality execution, with the pointer evented (ADR 0010 decision
+    D4.5). `manifest.uri` remains display and mirroring data; the
+    onchain bytes are the recoverable truth.
 15. Every executed finality (collection or scoped) must be followed by a
     state export that includes the new finality record and content root
     leaves (State Export And Archival Operations); the export-at-finality
@@ -1678,11 +1845,14 @@ components)` or equivalent tooling must expose the same comparisons before a
 state-changing finality transaction is sent, and operator runbooks must
 require a successful preview artifact hash before execution.
 `previewFinality` must also expose the computed sanction subject hash —
-the finality record preimage with `ARTIST_SANCTION` entries excluded from
-the component hash — so the artist signs exactly what will execute
+the domain-separated `SANCTION_SUBJECT_DOMAIN` preimage over the Core
+facts, the non-sanction component hash (`ARTIST_SANCTION` entries
+excluded), and the manifest reference, exactly as pinned at its home —
+so the artist signs exactly what will execute
 ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
-[AA-SANCTION] requirement 2); any drift between signing and finalization
-changes the subject hash and invalidates the sanction.
+[AA-SANCTION] requirement 2; ordered preimage inputs at [AA-DOMAINS]);
+any drift between signing and finalization changes the subject hash and
+invalidates the sanction.
 
 ### Finality Recovery
 
@@ -1781,7 +1951,10 @@ Rules:
    ordinary metadata admin.
 3. Recovery manifests name the failed component, old component address/codehash,
    new component address/codehash or snapshot route, old and new manifest
-   hashes, reason URI/hash, and whether artwork bytes changed.
+   hashes, reason URI/hash, whether artwork bytes changed, and — for
+   artist-bound collections when artwork bytes changed — the artist-side
+   approval reference or the recorded artist-unavailability finding of
+   rule 9.
 4. If artwork bytes change, the recovery is artwork-affecting and must be
    displayed as such forever.
 5. `verifyFinality` returns both original finality and current-route status so
@@ -1796,8 +1969,31 @@ Rules:
    expectedOldFinalityRecordHash, recoveryManifest.contentHash, recoveryRouteHash,
    executeAfter, artworkBytesChanged, reasonHash))`.
 8. `executeFinalityRecovery` rechecks status `SCHEDULED`, delay, old finality
-   record hash, and recovery manifest hash before marking the recovery
+   record hash, recovery manifest hash, and the rule 9 artist-side
+   precondition where it applies, before marking the recovery
    `EXECUTED`.
+9. Artwork-bytes-affecting recovery is artist-gated wherever an artist
+   is bound (ADR 0011 decision R7.3). For a collection or scope whose
+   finality carried the `ARTIST_SANCTION` component, executing a
+   recovery with `artworkBytesChanged = true` requires a verified
+   artist-class approval — artist, estate/successor, or steward
+   authority per
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-SANCTION] — carried as a signed `StreamArtistRecoveryApproval`
+   binding the exact old finality record hash and recovery manifest
+   content hash of this recovery record, and verified at execution
+   through the artist registry's `verifyRecoveryApproval` surface
+   ([AA-RECOVERY]; the typed payload and its record domain are owned
+   there).
+   Where no live artist authority exists, the substitute is a recorded
+   artist-unavailability finding plus arbiter approval under a long
+   delay: `executeAfter` at least the [GOV-WINDOWS] terminal-freeze veto
+   floor, with the terminal-freeze veto guardian able to veto. The
+   approval reference or unavailability finding is bound into the
+   recovery manifest and displayed with the recovery forever. The
+   sanction ceremony made "the artist approved these exact bytes" the
+   product; no platform-only path may decide what replaces a sanctioned
+   work's serving route.
 
 ## Governance Staging [LTA-GOV]
 
@@ -1989,8 +2185,9 @@ gated by the 30-day `SUCCESSOR_DECLARATION` delay. The delay gates only the
 onchain canonical successor pointer/declaration execution.
 
 The successor manifest must include old chain ID, old Core, new chain ID, new
-Core, ownership snapshot hash, complete event-history snapshot hash,
-collection-snapshot root, activation statement, and explicit old-Core status:
+Core, ownership snapshot hash, complete event-history snapshot hash (the
+[LTA-EVENT-HISTORY] serialization), collection-snapshot root, activation
+statement, and explicit old-Core status:
 `ACTIVE`, `DEPRECATED_QUERYABLE`, or `DEPRECATED_ZERO_ROYALTIES`. Indexers must
 not infer deprecation from the existence of a successor event alone; they should
 read `coreLifecycleStatus()` or the successor manifest status that the read
@@ -2046,6 +2243,8 @@ core address
 block number/hash
 token ownership root
 token-to-collection root, including burned tokens with retained mappings
+token data root                renderer-input tokenData byte-hashes;
+                               burned tokens included
 collection serial root
 collection facts root
 entropy seed/status root
@@ -2057,7 +2256,7 @@ collection record-chain root   metadata, attestation, preservation,
 artwork manifest root          script/dependency/media manifests, token
                                content roots, snapshots, reference renders
 lock root                      one-way metadata lock states
-event history snapshot hash
+event history snapshot hash    [LTA-EVENT-HISTORY] serialization
 export manifest URI/hash
 ```
 
@@ -2185,6 +2384,13 @@ bytes32 collectionSerialLeaf = keccak256(abi.encode(
     uint256(collectionId),
     uint256(collectionSerial),
     uint256(tokenId),
+    bool(burned)
+));
+
+bytes32 tokenDataLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_TOKEN_DATA_LEAF_V1,
+    uint256(tokenId),
+    bytes32(tokenDataHash),
     bool(burned)
 ));
 
@@ -2324,6 +2530,23 @@ bytes32 lockLeaf = keccak256(abi.encode(
 ));
 ```
 
+Token-data leaves cover every token with authoritative retained
+identity — minted, prepared-incomplete, and burned alike: burn clears
+ownership, never renderer input, and Core retains the tokenData bytes
+for burned tokens
+([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+[MPA-CORE-ABI];
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-BURN]). `tokenDataHash` is the Core-stored commitment
+`keccak256(tokenData)` (`keccak256("")` when the stored bytes are
+empty). The bytes themselves are a state-recovered surface: no event
+carries them, so event replay alone can never reconstruct the
+artwork-input layer — exports attest it from state, and the
+reconstruction client and the protocol v1 reconstruction profile
+([`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+[PV1-RECON]) recover it from state reads or prior exports, never from
+log replay (ADR 0011 decision R12).
+
 Record-chain leaves cover every accumulator lane in the deployment:
 collection metadata records, attestations, preservation records, fixity
 cycles, owner records, and artist-registry records. `laneHost` is the
@@ -2343,7 +2566,8 @@ one-way lock state of the metadata lock model.
 
 Leaves are sorted by `(tokenId)` for the token-to-collection root and by
 `(collectionId, collectionSerial, tokenId)` for the collection-serial root.
-Entropy leaves are sorted by `(tokenId)`. Finality leaves are sorted by
+Token-data leaves and entropy leaves are sorted by `(tokenId)`.
+Finality leaves are sorted by
 `(scopeType, collectionId, tokenId, scopeId, finalityRecordHash)`.
 Record-chain leaves are sorted by `(laneHost, scopeKey, recordType)`;
 artwork manifest leaves by `(collectionId, manifestType, subjectId,
@@ -2352,26 +2576,117 @@ Each additional root defines a deterministic sort key in the export manifest;
 the field lists above are minimum v1 leaves and may be extended only by a new
 leaf version.
 
-Dual-family archival rule [LTA-ARCHIVE] (ADR 0010 decision D4.6):
+Event-history snapshot serialization [LTA-EVENT-HISTORY] (ADR 0011
+decision R12):
 
-Every render-critical or preservation-critical offchain payload must be
-mirrored across at least two independent storage families — for example
-IPFS plus Arweave, Filecoin, an institutional archive, or another
-content-addressed medium — with an onchain archive receipt and a passing
-fixity record per family. For payloads referenced by any finality scope, those receipts and
-fixity records must exist before finality executes (finality
-requirement 11); for other payloads they must exist before the payload is
-declared preservation-covered. The manifest records storage locations,
-fixity hashes, last check time, and the agent that performed the check.
-Ongoing verification is the mandated fixity program — annual full sweep,
-quarterly sampling, repair-from-mirror, supersession lineage — whose
-normative home is
-[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-[CMC-FIXITY-PROGRAM]; this document consumes its cycle records in
-monitoring and the Operations gate. HTTPS-only render-critical payloads
-are allowed only when the collection intentionally accepts service-backed
-mutability, and such collections can never satisfy the finality
-preconditions above.
+Every export and successor manifest carries an event-history snapshot
+hash, and post-expiry recovery leans on mirrored event-history
+snapshots, so the serialization is pinned like every other export
+surface: two honest archives of the same logs must produce the same
+hash, or the one artifact that carries event payload content after
+history expiry cannot be cross-verified.
+
+1. Record set. The snapshot covers every log emitted within its block
+   range by the addresses in the export manifest's address set: Core,
+   every genesis-profile contract, every module ever registered in a
+   genesis-profile registry, and every factory-deployed split wallet.
+   The address-set derivation rule is recorded in the export manifest
+   so an independent indexer reproduces the same set.
+2. Record encoding. Each log is one RFC 8785 (JCS) canonical JSON
+   object with exactly these members and no others: `address`,
+   `blockHash`, `blockNumber`, `data`, `logIndex`, `topics`,
+   `transactionHash`, `transactionIndex`. Byte-valued members are
+   `0x`-prefixed lowercase hex of even length; quantity-valued members
+   (`blockNumber`, `logIndex`, `transactionIndex`) are `0x`-prefixed
+   lowercase hex quantities with no leading zeros, per Ethereum
+   JSON-RPC conventions.
+3. Ordering and framing. Records are serialized one per line — each
+   record's JCS bytes followed by one LF (0x0A) — in ascending
+   `(blockNumber, transactionIndex, logIndex)` order, chunked into
+   contiguous, non-overlapping, ascending block ranges. Each chunk's
+   `(startBlock, endBlock, recordCount, chunkHash)` — `chunkHash` is
+   `keccak256` of the chunk's JSONL bytes — is listed in the export
+   manifest.
+4. Hash construction:
+
+   ```solidity
+   struct EventHistoryChunk {
+       uint64 startBlock;
+       uint64 endBlock;
+       uint64 recordCount;
+       bytes32 chunkHash;
+   }
+
+   bytes32 eventHistorySnapshotHash = keccak256(abi.encode(
+       STREAM_EXPORT_EVENT_HISTORY_V1,
+       uint256(chainId),
+       address(core),
+       uint64(startBlock),
+       uint64(endBlock),
+       uint64(recordCount),
+       chunks
+   ));
+   ```
+
+   `chunks` is the full `EventHistoryChunk[]` in ascending `startBlock`
+   order. `STREAM_EXPORT_EVENT_HISTORY_V1` is pinned in [LTA-DOMAINS]
+   and mirrored in the protocol v1 domain-constants table with the same
+   CI recomputation test as every other export domain.
+5. Records are taken at the export's named confirmation depth; a
+   snapshot whose range is later reorged is superseded through
+   `StateExportSuperseded`, never corrected in place. An export or
+   successor manifest whose event-history snapshot hash is computed
+   over any other serialization is nonconformant.
+
+Dual-family archival rule [LTA-ARCHIVE] (ADR 0010 decision D4.6;
+ADR 0011 decision R4):
+
+1. Every render-critical or preservation-critical offchain payload must
+   be mirrored across at least two independent storage families — for
+   example IPFS plus Arweave, Filecoin, an institutional archive, or
+   another content-addressed medium — with an onchain archive receipt
+   and a passing fixity record per family. For payloads referenced by
+   any finality scope, those receipts and fixity records must exist
+   before finality executes (finality requirement 11); for other
+   payloads they must exist before the payload is declared
+   preservation-covered.
+2. Receipts are evidence-classed, and operator assertion alone is
+   nonconformant (ADR 0011 decision R4). Every archive receipt carries
+   its evidence class, and at least one of the two receipts per payload
+   must be cryptographically verifiable: a content-addressed inclusion
+   proof binding the storage identifier to the committed bytes (an
+   IPFS-family receipt digest must equal the content CID of the
+   committed bytes; an Arweave-class receipt must carry the transaction
+   identifier and data-root inclusion path), or an attested possession
+   proof signed by the storing agent and audited by the fixity program.
+   Family-appropriate identifier fields are schema-validated. Receipt
+   and fixity record shapes, the evidence-class field, and the
+   validation rules are owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   (Preservation Receipts, [CMC-FIXITY-PROGRAM]). Without this rule the
+   strongest finality precondition in the architecture would reduce to
+   trusting the operator the architecture elsewhere refuses to trust.
+3. At least one of the two families for every render-critical payload
+   must carry pay-once endowed permanence economics — an Arweave-class
+   storage endowment or an institutional perpetual commitment;
+   renewal-funded families can never fill both slots (ADR 0011 decision
+   R4). Unfunded renewal is the most common real-world NFT permanence
+   failure, and two renewal-funded families decay together when their
+   payer disappears — fifty years exceeds most corporate lifespans.
+   Each family's economics class — `ENDOWED` or `RENEWAL_FUNDED` — is
+   recorded in the funding manifest ([LTA-FUNDING]) and gated at
+   deployment.
+4. The manifest records storage locations, fixity hashes, last check
+   time, and the agent that performed the check.
+5. Ongoing verification is the mandated fixity program — annual full
+   sweep, quarterly sampling, repair-from-mirror, supersession lineage —
+   whose normative home is
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-FIXITY-PROGRAM]; this document consumes its cycle records in
+   monitoring and the Operations gate.
+6. HTTPS-only render-critical payloads are allowed only when the
+   collection intentionally accepts service-backed mutability, and such
+   collections can never satisfy the finality preconditions above.
 
 Every Ethereum hard fork, L2 migration, or material gas-schedule change must
 trigger a protocol-parameter review — the repricing review checklist that
@@ -2396,9 +2711,11 @@ Reconstruction client requirements [LTA-RECON] (ADR 0010 decision D4.8):
    the production frontend. From genesis it must replay the event catalog
    and reconstruct token identity and collection serials (from
    `TokenCollectionRegistered` and the mint/burn events), split profiles,
-   escrow balances, entropy status/seeds, collection metadata snapshots,
-   record-chain lanes, and finality records from archived chain data and
-   content-addressed manifests, reproducing the state-export roots.
+   escrow balances, entropy status/seeds, renderer-input tokenData (a
+   state-recovered surface, never log-replayed), collection metadata
+   snapshots, record-chain lanes, and finality records from archived
+   chain data and content-addressed manifests, reproducing the
+   state-export roots.
 2. The client is conformance-gated, not aspirational: the matrix
    Operations gate must verify that the client exists at genesis, that its
    source-archive hash equals `streamSystemManifest()`'s
@@ -2411,11 +2728,21 @@ Reconstruction client requirements [LTA-RECON] (ADR 0010 decision D4.8):
    outputs must be mirrored with the deployment manifest under the
    dual-family archival rule [LTA-ARCHIVE].
 4. Operations must schedule periodic preservation drills — cadence
-   recorded in the hash-committed operations runbook — that independently
-   rebuild the export roots, re-render at least one finalized
-   onchain/hybrid collection from archived payloads, compare the re-render
-   byte-hashes against the `REFERENCE_RENDER` captures (finality
-   requirement 12), and publish the drill report hash.
+   recorded in the hash-committed operations runbook — that
+   independently rebuild the export roots, re-render at least one
+   finalized onchain/hybrid collection from archived payloads inside an
+   environment reconstructed from its archived execution-environment
+   artifact, and compare the re-renders against the `REFERENCE_RENDER`
+   captures under each work's pinned acceptance mode (finality
+   requirement 12; ADR 0011 decision R3). Drill reports classify every
+   compared work as `MATCH`, `TOLERABLE_VARIANCE` (within the pinned
+   mode's metric and threshold; unreachable under `BYTE_EXACT`), or
+   `DIVERGENT` — never a bare byte pass/fail, so a future conservator
+   can distinguish acceptable rasterization variance from actual loss
+   instead of learning to ignore drill failures. Each drill must also
+   prove that at least one archived execution-environment artifact
+   still boots and reproduces a reference capture, and must publish the
+   drill report hash.
 5. Those drills must also prove that the reconstruction client still
    builds from archived source, pinned dependencies, and archived build
    instructions on contemporary tooling or in a preserved build container.
@@ -2430,16 +2757,26 @@ runbook note. Funding requirements [LTA-FUNDING] (ADR 0010 decision D4.8):
    release manifest: funding source and parties, coverage horizon or term,
    covered payload and service classes (keepers, entropy request payments,
    monitoring, storage pinning/mirroring, domain/ENS renewal, fixity
-   cycles, preservation drills), and exhaustion alarm thresholds with
-   alert routing. The conformance-matrix Operations gate fails if the
-   manifest is missing or stale.
+   cycles, preservation drills), the economics class of every storage
+   family in use — `ENDOWED` (pay-once permanence) or `RENEWAL_FUNDED` —
+   and exhaustion alarm thresholds with alert routing. The
+   conformance-matrix Operations gate fails if the manifest is missing
+   or stale, if any storage family lacks its economics class, or if any
+   render-critical payload has no `ENDOWED` family ([LTA-ARCHIVE]
+   requirement 3; ADR 0011 decision R4).
 2. The manifest must document what degrades, in what order, if funding
    disappears — honest degradation is part of the permanence claim.
 3. A protocol-owned archival endowment — for example a revenue-class
    split entry labeled as a preservation fund feeding pinning contracts —
-   is an explicitly allowed extension under a separately accepted module
-   spec; genesis requires the funded arrangement statement, not the
-   onchain endowment.
+   should be configured at genesis under a separately accepted module
+   spec, and the funding manifest must state the endowment decision
+   explicitly either way: the configured endowment reference, or the
+   recorded rationale for launching on funded arrangements alone. The
+   operator-endowment decision is independent of the storage-side rule:
+   render-critical payloads require an `ENDOWED` storage family
+   regardless ([LTA-ARCHIVE] requirement 3), so no deployment's entire
+   offchain payload layer can depend on recurring payments by a mortal
+   operating entity (ADR 0011 decision R4).
 
 The specs, ADRs, event catalogs, release manifests, and reconstruction-client
 source archives are themselves preservation objects. Each deployment and material
@@ -2451,11 +2788,12 @@ original operating entity ceases to exist.
 Event-log and state availability are operational assumptions, not protocol
 guarantees. If EIP-4444-style history expiry, log pruning, state expiry, or RPC
 retention changes make ordinary `eth_getLogs`/archive reads incomplete, Stream
-relies on content-addressed state exports, mirrored event-history snapshots,
-archival reconstruction clients, and independent archive nodes named in the
-operations runbook — with the onchain record-chain accumulators keeping
-lane completeness provable from state alone, so a degraded archive can be
-audited rather than trusted ([LTA-EXPORT] requirement 4).
+relies on content-addressed state exports, mirrored event-history snapshots
+([LTA-EVENT-HISTORY]), archival reconstruction clients, and independent
+archive nodes named in the operations runbook — with the onchain
+record-chain accumulators keeping lane completeness provable from state
+alone, so a degraded archive can be audited rather than trusted
+([LTA-EXPORT] requirement 4).
 
 For literally unbounded open series, live per-token mappings are permanent
 state growth. Protocol v1 keeps explicit `tokenCollectionIdentity` storage
@@ -2497,20 +2835,30 @@ hashes plus a clear statement of old-Core status.
 Zero-admin and lost-quorum drills must cover the complete satellite set, not
 only Core. The runbook should periodically prove degraded-mode reads and
 operations for metadata router failure, finality verification, pending entropy,
-split-wallet release, escrow flush, state export publication, and event-catalog
-reconstruction. If a degraded-mode item depends on immutable gas assumptions
-that can fail under a future gas schedule, the drill report must say so rather
-than treating the guarantee as absolute.
+split-wallet release, escrow flush, state export publication, event-catalog
+reconstruction, and the permissionless probe-and-conditional-raise path for
+Governed Gas Parameters ([LTA-GGP] requirement 11). If a degraded-mode
+item depends on immutable gas assumptions that can fail under a future
+gas schedule, the drill report must say so rather than treating the
+guarantee as absolute.
 
 Read-only museum mode is the explicit posture when all governance is lost.
 Ownership, transfer, approvals, enumerable reads, retained token identity,
 frozen/finalized metadata reads, royalty disclosure as configured, split-wallet
 release, already-deployed-wallet escrow flush, finality verification ranges,
-state-export discovery, and archived reconstruction should continue where their
-immutable dependencies still work. New mint programs, pointer moves, economic
-changes, metadata mutations, provider recovery, registry replacement, and
-economics/artwork-affecting recovery halt unless fully precommitted before
-quorum loss.
+state-export discovery, permissionless GGP probe runs with their
+pre-approved conditional raises ([LTA-GGP] requirement 11) — so a later
+gas repricing cannot permanently zero `tokenURI()`/`royaltyInfo()` for
+frozen collections — the permissionless independent preservation and
+fixity lanes, which keep accepting institution-signed records with no
+operator or governance
+([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-INDEPENDENT-ATTESTOR]; ADR 0011 decision R11), and archived
+reconstruction should continue where their immutable dependencies still
+work. New mint programs, pointer
+moves, economic changes, metadata mutations, provider recovery, registry
+replacement, and economics/artwork-affecting recovery halt unless fully
+precommitted before quorum loss.
 
 ## Hash And Manifest Discipline [LTA-HASH]
 
@@ -2583,8 +2931,8 @@ Rosetta stone to social mirroring. Onchain catalog requirements
    conformant genesis posture.
 2. The genesis catalog payloads — event catalog, numeric ID catalog,
    schema catalog, canonicalization catalog, and the fallback-JSON schema
-   — must be stored as onchain bytes (SSTORE2 blobs or event-embedded
-   payloads) referenced from the registry and from
+   — must be stored as onchain bytes (contract storage or SSTORE2 blobs —
+   state-trie carriers; rule 6) referenced from the registry and from
    `streamSystemManifest()`; hash-plus-URI alone is nonconformant for
    these catalogs. Catalog updates replace the referenced bytes through
    staged governance and never reinterpret old IDs.
@@ -2596,6 +2944,22 @@ Rosetta stone to social mirroring. Onchain catalog requirements
    [LTA-ARCHIVE]; onchain bytes are mandated for the compact
    interpretation-critical catalogs above, not for bulk archives.
 5. New IDs are additions; old IDs are never reinterpreted.
+6. Onchain bytes means state-trie bytes (ADR 0011 decision R1).
+   Everywhere this spec set requires payload bytes to live onchain — the
+   catalogs above, the canonical bytes of finality and snapshot
+   manifests (finality requirement 14), meaning-bearing record-family
+   payloads, and onchain signature bundles
+   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-RECONSTRUCTION], [CMC-ATTESTATIONS]) — the conformant carriers
+   are contract storage and SSTORE2: bytes recoverable from an immutable
+   onchain read of state. Event-embedded payloads never satisfy an
+   onchain-bytes requirement, because log availability is an operational
+   assumption that EIP-4444-style history expiry can remove
+   ([LTA-EXPORT]): a post-expiry node holding only state could prove
+   such bytes missing — the record-chain accumulators still verify — yet
+   recover nothing. Events remain discovery pointers to the stored
+   bytes, and the with-operators-gone recovery guarantee may cite only
+   state-trie carriers.
 
 Manifest canonicalization:
 
@@ -2678,6 +3042,33 @@ ABI hash, deployed bytecode, constructor arguments, linked libraries, runtime
 code hash, creation code hash, compiler binary or container/Nix lock URI/hash,
 Sourcify/Etherscan or successor verification status, verifier output hash, and
 mirrored source archive URI/hash.
+
+## Deterministic Deployment [LTA-DEPLOY]
+
+Split wallets already receive the exemplary treatment: CREATE2 through
+the factory with init-code and runtime-code hashes bound into the
+profile identity
+([`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+Split Profile Model).
+The genesis contract set states its deployment-determinism posture
+explicitly rather than leaving the property to ceremony-time
+improvisation (ADR 0011 decision R10):
+
+1. Every contract in the conformance-matrix genesis deployment profile
+   must be deployed through the deterministic deployment factory named
+   in the deployment manifest, using CREATE2 with a pinned salt. The
+   factory address, per-contract salts, and init-code hashes are
+   recorded in the release/deployment manifest, so every genesis
+   address is reproducible from the manifest alone and the deployment
+   ceremony is auditable byte-for-byte before it runs.
+2. Later module registrations and successor-line deployments should use
+   the same factory-and-pinned-salt pattern; a deployment that
+   intentionally does not must record that decision and its rationale
+   in the module's deployment manifest.
+3. Determinism is auditability, not identity: every identity preimage
+   in the spec set binds concrete deployed addresses and code hashes,
+   so no consumer may treat address predictability as a substitute for
+   reading the pinned identity surfaces.
 
 ## Maximum On-Chain Options
 
@@ -2892,11 +3283,20 @@ merely unimplemented (ADR 0010 decision D9.2). Preclusions
    transfer- or time-conditioned ownership semantics cannot exist on this
    Core line.
 3. Transfer-restricting royalty enforcement is permanently impossible on
-   this Core line; disclosure-only ERC-2981 is the permanent posture.
+   this Core line; disclosure-only ERC-2981 is the permanent posture. A
+   declared successor line that adds enforcement must preserve, not
+   reinterpret, this line's recorded royalty terms: old-Core
+   `royaltyInfo()` disclosure, the resolver assignment history, and the
+   recorded artist acknowledgments of the disclosure-only term
+   ([`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+   [RSR-MARKETPLACE-ROYALTY]) remain the authoritative economic record
+   for works minted here (ADR 0011 decision R12).
 4. Adopting any of these requires a declared successor Core line.
    Exhibition, attendance, and membership artifacts should instead be
    modeled as separate contracts or as attestation records against the
-   existing tokens.
+   existing tokens — the documented attestation pattern is
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-MEMENTO] (ADR 0011 decision R9).
 
 These preclusions are mirrored in the protocol v1 exclusions list so
 absence is provably intentional.
@@ -3083,6 +3483,8 @@ them without restating.
 | `STREAM_EXPORT_RECORD_CHAIN_LEAF_V1` | `6529STREAM_EXPORT_RECORD_CHAIN_LEAF_V1` | 0xc0ec93115d32e7633c13d7414f7f77c5a20edf8a4c512bfbb1a0b8dbeaa6ace0 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; lane values per [CMC-RECORD-CHAIN] |
 | `STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1` | `6529STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1` | 0x75a6b72b058ed053bc42e32ee8ed32283b8f973f455854e870e1c1a3727ea984 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_LOCK_LEAF_V1` | `6529STREAM_EXPORT_LOCK_LEAF_V1` | 0x2439a59cd6c4a767eefacdb9d4397317f88ac30c996c1c5dae92821f7159536b | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_TOKEN_DATA_LEAF_V1` | `6529STREAM_EXPORT_TOKEN_DATA_LEAF_V1` | 0x0c586b41736dd3049878e98663002a07e79c06ab6ab5f49c09f03c0e44fa4610 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; retention per [MPA-CORE-ABI]/[CMC-BURN] |
+| `STREAM_EXPORT_EVENT_HISTORY_V1` | `6529STREAM_EXPORT_EVENT_HISTORY_V1` | 0xde2f44be2a232fbd4b086150b751c9483f78c1de4779a09d9d2acc84d4ac76ae | `STATE_EXPORT_V1` profile | `1` | domain; chainId; core; startBlock; endBlock; recordCount; `EventHistoryChunk[]` ([LTA-EVENT-HISTORY]) |
 | `GGP_FINALITY_COMPONENT_READ_GAS_ID` | `6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS` | 0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221 | finality registry | `1` | `keccak256` of the string preimage; no `abi.encode` inputs ([LTA-GGP]) |
 
 Component-type and manifest-type vocabularies (`keccak256` of the ASCII
@@ -3135,8 +3537,10 @@ Metadata gates:
    been recorded.
 9. finality is blocked in every mode without a recorded token content root,
    the required artist sanction or platform-works declaration, the artist
-   intent record or waiver, dual-family archive receipts with passing
-   fixity, and — for script-based works — the reference render component
+   intent record or waiver, dual-family archive receipts (at least one of
+   a verifiable evidence class) with passing fixity, and — for
+   script-based works — the reference render component with its archived
+   execution environment and pinned acceptance mode
    ([LTA-FINALITY] requirements 6, 9–12).
 10. renderer determinism static-analysis gate and golden output vectors
     ([MRR-DETERMINISM]).
@@ -3159,13 +3563,19 @@ Governance gates:
 4. event and view reconstruction tests.
 5. genesis role assignment proves no single EOA can execute material actions;
 6. deployment manifest includes event catalog hash, ABI checksums, module
-   manifest hashes, bytecode sizes, and governance delay configuration;
-7. GGP floor-rejection, raise-path, probe-gated-lower, and change-event
-   tests for every deployed parameter ([LTA-GGP] requirement 9);
+   manifest hashes, bytecode sizes, governance delay configuration, and
+   the deterministic-deployment factory, salts, and init-code hashes
+   ([LTA-DEPLOY]);
+7. GGP floor-rejection, raise-bound, emergency and conditional
+   probe-gated raise, probe-gated-lower, and change-event tests for
+   every deployed parameter ([LTA-GGP] requirement 9);
 8. terminal-freeze veto path exercised, and window widths verified against
    the recorded worst-case holder latencies ([LTA-GOV] rules 4 and 6);
 9. batch-action atomicity tests for every cross-contract "same governed
-   execution" obligation ([LTA-GOV] rule 5).
+   execution" obligation ([LTA-GOV] rule 5);
+10. registry-`ACTIVE` pre-approved fallback targets verified for every
+    critical pointer family, with a rehearsed permissionless emergency
+    move as release evidence ([LTA-POINTERS] rule 11).
 
 Operations gates:
 
@@ -3207,14 +3617,45 @@ Operations gates:
    entire protocol life on one randomness vendor.
 8. Governed Gas Parameters reintroduce a governance dependency into read
    paths that could have been fully static, accepted for survivability:
-   immutable floors, staged delays, and probes bound the risk, and an
-   immutable cap that strands a frozen collection after a repricing is the
-   worse permanence failure (ADR 0010 decision D1).
+   immutable floors, per-action raise bounds, staged delays, and probes
+   bound the risk, and an immutable cap that strands a frozen collection
+   after a repricing is the worse permanence failure (ADR 0010 decision
+   D1; ADR 0011 decision R5).
 9. Transfer openness permanently precludes soulbound tokens, rental
    standards, and every transfer-conditioned mechanic on this Core line
    ([LTA-STANDARDS]); the open-transfer guarantee to collectors and
    marketplaces is judged worth the loss, and the exclusion is recorded so
    absence is provably intentional.
+10. The protocol layer is deliberately outside legal-compliance scope,
+    and that is stated rather than implied (ADR 0011 decision R12).
+    Immutable split profiles cannot be edited to remove a recipient for
+    any legal reason — including a recipient later appearing on a
+    sanctions list, a near-certain event somewhere in a 50+ year
+    recipient population — and permissionless release means any caller
+    can push owed funds to such a recipient; the no-sweep rule is
+    absolute. Onchain catalogs, artwork bytes, and append-only records
+    honor no takedown demand, and permanent records can embed personal
+    data the protocol cannot redact — the schema-level privacy, sealed
+    payloads, and redaction design of [LTA-HASH] is the only
+    mitigation. Rights records are informational documentation, never
+    legal instruments. Compliance therefore lives at the operational
+    edge, never in a protocol mutation path: operators should screen
+    split recipients and record subjects at profile and record creation
+    time, apply jurisdiction-specific policy only in operator-run
+    frontends and services, and must disclose this posture in writing
+    to artists, recipients, and institutions in the same instrument as
+    the estate-loss disclosure
+    ([`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+    [RSR-ESTATE]).
+11. Curated onboarding is a disclosed liveness assumption, not an
+    accident (ADR 0011 decision R12): every collection and artist
+    binding on this Core line originates from governed platform roles,
+    so with governance gone no new collection or binding can ever be
+    created here, while every existing work keeps every permanence
+    guarantee. The stated posture and its consequences are owned by the
+    protocol v1 exclusions
+    ([`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+    [PV1-EXCL] item 9); this list records the acceptance.
 
 ## Recommended Genesis Implementation Order
 

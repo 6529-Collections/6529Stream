@@ -39,7 +39,7 @@ year contract life through the frozen extension mechanisms only:
 | --- | --- | --- |
 | Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, and Core-native ERC-2981 | None. Core gains no new semantics after deployment; no mutable policy or rendering logic in Core. Changing Core surfaces means a successor Core line |
 | Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, approved-standard ERC-20 primary settlement through outside-Core adapters, passive royalty receipt, and native/approved-asset revenue escrow | New settlement or recovery adapters are new Replaceable modules with their own accepted specs; non-standard ERC-20 behavior stays excluded until a spec accepts it |
-| Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Resolver implementations rotate behind the frozen resolver interface; marketplace registry overrides remain integration extras outside the protocol |
+| Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Resolver implementations rotate behind the frozen resolver interface; marketplace registry overrides remain outside protocol semantics, but launch royalty-resolution coverage is deployment-gated release evidence ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) [LCM-MARKETPLACE]; ADR 0011 decision R12) |
 | Minting | `StreamMintManager` policy plus `StreamMintLedger` accounting with many counters, aggregate-only consumption, signed tickets, and module-checked gates/resolvers | New counter resolvers and gates register through the frozen module registry and gate/resolver interfaces |
 | Metadata | `StreamMetadataRouter`, `StreamRendererV1`, `StreamCollectionMetadata`, and genesis preservation/attestation/view satellites for identity, rights, media, scripts, dependencies, custom fields, locks, schemas, C2PA, IIIF, PREMIS-style records, preservation, and museum-grade catalogue material | Additional legal, rights, VC/DID, EAS, or institution-specific modules extend the same Permanent manifest and record model |
 | Entropy | `StreamEntropyCoordinator`, Chainlink VRF primary provider, one reviewed fallback provider (ARRNG preferred, Pyth as the reviewed alternate), and a mock provider for local validation; VRF-only deployment is not conformant (ADR 0009 decision 21) | New providers are adapters behind the same Permanent provider interface, added through registry approval and provider epochs |
@@ -166,7 +166,7 @@ paths:
 | `royaltyInfo(uint256,uint256)` | Core | Marketplaces and indexers |
 | `supportsInterface(bytes4)` with ERC-721, ERC-4906, ERC-2981, and any accepted enumerable interface | Core | Marketplaces and indexers |
 | `mintFromManager(...)` and the prepared-mint pair, per the manager-only mint ABI home ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CORE-ABI]) | Core | `StreamMintManager` only |
-| `TokenCollectionRegistered(tokenId, collectionId, serial)` emission at identity write (ADR 0010 decision D10.1) | Core | Indexers and archive reconstruction |
+| `TokenCollectionRegistered` emission at identity write, carrying `uint16 schemaVersion` (ADR 0010 decision D10.1; ADR 0011 decision R12); the production signature is pinned once at the event home ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CORE-ABI]) | Core | Indexers and archive reconstruction |
 | token identity reads: collection ID, collection serial, authoritative identity read, burn audit as needed | Core | Resolver, router, indexers |
 | metadata router pointer read and update | Core | Admin and `tokenURI()` path |
 | minimal `tokenURI()` delegation to router | Core | ERC-721 metadata callers |
@@ -399,8 +399,9 @@ Sourcing). Every table must include:
 This table covers profile IDs, template IDs, materialized profile metadata,
 sale context if retained, counter keys, counter value keys, policy hashes,
 authorization IDs, nullifiers, entropy request keys, entropy seeds, metadata
-record hashes, freeze manifests, schema commitments, public interface
-selectors, and module capability selectors.
+record hashes, freeze manifests, schema commitments, governance action and
+batch-call domains, Governed Gas Parameter identifiers, public interface
+selectors, and module capability selectors (ADR 0011 decision R12).
 CI must include a checked test that recomputes every listed `keccak256`
 preimage and fails on drift between Solidity constants, docs, and release
 artifacts.
@@ -411,8 +412,15 @@ The CON-014 manager slice records these static phase policy domains in this
 checked spec table, which CI verifies row-for-row against
 `StreamMintManager.sol`. The normative home of the mint-manager hash
 family is [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
-([MPA-POLICY-HASH], [MPA-OPERATION]); this table mirrors the as-built
-constants and must match that home. `operationId` values are derived from
+([MPA-POLICY-HASH], [MPA-OPERATION]); this table pins the as-built CON-014
+constants — the home's labeled non-normative implementation evidence,
+including the V1 phase-config row that still hashes `paused` — and must
+match that evidence exactly. The deployment-required V2 preimages, which
+move pause out of policy identity and add the codehash pin modes
+(ADR 0011 decisions R6 and R12), are defined at the home and mirrored in
+the extension mirror rows below; the as-built rows here re-pin to the V2
+values together with the manager constants and this checker at
+implementation time. `operationId` values are derived from
 `OPERATION_DOMAIN` through `operationRoot` and then bind
 `operationRoot`, `operationNonce`, `tokenIndex`, `tokenDataHash`, and `salt`.
 Three input labels below are historical aliases pinned by the CI
@@ -463,20 +471,41 @@ Rules:
 2. Every hash value is computed from the adjacent string preimage and
    pinned; CI recomputes each one and fails on drift. Rows carrying
    `keccak256` values were verified at
-   authoring time and are re-verified by the same CI test.
+   authoring time and are re-verified by the same CI test. Every row
+   names its exact preimage and carries its pinned value; an unpinned
+   hash value fails Review-Entry condition 4 of
+   [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+   ([LCM-REVIEW-ENTRY]).
 3. Adding a hash domain anywhere in the spec set without a mirror row
-   here is a conformance defect; the release-artifact generator builds
-   the deployed domain-constants manifest from these mirrors plus the
-   checked manager table above.
+   here is a conformance defect. Completeness is closed-world across
+   every domain family — including the ADR 0004 governance action and
+   batch-call domains and every Governed Gas Parameter identifier in
+   the [LTA-GGP] inventory (ADR 0011 decision R12) — and the
+   release-artifact generator builds the deployed domain-constants
+   manifest from these mirrors plus the checked manager table above.
 
 ### Mint Manager And Ledger Extension Mirror Rows
 
 Home: [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
-([MPA-POLICY-HASH], [MPA-MERKLE], [MPA-TICKET], [MPA-CONTINUITY]).
+([MPA-POLICY-HASH], [MPA-OPERATION], Recipient Binding, [MPA-MERKLE],
+[MPA-TICKET], [MPA-CONTINUITY]). The `*_V2` rows are the
+deployment-required preimages of [MPA-POLICY-HASH] (pause-free
+phase-config identity and explicit codehash pin modes; ADR 0011 decisions
+R6 and R12); the corresponding `*_V1` rows in the checked manager table
+above remain as-built CON-014 evidence only.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
-| `COUNTER_BINDING_DOMAIN` | `6529STREAM_MINT_COUNTER_BINDING_V1` | 0xa65eb27407554a2e0a17dd2a689b804493f9d1cb88054b68066f10134ceb300b | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` |
+| `PHASE_CONFIG_DOMAIN_V2` | `6529STREAM_MINT_MANAGER_PHASE_CONFIG_V2` | 0xeed4fdd645ef6b511e1f03d00fb1a56f4978ecb2af721e40599609aab4c988b3 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (pause-free; ADR 0011 decision R6) |
+| `GATE_CONFIG_DOMAIN_V2` | `6529STREAM_MINT_MANAGER_GATE_CONFIG_V2` | 0xf4e6498f6418d2366655c59c7d35ae06469289fe2aed030e292f700ec8f3bcb7 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (adds `gateCodehashPinMode`; ADR 0011 decision R12) |
+| `COUNTER_BINDING_DOMAIN_V2` | `6529STREAM_MINT_COUNTER_BINDING_V2` | 0xd7ec90fda31887c4e19d4b086ce826d3696cead8f764c2ff30b7e270a7984aa4 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (adds `resolverCodehashPinMode`; ADR 0011 decision R12) |
+| `COUNTER_SET_DOMAIN` | `6529STREAM_MINT_MANAGER_COUNTER_SET_V1` | 0x9f547260725c60c0f995ca79086156721bb77e52911472b28d1da7fd2dcc1c39 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (`orderedCounterConfigHash`; ADR 0011 decision R12) |
+| `REQUEST_COMMITMENT_DOMAIN` | `6529STREAM_PREPARED_MINT_REQUEST_COMMITMENT_V1` | 0x789a9a34af13467a6c8515b149f7ee0c2af1291710bba4b4d2cc2e47b58dba92 | `StreamMintManager` | `1` | interior composite; mint spec `[MPA-OPERATION]` (ADR 0011 decision R12) |
+| `BATCH_RECIPIENTS_DOMAIN` | `6529STREAM_MINT_BATCH_RECIPIENTS_V1` | 0x4324becaa6aa4425a98ab5655b06dc69742271052ab6945737af6b60d6165d37 | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
+| `BATCH_BENEFICIARIES_DOMAIN` | `6529STREAM_MINT_BATCH_BENEFICIARIES_V1` | 0x0a6973855e884044cad2078ec0474c97f36787e5da302fce966608e212c3a0eb | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
+| `BATCH_TOKEN_DATA_DOMAIN` | `6529STREAM_MINT_BATCH_TOKEN_DATA_V1` | 0x1fe692f6c80a4afdd93c4053f730e1d47a294a2e89853b4abb4decd686e48d36 | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
+| `BATCH_COMMITMENTS_DOMAIN` | `6529STREAM_MINT_BATCH_COMMITMENTS_V1` | 0x80ee07d8d78cb77fa33d888adf252a80cc966ea113512b8000b714df1c4394d2 | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
+| `COUNTER_BINDING_DOMAIN` | `6529STREAM_MINT_COUNTER_BINDING_V1` | 0xa65eb27407554a2e0a17dd2a689b804493f9d1cb88054b68066f10134ceb300b | `StreamMintManager` | `1` | superseded by `COUNTER_BINDING_DOMAIN_V2` for deployment; retained as-built evidence; mint spec `[MPA-POLICY-HASH]` |
 | `ALLOWLIST_LEAF_DOMAIN` | `6529STREAM_MINT_ALLOWLIST_LEAF_V1` | 0x451c28449774ca808fa1b5c7df7e81572f7f4e8b59b1be20222058f75c496159 | `StreamMintManager` | `1` | double-hashed leaf; mint spec `[MPA-MERKLE]` |
 | `TICKET_AUTHORIZATION_DOMAIN` | `6529STREAM_MINT_TICKET_AUTHORIZATION_V1` | 0x255ffcce76be6ac89667675f1a7d2fb20ee56b101da7daddc9d13697a1217d97 | `StreamMintTicketGate` | `1` | mint spec `[MPA-TICKET]` |
 | `MINT_TICKET_TYPEHASH` | `MintTicket(uint256 chainId,address manager,address ledger,uint256 collectionId,bytes32 phaseId,address executor,address payer,address authorizer,uint8 authorizerKind,bytes32 initialRecipientsHash,bytes32 beneficiariesHash,bytes32 tokenDataArrayHash,bytes32 mintCommitmentsHash,uint256 quantity,bytes32 contextHash,bytes32 policyHash,bytes32 nonce,uint64 deadline)` | 0x8bebeeccaa47d5cdada1485a88dfd7933c17ca5dde68b2d549dcf1bd38e0bfa8 | `StreamMintTicketGate` | `1` | EIP-712 struct fields as listed; mint spec `[MPA-TICKET]` |
@@ -501,8 +530,11 @@ Home: [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
 | `STREAM_CONTENT_LEAF_V1` | `6529STREAM_CONTENT_LEAF_V1` | 0xfb3574a94e8672231a1ca6961a82ed077548322500d152474645664cb781b3e3 | content-selection adapters | `1` | double-hashed leaf; sales spec `[SSA-CONTENT]` |
 | `STREAM_CONTENT_CONTEXT_V1` | `6529STREAM_CONTENT_CONTEXT_V1` | 0xc8ed10e43ef466bc9a26cbf502bbe6560cc53fc75b5f48650849304775459c68 | content-selection adapters | `1` | sales spec `[SSA-CONTENT]` |
 | `STREAM_SEALED_BID_V1` | `6529STREAM_SEALED_BID_V1` | 0x3f5199758c189f6205a065046fe5778bc3e349f7c373fa5c9f419b0718e3e3c6 | sealed-bid extension | `1` | sales spec `[SSA-SEALED]` |
-| `SALE_AUTHORIZATION_TYPEHASH` | `SaleAuthorization(uint256 chainId,address saleAdapter,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 saleId,uint8 saleKind,uint8 revenueClass,bytes32 expectedPrimaryPolicyHash,uint8 primaryPolicyMode,bytes32 initialRecipientsHash,bytes32 beneficiariesHash,address payer,address executor,address asset,uint256 unitPrice,uint256 quantity,bytes32 contentSelectionHash,bytes32 policyHash,bytes32 nonce,uint64 deadline)` | 0x4d5722102337c13f9eba7b02dbdf7f716ab0ff4ef71d1c35a4bc2864461f64bc | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-AUTH]` |
-| `SALE_OFFER_TYPEHASH` | `SaleOffer(uint256 chainId,address saleAdapter,address core,uint256 collectionId,uint256 tokenId,bytes32 contentSelectionHash,address buyer,address asset,uint256 price,bytes32 nonce,uint64 deadline)` | 0x76d0c5e2d6bb4b74d8cbfcb3cb7228fa182deee45e6053f070eced61b486b8eb | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-OFFER]` |
+| `STREAM_SALE_PURCHASE_V1` | `6529STREAM_SALE_PURCHASE_V1` | 0x47c000df4b149f6f8f2ecb12a836c6fc38b7e5379a3a433ad3d20a83eda821b1 | sale adapters | `1` | sales spec `[SSA-IDENTITY]` (ADR 0011 decision R9) |
+| `STREAM_HOLDER_ENTITLEMENT_V1` | `6529STREAM_HOLDER_ENTITLEMENT_V1` | 0x19dbbfcae28a5b8eac83eed3c9053dd7ab7af833cc61cfa94fe866d6a9e256f4 | hold-to-claim extension | `1` | sales spec `[SSA-HOLDER]` (ADR 0011 decision R9) |
+| `STREAM_CONTENT_COMMIT_V1` | `6529STREAM_CONTENT_COMMIT_V1` | 0xd88e9c12d31ba2cd7a471bef88ad88216822842af7e38c0aef854486de420941 | content-selection adapters | `1` | sales spec `[SSA-CONTENT]` (ADR 0011 decision R9) |
+| `SALE_AUTHORIZATION_TYPEHASH` | `SaleAuthorization(uint256 chainId,address saleAdapter,address mintManager,uint256 collectionId,bytes32 phaseId,bytes32 saleId,uint8 saleKind,bytes32 revenueClass,bytes32 expectedPrimaryPolicyHash,uint8 primaryPolicyMode,bytes32 initialRecipientsHash,bytes32 beneficiariesHash,address payer,address executor,address asset,uint256 unitPrice,uint256 quantity,bytes32 contentSelectionHash,bytes32 policyHash,bytes32 nonce,uint64 deadline,uint64 finalizeBy)` | 0xffd150d67de6a2619775f6cb884eadc8802d3d37fbd584d32ad0ff83ceddb098 | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-AUTH]` (`bytes32 revenueClass` and trailing `uint64 finalizeBy`; ADR 0011 decisions R6 and R10; superseded predecessor hashes are recorded only in the home's supersession note) |
+| `SALE_OFFER_TYPEHASH` | `SaleOffer(uint256 chainId,address saleAdapter,address core,uint256 collectionId,uint256 tokenId,bytes32 contentSelectionHash,address buyer,address asset,uint256 price,bytes32 nonce,uint64 deadline,uint64 finalizeBy)` | 0x5befc984e6ca9dc13fb8238b12d2d8c7f77bcfbe46489470a66bbdda2b482d1b | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-OFFER]` (trailing `uint64 finalizeBy`; ADR 0011 decision R6) |
 
 ### Revenue Mirror Rows
 
@@ -526,13 +558,17 @@ ERC-5267.
 | `ASSIGNMENT_POINTER_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1` | 0xc96172afc4e32013f5189d2ac0fb5758ee908ce97051d18f5043370a090a0b97 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics) |
 | `ROYALTY_ASSIGNMENT_POINTER_CONTEXT_DOMAIN` | `6529STREAM_ROYALTY_ASSIGNMENT_POINTER_CONTEXT_V1` | 0xe02b9a1db06245707414f3be94c4005d9332ede9187a9fe5baacf54853ab4ba0 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics; binds `royaltyBps` per [RSR-ROYALTY-HASH]) |
 | `ASSIGNMENT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_V1` | 0x3d35bd72bf32163018d9b660465fde3bf2bc092b1fb09047dd0621fc6b8d7164 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics) |
-| `PRIMARY_POLICY_DOMAIN` | `STREAM_PRIMARY_POLICY_V1` | 0x2941bd2c0a4be5ec8f3bd231f745531af7bb0afddad77d202946040b45268480 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics) |
-| `ROYALTY_POLICY_DOMAIN` | `STREAM_ROYALTY_POLICY_V1` | 0x55e698bf6cd62ba4aab67a2aaad4a6a24be5d65e0582e13502ae30927c32e5a6 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-ROYALTY-HASH]` |
-| `ESCROW_RECOVERY_DOMAIN` | `STREAM_ESCROW_RECOVERY_V1` | 0xdd098be4056d58b3ee63a02422ba5f2ad2fb95296e759be20a1af466ab9aced9 | revenue escrow | `1` | revenue spec `[RSR-DOMAINS]` (escrow recovery) |
+| `PRIMARY_POLICY_DOMAIN` | `6529STREAM_PRIMARY_POLICY_V1` | 0x53c5c8e8dcd97f4f6a66557a6ede68c0798afd999c1cce5807f27d151fb50f12 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics; namespaced rename per `[RSR-DOMAINS]` rule 4, ADR 0011 decision R12) |
+| `ROYALTY_POLICY_DOMAIN` | `6529STREAM_ROYALTY_POLICY_V1` | 0x672cda40f3f95b129db3b9262cfb581cbe26ea0e95cb09b958ca58ebf62ba54a | `StreamRevenueResolver` | `1` | revenue spec `[RSR-ROYALTY-HASH]` (namespaced rename per `[RSR-DOMAINS]` rule 4, ADR 0011 decision R12) |
+| `ESCROW_RECOVERY_DOMAIN` | `6529STREAM_ESCROW_RECOVERY_V1` | 0xd2477116ef00eff9b80dc97ae00c04faec607b7609301cced9041de52f32243c | revenue escrow | `1` | revenue spec `[RSR-DOMAINS]` (escrow recovery; namespaced rename per `[RSR-DOMAINS]` rule 4, ADR 0011 decision R12) |
 | `RELEASE_AUTHORIZATION_TYPEHASH` | `StreamReleaseAuthorization(address asset,address account,address recipient,bytes32 nonce,uint64 deadline)` | 0xfc0465fe58ded163aac5c6c38a2171d353d941f9fbc8a1af61e5c309f87f680c | `StreamSplitWallet` | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-RELEASE-AUTH]` |
 | `PAYMENT_INTENT_TYPEHASH` | `StreamPaymentIntent(address payer,address asset,uint256 maxAmount,bytes32 saleRef,bytes32 expectedPrimaryPolicyHash,bytes32 nonce,uint64 deadline)` | 0x72c99e6f6f9e2422510a5dd5c2dc2f9ffd83c776670a8de4ffab990e45f825cd | ERC-20 settlement verifier | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-PAYMENT-INTENT]` |
-| `GGP_ERC_1271_GAS_LIMIT` | `6529STREAM_GGP_ERC_1271_GAS_LIMIT` | 0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157 | split factory parameter store | `1` | GGP key; revenue spec `[RSR-GGP]` |
-| `GGP_ASSET_POLICY_GAS_LIMIT` | `6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT` | 0xbfc1f824948b8dc9573791fa40eeb403e7322af41d0967f90518dbbb531bf648 | split factory parameter store | `1` | GGP key; revenue spec `[RSR-GGP]` |
+
+The revenue-hosted Governed Gas Parameter identifiers
+(`ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and their siblings) are
+mirrored in the consolidated
+[GGP identifier table](#governed-gas-parameter-identifier-mirror-rows)
+below (ADR 0011 decision R12).
 
 ### Artist Authority Mirror Rows
 
@@ -557,6 +593,20 @@ Home: [`docs/stream-artist-authority.md`](stream-artist-authority.md)
 | `SUCCESSION_RECORD_DOMAIN` | `6529STREAM_ARTIST_SUCCESSION_RECORD_V1` | 0xe72b08eca38f3231b67e0fa8daba2f1d5daf1953d4b91f8c8e698d14f0ed2b0a | `StreamArtistRegistry` | `1` | artist spec `[AA-ESTATE]` |
 | `DIRECTIVE_RECORD_DOMAIN` | `6529STREAM_ARTIST_ESTATE_DIRECTIVE_RECORD_V1` | 0x993e7562ac3c0f8eddb70e4c49c42ef750a52133056061d419fdbe9ee7236f50 | `StreamArtistRegistry` | `1` | artist spec `[AA-ESTATE]` |
 | `RECORD_CHAIN_DOMAIN` | `6529STREAM_ARTIST_RECORD_CHAIN_V1` | 0x2eac9cfc5ca84fbeed56ef1741255e2ec7e45f48bc5c5ceda94397aa23d2f23e | `StreamArtistRegistry` | `1` | artist spec `[AA-RECORDS]` |
+| `CAPABILITY_POLICY_SET_DOMAIN` | `6529STREAM_ARTIST_CAPABILITY_POLICY_SET_V1` | 0x87c9af42ac310f72fd69d92f1c290288dcf159f63ed2a1fc75c7e66cc55704d0 | `StreamArtistRegistry` | `1` | artist spec `[AA-COLLAB]` (ADR 0011 decision R7.8) |
+| `ACCEPTANCE_RECORD_DOMAIN` | `6529STREAM_ARTIST_ACCEPTANCE_RECORD_V1` | 0x4b6ab2e018b05a2ca441cf6b0bc3e12a4674b70fd785051a0536faf074f995b4 | `StreamArtistRegistry` | `1` | artist spec `[AA-BINDING]`, `[AA-RECORDS]` |
+| `GUARDIAN_SET_RECORD_DOMAIN` | `6529STREAM_ARTIST_GUARDIAN_SET_RECORD_V1` | 0xfb979fce9edd361cf23ba8baee900f7054451db7b563ba0ab11a5ef3621cd297 | `StreamArtistRegistry` | `1` | artist spec `[AA-GUARD]` (ADR 0011 decision R7.1) |
+| `ROTATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_ROTATION_RECORD_V1` | 0x8d7c32ae357c27253fd4480fe9d411cefc64a5634952ed8c8ebe7dcf63257ea5 | `StreamArtistRegistry` | `1` | artist spec `[AA-ROTATE]` (ADR 0011 decision R7.1) |
+| `IDENTITY_CONTEST_RECORD_DOMAIN` | `6529STREAM_ARTIST_IDENTITY_CONTEST_RECORD_V1` | 0x26a4221cd1625ab88b1ac279e1708a73efa176e486242b26832cdc94fe25e6bb | `StreamArtistRegistry` | `1` | artist spec `[AA-GUARD]` (ADR 0011 decision R7.1) |
+| `IDENTITY_RECOVERY_RECORD_DOMAIN` | `6529STREAM_ARTIST_IDENTITY_RECOVERY_RECORD_V1` | 0x459749364fd07c3a8f1998b82d893d33ef0942c30d94666b42dac1e37ba5feff | `StreamArtistRegistry` | `1` | artist spec `[AA-GUARD]` (ADR 0011 decision R7.1) |
+| `IDENTITY_RECOVERY_SUPERSESSION_DOMAIN` | `6529STREAM_ARTIST_IDENTITY_RECOVERY_SUPERSESSION_V1` | 0x0c8573762967a1af597f2a7afc4b655a87b3e22d2b11fbab6cf13c6f7b1396ae | `StreamArtistRegistry` | `1` | artist spec `[AA-GUARD]` (ADR 0011 decision R7.1) |
+| `CONTENT_CONSENT_RECORD_DOMAIN` | `6529STREAM_ARTIST_CONTENT_CONSENT_RECORD_V1` | 0x85ea98da8f1f57787fd3dc784129c3f4f4d4ac889735761822ba32cec9de0bee | `StreamArtistRegistry` | `1` | artist spec `[AA-CONTENT]` (ADR 0011 decision R7.2) |
+| `CONTENT_FREEZE_RECORD_DOMAIN` | `6529STREAM_ARTIST_CONTENT_FREEZE_RECORD_V1` | 0xdd3e1d6b06c6a49f0da1f66064526a5535238b6a1c258233a419aed42a968354 | `StreamArtistRegistry` | `1` | artist spec `[AA-CONTENT]` (ADR 0011 decision R7.2) |
+| `RECOVERY_APPROVAL_RECORD_DOMAIN` | `6529STREAM_ARTIST_RECOVERY_APPROVAL_RECORD_V1` | 0xe60e6ec1d140fa0166261169322ac5c58d77797094a2b68866f812d1172e89b9 | `StreamArtistRegistry` | `1` | artist spec `[AA-RECOVERY]` (ADR 0011 decision R7.3) |
+| `UNAVAILABILITY_FINDING_RECORD_DOMAIN` | `6529STREAM_ARTIST_UNAVAILABILITY_FINDING_RECORD_V1` | 0xc087b73d3ef4933341423d2630b88eca87257e38716a129b316ebc148a7fa1f5 | `StreamArtistRegistry` | `1` | artist spec `[AA-RECOVERY]` (ADR 0011 decision R7.3) |
+| `ESTATE_ACTIVATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_ESTATE_ACTIVATION_RECORD_V1` | 0x2bd396eef0a5daaf54fe3c6b7a3888c3d7f7a237c3c4eb69f2848677ee96302f | `StreamArtistRegistry` | `1` | artist spec `[AA-ESTATE]` (ADR 0011 decision R7.4) |
+| `PLATFORM_WORKS_CLAIM_RECORD_DOMAIN` | `6529STREAM_PLATFORM_WORKS_CLAIM_RECORD_V1` | 0x4b566ba07bf420b345ba4618b1dd0721da12c22766a8024791d4d651a170b0e6 | `StreamArtistRegistry` | `1` | artist spec `[AA-PLATFORM]` (ADR 0011 decision R7.5) |
+| `AUTH_REVOCATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_AUTH_REVOCATION_RECORD_V1` | 0x52beeaf4afc420319e9e3d55d092b732ea0ad2a3407f22b60918c0acb7c7d1e5 | `StreamArtistRegistry` | `1` | artist spec `[AA-REVOKE]` |
 | `STREAM_ARTIST_ACCEPTANCE_TYPEHASH` | `StreamArtistAcceptance(address core,uint256 collectionId,uint64 bindingGeneration,bytes32 bindingHash,bytes32 identityRecordHash,uint256 nonce,uint64 deadline)` | 0x863408883ac6994b06f1a735545fd486c6a1a53866fb8851488d56d1b54f92af | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-BINDING]` |
 | `STREAM_COLLABORATOR_ACCEPTANCE_TYPEHASH` | `StreamCollaboratorAcceptance(address core,uint256 collectionId,uint64 bindingGeneration,bytes32 bindingHash,address collaborator,bytes32 role,bytes32 shareLabelId,uint256 nonce,uint64 deadline)` | 0x636ddaeeea1f3879203e4707eba02a65484041c3869c8a04560af9a57886343b | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-COLLAB]` |
 | `STREAM_ARTIST_SANCTION_TYPEHASH` | `StreamArtistSanction(address core,uint8 scopeType,uint256 collectionId,uint256 tokenId,bytes32 scopeId,bytes32 sanctionSubjectHash,bytes32 statementHash,uint256 nonce,uint64 deadline)` | 0x0651c04c186a25456f0dc9ca0a4a29a5537f2aeb0fe7e69cb2d3d202b41549b3 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-SANCTION]` |
@@ -571,17 +621,27 @@ Home: [`docs/stream-artist-authority.md`](stream-artist-authority.md)
 | `STREAM_ARTIST_ESTATE_DIRECTIVE_TYPEHASH` | `StreamArtistEstateDirective(bytes32 artistId,uint32 grantedCapabilities,uint32 forbiddenCapabilities,bytes32 directivePayloadHash,uint256 nonce,uint64 signedAt)` | 0xa1f146b360069294c6453e91242bb36bb0245545d57b3c89e1cc73c25e953d31 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-ESTATE]` |
 | `STREAM_ARTIST_ATTRIBUTION_DISPUTE_TYPEHASH` | `StreamArtistAttributionDispute(address core,uint256 collectionId,uint64 bindingGeneration,uint8 disputeAction,bytes32 evidenceHash,bytes32 reasonHash,uint256 nonce,uint64 deadline)` | 0x8b535108c442947650eb1dec541e1e10f715f240a1554e488f2d4a51afb31541 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-DISPUTE]` |
 | `STREAM_ARTIST_AUTHORIZATION_REVOCATION_TYPEHASH` | `StreamArtistAuthorizationRevocation(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce,uint256 nonce,uint64 deadline)` | 0xd1d93f1d81c2c2b5353543093ebfca89c460de55b540dfed4a019c7ac448f214 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-REVOKE]` |
+| `STREAM_ARTIST_GUARDIAN_SET_TYPEHASH` | `StreamArtistGuardianSet(bytes32 artistId,address[] guardians,uint32 approvalThreshold,uint256 nonce,uint64 signedAt)` | 0xc1d4df790f8ec0e3a2f9171e160c06485194d9257a8f13d97c206eedfeffe7b3 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-GUARD]` (ADR 0011 decision R7.1) |
+| `STREAM_ARTIST_CONTENT_CONSENT_TYPEHASH` | `StreamArtistContentConsent(address core,address metadataContract,uint256 collectionId,bytes32 familyId,bytes32 newStateHash,uint256 nonce,uint64 deadline)` | 0x7908964dc70554ffd5c82353690255d1a8c338be77ffc0f8fb925a27d890587d | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-CONTENT]` (ADR 0011 decision R7.2) |
+| `STREAM_ARTIST_CONTENT_FREEZE_TYPEHASH` | `StreamArtistContentFreeze(address core,address metadataContract,uint256 collectionId,bytes32[] lockClasses,bytes32 expectedStateHash,uint256 nonce,uint64 deadline)` | 0xfcb15d96b29996a5852bf06058ae82a7e8acaf7d7601b13fe881ada5d30fc63b | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-CONTENT]` (ADR 0011 decision R7.2) |
+| `STREAM_ARTIST_RECOVERY_APPROVAL_TYPEHASH` | `StreamArtistRecoveryApproval(address core,address finalityRegistry,uint256 collectionId,bytes32 finalityRecordHash,bytes32 recoveryManifestHash,uint256 nonce,uint64 deadline)` | 0x242bffdf15416a6743c57bd362683aa2933edcd42a4ef176f4e983a745eee511 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-RECOVERY]` (ADR 0011 decision R7.3) |
+| `STREAM_ARTIST_ESTATE_ACTIVATION_TYPEHASH` | `StreamArtistEstateActivation(bytes32 artistId,address successor,bytes32 evidenceHash,uint256 nonce,uint64 deadline)` | 0x35ad5d0278eb067119334d7d4fddd596cad723598851900a95e6ad9a94e51a8a | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-ESTATE]` (ADR 0011 decision R7.4) |
 | `ARTIST_SANCTION` finality component type | `ARTIST_SANCTION` | 0x1e14b418e60392f62e7baf2e6edfcfb6dfeab92fb4428eff216b492ed5cef047 | finality registry | `1` | component type constant; artist spec `[AA-SANCTION]` |
 | `PLATFORM_WORKS_DECLARATION` finality component type | `PLATFORM_WORKS_DECLARATION` | 0x9b732a2be945a9747de080e93cd0a83076acad44dca7585847960ffebdb0d29d | finality registry | `1` | component type constant; artist spec `[AA-PLATFORM]` |
 | `STREAM_ARTIST_REGISTRY` module type | `STREAM_ARTIST_REGISTRY` | 0x2a9dd22d7225a4cc60f5a64aa47d28addaea744116b324a22149faadac0b090a | `StreamArtistRegistry` | `1` | module type constant; artist spec `[AA-MODULE]` |
 | `artist` beneficiary label | `artist` | 0xf8c87671fe259c56f53406842c278dbf0d49073ecc39fc38bfc052a1b1a125cb | split profiles/templates | `1` | label constant; artist spec `[AA-ECON]`, revenue spec `[RSR-TEMPLATES]` |
+| sanction ceremony schema ID | `6529STREAM_ARTIST_SANCTION_CEREMONY_V1` | 0xa7222b7835606e613ba5eee0ebc23654b567e946e997bb27e127e24ed9534c44 | `StreamArtistRegistry` | `1` | pinned schema identifier; artist spec `[AA-SANCTION]` requirement 9 (ADR 0011 decision R7.7) |
+| C2PA credentials schema ID | `6529STREAM_ARTIST_C2PA_CREDENTIALS_V1` | 0x89276c3535c7321ce7f36b8228b64a1b1b9667d531786d9d68df290f9bd0768a | `StreamArtistRegistry` | `1` | pinned schema identifier; artist spec `[AA-C2PA]` (ADR 0011 decision R7.9) |
 
 ### Collection And Preservation Metadata Mirror Rows
 
 Home: [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
 ([CMC-SUBJECT-ID], [CMC-CONTENT-ROOT], [CMC-RECORD-CHAIN],
-[CMC-OWNER-RECORDS]). EIP-712 domain for owner records:
-`("6529StreamOwnerRecords", "1", chainId, ownerRecords)` with ERC-5267.
+[CMC-OWNER-RECORDS], [CMC-INDEPENDENT-ATTESTOR]). EIP-712 domains: owner
+records use `("6529StreamOwnerRecords", "1", chainId, ownerRecords)`;
+relayed independent preservation records use
+`("6529StreamCollectionAttestations", "1", chainId, attestations)` — both
+with ERC-5267.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
@@ -593,6 +653,7 @@ Home: [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
 | `STREAM_TOKEN_CONTENT_NODE_V1` | `6529STREAM_TOKEN_CONTENT_NODE_V1` | `0x7239fc0713b7ccc92b7eef3087150a1f32037aff6ab05f5bf78db4f8ab71a6ea` | `StreamCollectionMetadata` | `1` | CM spec `[CMC-CONTENT-ROOT]` |
 | `STREAM_RECORD_CHAIN_V1` | `6529STREAM_RECORD_CHAIN_V1` | `0x0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa1609` | record-lane satellites | `1` | CM spec `[CMC-RECORD-CHAIN]` |
 | `STREAM_OWNER_RECORD_TYPEHASH` | `StreamOwnerRecord(address owner,uint256 tokenId,bytes32 subjectId,bytes32 recordType,bytes32 schemaId,uint16 algorithmId,bytes digest,bytes32 canonicalizationId,string uri,bytes payload,uint64 effectiveAt,uint256 nonce,uint64 deadline)` | `0x9c8c4f8b7ec1e8731277f53e36271ebf92fc96425f0c082143042400814c6b05` | `StreamOwnerRecords` | `1` | EIP-712; CM spec `[CMC-OWNER-RECORDS]` |
+| `STREAM_INDEPENDENT_PRESERVATION_TYPEHASH` | `StreamIndependentPreservationRecord(address attestor,uint256 scopeKey,bytes32 subjectId,bytes32 recordType,bytes32 schemaId,uint16 algorithmId,bytes digest,bytes32 canonicalizationId,string uri,bytes payload,uint64 effectiveAt,uint256 nonce,uint64 deadline)` | `0xcb13914f7a4c90b3e2d3d1513c3009284117ccab71b2a60935a620486947c768` | `StreamCollectionAttestations` | `1` | EIP-712; CM spec `[CMC-INDEPENDENT-ATTESTOR]` (ADR 0011 decision R11) |
 
 ### Entropy Mirror Rows
 
@@ -605,6 +666,9 @@ Homes: [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
 | --- | --- | --- | --- | --- | --- |
 | `STREAM_ENTROPY_REQUEST_V1` | `6529STREAM_ENTROPY_REQUEST_V1` | 0xf8ea7ebca4196e280c0b42e55e16736c8e836382a8859d151eb826edbecb7106 | `StreamEntropyCoordinator` | `1` | coordinator spec (Request Flow) |
 | `STREAM_ENTROPY_SEED_V1` | `6529STREAM_ENTROPY_SEED_V1` | 0x88e816cf6b63abe50b33fdfd5033b9e0f12b8e8ba3925c57c3954ecf8caca69f | `StreamEntropyCoordinator` | `1` | coordinator spec (Fulfillment Flow) |
+| `STREAM_ENTROPY_SCOPE_SUBJECT_V1` | `6529STREAM_ENTROPY_SCOPE_SUBJECT_V1` | 0xef9a2afab4bd9a15841ca37c46b3cdb891a47121a1bfab0201f386d0a7b77490 | `StreamEntropyCoordinator` | `1` | coordinator spec `[EC-SCOPE]` (Scope Entropy Requests; ADR 0011 decision R8) |
+| `STREAM_ENTROPY_SCOPE_REQUEST_V1` | `6529STREAM_ENTROPY_SCOPE_REQUEST_V1` | 0xda5ba2e7e598a368f9e05c751fa0bbce4620c6fe030d47737c9eeb15099a3b81 | `StreamEntropyCoordinator` | `1` | coordinator spec `[EC-SCOPE]` (Scope Entropy Requests; ADR 0011 decision R8) |
+| `STREAM_ENTROPY_SCOPE_SEED_V1` | `6529STREAM_ENTROPY_SCOPE_SEED_V1` | 0x6111edc8a4ae25589e49af170892e9083107d07df6b48b7201458e32ba38365b | `StreamEntropyCoordinator` | `1` | coordinator spec `[EC-SCOPE]` (Scope Entropy Requests; ADR 0011 decision R8) |
 | `FRESH_RECOVERY_POLICY_DOMAIN` | `6529STREAM_ENTROPY_FRESH_RECOVERY_POLICY_V1` | 0x903ca537e686c7d615b886dbd8d81e240e58123e9918bc89ccabb64f2fe9a327 | `StreamEntropyCoordinator` | `1` | coordinator spec (Storage Model; binds `incidentDeclarerRole`) |
 | `STREAM_PROVIDER_RAW_V1` | `6529STREAM_PROVIDER_RAW_V1` | 0x9d25920cde651730cff9eacf736aaa7aa2f6d1f22e948f5d5e362fb181a5bee1 | provider adapters (generic) | `1` | providers spec (Raw Randomness Compression) |
 | `STREAM_VRF_RAW_V1` | `6529STREAM_VRF_RAW_V1` | 0x9aec1af5d92901527f48ea05f0779a6d6cd5153a45cb99ffa4383b1b4beea311 | `StreamEntropyProviderVRF` | `1` | providers spec (Raw Randomness Compression) |
@@ -645,7 +709,63 @@ State Export And Archival Operations code blocks).
 | `STREAM_EXPORT_RECORD_CHAIN_LEAF_V1` | `6529STREAM_EXPORT_RECORD_CHAIN_LEAF_V1` | 0xc0ec93115d32e7633c13d7414f7f77c5a20edf8a4c512bfbb1a0b8dbeaa6ace0 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; lane values per [CMC-RECORD-CHAIN] |
 | `STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1` | `6529STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1` | 0x75a6b72b058ed053bc42e32ee8ed32283b8f973f455854e870e1c1a3727ea984 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_LOCK_LEAF_V1` | `6529STREAM_EXPORT_LOCK_LEAF_V1` | 0x2439a59cd6c4a767eefacdb9d4397317f88ac30c996c1c5dae92821f7159536b | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
-| `GGP_FINALITY_COMPONENT_READ_GAS_ID` | `6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS` | 0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221 | finality registry | `1` | `keccak256` of the string preimage; no `abi.encode` inputs ([LTA-GGP]) |
+| `STREAM_EXPORT_TOKEN_DATA_LEAF_V1` | `6529STREAM_EXPORT_TOKEN_DATA_LEAF_V1` | 0x0c586b41736dd3049878e98663002a07e79c06ab6ab5f49c09f03c0e44fa4610 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; retention per [MPA-CORE-ABI]/[CMC-BURN] (ADR 0011 decision R12) |
+| `STREAM_EXPORT_EVENT_HISTORY_V1` | `6529STREAM_EXPORT_EVENT_HISTORY_V1` | 0xde2f44be2a232fbd4b086150b751c9483f78c1de4779a09d9d2acc84d4ac76ae | `STATE_EXPORT_V1` profile | `1` | event-history snapshot hash; [LTA-EVENT-HISTORY] (ADR 0011 decision R12) |
+
+The umbrella-hosted `FINALITY_COMPONENT_READ_GAS` parameter identifier is
+mirrored in the consolidated
+[GGP identifier table](#governed-gas-parameter-identifier-mirror-rows)
+below (ADR 0011 decision R12).
+
+### Governance Mirror Rows
+
+Home: [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+([GOV-ACTION-ID], [GOV-BATCH]). ADR 0004 is the owner-designated
+normative home of the canonical governance action identity (ADR 0010
+decision D3.4); these rows complete the mirror for the most-executed
+preimages in the system — every staged governance action, batch, and GGP
+change binds them (ADR 0011 decision R12).
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `STREAM_GOVERNANCE_ACTION_V1` | `6529STREAM_GOVERNANCE_ACTION_V1` | 0xda01e91bb5de11674cef69c6774002280d75bcb43cd9c78413c4b94d5d14249b | ADR 0004 governance timelock layer | `1` | ADR 0004 `[GOV-ACTION-ID]` |
+| `STREAM_GOVERNANCE_CALLS_V1` | `6529STREAM_GOVERNANCE_CALLS_V1` | 0x51c60c7ea5577cbf0c5157f544a7de1a186ae82b6fc4df6a626b9c8d1d3a0b61 | ADR 0004 governance timelock layer | `1` | ADR 0004 `[GOV-ACTION-ID]`, `[GOV-BATCH]` |
+
+### Governed Gas Parameter Identifier Mirror Rows
+
+Pattern home:
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+([LTA-GGP]). Every `parameterId` is the `keccak256` of the string
+preimage — `"6529STREAM_GGP_" || <constant name>` per [LTA-GGP] rule 5 —
+with no `abi.encode` inputs; the per-parameter host, genesis value,
+floor, and probe are owned by the subsystem home named in each Inputs
+cell. This table carries exactly one row per [LTA-GGP] inventory entry
+(ADR 0011 decision R12): an inventory entry without a row here, or a row
+without an inventory entry, is a conformance defect, and inventory
+growth by spec amendment must land with its mirror row in the same
+change.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `6529STREAM_GGP_ROYALTY_RESOLVER_GAS_LIMIT` | 0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda | `StreamCore` | `1` | GGP key; revenue spec `[RSR-GGP]`, `[RSR-2981-GAS]` |
+| `GGP_ROYALTY_RETURN_GAS_BUFFER` | `6529STREAM_GGP_ROYALTY_RETURN_GAS_BUFFER` | 0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7 | `StreamCore` | `1` | GGP key; revenue spec `[RSR-GGP]` |
+| `GGP_ERC_1271_GAS_LIMIT` | `6529STREAM_GGP_ERC_1271_GAS_LIMIT` | 0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157 | split factory parameter store | `1` | GGP key; revenue spec `[RSR-GGP]`, `[RSR-1271]` |
+| `GGP_ASSET_POLICY_GAS_LIMIT` | `6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT` | 0xbfc1f824948b8dc9573791fa40eeb403e7322af41d0967f90518dbbb531bf648 | split factory parameter store | `1` | GGP key; revenue spec `[RSR-GGP]`, `[RSR-ASSET-POLICY]` |
+| `GGP_WALLET_DEPOSIT_GAS_LIMIT` | `6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT` | 0xd208e16b8676adecbbdd17f529a9effcb9153af90ac08886fb2906298206ff45 | split factory parameter store | `1` | GGP key; revenue spec `[RSR-GGP]` |
+| `GGP_FLUSH_GAS_FLOOR` | `6529STREAM_GGP_FLUSH_GAS_FLOOR` | 0x99168b87a7d39f5ba4862568c012ad3b51c552ec78108b88c6be5f5a6426ebe6 | revenue escrow | `1` | GGP key; revenue spec `[RSR-GGP]` |
+| `GGP_MINT_GATE_GAS_LIMIT` | `6529STREAM_GGP_MINT_GATE_GAS_LIMIT` | 0xf896db78d4fb703c92d45856189181cb6daa113dada9718f74206095d4fbf817 | `StreamMintManager` | `1` | GGP key; mint spec `[MPA-GATES]` |
+| `GGP_TICKET_ERC1271_GAS_LIMIT` | `6529STREAM_GGP_TICKET_ERC1271_GAS_LIMIT` | 0x6a05447612b16e61c6b274125ccdfb6545e058d195b5d82128b41a7205e4a5b6 | `StreamMintTicketGate` | `1` | GGP key; mint spec `[MPA-TICKET]` |
+| `GGP_ARTIST_AUTHORITY_GAS_LIMIT` | `6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT` | 0x194fce9f57e4e64ea539858df133e20abf69979b77fd4c2556f7c185ac391fe3 | `StreamMintManager` | `1` | GGP key; mint spec `[MPA-CONSENT]` |
+| `GGP_SALE_ERC1271_GAS_LIMIT` | `6529STREAM_GGP_SALE_ERC1271_GAS_LIMIT` | 0x17b207440a43ce0136b5ee0bc3becf37652825825d88c68e1e0750bf59ec914c | sale adapters | `1` | GGP key; sales spec `[SSA-GAS]` |
+| `GGP_DELEGATE_REGISTRY_GAS_LIMIT` | `6529STREAM_GGP_DELEGATE_REGISTRY_GAS_LIMIT` | 0xd75b7f96fae550dd69de8ac7536a203e30ec57da63811df1559129479b5ef185 | delegate gate | `1` | GGP key; sales spec `[SSA-GAS]` |
+| `GGP_METADATA_ROUTER_GAS_LIMIT` | `6529STREAM_GGP_METADATA_ROUTER_GAS_LIMIT` | 0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93 | `StreamCore` | `1` | GGP key; metadata spec `[MRR-ROUTER-GGP]` |
+| `GGP_ENTROPY_VIEW_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_VIEW_GAS_LIMIT` | 0x2bef811c095d83c93627f797c5c71bc97b747ab91fba78266f8f86513f50f5f6 | metadata router | `1` | GGP key; metadata spec `[MRR-ENTROPY-READ]` |
+| `GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | 0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17 | `StreamCore` | `1` | GGP key; coordinator spec `[EC-REGGAS]` |
+| `GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | 0xaf00713aa70c259c23836c61245814e6e3b5fab1fe61b8879c0bd5450f23537c | `StreamEntropyCoordinator` | `1` | GGP key; coordinator spec `[EC-INCIDENT-ROLE]` |
+| `GGP_VRF_CALLBACK_GAS_LIMIT` | `6529STREAM_GGP_VRF_CALLBACK_GAS_LIMIT` | 0xb54bc37de6ab63d94434a3fb47e0b24ad67118105c91c59db7b1c58d482f5491 | provider adapters | `1` | GGP key; providers spec `[EP-VRF-CONFIG]` |
+| `GGP_ARTIST_ERC1271_VERIFY_GAS` | `6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS` | 0x04bd88d7a1b04a4fc7476b74a962c2fea893f8ad4e6711b1c13e828f151458b5 | `StreamArtistRegistry` | `1` | GGP key; artist spec `[AA-SIGVER]` |
+| `GGP_METADATA_ERC1271_VERIFY_GAS_ID` | `6529STREAM_GGP_METADATA_ERC1271_VERIFY_GAS` | 0x3ca324ef8262b1ff4cb8753a082cd8780e50f754c1a323a433e0e7665a5ec9f9 | verifying metadata satellites | `1` | GGP key; CM spec `[CMC-SIGVER-GGP]` (ADR 0011 decision R10) |
+| `GGP_FINALITY_COMPONENT_READ_GAS_ID` | `6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS` | 0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221 | finality registry | `1` | GGP key; umbrella `[LTA-GGP]` (Artwork Finality Freeze) |
 
 ## Event Reconstruction
 
@@ -683,6 +803,14 @@ the following from emitted events and compares against direct reads:
 
 State reads remain useful for live tooling, but event replay must be
 sufficient for long-lived indexers and archive reconstruction.
+
+Renderer-input `tokenData` bytes are the one deliberate state-recovered
+surface in this plan, never an event-replay surface (ADR 0011 decisions
+R1 and R12): Core retains them for burned tokens
+([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+[MPA-CORE-ABI]; [CMC-BURN]), and reconstruction reads them from Core
+state or from the `STREAM_EXPORT_TOKEN_DATA_LEAF_V1` leaf of the state
+export ([LTA-EXPORT]) — log data is not a carrier for them.
 
 ## Module Identity Surface
 
@@ -730,12 +858,22 @@ mechanisms.
    deployment by any module (ADR 0010 decision D9.2). Royalty behavior on
    this Core line is disclosure-only — Core-native ERC-2981 plus the
    resolver — and that is a deliberate, permanent, artist-facing term
-   stated before binding, not an open roadmap item.
+   stated before binding, not an open roadmap item. Two consequences are
+   deployment-gated rather than implied (ADR 0011 decision R12): the
+   artist's recorded acknowledgment of the disclosure-only term is
+   release evidence in the artist ceremony rehearsal gate, and royalty
+   resolution on the pinned launch marketplaces — shared royalty-registry
+   entries and per-marketplace royalty configuration included — is
+   release evidence in the marketplace royalty-resolution gate (both
+   [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md),
+   [LCM-MARKETPLACE] and Required Gates).
 2. Non-transferable, soulbound, or lockable tokens (ERC-5192-class
    locks) — successor line only, precluded by the same transfer-openness
    invariant. Exhibition mementos, attendance artifacts, and artist-proof
    soulbounds must be modeled as separate contracts or as attestation
-   records, never as Core token properties.
+   records — the documented pattern is
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-MEMENTO] (ADR 0011 decision R9) — never as Core token properties.
 3. Rental and user-role mechanics (ERC-4907-class) and any other
    transfer-conditioned or transfer-hooked token behavior — successor
    line only, same invariant.
@@ -750,6 +888,31 @@ mechanisms.
    `EntropySecurityClass.LOW_SECURITY` (ADR 0010 decision D8.8; home
    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)).
 8. Arbitrary sweep authority over split-wallet or escrow owed funds.
+9. Permissionless artist onboarding and permissionless collection
+   creation. Protocol v1 is a curated platform, and that is a
+   deliberate, stated posture of this deployment, not an accident of
+   scope (ADR 0011 decision R12): every collection and every artist
+   binding originates from governed platform roles
+   ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-ROLES];
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)),
+   so the platform's willingness to onboard is a disclosed liveness
+   assumption — with governance gone, every existing work keeps every
+   permanence guarantee, but no new collection or binding can ever be
+   created on this deployment. Artist-initiated binding-proposal
+   surfaces may arrive later as Replaceable modules behind the frozen
+   registry interfaces through their own accepted specs, but creation
+   and binding execution authority remains governed on this Core line
+   for its whole life.
+10. Serial-number and token-ID selection, and durable serial
+    reservations — successor line only. v1 Core allocates collection
+    serials sequentially with no durable reservation state; the single
+    home for the reservation posture is
+    [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+    (Core Contract Changes; ADR 0009 decision 1; ADR 0011 decision R9),
+    and content selection binds artwork content only, never serials
+    ([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+    [SSA-CONTENT]).
 
 Sale-mechanic exclusions (orderbooks, bonding curves, secondary-market
 listings, cross-chain execution, ERC-2771 forwarders in sale paths) are
@@ -771,12 +934,14 @@ but they must remain outside Core:
    ([`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
    [RSR-PAYMENT-INTENT]; ADR 0010 decision D8.2). Non-standard ERC-20
    behavior remains unsupported unless a separate adapter spec accepts it.
-2. C2PA, IIIF, and PREMIS-style records, richer preservation modules, and
-   museum-grade metadata depth through collection metadata, preservation,
-   attestation, and view satellites, plus the owner-writable registrar
-   records satellite
-   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-   [CMC-OWNER-RECORDS]; ADR 0010 decision D6.2).
+2. C2PA, IIIF, and PREMIS records — the pinned PREMIS v3 crosswalk
+   profile lives at
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-PREMIS-PROFILE] (ADR 0011 decision R11) — richer preservation
+   modules, and museum-grade metadata depth through collection metadata,
+   preservation, attestation, and view satellites, plus the
+   owner-writable registrar records satellite ([CMC-OWNER-RECORDS];
+   ADR 0010 decision D6.2).
 3. Dual entropy providers (ADR 0009 decision 21): Chainlink VRF primary
    plus one reviewed fallback provider, with ARRNG as the preferred
    candidate and Pyth as the reviewed alternate. A VRF-only deployment is

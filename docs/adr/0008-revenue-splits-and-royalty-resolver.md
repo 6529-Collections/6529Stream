@@ -20,6 +20,18 @@ releasable-under-grace; D9.2 states that royalty enforcement is impossible
 on this Core line; and D10.6 deduplicates the revenue event surface and
 adds the claim-aggregation periphery.
 
+Further amended by [ADR 0011](0011-world-class-pass-round-2.md): decision
+R6 binds buyer drift envelopes to escrow-holding sale modes so deferred
+settlement can never strand buyer funds; R9 pins the
+settlementKey-to-saleId mapping rule; R10 scopes authorization nonces per
+signer, adds the `PaymentIntent` payer-is-caller exemption, and elects
+ADR 0004 [GOV-1271-CLASS] as the single ERC-1271 wallet-class home; R12
+renames the three unprefixed revenue domain strings into the
+`6529STREAM_` namespace, applies the genesis-wide optional-mirror ban,
+drops the curators bucket from the genesis default template, and gates
+marketplace royalty-resolution coverage and the rehearsed recipient claim
+flow.
+
 This ADR is the design record for the revenue and royalty architecture of
 the first production deployment, which is the permanent system. Under the
 single-sourcing rule (ADR 0010 decision D3), the companion specification
@@ -321,9 +333,12 @@ supported `accountSource` from settlement context. `ARTIST` is a
 first-class beneficiary class (ADR 0010 decision D2.5): the
 `keccak256("COLLECTION_ARTIST")` source resolves to the collection's
 accepted artist binding under `docs/stream-artist-authority.md`, and
-poster-like proceeds map to `keccak256("SALE_POSTER")`; protocol and
-curator-pool shares map to static accounts. The genesis default template
-for artist-bound collections is artist-majority, artist shares below
+poster-like proceeds map to `keccak256("SALE_POSTER")`; protocol shares
+map to static accounts. The genesis default template
+for artist-bound collections is artist-majority and carries no curators
+bucket — curator classes are deployment configuration only when a
+conformant pull-accounting pool contract exists (ADR 0011 decision R12) —
+artist shares below
 500,000 ppm require artist co-signature, and the legacy three-bucket
 poster split is non-normative history — the full artist-take posture and
 disclosure rules are defined in `docs/revenue-splits-and-royalties.md`
@@ -478,15 +493,20 @@ domain defined in `docs/revenue-splits-and-royalties.md` (Release
 Authorization): the struct binds asset, account, recipient, nonce, and
 deadline, the domain separator binds wallet and chain ID, releases are
 always full-releasable (no amount field can drift), and unused nonces are
-revocable. Nonces are consumed before transfer under CEI.
+revocable. Nonces are consumed before transfer under CEI, with
+consumed-nonce state keyed per signer — `(account, nonce)` in split
+wallets, `(payer, nonce)` at the ERC-20 settlement verifier — so no
+account can consume or revoke another account's nonce value, and replay
+views take the explicit signer address (ADR 0011 decisions R10 and R12).
 ERC-1271 verification uses the `ERC_1271_GAS_LIMIT` Governed Gas Parameter
 (ADR 0010 decisions D1 and D7.3) read from the wallet line's factory
 parameter store, `staticcall`, and bounded returndata decoding. A failed,
 out-of-gas, malformed, or wrong-magic-value `isValidSignature` staticcall
 reverts the alternate release before nonce consumption or transfer. The
-genesis planning value is 400,000 gas, sized against the named supported
-wallet class — Safe up to 9-of-9, one nesting level, and pure-Solidity
-P-256/WebAuthn verification — with the measured classes, value, and
+genesis planning value is 400,000 gas, sized against the measured heaviest
+wallet class named by ADR 0004 [GOV-1271-CLASS] — the single wallet-class
+home every verifying layer cites (ADR 0011 decision R10) — with the
+measured classes, value, and
 immutable floor recorded in the release manifest, and the parameter
 raisable if future legitimate schemes grow heavier. The entitled contract
 account's self-execution path remains cap-independent. The full rules are
@@ -802,12 +822,16 @@ decision D3; GOOD-02 election):
   earlier revision of this ADR sketched a divergent flat
   `STREAM_REVENUE_ASSIGNMENT_V1` preimage; the spec's family governs and
   the flat sketch is void.
-- `resolvedPrimaryPolicyHash` under `STREAM_PRIMARY_POLICY_V1`, in
+- `resolvedPrimaryPolicyHash` under `PRIMARY_POLICY_DOMAIN` (string
+  preimage `6529STREAM_PRIMARY_POLICY_V1`), in
   Assignment Semantics.
-- `royaltyAssignmentHash` under `STREAM_ROYALTY_POLICY_V1` — binding chain,
+- `royaltyAssignmentHash` under `ROYALTY_POLICY_DOMAIN` (string preimage
+  `6529STREAM_ROYALTY_POLICY_V1`) — binding chain,
   resolver, resolution context, profile, wallet, `royaltyBps`, and the
   per-key `assignmentHash` — in Canonical Royalty Policy Hash. This ADR
-  originated the domain string; the spec is now its normative home.
+  originated the domain string; the spec is now its normative home, and
+  ADR 0011 decision R12 renamed both strings (and the escrow recovery
+  domain) into the `6529STREAM_` namespace with hashes re-pinned.
 
 Signed sale policy, royalty snapshots, resolver probes, and assignment events
 must use those preimages or a later versioned replacement.
@@ -912,7 +936,11 @@ A standing payer allowance alone is never spendable as official revenue:
 before any allowance pull, the settlement path must verify a payer-signed
 EIP-712/ERC-1271 `PaymentIntent` binding payer, asset, amount cap, sale
 reference, expected policy hash, nonce, and deadline (ADR 0010 decision
-D8.2). The pinned `PAYMENT_INTENT_TYPEHASH`, domain, and verification rules
+D8.2), unless a by-construction intent applies — `msg.value` for native
+ETH, or the payer-is-caller exemption where `payer == msg.sender` in the
+settlement call frame executes its own bounded purchase (ADR 0011
+decision R10). The pinned `PAYMENT_INTENT_TYPEHASH`, domain, and
+verification rules — including `(payer, nonce)` consumed-intent keying —
 are defined in `docs/revenue-splits-and-royalties.md`
 [RSR-PAYMENT-INTENT]; a compromised enabled caller therefore cannot drain
 standing approvals into official settlement.
@@ -932,8 +960,10 @@ deadline; the pinned inventory governs (GOOD-07 election).
 
 `expectedPrimaryPolicyHash` commits to the resolved assignment or template
 policy the signer expects. `STRICT_MATCH` is the launch default and reverts if
-the resolver state has drifted. `ALLOW_CURRENT` is allowed only when the product
-intentionally lets the current resolver assignment govern the sale, and that
+the resolver state has drifted. `ALLOW_CURRENT` is allowed when the product
+intentionally lets the current resolver assignment govern the sale — and is
+mandatory, envelope-bounded, for the deferred leg of escrow-holding sale
+modes (ADR 0011 decision R6; see below) — and that
 choice must be visible in events. If a scope freezes before settlement,
 `ALLOW_CURRENT` resolves the then-current frozen assignment. Silent drift is not
 acceptable; `STRICT_MATCH` remains the default for economically material sales.
@@ -946,6 +976,15 @@ between signature and settlement flips that bit, changes the hash, and makes
 Freeze-mode transitions between frozen states (for example exact to
 permanent) do not change economics and do not change the hash.
 `ALLOW_CURRENT` is the explicit opt-in to that drift.
+Escrow-holding sale modes — refund windows, Dutch uniform clearing,
+mint-at-settlement, accepted offers — settle a deferred leg that no party
+can re-sign, so they must not bind `STRICT_MATCH` there: the buyer's
+signed drift envelope (maximum price, sale reference, finalize-by
+deadline) authorizes `ALLOW_CURRENT` finalization within its bounds, and a
+permissionless refund path unlocks escrowed funds past the deadline, per
+`docs/revenue-splits-and-royalties.md` [RSR-SALE-AUTH].5 and
+[RSR-SETTLEMENT-BOUNDARY].9 and the sale-side state machines of
+`docs/stream-sales-and-auctions.md` (ADR 0011 decision R6).
 
 No production sale path may use `tx.origin` as payer, recipient, executor, or
 authorizer. The drop and auction authorization rewrites are hard launch gates:
@@ -988,9 +1027,13 @@ Target fixed-price flow:
 7. Emit a primary revenue event only after the sale amount is either held by the
    official split wallet or recorded as owed by the protocol-owned revenue
    escrow.
-8. Include `saleKind`, `saleId`, collection ID, token ID, payer, poster,
-   beneficiary, revenue class, profile ID, wallet, asset, amount, and whether
-   the profile came from a template.
+8. Emit the [RSR-EVENTS] settlement facts with the sale identity mapped
+   per `docs/revenue-splits-and-royalties.md` [RSR-SETTLEMENT-BOUNDARY].5
+   (`settlementId` = sales-spec `saleId`, `saleNonce` = its adapter-local
+   nonce; ADR 0011 decision R9), plus collection ID, token ID, payer,
+   poster, beneficiary, revenue class, profile ID, wallet, asset, amount,
+   and whether the profile came from a template. Sale-kind discriminators
+   stay sale-side per `docs/stream-sales-and-auctions.md`.
 
 Launch paid primary mints must use exactly one of the two atomic paths —
 `PRE_REVENUE_SINGLE_STEP` and `PREPARED_MINT` — whose normative step
@@ -1157,7 +1200,8 @@ Revenue escrow lifecycle:
   `EscrowRecoveryStatus`, `EscrowCreditKey`, `EscrowRecoveryManifestRef`,
   `EscrowRecoveryRecord`, the schedule/cancel/execute functions and their
   `EscrowRecoveryScheduled` / `EscrowRecoveryCancelled` /
-  `EscrowRecoveryExecuted` events, the `STREAM_ESCROW_RECOVERY_V1`
+  `EscrowRecoveryExecuted` events, the `ESCROW_RECOVERY_DOMAIN`
+  (`6529STREAM_ESCROW_RECOVERY_V1`)
   `recoveryId` preimage, and the execution recheck rules — is defined once
   in
   [`docs/revenue-splits-and-royalties.md`](../revenue-splits-and-royalties.md)
@@ -1418,8 +1462,10 @@ Royalty resolution rules:
   defaults, or may ignore token-varying receivers. Per-token or per-collection
   receiver changes are therefore best-effort disclosures, and retained
   marketplace evidence is required before public claims.
-- Royalty payment remains voluntary unless a separate enforcement ADR is
-  accepted.
+- Royalty payment remains voluntary permanently on this Core line: no
+  later ADR, module, or registry can add enforcement to this deployment,
+  and a declared successor Core line is the only enforcement path
+  (ADR 0010 decision D9.2).
 
 Recommended diagnostic probe:
 
@@ -1585,9 +1631,13 @@ The intended escrow query path is: index by `revenueClass`, `profileId`, and
 owed balance from unindexed event data. Indexers that need asset-first lookup
 must maintain their own secondary index from the full event stream.
 
-`saleId` is the drop ID for fixed-price drops. For auctions, `saleId` may be
-the token ID only if a token can have at most one primary auction in that
-sale contract; otherwise it must include or point to an auction nonce.
+Sale identity in settlement events follows the pinned mapping rule of
+`docs/revenue-splits-and-royalties.md` [RSR-SETTLEMENT-BOUNDARY].5
+(ADR 0011 decision R9): `settlementId` is the sales-spec `bytes32 saleId`
+under `docs/stream-sales-and-auctions.md` [SSA-IDENTITY], and `saleNonce`
+is that identity's adapter-local nonce. An earlier revision of this ADR
+described `saleId` as "the drop ID" or "the token ID"; that vocabulary is
+superseded and void.
 Sale-kind discriminators and sale-side event schemas are owned by
 `docs/stream-sales-and-auctions.md`; the v1 `saleContextHash` binds no
 `saleKind`.
@@ -1633,7 +1683,16 @@ Sale-kind discriminators and sale-side event schemas are owned by
 
 - Retain evidence for OpenSea, Reservoir, Manifold, Blur, and other relevant
   display/indexer paths before public claims.
-- Keep wording conservative: ERC-2981 disclosure is not enforcement.
+- Record royalty-resolution coverage per
+  `docs/revenue-splits-and-royalties.md` [RSR-MARKETPLACE-ROYALTY]: where
+  each named marketplace resolves royalties for shared contracts, a
+  Royalty Registry entry mirroring Core-native ERC-2981 where applicable,
+  and per-marketplace royalty configuration verification for the majors —
+  a named deployment gate, not an integration extra (ADR 0011 decision
+  R12).
+- Keep wording conservative: ERC-2981 disclosure is not enforcement, and
+  the artist onboarding artifact records the required acknowledgment of
+  the disclosure-only term ([RSR-MARKETPLACE-ROYALTY].3).
 
 ## Security Considerations
 
@@ -1694,6 +1753,9 @@ Add tests for:
 - release-to alternate recipient;
 - alternate-recipient release requires entitled-account caller or valid
   EIP-712/ERC-1271 authorization with nonce and deadline;
+- consumed-nonce state is keyed per signer: one account cannot consume,
+  revoke, or invalidate another account's nonce value, and the
+  explicit-address replay views answer for any queried signer;
 - failed native release preserves releasable accounting;
 - reentrant release cannot drain more than releasable balance;
 - rounding dust remains bounded, non-negative, and non-withdrawable;
@@ -1769,9 +1831,15 @@ Add tests for:
   initial-recipients hash, beneficiaries hash, executor, asset, quantity,
   price, nonce, deadline, collection, and sale program — under the pinned
   typehash;
-- ERC-20 settlement without a valid payer-signed `PaymentIntent` reverts
+- ERC-20 settlement initiated by any caller other than the payer itself
+  without a valid payer-signed `PaymentIntent` reverts
   before any allowance pull; replayed, expired, over-cap, wrong-sale, and
-  revoked intents revert;
+  revoked intents revert; the payer-is-caller path cannot pull an asset
+  or amount beyond the sale authorization's binding;
+- escrow-holding sale modes finalize under `ALLOW_CURRENT` within the
+  buyer's drift envelope after resolved-policy drift, and the
+  permissionless refund path unlocks escrowed funds past the finalize-by
+  deadline;
 - static analysis rejects `tx.origin` in production mint, sale, drop, auction,
   or authorization paths;
 - auction settlement records revenue and final settlement state before external
@@ -1859,8 +1927,11 @@ royalty policy.
 
 ### Royalty Enforcement By Transfer Restriction
 
-Rejected for this ADR. It is a separate product and governance decision with
-major composability tradeoffs.
+Rejected permanently for this Core line, not merely for this ADR: ERC-721
+transfer carries no validator hook, so enforcement can never be added to
+this deployment by any later decision; only a declared successor Core
+line can enforce (ADR 0010 decision D9.2). The composability tradeoff is
+accepted as a permanent, disclosed, artist-facing term.
 
 ## Accepted Risks
 
