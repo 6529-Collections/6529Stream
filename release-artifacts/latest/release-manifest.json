@@ -71,14 +71,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:c86ea48c77096b2887cae9a449f6d51acb476f4a1eb4f8d8fb1eadc005800217",
-        "size_bytes": 80634,
+        "sha256": "sha256:01daa406691e0dbdd4569fa9d8b166a0f18f0d0281ccdd192af9a901bc14f95f",
+        "size_bytes": 82579,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:180a7665d6e723e28f82bbc0882df0439a86c3f4e080d7c7fed8f2a4723e12d0",
-        "size_bytes": 77535
+        "sha256": "sha256:ca3ab2e3c403b8d24649f5f0c354173edccaf3fef6e1695764fb5331a2c7d87f",
+        "size_bytes": 79466
       }
     },
     "release_candidate_lockfile": {
