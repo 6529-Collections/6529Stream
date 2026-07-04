@@ -2352,8 +2352,8 @@ setScriptChunk              script admin or global admin
 setDependencyManifest       script admin or global admin
 submitArtistAttestation     artist address or delegated artist signer
 recordCollectionAttestation attester, collection metadata admin, or global admin
-setCollectionRecord         metadata safe-operator or global admin
-setCollectionRecordWithRevision metadata safe-operator or global admin
+setCollectionRecord         whole-module safe-operator or global admin
+setCollectionRecordWithRevision whole-module safe-operator or global admin
 recordCollectionRecord      preservation safe-operator or global admin
 publishCollectionSnapshot   collection metadata admin or global admin
 lockCollectionField         freeze admin or global admin
