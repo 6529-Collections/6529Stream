@@ -38,7 +38,9 @@ contract StreamMintModuleRegistry is ERC165, Ownable, IStreamMintModuleRegistry 
         }
         if (
             (info.status == ModuleStatus.ACTIVE || info.status == ModuleStatus.DEPRECATED)
-                && (module.code.length == 0 || info.metadataHash == bytes32(0))
+                && (module.code.length == 0
+                    || info.metadataHash == bytes32(0)
+                    || info.gasLimit == 0)
         ) {
             revert InvalidMintModuleInfo(module);
         }

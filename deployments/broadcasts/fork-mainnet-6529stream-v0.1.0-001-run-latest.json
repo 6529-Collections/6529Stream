@@ -401,7 +401,20 @@
       "hash": "0x1313131313131313131313131313131313131313131313131313131313131313",
       "transactionType": "CREATE",
       "contractName": "StreamMintModuleRegistry",
-      "contractAddress": "0x2000000000000000000000000000000000000013"
+      "contractAddress": "0x2000000000000000000000000000000000000013",
+      "function": null,
+      "arguments": [],
+      "transaction": {
+        "from": "0x0000000000000000000000000000000000006537",
+        "to": null,
+        "gas": "0x1",
+        "value": "0x0",
+        "input": "0x",
+        "nonce": "0xf",
+        "chainId": "0x1"
+      },
+      "additionalContracts": [],
+      "isFixedGasLimit": false
     },
     {
       "transactionType": "CREATE",
@@ -410,7 +423,8 @@
       "function": null,
       "arguments": [
         "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
-        "0x200000000000000000000000000000000000000f"
+        "0x200000000000000000000000000000000000000f",
+        "0x2000000000000000000000000000000000000013"
       ],
       "transaction": {
         "from": "0x0000000000000000000000000000000000006537",
@@ -418,7 +432,7 @@
         "gas": "0x1",
         "value": "0x0",
         "input": "0x",
-        "nonce": "0xf",
+        "nonce": "0x10",
         "chainId": "0x1"
       },
       "additionalContracts": [],
@@ -1752,9 +1766,21 @@
       "contractAddress": "0x200000000000000000000000000000000000000f"
     },
     {
+      "type": "0x2",
+      "status": "0x1",
+      "cumulativeGasUsed": "0x1",
+      "logs": [],
+      "logsBloom": "0x0",
       "transactionHash": "0x1313131313131313131313131313131313131313131313131313131313131313",
-      "contractAddress": "0x2000000000000000000000000000000000000013",
-      "status": "0x1"
+      "transactionIndex": "0x1d",
+      "blockHash": "0xa9d2259b3ff30c289e9c79a9a92366d0175c3dbc9ff60a0bdf433271cf34564c",
+      "blockNumber": "0x1824c12",
+      "gasUsed": "0x1",
+      "effectiveGasPrice": "0x87c7d93",
+      "blobGasPrice": "0x1f21cff4ad975ed24d5b3",
+      "from": "0x0000000000000000000000000000000000006537",
+      "to": null,
+      "contractAddress": "0x2000000000000000000000000000000000000013"
     },
     {
       "type": "0x2",
@@ -1763,7 +1789,7 @@
       "logs": [],
       "logsBloom": "0x0",
       "transactionHash": "0x1010101010101010101010101010101010101010101010101010101010101010",
-      "transactionIndex": "0x1d",
+      "transactionIndex": "0x1e",
       "blockHash": "0xa9d2259b3ff30c289e9c79a9a92366d0175c3dbc9ff60a0bdf433271cf34564c",
       "blockNumber": "0x1824c12",
       "gasUsed": "0x1",

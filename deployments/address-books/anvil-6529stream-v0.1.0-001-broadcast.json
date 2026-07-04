@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_address_books.py:1",
   "source": {
     "deployment_manifest": "deployments/examples/anvil-6529stream-v0.1.0-001-broadcast.json",
-    "deployment_manifest_sha256": "sha256:c976d13e6beb25f32758eb18580022fb9a3beca770b91a75405812949fd98451",
+    "deployment_manifest_sha256": "sha256:3e81078ea4566c823ae2dbb7f792e3d79e787b42f57d53e8bbd0fc7a3898825c",
     "release_artifacts": "release-artifacts/latest",
     "abi_checksums": "release-artifacts/latest/abi-checksums.json",
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
@@ -122,7 +122,7 @@
       "source": "smart-contracts/StreamMintManager.sol",
       "artifact_path": "out/StreamMintManager.sol/StreamMintManager.json",
       "abi_hash": "sha256:acc87d87f469b726c4df8e7b50517a2489a034376cdec964fbfa8256c41cc74f",
-      "runtime_bytecode_hash": "sha256:98c0dad66ab9c8814165f325137ade357347d3ac9946bfbd2d2e576c66894792",
+      "runtime_bytecode_hash": "sha256:f27ffa3f73aca49965ec25094f4e5934478de5f23ef971e361131c548bfb0a36",
       "verification_status": "not_applicable"
     },
     "StreamMintModuleRegistry": {
@@ -130,7 +130,7 @@
       "source": "smart-contracts/StreamMintModuleRegistry.sol",
       "artifact_path": "out/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
       "abi_hash": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
-      "runtime_bytecode_hash": "sha256:af8943b6fda8a6aae4bc9c3171e2ea1b1deaf530ce62f21276f964c9b8d7f77e",
+      "runtime_bytecode_hash": "sha256:5f2106e95a2e083bd0ef3a857ceccc9c463a390f811771cfdc909419105ae442",
       "verification_status": "not_applicable"
     },
     "StreamMinter": {
@@ -154,7 +154,7 @@
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
       "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
       "abi_hash": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
-      "runtime_bytecode_hash": "sha256:313d07b6439f44a23dc4753526f900eb1ca0b94265c3bdb6bc9843767f7ecc84",
+      "runtime_bytecode_hash": "sha256:b81138d34d93a7d28ae231bc1c2d83b1f28c8530a92a3da2d162d72cdf0eb351",
       "verification_status": "not_applicable"
     },
     "StreamRevenueResolver": {

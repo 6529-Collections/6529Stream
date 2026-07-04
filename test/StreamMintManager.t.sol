@@ -122,6 +122,8 @@ contract MockMintGate is ERC165 {
     uint64 public maxQuantity;
     bytes32 public gateHash;
     bool public shouldRevert;
+    bool public advertisesInterface = true;
+    bytes32 public expectedCallDataHash;
 
     bytes32 private _nullifier;
 
@@ -145,12 +147,23 @@ contract MockMintGate is ERC165 {
         _nullifier = nullifier;
     }
 
+    function setAdvertisesInterface(bool advertisesInterface_) external {
+        advertisesInterface = advertisesInterface_;
+    }
+
+    function setExpectedCallData(bytes calldata expectedCallData) external {
+        expectedCallDataHash = keccak256(expectedCallData);
+    }
+
     fallback(bytes calldata) external returns (bytes memory) {
         if (msg.sig != IStreamMintGate.validateMint.selector) {
             revert("unsupported selector");
         }
         if (shouldRevert) {
             revert("gate rejected");
+        }
+        if (expectedCallDataHash != bytes32(0) && keccak256(msg.data) != expectedCallDataHash) {
+            revert("unexpected gate calldata");
         }
         bytes32[] memory nullifiers = new bytes32[](_nullifier == bytes32(0) ? 0 : 1);
         if (_nullifier != bytes32(0)) {
@@ -167,8 +180,8 @@ contract MockMintGate is ERC165 {
     }
 
     function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
-        return
-            interfaceId == type(IStreamMintGate).interfaceId || super.supportsInterface(interfaceId);
+        return (advertisesInterface && interfaceId == type(IStreamMintGate).interfaceId)
+            || super.supportsInterface(interfaceId);
     }
 }
 
@@ -256,6 +269,16 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         bytes32 gateHash,
         bytes32 policyHash
     );
+    event MintPreparedBatchExecuted(
+        bytes32 indexed operationRoot,
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        bytes32 policyHash,
+        bytes32 authorizationId,
+        address executor,
+        uint256 quantity,
+        bytes32 contextHash
+    );
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant SECOND_COLLECTION_ID = 2;
@@ -292,6 +315,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
     bytes32 private constant GATE_METADATA_HASH = keccak256("gate-metadata");
     bytes32 private constant GATE_AUTHORIZATION_ID = keccak256("gate-authorization");
     bytes32 private constant GATE_HASH = keccak256("gate-evidence");
+    uint32 private constant GATE_GAS_LIMIT = 400_000;
 
     StreamCore private core;
     StreamMintLedger private ledger;
@@ -566,7 +590,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
         storedGate.gateCodehash.assertEq(address(gate).codehash, "gate codehash");
         storedGate.gateMetadataHash.assertEq(GATE_METADATA_HASH, "gate metadata");
         uint256(storedGate.gateSemanticVersion).assertEq(1, "gate version");
-        uint256(storedGate.gateGasLimit).assertEq(0, "gate gas limit");
+        uint256(storedGate.gateGasLimit).assertEq(GATE_GAS_LIMIT, "gate gas limit");
 
         address[] memory noExecutors = new address[](0);
         manager.phasePolicyHash(COLLECTION_ID, PHASE_ID)
@@ -636,6 +660,29 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             _singleRequest(RECIPIENT, bytes32(0), CONTEXT_HASH);
         bytes32 activePolicy = manager.phasePolicyHash(COLLECTION_ID, PHASE_ID);
         request.expectedPolicyHash = activePolicy;
+        request.gateData = bytes("gate-proof");
+        gate.setExpectedCallData(
+            abi.encodeWithSelector(
+                IStreamMintGate.validateMint.selector,
+                address(manager),
+                EXECUTOR,
+                COLLECTION_ID,
+                PHASE_ID,
+                PAYER,
+                address(0),
+                request.initialRecipients,
+                request.beneficiaries,
+                CONTEXT_HASH,
+                activePolicy,
+                request.gateData
+            )
+        );
+
+        IStreamMintManager.MintRequest memory rootRequest = request;
+        rootRequest.authorizationId = GATE_AUTHORIZATION_ID;
+        bytes32 expectedRoot = _expectedOperationRoot(
+            rootRequest, activePolicy, manager.nextOperationNonce(), 1, EXECUTOR
+        );
 
         vm.expectEmit(true, true, true, true);
         emit MintGateValidated(
@@ -648,6 +695,17 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             CONTEXT_HASH,
             GATE_HASH,
             activePolicy
+        );
+        vm.expectEmit(true, true, true, true);
+        emit MintPreparedBatchExecuted(
+            expectedRoot,
+            COLLECTION_ID,
+            PHASE_ID,
+            activePolicy,
+            GATE_AUTHORIZATION_ID,
+            EXECUTOR,
+            1,
+            CONTEXT_HASH
         );
         vm.prank(EXECUTOR);
         manager.mintPrepared(request);
@@ -669,6 +727,75 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
                 )
             ).assertEq(1, "gate authorizer counter");
         core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "owner");
+    }
+
+    function testGatedMintRequiresGateSuppliedAuthorizationId() public {
+        MockMintGate gate = new MockMintGate();
+        _configureGatedPhase(gate, 5, 3, 1);
+        gate.setResult(bytes32(0), address(0), 1, GATE_HASH);
+
+        IStreamMintManager.MintRequest memory request =
+            _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintManager.MintAuthorizationRequired.selector, COLLECTION_ID, PHASE_ID
+            )
+        );
+        vm.prank(EXECUTOR);
+        manager.mintPrepared(request);
+
+        IStreamMintManager.MintRequest memory requestWithCallerId =
+            _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintManager.MintAuthorizationRequired.selector, COLLECTION_ID, PHASE_ID
+            )
+        );
+        vm.prank(EXECUTOR);
+        manager.mintPrepared(requestWithCallerId);
+
+        core.viewCirSupply(COLLECTION_ID).assertEq(0, "core not touched");
+    }
+
+    function testGatedMintRejectsConflictingRequestAuthorizationId() public {
+        MockMintGate gate = new MockMintGate();
+        _configureGatedPhase(gate, 5, 3, 1);
+        gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
+
+        IStreamMintManager.MintRequest memory request =
+            _singleRequest(RECIPIENT, AUTHORIZATION_ID, bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintManager.MintGateAuthorizationMismatch.selector,
+                AUTHORIZATION_ID,
+                GATE_AUTHORIZATION_ID
+            )
+        );
+        vm.prank(EXECUTOR);
+        manager.mintPrepared(request);
+
+        ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
+            .assertFalse("authorization not consumed");
+        core.viewCirSupply(COLLECTION_ID).assertEq(0, "core not touched");
+    }
+
+    function testGatedMintRejectsGateThatStopsAdvertisingInterface() public {
+        MockMintGate gate = new MockMintGate();
+        _configureGatedPhase(gate, 5, 3, 1);
+        gate.setResult(GATE_AUTHORIZATION_ID, address(0), 1, GATE_HASH);
+        gate.setAdvertisesInterface(false);
+
+        IStreamMintManager.MintRequest memory request =
+            _singleRequest(RECIPIENT, bytes32(0), bytes32(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamMintManager.MintGateNotActive.selector, address(gate))
+        );
+        vm.prank(EXECUTOR);
+        manager.mintPrepared(request);
+
+        ledger.isManagerAuthorizationUsed(address(manager), GATE_AUTHORIZATION_ID)
+            .assertFalse("authorization not consumed");
+        core.viewCirSupply(COLLECTION_ID).assertEq(0, "core not touched");
     }
 
     function testGatedMintRejectsReplayAndRollsBack() public {
@@ -1885,7 +2012,7 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             semanticVersion: 1,
             codehash: address(gate).codehash,
             metadataHash: GATE_METADATA_HASH,
-            gasLimit: 0
+            gasLimit: GATE_GAS_LIMIT
         });
     }
 

@@ -28,6 +28,18 @@ contract StreamMintModuleRegistryTest is CharacterizationTestBase {
     using Assertions for bytes32;
     using Assertions for uint256;
 
+    event MintModuleUpdated(
+        address indexed module,
+        IStreamMintModuleRegistry.ModuleStatus status,
+        bytes4 indexed interfaceId,
+        uint32 semanticVersion,
+        bytes32 codehash,
+        bytes32 metadataHash,
+        uint32 gasLimit,
+        address indexed admin
+    );
+    event MintModuleMetadata(address indexed module, bytes32 metadataHash, string metadataURI);
+
     bytes32 private constant METADATA_HASH = keccak256("registry-module-metadata");
     string private constant METADATA_URI = "ipfs://registry-module";
 
@@ -56,6 +68,19 @@ contract StreamMintModuleRegistryTest is CharacterizationTestBase {
         vm.expectRevert(bytes("Ownable: caller is not the owner"));
         registry.setModule(address(gate), info, METADATA_URI);
 
+        vm.expectEmit(true, true, true, true);
+        emit MintModuleUpdated(
+            address(gate),
+            IStreamMintModuleRegistry.ModuleStatus.ACTIVE,
+            type(IStreamMintGate).interfaceId,
+            1,
+            address(gate).codehash,
+            METADATA_HASH,
+            50_000,
+            address(this)
+        );
+        vm.expectEmit(true, true, true, true);
+        emit MintModuleMetadata(address(gate), METADATA_HASH, METADATA_URI);
         registry.setModule(address(gate), info, METADATA_URI);
 
         IStreamMintModuleRegistry.MintModuleInfo memory stored = registry.moduleInfo(address(gate));
@@ -121,6 +146,24 @@ contract StreamMintModuleRegistryTest is CharacterizationTestBase {
             )
         );
         registry.setModule(address(gate), info, METADATA_URI);
+
+        info = _moduleInfo(IStreamMintModuleRegistry.ModuleStatus.ACTIVE);
+        info.gasLimit = 0;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintModuleRegistry.InvalidMintModuleInfo.selector, address(gate)
+            )
+        );
+        registry.setModule(address(gate), info, METADATA_URI);
+
+        info = _moduleInfo(IStreamMintModuleRegistry.ModuleStatus.DEPRECATED);
+        info.gasLimit = 0;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamMintModuleRegistry.InvalidMintModuleInfo.selector, address(gate)
+            )
+        );
+        registry.setModule(address(gate), info, METADATA_URI);
     }
 
     function testStatusTransitionsDriveActiveCheckAndClear() public {
@@ -130,6 +173,17 @@ contract StreamMintModuleRegistryTest is CharacterizationTestBase {
         registry.isModuleActive(address(gate), type(IStreamMintGate).interfaceId)
             .assertTrue("active");
 
+        vm.expectEmit(true, true, true, true);
+        emit MintModuleUpdated(
+            address(gate),
+            IStreamMintModuleRegistry.ModuleStatus.DEPRECATED,
+            type(IStreamMintGate).interfaceId,
+            1,
+            address(gate).codehash,
+            METADATA_HASH,
+            50_000,
+            address(this)
+        );
         registry.setModule(
             address(gate),
             _moduleInfo(IStreamMintModuleRegistry.ModuleStatus.DEPRECATED),
@@ -146,6 +200,17 @@ contract StreamMintModuleRegistryTest is CharacterizationTestBase {
 
         IStreamMintModuleRegistry.MintModuleInfo memory clearInfo =
             _moduleInfo(IStreamMintModuleRegistry.ModuleStatus.UNKNOWN);
+        vm.expectEmit(true, true, true, true);
+        emit MintModuleUpdated(
+            address(gate),
+            IStreamMintModuleRegistry.ModuleStatus.UNKNOWN,
+            bytes4(0),
+            0,
+            bytes32(0),
+            bytes32(0),
+            0,
+            address(this)
+        );
         registry.setModule(address(gate), clearInfo, "");
 
         IStreamMintModuleRegistry.MintModuleInfo memory stored = registry.moduleInfo(address(gate));

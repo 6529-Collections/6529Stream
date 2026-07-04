@@ -6935,7 +6935,7 @@
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamMintModuleRegistry:function:supportsInterface(bytes4)",
       "kind": "function",
-      "line": 97,
+      "line": 99,
       "reason": "Current first-party release surface lacks nearby NatSpec; keep explicit until the Solidity declaration receives NatSpec.",
       "signature": "supportsInterface(bytes4)",
       "source": "smart-contracts/StreamMintModuleRegistry.sol",

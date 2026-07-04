@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "./IERC165.sol";
 import "./IStreamCore.sol";
 import "./IStreamMintGate.sol";
 import "./IStreamMintLedger.sol";
@@ -22,6 +23,8 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     /// @notice Domain separator for optional gate configuration hashes.
     bytes32 public constant GATE_CONFIG_DOMAIN =
         keccak256("6529STREAM_MINT_MANAGER_GATE_CONFIG_V1");
+    /// @notice Gas ceiling for ERC-165 probes of gate modules per EIP-165 guidance.
+    uint256 private constant GATE_ERC165_PROBE_GAS = 30_000;
     /// @notice Domain separator for sorted executor set hashes.
     bytes32 public constant EXECUTOR_SET_DOMAIN =
         keccak256("6529STREAM_MINT_MANAGER_EXECUTOR_SET_V1");
@@ -579,16 +582,16 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             effectiveAuthorizer = result.authorizer;
         }
 
-        bytes32 authorizationId = request.authorizationId;
-        if (result.authorizationId != bytes32(0)) {
-            if (authorizationId != bytes32(0) && authorizationId != result.authorizationId) {
-                revert MintGateAuthorizationMismatch(authorizationId, result.authorizationId);
-            }
-            authorizationId = result.authorizationId;
-        }
-        if (authorizationId == bytes32(0)) {
+        if (result.authorizationId == bytes32(0)) {
             revert MintAuthorizationRequired(request.collectionId, request.phaseId);
         }
+        if (
+            request.authorizationId != bytes32(0)
+                && request.authorizationId != result.authorizationId
+        ) {
+            revert MintGateAuthorizationMismatch(request.authorizationId, result.authorizationId);
+        }
+        bytes32 authorizationId = result.authorizationId;
 
         emit MintGateValidated(
             request.collectionId,
@@ -634,9 +637,8 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         returns (IStreamMintGate.GateResult memory)
     {
         bytes memory payload = _gateCallPayload(gateCall);
-        (bool ok, bytes memory returndata) = gateCall.gasLimit == 0
-            ? gateCall.gate.staticcall(payload)
-            : gateCall.gate.staticcall{ gas: gateCall.gasLimit }(payload);
+        (bool ok, bytes memory returndata) =
+            gateCall.gate.staticcall{ gas: gateCall.gasLimit }(payload);
         if (!ok) {
             revert MintGateValidationFailed(gateCall.gate);
         }
@@ -741,10 +743,23 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         }
         if (
             info.status != IStreamMintModuleRegistry.ModuleStatus.ACTIVE
-                || info.interfaceId != type(IStreamMintGate).interfaceId || gate.code.length == 0
-                || info.codehash != gate.codehash
+                || info.interfaceId != type(IStreamMintGate).interfaceId || info.gasLimit == 0
+                || gate.code.length == 0 || info.codehash != gate.codehash
+                || !_gateAdvertisesInterface(gate)
         ) {
             revert MintGateNotActive(gate);
+        }
+    }
+
+    function _gateAdvertisesInterface(address gate) private view returns (bool) {
+        try IERC165(gate).supportsInterface{ gas: GATE_ERC165_PROBE_GAS }(
+            type(IStreamMintGate).interfaceId
+        ) returns (
+            bool supported
+        ) {
+            return supported;
+        } catch {
+            return false;
         }
     }
 
