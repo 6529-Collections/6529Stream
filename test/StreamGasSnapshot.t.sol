@@ -11,6 +11,7 @@ import "../smart-contracts/StreamCuratorsPool.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMintLedger.sol";
 import "../smart-contracts/StreamMintManager.sol";
+import "../smart-contracts/StreamMintModuleRegistry.sol";
 import "./helpers/DropAuthTestHelper.sol";
 import "./helpers/StreamFixture.sol";
 
@@ -191,8 +192,9 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         vm.pauseGasMetering();
         DeployedStream memory deployed = deployStream(PAYOUT, CURATORS_POOL);
         StreamMintLedger ledger = new StreamMintLedger();
+        StreamMintModuleRegistry moduleRegistry = new StreamMintModuleRegistry();
         StreamMintManager manager =
-            new StreamMintManager(IStreamCore(address(deployed.core)), ledger);
+            new StreamMintManager(IStreamCore(address(deployed.core)), ledger, moduleRegistry);
         ledger.setLedgerWriter(address(manager), true);
         deployed.core.updateContracts(4, address(manager));
         _configureMaxLaunchBatchPhase(manager);
@@ -338,7 +340,9 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
             configHash: keccak256("gas-phase-config"),
             metadataHash: keccak256("gas-phase-metadata")
         });
-        manager.configurePhase(COLLECTION_ID, GAS_PHASE_ID, config, counterIds, counterConfigs);
+        manager.configurePhase(
+            COLLECTION_ID, GAS_PHASE_ID, config, _emptyGateConfig(), counterIds, counterConfigs
+        );
         manager.setPhaseExecutor(COLLECTION_ID, GAS_PHASE_ID, MINT_MANAGER_EXECUTOR, true);
     }
 
@@ -369,7 +373,19 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
             salts: salts,
             authorizationId: GAS_AUTHORIZATION_ID,
             contextHash: bytes32(0),
-            expectedPolicyHash: manager.phasePolicyHash(COLLECTION_ID, GAS_PHASE_ID)
+            expectedPolicyHash: manager.phasePolicyHash(COLLECTION_ID, GAS_PHASE_ID),
+            gateData: ""
+        });
+    }
+
+    function _emptyGateConfig() private pure returns (IStreamMintManager.MintGateConfig memory) {
+        return IStreamMintManager.MintGateConfig({
+            gate: address(0),
+            gateConfigHash: bytes32(0),
+            gateCodehash: bytes32(0),
+            gateMetadataHash: bytes32(0),
+            gateSemanticVersion: 0,
+            gateGasLimit: 0
         });
     }
 }

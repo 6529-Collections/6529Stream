@@ -32,6 +32,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 - Added the `StreamMintLedger` static counter accounting foundation, with deployed-contract ledger writers, registered phase policy hashes, launch-safe static counter policies, cap-checked counter consumption, authorization replay protection, and focused ledger tests, without adding Core bytecode or routing existing sale/drop/auction flows through the mint manager yet.
 - Added the `StreamMintManager` phase policy and prepared-mint execution surface, with launch-static counter policy registration, executor allowlists, phase pause/window guards, bounded ledger consumption construction, stale-policy and authorization replay protection, Core prepare/complete execution, deployment rehearsal wiring, release-artifact coverage, and focused rollback/reentrancy tests while keeping gates, resolver counters, callable nullifiers, and existing Drops/Auctions routing as follow-up slices.
 - Added launch v1 `StreamCollectionMetadata` and `StreamPreservationRecords` satellites, with schema-bound collection metadata records, immutable snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation records, tagged hash references, post-freeze append-only preservation behavior, deployment rehearsal wiring, release-artifact coverage, and focused event-reconstruction/admin/freeze tests while keeping attestations and view references as follow-up satellites.
+- Added the launch v1 mint gate and module registry foundation, with `IStreamMintGate`, `IStreamMintModuleRegistry`, `StreamMintModuleRegistry`, optional phase gate pins in `StreamMintManager`, gate-derived authorization and authorizer accounting, mint-time registry revalidation, deployment rehearsal wiring, release-artifact coverage, and focused fail-closed tests while keeping concrete ticket/Merkle/TDH gates and callable nullifiers as follow-up slices.
 - Added drop-authorization ZK nullifier binding helpers and docs, using `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay read-only while `StreamDrops` consumes the derived drop ID as the replay guard.
 - Added proposed pre-launch revenue split and royalty resolver specs covering arbitrary labeled split profiles, primary-sale templates, pull-based split wallets, native/ERC-20 release accounting, scoped assignment freezes, and Core-native resolver-backed ERC-2981 as the launch target.
 - Added a root `AGENTS.md` operating guide for automated coding agents, covering task startup, scope discipline, validation choices, PR/bot workflow, and security boundaries, with markdown-link checker coverage for the new guide.
@@ -282,7 +283,7 @@ These notes describe the committed pre-audit local baseline only; they do not pr
 
 - Bytecode proof local/fork status: `generated_from_committed_artifacts`
 - Bytecode proof production status: `missing_reviewed_live_proof`
-- Contract proof count: `54`
+- Contract proof count: `57`
 - Risk count: `12`
 
 ### Risk Status Counts

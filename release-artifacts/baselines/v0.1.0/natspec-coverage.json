@@ -6350,11 +6350,33 @@
     {
       "contract": "StreamMintManager",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:InvalidMintGate(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidMintGate(address)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamMintManager:custom_error:InvalidMintLedgerContract(address)",
       "kind": "custom_error",
       "line": null,
       "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
       "signature": "InvalidMintLedgerContract(address)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:InvalidMintModuleRegistry(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidMintModuleRegistry(address)",
       "source": "smart-contracts/StreamMintManager.sol",
       "status": "declaration_not_in_source"
     },
@@ -6454,6 +6476,94 @@
       "line": null,
       "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
       "signature": "MintExecutorCountLimitExceeded(uint256,uint256)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateAuthorizationMismatch(bytes32,bytes32)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateAuthorizationMismatch(bytes32,bytes32)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateAuthorizerMismatch(address,address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateAuthorizerMismatch(address,address)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateCodehashChanged(address,bytes32,bytes32)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateCodehashChanged(address,bytes32,bytes32)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateHashRequired(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateHashRequired(address)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateNotActive(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateNotActive(address)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateNullifiersUnsupported(bytes32)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateNullifiersUnsupported(bytes32)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateQuantityExceeded(uint256,uint256)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateQuantityExceeded(uint256,uint256)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:custom_error:MintGateValidationFailed(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateValidationFailed(address)",
       "source": "smart-contracts/StreamMintManager.sol",
       "status": "declaration_not_in_source"
     },
@@ -6581,6 +6691,17 @@
     {
       "contract": "StreamMintManager",
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:event:MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamMintManager:event:MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
       "kind": "event",
       "line": null,
@@ -6597,6 +6718,17 @@
       "line": null,
       "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
       "signature": "MintPhaseExecutorUpdated(uint256,bytes32,address,bool,bytes32,address)",
+      "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintManager",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintManager:event:MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
       "source": "smart-contracts/StreamMintManager.sol",
       "status": "declaration_not_in_source"
     },
@@ -6697,6 +6829,127 @@
       "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
       "signature": "transferOwnership(address)",
       "source": "smart-contracts/StreamMintManager.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:custom_error:InvalidMintModule(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidMintModule(address)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:custom_error:InvalidMintModuleInfo(address)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "InvalidMintModuleInfo(address)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:custom_error:MintModuleCodehashMismatch(address,bytes32,bytes32)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintModuleCodehashMismatch(address,bytes32,bytes32)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:custom_error:MintModuleInterfaceUnsupported(address,bytes4)",
+      "kind": "custom_error",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintModuleInterfaceUnsupported(address,bytes4)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:event:MintModuleMetadata(address,bytes32,string)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintModuleMetadata(address,bytes32,string)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:event:MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:event:OwnershipTransferred(address,address)",
+      "kind": "event",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "OwnershipTransferred(address,address)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:function:owner()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "owner()",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:function:renounceOwnership()",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "renounceOwnership()",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "declaration_not_in_source"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:function:supportsInterface(bytes4)",
+      "kind": "function",
+      "line": 102,
+      "reason": "Current first-party release surface lacks nearby NatSpec; keep explicit until the Solidity declaration receives NatSpec.",
+      "signature": "supportsInterface(bytes4)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "status": "missing_natspec"
+    },
+    {
+      "contract": "StreamMintModuleRegistry",
+      "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
+      "id": "StreamMintModuleRegistry:function:transferOwnership(address)",
+      "kind": "function",
+      "line": null,
+      "reason": "ABI entry is inherited from a dependency or generated outside the first-party declaration body; keep explicit until the source surface is documented or intentionally excluded.",
+      "signature": "transferOwnership(address)",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
       "status": "declaration_not_in_source"
     },
     {

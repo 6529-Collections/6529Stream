@@ -15,6 +15,8 @@ import "../smart-contracts/StreamContractMetadata.sol";
 import "../smart-contracts/StreamCore.sol";
 import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
+import "../smart-contracts/StreamMintManager.sol";
+import "../smart-contracts/StreamMintModuleRegistry.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
@@ -96,6 +98,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         Assertions.assertTrue(
             primarySaleSettlement.isStreamPrimarySaleSettlement(), "primary settlement marker"
         );
+        _assertMintModuleRegistry(result, config);
         Assertions.assertEq(
             address(primarySaleSettlement.revenueResolver()),
             result.revenueResolver,
@@ -126,6 +129,27 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         );
         Assertions.assertTrue(
             StreamAuctions(result.auctions).isStreamAuctionsContract(), "auction contract"
+        );
+    }
+
+    function _assertMintModuleRegistry(
+        RehearseDeployment.DeploymentResult memory result,
+        RehearseDeployment.DeploymentConfig memory config
+    ) private view {
+        StreamMintModuleRegistry mintModuleRegistry =
+            StreamMintModuleRegistry(result.mintModuleRegistry);
+        StreamMintManager mintManager = StreamMintManager(result.mintManager);
+
+        Assertions.assertEq(
+            mintModuleRegistry.owner(), config.adminSafe, "mint module registry owner not safe"
+        );
+        Assertions.assertTrue(
+            mintModuleRegistry.isStreamMintModuleRegistry(), "mint module registry marker"
+        );
+        Assertions.assertEq(
+            address(mintManager.moduleRegistry()),
+            result.mintModuleRegistry,
+            "mint manager module registry"
         );
     }
 
@@ -536,6 +560,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
             abi.encode(
                 _contractBinding(result.minter),
                 _contractBinding(result.mintLedger),
+                _contractBinding(result.mintModuleRegistry),
                 _contractBinding(result.mintManager),
                 _contractBinding(result.randomizerVrf),
                 _contractBinding(result.randomizerRng)

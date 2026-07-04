@@ -24,8 +24,10 @@
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0x2cfff1d3",
     "IStreamDrops": "0xd7c2abe3",
+    "IStreamMintGate": "0xa5d7921d",
     "IStreamMintLedger": "0x79bc7192",
-    "IStreamMintManager": "0x6bd9f3cb",
+    "IStreamMintManager": "0xfc2559eb",
+    "IStreamMintModuleRegistry": "0x4eb81941",
     "IStreamMinter": "0x0f48ec25",
     "IStreamPreservationRecords": "0xad590280",
     "IStreamPrimarySaleSettlement": "0x53f97e17",
@@ -845,6 +847,24 @@
         }
       ]
     },
+    "IStreamMintGate": {
+      "source": "smart-contracts/IStreamMintGate.sol",
+      "artifact_path": "out/IStreamMintGate.sol/IStreamMintGate.json",
+      "abi_sha256": "sha256:0725dcb8f0e9e9a9de912a5c75ef775f9ae0fc2f717cbe4e4a93ac8074214be9",
+      "interface_id": "0xa5d7921d",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xa5d7921d",
+      "function_selectors": [
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
+        },
+        {
+          "signature": "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)",
+          "selector": "0xa4285bba"
+        }
+      ]
+    },
     "IStreamMintLedger": {
       "source": "smart-contracts/IStreamMintLedger.sol",
       "artifact_path": "out/IStreamMintLedger.sol/IStreamMintLedger.json",
@@ -906,14 +926,14 @@
     "IStreamMintManager": {
       "source": "smart-contracts/IStreamMintManager.sol",
       "artifact_path": "out/IStreamMintManager.sol/IStreamMintManager.json",
-      "abi_sha256": "sha256:51a85fbbe1ad4afbc59d7f1c41632345b2e08bb0ab6e90024690e2472dc079b1",
-      "interface_id": "0x6bd9f3cb",
+      "abi_sha256": "sha256:35697e221de52b5d3974a4e08ca17528a668754cef5ec999a618d710c267f755",
+      "interface_id": "0xfc2559eb",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x6bd9f3cb",
+      "computed_selector_xor": "0xfc2559eb",
       "function_selectors": [
         {
-          "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
-          "selector": "0xf6c40160"
+          "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+          "selector": "0x01bc316a"
         },
         {
           "signature": "counterConfig(uint256,bytes32,bytes32)",
@@ -924,8 +944,8 @@
           "selector": "0x47588f68"
         },
         {
-          "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
-          "selector": "0x2cfccbc6"
+          "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes))",
+          "selector": "0x000794df"
         },
         {
           "signature": "phase(uint256,bytes32)",
@@ -938,6 +958,10 @@
         {
           "signature": "phaseExecutor(uint256,bytes32,address)",
           "selector": "0x84fd1d05"
+        },
+        {
+          "signature": "phaseGate(uint256,bytes32)",
+          "selector": "0x4c7fc533"
         },
         {
           "signature": "phasePolicyHash(uint256,bytes32)",
@@ -958,6 +982,36 @@
         {
           "signature": "setPhasePaused(uint256,bytes32,bool)",
           "selector": "0x846bb3a1"
+        }
+      ]
+    },
+    "IStreamMintModuleRegistry": {
+      "source": "smart-contracts/IStreamMintModuleRegistry.sol",
+      "artifact_path": "out/IStreamMintModuleRegistry.sol/IStreamMintModuleRegistry.json",
+      "abi_sha256": "sha256:582538c63865086c0bf211787e97e1d9ec37a472167ff331d3b79f50f9064af4",
+      "interface_id": "0x4eb81941",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x4eb81941",
+      "function_selectors": [
+        {
+          "signature": "isModuleActive(address,bytes4)",
+          "selector": "0x737f4b5f"
+        },
+        {
+          "signature": "isStreamMintModuleRegistry()",
+          "selector": "0x59cce87f"
+        },
+        {
+          "signature": "moduleInfo(address)",
+          "selector": "0x56b97ec1"
+        },
+        {
+          "signature": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+          "selector": "0x334d0d07"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
         }
       ]
     },

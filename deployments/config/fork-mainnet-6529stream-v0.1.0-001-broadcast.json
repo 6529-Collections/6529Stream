@@ -184,11 +184,18 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamMintModuleRegistry",
+        "address": "0x2000000000000000000000000000000000000013",
+        "constructor_args": [],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamMintManager",
         "address": "0x2000000000000000000000000000000000000010",
         "constructor_args": [
           "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
-          "0x200000000000000000000000000000000000000f"
+          "0x200000000000000000000000000000000000000f",
+          "0x2000000000000000000000000000000000000013"
         ],
         "verification_status": "not_applicable"
       }
@@ -236,6 +243,10 @@
           "new_owner": "0x0000000000000000000000000000000000006529"
         },
         {
+          "contract": "StreamMintModuleRegistry",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
           "contract": "StreamMintManager",
           "new_owner": "0x0000000000000000000000000000000000006529"
         }
@@ -266,7 +277,7 @@
   "broadcast_evidence": {
     "schema_version": "6529stream.foundry-broadcast-evidence.v1",
     "broadcast_file": "deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json",
-    "broadcast_sha256": "sha256:184c01345c19fbf6646a298f01fbc8973f47429bc29d8abb7f5d7094d477bd76",
+    "broadcast_sha256": "sha256:f778fb20d24bda64bf256b75850613f779f44283e22a69428adf815cd3f7452c",
     "template_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001.json",
     "generated_config": "deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json",
     "chain_id": 1,
@@ -355,6 +366,11 @@
         "contract": "StreamMintLedger",
         "address": "0x200000000000000000000000000000000000000f",
         "transaction_hash": "0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
+      },
+      {
+        "contract": "StreamMintModuleRegistry",
+        "address": "0x2000000000000000000000000000000000000013",
+        "transaction_hash": "0x1313131313131313131313131313131313131313131313131313131313131313"
       },
       {
         "contract": "StreamMintManager",

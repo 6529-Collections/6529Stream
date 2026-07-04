@@ -54,6 +54,10 @@
       "source": "smart-contracts/StreamMintLedger.sol"
     },
     {
+      "name": "StreamMintModuleRegistry",
+      "source": "smart-contracts/StreamMintModuleRegistry.sol"
+    },
+    {
       "name": "StreamMintManager",
       "source": "smart-contracts/StreamMintManager.sol"
     },
@@ -231,12 +235,20 @@
       "source": "smart-contracts/IStreamMinter.sol"
     },
     {
+      "name": "IStreamMintGate",
+      "source": "smart-contracts/IStreamMintGate.sol"
+    },
+    {
       "name": "IStreamMintManager",
       "source": "smart-contracts/IStreamMintManager.sol"
     },
     {
       "name": "IStreamMintLedger",
       "source": "smart-contracts/IStreamMintLedger.sol"
+    },
+    {
+      "name": "IStreamMintModuleRegistry",
+      "source": "smart-contracts/IStreamMintModuleRegistry.sol"
     },
     {
       "name": "IStreamPrimarySaleSettlement",

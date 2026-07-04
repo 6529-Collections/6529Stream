@@ -39,6 +39,80 @@
       ]
     },
     {
+      "topic0": "0x04e9eb42a29232bb7f9414c45885a23d35175a201fed2aea9a83f76b4d60da79",
+      "signature": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+      "name": "MintGateValidated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "phaseId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "gate",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "authorizationId",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "authorizer",
+          "type": "address",
+          "indexed": false,
+          "internal_type": "address"
+        },
+        {
+          "index": 5,
+          "name": "quantity",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 6,
+          "name": "contextHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 7,
+          "name": "gateHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 8,
+          "name": "policyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamMintManager"
+      ]
+    },
+    {
       "topic0": "0x08d3619b7b7042b0abc676395bb4c030f0ffdc15d2e1ecdd507e6c933fd5a5f1",
       "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
       "name": "ERC20Released",
@@ -96,6 +170,73 @@
       ],
       "emitted_by": [
         "StreamSplitWallet"
+      ]
+    },
+    {
+      "topic0": "0x09815eaeb5b539ac67baf5ddc43e22e8ab2d51e6798fc9716c8262ff12d0de41",
+      "signature": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+      "name": "MintModuleUpdated",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "module",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "status",
+          "type": "uint8",
+          "indexed": false,
+          "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus"
+        },
+        {
+          "index": 2,
+          "name": "interfaceId",
+          "type": "bytes4",
+          "indexed": true,
+          "internal_type": "bytes4"
+        },
+        {
+          "index": 3,
+          "name": "semanticVersion",
+          "type": "uint32",
+          "indexed": false,
+          "internal_type": "uint32"
+        },
+        {
+          "index": 4,
+          "name": "codehash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "metadataHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "gasLimit",
+          "type": "uint32",
+          "indexed": false,
+          "internal_type": "uint32"
+        },
+        {
+          "index": 7,
+          "name": "admin",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        }
+      ],
+      "emitted_by": [
+        "StreamMintModuleRegistry"
       ]
     },
     {
@@ -436,6 +577,80 @@
       ],
       "emitted_by": [
         "StreamCore"
+      ]
+    },
+    {
+      "topic0": "0x19ff29678fa57c184bc1454739f5988f49cdf09bd02e64768812ba9708cc86b8",
+      "signature": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+      "name": "MintPhaseGateConfigured",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "phaseId",
+          "type": "bytes32",
+          "indexed": true,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "gate",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 3,
+          "name": "gateConfigHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 4,
+          "name": "gateCodehash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 5,
+          "name": "gateMetadataHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 6,
+          "name": "gateSemanticVersion",
+          "type": "uint32",
+          "indexed": false,
+          "internal_type": "uint32"
+        },
+        {
+          "index": 7,
+          "name": "gateGasLimit",
+          "type": "uint32",
+          "indexed": false,
+          "internal_type": "uint32"
+        },
+        {
+          "index": 8,
+          "name": "policyHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        }
+      ],
+      "emitted_by": [
+        "StreamMintManager"
       ]
     },
     {
@@ -2383,6 +2598,7 @@
         "StreamDrops",
         "StreamMintLedger",
         "StreamMintManager",
+        "StreamMintModuleRegistry",
         "StreamPrimarySaleSettlement",
         "StreamRevenueResolver"
       ]
@@ -2456,6 +2672,38 @@
       ],
       "emitted_by": [
         "StreamMinter"
+      ]
+    },
+    {
+      "topic0": "0x9517d14f747fcf52d95f70fb98c5239d7619e4b3692ce32266b37740979f31f6",
+      "signature": "MintModuleMetadata(address,bytes32,string)",
+      "name": "MintModuleMetadata",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "module",
+          "type": "address",
+          "indexed": true,
+          "internal_type": "address"
+        },
+        {
+          "index": 1,
+          "name": "metadataHash",
+          "type": "bytes32",
+          "indexed": false,
+          "internal_type": "bytes32"
+        },
+        {
+          "index": 2,
+          "name": "metadataURI",
+          "type": "string",
+          "indexed": false,
+          "internal_type": "string"
+        }
+      ],
+      "emitted_by": [
+        "StreamMintModuleRegistry"
       ]
     },
     {
@@ -7776,6 +8024,77 @@
           ]
         },
         {
+          "name": "MintGateValidated",
+          "signature": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+          "topic0": "0x04e9eb42a29232bb7f9414c45885a23d35175a201fed2aea9a83f76b4d60da79",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "phaseId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "gate",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "authorizationId",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "authorizer",
+              "type": "address",
+              "indexed": false,
+              "internal_type": "address"
+            },
+            {
+              "index": 5,
+              "name": "quantity",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 6,
+              "name": "contextHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 7,
+              "name": "gateHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 8,
+              "name": "policyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
           "name": "MintPhaseConfigured",
           "signature": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
           "topic0": "0xaf09811571ab69cee855be8d78ba844e3eab333f1c2dace74c2a9cf26e468c84",
@@ -7893,6 +8212,77 @@
               "type": "address",
               "indexed": false,
               "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "MintPhaseGateConfigured",
+          "signature": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+          "topic0": "0x19ff29678fa57c184bc1454739f5988f49cdf09bd02e64768812ba9708cc86b8",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "phaseId",
+              "type": "bytes32",
+              "indexed": true,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "gate",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 3,
+              "name": "gateConfigHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 4,
+              "name": "gateCodehash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "gateMetadataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "gateSemanticVersion",
+              "type": "uint32",
+              "indexed": false,
+              "internal_type": "uint32"
+            },
+            {
+              "index": 7,
+              "name": "gateGasLimit",
+              "type": "uint32",
+              "indexed": false,
+              "internal_type": "uint32"
+            },
+            {
+              "index": 8,
+              "name": "policyHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
             }
           ]
         },
@@ -8071,6 +8461,127 @@
               "type": "bytes32",
               "indexed": false,
               "internal_type": "bytes32"
+            }
+          ]
+        },
+        {
+          "name": "OwnershipTransferred",
+          "signature": "OwnershipTransferred(address,address)",
+          "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            }
+          ]
+        }
+      ]
+    },
+    "StreamMintModuleRegistry": {
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "artifact_path": "out/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
+      "events": [
+        {
+          "name": "MintModuleMetadata",
+          "signature": "MintModuleMetadata(address,bytes32,string)",
+          "topic0": "0x9517d14f747fcf52d95f70fb98c5239d7619e4b3692ce32266b37740979f31f6",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 2,
+              "name": "metadataURI",
+              "type": "string",
+              "indexed": false,
+              "internal_type": "string"
+            }
+          ]
+        },
+        {
+          "name": "MintModuleUpdated",
+          "signature": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+          "topic0": "0x09815eaeb5b539ac67baf5ddc43e22e8ab2d51e6798fc9716c8262ff12d0de41",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "module",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
+            },
+            {
+              "index": 1,
+              "name": "status",
+              "type": "uint8",
+              "indexed": false,
+              "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus"
+            },
+            {
+              "index": 2,
+              "name": "interfaceId",
+              "type": "bytes4",
+              "indexed": true,
+              "internal_type": "bytes4"
+            },
+            {
+              "index": 3,
+              "name": "semanticVersion",
+              "type": "uint32",
+              "indexed": false,
+              "internal_type": "uint32"
+            },
+            {
+              "index": 4,
+              "name": "codehash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 5,
+              "name": "metadataHash",
+              "type": "bytes32",
+              "indexed": false,
+              "internal_type": "bytes32"
+            },
+            {
+              "index": 6,
+              "name": "gasLimit",
+              "type": "uint32",
+              "indexed": false,
+              "internal_type": "uint32"
+            },
+            {
+              "index": 7,
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internal_type": "address"
             }
           ]
         },
