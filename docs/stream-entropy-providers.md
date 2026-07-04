@@ -261,12 +261,17 @@ registration authority, LINK/native funding account, callback gas settings, and
 the process for moving future requests to a new subscription without altering
 old request provenance.
 
-Recommended version interface:
+The provider-family identity surface is the one already declared on
+`IStreamEntropyProvider`:
 
 ```solidity
-function providerType() external pure returns (bytes32);
-function providerVersion() external pure returns (bytes32);
+function streamEntropyProviderFamily() external pure returns (bytes32);
+function streamEntropyProviderVersion() external pure returns (bytes32);
 ```
+
+Providers additionally expose the canonical module identity surface
+(`streamModuleType()` and companions, ADR 0009 decision 3) like every other
+satellite.
 
 Example values:
 
@@ -607,7 +612,7 @@ mapping(uint256 arrngRequestId => ProviderResult) results;
 StreamEntropyCoordinator.requestEntropy(tokenId)
   -> StreamEntropyProviderARRNG.requestEntropy(requestKey, context)
        require msg.sender == coordinator
-       require msg.value >= requestPaymentWei, if payment is required
+       require msg.value == requestPaymentWei, if payment is required
        request external randomness
        store arrngRequestId -> requestKey
        emit ARRNGEntropyRequested
@@ -1091,7 +1096,8 @@ Existing `StreamCore` should not need changes for new provider adapters.
 Common provider tests:
 
 1. `isStreamEntropyProvider()` returns true.
-2. `providerType()` and `providerVersion()` are stable.
+2. `streamEntropyProviderFamily()` and `streamEntropyProviderVersion()` are
+   stable.
 3. Only coordinator can call `requestEntropy`.
 4. Request maps provider request ID to request key.
 5. Unknown callback request IDs are rejected or explicitly evented.

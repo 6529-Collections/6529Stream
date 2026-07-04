@@ -2258,8 +2258,9 @@ the flow to a new reviewed phase ID/policy.
 Core tests:
 
 1. Only `mintManager` can call `mintFromManager()`.
-2. Core computes the next token ID and collection-local serial inside the
-   collection's reserved range.
+2. Core computes the next token ID from the global sequential counter and
+   stores the collection-local serial explicitly in the token identity
+   record (ADR 0009 decision 1).
 3. Core reverts when the collection is unknown, paused, closed, not yet active
    for minting, or artwork-finality-blocked for new supply.
 4. Core reverts when collection supply is exhausted.

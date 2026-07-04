@@ -1502,7 +1502,7 @@ Rules:
    mandatory v1 storage.
 7. This keeps the genesis metadata contract auditable while preserving the
    50-year knowledge-system model.
-8. `contentHashDigest`, `signatureHashDigest`, and `uri` must respect v1
+8. `contentHash.digest`, `signatureHash.digest`, and `uri` must respect v1
    byte limits. Oversized records revert before emitting events.
 9. New record families are admitted through registry governance and explicit
    authorization policy updates. They cannot change tokenURI, renderer output,
@@ -1973,6 +1973,17 @@ function recordCollectionAttestation(
     CollectionAttestation calldata attestation
 ) external;
 
+function setCollectionRecord(
+    uint256 collectionId,
+    CollectionRecord calldata record
+) external returns (bytes32 recordHash);
+
+function setCollectionRecordWithRevision(
+    uint256 collectionId,
+    CollectionRecord calldata record,
+    uint64 expectedRevision
+) external returns (bytes32 recordHash);
+
 function recordCollectionRecord(
     uint256 collectionId,
     CollectionRecord calldata record
@@ -2341,6 +2352,8 @@ setScriptChunk              script admin or global admin
 setDependencyManifest       script admin or global admin
 submitArtistAttestation     artist address or delegated artist signer
 recordCollectionAttestation attester, collection metadata admin, or global admin
+setCollectionRecord         metadata safe-operator or global admin
+setCollectionRecordWithRevision metadata safe-operator or global admin
 recordCollectionRecord      preservation safe-operator or global admin
 publishCollectionSnapshot   collection metadata admin or global admin
 lockCollectionField         freeze admin or global admin
@@ -2496,9 +2509,11 @@ contract URI is an offchain URI rather than an onchain JSON data URI, the
 metadata contract should store the URI and an optional schema/hash commitment.
 
 Collection contract URI updates should emit collection-specific metadata events.
-Protocol v1 does not add `contractURI()` to Core. Router-level global contract
-metadata reads may emit `ContractURIUpdated()` from the router or metadata
-contract that exposes the global read. Collection-level contract metadata
+Protocol v1 adds `contractURI()` to Core as the canonical ERC-7572 hook — a
+thin, bounded read delegated to the contract-metadata satellite through the
+cached pointer policy (ADR 0009 decision 4). `ContractURIUpdated()` is
+Core-originated through the same restricted emitter posture as the ERC-4906
+refresh events (ADR 0009 decision 5). Collection-level contract metadata
 remains available through `StreamCollectionMetadata.contractURI(collectionId)`
 and token JSON references.
 

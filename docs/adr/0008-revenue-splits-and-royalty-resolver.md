@@ -801,10 +801,13 @@ bytes32 assignmentHash = keccak256(abi.encode(
     address(splitWallet),
     uint16(royaltyBps),
     uint8(assignmentKind),
-    uint8(freezeMode),
-    bool(permanentFreeze),
+    bool(frozen),
     bytes32(metadataHash)
 ));
+// The assignment hash binds the frozen bit only (ADR 0009 decision 9);
+// freeze-mode transitions between frozen states do not change the hash.
+// The canonical field-level preimage is defined in
+// docs/revenue-splits-and-royalties.md.
 
 bytes32 resolvedPrimaryPolicyHash = keccak256(abi.encode(
     STREAM_PRIMARY_POLICY_V1,
@@ -873,11 +876,11 @@ Rules:
 - `royaltyBps` must be less than or equal to Core's immutable
   `maxRoyaltyBps`. A resolver may mirror the same cap or choose a lower cap,
   but it cannot raise the Core ceiling.
-- The recommended initial Core `maxRoyaltyBps` is 1000. Some marketplaces warn
-  on or reject royalties above 1000 bps. The Core cap must not exceed 10,000.
-  Raising that ceiling after launch requires a new Core deployment line and
-  explicit rollout plan; lowering resolver policy can use a new resolver
-  deployment and rollout plan.
+- The Core `maxRoyaltyBps` is 1000 and immutable in Core
+  (ADR 0009 decision 7). Some marketplaces warn on or reject royalties above
+  1000 bps. Raising the cap requires a successor Core line and explicit
+  rollout plan; lowering resolver policy can use a new resolver deployment
+  and rollout plan.
 - Assignment setters must validate wallet deployment, `walletFor(profileId)`,
   `wallet.profileId()`, and an active runtime code hash at assignment time.
   Core `royaltyInfo()` must not redo expensive wallet validation on every read.

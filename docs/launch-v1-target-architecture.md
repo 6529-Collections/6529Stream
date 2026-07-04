@@ -275,7 +275,8 @@ Rules:
 2. `EXACT_FROZEN` freezes exactly one assignment key.
 3. `INHERITED_FROZEN` freezes a scope and all realized descendants.
 4. `GLOBAL_FROZEN` freezes an entire revenue class across default,
-   collection, and token scopes.
+   collection, and token scopes; a deployment-wide global freeze also blocks
+   creation of new revenue classes (ADR 0009 decision 8).
 5. `PERMANENT_FROZEN` cannot be loosened or unfrozen.
 6. Timelocked loosening is allowed only for non-permanent freezes and must
    emit before/after policy hashes.
