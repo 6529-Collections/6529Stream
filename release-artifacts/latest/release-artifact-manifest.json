@@ -8,7 +8,7 @@
   "artifacts": {
     "abi-checksums.json": {
       "path": "abi-checksums.json",
-      "sha256": "sha256:719608425eaeb6557e31d3a5bb638434fad895c8cb73cd2cabc179033e26bd0f"
+      "sha256": "sha256:6921cf7f5399f9e51ea195b401d0edb70aba2b2bef36dcf9a2a8757575c0ebe2"
     },
     "event-topic-catalog.json": {
       "path": "event-topic-catalog.json",

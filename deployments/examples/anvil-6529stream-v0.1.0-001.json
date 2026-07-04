@@ -202,7 +202,7 @@
       "address": "0x0000000000000000000000000000000000000013",
       "constructor_args": [],
       "abi_hash": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
-      "bytecode_hash": "sha256:5f2106e95a2e083bd0ef3a857ceccc9c463a390f811771cfdc909419105ae442",
+      "bytecode_hash": "sha256:7175d13313271dbd49b6e443427844a3528073315276079ca0788a6e13df22cf",
       "verification_status": "not_applicable"
     },
     "StreamMintManager": {
@@ -282,7 +282,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:e63c1caa4b3485880bc572705ee6912a545e5f9a970e2388299879266d78e3f5",
+    "manifest_sha256": "sha256:41f1a6fda1c20f0de51efd437c3893d3c6ab6dbe031229b7ca1032b5da086300",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",

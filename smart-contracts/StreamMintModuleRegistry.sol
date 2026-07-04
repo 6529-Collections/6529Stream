@@ -8,6 +8,9 @@ import "./Ownable.sol";
 
 /// @notice Boring allowlist registry for StreamMintManager gates and future modules.
 contract StreamMintModuleRegistry is ERC165, Ownable, IStreamMintModuleRegistry {
+    /// @notice Gas ceiling for ERC-165 probes of candidate modules per EIP-165 guidance.
+    uint256 private constant MODULE_ERC165_PROBE_GAS = 30_000;
+
     mapping(address => MintModuleInfo) private _moduleInfo;
 
     /// @notice Returns true for deployment validation.
@@ -107,7 +110,9 @@ contract StreamMintModuleRegistry is ERC165, Ownable, IStreamMintModuleRegistry 
     }
 
     function _supportsInterface(address module, bytes4 interfaceId) private view returns (bool) {
-        try IERC165(module).supportsInterface(interfaceId) returns (bool supported) {
+        try IERC165(module).supportsInterface{ gas: MODULE_ERC165_PROBE_GAS }(interfaceId) returns (
+            bool supported
+        ) {
             return supported;
         } catch {
             return false;
