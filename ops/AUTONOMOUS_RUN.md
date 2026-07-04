@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/collection-metadata-preservation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/637` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/638` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/639` |
-| Next issue | Collection attestations and collection view/reference satellites after the metadata/preservation slice. |
+| Active PR branch | `codex/mint-gate-registry-foundation` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/639` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/640` |
+| Active PR | TBD |
+| Next issue | Concrete ticket/Merkle/TDH gate implementations and callable nullifier support after the gate/registry foundation slice. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-06-26 07:17 UTC` |
+| Last updated | `2026-07-04 00:00 UTC` |
 
 ## Current Run Notes
 
@@ -55,30 +55,27 @@ evidence, and audit/readiness gates.
   and issue #634 is closed completed.
 - PR #637 merged the `StreamMintManager` phase policy and prepared-mint
   execution slice, and issue #636 is closed completed.
-- The current topic is CON-015 on branch
-  `codex/collection-metadata-preservation`; PR #639 is open for issue #638 and
-  CodeRabbit has been requested.
-- For substantive local drafts, request parallel OpenRouter review from Opus
-  4.8, GPT-5.5 Pro, and GLM 5.2 before opening the PR.
-- Current topic adds launch v1 `StreamCollectionMetadata` and
-  `StreamPreservationRecords` as outside-Core satellites. The local draft uses
-  compact schema-bound generic metadata records for typed launch groups,
-  immutable snapshot publication, PREMIS/C2PA/IIIF/fixity-ready preservation
-  records with tagged hash references, event reconstruction, deployment
-  rehearsal wiring, and release artifact coverage. Focused
-  `StreamCollectionMetadata`, `StreamPreservationRecords`, and
-  `StreamDeploymentManifest` tests pass locally after the snapshot hash was
-  domain-separated by `snapshotId`. Production via-IR size output records
-  `StreamCore` at 24,150 bytes with 426 bytes of EIP-170 margin,
-  `StreamCollectionMetadata` at 10,166 bytes, and
-  `StreamPreservationRecords` at 7,734 bytes.
-- Current local review status for CON-015: Opus 4.8 and GLM 5.2 returned no
-  P0/P1 issues. GPT-5.5 Pro ran at high/max reasoning, found one P2 in the
-  deployment manifest identity binding, and closed that finding after the
-  follow-up fix bound satellite `streamCore`, `adminsContract`, and
-  `streamModuleSupersedes` state.
-- Remaining CON-015 work: wait for CI, CodeRabbit, and any bot or human review
-  feedback on PR #639; resolve actionable findings before merge.
+- PR #639 merged the CON-015 collection metadata and preservation satellites,
+  and issue #638 is closed completed.
+- The current topic is CON-016 on branch
+  `codex/mint-gate-registry-foundation` for issue #640; the local draft is
+  complete and the PR is being opened.
+- Current topic adds `IStreamMintGate`, `IStreamMintModuleRegistry`, and
+  `StreamMintModuleRegistry` as the approved outside-Core module boundary,
+  plus optional phase gate pins in `StreamMintManager` with gate-derived
+  authorization and authorizer accounting, mint-time registry
+  status/interface/codehash/metadata/version/gas-limit revalidation before any
+  ledger or Core mutation, deployment rehearsal wiring, and release-artifact
+  coverage. Gate calls use bounded `staticcall`, non-empty gate nullifier
+  arrays are rejected until the callable-nullifier slice, and ungated phases
+  keep requiring explicit request authorization IDs.
+- Local validation for CON-016: focused `StreamMintModuleRegistry` (4) and
+  `StreamMintManager` (43) suites, deployment manifest and gas snapshot
+  suites, the full release-artifact regeneration chain
+  (`make release-checksums`), and the full Windows check suite pass locally.
+- Remaining CON-016 work: open the PR for issue #640, request CodeRabbit, wait
+  for CI and bot feedback, resolve actionable findings, and merge only when
+  clean per the maintainer's explicit merge authorization.
 - Keep attestations, collection view/reference satellites, typed
   PREMIS/C2PA/IIIF companion ABIs, custom gates, ERC-20 auction bidding, and
   royalty resolver integration as follow-up slices unless the current review
@@ -16404,6 +16401,9 @@ Outcome:
 | 2026-06-19 10:37 | Open PR #608 for issue #607 | PR #608 is open at `https://github.com/6529-Collections/6529Stream/pull/608`, closes issue #607, and packages the shared symlink-safe retained-path helper, six migrated release evidence checkers, live metadata-browser and production broadcast symlink regressions, release checksum coverage for the helper, refreshed release artifacts, and roadmap/status/backlog/run-state updates. Next action is to push this PR-number state update, request CodeRabbit, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
 | 2026-06-19 10:42 | Address PR #608 bot polish | 6529bot security reported no findings and general review marked PR #608 good to merge with non-blocking polish. Accepted the useful suggestions by documenting the helper's drive/root/backslash/symlink/escape policy and intended keyword call shape, adding a production broadcast retained-path backslash rejection regression, confirming no committed production broadcast evidence references use backslashes, and regenerating release checksums. Focused validation passed: Python compile for the helper/production broadcast checker/tests, `python scripts\test_production_broadcast_retention.py` with 16 tests, `python scripts\check_production_broadcast_retention.py`, `make release-checksums`, `python scripts\check_autonomous_state.py`, `python scripts\verify_release_artifacts.py`, `python scripts\check_changelog.py`, `python scripts\check_markdown_links.py`, `python scripts\generate_release_checksums.py --check`, and `codex-diff-check`. Next action is to commit/push the review-response head, wait for latest CI/CodeRabbit/6529bot feedback, then merge only when clean. |
 | 2026-06-26 07:17 | Open PR #639 for CON-015 | PR #639 is open at `https://github.com/6529-Collections/6529Stream/pull/639`, closes issue #638, and packages launch v1 `StreamCollectionMetadata` and `StreamPreservationRecords` satellites, deployment/release artifact wiring, docs, risk-register coverage, and focused tests. Local validation passed through focused metadata, preservation, and deployment manifest suites, release generator checks, ceremony/autonomous/Markdown checks, `codex-diff-check`, and Windows `scripts\check.ps1`. OpenRouter review used Opus 4.8, GLM 5.2, and GPT-5.5 Pro at high/max reasoning; GPT's manifest identity-binding P2 was fixed and closed. CodeRabbit was requested in comment `4807234292`. Next action is to push this PR-number state update, wait for CI and bot feedback, resolve anything actionable, then merge only when clean. |
+| 2026-06-26 08:05 | Merge PR #639 and start CON-016 | PR #639 merged as `7ac2018e` after review and CI/bot feedback were clean; issue #638 closed completed. Local `main` was fast-forwarded to `origin/main`, the merged feature branch was deleted locally/remotely, issue #640 was opened for `CON-016: Add mint gate interface and module registry foundation`, and branch `codex/mint-gate-registry-foundation` now carries the next outside-Core gate/registry slice. |
+| 2026-06-26 08:45 | Implement CON-016 local draft | Added `IStreamMintGate`, `IStreamMintModuleRegistry`, `StreamMintModuleRegistry`, optional phase gate pins in `StreamMintManager`, gate-derived authorization and authorizer accounting, mint-time registry/status/codehash/metadata/version/gas-limit revalidation, deployment rehearsal wiring, focused manager/registry/deployment tests, release contract config, changelog, backlog, and active-context updates. Focused `StreamMintManager`, `StreamMintModuleRegistry`, deployment-manifest, and gas snapshot suites pass locally. Next action is to regenerate/check release artifacts, run broader local validation, request parallel OpenRouter review from Opus 4.8, GPT-5.5 Pro at high/max reasoning, and GLM 5.2, iterate on findings, then open the PR for issue #640. |
+| 2026-07-04 00:00 | Validate CON-016 and prepare PR | Completed local validation of the CON-016 draft under explicit maintainer direction to open, iterate, and merge the PR. Refreshed the stale fork-randomizer-operations evidence hash pins that the regenerated fork deployment manifest invalidated (randomizer operations JSON, retained-artifact template, public-beta template, evidence envelope, public-beta evidence row, and one-of-one permanence provenance binding), regenerated the release evidence packet index, issue backlog, issue body sync, and the full release manifest/bytecode-proof/lockfile/checksum chain, and updated durable run state from CON-015 to CON-016. Focused registry/manager suites, `make release-checksums`, and the full Windows check suite pass locally. Next action is to commit, push, open the PR for issue #640, record the PR number in durable state, request CodeRabbit, iterate on CI/bot findings, and merge only when clean. |
 
 ## Resume Instructions
 

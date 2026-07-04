@@ -398,6 +398,12 @@
       "hash": "0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f"
     },
     {
+      "hash": "0x1313131313131313131313131313131313131313131313131313131313131313",
+      "transactionType": "CREATE",
+      "contractName": "StreamMintModuleRegistry",
+      "contractAddress": "0x2000000000000000000000000000000000000013"
+    },
+    {
       "transactionType": "CREATE",
       "contractName": "StreamMintManager",
       "contractAddress": "0x2000000000000000000000000000000000000010",
@@ -1744,6 +1750,11 @@
       "from": "0x0000000000000000000000000000000000006537",
       "to": null,
       "contractAddress": "0x200000000000000000000000000000000000000f"
+    },
+    {
+      "transactionHash": "0x1313131313131313131313131313131313131313131313131313131313131313",
+      "contractAddress": "0x2000000000000000000000000000000000000013",
+      "status": "0x1"
     },
     {
       "type": "0x2",

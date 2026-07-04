@@ -2,8 +2,10 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamCore.sol";
+import "./IStreamMintGate.sol";
 import "./IStreamMintLedger.sol";
 import "./IStreamMintManager.sol";
+import "./IStreamMintModuleRegistry.sol";
 import "./Ownable.sol";
 import "./ReentrancyGuard.sol";
 
@@ -17,6 +19,9 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     /// @notice Domain separator for ordered counter configuration hashes.
     bytes32 public constant COUNTER_CONFIG_DOMAIN =
         keccak256("6529STREAM_MINT_MANAGER_COUNTER_CONFIG_V1");
+    /// @notice Domain separator for optional gate configuration hashes.
+    bytes32 public constant GATE_CONFIG_DOMAIN =
+        keccak256("6529STREAM_MINT_MANAGER_GATE_CONFIG_V1");
     /// @notice Domain separator for sorted executor set hashes.
     bytes32 public constant EXECUTOR_SET_DOMAIN =
         keccak256("6529STREAM_MINT_MANAGER_EXECUTOR_SET_V1");
@@ -42,6 +47,8 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     IStreamCore public immutable core;
     /// @notice StreamMintLedger dependency that enforces phase counter consumption.
     IStreamMintLedger public immutable mintLedger;
+    /// @notice Registry dependency that approves optional mint gate modules.
+    IStreamMintModuleRegistry public immutable moduleRegistry;
     /// @notice Next nonce reserved for prepared mint operation IDs.
     uint256 public nextOperationNonce;
 
@@ -50,7 +57,28 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         MintPhaseConfig config;
     }
 
+    struct GateCall {
+        address gate;
+        uint32 gasLimit;
+        address executor;
+        uint256 collectionId;
+        bytes32 phaseId;
+        address payer;
+        address authorizer;
+        address[] initialRecipients;
+        address[] beneficiaries;
+        bytes32 contextHash;
+        bytes32 policyHash;
+        bytes gateData;
+    }
+
+    struct MintAuthorization {
+        bytes32 authorizationId;
+        address authorizer;
+    }
+
     mapping(uint256 => mapping(bytes32 => PhaseState)) private _phases;
+    mapping(uint256 => mapping(bytes32 => MintGateConfig)) private _phaseGateConfigs;
     /// @notice Active manager policy hash for each configured phase.
     mapping(uint256 => mapping(bytes32 => bytes32)) public override phasePolicyHash;
     /// @notice Whether an executor may mint for a configured phase.
@@ -61,7 +89,11 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     mapping(uint256 => mapping(bytes32 => address[])) private _phaseExecutors;
     mapping(uint256 => mapping(bytes32 => mapping(address => uint256))) private _phaseExecutorIndex;
 
-    constructor(IStreamCore core_, IStreamMintLedger mintLedger_) {
+    constructor(
+        IStreamCore core_,
+        IStreamMintLedger mintLedger_,
+        IStreamMintModuleRegistry moduleRegistry_
+    ) {
         if (address(core_).code.length == 0) {
             revert InvalidCoreContract(address(core_));
         }
@@ -84,8 +116,20 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             revert InvalidMintLedgerContract(address(mintLedger_));
         }
 
+        if (address(moduleRegistry_).code.length == 0) {
+            revert InvalidMintModuleRegistry(address(moduleRegistry_));
+        }
+        try moduleRegistry_.isStreamMintModuleRegistry() returns (bool ok) {
+            if (!ok) {
+                revert InvalidMintModuleRegistry(address(moduleRegistry_));
+            }
+        } catch {
+            revert InvalidMintModuleRegistry(address(moduleRegistry_));
+        }
+
         core = core_;
         mintLedger = mintLedger_;
+        moduleRegistry = moduleRegistry_;
     }
 
     /// @notice Returns true for deployment validation.
@@ -98,6 +142,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         uint256 collectionId,
         bytes32 phaseId,
         MintPhaseConfig calldata config,
+        MintGateConfig calldata gateConfig,
         bytes32[] calldata counterIds,
         MintCounterConfig[] calldata counterConfigs
     ) external override onlyOwner nonReentrant returns (bytes32 policyHash) {
@@ -121,8 +166,10 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             _requireStaticCounterConfig(counterIds[i], counterConfigs[i]);
             ledgerPolicies[i] = _ledgerPolicy(counterConfigs[i]);
         }
+        MintGateConfig memory validatedGateConfig = _validatedGateConfig(gateConfig);
 
         _replacePhaseCounters(collectionId, phaseId, ids, counterConfigs);
+        _phaseGateConfigs[collectionId][phaseId] = validatedGateConfig;
         _phases[collectionId][phaseId] = PhaseState({ exists: true, config: config });
 
         policyHash = _computePolicyHash(collectionId, phaseId);
@@ -131,22 +178,13 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             address(this), collectionId, phaseId, policyHash, ids, ledgerPolicies
         );
 
-        emit MintPhaseConfigured(
-            collectionId,
-            phaseId,
-            policyHash,
-            config.startTime,
-            config.endTime,
-            config.maxBatchQuantity,
-            config.configHash,
-            config.metadataHash,
-            msg.sender
-        );
+        _emitPhaseConfigured(collectionId, phaseId, config, policyHash);
         for (uint256 i = 0; i < counterIds.length; i++) {
             _emitCounterConfigured(
                 collectionId, phaseId, counterIds[i], counterConfigs[i], policyHash
             );
         }
+        _emitGateConfigured(collectionId, phaseId, validatedGateConfig, policyHash);
     }
 
     /// @notice Enables or disables a caller for a configured phase.
@@ -213,14 +251,15 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         if (request.expectedPolicyHash != policyHash) {
             revert MintPolicyHashMismatch(request.expectedPolicyHash, policyHash);
         }
-        if (request.authorizationId == bytes32(0)) {
-            revert MintAuthorizationRequired(request.collectionId, request.phaseId);
-        }
 
-        _consumeCounters(request, quantity, policyHash);
+        MintAuthorization memory mintAuthorization =
+            _validateGateAndAuthorization(request, quantity, policyHash);
+        _consumeCounters(request, quantity, policyHash, mintAuthorization);
         uint256 operationNonce = nextOperationNonce;
         nextOperationNonce = operationNonce + quantity;
-        bytes32 operationRoot = _operationRoot(request, policyHash, operationNonce, quantity);
+        bytes32 operationRoot = _operationRoot(
+            request, policyHash, mintAuthorization.authorizationId, operationNonce, quantity
+        );
 
         for (uint256 i = 0; i < quantity; i++) {
             uint256 tokenId =
@@ -231,7 +270,9 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             lastTokenId = tokenId;
         }
 
-        _emitBatchExecuted(request, operationRoot, policyHash, quantity);
+        _emitBatchExecuted(
+            request, operationRoot, policyHash, mintAuthorization.authorizationId, quantity
+        );
     }
 
     function _executePreparedToken(
@@ -283,6 +324,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         MintRequest calldata request,
         bytes32 operationRoot,
         bytes32 policyHash,
+        bytes32 authorizationId,
         uint256 quantity
     ) private {
         emit MintPreparedBatchExecuted(
@@ -290,7 +332,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             request.collectionId,
             request.phaseId,
             policyHash,
-            request.authorizationId,
+            authorizationId,
             msg.sender,
             quantity,
             request.contextHash
@@ -326,6 +368,16 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         returns (MintCounterConfig memory)
     {
         return _counterConfigs[collectionId][phaseId][counterId];
+    }
+
+    /// @notice Returns one phase's optional gate config.
+    function phaseGate(uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        override
+        returns (MintGateConfig memory)
+    {
+        return _phaseGateConfigs[collectionId][phaseId];
     }
 
     /// @notice Previews the manager-derived subject key for one token/counter context.
@@ -423,45 +475,277 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         }
     }
 
-    function _consumeCounters(MintRequest calldata request, uint256 quantity, bytes32 policyHash)
-        private
-    {
+    function _consumeCounters(
+        MintRequest calldata request,
+        uint256 quantity,
+        bytes32 policyHash,
+        MintAuthorization memory mintAuthorization
+    ) private {
+        IStreamMintLedger.CounterConsumption[] memory consumptions =
+            _counterConsumptions(request, quantity, mintAuthorization.authorizer);
+        bytes32[] memory nullifiers = new bytes32[](0);
+        mintLedger.consume(consumptions, mintAuthorization.authorizationId, nullifiers, policyHash);
+    }
+
+    function _counterConsumptions(
+        MintRequest calldata request,
+        uint256 quantity,
+        address authorizer
+    ) private view returns (IStreamMintLedger.CounterConsumption[] memory consumptions) {
         bytes32[] storage counterIds = _phaseCounterIds[request.collectionId][request.phaseId];
+        consumptions = new IStreamMintLedger
+            .CounterConsumption[](_counterConsumptionCount(request, quantity, counterIds));
+        uint256 cursor;
         uint256 counterCount = counterIds.length;
-        uint256 consumptionCount;
+        for (uint256 counterIndex = 0; counterIndex < counterCount; counterIndex++) {
+            bytes32 counterId = counterIds[counterIndex];
+            MintCounterConfig memory config =
+                _counterConfigs[request.collectionId][request.phaseId][counterId];
+            cursor = _appendCounterConsumptions(
+                consumptions, cursor, request, quantity, counterId, config, authorizer
+            );
+        }
+    }
+
+    function _counterConsumptionCount(
+        MintRequest calldata request,
+        uint256 quantity,
+        bytes32[] storage counterIds
+    ) private view returns (uint256 consumptionCount) {
+        uint256 counterCount = counterIds.length;
         for (uint256 counterIndex = 0; counterIndex < counterCount; counterIndex++) {
             bytes32 counterId = counterIds[counterIndex];
             MintCounterConfig memory config =
                 _counterConfigs[request.collectionId][request.phaseId][counterId];
             consumptionCount += config.keyMode == CounterKeyMode.CONTEXT ? 1 : quantity;
         }
-        IStreamMintLedger.CounterConsumption[] memory consumptions =
-            new IStreamMintLedger.CounterConsumption[](consumptionCount);
-        uint256 cursor;
+    }
 
-        for (uint256 counterIndex = 0; counterIndex < counterCount; counterIndex++) {
-            bytes32 counterId = counterIds[counterIndex];
-            MintCounterConfig memory config =
-                _counterConfigs[request.collectionId][request.phaseId][counterId];
-            if (config.keyMode == CounterKeyMode.CONTEXT) {
-                IStreamMintLedger.CounterConsumption memory consumption = _counterConsumption(
-                    request, BATCH_COUNTER_TOKEN_INDEX, counterId, config, address(0)
-                );
-                consumptions[cursor] = consumption;
-                cursor++;
-                continue;
-            }
-            for (uint256 tokenIndex = 0; tokenIndex < quantity; tokenIndex++) {
-                address recipient = request.beneficiaries[tokenIndex];
-                IStreamMintLedger.CounterConsumption memory consumption =
-                    _counterConsumption(request, tokenIndex, counterId, config, recipient);
-                consumptions[cursor] = consumption;
-                cursor++;
-            }
+    function _appendCounterConsumptions(
+        IStreamMintLedger.CounterConsumption[] memory consumptions,
+        uint256 cursor,
+        MintRequest calldata request,
+        uint256 quantity,
+        bytes32 counterId,
+        MintCounterConfig memory config,
+        address authorizer
+    ) private view returns (uint256) {
+        if (config.keyMode == CounterKeyMode.CONTEXT) {
+            consumptions[cursor] = _contextCounterConsumption(
+                request, counterId, config, authorizer
+            );
+            return cursor + 1;
         }
 
-        bytes32[] memory nullifiers = new bytes32[](0);
-        mintLedger.consume(consumptions, request.authorizationId, nullifiers, policyHash);
+        for (uint256 tokenIndex = 0; tokenIndex < quantity; tokenIndex++) {
+            consumptions[cursor] =
+                _tokenCounterConsumption(request, tokenIndex, counterId, config, authorizer);
+            cursor++;
+        }
+        return cursor;
+    }
+
+    function _validateGateAndAuthorization(
+        MintRequest calldata request,
+        uint256 quantity,
+        bytes32 policyHash
+    ) private returns (MintAuthorization memory mintAuthorization) {
+        MintGateConfig memory gateConfig = _phaseGateConfigs[request.collectionId][request.phaseId];
+        if (gateConfig.gate == address(0)) {
+            if (request.authorizationId == bytes32(0)) {
+                revert MintAuthorizationRequired(request.collectionId, request.phaseId);
+            }
+            return MintAuthorization({
+                authorizationId: request.authorizationId, authorizer: request.authorizer
+            });
+        }
+
+        _requireGateStillActive(gateConfig);
+        IStreamMintGate.GateResult memory result = _callGate(request, policyHash, gateConfig);
+        if (result.nullifiers.length != 0) {
+            revert MintGateNullifiersUnsupported(result.nullifiers[0]);
+        }
+        if (result.maxQuantity != 0 && quantity > result.maxQuantity) {
+            revert MintGateQuantityExceeded(quantity, result.maxQuantity);
+        }
+        if (result.gateHash == bytes32(0)) {
+            revert MintGateHashRequired(gateConfig.gate);
+        }
+        address effectiveAuthorizer = request.authorizer;
+        if (result.authorizer != address(0)) {
+            if (effectiveAuthorizer != address(0) && effectiveAuthorizer != result.authorizer) {
+                revert MintGateAuthorizerMismatch(request.authorizer, result.authorizer);
+            }
+            effectiveAuthorizer = result.authorizer;
+        }
+
+        bytes32 authorizationId = request.authorizationId;
+        if (result.authorizationId != bytes32(0)) {
+            if (authorizationId != bytes32(0) && authorizationId != result.authorizationId) {
+                revert MintGateAuthorizationMismatch(authorizationId, result.authorizationId);
+            }
+            authorizationId = result.authorizationId;
+        }
+        if (authorizationId == bytes32(0)) {
+            revert MintAuthorizationRequired(request.collectionId, request.phaseId);
+        }
+
+        emit MintGateValidated(
+            request.collectionId,
+            request.phaseId,
+            gateConfig.gate,
+            authorizationId,
+            effectiveAuthorizer,
+            quantity,
+            request.contextHash,
+            result.gateHash,
+            policyHash
+        );
+
+        return
+            MintAuthorization({ authorizationId: authorizationId, authorizer: effectiveAuthorizer });
+    }
+
+    function _callGate(
+        MintRequest calldata request,
+        bytes32 policyHash,
+        MintGateConfig memory gateConfig
+    ) private view returns (IStreamMintGate.GateResult memory result) {
+        GateCall memory gateCall;
+        gateCall.gate = gateConfig.gate;
+        gateCall.gasLimit = gateConfig.gateGasLimit;
+        gateCall.executor = msg.sender;
+        gateCall.collectionId = request.collectionId;
+        gateCall.phaseId = request.phaseId;
+        gateCall.payer = request.payer;
+        gateCall.authorizer = request.authorizer;
+        gateCall.initialRecipients = request.initialRecipients;
+        gateCall.beneficiaries = request.beneficiaries;
+        gateCall.contextHash = request.contextHash;
+        gateCall.policyHash = policyHash;
+        gateCall.gateData = request.gateData;
+
+        return _executeGateCall(gateCall);
+    }
+
+    function _executeGateCall(GateCall memory gateCall)
+        private
+        view
+        returns (IStreamMintGate.GateResult memory)
+    {
+        bytes memory payload = _gateCallPayload(gateCall);
+        (bool ok, bytes memory returndata) = gateCall.gasLimit == 0
+            ? gateCall.gate.staticcall(payload)
+            : gateCall.gate.staticcall{ gas: gateCall.gasLimit }(payload);
+        if (!ok) {
+            revert MintGateValidationFailed(gateCall.gate);
+        }
+        return abi.decode(returndata, (IStreamMintGate.GateResult));
+    }
+
+    function _gateCallPayload(GateCall memory gateCall) private view returns (bytes memory) {
+        return abi.encodeWithSelector(
+            IStreamMintGate.validateMint.selector,
+            address(this),
+            gateCall.executor,
+            gateCall.collectionId,
+            gateCall.phaseId,
+            gateCall.payer,
+            gateCall.authorizer,
+            gateCall.initialRecipients,
+            gateCall.beneficiaries,
+            gateCall.contextHash,
+            gateCall.policyHash,
+            gateCall.gateData
+        );
+    }
+
+    function _validatedGateConfig(MintGateConfig calldata gateConfig)
+        private
+        view
+        returns (MintGateConfig memory)
+    {
+        if (gateConfig.gate == address(0)) {
+            if (
+                gateConfig.gateConfigHash != bytes32(0) || gateConfig.gateCodehash != bytes32(0)
+                    || gateConfig.gateMetadataHash != bytes32(0)
+                    || gateConfig.gateSemanticVersion != 0 || gateConfig.gateGasLimit != 0
+            ) {
+                revert InvalidMintGate(gateConfig.gate);
+            }
+            return gateConfig;
+        }
+        if (gateConfig.gateConfigHash == bytes32(0)) {
+            revert InvalidMintGate(gateConfig.gate);
+        }
+
+        IStreamMintModuleRegistry.MintModuleInfo memory info =
+            _requireActiveGateInfo(gateConfig.gate);
+        bytes32 actualCodehash = gateConfig.gate.codehash;
+        if (gateConfig.gateCodehash != bytes32(0) && gateConfig.gateCodehash != actualCodehash) {
+            revert MintGateCodehashChanged(gateConfig.gate, gateConfig.gateCodehash, actualCodehash);
+        }
+        if (
+            gateConfig.gateMetadataHash != bytes32(0)
+                && gateConfig.gateMetadataHash != info.metadataHash
+        ) {
+            revert InvalidMintGate(gateConfig.gate);
+        }
+        if (
+            gateConfig.gateSemanticVersion != 0
+                && gateConfig.gateSemanticVersion != info.semanticVersion
+        ) {
+            revert InvalidMintGate(gateConfig.gate);
+        }
+        if (gateConfig.gateGasLimit != 0 && gateConfig.gateGasLimit != info.gasLimit) {
+            revert InvalidMintGate(gateConfig.gate);
+        }
+
+        return MintGateConfig({
+            gate: gateConfig.gate,
+            gateConfigHash: gateConfig.gateConfigHash,
+            gateCodehash: actualCodehash,
+            gateMetadataHash: info.metadataHash,
+            gateSemanticVersion: info.semanticVersion,
+            gateGasLimit: info.gasLimit
+        });
+    }
+
+    function _requireGateStillActive(MintGateConfig memory gateConfig) private view {
+        IStreamMintModuleRegistry.MintModuleInfo memory info =
+            _requireActiveGateInfo(gateConfig.gate);
+        bytes32 actualCodehash = gateConfig.gate.codehash;
+        if (actualCodehash != gateConfig.gateCodehash || actualCodehash != info.codehash) {
+            revert MintGateCodehashChanged(gateConfig.gate, gateConfig.gateCodehash, actualCodehash);
+        }
+        if (
+            info.metadataHash != gateConfig.gateMetadataHash
+                || info.semanticVersion != gateConfig.gateSemanticVersion
+                || info.gasLimit != gateConfig.gateGasLimit
+        ) {
+            revert MintGateNotActive(gateConfig.gate);
+        }
+    }
+
+    function _requireActiveGateInfo(address gate)
+        private
+        view
+        returns (IStreamMintModuleRegistry.MintModuleInfo memory info)
+    {
+        try moduleRegistry.moduleInfo(gate) returns (
+            IStreamMintModuleRegistry.MintModuleInfo memory moduleInfo
+        ) {
+            info = moduleInfo;
+        } catch {
+            revert MintGateNotActive(gate);
+        }
+        if (
+            info.status != IStreamMintModuleRegistry.ModuleStatus.ACTIVE
+                || info.interfaceId != type(IStreamMintGate).interfaceId || gate.code.length == 0
+                || info.codehash != gate.codehash
+        ) {
+            revert MintGateNotActive(gate);
+        }
     }
 
     function _counterConsumption(
@@ -469,39 +753,71 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
         uint256 tokenIndex,
         bytes32 counterId,
         MintCounterConfig memory config,
-        address recipient
+        address recipient,
+        address authorizer
     ) private view returns (IStreamMintLedger.CounterConsumption memory consumption) {
-        bytes32 subjectKey = _subjectKey(
-            config.keyMode,
+        bytes32 subjectKey =
+            _counterSubjectKey(request, counterId, config.keyMode, recipient, authorizer);
+        consumption.valueKey = mintLedger.deriveCounterValueKey(
+            address(this), request.collectionId, request.phaseId, counterId, subjectKey
+        );
+        consumption.collectionId = request.collectionId;
+        consumption.phaseId = request.phaseId;
+        consumption.counterId = counterId;
+        consumption.subjectKey = subjectKey;
+        consumption.payer = request.payer;
+        consumption.recipient = recipient;
+        consumption.authorizer = authorizer;
+        consumption.executor = msg.sender;
+        consumption.increment = config.staticIncrement;
+        consumption.cap =
+            config.capMode == IStreamMintLedger.CounterCapMode.STATIC ? config.staticCap : 0;
+        consumption.contextHash = request.contextHash;
+        consumption.resolutionHash =
+            _resolutionHash(request, tokenIndex, counterId, subjectKey, config);
+    }
+
+    function _contextCounterConsumption(
+        MintRequest calldata request,
+        bytes32 counterId,
+        MintCounterConfig memory config,
+        address authorizer
+    ) private view returns (IStreamMintLedger.CounterConsumption memory) {
+        return _counterConsumption(
+            request, BATCH_COUNTER_TOKEN_INDEX, counterId, config, address(0), authorizer
+        );
+    }
+
+    function _tokenCounterConsumption(
+        MintRequest calldata request,
+        uint256 tokenIndex,
+        bytes32 counterId,
+        MintCounterConfig memory config,
+        address authorizer
+    ) private view returns (IStreamMintLedger.CounterConsumption memory) {
+        return _counterConsumption(
+            request, tokenIndex, counterId, config, request.beneficiaries[tokenIndex], authorizer
+        );
+    }
+
+    function _counterSubjectKey(
+        MintRequest calldata request,
+        bytes32 counterId,
+        CounterKeyMode keyMode,
+        address recipient,
+        address authorizer
+    ) private view returns (bytes32) {
+        return _subjectKey(
+            keyMode,
             request.collectionId,
             request.phaseId,
             counterId,
             request.payer,
             recipient,
             msg.sender,
-            request.authorizer,
+            authorizer,
             request.contextHash
         );
-        bytes32 valueKey = mintLedger.deriveCounterValueKey(
-            address(this), request.collectionId, request.phaseId, counterId, subjectKey
-        );
-        uint64 cap =
-            config.capMode == IStreamMintLedger.CounterCapMode.STATIC ? config.staticCap : 0;
-        consumption = IStreamMintLedger.CounterConsumption({
-            valueKey: valueKey,
-            collectionId: request.collectionId,
-            phaseId: request.phaseId,
-            counterId: counterId,
-            subjectKey: subjectKey,
-            payer: request.payer,
-            recipient: recipient,
-            authorizer: request.authorizer,
-            executor: msg.sender,
-            increment: config.staticIncrement,
-            cap: cap,
-            contextHash: request.contextHash,
-            resolutionHash: _resolutionHash(request, tokenIndex, counterId, subjectKey, config)
-        });
     }
 
     function _subjectKey(
@@ -636,10 +952,12 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
                 uint256(block.chainid),
                 address(this),
                 address(mintLedger),
+                address(moduleRegistry),
                 SCHEMA_VERSION,
                 collectionId,
                 phaseId,
                 _phaseConfigHash(_phases[collectionId][phaseId].config),
+                _gateConfigHash(_phaseGateConfigs[collectionId][phaseId]),
                 _orderedCounterConfigHash(collectionId, phaseId),
                 _executorSetHash(collectionId, phaseId)
             )
@@ -656,6 +974,20 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
                 config.maxBatchQuantity,
                 config.configHash,
                 config.metadataHash
+            )
+        );
+    }
+
+    function _gateConfigHash(MintGateConfig memory gateConfig) private pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                GATE_CONFIG_DOMAIN,
+                gateConfig.gate,
+                gateConfig.gateConfigHash,
+                gateConfig.gateCodehash,
+                gateConfig.gateMetadataHash,
+                gateConfig.gateSemanticVersion,
+                gateConfig.gateGasLimit
             )
         );
     }
@@ -708,6 +1040,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
     function _operationRoot(
         MintRequest calldata request,
         bytes32 policyHash,
+        bytes32 authorizationId,
         uint256 operationNonce,
         uint256 quantity
     ) private view returns (bytes32) {
@@ -721,7 +1054,7 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
                 request.collectionId,
                 request.phaseId,
                 policyHash,
-                request.authorizationId,
+                authorizationId,
                 _requestCommitment(request),
                 request.contextHash,
                 msg.sender,
@@ -888,6 +1221,44 @@ contract StreamMintManager is IStreamMintManager, Ownable, ReentrancyGuard {
             config.staticCap,
             config.staticIncrement,
             config.counterConfigHash,
+            policyHash
+        );
+    }
+
+    function _emitPhaseConfigured(
+        uint256 collectionId,
+        bytes32 phaseId,
+        MintPhaseConfig calldata config,
+        bytes32 policyHash
+    ) private {
+        emit MintPhaseConfigured(
+            collectionId,
+            phaseId,
+            policyHash,
+            config.startTime,
+            config.endTime,
+            config.maxBatchQuantity,
+            config.configHash,
+            config.metadataHash,
+            msg.sender
+        );
+    }
+
+    function _emitGateConfigured(
+        uint256 collectionId,
+        bytes32 phaseId,
+        MintGateConfig memory gateConfig,
+        bytes32 policyHash
+    ) private {
+        emit MintPhaseGateConfigured(
+            collectionId,
+            phaseId,
+            gateConfig.gate,
+            gateConfig.gateConfigHash,
+            gateConfig.gateCodehash,
+            gateConfig.gateMetadataHash,
+            gateConfig.gateSemanticVersion,
+            gateConfig.gateGasLimit,
             policyHash
         );
     }

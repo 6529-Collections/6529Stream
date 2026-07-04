@@ -40,9 +40,9 @@ EXPECTED_DOMAINS: tuple[DomainSpec, ...] = (
         schema_version=SCHEMA_VERSION,
         inputs=(
             "POLICY_DOMAIN; uint256(block.chainid); address(this); "
-            "address(mintLedger); SCHEMA_VERSION; collectionId; phaseId; "
-            "_phaseConfigHash(config); _orderedCounterConfigHash(collectionId, phaseId); "
-            "_executorSetHash(collectionId, phaseId)"
+            "address(mintLedger); address(moduleRegistry); SCHEMA_VERSION; collectionId; "
+            "phaseId; _phaseConfigHash(config); _gateConfigHash(gateConfig); "
+            "_orderedCounterConfigHash(collectionId, phaseId); _executorSetHash(collectionId, phaseId)"
         ),
     ),
     DomainSpec(
@@ -64,6 +64,17 @@ EXPECTED_DOMAINS: tuple[DomainSpec, ...] = (
             "COUNTER_CONFIG_DOMAIN; counterId; config.enabled; config.keyMode; "
             "config.capMode; config.deltaMode; config.staticCap; "
             "config.staticIncrement; config.counterConfigHash"
+        ),
+    ),
+    DomainSpec(
+        name="GATE_CONFIG_DOMAIN",
+        preimage="6529STREAM_MINT_MANAGER_GATE_CONFIG_V1",
+        owner="StreamMintManager",
+        schema_version=SCHEMA_VERSION,
+        inputs=(
+            "GATE_CONFIG_DOMAIN; gateConfig.gate; gateConfig.gateConfigHash; "
+            "gateConfig.gateCodehash; gateConfig.gateMetadataHash; "
+            "gateConfig.gateSemanticVersion; gateConfig.gateGasLimit"
         ),
     ),
     DomainSpec(

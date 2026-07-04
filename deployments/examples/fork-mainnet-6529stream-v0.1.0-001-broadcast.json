@@ -50,7 +50,7 @@
         "0x9bc64ec7e88f11dfad9b4caeee4814dcf783638f"
       ],
       "abi_hash": "sha256:be80dc77a6d763a644780b4d70b353ec4f35f890e1b66a6a7a4a00ebeb2c063b",
-      "bytecode_hash": "sha256:05152aef17b9511818909d685c8b1e292c19705cc0c8ed05723d6d467c84a82e",
+      "bytecode_hash": "sha256:2f7bb20ed0115799fb46c861f22f810ebc70f0924bd09a3dcf50fd391e351825",
       "verification_status": "not_applicable"
     },
     "StreamContractMetadata": {
@@ -198,14 +198,22 @@
       "bytecode_hash": "sha256:c5730bc4ecf04bff2d180b2ba463707dff7da3de89c0b3ffe21eb29d11acee27",
       "verification_status": "not_applicable"
     },
+    "StreamMintModuleRegistry": {
+      "address": "0x2000000000000000000000000000000000000013",
+      "constructor_args": [],
+      "abi_hash": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
+      "bytecode_hash": "sha256:af8943b6fda8a6aae4bc9c3171e2ea1b1deaf530ce62f21276f964c9b8d7f77e",
+      "verification_status": "not_applicable"
+    },
     "StreamMintManager": {
       "address": "0x2000000000000000000000000000000000000010",
       "constructor_args": [
         "0x74ff318d8c72a9343d465ef1a8725f4fe20b6015",
-        "0x200000000000000000000000000000000000000f"
+        "0x200000000000000000000000000000000000000f",
+        "0x2000000000000000000000000000000000000013"
       ],
-      "abi_hash": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377",
-      "bytecode_hash": "sha256:93f84590904c3e0613e176de1930d973bf0ca6a4d0bd914b1c0e4686b92f1294",
+      "abi_hash": "sha256:acc87d87f469b726c4df8e7b50517a2489a034376cdec964fbfa8256c41cc74f",
+      "bytecode_hash": "sha256:98c0dad66ab9c8814165f325137ade357347d3ac9946bfbd2d2e576c66894792",
       "verification_status": "not_applicable"
     }
   },
@@ -252,6 +260,10 @@
         "new_owner": "0x0000000000000000000000000000000000006529"
       },
       {
+        "contract": "StreamMintModuleRegistry",
+        "new_owner": "0x0000000000000000000000000000000000006529"
+      },
+      {
         "contract": "StreamMintManager",
         "new_owner": "0x0000000000000000000000000000000000006529"
       }
@@ -270,7 +282,7 @@
     ]
   },
   "release_artifacts": {
-    "manifest_sha256": "sha256:4e63f19365266fe2b7bd3e6d59222e0ca892939cf6db7b45fad4c2da948a5335",
+    "manifest_sha256": "sha256:878b1a6250ff95a2241e8daa329eb471c24c8f15f23e07e0e14963d10e03fd46",
     "abi_hashes": {
       "StreamAdmins": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -289,7 +301,8 @@
       "StreamRevenueResolver": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
       "StreamPrimarySaleSettlement": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
       "StreamMintLedger": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
-      "StreamMintManager": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377"
+      "StreamMintModuleRegistry": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
+      "StreamMintManager": "sha256:acc87d87f469b726c4df8e7b50517a2489a034376cdec964fbfa8256c41cc74f"
     },
     "event_topic_catalog": "release-artifacts/latest/event-topic-catalog.json"
   },

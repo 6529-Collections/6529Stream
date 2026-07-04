@@ -51,6 +51,7 @@ SEPOLIA_EXPECTED_CONTRACTS = {
     "StreamRevenueResolver",
     "StreamPrimarySaleSettlement",
     "StreamMintLedger",
+    "StreamMintModuleRegistry",
     "StreamMintManager",
 }
 TEMPLATE_FORBIDDEN_SECRET_RE = re.compile(

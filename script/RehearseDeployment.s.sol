@@ -16,6 +16,7 @@ import "../smart-contracts/StreamDrops.sol";
 import "../smart-contracts/StreamMinter.sol";
 import "../smart-contracts/StreamMintLedger.sol";
 import "../smart-contracts/StreamMintManager.sol";
+import "../smart-contracts/StreamMintModuleRegistry.sol";
 import "../smart-contracts/StreamPrimarySaleSettlement.sol";
 import "../smart-contracts/StreamPreservationRecords.sol";
 import "../smart-contracts/StreamRevenueResolver.sol";
@@ -75,6 +76,7 @@ contract RehearseDeployment {
         address revenueResolver;
         address primarySaleSettlement;
         address mintLedger;
+        address mintModuleRegistry;
         address mintManager;
         uint256 sampleCollectionId;
         uint256 sampleMintStart;
@@ -154,6 +156,7 @@ contract RehearseDeployment {
         deployed.revenueResolver.transferOwnership(config.adminSafe);
         deployed.primarySaleSettlement.transferOwnership(config.adminSafe);
         deployed.mintLedger.transferOwnership(config.adminSafe);
+        deployed.mintModuleRegistry.transferOwnership(config.adminSafe);
         deployed.mintManager.transferOwnership(config.adminSafe);
         deployed.core.transferOwnership(config.adminSafe);
         deployed.admins.transferOwnership(config.adminSafe);
@@ -179,6 +182,7 @@ contract RehearseDeployment {
         StreamRevenueResolver revenueResolver;
         StreamPrimarySaleSettlement primarySaleSettlement;
         StreamMintLedger mintLedger;
+        StreamMintModuleRegistry mintModuleRegistry;
         StreamMintManager mintManager;
     }
 
@@ -232,8 +236,10 @@ contract RehearseDeployment {
         deployed.revenueResolver = new StreamRevenueResolver(deployed.splitFactory);
         deployed.primarySaleSettlement = new StreamPrimarySaleSettlement(deployed.revenueResolver);
         deployed.mintLedger = new StreamMintLedger();
-        deployed.mintManager =
-            new StreamMintManager(IStreamCore(address(deployed.core)), deployed.mintLedger);
+        deployed.mintModuleRegistry = new StreamMintModuleRegistry();
+        deployed.mintManager = new StreamMintManager(
+            IStreamCore(address(deployed.core)), deployed.mintLedger, deployed.mintModuleRegistry
+        );
     }
 
     function _configureAdminCeremony(StreamAdmins admins, DeploymentConfig memory config) private {
@@ -312,6 +318,7 @@ contract RehearseDeployment {
             revenueResolver: address(deployed.revenueResolver),
             primarySaleSettlement: address(deployed.primarySaleSettlement),
             mintLedger: address(deployed.mintLedger),
+            mintModuleRegistry: address(deployed.mintModuleRegistry),
             mintManager: address(deployed.mintManager),
             sampleCollectionId: collectionId,
             sampleMintStart: mintStart,
@@ -431,6 +438,7 @@ contract RehearseDeployment {
             abi.encode(
                 _contractBinding(address(deployed.minter)),
                 _contractBinding(address(deployed.mintLedger)),
+                _contractBinding(address(deployed.mintModuleRegistry)),
                 _contractBinding(address(deployed.mintManager)),
                 _contractBinding(address(deployed.randomizerVrf)),
                 _contractBinding(address(deployed.randomizerRng))

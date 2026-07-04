@@ -14601,22 +14601,22 @@
     "StreamMintManager": {
       "source": "smart-contracts/StreamMintManager.sol",
       "artifact_path": "out/StreamMintManager.sol/StreamMintManager.json",
-      "abi_sha256": "sha256:2736022748d0aa83542827fd1b23ccc3878c0799d39a5dc0812cf9966e783377",
-      "abi_entries": 62,
+      "abi_sha256": "sha256:acc87d87f469b726c4df8e7b50517a2489a034376cdec964fbfa8256c41cc74f",
+      "abi_entries": 77,
       "entry_counts": {
         "constructors": 1,
-        "functions": 29,
-        "events": 7,
-        "errors": 25,
+        "functions": 32,
+        "events": 9,
+        "errors": 35,
         "fallbacks": 0,
         "receives": 0
       },
       "entries": {
         "constructors": [
           {
-            "key": "constructor(address,address)",
+            "key": "constructor(address,address,address)",
             "kind": "constructor",
-            "signature": "constructor(address,address)",
+            "signature": "constructor(address,address,address)",
             "inputs": [
               {
                 "name": "core_",
@@ -14627,6 +14627,11 @@
                 "name": "mintLedger_",
                 "type": "address",
                 "internal_type": "contract IStreamMintLedger"
+              },
+              {
+                "name": "moduleRegistry_",
+                "type": "address",
+                "internal_type": "contract IStreamMintModuleRegistry"
               }
             ],
             "state_mutability": "nonpayable"
@@ -14653,6 +14658,21 @@
             "kind": "function",
             "name": "EXECUTOR_SET_DOMAIN",
             "signature": "EXECUTOR_SET_DOMAIN()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "GATE_CONFIG_DOMAIN()",
+            "kind": "function",
+            "name": "GATE_CONFIG_DOMAIN",
+            "signature": "GATE_CONFIG_DOMAIN()",
             "inputs": [],
             "outputs": [
               {
@@ -14799,10 +14819,10 @@
             "state_mutability": "view"
           },
           {
-            "key": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "key": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
             "kind": "function",
             "name": "configurePhase",
-            "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
             "inputs": [
               {
                 "name": "collectionId",
@@ -14848,6 +14868,43 @@
                     "name": "metadataHash",
                     "type": "bytes32",
                     "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "gateConfig",
+                "type": "(address,bytes32,bytes32,bytes32,uint32,uint32)",
+                "internal_type": "struct IStreamMintManager.MintGateConfig",
+                "components": [
+                  {
+                    "name": "gate",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "gateConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateCodehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateMetadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateSemanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "gateGasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
                   }
                 ]
               },
@@ -15022,14 +15079,14 @@
             "state_mutability": "view"
           },
           {
-            "key": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "key": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes))",
             "kind": "function",
             "name": "mintPrepared",
-            "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes))",
             "inputs": [
               {
                 "name": "request",
-                "type": "(uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32)",
+                "type": "(uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes)",
                 "internal_type": "struct IStreamMintManager.MintRequest",
                 "components": [
                   {
@@ -15086,6 +15143,11 @@
                     "name": "expectedPolicyHash",
                     "type": "bytes32",
                     "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateData",
+                    "type": "bytes",
+                    "internal_type": "bytes"
                   }
                 ]
               }
@@ -15103,6 +15165,21 @@
               }
             ],
             "state_mutability": "nonpayable"
+          },
+          {
+            "key": "moduleRegistry()",
+            "kind": "function",
+            "name": "moduleRegistry",
+            "signature": "moduleRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "contract IStreamMintModuleRegistry"
+              }
+            ],
+            "state_mutability": "view"
           },
           {
             "key": "nextOperationNonce()",
@@ -15250,6 +15327,64 @@
                 "name": "",
                 "type": "bool",
                 "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phaseGate(uint256,bytes32)",
+            "kind": "function",
+            "name": "phaseGate",
+            "signature": "phaseGate(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes32,bytes32,uint32,uint32)",
+                "internal_type": "struct IStreamMintManager.MintGateConfig",
+                "components": [
+                  {
+                    "name": "gate",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "gateConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateCodehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateMetadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateSemanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "gateGasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  }
+                ]
               }
             ],
             "state_mutability": "view"
@@ -15528,6 +15663,69 @@
             ]
           },
           {
+            "key": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintGateValidated",
+            "signature": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
             "key": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
             "kind": "event",
             "name": "MintPhaseConfigured",
@@ -15631,6 +15829,69 @@
                 "name": "admin",
                 "type": "address",
                 "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+            "kind": "event",
+            "name": "MintPhaseGateConfigured",
+            "signature": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "gateConfigHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateCodehash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateMetadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateSemanticVersion",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "gateGasLimit",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
                 "indexed": false
               }
             ]
@@ -15888,6 +16149,19 @@
             ]
           },
           {
+            "key": "InvalidMintGate(address)",
+            "kind": "error",
+            "name": "InvalidMintGate",
+            "signature": "InvalidMintGate(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
             "key": "InvalidMintLedgerContract(address)",
             "kind": "error",
             "name": "InvalidMintLedgerContract",
@@ -15895,6 +16169,19 @@
             "inputs": [
               {
                 "name": "mintLedger",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintModuleRegistry(address)",
+            "kind": "error",
+            "name": "InvalidMintModuleRegistry",
+            "signature": "InvalidMintModuleRegistry(address)",
+            "inputs": [
+              {
+                "name": "registry",
                 "type": "address",
                 "internal_type": "address"
               }
@@ -16058,6 +16345,135 @@
                 "name": "maxExecutorCount",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintGateAuthorizationMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintGateAuthorizationMismatch",
+            "signature": "MintGateAuthorizationMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "requestAuthorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "gateAuthorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintGateAuthorizerMismatch(address,address)",
+            "kind": "error",
+            "name": "MintGateAuthorizerMismatch",
+            "signature": "MintGateAuthorizerMismatch(address,address)",
+            "inputs": [
+              {
+                "name": "requestAuthorizer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "gateAuthorizer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateCodehashChanged(address,bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintGateCodehashChanged",
+            "signature": "MintGateCodehashChanged(address,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintGateHashRequired(address)",
+            "kind": "error",
+            "name": "MintGateHashRequired",
+            "signature": "MintGateHashRequired(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateNotActive(address)",
+            "kind": "error",
+            "name": "MintGateNotActive",
+            "signature": "MintGateNotActive(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateNullifiersUnsupported(bytes32)",
+            "kind": "error",
+            "name": "MintGateNullifiersUnsupported",
+            "signature": "MintGateNullifiersUnsupported(bytes32)",
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintGateQuantityExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintGateQuantityExceeded",
+            "signature": "MintGateQuantityExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxQuantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintGateValidationFailed(address)",
+            "kind": "error",
+            "name": "MintGateValidationFailed",
+            "signature": "MintGateValidationFailed(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
               }
             ]
           },
@@ -16237,6 +16653,414 @@
                 "name": "counterId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "StreamMintModuleRegistry": {
+      "source": "smart-contracts/StreamMintModuleRegistry.sol",
+      "artifact_path": "out/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
+      "abi_sha256": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
+      "abi_entries": 15,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 8,
+        "events": 3,
+        "errors": 4,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "isModuleActive(address,bytes4)",
+            "kind": "function",
+            "name": "isModuleActive",
+            "signature": "isModuleActive(address,bytes4)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamMintModuleRegistry()",
+            "kind": "function",
+            "name": "isStreamMintModuleRegistry",
+            "signature": "isStreamMintModuleRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "moduleInfo(address)",
+            "kind": "function",
+            "name": "moduleInfo",
+            "signature": "moduleInfo(address)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)",
+                "internal_type": "struct IStreamMintModuleRegistry.MintModuleInfo",
+                "components": [
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "semanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "codehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "owner()",
+            "kind": "function",
+            "name": "owner",
+            "signature": "owner()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "renounceOwnership()",
+            "kind": "function",
+            "name": "renounceOwnership",
+            "signature": "renounceOwnership()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+            "kind": "function",
+            "name": "setModule",
+            "signature": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "info",
+                "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)",
+                "internal_type": "struct IStreamMintModuleRegistry.MintModuleInfo",
+                "components": [
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "semanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "codehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURI",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "transferOwnership(address)",
+            "kind": "function",
+            "name": "transferOwnership",
+            "signature": "transferOwnership(address)",
+            "inputs": [
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "MintModuleMetadata(address,bytes32,string)",
+            "kind": "event",
+            "name": "MintModuleMetadata",
+            "signature": "MintModuleMetadata(address,bytes32,string)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "metadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataURI",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+            "kind": "event",
+            "name": "MintModuleUpdated",
+            "signature": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus",
+                "indexed": false
+              },
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": true
+              },
+              {
+                "name": "semanticVersion",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "codehash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gasLimit",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "OwnershipTransferred(address,address)",
+            "kind": "event",
+            "name": "OwnershipTransferred",
+            "signature": "OwnershipTransferred(address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "previousOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newOwner",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "InvalidMintModule(address)",
+            "kind": "error",
+            "name": "InvalidMintModule",
+            "signature": "InvalidMintModule(address)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintModuleInfo(address)",
+            "kind": "error",
+            "name": "InvalidMintModuleInfo",
+            "signature": "InvalidMintModuleInfo(address)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintModuleCodehashMismatch(address,bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintModuleCodehashMismatch",
+            "signature": "MintModuleCodehashMismatch(address,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintModuleInterfaceUnsupported(address,bytes4)",
+            "kind": "error",
+            "name": "MintModuleInterfaceUnsupported",
+            "signature": "MintModuleInterfaceUnsupported(address,bytes4)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
               }
             ]
           }
@@ -27154,6 +27978,148 @@
         "receives": []
       }
     },
+    "IStreamMintGate": {
+      "source": "smart-contracts/IStreamMintGate.sol",
+      "artifact_path": "out/IStreamMintGate.sol/IStreamMintGate.json",
+      "abi_sha256": "sha256:0725dcb8f0e9e9a9de912a5c75ef775f9ae0fc2f717cbe4e4a93ac8074214be9",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 2,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)",
+            "kind": "function",
+            "name": "validateMint",
+            "signature": "validateMint(address,address,uint256,bytes32,address,address,address[],address[],bytes32,bytes32,bytes)",
+            "inputs": [
+              {
+                "name": "manager",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "payer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "initialRecipients",
+                "type": "address[]",
+                "internal_type": "address[]"
+              },
+              {
+                "name": "beneficiaries",
+                "type": "address[]",
+                "internal_type": "address[]"
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "gateData",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,bytes32[],address,uint64,bytes32)",
+                "internal_type": "struct IStreamMintGate.GateResult",
+                "components": [
+                  {
+                    "name": "authorizationId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "nullifiers",
+                    "type": "bytes32[]",
+                    "internal_type": "bytes32[]"
+                  },
+                  {
+                    "name": "authorizer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "maxQuantity",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "gateHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "IStreamMintLedger": {
       "source": "smart-contracts/IStreamMintLedger.sol",
       "artifact_path": "out/IStreamMintLedger.sol/IStreamMintLedger.json",
@@ -28166,13 +29132,13 @@
     "IStreamMintManager": {
       "source": "smart-contracts/IStreamMintManager.sol",
       "artifact_path": "out/IStreamMintManager.sol/IStreamMintManager.json",
-      "abi_sha256": "sha256:51a85fbbe1ad4afbc59d7f1c41632345b2e08bb0ab6e90024690e2472dc079b1",
-      "abi_entries": 42,
+      "abi_sha256": "sha256:35697e221de52b5d3974a4e08ca17528a668754cef5ec999a618d710c267f755",
+      "abi_entries": 55,
       "entry_counts": {
         "constructors": 0,
-        "functions": 12,
-        "events": 6,
-        "errors": 24,
+        "functions": 13,
+        "events": 8,
+        "errors": 34,
         "fallbacks": 0,
         "receives": 0
       },
@@ -28180,10 +29146,10 @@
         "constructors": [],
         "functions": [
           {
-            "key": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "key": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
             "kind": "function",
             "name": "configurePhase",
-            "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
+            "signature": "configurePhase(uint256,bytes32,(bool,uint64,uint64,uint32,bytes32,bytes32),(address,bytes32,bytes32,bytes32,uint32,uint32),bytes32[],(bool,uint8,uint8,uint8,uint64,uint64,bytes32)[])",
             "inputs": [
               {
                 "name": "collectionId",
@@ -28229,6 +29195,43 @@
                     "name": "metadataHash",
                     "type": "bytes32",
                     "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "gateConfig",
+                "type": "(address,bytes32,bytes32,bytes32,uint32,uint32)",
+                "internal_type": "struct IStreamMintManager.MintGateConfig",
+                "components": [
+                  {
+                    "name": "gate",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "gateConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateCodehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateMetadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateSemanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "gateGasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
                   }
                 ]
               },
@@ -28373,14 +29376,14 @@
             "state_mutability": "view"
           },
           {
-            "key": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "key": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes))",
             "kind": "function",
             "name": "mintPrepared",
-            "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32))",
+            "signature": "mintPrepared((uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes))",
             "inputs": [
               {
                 "name": "request",
-                "type": "(uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32)",
+                "type": "(uint256,bytes32,address,address,address[],address[],string[],uint256[],bytes32,bytes32,bytes32,bytes)",
                 "internal_type": "struct IStreamMintManager.MintRequest",
                 "components": [
                   {
@@ -28437,6 +29440,11 @@
                     "name": "expectedPolicyHash",
                     "type": "bytes32",
                     "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateData",
+                    "type": "bytes",
+                    "internal_type": "bytes"
                   }
                 ]
               }
@@ -28571,6 +29579,64 @@
                 "name": "",
                 "type": "bool",
                 "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "phaseGate(uint256,bytes32)",
+            "kind": "function",
+            "name": "phaseGate",
+            "signature": "phaseGate(uint256,bytes32)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(address,bytes32,bytes32,bytes32,uint32,uint32)",
+                "internal_type": "struct IStreamMintManager.MintGateConfig",
+                "components": [
+                  {
+                    "name": "gate",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "gateConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateCodehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateMetadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gateSemanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "gateGasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  }
+                ]
               }
             ],
             "state_mutability": "view"
@@ -28825,6 +29891,69 @@
             ]
           },
           {
+            "key": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+            "kind": "event",
+            "name": "MintGateValidated",
+            "signature": "MintGateValidated(uint256,bytes32,address,bytes32,address,uint256,bytes32,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "authorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "authorizer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "contextHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
             "key": "MintPhaseConfigured(uint256,bytes32,bytes32,uint64,uint64,uint32,bytes32,bytes32,address)",
             "kind": "event",
             "name": "MintPhaseConfigured",
@@ -28928,6 +30057,69 @@
                 "name": "admin",
                 "type": "address",
                 "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+            "kind": "event",
+            "name": "MintPhaseGateConfigured",
+            "signature": "MintPhaseGateConfigured(uint256,bytes32,address,bytes32,bytes32,bytes32,uint32,uint32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "phaseId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "gateConfigHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateCodehash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateMetadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gateSemanticVersion",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "gateGasLimit",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "policyHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
                 "indexed": false
               }
             ]
@@ -29164,6 +30356,19 @@
             ]
           },
           {
+            "key": "InvalidMintGate(address)",
+            "kind": "error",
+            "name": "InvalidMintGate",
+            "signature": "InvalidMintGate(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
             "key": "InvalidMintLedgerContract(address)",
             "kind": "error",
             "name": "InvalidMintLedgerContract",
@@ -29171,6 +30376,19 @@
             "inputs": [
               {
                 "name": "mintLedger",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintModuleRegistry(address)",
+            "kind": "error",
+            "name": "InvalidMintModuleRegistry",
+            "signature": "InvalidMintModuleRegistry(address)",
+            "inputs": [
+              {
+                "name": "registry",
                 "type": "address",
                 "internal_type": "address"
               }
@@ -29334,6 +30552,135 @@
                 "name": "maxExecutorCount",
                 "type": "uint256",
                 "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintGateAuthorizationMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintGateAuthorizationMismatch",
+            "signature": "MintGateAuthorizationMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "requestAuthorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "gateAuthorizationId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintGateAuthorizerMismatch(address,address)",
+            "kind": "error",
+            "name": "MintGateAuthorizerMismatch",
+            "signature": "MintGateAuthorizerMismatch(address,address)",
+            "inputs": [
+              {
+                "name": "requestAuthorizer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "gateAuthorizer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateCodehashChanged(address,bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintGateCodehashChanged",
+            "signature": "MintGateCodehashChanged(address,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintGateHashRequired(address)",
+            "kind": "error",
+            "name": "MintGateHashRequired",
+            "signature": "MintGateHashRequired(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateNotActive(address)",
+            "kind": "error",
+            "name": "MintGateNotActive",
+            "signature": "MintGateNotActive(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintGateNullifiersUnsupported(bytes32)",
+            "kind": "error",
+            "name": "MintGateNullifiersUnsupported",
+            "signature": "MintGateNullifiersUnsupported(bytes32)",
+            "inputs": [
+              {
+                "name": "nullifier",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintGateQuantityExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "MintGateQuantityExceeded",
+            "signature": "MintGateQuantityExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "quantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxQuantity",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "MintGateValidationFailed(address)",
+            "kind": "error",
+            "name": "MintGateValidationFailed",
+            "signature": "MintGateValidationFailed(address)",
+            "inputs": [
+              {
+                "name": "gate",
+                "type": "address",
+                "internal_type": "address"
               }
             ]
           },
@@ -29506,6 +30853,354 @@
                 "name": "counterId",
                 "type": "bytes32",
                 "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamMintModuleRegistry": {
+      "source": "smart-contracts/IStreamMintModuleRegistry.sol",
+      "artifact_path": "out/IStreamMintModuleRegistry.sol/IStreamMintModuleRegistry.json",
+      "abi_sha256": "sha256:582538c63865086c0bf211787e97e1d9ec37a472167ff331d3b79f50f9064af4",
+      "abi_entries": 11,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 5,
+        "events": 2,
+        "errors": 4,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "isModuleActive(address,bytes4)",
+            "kind": "function",
+            "name": "isModuleActive",
+            "signature": "isModuleActive(address,bytes4)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamMintModuleRegistry()",
+            "kind": "function",
+            "name": "isStreamMintModuleRegistry",
+            "signature": "isStreamMintModuleRegistry()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "moduleInfo(address)",
+            "kind": "function",
+            "name": "moduleInfo",
+            "signature": "moduleInfo(address)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)",
+                "internal_type": "struct IStreamMintModuleRegistry.MintModuleInfo",
+                "components": [
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "semanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "codehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+            "kind": "function",
+            "name": "setModule",
+            "signature": "setModule(address,(uint8,bytes4,uint32,bytes32,bytes32,uint32),string)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "info",
+                "type": "(uint8,bytes4,uint32,bytes32,bytes32,uint32)",
+                "internal_type": "struct IStreamMintModuleRegistry.MintModuleInfo",
+                "components": [
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "semanticVersion",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  },
+                  {
+                    "name": "codehash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "metadataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "gasLimit",
+                    "type": "uint32",
+                    "internal_type": "uint32"
+                  }
+                ]
+              },
+              {
+                "name": "metadataURI",
+                "type": "string",
+                "internal_type": "string"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "MintModuleMetadata(address,bytes32,string)",
+            "kind": "event",
+            "name": "MintModuleMetadata",
+            "signature": "MintModuleMetadata(address,bytes32,string)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "metadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataURI",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+            "kind": "event",
+            "name": "MintModuleUpdated",
+            "signature": "MintModuleUpdated(address,uint8,bytes4,uint32,bytes32,bytes32,uint32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "enum IStreamMintModuleRegistry.ModuleStatus",
+                "indexed": false
+              },
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": true
+              },
+              {
+                "name": "semanticVersion",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "codehash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "metadataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "gasLimit",
+                "type": "uint32",
+                "internal_type": "uint32",
+                "indexed": false
+              },
+              {
+                "name": "admin",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "InvalidMintModule(address)",
+            "kind": "error",
+            "name": "InvalidMintModule",
+            "signature": "InvalidMintModule(address)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidMintModuleInfo(address)",
+            "kind": "error",
+            "name": "InvalidMintModuleInfo",
+            "signature": "InvalidMintModuleInfo(address)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "MintModuleCodehashMismatch(address,bytes32,bytes32)",
+            "kind": "error",
+            "name": "MintModuleCodehashMismatch",
+            "signature": "MintModuleCodehashMismatch(address,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "MintModuleInterfaceUnsupported(address,bytes4)",
+            "kind": "error",
+            "name": "MintModuleInterfaceUnsupported",
+            "signature": "MintModuleInterfaceUnsupported(address,bytes4)",
+            "inputs": [
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
               }
             ]
           }
