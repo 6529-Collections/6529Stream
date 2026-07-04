@@ -1020,6 +1020,35 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Resolved all 24 open questions raised by the specification permanence
+  reframe through accepted `docs/adr/0009-protocol-v1-open-question-resolutions.md`
+  and accepted ADR 0008 (amended by ADR 0009 decisions 8 and 9): sequential
+  global token IDs with stored collection serials, the 2,000-byte Core
+  headroom rule as the governing size gate, dual genesis entropy providers
+  (VRF plus reviewed ARRNG/Pyth fallback; VRF-only nonconformant), the full
+  five-scope genesis finality registry, one canonical `stream`-prefixed
+  module identity surface, mandatory Core `contractURI()` and
+  Core-originated ERC-4906 refresh emitters, `maxRoyaltyBps = 1000`,
+  frozen-bit-only assignment-hash binding, deployment-wide global freeze
+  blocking new revenue classes, `COLLECTION_SCOPE_PHASE_ID = 0` cross-phase
+  counter derivation, `fulfillEntropy` outcome codes for stale-result
+  handling, and the metadata/collection-metadata decisions recorded in the
+  ADR. Removed every inline `OQ-*` marker and moved the register to
+  Resolved.
+- Reframed the Stream specification set from launch-phase language onto
+  permanence classes for permanent 6529-network infrastructure: added
+  `docs/spec-policy.md` (Permanent/Replaceable/Operational taxonomy,
+  Draft/Review/Final lifecycle, ADR-gated amendments) and
+  `docs/spec-open-questions.md` (tracked `OQ-*` decisions), retitled the
+  launch v1 target architecture to the Stream protocol v1 specification and
+  the launch conformance matrix to the deployment conformance matrix, swept
+  launch/pre-launch/future-module wording from the umbrella, revenue, mint,
+  metadata, collection metadata, and entropy specs, canonicalized the
+  `royaltyReceiverAndBps` (`0x54f77a09`) resolver selector across the matrix
+  and umbrella spec, and marked genuinely open decisions with inline `OQ-*`
+  markers instead of deferral hedges. Spec file names are unchanged;
+  normative requirements are unchanged except where hedges became tracked
+  open questions.
 - Recovered 392 bytes of measured `StreamCore` runtime headroom with
   behavior-preserving storage caching and invariant-bounded unchecked counter
   arithmetic; that release step measured production via-IR runtime at 21,831

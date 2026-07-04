@@ -10,12 +10,23 @@ Read this document together with the [threat model](threat-model.md), the
 the [known blockers](known-blockers.md), and the canonical roadmap in
 [`ops/ROADMAP.md`](../ops/ROADMAP.md).
 
-## Pre-Launch Target Specs
+## Protocol Specification
 
-This page maps the current local baseline. The intended pre-launch architecture
-for the expanded Stream modules is specified separately:
+This page maps the current local baseline. The normative specification the
+production system must conform to is maintained separately. 6529Stream is
+permanent infrastructure: the first production deployment is the permanent
+system, and every divergence between this baseline and the specs below is a
+deployment blocker tracked by the
+[deployment conformance matrix](launch-conformance-matrix.md), not a
+tolerated interim state. Specification conventions, permanence classes, and
+the amendment process are defined in the
+[specification policy](spec-policy.md); undecided items are tracked in the
+[open-questions register](spec-open-questions.md).
 
-- [Launch v1 target architecture](launch-v1-target-architecture.md)
+- [Specification policy](spec-policy.md)
+- [Stream protocol v1 specification](launch-v1-target-architecture.md)
+- [Stream long-term architecture](stream-long-term-architecture.md)
+- [Deployment conformance matrix](launch-conformance-matrix.md)
 - [Revenue splits and royalties](revenue-splits-and-royalties.md)
 - [Mint policy and accounting](mint-policy-and-accounting.md)
 - [Metadata router and renderer](metadata-router-and-renderer.md)
@@ -23,6 +34,7 @@ for the expanded Stream modules is specified separately:
 - [Entropy coordinator](stream-entropy-coordinator.md)
 - [Entropy providers](stream-entropy-providers.md)
 - [ADR 0008: revenue splits and royalty resolver](adr/0008-revenue-splits-and-royalty-resolver.md)
+- [Open-questions register](spec-open-questions.md)
 
 ## Maturity And Scope
 

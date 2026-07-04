@@ -2,11 +2,15 @@
 
 ## Status
 
-Proposed.
+Accepted.
 
-This ADR is a pre-launch target design record. 6529Stream has not launched, so
-the revenue and royalty architecture should be implemented before launch as the
-initial production architecture.
+Accepted 2026-07-04 through
+[ADR 0009](0009-protocol-v1-open-question-resolutions.md) (decision 10),
+amended by ADR 0009 decisions 8 (deployment-wide global freeze blocks new
+revenue classes) and 9 (the assignment hash binds the frozen bit only).
+
+This ADR is the design record for the revenue and royalty architecture of
+the first production deployment, which is the permanent system.
 The cross-cutting 50+ year architecture principles live in
 `docs/stream-long-term-architecture.md`.
 
@@ -797,10 +801,13 @@ bytes32 assignmentHash = keccak256(abi.encode(
     address(splitWallet),
     uint16(royaltyBps),
     uint8(assignmentKind),
-    uint8(freezeMode),
-    bool(permanentFreeze),
+    bool(frozen),
     bytes32(metadataHash)
 ));
+// The assignment hash binds the frozen bit only (ADR 0009 decision 9);
+// freeze-mode transitions between frozen states do not change the hash.
+// The canonical field-level preimage is defined in
+// docs/revenue-splits-and-royalties.md.
 
 bytes32 resolvedPrimaryPolicyHash = keccak256(abi.encode(
     STREAM_PRIMARY_POLICY_V1,
@@ -869,11 +876,11 @@ Rules:
 - `royaltyBps` must be less than or equal to Core's immutable
   `maxRoyaltyBps`. A resolver may mirror the same cap or choose a lower cap,
   but it cannot raise the Core ceiling.
-- The recommended initial Core `maxRoyaltyBps` is 1000. Some marketplaces warn
-  on or reject royalties above 1000 bps. The Core cap must not exceed 10,000.
-  Raising that ceiling after launch requires a new Core deployment line and
-  explicit rollout plan; lowering resolver policy can use a new resolver
-  deployment and rollout plan.
+- The Core `maxRoyaltyBps` is 1000 and immutable in Core
+  (ADR 0009 decision 7). Some marketplaces warn on or reject royalties above
+  1000 bps. Raising the cap requires a successor Core line and explicit
+  rollout plan; lowering resolver policy can use a new resolver deployment
+  and rollout plan.
 - Assignment setters must validate wallet deployment, `walletFor(profileId)`,
   `wallet.profileId()`, and an active runtime code hash at assignment time.
   Core `royaltyInfo()` must not redo expensive wallet validation on every read.
@@ -902,9 +909,10 @@ Rules:
   range guess or unknown future token ID.
 - A global freeze is implicitly `freezeMode = INHERITED` across default,
   collection, and token scopes for the affected revenue class. It can make all
-  assignments immutable for a deployment line. Whether it also blocks entirely
-  new revenue classes must be an explicit release decision; deployment-wide
-  global freeze should block both.
+  assignments immutable for a deployment line. A deployment-wide global freeze
+  blocks both all existing keys and the creation of entirely new revenue
+  classes (ADR 0009 decision 8); a global freeze bypassable by minting a new
+  class is not a credible freeze.
 - Every set, clear, and freeze action must emit enough data for indexers to
   reconstruct historical policy.
 
@@ -952,9 +960,12 @@ choice must be visible in events. If a scope freezes before settlement,
 acceptable; `STRICT_MATCH` remains the default for economically material sales.
 Settlement events must expose whether drift was observed between the signed
 `expectedPrimaryPolicyHash` and the resolved settlement policy.
-The resolved primary policy hash includes `freezeMode` and `permanentFreeze`.
-A freeze between signature and settlement therefore changes the hash and makes
+The resolved primary policy hash binds the assignment's frozen bit through
+the canonical `assignmentHash` preimage (ADR 0009 decision 9). A freeze
+between signature and settlement flips that bit, changes the hash, and makes
 `STRICT_MATCH` revert unless the signer authorized the frozen policy hash.
+Freeze-mode transitions between frozen states (for example exact to
+permanent) do not change economics and do not change the hash.
 `ALLOW_CURRENT` is the explicit opt-in to that drift.
 
 No production sale path may use `tx.origin` as payer, recipient, executor, or

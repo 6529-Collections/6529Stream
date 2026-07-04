@@ -548,7 +548,7 @@ Before a deployment can become public-beta eligible:
   `setCollectionRecord`, `setCollectionRecordWithRevision`, and
   `publishCollectionSnapshot`, plus `StreamPreservationRecords`
   `recordCollectionRecord`, are intentionally whole-module grants for trusted
-  metadata or preservation operators in launch v1. Treat those grants as
+  metadata or preservation operators in protocol v1. Treat those grants as
   custody-sensitive: a compromised writer can publish any accepted metadata,
   preservation, C2PA/PREMIS, rights, or snapshot record in the target module.
 - Configure pause guardians and unpause admins.

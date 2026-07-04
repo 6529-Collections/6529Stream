@@ -1,58 +1,81 @@
-# Launch V1 Target Architecture
+# Stream Protocol v1 Specification
 
-This document is the normative pre-launch target for the expanded Stream
-specification set. It reconciles the revenue, mint, metadata, and entropy specs
-into one launch scope. The current contracts remain the implementation
-baseline, not the final launch architecture.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
+inline are resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
-6529Stream has not launched. These requirements are therefore implementation
-targets for the initial production system.
+This document is the normative protocol v1 specification for 6529Stream. It
+reconciles the revenue, mint, metadata, and entropy specs into one protocol
+scope. 6529Stream is permanent infrastructure for the 6529 network: the
+first production deployment is the permanent system, and these requirements
+are the standard that deployment must satisfy — there is no lower
+provisional bar for a first version and no deferred-quality tier after it.
 
-## Launch Scope
+The current repository contracts predate this specification and do not yet
+conform. [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+is the enforcement point: it blocks any production deployment on the full
+gate set, and [`docs/architecture.md`](architecture.md) maps the as-built
+baseline honestly until the implementation conforms.
 
-Launch v1 should ship the smallest auditable system that preserves 50-year
-optionality:
+## Protocol v1 Scope
 
-| Area | Launch v1 requirement | Future extension posture |
+Protocol v1 is the smallest auditable system that remains extensible over a
+50+ year contract life:
+
+| Area | Protocol v1 requirement | Extension surface (Permanent from v1) |
 | --- | --- | --- |
-| Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, and Core-native ERC-2981 | No mutable policy or rendering logic in Core |
-| Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, approved-standard ERC-20 primary settlement through outside-Core adapters, passive royalty receipt, and native/approved-asset revenue escrow | Non-standard ERC-20 behavior and special recovery adapters require accepted follow-up specs |
-| Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Marketplace registry overrides are integration extras, not the launch path |
-| Minting | `StreamMintManager` policy plus `StreamMintLedger` accounting with many counters, aggregate-only consumption, signed tickets, and module-checked gates/resolvers | New counter resolvers and gates can be added through the registry |
-| Metadata | `StreamMetadataRouter`, `StreamRendererV1`, `StreamCollectionMetadata`, and launch preservation/attestation/view satellites for identity, rights, media, scripts, dependencies, custom fields, locks, schemas, C2PA, IIIF, PREMIS-style records, preservation, and museum-grade catalogue material | Additional specialized legal, rights, VC/DID, EAS, or institution-specific modules can extend the same manifest and record model |
-| Entropy | `StreamEntropyCoordinator`, Chainlink VRF provider, mock provider, and a v1 fallback decision for reviewed ARRNG or Pyth versus an explicit VRF-only exception | Other providers remain future adapters behind the same interface |
+| Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, and Core-native ERC-2981 | None. Core gains no new semantics after deployment; no mutable policy or rendering logic in Core. Changing Core surfaces means a successor Core line |
+| Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, approved-standard ERC-20 primary settlement through outside-Core adapters, passive royalty receipt, and native/approved-asset revenue escrow | New settlement or recovery adapters are new Replaceable modules with their own accepted specs; non-standard ERC-20 behavior stays excluded until a spec accepts it |
+| Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Resolver implementations rotate behind the frozen resolver interface; marketplace registry overrides remain integration extras outside the protocol |
+| Minting | `StreamMintManager` policy plus `StreamMintLedger` accounting with many counters, aggregate-only consumption, signed tickets, and module-checked gates/resolvers | New counter resolvers and gates register through the frozen module registry and gate/resolver interfaces |
+| Metadata | `StreamMetadataRouter`, `StreamRendererV1`, `StreamCollectionMetadata`, and genesis preservation/attestation/view satellites for identity, rights, media, scripts, dependencies, custom fields, locks, schemas, C2PA, IIIF, PREMIS-style records, preservation, and museum-grade catalogue material | Additional legal, rights, VC/DID, EAS, or institution-specific modules extend the same Permanent manifest and record model |
+| Entropy | `StreamEntropyCoordinator`, Chainlink VRF primary provider, one reviewed fallback provider (ARRNG preferred, Pyth as the reviewed alternate), and a mock provider for local validation; VRF-only deployment is not conformant (ADR 0009 decision 21) | New providers are adapters behind the same Permanent provider interface, added through registry approval and provider epochs |
 
-The launch docs may describe future extension points, but implementation
-requirements must be labeled launch v1 or future module. A future module must
-not become an implicit launch dependency merely because it appears in a design
-appendix.
+Every implementation requirement in the Stream specs carries a permanence
+class as defined in [`docs/spec-policy.md`](spec-policy.md): Permanent,
+Replaceable, or Operational. Spec documents may describe extension points,
+but a module outside the genesis deployment set must never become an
+implicit dependency of a Permanent or genesis surface merely because it
+appears in a design appendix.
 
 ## Canonical Token Identity
 
-Launch v1 uses explicit Core-owned token identity:
+Protocol v1 uses explicit Core-owned token identity. This is Permanent
+semantics:
 
-1. Core allocates globally unique ERC-721 `tokenId` values.
+1. Core allocates sequential global ERC-721 `tokenId` values from one
+   counter starting at 1 (ADR 0009 decision 1).
 2. Core writes `tokenId -> collectionId`.
 3. Core writes `tokenId -> collectionSerial`.
-4. Core writes a non-reverting token identity bit used by royalty, metadata,
-   burn, and audit reads. This is distinct from ERC-721 minted ownership
-   existence; a reserved token identity is not transferable until final mint.
+4. Core exposes a non-reverting authoritative identity read — the
+   `mappingExists` result of `tokenCollectionIdentity` — used by royalty,
+   metadata, burn, and audit reads. This is distinct from ERC-721 minted
+   ownership existence; a reserved token identity is not transferable until
+   final mint. The read semantics are Permanent; whether Core stores a
+   discrete identity flag or derives it from ownership, burned-token audit
+   state, and prepared-mint state is implementation-defined, provided the
+   read is authoritative and never reverts.
 5. Core owns collection supply mode, status, max supply when applicable,
    minted-ever counts, burned counts, and next serial.
 6. Core is the only source of truth for token existence and collection
    membership.
 
-The current reserved range formula, `collectionId * 10_000_000_000`, is a
-baseline implementation detail and should not be the launch v1 identity model.
-If implementation chooses to retain namespaced ranges, it must still expose the
-explicit mapping and token identity bit above, and the range capacity must not be
-misrepresented as final collection supply.
+Token ID arithmetic is never authority and carries no meaning. The reserved
+range formula in the baseline code, `collectionId * 10_000_000_000`, must be
+removed from the allocator (ADR 0009 decision 1): token IDs are sequential
+and global, `collectionId` and `collectionSerial` are stored explicitly in
+the token identity record, and no serial or collection value may be derived
+from the shape of a token ID. Packing `collectionId` and `collectionSerial`
+into one storage slot with bounded widths is an implementation choice; the
+read surface returns `uint256` values.
 
-Identity, burn audit, royalty, resolver, and router resolution reads must use
-the explicit token identity bit and stored collection mapping, not ERC-721
-ownership existence or `_requireMinted`. `tokenURI()` may keep normal ERC-721
-metadata behavior for unminted tokens, but metadata routing must not infer
-collection identity from token ID ranges.
+Identity, burn audit, royalty, resolver, and router resolution reads must
+use the authoritative identity read and stored collection mapping, not
+ERC-721 ownership existence or `_requireMinted`. `tokenURI()` may keep
+normal ERC-721 metadata behavior for unminted tokens, but metadata routing
+must not infer collection identity from token ID ranges.
 
 Mint ordering must be:
 
@@ -62,20 +85,20 @@ Mint ordering must be:
 4. Record or escrow revenue.
 5. Consume mint ledger counters, authorization IDs, and any nullifiers.
 6. Register entropy request context.
-7. Mint or transfer to the final recipient only after required accounting and
-   entropy registration are durable.
+7. Mint or transfer to the final recipient only after required accounting
+   and entropy registration are durable.
 
-Any safe recipient callback must happen after the accounting and entropy steps
-above. If the final recipient is a contract and callback timing would violate
-that order, the launch design should mint to custody first or use an internal
-mint followed by a separate safe transfer.
+Any safe recipient callback must happen after the accounting and entropy
+steps above. If the final recipient is a contract and callback timing would
+violate that order, the implementation should mint to custody first or use
+an internal mint followed by a separate safe transfer.
 
 ## Core Hook Budget
 
 Core-native ERC-2981 is mandatory. Core may stay small only by moving other
 logic out.
 
-The launch implementation must provide one measured Core hook proof before the
+The implementation must provide one measured Core hook proof before the
 implementation PR is accepted. The proof must be produced by:
 
 ```bash
@@ -83,22 +106,23 @@ forge build --sizes --via-ir --skip test --skip script --force
 python scripts/check_contract_size_budget.py
 ```
 
-The measured Core must include every mandatory launch hook with final call
-shapes, not placeholders that omit calldata, returndata, storage, or external
-call paths:
+The measured Core must include every mandatory hook with final call shapes,
+not placeholders that omit calldata, returndata, storage, or external call
+paths:
 
 | Hook | Selector owner | Required caller/user |
 | --- | --- | --- |
 | `royaltyInfo(uint256,uint256)` | Core | Marketplaces and indexers |
 | `supportsInterface(bytes4)` with ERC-721, ERC-4906, ERC-2981, and any accepted enumerable interface | Core | Marketplaces and indexers |
 | `mintFromManager(...)` or equivalent manager-only mint boundary | Core | `StreamMintManager` only |
-| token identity reads: collection ID, collection serial, token identity bit, burn audit as needed | Core | Resolver, router, indexers |
+| token identity reads: collection ID, collection serial, authoritative identity read, burn audit as needed | Core | Resolver, router, indexers |
 | metadata router pointer read and update | Core | Admin and `tokenURI()` path |
 | minimal `tokenURI()` delegation to router | Core | ERC-721 metadata callers |
+| minimal `contractURI()` delegation to the contract-metadata satellite (ADR 0009 decision 4) | Core | Marketplaces and indexers (ERC-7572) |
 | collection metadata pointer read and update | Core | Router and admin tooling |
 | entropy coordinator pointer read and update | Core | Mint and entropy lifecycle |
 | entropy registration call during mint | Core to coordinator | Mint path |
-| ERC-4906 event emission authority or Core-originated metadata refresh path | Core | Metadata/admin paths |
+| Core-originated ERC-4906 refresh emitters callable by authorized satellites (ADR 0009 decision 5) | Core | Metadata router, finality registry, entropy lifecycle |
 
 The implementation PR must report:
 
@@ -108,51 +132,64 @@ The implementation PR must report:
 4. Whether the margin remains above the release floor and warning threshold.
 5. Which non-essential Core logic was moved out if the first attempt failed.
 
-Current launch hook implementation proof:
+The governing size rule is the conformance-matrix headroom target
+(ADR 0009 decision 2): `StreamCore` runtime must retain at least 2,000
+bytes of EIP-170 margin at the deployment gate, proven by one
+post-extraction measured build that includes every mandatory hook in the
+table above. The bytecode-spend baseline and exception ledger in
+`release-artifacts/contracts.json` remain the pre-deployment development
+control; interim exceptions cannot survive to the deployment gate.
+
+Implementation evidence (non-normative). Measured Core hook proof at the
+time of the CON-012 slice:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
 2. New measured `StreamCore` runtime: 24,150 bytes.
 3. EIP-170 margin: 426 bytes.
-4. The margin remains above the 384-byte release floor but below the 512-byte
-   warning threshold.
+4. The margin remains above the 384-byte release floor but below the
+   512-byte warning threshold.
 5. The Core hook keeps the immediate manager mint ABI minimal and leaves
-   beneficiary/payment evidence, batch commitments, operation events, and richer
-   mint policy to the manager, ledger, sale adapter, and settlement satellites.
+   beneficiary/payment evidence, batch commitments, operation events, and
+   richer mint policy to the manager, ledger, sale adapter, and settlement
+   satellites.
 
-Current CON-013 implementation proof:
+Implementation evidence (non-normative). CON-013 slice:
 
-1. `StreamMintLedger` is release-tracked as the first outside-Core durable mint
-   accounting satellite.
-2. The ledger supports owner-authorized deployed-contract writers, one active
-   registered `policyHash` per `(manager, collectionId, phaseId)`, launch-safe
-   static counter policies, canonical manager-scoped value-key derivation,
-   cap-checked counter consumption, durable values across policy
-   re-registration, and manager-scoped authorization replay protection.
+1. `StreamMintLedger` is release-tracked as the first outside-Core durable
+   mint accounting satellite.
+2. The ledger supports owner-authorized deployed-contract writers, one
+   active registered `policyHash` per `(manager, collectionId, phaseId)`,
+   deployment-safe static counter policies, canonical manager-scoped
+   value-key derivation, cap-checked counter consumption, durable values
+   across policy re-registration, and manager-scoped authorization replay
+   protection.
 3. Resolver caps/deltas, custom gates, callable nullifier systems, sale/drop
    routing, payment collection, and Core mint execution remain outside this
    ledger-only slice.
 
-Current CON-014 implementation proof:
+Implementation evidence (non-normative). CON-014 slice:
 
-1. `StreamMintManager` is release-tracked as the outside-Core phase policy and
-   prepared-mint execution surface paired with `StreamMintLedger`.
-2. The manager supports owner-configured launch-static phase policies, ordered
-   counters, executor allowlists, pause/start/end guards, active `policyHash`
-   registration in the ledger, bounded batch counter consumption construction,
-   ledger cap enforcement with nonzero authorization IDs, stale-policy rejection
-   through a required expected policy hash, and Core prepare/complete execution.
-3. Dynamic resolver counters, custom gates, callable nullifiers, primary-sale
-   settlement routing, existing drop/auction routing, and royalty resolver
-   integration remain follow-up slices.
+1. `StreamMintManager` is release-tracked as the outside-Core phase policy
+   and prepared-mint execution surface paired with `StreamMintLedger`.
+2. The manager supports owner-configured static phase policies, ordered
+   counters, executor allowlists, pause/start/end guards, active
+   `policyHash` registration in the ledger, bounded batch counter
+   consumption construction, ledger cap enforcement with nonzero
+   authorization IDs, stale-policy rejection through a required expected
+   policy hash, and Core prepare/complete execution.
+3. Dynamic resolver counters, custom gates, callable nullifiers,
+   primary-sale settlement routing, existing drop/auction routing, and
+   royalty resolver integration remain follow-up slices.
 
-No launch v1 implementation may drop Core-native ERC-2981 to solve size
+No conformant implementation may drop Core-native ERC-2981 to solve size
 pressure. Refactor metadata, collection metadata, entropy, mint policy, or
 other non-Core behavior out first.
 
 ## Royalty Resolver Contract
 
 Core must not trust a resolver-supplied royalty amount. The resolver returns
-receiver and bps; Core computes the amount:
+receiver and bps; Core computes the amount. The interface and selector are
+Permanent:
 
 ```solidity
 interface IStreamRevenueResolver {
@@ -176,51 +213,51 @@ Core requirements:
 
 1. Use an immutable or tightly governed resolver address and immutable
    `royaltyResolverGasLimit`.
-2. Own an immutable `maxRoyaltyBps` cap, recommended at 1000 for launch unless
-   a later accepted spec chooses another cap before deployment. The cap must
-   not exceed 10,000. The resolver may enforce the same cap, but Core is the
-   final guard.
-3. Perform a `staticcall` with the explicit gas limit only when parent gas is
-   sufficient under EIP-150's 63/64 forwarding rule plus a fixed return/decode
-   overhead. If parent gas is insufficient, return `(address(0), 0)` without
-   reverting.
-4. Use capped assembly returndata handling, copy at most 64 bytes, and require
-   `returndatasize() == 64`; undersized or oversized returndata returns
-   `(address(0), 0)`.
+2. Own an immutable `maxRoyaltyBps` cap of 1000 (ADR 0009 decision 7). The
+   resolver may enforce the same cap, but Core is the final guard.
+3. Perform a `staticcall` with the explicit gas limit only when parent gas
+   is sufficient under EIP-150's 63/64 forwarding rule plus a fixed
+   return/decode overhead. If parent gas is insufficient, return
+   `(address(0), 0)` without reverting.
+4. Use capped assembly returndata handling, copy at most 64 bytes, and
+   require `returndatasize() == 64`; undersized or oversized returndata
+   returns `(address(0), 0)`.
 5. Decode `(address receiver, uint16 royaltyBps)` from the 64-byte result.
 6. Return `(address(0), 0)` when the call fails, returns malformed data,
-   returns `receiver == address(0)`, returns `royaltyBps == 0`, returns
-   `royaltyBps > maxRoyaltyBps`, or otherwise fails Core's cheap return-shape
-   checks.
+   returns excess data, returns `receiver == address(0)`, returns
+   `royaltyBps == 0`, returns `royaltyBps > maxRoyaltyBps`, or otherwise
+   fails Core's cheap return-shape checks.
 7. Compute `amount = mulDiv(salePrice, royaltyBps, 10_000)` or equivalent
    full-precision checked math in Core for every `uint256 salePrice`.
 8. Never call `_requireMinted` from `royaltyInfo()`.
 9. Treat fallback-to-zero as a monitorable incident, not as normal healthy
    operation.
 
-The resolver may use Core token identity reads, but Core remains the authority
-for token-to-collection mapping and existence.
+The resolver may use Core token identity reads, but Core remains the
+authority for token-to-collection mapping and existence.
 The resolver must be deployed for exactly one Core and must revert or return
-zero if the `core` argument differs from that bound Core. Core cannot prove that
-logic from returndata alone; launch conformance must enforce it through
-resolver code-hash approval, static analysis, tests, and by always passing
-`address(this)`.
-Core intentionally falls back to zero rather than a stale default receiver/bps
-because a Core-local fallback would become a second royalty source of truth.
-This accepts temporary royalty-disclosure loss during resolver incidents in
-exchange for avoiding silent payment to a wrong or superseded wallet. Launch
-readiness must include resolver-health probes that use the same selector, gas
-cap, parent-gas precheck, returndata-size rule, and decode path as
-`royaltyInfo()`.
+zero if the `core` argument differs from that bound Core. Core cannot prove
+that logic from returndata alone; deployment conformance must enforce it
+through resolver code-hash approval, static analysis, tests, and by always
+passing `address(this)`.
+Core intentionally falls back to zero rather than a stale default
+receiver/bps because a Core-local fallback would become a second royalty
+source of truth. This accepts temporary royalty-disclosure loss during
+resolver incidents in exchange for avoiding silent payment to a wrong or
+superseded wallet. Deployment readiness must include resolver-health probes
+that use the same selector, gas cap, parent-gas precheck, returndata-size
+rule, and decode path as `royaltyInfo()`.
 
 Primary-sale deposits and escrow credits must account for the full received
-amount. Split-wallet per-recipient floors may leave bounded rounding dust, but
-that dust is not emergency surplus and has no ordinary sweep path in launch v1.
-Any future final dust sweep requires its own accepted decommission spec.
+amount. Split-wallet per-recipient floors may leave bounded rounding dust,
+but that dust is not emergency surplus and has no ordinary sweep path in
+protocol v1. A final dust sweep, if ever wanted, requires its own accepted
+decommission spec; none exists in v1.
 
 ## Assignment And Freeze State
 
-Revenue and royalty assignment freezes use one canonical state machine:
+Revenue and royalty assignment freezes use one canonical state machine.
+Freeze semantics are Permanent:
 
 ```solidity
 enum FreezeState {
@@ -237,23 +274,26 @@ Rules:
 1. `UNFROZEN` assignments can be set or cleared by authorized policy admins.
 2. `EXACT_FROZEN` freezes exactly one assignment key.
 3. `INHERITED_FROZEN` freezes a scope and all realized descendants.
-4. `GLOBAL_FROZEN` freezes an entire revenue class across default, collection,
-   and token scopes.
+4. `GLOBAL_FROZEN` freezes an entire revenue class across default,
+   collection, and token scopes; a deployment-wide global freeze also blocks
+   creation of new revenue classes (ADR 0009 decision 8).
 5. `PERMANENT_FROZEN` cannot be loosened or unfrozen.
-6. Timelocked loosening is allowed only for non-permanent freezes and must emit
-   before/after policy hashes.
+6. Timelocked loosening is allowed only for non-permanent freezes and must
+   emit before/after policy hashes.
 7. Token-scope assignments may be created only after Core has written the
-   token's collection mapping and token identity bit. Otherwise the resolver must
-   revert with a typed error such as `TokenCollectionUnmapped`.
+   token's collection mapping and authoritative identity. Otherwise the
+   resolver must revert with a typed error such as `TokenCollectionUnmapped`.
 8. Inherited-freeze descendant counters are keyed only by realized ancestry.
-9. If the implementation cannot enumerate lower descendants, inherited freeze
-   must either revert when descendant counters are nonzero or use a lazy epoch
-   model that blocks later descendant mutation without enumeration.
+9. If the implementation cannot enumerate lower descendants, inherited
+   freeze must either revert when descendant counters are nonzero or use a
+   lazy epoch model that blocks later descendant mutation without
+   enumeration.
 
 ## Domain Constants And Schema Versions
 
-Every domain constant used in hashing must be recorded in one release artifact
-or checked spec table before implementation. The table must include:
+Every domain constant used in hashing is Permanent and must be recorded in
+one release artifact or checked spec table before implementation. The table
+must include:
 
 | Field | Meaning |
 | --- | --- |
@@ -275,8 +315,8 @@ artifacts.
 
 ### StreamMintManager Domain Constants
 
-The CON-014 manager slice records these launch-static phase policy domains in
-this checked spec table. `operationId` values are derived from
+The CON-014 manager slice records these static phase policy domains in this
+checked spec table. `operationId` values are derived from
 `OPERATION_DOMAIN` through `operationRoot` and then bind
 `operationRoot`, `operationNonce`, `tokenIndex`, `tokenDataHash`, and `salt`.
 
@@ -293,9 +333,9 @@ this checked spec table. `operationId` values are derived from
 
 ## Event Reconstruction
 
-Every launch module must have an event-only reconstruction test plan. The
-implementation test suite must include at least one harness that rebuilds the
-following from emitted events and compares against direct reads:
+Every genesis module must have an event-only reconstruction test plan. The
+implementation test suite must include at least one harness that rebuilds
+the following from emitted events and compares against direct reads:
 
 1. Split profile entries and wallet address.
 2. Revenue assignments and freeze state.
@@ -307,43 +347,56 @@ following from emitted events and compares against direct reads:
 7. Collection metadata field values, locks, and schema/view commitments.
 8. Metadata refresh events.
 
-State reads remain useful for live tooling, but event replay must be sufficient
-for long-lived indexers and archive reconstruction.
+State reads remain useful for live tooling, but event replay must be
+sufficient for long-lived indexers and archive reconstruction.
 
-## Capability Beacons
+## Module Identity Surface
 
-Every launch satellite should expose a small capability surface:
+Every genesis satellite must expose the canonical module identity surface
+(ADR 0009 decision 3), defined once in
+[`stream-long-term-architecture.md`](stream-long-term-architecture.md)
+(Satellite Versioning) and golden-tested by selector:
 
 ```solidity
-function streamModuleFamily() external pure returns (bytes32);
+function streamModuleType() external pure returns (bytes32);
 function streamModuleVersion() external pure returns (bytes32);
+function streamModuleInterfaceId() external pure returns (bytes4);
 function streamModuleSchemaHash() external view returns (bytes32);
 function streamModuleSupersedes() external view returns (address);
+function streamModuleCodeHash() external view returns (bytes32);
+function streamModuleDeploymentManifestHash() external view returns (bytes32);
+function streamModuleManifest() external view returns (string memory uri, bytes32 hash);
 ```
 
 This mirrors the existing contract metadata release-hash posture and gives
 future indexers a way to discover module families without frontend-specific
 knowledge.
-`streamModuleSupersedes()` returns the immediate predecessor in the same module
-family, not the latest known descendant. Indexers reconstruct longer successor
-chains by following the predecessor links and matching module family/schema
-hashes.
+`streamModuleSupersedes()` returns the immediate predecessor in the same
+module family, not the latest known descendant. Indexers reconstruct longer
+successor chains by following the predecessor links and matching module
+type/schema hashes.
 
-## Launch Deferrals
+## Protocol v1 Exclusions
 
-The following are intentionally not launch v1 requirements:
+The following are excluded from protocol v1. Exclusion is intentional
+absence, not deferral: the semantics below do not exist in v1, and adding
+any of them later requires a new accepted module spec against the frozen
+extension mechanisms, or a successor Core line where Permanent surfaces are
+affected.
 
 1. Transfer-restricting royalty enforcement.
 2. General onchain policy VM behavior.
 3. Transfer of arbitrary museum, rights, legal, VC/DID, EAS, or
    institution-specific graph logic into `StreamCore`.
-4. Multi-source entropy mixers, VDFs, timelock reveal, drand, Randcast, Supra,
-   Witnet, or API3 provider implementations.
+4. Multi-source entropy mixers, VDFs, timelock reveal, drand, Randcast,
+   Supra, Witnet, or API3 provider implementations.
 5. Same-transaction instant entropy fulfillment during mint.
 6. Arbitrary sweep authority over split-wallet or escrow owed funds.
 
-The following are v1 requirements or v1 launch decisions, but they must remain
-outside Core:
+## Genesis Requirements Outside Core
+
+The following are protocol v1 requirements or ratified genesis decisions,
+but they must remain outside Core:
 
 1. ERC-20 primary-sale settlement for approved standard assets through a
    payment adapter or primary-sale settlement module. Non-standard ERC-20
@@ -351,7 +404,14 @@ outside Core:
 2. C2PA, IIIF, and PREMIS-style records, richer preservation modules, and
    museum-grade metadata depth through collection metadata, preservation,
    attestation, and view satellites.
-3. A reviewed entropy fallback decision: either ship a reviewed ARRNG or Pyth
-   fallback provider, with ARRNG as the lower-complexity initial candidate, or
-   record an explicit reviewed VRF-only launch exception in a checksum-covered
-   `StreamEntropyLaunchDecision` manifest with coordinator failure behavior.
+3. Dual entropy providers (ADR 0009 decision 21): Chainlink VRF primary
+   plus one reviewed fallback provider, with ARRNG as the preferred
+   candidate and Pyth as the reviewed alternate. A VRF-only deployment is
+   not conformant. The checksum-covered `StreamEntropyLaunchDecision`
+   manifest records which fallback shipped, its review evidence, and the
+   coordinator failure posture.
+4. The full scoped-finality surface (ADR 0009 decision 6):
+   `StreamArtworkFinalityRegistry` ships with all five scopes —
+   `COLLECTION`, `TOKEN`, `RELEASE`, `SEASON`, and `VIEW` — fully
+   specified, fully tested, and gate-covered, trading audit surface for
+   permanent flexibility by protocol-owner decision.

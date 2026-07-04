@@ -1,12 +1,20 @@
 # Metadata Router And Renderer
 
-This document is a pre-launch target specification for moving Stream metadata
-rendering and script assembly out of `StreamCore` into dedicated metadata
-contracts. `StreamCore` should remain the canonical ERC-721 contract, keep
-`ERC721Enumerable`, and expose `tokenURI(uint256)` as required by ERC-721
-metadata. The heavy metadata construction logic should live outside Core.
-The cross-cutting 50+ year architecture principles live in
-`docs/stream-long-term-architecture.md`.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); its formerly open decisions are
+resolved by [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md)
+and recorded in the `Resolved` section of
+[`docs/spec-open-questions.md`](spec-open-questions.md).
+
+This document specifies how Stream metadata rendering and script assembly move
+out of `StreamCore` into dedicated metadata contracts. 6529Stream is permanent
+infrastructure for the 6529 network: the first production deployment is the
+permanent system, and the requirements below are classified by permanence
+class per `docs/spec-policy.md`, not by launch phase. `StreamCore` should
+remain the canonical ERC-721 contract, keep `ERC721Enumerable`, and expose
+`tokenURI(uint256)` as required by ERC-721 metadata. The heavy metadata
+construction logic should live outside Core. The cross-cutting 50+ year
+architecture principles live in `docs/stream-long-term-architecture.md`.
 
 ## Design Summary
 
@@ -23,7 +31,7 @@ StreamCore
   - token to collection identity
   - collection supply facts needed by token naming
   - minimal tokenURI forwarding
-  - optional minimal contractURI forwarding
+  - minimal contractURI forwarding
   - admin-controlled metadata router pointer
 
 StreamMetadataRouter
@@ -63,22 +71,30 @@ research pass in `docs/metadata-renderer-research.md`:
    putting rich Stream-native facts under `properties.stream` and sibling
    namespaces.
 4. Add ERC-7572-shaped contract metadata through router and
-   `StreamCollectionMetadata` reads. Do not add Core `contractURI()` in launch
-   v1 unless a later bytecode and marketplace evidence review explicitly
-   accepts that Core surface.
+   `StreamCollectionMetadata` reads, and include Core `contractURI()` as a
+   mandatory Core hook (ADR 0009 decision 4). Marketplaces resolve ERC-7572
+   contract-level metadata from the ERC-721 address, so Core exposes a thin,
+   bounded read that delegates to the contract-metadata satellite through
+   the cached pointer policy, with the same fail-safe posture as
+   `tokenURI()`. The hook is part of the Core hook budget and is covered by
+   the measured Core size proof (ADR 0009 decision 2).
 5. Emit ERC-4906-compatible metadata refresh events from Core whenever token
    JSON materially changes.
 6. Make renderer, script, dependency, media, and schema manifests first-class,
    with URI and hash commitments for every offchain or externally resolved
    payload.
-7. Design storage as plural from day one: launch can use chunked strings, while
-   the manifest interfaces can later point to SSTORE2, EthFS, Arweave, IPFS,
-   dependency registries, or other durable stores without touching Core.
-8. Keep frontier ideas as optional modules outside launch Core: post-mint
+7. Design storage as plural from day one: genesis can use chunked strings,
+   while the manifest interfaces can later point to SSTORE2, EthFS, Arweave,
+   IPFS, dependency registries, or other durable stores without touching Core.
+8. Keep frontier ideas as optional modules outside protocol v1 Core: post-mint
    parameters, dynamic onchain traits, alternate token views, token-bound
    accounts, and agent-readable metadata/tooling.
 
 ## Current Implementation Baseline
+
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); it records point-in-time as-built
+state and does not weaken any requirement in this spec.
 
 Current `origin/main` already made an important metadata-safety pass:
 
@@ -107,9 +123,9 @@ too much long-term metadata responsibility:
 
 The target architecture keeps the current safety improvements but moves the
 metadata policy, storage, and rendering boundary out of `StreamCore`. Core
-should retain only minimal `tokenURI()` forwarding, optional minimal
-token existence checks, token-to-collection facts,
-and Core-originated metadata refresh events.
+should retain only minimal `tokenURI()` forwarding, minimal `contractURI()`
+forwarding (ADR 0009 decision 4), token existence checks,
+token-to-collection facts, and Core-originated metadata refresh events.
 
 The earlier scratch compile showed that moving renderer/script assembly out of
 Core saves about `3.8 KB` of runtime bytecode. The exact number should be
@@ -141,9 +157,11 @@ pollute trait filters or depend on every marketplace recognizing new fields.
 3. Keep `tokenURI(uint256)` Core-native from the caller's perspective.
 4. Make metadata rendering a first-class module with explicit versioning.
 5. Support default, collection-level, and token-level renderer configuration.
-6. Support explicit pending, offchain, onchain, and hybrid metadata modes.
+6. Support explicit pending, offchain, and onchain metadata modes, with
+   `HYBRID` reserved as a dormant enum value at genesis (ADR 0009
+   decision 17).
 7. Provide safer JSON and JavaScript assembly than raw string concatenation.
-8. Support richer future metadata schemas without redeploying the NFT core.
+8. Support richer metadata schemas over time without redeploying the NFT core.
 9. Make metadata update events clear for marketplaces and indexers.
 10. Allow irreversible freezes at the collection or token scope.
 11. Emit a rich default metadata schema while keeping extension fields open.
@@ -227,7 +245,7 @@ The cross-contract numeric values are pinned in the Numeric ID Catalog:
 `ROUTER_UNSET = 4`, `ROUTER_NO_CODE = 5`, `ROUTER_REVERTED = 6`,
 `ROUTER_RETURNDATA_OVERSIZED = 7`, and `ROUTER_MALFORMED = 8`.
 
-Launch implementation requirements:
+Production implementation requirements:
 
 1. `metadataRouter == address(0)` returns the documented fallback JSON data URI
    for minted tokens with status `ROUTER_UNSET`.
@@ -250,7 +268,7 @@ Launch implementation requirements:
    oversized return, no-code router, and unset router cases.
 `METADATA_ROUTER_GAS_LIMIT` must be a deploy-time immutable for a Core release,
 not mutable governance state. A successor Core may choose a different immutable
-gas limit after measuring a new router implementation, but launch Core must not
+gas limit after measuring a new router implementation, but v1 Core must not
 include a runtime setter that changes marketplace metadata read behavior.
 The fallback JSON schema must be canonicalized and hash-committed in the
 release manifest. The schema defines exact required fields, optional fields,
@@ -281,13 +299,20 @@ revert for nonexistent or burned tokens. It returns `NONEXISTENT` for a token
 ID with no authoritative Core identity mapping, and `BURNED` for a token whose
 retained mapping exists but ERC-721 ownership has been removed. The only
 acceptable reverts are ordinary Solidity panics or catastrophic read failures
-outside the launch test envelope.
+outside the v1 test envelope.
 
-Core should not expose `contractURI()` in launch v1. Stream is a
-multi-collection ERC-721, and Core bytecode is reserved for ownership,
-enumeration, Core-native ERC-2981, Core-native `tokenURI()` forwarding, and
-Core-originated ERC-4906 refresh. ERC-7572-shaped contract metadata should be
-served through router and metadata reads:
+Core exposes `contractURI()` in protocol v1 as a mandatory Core hook
+(ADR 0009 decision 4). Stream is a multi-collection ERC-721, and marketplaces
+resolve ERC-7572 contract-level metadata from the ERC-721 address, so the
+standards-correct permanent surface is a thin, bounded Core read that
+delegates to the contract-metadata satellite through the cached pointer
+policy. The delegated read uses the same fail-safe posture as `tokenURI()`:
+a bounded staticcall with a returndata cap, returning the documented
+fallback payload instead of reverting when the satellite read is unset,
+code-less, reverting, oversized, or malformed. The hook is part of the Core
+hook budget and is covered by the measured Core size proof (ADR 0009
+decision 2). The router serves the same ERC-7572-shaped contract metadata
+through its own reads:
 
 ```solidity
 function contractURIForCore(address core)
@@ -302,19 +327,18 @@ function contractURIForCollection(address core, uint256 collectionId)
 ```
 
 Collection-specific contract metadata lives in
-`StreamCollectionMetadata.contractURI(collectionId)`. The launch release
-manifest must record that Core intentionally omits `contractURI()` to preserve
-bytecode headroom and must point indexers to the Stream-native global and
-collection-scoped metadata reads. A future Core `contractURI()` can be
-reconsidered only after final bytecode measurements and marketplace evidence
-show it is worth the Core surface.
-Marketplace and indexer discovery guidance: read the Core-hosted
-`streamSystemManifest()` to discover the current metadata router and collection
-metadata contract, call `StreamMetadataRouter.contractURIForCore(core)` for
-global Stream contract metadata, and call
+`StreamCollectionMetadata.contractURI(collectionId)`. The genesis release
+manifest must record the Core `contractURI()` hook, its delegated read route
+and fallback schema, and the Stream-native global and collection-scoped
+metadata reads (ADR 0009 decision 4).
+Marketplace and indexer discovery guidance: call Core `contractURI()` for
+ERC-7572 contract-level metadata, read the Core-hosted
+`streamSystemManifest()` to discover the current metadata router and
+collection metadata contract, call
+`StreamMetadataRouter.contractURIForCore(core)` for the router-served global
+Stream contract metadata, and call
 `StreamCollectionMetadata.contractURI(collectionId)` for collection-specific
-contract metadata. Core intentionally has no ERC-7572 `contractURI()` selector
-in launch v1.
+contract metadata.
 
 Core should emit an event when the router changes:
 
@@ -329,10 +353,10 @@ the same execution as the canonical pointer update if it is included. It must
 not be used as a separate update path or carry different authority semantics.
 
 Core should only allow router changes through ADR 0004 governance/action roles.
-Legacy selector-map `StreamAdmins` authorization is nonconformant for launch.
-The
-router should be set before launch. Router changes must follow the shared Core
-Satellite Pointer Policy in `docs/stream-long-term-architecture.md`: staged
+Legacy selector-map `StreamAdmins` authorization is nonconformant for
+production deployment. The router should be set at genesis. Router changes
+must follow the shared Core Satellite Pointer Policy in
+`docs/stream-long-term-architecture.md`: staged
 operation ID, registry eligibility, expected code hash, expected manifest hash,
 reason URI/hash, cancellation path, execution recheck, and optional one-way
 pointer freeze. Incident updates must not silently alter frozen collection or
@@ -475,7 +499,8 @@ enum TokenRenderState {
 
 For Phase 1, burned-token behavior may be limited to normal ERC-721 behavior:
 `StreamCore.tokenURI()` reverts because `_requireMinted(tokenId)` fails. The
-enum is still useful for renderer APIs and future explicit burned-token views.
+enum is still useful for renderer APIs and for explicit burned-token view
+modules added under separate accepted specs.
 
 ## Renderer Responsibilities
 
@@ -795,7 +820,8 @@ Rules:
 10. `view_id` and `view_manifest_hash` describe the current default view that
     produced this `tokenURI()` response.
 
-Additional Stream namespaces may be introduced later:
+Additional Stream namespaces may be introduced through separate accepted
+schema versions:
 
 ```json
 {
@@ -834,8 +860,10 @@ surface. It should not dump every Stream machine fact into attributes.
 Recommended default behavior:
 
 1. Include token or collection-provided artistic traits from `attributesJSON`.
-2. Allow collection config to opt into protocol attributes such as
-   `Collection`, `Artist`, `Renderer`, `Metadata Mode`, or `Render State`.
+2. Include protocol-generated attributes such as `Collection`, `Artist`,
+   `Renderer`, `Metadata Mode`, or `Render State` only when the collection
+   config opts in: protocol attributes are opt-in per collection, never
+   default-on (ADR 0009 decision 18).
 3. Keep hashes, addresses, dependency IDs, script hashes, and schema IDs under
    `properties`, not `attributes`, unless a collection explicitly wants them as
    visible traits.
@@ -864,10 +892,12 @@ token properties extension
 ```
 
 If two objects define the same key, token scope wins over collection scope, and
-collection scope wins over default scope. The renderer should reject malformed
-JSON fragments before storage where practical. If full onchain validation is too
-expensive, admin tooling must validate fragments before submission and the
-contract should store a fragment hash for auditability.
+collection scope wins over default scope. Protocol v1 does not validate raw
+JSON fragments onchain: onchain JSON validation is rejected as
+gas-prohibitive security theater (ADR 0009 decision 12). Raw fragments are
+admin-trusted — operator tooling must validate them before submission, and
+the contract must store a fragment hash and schema ID and emit an event for
+every fragment write so the trusted payload stays auditable.
 
 ## Canonical View Model
 
@@ -883,8 +913,9 @@ Recommended view behavior:
    when configured.
 3. Alternate views should not change ERC-721 ownership, token identity, or the
    default marketplace JSON shape.
-4. Future view-specific reads such as `tokenURIForView(tokenId, viewId)` or
-   `tokenHTMLForView(tokenId, viewId)` can be added outside Core if product
+4. View-specific reads such as `tokenURIForView(tokenId, viewId)` or
+   `tokenHTMLForView(tokenId, viewId)` can be added outside Core as
+   Replaceable-layer view modules with separate accepted specs if product
    needs justify them.
 5. The router should pass `viewId` and `viewManifestHash` into the renderer
    context so generated JSON can identify the view that produced it.
@@ -927,7 +958,7 @@ baseURI + tokenId when offchainURIIdMode = TOKEN_ID
 baseURI + collectionSerial when offchainURIIdMode = COLLECTION_SERIAL
 ```
 
-The launch implementation should support both modes. The default can remain
+The genesis implementation should support both modes. The default can remain
 `TOKEN_ID` for compatibility, but ongoing subcollections such as long-running
 photography series should be able to opt into `COLLECTION_SERIAL`.
 
@@ -1031,6 +1062,14 @@ initial use cases are:
 Hybrid mode should still produce deterministic `tokenURI()` output from the
 current onchain configuration.
 
+At genesis, `HYBRID` is a dormant enum value (ADR 0009 decision 17): the
+router rejects assigning `HYBRID` to any metadata config until a
+hybrid-capable renderer version is registered through the renderer registry.
+Genesis tests cover the offchain and onchain modes plus this dormancy
+rejection. Renderers are Replaceable modules behind frozen interfaces, so
+hybrid rendering arrives, if ever, as a new renderer version through the
+registry without touching Core.
+
 ## Script Assembly
 
 The renderer should not inject loose top-level variables as the primary API.
@@ -1110,7 +1149,7 @@ Rules:
    should be recomputable by third-party tools from the documented canonical
    inputs.
 
-For compatibility with simple sketches, `StreamRendererV1` may also provide
+For compatibility with simple sketches, `StreamRendererV1` also provides
 legacy-style local variables inside the generated shell:
 
 ```js
@@ -1120,13 +1159,16 @@ const tokenId = Number(stream.tokenId);
 const tokenData = stream.tokenData;
 ```
 
-The exact compatibility variables should be documented before launch and then
-treated as stable for `StreamRendererV1`.
+`StreamRendererV1` exposes exactly these four legacy compatibility
+variables — `stream`, `hash`, `tokenId`, and `tokenData` — pinned for the
+renderer's life and covered by a golden test (ADR 0009 decision 13). No
+variable may be silently added or removed; a different variable set is a new
+renderer version.
 
 When a collection freezes renderer metadata, it pins the render context version,
 renderer family, dependency manifest, and script manifest used by that
-collection. Future `STREAM_CONTEXT_V2` or renderer releases may exist, but they
-must not silently change frozen `StreamRendererV1` collections. Mutable
+collection. Successor `STREAM_CONTEXT_V2` or renderer releases may exist, but
+they must not silently change frozen `StreamRendererV1` collections. Mutable
 collections can opt into a newer context through explicit metadata governance
 and metadata refresh events.
 
@@ -1143,7 +1185,8 @@ for i in 0 .. dependencyScriptCount - 1:
 
 The renderer should avoid making Core responsible for dependency script
 concatenation. If dependency script payloads become large, the metadata layer
-can later introduce a dedicated dependency resolver without touching Core.
+can introduce a dedicated dependency resolver, under a separate accepted spec,
+without touching Core.
 
 The dependency registry address must be a metadata-router or renderer
 configuration pointer governed by ADR 0004, not a hardcoded permanent address.
@@ -1160,7 +1203,7 @@ manifest commits to the exact bytes being executed.
 
 ### Dependency Registry Requirements
 
-The launch dependency registry is a versioned satellite, not an ungoverned
+The genesis dependency registry is a versioned satellite, not an ungoverned
 library bucket.
 
 Required surface:
@@ -1199,7 +1242,7 @@ Rules:
 ## Storage Pluralism
 
 The metadata layer should not assume one permanent storage substrate for scripts,
-dependencies, schemas, or media. Launch can use simple chunked strings for
+dependencies, schemas, or media. Genesis can use simple chunked strings for
 auditability, but the interfaces should support multiple source types:
 
 ```solidity
@@ -1220,20 +1263,22 @@ Guidance:
 
 1. Core should never care which source type a script, dependency, schema, or
    media object uses.
-2. `INLINE_CHUNKS` is the preferred launch source for collection scripts because
-   it is simple and auditable.
-3. SSTORE2-style blob contracts can be introduced later for larger write-once
-   payloads.
+2. `INLINE_CHUNKS` is the preferred genesis source for collection scripts
+   because it is simple and auditable.
+3. SSTORE2-style blob contracts can be added later, as Replaceable-layer
+   source implementations, for larger write-once payloads.
 4. EthFS or a dependency registry can be used for shared JavaScript libraries,
    fonts, or other reusable assets.
-5. IPFS, Arweave, HTTPS, and future URI types are acceptable only when paired
-   with hashes or other integrity commitments where the payload matters.
+5. IPFS, Arweave, HTTPS, and later-registered URI source types are acceptable
+   only when paired with hashes or other integrity commitments where the
+   payload matters.
 6. `WEB3_CALL` leaves room for ERC-4804-style raw onchain JSON or HTML views.
 7. Every non-inline source should include enough manifest data for consumers to
    know where to fetch the payload and how to verify it.
-8. Launch v1 should not include an `OTHER` source type because it has no
-   resolution semantics. Future source types should be added through a new enum
-   value or a versioned extension module with explicit resolver rules.
+8. Protocol v1 should not include an `OTHER` source type because it has no
+   resolution semantics. New source types should be added through a new enum
+   value or a versioned extension module with explicit resolver rules, each
+   under its own separate accepted spec.
 
 ## Escaping And Encoding
 
@@ -1284,7 +1329,7 @@ struct HashRef {
 }
 ```
 
-Launch defaults:
+Protocol v1 defaults:
 
 ```text
 algorithmId = HASH_KECCAK256
@@ -1294,7 +1339,7 @@ schemaId = the schema that defines the payload
 
 Algorithm, canonicalization, and schema identifiers are part of the public
 release manifest. They should be allocated from an append-only registry with
-reserved governance ranges. A future algorithm, canonicalization profile, or
+reserved governance ranges. A new algorithm, canonicalization profile, or
 schema family must get a new explicit ID; existing IDs must never be reused or
 retargeted.
 
@@ -1308,13 +1353,14 @@ Rules:
 
 1. Onchain struct commitments use `abi.encode` with explicit field order and
    type widths.
-2. Offchain JSON manifests use RFC 8785 JSON Canonicalization Scheme in launch
-   v1. A future non-JCS payload must use a distinct `canonicalizationId` and
-   schema ID; consumers must not infer canonicalization from a URI or file
-   extension.
-3. Raw JSON fragments such as `attributesJSON` and `propertiesJSON` must either
-   be validated before storage or marked as admin-trusted fragments with a
-   stored hash and schema.
+2. Offchain JSON manifests use RFC 8785 JSON Canonicalization Scheme in
+   protocol v1. A non-JCS payload family added under a separate accepted spec
+   must use a distinct `canonicalizationId` and schema ID; consumers must not
+   infer canonicalization from a URI or file extension.
+3. Raw JSON fragments such as `attributesJSON` and `propertiesJSON` are
+   admin-trusted fragments, validated by operator tooling before submission
+   and stored with a fragment hash and schema ID (ADR 0009 decision 12);
+   protocol v1 performs no onchain JSON validation.
 4. Omitted fields, null fields, empty strings, and empty arrays/objects must
    have schema-defined meaning before final artwork freeze.
 5. Protocol identity hashes use version-fixed `keccak256`. Preservation and
@@ -1327,7 +1373,8 @@ Rules:
    limit, returndata limit, global metadata discovery reads, and
    `ContractURIUpdated()` emitter address.
 
-Launch v1 should enforce explicit upper bounds. Recommended hard maxima:
+Protocol v1 enforces explicit upper bounds. Normative v1 hard maxima
+(ADR 0009 decision 14):
 
 ```text
 MAX_SHORT_STRING_BYTES       1,024
@@ -1345,10 +1392,11 @@ MAX_DEFAULT_TOKEN_URI_BYTES  24,576
 MAX_ARCHIVE_VIEW_BYTES      65,536
 ```
 
-These values may be adjusted before implementation, but v1 must choose and test
-finite limits. Writes that exceed storage limits should revert with specific
-errors. Rendering that would exceed renderer limits should fail predictably and
-be caught by pre-activation tooling.
+These values are ratified as the normative v1 limits (ADR 0009 decision 14),
+subject only to pre-deployment measurement that pins the deployed constants
+in the release manifest. Writes that exceed storage limits must revert with
+specific errors. Rendering that would exceed renderer limits must fail
+predictably and be caught by pre-activation tooling.
 
 Default marketplace `tokenURI()` output must remain small enough for ordinary
 wallet, marketplace, and indexer calls. Payloads that exceed
@@ -1428,7 +1476,7 @@ event strategies:
 2. Emit equivalent events from `StreamMetadataRouter` and document that indexers
    should observe the router as the metadata authority.
 
-Preferred launch approach: Core should expose restricted helper functions that
+Preferred v1 approach: Core should expose restricted helper functions that
 allow the metadata router to cause Core to emit ERC-4906 events. This makes the
 events originate from the NFT contract that marketplaces already index.
 
@@ -1439,9 +1487,9 @@ must verify that token IDs or collection ranges are valid for the requested
 refresh, enforce a reasonable batch/range limit, and emit an internal reason or
 manifest hash so indexers can distinguish normal metadata refresh from
 governance or recovery. The helper is not an arbitrary log-spam bridge.
-Launch `MAX_REFRESH_RANGE` should be no more than 5,000 token IDs per
-`BatchMetadataUpdate` helper call unless a later marketplace/indexer review
-accepts a different limit.
+Protocol v1 pins `MAX_REFRESH_RANGE = 5_000` token IDs per
+`BatchMetadataUpdate` helper call (ADR 0009 decision 15), confirmed by
+marketplace/indexer review evidence before deployment.
 If an accepted recovery for a finalized scope legitimately affects more than
 `MAX_REFRESH_RANGE` minted tokens, the router must request chunked refreshes.
 Each chunk emits a standard `BatchMetadataUpdate(from, to)` plus the
@@ -1457,11 +1505,14 @@ rendering may emit preservation-specific events, but they should not trigger
 `MetadataUpdate` or `BatchMetadataUpdate` for frozen default-tokenURI output
 unless a separate explicitly versioned archive view changes.
 
-For ERC-7572-style contract metadata, Core does not emit
-`ContractURIUpdated()` in launch v1 because Core does not expose
-`contractURI()`. Router-level global contract metadata updates should emit
-`ContractURIUpdated()` from the router or metadata contract that exposes the
-global contract metadata read. Collection-scoped contract URI updates should
+For ERC-7572-style contract metadata, Core exposes `contractURI()` in
+protocol v1 (ADR 0009 decision 4), and the same Core-origination rationale
+applies as for ERC-4906 refresh: marketplaces watch the ERC-721 contract.
+Global contract metadata updates should therefore cause Core to emit
+`ContractURIUpdated()` through the same restricted router-callable helper
+posture, with the router or metadata contract that stores the underlying
+global read free to emit a supplementary mirror; the release manifest
+records the emitter address. Collection-scoped contract URI updates should
 emit collection-specific events from `StreamCollectionMetadata`. Because
 ERC-7572 exposes one `contractURI()` without a collection argument,
 collection-specific contract metadata is discovered through
@@ -1480,10 +1531,11 @@ token freeze               freezes token-specific metadata and renderer override
 ```
 
 If `StreamCore.collectionFreezeStatus(collectionId)` is true, the metadata
-router must reject every mutable collection-scoped metadata path in launch v1.
-Pre-freeze token-level exceptions must not bypass Core collection freeze unless
-a later accepted spec explicitly introduces that narrower behavior. The launch
-rule is:
+router must reject every mutable collection-scoped metadata path in protocol
+v1. No token-level exception may bypass Core collection freeze — absolutely
+and permanently for this Core line (ADR 0009 decision 16). A later bypass
+would retroactively weaken every already-frozen collection's promise, so no
+successor spec for this Core line may introduce one. The v1 rule is:
 
 ```text
 Core collection freeze freezes metadata for that collection.
@@ -1492,7 +1544,7 @@ Core collection freeze freezes metadata for that collection.
 The router may also expose its own metadata-specific freeze before Core
 collection freeze, but all freeze actions must be irreversible.
 
-Launch freeze precedence:
+Freeze precedence:
 
 ```text
 Core collection freeze
@@ -1600,18 +1652,19 @@ Metadata failure should be explicit and scope-aware:
 6. Offchain mutable URIs may remain mutable only when the collection policy says
    so. Render-critical offchain payloads require hash commitments before
    artwork finality.
-7. Launch Core must return a minimal documented pending/error JSON data URI for
-   minted tokens when `metadataRouter == address(0)`, has no code, reverts, or
-   returns malformed data. The payload includes `name`, `description`, a
-   fallback `image` or empty image, and `properties.stream.error`. Core exposes
-   the precise reason through `tokenURIStatus`. Core should not revert
-   `tokenURI()` for minted tokens solely because the router failed.
+7. Production Core must return a minimal documented pending/error JSON data
+   URI for minted tokens when `metadataRouter == address(0)`, has no code,
+   reverts, or returns malformed data. The payload includes `name`,
+   `description`, a fallback `image` or empty image, and
+   `properties.stream.error`. Core exposes the precise reason through
+   `tokenURIStatus`. Core should not revert `tokenURI()` for minted tokens
+   solely because the router failed.
 
 ## Admin Model
 
 Metadata admin should use ADR 0004 governance/action roles rather than a new
 unrelated owner model. Legacy selector-map `StreamAdmins` authorization is
-nonconformant for launch.
+nonconformant for production deployment.
 
 Recommended permissions:
 
@@ -1672,6 +1725,10 @@ metadata admin
 
 ## Bytecode Impact
 
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); measurements are point-in-time and
+superseded by the release-artifact size proofs.
+
 The scratch measurement for moving renderer/script assembly out of Core showed:
 
 ```text
@@ -1706,10 +1763,12 @@ net savings are still large enough to materially improve Core headroom.
    dependencies.
 10. Freezes should be one-way and easy to verify from events.
 
-## Future Optional Modules
+## Protocol v1 Exclusions: Optional Extension Modules
 
-The following ideas are worth preserving in the architecture, but they should
-not be embedded in launch Core:
+The following ideas are worth preserving in the architecture, but they are
+excluded from protocol v1 and should not be embedded in v1 Core. Each is a
+candidate Replaceable-layer module, added through the frozen interfaces and
+registries under its own separate accepted spec:
 
 1. `StreamTokenParams`: artist-approved post-mint parameters inspired by Art
    Blocks PostParams. This should define parameter types, bounds, update
@@ -1719,7 +1778,7 @@ not be embedded in launch Core:
    should be used only when another contract needs to read or enforce a trait,
    not for ordinary display attributes.
 3. `StreamMetadataViews`: richer view-specific reads and negotiation on top of
-   the launch `CollectionViewManifest` baseline, inspired by ERC-7160 and
+   the v1 `CollectionViewManifest` baseline, inspired by ERC-7160 and
    ERC-5773. Examples: live views, token-specific archive views, raw JSON, raw
    HTML, and renderer-selected media variants. The default `tokenURI()` view
    should remain marketplace-friendly and deterministic.
@@ -1727,8 +1786,8 @@ not be embedded in launch Core:
    collector-added archives, exhibition history, owned editions, or
    participatory works.
 5. `StreamTokenRelationships`: ERC-7401-inspired parent/child and companion
-   asset relationships expressed as metadata relationships unless a future
-   product explicitly needs ownership nesting.
+   asset relationships expressed as metadata relationships unless a separate
+   accepted spec establishes a concrete product need for ownership nesting.
 6. `StreamCulturalContext`: ERC-6596-inspired cultural and historical metadata
    views for provenance, institutions, exhibitions, historical context,
    scholarship, and cross-collection discovery.
@@ -1754,7 +1813,7 @@ base token identity model.
    minted-token fallback behavior.
 4. Move existing behavior into `StreamMetadataRouter` plus `StreamRendererV1`.
 5. Preserve current offchain, pending, and onchain observable behavior unless
-   the team explicitly changes it before launch.
+   the team explicitly changes it before production deployment.
 
 ### Phase 2: Safer Rendering
 
@@ -1777,13 +1836,14 @@ base token identity model.
 ### Phase 4: Metadata Refresh And Tooling
 
 1. Add Core-originated metadata refresh events.
-2. Add router- or metadata-contract-originated `ContractURIUpdated()` support
-   for global contract metadata changes.
+2. Add `ContractURIUpdated()` support for global contract metadata changes
+   through the Core `contractURI()` hook and its restricted emitter path
+   (ADR 0009 decision 4).
 3. Add admin tooling for metadata config inspection.
 4. Add script, HTML, JSON, and manifest size warnings.
 5. Add view manifest and snapshot inspection tooling.
-6. Add tests for pending, offchain, onchain, hybrid, collection override, token
-   override, and freeze behavior.
+6. Add tests for pending, offchain, onchain, hybrid dormancy, collection
+   override, token override, and freeze behavior.
 
 ### Phase 5: Optional Metadata Modules
 
@@ -1791,7 +1851,8 @@ base token identity model.
    support becomes a product requirement.
 2. Add richer alternate token views only outside the default `tokenURI()` path.
 3. Add post-mint params, dynamic traits, token-bound account references, or
-   agent-readable manifests only after concrete launch use cases are approved.
+   agent-readable manifests only after concrete use cases are approved in
+   separate accepted specs.
 
 ## Required Tests
 
@@ -1807,9 +1868,11 @@ Core tests:
 5. Core still reports ERC-721 enumerable behavior.
 6. Core advertises ERC-4906 support if Core-originated metadata update events
    are implemented.
-7. Core does not expose `contractURI()` in launch v1.
-8. The release manifest records that global contract metadata discovery lives
-   on the router/metadata contract, not Core.
+7. Core `contractURI()` returns the delegated contract metadata through the
+   bounded read path and returns the documented fallback payload when the
+   delegated read is unset, code-less, reverting, oversized, or malformed.
+8. The release manifest records the global contract metadata discovery path:
+   the Core `contractURI()` hook plus the router/metadata contract reads.
 
 Router tests:
 
@@ -1819,7 +1882,9 @@ Router tests:
 4. Pending offchain tokens return pending URI behavior.
 5. Active offchain tokens return base URI behavior.
 6. Onchain tokens return Base64 JSON data URI.
-7. Hybrid mode returns the configured hybrid output.
+7. Hybrid mode is dormant: `HYBRID` config assignment is rejected until a
+   hybrid-capable renderer version is registered through the renderer
+   registry.
 8. Frozen collection metadata cannot be changed.
 9. Frozen token metadata cannot be changed.
 10. Metadata update events are emitted.
@@ -1860,37 +1925,63 @@ Renderer tests:
     snapshot hash when known.
 20. Large numeric IDs are encoded as strings in machine-readable properties.
 21. Protocol facts do not pollute `attributes` unless explicitly configured.
+22. Legacy compatibility variables are exactly `stream`, `hash`, `tokenId`,
+    and `tokenData`, verified by a golden test.
 
-## Open Decisions
+## Resolved Decisions
 
-1. Whether `attributesJSON` should be fully validated on write or accepted as a
-   trusted admin-provided raw JSON fragment.
-2. Whether hybrid mode is needed at launch or should be included as a dormant
-   enum value with tests only for offchain and onchain.
-3. Whether protocol attributes should be opt-in by collection or enabled by
-   default for all collections.
-4. Whether `propertiesJSON` should be fully validated onchain or validated by
-   admin tooling with a stored hash.
-5. The release manifest should name the exact global metadata discovery path
-   because launch v1 intentionally excludes Core `contractURI()`.
-6. Whether launch enforces raw JSON fragment validation onchain or accepts
-   admin-trusted fragments with stored hashes and schema IDs. The hash and
-   canonicalization baseline is no longer open: use version-fixed `keccak256`
-   for protocol identities, RFC 8785/JCS for hash-committed JSON manifests,
-   and explicit algorithm tags for preservation hashes.
+Every formerly open decision in this document is resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md); the register
+entries live in the `Resolved` section of
+[`docs/spec-open-questions.md`](spec-open-questions.md). No open decisions
+remain in this specification.
 
-## Recommended Launch Position
+1. Core `contractURI()` is a mandatory Core hook: a thin, bounded delegated
+   read to the contract-metadata satellite through the cached pointer
+   policy, with the same fail-safe posture as `tokenURI()` and covered by
+   the measured Core size proof. The release manifest names the full global
+   metadata discovery path, including the Core surface (ADR 0009
+   decision 4).
+2. Raw JSON fragments (`attributesJSON`, `propertiesJSON`) are
+   admin-trusted: validated by operator tooling before submission, stored
+   with a fragment hash and schema ID, and evented; onchain JSON validation
+   is rejected (ADR 0009 decision 12). The hash and canonicalization
+   baseline is version-fixed `keccak256` for protocol identities, RFC
+   8785/JCS for hash-committed JSON manifests, and explicit algorithm tags
+   for preservation hashes.
+3. `StreamRendererV1` exposes exactly four legacy compatibility variables —
+   `stream`, `hash`, `tokenId`, `tokenData` — pinned for the renderer's
+   life and golden-tested, with no silent additions (ADR 0009 decision 13).
+4. The size and canonicalization maxima in this document are the normative
+   v1 limits; pre-deployment measurement pins the deployed constants in the
+   release manifest (ADR 0009 decision 14).
+5. `MAX_REFRESH_RANGE = 5_000` token IDs per `BatchMetadataUpdate` helper
+   call, confirmed by marketplace/indexer review evidence before deployment
+   (ADR 0009 decision 15).
+6. No token-level exception may bypass Core collection freeze, absolutely
+   and permanently for this Core line (ADR 0009 decision 16).
+7. Hybrid mode is a dormant enum value at genesis; tests cover the offchain
+   and onchain modes, and hybrid arrives, if ever, as a new renderer
+   version through the renderer registry (ADR 0009 decision 17).
+8. Protocol-generated attributes are opt-in per collection (ADR 0009
+   decision 18).
+9. Token-scope metadata configuration ships in the genesis router (ADR 0009
+   decision 19).
 
-For launch, implement `StreamMetadataRouter` and `StreamRendererV1` before
-adding the new revenue and royalty resolver work to Core. This buys Core
-bytecode headroom early and gives the team a better place to implement
+## Recommended Protocol v1 Position
+
+For protocol v1, implement `StreamMetadataRouter` and `StreamRendererV1`
+before adding the new revenue and royalty resolver work to Core. This buys
+Core bytecode headroom early and gives the team a better place to implement
 marketplace-facing metadata behavior.
 
-The launch version should support:
+The genesis deployment should support:
 
 1. Core-native `tokenURI()` forwarding.
 2. Default and collection-level metadata config.
-3. Token-level config if implementation complexity remains modest.
+3. Token-level metadata config, which ships in the genesis router
+   (ADR 0009 decision 19): the resolution order,
+   `TokenMetadataConfigUpdated` events, and router tests assume it.
 4. Offchain and onchain modes.
 5. Pending URI behavior.
 6. Safe Base64 JSON output.
@@ -1908,7 +1999,7 @@ The launch version should support:
 18. One-way collection metadata freeze.
 19. ERC-4906-style metadata refresh events from Core.
 20. ERC-7572-shaped global metadata reads on the router or metadata contract,
-    with Core `contractURI()` intentionally omitted from launch v1.
+    plus the mandatory Core `contractURI()` hook (ADR 0009 decision 4).
 21. View manifest references in `properties.views`.
 22. Snapshot hash and view identity disclosure in `properties.stream`.
 23. Optional archive, IIIF, rights-policy, cultural, preservation, C2PA, fixity,
