@@ -117,9 +117,9 @@ Decision numbers below are cited from the specs as "(ADR 0010 decision N)".
    precisely. Full backfill across all documents is a Review-entry
    condition tracked in the conformance matrix.
 4. **Canonical governance action ID.** ADR 0004 gains the definition every
-   spec already cites: `STREAM_GOVERNANCE_ACTION_V1` over (chain, governance
-   contract, action class, calls hash per D7, scope, old/new value hashes,
-   nonce, notBefore, expiresAfter, reason hash). One preimage, one home.
+   spec already cites: the `STREAM_GOVERNANCE_ACTION_V1` preimage, defined
+   once in ADR 0004 [GOV-ACTION-ID] (the authoritative field list lives
+   there, not here). One preimage, one home.
 5. **Pinned EIP-712 surfaces.** Every signed payload that moves value or
    mints (mint tickets, sale authorizations, payment intents, release
    authorizations, artist consents/sanctions, delegations) gets a pinned

@@ -1044,6 +1044,7 @@ non-reverting, and adds no cross-contract gas coupling):
 function artistAttestationStatus(
     uint256 collectionId,
     uint8 subjectKind,
+    bytes32 subjectId,
     bytes32 currentSubjectStateHash
 ) external view returns (
     uint8 status,           // 0 NONE, 1 ATTESTED_CURRENT,
@@ -1614,6 +1615,7 @@ interface IStreamArtistRegistry {
     function artistAttestationStatus(
         uint256 collectionId,
         uint8 subjectKind,
+        bytes32 subjectId,
         bytes32 currentSubjectStateHash
     )
         external view

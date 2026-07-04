@@ -1358,6 +1358,8 @@ Recommended storage model:
 
 ```solidity
 struct ArtistAttestation {
+    uint8 subjectKind;
+    bytes32 subjectId;
     address signer;
     bytes32 attestedDigest;
     bytes32 boundStateHash;
