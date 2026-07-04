@@ -23,6 +23,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0007-upgrade-redeployment.md`](0007-upgrade-redeployment.md) | Accepted | [#53](https://github.com/6529-Collections/6529Stream/issues/53) |
 | [`0008-revenue-splits-and-royalty-resolver.md`](0008-revenue-splits-and-royalty-resolver.md) | Accepted | Protocol design request |
 | [`0009-protocol-v1-open-question-resolutions.md`](0009-protocol-v1-open-question-resolutions.md) | Accepted | Protocol v1 open-question resolutions |
+| [`0010-world-class-spec-pass.md`](0010-world-class-spec-pass.md) | Accepted | Nine-lens review resolutions |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

@@ -191,8 +191,10 @@ Required lessons to preserve:
    already-received randomness. It must not mean asking for a different random
    output.
 9. Provider callbacks store the raw result or compressed raw result before
-   calling the coordinator. Raw provider outputs should be emitted for audit
-   where practical; contract storage can keep compact hashes.
+   calling the coordinator, and deliver to the coordinator through
+   try/catch so a coordinator revert never unwinds the stored result
+   (ADR 0010 decision D8.1). Raw provider outputs should be emitted for
+   audit where practical; contract storage can keep compact hashes.
 10. Providers with request IDs returned after an external call, such as the
     historical arRNG integration shape, need an explicit reentrancy guard or
     pre-reserved local request record so a callback cannot arrive before the
@@ -268,7 +270,7 @@ identity is known:
 function _mintProcessing(
     uint256 tokenId,
     address recipient,
-    string memory tokenData_,
+    bytes memory tokenData_,
     uint256 collectionId,
     bytes32 mintCommitment
 ) internal {
@@ -285,11 +287,11 @@ function _mintProcessing(
 }
 ```
 
-The final implementation may keep the current `_saltfun_o` parameter name for a
-short transition during development, but the production interface should treat
-this value as a typed `bytes32 mintCommitment` or remove it if not used. Since
-no production deployment exists yet, the preferred path is a clean production
-signature.
+Parameter typing and naming follow the Core mint ABI home
+([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+[MPA-CORE-ABI]): `tokenData` is opaque `bytes` end to end, and
+`bytes32 mintCommitment` replaces the legacy `_saltfun_o` parameter on
+every production Core mint surface.
 
 `onTokenMinted` must register token entropy state before any external receiver
 callback can observe the freshly minted token. If `_safeMint` later reverts, the
@@ -302,14 +304,71 @@ through an idempotent request function on the coordinator after token state is
 registered and `mintFromManager` has returned. A safe receiver callback may
 therefore observe `REGISTERED` or pending entropy state; metadata must render
 pending output honestly until a seed is finalized.
-Core calls `onTokenMinted` with a deploy-time immutable
-`ENTROPY_REGISTRATION_GAS_LIMIT` and an EIP-150-aware parent gas precheck.
-Initial planning target is 80,000 gas for all-cold registration, but the
-production deployment must use measured gas plus margin and publish the value
-in the release manifest. If the coordinator call reverts, runs out of its
-cap, or returns malformed success behavior, the mint reverts and all token
-identity writes unwind. Core must not forward all remaining gas to a mutable
-coordinator.
+Core calls `onTokenMinted` with a bounded gas stipend and an EIP-150-aware
+parent gas precheck. The stipend is a Governed Gas Parameter, not an
+immutable constant (ADR 0010 decision D1.1).
+
+Requirements [EC-REGGAS]:
+
+1. `ENTROPY_REGISTRATION_GAS_LIMIT` is a Governed Gas Parameter: a Core
+   storage value with a deploy-time immutable floor
+   `ENTROPY_REGISTRATION_GAS_FLOOR` (ADR 0010 decision D1.1). Core must
+   forward at most the current parameter value to `onTokenMinted` and must
+   not forward all remaining gas to a mutable coordinator.
+2. The floor must be at least four times the measured all-cold
+   registration gas of the genesis coordinator under the deployment gas
+   schedule, and the genesis value must be at least the floor. The
+   historical planning target for measured all-cold registration is
+   80,000 gas; the deployed floor and genesis value must come from
+   measured gas, and both are recorded in the release manifest
+   (ADR 0010 decision D1.4).
+3. The EIP-150 63/64 parent gas precheck remains mandatory and reads the
+   live parameter value per the model home,
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   [LTA-GGP] requirement 5. If the precheck fails, the mint reverts
+   before the coordinator call.
+4. Raise and lower governance follows [LTA-GGP] requirements 1–2
+   unchanged; parameter changes execute as canonical ADR 0004 governance
+   actions.
+5. The parameter is Operational-layer per [LTA-GGP] requirement 3; in
+   this subsystem the exclusion additionally covers entropy policy
+   manifests and seed derivation, so retuning gas never touches artwork
+   identity.
+6. If the coordinator call reverts, runs out of the forwarded stipend, or
+   returns malformed success behavior, the mint reverts and all token
+   identity writes unwind.
+7. Monitoring follows the [LTA-GGP] requirement 6 threshold. The response
+   is a staged raise; where a raise cannot restore margin, a
+   leaner-storage safe-mode coordinator behind the same read ABI must be
+   staged (see [Coordinator Replacement And State
+   Continuity](#coordinator-replacement-and-state-continuity)).
+8. The parameter is a member of the hard-fork/repricing review checklist
+   ([LTA-GGP]), and every change emits the parameter-named alias event
+   below — a member of the canonical GGP change-event family per
+   [LTA-GGP] requirement 4, tagged as such in the event catalog:
+
+```solidity
+event EntropyRegistrationGasLimitUpdated(
+    uint16 schemaVersion,
+    uint256 oldValue,
+    uint256 newValue,
+    uint256 floor
+);
+```
+
+Registration failure can never permanently brick minting. The recovery
+chain is explicit (ADR 0010 decision D1.5): the registration cap is
+raisable without limit above the floor, and the Core coordinator pointer
+is replaceable under the Core Satellite Pointer Policy with a pre-approved
+safe-mode coordinator whose registration write fits a leaner storage
+layout behind the same read ABI. Accepted terminal risk: the residual
+failure mode is a gas repricing so severe that no mint transaction can
+carry registration within the block gas limit while governance quorum is
+simultaneously lost. This mirrors the accepted `FLUSH_GAS_FLOOR` terminal
+risk in
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+and is accepted with the same posture: no hidden admin path, recovery only
+through governed succession.
 
 If Core exposes `prepareMintFromManager`, the prepare step must not call
 `onTokenMinted`, request entropy, or write provider/request state. Prepare only
@@ -330,6 +389,27 @@ completion. If the top-level transaction reverts, registration and request
 events disappear with the revert. `tokenEntropy` reads for a
 prepared-incomplete token must disclose that status, or revert, so satellites
 do not confuse it with an ordinary minted token.
+
+This document is the owning home of `EntropyStatus` semantics; the
+lifecycle reconciliation matrix in
+[`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) is a
+checker-verified mirror of the mapping below and must match it (ADR 0010
+decision D3.1).
+
+Lifecycle mapping requirements [EC-LIFECYCLE]:
+
+1. While a token is prepared-incomplete, the coordinator has no token
+   entropy record: the only reachable `EntropyStatus` is `NONE`.
+   `REGISTERED` and the terminal `DISABLED` / `NOT_REQUIRED` records are
+   written only by `onTokenMinted`, which runs only at completion.
+   `tokenEntropy` must disclose the prepared-incomplete condition (by
+   consulting Core token status or an equivalent Core-authenticated flag)
+   or revert; consumers must treat either behavior as pending.
+2. Nonexistent tokens have `EntropyStatus` `NONE`. `EntropyStatus` has no
+   `UNKNOWN` member; mirrors and indexers must not invent one.
+3. Burned tokens retain their last written entropy status. Burning does
+   not clear the token-to-request binding and does not create a new
+   entropy state.
 
 Coordinator availability is a hard mint prerequisite. Core should not catch and
 ignore a failed `onTokenMinted` call because that would create minted tokens
@@ -381,7 +461,9 @@ interface IStreamEntropyCoordinator {
 `requestEntropy` is callable by the minter path, entropy admins, and global
 admins. Anyone may call it only for collections that explicitly enable
 public requests: public requests are opt-in per collection, never a default
-(ADR 0009 decision 22).
+(ADR 0009 decision 22). `requestEntropy` is payable; `msg.value` is the
+caller's maximum fee bound with pull-credit refund of excess [EC-FEEBIND]
+(ADR 0010 decision D8.7).
 
 `fulfillEntropy` is callable only by the provider currently assigned to the
 active request key.
@@ -395,7 +477,8 @@ enum EntropyFulfillmentOutcome {
     REJECTED_STALE_EPOCH,
     REJECTED_INACTIVE_REQUEST,
     REJECTED_ALREADY_FINALIZED,
-    REJECTED_UNKNOWN_REQUEST
+    REJECTED_UNKNOWN_REQUEST,
+    REJECTED_PROVIDER_REVOKED
 }
 ```
 
@@ -403,6 +486,13 @@ Benign rejections return an outcome and do not revert, because provider
 callbacks — including VRF callbacks — must not revert. Hard violations
 (unauthorized provider, reentrancy) still revert with typed errors. The
 outcome values are pinned in the Numeric ID Catalog.
+
+`REJECTED_PROVIDER_REVOKED` is returned when the caller is the request's
+bound provider but that provider is `INCIDENT_REVOKED` at fulfillment time
+(ADR 0010 decision D8.1): the call does not revert, does not finalize, and
+the adapter must retain its stored result so an approved recovery policy
+can resolve the request. Revocation between request and fulfillment is a
+classifiable operational condition, never a randomness-loss path.
 
 ### Coordinator Read Interface
 
@@ -507,6 +597,12 @@ coordinator.fulfillEntropy(requestKey, rawRandomness);
 The coordinator should use `requestKey` as the canonical request identifier.
 Provider request IDs are retained for provenance only.
 
+`quoteRequest` must return the exact fee that `requestEntropy` will require
+for the same context in the same transaction; the normative quote rules are
+provider-side and live in
+[`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+[EP-QUOTE]. The coordinator's use of the quote is defined in [EC-FEEBIND].
+
 `providerResultStatus` is required for incident analysis and fresh-recovery
 safety. The coordinator and operator tooling must be able to distinguish "the
 provider never accepted or never produced randomness" from "the provider
@@ -549,6 +645,11 @@ enum ProviderResultStatus {
     TERMINAL_STALE,
     TERMINAL_FAILED
 }
+
+enum EntropySecurityClass {
+    HIGH_ASSURANCE,
+    LOW_SECURITY
+}
 ```
 
 `NONE` means the coordinator has no token entropy state. Renderers should treat
@@ -578,6 +679,34 @@ token unless an explicit recovery policy says otherwise.
 `FAILED` means the active request was declared unrecoverable under the incident
 policy. It does not imply a normal reroll is available.
 
+`EntropySecurityClass` is the collection's declared entropy assurance
+posture (ADR 0010 decision D8.8). `HIGH_ASSURANCE` (value 0, the default)
+means only reviewed async verifiable randomness may finalize seeds for the
+collection. `LOW_SECURITY` means the collection explicitly accepts
+manipulable-entropy exposure — block-derived instant modes and their
+structural request-timing grinding — and must disclose that acceptance in
+collection provenance and metadata notes. `INSTANT` mode is configurable
+only for `LOW_SECURITY` collections [EC-CONFIG]. The class values are
+pinned in the Numeric ID Catalog.
+
+## Domain Constants
+
+This document is the normative home of the coordinator-owned hashing
+domains (ADR 0010 decision D3.1). Ordered `abi.encode` input lists are
+defined once, in the owning sections referenced below; the checked
+domain-constants table in
+[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+mirrors these rows, and release tooling computes and pins the hash values.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `STREAM_ENTROPY_REQUEST_V1` | `6529STREAM_ENTROPY_REQUEST_V1` | 0xf8ea7ebca4196e280c0b42e55e16736c8e836382a8859d151eb826edbecb7106 | `StreamEntropyCoordinator` | `1` | [Request Flow](#request-flow) |
+| `STREAM_ENTROPY_SEED_V1` | `6529STREAM_ENTROPY_SEED_V1` | 0x88e816cf6b63abe50b33fdfd5033b9e0f12b8e8ba3925c57c3954ecf8caca69f | `StreamEntropyCoordinator` | `1` | [Fulfillment Flow](#fulfillment-flow) |
+| `FRESH_RECOVERY_POLICY_DOMAIN` | `6529STREAM_ENTROPY_FRESH_RECOVERY_POLICY_V1` | 0x903ca537e686c7d615b886dbd8d81e240e58123e9918bc89ccabb64f2fe9a327 | `StreamEntropyCoordinator` | `1` | [Storage Model](#storage-model) |
+
+Provider-side raw randomness compression domains are owned by
+[`docs/stream-entropy-providers.md`](stream-entropy-providers.md).
+
 ## Storage Model
 
 Recommended collection config:
@@ -585,6 +714,7 @@ Recommended collection config:
 ```solidity
 struct CollectionEntropyConfig {
     EntropyMode mode;
+    EntropySecurityClass securityClass;
     address provider;
     uint32 providerEpoch;
     bytes32 collectionSalt;
@@ -615,7 +745,7 @@ struct FreshRecoveryPolicy {
     bool exists;
     bool frozen;
     uint16 maxFreshRecoveryAttempts;
-    address incidentDeclarer;
+    bytes32 incidentDeclarerRole;
     bytes32 reasonSchemaHash;
     bytes32 policyManifestHash;
     FreshRecoveryStep[] steps;
@@ -633,7 +763,7 @@ bytes32 freshRecoveryPolicyHash = keccak256(abi.encode(
     address(coordinator),
     bytes32(policyId),
     uint16(maxFreshRecoveryAttempts),
-    address(incidentDeclarer),
+    bytes32(incidentDeclarerRole),
     bytes32(reasonSchemaHash),
     bytes32(policyManifestHash),
     bytes32(stepsHash)
@@ -643,6 +773,23 @@ bytes32 freshRecoveryPolicyHash = keccak256(abi.encode(
 `steps` must be encoded as an ordered `FreshRecoveryStep[]` with `abi.encode`.
 Packed encodings, JSON encodings, and display-order-dependent hashes are not
 valid.
+
+Incident declarer requirements [EC-INCIDENT-ROLE]:
+
+1. `incidentDeclarerRole` is an ADR 0004 role identifier, never a raw
+   address (ADR 0010 decision D7.4). Freezing a policy freezes the role
+   binding; the holder behind the role rotates through ADR 0004 governance
+   over decades without touching the frozen policy.
+2. At declaration time the coordinator must resolve the role through the
+   ADR 0004 admin/governance registry and accept the caller only if the
+   registry confirms the caller currently holds the role. Embedding a raw
+   declarer address in a fresh-recovery policy is nonconformant.
+3. The genesis vocabulary entry for this authority is
+   `ROLE_ENTROPY_INCIDENT_DECLARER`; the role-constant vocabulary is owned
+   by [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   [GOV-ROLES].
+4. Role holders must satisfy the protocol custody bar: Safe/multisig or
+   governance contracts, not long-lived EOAs (ADR 0010 decision D7.5).
 
 Recommended token state:
 
@@ -714,13 +861,22 @@ Entropy state must survive pointer changes:
    must not make finalized seeds or request history unreadable.
 6. A successor coordinator must not rederive or refinalize seeds for tokens
    registered under a previous coordinator.
-7. Safe-mode coordinators write the same `TokenEntropy` shape, with status
-   `REGISTERED` or a terminal non-random status, and expose the same read
-   interface. Transitioning from safe-mode to a full coordinator affects only
-   newly minted tokens unless a frozen recovery policy explicitly moves pending
+7. Safe-mode coordinators must expose the same read ABI —
+   `IStreamEntropyView` semantics and the `EntropyStatus` vocabulary — and
+   register tokens with status `REGISTERED` or a terminal non-random
+   status. "Same shape" means read ABI, not storage layout: a safe-mode
+   coordinator may use a cheaper storage packing so registration fits
+   comfortably inside `ENTROPY_REGISTRATION_GAS_LIMIT` [EC-REGGAS].
+   Transitioning from safe-mode to a full coordinator affects only newly
+   minted tokens unless a frozen recovery policy explicitly moves pending
    requests.
 8. Deployment manifests list every prior coordinator, its code hash, status,
    and collections/tokens whose entropy reads remain pinned to it.
+9. The raisable registration cap [EC-REGGAS] plus this replaceable pointer
+   are the explicit never-brick recovery chain for the mint path (ADR 0010
+   decision D1.5): no gas repricing short of block-gas-limit scale can
+   permanently stop registration, because the cap can always be raised and
+   a leaner coordinator can always be staged.
 
 ## Provider Registry
 
@@ -826,7 +982,7 @@ Admins configure collection entropy before minting:
 function configureFreshRecoveryPolicy(
     bytes32 policyId,
     uint16 maxFreshRecoveryAttempts,
-    address incidentDeclarer,
+    bytes32 incidentDeclarerRole,
     bytes32 reasonSchemaHash,
     bytes32 policyManifestHash,
     FreshRecoveryStep[] calldata steps
@@ -835,10 +991,11 @@ function configureFreshRecoveryPolicy(
 function freezeFreshRecoveryPolicy(bytes32 policyId) external;
 
 event FreshRecoveryPolicyConfigured(
+    uint16 schemaVersion,
     bytes32 indexed policyId,
     bytes32 indexed policyHash,
     uint16 maxFreshRecoveryAttempts,
-    address incidentDeclarer,
+    bytes32 incidentDeclarerRole,
     bytes32 policyManifestHash
 );
 
@@ -849,15 +1006,17 @@ event FreshRecoveryPolicyFrozen(
 ```
 
 Fresh recovery policies are configured before collection configs reference
-them. A collection can use a policy only after it is frozen. Freezing a policy
-means its step list, incident declarer, reason schema, max attempts, and
-manifest hash cannot change. Updating any of those fields requires a new
-`policyId`.
+them. A collection can use a policy only after it is frozen. Freezing a
+policy means its step list, incident declarer role, reason schema, max
+attempts, and manifest hash cannot change. Updating any of those fields
+requires a new `policyId`. The frozen `incidentDeclarerRole` is a role
+reference, not a holder address [EC-INCIDENT-ROLE].
 
 ```solidity
 function configureCollectionEntropy(
     uint256 collectionId,
     EntropyMode mode,
+    EntropySecurityClass securityClass,
     address provider,
     bytes32 collectionSalt,
     bytes32 providerConfigHash,
@@ -868,7 +1027,7 @@ function configureCollectionEntropy(
 ) external;
 ```
 
-Rules:
+Rules [EC-CONFIG]:
 
 1. `provider` must be active unless `mode == DISABLED`.
 2. `requestTimeoutBlocks` must be nonzero for async providers.
@@ -889,6 +1048,18 @@ Rules:
 9. Ordinary config changes are blocked while the collection has pending
    requests unless the change is an explicit incident action.
 10. Config events must include the new provider epoch and provider config hash.
+11. `mode == INSTANT` must be rejected unless
+    `securityClass == LOW_SECURITY` (ADR 0010 decision D8.8). The declared
+    class freezes with the config, is disclosed by
+    `collectionEntropyConfig`, and must be surfaced in collection
+    provenance and metadata notes. `HIGH_ASSURANCE` is the default and
+    forbids instant mode.
+12. Gas-limit-class values are never part of collection entropy identity:
+    provider config hashes exclude Operational-layer parameters per
+    [`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+    [EP-CONFIGHASH], so retuning gas, funding, or custody never increments
+    `providerEpoch` and never disturbs a frozen collection (ADR 0010
+    decision D1.3).
 
 Freeze:
 
@@ -982,7 +1153,7 @@ Rules:
 ## Request Flow
 
 ```text
-requestEntropy(tokenId) [nonReentrant]
+requestEntropy(tokenId) [nonReentrant, payable]
   verifies token is REGISTERED, or STALE/FAILED with approved incident recovery
   rejects prepared-incomplete tokens and terminal DISABLED/NOT_REQUIRED tokens
   rejects if token is already REQUESTED or FINALIZED
@@ -990,7 +1161,9 @@ requestEntropy(tokenId) [nonReentrant]
   snapshots provider epoch and provider config hash
   builds requestKey
   stores active request and marks token REQUESTED before any provider call
-  calls provider.requestEntropy{value: msg.value}(requestKey, context)
+  quotes fee = provider.quoteRequest(context) in the same transaction
+  requires msg.value >= fee and credits any excess to the payer [EC-FEEBIND]
+  calls provider.requestEntropy{value: fee}(requestKey, context)
   stores providerRequestId
   emits EntropyRequested
 ```
@@ -1041,20 +1214,68 @@ event EntropyRequested(
 );
 ```
 
-Native ETH request payments:
+Native ETH request payments bind the caller's `msg.value` as a maximum fee
+against a same-transaction provider quote, with pull-credit refund of any
+excess (ADR 0010 decision D8.7). This closes exact-payment griefing under
+provider fee drift: a fee change between the caller's offchain quote and
+execution cannot fail a request whose `msg.value` still covers the new fee,
+and a fee decrease refunds rather than reverts.
+
+Requirements [EC-FEEBIND]:
 
 1. `requestEntropy` may be payable for providers that need native ETH.
-2. The coordinator should quote or compute the required provider payment before
-   the provider call.
-3. Protocol v1 should reject `msg.value` greater than the required payment
-   rather than hold or refund excess ETH. If a provider adapter added later
-   requires refund behavior, its separately accepted adapter spec must define
-   an explicit, bounded, non-reentrant, and evented refund path.
-4. The coordinator should not become a general ETH custody contract.
-5. Accidental or forced ETH recovery, if included, should be admin-only,
-   evented, and sent to a protocol treasury address.
+   `msg.value` is the caller-supplied `maxFeeWei`: the binding upper bound
+   on what the request may pay.
+2. The coordinator must obtain the required fee by calling
+   `provider.quoteRequest(context)` in the same transaction, before the
+   provider request call [EP-QUOTE]. Offchain or prior-block quotes are
+   never binding.
+3. If `msg.value` is less than the quoted fee, `requestEntropy` must
+   revert with a typed error carrying the quoted fee.
+4. The coordinator must forward exactly the quoted fee to the provider.
+   Adapters keep exact-payment discipline at their boundary; the
+   coordinator, never the adapter, absorbs caller overpayment.
+5. Any excess (`msg.value` minus fee) must be credited to the payer as a
+   pull-based refund credit in the same transaction and evented. Push
+   refunds inside `requestEntropy` are forbidden.
+6. Refund credits are withdrawable through a dedicated non-reentrant claim
+   function that zeroes the credit before transfer and reverts the claim
+   on a failed transfer. Only the credited payer can claim, to a
+   destination it names.
+7. The coordinator must not become a general ETH custody contract: tracked
+   refund credits are the only balances it may hold across transactions.
+   Accidental or forced ETH recovery, if included, must be admin-only,
+   evented, sent to the protocol treasury, and provably unable to reduce
+   the aggregate of tracked refund credits.
+8. Fee credits are Operational balances: excluded from entropy identity,
+   policy manifests, and seed derivation.
 
-Request transition guards:
+Refund credit surface:
+
+```solidity
+mapping(address payer => uint256 creditWei) entropyFeeCredits;
+
+function entropyFeeCredit(address payer) external view returns (uint256);
+
+function claimEntropyFeeCredit(address to) external;
+
+event EntropyFeeCredited(
+    uint16 schemaVersion,
+    address indexed payer,
+    uint256 indexed tokenId,
+    uint256 quotedFeeWei,
+    uint256 creditedWei
+);
+
+event EntropyFeeCreditClaimed(
+    uint16 schemaVersion,
+    address indexed payer,
+    address indexed to,
+    uint256 amountWei
+);
+```
+
+Request transition guards [EC-REQUEST-GUARDS]:
 
 1. `requestEntropy` must use a reentrancy guard or equivalent state lock.
 2. The only normal starting status is `REGISTERED`.
@@ -1076,7 +1297,10 @@ Request transition guards:
 8. For `INSTANT` mode, v1 uses the bounded
    `IStreamInstantEntropyProvider.instantEntropy(requestKey, context)`
    read/return path from inside `requestEntropy`; it must not use an external
-   callback into `fulfillEntropy`. The coordinator finalizes once from the
+   callback into `fulfillEntropy`. The path is reachable only for
+   collections whose frozen config declares
+   `EntropySecurityClass.LOW_SECURITY` (ADR 0010 decision D8.8) [EC-CONFIG].
+   The coordinator finalizes once from the
    returned raw value before `requestEntropy` returns. If the instant read
    fails, the transaction reverts and the pre-call `REQUESTED` state unwinds.
    The instant provider function must be `view`, and release static analysis
@@ -1101,8 +1325,9 @@ Rules:
    request can still fulfill.
 4. Do not expose user-facing "reroll", "cancel randomness", or "try again"
    semantics.
-5. Provider callbacks should store raw randomness before calling the
-   coordinator.
+5. Provider callbacks must store raw randomness before calling the
+   coordinator and must deliver through try/catch [EP-CALLBACK]
+   (ADR 0010 decision D8.1).
 6. Coordinator fulfillment should be intentionally small and should not depend
    on complex downstream rendering or payment logic.
 7. Retrying delivery of already received randomness is safe. Requesting new
@@ -1152,7 +1377,7 @@ provider callbacks — including VRF callbacks that must not revert — receive
 a machine-readable verdict. Hard violations (unauthorized provider,
 reentrancy) still revert with typed errors. Event behavior is unchanged.
 
-Rules:
+Rules [EC-FULFILL]:
 
 1. `fulfillEntropy` must use a reentrancy guard or equivalent state lock;
    reentrancy is a hard violation and reverts with a typed error.
@@ -1162,7 +1387,13 @@ Rules:
    `REJECTED_INACTIVE_REQUEST`.
 4. Caller must be the provider stored on the request; an unauthorized caller
    is a hard violation and reverts with a typed error.
-5. Provider must not be `INCIDENT_REVOKED`.
+5. Provider must not be `INCIDENT_REVOKED`. A revoked bound provider is a
+   benign rejection, never a revert (ADR 0010 decision D8.1): the call
+   emits `StaleEntropyFulfillment` with the revocation reason, does not
+   finalize, and returns `REJECTED_PROVIDER_REVOKED`. The adapter must
+   retain its stored result [EP-CALLBACK]; that retained
+   `rawRandomnessReceived` proof keeps unsafe fresh recovery blocked while
+   an approved recovery policy resolves the request.
 6. Token status must be `REQUESTED`; a non-`REQUESTED`, non-finalized token
    returns `REJECTED_INACTIVE_REQUEST`.
 7. Token must not already be finalized; an already finalized token returns
@@ -1177,6 +1408,13 @@ Rules:
     and returns `REJECTED_STALE_EPOCH`.
 12. `fulfillEntropy` cannot call `requestEntropy`; delivery retry calls
     `fulfillEntropy` again with the same stored raw randomness.
+13. The full `fulfillEntropy` gas envelope — including the restricted Core
+    refresh emitter call after finalization — must be measured and
+    published in the release manifest so async providers can size their
+    callback gas limits with a stated margin [EP-CALLBACK]. A fulfillment
+    frame that runs out of gas inside a provider callback is recoverable:
+    the adapter's persisted result plus delivery retry re-deliver the
+    identical randomness (ADR 0010 decision D8.1).
 
 Seed derivation:
 
@@ -1250,6 +1488,14 @@ If a provider adapter receives valid randomness but the coordinator call fails,
 the adapter must retain the raw randomness and expose
 `retryCoordinatorFulfillment(providerRequestId)`.
 
+Provider callbacks must persist the result before delivery and must call
+`fulfillEntropy` through try/catch or a checked low-level call so a
+coordinator revert can never unwind the stored randomness or bubble into
+the upstream randomness callback (ADR 0010 decision D8.1). The normative
+callback rules live in
+[`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+[EP-CALLBACK].
+
 Delivery retry keeps the same:
 
 1. provider request ID;
@@ -1274,7 +1520,7 @@ A complete fresh-recovery policy is represented by the frozen
 2. provider epochs and provider config hashes;
 3. request timeout or incident conditions;
 4. maximum fresh attempts;
-5. who can declare the incident;
+5. the incident declarer role reference [EC-INCIDENT-ROLE];
 6. the required reason URI/hash;
 7. whether late fulfillment from the original provider is accepted or stale;
 8. adapter result-status proof that no raw randomness was received for the
@@ -1294,17 +1540,25 @@ function markEntropyRequestUnrecoverable(
 ) external;
 ```
 
-Rules:
+Rules [EC-INCIDENT]:
 
 1. Token must be `REQUESTED`.
 2. `block.number` must be greater than
    `requestedAtBlock + requestTimeoutBlocks`, unless a provider is
    `INCIDENT_REVOKED`.
-3. The provider adapter's `providerResultStatus` must prove that no valid raw
-   randomness was received for the old provider request. The coordinator should
-   call this status probe with an explicit gas cap and treat failure, malformed
-   data, or out-of-gas as "not safe to recover."
-4. Caller should be admin/governance only.
+3. The provider adapter's `providerResultStatus` must prove that no valid
+   raw randomness was received for the old provider request. The
+   coordinator must call this status probe as a bounded staticcall under
+   `ENTROPY_RESULT_PROBE_GAS_LIMIT` — a coordinator Governed Gas Parameter
+   with immutable floor `ENTROPY_RESULT_PROBE_GAS_FLOOR`, governed,
+   monitored, and manifest-recorded exactly as [EC-REGGAS] items 2, 4, 5,
+   7, and 8 prescribe (ADR 0010 decision D1.1) — and treat failure,
+   malformed data, or out-of-gas as "not safe to recover."
+4. The caller must hold the collection policy's frozen
+   `incidentDeclarerRole`, resolved through the ADR 0004 registry at call
+   time; for collections without a fresh-recovery policy the caller must
+   hold `ROLE_ENTROPY_INCIDENT_DECLARER` [EC-INCIDENT-ROLE]. Raw-address
+   authority is nonconformant (ADR 0010 decision D7.4).
 5. The action must emit a human-readable or content-addressed incident reason.
 6. Token status becomes `FAILED`.
 7. The active request is closed only as an incident action.
@@ -1368,7 +1622,7 @@ public incident process.
 Some collections may use an instant deterministic provider. This mode is lower
 assurance than external verifiable randomness unless carefully designed.
 
-Instant provider rules:
+Instant provider rules [EC-INSTANT]:
 
 1. It must be explicitly configured as `INSTANT`.
 2. It should derive raw randomness from data that cannot be freely chosen after
@@ -1385,6 +1639,15 @@ Instant provider rules:
 7. The instant provider must be pure, bounded, and have no external call, no
    Core call, and no callback path. If it can fail, block, reenter, or consult
    mutable external state, it is not eligible for production use.
+8. Instant mode is restricted to collections whose frozen config declares
+   `EntropySecurityClass.LOW_SECURITY`; the coordinator must reject
+   `INSTANT` configuration for `HIGH_ASSURANCE` collections [EC-CONFIG]
+   (ADR 0010 decision D8.8).
+9. The synchronous view call shape structurally permits request-timing
+   grinding for any mode whose output varies across candidate inclusion
+   blocks. The normative disclosure and provider-side restrictions live in
+   [`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+   [EP-INSTANT-TIMING].
 
 The current NXT-style randomizer should not be treated as equivalent to VRF
 without an explicit security review.
@@ -1402,8 +1665,10 @@ The VRF adapter should:
 1. Receive `requestKey` from the coordinator.
 2. Request randomness from the VRF coordinator.
 3. Store `providerRequestId -> requestKey`.
-4. On VRF callback, compress returned words to `bytes32 rawRandomness`.
-5. Call `StreamEntropyCoordinator.fulfillEntropy(requestKey, rawRandomness)`.
+4. On VRF callback, compress returned words to `bytes32 rawRandomness` and
+   persist the result before delivery.
+5. Call `StreamEntropyCoordinator.fulfillEntropy(requestKey, rawRandomness)`
+   through try/catch [EP-CALLBACK] (ADR 0010 decision D8.1).
 6. Emit provider-level request and callback events.
 7. Avoid writing to Core, deriving the final token seed, or exposing
    `setTokenHash`-style callbacks.
@@ -1436,6 +1701,31 @@ Metadata Router should read:
 ```solidity
 (bytes32 seed, bool finalized) = entropyCoordinator.tokenSeed(tokenId);
 ```
+
+Read-boundary requirements [EC-VIEWREAD]:
+
+1. Router and renderer reads of the pinned `coordinatorAtMint(tokenId)`
+   are bounded, fail-safe staticcalls governed by the router-held
+   `ENTROPY_VIEW_GAS_LIMIT` Governed Gas Parameter with an EIP-150 63/64
+   parent precheck (ADR 0010 decision D1.1). That parameter's normative
+   home, floor, and manifest pinning are defined in
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md);
+   this document guarantees the coordinator side stated below.
+2. Returndata bounds are fixed by the read interface: `tokenSeed` returns
+   exactly 64 bytes, `tokenEntropyStatus` exactly 32 bytes, and
+   `tokenEntropy` a fixed 256-byte tuple. Consumers must cap the
+   returndata copy at the expected size and treat oversized or malformed
+   returndata as a failed read.
+3. Coordinator view functions must be O(1) storage reads with no external
+   calls and no loops over token or request counts, so a manifest-pinned
+   read cap stays sufficient across the system's life. They must not
+   revert for minted tokens; the documented prepared-incomplete
+   disclosure [EC-LIFECYCLE] is the only exception, and consumers treat
+   it as pending.
+4. A failed, reverting, out-of-gas, or malformed read renders
+   pending/unknown metadata and must never revert `tokenURI()` for a
+   minted token; the router-side failure semantics are owned by
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md).
 
 Rendering behavior:
 
@@ -1472,6 +1762,9 @@ entropy config admin     configure collection entropy before freeze
 provider admin           approve, deprecate, or revoke providers
 request operator         request entropy or trigger delivery retry where allowed
 metadata refresh admin   coordinate refresh events if required
+gas parameter admin      stage GGP raises/lowers through ADR 0004 action classes
+incident declarer        declare entropy incidents through the frozen role
+                         reference [EC-INCIDENT-ROLE]
 ```
 
 All admin actions should emit events and should include a reason URI where
@@ -1502,6 +1795,19 @@ practical.
     randomness was received for the old request.
 18. Mint registration happens before any `_safeMint` receiver callback can
     observe the token.
+19. Every entropy-path gas cap is a Governed Gas Parameter at or above its
+    immutable floor; gas retuning never changes entropy identity, policy
+    manifests, seeds, or provider epochs (ADR 0010 decisions D1.1, D1.3).
+20. `requestEntropy` never retains more than the provider-quoted fee;
+    excess is credited to the payer and leaves only by pull [EC-FEEBIND].
+21. Instant-mode finalization is reachable only for collections whose
+    frozen config declares `LOW_SECURITY` (ADR 0010 decision D8.8).
+22. Incident declaration authority resolves through a frozen role
+    reference, never through a frozen raw address (ADR 0010 decision
+    D7.4).
+23. A revoked bound provider's fulfillment attempt cannot finalize, cannot
+    revert the callback frame, and cannot erase the adapter's stored
+    result (ADR 0010 decision D8.1).
 
 ## Security Considerations
 
@@ -1520,6 +1826,12 @@ reentrancy analysis, and metadata-observation model.
 For collections whose art depends on entropy, provider and salt configuration
 should be frozen before public mint starts. Changing provider after partial
 minting can create selection or perception risk.
+
+Grinding vectors include input choice and request timing. Request-timing
+selection against synchronous instant providers is structural and cannot
+be prevented behind the frozen instant interface; it is disclosed and
+restricted to `LOW_SECURITY` collections instead of papered over
+(ADR 0010 decision D8.8) [EP-INSTANT-TIMING].
 
 ### Zero Values
 
@@ -1638,6 +1950,14 @@ Core integration tests:
 7. If `onTokenMinted` reverts, the whole mint reverts and no token is minted.
 8. Emergency switch to a pre-approved safe-mode coordinator preserves
    registration semantics.
+9. `ENTROPY_REGISTRATION_GAS_LIMIT` behaves per [EC-REGGAS]: raise through
+   the short delay class, lower only with a passing health probe, floor
+   rejection below `ENTROPY_REGISTRATION_GAS_FLOOR`, and change events
+   with old and new values.
+10. The EIP-150 parent precheck is exercised at, below, and above the
+    threshold and reads the live parameter value after a raise.
+11. Gas parameter values appear in no finality manifest, frozen-route
+    identity, entropy policy manifest, or seed derivation input.
 
 Coordinator config tests:
 
@@ -1650,8 +1970,14 @@ Coordinator config tests:
    precommitted fallback.
 7. `maxFreshRecoveryAttempts > 0` is rejected unless a frozen
    `FreshRecoveryPolicy` exists and its hash matches collection config.
-8. Fresh recovery policy steps, incident declarer, provider epochs, and reason
-   schema are included in the policy hash.
+8. Fresh recovery policy steps, incident declarer role, provider epochs, and
+   reason schema are included in the policy hash.
+9. `INSTANT` configuration is rejected unless the collection declares
+   `EntropySecurityClass.LOW_SECURITY`; the declared class freezes with
+   the config and is readable through `collectionEntropyConfig`.
+10. Rotating the holder behind a frozen `incidentDeclarerRole` through
+    ADR 0004 governance requires no policy or config change, and incident
+    declaration honors the post-rotation holder.
 
 Request tests:
 
@@ -1668,6 +1994,13 @@ Request tests:
     already `FINALIZED` tokens.
 11. `requestEntropy` writes `REQUESTED` state before any provider or instant
     provider call.
+12. Fee binding [EC-FEEBIND]: `msg.value` below the same-transaction quote
+    reverts with the quoted fee; `msg.value` equal to the quote forwards
+    exactly; excess is credited to the payer, evented, and claimable only
+    by pull; claims zero the credit before transfer and reject reentrancy.
+13. A provider fee change between quote observation and execution cannot
+    fail a request whose `msg.value` still covers the new fee; forced ETH
+    recovery cannot reduce the aggregate of tracked fee credits.
 
 Fulfillment tests:
 
@@ -1687,7 +2020,14 @@ Fulfillment tests:
     and already finalized tokens, returning their `EntropyFulfillmentOutcome`
     codes without reverting; unauthorized providers revert.
 12. Synchronous `INSTANT` finality uses `instantEntropy` return data, not a
-    callback into `fulfillEntropy`.
+    callback into `fulfillEntropy`, and is rejected for collections that do
+    not declare `LOW_SECURITY`.
+13. Fulfillment by the bound provider while `INCIDENT_REVOKED` emits
+    `StaleEntropyFulfillment`, returns `REJECTED_PROVIDER_REVOKED`, does
+    not finalize, and does not revert.
+14. The measured `fulfillEntropy` gas envelope, including the Core refresh
+    emitter, is published and matches the provider callback sizing tests
+    [EP-CALLBACK].
 
 Delivery retry tests:
 
@@ -1714,6 +2054,12 @@ Incident recovery tests:
    `maxFreshRecoveryAttempts = 0`.
 10. Fresh recovery follows the frozen ordered policy step and cannot choose an
     ad hoc provider after the incident.
+11. `markEntropyRequestUnrecoverable` accepts only a caller holding the
+    frozen incident declarer role via live ADR 0004 resolution and rejects
+    every other caller, including former role holders after rotation.
+12. The adapter result probe runs under `ENTROPY_RESULT_PROBE_GAS_LIMIT`
+    and treats out-of-gas, revert, and malformed returndata as unsafe to
+    recover.
 
 Provider adapter tests:
 
@@ -1721,11 +2067,16 @@ Provider adapter tests:
 2. VRF callback fulfills through coordinator.
 3. ARRNG adapter maps provider request ID to request key.
 4. Provider adapters reject unauthorized callers where applicable.
-5. Payable providers enforce exact payment and reject excess payment unless a
-   separately accepted adapter-specific ADR explicitly accepts a bounded
-   refund path.
+5. Payable providers enforce exact payment at the adapter boundary; caller
+   overpayment never reaches the adapter because the coordinator binds
+   `msg.value` as `maxFeeWei`, forwards exactly the same-transaction
+   quote, and credits excess as a pull refund [EC-FEEBIND] (ADR 0010
+   decision D8.7).
 6. Provider adapters expose result status for requested, received, delivered,
    stale, and failed cases.
+7. Provider callbacks persist results and deliver through try/catch; a
+   coordinator revert during callback never reverts the upstream frame and
+   never erases the stored result [EP-CALLBACK].
 
 Renderer integration tests:
 
@@ -1746,7 +2097,8 @@ Renderer integration tests:
 3. No instant provider ships at genesis; the `IStreamInstantEntropyProvider`
    interface is Permanent and frozen, so a reviewed instant provider can be
    added later as a Replaceable module if a collection needs one
-   (ADR 0009 decision 24).
+   (ADR 0009 decision 24), subject to the low-security class restriction
+   and timing-grinding disclosure (ADR 0010 decision D8.8).
 4. Genesis ships dual providers: Chainlink VRF primary plus one reviewed
    fallback, with ARRNG as the preferred candidate and Pyth as the reviewed
    alternate; a VRF-only deployment is not conformant, and the former
@@ -1758,6 +2110,26 @@ Renderer integration tests:
 6. `fulfillEntropy` returns a pinned `EntropyFulfillmentOutcome` code
    instead of reverting on benign rejection; hard violations still revert
    with typed errors (ADR 0009 decision 25).
+7. `ENTROPY_REGISTRATION_GAS_LIMIT` and every coordinator-side external
+   call cap are Governed Gas Parameters with immutable floors, staged
+   raise/lower, health probes, and exclusion from finality identity; the
+   never-brick recovery chain — raisable cap plus replaceable coordinator
+   pointer — is explicit (ADR 0010 decisions D1.1 through D1.5).
+8. Request payment binds `msg.value` as `maxFeeWei` against a
+   same-transaction provider quote with pull-credit refund of excess
+   [EC-FEEBIND] (ADR 0010 decision D8.7).
+9. Instant mode is restricted to collections declaring
+   `EntropySecurityClass.LOW_SECURITY`, and the instant interface's
+   structural request-timing exposure is disclosed rather than papered
+   over; the genesis exclusion stands (ADR 0010 decision D8.8).
+10. Incident declaration authority is a role reference resolved through
+    the ADR 0004 registry, never a frozen raw address (ADR 0010 decision
+    D7.4).
+11. A revoked bound provider's fulfillment is a non-reverting benign
+    rejection with the pinned `REJECTED_PROVIDER_REVOKED` outcome, and
+    provider callbacks persist randomness and deliver through try/catch
+    so a coordinator revert can never lose provider randomness (ADR 0010
+    decision D8.1).
 
 These resolutions are normative; the requirements in the body of this
 document already state each decided behavior.

@@ -11,11 +11,41 @@ roadmap item.
 
 ## Scope
 
+Requirements [LCM-SCOPE]:
+
 The current contracts predate the protocol specification and do not yet
 conform. A specs-only PR may merge before implementation, but a deployment,
 audit handoff, or release branch must treat any failed gate as blocking.
 
+## Review-Entry Conditions
+
+Requirements [LCM-REVIEW-ENTRY]:
+
+No specification in the inventory may move from `Draft` to `Review` until
+the conditions below hold; this matrix is the tracking point named by
+[`docs/spec-policy.md`](spec-policy.md) (Requirement Anchors):
+
+1. Requirement-anchor backfill is complete: every normative section in
+   every inventory document carries a stable bracketed anchor, and every
+   binding requirement is numbered within its section.
+2. A machine-checked traceability artifact maps every anchored `must` to
+   at least one named gate row, test, static check, or release artifact
+   in this matrix, and CI fails on unmapped requirements (ADR 0010
+   decision D3.3).
+3. The v1 machine-readable event catalog exists with final production
+   signatures — including `schemaVersion` positions and `topic0` values —
+   for every non-standard event, generated from the spec set and checked
+   by the golden event tests. Event snippets in spec prose remain
+   illustrative; this catalog is the authority
+   ([`docs/spec-policy.md`](spec-policy.md), Normative Precedence And
+   Single Sourcing).
+4. Every hash value in the domain-constants homes and the protocol v1
+   mirror tables is pinned from its string preimage, and the CI
+   recomputation test passes.
+
 ## Forbidden Production Patterns
+
+Requirements [LCM-FORBIDDEN]:
 
 Production contracts must not contain:
 
@@ -40,60 +70,141 @@ Production contracts must not contain:
 10. `bytes32(0)` as an entropy pending/finalized sentinel.
 11. Multi-source entropy mixers, timelock reveal schemes, or instant entropy
     finalization inside sale settlement as default production behavior.
+12. `address(0)` as a blessed-authorizer convention anywhere a signed
+    authorization is verified; authorization surfaces carry an explicit
+    `AuthorizerKind` and reject zero `ecrecover` results
+    ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+    [MPA-AUTHZ]; ADR 0010 decision D8.3).
+13. Zero-as-sentinel counter increments: counter increments are explicit
+    `>= 1` values, and zero is invalid at configuration and consumption
+    (ADR 0010 decision D8.4).
 
 ## Required Gates
 
-| Gate | Code Surface | Required Tests | Release Artifact |
-|---|---|---|---|
-| Core-native ERC-2981 | `StreamCore.royaltyInfo`, revenue resolver | canonical `0x54f77a09` resolver selector; malformed/OOG/external-call resolver fallback; all-cold gas | Core bytecode size, resolver gas report |
-| Pull split wallets | split factory, split wallet, revenue escrow | conservation fuzz, forced ETH, approved-standard ERC-20 release/sync, unsupported ERC-20 denial, reentrancy | profile schema, wallet code hashes |
-| Primary native ETH and approved-standard ERC-20 settlement | fixed-price sale adapter, ERC-20 primary settlement adapter, asset policy registry, revenue escrow | no `tx.origin`, policy hash binding, escrow fallback, adapter and escrow both enforce `ACTIVE` asset policy, exact ERC-20 transfer accounting, allowance/payment failure handling | sale authorization schema, approved asset and adapter manifests |
-| Auction settlement | auction contract | bid custody, pull refunds, settlement CEI | auction state-machine manifest |
-| Collection management | Core collection boundary | create/status/max-supply events and transitions | collection facts schema |
-| Token identity | Core mint boundary, `tokenCollectionIdentity` | Core-owned token allocation, collection serial mapping, mapping-existence read, prepared-incomplete identity read, burn retained mapping | token identity schema |
-| Token-level metadata | collection metadata satellite | token data/field overrides, token locks, burned archival reads | token metadata schema |
-| Burn | Core burn boundary | owner/approved, mapping retained, finalized burn blocked | burn policy manifest |
-| Mint accounting | mint manager, ledger | duplicate-key aggregation, static caps, signed ticket binding | policy hash schema |
-| Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path | entropy policy manifest |
-| Metadata routing | metadata router, renderer | escaping, size limits, router failure behavior, ERC-4906 auth | renderer and context manifests |
-| Contract metadata | Core `contractURI()` delegation, contract-metadata satellite | ERC-7572 `contractURI()` bounded delegated read, satellite pointer, failure fallback, `ContractURIUpdated()` emitter auth (ADR 0009 decision 4) | contract-metadata manifest, selector test |
-| Collection metadata | metadata contract plus metadata satellites | typed v1 fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling | schema and snapshot manifests, metadata aggregate ABI/bytecode report |
-| Preservation records | `StreamPreservationRecords` | PREMIS-style event/object/agent/right records, fixity hash validation, event reconstruction, post-freeze record behavior | preservation module manifest, schema hashes, code hash |
-| Collection attestations | `StreamCollectionAttestations` | C2PA/EIP-712/ERC-1271-compatible attestations, signer authority, supersession, event reconstruction | attestation module manifest, schema hashes, code hash |
-| Collection views | `StreamCollectionViews` | IIIF/view URI commitments, accessibility/display view references, bounded reads, event reconstruction | view module manifest, schema hashes, code hash |
-| Entropy fallback provider | entropy coordinator, reviewed fallback provider | reviewed ARRNG or Pyth fallback provider shipped alongside VRF (ADR 0009 decision 21); VRF-only deployment fails this gate; coordinator failure mode matches the retained decision manifest | checksum-covered `release-artifacts/latest/entropy-launch-decision.json` or equivalent release-manifest record |
-| Artwork finality | Core plus satellites | typed finality preimage, pointer race, `verifyFinality` | finality manifest |
-| Governance | governance/timelock, role registry | no single EOA, role map cardinality, delays | genesis governance manifest |
-| Events | every subsystem | event reconstruction, supersession map | event catalog hash |
-| Operations | monitoring/export/storage | degraded-admin test, state export, storage redundancy | ops runbook hashes |
+Requirements [LCM-GATES]:
+
+Every gate row carries a Genesis flag: `mandatory` gates block the genesis
+deployment ceremony outright; a `conditional` gate binds the named surface
+and blocks any deployment that ships that surface. All genesis-inventory
+surfaces are `mandatory` (ADR 0010 decision D5.10) — the optional-at-genesis
+list in the Genesis Deployment Profile is the only source of conditional
+surfaces, and shipping one without its activated gate row fails this
+matrix.
+
+| Gate | Code Surface | Required Tests | Release Artifact | Genesis |
+|---|---|---|---|---|
+| Core-native ERC-2981 | `StreamCore.royaltyInfo`, revenue resolver | canonical `0x54f77a09` resolver selector; malformed/OOG/external-call resolver fallback; all-cold gas; precheck and staticcall read current `ROYALTY_RESOLVER_GAS_LIMIT` GGP value ([RSR-2981-GAS]) | Core bytecode size, resolver gas report | mandatory |
+| Pull split wallets | split factory, split wallet, revenue escrow | conservation fuzz, forced ETH, approved-standard ERC-20 release/sync, unsupported ERC-20 denial, reentrancy, `DEPRECATED` release-under-grace ([RSR-ASSET-POLICY]); ERC-1271 named-class verification — heaviest legitimate wallet class passes within the `ERC_1271_GAS_LIMIT` GGP, malicious wallet rejected ([RSR-1271]) | profile schema, wallet code hashes | mandatory |
+| Primary native ETH and approved-standard ERC-20 settlement | fixed-price sale adapter, ERC-20 primary settlement adapter, `StreamPrimarySaleSettlement`, asset policy registry, revenue escrow | no `tx.origin`, policy hash binding, escrow fallback, adapter and escrow both enforce `ACTIVE` asset policy, exact ERC-20 transfer accounting, allowance/payment failure handling; payer-signed `PaymentIntent` verified before any allowance pull with expired/replayed/revoked/over-cap negative tests ([RSR-PAYMENT-INTENT]) | sale authorization schema, approved asset and adapter manifests | mandatory |
+| Sales and auctions | genesis sale adapters and gate modules per [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) | the full [SSA-GATES] suite: English auction (reserve, increment floor, anti-snipe extension and cap, CEI, idempotent settlement, pull refunds), Dutch (schedule determinism, clearing, rebate conservation), refund-window custody, burn-to-mint (retained-identity proof, manager-scoped nullifiers, finality interaction refusals), delegate gate, content selection, registry governance, ERC-4337 + paymaster end-to-end run, custody-held settlement ordering (`CUSTODY_SETTLEMENT_TRANSFER`, [RSR-SETTLEMENT-BOUNDARY]), event reconstruction | sale/auction state-machine manifests, adapter registry manifest | mandatory |
+| Collection management | Core collection boundary | create/status/max-supply events and transitions | collection facts schema | mandatory |
+| Token identity | Core mint boundary, `tokenCollectionIdentity` | Core-owned token allocation, collection serial mapping, mapping-existence read, prepared-incomplete identity read, burn retained mapping; `TokenCollectionRegistered` emitted at identity write and event-only replay rebuilds the full mapping (ADR 0010 decision D10.1; protocol v1 [PV1-RECON].9) | token identity schema | mandatory |
+| Token-level metadata | collection metadata satellite | token data/field overrides, token locks, burned archival reads | token metadata schema | mandatory |
+| Burn | Core burn boundary | owner/approved, mapping retained, finalized burn blocked, one-way collection burn block readable for finality ([CMC-BURN]; ADR 0010 decision D10.5) | burn policy manifest | mandatory |
+| Mint accounting | mint manager, ledger, `StreamMintTicketGate` | duplicate-key aggregation, static caps, signed ticket binding; reentrancy guard on `mint()` and prepared entrypoints; `registerPhasePolicy` binds `msg.sender` to its manager argument; gate calls forward `max(gateGasLimit, MINT_GATE_GAS_LIMIT)` with returndata/nullifier bounds ([MPA-GATES]); `AuthorizerKind` enforcement with zero-`ecrecover` and non-canonical-signature negatives ([MPA-AUTHZ]); zero-increment rejection; manager-scoped nullifiers; Merkle allowlist cap mode ([MPA-MERKLE]); `GLOBAL` counter scope with reserved-constant `(0, 0)` derivation goldens ([MPA-SCOPES]); counter-continuity import ([MPA-CONTINUITY]); policy grace windows ([MPA-GRACE]); ticket revocation | policy hash schema | mandatory |
+| Artist authority | `StreamArtistRegistry` plus consuming satellites | the nine [AA-GATES] suites: two-sided binding, sanction-required finality, consent modes, economics consent and royalty freeze, signature verification (ERC-1271, GGP probes), key lifecycle (rotation/succession/dormancy), disputes, attribution display, record-family write authority | artist registry manifest, consent/sanction schema hashes | mandatory |
+| Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path; `ENTROPY_REGISTRATION_GAS_LIMIT` GGP semantics ([EC-REGGAS]); `maxFeeWei` binding with pull-credit refunds ([EC-FEEBIND]); callback persistence and retry ([EP-CALLBACK]); `INSTANT` restricted to declared `LOW_SECURITY` collections; lifecycle mapping matches [EC-LIFECYCLE] | entropy policy manifest; measured `fulfillEntropy` gas envelope with callback margin and `VRF_CALLBACK_GAS_FLOOR` record | mandatory |
+| Metadata routing | metadata router, renderer | escaping, size limits, router failure behavior, ERC-4906 auth; renderer determinism static gate and pinned golden render vectors ([MRR-DETERMINISM]); full-view and paged-chunk byte identity ([MRR-FULL-VIEW]) | renderer and context manifests, golden render vector artifact | mandatory |
+| Contract metadata | Core `contractURI()` delegation, contract-metadata satellite | ERC-7572 `contractURI()` bounded delegated read, satellite pointer, failure fallback, `ContractURIUpdated()` emitter auth (ADR 0009 decision 4) | contract-metadata manifest, selector test | mandatory |
+| Marketplace collection display | collection discovery machine path ([MRR-COLLECTION-DISCOVERY]) | retained evidence that each artist series resolves as its own collection on the major marketplaces/indexers targeted at launch, exercised through the published machine path; the standards-track signal remains reserved as OQ-X8 in [`docs/spec-open-questions.md`](spec-open-questions.md) and this gate does not resolve it | marketplace/indexer display evidence bundle | mandatory |
+| Collection metadata | metadata contract plus metadata satellites | typed v1 fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling; token content roots publishable and verified pre-finality ([CMC-CONTENT-ROOT]); per-lane record-chain accumulators ([CMC-RECORD-CHAIN]) | schema and snapshot manifests, metadata aggregate ABI/bytecode report | mandatory |
+| Owner records | `StreamOwnerRecords` | ownerOf-gated, signature-verified, append-only owner families (`ACCESSION`, `CONDITION_REPORT`, `EXHIBITION`, `LOAN`, `DEACCESSION`, `CITATION`), `TITLE_BINDING` schema, firewalled from render/finality/economics ([CMC-OWNER-RECORDS]); record-family grant-set verification across all genesis satellites — the CON-015 whole-module writer exception is retired ([CMC-AUTHZ], [AA-RECORDS]; ADR 0010 decision D2.8) | owner-records module manifest, grant map artifact | mandatory |
+| Preservation records | `StreamPreservationRecords` | PREMIS-style event/object/agent/right records, fixity hash validation, event reconstruction, post-freeze record behavior | preservation module manifest, schema hashes, code hash | mandatory |
+| Collection attestations | `StreamCollectionAttestations` | C2PA/EIP-712/ERC-1271-compatible attestations, onchain verification at write for signer-verified classes, signer authority, supersession, event reconstruction ([CMC-ATTESTATIONS]) | attestation module manifest, schema hashes, code hash | mandatory |
+| Collection views | `StreamCollectionViews` | IIIF/view URI commitments, accessibility/display view references, bounded reads, event reconstruction | view module manifest, schema hashes, code hash | mandatory |
+| Entropy fallback provider | entropy coordinator, reviewed fallback provider | reviewed ARRNG or Pyth fallback provider shipped alongside VRF (ADR 0009 decision 21); VRF-only deployment fails this gate; coordinator failure mode matches the retained decision manifest | checksum-covered `release-artifacts/latest/entropy-launch-decision.json` or equivalent release-manifest record | mandatory |
+| Artwork finality | Core plus satellites | typed finality preimage, pointer race, `verifyFinality`; token content root recorded before any finality in every metadata mode ([CMC-CONTENT-ROOT]); `REFERENCE_RENDER` component with capture-environment manifest for script-based works ([MRR-FINALITY]); `ARTIST_SANCTION` or `PLATFORM_WORKS` component verified ([AA-SANCTION], [AA-PLATFORM]); artist intent record or recorded waiver ([CMC-ARTIST-INTENT]); dual-family archival receipts plus passing per-family fixity records for every finality-referenced offchain payload ([LTA-ARCHIVE]); collection scope requires `CLOSED` plus the one-way burn block (ADR 0010 decision D10.5) | finality manifest | mandatory |
+| Governed gas parameters | every GGP host (Core, factories, coordinator, router, registries) | per parameter: immutable floor enforced; staged raise plus raise-only emergency path; lower requires a recorded passing health probe at the proposed value and can never cross the floor; change events with old/new values; excluded from finality manifests, frozen-route identity, and economic preimages — all per the pattern home ([LTA-GGP]; ADR 0010 decision D1) and its full inventory | GGP inventory with genesis values and floors in the release manifest, repricing review checklist | mandatory |
+| Governance | governance/timelock, role registry | no single EOA, role map cardinality, delays; canonical action ID and atomic batch execution ([GOV-ACTION-ID], [GOV-BATCH]); window floors and dedicated unpause role ([GOV-WINDOWS]); long-lived authorities are role references resolved through the admin registry, not raw addresses (ADR 0010 decision D7.4); entropy-provider operational authorities contract-held with rehearsed rotation ([EP-CUSTODY]) | genesis governance manifest, governance action policy catalog | mandatory |
+| Collector gas budget | both paid mint paths, genesis sale adapters | measured all-cold end-to-end collector transaction gas for `PRE_REVENUE_SINGLE_STEP` and `PREPARED_MINT` (single and batch of 10), free allowlisted mint, fixed-price and Dutch purchases, each inside its stated envelope ([MPA-GAS-BUDGET]; ADR 0010 decision D5.10); measured ERC-721 enumerable per-mint and per-transfer overhead recorded per [LTA-TRADEOFFS] item 2 (ADR 0010 decision D9.3) | checksum-covered gas budget artifact | mandatory |
+| Fixity program | preservation records, operations | mandated fixity schedule (annual full sweep, quarterly sampling), `FIXITY_CYCLE_COMPLETED`/`FIXITY_FAILURE` records, repair-from-mirror and escalation policy ([CMC-FIXITY-PROGRAM]; ADR 0010 decision D6.3) | deployment-gated fixity operations manifest | mandatory |
+| Reconstruction client | archival reconstruction client | client exists at genesis and rebuilds every [PV1-RECON] item from events alone; source-archive hash matches `streamSystemManifest().reconstructionClientHash`; replay test vectors pass in CI; reproducible-build instructions verified (ADR 0010 decision D4.8) | client source archive hash, replay vector artifact, drill cadence in ops runbook hashes | mandatory |
+| Funding manifest | operations | published funding/endowment manifest naming the source, coverage horizon, and exhaustion alarms for keepers, entropy fees, storage mirrors, fixity cycles, and drills; each recurring obligation names its funded operational owner (ADR 0010 decision D4.8) | checksum-covered funding manifest | mandatory |
+| Claim aggregation | claim router periphery | permissionless `claimMany`/`syncAndClaimMany`, release-to-self only, continue-on-failure mode, one-transaction aggregated claiming across at least 20 wallets ([RSR-CLAIM-ROUTER]; ADR 0010 decision D10.6) | claim router manifest | mandatory |
+| Events | every subsystem | event reconstruction, supersession map | event catalog hash | mandatory |
+| Operations | monitoring/export/storage | degraded-admin test, state export with metadata/record-chain roots, storage redundancy, export cadence per the umbrella schedule | ops runbook hashes | mandatory |
 
 ## Genesis Deployment Profile
 
-Mandatory genesis contracts/interfaces:
+Requirements [LCM-GENESIS]:
+
+Genesis is the smallest system consistent with the owner-ratified
+permanence and flexibility posture (ADR 0010 decision D9.1); it is not a
+minimal system, and this profile states the full cost honestly. Every
+entry below names the concrete genesis deployment; a parenthesized
+interface is the Permanent surface that deployment must satisfy. An
+interface with no concrete deployment, or a required gate whose contract
+is absent from this list, is a matrix violation. This inventory is
+exhaustive: 33 deployable production contracts, plus per-collection split
+wallets created on demand by `CREATE2` through the factory. Governed Gas
+Parameter stores are storage surfaces of the listed contracts (Core and
+the split factory parameter store), not separate deployments; the mock
+entropy provider exists only in local validation and never deploys to
+production.
+
+Mandatory genesis contracts:
 
 ```text
-StreamCore
-StreamGovernance or equivalent ADR 0004 timelock/role layer
-IStreamModuleRegistry
-IStreamRevenueResolver
-IStreamSplitFactory
-IStreamSplitWallet
-IStreamRevenueEscrow
-StreamMintManager
-StreamMintLedger
-StreamMetadataRouter
-StreamCollectionMetadata
-StreamPreservationRecords
-StreamCollectionAttestations
-StreamCollectionViews
-StreamEntropyCoordinator
-Chainlink VRF primary provider for entropy-enabled collections
-Reviewed ARRNG or Pyth fallback provider (VRF-only deployment is not conformant)
-ERC-20 primary settlement adapter for approved standard assets
-StreamArtworkFinalityRegistry with the full scope set: COLLECTION, TOKEN, RELEASE, SEASON, VIEW (ADR 0009 decision 6)
+ 1 StreamCore
+ 2 StreamGovernance or equivalent ADR 0004 timelock/role layer
+ 3 StreamModuleRegistry (canonical IStreamModuleRegistry)
+ 4 StreamRevenueResolver (IStreamRevenueResolver)
+ 5 StreamSplitFactory (IStreamSplitFactory)
+ 6 StreamSplitWallet clone implementation (IStreamSplitWallet)
+ 7 StreamRevenueEscrow (IStreamRevenueEscrow)
+ 8 StreamAssetPolicyRegistry (pinned immutably by the split factory)
+ 9 StreamPrimarySaleSettlement
+10 StreamClaimRouter (IStreamClaimRouter, [RSR-CLAIM-ROUTER])
+11 StreamMintManager
+12 StreamMintLedger
+13 StreamMintTicketGate (signed mint-ticket gate module, [MPA-TICKET]
+   EIP-712 verifier)
+14 StreamFixedPriceSaleAdapter
+15 StreamEnglishAuctionHouse
+16 StreamDutchAuctionAdapter
+17 StreamPrivateSaleAdapter
+18 StreamBurnMintGate
+19 StreamDelegateRegistryGate
+20 ERC-20 primary settlement adapter for approved standard assets
+21 StreamArtistRegistry
+22 StreamMetadataRouter
+23 StreamRendererV1
+24 StreamCollectionMetadata
+25 StreamSchemaRegistry (schema and canonicalization registry satellite,
+   [CMC-SCHEMA-REGISTRY])
+26 StreamOwnerRecords
+27 StreamPreservationRecords
+28 StreamCollectionAttestations
+29 StreamCollectionViews
+30 StreamEntropyCoordinator
+31 StreamEntropyProviderVRF (Chainlink VRF primary provider adapter)
+32 StreamEntropyProviderARRNG or StreamEntropyProviderPyth (reviewed
+   fallback provider adapter; VRF-only deployment is not conformant)
+33 StreamArtworkFinalityRegistry with the full scope set: COLLECTION,
+   TOKEN, RELEASE, SEASON, VIEW (ADR 0009 decision 6)
 ```
 
-Specified but optional-at-genesis surfaces:
+`StreamModuleRegistry` is the single module registry instance (ADR 0010
+decision D10.2): it implements the canonical merged record shape defined
+once in [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+(Registry Pattern) and serves satellite pointer eligibility, mint gate and
+counter-resolver registration, and sale adapter/executor registration
+([SSA-REGISTRY]); the mint spec's per-module `gasLimit` read is an
+extension record on the same registry, not a second registry contract.
+The auction contracts are inside the genesis conformance boundary: no
+deployment may defer them, and no auction may run anywhere except through
+the gate-covered genesis adapters.
+
+Genesis audit plan (ADR 0010 decision D9.1): the release manifest must
+include a published subsystem-by-subsystem audit plan artifact covering
+every contract above — per-subsystem scope, audit ordering, auditor
+identity or class, and completion evidence — and the deployment ceremony
+fails while any subsystem lacks recorded audit completion. Recurring
+operational obligations (fixity cycles, state exports, drills, funding)
+each name their funded operational owner in the funding manifest gate.
+
+Specified but optional-at-genesis surfaces (the only `conditional`
+surfaces; each activates its own gate rows through its accepted ADR):
 
 ```text
 Custom counter resolvers
@@ -101,6 +212,8 @@ Resolver-defined caps/deltas
 Privacy nullifiers
 CCIP Read and future onchain web adapters
 Non-standard ERC-20 primary adapters
+Sealed-bid and ranked auction implementations (frozen extension profiles)
+StreamLabelRegistry (display-only label metadata; no accounting authority)
 Additional institution-specific preservation, rights, VC/DID, EAS, or legal modules
 ```
 
@@ -135,10 +248,10 @@ Bounded contractURI delegated read (ERC-7572)       permanent     300-600
 Satellite pointer cached reads and governance hooks permanent   1,200-2,000
 Core finality fact reads and lifecycle reads        permanent     700-1,200
 Core-originated ERC-4906 refresh emitters           permanent     300-700
-streamSystemManifest storage-only read              high          500-1,000
+streamSystemManifest storage-only read              permanent     500-1,000
 Successor declaration history                       medium        500-1,000
 latestStateExport storage-only read                 medium        300-700
-Prepared mint prepare/complete                      conditional   900-1,800
+Prepared mint prepare/complete                      permanent     900-1,800
 ```
 
 The 2,000-byte headroom target above is the governing deployment rule
@@ -146,11 +259,11 @@ The 2,000-byte headroom target above is the governing deployment rule
 `release-artifacts/contracts.json` remain the pre-deployment development
 control, and interim exceptions cannot survive to the deployment gate.
 
-If the measured build loses the 2,000-byte
-headroom, the priority order is: keep ERC-721/enumerable, token identity,
-Core-native ERC-2981, and bounded `tokenURI`; then move successor history,
-state export publication, rich manifest discovery, and optional prepared-mint
-convenience into a thin immutable discovery or mint satellite that Core points
+If the measured build loses the 2,000-byte headroom, the priority order is:
+every `permanent` row stays in Core — including `streamSystemManifest()` and
+the prepared-mint pair, which are never relocation candidates (ADR 0010
+decision D10.6; [MPA-CORE-ABI]) — then successor history and state export
+publication move into a thin immutable discovery satellite that Core points
 to through the same cached pointer policy.
 
 Additional paid-mint/finality/escrow deployment tests:
@@ -160,32 +273,38 @@ Additional paid-mint/finality/escrow deployment tests:
    or `PREPARED_MINT`.
 2. Signed policy expecting token-level economics cannot use
    `PRE_REVENUE_SINGLE_STEP`.
-2. A collection configured `ROYALTY_SNAPSHOT_AT_MINT` cannot bind to a
+3. A collection configured `ROYALTY_SNAPSHOT_AT_MINT` cannot bind to a
    single-step-only sale adapter.
-3. Finality rejects mismatched manifest content hash, URI hash, component code
+4. Finality rejects mismatched manifest content hash, URI hash, component code
    hash, unsorted components, duplicate components, and missing `hasMaxSupply`.
-4. Pointer replacement is blocked for frozen/finalized routes unless the new
+5. Pointer replacement is blocked for frozen/finalized routes unless the new
    target proves frozen-route support or a recovery manifest has executed.
-5. Escrow credits created before factory replacement flush through their stored
+6. Escrow credits created before factory replacement flush through their stored
    factory.
-6. ERC-1271 alternate-recipient release authorization is gas-capped and tested
+7. ERC-1271 alternate-recipient release authorization is gas-capped and tested
    against a malicious contract wallet.
-7. `PREPARED_MINT` exposes and verifies one canonical `operationId` across sale
+8. `PREPARED_MINT` exposes and verifies one canonical `operationId` across sale
    adapter, manager, ledger, Core prepare/complete, resolver snapshot, entropy
    registration, and escrow/deposit path.
-8. Token-level primary and royalty snapshots taken during `PREPARED_MINT` are
+9. Token-level primary and royalty snapshots taken during `PREPARED_MINT` are
    independent of entropy seed/status and renderer output.
-9. Open-ended collections can finalize a token, release, season, or view scope
-   without closing the parent collection, and frozen-route checks include the
-   full scoped finality key.
-10. Collection-level finality is impossible unless `CLOSED` makes
-    `mintedSupply`, `burnedSupply`, and `nextCollectionSerial` immutable.
-11. `royaltyInfo()` and `tokenURI()` gas budgets are independent top-level
+10. Open-ended collections can finalize a token, release, season, or view scope
+    without closing the parent collection, and frozen-route checks include the
+    full scoped finality key.
+11. Collection-level finality is impossible unless `CLOSED` makes
+    `mintedSupply`, `burnedSupply`, and `nextCollectionSerial` immutable and
+    the one-way collection burn block is set (ADR 0010 decision D10.5).
+12. `royaltyInfo()` and `tokenURI()` gas budgets are independent top-level
     reads; no production helper combines both in one bounded staticcall frame.
-12. Degraded-mode escrow tests document the condition that `flushEscrow`
-    remains possible only while the immutable gas floor is satisfiable.
+13. Degraded-mode escrow tests document the condition that `flushEscrow`
+    remains possible only while the current `FLUSH_GAS_FLOOR` Governed Gas
+    Parameter is satisfiable; the parameter is raisable with an immutable
+    floor ([RSR-GGP]), so the degraded condition is recoverable by
+    governance rather than permanent.
 
 ## Static Analysis Gates
+
+Requirements [LCM-STATIC]:
 
 CI must fail if any production contract violates these checks:
 
@@ -215,8 +334,18 @@ CI must fail if any production contract violates these checks:
     accepted ADR enables them. Reserved enum values may exist in manifests, but
     excluded call paths must be physically absent from production bytecode or
     blocked before any external call/state write by static checks.
+12. The renderer or router `tokenURI` path contains environment or context
+    opcodes — `TIMESTAMP`, `NUMBER`, `PREVRANDAO`, `BLOCKHASH`,
+    `COINBASE`, `BASEFEE`, `GASLIMIT`, `GASPRICE`, `BALANCE`,
+    `SELFBALANCE` — or any external read outside the pinned allowlist of
+    Core identity, entropy view, and metadata storage reads
+    ([MRR-DETERMINISM]; ADR 0010 decision D4.3). Renderer output must be a
+    pure function of contract state and the render request; the pinned
+    golden render vectors re-verify this at every preservation drill.
 
 ## Golden Interface Tests
+
+Requirements [LCM-GOLDEN]:
 
 CI must include small deterministic tests for production interfaces whose
 accidental drift would break indexers, marketplaces, or satellite contracts:
@@ -250,7 +379,8 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
    two-tier model plus named exception floors; the richer action-class taxonomy
    is manifest/runbook vocabulary until a later ADR implements it onchain.
 10. Governance tests cover `governanceAction(actionId)`, virtual or materialized
-    expiry, terminal-freeze veto, complete scheduled/executed/cancelled/vetoed
+    expiry, the terminal-freeze veto path ([LTA-FREEZE] rule 4;
+    [GOV-WINDOWS]), complete scheduled/executed/cancelled/vetoed
     event payloads, and replay protection through nonce/action ID.
 11. `IStreamCorePointerView.getSatellitePointer` returns target, code hash,
     freeze state, module type, interface ID, registry address, registry status,
@@ -266,22 +396,38 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
 15. A collection on a single-step-only mint path cannot select a renderer that
     requires renderer-visible `tokenData` bytes before the recipient callback.
 16. `PRE_REVENUE_SINGLE_STEP` with any `RECIPIENT`-keyed counter requires
-    `initialRecipient == beneficiary` for each element and otherwise reverts.
+    `initialRecipients[i] == beneficiaries[i]` for each element and
+    otherwise reverts with `MintSingleStepRecipientMismatch(index)`. This
+    golden test exercises `StreamMintManager`: the manager is the single
+    enforcement point for recipient-owner equality
+    ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+    [MPA-SINGLE-STEP]); sale adapters may pre-screen but their checks are
+    not the conformance locus.
 17. A finalized collection-scope artwork recovery that affects more than
     `MAX_REFRESH_RANGE` tokens emits chunked `BatchMetadataUpdate` events with
     the same recovery reason hash and never emits one oversized range.
 18. A minted token whose pinned entropy coordinator has no code, reverts, is
     incident-revoked, or returns malformed data renders pending/unknown
     metadata rather than reverting `tokenURI()`.
-19. Core calls `onTokenMinted` with immutable `ENTROPY_REGISTRATION_GAS_LIMIT`,
-    an EIP-150-aware parent gas precheck, measured deployment margin, and mint
-    revert on registration failure.
+19. Core calls `onTokenMinted` forwarding the current
+    `ENTROPY_REGISTRATION_GAS_LIMIT` Governed Gas Parameter — immutable
+    floor, staged raise with a raise-only emergency path, probe-gated
+    lower, change events, per
+    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+    [EC-REGGAS] — with an EIP-150-aware parent gas precheck that reads the
+    live value, measured deployment margin, and mint revert on
+    registration failure; the GGP raise plus replaceable coordinator
+    pointer recovery chain is tested (ADR 0010 decision D1.5).
 20. CI asserts every production event in the event catalog has at most three
     `indexed` fields, matching the Solidity log topic limit.
 21. Golden tests assert numeric enum values for `TokenURIReadStatus`,
-    `StreamTokenLifecycle`, `EntropyStatus`, `ProviderResultStatus`,
-    `ModuleRegistryStatus`, finality scope types, and recovery statuses match
-    the manifest-pinned Numeric ID Catalog.
+    `StreamTokenLifecycle`, `EntropyStatus`, `EntropyFulfillmentOutcome`,
+    `EntropySecurityClass`, `ProviderResultStatus`,
+    `ModuleRegistryStatus`, `AuthorizerKind`, asset policy statuses,
+    `AttributionState`, `ArtistConsentMode`, `ArtistAuthorityClass`,
+    `CollabPolicyMode`, `SaleKind`, `DutchDecayKind`, finality scope
+    types, and recovery statuses match the manifest-pinned Numeric ID
+    Catalog.
 22. Any satellite function reachable during `PREPARED_MINT`, including resolver
     snapshot hooks, escrow/deposit paths, and entropy registration helpers,
     reads or re-verifies Core `preparedMint(tokenId).operationId` and reverts
@@ -290,6 +436,16 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
     update Core's cached manifest/catalog hashes atomically in the same
     governed execution; tests fail if registry/catalog publisher state drifts
     from Core's cached discovery fields.
+24. Core's restricted ERC-4906 refresh emitters accept exactly the
+    caller set pinned by the protocol v1 Core hook table — the metadata
+    router, the artwork finality registry, and the entropy coordinator,
+    each resolved through Core's cached satellite pointers — and revert
+    for every other caller, including admins and superseded pointer
+    values (ADR 0010 decision D3.6).
+25. Every enum literal named in this matrix — including the lifecycle
+    reconciliation matrix and the Numeric ID Catalog coverage list —
+    appears verbatim in the owning spec's enum definition; CI fails on
+    any literal (such as a status name) that no home document defines.
 
 ## Current-Code Contradictions
 
@@ -311,8 +467,12 @@ deployment where it conflicts with this matrix:
 
 ## Event Catalog Schema
 
+Requirements [LCM-EVENTS]:
+
 Every release must include a machine-readable event catalog canonicalized with
-RFC 8785/JCS:
+RFC 8785/JCS. The catalog is generated before any document enters Review
+(Review-Entry Conditions above), not at deployment time, so golden event
+tests always have an authoritative target:
 
 ```json
 {
@@ -346,43 +506,70 @@ pinned in this catalog. Event replacements must use `supersedes` and
 and are never reinterpreted.
 The v1 catalog must explicitly list standard-event exemptions where the event
 signature cannot include `schemaVersion`, including ERC-721 `Transfer`,
-`Approval`, `ApprovalForAll`, ERC-2981 interface discovery through ERC-165, and
+`Approval`, `ApprovalForAll`, ERC-2981 interface discovery through ERC-165,
 ERC-4906 `MetadataUpdate` / `BatchMetadataUpdate` if emitted with their
-standard signatures.
+standard signatures, and ERC-7572 `ContractURIUpdated()` (ADR 0010
+decision D10.6).
 Any non-standard event snippet elsewhere in the specs that omits
 `schemaVersion` is shorthand, not permission to omit it from the production ABI. The
 event catalog and golden event tests are authoritative.
 
 ## Numeric ID Catalog
 
+Requirements [LCM-IDS]:
+
 Every enum-like numeric value that crosses contract, indexer, or manifest
 boundaries must be assigned in a manifest-pinned numeric ID catalog. The v1
 catalog must cover at least module registry states, governance action classes
 and statuses, freeze modes, collection statuses, supply modes, entropy
-statuses, provider result statuses, asset policy statuses, schema statuses,
-hash algorithms, canonicalization IDs, source/storage types, token URI read
-statuses, finality scope types, and recovery statuses. IDs may be deprecated
-but not reinterpreted.
+statuses, entropy fulfillment outcomes (including
+`REJECTED_PROVIDER_REVOKED = 5`), entropy security classes
+(`HIGH_ASSURANCE = 0`, `LOW_SECURITY = 1`), provider result statuses,
+asset policy statuses (`UNKNOWN = 0`, `ACTIVE = 1`, `INACTIVE = 2`,
+`DEPRECATED = 3`, `UNSUPPORTED = 4`, home [RSR-ASSET-POLICY]),
+authorizer kinds ([MPA-AUTHZ]), sale and Dutch-decay kinds (sales spec),
+English-auction lifecycle states and refund-window purchase states
+(sales spec [SSA-ENGLISH] state machine and [SSA-REFUND]),
+attribution states, artist consent modes, artist authority classes, and
+collaborator policy modes
+([`docs/stream-artist-authority.md`](stream-artist-authority.md)),
+owner-record family constants (`ACCESSION`, `CONDITION_REPORT`,
+`EXHIBITION`, `LOAN`, `DEACCESSION`, `CITATION`; home
+[CMC-OWNER-RECORDS]), schema statuses, hash algorithms, canonicalization
+IDs, source/storage types, token URI read statuses, finality scope types,
+and recovery statuses. IDs may be deprecated but not reinterpreted.
 The Numeric ID Catalog has its own schema version, schema URI/hash,
 canonicalization ID, and supersedes-catalog hash. Updating the catalog format
 is a catalog supersession, not a mutation of old IDs.
 
-Lifecycle reconciliation matrix:
+Lifecycle reconciliation matrix — a checker-verified mirror of the
+lifecycle mapping home in
+[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+([EC-LIFECYCLE]); on any conflict the home wins (ADR 0010 decision D3.1):
 
 ```text
 Token condition        StreamTokenLifecycle     TokenURIReadStatus     EntropyStatus
-nonexistent            UNKNOWN                  NONEXISTENT            NONE/UNKNOWN
-prepared incomplete    PREPARED_INCOMPLETE      PREPARED_INCOMPLETE    REGISTERED or terminal DISABLED/NOT_REQUIRED
+nonexistent            UNKNOWN                  NONEXISTENT            NONE
+prepared incomplete    PREPARED_INCOMPLETE      PREPARED_INCOMPLETE    NONE (no record)
 minted pending         MINTED                   OK                     REGISTERED/REQUESTED/STALE/FAILED
+minted non-random      MINTED                   OK                     terminal DISABLED/NOT_REQUIRED
 minted finalized       MINTED                   OK                     FINALIZED
-burned                 BURNED                   BURNED                 retained last entropy status or terminal archive status
+burned                 BURNED                   BURNED                 retained last written entropy status
 ```
 
-The numeric ID catalog pins values independently for each enum; indexers must
-not assume the same word has the same numeric value across different enum
-families.
+`EntropyStatus` has no `UNKNOWN` member. `REGISTERED` and the terminal
+`DISABLED`/`NOT_REQUIRED` records are written only by `onTokenMinted` at
+completion, so a prepared-incomplete token has no coordinator record:
+`tokenEntropy` discloses that condition or reverts, and consumers treat
+either as pending ([EC-LIFECYCLE]). Mirrors and indexers must not invent
+values. Golden test 25 enforces that every literal above exists in the
+owning enum definition. The numeric ID catalog pins values independently
+for each enum; indexers must not assume the same word has the same
+numeric value across different enum families.
 
 ## Indexed Field Policy
+
+Requirements [LCM-INDEXED]:
 
 Indexed event fields are part of Stream's long-term query contract. Every
 production event must classify each field as indexed or unindexed in the event

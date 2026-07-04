@@ -14,18 +14,45 @@ policy/accounting, `MR` metadata router/renderer, `CM` collection metadata,
 
 ## Open
 
-None. All 24 questions raised by the permanence reframe were resolved on
+### OQ-X8: Marketplace-consumable collection identity signal
+
+The one question the protocol owner has reserved (ADR 0010 decision D11).
+Sequential global token IDs (ADR 0009 decision 1) plus a shared
+multi-collection Core contract leave marketplaces and indexers no
+consumable signal for grouping tokens into collections — the range
+heuristic is gone by design, and nothing standard replaced it.
+
+- Why it blocks: collector-facing collection pages, marketplace search,
+  and third-party analytics all need a grouping signal; without a specified
+  one, every integrator invents their own and the ecosystem fragments.
+  Must be resolved before the metadata specs reach `Final`; does not block
+  Draft-stage work.
+- Options: (a) per-collection contract-metadata surfaces (an ERC-7572-style
+  collection-scoped `contractURI` read exposed through the router);
+  (b) ERC-7496 dynamic traits carrying collection identity; (c) a pinned
+  indexer-facing collection registry read plus documented integration
+  guidance; (d) marketplace-standard sub-collection metadata in token JSON
+  (`properties.stream.collection`) plus outreach to major marketplaces.
+- Recommendation: none recorded — reserved to the protocol owner.
+- Decision owner: protocol owner.
+
+All 25 other questions raised by the permanence reframe were resolved on
 2026-07-04 through
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md), in the same
-PR that removed the inline markers.
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) (count
+corrected from 24 per ADR 0010), in the same PR that removed the inline
+markers. The nine-lens review findings were resolved through
+[ADR 0010](adr/0010-world-class-spec-pass.md).
 
 ## Resolved
 
-All entries below were resolved 2026-07-04. The decision record is
+The 25 entries below were resolved 2026-07-04. The decision record is
 [ADR 0009: Protocol V1 Open-Question Resolutions](adr/0009-protocol-v1-open-question-resolutions.md);
 decision numbers refer to it. OQ-X5 and OQ-X6 were ratified explicitly by
 the protocol owner; the rest were delegated under the review lens "the most
-world-class approach, not the most convenient for us now."
+world-class approach, not the most convenient for us now." The subsequent
+nine-lens review findings were resolved through
+[ADR 0010: World-Class Specification Pass](adr/0010-world-class-spec-pass.md),
+which also opened OQ-X8 above as the single reserved question.
 
 ### Cross-cutting
 

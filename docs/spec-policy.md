@@ -100,6 +100,31 @@ specifications, but the Permanent interfaces they cite may not drift, and
 existing module specs for deployed implementations become historical records
 under the same errata-only rule.
 
+## Normative Precedence And Single Sourcing
+
+Amended by ADR 0010 (decision D3). Every Permanent definition — hash
+preimage, interface, enum, event schema, canonical ordering — has exactly
+one owning document section, its normative home. Every other document cites
+the home instead of restating it; a checker-verified mirror table (such as
+the domain-constants tables in the protocol v1 specification) is a mirror,
+not a second home.
+
+If two documents conflict, the owning home wins and the conflict is a
+defect to repair, never an interpretation choice. ADRs are decision
+records: the specs they amend are the homes, and ADR text that drifts from
+its spec is corrected to cite the spec. Event snippets inside spec prose
+are illustrative; the machine-readable event catalog and its golden tests
+are the authoritative event signatures.
+
+## Requirement Anchors
+
+Normative sections carry stable bracketed anchors on or directly beneath
+their headings (for example `[MPA-COUNTERS]`), with binding requirements
+numbered inside the section so gates, tests, reviews, and other documents
+can cite a requirement precisely and durably. New and edited normative
+sections must carry anchors; full backfill across the older documents is a
+Review-entry condition tracked by the conformance matrix.
+
 ## Amendment Process
 
 Accepted ADRs under [`docs/adr/`](adr/README.md) are the only mechanism that
@@ -177,6 +202,8 @@ requirement; only the amendment process changes requirements.
 | [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) | Replaceable (provider adapters) | Draft |
+| [`docs/stream-artist-authority.md`](stream-artist-authority.md) | Permanent interfaces + Replaceable genesis modules (artist authority) | Draft |
+| [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) | Permanent interfaces + Replaceable genesis modules (sales and auctions) | Draft |
 | [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) | Deployment gate over all layers | Draft |
 | [`docs/adr/`](adr/README.md) | Decision records / amendment mechanism | Per-ADR status |
 

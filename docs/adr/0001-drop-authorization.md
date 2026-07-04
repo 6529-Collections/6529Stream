@@ -153,8 +153,8 @@ The public-beta target design is:
    design. `dropId` is the derived replay identifier, not an independent nonce.
    After validating the signer, the contract must require:
    `dropId == keccak256(abi.encode(DROP_ID_TYPEHASH, signer, signerEpoch, nonce, salt))`.
-   `DROP_ID_TYPEHASH` is
-   `keccak256("DropId(address signer,uint256 signerEpoch,uint256 nonce,uint256 salt)")`.
+   `DROP_ID_TYPEHASH` is the pinned `DropId` type string; its single
+   definition is the helper derivation block later in this ADR.
    The signer pipeline must not issue two live payloads with the same
    `(signer, signerEpoch, nonce, salt)` tuple.
 14. `dropId` must be globally unique and consumed in storage before any external

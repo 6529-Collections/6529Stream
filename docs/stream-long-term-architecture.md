@@ -3,8 +3,9 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
-in [`docs/spec-open-questions.md`](spec-open-questions.md).
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and
+[ADR 0010](adr/0010-world-class-spec-pass.md) and recorded in
+[`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the umbrella architecture specification for making
 6529Stream durable over a 50+ year contract life. 6529Stream is permanent
@@ -19,6 +20,8 @@ Companion specs:
 - `docs/launch-v1-target-architecture.md` (Stream protocol v1 specification)
 - `docs/revenue-splits-and-royalties.md`
 - `docs/mint-policy-and-accounting.md`
+- `docs/stream-sales-and-auctions.md`
+- `docs/stream-artist-authority.md`
 - `docs/adr/0004-admin-governance.md`
 - `docs/adr/0008-revenue-splits-and-royalty-resolver.md`
 - `docs/launch-conformance-matrix.md` (deployment conformance gates)
@@ -26,6 +29,14 @@ Companion specs:
 - `docs/collection-metadata-contract.md`
 - `docs/stream-entropy-coordinator.md`
 - `docs/stream-entropy-providers.md`
+
+This document is the normative home of the cross-cutting patterns:
+the Governed Gas Parameter model, the module registry record shape, the
+Core satellite pointer policy, the token identity model, the freeze model,
+the artwork finality model, the state export profile, and the hash and
+manifest discipline. Subsystem specs instantiate these patterns and cite
+this document; per the precedence rule in
+[`docs/spec-policy.md`](spec-policy.md), restating a pattern is a defect.
 
 ## Design Thesis
 
@@ -86,6 +97,10 @@ version or manifest hashes.
     layout or offchain operator memory.
 15. Treat standards, marketplaces, randomness providers, and storage systems as
     replaceable over decades.
+16. Prefer governed parameters with immutable floors over immutable caps
+    for every external-call gas bound; a cap that cannot move is a bet
+    against 50 years of opcode repricing (ADR 0010 decision D1; see
+    Governed Gas Parameters).
 
 ## Core Minimalism
 
@@ -157,9 +172,14 @@ deterministic IDs to init code hash, runtime code hash, schema version,
 interface ID, manifest hash, deployment manifest hash, chain ID, and factory
 address.
 
-## Registry Pattern
+## Registry Pattern [LTA-REGISTRY]
 
 Use registries for replaceable modules, but keep registry authority narrow.
+This section is the single normative home of the module registry interface
+and record shape (ADR 0010 decision D10.2). Protocol v1 has exactly one
+module-registry interface; mint gates, counter resolvers, sale-adapter
+executors, renderers, entropy providers, artist registries, and Core
+satellites are all registered through it.
 
 Registry responsibilities:
 
@@ -185,7 +205,9 @@ Incident revocation must not imply admin sweep rights, hidden migration, or
 silent policy substitution. It should freeze the affected surface until an
 accepted recovery or successor path is published.
 
-Canonical v1 registry surface:
+Canonical v1 registry surface, merging the umbrella and mint-layer draft
+record shapes into the one record every consumer reads (ADR 0010 decision
+D10.2):
 
 ```solidity
 enum ModuleRegistryStatus {
@@ -200,6 +222,7 @@ struct StreamModuleRecord {
     bytes32 moduleType;
     bytes32 moduleVersion;
     bytes4 interfaceId;
+    uint32 moduleGasLimit;
     bytes32 runtimeCodeHash;
     bytes32 deploymentManifestHash;
     bytes32 moduleManifestHash;
@@ -225,13 +248,49 @@ interface IStreamModuleRegistry {
         view
         returns (bytes32 manifestHash, string memory manifestURI);
 }
+```
 
+Registry record requirements:
+
+1. `IStreamModuleRegistry`, `StreamModuleRecord`, and
+   `ModuleRegistryStatus` are the only module-registry surface in protocol
+   v1. A second registry interface, record shape, or status vocabulary for
+   the same pattern is nonconformant. Draft mint-layer names —
+   `IStreamMintModuleRegistry`, `MintModuleInfo`, `ModuleStatus`,
+   `isModuleActive` — are superseded aliases; consumers that named
+   `isModuleActive(module, interfaceId)` read
+   `isModuleEligible(module, moduleType, interfaceId)` with their module
+   type.
+2. `ModuleRegistryStatus` numeric IDs are pinned in the Numeric ID Catalog:
+   `UNKNOWN = 0`, `ACTIVE = 1`, `DEPRECATED = 2`, `INCIDENT_REVOKED = 3`.
+   The mint-layer draft name `BLOCKED` denotes `INCIDENT_REVOKED`; there is
+   no fifth state.
+3. `moduleGasLimit` is the registry's recommended per-module external-call
+   forwarding bound, consumed at configuration time by managers and routers
+   that hash a per-module gas value into policy identity (for example the
+   mint gate config in `docs/mint-policy-and-accounting.md` `[MPA-GATES]`).
+   Zero means no module-specific bound. Runtime enforcement combines the
+   policy-pinned value with the relevant Governed Gas Parameter; the
+   registry field itself is configuration metadata, not a live gas read.
+4. The conformance-matrix genesis deployment profile names every deployed
+   registry instance. A deployment may serve all module types from one
+   instance or split instances by subsystem, but every instance implements
+   this interface, and every policy or pointer preimage that binds a
+   registry address binds an instance listed in the genesis profile.
+5. Registry lifecycle changes are governed actions under the ADR 0004
+   action classes: registration and status loosening are
+   `DELAYED_LOOSENING`; incident revocation is `IMMEDIATE_TIGHTENING`.
+
+The registry emits schema-versioned lifecycle events:
+
+```solidity
 event StreamModuleRegistered(
     uint16 schemaVersion,
     address indexed module,
     bytes32 indexed moduleType,
     bytes4 indexed interfaceId,
     bytes32 moduleVersion,
+    uint32 moduleGasLimit,
     bytes32 runtimeCodeHash,
     bytes32 deploymentManifestHash,
     bytes32 moduleManifestHash,
@@ -262,7 +321,7 @@ If governance is lost before registry replacement, no hidden registry override
 exists; mutable assignments halt and read-only/degraded mode continues from
 cached pointer facts and frozen manifests.
 
-## Core Satellite Pointer Policy
+## Core Satellite Pointer Policy [LTA-POINTERS]
 
 The Core pointers to satellites are protocol-critical. A mutable resolver,
 metadata router, collection metadata contract, or entropy coordinator can
@@ -278,6 +337,7 @@ COLLECTION_METADATA
 ENTROPY_COORDINATOR
 MINT_MANAGER
 MINT_LEDGER
+ARTIST_REGISTRY
 STREAM_ADMINS_OR_GOVERNANCE
 ARTWORK_FINALITY_REGISTRY
 SYSTEM_MANIFEST
@@ -287,9 +347,14 @@ Required pointer lifecycle:
 
 1. New pointer targets must be approved by the relevant registry before they
    can be staged.
-2. Staging uses the canonical ADR 0004 governance action ID. Pointer-specific
-   fields are encoded into `callHash` and the pointer manifest hash; this
-   document does not define a second pointer operation preimage.
+2. Staging uses the canonical governance action of
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   [GOV-ACTION-ID]. Pointer-specific fields are encoded into the batch
+   `callsHash` and the pointer manifest hash; this document does not define
+   a second pointer operation preimage. A pointer move whose consistency
+   obligations span contracts — pointer plus cached system-manifest fields,
+   pointer plus catalog update, finality plus pointer freeze — must execute
+   as one atomic [GOV-BATCH] batch (ADR 0010 decision D7.1).
 
 3. Every staged operation emits old target, new target, code hash, manifest
    hash, earliest execution time, actor, indexed action ID, and reason URI/hash.
@@ -420,7 +485,132 @@ observed and stored during the latest successful pointer scheduling/execution
 recheck. If tools need the live registry status, they should call the registry
 directly with their own gas policy and compare it with Core's cached value.
 
-## Token Identity Model
+## Governed Gas Parameters [LTA-GGP]
+
+An immutable gas cap is a bet against 50 years of opcode repricing: one
+hard fork that reprices `SLOAD` or cold access can turn a fixed cap into a
+permanent outage for a frozen collection whose route can never change.
+Protocol v1 therefore contains no immutable external-call gas cap anywhere
+(ADR 0010 decision D1). Every external-call gas bound — royalty resolver
+reads, metadata router reads, entropy registration and view reads, ERC-1271
+verification, finality component reads, gate calls, asset-policy checks,
+escrow flush floors, and any future bound — is a Governed Gas Parameter
+(GGP).
+
+This section is the single normative home of the pattern. Subsystem specs
+instantiate parameters — hosts, genesis values, floors, probes — and cite
+this section; restating the model is a defect under the precedence rule.
+
+A Governed Gas Parameter is:
+
+1. a named constant whose current value is a storage-backed read on its
+   host contract or parameter store, never a deploy-time immutable or a
+   compiled-in constant;
+2. paired with an immutable per-parameter floor set at deployment from
+   measured need plus margin, below which the value can never be set;
+3. recorded in the release manifest with its genesis value, floor,
+   measurement evidence, and host;
+4. a named member of the hard-fork/repricing review checklist (State
+   Export And Archival Operations);
+5. identified by
+   `parameterId = keccak256("6529STREAM_GGP_" || <constant name>)`,
+   recorded in the owning subsystem's domain table.
+
+Requirements:
+
+1. Raising a GGP is a low-risk service-restoring action: it uses the
+   short-delay governance class, and a raise-only emergency path is
+   permitted (ADR 0010 decision D1.2).
+2. Lowering a GGP must use the normal delay class, must carry a recorded
+   passing health-probe run at the proposed value, and must revert below
+   the immutable floor. Probe variants that execute at a candidate value
+   live in diagnostics satellites or operator tooling, never in production
+   read paths.
+3. GGP values are Operational-layer. They must be excluded from finality
+   manifests, frozen-route identity, policy hashes, assignment hashes, and
+   every Permanent preimage, so retuning gas never touches artwork or
+   economic identity (ADR 0010 decision D1.3). Frozen collections keep
+   working because the cap can always be raised.
+4. Every GGP change executes through the canonical governance action
+   ([GOV-ACTION-ID] in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
+   and emits the canonical change event:
+
+   ```solidity
+   event GasParameterUpdated(
+       uint16 schemaVersion,
+       bytes32 indexed parameterId,
+       address indexed host,
+       bytes32 indexed actionId,
+       uint256 oldValue,
+       uint256 newValue,
+       uint256 floor
+   );
+   ```
+
+   A host spec may instead pin a parameter-named alias event carrying at
+   least `(schemaVersion, oldValue, newValue, floor)` where the parameter
+   and host are implied by the emitter; the event catalog must tag every
+   alias as a member of the GGP change family so indexers reconstruct
+   every parameter's value history uniformly.
+5. Every EIP-150 63/64 parent-gas precheck reads the current GGP value at
+   call time, never a compiled-in constant (ADR 0010 decision D1.4).
+6. Monitoring must alert when a measured guarded path exceeds two-thirds
+   of its current GGP value or when margin falls below the
+   release-manifest SLO, whichever is stricter.
+7. The remediation order for a guarded path outgrowing its bound is:
+   staged (or emergency raise-only) GGP raise first; a storage-compressed
+   successor implementation second; a new deployment line only when the
+   host contract itself is obsolete. Cap exhaustion is a recoverable
+   operational incident, never a permanent outage.
+8. The mint-path never-brick chain is explicit (ADR 0010 decision D1.5):
+   entropy registration failure cannot permanently brick minting, because
+   `ENTROPY_REGISTRATION_GAS_LIMIT` is raisable without limit above its
+   floor ([EC-REGGAS] in
+   [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md))
+   and the `ENTROPY_COORDINATOR` pointer is replaceable under the Core
+   Satellite Pointer Policy. The same two-step recovery chain — raise the
+   cap, then replace the pointer — applies to every guarded satellite
+   read.
+9. GGP floor/raise/lower/probe behavior is conformance-gated: the matrix
+   governance gates must include a floor-rejection test, a raise-path
+   test, a probe-gated lower test, and change-event assertions for every
+   deployed GGP.
+
+GGP inventory. The model is instantiated by the parameters below; each
+home owns host, genesis value, floor sizing, and probe definition:
+
+| Parameter | Host | Normative home |
+| --- | --- | --- |
+| `ROYALTY_RESOLVER_GAS_LIMIT` | `StreamCore` | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-2981-GAS] |
+| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP] |
+| `ERC_1271_GAS_LIMIT` | split factory parameter store | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-1271] |
+| `ASSET_POLICY_GAS_LIMIT` | split factory parameter store | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-ASSET-POLICY] |
+| `WALLET_DEPOSIT_GAS_LIMIT` | split factory parameter store | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP] |
+| `FLUSH_GAS_FLOOR` | revenue escrow | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP] |
+| `MINT_GATE_GAS_LIMIT` | mint manager | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-GATES] |
+| `TICKET_ERC1271_GAS_LIMIT` | `StreamMintTicketGate` | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-TICKET] |
+| `ARTIST_AUTHORITY_GAS_LIMIT` | mint manager | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CONSENT] |
+| `SALE_ERC1271_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
+| `DELEGATE_REGISTRY_GAS_LIMIT` | delegate gate | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
+| `METADATA_ROUTER_GAS_LIMIT` | `StreamCore` | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ROUTER-GGP] |
+| `ENTROPY_VIEW_GAS_LIMIT` | metadata router | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ENTROPY-READ] |
+| `ENTROPY_REGISTRATION_GAS_LIMIT` | `StreamCore` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-REGGAS] |
+| `ENTROPY_RESULT_PROBE_GAS_LIMIT` | entropy coordinator | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-INCIDENT-ROLE] |
+| `VRF_CALLBACK_GAS_LIMIT` | provider adapters | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) [EP-VRF-CONFIG] |
+| `ARTIST_ERC1271_VERIFY_GAS` | artist registry | [`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-SIGVER] |
+| `FINALITY_COMPONENT_READ_GAS` | finality registry | this document (Artwork Finality Freeze) |
+
+A future guarded path that is not in this inventory must still be a GGP;
+the inventory grows by ordinary spec amendment, and the release manifest is
+the authoritative deployed set.
+
+The repricing-review membership is bidirectional: every hard-fork or
+gas-schedule review (State Export And Archival Operations) remeasures every
+inventory row against its current value and floor, and publishes raise
+recommendations in the compatibility report before user impact, not after.
+
+## Token Identity Model [LTA-IDENTITY]
 
 Protocol correctness must not depend on heuristic token ID range guesses.
 
@@ -457,11 +647,32 @@ Normative v1 rule:
    and finality manifest explicitly preserve a burn path and prove that burning
    cannot change the promised artwork, supply semantics, entropy interpretation,
    or revenue/royalty history. If that explicit policy is absent, burn attempts
-   for frozen collections revert.
+   for frozen collections revert. Collection-scope artwork finality
+   additionally requires the one-way Core burn block (finality
+   requirement 7 below).
+9. Core must emit `TokenCollectionRegistered(tokenId, collectionId,
+   serial)` at every authoritative identity write (ADR 0010 decision
+   D10.1). Sequential global token IDs carry no collection information, so
+   without this event the token-to-collection mapping is unrecoverable
+   from logs by design. The event schema and emission point are owned by
+   the Core mint ABI in
+   [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+   `[MPA-CORE-ABI]`; event-only reconstruction of token identity and
+   collection serial is a normative archival guarantee, listed in the
+   protocol v1 event-reconstruction set and gated by the conformance
+   matrix.
 
 The baseline implementation's collection-range allocator must be replaced by
 the sequential global allocator; the explicit mapping model above is the
 long-term identity surface either way (ADR 0009 decision 1).
+
+Sequential IDs inside one shared contract leave no marketplace-consumable
+collection identity signal; that is the single reserved open question
+(OQ-X8 in [`docs/spec-open-questions.md`](spec-open-questions.md)), and
+the candidate directions live in
+[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+(collection discovery). The onchain identity model above is complete and
+unaffected by how OQ-X8 resolves.
 
 Canonical Core read surface:
 
@@ -543,10 +754,14 @@ Rules:
 6. Open-ended collections must not require final supply knowledge for revenue,
    royalty, metadata, or entropy policy.
 
-## Freeze Model
+## Freeze Model [LTA-FREEZE]
 
 A 50-year contract needs both flexibility and finality. The system should use
-explicit freeze semantics instead of relying on social promises.
+explicit freeze semantics instead of relying on social promises. This
+section is the single normative home of the freeze-loosening rule
+(ADR 0010 decision D3.6); the protocol v1 Assignment And Freeze State rules
+and the revenue-spec freeze mechanics are instantiations that cite it, and
+a statement that conflicts with this section is a defect.
 
 Freeze modes:
 
@@ -559,25 +774,54 @@ GLOBAL      freezes every key in the policy family
 
 Freeze rules:
 
-1. Freezes are one-way unless a separate accepted spec explicitly defines a
-   timelocked unfreeze product; none exists in protocol v1.
+1. Freezes are one-way by default, and there is exactly one loosening
+   rule in the entire spec set. Timelocked loosening exists only for
+   non-permanent freeze states (`EXACT`, `INHERITED`, and non-permanent
+   `GLOBAL`), only for products that explicitly advertised mutable
+   economics or loosening at assignment time, and only through the
+   ADR 0004 `DELAYED_LOOSENING` action class with before/after policy
+   hashes in the execution event. `PERMANENT_FROZEN` states, permanent
+   global freezes, and artwork finality never loosen; their only exit is
+   a successor Core line. Core satellite pointer freezes are permanent by
+   construction and outside this loosening rule entirely ([LTA-POINTERS]
+   rule 7). No other document may define a different loosening path;
+   hidden unfreezes do not exist.
 2. The default protocol posture treats economic and final artwork freezes
-   as irreversible.
-3. Inherited freeze needs O(1) enforcement through counters, dirty bits, or
+   as irreversible; advertising loosening is the explicit exception, never
+   the default.
+3. Because freeze state is bound into the relevant assignment/policy hash,
+   executing a loosening changes that hash and invalidates every signed
+   payload that bound the frozen hash (strict-match sales, consents,
+   tickets). A later re-freeze to byte-identical policy values reproduces
+   the identical hash, and hash-bound payloads validate again by hash
+   equality; specs binding assignment hashes must rely on hash equality,
+   never on freeze-transition history.
+4. Executing any freeze whose class is irreversible (`PERMANENT_FROZEN`,
+   permanent `GLOBAL`, artwork finality) must use the ADR 0004
+   `TERMINAL_FREEZE` class with both a delay and an independent
+   veto/guardian authority ([GOV-WINDOWS]; ADR 0010 decision D8.9). One
+   compromised key plus one timelock window must never be sufficient to
+   permanently freeze economics or artwork; the matrix governance gates
+   verify the veto path.
+5. Inherited freeze needs O(1) enforcement through counters, dirty bits, or
    explicit descendant materialization, not unbounded enumeration.
-4. Freezing collection metadata should also freeze renderer choice, script
+6. Freezing collection metadata should also freeze renderer choice, script
    manifest, dependency manifest, media manifests, and entropy policy if those
    facts define the final artwork.
-5. Freezing revenue policy should be per revenue class, because primary-sale
+7. Freezing revenue policy should be per revenue class, because primary-sale
    economics and royalties are separate promises.
-6. Global freeze should clearly state whether it also blocks future revenue
-   classes, renderer families, provider families, or only existing keys.
+8. Global freeze must state whether it also blocks future revenue
+   classes, renderer families, provider families, or only existing keys;
+   a deployment-wide global revenue freeze also blocks creation of new
+   revenue classes (ADR 0009 decision 8).
 
-## Artwork Finality Freeze
+## Artwork Finality Freeze [LTA-FINALITY]
 
 Final artwork is cross-contract state. A collection cannot be honestly
 described as final if the script is frozen but the renderer, dependency
-manifest, media manifest, or entropy policy is still mutable.
+manifest, media manifest, or entropy policy is still mutable — or if the
+bound artist never signed it, or if the per-token bytes it promises were
+never hash-bound and archived.
 
 Define a single collection finality action hosted by a dedicated
 `StreamArtworkFinalityRegistry` satellite. Core stays small; the finality
@@ -596,12 +840,19 @@ function finalizeCollectionArtwork(
 
 Access control:
 
-1. `finalizeCollectionArtwork` requires `ROLE_COLLECTION_FINALITY_ADMIN`
-   through ADR 0004 governance. Ordinary metadata, revenue, entropy, or
-   collection admins cannot finalize artwork.
-2. `scheduleFinalityRecovery` and `cancelFinalityRecovery` require
+1. `finalizeCollectionArtwork` requires `ROLE_COLLECTION_FINALITY_ADMIN`,
+   an ADR 0004 role reference ([GOV-ROLES]) resolved through the admin
+   registry. Ordinary metadata, revenue, entropy, or collection admins
+   cannot finalize artwork.
+2. Finality is irreversible, so its staged execution uses the ADR 0004
+   `TERMINAL_FREEZE` class: a delay plus an independent veto/guardian
+   authority per [GOV-WINDOWS] (ADR 0010 decision D8.9). The platform role
+   alone is never sufficient for an artist-bound collection: finality
+   requirement 9 below additionally requires the verified artist sanction,
+   so no operator can finalize an artist's series unilaterally.
+3. `scheduleFinalityRecovery` and `cancelFinalityRecovery` require
    `ROLE_COLLECTION_FINALITY_ADMIN`.
-3. `executeFinalityRecovery` is permissionless after the scheduled delay if the
+4. `executeFinalityRecovery` is permissionless after the scheduled delay if the
    recovery record is still `SCHEDULED` and all execution preconditions recheck.
 
 ```solidity
@@ -844,8 +1095,22 @@ SCRIPT_SOURCE
 DEPENDENCY_SOURCE
 MEDIA_MANIFEST
 ENTROPY_COORDINATOR
+ARTIST_SANCTION             artist-bound collections
+PLATFORM_WORKS_DECLARATION  artist-less collections
+REFERENCE_RENDER            script-based (onchain/hybrid) works
 OPTIONAL_SNAPSHOT_ROUTE
 ```
+
+Exactly one of `ARTIST_SANCTION` and `PLATFORM_WORKS_DECLARATION` applies
+to every collection; a finality submission carrying neither is
+nonconformant. Both are served by the artist registry, and their component
+semantics, `dataHash` preimages, and verification reads are owned by
+[`docs/stream-artist-authority.md`](stream-artist-authority.md)
+[AA-SANCTION] (ADR 0010 decision D2.3). `REFERENCE_RENDER` binds the
+hash-committed reference output captures and execution-environment
+manifest whose record schema is owned by
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-FINALITY-INPUTS] (ADR 0010 decision D4.2).
 
 Core facts are not a `FinalityComponentExpectation` entry; they are the
 separately computed `coreCollectionFactsHash` or `scopedCoreFactsHash` input to
@@ -872,8 +1137,25 @@ The finality manifest must bind:
 8. Entropy coordinator address, provider config, provider epoch, collection
    salt commitment, pending/finalized policy, and any allowed post-finality
    entropy state.
-9. Post-freeze exceptions, if any, such as typo-only offchain label metadata or
-   preservation mirrors that cannot change artwork bytes.
+9. The token content root, leaf count, and content-root schema for the
+   finality scope
+   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-CONTENT-ROOT]).
+10. For script-based works: the reference render captures and the
+    execution-environment manifest (renderer build, render context
+    version, browser/engine build, viewport, color space, capture
+    toolchain) bound through the `REFERENCE_RENDER` component
+    (ADR 0010 decision D4.2).
+11. The artist sanction record hash, or the platform-works declaration
+    hash, and — for artist-bound collections — the `ARTIST_INTENT` record
+    hash or its recorded artist-signed waiver
+    ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+    [AA-SANCTION], [AA-INTENT]).
+12. The archive receipts and fixity records satisfying the dual-family
+    archival rule (finality requirement 11) for every offchain
+    render-critical payload.
+13. Post-freeze exceptions, if any, such as typo-only offchain label metadata
+    or preservation mirrors that cannot change artwork bytes.
 
 Finality requirements:
 
@@ -886,25 +1168,93 @@ Finality requirements:
    recovery manifest and preserve the original finality manifest.
 5. Frozen renderers may be deprecated for new collections, but they must keep
    serving historical frozen collections or a hash-bound snapshot route.
-6. Onchain and hybrid collections cannot be finalized unless a snapshot
-   manifest hash covering assembled script bytes, dependency payloads, renderer
-   context, metadata root, media hashes, and entropy policy has already been
-   recorded in the collection metadata contract.
+6. No finality at any scope, in any metadata mode — including `OFFCHAIN` —
+   may execute unless a token content root covering every token in the
+   finality scope has been recorded and its root and leaf count verify at
+   execution
+   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-CONTENT-ROOT]; ADR 0010 decision D4.1). Onchain and hybrid
+   collections additionally cannot be finalized unless a snapshot manifest
+   hash covering assembled script bytes, dependency payloads, renderer
+   context, metadata root, media hashes, and entropy policy has already
+   been recorded in the collection metadata contract. Finality is
+   forbidden while any render-critical payload resolves through mutable
+   transport without a content-hash commitment; a frozen `baseURI` proves
+   which URI was promised, never which artwork.
 7. Collection-level artwork finality that binds `mintedSupply`,
-   `burnedSupply`, and `nextCollectionSerial` requires Core collection status
-   `CLOSED`. For collection-level finality, `CLOSED` must guarantee that
-   `mintedSupply`, `burnedSupply`, and `nextCollectionSerial` are immutable
-   thereafter. `coreCollectionFinalityFacts(collectionId)` must therefore be
-   invariant for a `CLOSED` finalized collection. If Core cannot guarantee
-   this invariant, collection-level finality is forbidden and only scoped
-   token, release, season, or view finality may be used. Collection-scope
-   artwork finality forbids any surviving burn path, because a post-finality
-   burn would mutate `burnedSupply`. Collections that require post-finality
-   burns must use scoped finality only; scoped Core facts intentionally do not
-   bind collection-wide burned supply.
+   `burnedSupply`, and `nextCollectionSerial` requires Core collection
+   status `CLOSED` plus the one-way Core burn block, verified through
+   `collectionBurnsBlocked(collectionId) == true` in the same staged
+   action that records finality. `CLOSED` alone only ends minting and can
+   never guarantee an immutable `burnedSupply`; the burn block is the
+   Core-verifiable no-burn invariant, and its surface
+   (`blockCollectionBurns`, `collectionBurnsBlocked`,
+   `CollectionBurnsBlocked`) is owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-BURN] (ADR 0010 decision D10.5). Burns between `CLOSED` and the
+   burn block are allowed: Core supply facts are read at finality
+   execution time, after the burn block, so late burns are bound into the
+   facts hash, never raced. A collection that needs post-finality burns
+   must never set the burn block and must use scoped token, release,
+   season, or view finality; scoped Core facts intentionally do not bind
+   collection-wide burned supply.
 8. Ongoing open series use token-level, release-level, season-level, or
    view-level snapshot/finality records rather than collection-level finality
    for the still-open parent collection.
+9. For any collection with a bound artist, finality requires the verified
+   `ARTIST_SANCTION` component; for artist-less collections it requires
+   the immutable `PLATFORM_WORKS_DECLARATION` component. The finality
+   registry must compute the sanction subject hash from the Core facts,
+   the non-sanction component list, and the manifest reference, must call
+   `verifySanctionForSubject` on the artist registry, and must revert on
+   mismatch ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-SANCTION]; ADR 0010 decision D2.3). There is no unsigned
+   finalization path for artist-bound collections; absence of sanction is
+   always provable intent through the platform-works declaration, never
+   silence.
+10. Artist-bound collections additionally require an `ARTIST_INTENT`
+    record or its explicit recorded artist-signed waiver before finality
+    ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+    [AA-INTENT];
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+    [CMC-ARTIST-INTENT]; ADR 0010 decision D6.4).
+11. Dual-family archival proof (ADR 0010 decision D4.6). For every
+    hash-committed offchain render-critical payload in the finality scope
+    — media masters, photography masters, large dependency payloads,
+    IIIF manifests, oversized signature bundles — at least two onchain
+    archive receipts on independent storage families, each with a passing
+    fixity record, must be recorded before finality executes. The receipt
+    and fixity record shapes are owned by
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+    (Preservation Receipts, [CMC-FIXITY-PROGRAM]); this requirement makes
+    them a finality precondition, gated by the conformance matrix and
+    checked by finality preview tooling. Hash commitments without enforced
+    replicas verify in 2075 and recover nothing.
+12. Script-based works (`ONCHAIN` and hybrid) require the
+    `REFERENCE_RENDER` component before finality: hash-committed reference
+    output captures for a pinned token sample or all tokens, plus the
+    execution-environment manifest, so a future re-render is verifiable
+    against recorded ground truth (ADR 0010 decision D4.2;
+    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+    [MRR-FINALITY];
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+    [CMC-FINALITY-INPUTS]). The preservation drill's acceptance criterion
+    is byte-hash comparison against these captures.
+13. A renderer version may participate in finality only if it passed the
+    renderer determinism static-analysis gate and its golden input/output
+    vectors are pinned in the release manifest
+    ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+    [MRR-DETERMINISM]; ADR 0010 decision D4.3).
+14. The canonical bytes of the finality manifest (and of every snapshot
+    manifest it binds) must be stored onchain — SSTORE2 blob or
+    event-embedded payload — at or before finality execution, with the
+    pointer evented (ADR 0010 decision D4.5). `manifest.uri` remains
+    display and mirroring data; the onchain bytes are the recoverable
+    truth.
+15. Every executed finality (collection or scoped) must be followed by a
+    state export that includes the new finality record and content root
+    leaves (State Export And Archival Operations); the export-at-finality
+    cadence is a conformance gate (ADR 0010 decision D4.4).
 
 ### Scoped Finality For Open Series
 
@@ -1291,22 +1641,33 @@ function verifyFinalityRange(
 
 `verifyFinality` and `finalityStillMatches` are non-reverting diagnostic reads
 for already-recorded finality. They must use bounded `staticcall` to every
-component, with a deployment-measured `FINALITY_COMPONENT_READ_GAS` and a bounded
-returndata copy for the fixed return struct. If any component read reverts,
+component, with a bounded returndata copy for the fixed return struct.
+`FINALITY_COMPONENT_READ_GAS` is a Governed Gas Parameter hosted by the
+finality registry ([LTA-GGP]): its genesis value is measured at deployment,
+its immutable floor is at least twice the deepest measured all-cold
+component read, and future repricing is remediated by raising the value —
+archival verification never becomes permanently impractical behind a fixed
+cap. If any component read reverts,
 runs out of its gas cap, returns malformed data, has no code, or no longer
 matches the expected code hash, the read returns `currentRouteMatches = false`
 or `false` and still returns the stored finality hash. It must not revert merely
 because a historical component became unhealthy.
 The release manifest must publish both per-component and total worst-case
 diagnostic gas for `MAX_FINALITY_COMPONENTS`. If the full `verifyFinality`
-read becomes impractical under future gas schedules, `verifyFinalityRange`
-remains the archival verification primitive. Implementations should expose a
+read becomes impractical under future gas schedules, the first remediation
+is raising the `FINALITY_COMPONENT_READ_GAS` GGP; `verifyFinalityRange`
+remains the archival verification primitive. Archival tools can also
+always bypass the capped diagnostic entirely: `finalityComponents` returns
+the stored expectations, and a tool may read each component directly with
+caller-chosen gas and compare — the diagnostic is a convenience, never the
+only verification path. Implementations should expose a
 documented diagnostic status such as `VERIFY_RANGE_REQUIRED` before attempting
 component reads when the published full-read budget is not satisfiable, instead
 of allowing callers to hit an unexplained out-of-gas condition.
-Initial planning target is `FINALITY_COMPONENT_READ_GAS = 30_000` and a full
-diagnostic budget under 1,200,000 gas for 32 components, but deployment uses
-measured values plus margin. Operator tooling should prefer
+The genesis planning value is `FINALITY_COMPONENT_READ_GAS = 30_000` and a
+full diagnostic budget under 1,200,000 gas for 32 components; deployment
+uses measured values plus margin, recorded with the floor in the release
+manifest per [LTA-GGP]. Operator tooling should prefer
 `verifyFinalityRange` for routine archival checks once a collection has more
 than eight components.
 
@@ -1316,6 +1677,12 @@ or differs from the submitted expectation. `previewFinality(collectionId,
 components)` or equivalent tooling must expose the same comparisons before a
 state-changing finality transaction is sent, and operator runbooks must
 require a successful preview artifact hash before execution.
+`previewFinality` must also expose the computed sanction subject hash —
+the finality record preimage with `ARTIST_SANCTION` entries excluded from
+the component hash — so the artist signs exactly what will execute
+([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+[AA-SANCTION] requirement 2); any drift between signing and finalization
+changes the subject hash and invalidates the sanction.
 
 ### Finality Recovery
 
@@ -1432,31 +1799,18 @@ Rules:
    record hash, and recovery manifest hash before marking the recovery
    `EXECUTED`.
 
-## Governance Staging
+## Governance Staging [LTA-GOV]
 
-"Use timelock" is not enough. Staged governance actions should share an
-implementable model.
-
-Required staged-operation fields:
-
-```text
-operationType
-target contract
-selector or action family
-scope and scope ID
-old value hash
-new value hash
-nonce
-notBefore timestamp
-expiresAfter timestamp
-actor
-reason hash and reason URI
-manifest hash
-```
-
-The canonical action ID/preimage is defined in `docs/adr/0004-admin-governance.md`.
-Subsystem specs may name domain-specific fields, but they must fold into that
-single staged-operation schema rather than inventing conflicting preimages.
+"Use timelock" is not enough. Staged governance actions share one
+implementable model, and this document does not restate it: the canonical
+action ID and preimage (`STREAM_GOVERNANCE_ACTION_V1`), the atomic batch
+execution rules, and the window floors and unpause classification are
+defined once in
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+[GOV-ACTION-ID], [GOV-BATCH], and [GOV-WINDOWS] (ADR 0010 decisions D3.4,
+D7.1, D7.2). Subsystem specs fold domain-specific fields into
+`scopeHash`/`newValueHash` of that one preimage; defining a second
+staged-operation preimage anywhere is nonconformant.
 
 Rules:
 
@@ -1465,16 +1819,44 @@ Rules:
    freezes, and artwork finality freezes require staged operations.
 2. Staging and execution emit separate events.
 3. Cancellation is evented and must be possible before execution.
-4. Irreversible freezes should have a veto or guardian delay so one compromised
-   key cannot instantly and permanently freeze artwork or economics.
-5. Emergency operations must be narrower than normal governance. They can pause,
-   deprecate, incident-revoke, or move to a pre-approved safe fallback, but they
-   cannot sweep owed funds or change final artwork/economics without the normal
-   recovery process.
-6. The role-admin hierarchy and delay values are deployment parameters and must
-   be recorded in deployment manifests.
+4. Irreversible freezes — `PERMANENT_FROZEN`, permanent global freezes, and
+   artwork finality — must carry both a delay and an independent
+   veto/guardian authority through the ADR 0004 `TERMINAL_FREEZE` class
+   and its `terminalFreezeVetoGuardian`/`vetoTerminalFreeze` surface, so
+   one compromised key plus one timelock window can never instantly and
+   permanently freeze artwork or economics (ADR 0010 decision D8.9). The
+   matrix governance gates verify the veto path, not only the runbook.
+5. Every atomicity obligation stated as "in the same governed execution"
+   anywhere in the spec set — pointer plus cached manifest fields,
+   finality plus collection-scoped pointer freeze, phase policy plus
+   ledger registration — must be satisfied either by one externally
+   callable entrypoint on one target or by one atomic [GOV-BATCH] batch;
+   partial application must never be observable (ADR 0010 decision D7.1).
+6. Windows must be sized for the actual holder. For every role that must
+   act inside a window — canceller, vetoer, pause guardian, unpause admin,
+   emergency admin — the deployment manifest must record the holder's
+   worst-case execution latency (multisig coordination, governor
+   proposal-to-execution time), and the configured window must be at least
+   that latency plus margin, never below the [GOV-WINDOWS] floors
+   (ADR 0010 decision D7.2). A veto window a governor cannot physically
+   meet is a dead control and fails the governance gate.
+7. Governor-held defensive roles should use a guardian-module pattern: the
+   governor pre-authorizes a narrow, bounded, auto-expiring executor for
+   pause/veto/cancel so defense does not require a full proposal cycle.
+   Emergency moves to registry-pre-approved fallback targets must be
+   permissionlessly executable once the triggering incident condition is
+   onchain-observable (for example a target marked `INCIDENT_REVOKED`).
+8. Emergency operations must be narrower than normal governance. They can
+   pause, deprecate, incident-revoke, or move to a pre-approved safe
+   fallback, but they cannot sweep owed funds or change final
+   artwork/economics without the normal recovery process. Unpause is its
+   own no-timelock operational class held by a dedicated role, distinct
+   from pause guardians ([GOV-WINDOWS]).
+9. The role-admin hierarchy and delay values are deployment parameters and
+   must be recorded in deployment manifests, together with the governance
+   action policy catalog required by ADR 0004.
 
-## System Manifest And Successor Declaration
+## System Manifest And Successor Declaration [LTA-MANIFEST]
 
 A future indexer, museum, or marketplace needs one deterministic way to discover
 the active Stream system.
@@ -1494,6 +1876,7 @@ function streamSystemManifest()
         address entropyCoordinator,
         address mintManager,
         address mintLedger,
+        address artistRegistry,
         address streamAdminsOrGovernance,
         address artworkFinalityRegistry,
         address moduleRegistry,
@@ -1509,7 +1892,12 @@ function streamSystemManifest()
 ```
 
 The `streamSystemManifest()` read is hosted on Core and is a required Core
-surface from genesis, not an optional convenience. The release manifest records its selector,
+surface from genesis, not an optional convenience (ADR 0010 decision
+D10.6). It is classified `permanent` in the Core bytecode planning budget:
+it is never a size-pressure relocation candidate, the conformance-matrix
+drop-order list must not contain it, and the Core Minimalism rule applies —
+under bytecode pressure, other logic moves out until this read fits with
+headroom. The release manifest records its selector,
 interface ID if one is assigned, return shape, and gas measurement. The
 manifest should include module addresses, versions, code hashes, registry
 states, pointer freeze states, event catalog hash, compatibility matrix hash,
@@ -1608,12 +1996,27 @@ not infer deprecation from the existence of a successor event alone; they should
 read `coreLifecycleStatus()` or the successor manifest status that the read
 hashes.
 
-## Resolver Safety Invariants
+Successor declarations never re-identify works. The canonical scholarly
+citation of any work — the CAIP-19-shaped `chainId:core:tokenId` form and
+its `@recordState` qualifier — is owned by
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-CITATION] (ADR 0010 decision D6.6); the original triple remains the
+permanent citation forever, successor manifests must carry the
+cross-reference back to it, and the spec bundle republishes the citation
+profile for offline use.
+
+## Resolver Safety Invariants [LTA-RESOLVER]
 
 Core read paths that call satellites must be bounded and boring. In particular,
 the royalty resolver's `royaltyReceiverAndBps` path must be storage reads and
 arithmetic only. It must not make external calls, deploy wallets, read ERC-20
 balances, call receiver hooks, or depend on mutable marketplace context.
+Every gas bound on these read paths is a Governed Gas Parameter
+([LTA-GGP]); the royalty-read instantiation is owned by
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+[RSR-2981-GAS] and the router-read instantiation by
+[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+[MRR-ROUTER-GGP].
 
 Deployment validation must include malicious resolvers that consume all gas,
 return malformed data, return excess data, attempt external calls, or recurse
@@ -1627,10 +2030,14 @@ combined marketplace read that invokes both the royalty resolver and metadata
 router within one shared `staticcall` frame or derives one gas cap from the
 other.
 
-## State Export And Archival Operations
+## State Export And Archival Operations [LTA-EXPORT]
 
 A 50-year system needs verifiable state export, not only live RPC reads.
-Deployment and successor manifests should define a `StateExport` profile:
+The state export is the designated bridge across EIP-4444-style history
+expiry and the input to successor declarations, so it must attest the
+artwork and metadata knowledge layer with the same rigor as the economic
+layer (ADR 0010 decision D4.4). Deployment and successor manifests define
+the `StateExport` profile:
 
 ```text
 STATE_EXPORT_V1
@@ -1645,15 +2052,42 @@ entropy seed/status root
 revenue assignment root
 split profile root
 finality record root
+collection record-chain root   metadata, attestation, preservation,
+                               owner-record, and artist-registry lanes
+artwork manifest root          script/dependency/media manifests, token
+                               content roots, snapshots, reference renders
+lock root                      one-way metadata lock states
 event history snapshot hash
 export manifest URI/hash
 ```
 
 The export may be produced offchain by indexers, but the format must be
 canonical and independently reproducible from chain data. Successor
-declarations should reference the latest state export hash and, for chains
-hosting onchain art, a content-addressed mirror of every finalized assembled
-artwork snapshot.
+declarations should reference the latest state export hash. Every export —
+not only successor manifests — must reference a content-addressed mirror
+of every finalized assembled artwork snapshot for chains hosting onchain
+art.
+
+Export cadence requirements:
+
+1. A genesis state export must be produced and published before public
+   sale; the conformance-matrix Operations gate verifies it.
+2. A state export must be produced after every executed finality
+   (collection or scoped), including the new finality record, content
+   root, and record-chain leaves (finality requirement 15).
+3. Ongoing exports follow a published cadence recorded in the
+   hash-committed operations runbook; the cadence, the responsible agent,
+   and the alerting rule for a missed export are deployment-gated
+   operational manifest content, not informal practice (ADR 0010 decision
+   D4.4).
+4. Completeness of any replica is provable: every record lane carries the
+   O(1) rolling `recordChainHash` accumulator owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-RECORD-CHAIN], exports carry per-lane `(chainHash, recordCount)`
+   leaves, and a recovered event set is complete exactly when replay
+   reproduces the stored accumulator. Latest-hash reads alone cannot prove
+   a recovered history is complete; the accumulator closes that gap even
+   under full log expiry with operators gone.
 
 Discoverable export publication surface:
 
@@ -1862,28 +2296,92 @@ bytes32 recoveryLeaf = keccak256(abi.encode(
     bytes32(recoveryManifestContentHash),
     uint64(executeAfter)
 ));
+
+bytes32 recordChainLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_RECORD_CHAIN_LEAF_V1,
+    address(laneHost),
+    uint256(scopeKey),
+    bytes32(recordType),
+    bytes32(chainHash),
+    uint64(recordCount)
+));
+
+bytes32 artworkManifestLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1,
+    uint256(collectionId),
+    bytes32(manifestType),
+    bytes32(subjectId),
+    bytes32(contentHash),
+    bytes32(schemaId),
+    uint64(itemCount)
+));
+
+bytes32 lockLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_LOCK_LEAF_V1,
+    uint256(collectionId),
+    bytes32(lockId),
+    bool(locked)
+));
 ```
+
+Record-chain leaves cover every accumulator lane in the deployment:
+collection metadata records, attestations, preservation records, fixity
+cycles, owner records, and artist-registry records. `laneHost` is the
+lane-hosting contract, `scopeKey` and `recordType` follow the accumulator
+preimage of
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-RECORD-CHAIN], and `(chainHash, recordCount)` are the stored
+accumulator values at the export block. Artwork manifest leaves cover the
+per-collection knowledge layer: `manifestType` is a pinned `bytes32`
+vocabulary of at least `SCRIPT_MANIFEST`, `DEPENDENCY_MANIFEST`,
+`MEDIA_MANIFEST`, `CONTENT_ROOT`, `SNAPSHOT_MANIFEST`,
+`REFERENCE_RENDER`, and `EXECUTION_ENVIRONMENT`; `subjectId` uses the
+pinned subject derivations of [CMC-SUBJECT-ID] where the manifest is
+narrower than the collection; `itemCount` carries the leaf count for
+content roots and zero where inapplicable. Lock leaves export every
+one-way lock state of the metadata lock model.
 
 Leaves are sorted by `(tokenId)` for the token-to-collection root and by
 `(collectionId, collectionSerial, tokenId)` for the collection-serial root.
 Entropy leaves are sorted by `(tokenId)`. Finality leaves are sorted by
 `(scopeType, collectionId, tokenId, scopeId, finalityRecordHash)`.
+Record-chain leaves are sorted by `(laneHost, scopeKey, recordType)`;
+artwork manifest leaves by `(collectionId, manifestType, subjectId,
+contentHash)`; lock leaves by `(collectionId, lockId)`.
 Each additional root defines a deterministic sort key in the export manifest;
 the field lists above are minimum v1 leaves and may be extended only by a new
 leaf version.
 
-Render-critical and preservation-critical payloads should be mirrored across at
-least two independent storage families where practical, for example IPFS plus
-Arweave, Filecoin, institutional archives, or another content-addressed medium.
-The manifest records storage locations, fixity hashes, last check time, and the
-agent that performed the check. HTTPS-only render-critical payloads are allowed
-only when the collection intentionally accepts service-backed mutability.
+Dual-family archival rule [LTA-ARCHIVE] (ADR 0010 decision D4.6):
 
-Every Ethereum hard fork, L2 migration, or material gas-schedule change should
-trigger a protocol-parameter review. The review remeasures Core bytecode,
+Every render-critical or preservation-critical offchain payload must be
+mirrored across at least two independent storage families — for example
+IPFS plus Arweave, Filecoin, an institutional archive, or another
+content-addressed medium — with an onchain archive receipt and a passing
+fixity record per family. For payloads referenced by any finality scope, those receipts and
+fixity records must exist before finality executes (finality
+requirement 11); for other payloads they must exist before the payload is
+declared preservation-covered. The manifest records storage locations,
+fixity hashes, last check time, and the agent that performed the check.
+Ongoing verification is the mandated fixity program — annual full sweep,
+quarterly sampling, repair-from-mirror, supersession lineage — whose
+normative home is
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-FIXITY-PROGRAM]; this document consumes its cycle records in
+monitoring and the Operations gate. HTTPS-only render-critical payloads
+are allowed only when the collection intentionally accepts service-backed
+mutability, and such collections can never satisfy the finality
+preconditions above.
+
+Every Ethereum hard fork, L2 migration, or material gas-schedule change must
+trigger a protocol-parameter review — the repricing review checklist that
+every Governed Gas Parameter belongs to ([LTA-GGP]). The review remeasures
+Core bytecode,
 resolver gas, `SLOAD`/`STATICCALL` assumptions, split-wallet release gas,
-metadata rendering limits, and any SSTORE2 or chunk-read assumptions, then
-publishes a compatibility report hash. Periodic reviews should also sample
+metadata rendering limits, and any SSTORE2 or chunk-read assumptions,
+remeasures every GGP inventory row against its current value and floor,
+and publishes a compatibility report hash with raise recommendations
+before user impact. Periodic reviews should also sample
 marketplace, wallet, indexer, archive-node, and metadata-cache behavior for
 ERC-2981, ERC-4906, tokenURI fallback handling, contract metadata discovery,
 and frozen/recovered collection display.
@@ -1892,26 +2390,57 @@ semantics materially change, the review must re-evaluate entropy
 `requestTimeoutBlocks`, governance delay UX, stale request windows, and any
 block-number-based archival/export policy.
 
-Stream should maintain a minimum archival reconstruction client outside the
-production frontend. From genesis it must be able to replay the event catalog,
-reconstruct token-to-collection mappings, split profiles, escrow balances,
-entropy status/seeds, collection metadata snapshots, and finality records from
-archived chain data and content-addressed manifests. Its source archive,
-reproducible build instructions, and test-vector outputs should be mirrored
-with the deployment manifest. Operations should schedule periodic preservation
-drills that independently rebuild these roots, render at least one finalized
-onchain/hybrid collection from archived payloads, and publish the drill report
-hash.
-Those drills must also prove that the reconstruction client still builds from
-archived source, pinned dependencies, and archived build instructions on
-contemporary tooling or in a preserved build container. If it does not, the
-replacement client and migration notes become preservation artifacts with their
-own URI/hash.
+Reconstruction client requirements [LTA-RECON] (ADR 0010 decision D4.8):
 
-Long-term operations also need a funding posture. The deployment runbook should
-name the treasury or funding mechanism for keepers, entropy request payments,
-monitoring, storage pinning/mirroring, domain/ENS renewal, and preservation
-drills, and should document what degrades if funding disappears.
+1. Stream must maintain a minimum archival reconstruction client outside
+   the production frontend. From genesis it must replay the event catalog
+   and reconstruct token identity and collection serials (from
+   `TokenCollectionRegistered` and the mint/burn events), split profiles,
+   escrow balances, entropy status/seeds, collection metadata snapshots,
+   record-chain lanes, and finality records from archived chain data and
+   content-addressed manifests, reproducing the state-export roots.
+2. The client is conformance-gated, not aspirational: the matrix
+   Operations gate must verify that the client exists at genesis, that its
+   source-archive hash equals `streamSystemManifest()`'s
+   `reconstructionClientHash`, that its replay test vectors pass in CI,
+   and that its reproducible-build instructions have been executed and
+   verified. A deployment cannot pass its gates while the client is
+   missing — an ungated must here would be exactly the artwork-critical
+   social promise this framework exists to eliminate.
+3. Its source archive, reproducible build instructions, and test-vector
+   outputs must be mirrored with the deployment manifest under the
+   dual-family archival rule [LTA-ARCHIVE].
+4. Operations must schedule periodic preservation drills — cadence
+   recorded in the hash-committed operations runbook — that independently
+   rebuild the export roots, re-render at least one finalized
+   onchain/hybrid collection from archived payloads, compare the re-render
+   byte-hashes against the `REFERENCE_RENDER` captures (finality
+   requirement 12), and publish the drill report hash.
+5. Those drills must also prove that the reconstruction client still
+   builds from archived source, pinned dependencies, and archived build
+   instructions on contemporary tooling or in a preserved build container.
+   If it does not, the replacement client and migration notes become
+   preservation artifacts with their own URI/hash.
+
+Unfunded storage is the most common real-world cause of NFT permanence
+failure, so the funding posture is a checked deployment artifact, not a
+runbook note. Funding requirements [LTA-FUNDING] (ADR 0010 decision D4.8):
+
+1. Genesis requires a published funding/endowment manifest hashed into the
+   release manifest: funding source and parties, coverage horizon or term,
+   covered payload and service classes (keepers, entropy request payments,
+   monitoring, storage pinning/mirroring, domain/ENS renewal, fixity
+   cycles, preservation drills), and exhaustion alarm thresholds with
+   alert routing. The conformance-matrix Operations gate fails if the
+   manifest is missing or stale.
+2. The manifest must document what degrades, in what order, if funding
+   disappears — honest degradation is part of the permanence claim.
+3. A protocol-owned archival endowment — for example a revenue-class
+   split entry labeled as a preservation fund feeding pinning contracts —
+   is an explicitly allowed extension under a separately accepted module
+   spec; genesis requires the funded arrangement statement, not the
+   onchain endowment.
+
 The specs, ADRs, event catalogs, release manifests, and reconstruction-client
 source archives are themselves preservation objects. Each deployment and material
 upgrade should publish a content-addressed spec bundle hash in the deployment
@@ -1924,7 +2453,9 @@ guarantees. If EIP-4444-style history expiry, log pruning, state expiry, or RPC
 retention changes make ordinary `eth_getLogs`/archive reads incomplete, Stream
 relies on content-addressed state exports, mirrored event-history snapshots,
 archival reconstruction clients, and independent archive nodes named in the
-operations runbook.
+operations runbook — with the onchain record-chain accumulators keeping
+lane completeness provable from state alone, so a degraded archive can be
+audited rather than trusted ([LTA-EXPORT] requirement 4).
 
 For literally unbounded open series, live per-token mappings are permanent
 state growth. Protocol v1 keeps explicit `tokenCollectionIdentity` storage
@@ -1948,8 +2479,14 @@ Monitoring operations should define alert routing and escalation for:
 5. unsupported asset receipt;
 6. finality mismatch;
 7. governance action scheduled/executed/cancelled;
-8. storage fixity failure;
-9. marketplace cache divergence.
+8. fixity cycle results — `FIXITY_CYCLE_COMPLETED` missing past its
+   published cadence, and every `FIXITY_FAILURE` record, per the fixity
+   program in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-FIXITY-PROGRAM];
+9. Governed Gas Parameter margin breaches ([LTA-GGP] requirement 6);
+10. missed state exports past the published cadence ([LTA-EXPORT]);
+11. marketplace cache divergence.
 
 If immutable Core is found to have a critical bug, the default incident posture
 is communication, pause/tightening where available, state export, and successor
@@ -1975,7 +2512,7 @@ changes, metadata mutations, provider recovery, registry replacement, and
 economics/artwork-affecting recovery halt unless fully precommitted before
 quorum loss.
 
-## Hash And Manifest Discipline
+## Hash And Manifest Discipline [LTA-HASH]
 
 Every durable identity must be domain-separated and versioned.
 
@@ -2029,12 +2566,36 @@ Protocol v1 does not include a generic `OTHER` hash bucket. New hash algorithms
 must be assigned explicit IDs through the append-only hash/canonicalization
 registry and documented in a release manifest or successor schema.
 
-The hash, canonicalization, schema, and enum ID spaces must have a governing
-surface from genesis. The minimum acceptable genesis posture is a manifest-pinned
-numeric allocation file whose hash is included in `streamSystemManifest()` and
-the release manifest. A stronger posture is an append-only registry satellite
-with explicit IDs, URI/hash, status, and supersession links. Either way, new
-IDs are additions; old IDs are never reinterpreted.
+Every verification path bottoms out in the interpretation-critical
+catalogs — without the numeric ID catalog an archivist cannot decode
+stored enum values, without the event catalog logs are uninterpretable,
+without canonicalization profiles no manifest hash is checkable. For tens
+of kilobytes of one-time storage the protocol does not leave its own
+Rosetta stone to social mirroring. Onchain catalog requirements
+[LTA-CATALOGS] (ADR 0010 decision D4.5):
+
+1. The hash, canonicalization, schema, and enum ID spaces are governed by
+   the append-only registry satellite from genesis — explicit IDs,
+   URI/hash, status, and supersession links; the satellite architecture is
+   owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-SCHEMA-REGISTRY]. A manifest-pinned allocation file alone is not a
+   conformant genesis posture.
+2. The genesis catalog payloads — event catalog, numeric ID catalog,
+   schema catalog, canonicalization catalog, and the fallback-JSON schema
+   — must be stored as onchain bytes (SSTORE2 blobs or event-embedded
+   payloads) referenced from the registry and from
+   `streamSystemManifest()`; hash-plus-URI alone is nonconformant for
+   these catalogs. Catalog updates replace the referenced bytes through
+   staged governance and never reinterpret old IDs.
+3. The canonical bytes of every finality manifest and snapshot manifest
+   are stored onchain at publication (finality requirement 14; snapshot
+   rule in the collection metadata spec).
+4. The spec bundle and other large preservation objects remain
+   hash-committed and mirrored under the dual-family archival rule
+   [LTA-ARCHIVE]; onchain bytes are mandated for the compact
+   interpretation-critical catalogs above, not for bulk archives.
+5. New IDs are additions; old IDs are never reinterpreted.
 
 Manifest canonicalization:
 
@@ -2231,6 +2792,11 @@ Rules:
 9. Metadata exposes pending, finalized, stale, failed, and recovery states.
 10. Future entropy systems are added as adapters after review, not by changing
     Core.
+11. Entropy registration failure can never permanently brick minting: the
+    registration gas bound is a raisable Governed Gas Parameter and the
+    coordinator pointer is replaceable ([LTA-GGP] requirement 8;
+    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+    [EC-REGGAS]; ADR 0010 decision D1.5).
 
 For v1 high-value collections, fresh entropy recovery after an accepted provider
 request should be disabled unless a complete recovery policy is configured and
@@ -2262,7 +2828,12 @@ Rules:
 
 1. `tokenURI()` remains marketplace-friendly.
 2. Rich protocol facts live under namespaced `properties`.
-3. Renderer output should be deterministic for a fixed config and token state.
+3. Renderer output must be deterministic: a pure function of contract
+   state and the render request, enforced by the opcode-ban
+   static-analysis gate and pinned golden output vectors whose normative
+   home is
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   [MRR-DETERMINISM] (ADR 0010 decision D4.3).
 4. Alternate views should not destabilize the default `tokenURI()` surface.
 5. Metadata refresh events should originate from Core when marketplaces are
    expected to observe them.
@@ -2308,6 +2879,28 @@ advertisement that cannot be safely added to the existing Core, adoption should
 use a successor Core declaration rather than pretending a satellite can change
 old Core's ERC-165 truth.
 
+Transfer openness is a Permanent Core invariant with permanent
+consequences. Core has no transfer hooks and never conditions transfers,
+so every transfer-conditioned mechanic is precluded on this Core line, not
+merely unimplemented (ADR 0010 decision D9.2). Preclusions
+[LTA-STANDARDS]:
+
+1. Non-transferable and lockable tokens — soulbound editions, ERC-5192
+   locks, exhibition mementos, artist proofs bound to a wallet — cannot
+   exist on this Core line.
+2. Rental and user-role standards (ERC-4907 and successors) that require
+   transfer- or time-conditioned ownership semantics cannot exist on this
+   Core line.
+3. Transfer-restricting royalty enforcement is permanently impossible on
+   this Core line; disclosure-only ERC-2981 is the permanent posture.
+4. Adopting any of these requires a declared successor Core line.
+   Exhibition, attendance, and membership artifacts should instead be
+   modeled as separate contracts or as attestation records against the
+   existing tokens.
+
+These preclusions are mirrored in the protocol v1 exclusions list so
+absence is provably intentional.
+
 ## Governance And Operations
 
 Governance should be boring, evented, and recoverable.
@@ -2347,27 +2940,49 @@ function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
 
 The probe is not used by marketplaces. It exists so operators can emit and
 monitor incident evidence that `royaltyInfo()` itself cannot emit because it is
-`view`.
-
-```solidity
-event RoyaltyInfoProbed(
-    uint16 schemaVersion,
-    uint256 indexed tokenId,
-    address indexed receiver,
-    uint256 royaltyAmount,
-    bool resolverCallSucceeded,
-    bytes32 assignmentHash,
-    bytes32 failureReason
-);
-```
+`view`. The probe's `RoyaltyInfoProbed` event schema is defined once in
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+([RSR-2981-GAS]); this document does not restate it.
 
 Diagnostics are operational tools, not permanent marketplace surfaces. If a
 diagnostic such as `probeRoyaltyInfo`, full `verifyFinality`, or a catalog
-consistency read becomes impractical under future gas schedules, the successor
-manifest or release manifest must deprecate that diagnostic, point to a range
+consistency read becomes impractical under future gas schedules, the first
+remediation is raising the relevant Governed Gas Parameter ([LTA-GGP]);
+only if the diagnostic remains impractical at any justifiable value does
+the successor
+manifest or release manifest deprecate that diagnostic, point to a range
 or offchain-verifiable replacement, and keep old selectors documented for
 historical deployments. Production `royaltyInfo()` and `tokenURI()` behavior
 must not depend on deprecated diagnostics.
+
+### Institutional Custody Guidance [LTA-CUSTODY]
+
+Owner-side custody is outside protocol control, but a spec this candid
+about protocol degradation must be equally candid about the owner side
+(ADR 0010 decision D6.7). This guidance is Operational.
+
+1. Token custody is bearer custody. Loss of the owner key is irrecoverable
+   loss of the asset: no protocol role, artist, or governance process can
+   reassign ownership, and no successor declaration changes old-Core
+   ownership. Acquisition committees should treat owner-key loss as a
+   named total-loss mode in their risk memo.
+2. Institutions holding for decades should hold through a Safe or
+   equivalent contract wallet with a board-governed signer policy,
+   documented signer succession, periodic signer-liveness rehearsal, and a
+   qualified-custodian or estate fallback — the same posture this spec
+   demands of protocol roles.
+3. Custody transitions (accession, internal signer rotation, loans,
+   deaccession) can be documented onchain without platform involvement
+   through the owner-writable registrar records of
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-OWNER-RECORDS]; the object dossier export and citation profile
+   give registrars a stable reference frame.
+4. Read-only museum mode (State Export And Archival Operations) is the
+   protocol-side guarantee that institutional reads — ownership,
+   provenance, finality verification, archived reconstruction — survive
+   total governance loss; institutional custody planning should assume no
+   operator will exist and verify that the institution's own tooling can
+   consume state exports and the reconstruction client.
 
 ## Observability
 
@@ -2431,6 +3046,52 @@ Recovery principles:
 7. Publish migration/reroute specs before moving stranded funds or changing
    frozen artwork/economics.
 
+## Umbrella Domain Constants [LTA-DOMAINS]
+
+This document is the normative home of the finality and state-export hash
+domains. Every constant is Permanent: recorded here with its string
+preimage and ordered inputs, mirrored as checker-verified rows in the
+protocol v1 domain-constants table, and recomputed by CI, which fails on
+drift between constants, homes, mirrors, and release artifacts. The
+ordered `abi.encode` input lists are pinned by the code blocks in Artwork
+Finality Freeze and State Export And Archival Operations; the table names
+them without restating.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `STREAM_FINALITY_COMPONENTS_V1` | `6529STREAM_FINALITY_COMPONENTS_V1` | 0xf57efb77611ea13bd3a60968beee86ec330159736aa5d42707a9c0676dbc8898 | finality registry | `1` | domain; sorted `FinalityComponentExpectation[]` (Artwork Finality Freeze) |
+| `STREAM_CORE_COLLECTION_FACTS_V1` | `6529STREAM_CORE_COLLECTION_FACTS_V1` | 0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764 | finality registry | `1` | domain; chainid; core; collectionId; `CoreCollectionFinalityFacts` fields (Artwork Finality Freeze) |
+| `STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | `6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | 0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26 | `StreamCore` | `1` | domain; chainid; core; collectionId (Artwork Finality Freeze) |
+| `STREAM_FINALITY_V1` | `6529STREAM_FINALITY_V1` | 0x569714204c899f0d33a0f98879ce85708169a5f1e11f763f2897f64e5d6c8493 | finality registry | `1` | domain; chainid; core; collectionId; coreCollectionFactsHash; componentsHash; manifest uriHash/contentHash/schemaId/canonicalizationHash |
+| `STREAM_FINALITY_RECOVERY_V1` | `6529STREAM_FINALITY_RECOVERY_V1` | 0x521e8df5a00a793a5b47409e1e7711b4b8857ba9e6c833fe59a48dfa865b19ac | finality registry | `1` | domain; chainid; finalityRegistry; collectionId; expectedOldFinalityRecordHash; recoveryManifest.contentHash; recoveryRouteHash; executeAfter; artworkBytesChanged; reasonHash |
+| `STREAM_SCOPED_FINALITY_V1` | `6529STREAM_SCOPED_FINALITY_V1` | 0x5b56313142e6381659f9d10163ccfa5ea22cb437617c8e69b37c31ecda6f3a50 | finality registry | `1` | domain; chainid; core; scopeType; collectionId; tokenId; scopeId; scopedCoreFactsHash; componentsHash; manifest uriHash/contentHash/schemaId/canonicalizationHash |
+| `STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | `6529STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | 0x5c6390c543248a4d63630061d67c3d2245df223d9ac586deccabf40620b43f6e | finality registry | `1` | domain; chainid; core; scope fields; `ScopedCoreFinalityFacts` fields (Scoped Finality For Open Series) |
+| `STREAM_SCOPED_FINALITY_RECOVERY_V1` | `6529STREAM_SCOPED_FINALITY_RECOVERY_V1` | 0x7111cd2afae740dbddcd349ab0b8b9269b6a81c331cef7ca8d542e87308bc54a | finality registry | `1` | domain; chainid; finalityRegistry; scope fields; expectedOldFinalityRecordHash; recoveryManifest.contentHash; recoveryRouteHash; executeAfter; artworkBytesChanged; reasonHash |
+| `STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1` | `6529STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1` | 0x584f047f88b167145486935a02a69e85bf86fdaa6200d84996b4b03124922beb | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1` | `6529STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1` | 0x8868a51be1bdbae4624466a9fa15a9c14b03dd877a0d62e9fca92a2651a8ee2d | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_ENTROPY_LEAF_V1` | `6529STREAM_EXPORT_ENTROPY_LEAF_V1` | 0x0160b86ab41aa57205650b067fbed4e57e8e346b664d01f1a4595213af403c73 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_FINALITY_LEAF_V1` | `6529STREAM_EXPORT_FINALITY_LEAF_V1` | 0xe1aa59240cbf23c892175f79140c47438ec2db63500bb3c43dc2cddf36ed92c7 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_SPLIT_PROFILE_LEAF_V1` | `6529STREAM_EXPORT_SPLIT_PROFILE_LEAF_V1` | 0xa105567cd79aeddb669b7f22370bd8e375e8b74c131b5305b8fd5a0e614505e4 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_SPLIT_ENTRY_LEAF_V1` | `6529STREAM_EXPORT_SPLIT_ENTRY_LEAF_V1` | 0x63ac827ee22adfd396ab63e6c8e4a3bca7e4a645c6141abeb1bd36805095cc42 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_REVENUE_ASSIGNMENT_LEAF_V1` | `6529STREAM_EXPORT_REVENUE_ASSIGNMENT_LEAF_V1` | 0x063c43d4dce1eebd74b009c22e301aa2d76fdc560665c8bbc24daa19a801a2ad | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_ESCROW_CREDIT_LEAF_V1` | `6529STREAM_EXPORT_ESCROW_CREDIT_LEAF_V1` | 0x943bff9afcadeec1628590d3b88f68d5aea504c1ba5256b4333f3a7dd1db7af2 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_MINT_COUNTER_LEAF_V1` | `6529STREAM_EXPORT_MINT_COUNTER_LEAF_V1` | 0xda394087539bfc7283e4d78855493bf4c1ef26a24f2074a930b51aff26cf2bf9 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_AUTHORIZATION_LEAF_V1` | `6529STREAM_EXPORT_AUTHORIZATION_LEAF_V1` | 0x8feca7dbfefa49f93018dd146f49b466753e8d55d2cfe1ddd455b87875411edf | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_REGISTRY_RECORD_LEAF_V1` | `6529STREAM_EXPORT_REGISTRY_RECORD_LEAF_V1` | 0x65511c163de32ba01544ff43eb9f587576c93f3682cf25798d4b19155ad5a338 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_CATALOG_LEAF_V1` | `6529STREAM_EXPORT_CATALOG_LEAF_V1` | 0xbfc5b9ed3abb2d26d65422468bd303f67c4ad17adc9a4cc71fbaefd97d880d17 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_RECOVERY_LEAF_V1` | `6529STREAM_EXPORT_RECOVERY_LEAF_V1` | 0xb325dd3c363b686878389fab871ec0303eb41e984e1856d9632cf3ff0b312160 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_RECORD_CHAIN_LEAF_V1` | `6529STREAM_EXPORT_RECORD_CHAIN_LEAF_V1` | 0xc0ec93115d32e7633c13d7414f7f77c5a20edf8a4c512bfbb1a0b8dbeaa6ace0 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; lane values per [CMC-RECORD-CHAIN] |
+| `STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1` | `6529STREAM_EXPORT_ARTWORK_MANIFEST_LEAF_V1` | 0x75a6b72b058ed053bc42e32ee8ed32283b8f973f455854e870e1c1a3727ea984 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_LOCK_LEAF_V1` | `6529STREAM_EXPORT_LOCK_LEAF_V1` | 0x2439a59cd6c4a767eefacdb9d4397317f88ac30c996c1c5dae92821f7159536b | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `GGP_FINALITY_COMPONENT_READ_GAS_ID` | `6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS` | 0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221 | finality registry | `1` | `keccak256` of the string preimage; no `abi.encode` inputs ([LTA-GGP]) |
+
+Component-type and manifest-type vocabularies (`keccak256` of the ASCII
+name) are pinned by their owning sections: finality component types in
+Artwork Finality Freeze (with `ARTIST_SANCTION` and
+`PLATFORM_WORKS_DECLARATION` owned by
+[`docs/stream-artist-authority.md`](stream-artist-authority.md)
+[AA-DOMAINS]) and export manifest types in [LTA-EXPORT].
+
 ## Release Gates
 
 No subsystem is deployable until these gates pass.
@@ -2472,6 +3133,13 @@ Metadata gates:
    jointly locked.
 8. onchain collection finality is blocked unless the snapshot manifest hash has
    been recorded.
+9. finality is blocked in every mode without a recorded token content root,
+   the required artist sanction or platform-works declaration, the artist
+   intent record or waiver, dual-family archive receipts with passing
+   fixity, and — for script-based works — the reference render component
+   ([LTA-FINALITY] requirements 6, 9–12).
+10. renderer determinism static-analysis gate and golden output vectors
+    ([MRR-DETERMINISM]).
 
 Entropy gates:
 
@@ -2491,22 +3159,62 @@ Governance gates:
 4. event and view reconstruction tests.
 5. genesis role assignment proves no single EOA can execute material actions;
 6. deployment manifest includes event catalog hash, ABI checksums, module
-   manifest hashes, bytecode sizes, and governance delay configuration.
+   manifest hashes, bytecode sizes, and governance delay configuration;
+7. GGP floor-rejection, raise-path, probe-gated-lower, and change-event
+   tests for every deployed parameter ([LTA-GGP] requirement 9);
+8. terminal-freeze veto path exercised, and window widths verified against
+   the recorded worst-case holder latencies ([LTA-GOV] rules 4 and 6);
+9. batch-action atomicity tests for every cross-contract "same governed
+   execution" obligation ([LTA-GOV] rule 5).
 
-## Accepted Tradeoffs
+Operations gates:
+
+1. genesis state export produced and reproduced by an independent indexer;
+2. export cadence, fixity program manifest, and funding/endowment manifest
+   published and hashed ([LTA-EXPORT], [LTA-ARCHIVE], [LTA-FUNDING]);
+3. reconstruction client build, replay vectors, and manifest hash match
+   ([LTA-RECON]);
+4. degraded-admin and museum-mode drill artifacts.
+
+## Accepted Tradeoffs [LTA-TRADEOFFS]
 
 1. Satellite contracts add integration complexity, but protect Core from
    decades of changing policy.
-2. Pull payments require recipients to claim, but protect settlement from
+2. `ERC721Enumerable` is a permanent per-transfer gas tax, accepted with
+   open eyes (ADR 0010 decision D9.3). The enumerable bookkeeping adds
+   roughly 45,000–50,000 gas to an all-cold mint and roughly
+   60,000–70,000 gas to an all-cold wallet-to-wallet transfer versus a
+   plain ERC-721 — several cold `SSTORE`s for the owner-index and
+   global-index structures on every ownership change, paid by collectors
+   on every marketplace sale for the life of the system. Modern flagship
+   contracts drop enumerable and lean on indexers; Stream keeps it because
+   onchain enumeration without indexers is load-bearing for read-only
+   museum mode and degraded-governance reconstruction, and state-export
+   roots complement but cannot serve live wallet reads. The release
+   manifest must publish the measured per-mint and per-transfer overhead
+   for the deployed bytecode as a gate artifact so the cost stays
+   quantified, not folkloric. Dropping enumerable is a successor-line
+   decision.
+3. Pull payments require recipients to claim, but protect settlement from
    recipient behavior.
-3. Core-native ERC-2981 costs bytecode, but is necessary for marketplace
+4. Core-native ERC-2981 costs bytecode, but is necessary for marketplace
    compatibility and should be protected by moving other logic out.
-4. Freeze controls reduce future flexibility, but create credible permanence
+5. Freeze controls reduce future flexibility, but create credible permanence
    when used.
-5. Hash commitments make offchain artifacts verifiable, but do not guarantee
+6. Hash commitments make offchain artifacts verifiable, but do not guarantee
    every future client will fetch or display them.
-6. Provider-adapter optionality adds operational work, but avoids betting the
+7. Provider-adapter optionality adds operational work, but avoids betting the
    entire protocol life on one randomness vendor.
+8. Governed Gas Parameters reintroduce a governance dependency into read
+   paths that could have been fully static, accepted for survivability:
+   immutable floors, staged delays, and probes bound the risk, and an
+   immutable cap that strands a frozen collection after a repricing is the
+   worse permanence failure (ADR 0010 decision D1).
+9. Transfer openness permanently precludes soulbound tokens, rental
+   standards, and every transfer-conditioned mechanic on this Core line
+   ([LTA-STANDARDS]); the open-transfer guarantee to collectors and
+   marketplaces is judged worth the loss, and the exclusion is recorded so
+   absence is provably intentional.
 
 ## Recommended Genesis Implementation Order
 

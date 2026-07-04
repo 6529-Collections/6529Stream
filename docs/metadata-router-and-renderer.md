@@ -4,7 +4,10 @@ Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); its formerly open decisions are
 resolved by [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md)
 and recorded in the `Resolved` section of
-[`docs/spec-open-questions.md`](spec-open-questions.md).
+[`docs/spec-open-questions.md`](spec-open-questions.md). It is amended by
+[ADR 0010](adr/0010-world-class-spec-pass.md): governed gas parameters,
+renderer determinism, per-token content binding, onchain scale and the
+full-view route, refresh-emitter authority, and attribution disclosure.
 
 This document specifies how Stream metadata rendering and script assembly move
 out of `StreamCore` into dedicated metadata contracts. 6529Stream is permanent
@@ -83,9 +86,11 @@ research pass in `docs/metadata-renderer-research.md`:
 6. Make renderer, script, dependency, media, and schema manifests first-class,
    with URI and hash commitments for every offchain or externally resolved
    payload.
-7. Design storage as plural from day one: genesis can use chunked strings,
-   while the manifest interfaces can later point to SSTORE2, EthFS, Arweave,
-   IPFS, dependency registries, or other durable stores without touching Core.
+7. Design storage as plural from day one: genesis uses chunked strings for
+   small scripts and SSTORE2 write-once blobs for large ones (ADR 0010
+   decision 4), while the manifest interfaces can later point to EthFS,
+   Arweave, IPFS, dependency registries, or other durable stores without
+   touching Core.
 8. Keep frontier ideas as optional modules outside protocol v1 Core: post-mint
    parameters, dynamic onchain traits, alternate token views, token-bound
    accounts, and agent-readable metadata/tooling.
@@ -245,15 +250,19 @@ The cross-contract numeric values are pinned in the Numeric ID Catalog:
 `ROUTER_UNSET = 4`, `ROUTER_NO_CODE = 5`, `ROUTER_REVERTED = 6`,
 `ROUTER_RETURNDATA_OVERSIZED = 7`, and `ROUTER_MALFORMED = 8`.
 
-Production implementation requirements:
+Production implementation requirements [MRR-CORE-TOKENURI]:
 
 1. `metadataRouter == address(0)` returns the documented fallback JSON data URI
    for minted tokens with status `ROUTER_UNSET`.
 2. A router address with no code returns the fallback with status
    `ROUTER_NO_CODE`.
-3. Core calls the router through low-level `staticcall` with
-   `METADATA_ROUTER_GAS_LIMIT`, after checking that parent gas can cover the
-   call plus a named return buffer.
+3. Core calls the router through low-level `staticcall` with the current
+   `METADATA_ROUTER_GAS_LIMIT` value, after a parent gas precheck that
+   accounts for EIP-150's 63/64 gas forwarding rule plus a named return
+   buffer, so a caller cannot pass the precheck while the router receives
+   less than `METADATA_ROUTER_GAS_LIMIT`. CI must test calls just below, at,
+   and above the precheck threshold, mirroring the royalty-path precheck
+   tests in [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md).
 4. Core copies at most `MAX_TOKEN_URI_RETURNDATA` bytes from returndata before
    decoding. A router cannot force unbounded memory allocation.
 5. Revert, malformed ABI, oversized returndata, or an empty required response
@@ -263,13 +272,31 @@ Production implementation requirements:
    revert in Core's default `tokenURI()` path.
 7. The fallback payload is intentionally small and deterministic. It includes a
    name, description, optional empty image, and `properties.stream.error`.
-8. The release manifest records the router gas limit, returndata limit, fallback
-   schema hash, and gas measurements for success, revert, malformed return,
-   oversized return, no-code router, and unset router cases.
-`METADATA_ROUTER_GAS_LIMIT` must be a deploy-time immutable for a Core release,
-not mutable governance state. A successor Core may choose a different immutable
-gas limit after measuring a new router implementation, but v1 Core must not
-include a runtime setter that changes marketplace metadata read behavior.
+8. The release manifest records the router gas-parameter genesis value and
+   floor, returndata limit, fallback schema hash, and gas measurements for
+   success, revert, malformed return, oversized return, no-code router, and
+   unset router cases.
+
+`METADATA_ROUTER_GAS_LIMIT` is a Governed Gas Parameter under the model
+home,
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+[LTA-GGP] (ADR 0010 decision D1). Router gas-cap rules [MRR-ROUTER-GGP]:
+
+1. The parameter is Core-hosted with immutable floor
+   `METADATA_ROUTER_GAS_FLOOR`, set at deployment from the measured
+   deepest cold read path plus margin; floor, raise/lower classes,
+   Operational-layer exclusion, change events, EIP-150 live-value
+   prechecks, repricing-checklist membership, and release-manifest
+   recording follow [LTA-GGP] unchanged, and this document adds no
+   pattern rules of its own.
+2. The health probe for lowering is a recorded `tokenURI()` +
+   `contractURI()` read sweep over the deepest known routes at the
+   proposed value.
+3. A deploy-time immutable cap is nonconformant for this Core line
+   because a future opcode repricing would otherwise permanently degrade
+   `tokenURI()` for every frozen collection; raising the cap is the cure
+   and never touches artwork identity ([LTA-GGP] requirement 3).
+
 The fallback JSON schema must be canonicalized and hash-committed in the
 release manifest. The schema defines exact required fields, optional fields,
 error-code vocabulary, omitted/null semantics, and canonicalization method so
@@ -309,10 +336,13 @@ delegates to the contract-metadata satellite through the cached pointer
 policy. The delegated read uses the same fail-safe posture as `tokenURI()`:
 a bounded staticcall with a returndata cap, returning the documented
 fallback payload instead of reverting when the satellite read is unset,
-code-less, reverting, oversized, or malformed. The hook is part of the Core
-hook budget and is covered by the measured Core size proof (ADR 0009
-decision 2). The router serves the same ERC-7572-shaped contract metadata
-through its own reads:
+code-less, reverting, oversized, or malformed. The delegated read uses the
+same `METADATA_ROUTER_GAS_LIMIT` Governed Gas Parameter and the same
+EIP-150 63/64 parent precheck as `tokenURI()` [MRR-CORE-TOKENURI], with CI
+threshold tests just below, at, and above the precheck threshold. The hook
+is part of the Core hook budget and is covered by the measured Core size
+proof (ADR 0009 decision 2). The router serves the same ERC-7572-shaped
+contract metadata through its own reads:
 
 ```solidity
 function contractURIForCore(address core)
@@ -331,14 +361,38 @@ Collection-specific contract metadata lives in
 manifest must record the Core `contractURI()` hook, its delegated read route
 and fallback schema, and the Stream-native global and collection-scoped
 metadata reads (ADR 0009 decision 4).
-Marketplace and indexer discovery guidance: call Core `contractURI()` for
-ERC-7572 contract-level metadata, read the Core-hosted
-`streamSystemManifest()` to discover the current metadata router and
-collection metadata contract, call
-`StreamMetadataRouter.contractURIForCore(core)` for the router-served global
-Stream contract metadata, and call
-`StreamCollectionMetadata.contractURI(collectionId)` for collection-specific
-contract metadata.
+
+Collection discovery contract [MRR-COLLECTION-DISCOVERY]:
+
+1. Token ID arithmetic carries no collection meaning (ADR 0009 decision 1),
+   so the published machine path for per-collection identity is normative:
+   `StreamCollectionCreated(collectionId, ...)` events enumerate
+   collections, `tokenCollectionIdentity(tokenId)` maps any token to its
+   collection and collection-local serial,
+   `StreamCollectionMetadata.contractURI(collectionId)` serves
+   ERC-7572-shaped per-collection metadata, and
+   `properties.stream.collection_id` / `collection_serial` restate the
+   mapping inside every default token JSON. Indexers must never be asked to
+   infer collection membership from token ID ranges.
+2. Marketplace and indexer discovery guidance: call Core `contractURI()` for
+   ERC-7572 contract-level metadata, read the Core-hosted
+   `streamSystemManifest()` to discover the current metadata router and
+   collection metadata contract, call
+   `StreamMetadataRouter.contractURIForCore(core)` for the router-served
+   global Stream contract metadata, and call
+   `StreamCollectionMetadata.contractURI(collectionId)` for
+   collection-specific contract metadata.
+3. Per-collection marketplace display is a launch condition, not an
+   operational hope: the conformance matrix carries a gate requiring
+   retained evidence that each artist series resolves as its own collection
+   on the major marketplaces/indexers targeted at launch, using the machine
+   path above as the published integration contract.
+4. The remaining decision — a marketplace-native, standards-track
+   collection-identity signal under sequential token IDs — is the single
+   reserved open question of the spec set, tracked as OQ-X8 in
+   [`docs/spec-open-questions.md`](spec-open-questions.md) (ADR 0010
+   decision 11). It does not block Draft-stage work and must be resolved
+   before this document reaches Final.
 
 Core should emit an event when the router changes:
 
@@ -420,14 +474,34 @@ interface IStreamEntropyView {
 }
 ```
 
-The router must treat entropy reads as bounded and fail-safe for minted tokens.
-If the pinned `coordinatorAtMint(tokenId)` has no code, is
-incident-revoked, reverts, runs out of its read gas cap, or returns malformed
-data, the router reports entropy as `PENDING_UNKNOWN` and renders the
-collection's pending/unknown view. It must not revert `tokenURI()` for a minted
-token solely because the pinned coordinator is unhealthy. Finality diagnostics
-may still report that the current entropy route no longer matches the frozen
-record.
+The router must treat entropy reads as bounded and fail-safe for minted
+tokens. Entropy read rules [MRR-ENTROPY-READ]:
+
+1. The router calls the pinned coordinator through `staticcall` with
+   `ENTROPY_VIEW_GAS_LIMIT`, a Governed Gas Parameter with immutable floor
+   `ENTROPY_VIEW_GAS_FLOOR` under the model home
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   [LTA-GGP] (ADR 0010 decision D1), after an EIP-150 63/64 parent
+   precheck with the same threshold CI tests as the Core router call
+   [MRR-CORE-TOKENURI].
+2. The router copies at most `MAX_ENTROPY_VIEW_RETURNDATA = 64` bytes of
+   returndata — the ABI encoding of `(bytes32 seed, bool finalized)` — and
+   treats oversized or malformed returndata as a failed read.
+3. If the pinned `coordinatorAtMint(tokenId)` has no code, is
+   incident-revoked, reverts, runs out of `ENTROPY_VIEW_GAS_LIMIT`, or
+   returns malformed data, the router reports entropy as `PENDING_UNKNOWN`
+   and renders the collection's pending/unknown view. It must not revert
+   `tokenURI()` for a minted token solely because the pinned coordinator is
+   unhealthy. Finality diagnostics may still report that the current entropy
+   route no longer matches the frozen record.
+4. `PENDING_UNKNOWN` is router/renderer disposition vocabulary, not an
+   `EntropyStatus` enum member. The coordinator's `EntropyStatus` vocabulary
+   is owned by [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md):
+   a prepared-incomplete token has no coordinator record (`NONE`, or the
+   coordinator read reverts per that spec), and the router must render it as
+   pending without inventing additional status values.
+5. The genesis value and floor of `ENTROPY_VIEW_GAS_LIMIT`, and the
+   returndata cap, are recorded in the release manifest.
 
 ## Metadata Router Responsibilities
 
@@ -623,44 +697,24 @@ Collection metadata should use the rich typed groups specified in
 display, and open custom fields. Renderers should consume those group reads
 instead of relying on Core-owned strings.
 
-Illustrative renderer-facing summary:
+Storage shape ownership [MRR-STORAGE-HOMES]:
 
-```solidity
-struct CollectionMetadataView {
-    CollectionIdentity identity;
-    CollectionPeople people;
-    CollectionMedia media;
-    CollectionURIs uris;
-    CollectionRights rights;
-    CollectionDisplay display;
-}
-```
-
-Token metadata:
-
-```solidity
-struct TokenMetadata {
-    string nameOverride;
-    string descriptionOverride;
-    string tokenData;
-    string imageURI;
-    string animationURI;
-    string externalURI;
-    string backgroundColor;
-    string attributesJSON;
-    string propertiesJSON;
-    bool frozen;
-}
-```
-
-Collection scripts should remain chunked:
-
-```solidity
-mapping(uint256 collectionId => string[] scriptChunks) collectionScripts;
-```
-
-The implementation may use append, replace-at-index, and clear-and-replace
-operations, subject to freeze policy. Each operation should emit an event.
+1. The `CollectionMetadataView`, `TokenMetadata`, script manifest, script
+   chunk, dependency manifest, and media manifest storage shapes are owned
+   by [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
+   this document cites them and must not restate the structs (ADR 0010
+   decision 3).
+2. Mint-time `tokenData` and its `tokenDataHash` commitment are owned by the
+   Core mint ABI in
+   [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md):
+   V1 Core stores the renderer-visible `tokenData` string and its hash, and
+   the renderer reads mint-time token data from Core, not from the metadata
+   contract (ADR 0010 decision 3). `StreamCollectionMetadata` stores only
+   token-level display metadata that Core deliberately does not store.
+3. Script chunk mutation operations (append, replace-at-index,
+   clear-and-replace, subject to freeze policy, each emitting an event) are
+   specified in the collection metadata contract; the router only resolves
+   and routes.
 
 ## Artwork Primitive
 
@@ -698,6 +752,45 @@ Renderer behavior:
    which renderer and context version produced it.
 5. The default token view should remain marketplace-friendly even when richer
    archival or exhibition views exist elsewhere.
+
+## Renderer Determinism
+
+The renderer is the contract that produces the permanent artwork bytes, so
+its determinism is enforced at the same rigor as the royalty resolver's
+static-analysis gate, not left as guidance (ADR 0010 decision 4).
+
+Determinism requirements [MRR-DETERMINISM]:
+
+1. Renderer output must be a pure function of `(contract state,
+   RenderRequest)`. Two calls with identical resolved inputs must return
+   byte-identical output on any node, at any block, in any year.
+2. A deployed renderer's `tokenURI` path, and every router `tokenURI` /
+   `contractURI` code path, must not execute environment or context opcodes:
+   `TIMESTAMP`, `NUMBER`, `PREVRANDAO`/`DIFFICULTY`, `BLOCKHASH`,
+   `BLOBHASH`, `COINBASE`, `GASLIMIT`, `BASEFEE`, `BLOBBASEFEE`, `BALANCE`,
+   `SELFBALANCE`, `ORIGIN`, and `GASPRICE`. `GAS` may be read only for the
+   bounded-call prechecks specified in this document.
+3. Renderer and router read paths must not perform external calls other than
+   `staticcall` reads to the allowlisted metadata dependencies: Core,
+   `StreamCollectionMetadata` and its named companion satellites, the
+   dependency registry, and the pinned entropy coordinator. No other
+   external read, no `CALL` with value, no `DELEGATECALL`, and no `CREATE`
+   family opcodes are permitted in these paths.
+4. Rules 2 and 3 are verified by a static-analysis gate in the conformance
+   matrix, mirroring the royalty-resolver and instant-entropy opcode gates,
+   before any renderer version is registered.
+5. The release manifest must pin golden input/output vectors for each
+   deployed renderer version: a documented set of `RenderRequest` inputs
+   plus the keccak256 hash of each byte-exact output. Golden-vector
+   recomputation is a deployment gate and is re-checked by every
+   preservation drill, so drift in any dependency of the render path is
+   detected while it is still diagnosable.
+6. Nondeterministic artist script behavior inside the browser (unseeded
+   randomness, time, network) is out of consensus scope, but pre-activation
+   tooling must warn when a collection script references network fetches,
+   `Date`, or unseeded entropy sources, and the artist-intent record
+   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
+   is the place to declare intended variability.
 
 ## Default Token Metadata Schema
 
@@ -768,6 +861,7 @@ Recommended default:
       "chain_id": "1",
       "core": "0x...",
       "token_id": "123",
+      "citation": "eip155:1/erc721:0x.../123",
       "collection_id": "1",
       "collection_serial": "23",
       "collection_supply_mode": "UNCAPPED_OPEN",
@@ -819,6 +913,11 @@ Rules:
    snapshot when one exists.
 10. `view_id` and `view_manifest_hash` describe the current default view that
     produced this `tokenURI()` response.
+11. `citation` must carry the canonical citation string for the work, in the
+    format owned by the Canonical Citation Profile in
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+    (ADR 0010 decision 6), so scholarly and registrar references converge on
+    one blessed identifier instead of marketplace URLs.
 
 Additional Stream namespaces may be introduced through separate accepted
 schema versions:
@@ -851,6 +950,42 @@ Known namespace meanings:
    archive, print, accessibility, AR/VR, raw JSON, raw HTML, or agent-readable
    views.
 7. `properties.extensions` is open-ended project-specific metadata.
+
+### Attribution Disclosure
+
+Marketplaces, wallets, and archives consume `tokenURI()`, not contract
+internals, so the default JSON must distinguish artist-attested attribution
+from platform-claimed attribution (ADR 0010 decision 2).
+
+Attribution disclosure requirements [MRR-ATTRIBUTION]:
+
+1. Default token JSON for every collection must emit
+   `properties.provenance.attribution_status` with exactly one of the
+   pinned values `claimed`, `artist_accepted`, `artist_sanctioned`,
+   `disputed`, or `revoked`, derived from the collection's artist binding
+   state in the artist authority registry. The binding, acceptance,
+   sanction, dispute, and revocation semantics are owned by
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010 decision 2); this renderer
+   only discloses them.
+2. Until the bound artist has accepted onchain, the renderer must present
+   the attribution as unverified: `attribution_status = "claimed"`, and any
+   `Artist` attribute or `properties.rights.artist` value is platform
+   assertion, not artist fact.
+3. When a current artist attestation exists, the renderer must emit
+   `properties.provenance.artist_attestation_status`
+   (`NONE | ATTESTED_CURRENT | ATTESTED_STALE | DISPUTED`), the attested
+   digest, and the attestation record reference, derived from the
+   staleness-aware attestation read in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md).
+   An attestation whose bound state hash no longer matches current
+   collection state must be reported `ATTESTED_STALE`, never silently
+   presented as current.
+4. Collections declared `PLATFORM_WORKS` at creation disclose that class
+   through `properties.provenance.consent_mode`; the declaration is
+   immutable and must not be rendered as artist-attributed work.
+5. Disputed or revoked attribution must remain visible: the renderer must
+   not drop a `disputed`/`revoked` status from the default JSON while the
+   dispute record stands.
 
 ## Attribute Policy
 
@@ -938,6 +1073,50 @@ RAW_HTML         canonical rendered HTML surface
 AGENT            agent-readable schema and tool context
 ```
 
+## Full-View Serving And Reconstruction Reads
+
+Large onchain generative works must be reconstructable from chain state by
+live reads at genesis, not only by hash-committed offchain mirrors
+(ADR 0010 decision 4). The default `tokenURI()` stays marketplace-sized;
+this section is the documented over-cap serving story.
+
+Full-view requirements [MRR-FULL-VIEW]:
+
+1. The genesis router/renderer pair must expose full-view reads outside the
+   default `tokenURI()` envelope:
+
+   ```solidity
+   function tokenHTML(uint256 tokenId) external view returns (string memory);
+   function tokenJSON(uint256 tokenId) external view returns (string memory);
+   ```
+
+   `tokenHTML` assembles the complete executable HTML for an onchain work —
+   render context, dependency payload, and collection script — from chain
+   state, resolving every payload from its hash-pinned source. `tokenJSON`
+   returns the canonical raw metadata document. These reads serve the
+   `RAW_HTML` and `RAW_JSON` canonical views and are bounded only by node
+   execution limits, not by `MAX_DEFAULT_TOKEN_URI_BYTES`.
+2. The paged reconstruction path is mandatory alongside the assembled reads:
+   `scriptChunk(collectionId, index)` and `dependencyChunk(dependencyId,
+   index)` let any client rebuild payloads chunk by chunk when a single
+   assembled read exceeds an RPC provider's response limits. The assembled
+   reads and the paged path must produce byte-identical payloads, verified
+   by a conformance test.
+3. Payloads whose default `tokenURI()` output would exceed
+   `MAX_DEFAULT_TOKEN_URI_BYTES` must serve a marketplace-sized default view
+   (offchain URI or compact onchain JSON referencing the full views) and
+   expose the full artwork through `tokenHTML`/`tokenJSON` plus the
+   `properties.views` references. Exceeding the default cap is a serving
+   decision, never a reason to leave artwork bytes off chain.
+4. Frozen onchain collections must still publish the assembled snapshot
+   manifest so preservation does not depend on any future RPC endpoint
+   tolerating maximum-size live rendering; the full-view reads and the
+   snapshot manifest are complementary, and both are conformance-gated.
+5. Richer view negotiation (token-specific views, live views, programmable
+   selection) remains a Replaceable extension module under a separate
+   accepted spec; only the two raw full-view reads above are genesis
+   requirements.
+
 ## Metadata Modes
 
 ### Offchain Mode
@@ -961,6 +1140,24 @@ baseURI + collectionSerial when offchainURIIdMode = COLLECTION_SERIAL
 The genesis implementation should support both modes. The default can remain
 `TOKEN_ID` for compatibility, but ongoing subcollections such as long-running
 photography series should be able to opt into `COLLECTION_SERIAL`.
+
+Offchain content binding [MRR-OFFCHAIN-BINDING]:
+
+1. An offchain URI is a locator, never a content commitment. Before any
+   artwork finality at any scope — including token, release, season, and
+   view scopes — an offchain-mode collection must have a recorded token
+   content root covering every token in the finality scope, per the Token
+   Content Root requirements in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   (ADR 0010 decision 4). Finality over `baseURI + tokenId` strings without
+   per-token content hashes is nonconformant: in 2075 the chain would prove
+   which URI was frozen but not which artwork it named.
+2. Collection-scope finality is forbidden while any render-critical payload
+   of the collection resolves through mutable transport (HTTPS, IPNS, or a
+   mutable gateway path) without a recorded content hash.
+3. Mutable offchain URIs remain acceptable for collections that have not
+   reached finality, when the collection policy says so and tooling
+   discloses the mutability.
 
 ### Onchain Mode
 
@@ -1021,13 +1218,20 @@ namespaces when useful:
       "estate_contact_uri": "..."
     },
     "provenance": {
+      "attribution_status": "artist_sanctioned",
+      "consent_mode": "ARTIST_SIGNED_POLICY",
+      "artist_attestation_status": "ATTESTED_CURRENT",
+      "artist_attestation_digest": "0x...",
+      "artist_attestation_record": "0x...",
       "script_hash": "0x...",
       "dependency_hash": "0x...",
       "artist_attestation_hash": "0x...",
       "curator_attestation_hash": "0x...",
       "c2pa_manifest_uri": "ipfs://...",
       "c2pa_manifest_hash": "0x...",
-      "c2pa_validation_status": "...",
+      "c2pa_validation_status": "VALID",
+      "c2pa_validator_class": "CONFIGURED_PROVENANCE_VERIFIER",
+      "c2pa_validation_report_uri": "ipfs://...",
       "preservation_event_log_uri": "ipfs://...",
       "fixity_check_uri": "ipfs://...",
       "source_media_relationships_uri": "ipfs://...",
@@ -1148,6 +1352,10 @@ Rules:
    used by the token metadata JSON encoder. Snapshot and view manifest hashes
    should be recomputable by third-party tools from the documented canonical
    inputs.
+8. `tokenData` values are read from Core's renderer-visible `tokenData`
+   storage, whose locus and hash binding are owned by the Core mint ABI in
+   [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+   [MRR-STORAGE-HOMES].
 
 For compatibility with simple sketches, `StreamRendererV1` also provides
 legacy-style local variables inside the generated shell:
@@ -1263,10 +1471,14 @@ Guidance:
 
 1. Core should never care which source type a script, dependency, schema, or
    media object uses.
-2. `INLINE_CHUNKS` is the preferred genesis source for collection scripts
-   because it is simple and auditable.
-3. SSTORE2-style blob contracts can be added later, as Replaceable-layer
-   source implementations, for larger write-once payloads.
+2. `INLINE_CHUNKS` remains supported for small collection scripts because it
+   is simple and auditable.
+3. `SSTORE2` chunked write-once blob storage is a genesis capability, not a
+   later addition (ADR 0010 decision 4): the genesis metadata contract must
+   accept SSTORE2-backed script chunks so serious long-form generative works
+   can be fully onchain from launch. Chunk sizes and the total script cap
+   are specified in Canonicalization And Size Limits and in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md).
 4. EthFS or a dependency registry can be used for shared JavaScript libraries,
    fonts, or other reusable assets.
 5. IPFS, Arweave, HTTPS, and later-registered URI source types are acceptable
@@ -1294,7 +1506,11 @@ Required safeguards:
 4. HTML should include a charset and viewport.
 5. Metadata JSON should be Base64-encoded to avoid raw URI escaping issues.
 
-Recommended HTML shell:
+Canonical HTML shell rules for `ONCHAIN` and hybrid modes [MRR-SHELL]:
+
+Every executed script is inlined from a hash-pinned source; the shell
+contains no external `<script src>` and no network fetch of executable
+content:
 
 ```html
 <!doctype html>
@@ -1302,16 +1518,24 @@ Recommended HTML shell:
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <script src="..."></script>
   </head>
   <body>
     <script>window.__STREAM_TOKEN__ = ...;</script>
-    <script>...</script>
+    <script>/* inlined hash-pinned dependency payload */</script>
+    <script>/* inlined hash-pinned collection script */</script>
   </body>
 </html>
 ```
 
-The implementation should keep the shell deterministic and minimal.
+The implementation should keep the shell deterministic and minimal. A shell
+that loads executable content through an external `<script src="...">` is
+nonconformant for any collection that can reach artwork finality in
+`ONCHAIN` or hybrid mode, because frozen artwork that loads remote code is
+mutable artwork: the URI can change payloads without changing any onchain
+hash. A `src`-based shell may exist only for explicitly service-backed,
+non-finalizable HTTPS-trust collections, and tooling must block finality
+for any collection whose shell executes non-inlined sources. This restates
+the Dependency Assembly rule; the two must never diverge.
 
 ## Canonicalization And Size Limits
 
@@ -1369,12 +1593,14 @@ Rules:
    Malformed, empty, or oversized digests revert on write. Variable-length
    encodings such as multihash must define their own maximum byte length and
    inner algorithm validation.
-7. The release manifest records the fallback JSON schema hash, router gas
-   limit, returndata limit, global metadata discovery reads, and
-   `ContractURIUpdated()` emitter address.
+7. The release manifest records the fallback JSON schema hash, the genesis
+   value and floor of every Governed Gas Parameter in this document
+   (`METADATA_ROUTER_GAS_LIMIT`, `ENTROPY_VIEW_GAS_LIMIT`), returndata
+   limits, global metadata discovery reads, and the `ContractURIUpdated()`
+   emitter address.
 
 Protocol v1 enforces explicit upper bounds. Normative v1 hard maxima
-(ADR 0009 decision 14):
+(ADR 0009 decision 14, script totals raised by ADR 0010 decision 4):
 
 ```text
 MAX_SHORT_STRING_BYTES       1,024
@@ -1384,26 +1610,42 @@ MAX_TOKEN_DATA_BYTES        16,384
 MAX_ATTRIBUTES_JSON_BYTES   65,536
 MAX_PROPERTIES_JSON_BYTES   65,536
 MAX_CUSTOM_FIELDS              128
-MAX_SCRIPT_CHUNK_BYTES       8,192
+MAX_SCRIPT_CHUNK_BYTES       8,192   (INLINE_CHUNKS storage)
+MAX_SSTORE2_CHUNK_BYTES     24,576   (SSTORE2 chunk payload)
 MAX_SCRIPT_CHUNKS               32
-MAX_TOTAL_ONCHAIN_SCRIPT_BYTES  24,576
+MAX_TOTAL_ONCHAIN_SCRIPT_BYTES 786,432
 MAX_BATCH_MUTATIONS             50
 MAX_DEFAULT_TOKEN_URI_BYTES  24,576
 MAX_ARCHIVE_VIEW_BYTES      65,536
 ```
 
-These values are ratified as the normative v1 limits (ADR 0009 decision 14),
-subject only to pre-deployment measurement that pins the deployed constants
-in the release manifest. Writes that exceed storage limits must revert with
-specific errors. Rendering that would exceed renderer limits must fail
-predictably and be caught by pre-activation tooling.
+These values are the normative v1 limits (ADR 0009 decision 14, with
+`MAX_TOTAL_ONCHAIN_SCRIPT_BYTES` raised to 786,432 — 32 SSTORE2 chunks of
+24,576 bytes — by ADR 0010 decision 4), subject only to pre-deployment
+measurement that pins the deployed constants in the release manifest.
+Writes that exceed storage limits must revert with specific errors.
+Rendering that would exceed renderer limits must fail predictably and be
+caught by pre-activation tooling.
 
-Default marketplace `tokenURI()` output must remain small enough for ordinary
-wallet, marketplace, and indexer calls. Payloads that exceed
-`MAX_DEFAULT_TOKEN_URI_BYTES` must use offchain, hybrid, archive, raw HTML, or
-raw JSON views rather than the default `tokenURI()` path. Frozen onchain
-collections should publish an assembled snapshot manifest so preservation does
-not depend on every future RPC endpoint tolerating maximum-size live rendering.
+Script cap scope and over-cap posture [MRR-SCRIPT-CAP]:
+
+1. `MAX_TOTAL_ONCHAIN_SCRIPT_BYTES` applies to the per-collection artist
+   script; dependency payloads resolved through the dependency registry are
+   excluded from it.
+2. A work whose script exceeds the cap must launch in `OFFCHAIN` mode with
+   script-manifest hash commitments and remains finalizable through the
+   snapshot-manifest and token-content-root path in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
+   it must not be silently truncated or split across pseudo-dependencies.
+3. Default marketplace `tokenURI()` output must remain small enough for
+   ordinary wallet, marketplace, and indexer calls. Payloads that exceed
+   `MAX_DEFAULT_TOKEN_URI_BYTES` serve a marketplace-sized default view and
+   expose the full artwork through the genesis full-view reads
+   [MRR-FULL-VIEW] and archive/raw views; over-cap works are a serving
+   decision, not an offchain fallback.
+4. Frozen onchain collections must publish an assembled snapshot manifest so
+   preservation does not depend on every future RPC endpoint tolerating
+   maximum-size live rendering.
 
 ## Events
 
@@ -1477,16 +1719,34 @@ event strategies:
    should observe the router as the metadata authority.
 
 Preferred v1 approach: Core should expose restricted helper functions that
-allow the metadata router to cause Core to emit ERC-4906 events. This makes the
-events originate from the NFT contract that marketplaces already index.
+allow authorized satellites to cause Core to emit ERC-4906 events. This makes
+the events originate from the NFT contract that marketplaces already index.
 
-Those helper functions must be callable only by the current `metadataRouter`
-pointer stored in Core. A stale router, replacement candidate, generic metadata
-admin, or collection admin must not be able to call them directly. The helper
-must verify that token IDs or collection ranges are valid for the requested
-refresh, enforce a reasonable batch/range limit, and emit an internal reason or
-manifest hash so indexers can distinguish normal metadata refresh from
-governance or recovery. The helper is not an arbitrary log-spam bridge.
+Refresh emitter authorization [MRR-REFRESH-EMITTERS]:
+
+1. The authorized caller set for Core's restricted
+   `emitMetadataUpdate`/`emitBatchMetadataUpdate` helpers is owned by the
+   Core Hook Budget table in
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+   (ADR 0009 decision 5; ADR 0010 decision 10): the current metadata router,
+   the artwork finality registry, and the entropy coordinator, each resolved
+   from Core's own cached satellite pointers at call time. This document
+   cites that home and must not narrow or extend the set.
+2. The caller check derives from Core's satellite pointer storage, never
+   from a separately mutable allowlist: a caller is authorized exactly when
+   it equals the current `metadataRouter`, the current finality registry
+   pointer, or the entropy coordinator authorized under the cached pointer
+   policy for the affected tokens. A stale router, replacement candidate,
+   generic metadata admin, or collection admin must not be able to call the
+   helpers directly.
+3. A golden conformance test must enumerate the exact authorized caller set
+   and prove both acceptance for each authorized satellite and rejection for
+   every other caller class.
+4. The helper must verify that token IDs or collection ranges are valid for
+   the requested refresh, enforce the batch/range limit, and emit an
+   internal reason or manifest hash so indexers can distinguish normal
+   metadata refresh from entropy finalization, governance, or recovery. The
+   helper is not an arbitrary log-spam bridge.
 Protocol v1 pins `MAX_REFRESH_RANGE = 5_000` token IDs per
 `BatchMetadataUpdate` helper call (ADR 0009 decision 15), confirmed by
 marketplace/indexer review evidence before deployment.
@@ -1565,7 +1825,9 @@ Metadata field/group locks
 
 Append-only preservation records
   may continue after Core collection freeze only if:
-    the collection did not lock PRESERVATION_RECORDS,
+    the collection did not lock PRESERVATION_RECEIPTS
+      (lock IDs are owned by the Lock Model in
+      docs/collection-metadata-contract.md),
     the record type is append-only,
     the record cannot change tokenURI, renderer output, royalties, minting, or
       ownership,
@@ -1579,12 +1841,12 @@ object, not a mutation of the frozen object.
 
 ## Artwork Finality
 
-For onchain and hybrid collections, final artwork freeze is stronger than
-"metadata config frozen." A collection finality action must atomically bind the
-metadata contract, metadata root or snapshot, router config, renderer address,
-renderer code hash, render context version, script manifest, assembled script
-hash, dependency sources, media manifests, entropy coordinator/config, and any
-post-freeze exceptions.
+Final artwork freeze is stronger than "metadata config frozen" in every
+metadata mode. A collection finality action must atomically bind the
+metadata contract, metadata root or snapshot, token content root, router
+config, renderer address, renderer code hash, render context version, script
+manifest, assembled script hash, dependency sources, media manifests,
+entropy coordinator/config, and any post-freeze exceptions.
 
 The cross-module finality action is hosted by `StreamArtworkFinalityRegistry`
 as described in `docs/stream-long-term-architecture.md`:
@@ -1605,7 +1867,7 @@ either implement `IStreamFinalityComponent` directly or be represented by a
 finality adapter that returns frozen state, code hash, module version, manifest
 hash, and data hash.
 
-Renderer and router rules after finality:
+Renderer and router rules after finality [MRR-FINALITY]:
 
 1. The resolved renderer for a finalized collection must keep serving that
    collection, even if deprecated for new mutable collections.
@@ -1614,9 +1876,9 @@ Renderer and router rules after finality:
    manifest. They must not silently receive "equivalent" new artwork.
 3. A renderer assignment for a finalized collection must verify the original
    finality manifest or the accepted recovery manifest.
-4. Finalized onchain collections should expose or publish an assembled script
-   and dependency snapshot hash so independent preservation tools can reproduce
-   the bytes without relying on future chunk assembly code.
+4. Finalized onchain collections must expose or publish an assembled script
+   and dependency snapshot hash so independent preservation tools can
+   reproduce the bytes without relying on future chunk assembly code.
 5. Metadata refresh events after finality must identify whether the change is
    display-only, preservation-only, or artwork-affecting. Artwork-affecting
    changes require a new recovery manifest.
@@ -1626,6 +1888,31 @@ Renderer and router rules after finality:
    described in `docs/stream-long-term-architecture.md`.
 7. Onchain and hybrid collections cannot finalize unless the assembled script
    and dependency snapshot manifest hash has already been recorded.
+8. No finality at any scope, in any metadata mode — including `OFFCHAIN` —
+   may execute unless a token content root covering every token in the
+   finality scope has been recorded, per the Token Content Root
+   requirements in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   (ADR 0010 decision 4). Finality without per-token content binding is
+   nonconformant.
+9. Finality for script-based works (`ONCHAIN` and hybrid modes) requires a
+   `REFERENCE_RENDER` component: hash-committed reference output captures
+   for a pinned token sample or all tokens, plus an execution-environment
+   manifest naming renderer version, render context version, browser/engine
+   build, viewport, color space, and capture toolchain, recorded as a
+   collection record before `finalizeCollectionArtwork` executes
+   (ADR 0010 decision 4). The record schema is owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md).
+   The preservation drill's acceptance criterion is byte-hash comparison of
+   a re-render against this reference. For `OFFCHAIN` collections the
+   component is optional but tooling-warned.
+10. Finality for a collection with a bound artist requires the artist
+    sanction and artist-intent preconditions defined in
+    [`docs/stream-artist-authority.md`](stream-artist-authority.md) and in the Artwork Finality Inputs of
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+    (ADR 0010 decisions 2 and 6): an `ARTIST_SANCTION` finality component
+    and an `ARTIST_INTENT` record or its explicit recorded waiver. The
+    router only surfaces these states; it does not own them.
 
 Burned token behavior remains asymmetric by design: `StreamCore.tokenURI()` may
 revert for burned tokens because ERC-721 ownership no longer exists, while
@@ -1649,9 +1936,10 @@ Metadata failure should be explicit and scope-aware:
    that would hit those failures.
 5. Pending-entropy metadata must disclose pending status rather than fabricate a
    seed or return final artwork.
-6. Offchain mutable URIs may remain mutable only when the collection policy says
-   so. Render-critical offchain payloads require hash commitments before
-   artwork finality.
+6. Offchain mutable URIs may remain mutable only when the collection policy
+   says so. Render-critical offchain payloads must have hash commitments and
+   a recorded token content root before artwork finality at any scope
+   [MRR-OFFCHAIN-BINDING].
 7. Production Core must return a minimal documented pending/error JSON data
    URI for minted tokens when `metadataRouter == address(0)`, has no code,
    reverts, or returns malformed data. The payload includes `name`,
@@ -1680,9 +1968,13 @@ freezeCollectionMetadata       collection/global metadata admin
 freezeTokenMetadata            token/global metadata admin
 ```
 
-Artist signing and collection freeze rules should remain compatible with the
-existing artist authority model, but mutable metadata updates after artist
-signature should be deliberately constrained by policy.
+Artist identity, acceptance, attestation, consent-mode, and sanction
+authority are owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010
+decision 2); metadata admin roles never substitute for artist authority.
+Mutable metadata updates after an artist attestation must be deliberately
+constrained by policy, and any render-affecting update invalidates
+attestation currency per the staleness rules in
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md).
 
 ## Expected Core Interaction
 
@@ -1777,11 +2069,13 @@ registries under its own separate accepted spec:
 2. `StreamDynamicTraits`: enforceable onchain traits inspired by ERC-7496. This
    should be used only when another contract needs to read or enforce a trait,
    not for ordinary display attributes.
-3. `StreamMetadataViews`: richer view-specific reads and negotiation on top of
-   the v1 `CollectionViewManifest` baseline, inspired by ERC-7160 and
-   ERC-5773. Examples: live views, token-specific archive views, raw JSON, raw
-   HTML, and renderer-selected media variants. The default `tokenURI()` view
-   should remain marketplace-friendly and deterministic.
+3. `StreamMetadataViews`: richer view-specific reads and negotiation on top
+   of the v1 `CollectionViewManifest` baseline and the genesis full-view
+   reads [MRR-FULL-VIEW], inspired by ERC-7160 and ERC-5773. Examples: live
+   views, token-specific archive views, and renderer-selected media
+   variants. Raw `tokenJSON`/`tokenHTML` reads are genesis surface, not part
+   of this exclusion. The default `tokenURI()` view should remain
+   marketplace-friendly and deterministic.
 4. `StreamTokenBoundAccounts`: optional ERC-6551 integration for
    collector-added archives, exhibition history, owned editions, or
    participatory works.
@@ -1824,6 +2118,10 @@ base token identity model.
 5. Add renderer manifest and version disclosure.
 6. Add schema URI/hash disclosure.
 7. Add MIME-aware `content` object support.
+8. Add the genesis full-view reads `tokenHTML`/`tokenJSON` and verify the
+   paged chunk reconstruction path against them [MRR-FULL-VIEW].
+9. Pin golden render vectors and pass the renderer determinism
+   static-analysis gate [MRR-DETERMINISM].
 
 ### Phase 3: Scoped Overrides
 
@@ -1847,10 +2145,10 @@ base token identity model.
 
 ### Phase 5: Optional Metadata Modules
 
-1. Add raw `tokenJSON(uint256)` and `tokenHTML(uint256)` reads if ERC-4804
-   support becomes a product requirement.
-2. Add richer alternate token views only outside the default `tokenURI()` path.
-3. Add post-mint params, dynamic traits, token-bound account references, or
+1. Add richer alternate token views, beyond the genesis
+   `tokenJSON`/`tokenHTML` full-view reads, only outside the default
+   `tokenURI()` path.
+2. Add post-mint params, dynamic traits, token-bound account references, or
    agent-readable manifests only after concrete use cases are approved in
    separate accepted specs.
 
@@ -1873,6 +2171,16 @@ Core tests:
    delegated read is unset, code-less, reverting, oversized, or malformed.
 8. The release manifest records the global contract metadata discovery path:
    the Core `contractURI()` hook plus the router/metadata contract reads.
+9. EIP-150 63/64 precheck threshold tests: `tokenURI()` and `contractURI()`
+   calls just below, at, and above the precheck threshold behave as
+   specified [MRR-CORE-TOKENURI].
+10. Governed Gas Parameter tests for `METADATA_ROUTER_GAS_LIMIT`: raise
+    path, lower path with health probe, floor rejection, change event, and
+    exclusion from finality identity [MRR-ROUTER-GGP].
+11. The restricted ERC-4906 helper golden test enumerates the exact
+    authorized caller set — metadata router, finality registry, entropy
+    coordinator — and proves rejection for every other caller class
+    [MRR-REFRESH-EMITTERS].
 
 Router tests:
 
@@ -1895,6 +2203,14 @@ Router tests:
     contract metadata.
 14. Collection view metadata updates emit a view-specific refresh event.
 15. Collection snapshot updates emit a snapshot-specific refresh event.
+16. Entropy view reads enforce `ENTROPY_VIEW_GAS_LIMIT` and the 64-byte
+    returndata cap, and degrade to pending output on coordinator failure
+    [MRR-ENTROPY-READ].
+17. Finality gates: no finality at any scope without a recorded token
+    content root; script-based finality without a `REFERENCE_RENDER`
+    component is rejected [MRR-FINALITY].
+18. Full-view reads `tokenHTML`/`tokenJSON` serve over-cap works, and the
+    paged chunk path reproduces byte-identical payloads [MRR-FULL-VIEW].
 
 Renderer tests:
 
@@ -1927,14 +2243,39 @@ Renderer tests:
 21. Protocol facts do not pollute `attributes` unless explicitly configured.
 22. Legacy compatibility variables are exactly `stream`, `hash`, `tokenId`,
     and `tokenData`, verified by a golden test.
+23. Golden render vectors: pinned `RenderRequest` inputs reproduce the
+    pinned output hashes for the deployed renderer version
+    [MRR-DETERMINISM].
+24. The renderer static-analysis gate rejects environment/context opcodes
+    and non-allowlisted external reads in `tokenURI` paths
+    [MRR-DETERMINISM].
+25. The `ONCHAIN`-mode HTML shell contains no external `<script src>`;
+    every executed payload is inlined from a hash-pinned source
+    [MRR-SHELL].
+26. `properties.provenance.attribution_status` renders each pinned state —
+    `claimed`, `artist_accepted`, `artist_sanctioned`, `disputed`,
+    `revoked` — from the corresponding artist authority registry state, and
+    stale attestations report `ATTESTED_STALE` [MRR-ATTRIBUTION].
+27. `properties.stream.citation` matches the Canonical Citation Profile
+    format for the rendered token.
 
 ## Resolved Decisions
 
 Every formerly open decision in this document is resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md); the register
 entries live in the `Resolved` section of
-[`docs/spec-open-questions.md`](spec-open-questions.md). No open decisions
-remain in this specification.
+[`docs/spec-open-questions.md`](spec-open-questions.md).
+[ADR 0010](adr/0010-world-class-spec-pass.md) then amends four postures in
+this document: the router and entropy-view gas caps are Governed Gas
+Parameters rather than deploy-time immutables (decision 1); the total
+onchain script cap rises to 786,432 bytes with SSTORE2 genesis storage and
+the full-view serving route (decision 4); every finality scope in every
+mode requires a token content root and, for script-based works, a reference
+render (decision 4); and the ERC-4906 emitter authority is the
+authorized-satellite set owned by the protocol v1 hook table (decision 10).
+The only open decision touching this document is OQ-X8 (marketplace
+collection-identity signal), reserved in the register and blocking Final,
+not Draft [MRR-COLLECTION-DISCOVERY].
 
 1. Core `contractURI()` is a mandatory Core hook: a thin, bounded delegated
    read to the contract-metadata satellite through the cached pointer
@@ -2004,3 +2345,13 @@ The genesis deployment should support:
 22. Snapshot hash and view identity disclosure in `properties.stream`.
 23. Optional archive, IIIF, rights-policy, cultural, preservation, C2PA, fixity,
     and provenance references in namespaced `properties` objects.
+24. SSTORE2-backed chunked script storage up to
+    `MAX_TOTAL_ONCHAIN_SCRIPT_BYTES = 786,432` [MRR-SCRIPT-CAP].
+25. Genesis full-view reads `tokenHTML`/`tokenJSON` plus paged chunk
+    reconstruction [MRR-FULL-VIEW].
+26. Renderer determinism gate and pinned golden render vectors
+    [MRR-DETERMINISM].
+27. Governed Gas Parameters with immutable floors for the router and
+    entropy-view read caps [MRR-ROUTER-GGP] [MRR-ENTROPY-READ].
+28. Attribution and citation disclosure in default token JSON
+    [MRR-ATTRIBUTION].

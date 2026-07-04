@@ -1020,6 +1020,36 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Hardened the full specification set through accepted
+  `docs/adr/0010-world-class-spec-pass.md`, resolving all 112 findings of a
+  nine-lens independent review (permanence, artist provenance, Safe/TDH
+  operability, minting coverage, best-in-world comparison, good patterns,
+  anti-patterns, meta-consistency, museum practice): added
+  `docs/stream-artist-authority.md` (two-sided artist identity, artist
+  sanction as a finality component, mint-path consent modes, estate and
+  succession, artist economics rights) and `docs/stream-sales-and-auctions.md`
+  (sale adapter conformance, English/Dutch auctions with anti-snipe and
+  increments, burn-to-mint, Merkle allowlists, refund windows, delegated
+  minting); replaced every immutable gas cap with Governed Gas Parameters
+  (immutable floors, staged raise/lower, health probes — minting can never
+  brick and marketplace reads can never permanently zero under gas
+  repricing); extended finality with per-token content roots for all
+  metadata modes, reference-render capture, renderer-determinism gates, and
+  dual-family archival proof; extended state exports to the artwork/metadata
+  layer with record-chain accumulators; added the museum object dossier
+  (pinned token subject IDs, owner-writable accession/condition/exhibition/
+  deaccession records, a mandated fixity program, artist-intent records,
+  C2PA media binding, IIIF profile, citation profile); defined the canonical
+  governance action-ID preimage with atomic batch execution and
+  multisig-sized window floors in ADR 0004; adopted single-sourcing with
+  normative homes, precedence, and requirement anchors in the spec policy;
+  pinned 175 new hash-domain and EIP-712 typehash constants; closed the
+  reviewed anti-patterns (PaymentIntent binding for ERC-20 pulls,
+  authorizerKind replacing address(0) conventions, manager-scoped
+  nullifiers, VRF callback try/catch persistence, fee-quote-bound entropy
+  payments); and opened `OQ-X8` (marketplace collection identity signal
+  under sequential token IDs) as the single owner-reserved question.
+  Corrected the ADR 0009/register decision count from 24 to 25.
 - Resolved all 24 open questions raised by the specification permanence
   reframe through accepted `docs/adr/0009-protocol-v1-open-question-resolutions.md`
   and accepted ADR 0008 (amended by ADR 0009 decisions 8 and 9): sequential

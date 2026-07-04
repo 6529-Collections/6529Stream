@@ -650,6 +650,85 @@ virtually by the read when `status == SCHEDULED && block.timestamp >
 expiresAfter`. Expired actions cannot execute. They must be cancelled or
 rescheduled with a new nonce and new action ID.
 
+### Canonical Action ID And Batch Execution [GOV-ACTION-ID]
+
+Amended by ADR 0010 (decisions D3.4 and D7.1). This section is the single
+normative home of the governance action identity that every Stream spec
+cites; no other document may restate the preimage.
+
+A governance action is an atomic batch of one or more calls. Single-call
+actions are batches of length one; cross-contract updates that must land
+together (pointer plus catalog plus manifest cache) execute as one batch.
+
+```solidity
+struct GovernanceCall {
+    address target;
+    uint256 value;
+    bytes4 selector;
+    bytes32 callDataHash; // keccak256(callData)
+}
+
+bytes32 constant STREAM_GOVERNANCE_CALLS_V1 =
+    0x51c60c7ea5577cbf0c5157f544a7de1a186ae82b6fc4df6a626b9c8d1d3a0b61;
+    // keccak256("6529STREAM_GOVERNANCE_CALLS_V1")
+
+bytes32 callsHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_CALLS_V1,
+    calls
+));
+
+bytes32 constant STREAM_GOVERNANCE_ACTION_V1 =
+    0xda01e91bb5de11674cef69c6774002280d75bcb43cd9c78413c4b94d5d14249b;
+    // keccak256("6529STREAM_GOVERNANCE_ACTION_V1")
+
+bytes32 actionId = keccak256(abi.encode(
+    STREAM_GOVERNANCE_ACTION_V1,
+    uint256(block.chainid),
+    address(this),            // the governance contract
+    uint8(actionClass),
+    callsHash,
+    bytes32(scopeHash),
+    bytes32(oldValueHash),
+    bytes32(newValueHash),
+    uint256(nonce),
+    uint64(notBefore),
+    uint64(expiresAfter),
+    bytes32(reasonHash),
+    bytes32(manifestHash)
+));
+```
+
+Batch rules [GOV-BATCH]:
+
+1. Execution supplies the full ordered `GovernanceCall[]` plus each call's
+   `callData`; every `callDataHash` must match, and the recomputed
+   `callsHash` and `actionId` must match the stored action.
+2. Batch execution is atomic: every call succeeds or the whole action
+   reverts. Partial application is never observable.
+3. The single-call `GovernanceAction` storage shape remains valid: it
+   stores `callsHash` in `callHash` for batches, and the stored
+   `target`/`selector` are those of the first call for indexing.
+4. Subsystem specs that stage governed operations (pointer moves, catalog
+   updates, GGP changes, registry lifecycle) fold their fields into
+   `scopeHash`/`newValueHash` and this one preimage; defining a second
+   staged-operation preimage is nonconformant (ADR 0010 decision D3.4).
+
+### Governance Window Floors And Unpause [GOV-WINDOWS]
+
+Amended by ADR 0010 (decisions D7.2). Windows are sized for multisig and
+governor-contract latency, not for fast single signers:
+
+1. Delayed action classes must keep an open-to-execute window
+   (`expiresAfter - notBefore`) of at least 7 days.
+2. Emergency classes must be executable by role-redundant holders and
+   assume at least 4 hours of coordination latency; no emergency path may
+   presume a single hot key.
+3. Unpause is a dedicated operational class: a distinct `ROLE_UNPAUSE`
+   (grantable to a Safe or governor contract) executes unpause with no
+   timelock and an evented reason. Pause guardians cannot unpause; unpause
+   holders cannot pause. The two-tier delay model does not apply to
+   unpause.
+
 Execution rules:
 
 1. `scheduleGovernanceAction` allocates the next nonce, computes the canonical
@@ -718,6 +797,37 @@ function vetoTerminalFreeze(bytes32 actionId, bytes32 reasonHash) external;
 The guardian can only veto while the action is scheduled and before the veto
 deadline. It cannot edit the action, execute a different action, sweep funds,
 or unfreeze an already executed terminal freeze.
+
+### Role Vocabulary [GOV-ROLES]
+
+Amended by ADR 0010 (decision D7.4). This subsection is the single home of
+the protocol-wide `ROLE_*` constant vocabulary. Long-lived authorities in
+every Stream spec are `bytes32` role references resolved through the admin
+registry at call time, never raw frozen addresses. A subsystem spec may
+reference only roles enumerated here; introducing a new role constant
+amends this table.
+
+Each `ROLE_*` constant is `keccak256` of its own name. Grant classes:
+`root` roles are granted and revoked only by `GovernanceRoot`;
+`operational` roles are grantable by `RoleManager`. Every holder is a
+Safe/multisig or governance contract per the Role Model above.
+
+| Role constant | Authority | Grant class | Normative home |
+| --- | --- | --- | --- |
+| `ROLE_UNPAUSE` | Executes unpause with no timelock and an evented reason; disjoint from pause guardians | root | this ADR, [GOV-WINDOWS].3 |
+| `ROLE_COLLECTION_FINALITY_ADMIN` | Executes `finalizeCollectionArtwork` / scoped finality subject to component verification | root | [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) (Artwork Finality Freeze [LTA-FINALITY]) |
+| `ROLE_TERMINAL_FREEZE_VETO` | Per-scope terminal-freeze veto guardian resolved through `terminalFreezeVetoGuardian`; independent of scheduling roles | root | this ADR ([GOV-WINDOWS] veto surface); [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) [LTA-FREEZE] rule 4 |
+| `ROLE_ENTROPY_INCIDENT_DECLARER` | Declares entropy requests unrecoverable under the fresh-recovery policy | operational | [`docs/stream-entropy-coordinator.md`](../stream-entropy-coordinator.md) [EC-INCIDENT-ROLE] |
+| `ROLE_ARTIST_REGISTRY_ADMIN` | Proposes artist bindings, declares platform works, withdraws unaccepted proposals | operational | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-ROLES] |
+| `ROLE_ATTRIBUTION_ARBITER` | Governed arbiter for attribution disputes and post-revocation rebinding approval | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DISPUTE] |
+| `ROLE_ARTIST_DORMANCY_ADMIN` | Initiates and completes the governed artist-dormancy procedure | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DORMANCY] |
+
+The legacy CamelCase names in the Role Model table (for example
+`UnpauseAdmin`, `PauseGuardian`) are the P0 authority descriptions; where a
+production surface binds an authority into storage, an event, or a policy
+hash, it binds the `ROLE_*` constant, and the registry maps the constant to
+its current holder. Pause-guardian authority remains a Role Model grant and
+gains no `ROLE_*` storage binding in v1 because no spec stores it.
 
 ### Future Governance Events
 

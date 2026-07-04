@@ -14,11 +14,12 @@ recorded here as final. This ADR is the decision record referenced by the
 ## Problem
 
 The Stream specification set was rewritten onto permanence classes
-([`docs/spec-policy.md`](../spec-policy.md)). That rewrite surfaced 24 open
+([`docs/spec-policy.md`](../spec-policy.md)). That rewrite surfaced 25 open
 questions — genuine decisions, internal contradictions, and specification
 gaps — each marked inline with `OQ-*` and tracked in the register. Under the
 spec policy, no spec that defines Permanent surfaces can reach `Final` while
-any of them is open. This ADR resolves all 24.
+any of them is open. This ADR resolves all 25 through 25 numbered decisions
+(count corrected per ADR 0010; earlier copies miscounted the set as 24).
 
 ## Current Behavior
 
