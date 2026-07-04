@@ -1,11 +1,20 @@
 # Mint Policy And Accounting
 
-This document is a pre-launch target specification for moving mint limits and
-mint accounting out of `StreamCore` into a dedicated mint subsystem made of
-`StreamMintManager` and `StreamMintLedger`. `StreamCore` should remain the
-canonical ERC-721 contract, keep `ERC721Enumerable`, and mint only after an
-authorized mint manager has validated policy and consumed allowance through the
-ledger.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
+inline are resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+in [`docs/spec-open-questions.md`](spec-open-questions.md).
+
+This document specifies moving mint limits and mint accounting out of
+`StreamCore` into a dedicated mint subsystem made of `StreamMintManager` and
+`StreamMintLedger`. 6529Stream is permanent infrastructure for the 6529
+network: the first production deployment is the permanent system, and every
+requirement here is classified by what can ever change about it — Permanent,
+Replaceable, or Operational per [`docs/spec-policy.md`](spec-policy.md) —
+rather than by launch phase. `StreamCore` should remain the canonical ERC-721
+contract, keep `ERC721Enumerable`, and mint only after an authorized mint
+manager has validated policy and consumed allowance through the ledger.
 The cross-cutting 50+ year architecture principles live in
 `docs/stream-long-term-architecture.md`.
 
@@ -29,8 +38,8 @@ StreamMintManager
   - open-vocabulary counter IDs
   - many simultaneous counters per phase
   - phase, collection, and global counter scopes
-  - launch counter keys for recipient, payer, executor, constant, and context
-  - future resolver-backed profile, delegation, and custom counter keys
+  - v1 counter keys for recipient, payer, executor, constant, and context
+  - extension resolver-backed profile, delegation, and custom counter keys
   - batch quantity limits
   - policy fingerprint computation
   - executor authorization
@@ -60,7 +69,7 @@ Optional Gate/Resolver Contracts
   - Merkle allowlist validation
   - EIP-712 ticket validation
   - ERC-1271 smart-wallet signature validation
-  - future 6529 profile/delegation counter-key resolution
+  - extension 6529 profile/delegation counter-key resolution
   - privacy-preserving nullifier resolution
 ```
 
@@ -69,10 +78,10 @@ ledger accepts writes only from authorized managers. Sale and drop contracts cal
 the manager; the manager validates mint policy, consumes allowance through the
 ledger, and then calls Core.
 
-## Launch Scope
+## Protocol v1 Scope
 
-Launch mint scope should be auditable and intentionally smaller than the full
-future counter system:
+Protocol v1 mint scope should be auditable and intentionally smaller than the
+full counter model this document defines:
 
 1. Core-owned global token ID allocation.
 2. Fixed-size, capped-open, and uncapped-open collection minting.
@@ -84,16 +93,22 @@ future counter system:
 7. Module registry with interface and codehash checks for approved gates.
 8. One durable ledger for counter and authorization consumption.
 
-Non-launch unless separately approved:
+Excluded from protocol v1 — intentional absence, not deferral; each item
+requires its own accepted spec or ADR through the frozen extension mechanisms
+before it can exist:
 
 1. Resolver-defined caps.
 2. Resolver-defined deltas.
 3. Privacy-preserving nullifier systems.
 4. General-purpose custom policy VMs.
-5. ERC-20 primary payment adapters.
+5. ERC-20 primary payment adapters inside the mint subsystem. Approved-standard
+   ERC-20 primary settlement is a protocol v1 requirement, but it lives in the
+   revenue and settlement satellites per
+   [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md);
+   the mint manager and ledger stay non-payable and asset-agnostic.
 6. Delegated-profile, consolidated-identity, or other resolver-backed counter
    subjects unless a concrete resolver interface, gas cap, registry status, and
-   test suite are accepted with that launch branch.
+   test suite are accepted in that extension's own spec.
 
 ## Current Implementation Baseline
 
@@ -102,13 +117,13 @@ The first outside-Core implementation slices now exist:
 - CON-012 added Core's `mintManager` pointer, manager-only immediate and
   prepared mint hooks, prepared abort/recovery, and `tokenCollectionIdentity`
   reads in PR #633.
-- CON-013 adds `StreamMintLedger` as a static launch counter and authorization
+- CON-013 adds `StreamMintLedger` as a static v1 counter and authorization
   replay ledger. It records one active policy hash per
   `(manager, collectionId, phaseId)`, owner-authorized ledger writers,
-  launch-safe static counter policies, monotonic counter values, and
+  deployment-safe static counter policies, monotonic counter values, and
   authorization consumption. It intentionally does not execute phase policy,
   call Core, route `StreamDrops`, collect payment, validate custom gates, or
-  support resolver caps/deltas/nullifiers yet. Until the concrete
+  support resolver caps/deltas/nullifiers. Until the concrete
   `StreamMintManager` lands, writer authorization is owner-managed and limited
   to deployed contracts; the manager integration PR should add the reviewed
   manager capability check.
@@ -146,14 +161,14 @@ bytecode size; it is correctness, extensibility, and clean contract ownership.
 5. Allow the same collection to have many independent mint phases.
 6. Support many counters per phase from the beginning.
 7. Track consumed allowance by configurable counter keys.
-8. Support wallet, payer, recipient, and context counter-key models at launch,
-   while leaving resolver-backed delegated profile and custom identity models
-   for explicitly approved extensions.
+8. Support wallet, payer, recipient, and context counter-key models from
+   genesis, while leaving resolver-backed delegated profile and custom identity
+   models to separately accepted extension specs.
 9. Support phase-scoped, collection-scoped, and global counters.
 10. Support batch mints without allowing duplicate-recipient or duplicate-key
    bypasses.
 11. Support executor contracts for paid sales, drops, auctions, reserves, and
-   future mint mechanisms.
+   new mint mechanisms.
 12. Expose clear read APIs for frontend, indexers, and operator tooling.
 13. Use typed errors and events that make policy history reconstructable.
 14. Avoid `tx.origin`.
@@ -219,9 +234,12 @@ mapping(uint256 tokenId => uint256 collectionId) tokenCollectionId; // current C
 mapping(uint256 tokenId => PreparedMintRecord) preparedMintRecords;
 ```
 
-Launch Core derives the collection-local serial from the token ID and the
-collection reserved range instead of storing a separate serial mapping. It also
-derives the canonical mapping-exists read from live ownership, burned-token
+V1 Core allocates sequential global token IDs and stores the collection ID
+and collection-local serial explicitly in the token identity record
+(ADR 0009 decision 1); no serial or collection value is derived from token
+ID arithmetic, and the baseline reserved-range derivation must be removed.
+Core may still
+derive the canonical mapping-exists read from live ownership, burned-token
 audit state, and prepared-mint state instead of storing a separate boolean.
 
 Core should expose the canonical read shared by royalties, metadata, finality,
@@ -254,7 +272,7 @@ function mintFromManager(
 ) external returns (uint256 tokenId, uint256 collectionSerial);
 ```
 
-`tokenDataHash` is a commitment to `keccak256(bytes(tokenData))`. Launch Core
+`tokenDataHash` is a commitment to `keccak256(bytes(tokenData))`. V1 Core
 still stores the renderer-visible `tokenData` string because the current
 metadata renderer consumes it; the hash is the sale/manager commitment that
 prevents a later caller from swapping renderer input after policy acceptance.
@@ -272,17 +290,17 @@ drop/sale pause policy, eligibility, price, asset, settlement, beneficiary, and
 authorization checks are trusted manager responsibilities and must be evidenced
 in the manager, ledger, sale adapter, or settlement adapter records.
 
-Launch should not include persistent standalone token reservations. When another
-spec says a token is "reserved," it means either:
+Protocol v1 should not include persistent standalone token reservations. When
+another spec says a token is "reserved," it means either:
 
 1. the token identity is prepared and completed inside the same top-level
    transaction by the mint manager, so any later failure reverts the mapping and
    serial allocation; or
-2. a later reservation ADR has defined expiry, cancellation, serial-gap,
-   revenue, and royalty-snapshot rules.
+2. a separate accepted reservation ADR has defined expiry, cancellation,
+   serial-gap, revenue, and royalty-snapshot rules.
 
 If same-transaction prepared mints are needed for token-level primary policy,
-Core may expose a manager-only two-step internal launch surface:
+Core may expose a manager-only two-step internal surface:
 
 ```solidity
 function prepareMintFromManager(
@@ -308,8 +326,9 @@ revenue is recorded and before the transaction returns. Completion clears the
 prepared record before minting, keeps the global Core completion sentinel active
 through the ERC-721 receiver callback, then clears that sentinel only after the
 normal mint entropy/randomizer boundary returns for the now-complete token.
-Persistent prepared tokens are forbidden in launch unless the later reservation
-ADR exists. As a recovery escape for a stranded prepared mint, Core allows the
+Persistent prepared tokens are forbidden in protocol v1 unless the separate
+reservation ADR above is accepted. As a recovery escape for a stranded
+prepared mint, Core allows the
 admin to replace only the `mintManager` pointer while the sentinel is active so
 a reviewed replacement manager can call the existing abort hook; other critical
 contract pointers remain locked.
@@ -334,14 +353,14 @@ Prepared-mint safety rules:
    while retaining a Core-level completion sentinel that blocks unrelated Core
    mint, burn, transfer, approval, admin mutation, and second-prepare paths
    until the completion-time entropy/randomizer boundary finishes. The only
-   launch recovery exception is mint-manager replacement, which lets a
+   v1 recovery exception is mint-manager replacement, which lets a
    replacement manager abort a stranded prepared mint without changing admin,
    minter, dependency, randomizer, metadata, or token state.
 5. If any later step in the top-level transaction reverts, the prepared mapping,
    collection serial, revenue/royalty snapshot, and any entropy/randomizer state
    reached during completion all revert with the transaction.
 6. A prepared token that is not completed in the same top-level manager flow is
-   a bug; launch Core must not expose a durable prepared-token or reservation
+   a bug; v1 Core must not expose a durable prepared-token or reservation
    state. If a manager bug strands one anyway, replacing the mint manager and
    aborting through the new manager is an incident-recovery path, not a normal
    reservation lifecycle.
@@ -427,7 +446,7 @@ whose operation ID does not match the operation currently locked by the mint
 manager. The operation lock is non-reentrant and cannot be reused for a
 different token, batch, payer, phase, policy hash, or sale adapter.
 
-Launch control-flow owner: `StreamMintManager`. User-facing sale adapters call
+Control-flow owner: `StreamMintManager`. User-facing sale adapters call
 one manager-owned prepared-mint entrypoint or a sale adapter entrypoint that
 immediately delegates to the manager. Core `prepareMintFromManager` and
 `completePreparedMintFromManager` are restricted to `msg.sender == mintManager`
@@ -489,7 +508,7 @@ event PreparedMintCompleted(
 );
 ```
 
-Successful launch transactions leave no persistent prepared state after
+Successful v1 transactions leave no persistent prepared state after
 completion: `preparedMint(tokenId).exists` returns false once
 `completePreparedMintFromManager` clears the record. During the receiver
 callback, the token is live and `preparedMint(tokenId).exists == false`, but
@@ -512,14 +531,14 @@ Required Core behavior:
    store token-to-collection identity. The collection-local serial is returned
    and remains derivable from the token ID and collection range; mapping
    existence is derived by `tokenCollectionIdentity`.
-7. In the current direct-randomizer launch slice, reach the legacy
-   randomizer/hash boundary after `_safeMint`. The future entropy-coordinator
+7. In the current direct-randomizer implementation slice, reach the legacy
+   randomizer/hash boundary after `_safeMint`. The entropy-coordinator
    target registers bounded entropy state before `_safeMint` and before any
    external receiver callback can observe the token.
 8. Mint to `initialRecipient`.
 9. Return the minted token ID and collection-local serial.
 
-The future entropy registration hook must be bounded and must not call external
+The entropy registration hook must be bounded and must not call external
 randomness providers from the mint path. In the current Core hook slice, the
 legacy randomizer call remains after `_safeMint`, so paid flows that require
 token-level economic state before a receiver callback must use `PREPARED_MINT`
@@ -536,13 +555,13 @@ the manager, ledger, and sale adapter must keep beneficiary and payment
 evidence. Custody flows must emit the later transfer normally so event consumers
 can reconstruct the whole path.
 
-Core intentionally does not emit manager-specific mint or prepared-mint events
-in the bytecode-constrained launch slice. Indexers can observe ERC-721
+The bytecode-constrained v1 Core intentionally does not emit manager-specific
+mint or prepared-mint events. Indexers can observe ERC-721
 `Transfer`, call `tokenCollectionIdentity`, and consume the richer manager,
 ledger, settlement, and prepared-operation events emitted by the satellites.
 
 The existing `StreamCore.mint(uint256,address,string,uint256,uint256)` entrypoint
-should be replaced by `mintFromManager` before launch.
+should be replaced by `mintFromManager` before production deployment.
 
 Burn behavior must preserve the identity mapping used by royalties and audits.
 If a token is burned, Core removes ERC-721 ownership and enumerable membership
@@ -553,7 +572,7 @@ from the burned audit state. Burned-token
 `tokenURI()` may revert under
 normal ERC-721 metadata semantics, while `royaltyInfo()` can still disclose the
 last token, collection, then default royalty policy.
-Launch Core retains the legacy `BurnedTokenRemintNotAllowed(uint256)` selector
+V1 Core retains the legacy `BurnedTokenRemintNotAllowed(uint256)` selector
 for catalog/ABI continuity and because the optimized build is smaller with the
 selector present; the current burned-remint regression path reverts earlier as
 `TokenOutsideCollectionRange()` through sequential token allocation.
@@ -683,15 +702,17 @@ leaf, signed ticket, profile score, delegation graph, or future identity system.
 `1`, such as auction lots, weighted claims, profile-weighted credits, or a
 batch-level nullifier.
 
-Launch implementations must reject `CounterCapMode.RESOLVER`,
+V1 implementations must reject `CounterCapMode.RESOLVER`,
 `CounterDeltaMode.RESOLVER`, `CUSTOM_RESOLVER`, and non-empty nullifier
-consumption unless the corresponding extension has been accepted by a later ADR
-and enabled in the module registry. Future enum values are allowed in the
-schema so policy hashes can evolve, but dead enum surface must not become
-dead-but-callable launch code. Tests should configure each deferred mode and
-prove it reverts before any counter or mint state is written.
+consumption unless the corresponding extension has its own accepted ADR and is
+enabled in the module registry; until then these modes are excluded from v1
+bytecode as intentional absence, not deferral. Reserved enum values are
+allowed in the schema so policy hashes can evolve, but reserved enum surface
+must not become dead-but-callable production code. Tests should configure each
+excluded mode and prove it reverts before any counter or mint state is
+written.
 
-Launch-permitted counter combinations are finite:
+The v1-permitted counter combinations are finite:
 
 ```text
 scope             key mode                  update mode   cap mode   delta mode
@@ -705,9 +726,9 @@ PHASE             CONTEXT                   PER_BATCH     STATIC     STATIC
 COLLECTION        CONTEXT                   PER_BATCH     STATIC     STATIC
 ```
 
-Any other combination reverts at configuration time unless a later ADR expands
-the allowed set. This table bounds the launch test matrix.
-There is no separate `BENEFICIARY` enum in launch: `RECIPIENT` means the
+Any other combination reverts at configuration time unless a separate accepted
+ADR expands the allowed set. This table bounds the v1 test matrix.
+There is no separate `BENEFICIARY` enum in v1: `RECIPIENT` means the
 intended beneficiary as defined below, not the temporary initial recipient.
 
 Examples:
@@ -790,13 +811,13 @@ bytes32 subjectKey = keccak256(abi.encode(
 ```
 
 `CONTEXT` uses `batch.contextHash`. If a context counter is configured, the
-manager must require a nonzero `contextHash`. Launch `CONTEXT` counters are
+manager must require a nonzero `contextHash`. V1 `CONTEXT` counters are
 batch-scoped: one prepared mint request consumes the configured static
 increment once for that context, even when the request mints multiple tokens.
 The ledger context event should therefore be treated as batch evidence rather
 than recipient-specific evidence for this key mode.
 
-The durable ledger value key is scoped separately. For the CON-013 launch
+The durable ledger value key is scoped separately. For the CON-013 genesis
 ledger, the canonical key is manager-scoped and uses the resolved phase/counter
 subject:
 
@@ -811,8 +832,8 @@ bytes32 valueKey = keccak256(abi.encode(
 ```
 
 Cross-collection or cross-phase sharing must therefore be explicit in the
-subject resolver or in a future reviewed ledger design rather than inferred from
-zeroed collection/phase fields.
+subject resolver or in a separately accepted ledger design rather than inferred
+from zeroed collection/phase fields.
 
 For `CUSTOM_RESOLVER`, the counter points to a resolver:
 
@@ -901,8 +922,8 @@ paused             admin pause for this phase
 startTime          zero means no lower time bound
 endTime            zero means no upper time bound
 gate               optional validation module
-maxBatchQuantity   nonzero per-call cap; launch managers must also enforce a reviewed hard maximum
-maxCounters        maximum enabled counters this phase may evaluate; launch managers may enforce this through a reviewed hard maximum constant
+maxBatchQuantity   nonzero per-call cap; v1 managers must also enforce a reviewed hard maximum
+maxCounters        maximum enabled counters this phase may evaluate; v1 managers may enforce this through a reviewed hard maximum constant
 configHash         optional hash of offchain/operator config
 ```
 
@@ -980,15 +1001,16 @@ active policy hash during consumption. The manager registers or updates
 `registeredPhasePolicyHashes[manager][collectionId][phaseId]` through an
 authorized configuration path before the phase can mint. During consumption the
 ledger verifies that the supplied `policyHash` equals that registered value and
-then repeats cap checks against `registeredCounterPolicies`. In launch v1, the
+then repeats cap checks against `registeredCounterPolicies`. In protocol v1, the
 ledger rejects resolver cap/delta modes and verifies supplied `cap` equals
 `staticCap` for `STATIC`, supplied `cap` is zero for `NONE`, and supplied
 `increment` equals `staticIncrement`. This keeps ledger verification implementable and
 auditable while still ensuring events bind to the active manager policy.
 
-Launch v1 has one active registered policy hash per
+Protocol v1 has one active registered policy hash per
 `(manager, collectionId, phaseId)`. Multiple concurrently valid policy hashes
-are not allowed unless a later ADR defines a ticket-transition window. Any
+are not allowed unless a separate accepted ADR defines a ticket-transition
+window. Any
 phase configuration change that changes `policyHash` must update the manager
 state, registered phase hash, and registered counter policies atomically in the
 same governance execution before the new phase can mint. Tightening changes may
@@ -999,7 +1021,7 @@ different ledger, and a ledger replacement cannot reset or bypass counters for
 that frozen policy.
 
 `counterValues` are durable and are not reset when a phase policy is
-re-registered. For the CON-013 launch ledger, the canonical value key is keyed
+re-registered. For the CON-013 genesis ledger, the canonical value key is keyed
 by the authorized manager and the resolved phase/counter subject:
 
 ```solidity
@@ -1013,13 +1035,20 @@ bytes32 valueKey = keccak256(abi.encode(
 ```
 
 The ledger exposes `deriveCounterValueKey` and rejects any supplied `valueKey`
-that does not match this derivation. Future manager-level scopes such as
+that does not match this derivation. Manager-level scopes such as
 `GLOBAL`, `COLLECTION`, and resolver-backed subjects must resolve to the
 effective `(collectionId, phaseId, counterId, subjectKey)` tuple before calling
-the ledger.
+the ledger. The canonical cross-phase tuple is defined by
+ADR 0009 decision 11: `phaseId = 0` is the reserved, named collection-scope
+value (`COLLECTION_SCOPE_PHASE_ID = 0`). Real phases must register with
+`phaseId >= 1`, and the manager and ledger reject phase registration at 0.
+`GLOBAL` and `COLLECTION` scoped counters derive their value keys with the
+reserved value, keeping one derivation function; the reserved constant is
+documented in the domain-constant table's inputs and covered by a golden
+test.
 
 `authorizationUsed` is for signed tickets, drop IDs, or other external mint
-authorizations returned by a gate. The CON-013 launch ledger scopes consumed
+authorizations returned by a gate. The CON-013 genesis ledger scopes consumed
 authorization IDs by manager so two authorized managers cannot collide on the
 same raw replay ID. Managers should still domain-separate authorization IDs by
 chain, ledger, manager, and signed payload so replay evidence remains portable
@@ -1116,17 +1145,17 @@ ledger owns the final cap checks and writes, so counter accounting has a single
 durable enforcement point and any later revert rolls the whole transaction
 back.
 
-The CON-014 launch manager implements this static path as
+The CON-014 genesis manager implements this static path as
 `StreamMintManager`: owners configure phase policy and ordered static counters,
 grant per-phase executors, optionally pause phases, register each active
 `policyHash` with `StreamMintLedger`, build bounded batch counter consumptions,
-enforce named launch hard caps for batch size and counter count, require callers
+enforce named v1 hard caps for batch size and counter count, require callers
 to bind the active `policyHash`, consume a nonzero authorization ID with the
 ledger, derive operation roots from the static request commitment, then execute
-Core's prepared mint pair atomically. The launch manager intentionally does not
-yet
-route existing `StreamDrops` or auction flows, execute payment settlement,
-consult gates, resolve dynamic caps/deltas, or use callable nullifiers.
+Core's prepared mint pair atomically. The implemented manager slice does not
+yet route existing `StreamDrops` or auction flows, execute payment settlement,
+or consult gates; dynamic resolver caps/deltas and callable nullifiers are
+protocol v1 exclusions until their own ADRs are accepted.
 
 Ledger events:
 
@@ -1257,19 +1286,19 @@ struct MintBatch {
 }
 ```
 
-Launch token-data ownership decision:
+Protocol v1 token-data ownership decision:
 
 ```text
 Core role: renderer-visible tokenData plus hash commitment
 Metadata role: renderer-visible tokenData bytes consumed by the current renderer
 ```
 
-Launch Core stores renderer-visible `tokenData` because the current metadata
+V1 Core stores renderer-visible `tokenData` because the current metadata
 renderer consumes it. Core also verifies
 `tokenDataHash = keccak256(bytes(tokenData))` against the manager or sale
 commitment so a caller cannot swap renderer input after policy acceptance. A
-future hash-only or externalized metadata storage design needs a separate
-accepted migration because it changes renderer and finality assumptions.
+hash-only or externalized metadata storage design needs a separate
+accepted migration spec because it changes renderer and finality assumptions.
 
 Rules:
 
@@ -1289,7 +1318,7 @@ Rules:
 10. `tokenData` is opaque bytes. Renderer/schema code may interpret it as
     UTF-8, JSON, CBOR, or another format, but Core and the mint manager do not
     parse it.
-11. Each `tokenData[i]` must satisfy the collection metadata launch limit
+11. Each `tokenData[i]` must satisfy the collection metadata v1 limit
      `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
      calldata/gas cap. In the mint-manager path, Core validates token data after
      manager ledger consumption and before prepared mint state, payment
@@ -1390,7 +1419,7 @@ Examples of executors:
 2. Drop execution contract.
 3. Auction settlement contract.
 4. Artist reserve allocator.
-5. Future claim contract.
+5. New claim contracts.
 
 This makes the manager a policy and accounting layer, not a public payment
 router. Public mint UX can still exist through a public sale adapter.
@@ -1600,7 +1629,7 @@ Canonical state-changing mint sequence:
 16. For each token, Core writes token identity, collection serial, and
     renderer-visible `tokenData` verified against `tokenDataHash`.
 17. The current Core slice reaches the legacy randomizer/hash boundary after
-    `_safeMint`; the future entropy-coordinator target registers bounded
+    `_safeMint`; the entropy-coordinator target registers bounded
     entropy state before `_safeMint` without calling external randomness
     providers.
 18. The authorized mint manager, sale adapter, or resolver hook records any
@@ -1615,15 +1644,15 @@ Ledger accounting should happen before the Core mint calls. If any Core mint
 reverts, EVM rollback reverts the ledger updates too.
 The invariant is: no external untrusted callback executes before counter
 consumption, identity mapping, and required royalty snapshot are complete for
-that token. Entropy-before-callback is a future entropy-coordinator invariant,
+that token. Entropy-before-callback is an entropy-coordinator invariant,
 not a guarantee of the current direct-randomizer hook.
 
-For paid primary mints, launch must use exactly one of the named orchestration
-paths in `docs/revenue-splits-and-royalties.md`:
+For paid primary mints, protocol v1 must use exactly one of the named
+orchestration paths in `docs/revenue-splits-and-royalties.md`:
 
 1. `PRE_REVENUE_SINGLE_STEP`: sale adapter records split-wallet deposit or
    escrow before calling the mint manager, and token-level primary overrides or
-   required mint-time royalty snapshots are unavailable. In launch manager
+   required mint-time royalty snapshots are unavailable. In v1 manager
    accounting, a `RECIPIENT`-keyed counter is keyed to `beneficiary`, not the
    temporary `initialRecipient`. A sale adapter or allowlisted executor that
    needs recipient-owner equality must enforce it in its own sale policy before
@@ -1649,10 +1678,10 @@ interleaving with another mint, transfer, burn, release, escrow flush, or
 snapshot for the prepared token.
 
 Duplicate beneficiaries, duplicate initial recipients, or duplicate counter keys
-in a batch must not bypass caps. Launch implementation must aggregate projected
+in a batch must not bypass caps. The v1 implementation must aggregate projected
 increments before writing state so all counters are evaluated against the
-complete batch. Sequential fallback is not launch-conformant unless a later ADR
-defines and tests it.
+complete batch. Sequential fallback is not deployment-conformant unless a
+separate accepted ADR defines and tests it.
 
 ## Events
 
@@ -1955,8 +1984,8 @@ function setPhasePaused(
 ) external;
 ```
 
-Later mutable-manager versions may add separate counter, metadata, ledger, or
-registry administration:
+Mutable-manager implementations accepted in their own specs may add separate
+counter, metadata, ledger, or registry administration:
 
 ```solidity
 function configureCounter(
@@ -2032,7 +2061,7 @@ state and the policy hash that was frozen, so event replay can reconstruct when
 the phase became permanently stricter.
 
 Counter values must never be decremented. If an operator needs a different
-policy, the correct answer is a new phase ID or a stricter future counter, not
+policy, the correct answer is a new phase ID or a new stricter counter, not
 rewriting history.
 
 The exact freeze posture should be conservative: freezing should only make a
@@ -2060,7 +2089,7 @@ phase stricter or permanently closed.
     integer widths.
 12. All arithmetic should be checked by Solidity 0.8+.
 13. Full manager-level counter storage keys should be domain-separated by chain
-    ID and ledger address. The CON-013 launch ledger intentionally uses a
+    ID and ledger address. The CON-013 genesis ledger intentionally uses a
     phase-scoped in-ledger key derived from manager, collection ID, phase ID,
     counter ID, and subject key; managers must still bind chain ID and ledger
     address into policy hashes and authorization IDs.
@@ -2146,9 +2175,9 @@ StreamDrops or Auction adapter
   -> StreamCore.mintFromManager(...)
 ```
 
-`StreamMinter` can be replaced by `StreamMintManager` before launch. The
-preferred launch design is one mint manager contract for phase policy and one
-mint ledger contract for durable accounting.
+`StreamMinter` can be replaced by `StreamMintManager` before production
+deployment. The preferred genesis design is one mint manager contract for
+phase policy and one mint ledger contract for durable accounting.
 
 ## Implementation Sequence
 
@@ -2162,10 +2191,10 @@ mint ledger contract for durable accounting.
 
 ### Phase 2: Manager Policy And Accounting
 
-Status: CON-013 and CON-014 implement the launch-static foundation:
+Status: CON-013 and CON-014 implement the static v1 foundation:
 
 1. `StreamMintLedger` owns deployed manager writers, phase policy hashes,
-   launch-static counter policies, counter values, and authorization replay
+   static counter policies, counter values, and authorization replay
    state.
 2. `StreamMintManager` owns phase configuration, executor authorization,
    pause/window guards, canonical `policyHash` computation, counter subject
@@ -2175,43 +2204,44 @@ Status: CON-013 and CON-014 implement the launch-static foundation:
    uncapped counters, and subject modes for constant, payer, recipient,
    executor, authorizer, and context-derived keys.
 4. `mintPrepared` requires a nonzero `expectedPolicyHash` and nonzero
-   `authorizationId` so launch execution cannot bypass stale-policy detection
-   or ledger replay protection. `authorizationId` is a replay key supplied by
-   the allowlisted executor; it is not, by itself, cryptographic signature
-   verification. A buggy or compromised allowlisted executor can choose the
-   request contents for any unused `authorizationId`, so untrusted sale, drop,
-   or gate flows must bind `authorizationId` to their own reviewed signed
-   commitment before they receive executor rights.
-5. Dynamic resolver caps/deltas, broader global scopes, gates, callable
-   nullifiers, payment settlement, and sale/auction routing remain follow-up
-   topics.
+   `authorizationId` so production execution cannot bypass stale-policy
+   detection or ledger replay protection. `authorizationId` is a replay key
+   supplied by the allowlisted executor; it is not, by itself, cryptographic
+   signature verification. A buggy or compromised allowlisted executor can
+   choose the request contents for any unused `authorizationId`, so untrusted
+   sale, drop, or gate flows must bind `authorizationId` to their own reviewed
+   signed commitment before they receive executor rights.
+5. Gates, payment settlement, and sale/auction routing remain later
+   implementation slices of this specification; dynamic resolver caps/deltas,
+   broader global scopes, and callable nullifiers are protocol v1 exclusions
+   until their own ADRs are accepted.
 
-`configurePhase` is initial-only in the launch manager. Reconfiguration that
-changes a phase's counter set must use a new phase ID or a later explicit
-reconfiguration path with reviewed migration semantics. Executor-set changes
-and pause changes are intentionally folded into `policyHash`; they refresh the
-registered ledger policy and invalidate in-flight requests bound to the prior
-`expectedPolicyHash`. Returning to the same executor set and pause/config state
-may restore the same deterministic hash, but replay protection still comes from
-the ledger-scoped `authorizationId`. Phase pause is therefore an operational
-stop switch, not durable revocation for an unused authorization; durable
-revocation requires consuming or refusing that authorization, removing the
-executor until it is safe to restore, or moving the flow to a new reviewed phase
-ID/policy.
+`configurePhase` is initial-only in the genesis manager. Reconfiguration that
+changes a phase's counter set must use a new phase ID or a separately accepted
+explicit reconfiguration path with reviewed migration semantics. Executor-set
+changes and pause changes are intentionally folded into `policyHash`; they
+refresh the registered ledger policy and invalidate in-flight requests bound
+to the prior `expectedPolicyHash`. Returning to the same executor set and
+pause/config state may restore the same deterministic hash, but replay
+protection still comes from the ledger-scoped `authorizationId`. Phase pause
+is therefore an operational stop switch, not durable revocation for an unused
+authorization; durable revocation requires consuming or refusing that
+authorization, removing the executor until it is safe to restore, or moving
+the flow to a new reviewed phase ID/policy.
 
 ### Phase 3: Gates And Counter Resolvers
 
 1. Add optional gate interface support.
 2. Add module registry checks.
 3. Add signed authorization replay protection in the ledger.
-4. Add custom counter resolver support only after the static launch path is
+4. Add custom counter resolver support only after the static v1 path is
    audited.
 5. Add EIP-712 signed ticket gate.
 6. Add ERC-1271 smart-wallet signature support.
 7. Add TDH/drop gate if needed.
 8. Add Merkle gates where product flows require them.
-9. Add nullifier support for privacy-preserving claim systems as a future
-   extension.
+9. Add nullifier support for privacy-preserving claim systems as a separately
+   accepted extension.
 
 ### Phase 4: Integration And Tooling
 
@@ -2278,7 +2308,7 @@ Manager tests:
     to bypass counters. Entropy request paths remain outside receiver-callback
     assumptions until the entropy coordinator lands.
 
-Future resolver/nullifier tests:
+Resolver/nullifier extension tests:
 
 1. Before a resolver/nullifier ADR is accepted, configuring
    `CounterCapMode.RESOLVER`, `CounterDeltaMode.RESOLVER`, `CUSTOM_RESOLVER`,
@@ -2341,9 +2371,9 @@ Integration tests:
     separation.
 17. ERC-1271 smart-wallet signatures are supported for signed tickets.
 18. Gate and resolver modules are checked through the module registry.
-19. Resolver-provided dynamic caps and increments are future extensions unless
-    accepted in a later launch-scope decision.
-20. Nullifier-based claim replay protection is a future extension unless
-    accepted in a later launch-scope decision.
+19. Resolver-provided dynamic caps and increments are excluded from protocol
+    v1 unless admitted by their own accepted ADR.
+20. Nullifier-based claim replay protection is excluded from protocol v1
+    unless admitted by its own accepted ADR.
 21. `canMint()` returns explainable counter previews, not just a boolean.
 22. Freeze policy prevents later loosening of frozen phases.

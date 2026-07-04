@@ -37,9 +37,15 @@ Start with:
 - [ops/ROADMAP.md](ops/ROADMAP.md)
 - [ops/EXECUTION_BACKLOG.md](ops/EXECUTION_BACKLOG.md)
 
-Pre-launch target architecture specs:
+Protocol specification set (6529Stream is permanent infrastructure; the
+specs are written against permanence classes per
+[docs/spec-policy.md](docs/spec-policy.md), with open decisions tracked in
+[docs/spec-open-questions.md](docs/spec-open-questions.md)):
 
+- [docs/spec-policy.md](docs/spec-policy.md)
 - [docs/launch-v1-target-architecture.md](docs/launch-v1-target-architecture.md)
+- [docs/stream-long-term-architecture.md](docs/stream-long-term-architecture.md)
+- [docs/launch-conformance-matrix.md](docs/launch-conformance-matrix.md)
 - [docs/revenue-splits-and-royalties.md](docs/revenue-splits-and-royalties.md)
 - [docs/mint-policy-and-accounting.md](docs/mint-policy-and-accounting.md)
 - [docs/metadata-router-and-renderer.md](docs/metadata-router-and-renderer.md)
@@ -47,6 +53,7 @@ Pre-launch target architecture specs:
 - [docs/stream-entropy-coordinator.md](docs/stream-entropy-coordinator.md)
 - [docs/stream-entropy-providers.md](docs/stream-entropy-providers.md)
 - [docs/adr/0008-revenue-splits-and-royalty-resolver.md](docs/adr/0008-revenue-splits-and-royalty-resolver.md)
+- [docs/spec-open-questions.md](docs/spec-open-questions.md)
 
 ## First 30 Minutes
 
@@ -204,6 +211,8 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [docs/tooling.md](docs/tooling.md)
 - [docs/architecture.md](docs/architecture.md)
 - [docs/threat-model.md](docs/threat-model.md)
+- [docs/spec-policy.md](docs/spec-policy.md)
+- [docs/spec-open-questions.md](docs/spec-open-questions.md)
 - [docs/launch-v1-target-architecture.md](docs/launch-v1-target-architecture.md)
 - [docs/revenue-splits-and-royalties.md](docs/revenue-splits-and-royalties.md)
 - [docs/mint-policy-and-accounting.md](docs/mint-policy-and-accounting.md)

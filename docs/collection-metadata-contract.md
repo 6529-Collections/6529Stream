@@ -1,8 +1,17 @@
 # Collection Metadata Contract
 
-This document is a pre-launch target specification for moving collection
-metadata storage out of `StreamCore` into a dedicated
-`StreamCollectionMetadata` contract.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); its formerly open decisions are
+resolved by [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md)
+and recorded in the `Resolved` section of
+[`docs/spec-open-questions.md`](spec-open-questions.md).
+
+This document specifies moving collection metadata storage out of
+`StreamCore` into a dedicated `StreamCollectionMetadata` contract.
+6529Stream is permanent infrastructure for the 6529 network; the first
+production deployment is the permanent system. Requirements here are
+classified by permanence class per the spec policy — Permanent interfaces,
+Replaceable genesis modules, Operational practice — not by delivery phase.
 
 `StreamCore` should remain the canonical ERC-721 contract with
 `ERC721Enumerable`. Collection identity, ownership, transfers, approvals,
@@ -55,14 +64,14 @@ Recommended companion responsibilities:
    supersession, and schema status.
 2. `StreamCollectionSnapshot`: canonical collection manifest snapshots and
    revision-oriented publication events. This can be a module or event surface,
-   not necessarily a separate launch contract.
+   not necessarily a separate genesis contract.
 3. `StreamCollectionAttestations`: artist, curator, estate, institution,
    preservation, C2PA, EAS, VC, EIP-712, and ERC-1271-compatible attestation
    records. This can start inside `StreamCollectionMetadata` and split out if
    it grows.
 4. `StreamPreservationRecords`: archive receipts, PREMIS-style preservation
    records, fixity checks, storage/migration events, and media-provenance
-   references. This should remain outside Core even if implemented at launch.
+   references. This should remain outside Core even if implemented at genesis.
 
 ## Collection Knowledge System
 
@@ -77,7 +86,7 @@ The architecture should have four layers:
    remain in `StreamCore`.
 2. Typed public metadata: identity, people, media, URIs, rights, display, and
    other fields that wallets, marketplaces, 6529 frontends, and renderers should
-   understand from launch.
+   understand from genesis.
 3. Extensible knowledge graph: arbitrary `bytes32` keys, field types, hashes,
    URIs, schemas, attestations, view manifests, and open vocabularies that can
    grow without redeploying Core or hardcoding labels forever.
@@ -105,9 +114,9 @@ External signals to use:
 3. [ERC-5773](https://eips.ethereum.org/EIPS/eip-5773): context-dependent
    multi-asset output for different display environments.
 4. [ERC-7401](https://eips.ethereum.org/EIPS/eip-7401): parent/child NFT
-   relationship modeling, useful as inspiration for future token-linked
-   archives or companion assets without changing Stream's ERC-721 ownership
-   model at launch.
+   relationship modeling, useful as inspiration for token-linked archive or
+   companion-asset modules added through separate accepted specs, without
+   changing Stream's ERC-721 ownership model.
 5. [ERC-7496](https://eips.ethereum.org/EIPS/eip-7496): dynamic onchain traits
    when another contract needs enforceable traits rather than ordinary display
    attributes.
@@ -134,6 +143,10 @@ how to verify it, and what schema interprets it. It should not try to store a
 museum archive directly in ERC-721 Core.
 
 ## Current Implementation Baseline
+
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); it records point-in-time as-built
+state and does not weaken any requirement in this spec.
 
 Current `origin/main` already includes a safer metadata helper layer and
 metadata refresh events, but `StreamCore` still stores collection display and
@@ -201,7 +214,7 @@ not live in ERC-721 Core.
     stewardship.
 12. Support multiple canonical views of the same collection without changing
     the default marketplace `tokenURI()` path.
-13. Keep the launch implementation simple enough to audit.
+13. Keep the genesis implementation simple enough to audit.
 
 ## Non-Goals
 
@@ -213,15 +226,15 @@ not live in ERC-721 Core.
 6. It does not store marketplace secrets or private data.
 7. It does not rely on hardcoded field labels as a complete permanent schema.
 
-## Launch Scope Reduction
+## V1 Scope Reduction
 
-The collection metadata architecture is a 50-year knowledge system, but launch
-ABI must stay small enough to audit. The launch contract should implement the
+The collection metadata architecture is a 50-year knowledge system, but the v1
+ABI must stay small enough to audit. The genesis contract should implement the
 first column, treat the second column as schema/manifest guidance, and use the
-third column as v1 outside-Core companion surface where the main launch ABI would
+third column as v1 outside-Core companion surface where the main v1 ABI would
 become too large.
 
-| Launch ABI | Schema/Manifest Guidance | V1 Outside-Core Companion Surface |
+| V1 ABI | Schema/Manifest Guidance | V1 Outside-Core Companion Surface |
 |---|---|---|
 | `CollectionIdentity` | PREMIS object/event/agent/right payload schemas | `StreamSchemaRegistry` |
 | `CollectionPeople` | C2PA assertion, ingredient, action schemas | `StreamCollectionAttestations` |
@@ -238,18 +251,18 @@ become too large.
 | append-only snapshots | museum/catalogue manifests | snapshot attestation network |
 | revision/events | event catalog JSON | indexer checkpoint service |
 
-Launch v1 must support C2PA, IIIF, PREMIS-style, fixity,
+Protocol v1 must support C2PA, IIIF, PREMIS-style, fixity,
 media-relationship, archive, and museum/catalogue records as real metadata and
 preservation surfaces. The default implementation path is `CollectionRecord`
-plus `schemaId`, `HashRef`, URI commitments, and launch companion satellites
+plus `schemaId`, `HashRef`, URI commitments, and genesis companion satellites
 such as `StreamPreservationRecords`, `StreamCollectionAttestations`, and
 `StreamCollectionViews`. Typed PREMIS/C2PA/IIIF structs can be promoted into a
 companion ABI when they pass the same function-count, event-reconstruction,
 schema-hash, and audit-scope gates; they must not be embedded in `StreamCore`.
 
-The first launch implementation slice should keep the audited onchain ABI
+The genesis implementation slice should keep the audited onchain ABI
 compact by storing schema-bound generic records instead of one setter per
-museum field. In that shape, `recordType` identifies typed launch groups such
+museum field. In that shape, `recordType` identifies typed v1 groups such
 as identity, rights, IIIF views, C2PA references, catalogue records, script or
 media manifests, and custom-gate metadata; `schemaId`, URI, content hash,
 auxiliary hash, revision, snapshot, and event payloads provide the stable
@@ -257,20 +270,20 @@ reconstruction surface. Field-specific ABIs remain candidates for companion
 satellites only after they clear the aggregate function-count and audit-scope
 ceiling.
 
-Launch metadata surfaces must also have a hard aggregate function-count,
+Genesis metadata surfaces must also have a hard aggregate function-count,
 bytecode, and audit-scope ceiling across `StreamCollectionMetadata` and any v1
 metadata companion satellites. Before audit handoff, the release manifest must
 publish the external/public function count, interface IDs, selectors, owner
 subsystem, runtime bytecode size, module manifest, and code hash for
 `StreamCollectionMetadata`, `StreamPreservationRecords`,
 `StreamCollectionAttestations`, and `StreamCollectionViews`. The initial
-aggregate ceiling is 80 external/public functions across those launch metadata
-surfaces, including inherited views, with a launch soft target of 60 or fewer.
+aggregate ceiling is 80 external/public functions across those genesis metadata
+surfaces, including inherited views, with a v1 soft target of 60 or fewer.
 Exceeding the soft target requires an audit-scope note; exceeding the hard
-ceiling requires a new ADR that either removes launch surface or defers a
-responsibility to a later accepted module. This keeps "world-class metadata"
+ceiling requires a new ADR that either removes v1 surface or moves a
+responsibility to a separate accepted module. This keeps "world-class metadata"
 from quietly turning into an unauditable cluster of monoliths.
-The release checker for the launch candidate must fail if the aggregate
+The release checker for the deployment candidate must fail if the aggregate
 function count, selector catalog, bytecode report, or code-hash manifest for
 these metadata surfaces is missing or exceeds the accepted ceiling.
 
@@ -316,11 +329,14 @@ created without knowing its final size. This is required for permanent Stream
 subcollections such as an ongoing photographic series where the artist does not
 know how many works will be added over time.
 
-The launch architecture should allocate global sequential ERC-721 token IDs and
-store explicit `tokenId -> collectionId` plus `tokenId -> collectionSerial`
-mappings. The current namespaced token ID formula is current-code context, not
-the target model. Collection-local serials remain stable display and accounting
-facts without being encoded into the token ID.
+Core allocates sequential global ERC-721 token IDs from one global counter
+starting at 1 and stores explicit `tokenId -> collectionId` plus
+`tokenId -> collectionSerial` mappings (ADR 0009 decision 1). Token ID
+arithmetic carries no meaning: no serial or collection value may be derived
+from the token ID, and the namespaced-range formula is removed from the
+allocator. The current namespaced token ID formula is current-code context,
+not the target model. Collection-local serials remain stable display and
+accounting facts without being encoded into the token ID.
 
 Core should expose a read interface:
 
@@ -385,8 +401,9 @@ Rules:
    collection was explicitly configured as capped-open.
 5. V1 status transitions are `ACTIVE <-> PAUSED`, `ACTIVE -> CLOSED`, and
    `PAUSED -> CLOSED`. `CLOSED` is terminal and cannot be reopened. Ongoing
-   collections should use `PAUSED` for temporary pauses; a future reopenable
-   state such as `SUSPENDED` requires a later ADR.
+   collections should use `PAUSED` for temporary pauses; a reopenable state
+   such as `SUSPENDED` is excluded from protocol v1 and, because Core owns
+   collection status, would require a successor Core line.
 6. Metadata, revenue, mint, and entropy satellites listen to collection events
    but do not create collection identity.
 
@@ -453,7 +470,7 @@ event StreamTokenBurned(
 
 ## Open-Ended Collections
 
-Open-ended collections are a first-class launch requirement.
+Open-ended collections are a first-class protocol v1 requirement.
 
 Examples:
 
@@ -521,9 +538,9 @@ Core should allocate the token ID and local serial. Sale contracts should not
 need to precompute token IDs by hand. If a sale path needs a token-level primary
 or royalty override, it should allocate the token through Core before external
 recipient callbacks, write the authoritative token-to-collection mapping, and
-then settle revenue. Launch v1 does not define a standalone premint reservation
-API; unknown future token IDs are not valid collection authority for metadata,
-revenue, royalty, entropy, or freeze rules.
+then settle revenue. Protocol v1 does not define a standalone premint
+reservation API; unknown future token IDs are not valid collection authority
+for metadata, revenue, royalty, entropy, or freeze rules.
 
 ## Contract Identity
 
@@ -594,7 +611,7 @@ depth, gas, or ABI complexity.
 
 ## Typed Metadata
 
-The contract should ship with a rich typed metadata model from launch. The
+The contract should ship with a rich typed metadata model from genesis. The
 typed model is the stable, first-class API for fields that renderers,
 marketplaces, wallets, indexers, and 6529 frontends are expected to understand
 without collection-specific interpretation.
@@ -726,10 +743,11 @@ Rights and provenance guidance:
 6. Rights fields are disclosure and evidence surfaces, not onchain legal
    enforcement. Operator UX and rights schemas must state that commercial,
    derivative, AI-training, print, exhibition, estate, or attribution metadata
-   does not itself compel offchain actors unless a separate legal agreement or
-   future enforcement ADR says so. Collections using legal or estate fields
-   should obtain offchain legal review before publication, because immutable
-   notice can outlive changes in law, ownership, or estate administration.
+   does not itself compel offchain actors unless a separate legal agreement
+   or a separately accepted enforcement ADR says so. Collections using legal
+   or estate fields should obtain offchain legal review before publication,
+   because immutable notice can outlive changes in law, ownership, or estate
+   administration.
 
 ```solidity
 struct CollectionDisplay {
@@ -764,7 +782,7 @@ is exposed as bytes plus an optional decoded view chosen by the renderer. Core
 stores only `tokenDataHash`; `StreamCollectionMetadata` stores renderer-visible
 token data bytes or a hash-bound URI/ref when a collection needs them.
 
-Recommended token-level launch API:
+Recommended token-level v1 API:
 
 ```solidity
 struct TokenMetadata {
@@ -829,7 +847,7 @@ struct CollectionMetadataView {
 }
 ```
 
-Typed metadata should be extensive enough to make launch collections feel
+Typed metadata should be extensive enough to make genesis collections feel
 complete in marketplaces, galleries, wallets, and 6529 frontends. It should not
 try to predict every future field. That is the job of open metadata fields.
 
@@ -894,18 +912,18 @@ enum PayloadSourceType {
 
 Rules:
 
-1. `INLINE_CHUNKS` is the preferred launch path for collection scripts.
-2. `DEPENDENCY_REGISTRY` is the preferred launch path for shared JavaScript
+1. `INLINE_CHUNKS` is the preferred v1 path for collection scripts.
+2. `DEPENDENCY_REGISTRY` is the preferred v1 path for shared JavaScript
    dependencies already supported by the protocol.
 3. `IPFS`, `ARWEAVE`, and `HTTPS` require a hash commitment for payloads that
    affect rendering, provenance, or collector display.
-4. `SSTORE2` and `ETHFS` are not required at launch, but the manifest model
+4. `SSTORE2` and `ETHFS` are not required at genesis, but the manifest model
    must be able to represent them.
 5. `WEB3_CALL` leaves room for ERC-4804-style onchain JSON or HTML reads.
 6. Source type additions should be additive. Unknown source types in future
    schemas must not change Core behavior.
-7. Launch v1 should not include an `OTHER` source type because it has no
-   resolution semantics. Future source types must be added through explicit
+7. Protocol v1 should not include an `OTHER` source type because it has no
+   resolution semantics. New source types must be added through explicit
    enum values or versioned extension modules with resolver rules.
 
 ## Open Metadata Fields
@@ -1058,7 +1076,7 @@ Field values should be bytes so future values can be:
 
 For discoverability, the contract should either keep an enumerable list of
 custom field keys per collection or emit enough events for indexers to
-reconstruct it. The preferred launch design is:
+reconstruct it. The preferred v1 design is:
 
 ```solidity
 mapping(uint256 collectionId => bytes32[] keys) collectionFieldKeys;
@@ -1078,13 +1096,13 @@ their expected format through either:
 2. A schema ID in `CollectionIdentity`.
 3. A companion format key such as `keccak256("FIELD_FORMAT:<fieldKey>")`.
 
-The launch implementation does not need a universal type registry, but it
-should leave room for one.
+The v1 implementation does not need a universal type registry, but it
+should leave room for one as a separate accepted module.
 
 ### Field Families
 
 Known custom fields should be documented as families rather than as a closed
-list. Suggested launch families:
+list. Suggested v1 families:
 
 1. Curatorial fields: artist statements, curator notes, museum labels,
    exhibition context, season/release context, and collection narratives.
@@ -1123,7 +1141,7 @@ struct ScriptManifest {
 }
 ```
 
-Launch behavior:
+V1 behavior:
 
 1. `libraryURI` replaces the current `collectionLibrary`.
 2. Onchain script chunks replace the current `collectionScript`.
@@ -1131,7 +1149,7 @@ Launch behavior:
 4. `rendererCompatibility` states the renderer/API version expected by the
    script.
 5. `scriptURI` is an optional offchain mirror or source reference.
-6. `sourceType` should be `INLINE_CHUNKS` for launch onchain scripts.
+6. `sourceType` should be `INLINE_CHUNKS` for v1 onchain scripts.
 7. `sourcePointer` can later point to a blob contract, EthFS path, Arweave ID,
    IPFS CID, or another storage-specific identifier.
 8. `mimeType` should normally be `application/javascript` for executable
@@ -1175,7 +1193,7 @@ payload even if the source is external.
 
 Guidance:
 
-1. Launch dependency manifests can use `DEPENDENCY_REGISTRY` when the existing
+1. V1 dependency manifests can use `DEPENDENCY_REGISTRY` when the existing
    registry contains the dependency.
 2. `version` is a human-readable version string. It is not a security
    primitive.
@@ -1318,10 +1336,10 @@ Rules:
    key-level, or content-hash commitments where possible so a defunct ENS
    resolver or DID method does not erase provenance.
 
-Launch can store the latest attestation hash per type plus emit append-only
-events. Full onchain attestation arrays are optional if gas becomes annoying;
-events plus explicit read slots for important latest hashes are enough for the
-first version.
+The genesis implementation can store the latest attestation hash per type plus
+emit append-only events. Full onchain attestation arrays are optional if gas
+becomes annoying; events plus explicit read slots for important latest hashes
+are enough for v1.
 
 ## Preservation Receipts
 
@@ -1386,13 +1404,14 @@ The detailed preservation payload should live in canonical JSON, CBOR, IIIF,
 PREMIS XML/JSON, C2PA manifests, W3C VC payloads, or future formats referenced
 by URI/hash.
 
-### Launch Onchain Record Primitive
+### V1 Onchain Record Primitive
 
 The detailed structs below define Stream's preservation schema vocabulary. They
-should not all become separate launch ABI methods or storage layouts.
+should not all become separate v1 ABI methods or storage layouts.
 
-Launch should use one generic record primitive for preservation, provenance,
-attestation, relationship, fixity, C2PA, IIIF, rights, and archive records:
+Protocol v1 should use one generic record primitive for preservation,
+provenance, attestation, relationship, fixity, C2PA, IIIF, rights, and
+archive records:
 
 ```solidity
 struct HashRef {
@@ -1430,14 +1449,14 @@ hashing, such as `ABI_V1`, `RFC8785_JCS`, `DET_CBOR`, `RAW_BYTES`, `PREMIS_XML`,
 `bytes32 keccak256` fields elsewhere, but preservation-critical records need
 algorithm-tagged fixity.
 
-Launch v1 must define numeric IDs for every hash algorithm and
+Protocol v1 must define numeric IDs for every hash algorithm and
 canonicalization profile in the release manifest. Unknown hash algorithms are
-not accepted in launch writes; future algorithms require an explicit registry
+not accepted in v1 writes; new algorithms require an explicit registry
 or contract version rather than a generic `OTHER` bucket.
 
 Algorithm, canonicalization, record-type, and schema identifiers should be
 allocated through an append-only registry with reserved governance ranges.
-Existing IDs must never be reused with different meaning. Future hash families,
+Existing IDs must never be reused with different meaning. New hash families,
 canonicalization profiles, record families, or schema families require explicit
 new IDs and do not require any change to Core token identity assumptions.
 
@@ -1446,7 +1465,7 @@ Malformed, empty, or oversized digests revert before storage or event emission.
 Variable-length formats such as multihash must define their maximum byte length
 and inner algorithm validation in the release manifest or schema registry.
 
-Recommended launch write:
+Recommended v1 write:
 
 ```solidity
 function recordCollectionRecord(
@@ -1455,7 +1474,7 @@ function recordCollectionRecord(
 ) external;
 ```
 
-Recommended launch event:
+Recommended v1 event:
 
 ```solidity
 event CollectionRecordRecorded(
@@ -1479,10 +1498,11 @@ Rules:
 5. `signatureScheme` and `signatureHash` are optional commitments to EIP-712,
    ERC-1271, W3C VC, EAS, C2PA, DID-linked, or future verification bundles.
 6. The typed records below are recommended offchain schema profiles and
-   optional future companion-contract interfaces, not mandatory launch storage.
-7. This keeps the launch metadata contract auditable while preserving the
+   optional companion-contract interfaces under separate accepted specs, not
+   mandatory v1 storage.
+7. This keeps the genesis metadata contract auditable while preserving the
    50-year knowledge-system model.
-8. `contentHashDigest`, `signatureHashDigest`, and `uri` must respect launch
+8. `contentHashDigest`, `signatureHashDigest`, and `uri` must respect v1
    byte limits. Oversized records revert before emitting events.
 9. New record families are admitted through registry governance and explicit
    authorization policy updates. They cannot change tokenURI, renderer output,
@@ -1762,9 +1782,10 @@ HAS_COMPANION_ASSET
 Rules:
 
 1. ERC-7401-style parent/child ideas should be represented as metadata
-   relationships at launch, not as Core ownership nesting.
-2. If future Stream modules add token-linked companion assets, they should use
-   explicit relationship records and not infer relationships from naming.
+   relationships, not as Core ownership nesting.
+2. Stream modules that later add token-linked companion assets through
+   separate accepted specs should use explicit relationship records and not
+   infer relationships from naming.
 3. Relationship payloads should include enough chain ID, contract address, token
    ID, object ID, URI, and hash data to survive migrations and mirrors.
 
@@ -1834,16 +1855,20 @@ Rules:
 1. Locks are one-way.
 2. `METADATA_ALL` blocks all mutable metadata updates.
 3. Field-specific locks block only that field or group.
-4. Core collection freeze may imply metadata freeze if the launch policy wants
-   that, but this should be explicit.
+4. Core collection freeze never implies a metadata lock (ADR 0009
+   decision 20). Locks are explicit only, and the locks or snapshots a
+   collection's policy promises (`SNAPSHOTS`, and `METADATA_ALL` where
+   promised) must be in place before Core freeze, per rules 7 and 8.
+   Implied side effects are hidden coupling; the architecture forbids them
+   everywhere else.
 5. Script and dependency locks should be strongly encouraged before final
    collection freeze.
 6. Preservation receipts may remain appendable after display metadata is frozen
    if the collection policy wants ongoing archive maintenance.
-7. In the launch generic metadata satellite, locking an ordinary `recordType`
+7. In the v1 generic metadata satellite, locking an ordinary `recordType`
    also blocks snapshots that declare the same `recordType`. `SNAPSHOTS` and
    `METADATA_ALL` block snapshot publication across all record families.
-8. After Core collection freeze, the launch generic satellite still permits
+8. After Core collection freeze, the v1 generic satellite still permits
    ordinary `recordType` locks so an operator can seal the specific final
    metadata family that was just snapshotted. Broad `SNAPSHOTS` and
    `METADATA_ALL` locks are freeze-specific terminal controls and must be set
@@ -1973,9 +1998,9 @@ blob pointers instead of strings.
 
 Typed convenience writes such as `recordArchiveReceipt`,
 `recordPreservationEvent`, `recordFixityCheck`, `recordC2PAReference`, and
-`recordMediaRelationship` may be added in a later companion contract. For launch
-they should be represented through `recordCollectionRecord` with a schema ID and
-content hash.
+`recordMediaRelationship` may be added in a companion module under its own
+accepted spec. In v1 they should be represented through
+`recordCollectionRecord` with a schema ID and content hash.
 
 ## Read API
 
@@ -2105,7 +2130,7 @@ function snapshotHash(uint256 collectionId, bytes32 snapshotId)
     returns (bytes32);
 ```
 
-Launch does not need typed storage reads for every historical attestation,
+Protocol v1 does not need typed storage reads for every historical attestation,
 archive receipt, preservation event, fixity check, C2PA reference, or media
 relationship. Events are the canonical append-only history. Read slots should
 focus on latest generic record hashes, active snapshots, and values renderers
@@ -2267,7 +2292,7 @@ event CollectionCoreStatusObserved(
 event ContractURIUpdated();
 ```
 
-Every launch event that mutates a typed metadata group must emit enough payload
+Every v1 event that mutates a typed metadata group must emit enough payload
 data for event-only reconstruction. It can do this by emitting all changed
 fields directly, or by emitting a deterministic delta record with schema ID,
 canonicalization ID, URI, and content hash. Hash-only events are acceptable only
@@ -2276,10 +2301,11 @@ same transaction or from an immutable onchain read named by the event.
 
 `CollectionArchiveReceiptRecorded`, `CollectionPreservationEventRecorded`,
 `CollectionFixityCheckRecorded`, `CollectionC2PAReferenceRecorded`, and
-`CollectionMediaRelationshipRecorded` are useful future typed events or
-companion-contract events. The launch metadata contract can emit only
-`CollectionRecordRecorded` for those record families and still preserve the same
-offchain schema semantics through `recordType`, `subjectId`, and `schemaId`.
+`CollectionMediaRelationshipRecorded` are candidate typed events for
+companion modules under separate accepted specs. The genesis metadata
+contract can emit only `CollectionRecordRecorded` for those record families
+and still preserve the same offchain schema semantics through `recordType`,
+`subjectId`, and `schemaId`.
 
 The metadata router or Core should also emit ERC-4906-style events where token
 metadata may change:
@@ -2293,7 +2319,7 @@ event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
 
 Use ADR 0004 governance/action roles rather than inventing a second admin
 system. Legacy selector-map `StreamAdmins` authorization is nonconformant for
-launch.
+protocol v1.
 
 Recommended permissions:
 
@@ -2320,30 +2346,31 @@ publishCollectionSnapshot   collection metadata admin or global admin
 lockCollectionField         freeze admin or global admin
 ```
 
-The launch v1 generic metadata and preservation satellites use selector-level
+The v1 generic metadata and preservation satellites use selector-level
 writer authorization. Their `setCollectionRecord`,
 `setCollectionRecordWithRevision`, `publishCollectionSnapshot`, and
 `recordCollectionRecord` selectors are whole-module safe-operator grants and a
-CON-015 launch-v1 exception to ADR-0004's nonconformant selector-map guidance,
-not record-family-limited delegation. The exception applies only when operators
-choose the launch generic satellites under Safe/operator custody. Operators
-must grant those selectors only to global admins or fully trusted
+CON-015 protocol-v1 exception to ADR-0004's nonconformant selector-map
+guidance, not record-family-limited delegation. The exception applies only
+when operators choose the v1 generic satellites under Safe/operator custody.
+Operators must grant those selectors only to global admins or fully trusted
 metadata/preservation roles that are allowed to write every record type accepted
-by the target module. Other launch paths remain governed by the earlier
+by the target module. Other v1 paths remain governed by the earlier
 nonconformant selector-map guidance unless this specific operator-custody model
 is explicitly in effect. Record-family-specific authorization remains a
-requirement for future typed companion modules or attestation workflows that
-delegate to artists, curators, institutions, rights administrators, provenance
-verifiers, or archive verifiers.
+requirement for typed companion modules or attestation workflows, added through
+separate accepted specs, that delegate to artists, curators, institutions,
+rights administrators, provenance verifiers, or archive verifiers.
 
-This is an operator-custody risk, not just a UX detail. A compromised launch
+This is an operator-custody risk, not just a UX detail. A compromised v1
 generic writer can publish identity, rights, C2PA/PREMIS, snapshot, and archive
 records for any collection in the module. Public-beta ceremony evidence must
 show that those writer selectors are granted only to fully trusted operational
-roles, and the risk register carries the narrower future-module mitigation.
+roles, and the risk register carries the narrower record-family-module
+mitigation.
 
-When record-family-specific modules are introduced, their authorization must be
-explicit by record type:
+When record-family-specific modules are introduced through separate accepted
+specs, their authorization must be explicit by record type:
 
 ```text
 ARTIST_*                  artist address, delegated artist signer, or global admin
@@ -2358,22 +2385,23 @@ MEDIA_RELATIONSHIP_*      preservation admin or collection metadata admin
 AGENT_*                   agent metadata admin or global admin
 ```
 
-No record family is permissionless in launch v1. If a future collection wants
+No record family is permissionless in protocol v1. If a collection later wants
 public collector notes or community annotations, that should be a separate
-moderated module whose records cannot affect tokenURI, renderer output,
-artwork finality, rights, royalties, minting, or ownership.
+moderated module, under its own accepted spec, whose records cannot affect
+tokenURI, renderer output, artwork finality, rights, royalties, minting, or
+ownership.
 
 Every mutation must check:
 
 1. The collection exists in Core.
-2. The caller has whole-module authority for the launch generic satellite, or
-   record-family authority for a future typed module.
+2. The caller has whole-module authority for the v1 generic satellite, or
+   record-family authority for a separately accepted typed module.
 3. The relevant lock is not active.
 4. The input is structurally valid.
 
 ## Validation
 
-Recommended launch validations:
+Recommended v1 validations:
 
 1. `collectionId` must exist in Core.
 2. `schemaId` should be nonzero after final metadata setup.
@@ -2468,7 +2496,7 @@ contract URI is an offchain URI rather than an onchain JSON data URI, the
 metadata contract should store the URI and an optional schema/hash commitment.
 
 Collection contract URI updates should emit collection-specific metadata events.
-Launch v1 does not add `contractURI()` to Core. Router-level global contract
+Protocol v1 does not add `contractURI()` to Core. Router-level global contract
 metadata reads may emit `ContractURIUpdated()` from the router or metadata
 contract that exposes the global read. Collection-level contract metadata
 remains available through `StreamCollectionMetadata.contractURI(collectionId)`
@@ -2530,10 +2558,10 @@ Recommended approach:
 This gives the system room to evolve without hardcoding every future metadata
 field in Solidity.
 
-## Launch ABI Partitioning
+## V1 ABI Partitioning
 
 `StreamCollectionMetadata` is the authoritative collection knowledge system,
-but it does not have to place every long-term feature in one launch ABI. If the
+but it does not have to place every long-term feature in one v1 ABI. If the
 main metadata contract approaches its function-count, bytecode, or auditability
 ceiling, these responsibilities should move to companion contracts named in the
 system manifest and linked by schema/manifest hashes:
@@ -2546,11 +2574,11 @@ StreamCollectionViews
 StreamPreservationRecords
 ```
 
-The launch invariant is discoverability and integrity, not monolith size. Core
-does not care which companion serves a snapshot, attestation, or alternate
-view, as long as the collection metadata root, finality manifest, event catalog,
-and system manifest identify the responsible module, interface ID, code hash,
-schema ID, URI, and content hash.
+The governing invariant is discoverability and integrity, not monolith size.
+Core does not care which companion serves a snapshot, attestation, or
+alternate view, as long as the collection metadata root, finality manifest,
+event catalog, and system manifest identify the responsible module, interface
+ID, code hash, schema ID, URI, and content hash.
 
 ## Canonical Hash Serialization
 
@@ -2578,9 +2606,9 @@ Default rules:
 Schemas may define additional canonicalization rules, but they must be
 identified by `schemaId`, `schemaURI`, and `schemaHash`.
 
-## Launch Limits
+## V1 Limits
 
-The metadata contract must choose finite launch limits before implementation.
+The metadata contract must choose finite v1 limits before implementation.
 Recommended v1 hard maxima:
 
 ```text
@@ -2617,9 +2645,9 @@ and agents to understand a payload years later.
 
 Preferred architecture:
 
-1. Launch can store schema URI/hash directly in collection metadata.
-2. If schema usage grows, add a small `StreamSchemaRegistry` companion contract
-   rather than baking every schema into Core.
+1. Protocol v1 can store schema URI/hash directly in collection metadata.
+2. If schema usage grows, add a small `StreamSchemaRegistry` companion module
+   through a separate accepted spec rather than baking every schema into Core.
 3. The registry should be append-friendly and deprecation-aware, not mutable in
    a way that silently changes what an old schema meant.
 
@@ -2850,10 +2878,11 @@ The implementation should optimize for graceful aging:
 9. The contract should avoid assuming today's marketplaces, URI schemes,
    storage networks, signature standards, or display devices are final.
 
-## Reserved Future Metadata Surfaces
+## Reserved Extension Surfaces
 
-The launch metadata contract should leave clear extension points for future
-modules without implementing them in Core:
+The genesis metadata contract should leave clear extension points for
+Replaceable-layer modules added through separate accepted specs, without
+implementing them in Core:
 
 1. Post-mint parameters may use custom fields such as
    `POST_MINT_PARAMS_SCHEMA_URI`, `POST_MINT_PARAMS_SCHEMA_HASH`, and
@@ -2861,21 +2890,26 @@ modules without implementing them in Core:
 2. Dynamic onchain traits may use custom fields such as
    `DYNAMIC_TRAITS_MODULE` and `DYNAMIC_TRAITS_SCHEMA_URI`, but ordinary display
    traits should remain in token `attributes`.
-3. Specialized future view modules may extend launch view manifests with
-   token-specific views, live views, programmable view negotiation, or raw
-   onchain HTML/JSON reads. They should build on `CollectionViewManifest`
-   rather than changing `StreamCore.tokenURI()`.
+3. Specialized view modules added through separate accepted specs may extend
+   v1 view manifests with token-specific views, live views, programmable view
+   negotiation, or raw onchain HTML/JSON reads. They should build on
+   `CollectionViewManifest` rather than changing `StreamCore.tokenURI()`.
 4. Token-bound account integration may use `TOKEN_BOUND_ACCOUNT_REGISTRY` and
    token-level metadata fields when a concrete product use case exists.
 5. Agent-readable metadata may use `AGENT_MANIFEST_URI`,
    `AGENT_MANIFEST_HASH`, and schema fields that describe how tools should
    inspect, render, validate, or explain a collection.
 
-Except for the launch view-manifest support specified above, these are reserved
-conventions rather than launch requirements. They should be implemented as
-separate modules that read Core and metadata interfaces.
+Except for the v1 view-manifest support specified above, these are reserved
+conventions excluded from protocol v1, not v1 requirements. They should be
+implemented as separate accepted modules that read Core and metadata
+interfaces.
 
 ## Bytecode Impact
+
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); measurements are point-in-time and
+superseded by the release-artifact size proofs.
 
 Measured scratch compile:
 
@@ -2924,11 +2958,11 @@ live in Core.
 6. Add generalized attestations.
 7. Add generic collection records for archive, preservation, fixity, C2PA,
    relationship, rights, and cultural records.
-8. Add launch companion contracts for preservation records, attestations, and
+8. Add genesis companion contracts for preservation records, attestations, and
    view references when those surfaces would push `StreamCollectionMetadata`
    past its function-count, bytecode, or auditability ceiling.
 9. Keep PREMIS/C2PA/IIIF typed structs out of Core; represent them through
-   schema/hash commitments or companion ABIs with explicit launch manifests.
+   schema/hash commitments or companion ABIs with explicit module manifests.
 10. Add IIIF/view manifest conventions.
 11. Add snapshot publication.
 12. Add rich events and metadata refresh hooks.
@@ -2954,10 +2988,10 @@ Core integration tests:
 
 Metadata write tests:
 
-The first launch implementation exercises typed launch groups through generic
+The genesis implementation exercises typed v1 groups through generic
 schema-bound records. The field-specific tests below apply directly to any
-future typed ABI promotion and indirectly to v1 records by mapping each field
-group to a `recordType`/`schemaId` pair.
+typed ABI promotion under a separate accepted spec and indirectly to v1
+records by mapping each field group to a `recordType`/`schemaId` pair.
 
 1. Admin can set collection identity.
 2. Admin can set collection people.
@@ -3025,13 +3059,13 @@ Event/indexing tests:
 6. Preservation event, fixity, C2PA reference, and media relationship histories
    are reconstructable from `CollectionRecordRecorded` events.
 
-## Recommended Launch Position
+## Recommended V1 Position
 
-For launch, implement a dedicated `StreamCollectionMetadata` contract rather
-than storing collection metadata inside `StreamMetadataRouter`.
+For protocol v1, implement a dedicated `StreamCollectionMetadata` contract
+rather than storing collection metadata inside `StreamMetadataRouter`.
 
 Core should keep `ERC721Enumerable` and token behavior. The metadata contract
-and v1 companion satellites should own the launch ABI listed in `Launch Scope
+and v1 companion satellites should own the v1 ABI listed in `V1 Scope
 Reduction`: compact schema-bound collection records for typed metadata groups,
 script/dependency/media manifest commitments, schema commitments, view
 manifests, snapshot events, revision events, generic collection records, field

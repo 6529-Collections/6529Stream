@@ -1,16 +1,27 @@
 # Stream Long-Term Architecture
 
-This document is the umbrella pre-launch target specification for making
-6529Stream durable over a 50+ year contract life. It ties together the proposed
-revenue, royalty, metadata, renderer, entropy, and provider specs.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
+inline are resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+in [`docs/spec-open-questions.md`](spec-open-questions.md).
+
+This document is the umbrella architecture specification for making
+6529Stream durable over a 50+ year contract life. 6529Stream is permanent
+infrastructure for the 6529 network: the first production deployment is the
+permanent system, and every requirement here is classified by what can ever
+change about it — Permanent, Replaceable, or Operational — rather than by
+launch phase. It ties together the revenue, royalty, metadata, renderer,
+entropy, and provider specs.
 
 Companion specs:
 
+- `docs/launch-v1-target-architecture.md` (Stream protocol v1 specification)
 - `docs/revenue-splits-and-royalties.md`
 - `docs/mint-policy-and-accounting.md`
 - `docs/adr/0004-admin-governance.md`
 - `docs/adr/0008-revenue-splits-and-royalty-resolver.md`
-- `docs/launch-conformance-matrix.md`
+- `docs/launch-conformance-matrix.md` (deployment conformance gates)
 - `docs/metadata-router-and-renderer.md`
 - `docs/collection-metadata-contract.md`
 - `docs/stream-entropy-coordinator.md`
@@ -108,16 +119,24 @@ permanent surfaces fit with headroom.
 
 ## Satellite Versioning
 
-Every satellite family should have a stable version and manifest surface:
+Every satellite family must expose the canonical module identity surface
+(ADR 0009 decision 3). The `stream` prefix follows the
+`streamSystemManifest()` precedent and keeps these selectors unambiguous in
+ABIs and explorers over decades; the selectors are golden-tested:
 
 ```solidity
-function moduleType() external pure returns (bytes32);
-function moduleVersion() external pure returns (bytes32);
-function moduleInterfaceId() external pure returns (bytes4);
-function implementationCodeHash() external view returns (bytes32);
-function deploymentManifestHash() external view returns (bytes32);
-function moduleManifest() external view returns (string memory uri, bytes32 hash);
+function streamModuleType() external pure returns (bytes32);
+function streamModuleVersion() external pure returns (bytes32);
+function streamModuleInterfaceId() external pure returns (bytes4);
+function streamModuleSchemaHash() external view returns (bytes32);
+function streamModuleSupersedes() external view returns (address);
+function streamModuleCodeHash() external view returns (bytes32);
+function streamModuleDeploymentManifestHash() external view returns (bytes32);
+function streamModuleManifest() external view returns (string memory uri, bytes32 hash);
 ```
+
+`streamModuleSupersedes()` returns the immediate predecessor in the same
+module family, or the zero address for a first-generation module.
 
 Recommended module type examples:
 
@@ -166,7 +185,7 @@ Incident revocation must not imply admin sweep rights, hidden migration, or
 silent policy substitution. It should freeze the affected surface until an
 accepted recovery or successor path is published.
 
-Canonical launch registry surface:
+Canonical v1 registry surface:
 
 ```solidity
 enum ModuleRegistryStatus {
@@ -229,7 +248,7 @@ event StreamModuleStatusChanged(
 );
 ```
 
-Every launch pointer assignment, module registry check, and frozen-route
+Every pointer assignment, module registry check, and frozen-route
 compatibility check must name the registry that supplied eligibility. A pointer
 cannot be considered inspectable if tools can read only the target address and
 must guess which registry, module type, interface, or manifest made that target
@@ -333,10 +352,10 @@ event FrozenRoutePinned(
 );
 ```
 
-Launch routing model: Core stays small and calls the current global
+Protocol v1 routing model: Core stays small and calls the current global
 `METADATA_ROUTER`. The metadata router, not Core, owns collection-level frozen
-route dispatch. A replacement global router is launch-conformant only if it can
-serve or delegate every pinned frozen route reported by the frozen route
+route dispatch. A replacement global router is deployment-conformant only if it
+can serve or delegate every pinned frozen route reported by the frozen route
 registry, or if an executed recovery manifest supersedes that route. Core does
 not add arbitrary per-collection router pointers in v1.
 
@@ -373,7 +392,7 @@ event CoreSatellitePointerFrozen(
 );
 ```
 
-Core must expose a required pointer read interface from launch:
+Core must expose a required pointer read interface from genesis:
 
 ```solidity
 interface IStreamCorePointerView {
@@ -412,10 +431,11 @@ Normative v1 rule:
    authoritative.
 2. Core stores or exposes an explicit collection-local serial for every minted
    token.
-3. Namespaced token ID ranges may remain an allocation optimization, but they
-   are not authority for royalty, metadata, revenue, entropy, or freeze
+3. Token IDs are allocated sequentially from one global counter
+   (ADR 0009 decision 1). Token ID arithmetic carries no meaning and is
+   never authority for royalty, metadata, revenue, entropy, or freeze
    resolution.
-4. Launch v1 does not need a standalone premint reservation API. Premint or
+4. Protocol v1 does not include a standalone premint reservation API. Premint or
    nonexistent token IDs without an authoritative same-transaction allocation
    mapping are unmapped. They may use default royalty behavior or zero, but
    must not be assigned to a collection from a range heuristic.
@@ -432,15 +452,16 @@ Normative v1 rule:
 7. Inherited collection freezes apply to token-level assignments through this
    authoritative mapping. No token override can escape an inherited freeze by
    being created before the mapping exists.
-8. Launch Core should preserve the current conservative burn posture: a frozen
+8. Core should preserve the conservative burn posture: a frozen
    or artwork-finalized collection is non-burnable unless its pre-freeze policy
    and finality manifest explicitly preserve a burn path and prove that burning
    cannot change the promised artwork, supply semantics, entropy interpretation,
    or revenue/royalty history. If that explicit policy is absent, burn attempts
    for frozen collections revert.
 
-This rule resolves the long-term model even if the implementation continues to
-allocate token IDs from collection ranges.
+The baseline implementation's collection-range allocator must be replaced by
+the sequential global allocator; the explicit mapping model above is the
+long-term identity surface either way (ADR 0009 decision 1).
 
 Canonical Core read surface:
 
@@ -475,9 +496,10 @@ interface IStreamCoreTokenIdentityView {
 }
 ```
 
-`mappingExists` is the public authoritative identity read. Current launch Core
-derives it from live ownership, burned-token audit state, and prepared-mint
-state rather than storing a separate boolean. For a currently minted token, the
+`mappingExists` is the public authoritative identity read. The read semantics
+are Permanent; the v1 implementation may derive the result from live
+ownership, burned-token audit state, and prepared-mint state rather than
+storing a separate boolean. For a currently minted token, the
 function returns `(true, collectionId, collectionSerial, false)`. For a burned
 token that was once minted, it returns
 `(true, lastCollectionId, lastCollectionSerial, true)`. For a prepared-incomplete
@@ -537,9 +559,9 @@ GLOBAL      freezes every key in the policy family
 
 Freeze rules:
 
-1. Freezes are one-way unless a future spec explicitly defines a timelocked
-   unfreeze product.
-2. The default launch posture should treat economic and final artwork freezes
+1. Freezes are one-way unless a separate accepted spec explicitly defines a
+   timelocked unfreeze product; none exists in protocol v1.
+2. The default protocol posture treats economic and final artwork freezes
    as irreversible.
 3. Inherited freeze needs O(1) enforcement through counters, dirty bits, or
    explicit descendant materialization, not unbounded enumeration.
@@ -739,7 +761,7 @@ bytes32 coreCollectionFactsHash = keccak256(abi.encode(
 `collectionConfigHash` is Core's hash of collection-level supply/status fields
 that are not otherwise included above. It must not include mutable display
 metadata, economic assignments, or event-only labels.
-For launch v1, if no additional Core-owned collection config fields affect
+For protocol v1, if no additional Core-owned collection config fields affect
 finality beyond the fields explicitly listed in `CoreCollectionFinalityFacts`,
 `collectionConfigHash` is:
 
@@ -753,14 +775,14 @@ bytes32 collectionConfigHash = keccak256(abi.encode(
 ```
 
 If implementation adds another Core-owned collection config field that affects
-minting, burning, supply, status, or finality, the launch spec must update this
+minting, burning, supply, status, or finality, this spec must update the
 preimage before deployment. A generic "whatever Core stores" hash is not
 conformant.
 
 Each component's `dataHash` preimage is component-owned but must be versioned,
-typed, and named in that component's manifest. Launch components must publish
+typed, and named in that component's manifest. Genesis components must publish
 their `dataHash` schema in the release manifest. A generic "hash whatever the
-module wants" value is not launch-conformant.
+module wants" value is not deployment-conformant.
 
 The registry computes the finality record hash onchain:
 
@@ -829,9 +851,10 @@ Core facts are not a `FinalityComponentExpectation` entry; they are the
 separately computed `coreCollectionFactsHash` or `scopedCoreFactsHash` input to
 the finality record. Finality is not valid if any required satellite component
 is merely promised frozen offchain.
-Launch should cap finality component count and calldata size. Initial limits:
-`MAX_FINALITY_COMPONENTS = 32` and `MAX_FINALITY_CALLDATA_BYTES = 32_768`,
-subject to implementation measurement before deployment.
+The finality registry must cap component count and calldata size. Planning
+values are `MAX_FINALITY_COMPONENTS = 32` and
+`MAX_FINALITY_CALLDATA_BYTES = 32_768`; the deployed constants are measured
+before deployment and pinned in the release manifest.
 
 The finality manifest must bind:
 
@@ -885,7 +908,7 @@ Finality requirements:
 
 ### Scoped Finality For Open Series
 
-Open-ended collections are a first-class launch target. They need finality for
+Open-ended collections are a first-class protocol v1 target. They need finality for
 individual works, releases, seasons, exhibitions, and archival views without
 pretending the parent collection has a final supply.
 
@@ -1015,7 +1038,7 @@ Scope rules:
    `(scopeType, collectionId, tokenId, scopeId, finalityRecordHash)`, not only
    `collectionId`.
 6. A global router, renderer, collection metadata, or entropy pointer
-   replacement is launch-conformant only if it can serve every pinned scoped
+   replacement is deployment-conformant only if it can serve every pinned scoped
    route or a delayed recovery manifest supersedes the affected scope.
 7. Scoped finality recovery uses the same status machine as collection finality
    but its `recoveryId` preimage includes the full `FinalityScope`.
@@ -1268,7 +1291,7 @@ function verifyFinalityRange(
 
 `verifyFinality` and `finalityStillMatches` are non-reverting diagnostic reads
 for already-recorded finality. They must use bounded `staticcall` to every
-component, with a launch-measured `FINALITY_COMPONENT_READ_GAS` and a bounded
+component, with a deployment-measured `FINALITY_COMPONENT_READ_GAS` and a bounded
 returndata copy for the fixed return struct. If any component read reverts,
 runs out of its gas cap, returns malformed data, has no code, or no longer
 matches the expected code hash, the read returns `currentRouteMatches = false`
@@ -1282,7 +1305,7 @@ documented diagnostic status such as `VERIFY_RANGE_REQUIRED` before attempting
 component reads when the published full-read budget is not satisfiable, instead
 of allowing callers to hit an unexplained out-of-gas condition.
 Initial planning target is `FINALITY_COMPONENT_READ_GAS = 30_000` and a full
-diagnostic budget under 1,200,000 gas for 32 components, but launch uses
+diagnostic budget under 1,200,000 gas for 32 components, but deployment uses
 measured values plus margin. Operator tooling should prefer
 `verifyFinalityRange` for routine archival checks once a collection has more
 than eight components.
@@ -1291,7 +1314,7 @@ Finality recording is stricter: `finalizeCollectionArtwork` reverts if any
 required component read fails, returns malformed data, reports `frozen = false`,
 or differs from the submitted expectation. `previewFinality(collectionId,
 components)` or equivalent tooling must expose the same comparisons before a
-state-changing finality transaction is sent, and launch operator runbooks must
+state-changing finality transaction is sent, and operator runbooks must
 require a successful preview artifact hash before execution.
 
 ### Finality Recovery
@@ -1485,8 +1508,8 @@ function streamSystemManifest()
     );
 ```
 
-The `streamSystemManifest()` read is hosted on Core and is a required launch
-surface, not an optional convenience. The release manifest records its selector,
+The `streamSystemManifest()` read is hosted on Core and is a required Core
+surface from genesis, not an optional convenience. The release manifest records its selector,
 interface ID if one is assigned, return shape, and gas measurement. The
 manifest should include module addresses, versions, code hashes, registry
 states, pointer freeze states, event catalog hash, compatibility matrix hash,
@@ -1588,18 +1611,18 @@ hashes.
 ## Resolver Safety Invariants
 
 Core read paths that call satellites must be bounded and boring. In particular,
-the royalty resolver's `royaltyInfoForToken` path must be storage reads and
+the royalty resolver's `royaltyReceiverAndBps` path must be storage reads and
 arithmetic only. It must not make external calls, deploy wallets, read ERC-20
 balances, call receiver hooks, or depend on mutable marketplace context.
 
-Launch validation must include malicious resolvers that consume all gas,
+Deployment validation must include malicious resolvers that consume all gas,
 return malformed data, return excess data, attempt external calls, or recurse
 through another view. Core must return `(address(0), 0)` without reverting
 under every resolver failure mode, and the production resolver implementation
 must be audited against the no-external-call invariant.
 
 `royaltyInfo()` and `tokenURI()` bounded reads are independent marketplace
-entrypoints with independent top-level gas budgets. Launch code must not add a
+entrypoints with independent top-level gas budgets. Production code must not add a
 combined marketplace read that invokes both the royalty resolver and metadata
 router within one shared `staticcall` frame or derives one gas cap from the
 other.
@@ -1870,7 +1893,7 @@ semantics materially change, the review must re-evaluate entropy
 block-number-based archival/export policy.
 
 Stream should maintain a minimum archival reconstruction client outside the
-production frontend. At launch it must be able to replay the event catalog,
+production frontend. From genesis it must be able to replay the event catalog,
 reconstruct token-to-collection mappings, split profiles, escrow balances,
 entropy status/seeds, collection metadata snapshots, and finality records from
 archived chain data and content-addressed manifests. Its source archive,
@@ -1890,7 +1913,7 @@ name the treasury or funding mechanism for keepers, entropy request payments,
 monitoring, storage pinning/mirroring, domain/ENS renewal, and preservation
 drills, and should document what degrades if funding disappears.
 The specs, ADRs, event catalogs, release manifests, and reconstruction-client
-source archives are themselves preservation objects. Each launch and material
+source archives are themselves preservation objects. Each deployment and material
 upgrade should publish a content-addressed spec bundle hash in the deployment
 manifest and mirror it across independent storage families. Governance runbooks
 should also name legal-entity succession and dissolution risks; the contracts do
@@ -1904,15 +1927,15 @@ archival reconstruction clients, and independent archive nodes named in the
 operations runbook.
 
 For literally unbounded open series, live per-token mappings are permanent
-state growth. Launch keeps explicit `tokenCollectionIdentity` storage because
-that is the most robust marketplace and royalty surface. A future state-expiry
-or storage-rent era may add a successor deployment line in which cold token
-identity proofs are served from a canonical state-export root, but that is a
-new architecture decision. The launch Core must not silently replace live
+state growth. Protocol v1 keeps explicit `tokenCollectionIdentity` storage
+because that is the most robust marketplace and royalty surface. A future
+state-expiry or storage-rent era may add a successor deployment line in which
+cold token identity proofs are served from a canonical state-export root, but
+that is a successor-line decision. Core must not silently replace live
 token identity reads with offchain proofs. The same posture applies to durable
 mint ledger counters, authorization/nullifier state, escrow owed balances,
 split release state, finality records, recovery records, and registry/catalog
-state: launch keeps them live where the protocol requires live reads, and any
+state: v1 keeps them live where the protocol requires live reads, and any
 future proof-backed cold-storage model is a successor-line decision with state
 export roots and explicit user-facing tradeoffs.
 
@@ -2002,12 +2025,12 @@ algorithm-tagged for long-term agility:
 hashAlgorithm = HASH_KECCAK256 | HASH_SHA256 | HASH_BLAKE3 | HASH_MULTIHASH
 ```
 
-Launch should not include a generic `OTHER` hash bucket. New hash algorithms
+Protocol v1 does not include a generic `OTHER` hash bucket. New hash algorithms
 must be assigned explicit IDs through the append-only hash/canonicalization
 registry and documented in a release manifest or successor schema.
 
-The hash, canonicalization, schema, and enum ID spaces must have a launch
-governing surface. The minimum acceptable launch posture is a manifest-pinned
+The hash, canonicalization, schema, and enum ID spaces must have a governing
+surface from genesis. The minimum acceptable genesis posture is a manifest-pinned
 numeric allocation file whose hash is included in `streamSystemManifest()` and
 the release manifest. A stronger posture is an append-only registry satellite
 with explicit IDs, URI/hash, status, and supersession links. Either way, new
@@ -2022,7 +2045,8 @@ Manifest canonicalization:
 3. Raw JSON fragments used in metadata must be either validated before storage
    or marked as admin-trusted with a stored hash and schema.
 4. Omitted field, null field, empty string, and empty array/object semantics
-   must be specified for every manifest family before launch.
+   must be specified for every manifest family before the owning spec
+   reaches Final.
 
 Privacy and redaction are part of manifest design. Provenance records may
 include sensitive camera, location, institution, estate, model-release, or
@@ -2097,12 +2121,12 @@ mirrored source archive URI/hash.
 ## Maximum On-Chain Options
 
 The architecture should leave room for every reasonable long-term on-chain or
-verifiable mode without putting all of them in launch Core.
+verifiable mode without putting all of them in Core.
 
 Allowed storage and resolution families:
 
 ```text
-INLINE_CHUNKS       simple launch path for scripts and small JSON fragments
+INLINE_CHUNKS       simple v1 path for scripts and small JSON fragments
 SSTORE2             large write-once payloads
 ETHFS               shared onchain web assets
 DEPENDENCY_REGISTRY shared JavaScript/library dependencies
@@ -2117,7 +2141,7 @@ WEB3_CALL           future onchain composable views
 Rules:
 
 1. Core must not care which source family a payload uses.
-2. Launch may use inline chunks for auditability.
+2. Protocol v1 may use inline chunks for auditability.
 3. Offchain sources that matter to final artwork should carry hash commitments.
 4. Mutable HTTPS is acceptable only when the product intentionally wants a
    mutable or service-backed surface and the metadata says so.
@@ -2302,7 +2326,7 @@ Required practices:
 7. Treat fallback-to-zero royalty behavior, metadata router failure, and
    entropy request stalls as incidents requiring monitoring.
 
-Royalty resolver readiness is a launch gate. Before public sale, governance
+Royalty resolver readiness is a deployment gate. Before public sale, governance
 should stage, execute, and optionally freeze or timelock the resolver pointer;
 operator tooling should run a non-view diagnostic probe that records resolver
 health, configured defaults, gas behavior, and fallback-to-zero incidents.
@@ -2375,7 +2399,7 @@ Event indexing policy:
 
 ## Failure And Recovery
 
-The launch architecture should define failure modes before they occur.
+The architecture should define failure modes before they occur.
 
 Expected failure classes:
 
@@ -2409,15 +2433,20 @@ Recovery principles:
 
 ## Release Gates
 
-No subsystem should be considered launch-ready until these gates pass.
+No subsystem is deployable until these gates pass.
 
 Core gates:
 
 1. `forge build`.
 2. Core bytecode below EIP-170 with documented headroom after each extraction
    and again after Core-native ERC-2981 is added.
-   CI should fail if Core runtime bytecode exceeds 22,000 bytes unless a
-   launch-blocking governance review accepts a new ceiling with rationale.
+   The governing rule is the deployment-conformance headroom target
+   (ADR 0009 decision 2): Core runtime must retain at least 2,000 bytes of
+   EIP-170 margin at the deployment gate, proven by one post-extraction
+   measured build with the full mandatory hook set. The bytecode-spend
+   baseline and exception ledger in `release-artifacts/contracts.json`
+   remain the pre-deployment development control; interim exceptions cannot
+   survive to the deployment gate.
 3. interface IDs verified.
 4. ERC-721 enumerable behavior unchanged.
 5. Core-native ERC-2981 tested under resolver failure.
@@ -2479,7 +2508,7 @@ Governance gates:
 6. Provider-adapter optionality adds operational work, but avoids betting the
    entire protocol life on one randomness vendor.
 
-## Recommended Pre-Launch Order
+## Recommended Genesis Implementation Order
 
 1. Extract metadata router and renderer from Core.
 2. Extract collection metadata storage from Core.
@@ -2487,7 +2516,7 @@ Governance gates:
 4. Implement revenue resolver and split wallets.
 5. Add minimal resolver-backed Core ERC-2981.
 6. Run bytecode and interface gates.
-7. Freeze launch module manifests and deployment runbooks.
+7. Freeze genesis module manifests and deployment runbooks.
 8. Gather marketplace, indexer, and rendering evidence before public claims.
 
 This order maximizes Core headroom before adding mandatory ERC-2981 and keeps

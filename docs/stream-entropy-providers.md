@@ -1,7 +1,18 @@
 # Stream Entropy Provider Adapters
 
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
+inline are resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+in [`docs/spec-open-questions.md`](spec-open-questions.md).
+
 This document specifies the Stream-native entropy provider adapter contracts
-that feed raw randomness into `StreamEntropyCoordinator`.
+that feed raw randomness into `StreamEntropyCoordinator`. 6529Stream is
+permanent infrastructure for the 6529 network: the first production
+deployment is the permanent system. Requirements here are classified by
+permanence class per `docs/spec-policy.md`. The provider interface and its
+result-status semantics are Permanent; individual provider adapters are
+Replaceable modules behind that frozen interface.
 
 The coordinator spec is `docs/stream-entropy-coordinator.md`. That document
 defines token registration, request lifecycle, seed finalization, delivery
@@ -11,25 +22,31 @@ randomness sources to that coordinator.
 The cross-cutting 50+ year architecture principles live in
 `docs/stream-long-term-architecture.md`.
 
-## Launch Scope
+## Genesis Adapter Scope
 
-Launch adapter scope is intentionally small:
+The genesis adapter set is intentionally small:
 
 1. `StreamEntropyProviderVRF` as the default high-assurance production adapter.
 2. `StreamEntropyProviderMock` for local development, tests, and deterministic
    simulations.
-3. A v1 fallback decision: either ship one reviewed
+3. One reviewed fallback adapter shipped alongside VRF: genesis ships dual
+   providers — VRF primary plus one reviewed
    `StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth` fallback, with
-   ARRNG as the lower-complexity initial fallback candidate, or record an
-   explicit reviewed VRF-only launch exception. The choice must be retained in a
-   checksum-covered `StreamEntropyLaunchDecision` manifest, either as
+   ARRNG as the preferred candidate and Pyth as the reviewed alternate
+   (ADR 0009 decision 21). A VRF-only deployment is not conformant; the
+   former reviewed VRF-only exception path is removed. The shipped choice
+   must be retained in a checksum-covered `StreamEntropyLaunchDecision`
+   manifest, either as
    `release-artifacts/latest/entropy-launch-decision.json` or as an equivalent
    release-manifest record, that records the mode, selected provider code hashes,
    policy hashes, review evidence, and coordinator failure behavior.
 
-All other provider families in this document are future research or future
-adapter candidates. They should not be treated as launch implementation scope
-unless a later ADR explicitly promotes one of them.
+All other provider families in this document are extension candidates:
+Replaceable-layer adapters that may be added behind the frozen provider
+interface, provider epochs, and coordinator registry approval. Each requires
+its own separate accepted spec and review before production use, and none is
+part of the genesis implementation scope unless an accepted ADR explicitly
+promotes it.
 
 ## Design Position
 
@@ -56,7 +73,7 @@ token hash.
 
 The current `NextGenRandomizerNXT`, `NextGenRandomizerRNG`, and
 `NextGenRandomizerVRF` contracts are reference material only. The production
-launch target is a new set of Stream-native adapters.
+target is a new set of Stream-native adapters.
 
 ## NextGen Lifecycle Lessons For Adapters
 
@@ -102,7 +119,7 @@ The provider landscape breaks into five useful categories:
 5. Native or local schemes: PREVRANDAO, delayed blockhash, VDF/SNARK beacon
    research, and app-level commit-reveal.
 
-Launch recommendation remains simple: use Chainlink VRF v2.5 as the first
+The genesis recommendation remains simple: use Chainlink VRF v2.5 as the first
 default high-assurance adapter because it is production-proven, verifies proofs
 onchain before consumer use, has clear security guidance, and supports modern
 subscription/native-token funding paths.
@@ -346,19 +363,27 @@ Rules:
 2. Result must not already be delivered.
 3. Function may be called by anyone, unless the provider source requires a more
    constrained policy.
-4. Adapter calls `coordinator.fulfillEntropy(requestKey, rawRandomness)`.
-5. On success, marks result delivered.
-6. On failure, emits failure and keeps result available for later retry.
+4. Adapter calls
+   `uint8 outcome = coordinator.fulfillEntropy(requestKey, rawRandomness);`
+   and inspects the returned outcome.
+5. On a `FINALIZED` outcome, marks result delivered.
+6. On a revert, emits failure and keeps result available for later retry.
+7. On a benign rejection outcome, applies the terminal-stale rule below.
 
-If the coordinator rejects because the request is stale, already finalized, or
-failed, the adapter may mark the result terminal after a successful explicit
-coordinator stale-response path exists. Until then, retaining the result is
-safer.
+`fulfillEntropy` returns a pinned `EntropyFulfillmentOutcome` code instead of
+reverting on benign rejection (ADR 0009 decision 25); the outcome enum is
+defined in `docs/stream-entropy-coordinator.md`. If the coordinator rejects
+because the request is stale, already finalized, or failed, the adapter
+should retain the result. An adapter may mark a delivered result
+`TERMINAL_STALE` only when `fulfillEntropy` returned `REJECTED_STALE_EPOCH`
+or `REJECTED_INACTIVE_REQUEST`, or when the coordinator's request-status
+read shows that the adapter's stored (epoch, attempt) pair is no longer
+active.
 
 ## StreamEntropyProviderVRF
 
-`StreamEntropyProviderVRF` is the default high-assurance launch provider family.
-It should be a new Stream-native adapter, not the current
+`StreamEntropyProviderVRF` is the default high-assurance genesis provider
+family. It should be a new Stream-native adapter, not the current
 `NextGenRandomizerVRF` wired into the new system.
 
 ### Responsibilities
@@ -462,8 +487,8 @@ VRF coordinator callback
   -> adapter verifies known vrfRequestId
   -> adapter compresses random words to rawRandomness
   -> adapter stores result and marks RAW_RANDOMNESS_RECEIVED
-  -> adapter attempts coordinator.fulfillEntropy(requestKey, rawRandomness)
-  -> adapter marks delivered only after success
+  -> uint8 outcome = coordinator.fulfillEntropy(requestKey, rawRandomness)
+  -> adapter marks delivered only on a FINALIZED outcome
 ```
 
 Recommended raw compression:
@@ -504,7 +529,7 @@ function updateVRFConfig(
 Rules:
 
 1. Admin-only through ADR 0004 governance/action roles. Legacy selector-map
-   `StreamAdmins` authorization is nonconformant for launch.
+   `StreamAdmins` authorization is nonconformant for production deployment.
 2. Emit `VRFConfigUpdated`.
 3. Existing requests retain the provenance values emitted at request time.
 4. Updates affect only future requests.
@@ -534,11 +559,13 @@ event VRFConfigUpdated(
 
 ## StreamEntropyProviderARRNG
 
-`StreamEntropyProviderARRNG` is the lower-complexity initial v1 fallback
-candidate if launch chooses to ship a fallback provider instead of a reviewed
-VRF-only exception. It should be a new Stream-native adapter if retained. The
-current `NextGenRandomizerRNG` can inform the integration, but should not be
-reused as-is.
+`StreamEntropyProviderARRNG` is the preferred candidate for the reviewed
+fallback provider that genesis ships alongside the VRF primary: genesis
+ships VRF primary plus one reviewed fallback, ARRNG preferred for its
+existing operational experience, Pyth as the reviewed alternate, and a
+VRF-only deployment is not conformant (ADR 0009 decision 21). It should be
+a new Stream-native adapter if selected. The current `NextGenRandomizerRNG`
+can inform the integration, but should not be reused as-is.
 
 ### Responsibilities
 
@@ -660,10 +687,12 @@ event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
 
 ## StreamEntropyProviderPyth
 
-`StreamEntropyProviderPyth` is an accepted v1 fallback candidate if launch
-chooses a Pyth fallback instead of ARRNG or a reviewed VRF-only exception. It is
-more integration-complex than ARRNG and needs explicit fee, callback, liveness,
-and audit coverage before activation.
+`StreamEntropyProviderPyth` is the reviewed alternate for the fallback
+provider that genesis ships alongside the VRF primary: it ships only if it,
+rather than the preferred ARRNG candidate, is selected as the reviewed
+fallback (ADR 0009 decision 21). It is more integration-complex than
+ARRNG and needs explicit fee, callback, liveness, and audit coverage before
+activation.
 
 Pyth Entropy uses a two-party commit-reveal construction. The provider commits
 to values through a hash chain, the user contract supplies its own contribution,
@@ -713,7 +742,9 @@ bytes32 rawRandomness = keccak256(abi.encode(
 
 ## StreamEntropyProviderDrand
 
-`StreamEntropyProviderDrand` is a future public-beacon adapter family.
+`StreamEntropyProviderDrand` is an extension public-beacon adapter family:
+a Replaceable-layer candidate behind the frozen provider interface, requiring
+a separate accepted spec and review before production use.
 
 drand is a distributed public randomness beacon backed by threshold BLS
 signatures. It is especially interesting after EIP-2537 because Ethereum now
@@ -769,7 +800,7 @@ bytes32 rawRandomness = keccak256(abi.encode(
 
 ## StreamEntropyProviderRandcast
 
-`StreamEntropyProviderRandcast` is a future threshold-BLS oracle adapter
+`StreamEntropyProviderRandcast` is an extension threshold-BLS oracle adapter
 candidate.
 
 ARPA Randcast uses a network of nodes performing BLS threshold signature tasks.
@@ -777,7 +808,7 @@ The adapter model looks similar to a VRF callback: request randomness, map the
 provider request ID to the Stream request key, receive a verifiable random seed,
 store first, and fulfill the coordinator.
 
-This is not a launch-default recommendation. It is a good candidate to keep on
+This is not a genesis-default recommendation. It is a good candidate to keep on
 the provider roadmap because it gives Stream another independent randomness
 network family.
 
@@ -791,7 +822,7 @@ Required review before implementation:
 
 ## StreamEntropyProviderSupra
 
-`StreamEntropyProviderSupra` is a future dVRF adapter candidate.
+`StreamEntropyProviderSupra` is an extension dVRF adapter candidate.
 
 Supra dVRF exposes randomness through router/deposit-style contracts and
 supports callback-based request flows with configurable confirmations and
@@ -809,7 +840,8 @@ The adapter should follow the same store-first pattern as VRF:
 
 ## StreamEntropyProviderWitnet
 
-`StreamEntropyProviderWitnet` is a future crowd-witnessing randomness candidate.
+`StreamEntropyProviderWitnet` is an extension crowd-witnessing randomness
+candidate.
 
 Witnet's model uses randomly selected witnesses with commit-reveal and
 aggregation. It is conceptually attractive because it is not a single oracle
@@ -819,7 +851,7 @@ for production collections.
 
 ## StreamEntropyProviderAPI3QRNG
 
-`StreamEntropyProviderAPI3QRNG` is a future physical-entropy candidate.
+`StreamEntropyProviderAPI3QRNG` is an extension physical-entropy candidate.
 
 Quantum randomness can be excellent as entropy, but for Stream the key question
 is not just the entropy source. It is whether the whole delivery path is
@@ -860,8 +892,9 @@ Rules:
 5. The final mixer result must still go through the coordinator as one
    `rawRandomness` value.
 
-Launch posture: do not make this the default. Consider it for exceptional
-high-value collections after the single-provider flow is audited and deployed.
+Genesis posture: do not make this the default. Consider it for exceptional
+high-value collections, through a separate accepted spec, after the
+single-provider flow is audited and deployed.
 
 ## Timelock Reveal Layer
 
@@ -888,8 +921,8 @@ VDF and SNARK blockhash-oracle designs are frontier research for Ethereum
 randomness. They aim to improve liveness, reduce lookback limitations, or make
 beacon manipulation economically unattractive.
 
-Stream should not build a custom VDF beacon for launch. The better 50-year
-architecture is:
+Stream should not build a custom VDF beacon for the genesis deployment. The
+better 50-year architecture is:
 
 1. keep `StreamCore` independent of any provider;
 2. keep provider adapters narrow;
@@ -943,10 +976,10 @@ enum InstantMode {
 }
 ```
 
-Recommended launch posture:
+Recommended genesis posture:
 
 ```text
-COMMIT_REVEAL             defer unless fully specified
+COMMIT_REVEAL             excluded from v1 unless fully specified
 DELAYED_BLOCKHASH         explicit low-assurance only
 DETERMINISTIC_TEST_ONLY   tests and local development only
 ```
@@ -996,7 +1029,7 @@ event InstantEntropyProduced(
 
 ### Security Requirements
 
-1. Disabled by default in launch config.
+1. Disabled by default in genesis config.
 2. Must be explicitly configured per collection.
 3. Must emit mode and assumptions.
 4. Must not call Core.
@@ -1031,14 +1064,17 @@ The mock provider should make tests precise:
 5. zero raw randomness still finalizes through explicit status;
 6. coordinator seed derivation is deterministic.
 
-## Future Provider Adapters
+## Extension Provider Adapters
 
-Future adapters should be added by implementing `IStreamEntropyProvider` and
-being activated in the coordinator provider registry.
+New provider adapters are Replaceable-layer extensions: they implement the
+frozen `IStreamEntropyProvider` interface and are activated in the coordinator
+provider registry through provider epochs and registry approval. The adapter
+interface and result-status semantics are final in v1; only the provider
+catalog grows.
 
 New adapters require:
 
-1. provider-specific spec section;
+1. a separate accepted provider-specific spec;
 2. source security model;
 3. request and callback mapping design;
 4. payment model, if any;
@@ -1048,7 +1084,7 @@ New adapters require:
 8. deployment runbook;
 9. provider lifecycle policy.
 
-Existing `StreamCore` should not need changes for future providers.
+Existing `StreamCore` should not need changes for new provider adapters.
 
 ## Required Tests
 
@@ -1060,8 +1096,10 @@ Common provider tests:
 4. Request maps provider request ID to request key.
 5. Unknown callback request IDs are rejected or explicitly evented.
 6. Callback stores raw randomness before coordinator fulfillment.
-7. Coordinator fulfillment success marks result delivered.
-8. Coordinator fulfillment failure leaves result retryable.
+7. A `FINALIZED` coordinator fulfillment outcome marks result delivered.
+8. A reverted coordinator fulfillment leaves result retryable; a
+   `REJECTED_STALE_EPOCH` or `REJECTED_INACTIVE_REQUEST` outcome authorizes
+   `TERMINAL_STALE` marking.
 9. `retryCoordinatorFulfillment` succeeds after a transient coordinator failure.
 10. Adapter never calls Core.
 11. Duplicate live request keys are rejected.
@@ -1139,38 +1177,41 @@ Mock provider tests:
 2. Zero raw randomness is handled by status, not sentinel values.
 3. Wrong request key cannot be fulfilled.
 
-## Launch Recommendation
+## Genesis Recommendation
 
 Build `StreamEntropyProviderVRF` first and make it the default provider for
 collections whose art depends on entropy.
 
 Build `StreamEntropyProviderMock` for tests.
 
-Before launch, make and retain one fallback decision:
+The fallback requirement is decided (ADR 0009 decision 21): genesis ships
+dual providers — VRF primary plus one reviewed fallback — and a VRF-only
+deployment is not conformant. Before production deployment, build and
+review exactly one fallback provider:
 
-1. Build and review `StreamEntropyProviderARRNG` as the lower-complexity
-   fallback provider.
-2. Or build and review `StreamEntropyProviderPyth` if its fee, callback,
-   liveness, and audit requirements are accepted.
-3. Or record an explicit reviewed VRF-only launch exception with operational
-   monitoring and no silent fallback.
+1. `StreamEntropyProviderARRNG` as the preferred lower-complexity fallback
+   provider.
+2. Or `StreamEntropyProviderPyth` as the reviewed alternate, if its fee,
+   callback, liveness, and audit requirements are accepted.
 
-The retained `StreamEntropyLaunchDecision` manifest is the release artifact for
-that choice and must be covered by the release manifest, release-candidate
-lockfile, and checksum bundle once a launch candidate chooses a mode. In
-`VRF_ONLY`, unavailable VRF halts or rejects new entropy requests for
-entropy-dependent collections rather than silently substituting another source.
-In fallback modes, the coordinator may use only the reviewed fallback provider
-and policy hash recorded in the manifest.
+If neither fallback review completes, deployment blocks. Retain the
+`StreamEntropyLaunchDecision` manifest recording which fallback shipped, its
+review evidence, and the coordinator failure posture; it is the release
+artifact for that choice and must be covered by the release manifest,
+release-candidate lockfile, and checksum bundle once a release candidate
+chooses a mode. The coordinator may use only the reviewed fallback provider
+and policy hash recorded in the manifest; an unavailable provider must never
+be silently substituted with another source.
 
-Track drand, Randcast, Supra, Witnet, and API3 QRNG as future adapters. The
+Track drand, Randcast, Supra, Witnet, and API3 QRNG as extension adapter
+candidates, each requiring a separate accepted spec before production use. The
 best 50-year posture is not to guess the permanent winner now, but to keep
 `StreamCore` stable and add provider adapters as the market matures.
 
 Do not ship a multi-source mixer as the default. It is promising for exceptional
 collections, but it creates liveness and selective-abort complexity.
 
-Do not ship `StreamEntropyProviderInstant` as a default launch provider. If it
+Do not ship `StreamEntropyProviderInstant` as a default genesis provider. If it
 is implemented, it should be explicit-only and carry clear provenance warnings.
 
 ## Reference URLs

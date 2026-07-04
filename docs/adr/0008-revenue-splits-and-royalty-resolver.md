@@ -2,11 +2,15 @@
 
 ## Status
 
-Proposed.
+Accepted.
 
-This ADR is a pre-launch target design record. 6529Stream has not launched, so
-the revenue and royalty architecture should be implemented before launch as the
-initial production architecture.
+Accepted 2026-07-04 through
+[ADR 0009](0009-protocol-v1-open-question-resolutions.md) (decision 10),
+amended by ADR 0009 decisions 8 (deployment-wide global freeze blocks new
+revenue classes) and 9 (the assignment hash binds the frozen bit only).
+
+This ADR is the design record for the revenue and royalty architecture of
+the first production deployment, which is the permanent system.
 The cross-cutting 50+ year architecture principles live in
 `docs/stream-long-term-architecture.md`.
 
@@ -902,9 +906,10 @@ Rules:
   range guess or unknown future token ID.
 - A global freeze is implicitly `freezeMode = INHERITED` across default,
   collection, and token scopes for the affected revenue class. It can make all
-  assignments immutable for a deployment line. Whether it also blocks entirely
-  new revenue classes must be an explicit release decision; deployment-wide
-  global freeze should block both.
+  assignments immutable for a deployment line. A deployment-wide global freeze
+  blocks both all existing keys and the creation of entirely new revenue
+  classes (ADR 0009 decision 8); a global freeze bypassable by minting a new
+  class is not a credible freeze.
 - Every set, clear, and freeze action must emit enough data for indexers to
   reconstruct historical policy.
 
@@ -952,9 +957,12 @@ choice must be visible in events. If a scope freezes before settlement,
 acceptable; `STRICT_MATCH` remains the default for economically material sales.
 Settlement events must expose whether drift was observed between the signed
 `expectedPrimaryPolicyHash` and the resolved settlement policy.
-The resolved primary policy hash includes `freezeMode` and `permanentFreeze`.
-A freeze between signature and settlement therefore changes the hash and makes
+The resolved primary policy hash binds the assignment's frozen bit through
+the canonical `assignmentHash` preimage (ADR 0009 decision 9). A freeze
+between signature and settlement flips that bit, changes the hash, and makes
 `STRICT_MATCH` revert unless the signer authorized the frozen policy hash.
+Freeze-mode transitions between frozen states (for example exact to
+permanent) do not change economics and do not change the hash.
 `ALLOW_CURRENT` is the explicit opt-in to that drift.
 
 No production sale path may use `tx.origin` as payer, recipient, executor, or

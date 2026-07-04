@@ -1,19 +1,23 @@
-# Launch Conformance Matrix
+# Deployment Conformance Matrix
 
-This document turns the Stream target architecture into launch gates. It is not
-a roadmap. A deployment is launch-conformant only when every gate below maps to
-code, tests, events, and release artifacts.
+Specification status: Draft; the gate set tracks the Draft specs it
+enforces. This document follows [`docs/spec-policy.md`](spec-policy.md).
+
+This document turns the Stream protocol specification into deployment gates.
+It is not a roadmap. A production deployment is conformant only when every
+gate below maps to code, tests, events, and release artifacts. A failed or
+unmapped gate is a specification violation that blocks deployment, not a
+roadmap item.
 
 ## Scope
 
-The current contracts are implementation baseline only. They are not
-launch-conformant until the gates in this document pass. A specs-only PR may
-merge before implementation, but a deployment, audit handoff, or launch branch
-must treat any failed gate as blocking.
+The current contracts predate the protocol specification and do not yet
+conform. A specs-only PR may merge before implementation, but a deployment,
+audit handoff, or release branch must treat any failed gate as blocking.
 
-## Forbidden Launch Patterns
+## Forbidden Production Patterns
 
-Production launch contracts must not contain:
+Production contracts must not contain:
 
 1. `tx.origin` in mint, sale, drop, auction, authorization, or payment paths.
 2. `abi.encodePacked` or string concatenation for authority, sale, assignment,
@@ -35,13 +39,13 @@ Production launch contracts must not contain:
    resolution, metadata routing, or inherited freeze checks.
 10. `bytes32(0)` as an entropy pending/finalized sentinel.
 11. Multi-source entropy mixers, timelock reveal schemes, or instant entropy
-    finalization inside sale settlement as default launch behavior.
+    finalization inside sale settlement as default production behavior.
 
 ## Required Gates
 
 | Gate | Code Surface | Required Tests | Release Artifact |
 |---|---|---|---|
-| Core-native ERC-2981 | `StreamCore.royaltyInfo`, revenue resolver | canonical `0x3d5d0e9e` resolver selector; malformed/OOG/external-call resolver fallback; all-cold gas | Core bytecode size, resolver gas report |
+| Core-native ERC-2981 | `StreamCore.royaltyInfo`, revenue resolver | canonical `0x54f77a09` resolver selector; malformed/OOG/external-call resolver fallback; all-cold gas | Core bytecode size, resolver gas report |
 | Pull split wallets | split factory, split wallet, revenue escrow | conservation fuzz, forced ETH, approved-standard ERC-20 release/sync, unsupported ERC-20 denial, reentrancy | profile schema, wallet code hashes |
 | Primary native ETH and approved-standard ERC-20 settlement | fixed-price sale adapter, ERC-20 primary settlement adapter, asset policy registry, revenue escrow | no `tx.origin`, policy hash binding, escrow fallback, adapter and escrow both enforce `ACTIVE` asset policy, exact ERC-20 transfer accounting, allowance/payment failure handling | sale authorization schema, approved asset and adapter manifests |
 | Auction settlement | auction contract | bid custody, pull refunds, settlement CEI | auction state-machine manifest |
@@ -52,19 +56,19 @@ Production launch contracts must not contain:
 | Mint accounting | mint manager, ledger | duplicate-key aggregation, static caps, signed ticket binding | policy hash schema |
 | Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path | entropy policy manifest |
 | Metadata routing | metadata router, renderer | escaping, size limits, router failure behavior, ERC-4906 auth | renderer and context manifests |
-| Collection metadata | metadata contract plus metadata satellites | typed launch fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling | schema and snapshot manifests, metadata aggregate ABI/bytecode report |
+| Collection metadata | metadata contract plus metadata satellites | typed v1 fields, generic records, locks, snapshots, aggregate function-count and bytecode ceiling | schema and snapshot manifests, metadata aggregate ABI/bytecode report |
 | Preservation records | `StreamPreservationRecords` | PREMIS-style event/object/agent/right records, fixity hash validation, event reconstruction, post-freeze record behavior | preservation module manifest, schema hashes, code hash |
 | Collection attestations | `StreamCollectionAttestations` | C2PA/EIP-712/ERC-1271-compatible attestations, signer authority, supersession, event reconstruction | attestation module manifest, schema hashes, code hash |
 | Collection views | `StreamCollectionViews` | IIIF/view URI commitments, accessibility/display view references, bounded reads, event reconstruction | view module manifest, schema hashes, code hash |
-| Entropy fallback decision | entropy coordinator, retained provider decision | reviewed ARRNG fallback, reviewed Pyth fallback, or reviewed VRF-only exception; coordinator failure mode matches retained decision | checksum-covered `release-artifacts/latest/entropy-launch-decision.json` or equivalent release-manifest record |
+| Entropy fallback provider | entropy coordinator, reviewed fallback provider | reviewed ARRNG or Pyth fallback provider shipped alongside VRF (ADR 0009 decision 21); VRF-only deployment fails this gate; coordinator failure mode matches the retained decision manifest | checksum-covered `release-artifacts/latest/entropy-launch-decision.json` or equivalent release-manifest record |
 | Artwork finality | Core plus satellites | typed finality preimage, pointer race, `verifyFinality` | finality manifest |
 | Governance | governance/timelock, role registry | no single EOA, role map cardinality, delays | genesis governance manifest |
 | Events | every subsystem | event reconstruction, supersession map | event catalog hash |
 | Operations | monitoring/export/storage | degraded-admin test, state export, storage redundancy | ops runbook hashes |
 
-## Minimum Launch Profile
+## Genesis Deployment Profile
 
-Mandatory launch contracts/interfaces:
+Mandatory genesis contracts/interfaces:
 
 ```text
 StreamCore
@@ -82,32 +86,34 @@ StreamPreservationRecords
 StreamCollectionAttestations
 StreamCollectionViews
 StreamEntropyCoordinator
-At least one approved entropy provider or explicit NOT_REQUIRED entropy mode
-Reviewed ARRNG/Pyth fallback provider or explicit reviewed VRF-only exception
+Chainlink VRF primary provider for entropy-enabled collections
+Reviewed ARRNG or Pyth fallback provider (VRF-only deployment is not conformant)
 ERC-20 primary settlement adapter for approved standard assets
-StreamArtworkFinalityRegistry if any collection launches with finality promises
+StreamArtworkFinalityRegistry with the full scope set: COLLECTION, TOKEN, RELEASE, SEASON, VIEW (ADR 0009 decision 6)
 ```
 
-Schema/future or optional-at-launch surfaces:
+Specified but optional-at-genesis surfaces:
 
 ```text
 Custom counter resolvers
 Resolver-defined caps/deltas
 Privacy nullifiers
-Scoped release/season/view finality if no launch collection needs it
 CCIP Read and future onchain web adapters
 Non-standard ERC-20 primary adapters
 Additional institution-specific preservation, rights, VC/DID, EAS, or legal modules
 ```
 
-Optional surfaces may be specified and reserved, but launch bytecode should not
-include callable dead paths for them before their ADR/test suite exists.
-Scoped finality write/read/recovery functions for `RELEASE`, `SEASON`, and
-`VIEW` must be physically absent from launch bytecode unless a launch collection
-needs that scope and the corresponding tests/manifests are included. `TOKEN`
-scope may ship with collection finality only if a launch use case requires it.
+Optional surfaces may be specified and reserved, but production bytecode must
+not include callable dead paths for them before their ADR/test suite exists.
+Scoped finality is not in the optional list: by protocol-owner decision
+(ADR 0009 decision 6), the genesis finality registry ships every scope —
+`COLLECTION`, `TOKEN`, `RELEASE`, `SEASON`, and `VIEW` — and each scope must
+arrive with complete write/read/recovery tests, scopeId schema publication,
+numeric-ID catalog entries, and event-catalog coverage. A scoped surface
+without its full gate coverage fails this matrix exactly as a dead path
+would.
 
-Launch Core should also publish a Core surface report: runtime bytecode size,
+The deployed Core should also publish a Core surface report: runtime bytecode size,
 external/public function count, ERC-165 interface set, and selector manifest.
 Target Core headroom is at least 2,000 bytes below the EIP-170 limit and a
 function count small enough that every selector is permanent, documented, and
@@ -124,23 +130,29 @@ Mint/burn/token identity/collection serials         permanent   3,000-4,500
 Collection facts/status/supply reads and writes     permanent   2,000-3,000
 Core-native ERC-2981 resolver read                  permanent     700-1,200
 Bounded tokenURI router read/fallback/status        permanent   1,400-2,400
+Bounded contractURI delegated read (ERC-7572)       permanent     300-600
 Satellite pointer cached reads and governance hooks permanent   1,200-2,000
 Core finality fact reads and lifecycle reads        permanent     700-1,200
-ERC-4906 helper emissions                           high          300-700
+Core-originated ERC-4906 refresh emitters           permanent     300-700
 streamSystemManifest storage-only read              high          500-1,000
 Successor declaration history                       medium        500-1,000
 latestStateExport storage-only read                 medium        300-700
 Prepared mint prepare/complete                      conditional   900-1,800
 ```
 
-If the measured build exceeds the 22,000-byte CI ceiling or loses the 2,000-byte
+The 2,000-byte headroom target above is the governing deployment rule
+(ADR 0009 decision 2); the bytecode-spend baseline and exception ledger in
+`release-artifacts/contracts.json` remain the pre-deployment development
+control, and interim exceptions cannot survive to the deployment gate.
+
+If the measured build loses the 2,000-byte
 headroom, the priority order is: keep ERC-721/enumerable, token identity,
 Core-native ERC-2981, and bounded `tokenURI`; then move successor history,
 state export publication, rich manifest discovery, and optional prepared-mint
 convenience into a thin immutable discovery or mint satellite that Core points
 to through the same cached pointer policy.
 
-Additional paid-mint/finality/escrow launch tests:
+Additional paid-mint/finality/escrow deployment tests:
 
 1. Malicious ERC-721 receiver cannot observe an unpaid, unregistered,
    unsnapshotted, or unaccounted paid mint in either `PRE_REVENUE_SINGLE_STEP`
@@ -168,13 +180,13 @@ Additional paid-mint/finality/escrow launch tests:
 10. Collection-level finality is impossible unless `CLOSED` makes
     `mintedSupply`, `burnedSupply`, and `nextCollectionSerial` immutable.
 11. `royaltyInfo()` and `tokenURI()` gas budgets are independent top-level
-    reads; no launch helper combines both in one bounded staticcall frame.
+    reads; no production helper combines both in one bounded staticcall frame.
 12. Degraded-mode escrow tests document the condition that `flushEscrow`
     remains possible only while the immutable gas floor is satisfiable.
 
 ## Static Analysis Gates
 
-CI must fail if any production launch contract violates these checks:
+CI must fail if any production contract violates these checks:
 
 1. `tx.origin` appears outside tests or explicit non-production mocks.
 2. Core inherits `ERC2981` or contains `_setDefaultRoyalty`,
@@ -185,7 +197,7 @@ CI must fail if any production launch contract violates these checks:
    `emergencyWithdraw`.
 5. Core stores script chunks, dependency chunks, randomizer pointers, token hash
    status, or primary-sale split percentages.
-6. Resolver `royaltyInfoForToken` or any function it can reach contains
+6. Resolver `royaltyReceiverAndBps` or any function it can reach contains
    `CALL`, `DELEGATECALL`, `STATICCALL`, `CREATE`, or `CREATE2` opcodes.
 7. Any production instant entropy provider reachable from `requestEntropy`
    contains `CALL`, `DELEGATECALL`, `STATICCALL`, `CREATE`, or `CREATE2`,
@@ -194,25 +206,25 @@ CI must fail if any production launch contract violates these checks:
    unless the shared role is intentionally documented in the role map.
 9. Production interface selectors differ from the release selector manifest
    without an intentional manifest update and test review.
-10. Launch satellites that promise immutability or bounded reads contain
+10. Production satellites that promise immutability or bounded reads contain
    `SELFDESTRUCT`, unrestricted `DELEGATECALL`, mutable proxy upgrade hooks, or
    unbounded returndata copies outside explicitly allowed test/migration mocks.
-11. Launch mint contracts compile callable `CUSTOM_RESOLVER`,
+11. Production mint contracts compile callable `CUSTOM_RESOLVER`,
     resolver-defined cap/delta, or nullifier execution paths before the
     accepted ADR enables them. Reserved enum values may exist in manifests, but
-    dead deferred call paths must be physically absent from launch bytecode or
+    excluded call paths must be physically absent from production bytecode or
     blocked before any external call/state write by static checks.
 
 ## Golden Interface Tests
 
-CI must include small deterministic tests for launch interfaces whose accidental
-drift would break indexers, marketplaces, or satellite contracts:
+CI must include small deterministic tests for production interfaces whose
+accidental drift would break indexers, marketplaces, or satellite contracts:
 
-1. `IStreamRevenueResolver.royaltyInfoForToken` has selector `0x3d5d0e9e`
+1. `IStreamRevenueResolver.royaltyReceiverAndBps` has selector `0x54f77a09`
    for the exact signature
-   `royaltyInfoForToken(address,uint256,uint256,uint256,bool)`.
-2. Core reports `supportsInterface(0x2a55205a) == true` when the launch build
-   includes Core-native ERC-2981, and `royaltyInfo()` uses the same capped
+   `royaltyReceiverAndBps(address,uint256,uint256,uint256,bool)`.
+2. Core reports `supportsInterface(0x2a55205a) == true` because the production
+   build includes Core-native ERC-2981, and `royaltyInfo()` uses the same capped
    resolver path as `probeRoyaltyInfo()`.
 3. `tokenCollectionIdentity(tokenId)` returns
    `(mappingExists, collectionId, collectionSerial, burned)` from Core storage,
@@ -233,7 +245,7 @@ drift would break indexers, marketplaces, or satellite contracts:
 8. Event catalog CI proves every replacement event has `supersedes` /
    `replacedBy` links, every archived event remains present forever, and no
    indexed field set changes without a replacement event.
-9. Governance tests prove the launch contracts enforce only the ADR 0004
+9. Governance tests prove the production contracts enforce only the ADR 0004
    two-tier model plus named exception floors; the richer action-class taxonomy
    is manifest/runbook vocabulary until a later ADR implements it onchain.
 10. Governance tests cover `governanceAction(actionId)`, virtual or materialized
@@ -261,7 +273,7 @@ drift would break indexers, marketplaces, or satellite contracts:
     incident-revoked, or returns malformed data renders pending/unknown
     metadata rather than reverting `tokenURI()`.
 19. Core calls `onTokenMinted` with immutable `ENTROPY_REGISTRATION_GAS_LIMIT`,
-    an EIP-150-aware parent gas precheck, measured launch margin, and mint
+    an EIP-150-aware parent gas precheck, measured deployment margin, and mint
     revert on registration failure.
 20. CI asserts every production event in the event catalog has at most three
     `indexed` fields, matching the Solidity log topic limit.
@@ -280,8 +292,8 @@ drift would break indexers, marketplaces, or satellite contracts:
 
 ## Current-Code Contradictions
 
-The baseline code must be rewritten or replaced before launch where it conflicts
-with this matrix:
+The baseline code must be rewritten or replaced before any production
+deployment where it conflicts with this matrix:
 
 1. `StreamCore` inherits OZ `ERC2981` and sets a hardcoded default royalty.
 2. `StreamDrops` uses `tx.origin`, push payments, and packed/string hashes.
@@ -294,7 +306,7 @@ with this matrix:
 7. Emergency withdraw functions can sweep balances without owed/surplus proof.
 8. `freezeCollection` is not cross-module artwork finality.
 9. `StreamCuratorsPool` push payments or unrestricted sweeps are not
-   launch-conformant if the pool holds owed rewards.
+   deployment-conformant if the pool holds owed rewards.
 
 ## Event Catalog Schema
 
@@ -337,13 +349,13 @@ signature cannot include `schemaVersion`, including ERC-721 `Transfer`,
 ERC-4906 `MetadataUpdate` / `BatchMetadataUpdate` if emitted with their
 standard signatures.
 Any non-standard event snippet elsewhere in the specs that omits
-`schemaVersion` is shorthand, not permission to omit it from launch ABI. The
+`schemaVersion` is shorthand, not permission to omit it from the production ABI. The
 event catalog and golden event tests are authoritative.
 
 ## Numeric ID Catalog
 
 Every enum-like numeric value that crosses contract, indexer, or manifest
-boundaries must be assigned in a manifest-pinned numeric ID catalog. The launch
+boundaries must be assigned in a manifest-pinned numeric ID catalog. The v1
 catalog must cover at least module registry states, governance action classes
 and statuses, freeze modes, collection statuses, supply modes, entropy
 statuses, provider result statuses, asset policy statuses, schema statuses,
@@ -372,7 +384,7 @@ families.
 ## Indexed Field Policy
 
 Indexed event fields are part of Stream's long-term query contract. Every
-launch event must classify each field as indexed or unindexed in the event
+production event must classify each field as indexed or unindexed in the event
 catalog and explain the reconstruction purpose for indexed fields. Required
 indexed field families:
 
@@ -387,5 +399,5 @@ indexed field families:
 5. `operationId` or `actionId` on governance staging, cancellation, execution,
    and recovery events.
 
-Changing an indexed field set after launch is an event replacement, not a
+Changing an indexed field set after deployment is an event replacement, not a
 semantic edit. The new event must supersede the old one in the event catalog.

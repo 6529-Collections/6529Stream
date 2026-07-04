@@ -1,8 +1,17 @@
 # Stream Entropy Coordinator
 
-This document is a pre-launch target specification for moving randomness,
-token seed finalization, and randomizer coordination out of `StreamCore` into a
-dedicated entropy subsystem.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
+inline are resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+in [`docs/spec-open-questions.md`](spec-open-questions.md).
+
+This document specifies the dedicated entropy subsystem that moves
+randomness, token seed finalization, and randomizer coordination out of
+`StreamCore`. 6529Stream is permanent infrastructure for the 6529 network:
+the first production deployment is the permanent system, and the requirements
+below are classified by permanence class per `docs/spec-policy.md`, not by
+launch phase.
 
 `StreamCore` should remain the canonical ERC-721 contract, keep
 `ERC721Enumerable`, and own token minting, ownership, approvals, enumeration,
@@ -33,9 +42,9 @@ StreamEntropyCoordinator
 
 StreamEntropyProvider adapters
   - Stream-native Chainlink VRF adapter
-  - Stream-native ARRNG adapter, if deliberately retained
+  - one reviewed Stream-native fallback adapter (ARRNG preferred, Pyth alternate)
   - deterministic/pseudo provider only when explicitly configured
-  - future provider adapters
+  - additional provider adapters via the provider registry
 
 StreamMetadataRouter / StreamRenderer
   - read token entropy status and seed
@@ -50,6 +59,10 @@ The target architecture separates three concerns:
 3. Metadata Router and Renderer consume finalized seeds.
 
 ## Current Implementation Baseline
+
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); it records point-in-time as-built
+state and does not weaken any requirement in this spec.
 
 Today `StreamCore` stores the randomizer address and interface in
 `collectionAdditionalData`:
@@ -110,8 +123,8 @@ provider adapter receives raw randomness
   -> metadata reads seed/status from StreamEntropyCoordinator
 ```
 
-The launch implementation should build Stream-native provider adapters rather
-than reuse the NextGen randomizers as-is.
+The production implementation should build Stream-native provider adapters
+rather than reuse the NextGen randomizers as-is.
 
 Assessment of current contracts:
 
@@ -126,7 +139,7 @@ NextGenRandomizerRNG
     coordinator lifecycle, delivery retry, provenance, and seed derivation model
 
 NextGenRandomizerVRF
-  - right provider family for launch
+  - right provider family for production
   - should be rewritten as StreamEntropyProviderVRF rather than reused as-is
 ```
 
@@ -203,7 +216,8 @@ Required lessons to preserve:
 9. Support synchronous and asynchronous entropy providers through adapters.
 10. Preserve strong event provenance for requests, fulfillments, delivery
     retries, recovery attempts, and provider decisions.
-11. Allow future entropy providers without redeploying the NFT Core.
+11. Allow new entropy providers to be added through the provider registry
+    without redeploying the NFT Core.
 12. Give metadata rendering a stable seed/status read interface.
 13. Support long-lived collections where provider infrastructure may change
     over decades.
@@ -274,7 +288,8 @@ function _mintProcessing(
 The final implementation may keep the current `_saltfun_o` parameter name for a
 short transition during development, but the production interface should treat
 this value as a typed `bytes32 mintCommitment` or remove it if not used. Since
-Stream is pre-launch, the preferred path is a clean production signature.
+no production deployment exists yet, the preferred path is a clean production
+signature.
 
 `onTokenMinted` must register token entropy state before any external receiver
 callback can observe the freshly minted token. If `_safeMint` later reverts, the
@@ -289,11 +304,12 @@ therefore observe `REGISTERED` or pending entropy state; metadata must render
 pending output honestly until a seed is finalized.
 Core calls `onTokenMinted` with a deploy-time immutable
 `ENTROPY_REGISTRATION_GAS_LIMIT` and an EIP-150-aware parent gas precheck.
-Initial planning target is 80,000 gas for all-cold registration, but launch
-must use measured gas plus margin and publish the value in the release
-manifest. If the coordinator call reverts, runs out of its cap, or returns
-malformed success behavior, the mint reverts and all token identity writes
-unwind. Core must not forward all remaining gas to a mutable coordinator.
+Initial planning target is 80,000 gas for all-cold registration, but the
+production deployment must use measured gas plus margin and publish the value
+in the release manifest. If the coordinator call reverts, runs out of its
+cap, or returns malformed success behavior, the mint reverts and all token
+identity writes unwind. Core must not forward all remaining gas to a mutable
+coordinator.
 
 If Core exposes `prepareMintFromManager`, the prepare step must not call
 `onTokenMinted`, request entropy, or write provider/request state. Prepare only
@@ -317,12 +333,12 @@ do not confuse it with an ordinary minted token.
 
 Coordinator availability is a hard mint prerequisite. Core should not catch and
 ignore a failed `onTokenMinted` call because that would create minted tokens
-without authoritative entropy state. Launch operations must therefore include a
-pre-approved, registry-approved, write-capable backup or safe-mode coordinator
-that can be staged or emergency-switched under the Core Satellite Pointer Policy
-if the active coordinator is incident-revoked. Safe-mode may register tokens and
-leave them `REGISTERED` without requesting provider randomness, but it must not
-silently mint unregistered tokens.
+without authoritative entropy state. Production operations must therefore
+include a pre-approved, registry-approved, write-capable backup or safe-mode
+coordinator that can be staged or emergency-switched under the Core Satellite
+Pointer Policy if the active coordinator is incident-revoked. Safe-mode may
+register tokens and leave them `REGISTERED` without requesting provider
+randomness, but it must not silently mint unregistered tokens.
 
 ## Coordinator Constructor
 
@@ -354,18 +370,39 @@ interface IStreamEntropyCoordinator {
         payable
         returns (bytes32 requestKey, uint256 providerRequestId);
 
-    function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness) external;
+    function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness)
+        external
+        returns (uint8 outcome);
 }
 ```
 
 `onTokenMinted` is callable only by Core.
 
-`requestEntropy` should be callable according to collection policy. The
-recommended launch policy is: minter, entropy admin, global admin, or anyone if
-the collection explicitly enables public requests.
+`requestEntropy` is callable by the minter path, entropy admins, and global
+admins. Anyone may call it only for collections that explicitly enable
+public requests: public requests are opt-in per collection, never a default
+(ADR 0009 decision 22).
 
 `fulfillEntropy` is callable only by the provider currently assigned to the
 active request key.
+
+`fulfillEntropy` returns a pinned outcome code instead of reverting on
+benign rejection (ADR 0009 decision 25):
+
+```solidity
+enum EntropyFulfillmentOutcome {
+    FINALIZED,
+    REJECTED_STALE_EPOCH,
+    REJECTED_INACTIVE_REQUEST,
+    REJECTED_ALREADY_FINALIZED,
+    REJECTED_UNKNOWN_REQUEST
+}
+```
+
+Benign rejections return an outcome and do not revert, because provider
+callbacks — including VRF callbacks — must not revert. Hard violations
+(unauthorized provider, reentrancy) still revert with typed errors. The
+outcome values are pinned in the Numeric ID Catalog.
 
 ### Coordinator Read Interface
 
@@ -561,7 +598,7 @@ struct CollectionEntropyConfig {
 }
 ```
 
-Fresh recovery policy is separate from the main config because most launch
+Fresh recovery policy is separate from the main config because most genesis
 collections should not use it. If `maxFreshRecoveryAttempts > 0`, the linked
 policy must exist and be frozen before public mint.
 
@@ -710,7 +747,7 @@ UNKNOWN            rejected
 
 Deprecation is forward-looking. It should not strand already requested tokens.
 Incident revocation is exceptional and should be accompanied by a documented
-recovery path before launch tooling exposes it.
+recovery path before production tooling exposes it.
 
 Collection provider epochs:
 
@@ -722,19 +759,20 @@ Collection provider epochs:
    current provider address.
 5. Replaced providers may fulfill requests from their original epoch only if
    the policy still allows old-epoch fulfillment.
-6. Otherwise, old-epoch callbacks emit `StaleEntropyFulfillment` and do not
-   mutate token seed.
+6. Otherwise, old-epoch callbacks emit `StaleEntropyFulfillment`, do not
+   mutate token seed, and return `REJECTED_STALE_EPOCH` (ADR 0009
+   decision 25).
 
-## Recommended Launch Provider Policy
+## Recommended Genesis Provider Policy
 
-For launch, the default high-assurance provider should be a new Stream-native
+At genesis, the default high-assurance provider should be a new Stream-native
 VRF adapter:
 
 ```text
 default high-assurance provider   StreamEntropyProviderVRF
-launch fallback decision          reviewed ARRNG/Pyth fallback or explicit VRF-only exception
-non-default / explicit only       instant or pseudo provider
-future providers                  added as new adapters through registry
+required reviewed fallback        ARRNG preferred, Pyth as the reviewed alternate
+instant / pseudo providers        excluded at genesis (ADR 0009 decision 24)
+additional providers              added as new adapters through registry
 ```
 
 The coordinator produces the final canonical seed. Providers supply raw
@@ -744,36 +782,41 @@ Recommended policy:
 
 1. High-value fully generative collections should use
    `StreamEntropyProviderVRF` by default.
-2. Launch must make an explicit fallback decision before public minting:
-   reviewed ARRNG fallback, reviewed Pyth fallback, or a reviewed VRF-only
-   exception. ARRNG is the lower-complexity initial fallback candidate.
-   The decision must be retained in a checksum-covered
+2. The genesis deployment ships dual providers (ADR 0009 decision 21):
+   Chainlink VRF as the primary provider plus one reviewed fallback
+   provider, with ARRNG as the preferred fallback candidate (existing
+   operational experience) and Pyth as the reviewed alternate. A VRF-only
+   deployment is not conformant; the former reviewed VRF-only exception
+   path is removed. If neither fallback review completes, deployment
+   blocks.
+   The shipped fallback choice must be retained in a checksum-covered
    `StreamEntropyLaunchDecision` manifest, either as
    `release-artifacts/latest/entropy-launch-decision.json` or as an equivalent
    release-manifest record, with:
-   - `mode = VRF_ONLY | ARRNG_FALLBACK | PYTH_FALLBACK`;
+   - `mode = ARRNG_FALLBACK | PYTH_FALLBACK`;
    - selected provider addresses, code hashes, policy hashes, and review
      evidence hashes;
    - coordinator behavior when the selected provider is unavailable;
    - the operational monitor and incident-response path for pending requests.
-   In `VRF_ONLY`, no silent fallback is allowed: new entropy requests revert or
-   remain unavailable when the frozen VRF provider is unavailable, while already
-   registered tokens keep truthful pending metadata until governance restores an
-   approved route or executes a separately reviewed recovery. In fallback modes,
-   the coordinator may route only through the precommitted reviewed fallback
-   path recorded in the manifest.
-3. Instant or pseudo providers should be disabled by default and enabled only by
-   explicit collection configuration.
-4. Instant or pseudo providers should include clear security assumptions in the
-   collection provenance notes when used.
+   The manifest records which fallback shipped, its review evidence, and the
+   coordinator failure posture. The coordinator may route only through the
+   precommitted reviewed fallback path recorded in the manifest; no silent
+   substitution of an unreviewed randomness source is allowed.
+3. No instant or pseudo provider ships at genesis (ADR 0009 decision 24). A
+   reviewed instant provider added later as a Replaceable module must be
+   disabled by default and enabled only by explicit collection
+   configuration.
+4. Instant or pseudo providers, where later added, should include clear
+   security assumptions in the collection provenance notes when used.
 5. Provider and fallback choices should be configured and frozen before public
    minting begins for collections where entropy affects artwork.
 6. Existing NextGen randomizer contracts may inform implementation, but should
    not be wired into production Core/Coordinator without being rewritten to the
    provider adapter interface and reviewed under this spec.
-7. Launch should set fresh entropy recovery attempts to zero for VRF collections
-   unless the recovery state machine has been separately audited. Delivery retry
-   of already-received randomness may be enabled because it does not reroll.
+7. Protocol v1 should set fresh entropy recovery attempts to zero for VRF
+   collections unless the recovery state machine has been separately audited.
+   Delivery retry of already-received randomness may be enabled because it
+   does not reroll.
 
 ## Collection Configuration
 
@@ -880,12 +923,16 @@ observe a token that lacks identity mapping and entropy registration.
 
 1. Caller must be Core.
 2. Token must not already be registered.
-3. Collection config must exist, or a default config must exist.
+3. Collection config must exist. Per-collection entropy configuration is
+   required and must be configured (and frozen where promised) before sale
+   start; there is no coordinator-level global default provider, because a
+   global default is an implicit dependency and changes the meaning of
+   "unconfigured" (ADR 0009 decision 23).
 4. If config mode is `DISABLED` or the render path is `NOT_REQUIRED`, the
    coordinator must record an explicit terminal token entropy status. Disabled
    collections must not revert minting because no provider is configured, and
    renderers must treat the token as intentionally not entropy-backed. A no-op
-   success that leaves no token entropy record is not launch-conformant.
+   success that leaves no token entropy record is not deployment-conformant.
 5. If config mode is `INSTANT`, `onTokenMinted` still records only registered
    state. It does not request entropy or finalize a seed. `INSTANT` means a
    later `requestEntropy` call may finalize synchronously in that request
@@ -999,9 +1046,10 @@ Native ETH request payments:
 1. `requestEntropy` may be payable for providers that need native ETH.
 2. The coordinator should quote or compute the required provider payment before
    the provider call.
-3. Launch v1 should reject `msg.value` greater than the required payment rather
-   than hold or refund excess ETH. If a later provider requires refund behavior,
-   the refund path must be explicit, bounded, non-reentrant, and evented.
+3. Protocol v1 should reject `msg.value` greater than the required payment
+   rather than hold or refund excess ETH. If a provider adapter added later
+   requires refund behavior, its separately accepted adapter spec must define
+   an explicit, bounded, non-reentrant, and evented refund path.
 4. The coordinator should not become a general ETH custody contract.
 5. Accidental or forced ETH recovery, if included, should be admin-only,
    evented, and sent to a protocol treasury address.
@@ -1021,14 +1069,17 @@ Request transition guards:
    token, the status and reentrancy guard both reject it.
 7. `fulfillEntropy` must reject unknown request keys, inactive request keys,
    wrong providers, wrong epochs, already finalized tokens, and tokens whose
-   status is not `REQUESTED`.
+   status is not `REQUESTED`. Wrong providers are hard violations and revert
+   with typed errors; the benign classes return their
+   `EntropyFulfillmentOutcome` codes without reverting (ADR 0009
+   decision 25).
 8. For `INSTANT` mode, v1 uses the bounded
    `IStreamInstantEntropyProvider.instantEntropy(requestKey, context)`
    read/return path from inside `requestEntropy`; it must not use an external
    callback into `fulfillEntropy`. The coordinator finalizes once from the
    returned raw value before `requestEntropy` returns. If the instant read
    fails, the transaction reverts and the pre-call `REQUESTED` state unwinds.
-   The instant provider function must be `view`, and launch static analysis
+   The instant provider function must be `view`, and release static analysis
    must fail if any reachable instant-provider path contains external calls,
    contract creation, delegatecall, or state writes.
 
@@ -1090,24 +1141,40 @@ returns to `REQUESTED` without enabling a fresh entropy request.
 Provider adapters fulfill through the coordinator:
 
 ```solidity
-function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness) external;
+function fulfillEntropy(bytes32 requestKey, bytes32 rawRandomness)
+    external
+    returns (uint8 outcome);
 ```
+
+`fulfillEntropy` returns a pinned `EntropyFulfillmentOutcome` code (ADR 0009
+decision 25). Benign rejections return their outcome and do not revert, so
+provider callbacks — including VRF callbacks that must not revert — receive
+a machine-readable verdict. Hard violations (unauthorized provider,
+reentrancy) still revert with typed errors. Event behavior is unchanged.
 
 Rules:
 
-1. `fulfillEntropy` must use a reentrancy guard or equivalent state lock.
-2. `requestKey` must exist.
-3. Request must be active.
-4. Caller must be the provider stored on the request.
+1. `fulfillEntropy` must use a reentrancy guard or equivalent state lock;
+   reentrancy is a hard violation and reverts with a typed error.
+2. `requestKey` must exist; an unknown request key returns
+   `REJECTED_UNKNOWN_REQUEST`.
+3. Request must be active; an inactive request key returns
+   `REJECTED_INACTIVE_REQUEST`.
+4. Caller must be the provider stored on the request; an unauthorized caller
+   is a hard violation and reverts with a typed error.
 5. Provider must not be `INCIDENT_REVOKED`.
-6. Token status must be `REQUESTED`.
-7. Token must not already be finalized.
-8. Fulfillment must finalize exactly one canonical seed.
+6. Token status must be `REQUESTED`; a non-`REQUESTED`, non-finalized token
+   returns `REJECTED_INACTIVE_REQUEST`.
+7. Token must not already be finalized; an already finalized token returns
+   `REJECTED_ALREADY_FINALIZED`.
+8. Fulfillment must finalize exactly one canonical seed; successful
+   finalization returns `FINALIZED`.
 9. Before any external refresh or notification call, fulfillment must mark the
    request inactive and set token status `FINALIZED`.
 10. Old request keys after incident recovery must be rejected or emitted as
-   stale.
-11. Wrong provider epoch must emit a stale/audit event and must not finalize.
+   stale; the call returns `REJECTED_STALE_EPOCH`.
+11. Wrong provider epoch must emit a stale/audit event, must not finalize,
+    and returns `REJECTED_STALE_EPOCH`.
 12. `fulfillEntropy` cannot call `requestEntropy`; delivery retry calls
     `fulfillEntropy` again with the same stored raw randomness.
 
@@ -1151,16 +1218,20 @@ event EntropyFinalized(
 );
 ```
 
-After fulfillment, the coordinator or metadata router should cause
-ERC-4906-style metadata refresh events for the token:
+After fulfillment, the coordinator should cause ERC-4906-style metadata
+refresh events for the token:
 
 ```solidity
 event MetadataUpdate(uint256 tokenId);
 ```
 
-If Core owns those events, the coordinator should call a restricted Core method
-or the metadata router should expose a refresh hook. The spec should avoid fake
-metadata update events emitted from contracts that marketplaces will not watch.
+Metadata refresh events are Core-originated (ADR 0009 decision 5): Core
+exposes restricted ERC-4906 refresh emitters callable by authorized
+satellites, and the coordinator calls that restricted Core method after
+finalization. The metadata router does not expose a refresh hook for this
+path. Marketplaces watch the ERC-721 contract, so a refresh event emitted
+from a satellite contract that marketplaces will not watch would never
+reach them.
 
 ## Retry And Failure Policy
 
@@ -1191,10 +1262,10 @@ This path is not a reroll and may be permissionless.
 ### Fresh Entropy Recovery
 
 A fresh provider request for the same token is a recovery event, not a normal
-retry. Launch v1 should disable fresh token-level recovery for high-value VRF
-collections by setting `maxFreshRecoveryAttempts = 0` unless the collection has
-a complete pre-mint recovery policy that was configured, evented, and frozen
-before public mint.
+retry. Protocol v1 should disable fresh token-level recovery for high-value
+VRF collections by setting `maxFreshRecoveryAttempts = 0` unless the
+collection has a complete pre-mint recovery policy that was configured,
+evented, and frozen before public mint.
 
 A complete fresh-recovery policy is represented by the frozen
 `FreshRecoveryPolicy` linked from `CollectionEntropyConfig`. It must define:
@@ -1282,7 +1353,11 @@ event StaleEntropyFulfillment(
 );
 ```
 
-For Chainlink-style VRF, the launch default should be no fresh token-level
+A stale fulfillment emits `StaleEntropyFulfillment`, does not finalize, and
+the `fulfillEntropy` call returns `REJECTED_STALE_EPOCH` (ADR 0009
+decision 25).
+
+For Chainlink-style VRF, the v1 default should be no fresh token-level
 request after the VRF request is accepted. Operational protection should come
 from funding monitors, provider health checks, callback gas runbooks, and
 delivery retry of already received randomness. Fresh recovery should be a rare
@@ -1345,10 +1420,14 @@ The ARRNG adapter should follow the same `requestKey` pattern:
 6. Avoid writing to Core, deriving the final token seed, or exposing
    `setTokenHash`-style callbacks.
 
-### Future Adapters
+### Additional Adapters
 
-Future providers should be added as new adapters and activated through the
-provider registry. Existing Core contracts should not need changes.
+Additional providers should be added as new Replaceable-layer adapters
+behind the frozen provider interface and activated through provider epochs
+and registry approval, each with its own separately accepted spec. The
+request lifecycle, seed derivation, epoch semantics, and stale, failed, and
+recovery semantics defined here are final in v1; only the provider catalog
+grows. Existing Core contracts should not need changes.
 
 ## Metadata Integration
 
@@ -1431,9 +1510,10 @@ practical.
 Core should not call external randomness providers directly. If mint calls the
 coordinator, the coordinator registers state without provider callbacks.
 External provider calls belong in `requestEntropy`, and `requestEntropy` is not
-called from `onTokenMinted` in v1. Any future design that wants seed finality
-before safe receiver callbacks must be specified in a separate ADR with an exact
-Core/manager call order, reentrancy analysis, and metadata-observation model.
+called from `onTokenMinted` in v1. Seed finality before safe receiver
+callbacks is excluded from protocol v1; any design that wants it must be
+specified in a separately accepted ADR with an exact Core/manager call order,
+reentrancy analysis, and metadata-observation model.
 
 ### Manipulation Resistance
 
@@ -1452,13 +1532,16 @@ Provider incident revocation can strand pending tokens. Tooling should require a
 documented recovery path before revocation is used. Precommitted fallback
 providers are preferred for long-running high-value collections.
 If the coordinator or provider quorum needed for safe recovery is lost, behavior
-must follow the retained `StreamEntropyLaunchDecision`. In `VRF_ONLY`, minting
-for entropy-dependent collections halts or request entrypoints revert as an
-accepted terminal degradation until governance restores the reviewed VRF route
-or accepts a separate recovery. In `ARRNG_FALLBACK` or `PYTH_FALLBACK`, the
-coordinator may use only the precommitted fallback path and policy hash recorded
-in the launch decision manifest. In every mode, the system should preserve
-existing ownership, finalized seeds, pending-state truthfulness, and metadata
+must follow the retained `StreamEntropyLaunchDecision`. In both
+`ARRNG_FALLBACK` and `PYTH_FALLBACK` (the only conformant modes, ADR 0009
+decision 21), the coordinator may use only the precommitted fallback path
+and policy hash recorded in the `StreamEntropyLaunchDecision` manifest. If
+both the frozen VRF route and the reviewed fallback are unavailable, new
+entropy requests revert or remain unavailable as an accepted terminal
+degradation until governance restores a reviewed route or accepts a
+separately reviewed recovery, while already registered tokens keep truthful
+pending metadata. In every mode, the system should preserve existing
+ownership, finalized seeds, pending-state truthfulness, and metadata
 fallback behavior rather than inventing an unauthorized randomness source.
 Collection `CLOSED` status does not block fulfillment for already-`REQUESTED`
 tokens or permissionless `requestEntropy` for already-`REGISTERED` tokens whose
@@ -1479,6 +1562,10 @@ Collectors and auditors should be able to reconstruct:
 8. final metadata refresh trigger.
 
 ## Bytecode Impact
+
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); measurements are point-in-time and
+superseded by the release-artifact size proofs.
 
 The layered scratch compile that removed randomizer/hash coordination from Core
 after renderer, collection metadata, and counter extraction saved roughly
@@ -1502,10 +1589,14 @@ Core hook and interfaces, but this refactor should still buy about `0.8 KB` to
 
 1. Implement a new `StreamEntropyProviderVRF` adapter using the `requestKey`
    pattern.
-2. Implement a new `StreamEntropyProviderARRNG` or
-   `StreamEntropyProviderPyth` adapter using the `requestKey` pattern if the v1
-   fallback decision chooses a fallback provider.
-3. Implement or explicitly defer an instant provider.
+2. Implement the reviewed fallback adapter using the `requestKey` pattern:
+   `StreamEntropyProviderARRNG` as the preferred fallback or
+   `StreamEntropyProviderPyth` as the reviewed alternate (ADR 0009
+   decision 21).
+3. Do not implement an instant provider: no instant provider ships at
+   genesis (ADR 0009 decision 24). The `IStreamInstantEntropyProvider`
+   interface is Permanent and frozen, so a reviewed instant provider can be
+   added later as a Replaceable module if a collection needs one.
 4. Add provider-level events and tests.
 5. Do not reuse `NextGenRandomizerNXT`, `NextGenRandomizerRNG`, or
    `NextGenRandomizerVRF` as production providers without rewriting them to the
@@ -1587,11 +1678,14 @@ Fulfillment tests:
 5. Fulfillment emits `EntropyFinalized`.
 6. Seed derivation is deterministic and domain-separated.
 7. Seed zero does not control status.
-8. Metadata refresh hook/event is triggered.
+8. Metadata refresh is triggered through the restricted Core refresh
+   emitter (ADR 0009 decision 5).
 9. Wrong provider epoch cannot fulfill.
-10. Stale fulfillment emits `StaleEntropyFulfillment` and does not mutate seed.
+10. Stale fulfillment emits `StaleEntropyFulfillment`, does not mutate seed,
+    and returns `REJECTED_STALE_EPOCH`.
 11. `fulfillEntropy` rejects inactive requests, non-`REQUESTED` token status,
-    and already finalized tokens.
+    and already finalized tokens, returning their `EntropyFulfillmentOutcome`
+    codes without reverting; unauthorized providers revert.
 12. Synchronous `INSTANT` finality uses `instantEntropy` return data, not a
     callback into `fulfillEntropy`.
 
@@ -1616,7 +1710,7 @@ Incident recovery tests:
 6. Max recovery attempts are enforced if fresh recovery is enabled.
 7. Incident-revoked provider behavior follows policy.
 8. Fresh recovery is rejected when the adapter reports raw randomness received.
-9. Fresh recovery is rejected for high-value launch configs with
+9. Fresh recovery is rejected for high-value v1 configs with
    `maxFreshRecoveryAttempts = 0`.
 10. Fresh recovery follows the frozen ordered policy step and cannot choose an
     ad hoc provider after the incident.
@@ -1628,7 +1722,8 @@ Provider adapter tests:
 3. ARRNG adapter maps provider request ID to request key.
 4. Provider adapters reject unauthorized callers where applicable.
 5. Payable providers enforce exact payment and reject excess payment unless a
-   later adapter-specific ADR explicitly accepts a bounded refund path.
+   separately accepted adapter-specific ADR explicitly accepts a bounded
+   refund path.
 6. Provider adapters expose result status for requested, received, delivered,
    stale, and failed cases.
 
@@ -1640,19 +1735,29 @@ Renderer integration tests:
 4. Render context includes entropy status and provider.
 5. Metadata output does not depend on Core `tokenToHash`.
 
-## Open Design Decisions
+## Resolved Design Decisions
 
-1. Whether launch collections should require entropy config before sale start or
-   allow a global default provider.
-2. Whether public `requestEntropy` should be enabled by default.
-3. Whether an instant provider should be included in v1 or deferred.
-4. Whether the v1 fallback decision ships reviewed ARRNG, reviewed Pyth, or a
-   reviewed VRF-only launch exception.
-5. Should Core or Metadata Router emit the ERC-4906-compatible refresh event
-   after entropy finalization?
+1. Per-collection entropy configuration is required and must be configured
+   (and frozen where promised) before sale start; there is no
+   coordinator-level global default provider (ADR 0009 decision 23).
+2. Public `requestEntropy` is not enabled by default: `requestEntropy` is
+   callable by the minter path, entropy admins, and global admins, and
+   public requests are opt-in per collection (ADR 0009 decision 22).
+3. No instant provider ships at genesis; the `IStreamInstantEntropyProvider`
+   interface is Permanent and frozen, so a reviewed instant provider can be
+   added later as a Replaceable module if a collection needs one
+   (ADR 0009 decision 24).
+4. Genesis ships dual providers: Chainlink VRF primary plus one reviewed
+   fallback, with ARRNG as the preferred candidate and Pyth as the reviewed
+   alternate; a VRF-only deployment is not conformant, and the former
+   VRF-only exception path is removed (ADR 0009 decision 21).
+5. Metadata refresh events are Core-originated: Core exposes restricted
+   ERC-4906 refresh emitters callable by authorized satellites, and the
+   coordinator calls the restricted Core method after entropy finalization
+   (ADR 0009 decision 5).
+6. `fulfillEntropy` returns a pinned `EntropyFulfillmentOutcome` code
+   instead of reverting on benign rejection; hard violations still revert
+   with typed errors (ADR 0009 decision 25).
 
-The preferred answers for a high-value launch are: configure and freeze entropy
-before sale start, allow operator/admin requests by default, defer instant
-providers unless strongly needed, make the reviewed fallback decision before
-public minting, and ensure refresh events are emitted from the contract or
-surface marketplaces actually monitor.
+These resolutions are normative; the requirements in the body of this
+document already state each decided behavior.

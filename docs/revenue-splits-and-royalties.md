@@ -1,12 +1,22 @@
 # Revenue Splits And Royalties
 
-This document is a pre-launch target specification for 6529Stream revenue
-splits and royalties. 6529Stream has not launched, so this architecture should
-be implemented as the initial production revenue and royalty system rather than
-as a later retrofit layer.
+Specification status: Draft. This document follows
+[`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
+inline are resolved by
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
-The proposed architecture is captured as ADR
-`docs/adr/0008-revenue-splits-and-royalty-resolver.md`.
+This document is the normative revenue and royalty specification for
+6529Stream. 6529Stream is permanent infrastructure for the 6529 network: the
+first production deployment is the permanent system, and this architecture
+is that system's revenue and royalty layer from genesis, not a retrofit.
+Requirements are classified by permanence class — Permanent, Replaceable, or
+Operational — as defined in `docs/spec-policy.md`.
+
+The architecture is captured as ADR
+`docs/adr/0008-revenue-splits-and-royalty-resolver.md`, Accepted and amended
+by `docs/adr/0009-protocol-v1-open-question-resolutions.md` decisions 8
+and 9.
 The cross-cutting 50+ year architecture principles live in
 `docs/stream-long-term-architecture.md`.
 
@@ -55,9 +65,9 @@ The design uses immutable split profiles and mutable assignments. Profiles say
 who gets paid. Assignments say which profile applies to a default, collection,
 or token scope.
 
-## Launch Scope
+## Protocol v1 Scope
 
-Launch scope is deliberately narrower than the long-term design surface:
+Protocol v1 scope is deliberately narrower than the long-term design surface:
 
 1. Native ETH primary-sale settlement.
 2. Native ETH ERC-2981 royalty receipts through split wallets.
@@ -70,7 +80,10 @@ Launch scope is deliberately narrower than the long-term design surface:
 8. Mint-time token royalty snapshots when a collection policy requires
    mint-time economics to persist.
 
-Non-launch unless a later ADR accepts the added risk:
+Excluded from protocol v1 — intentional absence, not deferral. Adding any of
+these requires a separately accepted module or adapter spec that accepts the
+added risk against the frozen interfaces, or a successor Core line where
+Permanent surfaces are affected:
 
 1. Fee-on-transfer, rebasing, callback, pausable-without-standard-reason, or
    other non-standard ERC-20 primary-sale adapters.
@@ -80,6 +93,10 @@ Non-launch unless a later ADR accepts the added risk:
 5. Marketplace registry override as the primary royalty path.
 
 ## Implementation Status
+
+This section is non-normative implementation evidence per
+[`docs/spec-policy.md`](spec-policy.md); it records point-in-time as-built
+state and does not weaken any requirement in this spec.
 
 The v1 split and primary-settlement implementation adds `StreamSplitFactory`,
 `StreamSplitWallet`, `StreamAssetPolicyRegistry`, `StreamRevenueResolver`, and
@@ -101,15 +118,15 @@ pull release from split wallets:
   payments.
 - `StreamAssetPolicyRegistry` is default-deny, owned by the deployment admin
   safe after rehearsal, records asset status plus evidence hash, and gives
-  wallets a fail-closed launch surface for approved standard ERC-20s.
+  wallets a fail-closed production surface for approved standard ERC-20s.
 - `StreamRevenueResolver` records deterministic default, collection, and token
   scoped primary assignments. Assignments point to an already verified split
   profile or to a primary split template. Template materialization currently
   supports the `SALE_POSTER` dynamic source and creates deterministic fixed
   split profiles through the split factory. The current resolver implements
   exact-key assignment freezes only; inherited freezes, global freezes, and
-  descendant override counters remain launch-target resolver work before
-  product-level permanent economics can be promised.
+  descendant override counters remain outstanding resolver work required by
+  this spec before product-level permanent economics can be promised.
 - `StreamPrimarySaleSettlement` accepts calls only from owner-authorized sale
   adapters, verifies the resolved primary policy hash under strict or
   allow-current policy mode, deposits exact native ETH or approved-standard
@@ -120,7 +137,8 @@ pull release from split wallets:
 - The slice spends no `StreamCore` bytecode and does not wire into fixed-price
   drops, auctions, escrow, or ERC-2981.
 - Fixed-price adapter integration, auction adapter integration, escrow fallback,
-  and Core-native resolver-backed ERC-2981 remain subsequent launch work.
+  and Core-native resolver-backed ERC-2981 remain outstanding implementation
+  work.
 
 ## Long-Term Principles
 
@@ -135,11 +153,11 @@ pull release from split wallets:
 8. Direct or forced ETH must not let admins sweep owed funds.
 9. Events and reads must reconstruct historical policy.
 10. Royalty disclosure is not royalty enforcement.
-11. Core-native ERC-2981 is mandatory for launch; royalty registry overrides are
-    not a launch substitute.
+11. Core-native ERC-2981 is mandatory from genesis; royalty registry overrides
+    are not a substitute.
 12. Collections may be fixed-size, capped-open, or uncapped-open. Revenue policy
     must not require final collection size to be known at collection creation.
-13. The launch Core must not keep a second royalty source of truth through
+13. The production Core must not keep a second royalty source of truth through
     OpenZeppelin `ERC2981` storage.
 14. Every contract pointer that can affect revenue resolution must follow ADR
     0004 pointer governance before it can be changed or frozen.
@@ -186,7 +204,7 @@ The same account may appear more than once under different labels when the
 profile intentionally records multiple roles. The same `(account, labelId)`
 pair must not appear twice.
 
-The recommended initial wallet limit is 64 entries and 64 unique accounts.
+The v1 wallet limit is 64 entries and 64 unique accounts.
 That is an implementation limit, not a protocol philosophy limit: larger
 future distributions should use a new wallet version, Merkle/accounting
 adapter, or another reviewed mechanism instead of unbounded loops.
@@ -296,8 +314,8 @@ is required only after on-chain observation has caught up so
 from cumulative `observedReceived`; incremental per-receipt allocation is not a
 valid implementation for this wallet version. Because the floor is applied to
 cumulative observed receipts, rounding dust does not accumulate across receipts.
-Any future final dust sweep needs its own decommissioning spec because later
-marketplace or forced receipts can still arrive.
+A final dust sweep needs its own separately accepted decommissioning spec
+because later marketplace or forced receipts can still arrive.
 
 Releases use checks-effects-interactions. If a native ETH or ERC-20 transfer
 fails, the transaction reverts and the entitlement remains claimable. The
@@ -325,8 +343,8 @@ Release authorization:
    decoding. A failed, out-of-gas, malformed, or wrong-magic-value
    `isValidSignature` staticcall reverts the alternate release before nonce
    consumption or transfer. The initial
-   planning cap is 50,000 gas, but launch uses measured gas plus margin and
-   records it in the release manifest.
+   planning cap is 50,000 gas, but the deployed artifact uses measured gas
+   plus margin and records it in the release manifest.
 6. `syncAsset` shares the same wallet-wide reentrancy guard as `release`.
    Operators should sync before release when they want a clean observation
    transaction; reentrant sync during an active release reverts.
@@ -422,7 +440,7 @@ or reducing entitlements.
 That is a safety freeze for the affected asset, not a sweep or recovery path:
 funds remain in the wallet, native ETH and other active assets remain usable,
 and the asset becomes syncable/releasable again only if the observed cumulative
-balance recovers to the previous high-water mark or a later reviewed
+balance recovers to the previous high-water mark or a separately accepted
 adapter/recovery spec accepts the non-standard behavior.
 `lastObservedReceived(asset)` is initialized at first detection through
 `syncAsset`, official deposit, or release; operator and recipient tools should
@@ -437,8 +455,8 @@ first observation. ERC-20 releases must also prove exact wallet and recipient
 balance deltas: the wallet balance must decrease by exactly the released
 amount and the recipient balance must increase by exactly the released amount.
 No-return tokens, no-op transfers, fee-on-transfer behavior, rebases,
-callbacks, and other non-standard behavior are unsupported unless a later
-adapter accepts them.
+callbacks, and other non-standard behavior are unsupported unless a
+separately accepted adapter spec accepts them.
 This deliberately excludes USDT-style no-return transfer tokens from the v1
 split-wallet ERC-20 path even if their `balanceOf` surface is otherwise
 readable; listing them requires a separate accepted adapter or wallet version.
@@ -451,7 +469,7 @@ registry is unavailable or an asset is unknown, non-native sync/release reverts
 safely for that asset only; native ETH and other active assets remain
 unaffected.
 
-The registry read is a bounded external read. The launch wallet line uses a
+The registry read is a bounded external read. The genesis wallet line uses a
 30,000 gas `staticcall` for the registry `assetStatus(address)` check and
 requires exactly 32 bytes of return data. Malformed return data, no code at
 the registry, registry revert, or under-forwarded gas makes the specific
@@ -491,17 +509,18 @@ but v1 split wallets accept only `ACTIVE` for non-native sync and release:
   split wallets.
 - `DEPRECATED`: previously approved assets are disabled for v1 sync and
   release.
-- `UNSUPPORTED`: release and sync for that asset are disabled until a later
-  adapter or recovery spec accepts the asset. Unsupported marking creates no
-  sweep right and blocks no other asset.
+- `UNSUPPORTED`: release and sync for that asset are disabled until a
+  separately accepted adapter or recovery spec accepts the asset. Unsupported
+  marking creates no sweep right and blocks no other asset.
 
 Moving an ERC-20 asset to `ACTIVE` is an asset-policy decision, not an automatic
 token-interface check. The policy admin should record evidence that the token
 has no transfer fees, rebases, confiscation mechanics, balance-decreasing hooks,
 callback surprises, no-return transfer semantics, or no-op transfer behavior
 that would violate the monotonic-balance and exact-delta assumptions.
-Unsupported-asset recoverability is deferred to a future state transition or
-adapter or recovery spec; the v1 unsupported state is not a sweep authority.
+Unsupported-asset recoverability is excluded from v1 and requires a
+separately accepted state-transition, adapter, or recovery spec; the v1
+unsupported state is not a sweep authority.
 
 If an ERC-20 moves back to `ACTIVE` after a period of inactive, deprecated, or
 unsupported operation, equality conservation is re-established only after the
@@ -526,8 +545,8 @@ tokens; the v1 correctness guarantee applies only to approved standard
 monotonic-balance assets. A governance-gated
 `markUnsupportedAsset(asset)` path may freeze only that asset without enabling
 any sweep or blocking ETH and other assets. Unsupported marking disables release
-and sync for that asset until a later asset-specific adapter or recovery spec
-is accepted.
+and sync for that asset until a separate asset-specific adapter or recovery
+spec is accepted.
 
 ## Open-Ended Collections And Revenue Epochs
 
@@ -541,8 +560,8 @@ supply.
 
 ### Token ID Model
 
-For launch, Core should allocate global sequential ERC-721 token IDs and store
-explicit mappings:
+Core allocates global sequential ERC-721 token IDs and stores explicit
+mappings (ADR 0009 decision 1):
 
 ```solidity
 mapping(uint256 tokenId => uint256 collectionId) tokenCollectionId;
@@ -551,8 +570,8 @@ mapping(uint256 tokenId => uint256 collectionSerial) tokenCollectionSerial;
 ```
 
 The current namespaced `collectionId * 10_000_000_000 + serial` formula should
-be removed before launch. It is useful historical context from the current
-code, but it is not the target identity model.
+be removed before production deployment. It is useful historical context
+from the current code, but it is not the target identity model.
 
 Rules:
 
@@ -564,7 +583,7 @@ Rules:
 4. `royaltyInfo()` uses the explicit mapping when it needs collection-scope
    resolution. CON-012 only exposes Core's canonical
    `tokenCollectionIdentity` read; wiring that read into the resolver-backed
-   `royaltyInfo()` implementation remains future resolver work.
+   `royaltyInfo()` implementation remains outstanding resolver work.
 5. Unmapped token IDs fall back only to default royalty assignment or zero.
 6. Burned tokens keep their last token-to-collection mapping for historical
    royalty disclosure. Burning removes ERC-721 ownership and enumerable
@@ -591,7 +610,7 @@ Rules:
 8. Assignment and revenue events must include both `collectionId` and `tokenId`
    when a token is known. For collection-level sale events before token
    allocation, the event must include a later token allocation event or a
-   same-transaction allocation reference. Launch v1 does not define a
+   same-transaction allocation reference. Protocol v1 does not define a
    standalone premint reservation API.
 
 Each collection should declare its royalty policy mode before public mint:
@@ -692,7 +711,7 @@ STRICT_MATCH      settlement reverts unless the resolved policy hash matches
 ALLOW_CURRENT     signer explicitly accepts settlement-time current policy
 ```
 
-Launch default should be `STRICT_MATCH` for economically material sales.
+The v1 default should be `STRICT_MATCH` for economically material sales.
 `ALLOW_CURRENT` is useful only for intentionally mutable sale programs and must
 be visible in the signed payload and settlement event. This prevents governance
 or operators from changing primary-sale economics between signature and
@@ -712,29 +731,34 @@ explicitly chose current-policy drift; `STRICT_MATCH` remains the default for
 economically material sales.
 Settlement events must expose whether drift was observed between the signed
 `expectedPrimaryPolicyHash` and the resolved settlement policy.
-The launch-target resolved primary policy hash includes `freezeMode` and
-`permanentFreeze`. The current foundation adapter binds the resolver assignment
-hash, and that assignment hash changes when its exact-key frozen bit changes.
+The resolved primary policy hash binds the assignment's frozen bit through
+the canonical `assignmentHash` preimage (ADR 0009 decision 9); it does not
+bind `freezeMode` or `permanentFreeze`, because freeze-mode transitions
+between frozen states do not change economics and must not invalidate
+outstanding signed authorizations. The foundation adapter binds the
+resolver assignment hash, and that assignment hash changes when its exact-key
+frozen bit changes.
 Therefore a freeze between signature and settlement changes the resolved policy
 hash and makes `STRICT_MATCH` revert unless the upstream authorization supplied
 the frozen policy hash. `ALLOW_CURRENT` is the explicit opt-in to that drift.
 
 No production sale path may use `tx.origin` as payer, recipient, executor, or
 authorizer. The current `StreamDrops` authorization model must be rewritten
-before launch so the signed sale authorization binds the actual recipient or
-recipient batch, payer, executor, collection, phase/drop/auction ID, quantity,
-price, nonce, deadline, and policy hash. Settlement recomputes those hashes
-from calldata and chain state. A static-analysis launch gate must fail the
-build if any sale, drop, auction, or mint path reads `tx.origin`.
+before production deployment so the signed sale authorization binds the
+actual recipient or recipient batch, payer, executor, collection,
+phase/drop/auction ID, quantity, price, nonce, deadline, and policy hash.
+Settlement recomputes those hashes from calldata and chain state. A
+static-analysis CI gate must fail the build if any sale, drop, auction, or
+mint path reads `tx.origin`.
 
 ### Normative Paid Mint Orchestration
 
-Every paid primary mint must use exactly one of these launch paths. No third
-paid mint order is launch-conformant.
+Every paid primary mint must use exactly one of these v1 paths. No third
+paid mint order is deployment-conformant.
 A collection configured for `ROYALTY_SNAPSHOT_AT_MINT` must reject binding to a
 sale adapter that supports only `PRE_REVENUE_SINGLE_STEP`. Snapshot-at-mint
-collections require `PREPARED_MINT` or a later accepted orchestration that
-writes the snapshot before any untrusted receiver callback.
+collections require `PREPARED_MINT` or a separately accepted orchestration
+that writes the snapshot before any untrusted receiver callback.
 
 `PRE_REVENUE_SINGLE_STEP`:
 
@@ -1138,7 +1162,7 @@ runtime code hash from the profile's wallet version; for a deployed wallet, it
 is the observed code hash. Deprecating a factory or code hash later does not
 block flushing credits created while that factory and hash were active. Only an
 explicit incident revocation can block normal flush for an escrow factory or
-runtime code hash, and that revocation must come with a launch-defined recovery
+runtime code hash, and that revocation must come with a spec-defined recovery
 plan for the owed funds.
 
 Escrow and wallet accounting are separate until flush succeeds:
@@ -1169,7 +1193,7 @@ cumulative release accounting.
 
 `flushEscrow` is outside the public-sale settlement gas envelope, but it still
 needs a published execution budget. The escrow contract should reject a flush
-before zeroing owed credit unless `gasleft()` is above a launch-configured
+before zeroing owed credit unless `gasleft()` is above a deployment-pinned
 `FLUSH_GAS_FLOOR` sized to cover worst-case `deployWallet`, code-hash
 verification, and native deposit with margin. CI should record the measured
 worst-case gas for deployed-wallet flush and undeployed-wallet flush. If the
@@ -1190,10 +1214,11 @@ each external subcall. Tests must measure the actual gas delivered to
 `gasleft()` value.
 After owed credit is zeroed, any deployment, code-hash check, or transfer
 failure must bubble as a revert of the entire `flushEscrow` call so EVM rollback
-restores the owed balance. Launch code must not swallow post-zeroing failures in
-`try/catch`, return `false` while leaving credit zeroed, or emit success after a
-failed subcall. Tests must simulate a subcall out-of-gas after the zeroing point
-and prove the parent call reverts with owed credit intact.
+restores the owed balance. Production code must not swallow post-zeroing
+failures in `try/catch`, return `false` while leaving credit zeroed, or emit
+success after a failed subcall. Tests must simulate a subcall out-of-gas
+after the zeroing point and prove the parent call reverts with owed credit
+intact.
 
 Escrow accounting is log-reconstructable but chain-finality-sensitive. Indexers
 and accounting exports should treat escrow deposits, flushes, and recovery
@@ -1205,9 +1230,10 @@ If a future gas-schedule change makes the immutable `FLUSH_GAS_FLOOR`
 incorrect, the correction path is a new escrow deployment line plus governed
 successor-wallet or escrow-credit recovery for affected credits. Monitoring
 must alert when measured flush gas approaches the immutable floor with
-insufficient margin. Launch operations should alert when measured worst-case
-undeployed-wallet flush gas exceeds two-thirds of `FLUSH_GAS_FLOOR` or when
-the margin falls below the release-manifest SLO, whichever is stricter.
+insufficient margin. Production operations should alert when measured
+worst-case undeployed-wallet flush gas exceeds two-thirds of
+`FLUSH_GAS_FLOOR` or when the margin falls below the release-manifest SLO,
+whichever is stricter.
 Accepted terminal risk: if a future gas-schedule change makes
 `FLUSH_GAS_FLOOR` permanently unreachable, a wallet was never deployed, and
 governance quorum is also lost so escrow recovery cannot execute, that owed
@@ -1354,10 +1380,10 @@ function escrowRecoveryRecord(bytes32 recoveryId)
 
 ### Auction Settlement State Machine
 
-Launch auctions are not allowed to rely on the current `StreamDrops` opt-in
-auction placeholder. A production `StreamAuctions` or equivalent settlement
-contract must own the full bid-custody state machine before auctions are
-launch-ready.
+Production auctions are not allowed to rely on the current `StreamDrops`
+opt-in auction placeholder. A production `StreamAuctions` or equivalent
+settlement contract must own the full bid-custody state machine before
+auctions are production-ready.
 
 Minimum auction model:
 
@@ -1366,8 +1392,9 @@ Minimum auction model:
    seller/beneficiary policy, accepted asset, reserve, start/end time,
    primary revenue class, and expected primary policy hash.
 2. Bids are native ETH in v1 unless a reviewed auction-specific ERC-20 adapter
-   is accepted. The approved-standard ERC-20 primary settlement launch
-   requirement does not by itself make ERC-20 auction bidding launch-ready.
+   is accepted. The v1 approved-standard ERC-20 primary settlement
+   requirement does not by itself make ERC-20 auction bidding
+   production-ready.
 3. Losing-bid refunds are pull-based. Outbid funds become refundable credit;
    auction settlement never pushes ETH to losing bidders.
 4. Settlement first marks the auction settled, records the winning payer,
@@ -1379,8 +1406,8 @@ Minimum auction model:
 6. Failed split-wallet deposit uses the same owed escrow path as fixed-price
    primary sales. A split-recipient receive hook cannot revert settlement.
 7. Refund claims use checks-effects-interactions, are non-reentrant, and remain
-   claimable forever unless a future decommissioning spec handles uneconomic
-   dust.
+   claimable forever unless a separately accepted decommissioning spec
+   handles uneconomic dust.
 8. Auction cancellation, reserve failure, and no-bid expiry are evented and
    release any bidder credits through the same pull refund path.
 9. `auctionId` and `saleId` are domain-separated by chain ID, auction contract,
@@ -1388,9 +1415,9 @@ Minimum auction model:
 10. Settlement rejects if the signed policy hash, payer, recipient, executor,
     or amount does not match the auction state.
 
-Until that state machine is implemented and tested, auctions are explicitly not
-launch-ready. Fixed-price primary sales can launch independently if their
-native ETH pull-payment path satisfies this spec.
+Until that state machine is implemented and tested, auctions are explicitly
+not production-ready. Fixed-price primary sales can enter production
+independently if their native ETH pull-payment path satisfies this spec.
 
 ## Royalties
 
@@ -1424,7 +1451,7 @@ If `royaltyBps` is zero, `royaltyInfo()` should return `(address(0), 0)`.
 
 ### StreamCore ERC-2981 Implementation
 
-Launch Core should not inherit OpenZeppelin `ERC2981` storage. The inherited
+Core should not inherit OpenZeppelin `ERC2981` storage. The inherited
 default and token royalty mappings create a second source of truth and waste
 bytecode. Core should implement `IERC2981` directly and route `royaltyInfo()`
 through the resolver.
@@ -1509,9 +1536,10 @@ function royaltyInfo(uint256 tokenId, uint256 salePrice)
 }
 ```
 
-Launch implementation must use capped assembly returndata copying instead of
-high-level `bytes memory` decode to avoid unbounded returndata allocation. The
-call copies at most 64 bytes and requires `returndatasize() == 64`.
+The production implementation must use capped assembly returndata copying
+instead of high-level `bytes memory` decode to avoid unbounded returndata
+allocation. The call copies at most 64 bytes and requires
+`returndatasize() == 64`.
 
 `mappedCollectionId` and `hasMappedCollection` come from Core's authoritative
 token identity read, not from a token ID range heuristic. Core derives
@@ -1563,7 +1591,7 @@ function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
 `probeRoyaltyInfo` lives on the approved revenue diagnostics satellite or on
 the revenue resolver if the resolver implementation includes diagnostics. It
 does not live on Core. The probe emits resolver health and fallback evidence for
-operators. It is not used by marketplaces, but it is a launch gate so
+operators. It is not used by marketplaces, but it is a deployment gate so
 fallback-to-zero cannot remain invisible during public sale readiness checks.
 The probe must use the exact same resolver selector, gas cap, parent gas
 precheck, returndata-size limit, and decode rules as production
@@ -1617,12 +1645,12 @@ The resolver is bound to exactly one Core address at deployment. If
 bound Core, it must revert or return `(address(0), 0)`. A resolver must never
 use a caller-supplied `core` argument to look up another deployment's
 assignments.
-Static analysis must fail launch if `royaltyReceiverAndBps` or any internal
+Static analysis must fail CI if `royaltyReceiverAndBps` or any internal
 function reachable only from that path contains `CALL`, `DELEGATECALL`,
 `STATICCALL`, `CREATE`, or `CREATE2` opcodes. The Core staticcall gas cap is
 defense in depth, not the primary proof that the deployed resolver is pure.
 
-Worst-case cold-access gas must be budgeted before deployment. Target launch
+Worst-case cold-access gas must be budgeted before deployment. Target v1
 shape with packed assignment storage:
 
 ```text
@@ -1641,15 +1669,16 @@ The exact deployed implementation must publish measured gas for all-cold
 token, collection, and default fallback cases. If the deepest cold path exceeds
 35,000 gas inside the resolver on the target compiler/EVM, the implementation
 must either compress assignment storage, raise the immutable resolver gas cap
-before deployment, or reduce resolver work. It must not launch with a cap that
-causes ordinary cold reads to silently return `(address(0), 0)`.
+before deployment, or reduce resolver work. It must not deploy with a cap
+that causes ordinary cold reads to silently return `(address(0), 0)`.
 
-Launch Core must use capped assembly returndata handling, not a high-level
-`bytes memory` decode that can allocate unbounded returndata. The call copies at
-most 64 bytes, requires `returndatasize() == 64`, and returns `(address(0), 0)`
-for malformed size. Core uses checked arithmetic or `mulDiv`-style math for
-`salePrice * royaltyBps / 10_000` after decoding bps from the resolver and does
-not rely on overflow reverts for normal fallback behavior.
+Production Core must use capped assembly returndata handling, not a
+high-level `bytes memory` decode that can allocate unbounded returndata. The
+call copies at most 64 bytes, requires `returndatasize() == 64`, and returns
+`(address(0), 0)` for malformed size. Core uses checked arithmetic or
+`mulDiv`-style math for `salePrice * royaltyBps / 10_000` after decoding bps
+from the resolver and does not rely on overflow reverts for normal fallback
+behavior.
 
 `royaltyInfo()` must not require the token to be minted. In the v1
 resolver-backed design, token IDs for which `tokenCollectionIdentity` reports
@@ -1658,8 +1687,9 @@ Collection-scope
 royalty resolution requires Core to pass both
 `hasMappedCollection = tokenCollectionIdentity(tokenId).mappingExists` and
 `mappedCollectionId = tokenCollectionIdentity(tokenId).collectionId`. Core must
-not infer a collection receiver for unmapped tokens unless a later ADR defines
-an exact token ID codec and storage-free collection existence gate.
+not infer a collection receiver for unmapped tokens; an exact token ID codec
+and storage-free collection existence gate are excluded from protocol v1 and
+would require a successor Core line.
 The mapping used by `royaltyInfo()` is written only when Core has an
 authoritative token assignment, such as mint, same-transaction allocation, or a
 custody-held token path. Burned tokens retain their last stored mapping for
@@ -1667,18 +1697,18 @@ royalty disclosure history, with `tokenCollectionIdentity` deriving
 `mappingExists = true` from burned audit state after burn. `royaltyInfo()`
 therefore still resolves token,
 collection, then default scope for burned tokens, while `tokenURI()` may revert
-under normal ERC-721 metadata semantics. Launch v1 does not define standalone
-premint reservations; premint or nonexistent tokens without the Core mapping
-are unmapped for royalty resolution.
+under normal ERC-721 metadata semantics. Protocol v1 does not define
+standalone premint reservations; premint or nonexistent tokens without the
+Core mapping are unmapped for royalty resolution.
 
-This is still disclosure. Unless a future enforcement ADR changes the product
-posture, marketplaces can ignore the royalty.
+This is still disclosure. Royalty enforcement is excluded from protocol v1;
+marketplaces can ignore the royalty.
 
 Marketplaces may cache receiver or bps results, may ignore token-varying
-receivers, or may only honor a default receiver. The launch contract still must
-expose Core-native ERC-2981 because it is the most broadly portable royalty
-disclosure surface.
-There is no Core-local fixed receiver fallback in the launch architecture. If
+receivers, or may only honor a default receiver. The production contract
+still must expose Core-native ERC-2981 because it is the most broadly
+portable royalty disclosure surface.
+There is no Core-local fixed receiver fallback in the v1 architecture. If
 the resolver returns zero, malformed data, or no configured default assignment,
 `royaltyInfo()` returns `(address(0), 0)`.
 
@@ -1886,17 +1916,18 @@ obvious.
 
 Freezes use `freezeMode`: `EXACT` blocks only the exact key, while `INHERITED`
 blocks lower-scope set and clear operations under the frozen ancestor. In
-launch v1, applying an `INHERITED` freeze with any mutable lower-scope override
-under that ancestor must revert. A later ADR may add a bounded batch operation
-that freezes descendants in the same governance action, but v1 must not pretend
-it can enumerate arbitrary token-level descendants.
+protocol v1, applying an `INHERITED` freeze with any mutable lower-scope
+override under that ancestor must revert. A separately accepted resolver spec
+may add a bounded batch operation that freezes descendants in the same
+governance action, but v1 must not pretend it can enumerate arbitrary
+token-level descendants.
 The resolver must maintain O(1) descendant override counters or dirty bits per
 `(revenueClass, scope, scopeId)` so inherited-freeze checks do not require
 enumerating token-level assignments. Counter updates are part of set and clear:
 setting a collection override increments the default ancestor counter; setting a
 token override increments its authoritative collection ancestor and the default
 ancestor; clearing decrements the same ancestors. Applying an inherited freeze
-with existing lower overrides reverts in launch v1.
+with existing lower overrides reverts in protocol v1.
 
 Formal descendant-counter invariant:
 
@@ -1925,12 +1956,14 @@ A global freeze is implicitly `freezeMode = INHERITED` across every default,
 collection, and token scope for the affected revenue class. It blocks set,
 clear, and unfreeze operations for any assignment in that revenue class,
 including creation of new assignments after the freeze.
-Whether it also blocks creation of entirely new revenue classes must be an
-explicit release decision; a deployment-wide global freeze should block both.
+A deployment-wide global freeze blocks both all existing keys and the
+creation of entirely new revenue classes (ADR 0009 decision 8);
+`freezeAllRevenue()` must enforce both, because a global freeze bypassable
+by minting a new class is not a credible freeze.
 
-## Canonical Launch Interfaces
+## Canonical v1 Interfaces
 
-Launch implementation PRs should converge on selector-stable ABI targets for
+Implementation PRs should converge on selector-stable ABI targets for
 the payment surface:
 
 ```solidity
@@ -2012,7 +2045,7 @@ display metadata stays in manifests and events.
 
 ## Events
 
-The future event surface should be indexer-first. At minimum:
+The event surface should be indexer-first. At minimum:
 
 ```solidity
 event SplitProfileCreated(
@@ -2245,8 +2278,8 @@ indexed fields. Fields that are not indexed must still be present where needed
 for wallets, indexers, operator tools, and release evidence to reconstruct
 policy.
 The indexed fields shown above are the normative v1 allocation. Changing an
-indexed field after launch is an indexer-breaking event schema change and
-requires a new event name or a new accepted ADR. Do not "optimize" event
+indexed field after deployment is an indexer-breaking event schema change
+and requires a new event name or a new accepted ADR. Do not "optimize" event
 indexing per implementation after downstream tooling has been built.
 The intended escrow query path is to index escrow credit/flush events by
 `revenueClass`, `profileId`, and `wallet`; `asset`, amount, and remaining owed
@@ -2300,7 +2333,8 @@ auction nonce. `beneficiary` is the token recipient.
 - Native ETH receive support.
 - Non-reverting, storage-free, recipient-code-free `receive`.
 - ERC-20 release support.
-- ERC-20 releases limited to approved standard assets or later adapters.
+- ERC-20 releases limited to approved standard assets or separately accepted
+  adapters.
 - Evented asset approval, approval deprecation, and unsupported marking.
 - Reentrancy protection on release.
 - Alternate recipient release.
@@ -2327,12 +2361,11 @@ auction nonce. `beneficiary` is the token recipient.
 - Separate primary and royalty assignment helpers.
 - Set, clear, freeze, and read functions.
 - Royalty bps cap mirrored from Core's immutable `maxRoyaltyBps`.
-- Core owns the hard immutable `maxRoyaltyBps`, recommended at 1000 for launch
-  unless a future accepted ADR chooses otherwise before deployment. The Core cap
-  must not exceed 10,000. A resolver may impose the same or a lower cap, but it
-  cannot raise the Core cap.
-  Raising the Core cap after launch requires a new Core deployment line and
-  explicit rollout plan; lowering resolver policy can use a new resolver
+- Core owns the hard immutable `maxRoyaltyBps` of 1000
+  (ADR 0009 decision 7). A resolver may impose the same or a lower cap,
+  but it cannot raise the Core cap.
+  Raising the Core cap after deployment requires a new Core deployment line
+  and explicit rollout plan; lowering resolver policy can use a new resolver
   deployment and rollout plan.
 - Resolver cap rollout runbook: deploy new resolver, register and approve its
   module identity/code hash/manifest hash, stage the Core resolver pointer
@@ -2340,8 +2373,8 @@ auction nonce. `beneficiary` is the token recipient.
   run `probeRoyaltyInfo` against representative default, collection, token,
   premint, burned, and malformed cases, emit a manifest-backed reason, execute
   after the delay, monitor fallback-to-zero diagnostics, and optionally freeze
-  the new pointer after launch confidence. Cap changes must not mutate old
-  resolver state in place.
+  the new pointer after operational confidence. Cap changes must not mutate
+  old resolver state in place.
 - Assignment-time wallet deployment, factory, profile ID, and code-hash
   validation.
 - Direct view for `primaryRevenueWallet(collectionId, tokenId, revenueClass)`.
@@ -2358,14 +2391,14 @@ auction nonce. `beneficiary` is the token recipient.
 
 - Replace three-bucket local split policy with resolver-backed profiles only
   after the split wallet and resolver have dedicated tests.
-- Preserve current pull-payment and owed/surplus behavior in the launch design.
+- Preserve current pull-payment and owed/surplus behavior in the v1 design.
 - Assignments may point only to verified official split wallets or a
   protocol-owned revenue escrow with ADR 0003 owed/surplus guarantees.
 - Use deterministic direct-deposit-then-escrow fallback so split wallet deposit
   failure cannot revert minting or auction settlement.
 - Do not ship auction settlement until the full bid-custody, pull-refund, and
   settlement state machine above is implemented. The current drop-side auction
-  placeholder is not a launch settlement path.
+  placeholder is not a production settlement path.
 - Keep v1 primary settlement limited to native ETH and approved standard ERC-20
   adapters; non-standard ERC-20 behavior requires a separate accepted adapter
   spec.
@@ -2376,10 +2409,10 @@ auction nonce. `beneficiary` is the token recipient.
 
 Any curator reward or pool contract that can hold owed funds must follow the
 same owed/surplus boundary as the primary splitter architecture. Push payments
-and unrestricted emergency sweeps are not launch-conformant for owed rewards.
-Either rewrite curator rewards to pull accounting with explicit surplus proofs
-or mark the current pool as a non-launch component outside the Stream
-payment conformance boundary.
+and unrestricted emergency sweeps are not deployment-conformant for owed
+rewards. Either rewrite curator rewards to pull accounting with explicit
+surplus proofs or mark the current pool as excluded from protocol v1, outside
+the Stream payment conformance boundary.
 
 ### StreamCore
 
@@ -2443,7 +2476,7 @@ Marketplace and indexer integrations should:
 - avoid claims that payment is guaranteed;
 - retain platform-specific evidence before public release claims.
 
-## Pre-Launch Implementation Sequence
+## Pre-Deployment Implementation Sequence
 
 1. Implement the split wallet factory and immutable split wallets.
 2. Add exhaustive split-profile, canonicalization, dust, release, ERC-20, and
@@ -2455,7 +2488,8 @@ Marketplace and indexer integrations should:
 5. Wire auction primary settlement only after the bid-custody and pull-refund
    state machine in this spec is implemented.
 6. Implement royalty assignments and split-wallet royalty receiver resolution.
-7. Add minimal resolver-backed `royaltyInfo()` to `StreamCore` before launch.
+7. Add minimal resolver-backed `royaltyInfo()` to `StreamCore` before
+   production deployment.
 8. Prove the Core size budget with measured bytecode output. If the size budget
    fails, refactor non-essential Core logic into satellites or compress helper
    code until Core-native ERC-2981 fits.
@@ -2534,7 +2568,8 @@ Marketplace and indexer integrations should:
 - Frozen assignments cannot mutate.
 - Inherited freezes block lower-scope set and clear operations; exact freezes
   affect only their explicit key.
-- Applying inherited freeze with existing lower overrides reverts in launch v1.
+- Applying inherited freeze with existing lower overrides reverts in
+  protocol v1.
 - Global freeze is inherited across all scopes for its revenue class.
 - Royalty bps is capped.
 - `royaltyInfo()` returns the resolved split wallet.
@@ -2572,7 +2607,7 @@ Marketplace and indexer integrations should:
   only through the timelocked successor-wallet reroute path.
 - Primary sale paths do not use `tx.origin` for payer, recipient, or execution
   identity.
-- Static analysis fails the launch build if `tx.origin` appears in any
+- Static analysis fails CI if `tx.origin` appears in any
   production mint, sale, drop, auction, or authorization path.
 - Signed primary sale authorizations bind `revenueClass` and
   `expectedPrimaryPolicyHash`, or explicitly opt into current-policy drift.
@@ -2639,7 +2674,7 @@ Marketplace and indexer integrations should:
 - Royalty resolver ABI, selector, gas cap, and malformed-return fallback are
   fixed and tested.
 - `royaltyInfo()` fallback-to-zero is paired with a non-view diagnostic probe
-  and launch readiness gate.
+  and deployment readiness gate.
 - `probeRoyaltyInfo` uses the same selector, gas cap, parent gas precheck,
   returndata cap, and decode rules as production `royaltyInfo()`.
 - Receipts smaller than the unique-account count remain bounded rounding dust
