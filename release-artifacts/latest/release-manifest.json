@@ -2329,8 +2329,8 @@
     "governance_docs": [
       {
         "path": "README.md",
-        "sha256": "sha256:83825d9c1e766d65d05b8bfb99cad4c1b6756ef024e0fb4fc510766142ea6a3c",
-        "size_bytes": 13952
+        "sha256": "sha256:3c43bf35eda0f17c5fd0480421d8ae76d9469cce355bb9d7b135ba53a3a3c892",
+        "size_bytes": 13699
       },
       {
         "path": ".github/PULL_REQUEST_TEMPLATE.md",
@@ -2414,8 +2414,8 @@
       },
       {
         "path": "docs/launch-v1-target-architecture.md",
-        "sha256": "sha256:b7e5054a47cc6ae5b70a7bd30b049593826ec2cab5665c0b5393788d985e9f76",
-        "size_bytes": 68818
+        "sha256": "sha256:b0432eddc916bbff72331154c5d9142cb2b164b2d177450b0cbd8dafa386e096",
+        "size_bytes": 68011
       },
       {
         "path": "docs/threat-model.md",
@@ -2459,8 +2459,8 @@
       },
       {
         "path": "docs/royalty-policy.md",
-        "sha256": "sha256:984dbe621f310235e972cf5538f0b9f27faddf6ba0209a055d14dd0d9b21414b",
-        "size_bytes": 15075
+        "sha256": "sha256:72203b12f25e589ed59d65994afab3c0b458369c92dbe6c1bb297b7f761ae134",
+        "size_bytes": 14812
       },
       {
         "path": "docs/warning-dispositions.md",
