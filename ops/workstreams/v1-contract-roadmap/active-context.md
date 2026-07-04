@@ -52,15 +52,17 @@ follow-up topics unless review finds this foundation needs a smaller boundary.
   completed.
 - Current topic branch: `codex/mint-gate-registry-foundation`.
 - Current topic issue: #640.
-- Current topic PR: not opened yet.
-- Current draft status: local gate/registry contracts, manager gate policy
-  wiring, deployment rehearsal wiring, release contract config, changelog,
-  backlog, and run-state updates are in progress. Focused
+- Current topic PR: #641
+  (`https://github.com/6529-Collections/6529Stream/pull/641`).
+- Current draft status: gate/registry contracts, manager gate policy wiring,
+  deployment rehearsal wiring, release contract config, changelog, backlog,
+  and run-state updates are committed and pushed. Focused
   `StreamMintManager`, `StreamMintModuleRegistry`, deployment-manifest, and gas
-  snapshot tests pass. Next transition: finish release artifact regeneration,
-  run local validation, send the OpenRouter review packet to Opus 4.8,
-  GPT-5.5 Pro at high/max reasoning, and GLM 5.2, iterate on findings, then
-  open the PR for issue #640.
+  snapshot tests, the release artifact regeneration chain, and the full
+  Windows check suite pass locally. Under explicit maintainer direction this
+  cycle runs PR review through CodeRabbit and repo bots instead of the
+  OpenRouter packet. Next transition: iterate on CI and bot findings on PR
+  #641, then merge when clean per the maintainer's merge authorization.
 
 ## Subagent Findings To Carry
 

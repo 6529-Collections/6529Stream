@@ -38,7 +38,7 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/mint-gate-registry-foundation` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/639` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/640` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/641` |
 | Next issue | Concrete ticket/Merkle/TDH gate implementations and callable nullifier support after the gate/registry foundation slice. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
