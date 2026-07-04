@@ -457,7 +457,7 @@ Requirements [SSA-ENGLISH]:
 8. Mint-at-settlement variant (`mintAtSettlement = true`): settlement is a
    paid mint and must execute the revenue spec's `PREPARED_MINT` path in
    the settlement transaction, with `initialRecipients = [winner]` (or
-   custody plus the rule 7 item (d) pull NFT claim path) and
+   the rule 7 item (d) pull NFT claim path) and
    `beneficiaries = [winner]`.
 9. Auction-start custody mint (`AUCTION_START_CUSTODY`): a token minted
    into auction custody before bidding is an unpaid custody mint, not a
