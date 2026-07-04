@@ -3,6 +3,7 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamMintLedger.sol";
+import "./IStreamMintModuleRegistry.sol";
 
 /// @notice Interface for outside-Core phase policy and mint execution.
 interface IStreamMintManager {
@@ -38,6 +39,16 @@ interface IStreamMintManager {
         bytes32 counterConfigHash;
     }
 
+    /// @notice Optional gate module pinned into one phase policy hash.
+    struct MintGateConfig {
+        address gate;
+        bytes32 gateConfigHash;
+        bytes32 gateCodehash;
+        bytes32 gateMetadataHash;
+        uint32 gateSemanticVersion;
+        uint32 gateGasLimit;
+    }
+
     /// @notice Prepared mint request executed atomically after ledger consumption.
     struct MintRequest {
         uint256 collectionId;
@@ -51,6 +62,7 @@ interface IStreamMintManager {
         bytes32 authorizationId;
         bytes32 contextHash;
         bytes32 expectedPolicyHash;
+        bytes gateData;
     }
 
     /// @notice Reverts when the Core dependency is not a valid StreamCore.
@@ -101,6 +113,28 @@ interface IStreamMintManager {
     error MintPolicyHashMismatch(bytes32 expectedPolicyHash, bytes32 activePolicyHash);
     /// @notice Reverts when a caller does not provide a replay-protected authorization ID.
     error MintAuthorizationRequired(uint256 collectionId, bytes32 phaseId);
+    /// @notice Reverts when the module registry dependency is invalid.
+    error InvalidMintModuleRegistry(address registry);
+    /// @notice Reverts when a configured gate is invalid for launch policy.
+    error InvalidMintGate(address gate);
+    /// @notice Reverts when a gate is not active for the required interface.
+    error MintGateNotActive(address gate);
+    /// @notice Reverts when a gate's codehash no longer matches the phase pin.
+    error MintGateCodehashChanged(address gate, bytes32 expected, bytes32 actual);
+    /// @notice Reverts when gate validation fails.
+    error MintGateValidationFailed(address gate);
+    /// @notice Reverts when a gate returns unsupported nullifiers.
+    error MintGateNullifiersUnsupported(bytes32 nullifier);
+    /// @notice Reverts when a gate returns too small a quantity limit.
+    error MintGateQuantityExceeded(uint256 quantity, uint256 maxQuantity);
+    /// @notice Reverts when request and gate authorization IDs conflict.
+    error MintGateAuthorizationMismatch(
+        bytes32 requestAuthorizationId, bytes32 gateAuthorizationId
+    );
+    /// @notice Reverts when request and gate authorizers conflict.
+    error MintGateAuthorizerMismatch(address requestAuthorizer, address gateAuthorizer);
+    /// @notice Reverts when a gate returns no durable evidence hash.
+    error MintGateHashRequired(address gate);
 
     /// @notice Emitted when a phase is configured and registered in the ledger.
     event MintPhaseConfigured(
@@ -144,6 +178,30 @@ interface IStreamMintManager {
         bytes32 counterConfigHash,
         bytes32 policyHash
     );
+    /// @notice Emitted when a phase binds an optional gate module.
+    event MintPhaseGateConfigured(
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        address indexed gate,
+        bytes32 gateConfigHash,
+        bytes32 gateCodehash,
+        bytes32 gateMetadataHash,
+        uint32 gateSemanticVersion,
+        uint32 gateGasLimit,
+        bytes32 policyHash
+    );
+    /// @notice Emitted after a gate validates one prepared mint batch.
+    event MintGateValidated(
+        uint256 indexed collectionId,
+        bytes32 indexed phaseId,
+        address indexed gate,
+        bytes32 authorizationId,
+        address authorizer,
+        uint256 quantity,
+        bytes32 contextHash,
+        bytes32 gateHash,
+        bytes32 policyHash
+    );
     /// @notice Emitted once per prepared batch after all tokens complete.
     event MintPreparedBatchExecuted(
         bytes32 indexed operationRoot,
@@ -175,6 +233,7 @@ interface IStreamMintManager {
         uint256 collectionId,
         bytes32 phaseId,
         MintPhaseConfig calldata config,
+        MintGateConfig calldata gateConfig,
         bytes32[] calldata counterIds,
         MintCounterConfig[] calldata counterConfigs
     ) external returns (bytes32 policyHash);
@@ -209,6 +268,11 @@ interface IStreamMintManager {
         external
         view
         returns (MintCounterConfig memory);
+    /// @notice Returns one phase's optional gate config.
+    function phaseGate(uint256 collectionId, bytes32 phaseId)
+        external
+        view
+        returns (MintGateConfig memory);
     /// @notice Previews the manager-derived subject key for one token/counter context.
     function previewSubjectKey(
         CounterKeyMode keyMode,

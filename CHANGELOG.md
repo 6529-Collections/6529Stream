@@ -57,6 +57,13 @@ the release policy in `docs/release-policy.md`.
   deployment rehearsal wiring, release-artifact coverage, and focused
   event-reconstruction/admin/freeze tests while keeping attestations and view
   references as follow-up satellites.
+- Added the launch v1 mint gate and module registry foundation, with
+  `IStreamMintGate`, `IStreamMintModuleRegistry`,
+  `StreamMintModuleRegistry`, optional phase gate pins in `StreamMintManager`,
+  gate-derived authorization and authorizer accounting, mint-time registry
+  revalidation, deployment rehearsal wiring, release-artifact coverage, and
+  focused fail-closed tests while keeping concrete ticket/Merkle/TDH gates and
+  callable nullifiers as follow-up slices.
 - Added drop-authorization ZK nullifier binding helpers and docs, using
   `salt = uint256(nullifierHash)` so ERC-1271 verifier contracts can stay
   read-only while `StreamDrops` consumes the derived drop ID as the replay

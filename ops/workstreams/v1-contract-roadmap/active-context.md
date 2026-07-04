@@ -9,26 +9,29 @@ feedback, merge when clean, then continue.
 
 ## Current Topic
 
-Collection metadata and preservation record satellites.
+Mint gate interface and module registry foundation.
 
-The current branch should implement the first outside-Core museum metadata and
-preservation slice on top of the merged payment, ledger, and manager
+The current branch should add the first outside-Core custom gate foundation on
+top of the merged payment, ledger, manager, metadata, and preservation
 foundations:
 
-- compact schema-bound records in `StreamCollectionMetadata` for typed launch
-  metadata groups;
-- immutable collection snapshot publication and latest-hash reads;
-- PREMIS/C2PA/IIIF/fixity-ready append-only records in
-  `StreamPreservationRecords`;
-- admin/pause, missing-collection, freeze, revision, lock, URI/hash, and event
-  reconstruction coverage;
-- deployment, address-book, release-artifact, changelog, and run-state wiring
-  without adding Core bytecode.
+- `IStreamMintGate` as the view-only phase eligibility module boundary;
+- `IStreamMintModuleRegistry` and `StreamMintModuleRegistry` as the approved
+  module registry with status, interface, codehash, metadata, semantic version,
+  and optional gas-limit pins;
+- optional per-phase gate configuration in `StreamMintManager`, bound into the
+  manager policy hash and revalidated at mint time before ledger/Core mutation;
+- gate-derived authorization IDs and authorizers flowing into ledger replay and
+  counter accounting, while ungated phases keep explicit request authorization
+  IDs;
+- v1 nullifier arrays rejected until the later callable-nullifier/accounting
+  slice;
+- deployment, release-artifact, changelog, and run-state wiring without adding
+  Core bytecode.
 
-Collection attestations, collection view/reference satellites, typed
-PREMIS/C2PA/IIIF companion ABIs, custom gates, ERC-20 auction bidding, callable
-nullifiers, and royalty resolver integration remain follow-up topics unless a
-smaller reviewed boundary is needed for this metadata/preservation slice.
+Concrete Merkle, signed-ticket, TDH, auction-proof, custom-resolver,
+callable-nullifier, and public mint adapter gate implementations remain
+follow-up topics unless review finds this foundation needs a smaller boundary.
 
 ## Branch State
 
@@ -45,22 +48,21 @@ smaller reviewed boundary is needed for this metadata/preservation slice.
 - Ledger foundation PR #635 merged and issue #634 is closed completed.
 - Mint manager phase/execution PR #637 merged and issue #636 is closed
   completed.
-- Current topic branch: `codex/collection-metadata-preservation`.
-- Current topic issue: #638.
-- Current topic PR: #639.
-- Current draft status: local `StreamCollectionMetadata` and
-  `StreamPreservationRecords` implementation, focused tests, rehearsal
-  deployment wiring, release/deployment artifact refreshes, changelog, backlog,
-  and run-state updates are in progress. Focused metadata, preservation, and
-  deployment manifest tests pass. Production via-IR size output records
-  `StreamCore` at 24,150 bytes with 426 bytes of EIP-170 margin,
-  `StreamCollectionMetadata` at 10,166 bytes, and
-  `StreamPreservationRecords` at 7,734 bytes. Opus 4.8 and GLM 5.2 returned
-  no P0/P1 issues. GPT-5.5 Pro ran at high/max reasoning, found one P2 in the
-  deployment manifest identity binding, and closed that finding after the
-  follow-up fix bound satellite dependency-pointer state. PR #639 is open and
-  CodeRabbit has been requested. Next transition: wait for CI and review-bot
-  feedback, resolve actionable findings, then merge if clean.
+- Collection metadata/preservation PR #639 merged and issue #638 is closed
+  completed.
+- Current topic branch: `codex/mint-gate-registry-foundation`.
+- Current topic issue: #640.
+- Current topic PR: #641
+  (`https://github.com/6529-Collections/6529Stream/pull/641`).
+- Current draft status: gate/registry contracts, manager gate policy wiring,
+  deployment rehearsal wiring, release contract config, changelog, backlog,
+  and run-state updates are committed and pushed. Focused
+  `StreamMintManager`, `StreamMintModuleRegistry`, deployment-manifest, and gas
+  snapshot tests, the release artifact regeneration chain, and the full
+  Windows check suite pass locally. Under explicit maintainer direction this
+  cycle runs PR review through CodeRabbit and repo bots instead of the
+  OpenRouter packet. Next transition: iterate on CI and bot findings on PR
+  #641, then merge when clean per the maintainer's merge authorization.
 
 ## Subagent Findings To Carry
 
@@ -108,8 +110,8 @@ smaller reviewed boundary is needed for this metadata/preservation slice.
   and the review loop is repeated.
 - PR review bots have no unresolved blocking findings, or deferrals are
   documented with rationale.
-- Current local validation target includes focused metadata/preservation tests,
-  `forge build`, `forge test -vvv`, production `via-ir` size build, deployment
-  rehearsal, release/deployment artifact checks,
+- Current local validation target includes focused mint manager/module registry
+  tests, `forge build`, `forge test -vvv`, production `via-ir` size build,
+  deployment rehearsal, release/deployment artifact checks,
   `python scripts/check_contract_size_budget.py`, `codex-diff-check`, and the
   full Windows `scripts\check.ps1` wrapper before PR/merge.

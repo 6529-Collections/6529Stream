@@ -184,11 +184,18 @@
         "verification_status": "not_applicable"
       },
       {
+        "name": "StreamMintModuleRegistry",
+        "address": "0x0000000000000000000000000000000000000013",
+        "constructor_args": [],
+        "verification_status": "not_applicable"
+      },
+      {
         "name": "StreamMintManager",
         "address": "0x0000000000000000000000000000000000000010",
         "constructor_args": [
           "0x0000000000000000000000000000000000000003",
-          "0x000000000000000000000000000000000000000f"
+          "0x000000000000000000000000000000000000000f",
+          "0x0000000000000000000000000000000000000013"
         ],
         "verification_status": "not_applicable"
       }
@@ -233,6 +240,10 @@
         },
         {
           "contract": "StreamMintLedger",
+          "new_owner": "0x0000000000000000000000000000000000006529"
+        },
+        {
+          "contract": "StreamMintModuleRegistry",
           "new_owner": "0x0000000000000000000000000000000000006529"
         },
         {

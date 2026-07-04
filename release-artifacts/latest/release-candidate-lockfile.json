@@ -55,39 +55,39 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:1fc76bfdc980d0c40cac15f1cb585e4c1771b4936c31c4ed33d6c48d0e8c2d0d",
-      "size_bytes": 134349,
+      "sha256": "sha256:059c55f44107cf53e14f2359dc4284cdcf4936464273a35fbb0767199d15b015",
+      "size_bytes": 134618,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:70497e4ffb858ca8a863c226b22fdf865260dacc2945971cd1251f59ab148b2e",
-      "size_bytes": 142403,
+      "sha256": "sha256:4bca03c438a229eae3c0e60b5d6088fbce74ab612e7ea7d976ce362787d6dc89",
+      "size_bytes": 150235,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
     "public_beta_evidence": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:e4082ec7554ff6d1c1cd86b359b60ac414c7eb25b1b3152a5ef72eb0af699cf6",
+      "sha256": "sha256:a2b6504a493c18e3e77547f72bca66d63b3bd7e9d1e30e0370547f16017433dc",
       "size_bytes": 10255,
       "schema_version": "6529stream.public-beta-evidence.v1"
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:61dda3981ca715315c443ec4605eca9b421475e9301753d56579527b742469bd",
+      "sha256": "sha256:8b0f5474c611d60a752618befe7df99df05f9d16e3a1f1d349eb9c6704d5e9cb",
       "size_bytes": 24573,
       "schema_version": "6529stream.risk-register.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:97bd546b8d14168f7cf98b73d23ea457bb2053dda7d00ee7083c1c17b91423ea",
-        "size_bytes": 80168,
+        "sha256": "sha256:c86ea48c77096b2887cae9a449f6d51acb476f4a1eb4f8d8fb1eadc005800217",
+        "size_bytes": 80634,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:9acabae699a6eaea4a497b099dbd35b865fd84cbad3b7ec49b8672b797c0525f",
-        "size_bytes": 77076
+        "sha256": "sha256:180a7665d6e723e28f82bbc0882df0439a86c3f4e080d7c7fed8f2a4723e12d0",
+        "size_bytes": 77535
       }
     },
     "blocker_reports": {
@@ -105,7 +105,7 @@
     "release_evidence_packet_index": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-packet-index.json",
-        "sha256": "sha256:19ac74793c1c692030ad464502272385e313a67b790d60e2694b15fbdba1ce5e",
+        "sha256": "sha256:124085397658f59ec64222560c1b87f66a5f61a547cacfe567cdcd201cc31e78",
         "size_bytes": 74299,
         "schema_version": "6529stream.release-evidence-packet-index.v1"
       },
@@ -118,7 +118,7 @@
     "release_evidence_issue_backlog": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
-        "sha256": "sha256:08eb5964717d99fd26e18e87ab5848fe0ad1a7735d90b917919524c1f2fde685",
+        "sha256": "sha256:b90914d327d267e2f590798dd50d5386239d13278dfda60d622a6cf01a926441",
         "size_bytes": 124588,
         "schema_version": "6529stream.release-evidence-issue-backlog.v1"
       },
@@ -131,13 +131,13 @@
     "release_evidence_issue_body_sync": {
       "json": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.json",
-        "sha256": "sha256:d1995c85635234315018c645e890a8c19435df022305610069bf2387fa1601d2",
+        "sha256": "sha256:66536a9e5e801b1602dbc899b04ad2a5b0bb46488c164e38cd278914bfab3b71",
         "size_bytes": 84653,
         "schema_version": "6529stream.release-evidence-issue-body-sync.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-evidence-issue-body-sync.md",
-        "sha256": "sha256:aef86157ea66274768f9a53c5c21aef53c42214235f8388523b06649ebf93d82",
+        "sha256": "sha256:7f2f62db366b07fed4c3745a3005ca838af85b326905eff79849e59cfa39cf66",
         "size_bytes": 75155
       }
     }
