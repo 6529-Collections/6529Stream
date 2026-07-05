@@ -29,8 +29,7 @@ abstract contract StreamGasProbe is IStreamGasParameterProbe {
     uint16 public constant GAS_PARAMETER_PROBE_SCHEMA_VERSION = 1;
 
     /// @dev keccak256("6529STREAM_GGP_PROBE_RUN_V1") — probe-run id domain.
-    bytes32 private constant _PROBE_RUN_DOMAIN_V1 =
-        keccak256("6529STREAM_GGP_PROBE_RUN_V1");
+    bytes32 private constant _PROBE_RUN_DOMAIN_V1 = keccak256("6529STREAM_GGP_PROBE_RUN_V1");
 
     struct ProbeRun {
         bytes32 probeRunId;
@@ -99,8 +98,9 @@ abstract contract StreamGasProbe is IStreamGasParameterProbe {
                 _runNonce
             )
         );
-        _runs[probedValue] =
-            ProbeRun({ probeRunId: probeRunId, passed: passed, probedAtBlock: uint64(block.number) });
+        _runs[probedValue] = ProbeRun({
+            probeRunId: probeRunId, passed: passed, probedAtBlock: uint64(block.number)
+        });
 
         emit GasParameterProbed(
             GAS_PARAMETER_PROBE_SCHEMA_VERSION,

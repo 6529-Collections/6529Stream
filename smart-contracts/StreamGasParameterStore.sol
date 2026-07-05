@@ -26,7 +26,7 @@ contract StreamGasParameterStore is StreamGasParameterHost {
         StreamGasParameterHost(authority)
     {
         uint256 count = configs.length;
-        for (uint256 i = 0; i < count; ) {
+        for (uint256 i = 0; i < count;) {
             _registerGasParameter(configs[i]);
             unchecked {
                 ++i;

@@ -126,8 +126,7 @@ interface IStreamTimeParameterHost {
 
     /// @notice Staged raise on the normal delay class ([LTA-GTP] change
     ///         discipline 1-2). Authority-only; at most 2x current per action.
-    function raiseTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId)
-        external;
+    function raiseTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
 
     /// @notice Staged lower on the normal delay class ([LTA-GTP] change
     ///         discipline 1-3). Authority-only; no less than half current per
@@ -135,8 +134,7 @@ interface IStreamTimeParameterHost {
     ///         requires a recorded passing cadence run at exactly `newValue`
     ///         within `probeMaxAgeBlocks` proving the proposed count still covers
     ///         the pinned wall-clock floor at the observed cadence.
-    function lowerTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId)
-        external;
+    function lowerTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
 
     /// @notice Moves the parameter's cadence-probe binding to a successor
     ///         Permanent-class probe on the normal delay class
@@ -145,6 +143,9 @@ interface IStreamTimeParameterHost {
     ///         wall-clock floor for this row (`pinnedWallClockFloorSeconds`
     ///         recheck), so a rebind can never change the width a candidate must
     ///         prove.
-    function rebindTimeParameterProbe(bytes32 parameterId, address newCadenceProbe, bytes32 actionId)
-        external;
+    function rebindTimeParameterProbe(
+        bytes32 parameterId,
+        address newCadenceProbe,
+        bytes32 actionId
+    ) external;
 }

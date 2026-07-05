@@ -22,7 +22,7 @@ contract StreamTimeParameterStore is StreamTimeParameterHost {
         StreamTimeParameterHost(authority)
     {
         uint256 count = configs.length;
-        for (uint256 i = 0; i < count; ) {
+        for (uint256 i = 0; i < count;) {
             _registerTimeParameter(configs[i]);
             unchecked {
                 ++i;

@@ -55,10 +55,8 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
     ///        a host with no governance whose change paths permanently revert.
     constructor(address authority) {
         if (authority != address(0)) {
-            if (
-                !IStreamGovernedParameterAuthority(authority)
-                    .isStreamGovernedParameterAuthority()
-            ) {
+            if (!IStreamGovernedParameterAuthority(authority).isStreamGovernedParameterAuthority())
+            {
                 revert TimeParameterInvalidAuthority(authority);
             }
         }
@@ -87,8 +85,7 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
             revert TimeParameterAlreadyRegistered(parameterId);
         }
         if (
-            config.floorBlocks == 0
-                || config.genesisValue < config.floorBlocks
+            config.floorBlocks == 0 || config.genesisValue < config.floorBlocks
                 || config.wallClockFloorSeconds == 0
                 || config.probeMaxAgeBlocks < PROBE_MAX_AGE_FLOOR_BLOCKS
         ) {
@@ -101,9 +98,8 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
         // immutable registration so the coverage width a candidate must prove can
         // never diverge between probe and host.
         if (
-            IStreamTimeParameterProbe(config.cadenceProbe).pinnedWallClockFloorSeconds(
-                parameterId
-            ) != config.wallClockFloorSeconds
+            IStreamTimeParameterProbe(config.cadenceProbe).pinnedWallClockFloorSeconds(parameterId)
+                != config.wallClockFloorSeconds
         ) {
             revert TimeParameterProbeMismatch(parameterId, config.cadenceProbe);
         }
@@ -283,8 +279,8 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
         uint256 proposedValue
     ) private view {
         (bytes32 probeRunId, bool passed, uint64 probedAtBlock) = IStreamTimeParameterProbe(
-            parameter.cadenceProbe
-        ).lastProbeRun(parameterId, proposedValue);
+                parameter.cadenceProbe
+            ).lastProbeRun(parameterId, proposedValue);
         if (probeRunId == bytes32(0)) {
             revert TimeParameterProbeRecordMissing(parameterId, proposedValue);
         }

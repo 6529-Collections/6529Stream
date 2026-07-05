@@ -111,8 +111,7 @@ contract StreamCadenceProbe is IStreamTimeParameterProbe {
         uint64 sampleMaxAgeBlocks_
     ) {
         if (
-            parameterNames.length == 0
-                || parameterNames.length != wallClockFloorSecondsByRow.length
+            parameterNames.length == 0 || parameterNames.length != wallClockFloorSecondsByRow.length
                 || sampleWindowBlocks_ < CADENCE_SAMPLE_FLOOR_BLOCKS
                 || sampleMaxAgeBlocks_ < sampleWindowBlocks_
         ) {
@@ -122,12 +121,11 @@ contract StreamCadenceProbe is IStreamTimeParameterProbe {
         sampleMaxAgeBlocks = sampleMaxAgeBlocks_;
 
         uint256 count = parameterNames.length;
-        for (uint256 i = 0; i < count; ) {
+        for (uint256 i = 0; i < count;) {
             if (bytes(parameterNames[i]).length == 0 || wallClockFloorSecondsByRow[i] == 0) {
                 revert StreamCadenceProbeInvalidConfig();
             }
-            bytes32 parameterId =
-                keccak256(abi.encodePacked("6529STREAM_GTP_", parameterNames[i]));
+            bytes32 parameterId = keccak256(abi.encodePacked("6529STREAM_GTP_", parameterNames[i]));
             if (_pinnedWallClockFloorSeconds[parameterId] != 0) {
                 revert StreamCadenceProbeInvalidConfig();
             }
@@ -151,8 +149,7 @@ contract StreamCadenceProbe is IStreamTimeParameterProbe {
             revert StreamCadenceProbeSampleAlreadyPending(_pendingSample.startBlock);
         }
         _pendingSample = PendingSample({
-            startBlock: uint64(block.number),
-            startTimestamp: uint64(block.timestamp)
+            startBlock: uint64(block.number), startTimestamp: uint64(block.timestamp)
         });
     }
 
@@ -241,9 +238,7 @@ contract StreamCadenceProbe is IStreamTimeParameterProbe {
             )
         );
         _runs[parameterId][candidateBlocks] = ProbeRun({
-            probeRunId: probeRunId,
-            passed: passed,
-            probedAtBlock: uint64(block.number)
+            probeRunId: probeRunId, passed: passed, probedAtBlock: uint64(block.number)
         });
 
         emit TimeParameterProbed(
@@ -282,7 +277,12 @@ contract StreamCadenceProbe is IStreamTimeParameterProbe {
     }
 
     /// @inheritdoc IStreamTimeParameterProbe
-    function pinnedWallClockFloorSeconds(bytes32 parameterId) external view override returns (uint64) {
+    function pinnedWallClockFloorSeconds(bytes32 parameterId)
+        external
+        view
+        override
+        returns (uint64)
+    {
         return _pinnedWallClockFloorSeconds[parameterId];
     }
 }

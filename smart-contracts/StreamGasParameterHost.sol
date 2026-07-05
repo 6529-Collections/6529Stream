@@ -77,10 +77,8 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
     ///        host with no governance whose governed entry points permanently revert.
     constructor(address authority) {
         if (authority != address(0)) {
-            if (
-                !IStreamGovernedParameterAuthority(authority)
-                    .isStreamGovernedParameterAuthority()
-            ) {
+            if (!IStreamGovernedParameterAuthority(authority).isStreamGovernedParameterAuthority())
+            {
                 revert GasParameterInvalidAuthority(authority);
             }
         }
@@ -110,8 +108,7 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
             revert GasParameterAlreadyRegistered(parameterId);
         }
         if (
-            config.floor == 0
-                || config.genesisValue < config.floor
+            config.floor == 0 || config.genesisValue < config.floor
                 || config.failureClass < FAILURE_CLASS_FORWARDING_CAP
                 || config.failureClass > FAILURE_CLASS_MIN_GAS_GATE
                 || config.probeMaxAgeBlocks < PROBE_MAX_AGE_FLOOR_BLOCKS
@@ -138,9 +135,7 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         // classes is impossible by construction (ADR 0012 decision T1).
         if (config.failureClass == FAILURE_CLASS_FORWARDING_CAP) {
             parameter.conditionalRaiseActionId = keccak256(
-                abi.encode(
-                    _CONDITIONAL_RAISE_DOMAIN_V1, block.chainid, address(this), parameterId
-                )
+                abi.encode(_CONDITIONAL_RAISE_DOMAIN_V1, block.chainid, address(this), parameterId)
             );
             parameter.conditionalRelowerActionId = keccak256(
                 abi.encode(
@@ -295,10 +290,7 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
     // ---------------------------------------------------------------------
 
     /// @inheritdoc IStreamGasParameterHost
-    function conditionalRaiseGasParameter(bytes32 parameterId, uint256 newValue)
-        external
-        override
-    {
+    function conditionalRaiseGasParameter(bytes32 parameterId, uint256 newValue) external override {
         GasParameterData storage parameter = _requireRegistered(parameterId);
         bytes32 standingActionId = parameter.conditionalRaiseActionId;
         if (standingActionId == bytes32(0)) {
@@ -406,8 +398,9 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         GasParameterData storage parameter,
         uint256 proposedValue
     ) private view {
-        (bytes32 probeRunId, bool passed, uint64 probedAtBlock) =
-            IStreamGasParameterProbe(parameter.probe).lastProbeRun(parameterId, proposedValue);
+        (bytes32 probeRunId, bool passed, uint64 probedAtBlock) = IStreamGasParameterProbe(
+                parameter.probe
+            ).lastProbeRun(parameterId, proposedValue);
         if (probeRunId == bytes32(0)) {
             revert GasParameterProbeRecordMissing(parameterId, proposedValue);
         }
