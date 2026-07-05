@@ -110,14 +110,17 @@ contract StreamModuleRegistry is ERC165, IStreamModuleRegistry {
         if (registration.interfaceId == bytes4(0) || registration.interfaceId == 0xffffffff) {
             revert InvalidModuleRecord(module);
         }
+        // FIX D: governance reads the live codehash before scheduling and pins
+        // it in the action at review time; execution-time pinning is mandatory,
+        // so a zero pin (accept whatever code is live at execution) is rejected.
+        if (registration.expectedRuntimeCodeHash == bytes32(0)) {
+            revert InvalidModuleRecord(module);
+        }
         if (!_supportsInterface(module, registration.interfaceId)) {
             revert ModuleInterfaceUnsupported(module, registration.interfaceId);
         }
         bytes32 runtimeCodeHash = module.codehash;
-        if (
-            registration.expectedRuntimeCodeHash != bytes32(0)
-                && registration.expectedRuntimeCodeHash != runtimeCodeHash
-        ) {
+        if (registration.expectedRuntimeCodeHash != runtimeCodeHash) {
             revert ModuleCodehashMismatch(
                 module, registration.expectedRuntimeCodeHash, runtimeCodeHash
             );

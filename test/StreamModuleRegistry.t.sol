@@ -130,7 +130,7 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
 
     function _registration(address moduleAddress)
         private
-        pure
+        view
         returns (StreamModuleRegistration memory registration)
     {
         registration.module = moduleAddress;
@@ -138,7 +138,10 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
         registration.moduleVersion = MODULE_VERSION;
         registration.interfaceId = MODULE_INTERFACE_ID;
         registration.moduleGasLimit = 400_000;
-        registration.expectedRuntimeCodeHash = bytes32(0);
+        // FIX D: governance pins the live codehash at review time; the default
+        // registration mirrors that. Tests exercising zero/mismatch pins
+        // override this field explicitly.
+        registration.expectedRuntimeCodeHash = moduleAddress.codehash;
         registration.deploymentManifestHash = DEPLOYMENT_MANIFEST_HASH;
         registration.moduleManifestHash = MODULE_MANIFEST_HASH;
         registration.moduleManifestURI = MODULE_MANIFEST_URI;
@@ -380,6 +383,17 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
         _register(registration);
         registration = _registration(address(module));
         registration.interfaceId = 0xffffffff;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamModuleRegistry.InvalidModuleRecord.selector, address(module)
+            )
+        );
+        _register(registration);
+
+        // FIX D: a zero codehash pin is rejected (execution-time pinning is
+        // mandatory; governance must pin the live codehash at review time).
+        registration = _registration(address(module));
+        registration.expectedRuntimeCodeHash = bytes32(0);
         vm.expectRevert(
             abi.encodeWithSelector(
                 StreamModuleRegistry.InvalidModuleRecord.selector, address(module)
@@ -674,7 +688,7 @@ contract StreamModuleRegistryGovernanceIntegrationTest is CharacterizationTestBa
         registration.moduleVersion = bytes32(uint256(1));
         registration.interfaceId = MODULE_INTERFACE_ID;
         registration.moduleGasLimit = 0;
-        registration.expectedRuntimeCodeHash = bytes32(0);
+        registration.expectedRuntimeCodeHash = address(module).codehash;
         registration.deploymentManifestHash = keccak256("deployment-manifest");
         registration.moduleManifestHash = keccak256("module-manifest");
         registration.moduleManifestURI = "ipfs://module-manifest";

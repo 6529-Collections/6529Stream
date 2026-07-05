@@ -32,7 +32,10 @@ struct StreamModuleRecord {
 ///         `StreamModuleRegistry.registerModule` lifecycle call.
 /// @dev Not part of the pinned [LTA-REGISTRY] read surface; the registry
 ///     records the module's live codehash and stamps the timestamps itself.
-///     `expectedRuntimeCodeHash` of zero skips the codehash pin check.
+///     `expectedRuntimeCodeHash` must be nonzero: governance reads the live
+///     codehash and pins it into the action at review time, and the registry
+///     rejects a zero pin so the bound is verified at review time rather than
+///     merely accepted at execution time.
 struct StreamModuleRegistration {
     address module;
     bytes32 moduleType;
