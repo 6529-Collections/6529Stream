@@ -6,8 +6,9 @@ inline are resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
 [ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
-[ADR 0012](adr/0012-world-class-pass-round-3.md), and
-[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded in
+[ADR 0012](adr/0012-world-class-pass-round-3.md),
+[ADR 0013](adr/0013-world-class-pass-round-4.md), and
+[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for
@@ -34,9 +35,11 @@ D5, D7.3, D8.2, D8.6, D9.2, and D10.6, by
 [ADR 0011](adr/0011-world-class-pass-round-2.md) decisions R6, R9, R10,
 and R12, by
 [ADR 0012](adr/0012-world-class-pass-round-3.md) decisions T3, T6,
-and T7, and by
+and T7, by
 [ADR 0013](adr/0013-world-class-pass-round-4.md) decisions U1, U6,
-and U7.
+and U7, and by
+[ADR 0014](adr/0014-world-class-pass-round-5.md) decisions V4, V5,
+V6, and V9.
 The cross-cutting 50+ year architecture principles, including the Governed
 Gas Parameter model, live in `docs/stream-long-term-architecture.md`. Sale
 and auction mechanics live in `docs/stream-sales-and-auctions.md` (ADR 0010
@@ -325,9 +328,15 @@ Requirements [RSR-GGP]:
     measurement artifact. `ROYALTY_RESOLVER_GAS_LIMIT` and
     `ROYALTY_RETURN_GAS_BUFFER` are `FORWARDING_CAP` — they bound the
     fail-safe `royaltyInfo()` read path, raising restores disclosure,
-    and each is a permissionless conditional-raise member per [LTA-GGP]
-    requirement 11, probed by `probeRoyaltyInfo` exactly as rule 5
-    states. `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
+    and each is a permissionless conditional-raise and
+    conditional-re-lower member per [LTA-GGP] requirement 11
+    (ADR 0014 decision V7): the host registers both pre-approved
+    actions at deployment — the raise gated on a recorded failing
+    probe run at the current value, the re-lower gated on a recorded
+    passing probe run at exactly the proposed lower value, bounded per
+    action and never below the floor — probed by `probeRoyaltyInfo`
+    exactly as rule 5 states, so a post-governance-loss raise chain is
+    walkable back down when a repricing reverses. `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
     `WALLET_DEPOSIT_GAS_LIMIT` are `FAIL_CLOSED_PRECHECK` — signature
     verification, asset-status resolution, and wallet deposits fail
     closed for the guarded operation, so raises are governance-only and
@@ -554,13 +563,17 @@ Requirements [RSR-RELEASE-AUTH]:
    ```solidity
    bytes32 constant RELEASE_AUTHORIZATION_TYPEHASH = keccak256(
        "StreamReleaseAuthorization(address asset,address account,"
-       "address recipient,bytes32 nonce,uint64 deadline)"
+       "address recipient,uint256 releasableSnapshot,bytes32 nonce,"
+       "uint64 deadline)"
    );
    ```
 
    Field inventory: `asset` (native sentinel `address(0)` allowed),
    `account` (the entitled account and required signer), `recipient`
-   (non-zero payout destination), `nonce` (single-use per signer:
+   (non-zero payout destination), `releasableSnapshot` (the exact full
+   releasable amount the signer authorized — the wallet-accounting
+   epoch binding of rule 4; ADR 0014 decision V5), `nonce` (single-use
+   per signer:
    consumed-nonce state is keyed by `(account, nonce)`, ADR 0011 decision
    R10), and
    `deadline` (unix seconds; expired authorizations revert). The EIP-712
@@ -570,6 +583,11 @@ Requirements [RSR-RELEASE-AUTH]:
    than duplicated in the struct. Wallets must expose ERC-5267 domain
    introspection. The typehash and domain are recorded in
    [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes).
+   Supersession note: an earlier revision pinned this struct without
+   the `releasableSnapshot` field (typehash
+   `0xfc0465fe58ded163aac5c6c38a2171d353d941f9fbc8a1af61e5c309f87f680c`);
+   that payload let the released amount float to execution time, and it
+   is superseded and void (ADR 0014 decision V5).
 3. The wallet must consume the release-authorization nonce before transfer
    under CEI. Consumed-nonce state is keyed by `(account, nonce)` — the
    entitled signing account plus the nonce, never a bare wallet-wide nonce
@@ -580,17 +598,53 @@ Requirements [RSR-RELEASE-AUTH]:
    `isReleaseAuthorizationNonceUsed(address account, bytes32 nonce)`;
    caller-relative (`msg.sender`-scoped) replay views are nonconformant
    (ADR 0011 decision R12).
-4. A relayer cannot change the asset, account, recipient, nonce, deadline,
-   or destination wallet named by the authorization. Releases in this
-   wallet version always release the full releasable amount computed at
-   execution time; there is no partial-release mode, so the authorization
-   deliberately binds no amount field and no amount can drift between
-   signature and execution.
+4. A relayer cannot change the asset, account, recipient,
+   `releasableSnapshot`, nonce, deadline, or destination wallet named by
+   the authorization. Releases in this wallet version always release the
+   full releasable amount computed at execution time; there is no
+   partial-release mode. Because receipts and permissionless
+   release-to-self can land between signature and relay, that
+   execution-time amount is not constant, so the authorization binds
+   the wallet-accounting epoch it was signed against (ADR 0014 decision
+   V5): execution recomputes `releasable(account, asset)` after the
+   normal pre-release observation and reverts unless it exactly equals
+   the signed `releasableSnapshot`. The snapshot is a guard, never an
+   amount selector — it selects no partial amount, and on mismatch the
+   signer re-signs against the current epoch — so the amount an
+   authorization can move can never drift between signature and
+   execution, and receipts landing after signature stay claimable under
+   a fresh authorization. Signing UIs must display `releasableSnapshot`
+   as the exact amount the authorization will move, and signing tools
+   should `syncAsset` before quoting it so lazily observed receipts do
+   not invalidate the authorization at relay.
 5. The entitled account must be able to revoke an unused authorization
    before its deadline, either by calling
    `revokeReleaseAuthorization(nonce)` from the account or by any caller
    presenting an account-signed EIP-712/ERC-1271 revocation over the same
-   nonce (ADR 0010 decision D10.4). Revocation is signer-scoped: the
+   nonce (ADR 0010 decision D10.4). The pinned revocation typed-data
+   surface is (ADR 0014 decision V6):
+
+   ```solidity
+   bytes32 constant RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH = keccak256(
+       "StreamReleaseAuthorizationRevocation(address account,"
+       "bytes32 nonce,uint64 deadline)"
+   );
+   ```
+
+   Field inventory: `account` (the entitled account and required
+   signer), `nonce` (the `(account, nonce)` pair being revoked), and
+   `deadline` (unix seconds; expired revocations revert at submission —
+   the deadline bounds only the relay window and never re-validates an
+   already consumed or revoked nonce). The payload verifies under the
+   same rule 2 split-wallet EIP-712 domain, so wallet and chain are
+   bound by the domain separator; like its parent family it is
+   domain-only under the in-struct chainId discipline of
+   `docs/launch-v1-target-architecture.md` [PV1-DOMAINS] (no domain
+   material is duplicated in the struct). Verification follows
+   [RSR-1271], the [MPA-AUTHZ] rule 5 golden negative tests run against
+   this payload per [RSR-1271].1, and the typehash is recorded in
+   [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes).
+   Revocation is signer-scoped: the
    direct call consumes `(msg.sender, nonce)` and a signed revocation
    consumes the signer's own `(account, nonce)` pair, so revocation can
    never consume a nonce outside the caller's or signer's own scope
@@ -1147,10 +1201,13 @@ Requirements [RSR-ORCHESTRATION]:
    it, and the [PV1-MINT-ORDER] invariants — layer-scoped validation
    before that layer's effects, with no effect observable by an
    untrusted party before all validation completes and no effect
-   surviving a later validation failure; identity and required
+   surviving a later validation failure; consent precedes creation (the
+   once-per-transaction `requireMintConsent` read reverts before ledger
+   consumption and Core allocation, [PV1-MINT-ORDER] invariant 7);
+   identity and required
    accounting before entropy registration; entropy registration before
    any untrusted recipient callback — govern where the lists are silent
-   (ADR 0010 decision D3.6; ADR 0012 decision T7).
+   (ADR 0010 decision D3.6; ADR 0012 decision T7; ADR 0014 decision V9).
 3. A collection configured for `ROYALTY_SNAPSHOT_AT_MINT` must reject
    binding to a sale adapter that supports only `PRE_REVENUE_SINGLE_STEP`.
    Snapshot-at-mint collections require `PREPARED_MINT` or a separately
@@ -1182,23 +1239,34 @@ Requirements [RSR-ORCHESTRATION]:
 2. Sale adapter resolves only collection/default primary policy. Token-level
    primary overrides and required mint-time royalty snapshots are unavailable in
    this path.
-3. Sale adapter materializes the split profile if needed and deposits native
-   ETH into the verified split wallet or records escrowed revenue under
-   `(revenueClass, profileId, wallet, asset)`.
+3. Sale adapter materializes the split profile if needed and deposits the
+   accepted settlement asset — native ETH, or an approved standard
+   ERC-20 pulled under the [RSR-PAYMENT-INTENT] payer-intent rules —
+   into the verified split wallet, or records escrowed revenue under the
+   asset-keyed `(revenueClass, profileId, wallet, asset)` credit
+   (ADR 0014 decision V5).
 4. Sale adapter calls the mint manager.
-5. Mint manager validates the phase, computes active `policyHash`, verifies the
-   signed `MintTicket` or equivalent sale authorization, and binds the exact
-   `mintCommitmentsHash`.
-6. Mint ledger verifies the manager-registered policy hash and consumes
+5. Mint manager validates the phase and computes active `policyHash`.
+6. Mint manager calls `requireMintConsent(collectionId, phaseId,
+   policyHash)` on the artist authority registry — the
+   once-per-mint-transaction consent and contest check placed by the
+   mint spec's Mint Execution Order step 9, executed after the active
+   `policyHash` is computed and before any gate, counter, ledger, or
+   Core step — and reverts on refusal (consent precedes creation,
+   [PV1-MINT-ORDER] invariant 7; ADR 0014 decision V9).
+7. Mint manager verifies the signed `MintTicket` or equivalent sale
+   authorization and binds the exact `mintCommitmentsHash`.
+8. Mint ledger verifies the manager-registered policy hash and consumes
    counters, authorization IDs, and nullifiers.
-7. Core executes `mintFromManager`, writes token identity, registers the
+9. Core executes `mintFromManager`, writes token identity, registers the
    token's entropy request context with the entropy coordinator, and only
    then `_safeMint`s to the initial recipient. Entropy registration must
    precede any untrusted recipient callback; the conformance-matrix entropy
    gate enforces this ordering at deployment.
 
-The step 3 deposit deliberately precedes manager and ledger validation
-(steps 5–6), and that ordering satisfies [PV1-MINT-ORDER] invariant 1,
+The step 3 deposit deliberately precedes manager validation, the consent
+check, and ledger consumption
+(steps 5–8), and that ordering satisfies [PV1-MINT-ORDER] invariant 1,
 whose validation-before-effects rule is scoped per layer and per
 observability (ADR 0012 decision T7): the sale adapter completes its own
 layer's validation (steps 1–2) before its deposit effect; the deposit
@@ -1209,6 +1277,32 @@ manager, ledger, and Core validation complete; and a validation failure
 at any later step reverts the deposit atomically under this section's
 single-transaction rule, so no effect survives a later validation
 failure.
+
+The ERC-20 realization of step 3 carries its own stated justification,
+never one inherited by argument from enabled-caller or asset vetting —
+the same anti-inheritance discipline [RSR-SETTLEMENT-BOUNDARY].11
+applies to guards (ADR 0014 decision V5). The only external code an
+ERC-20 single-step deposit executes is the settlement asset's own
+transfer code: the pull is payer-authorized in the same call frame
+under [RSR-PAYMENT-INTENT] (a signed `PaymentIntent` or the rule 5
+payer-is-caller exemption), bounded by the sale authorization's asset
+and amount, proven by the exact-delta checks of [RSR-PAYMENT-INTENT].1,
+and available only for `ACTIVE` assets whose recorded
+[RSR-ASSET-POLICY].8 activation evidence excludes callback, hook,
+fee-on-transfer, and other observation or reentry channels — so the
+observability claim above holds for the approved-asset transfer exactly
+as for the native `receive`. The [RSR-SETTLEMENT-BOUNDARY].11
+reentrancy guard on the settlement surface holds independently of that
+evidence, so even a mis-approved callback asset cannot double-record a
+`settlementKey` or leave any partially validated effect standing: any
+interference reverts the single transaction, restoring every effect.
+An earlier revision stated step 3 for native ETH only; that reading —
+which would have forced every ERC-20 fixed-price sale into
+`PREPARED_MINT` — is superseded, both blessed paths deposit the
+accepted settlement asset, and the conformance matrix's paid-mint suite
+must include an ERC-20 `PRE_REVENUE_SINGLE_STEP` vector proving the
+deposit-before-manager/ledger ordering and its atomic revert on a later
+validation failure.
 
 Non-normative implementation evidence: the current direct-randomizer Core
 slice reaches its legacy randomizer/hash boundary after `_safeMint`. That
@@ -1221,19 +1315,24 @@ entropy-coordinator boundary lands.
 
 1. Sale adapter validates payment, sale authorization, price, quantity, payer,
    recipients, beneficiaries, deadline, nonce, and `expectedPrimaryPolicyHash`.
-2. Mint manager validates the phase, computes active `policyHash`, verifies the
-   signed `MintTicket` or equivalent sale authorization, and binds the exact
-   `mintCommitmentsHash`.
-3. Mint ledger verifies the manager-registered policy hash and consumes
+2. Mint manager validates the phase and computes active `policyHash`.
+3. Mint manager calls `requireMintConsent(collectionId, phaseId,
+   policyHash)` — the same Mint Execution Order step 9 consent and
+   contest check as `PRE_REVENUE_SINGLE_STEP` step 6, in the same
+   placement — and reverts on refusal ([PV1-MINT-ORDER] invariant 7;
+   ADR 0014 decision V9).
+4. Mint manager verifies the signed `MintTicket` or equivalent sale
+   authorization and binds the exact `mintCommitmentsHash`.
+5. Mint ledger verifies the manager-registered policy hash and consumes
    counters, authorization IDs, and nullifiers.
-4. Core executes `prepareMintFromManager`, creating authoritative token identity
+6. Core executes `prepareMintFromManager`, creating authoritative token identity
    but no entropy/randomizer request and no ERC-721 transfer.
-5. Resolver snapshots any required token-level primary or royalty assignment
+7. Resolver snapshots any required token-level primary or royalty assignment
    from Core's authoritative mapping.
-6. Sale adapter deposits the accepted settlement asset into the verified split
+8. Sale adapter deposits the accepted settlement asset into the verified split
    wallet or records escrowed revenue under
    `(revenueClass, profileId, wallet, asset)`.
-7. Core executes `completePreparedMintFromManager`, clears the prepared record,
+9. Core executes `completePreparedMintFromManager`, clears the prepared record,
    `_safeMint`s to the initial recipient while keeping the Core completion
    sentinel active, and clears that sentinel only after the token's normal
    entropy/randomizer boundary returns.
@@ -1302,13 +1401,14 @@ Requirements [RSR-PAYMENT-INTENT]:
    paid into); `nonce` (single-use per signer: consumed-intent state is
    keyed by `(payer, nonce)` in the verifying contract, ADR 0011 decision
    R10); `deadline`.
-   The EIP-712 domain is `name = "6529StreamPrimarySaleSettlement"`,
+   The EIP-712 domain is `name = "6529StreamPaymentIntentVerifier"`,
    `version = "1"`, `chainId`, `verifyingContract` = the contract that
    performs the allowance pull, with ERC-5267 introspection. The typehash
    and domain are recorded in
    [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes);
    the domain-name family rule and the named genesis verifier are pinned
-   in [RSR-DOMAINS].2 (ADR 0012 decision T7).
+   in [RSR-DOMAINS].2 (ADR 0012 decision T7; family renamed
+   verifier-neutral by ADR 0014 decision V6).
 3. The verifier must consume the `PaymentIntent` `(payer, nonce)` pair
    before the allowance
    pull under CEI, verify contract-wallet signatures under [RSR-1271],
@@ -1320,7 +1420,30 @@ Requirements [RSR-PAYMENT-INTENT]:
    R10). The payer must be able to revoke an unused intent by
    nonce (payer-sent revocation consumes `(msg.sender, nonce)`;
    payer-signed revocation consumes the signer's own pair; evented;
-   ADR 0010 decision D10.4). The verifier must expose the
+   ADR 0010 decision D10.4). The pinned intent-revocation typed-data
+   surface is (ADR 0014 decision V6):
+
+   ```solidity
+   bytes32 constant PAYMENT_INTENT_REVOCATION_TYPEHASH = keccak256(
+       "StreamPaymentIntentRevocation(address payer,bytes32 nonce,"
+       "uint64 deadline)"
+   );
+   ```
+
+   Field inventory: `payer` (the intent signer and required revocation
+   signer), `nonce` (the `(payer, nonce)` pair being revoked), and
+   `deadline` (unix seconds; expired revocations revert at submission —
+   the deadline bounds only the relay window and never re-validates an
+   already consumed or revoked nonce). The payload verifies under the
+   rule 2 verifier domain — the same `verifyingContract` that would
+   consume the intent — and, like its parent family, is domain-only
+   under the in-struct chainId discipline of
+   `docs/launch-v1-target-architecture.md` [PV1-DOMAINS] (no domain
+   material is duplicated in the struct). Verification follows
+   [RSR-1271], the [MPA-AUTHZ] rule 5 golden negative tests run against
+   this payload per [RSR-1271].1, and the typehash is recorded in
+   [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes).
+   The verifier must expose the
    explicit-address replay view
    `isPaymentIntentNonceUsed(address payer, bytes32 nonce)`;
    caller-relative replay views are nonconformant (ADR 0011 decision
@@ -1445,7 +1568,19 @@ Requirements [RSR-TEMPLATES]:
 4. Protocol fee posture: the static protocol share in genesis default
    templates is 100,000 ppm (10%) and must not exceed that value in any
    default template without a recorded governance rationale. Per-sale
-   templates may choose lower protocol shares freely.
+   templates may choose lower protocol shares freely. The static
+   protocol account recorded in a genesis default template must be
+   resolved at template registration through the admin registry's
+   `ROLE_TREASURY` reference — the value-receiving role of the
+   [GOV-ROLES] vocabulary in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   — never hand-entered as a raw address, and the resolved account must
+   hold that role home's value-receiving rehearsal evidence (proved
+   capable of receiving ETH) before the template's first sale
+   (ADR 0014 decision V4). Because profiles are immutable, a later
+   `ROLE_TREASURY` rotation re-points only templates registered after
+   the rotation; profiles already materialized keep their recorded
+   account, exactly like every other immutable entry ([RSR-ESTATE]).
 5. Disclosure: every collection's resolved primary split — entries, shares,
    template or profile ID, and artist share — must be surfaced through the
    collection metadata surface (`docs/collection-metadata-contract.md`)
@@ -2006,6 +2141,16 @@ function submitEscrowRecoveryConsent(
     bytes calldata signature
 ) external;
 
+// Direct recording path (ADR 0014 decision V4): callable only by the
+// affected account itself (msg.sender == account), so a contract
+// account without ERC-1271 support can consent with no signature at
+// all — the cap-independent principle of [RSR-1271].5, mirroring the
+// direct-call revocation symmetry. Consumes the caller's own
+// (account, nonce) pair before recording (CEI) and records the same
+// consent fact, emitting EscrowRecoveryConsentRecorded.
+function recordEscrowRecoveryConsent(bytes32 recoveryId, bytes32 nonce)
+    external;
+
 // Callable only by the consenting account while the recovery is not
 // yet executed.
 function revokeEscrowRecoveryConsent(bytes32 recoveryId) external;
@@ -2045,15 +2190,22 @@ Requirements [RSR-ESCROW-RECOVERY]:
    successor whose canonical entries differ in any way — accounts,
    shares, or labels — redirects owed funds and must satisfy exactly one
    of the two paths below; no shorter or hedged path is conformant:
-   - Consent path: a recorded, unrevoked `StreamEscrowRecoveryConsent`
-     from every affected account — every account with a nonzero
+   - Consent path: a recorded, unrevoked consent from every affected
+     account — every account with a nonzero
      aggregate share in the old profile whose aggregate share in the
-     successor profile is lower, including removal. Consents are
-     relayable by any caller through `submitEscrowRecoveryConsent`,
+     successor profile is lower, including removal. Consent recording
+     has two equivalent paths (ADR 0014 decision V4): a
+     `StreamEscrowRecoveryConsent` relayable by any caller through
+     `submitEscrowRecoveryConsent`,
      verified under [RSR-1271] against the pinned
      `ESCROW_RECOVERY_CONSENT_TYPEHASH` and escrow EIP-712 domain
-     ([RSR-DOMAINS]), consume the signer's own `(account, nonce)` pair
-     before recording, reject expired deadlines, and bind one
+     ([RSR-DOMAINS]); or the affected account's own direct call to
+     `recordEscrowRecoveryConsent(recoveryId, nonce)` with
+     `msg.sender == account` and no signature — the cap-independent
+     recording path for contract accounts without ERC-1271 support.
+     Both paths consume the signer's or caller's own `(account, nonce)`
+     pair before recording, reject expired deadlines (signed path), and
+     bind one
      `recoveryId` (which itself binds the credit key, successor,
      expected amount, manifest content hash, `executeAfter`, and reason
      hash through rule 9). A consenting account may revoke its unused
@@ -2092,7 +2244,9 @@ Requirements [RSR-ESCROW-RECOVERY]:
     For an economics-changing recovery the recheck must also prove the
     rule 6 path condition still holds at execution time: identical
     canonical entries, or a recorded, unrevoked consent for every
-    affected account, or a schedule that passed the `TERMINAL_FREEZE`
+    affected account (recorded through either rule 6 consent path,
+    ADR 0014 decision V4), or a schedule that passed the
+    `TERMINAL_FREEZE`
     veto/guardian class with the notice evidence recorded. A revoked
     consent after scheduling fails the consent path and the execution
     reverts (ADR 0013 decision U7).
@@ -2587,7 +2741,8 @@ Requirements [RSR-2981-GAS]:
      `ROYALTY_RETURN_GAS_BUFFER` must never be set below that recorded
      work; buffer margin decay from repricing is remediated by raising
      the buffer ([RSR-GGP].10; both parameters are `FORWARDING_CAP`
-     conditional-raise members, [RSR-GGP].11).
+     conditional-raise and conditional-re-lower members, [RSR-GGP].11;
+     ADR 0014 decision V7).
    - An implementation realizing the precheck as the additive sum
      `LIMIT + BUFFER` must enforce, in the host at every set of either
      parameter (staged, emergency, or conditional),
@@ -2599,7 +2754,9 @@ Requirements [RSR-2981-GAS]:
    - Every staged raise or lower of either parameter records, as change
      evidence, a passing `probeRoyaltyInfo` threshold run at the
      proposed value pair ([RSR-GGP].5); emergency and conditional raises
-     keep their failing-run gates unchanged.
+     keep their failing-run gates unchanged, and the conditional
+     re-lower keeps its passing-run gate at exactly the proposed value
+     pair (ADR 0014 decision V7).
    - CI must include a golden test replaying the rule 2 threshold suite
      across simulated multi-step raise chains — repeated 2x raises of
      the limit with unchanged and with re-verified buffers — proving
@@ -3745,8 +3902,10 @@ Requirements [RSR-DOMAINS]:
 | `ROYALTY_POLICY_DOMAIN` | `6529STREAM_ROYALTY_POLICY_V1` | `0x672cda40f3f95b129db3b9262cfb581cbe26ea0e95cb09b958ca58ebf62ba54a` | `StreamRevenueResolver` | `1` | see [Canonical Royalty Policy Hash](#canonical-royalty-policy-hash) |
 | `ESCROW_RECOVERY_DOMAIN` | `6529STREAM_ESCROW_RECOVERY_V1` | `0xd2477116ef00eff9b80dc97ae00c04faec607b7609301cced9041de52f32243c` | revenue escrow | `1` | see [Primary Sales](#primary-sales) [RSR-ESCROW-RECOVERY] rule 9 |
 | `ESCROW_RECOVERY_CONSENT_TYPEHASH` | struct type string pinned in the [RSR-ESCROW-RECOVERY] consent surface: `StreamEscrowRecoveryConsent(address account,bytes32 recoveryId,bytes32 nonce,uint64 deadline)` | `0xff4cafe3ce3dbf31056d40511f4344d6c8070efc8f6eaf284d2c5366514ede2e` | revenue escrow | `1` | see [RSR-ESCROW-RECOVERY] rule 6 (ADR 0013 decision U7) |
-| `RELEASE_AUTHORIZATION_TYPEHASH` | struct type string pinned in [RSR-RELEASE-AUTH].2 | `0xfc0465fe58ded163aac5c6c38a2171d353d941f9fbc8a1af61e5c309f87f680c` | `StreamSplitWallet` | `1` | see [RSR-RELEASE-AUTH].2 |
+| `RELEASE_AUTHORIZATION_TYPEHASH` | struct type string pinned in [RSR-RELEASE-AUTH].2: `StreamReleaseAuthorization(address asset,address account,address recipient,uint256 releasableSnapshot,bytes32 nonce,uint64 deadline)` | 0x6d1a151c75313442dbdc6436c69f78a6976bd8aa729b510f6e538487f3b93109 | `StreamSplitWallet` | `1` | see [RSR-RELEASE-AUTH].2 (`releasableSnapshot` added by ADR 0014 decision V5; the snapshot-less predecessor hash is recorded only in that rule's supersession note) |
+| `RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH` | struct type string pinned in [RSR-RELEASE-AUTH].5: `StreamReleaseAuthorizationRevocation(address account,bytes32 nonce,uint64 deadline)` | 0xb4240d33db7140e28e850f33c2d22b71ae26cea8a0a8dafdce603a056c81e295 | `StreamSplitWallet` | `1` | see [RSR-RELEASE-AUTH].5 (ADR 0014 decision V6) |
 | `PAYMENT_INTENT_TYPEHASH` | struct type string pinned in [RSR-PAYMENT-INTENT].2 | `0x72c99e6f6f9e2422510a5dd5c2dc2f9ffd83c776670a8de4ffab990e45f825cd` | ERC-20 settlement verifier | `1` | see [RSR-PAYMENT-INTENT].2 |
+| `PAYMENT_INTENT_REVOCATION_TYPEHASH` | struct type string pinned in [RSR-PAYMENT-INTENT].3: `StreamPaymentIntentRevocation(address payer,bytes32 nonce,uint64 deadline)` | 0x3a5991afab010b2aa3f78362da982cf536e46d406a9e205c1f27b0f0e4c42e50 | ERC-20 settlement verifier | `1` | see [RSR-PAYMENT-INTENT].3 (ADR 0014 decision V6) |
 | `GGP_ERC_1271_GAS_LIMIT` | `6529STREAM_GGP_ERC_1271_GAS_LIMIT` | `0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_ASSET_POLICY_GAS_LIMIT` | `6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT` | `0xbfc1f824948b8dc9573791fa40eeb403e7322af41d0967f90518dbbb531bf648` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `6529STREAM_GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda` | `StreamCore` | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP], [RSR-2981-GAS]) |
@@ -3754,29 +3913,52 @@ Requirements [RSR-DOMAINS]:
 | `GGP_WALLET_DEPOSIT_GAS_LIMIT` | `6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT` | `0xd208e16b8676adecbbdd17f529a9effcb9153af90ac08886fb2906298206ff45` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_FLUSH_GAS_FLOOR` | `6529STREAM_GGP_FLUSH_GAS_FLOOR` | `0x99168b87a7d39f5ba4862568c012ad3b51c552ec78108b88c6be5f5a6426ebe6` | revenue escrow | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 
-2. EIP-712 domains for the three typehashes above are pinned as: split
-   wallets use `("6529StreamSplitWallet", "1", chainId, wallet)`; the
-   ERC-20 settlement verifier uses
-   `("6529StreamPrimarySaleSettlement", "1", chainId, verifier)`; the
+   The three rows above were pinned from their inline struct strings
+   of `docs/launch-v1-target-architecture.md` [PV1-MIRROR].2 — the
+   `RELEASE_AUTHORIZATION_TYPEHASH` preimage revised by ADR 0014
+   decision V5 and the two revocation typehashes added by ADR 0014
+   decision V6. Each exact struct string preimage is adjacent in its
+   row and at its rule home, the CI recomputation run pins the values
+   from those preimages, and an unpinned value fails the Review-entry
+   condition of `docs/launch-conformance-matrix.md` ([LCM-REVIEW-ENTRY]
+   condition 4).
+
+2. EIP-712 domains for the five typehashes above are pinned as: split
+   wallets verify `StreamReleaseAuthorization` and
+   `StreamReleaseAuthorizationRevocation` under
+   `("6529StreamSplitWallet", "1", chainId, wallet)`; the
+   `PaymentIntent` verifier verifies `StreamPaymentIntent` and
+   `StreamPaymentIntentRevocation` under
+   `("6529StreamPaymentIntentVerifier", "1", chainId, verifier)`; the
    revenue escrow verifies `StreamEscrowRecoveryConsent` under
    `("6529StreamRevenueEscrow", "1", chainId, escrow)` (ADR 0013
    decision U7). Every
    verifying contract must expose ERC-5267 `eip712Domain()`.
-   `PaymentIntent` domain-name family rule (ADR 0012 decision T7):
-   `"6529StreamPrimarySaleSettlement"` is the permanent family name for
-   every conformant `PaymentIntent` verifier; distinctness between
+   `PaymentIntent` domain-name family rule (ADR 0012 decision T7;
+   family renamed by ADR 0014 decision V6):
+   `"6529StreamPaymentIntentVerifier"` is the permanent family name for
+   every conformant `PaymentIntent` verifier. The name names the
+   verifying settlement contract class generically — never any single
+   deployed contract — and each adapter binds the domain with its own
+   address (the per-adapter domain binding rule): distinctness between
    verifiers is guaranteed solely by `verifyingContract`, never by name
    or version edits, and renaming the family for a later
    pull-performing adapter is a domain-separator change and
-   nonconformant. The verifier is always the contract that performs the
+   nonconformant. The superseded family name
+   `"6529StreamPrimarySaleSettlement"` asserted the identity of a
+   contract that is not a verifier; the rename is Draft-stage, re-pins
+   no deployed surface, and the superseded name must never be deployed
+   (ADR 0014 decision V6). The verifier is always the contract that
+   performs the
    payer allowance pull: at genesis that is the ERC-20 primary
    settlement adapter (genesis inventory contract 20 of
    `docs/launch-conformance-matrix.md`); `StreamPrimarySaleSettlement`
    (genesis inventory contract 9) performs no payer allowance pull and
    is not a `PaymentIntent` verifier at genesis. The release manifest
-   records each verifier's address and ERC-5267 domain, and wallet-UI
-   or audit tooling must key on the `(name, verifyingContract)` pair,
-   never the name alone.
+   records each verifier's address and ERC-5267 domain, and the
+   wallet-audit release evidence must record that wallet-UI and audit
+   tooling key on the `(name, verifyingContract)` pair, never the name
+   alone.
 3. The `MintTicket` typehash and domain are owned by
    `docs/mint-policy-and-accounting.md`; artist consent, sanction,
    economics-consent, royalty-freeze, and delegation typehashes are owned
@@ -4239,10 +4421,13 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
 - Escrow flush accepts the runtime code hash captured at credit time after that
   hash is deprecated, unless it has been explicitly incident-revoked.
 - Economics-changing escrow recovery executes only with a recorded,
-  unrevoked `StreamEscrowRecoveryConsent` from every affected account or
+  unrevoked consent from every affected account or
   through the `TERMINAL_FREEZE`-grade veto/guardian schedule with
   recorded artist/recipient notice; identical-entries recovery uses the
-  `FUNDS_RECOVERY` floor alone; consent nonces are per-signer with
+  `FUNDS_RECOVERY` floor alone; consent records through both rule 6
+  paths — the relayed signed payload and the affected account's direct
+  `recordEscrowRecoveryConsent` call — and consent nonces are per-signer
+  with
   explicit-address replay views ([RSR-ESCROW-RECOVERY] rules 6 and 10).
 - An EIP-7702 delegation designation at a predicted wallet address is
   classified as code: the no-code escrow precondition fails and the
@@ -4324,7 +4509,24 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   signature, and revocation consumes the ledger authorization ID.
 - Release authorizations verify under the pinned
   `RELEASE_AUTHORIZATION_TYPEHASH` and domain; revocation consumes the
-  nonce before any later use.
+  nonce before any later use, and signed revocations verify under the
+  pinned `RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH` at the split-wallet
+  domain while signed `PaymentIntent` revocations verify under the
+  pinned `PAYMENT_INTENT_REVOCATION_TYPEHASH` at the verifier domain
+  ([RSR-RELEASE-AUTH].5, [RSR-PAYMENT-INTENT].3).
+- An alternate-recipient release authorization whose
+  `releasableSnapshot` does not equal the execution-time full releasable
+  amount reverts; a matching snapshot releases exactly that amount, and
+  a receipt or release-to-self landing between signature and relay
+  forces a re-sign rather than a drifted release ([RSR-RELEASE-AUTH].4).
+- An ERC-20 `PRE_REVENUE_SINGLE_STEP` paid mint deposits the approved
+  settlement asset (or records the asset-keyed escrow credit) before
+  manager and ledger validation and reverts atomically on a later
+  validation failure ([RSR-ORCHESTRATION] step 3 ERC-20 realization).
+- `requireMintConsent` executes exactly once per paid mint transaction
+  in each blessed path, after active `policyHash` computation and before
+  ticket verification, ledger consumption, and Core allocation
+  ([RSR-ORCHESTRATION]; [PV1-MINT-ORDER] invariant 7).
 - EOA signatures on `ReleaseAuthorization`, `PaymentIntent`, and their
   revocation payloads reject zero recovery, high-`s` (EIP-2), and `v`
   outside `{27, 28}` under the [MPA-AUTHZ] rule 2 discipline cited by

@@ -84,6 +84,23 @@ minters in a drop actually pay, the per-unit editions cost, and the
 competitor comparison, so the cost position is stated in numbers rather
 than narrative.
 
+Non-normative sizing guidance for edition planning: at the pinned batch
+marginal ceiling (`MAX_COLLECTOR_GAS_BATCH_MARGINAL`, [MPA-GAS-BUDGET])
+an edition of 100 is roughly 15M gas of marginal minting — about half
+of one L1 block — and an edition of 1,000 is roughly 150M gas, several
+full blocks, so the envelope this line is sized for ends at 1/1s
+through editions in the low hundreds, and thousands-unit timed open
+editions are out of economic envelope by construction. The sanctioned
+home for beyond-envelope editions is a declared successor or companion
+line, never this deployment ([SSA-EDITIONS]; [PV1-EXCL] item 11). That
+concession is stated, not hedged: the major volume-edition venues run
+that business on L2 or multichain lanes, this Core line never will,
+and the volume-collector acquisition funnel is deliberately ceded — a
+future cheap-mint lane for the 6529 network arrives only as its own
+declared line through the successor declaration surface
+([LTA-MANIFEST]), with artist history portable through the registry
+import machinery ([AA-IMPORT]).
+
 Every implementation requirement in the Stream specs carries a permanence
 class as defined in [`docs/spec-policy.md`](spec-policy.md): Permanent,
 Replaceable, or Operational. Spec documents may describe extension points,
@@ -197,9 +214,12 @@ following invariants:
    allocation, so no token is ever created against a refused, disputed,
    contested, or unset consent state ([AA-CONSENT] requirements 5–6;
    [MPA-CONSENT]). The canonical state-changing sequence in the mint
-   spec (Mint Execution Order) and the [RSR-ORCHESTRATION] realizations
-   place this step explicitly; the conformance-matrix artist-authority
-   consent suite enforces it.
+   spec (Mint Execution Order) places this step explicitly; the
+   [RSR-ORCHESTRATION] step lists do not restate it — they bind it
+   through [RSR-ORCHESTRATION] rule 2, which subordinates both blessed
+   realizations to these invariants wherever their lists are silent
+   (ADR 0014 decision V9) — and the conformance-matrix
+   artist-authority consent suite enforces it.
 
 Two-path realization rule: a transaction that mints a token against
 payment must use exactly one of the two blessed realizations of these
@@ -657,6 +677,7 @@ Home: [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
 | `SALE_CUSTODY_GRANT_TYPEHASH` | `SaleCustodyGrant(uint256 chainId,address saleAdapter,address core,uint256 tokenId,address owner,bytes32 saleRef,bytes32 nonce,uint64 deadline)` | 0xb829ff4936e00a75578357cfc3d855c59e780debb698eb3e8c8e9aff1b013041 | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-CUSTODY-ENTRY]` (ADR 0012 decision T6) |
 | `SALE_OFFER_REVOCATION_TYPEHASH` | `SaleOfferRevocation(uint256 chainId,address saleAdapter,bytes32 offerDigest)` | 0xb80f6e5d7ac663ccfb28bbcfae73c4b3111804ebe80d7ac845e1eb88a44d191c | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-OFFER]` rule 5 (ADR 0012 decision T6) |
 | `SALE_AUTHORIZATION_REVOCATION_TYPEHASH` | `SaleAuthorizationRevocation(uint256 chainId,address saleAdapter,address authorizer,bytes32 authorizationDigest)` | 0x41d0d127fea4cbca0630f242fe7375e83ff775d8215636ae1fdd92b3d481a455 | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-OFFER]` rule 5 (ADR 0012 decision T6; `authorizer` field added by ADR 0013 decision U6 — the authorizer-less predecessor hash is recorded only in the home's supersession note) |
+| `SALE_CUSTODY_GRANT_REVOCATION_TYPEHASH` | `SaleCustodyGrantRevocation(uint256 chainId,address saleAdapter,address owner,bytes32 grantDigest)` | 0x56747c6d524c5e2b5568c382f06c2f3c787067868f362f65933656e7a67e8344 | sale adapters | `1` | EIP-712 struct fields as listed; sales spec `[SSA-CUSTODY-ENTRY]` rule 4 (ADR 0014 decision V6) |
 | `STREAM_CONTENT_CONSUMED_V1` | `6529STREAM_CONTENT_CONSUMED_V1` | 0x4a1bb00019fd08daa7e378b30312e4fdceb2c209f31effa024f891745f97f84a | content-consumption extension | `1` | sales spec `[SSA-CONTENT-UNIQUE]` (ADR 0012 decision T6) |
 | `STREAM_RAFFLE_DRAW_V1` | `6529STREAM_RAFFLE_DRAW_V1` | 0x7bac77537b9b49e1c88e29e0fac9da7b983e54a03de6f7327c4eed66b617622c | raffle extension | `1` | sales spec `[SSA-RAFFLE]` (ADR 0012 decision T6) |
 
@@ -696,8 +717,10 @@ U7) with ERC-5267.
 | `PRIMARY_POLICY_DOMAIN` | `6529STREAM_PRIMARY_POLICY_V1` | 0x53c5c8e8dcd97f4f6a66557a6ede68c0798afd999c1cce5807f27d151fb50f12 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics; namespaced rename per `[RSR-DOMAINS]` rule 4, ADR 0011 decision R12) |
 | `ROYALTY_POLICY_DOMAIN` | `6529STREAM_ROYALTY_POLICY_V1` | 0x672cda40f3f95b129db3b9262cfb581cbe26ea0e95cb09b958ca58ebf62ba54a | `StreamRevenueResolver` | `1` | revenue spec `[RSR-ROYALTY-HASH]` (namespaced rename per `[RSR-DOMAINS]` rule 4, ADR 0011 decision R12) |
 | `ESCROW_RECOVERY_DOMAIN` | `6529STREAM_ESCROW_RECOVERY_V1` | 0xd2477116ef00eff9b80dc97ae00c04faec607b7609301cced9041de52f32243c | revenue escrow | `1` | revenue spec `[RSR-DOMAINS]` (escrow recovery; namespaced rename per `[RSR-DOMAINS]` rule 4, ADR 0011 decision R12) |
-| `RELEASE_AUTHORIZATION_TYPEHASH` | `StreamReleaseAuthorization(address asset,address account,address recipient,bytes32 nonce,uint64 deadline)` | 0xfc0465fe58ded163aac5c6c38a2171d353d941f9fbc8a1af61e5c309f87f680c | `StreamSplitWallet` | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-RELEASE-AUTH]` |
+| `RELEASE_AUTHORIZATION_TYPEHASH` | `StreamReleaseAuthorization(address asset,address account,address recipient,uint256 releasableSnapshot,bytes32 nonce,uint64 deadline)` | 0x6d1a151c75313442dbdc6436c69f78a6976bd8aa729b510f6e538487f3b93109 | `StreamSplitWallet` | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-RELEASE-AUTH]` (`releasableSnapshot` field added by ADR 0014 decision V5 — the snapshot-less predecessor hash is recorded only in the home's supersession note) |
+| `RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH` | `StreamReleaseAuthorizationRevocation(address account,bytes32 nonce,uint64 deadline)` | 0xb4240d33db7140e28e850f33c2d22b71ae26cea8a0a8dafdce603a056c81e295 | `StreamSplitWallet` | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-RELEASE-AUTH]` rule 5 (ADR 0014 decision V6) |
 | `PAYMENT_INTENT_TYPEHASH` | `StreamPaymentIntent(address payer,address asset,uint256 maxAmount,bytes32 saleRef,bytes32 expectedPrimaryPolicyHash,bytes32 nonce,uint64 deadline)` | 0x72c99e6f6f9e2422510a5dd5c2dc2f9ffd83c776670a8de4ffab990e45f825cd | ERC-20 settlement verifier | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-PAYMENT-INTENT]` |
+| `PAYMENT_INTENT_REVOCATION_TYPEHASH` | `StreamPaymentIntentRevocation(address payer,bytes32 nonce,uint64 deadline)` | 0x3a5991afab010b2aa3f78362da982cf536e46d406a9e205c1f27b0f0e4c42e50 | ERC-20 settlement verifier | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-PAYMENT-INTENT]` rule 3 (ADR 0014 decision V6) |
 | `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_LOOSENING_POLICY_CONTEXT_V1` | 0x61951eb6d957b0ebe19a5f808b9a9925046a1cd43b22a3a55e012c60b09d7638 | `StreamRevenueResolver` | `1` | revenue spec `[RSR-DOMAINS]` (Assignment Semantics; `assignmentPolicyHash` branch derivation; ADR 0012 decision T7) |
 | `ESCROW_RECOVERY_CONSENT_TYPEHASH` | `StreamEscrowRecoveryConsent(address account,bytes32 recoveryId,bytes32 nonce,uint64 deadline)` | 0xff4cafe3ce3dbf31056d40511f4344d6c8070efc8f6eaf284d2c5366514ede2e | revenue escrow | `1` | EIP-712 struct fields as listed; revenue spec `[RSR-ESCROW-RECOVERY]` rule 6 (ADR 0013 decision U7) |
 
@@ -787,6 +810,14 @@ Home: [`docs/stream-artist-authority.md`](stream-artist-authority.md)
 | `STREAM_STEWARD_SANCTION_GRANT_TYPEHASH` | `StreamStewardSanctionGrant(bytes32 artistId,bool granted,bytes32 statementHash,uint256 nonce,uint64 signedAt)` | 0xb48c9f264543966930485ab31e707d91b18c4f9e8644f8dd4a8cbb38c2aea9f2 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-ESTATE]` requirement 7 (ADR 0013 decision U4) |
 | `STREAM_COLLABORATOR_IDENTITY_ACCEPTANCE_TYPEHASH` | `StreamCollaboratorIdentityAcceptance(address account,bytes32 identityRecordHash,uint256 nonce,uint64 deadline)` | 0x9a40f74dcb1bb82d3fa4b33ed2dedc82fab75d7dd6c4b04f86cf263a0b867380 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-COLLAB]` requirement 7 (ADR 0013 decision U4) |
 | artist identity document schema ID | `6529STREAM_ARTIST_IDENTITY_V1` | 0x513c1691fa38db92e21766dd1b22bc43dfb88d3f422917796fba5bcec0bb4c17 | `StreamArtistRegistry` | `1` | pinned schema identifier; artist spec `[AA-IDENTITY]` requirement 2 (ADR 0013 decision U4) |
+| `ATTRIBUTION_REPUDIATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_ATTRIBUTION_REPUDIATION_RECORD_V1` | 0x295c6fc296e56beb850b55533c6c5d2f45548cda45bb255d9b94a54b4884a4aa | `StreamArtistRegistry` | `1` | artist spec `[AA-DISPUTE]` requirement 5 (ADR 0014 decision V3) |
+| `STANDING_REVOCATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_STANDING_REVOCATION_RECORD_V1` | 0xc62769083037c111cec5a5f8d100e5c4064db79bec694312e35e53acc7256d0e | `StreamArtistRegistry` | `1` | artist spec `[AA-GUARD]` requirement 11 (ADR 0014 decision V3) |
+| `CONTENT_RATIFICATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_CONTENT_RATIFICATION_RECORD_V1` | 0x90a8ba640de3b545eba38c55a60ece1dc76395a2147d2d2045d8591fad19a730 | `StreamArtistRegistry` | `1` | artist spec `[AA-CONTENT]` requirement 6 (ADR 0014 decision V3) |
+| `PLATFORM_WORKS_CORRECTION_RECORD_DOMAIN` | `6529STREAM_PLATFORM_WORKS_CORRECTION_RECORD_V1` | 0x57109180107392289f9aa5aeb40ff031eccfd6b90246bd6c4a1f5c24df62df16 | `StreamArtistRegistry` | `1` | artist spec `[AA-PLATFORM]` requirement 8 (ADR 0014 decision V3) |
+| `STREAM_ARTIST_CONTENT_RATIFICATION_TYPEHASH` | `StreamArtistContentRatification(address core,address metadataContract,uint256 collectionId,bytes32 contentStateHash,uint256 nonce,uint64 deadline)` | 0x56c622946d6da26c6684a8bfd94e3142562ae44e7da904bebe454f049c01b1f5 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-CONTENT]` requirement 6 (ADR 0014 decision V3) |
+| `STREAM_ARTIST_STANDING_REVOCATION_TYPEHASH` | `StreamArtistStandingRevocation(bytes32 artistId,address revokedAddress,bytes32 reasonHash,uint256 nonce,uint64 deadline)` | 0xc3782eba55027b9bef1f60b09cfbcfa48bbd834194f743ae92029711ae18f936 | `StreamArtistRegistry` | `1` | EIP-712; artist spec `[AA-GUARD]` requirement 11 (ADR 0014 decision V3) |
+| personhood evidence-reference schema ID | `6529STREAM_ARTIST_PERSONHOOD_EVIDENCE_V1` | 0xbd2c70c3ca64561289cb94739dc105b9f0197370aa78d71850a414840f49d488 | `StreamArtistRegistry` | `1` | pinned schema identifier; artist spec `[AA-IDENTITY]` requirement 8 (ADR 0014 decision V3) |
+| personhood waiver schema ID | `6529STREAM_ARTIST_PERSONHOOD_WAIVER_V1` | 0xb7fae8632a4a5e5d691710e74a3e1e7ea5fd33638e689d90a7a9aa1f4442fb85 | `StreamArtistRegistry` | `1` | pinned schema identifier; artist spec `[AA-IDENTITY]` requirement 8 (ADR 0014 decision V3) |
 
 ### Collection And Preservation Metadata Mirror Rows
 
@@ -887,7 +918,15 @@ Home: [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
 normative home of the canonical governance action identity (ADR 0010
 decision D3.4); these rows complete the mirror for the most-executed
 preimages in the system — every staged governance action, batch, and GGP
-change binds them (ADR 0011 decision R12).
+change binds them (ADR 0011 decision R12). The hosting question is
+settled (ADR 0014 decision V6): the ADR 0004 home stands, visibly
+partitioned so its owner-designated normative sections are
+unmistakable against its baseline-era evidence (ADR 0014 decision V9),
+and these mirror rows close the outside-the-reviewed-set gap by
+placing both governance preimages inside the spec inventory's
+checker-verified mirror surface and the CI recomputation test — the
+inventory reviews them here, and the home's anchors own the ordered
+inputs, replay semantics, and window floors.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
@@ -948,6 +987,31 @@ choice.
 | `GTP_ENTROPY_REVEAL_SLO_BLOCKS` | `6529STREAM_GTP_ENTROPY_REVEAL_SLO_BLOCKS` | 0x823057688d7c18dca4c528004d7912dfe0a32c36528a2cff1eb0e2a9164ab5e0 | `StreamEntropyCoordinator` | `1` | GTP key ([LTA-GTP]; ADR 0012 decision T1); coordinator spec `[EC-TIME]` |
 | `GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `6529STREAM_GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | 0x0be33ccf48a79079b125936b770c51cdd786fd29d574ce9071323b86838bccd8 | `StreamEntropyCoordinator` | `1` | GTP key ([LTA-GTP]; ADR 0012 decision T1); coordinator spec `[EC-TIME]` |
 
+### Pinned-Name Glossary
+
+Three pinned name families read irregularly to a future maintainer and
+are glossed here rather than renamed, because the names and values are
+Permanent surface (ADR 0014 decision V9):
+
+1. The `GGP_`/`GTP_` identifier prefixes abbreviate Governed Gas
+   Parameter and Governed Time Parameter; the pattern homes are
+   [LTA-GGP] and [LTA-GTP], and the expansion appears wherever the
+   table above is consumed so the abbreviation never travels alone.
+2. The sales EIP-712 domain name `6529Stream Sales` is the single
+   spaced name among the `6529Stream*` domain names. The space is part
+   of the pinned Permanent name (home
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md),
+   Domain Constants And Typehashes); integration code must copy it
+   byte-exactly, and no CamelCase alias exists or ever will.
+3. The `STREAM_ADMINS_OR_GOVERNANCE` pointer family ([LTA-POINTERS])
+   is one family whose name records that its holder may be the admin
+   Safe layer early in the line's life or the ADR 0004 governance
+   layer later; the `OR` is part of the pinned vocabulary word, not an
+   unresolved design choice. The genesis inventory's governance-layer
+   entry carries the matching deployment-side note
+   ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+   [LCM-GENESIS]).
+
 ## Event Reconstruction
 
 Requirements [PV1-RECON]:
@@ -993,8 +1057,13 @@ surface in this plan, never an event-replay surface (ADR 0011 decisions
 R1 and R12): Core retains them for burned tokens
 ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
 [MPA-CORE-ABI]; [CMC-BURN]), and reconstruction reads them from Core
-state or from the `STREAM_EXPORT_TOKEN_DATA_LEAF_V1` leaf of the state
-export ([LTA-EXPORT]) — log data is not a carrier for them.
+state, verified against the `STREAM_EXPORT_TOKEN_DATA_LEAF_V1` leaves
+of the state export ([LTA-EXPORT]). The export leaf carries
+`(tokenId, tokenDataHash, burned)` — an attestation of the bytes,
+never the bytes — so no export artifact is a `tokenData` carrier, and
+log data is not a carrier for them either; a consumer without live
+state reads the bytes from an archival node or a state snapshot and
+proves them against the leaf hashes.
 
 ## Module Identity Surface
 
@@ -1051,7 +1120,13 @@ mechanisms.
    entries and per-marketplace royalty configuration included — is
    release evidence in the marketplace royalty-resolution gate (both
    [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md),
-   [LCM-MARKETPLACE] and Required Gates).
+   [LCM-MARKETPLACE] and Required Gates). The acknowledgment is paired
+   with the affirmative case in the same rehearsal artifact: the
+   artist's unilateral royalty-freeze right and economics-consent
+   standing ([AA-ECON]) and the deployment-gated marketplace
+   royalty-resolution coverage ([LCM-MARKETPLACE]) are presented
+   beside the disclosed term, so the term reads as a considered
+   posture with compensating artist protections, never a bare waiver.
 2. Non-transferable, soulbound, or lockable tokens (ERC-5192-class
    locks) — successor line only, precluded by the same transfer-openness
    invariant. Exhibition mementos, attendance artifacts, and artist-proof
@@ -1096,7 +1171,19 @@ mechanisms.
    later is an accepted Replaceable module spec against frozen
    interfaces, never a new Permanent surface and never a successor
    line, and a willing future governance is not blocked by missing
-   Permanent machinery.
+   Permanent machinery. The artist-departure posture is likewise
+   stated rather than implied: an artist who leaves the platform keeps
+   every already-shipped guarantee — verified attribution, the royalty
+   freeze right and economics-consent standing ([AA-ECON]), and
+   consent refusal that blocks every future mint of their bound
+   collections ([AA-CONSENT]) — but the existing corpus remains hosted
+   on this shared, operator-governed Core for the life of the line;
+   there is no artist-owned contract to take along, and the
+   artist-owned-contract segment served by artist-deployment platforms
+   is deliberately ceded by this line. The designed departure path for
+   future work is a declared successor or companion line with the
+   artist's registry history imported ([AA-IMPORT]; [LTA-MANIFEST]),
+   never a migration of existing tokens.
 10. Serial-number and token-ID selection, and durable serial
     reservations — successor line only. v1 Core allocates collection
     serials sequentially with no durable reservation state; the single

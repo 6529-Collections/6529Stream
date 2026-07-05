@@ -40,6 +40,14 @@ heuristic is gone by design, and nothing standard replaced it.
   through the router, `properties.stream.collection` fields, the
   collection-display evidence gate with standing-commitment hardening) is
   the interim posture, not the resolution.
+- Blast-radius honesty (ADR 0014 decision V9): the candidate resolutions
+  are not equally contained. Options (a), (b), and (d) are additive to the
+  shipped machine path. Option (c) — the per-collection ERC-721 facade
+  line — is invasive: it would touch Core mint delivery, marketplace
+  approvals, royalty resolution addressing, finality component identity,
+  and the export/event-history model, and its containment has not been
+  demonstrated. If (c) is the owner's direction, a dedicated design spec
+  and a fresh review round precede any adoption.
 - Options: (a) per-collection contract-metadata surfaces (an ERC-7572-style
   collection-scoped `contractURI` read exposed through the router);
   (b) ERC-7496 dynamic traits carrying collection identity; (c) a pinned

@@ -5,9 +5,10 @@ Specification status: Draft. This document follows
 [ADR 0010](adr/0010-world-class-spec-pass.md) decision D5, amended by
 [ADR 0011](adr/0011-world-class-pass-round-2.md) decisions R6, R8, and
 R9, by [ADR 0012](adr/0012-world-class-pass-round-3.md) decisions T4,
-T6, and T7, and by
+T6, and T7, by
 [ADR 0013](adr/0013-world-class-pass-round-4.md) decisions U6, U7, and
-U9.
+U9, and by
+[ADR 0014](adr/0014-world-class-pass-round-5.md) decisions V5 and V6.
 It is a new protocol v1 specification: the sale and auction layer enters
 the genesis inventory at the same EIP-grade depth as the mint, ledger, and
 revenue specifications instead of remaining an integration sketch.
@@ -24,9 +25,11 @@ burn-to-mint and burn-to-redeem gate modules, the external-collection
 burn recipe, the delegated-mint gate and delegated sale participation,
 pick-your-piece content selection and the cross-sale content-uniqueness
 recipe, sale-layer emergency pause, the contested-attribution sale stop,
-the adapter-side reveal-fee obligation, the raffle extension recipe, and
-the sealed-bid, ranked-auction,
-and ERC-20-bidding extension profiles. Other documents cite these
+the adapter-side reveal-fee obligation, the raffle extension recipe, the
+network-eligibility gate profile, the time-varying content-selection
+profile, the sealed-bid, ranked-auction,
+and ERC-20-bidding extension profiles, and the pattern coverage matrix.
+Other documents cite these
 definitions and must not restate them (ADR 0010 decision D3.1).
 
 Boundaries with the neighboring homes:
@@ -87,6 +90,7 @@ Extension profiles (Permanent interfaces, no genesis implementation)
   IStreamSealedBidAuction       commit/reveal sealed-bid auctions
   IStreamRankedAuction          multi-unit ranked/uniform-price auctions
   IStreamERC20AuctionBidding    ERC-20 bid escrow for live auctions
+  IStreamNetworkEligibilityGate TDH-class network-eligibility gates
 
 Flow for every paid mint sale:
   buyer or executor
@@ -110,8 +114,10 @@ Requirements [SSA-SCOPE]:
 1. Permanent surfaces defined by this document must be final before
    deployment: the sale adapter conformance profile, the
    `IStreamSaleAdapter`, `IStreamBurnMintGate`, `IStreamDelegateRegistryGate`,
-   `IStreamSealedBidAuction`, `IStreamRankedAuction`, and
-   `IStreamERC20AuctionBidding` interfaces, every hash preimage and
+   `IStreamSealedBidAuction`, `IStreamRankedAuction`,
+   `IStreamERC20AuctionBidding`, and `IStreamNetworkEligibilityGate`
+   interfaces, the [SSA-ENGLISH] rule 16 `auctionConfig` read, every
+   hash preimage and
    EIP-712 typehash in
    [Domain Constants And Typehashes](#domain-constants-and-typehashes), the
    sale/auction event schemas, the drift-envelope and refund-unlock rules
@@ -397,7 +403,9 @@ Requirements [SSA-ADAPTER]:
     governed sweep (ADR 0004 action classes) that computes
     `surplus = balance - trackedLiabilities`, reverts with
     `AdapterSurplusUnderfunded` if the sweep would leave any tracked
-    liability unfunded, and emits `AdapterSurplusSwept`; owed credits,
+    liability unfunded, and emits `AdapterSurplusSwept` binding the
+    authorizing governance `actionId` (ADR 0014 decision V6); owed
+    credits,
     escrow, and custody NFTs are untouchable by every sweep path
     ([SSA-ENGLISH] rule 12 restated adapter-wide).
 16. Owed-funds state export (ADR 0012 decision T3): every rule 14
@@ -533,7 +541,29 @@ Requirements [SSA-AUTH]:
    execution reverts (the override can never take a charged price
    below the clearing floor), and overridden purchases interact with
    clearing-price fixing and rebates per [SSA-DUTCH-CLEARING] rules 3
-   and 4. Two implementations of one sale record therefore charge
+   and 4. A proven leaf with `hasPriceOverride = true` and
+   `priceOverride = 0` is a declared free tier, pinned (ADR 0014
+   decision V5). On the kinds where the override is the exact charged
+   price or a charging ceiling — every paid kind except
+   `PAY_WHAT_YOU_WANT` — it is valid only when the sale record
+   carries an explicit creation-time free-claim declaration, bound
+   into `saleConfigHash` and disclosed on buyer surfaces (the
+   [SSA-DUTCH] rule 1 declared free-mint class generalized beyond
+   Dutch kinds), and an execution whose charged price is zero under
+   the declaration executes [SSA-ZERO] rule 1 semantics — a free mint
+   with no settlement-boundary deposit and no official-revenue
+   record. Without the declaration, a zero override reverts with
+   `SalePriceOverrideZeroUndeclared`, so the forbidden amount-0
+   official settlement ([SSA-DUTCH] rule 1) can never reappear
+   through an allowlist leaf and a free tier is always a declared
+   mechanic, never a configuration accident ([SSA-FIXED] rule 3);
+   clearing mode is stricter still — the clearing-floor rule above
+   rejects a zero override regardless of any declaration. On
+   `PAY_WHAT_YOU_WANT`, a zero override merely lowers the
+   authorization minimum to the band floor: the pinned band and
+   [SSA-PWYW] rule 3 already govern a zero chosen price, and no
+   separate declaration applies. Two implementations of one sale
+   record therefore charge
    identical amounts for the same proof on every kind.
 4. `contentSelectionHash` is zero except for (a) pick-your-piece sales,
    where it binds the selected content per
@@ -591,7 +621,9 @@ Requirements [SSA-FIXED]:
    time-varying prices: Dutch kinds bind `msg.value` as a maximum per
    [SSA-DUTCH] rule 3 (ADR 0011 decision R6).
 3. `unitPrice` must be nonzero for `FIXED_PRICE` and `OPEN_EDITION`; free
-   claims must use the explicit `ZERO_PRICE_CLAIM` kind ([SSA-ZERO]) so a
+   claims must use the explicit `ZERO_PRICE_CLAIM` kind ([SSA-ZERO]) —
+   or, inside a paid sale, the declared zero-override free tier of
+   [SSA-AUTH] rule 3 (ADR 0014 decision V5) — so a
    zero price is always a declared mechanic, never a configuration
    accident.
 4. `OPEN_EDITION` is `FIXED_PRICE` whose sale record declares no per-sale
@@ -627,6 +659,24 @@ semantic are successor-line-only and never exist on this Core line
 [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)):
 a "500-edition drop" on Stream is 500 ERC-721 serials in one
 collection, by design and not by omission.
+
+Edition-size envelope (non-normative sizing guidance, ADR 0014
+decision V5). The economic envelope is set by the measured mint
+ceilings of
+[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+[MPA-GAS-BUDGET] — about `150_000` gas marginal per serial in a batch
+of 10 (`MAX_COLLECTOR_GAS_BATCH_MARGINAL`) and up to `500_000` for a
+single paid mint — permanently on L1. Editions in the tens to low
+hundreds of serials are the intended envelope; a thousands-of-mints
+timed open edition is mechanically expressible but consumes tens of
+full L1 blocks of gas across its minters, and the sanctioned home for
+beyond-envelope mass editions is a successor line or L2 deployment,
+never a semantics change on this one. Serial assignment inside an
+edition is strictly mint-order — buyer serial selection never exists
+on this line (reservation posture home:
+[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+Core Contract Changes; onboarding disclosure duty: [SSA-CONTENT]
+rule 4).
 
 ### Zero-Price Claims
 
@@ -859,7 +909,24 @@ Requirements [SSA-ENGLISH]:
    `saleConfigHash`, emitted through the zero window in
    `AuctionCreated`, and disclosed on bidder surfaces as snipe
    exposure before bidding. Any other mixture of waiver flag and
-   window values reverts at configuration. Accepting snipe exposure is
+   window values reverts at configuration. Extension-budget
+   exhaustion is a declared state, never a silent one (ADR 0014
+   decision V5): once cumulative extensions consume
+   `maxTotalExtension`, the deadline is fixed and the auction is in a
+   budget-exhausted hard close — bidder surfaces must display the
+   fixed deadline as snipe exposure exactly as they display a declared
+   `hardClose` waiver, and must expose the remaining extension budget
+   (`maxTotalExtension - totalExtensionUsed`, read per rule 16 or
+   derived from `AuctionExtended` against `AuctionCreated`) while any
+   remains. The extension whose result first consumes half or more of
+   `maxTotalExtension` additionally emits
+   `AuctionExtensionBudgetWarning` — at most once per auction — with
+   the used and remaining seconds, so a long bidding war approaches
+   its boundary announced, never discovered. Because a rule 3 waived
+   increment floor makes budget burn by 1-wei self-outbids cheap, the
+   rule 3 waiver disclosure must state that composition when both
+   waived increments and anti-snipe extension are configured
+   together. Accepting snipe exposure is
    therefore a recorded, displayed choice — hard-deadline auction
    formats exist without a new adapter, and the safe defaults bind
    everyone who does not explicitly opt out.
@@ -955,7 +1022,24 @@ Requirements [SSA-ENGLISH]:
     custody to `poster`. After the first bid, the only emergency control
     is the pause surface of [Emergency Pause](#emergency-pause), which
     preserves bidder credits, tolls the bidding clock, and never
-    confiscates funds or strands the NFT.
+    confiscates funds or strands the NFT. Pre-bid cancellation is also
+    a seller-side race a bidder cannot see (ADR 0014 decision V5): a
+    poster watching the mempool can front-run an incoming
+    reserve-meeting first bid with a cancellation (or a custody-grant
+    revocation, [SSA-CUSTODY-ENTRY] rule 4), revert the bid, harvest
+    the free price discovery, and relist higher. The exposure is
+    disclosed, not silently carried: bidder surfaces for an unbid
+    auction must state, before bidding, that the listing is
+    poster-cancellable until the first valid bid lands (the
+    [SSA-CONTENT] rule 6 disclose-or-mitigate posture), and must
+    display the poster's historical pre-bid cancellation and
+    custody-revocation counts — derivable entirely from
+    `AuctionCancelled`, `SaleCustodyReleased`, and
+    `SaleCustodyGrantRevoked` history joined to poster identity
+    through `AuctionCreated` and `SaleCustodyDeposited`, so serial
+    price-discovery harvesting is visible with no new onchain field.
+    The disclosure fields are release evidence under [SSA-GATES]
+    item 21.
 12. Refund, proceeds, and NFT claims remain claimable forever; emergency or
     surplus withdrawals must never touch owed bidder credits, owed
     proceeds, or escrowed NFTs.
@@ -998,6 +1082,37 @@ Requirements [SSA-ENGLISH]:
     bid-time-verified authority, exactly like signer-verified tickets
     ([SSA-DELEGATE] rule 4), so a delegation revoked after binding
     never unbinds a placed bid.
+16. Integrator-readable protection surface (ADR 0014 decision V5):
+    bidder-protection state must be renderable from one state read,
+    not from decoding creation events, because over decades most bids
+    will not originate from the operator's frontend. The auction
+    house exposes the Permanent read
+
+    ```solidity
+    function auctionConfig(bytes32 auctionId)
+        external
+        view
+        returns (
+            uint16 minIncrementBps,
+            bool incrementFloorWaived,
+            bool hardClose,
+            uint32 antiSnipeWindow,
+            uint32 antiSnipeExtension,
+            uint32 maxTotalExtension,
+            uint32 totalExtensionUsed,
+            uint64 endTime
+        );
+    ```
+
+    reporting exactly the created configuration plus live extension
+    accounting and the live deadline, so any third-party marketplace,
+    bot, or wallet bidding directly onchain can render the
+    1-wei-outbid exposure (rule 3), the snipe exposure (rule 4,
+    including the remaining extension budget), and the current close
+    before bidding. Marketplace integration guidance must name this
+    read, and the [SSA-GATES] item 1 suite proves it matches the
+    `saleConfigHash`-committed configuration and the live extension
+    state.
 
 ## Dutch Auctions
 
@@ -1370,8 +1485,36 @@ Requirements [SSA-CUSTODY-ENTRY]:
    executes, the grant is spent and custody follows settlement. Grant
    digests consume through the adapter's append-only consumed-digest
    store ([SSA-OFFER] rule 4) at custody entry, so a grant executes at
-   most once and revokes through the [SSA-OFFER] rule 5 presentation
-   shape.
+   most once, and revocation follows the [SSA-OFFER] rule 5
+   presentation mechanics with its own pinned payload (ADR 0014
+   decision V6) — reusing `SALE_OFFER_REVOCATION_TYPEHASH` would put
+   a grant digest into a field named `offerDigest`, a cross-family
+   digest injection under a mismatched type string:
+
+   ```text
+   SALE_CUSTODY_GRANT_REVOCATION_TYPEHASH = keccak256(
+       "SaleCustodyGrantRevocation(uint256 chainId,address saleAdapter,"
+       "address owner,bytes32 grantDigest)"
+   );
+   ```
+
+   The revocation call presents the full `SaleCustodyGrant` struct;
+   the adapter recomputes the grant digest under its [SSA-AUTH]
+   rule 1 domain and voids it into the consumed-digest store when
+   `msg.sender == grant.owner` (owner-sent) or when the call carries
+   the owner's valid signature — EIP-712 or bounded ERC-1271 under
+   `SALE_ERC1271_GAS_LIMIT`, per the mint spec's `[MPA-AUTHZ]` rules
+   — over the payload above, whose `owner` field must equal the
+   grant's owner and whose `grantDigest` must equal the recomputed
+   digest. The void is evented `SaleCustodyGrantRevoked` and is
+   one-way; where custody already entered under the grant, the same
+   call stages the custody reclaim through this rule's pull-release
+   path, releasing to the owner only — a relayer can trigger the
+   reclaim, never redirect it. Bare digests and digest-to-owner
+   storage mappings are nonconformant, exactly as [SSA-OFFER] rule 5
+   pins for offers. Pre-sale revocation is also the seller-side race
+   [SSA-ENGLISH] rule 11 discloses; consignment and auction bidder
+   surfaces carry that duty (ADR 0014 decision V5).
 5. Single-token consignment is a one-entry `CUSTODY_INVENTORY_FIXED_PRICE`
    manifest — the sanctioned shape; no separate consignment kind
    exists. Auction consignment binds the consignor as `poster`. The
@@ -1683,7 +1826,12 @@ burn observation is replay- and custody-tricky, so the safety recipe is
 frozen now in the [SSA-HOLDER]/[SSA-RAFFLE] style instead of leaving a
 future adapter author to reconstruct intent (ADR 0013 decision U6). No
 genesis implementation ships; Protocol v1 Exclusions item 7 stands
-until an adapter spec meeting this recipe is accepted.
+until an adapter spec meeting this recipe is accepted. Until then, an
+external-burn-style program runs only as an operator-attested ticket
+phase — the ticket signer, not the chain, attests the burn — and that
+posture is the disclosed launch configuration (ADR 0014 decision V5):
+sale records and buyer surfaces must disclose the signer trust exactly
+as rule 3 discloses the `ATTESTED_TICKET` class ([SSA-GATES] item 21).
 
 ```solidity
 bytes32 externalBurnNullifier = keccak256(abi.encode(
@@ -1791,6 +1939,22 @@ Requirements [SSA-REDEEM]:
    records; they never modify the original redemption record.
 3. Redemption terms (what the burn redeems for) are hash-committed in the
    sale record before the program opens.
+4. Redemption without burning — claim the print or sculpture once
+   while keeping the token — is a declared composition, not a gap
+   (ADR 0014 decision V5). Exactly-once claim protection is the
+   [SSA-HOLDER] shape with `entitlementId` identifying the redemption
+   program: the holder-entitlement nullifier already gives
+   exactly-once per token, and the future hold-to-claim gate spec
+   explicitly covers keep-the-token physical claims. The durable
+   claim record is the owner-records redemption-claim family owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-OWNER-RECORDS] — an append-only record in the token's object
+   dossier with no transfer semantics: recording a redemption never
+   restricts, locks, or simulates restrictions on the token (the
+   Mementos rule 3 posture). Until an accepted hold-to-claim gate
+   spec exists, the disclosed launch posture is signed tickets plus
+   the owner-record claim entry ([SSA-HOLDER] rule 3; [SSA-GATES]
+   item 21).
 
 ### Mementos And Attendance Artifacts
 
@@ -1876,7 +2040,12 @@ Requirements [SSA-SEALED]:
    pins one `depositAmount`, every `commitBid` must send exactly it, and
    the deposit therefore reveals nothing about the sealed amount beyond
    eligibility. Deposit-equals-bid and deposit-above-bid schemes leak bid
-   ceilings and are nonconformant.
+   ceilings and are nonconformant. `depositAmount` itself is a
+   per-auction declared parameter — sized by the implementing spec's
+   pinned sizing rule, normally against the reserve or expected
+   clearing value — never a protocol-frozen constant, so deterrence
+   sizing stays governable per sale while uniformity, the leakage
+   protection, stays Permanent (ADR 0014 decision V5).
 3. Reveal completes funding: a valid reveal supplies the difference
    between the committed `amount` and `depositAmount` into adapter escrow
    in the reveal transaction, so every revealed bid is fully escrowed.
@@ -1891,7 +2060,18 @@ Requirements [SSA-SEALED]:
    declaration) is committed at creation, every forfeiture emits
    `SealedBidDepositForfeited`, and forfeited deposits flow to official
    settlement as supplemental revenue under the auction's `saleId` —
-   never to operator discretion.
+   never to operator discretion. The abstention-versus-leakage
+   tradeoff is inherent and must be a declared, sized choice (ADR 0014
+   decision V5): bid-proportional bonding leaks bid ceilings (rule 2),
+   while a uniform deposit bounds the deterrent at exactly
+   `depositAmount` — under pay-as-bid pricing, a bidder who observes
+   rivals' reveals and would win far above the runner-up rationally
+   abstains whenever the expected overpayment exceeds the forfeited
+   deposit. An implementing spec must therefore either adopt
+   second-price or uniform-clearing pricing (removing the abstention
+   motive) or pin a `depositAmount` sizing rule against that calculus
+   in its sale records, and must state which it chose alongside its
+   rule 5 pricing declaration.
 5. Settlement economics are not pinned here: the pricing rule (uniform
    clearing, pay-as-bid, second-price), the winner count `K`, and the
    tie-breaking rule are pinned by each implementation's accepted spec in
@@ -2012,9 +2192,45 @@ Requirements [SSA-RAFFLE]:
    recovery re-requests reuse the stored `scopeInputsHash`
    (coordinator home), and no reroll or re-draw surface exists.
 6. No genesis implementation ships. This recipe plus `[EC-SCOPE]` is
-   the conformance bar a future accepted raffle adapter spec must meet;
-   Protocol v1 Exclusions item 11 stands until one is accepted, and its
-   tests ship with that spec.
+   the conformance bar a future accepted raffle adapter spec must
+   meet; Protocol v1 Exclusions item 11 stands until one is accepted,
+   and its adapter bytecode tests ship with that spec, while the
+   worked example below is executable-verified at genesis through the
+   [SSA-GATES] item 20 recipe-vector suite (ADR 0014 decision V5).
+   Until a raffle adapter spec is accepted, the sanctioned launch-era
+   substitutes for oversubscribed demand are Dutch clearing (which
+   price-discovers demand at a uniform price) and allowlist tiers
+   (which ration demand by declared allocation); a drop using neither
+   resolves demand by gas-priority first-come-first-served, and
+   operator surfaces must present that as the drop's declared
+   allocation mechanic ([SSA-GATES] item 21).
+
+Worked example (normative fixture, ADR 0014 decision V5). An edition
+of 3 raffled among 8 escrowed entries runs exactly this way:
+
+1. Entries 0 through 7 are recorded with escrowed deposits; the entry
+   window closes; the adapter commits `entryRoot` over the 8 sorted,
+   double-hashed entry leaves and registers the `SALE`-kind scope
+   whose `scopeInputsHash` binds `entryRoot` ([EC-SCOPE-RAFFLE]
+   rules 1 and 2), so the seed provably postdates the closed entry
+   set.
+2. The coordinator finalizes `scopeSeed`. For each committed 0-based
+   entry index, the rank key derives under
+   `STREAM_ENTROPY_SCOPE_RANKING_V1` exactly as [EC-SCOPE-RAFFLE]
+   rule 3 pins, and the 3 lowest-ranked entries win — no operator
+   input, gas shaping, or caller ordering can change the set (rule 4).
+3. The adapter records the executed draw with the
+   `STREAM_RAFFLE_DRAW_V1` commitment above (`drawIndex = 0`), settles
+   the 3 winners at the entry price through a standard paid path, and
+   converts the 5 losing deposits into pull refunds in full (rule 3).
+   A draw that has not executed by the sale's finalize-by deadline
+   unlocks all 8 deposits ([SSA-ENVELOPE] rule 4).
+
+Every outcome above is recomputable offchain from
+`(scopeSeed, entryRoot)` alone, which is what makes the fixture a
+genesis-testable vector set: the [SSA-GATES] item 20 suite replays it
+against the coordinator's fair-allocation golden vectors
+([EC-SCOPE-RAFFLE]) with no adapter bytecode required.
 
 ## Delegated Minting
 
@@ -2139,12 +2355,89 @@ Requirements [SSA-HOLDER]:
    interface. The genesis-available fallbacks are the snapshot Merkle
    allowlist (`MERKLE_STATIC` over a holder snapshot) and signed mint
    tickets — both fully specified today; the fallbacks trust the snapshot
-   or signer where the gate verifies live ownership.
+   or signer where the gate verifies live ownership. That trust
+   difference is the disclosed launch posture, never a footnote
+   (ADR 0014 decision V5): sale records and buyer/artist surfaces for
+   a fallback-served holder program must disclose the snapshot block
+   and allowlist content hash, or the ticket signer identity
+   ([SSA-GATES] item 21), and the same posture governs every
+   network-eligibility fallback ([SSA-NETWORK-ELIGIBILITY] rule 5).
 4. A phase that instead wants per-source-token accounting without a
    nullifier may configure a `CONTEXT`-keyed, `PER_BATCH`, cap-1 counter
    whose `contextHash` derives from the source token, but the nullifier
    recipe of rule 1 is the sanctioned default because it composes with
    other counters without occupying the batch context slot.
+
+## Network Eligibility Gate Extension Profile
+
+The 6529 network's native drop grammar — TDH thresholds, profile
+classes, consolidated-identity allowances — is eligibility computed
+from network state, and at genesis it is served only by trust-based
+fallbacks (snapshot allowlists and signed tickets). This section
+freezes the gate-interface profile a future accepted TDH-class gate
+spec must meet, so the network's most distinctive patterns have a
+declared trust-minimizing replacement path instead of an undesigned
+one (ADR 0014 decision V5).
+
+```solidity
+interface IStreamNetworkEligibilityGate /* also implements IStreamMintGate */ {
+    function eligibilitySource() external view returns (address);
+
+    function eligibilityClass() external view returns (bytes32);
+
+    function subjectEligibility(address subject, uint256 collectionId)
+        external
+        view
+        returns (bool eligible, uint64 maxQuantity);
+}
+```
+
+Requirements [SSA-NETWORK-ELIGIBILITY]:
+
+1. Pinned source: the gate pins exactly one eligibility source — a TDH
+   accounting contract, profile registry, or consolidation registry —
+   by address and codehash in its module-registry record, and every
+   eligibility parameter (thresholds, weights, snapshot references)
+   binds into the gate config hash and therefore the phase
+   `policyHash`, so eligibility policy is frozen mint policy exactly
+   as a burn program is ([SSA-BURN] rule 3).
+2. Declared trust class, per source (the [SSA-BURN-EXTERNAL] rule 3
+   posture): `LIVE_ONCHAIN` — eligibility reads live onchain state and
+   trusts only the pinned source contract's read semantics — or
+   `ATTESTED_ORACLE` — the source republishes offchain-computed
+   network state (TDH is computed offchain), additionally trusting the
+   named writer set that posts it. The class is pinned in the gate
+   config hash and disclosed on sale-record buyer surfaces.
+3. Read discipline: eligibility reads are live at `validateMint` time
+   — never cached across transactions — as bounded `staticcall`s under
+   a Governed Gas Parameter the gate spec names, with the 63/64
+   parent-gas precheck and returndata copied only to the read's exact
+   ABI shape, failing closed ([SSA-DELEGATE] rules 2 and 3 applied to
+   the eligibility source).
+4. Eligibility, never accounting identity: the gate validates
+   eligibility and may bound quantity (`GateResult.maxQuantity`);
+   durable allowance still consumes through configured counters under
+   the mint spec's genesis key modes. Counting a consolidated identity
+   as one subject across wallets is the excluded delegation/profile
+   counter-resolver extension
+   ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+   Protocol v1 Scope, exclusion 6), and a gate must never emulate it
+   through a side channel.
+5. Disclosed launch posture: no gate implementation ships at genesis.
+   The genesis fallbacks are the snapshot Merkle allowlist
+   (`MERKLE_STATIC` over a network-state snapshot) and signed mint
+   tickets ([SSA-HOLDER] rule 3), which trust the snapshot generator
+   or ticket signer where this profile verifies at mint time. Sale
+   records and buyer/artist surfaces for network-gated phases served
+   by a fallback must disclose the snapshot block and content hash, or
+   the ticket signer identity, so the trust difference stays a
+   recorded fact until an accepted gate spec replaces it ([SSA-GATES]
+   item 21).
+6. This profile plus the mint spec's gate and registry rules
+   (`[MPA-GATES]`, `[MPA-REGISTRY]`) is the conformance bar a future
+   accepted network-eligibility gate spec must meet; Protocol v1
+   Exclusions item 18 stands until one is accepted, and its tests ship
+   with that spec.
 
 ## Pick-Your-Piece Content Selection
 
@@ -2215,7 +2508,15 @@ Requirements [SSA-CONTENT]:
    ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
    Core Contract Changes; sequential allocation per ADR 0009 decision 1;
    ADR 0011 decision R9). That mint-spec statement is the single home for
-   the reservation posture.
+   the reservation posture. Its collector-facing consequence — serial
+   assignment is strictly mint-order, never buyer-selected, for every
+   drop this platform ever runs — silently shapes series design
+   forever, so it gets the same disclosure treatment as the editions
+   posture and the royalty acknowledgment (ADR 0014 decision V5):
+   artist onboarding and drop-design surfaces must disclose it
+   alongside [SSA-EDITIONS] and the revenue spec's
+   [RSR-MARKETPLACE-ROYALTY] acknowledgment, so series designers learn
+   it at onboarding, never at drop design ([SSA-GATES] item 21).
 5. Unsold content simply expires with the sale; manifest publication does
    not obligate minting.
 6. Selection mode is a pinned sale-record field (ADR 0011 decision R9):
@@ -2244,6 +2545,57 @@ Requirements [SSA-CONTENT]:
    its content race or is never revealed becomes a pull refund in full
    once the reveal window closes; commit deposits are never forfeited and
    never touch official settlement.
+
+### Content Selection On Time-Varying Kinds
+
+Curated choice at a descending price — Dutch-with-selection — is a
+declared extension profile, not an undesigned composition (ADR 0014
+decision V5): both halves exist at genesis and the frozen domains
+already compose, so a future accepted adapter spec adds a `SaleKind`
+value and pins the invariants below, never new cryptographic surface.
+
+Requirements [SSA-CONTENT-TIME]:
+
+1. Reuse, not redesign: `STREAM_CONTENT_LEAF_V1`,
+   `STREAM_CONTENT_CONTEXT_V1`, and `STREAM_CONTENT_COMMIT_V1` bind
+   `saleId` generically and are reused unchanged; the new kind appends
+   through the [SSA-IDENTITY] rule 6 catalog, and [SSA-CONTENT]
+   rules 1 through 8 apply unchanged except where a rule below
+   refines them.
+2. Execution-time pricing: the charged unit price is the schedule
+   price of the executing transaction under the [SSA-DUTCH] rule 3
+   maximum-price binding. A commit binds the selected content and the
+   buyer's maximum (the commit deposit), never a price: the reveal
+   executes the purchase at the reveal-time schedule price and the
+   deposit excess pull-credits per [SSA-DUTCH] rule 3.
+   Price-at-commit charging is nonconformant — it would turn commits
+   into free price options against the committed schedule and make
+   settlement diverge from the deterministic rule 2 price.
+3. Windows bound the timing option: on a decaying schedule a
+   commit-holder gains by revealing late, so the accepted spec must
+   pin its commit and reveal windows against the schedule's decay —
+   reveal windows end at or before the schedule `endTime`, and the
+   window-versus-decay interaction is stated in the sale record — with
+   the [SSA-CONTENT] rule 7 strictly-later-block reveal rule
+   unchanged.
+4. Selection-mode discipline is unchanged and sharper: [SSA-CONTENT]
+   rule 6 applies verbatim, and a descending price strengthens the
+   front-running incentive, so a `PUBLIC`-mode declaration on a
+   time-varying kind carries the same disclosure duty with the price
+   drift noted on the same surface.
+5. Clearing interaction: composed with `DUTCH_AUCTION_CLEARING`
+   semantics, selection changes nothing in [SSA-DUTCH-CLEARING]
+   rules 3 and 4 — clearing fixes from schedule prices at execution,
+   the [SSA-CONTENT] rule 3 cap-1 content counter resolves piece
+   races, and per-purchase rebates and `priceOverride` ceilings
+   interact per [SSA-AUTH] rule 3.
+6. Auction-for-choice needs no new profile for 1/1s: a curated
+   pick-from-manifest auction already exists at genesis through the
+   [SSA-ENGLISH] rule 8 leaf-form artwork commitment; multi-lot choice
+   auctions are Protocol v1 Exclusions items 15 and 16 territory.
+7. No genesis implementation ships; Protocol v1 Exclusions item 19
+   stands until an adapter spec meeting this profile is accepted, and
+   its tests ship with that spec.
 
 ### Cross-Sale Content Uniqueness
 
@@ -2632,22 +2984,25 @@ Requirements [SSA-GAS]:
    sale identity in this layer. This document adds no pattern rules of
    its own.
 7. Failure-direction classes and probe discipline (ADR 0012 decision
-   T1; ADR 0013 decisions U6 and U7). Parameters 1 through 3 carry the
-   release-manifest
-   failure-direction class `FAIL_CLOSED_PRECHECK` ([LTA-GGP]
-   requirement 10): authorization verification, delegate resolution,
-   and artist-authority reads fail closed for the guarded entry or
-   configuration action, so raises are governance-only and registering
-   a permissionless conditional raise is nonconformant. Parameters 4
-   and 5 carry `FORWARDING_CAP`: each bounds gas forwarded to a
-   failure-isolated attempt whose failure path is safe — a caught
-   entropy request leaves the token `REGISTERED` in the SLO window; a
-   failed delivery records the pull NFT claim — so raising restores
-   direct service and the [LTA-GGP] requirement 11 permissionless
-   conditional raise applies. Both keep the [SSA-ADAPTER] rule 9
-   63/64 parent-gas precheck: insufficient parent gas reverts the
-   entry or settlement call, so no caller can gas-shape a false
-   failure onto someone else's outcome. Each parameter's
+   T1; ADR 0013 decisions U6 and U7; ADR 0014 decision V7). All five
+   parameters carry the release-manifest failure-direction class
+   `FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10). Parameters 1
+   through 3 fail closed directly: authorization verification,
+   delegate resolution, and artist-authority reads halt the guarded
+   entry or configuration action on shortfall. Parameters 4 and 5
+   bound failure-isolated attempts whose caught failure is safe — a
+   caught entropy request leaves the token `REGISTERED` in the SLO
+   window; a failed delivery records the pull NFT claim — but both
+   keep the [SSA-ADAPTER] rule 9 63/64 parent-gas precheck, and
+   insufficient parent gas reverts the entry or settlement call, so
+   no caller can gas-shape a false failure onto someone else's
+   outcome. Classification follows that observed failure direction
+   on the guarded call, never read-path association ([LTA-GGP]
+   requirement 10; ADR 0014 decision V7): raising either parameter
+   raises every purchaser's revert threshold, so raises for all five
+   are governance-only, and registering a permissionless conditional
+   raise or conditional re-lower for any of them is nonconformant —
+   the matrix scope-rejection test proves the absence. Each parameter's
    named probe is a Permanent-class probe contract ([LTA-GGP-PROBES])
    proving the guarded operation itself succeeds at the probed value
    over pinned caller-independent fixture inputs, with run records
@@ -2748,6 +3103,13 @@ event AuctionExtended(
     uint64 previousEndTime,
     uint64 newEndTime,
     uint32 totalExtensionUsed
+);
+
+event AuctionExtensionBudgetWarning(
+    uint16 schemaVersion,
+    bytes32 indexed auctionId,
+    uint32 totalExtensionUsed,
+    uint32 remainingExtension
 );
 
 event AuctionBidRefundCredited(
@@ -2912,6 +3274,12 @@ event SaleCustodyReleased(
     bytes32 reasonHash
 );
 
+event SaleCustodyGrantRevoked(
+    uint16 schemaVersion,
+    bytes32 indexed grantDigest,
+    address indexed owner
+);
+
 event ConsignmentSettled(
     uint16 schemaVersion,
     bytes32 indexed saleId,
@@ -3054,7 +3422,8 @@ event AdapterSurplusSwept(
     uint16 schemaVersion,
     address indexed to,
     address asset,
-    uint256 amount
+    uint256 amount,
+    bytes32 actionId
 );
 ```
 
@@ -3101,6 +3470,7 @@ error ContentProofInvalid(bytes32 contentId);
 error ContentAlreadySold(bytes32 contentId);
 error DelegationNotFound(address vault, address delegate);
 error OfferInvalid();
+error SalePriceOverrideZeroUndeclared(bytes32 saleId);
 error NothingClaimable(bytes32 saleId, address account);
 error AuctionArtworkMismatch(bytes32 expected, bytes32 actual);
 error CustodyGrantInvalid();
@@ -3138,6 +3508,7 @@ pinned from its string preimage and recomputed by CI.
 | `SALE_CUSTODY_GRANT_TYPEHASH` | struct type string pinned in [SSA-CUSTODY-ENTRY] | 0xb829ff4936e00a75578357cfc3d855c59e780debb698eb3e8c8e9aff1b013041 | sale adapters | `1` | EIP-712 struct fields per [SSA-CUSTODY-ENTRY] (ADR 0012 decision T6) |
 | `SALE_OFFER_REVOCATION_TYPEHASH` | struct type string pinned in [SSA-OFFER] rule 5 | 0xb80f6e5d7ac663ccfb28bbcfae73c4b3111804ebe80d7ac845e1eb88a44d191c | sale adapters | `1` | `chainId; saleAdapter; offerDigest` (ADR 0012 decision T6) |
 | `SALE_AUTHORIZATION_REVOCATION_TYPEHASH` | struct type string pinned in [SSA-OFFER] rule 5 | 0x41d0d127fea4cbca0630f242fe7375e83ff775d8215636ae1fdd92b3d481a455 | sale adapters | `1` | `chainId; saleAdapter; authorizer; authorizationDigest` (ADR 0012 decision T6; authorizer field added by ADR 0013 decision U6) |
+| `SALE_CUSTODY_GRANT_REVOCATION_TYPEHASH` | struct type string pinned in [SSA-CUSTODY-ENTRY] rule 4 | 0x56747c6d524c5e2b5568c382f06c2f3c787067868f362f65933656e7a67e8344 | sale adapters | `1` | `chainId; saleAdapter; owner; grantDigest` (ADR 0014 decision V6) |
 | `GGP_SALE_ERC1271_GAS_LIMIT` | `6529STREAM_GGP_SALE_ERC1271_GAS_LIMIT` | 0x17b207440a43ce0136b5ee0bc3becf37652825825d88c68e1e0750bf59ec914c | sale adapters | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS] |
 | `GGP_DELEGATE_REGISTRY_GAS_LIMIT` | `6529STREAM_GGP_DELEGATE_REGISTRY_GAS_LIMIT` | 0xd75b7f96fae550dd69de8ac7536a203e30ec57da63811df1559129479b5ef185 | delegate gate | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS] |
 | `GGP_SALE_ARTIST_AUTHORITY_GAS_LIMIT` | `6529STREAM_GGP_SALE_ARTIST_AUTHORITY_GAS_LIMIT` | 0xe8a88819edeabf6e6327f815980331deea6ed50c446b74f1a24055fbc65ad4d0 | sale adapters | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS]; ADR 0012 decision T4 |
@@ -3164,7 +3535,11 @@ ADR 0012 transitional note). A future amendment that adds a row may
 carry an unpinned placeholder only under the [PV1-MIRROR] rule 2
 transitional discipline — exact string preimage adjacent at home and
 mirror alike, pinned by the CI recomputation before this document
-leaves Draft.
+leaves Draft. The `SALE_CUSTODY_GRANT_REVOCATION_TYPEHASH` row
+(ADR 0014 decision V6) entered under that discipline and is now
+pinned like every other row: its full EIP-712 type string is pinned
+in [SSA-CUSTODY-ENTRY] rule 4, its hash value is recorded above, and
+the protocol v1 mirror carries the same preimage and value.
 
 The shared EIP-712 domain for adapter-owned signatures is
 `(name = "6529Stream Sales", version = "1", chainId, verifyingContract)`
@@ -3198,7 +3573,13 @@ Requirements [SSA-GATES]:
    `saleConfigHash`; ADR 0013 decision U6), deliver-to binding
    (delegated first-bid binding verified and immutable; non-delegate
    `deliverTo` refused; delivery to the vault with refunds to the
-   bidder), pre-bid cancellation,
+   bidder), budget-exhaustion hard close (extensions stop exactly at
+   `originalEndTime + maxTotalExtension`, a final-window bid after
+   exhaustion never extends, and `AuctionExtensionBudgetWarning`
+   emits exactly once when half the budget is first consumed;
+   ADR 0014 decision V5), `auctionConfig` read consistency (creation
+   configuration and live `totalExtensionUsed`/`endTime` match events
+   and `saleConfigHash`; ADR 0014 decision V5), pre-bid cancellation,
    emergency preservation of owed credits.
 2. Dutch suite: schedule determinism (linear and stepped), commitment
    verification, maximum-price purchase (excess credited as pull refund;
@@ -3282,7 +3663,14 @@ Requirements [SSA-GATES]:
     containing a rejecting contract recipient completes with exactly
     that element diverted to a pull NFT claim, every sibling
     delivered, and per-element divert events emitted (ADR 0013
-    decision U6).
+    decision U6). The suite also covers the declared zero-override
+    free tier ([SSA-AUTH] rule 3; ADR 0014 decision V5): a proven
+    zero-`priceOverride` leaf on a fixed-price or time-varying kind
+    without the sale record's free-claim declaration reverts
+    `SalePriceOverrideZeroUndeclared`; with the declaration it
+    executes [SSA-ZERO] semantics with no settlement record; and on
+    `PAY_WHAT_YOU_WANT` it binds a zero authorization minimum with
+    the band still enforced.
 14. Reveal-fee suite: allowance binding (allowance below the live fee
     reverts `SaleRevealFeeBelowRequired`; a fee retune between quote
     and inclusion lands with the live fee charged and the unspent
@@ -3335,6 +3723,11 @@ Requirements [SSA-GATES]:
 18. Consignment and custody-grant suite (ADR 0012 decision T6):
     owner-sent and owner-signed custody entry; non-owner grant refused;
     grant single-use and revocable-until-sale with custody reclaim;
+    the pinned `SaleCustodyGrantRevocation` shape (ADR 0014 decision
+    V6): owner-sent and owner-signed (ERC-1271 relayed) revocation
+    both void the digest and event `SaleCustodyGrantRevoked`, a
+    non-owner revocation is refused, a revoked grant never enters
+    custody, and a relayed reclaim releases only to the owner;
     consignment declaration required and misdeclaration refused
     (previously-delivered token sold as primary, or primary inventory
     sold as consignment); royalty computed, itemized, and delivered
@@ -3348,6 +3741,25 @@ Requirements [SSA-GATES]:
     opening without verified consent over the exact `saleConfigHash`
     reverts `SaleArtistConsentMissing`; consent evidence is evented;
     unpinned-scope collections configure without it.
+20. Raffle recipe vectors (ADR 0014 decision V5): the [SSA-RAFFLE]
+    worked example runs at genesis as an offchain-recomputable vector
+    suite — pinned fixture entries and a fixture seed reproduce the
+    [EC-SCOPE-RAFFLE] rule 3 winner order, the `STREAM_RAFFLE_DRAW_V1`
+    draw commitment recomputes from the fixture, and the
+    entry-root-before-seed ordering is asserted — shared with the
+    coordinator's fair-allocation golden vectors. Adapter bytecode
+    tests still ship with the future accepted raffle spec.
+21. Sale-surface disclosure evidence (ADR 0014 decision V5): the
+    rehearsal/release evidence checklist covers the round-5
+    disclosure duties — network-gate and holder fallback trust
+    ([SSA-NETWORK-ELIGIBILITY] rule 5, [SSA-HOLDER] rule 3,
+    [SSA-BURN-EXTERNAL] launch posture), keep-the-token redemption
+    posture ([SSA-REDEEM] rule 4), the sequential-serial consequence
+    ([SSA-CONTENT] rule 4), the pre-bid cancellation race and poster
+    history display ([SSA-ENGLISH] rule 11, [SSA-CUSTODY-ENTRY]
+    rule 4), the budget-exhausted hard-close display ([SSA-ENGLISH]
+    rule 4), and the FCFS default statement ([SSA-RAFFLE] rule 6) —
+    exactly as item 18 covers the consignment disclosure fields.
 
 ## Protocol v1 Exclusions
 
@@ -3410,6 +3822,103 @@ mechanisms:
     and any accepted hybrid must respect the [SSA-ENGLISH] rule 11
     boundary: after the first valid bid, no purchase path may cancel or
     bypass the auction.
+18. Network-eligibility (TDH-class) gate implementations — live
+    TDH/profile/consolidation eligibility computed from network state
+    (ADR 0014 decision V5). The frozen profile is
+    [SSA-NETWORK-ELIGIBILITY]; the disclosed genesis fallbacks are
+    snapshot Merkle allowlists and signed tickets.
+19. Content selection on time-varying kinds — Dutch-with-selection and
+    every choice-at-a-moving-price composition (ADR 0014 decision V5).
+    The frozen interaction profile is [SSA-CONTENT-TIME]; the appended
+    kind arrives through the [SSA-IDENTITY] rule 6 catalog.
+
+Format-gap honesty (ADR 0014 decision V5): items 1, 2, 11, and 15
+through 17 are sale formats in routine weekly use on incumbent venues
+— ranked small-edition auctions, buy-now hybrids, lots, WETH bidding,
+sealed bids, raffles. Their absence at genesis is a disclosed product
+posture, not an oversight: each carries a frozen interface, profile,
+or recipe above so it arrives as a reviewed Replaceable adapter, the
+[Pattern Coverage Matrix](#pattern-coverage-matrix) names the
+sanctioned genesis substitute per pattern, and the post-genesis
+adapter wave — which specs land first, with target review dates — is
+owned by the audit plan's critical-path schedule, not by this
+document.
+
+## Pattern Coverage Matrix
+
+[SSA-PATTERNS]
+
+One question dominates long-horizon curation: can this platform do X,
+and through which mechanism? The answer was previously spread across
+the `SaleKind` catalog, the mechanic-families table, four exclusion
+lists, and six recipe sections in four documents; this matrix
+consolidates it (ADR 0014 decision V5). It is a mirror, never a
+second home (spec policy, Normative Precedence And Single Sourcing):
+every row cites its owning anchor and restates no semantics, and a
+row conflicting with its home is a defect in the row. Status
+vocabulary: `genesis` (deployed genesis capability), `profile`
+(frozen Permanent interface or recipe, no genesis implementation; an
+accepted spec is the extension path), `operational` (documented
+pattern over genesis surfaces, no new contract), `excluded`
+(intentional absence with the stated extension path), and
+`successor-line` (never on this Core line).
+
+| Pattern | Status | Mechanism and owning anchor | Genesis substitute / notes |
+| --- | --- | --- | --- |
+| Fixed-price sale, open edition | genesis | `FIXED_PRICE`/`OPEN_EDITION`, [SSA-FIXED] | — |
+| Free claim | genesis | `ZERO_PRICE_CLAIM`, [SSA-ZERO] | — |
+| Free tier inside a paid drop | genesis | zero `priceOverride` under a declared free tier, [SSA-AUTH] rule 3 | declaration required, else revert |
+| Pay-what-you-want / tip-at-mint | genesis | `PAY_WHAT_YOU_WANT`, [SSA-PWYW] | — |
+| Reserve English auction (1/1) | genesis | `ENGLISH_AUCTION`, [SSA-ENGLISH] | — |
+| First-bid-starts auction | genesis | [SSA-ENGLISH] rule 14 | — |
+| Auction of a chosen curated work | genesis | [SSA-ENGLISH] rule 8 leaf commitment | one work per auction |
+| Dutch auction | genesis | `DUTCH_AUCTION`, [SSA-DUTCH] | — |
+| Uniform-clearing Dutch with rebates | genesis | `DUTCH_AUCTION_CLEARING`, [SSA-DUTCH-CLEARING] | — |
+| Private/direct sale | genesis | `PRIVATE_SALE`, [SSA-PRIVATE] | — |
+| Offer / accept-offer | genesis | `OFFER_SALE`, [SSA-OFFER] | atomic only (exclusion 13) |
+| Gallery inventory at fixed price | genesis | `CUSTODY_INVENTORY_FIXED_PRICE`, [SSA-INVENTORY] | — |
+| Consigned resale (estate, deaccession) | genesis | [SSA-CONSIGN] | secondary transfer, royalty-itemized |
+| Refund-window sale | genesis | `REFUND_WINDOW`, [SSA-REFUND] | — |
+| Burn-to-mint (Stream sources) | genesis | `BURN_TO_MINT`, [SSA-BURN] | — |
+| Burn-to-redeem (burn for physical) | genesis | `BURN_TO_REDEEM`, [SSA-REDEEM] | — |
+| Keep-the-token physical redemption | profile | [SSA-REDEEM] rule 4 over [SSA-HOLDER] | signed tickets + owner-record claim, disclosed |
+| External-collection burn (Memes card) | profile | [SSA-BURN-EXTERNAL], exclusion 7 | attested-ticket phases, disclosed |
+| Hold-to-claim companion/derivative | profile | [SSA-HOLDER], exclusion 12 | snapshot Merkle / tickets, disclosed |
+| TDH / network eligibility | profile | [SSA-NETWORK-ELIGIBILITY], exclusion 18 | snapshot Merkle / tickets, disclosed |
+| Airdrop / operator distribution | genesis | [SSA-AIRDROP] | — |
+| Pick-your-piece (fixed/private price) | genesis | [SSA-CONTENT] | — |
+| Pick-your-piece at a moving price | profile | [SSA-CONTENT-TIME], exclusion 19 | fixed-price selection, or Dutch without selection |
+| Cross-sale content uniqueness | profile + operational | [SSA-CONTENT-UNIQUE], exclusion 14 | mandatory rehearsal check at genesis |
+| Small editions (N ERC-721 serials) | genesis | [SSA-EDITIONS] | envelope note in that section |
+| Mass timed open editions | genesis mechanics, out of envelope | [SSA-EDITIONS] sizing note | successor line / L2 posture |
+| Ranked multi-unit edition auction | profile | `RANKED_AUCTION` (reserved kind), `IStreamRankedAuction`, exclusion 15 | Dutch clearing or sequential 1/1 auctions |
+| Sealed-bid auction | profile | `SEALED_BID` (reserved kind), [SSA-SEALED], exclusion 1 | — |
+| ERC-20 / WETH bidding | profile | [SSA-ERC20-BID], exclusion 2 | native ETH bids |
+| Raffle / random allocation | profile | [SSA-RAFFLE] + [EC-SCOPE-RAFFLE], exclusion 11 | Dutch clearing; allowlist tiers |
+| Buy-now terminating a live auction | excluded | exclusion 17 (append path) | fixed-price sale beside the auction |
+| Multi-token lots and bundles | excluded | exclusion 16 (append path) | per-token sales |
+| Bonding curves / VRGDA / AMM pricing | excluded | exclusion 3 | stepped Dutch approximation ([SSA-DUTCH] rule 5) |
+| Standing orderbooks / floor offers | excluded | exclusion 4 | single-subject offers |
+| Secondary marketplace / aggregation | excluded | exclusion 5 | [SSA-CONSIGN] carve only |
+| Escrowed offers | excluded | exclusion 13, [SSA-OFFER] rule 6 | atomic offers |
+| Post-settlement refunds of settled revenue | excluded | exclusion 6; [SSA-ADAPTER] rule 5 | refund-window mode before finalization |
+| Cross-chain sale execution | excluded | exclusion 8 | — |
+| ERC-2771 meta-transaction sale entry | excluded | exclusion 10; [SSA-AA] rule 4 | ERC-4337 smart accounts ([SSA-AA]) |
+| Fiat / card rails | operational | exclusion 9 | fronts a conformant onchain sale |
+| Mementos / attendance artifacts | operational | Mementos And Attendance Artifacts; [CMC-MEMENTO] | attestations; transferable token optional |
+| Evolving / dynamic works sale | genesis | sale kinds unchanged; recipe home [MRR-EVOLVING-RECIPE] | rendering/consent composition, no sale rule |
+| Serial / vanity number selection | successor-line | reservation posture home: mint spec Core Contract Changes; [SSA-CONTENT] rule 4 | content selection binds artwork, never serial |
+| Soulbound / transfer-locked tokens | successor-line | [PV1-EXCL] (protocol v1 specification) | attestation pattern above |
+| ERC-1155 / semi-fungible editions | successor-line | [SSA-EDITIONS]; [PV1-EXCL] item 11 | N ERC-721 serials |
+
+Row-set completeness is a checkable property: every `SaleKind` value,
+every extension profile and recipe anchor in this document, and every
+Protocol v1 Exclusions item above must appear in exactly one owning
+row (a notes-column cross-reference in another row does not count). A
+release checker enforcing that completeness is a Review-entry
+condition tracked by the conformance matrix's verification-tooling
+backlog (ADR 0014 decision V9); until it exists, the check runs as
+review discipline on every amendment touching a pattern home.
 
 ## Test Requirements
 
@@ -3426,11 +3935,14 @@ mechanisms:
    [SSA-CONTEST-STOP], and [SSA-GAS] maps
    to at least one test named in the conformance gates above.
    ([SSA-HOLDER], [SSA-SEALED], [SSA-ERC20-BID], [SSA-RAFFLE],
-   [SSA-BURN-EXTERNAL], and
-   [SSA-CONTENT-UNIQUE] rule 1 are extension
+   [SSA-BURN-EXTERNAL], [SSA-NETWORK-ELIGIBILITY],
+   [SSA-CONTENT-TIME], and [SSA-CONTENT-UNIQUE] rule 1 are extension
    profiles and recipes: their tests ship with the future
-   implementation specs. [SSA-CONTENT-UNIQUE] rules 2 and 3 map to the
-   rehearsal-evidence checklist.)
+   implementation specs, except the [SSA-RAFFLE] recipe vectors,
+   which run at genesis under [SSA-GATES] item 20 (ADR 0014 decision
+   V5). [SSA-CONTENT-UNIQUE] rules 2 and 3 and the [SSA-GATES]
+   item 21 disclosure duties map to the rehearsal-evidence
+   checklist.)
 2. Negative tests: below-reserve and below-increment bids; bid at exactly
    `endTime`; extension beyond `maxTotalExtension`; settlement before end;
    double settlement; refund after finalization; finalize during window;
@@ -3449,9 +3961,12 @@ mechanisms:
    with `mintAtSettlement = true`; Dutch `restingPrice = 0` or
    `startPrice = 0` without the declared free-mint class; reveal-fee
    allowance below the live fee; sub-floor increment or zero anti-snipe
-   window without the declared waiver; a claimed authorizer outside the
+   window without the declared waiver; a zero `priceOverride` leaf on
+   a paid kind without the declared free tier; a claimed authorizer
+   outside the
    sale-signer set; `claimRefundFor` by a non-delegate; custody grant
-   by a non-owner; custody
+   by a non-owner; custody grant revocation by a non-owner signature;
+   custody entry under a revoked grant; custody
    grant replay; custody reclaim after sale execution; consignment
    misdeclaration in both directions; entry action on a contest-stopped
    collection; surplus sweep exceeding surplus; sale opening without
@@ -3476,7 +3991,9 @@ mechanisms:
    — all bound into sale identity and events; the increment and
    anti-snipe floors are waivable only by explicit recorded
    creation-time declarations, disclosed on bidder surfaces (ADR 0013
-   decision U6).
+   decision U6), and extension-budget exhaustion is itself an evented,
+   displayed hard-close state with remaining budget readable onchain
+   (ADR 0014 decision V5).
 3. Dutch auctions support linear and stepped decay with committed
    schedules, purchases bind `msg.value` as a maximum with excess
    credited, and the clearing mode pays uniform prices with escrowed,
@@ -3488,7 +4005,8 @@ mechanisms:
 5. Burn-to-mint and burn-to-redeem work through the registry-governed gate
    with manager-scoped nullifiers and the finality interaction rule
    enforced and surfaced.
-6. Sealed-bid, ranked, and ERC-20-bidding interfaces are frozen with
+6. Sealed-bid, ranked, ERC-20-bidding, and network-eligibility
+   interfaces are frozen with
    safety invariants — never auction economics — and no genesis bytecode.
 7. Delegated minting and pick-your-piece selection follow the documented
    patterns without new trust assumptions, and differentiated-content
@@ -3524,3 +4042,7 @@ mechanisms:
     new sales refuse configuration — while every owed-funds surface
     stays live, and public escrow-mode buyers purchase at price with no
     typed signature under the standing drift envelope.
+17. The pattern coverage matrix answers pattern, status, mechanism,
+    and genesis substitute from one table, with every `SaleKind`
+    value, extension profile, recipe, and exclusion item in exactly
+    one row (ADR 0014 decision V5).

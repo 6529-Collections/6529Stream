@@ -6,8 +6,9 @@ inline are resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
 [ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
-[ADR 0012](adr/0012-world-class-pass-round-3.md), and
-[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded
+[ADR 0012](adr/0012-world-class-pass-round-3.md),
+[ADR 0013](adr/0013-world-class-pass-round-4.md), and
+[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the dedicated entropy subsystem that moves
@@ -283,9 +284,17 @@ Core should emit:
 event EntropyCoordinatorUpdated(
     uint16 schemaVersion,
     address indexed oldCoordinator,
-    address indexed newCoordinator
+    address indexed newCoordinator,
+    bytes32 indexed actionId
 );
 ```
+
+Coordinator pointer replacement executes as a canonical ADR 0004
+governance action, and the event binds that action's `actionId`
+([GOV-ACTION-ID] in
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
+per the uniform governance-evidence rule [EC-EVENTS] (ADR 0014
+decision V6).
 
 Core's mint flow should register the token with the coordinator after the token
 identity is known:
@@ -372,11 +381,13 @@ Requirements [EC-REGGAS]:
 8. The parameter is a member of the hard-fork/repricing review checklist
    ([LTA-GGP]), and every change emits the parameter-named alias event
    below — a member of the canonical GGP change-event family per
-   [LTA-GGP] requirement 4, tagged as such in the event catalog:
+   [LTA-GGP] requirement 4, tagged as such in the event catalog and
+   binding the authorizing action ID (ADR 0014 decision V6):
 
 ```solidity
 event EntropyRegistrationGasLimitUpdated(
     uint16 schemaVersion,
+    bytes32 indexed actionId,
     uint256 oldValue,
     uint256 newValue,
     uint256 floor
@@ -876,6 +887,18 @@ Requirements [EC-EVENTS]:
    (`ScopeEntropyRequestFailed`, `StaleScopeEntropyFulfillment`) carry
    their token event's exact field shape — `schemaVersion` included —
    with `scopeId` in place of `tokenId`.
+4. Governance-evidence binding is uniform (ADR 0014 decision V6): the
+   host event of every entropy-subsystem mutation that executes as a
+   canonical ADR 0004 governance action carries the authorizing
+   `bytes32 actionId` ([GOV-ACTION-ID] in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
+   alongside the governance events themselves. In this vocabulary
+   those hosts are `EntropyCoordinatorUpdated`,
+   `EntropyProviderStateUpdated`, and the parameter-named GGP/GTP
+   alias events, so reconstructing which staged action authorized a
+   change never requires transaction-level correlation. Which
+   coordinator selectors execute as canonical actions is stated in
+   [EC-ROLES] rule 2.
 
 ## Storage Model
 
@@ -1078,11 +1101,19 @@ The coordinator should maintain provider lifecycle state:
 event EntropyProviderStateUpdated(
     uint16 schemaVersion,
     address indexed provider,
+    bytes32 indexed actionId,
     ProviderState oldState,
     ProviderState newState,
     string reasonURI
 );
 ```
+
+Provider lifecycle transitions are registry lifecycle changes — material
+actions per [GOV-MATERIAL] in
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md) —
+executed as canonical ADR 0004 governance actions on their catalog
+classes, and the event binds the authorizing `actionId` [EC-EVENTS]
+(ADR 0014 decision V6).
 
 Provider behavior:
 
@@ -1353,14 +1384,19 @@ Requirements [EC-TIME]:
    the pre-lapse public-request exclusivity (ADR 0009 decision 22) and
    the original provider's declared patience hold for the life of the
    collection.
-3. Escalation gates open late, never early. Every window above gates an
-   escalation — an unrecoverable declaration, a public request, a
-   fallback-provider draw — whose premature firing is a reroll or
-   exclusivity hazard and whose late firing is a bounded liveness cost.
-   The immutable floors, the frozen declarations, and the max() rule
-   enforce onchain that no retune opens a gate earlier than both allow;
-   a governed lower restores a cadence-inflated window only down to
-   those bounds.
+3. Retune ordering is enforced onchain; cadence is not. Every window
+   above gates an escalation — an unrecoverable declaration, a public
+   request, a fallback-provider draw — whose premature firing is a
+   reroll or exclusivity hazard and whose late firing is a bounded
+   liveness cost. The immutable floors, the frozen declarations, and
+   the max() rule enforce onchain that no governed retune opens a
+   gate earlier, in block terms, than both allow; a governed lower
+   restores a cadence-inflated window only down to those bounds. What
+   no block-denominated rule can enforce is wall-clock ordering under
+   consensus-timing change: cadence moves a frozen block count's
+   wall-clock meaning in both directions, and the acceleration
+   direction carries the review and staging obligations of rules 6
+   and 8 (ADR 0014 decision V7).
 4. Change discipline is the pattern home's, cited not restated: the
    canonical governance action on the normal delay class, per-action
    raise and lower bounds, cadence-probe-gated lowers, and no emergency
@@ -1375,9 +1411,13 @@ Requirements [EC-TIME]:
    cadence probe — a Permanent-class probe contract under
    [LTA-GGP-PROBES], recorded per parameter in the release manifest
    with its `probeMaxAgeBlocks` — whose recorded observed-cadence runs
-   gate lowers and feed the review ([LTA-GTP]). Observed cadence drift
-   beyond the manifest tolerance is a monitored review trigger under
-   the same incident regime as [EC-REVEAL] rule 8.
+   gate lowers and feed the review ([LTA-GTP]). Observed cadence
+   drift beyond the manifest tolerance — slower or faster — is a
+   monitored review trigger under the same incident regime as
+   [EC-REVEAL] rule 8: a faster cadence triggers the same review
+   obligation as a slower one, remeasuring every effective window
+   against its pinned wall-clock floor ([LTA-GTP] definition item 2;
+   ADR 0014 decision V7).
 7. Genesis posture: each genesis value equals its floor, so the overlay
    is inert — every effective window equals the collection's declared
    value wherever that declaration meets the floor — until a cadence
@@ -1386,20 +1426,41 @@ Requirements [EC-TIME]:
    request timeout and one hour each for the reveal SLO and the
    recovery-step delay. The deployed floors come from the recorded
    sizing rationale, not from this prose.
-8. Accepted residual (ADR 0012 decision T1): block-cadence slowdown
-   lengthens frozen declared windows in wall-clock terms, and no
-   governance action may shorten a window below a collection's frozen
-   declaration. Escalations arrive late, never early; delivery retry,
+8. Cadence residuals bind in both directions (ADR 0012 decision T1;
+   ADR 0014 decision V7). Slowdown: cadence slowdown lengthens frozen
+   declared windows in wall-clock terms, and no governance action may
+   shorten a window below a collection's frozen declaration —
+   escalations arrive wall-clock-late, and delivery retry,
    reveal-owner and admin requests, and incident handling all remain
-   available throughout the longer wait.
+   available throughout the longer wait. Acceleration: faster block
+   cadence shrinks every effective window's wall-clock width until
+   staged raises land, opening incident-eligibility, fallback, and
+   recovery-pacing gates earlier than their pinned wall-clock floors
+   intend. That direction is not left to the review alone: where a
+   scheduled consensus-timing change would shrink any effective
+   window's wall-clock width below its pinned wall-clock floor,
+   operations must stage the corresponding GTP raises to execute at
+   or before activation — the time-parameter mirror of the
+   [EP-INFLIGHT] rule 3 activation-boundary drain in
+   [`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+   — and the staging obligation and its alert join the
+   release-manifest monitoring plan beside the rule 6 review trigger.
+   For unscheduled observed drift, the rule 6 review bounds the
+   exposure window. Throughout any transition the anti-reroll
+   backstops hold unchanged: an early-opening gate can accelerate an
+   escalation, but the [EC-INCIDENT] rule 3 three-part evidence rule
+   and Request Commitment Finality still block every fresh draw they
+   would block at the intended cadence.
 9. Every change emits the parameter-named alias event below — an alias
    member of the canonical `TimeParameterUpdated` change-event family
-   per [LTA-GTP], tagged as such in the event catalog:
+   per [LTA-GTP], tagged as such in the event catalog and binding the
+   authorizing action ID (ADR 0014 decision V6):
 
 ```solidity
 event EntropyTimeParameterUpdated(
     uint16 schemaVersion,
     bytes32 indexed parameterId,
+    bytes32 indexed actionId,
     uint256 oldValueBlocks,
     uint256 newValueBlocks,
     uint256 floorBlocks
@@ -1587,8 +1648,10 @@ Requirements [EC-FEEBIND]:
    refund credits and the tracked per-collection reveal-fee escrows
    [EC-REVEAL] are the only balances it may hold across transactions.
    Accidental or forced ETH recovery, if included, must be admin-only,
-   evented, sent to the protocol treasury, and provably unable to reduce
-   the aggregate of tracked refund credits and reveal-fee escrows.
+   evented, sent to the protocol treasury — the registry-resolved
+   `ROLE_TREASURY` holder [EC-ROLES] (ADR 0014 decision V4) — and
+   provably unable to reduce the aggregate of tracked refund credits
+   and reveal-fee escrows.
 8. Fee credits and reveal-fee escrows are Operational balances: excluded
    from entropy identity, policy manifests, and seed derivation.
 9. For tokens of a collection with a declared reveal policy, the quoted
@@ -2106,9 +2169,10 @@ Requirements [EC-REVEAL]:
    provider quote, every draw is evented, and escrow balances are
    Operational — excluded from entropy identity, policy manifests, and
    seed derivation [EC-FEEBIND] rules 7–9. Residual escrow is
-   withdrawable only by admin action, evented, to the protocol treasury,
-   and only when the collection has no non-terminal token entropy
-   records.
+   withdrawable only by admin action, evented, to the protocol
+   treasury — the registry-resolved `ROLE_TREASURY` holder [EC-ROLES]
+   (ADR 0014 decision V4) — and only when the collection has no
+   non-terminal token entropy records.
 8. The reveal operations manifest is a checked release artifact recording
    the reveal owner role and holder, the holder's recorded worst-case
    latency against the declared SLO (rule 3; ADR 0012 decision T5), the
@@ -2681,28 +2745,150 @@ window.__STREAM_TOKEN__ = {
 `hash` may be kept as the artist-friendly alias for the seed. `seed` should be
 included as the precise protocol term.
 
-## Access Control
+## Entropy Provenance Record [EC-PROVENANCE-RECORD]
 
-Recommended admin roles:
+For generative works the entropy chain is the authenticity argument, and
+the acquisition packet's entropy item must be one pinned shape, never a
+packet-generator choice (ADR 0014 decision V8). The packet composition
+is owned by [CMC-ACQUISITION-PACKET] item 4 in
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md):
+the record is the `STREAM_EXPORT_ENTROPY_LEAF_V1` field set of
+[LTA-EXPORT] in
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+plus this coordinator's `EntropyRequested` / `EntropyFinalized` event
+references for the token. This section owns the coordinator-side
+semantics those citations rest on — the field meanings, the
+event-reference shape, and the verification guarantee — and it rides
+inside the `STREAM_ACQUISITION_PACKET_V1` schema; it is not a separate
+schema family.
+
+Requirements [EC-PROVENANCE-RECORD]:
+
+1. Field set. The leaf field set — `tokenId`, `status`, `seed`,
+   `coordinatorAtMint`, `provider`, `providerEpoch`, `requestKey`,
+   `requestAttempt` — is read from the token's pinned
+   `coordinatorAtMint` under the coordinator replacement rules, with
+   field semantics exactly as this document defines them. The record
+   reuses the [LTA-EXPORT] leaf field set and semantics, never a
+   divergent shape; the leaf hash encoding stays owned by
+   [LTA-EXPORT].
+2. Event references. Each reference names transaction hash, log
+   index, and block number, cross-referenced to the covering
+   event-history snapshot hash ([LTA-EVENT-HISTORY], same document as
+   [LTA-EXPORT]) so the record stays verifiable after log-history
+   expiry. The pinned reference set is every `EntropyRequested` for
+   the token — one per request attempt — and, for a `FINALIZED`
+   token, the single `EntropyFinalized` that finalized the seed. For
+   a token whose status is not `FINALIZED`, the record carries the
+   same shape with the live status disclosed and the finalization
+   reference absent: a truthful record state, never an omitted item.
+3. Recomputability. A conformant record lets any party recompute the
+   seed: the referenced `EntropyFinalized` supplies
+   `providerConfigHash`, `providerRequestId`, and `rawRandomness`;
+   the token's `EntropyRegistered` event — locatable through the same
+   covering snapshots — supplies `mintCommitment`; the frozen
+   collection config read supplies `collectionSalt`; and the leaf
+   fields plus the packet's chain and Core context complete the
+   [Fulfillment Flow](#fulfillment-flow) preimage. Recomputation must
+   match `tokenSeed(tokenId)`, and two conformant generators emitting
+   the record for the same token at the same block must produce equal
+   field values. A record whose recomputation fails is nonconformant
+   evidence, not an alternative format.
+4. Verification lane. Dossier tooling emits the record inside the
+   acquisition packet, and the registrar regeneration check that
+   covers the packet ([CMC-OBJECT-DOSSIER] in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
+   covers this record: a registrar regenerates it from chain state
+   and the event-history snapshots with no operator involvement.
+
+Scope seeds consumed by a work's reveal or assignment resolve through
+the scope events and reads [EC-SCOPE]; a consuming spec that adds a
+scope profile to the packet extends [CMC-ACQUISITION-PACKET], never
+this token-record shape.
+
+## Access Control [EC-ROLES]
+
+Coordinator authority lives in exactly two vocabularies, both owned by
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md):
+the closed [GOV-ROLES] `ROLE_*` world for standing authorities, and the
+canonical action model ([GOV-ACTION-ID] plus the machine-readable
+governance action policy catalog) for governed mutations. The lowercase
+admin vocabulary of earlier drafts maps into those vocabularies as
+follows; nothing below mints a role constant outside [GOV-ROLES]
+(ADR 0014 decision V4):
 
 ```text
-global admin             emergency authority through ADR 0004 governance/action roles
-entropy config admin     configure collection entropy before freeze;
-                         retune the Operational reveal fee after freeze
+global admin             emergency and root authority through the
+                         ADR 0004 governance/action model; never a
+                         coordinator-local constant
+entropy config admin     ROLE_ENTROPY_ADMIN [GOV-ROLES]: configures
+                         collection entropy, fresh-recovery, and
+                         reveal policies before freeze; retunes the
+                         Operational reveal fee after freeze
                          [EC-REVEAL] rule 9
-provider admin           approve, deprecate, or revoke providers
-request operator         request entropy or trigger delivery retry where allowed
-metadata refresh admin   coordinate refresh events if required
-gas/time parameter admin stage GGP and GTP raises/lowers through ADR 0004
-                         action classes [EC-REGGAS] [EC-TIME]
-incident declarer        declare entropy incidents through the frozen role
-                         reference [EC-INCIDENT-ROLE]
-reveal owner             request entropy for reveal-declared collections
-                         through the frozen role reference [EC-REVEAL]
+provider admin           ROLE_ENTROPY_ADMIN [GOV-ROLES]: proposes
+                         provider approval, deprecation, and incident
+                         revocation; the transitions execute as
+                         canonical ADR 0004 governance actions
+                         (registry lifecycle changes are material,
+                         [GOV-MATERIAL])
+request operator         not a standing authority: the request
+                         surface is closed by the write-interface
+                         caller lists and [EC-REVEAL], and delivery
+                         retry is permissionless [EP-RETRY]; keeper
+                         tooling exercises those surfaces and holds
+                         no extra grant
+metadata refresh admin   not a standing authority: the coordinator
+                         itself calls the restricted Core refresh
+                         emitter at finalization (ADR 0009
+                         decision 5); Core-side emitter authorization
+                         is owned by the Core and metadata homes
+gas/time parameter admin not a standing authority: GGP and GTP
+                         changes execute as canonical ADR 0004
+                         governance actions on their delay classes
+                         [EC-REGGAS] [EC-TIME]
+incident declarer        ROLE_ENTROPY_INCIDENT_DECLARER through the
+                         frozen role reference [EC-INCIDENT-ROLE]
+reveal owner             ROLE_ENTROPY_REVEAL_OWNER through the frozen
+                         role reference [EC-REVEAL]
 ```
 
-All admin actions should emit events and should include a reason URI where
-practical.
+Requirements [EC-ROLES]:
+
+1. Closed world. Every standing coordinator authority is a [GOV-ROLES]
+   constant resolved through the ADR 0004 registry at call time; the
+   genesis coordinator constants are `ROLE_ENTROPY_ADMIN`,
+   `ROLE_ENTROPY_INCIDENT_DECLARER`, and `ROLE_ENTROPY_REVEAL_OWNER`
+   (ADR 0013 decision U5; ADR 0014 decision V4). Wherever this
+   document says "entropy admin(s)", it means the current holders of
+   `ROLE_ENTROPY_ADMIN`. Minting an ad-hoc role constant, or holding
+   a coordinator authority as an owner-style raw address, is
+   nonconformant.
+2. Two mutation classes, catalog-recorded. The subsystem's
+   protocol-level mutations — the Core `ENTROPY_COORDINATOR` pointer,
+   provider lifecycle state, and the GGP/GTP values — execute as
+   canonical ADR 0004 governance actions, and their host events bind
+   the authorizing action ID [EC-EVENTS] rule 4 (ADR 0014
+   decision V6). Collection-scoped configuration, freeze, reveal-fee,
+   and escrow-withdrawal calls are role-gated direct operations under
+   `ROLE_ENTROPY_ADMIN`. Every protected coordinator selector appears
+   in the machine-readable governance action policy catalog with its
+   role, action class, and delay, and the ADR 0004 cardinality test
+   covers the coordinator rows: unrelated coordinator functions must
+   not share an authorization key (ADR 0014 decision V4).
+3. Value destinations are role references. The residual reveal-fee
+   escrow and forced-ETH recovery destination — "the protocol
+   treasury" in [EC-FEEBIND] rule 7 and [EC-REVEAL] rule 7 — is the
+   current holder of `ROLE_TREASURY` ([GOV-ROLES]), resolved through
+   the registry at withdrawal time, never a stored raw address; the
+   holder's capable-of-receiving-ETH rehearsal check is owned by
+   [GOV-MATERIAL] (ADR 0014 decision V4).
+4. Custody and rotation. Role holders satisfy the protocol custody
+   bar (ADR 0010 decision D7.5), and holder rotation through ADR 0004
+   governance never touches frozen collection policies
+   [EC-INCIDENT-ROLE].
+
+All admin actions emit events and include a reason URI where practical.
 
 ## Invariants
 
@@ -2852,6 +3038,10 @@ Collectors and auditors should be able to reconstruct:
     unavailability-finding evidence behind every entropy config change
     and fresh redraw [EC-CONFIG] rule 14, [EC-INCIDENT] rule 12.
 
+The pinned packet form of this reconstruction — the [LTA-EXPORT] leaf
+field set plus this coordinator's event references — is the entropy
+provenance record [EC-PROVENANCE-RECORD] (ADR 0014 decision V8).
+
 ## Bytecode Impact
 
 This section is non-normative implementation evidence per
@@ -2990,6 +3180,12 @@ Coordinator config tests:
     recorded unavailability finding) proceeds; Operational retunes —
     GGP/GTP values and the reveal fee — need no consent [EC-CONFIG]
     rule 14 (ADR 0013 decision U4).
+14. Staged-action host events — `EntropyCoordinatorUpdated`,
+    `EntropyProviderStateUpdated`, `EntropyRegistrationGasLimitUpdated`,
+    and `EntropyTimeParameterUpdated` — carry an `actionId` equal to
+    the canonical governance action that executed the change, matching
+    the ADR 0004 governance events [EC-EVENTS] rule 4 (ADR 0014
+    decision V6).
 
 Request tests:
 
@@ -3139,9 +3335,9 @@ Reveal operation tests:
    `msg.value` is credited per [EC-FEEBIND]; every escrow draw is
    evented.
 5. Residual escrow withdrawal succeeds only when the collection has no
-   non-terminal token entropy records, pays only the protocol treasury,
-   and is evented; forced ETH cannot reduce the escrow or credit
-   aggregates.
+   non-terminal token entropy records, pays only the registry-resolved
+   `ROLE_TREASURY` holder [EC-ROLES], and is evented; forced ETH cannot
+   reduce the escrow or credit aggregates.
 6. The reveal owner role resolves through ADR 0004 at call time, and
    holder rotation requires no policy change.
 7. The reveal operations manifest — SLO target, holder-latency check,
@@ -3304,6 +3500,19 @@ Renderer integration tests:
     maxFee/pull-credit in the sales home [EC-CONFIG] rule 14,
     [EC-INCIDENT] rule 12, [EC-REVEAL] rules 5 and 9 (ADR 0013
     decisions U4 and U6).
+22. Round-5 tail: the lowercase admin vocabulary maps into the closed
+    [GOV-ROLES] world, with `ROLE_ENTROPY_ADMIN` as the genesis
+    config/provider authority and `ROLE_TREASURY` as the residual
+    value destination [EC-ROLES] (ADR 0014 decision V4); staged-action
+    host events bind the authorizing `actionId` [EC-EVENTS] rule 4
+    (ADR 0014 decision V6); GTP cadence residuals bind in both
+    directions, with faster cadence triggering the same review and a
+    pre-activation staging obligation for scheduled consensus-timing
+    changes [EC-TIME] rules 3, 6, and 8 (ADR 0014 decision V7); and
+    the acquisition packet's entropy item is pinned — the [LTA-EXPORT]
+    leaf field set plus this coordinator's event references — with the
+    reference and recomputability semantics owned by
+    [EC-PROVENANCE-RECORD] (ADR 0014 decision V8).
 
 These resolutions are normative; the requirements in the body of this
 document already state each decided behavior.

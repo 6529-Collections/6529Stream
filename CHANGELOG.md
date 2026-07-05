@@ -1020,6 +1020,26 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Applied the nine-lens round-5 resolutions through accepted
+  `docs/adr/0014-world-class-pass-round-5.md`: preservation now attaches
+  fully to the sale (ENDOWED archive receipt at or before first sale;
+  sale-follows lanes for reference renders and execution environments;
+  still-image masters for museum-grade), a pinned storage-family taxonomy
+  gains a family-extinction migration rule, artist attribution hardens
+  (staged revocation with guardian veto, old-key veto expiry, onchain
+  succession import verification, platform-works repair path, artist name
+  in attribution JSON, first-release content ratification), governance
+  closes the tail (standing handover latency proofs, guardian-module
+  holder discipline, superseded P0 direct-execution risk, treasury and
+  entropy-admin roles), sales pin zero-value overrides, fair-allocation
+  raffles, seller-action disclosure, anti-snipe exhaustion states, and a
+  pattern-coverage matrix, revenue pins the revocation typehashes and the
+  ERC-20 single-step realization, GGP classification closes the
+  purchase-path ratchet loophole and gains permissionless re-lower, and
+  the museum floor defaults to declared tiers with owner
+  notice-and-objection standing in recovery. The autonomous iteration
+  loop closes at five rounds (instrument ceiling 9.0/lens) pending
+  protocol-owner decisions on OQ-X8 and the merge bar.
 - Applied the nine-lens round-4 resolutions through accepted
   `docs/adr/0013-world-class-pass-round-4.md`: typed artist payout
   resolution (`artistPayoutAccount` reads with artist-signed designation

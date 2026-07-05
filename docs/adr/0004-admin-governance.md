@@ -665,6 +665,16 @@ virtually by the read when `status == SCHEDULED && block.timestamp >
 expiresAfter`. Expired actions cannot execute. They must be cancelled or
 rescheduled with a new nonce and new action ID.
 
+### Normative Homes (Current)
+
+Everything from here through [GOV-ROLES] is owner-designated current
+normative content (ADR 0014 decision V9): the Permanent governance homes
+the specification set cites. Sections above this banner are the P0-era
+decision record and baseline description; where they carry as-built
+implementation status they are non-normative evidence per
+[`docs/spec-policy.md`](../spec-policy.md), and where they conflict with
+the homes below, the homes win.
+
 ### Canonical Action ID And Batch Execution [GOV-ACTION-ID]
 
 Amended by ADR 0010 (decisions D3.4 and D7.1). This section is the single
@@ -780,7 +790,13 @@ deployment gate recorded in the ceremony evidence. Executability is
 verified, not assumed: a deployment-gated rehearsal executes at least one
 action of every material class from a Safe multisig and one from a
 governor contract, with the transcripts retained as release evidence
-(ADR 0012 decision T5). Non-material operational grants held by EOA-class
+(ADR 0012 decision T5). The window/latency compatibility proof is a
+standing obligation, not a one-time gate: any post-genesis handover of a
+material role to a slower holder class re-runs the latency rehearsal
+before the grant executes, and a handover without a passing proof is
+nonconformant (ADR 0014 decision V4). Value-receiving role holders must
+prove in the same rehearsal that they can receive native ETH
+(ADR 0014 decision V4). Non-material operational grants held by EOA-class
 wallets are reviewed on the funding-renewal cadence and either
 re-justified in the ceremony evidence or sunset (ADR 0012 decision T5).
 
@@ -929,6 +945,8 @@ Safe/multisig or governance contract per the Role Model above.
 | `ROLE_EXPORT_PUBLISHER` | Publishes state exports and event-history snapshots on the mandated cadence | operational | [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) [LTA-EXPORT] |
 | `ROLE_CLAIM_ROUTER_OPERATOR` | Operates the recipient claim-aggregation rehearsals and UX gate evidence | operational | [`docs/revenue-splits-and-royalties.md`](../revenue-splits-and-royalties.md) [RSR-CLAIM-ROUTER] |
 | `ROLE_EMERGENCY_RECIPIENT` | Receives emergency-withdrawal surplus; resolved through the admin registry, never a stored raw address (ADR 0013 decision U5) | root | this ADR (emergency-withdrawal rules) |
+| `ROLE_ENTROPY_ADMIN` | Configures collection entropy policy and provider assignments within staged-governance rules (ADR 0014 decision V4) | operational | [`docs/stream-entropy-coordinator.md`](../stream-entropy-coordinator.md) [EC-ROLES] |
+| `ROLE_TREASURY` | Receives protocol-fee and residual value flows (reveal-fee residuals and peers); resolved through the admin registry (ADR 0014 decision V4) | root | this ADR; value-flow homes cite it |
 
 Every authority any Stream specification references by role must appear in
 this table (ADR 0013 decision U5); an authority exercised through a raw
@@ -1103,7 +1121,11 @@ Long-lived funds policy:
 
 - P0 may use direct Safe execution instead of an on-chain timelock if the
   deployment runbook documents the review process and the repo is still
-  pre-audit.
+  pre-audit. [Superseded (ADR 0014 decision V4): production deployments
+  execute material actions only through the staged [GOV-ACTION-ID] model;
+  direct Safe execution without the onchain timelock is a pre-audit
+  development convenience only and is nonconformant at any deployment
+  gate.]
 - Collection-admin support may be deferred if the stale interface path is made
   explicit and no integration is told to rely on it.
 - Withdrawal pause is intentionally narrow. Some incidents may require pausing

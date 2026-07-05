@@ -69,6 +69,22 @@ economics-changing escrow recovery to affected-recipient consent or the
 `TERMINAL_FREEZE`-grade delay with artist/recipient notice
 ([RSR-ESCROW-RECOVERY] rules 6 and 10).
 
+Further amended by [ADR 0014](0014-world-class-pass-round-5.md): decision
+V4 adds the direct `msg.sender == account` escrow-recovery consent
+recording path for contract accounts without ERC-1271 support and
+resolves the genesis default template's static protocol account through
+the ADR 0004 [GOV-ROLES] `ROLE_TREASURY` reference; V5 binds
+`ReleaseAuthorization` to the wallet-accounting epoch it was signed
+against (the `releasableSnapshot` guard that makes the no-drift claim
+mechanically true) and states the ERC-20 realization of the
+`PRE_REVENUE_SINGLE_STEP` deposit step; V6 pins the
+`StreamReleaseAuthorizationRevocation` and
+`StreamPaymentIntentRevocation` typehashes with [RSR-DOMAINS] rows and
+protocol v1 mirrors and renames the `PaymentIntent` EIP-712 domain
+family verifier-neutral (`"6529StreamPaymentIntentVerifier"`, the
+per-adapter domain binding rule); and V9 places the `requireMintConsent`
+consent step explicitly in both [RSR-ORCHESTRATION] realizations.
+
 This ADR is the design record for the revenue and royalty architecture of
 the first production deployment, which is the permanent system. Under the
 single-sourcing rule (ADR 0010 decision D3), the companion specification
@@ -540,10 +556,16 @@ account. Releasing to any alternate recipient requires `msg.sender == account`
 or a valid EIP-712/ERC-1271 release authorization signed by the entitled
 account under the pinned `RELEASE_AUTHORIZATION_TYPEHASH` and split-wallet
 domain defined in `docs/revenue-splits-and-royalties.md` (Release
-Authorization): the struct binds asset, account, recipient, nonce, and
+Authorization): the struct binds asset, account, recipient, the
+`releasableSnapshot` wallet-accounting epoch guard (ADR 0014 decision
+V5), nonce, and
 deadline, the domain separator binds wallet and chain ID, releases are
-always full-releasable (no amount field can drift), and unused nonces are
-revocable. Nonces are consumed before transfer under CEI, with
+always full-releasable — execution reverts unless the execution-time
+full releasable amount equals the signed snapshot, so the released
+amount can never drift — and unused nonces are
+revocable directly or through the pinned
+`StreamReleaseAuthorizationRevocation` payload (ADR 0014 decision V6).
+Nonces are consumed before transfer under CEI, with
 consumed-nonce state keyed per signer — `(account, nonce)` in split
 wallets, `(payer, nonce)` at the ERC-20 settlement verifier — so no
 account can consume or revoke another account's nonce value, and replay
@@ -1007,7 +1029,12 @@ standing approvals into official settlement. The `PaymentIntent` EIP-712
 domain binds the actual pull-performing verifier under the permanent
 family name pinned in the revenue spec [RSR-DOMAINS].2 — at genesis the
 ERC-20 primary settlement adapter, with verifier distinctness carried by
-`verifyingContract` alone (ADR 0012 decision T7).
+`verifyingContract` alone (ADR 0012 decision T7). The family name is
+verifier-neutral, naming the verifying settlement contract class
+generically rather than any single contract, and the payer's signed
+intent revocation verifies under the pinned
+`StreamPaymentIntentRevocation` payload at the same verifier domain
+(ADR 0014 decision V6).
 Passive split-wallet ERC-20 receipts remain releasable under wallet accounting,
 but they are not primary-sale settlement evidence and do not relax the
 adapter-level exact-delta requirement.
@@ -1079,7 +1106,11 @@ Target fixed-price flow:
    before calling the single-step mint path.
 5. If the resolved wallet is deployed and still has the active or
    credit-eligible runtime code hash,
-   attempt a gas-bounded native deposit to the official split wallet.
+   attempt a gas-bounded deposit of the accepted settlement asset to the
+   official split wallet (native ETH, or an approved standard ERC-20
+   under the [RSR-PAYMENT-INTENT] payer-intent rules; the single-step
+   ERC-20 realization is stated in the revenue spec
+   [RSR-ORCHESTRATION], ADR 0014 decision V5).
 6. If the assignment was a materialized template, the wallet is undeployed, and
    the profile was created through the official factory, or if a deployed
    correct wallet rejects the gas-bounded deposit, record the amount in the
@@ -1147,7 +1178,7 @@ factory/profile preimage checks pass.
 
 When settlement materializes a primary template, the settlement gas budget must
 account for deploy-or-discover work. If deploying the materialized wallet cannot
-fit within the bounded settlement path, the sale records native revenue in
+fit within the bounded settlement path, the sale records settlement revenue in
 escrow against the deterministic wallet only if the profile preimage has been
 validated, the profile exists in the factory, the predicted wallet has no code,
 and `wallet == factory.walletFor(profileId)`. Deployment or discovery then uses
@@ -1269,8 +1300,12 @@ Revenue escrow lifecycle:
 - Recovery defaults to identical-entries successors, and every recovery
   schedule is an ADR 0004 `FUNDS_RECOVERY`-floor action. Redirecting owed
   funds to a successor whose canonical entries differ requires either a
-  verified `StreamEscrowRecoveryConsent` from every affected entitled
-  account or the full ADR 0004 `TERMINAL_FREEZE` veto/guardian delay
+  recorded consent from every affected entitled account — a verified
+  `StreamEscrowRecoveryConsent` relayed by any caller, or the account's
+  own direct `recordEscrowRecoveryConsent` call with
+  `msg.sender == account`, the signature-free path for contract
+  accounts without ERC-1271 support (ADR 0014 decision V4) — or the
+  full ADR 0004 `TERMINAL_FREEZE` veto/guardian delay
   class on top of that floor, with recorded notice to affected recipients
   and, for artist-bound collection revenue, the artist authority
   (ADR 0013 decision U7). The consent typed-data surface, affected-set
@@ -1874,6 +1909,12 @@ Add tests for:
 - release-to alternate recipient;
 - alternate-recipient release requires entitled-account caller or valid
   EIP-712/ERC-1271 authorization with nonce and deadline;
+- an authorization whose `releasableSnapshot` does not equal the
+  execution-time full releasable amount reverts, and a matching
+  snapshot releases exactly that amount (ADR 0014 decision V5);
+- signed release-authorization and `PaymentIntent` revocations verify
+  under their pinned revocation typehashes at the split-wallet and
+  verifier domains (ADR 0014 decision V6);
 - consumed-nonce state is keyed per signer: one account cannot consume,
   revoke, or invalidate another account's nonce value, and the
   explicit-address replay views answer for any queried signer;
@@ -2008,7 +2049,10 @@ Add tests for:
 - economics-changing escrow recovery executes only with recorded,
   unrevoked consent from every affected account or under the
   `TERMINAL_FREEZE`-grade schedule with recorded notice; identical-entries
-  recovery uses the `FUNDS_RECOVERY` floor; consent revocation before
+  recovery uses the `FUNDS_RECOVERY` floor; consent records through both
+  paths — relayed signed payload and the affected account's direct
+  `recordEscrowRecoveryConsent` call (ADR 0014 decision V4) — and
+  consent revocation before
   execution makes the consent-path execution revert
   ([RSR-ESCROW-RECOVERY] rules 6 and 10);
 - wallet-observed conservation excludes escrow-owed balances while system

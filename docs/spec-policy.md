@@ -136,8 +136,11 @@ Review-entry condition tracked by the conformance matrix.
 ## Decision Citation Format
 
 Decisions are cited uniformly as `(ADR <number> decision <id>)` — for
-example `(ADR 0010 decision D2.3)` or `(ADR 0011 decision R6)`. No other
-citation shape is conformant; mixed formats are defects.
+example `(ADR 0010 decision D2.3)` or `(ADR 0011 decision R6)`. ADR 0009
+predates lettered ids and its decisions are plain numerals by
+construction: `(ADR 0009 decision 21)` is the conformant shape for that
+one record (ADR 0014 decision V9). No other citation shape is conformant;
+mixed formats are defects.
 
 ## Amendment Process
 

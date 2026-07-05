@@ -29,7 +29,10 @@ claims whose genesis substance is an operator-writable log.
 
 ## Decisions
 
-Decision numbers below are cited from the specs as "(ADR 0010 decision N)".
+Decision ids below are cited from the specs as "(ADR 0010 decision D<n>)"
+— for example "(ADR 0010 decision D2.3)" — per the spec-policy Decision
+Citation Format (citation shape corrected by ADR 0014 decision V9; this
+line previously instructed the bare-numeral shape).
 
 ### D1. Governed Gas Parameters (GGP) — no immutable gas caps anywhere
 

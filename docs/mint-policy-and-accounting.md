@@ -8,9 +8,11 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md) (decisions R6, R9, and
 R12 amend this document),
 [ADR 0012](adr/0012-world-class-pass-round-3.md) (decisions T6 and T7
-amend this document), and
+amend this document),
 [ADR 0013](adr/0013-world-class-pass-round-4.md) (decisions U2, U6, U7,
-and U9 amend this document) and recorded in
+and U9 amend this document), and
+[ADR 0014](adr/0014-world-class-pass-round-5.md) (decisions V5 and V6
+amend this document) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -150,6 +152,13 @@ before it can exist:
    test suite are accepted in that extension's own spec. The genesis
    delegated-minting patterns that need no resolver are specified in
    [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   The declared replacement path for TDH-class eligibility itself —
+   live network-state gating without resolver-backed counter subjects
+   — is the frozen network-eligibility gate profile in
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+   `[SSA-NETWORK-ELIGIBILITY]` (ADR 0014 decision V5); until such a
+   gate spec is accepted, snapshot allowlists and signed tickets are
+   the disclosed fallbacks.
 7. ERC-2771 trusted forwarders in mint paths (see Smart Account Posture).
 
 ## Current Implementation Baseline
@@ -398,7 +407,12 @@ reservation state, so no module spec or ADR can add them against this
 Core (ADR 0011 decision R9). This statement is the single home for the
 reservation posture; the sales spec's serial-selection exclusion
 ([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
-`[SSA-CONTENT]`) cites it.
+`[SSA-CONTENT]`) cites it. The collector-facing consequence — serial
+assignment is strictly mint-order, never buyer-selected, for every
+drop on this line — carries an onboarding disclosure duty owned by
+the sales spec (`[SSA-CONTENT]` rule 4, same document; ADR 0014
+decision V5), so series designers learn the posture at onboarding,
+never at drop design.
 
 Same-transaction prepared mints carry token-level primary policy, and the
 capability is required at genesis: Core must expose the manager-only
@@ -1063,7 +1077,13 @@ Requirements [MPA-MERKLE]:
    a charging ceiling, `min(currentSchedulePrice, priceOverride)`,
    never below the clearing floor (ADR 0013 decision U6; the
    kind-role table is owned by
-   `docs/stream-sales-and-auctions.md` `[SSA-AUTH]` rule 3). The
+   `docs/stream-sales-and-auctions.md` `[SSA-AUTH]` rule 3). A leaf
+   with `hasPriceOverride = true` and `priceOverride = 0` is a
+   declared free tier whose per-kind acceptance rule — an explicit
+   sale-record free-claim declaration with `[SSA-ZERO]`-semantics
+   execution where the override is the charged price or ceiling,
+   revert otherwise — is likewise owned by `[SSA-AUTH]` rule 3
+   (ADR 0014 decision V5). The
    manager and ledger ignore price.
 6. `capRoot` is bound into the counter's binding commitment and therefore
    into `policyHash`; changing the allowlist is a policy change
@@ -1625,7 +1645,10 @@ protocol v1 exclusions until their own ADRs are accepted.
 Ledger events. These are production-exact signatures (ADR 0013
 decision U7): every event carries a leading `uint16 schemaVersion` and
 at most three indexed fields, and the event-catalog rows mirror this
-home rather than deciding signatures at catalog-generation time:
+home rather than deciding signatures at catalog-generation time. The
+governed `MintLedgerWriterUpdated` event binds the authorizing
+`actionId` and executing `admin` under the governance-evidence
+convention stated in [Events](#events) (ADR 0014 decision V6):
 
 ```solidity
 event MintLedgerCounterConsumed(
@@ -1718,7 +1741,9 @@ event MintLedgerNullifierImported(
 event MintLedgerWriterUpdated(
     uint16 schemaVersion,
     address indexed writer,
-    bool allowed
+    bool allowed,
+    bytes32 actionId,
+    address admin
 );
 ```
 
@@ -2816,6 +2841,21 @@ in the event catalog of
 [LCM-EVENTS]. The catalog mirrors these signatures; it never decides
 them.
 
+Governed-configuration host events bind governance evidence directly
+(ADR 0014 decision V6): every event recording a staged governed
+mutation in this subsystem — ledger-writer authorization
+(`MintLedgerWriterUpdated`), executor grants
+(`MintPhaseExecutorUpdated`), and the ledger and registry pointer
+changes (`MintLedgerUpdated`, `MintModuleRegistryUpdated`) — carries
+the authorizing ADR 0004 action identity as `bytes32 actionId`, plus
+the executing `admin` where it was absent, matching the revenue
+spec's `AssetPolicyUpdated` pattern. The mint subsystem's authority
+history — who may write the durable ledger, and under which staged
+action — therefore reconstructs from host events alone, with no
+transaction-level correlation against the separate governance events;
+the event-catalog golden tests cover the fields like every other
+schema field.
+
 Configuration events:
 
 ```solidity
@@ -2851,6 +2891,7 @@ event MintPhaseExecutorUpdated(
     address indexed executor,
     bool allowed,
     bytes32 policyHash,
+    bytes32 actionId,
     address admin
 );
 
@@ -2910,13 +2951,17 @@ event MintCounterResolverUpdated(
 event MintLedgerUpdated(
     uint16 schemaVersion,
     address indexed oldLedger,
-    address indexed newLedger
+    address indexed newLedger,
+    bytes32 actionId,
+    address admin
 );
 
 event MintModuleRegistryUpdated(
     uint16 schemaVersion,
     address indexed oldRegistry,
-    address indexed newRegistry
+    address indexed newRegistry,
+    bytes32 actionId,
+    address admin
 );
 ```
 

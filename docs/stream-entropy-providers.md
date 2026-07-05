@@ -6,8 +6,9 @@ inline are resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
 [ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
-[ADR 0012](adr/0012-world-class-pass-round-3.md), and
-[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded
+[ADR 0012](adr/0012-world-class-pass-round-3.md),
+[ADR 0013](adr/0013-world-class-pass-round-4.md), and
+[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the Stream-native entropy provider adapter contracts
@@ -398,7 +399,10 @@ production-exact signatures the machine-readable event catalog must
 reproduce; extension-family blocks bind their separately accepted
 adapter specs the same way. The conformance-matrix "snippet is
 shorthand" rule covers citations of these events in other documents,
-never this home.
+never this home. Host events of adapter mutations that execute as
+canonical ADR 0004 governance actions bind the authorizing
+`bytes32 actionId` (ADR 0014 decision V6); in the genesis adapter set
+that is `VRFConfigUpdated` [EP-VRF-CONFIG].
 
 Every provider must emit source-specific request and callback events. The
 minimum shared shape is:
@@ -826,7 +830,18 @@ Rules [EP-VRF-CONFIG]:
 
 1. Admin-only through ADR 0004 governance/action roles. Legacy selector-map
    `StreamAdmins` authorization is nonconformant for production deployment.
-2. Emit `VRFConfigUpdated`.
+   `updateVRFConfig` is one protected selector in the governance action
+   policy catalog; because its parameter set spans randomness identity
+   (rule 5) and a Governed Gas Parameter (rule 6), the selector is
+   catalog-classed as a canonical ADR 0004 governance action, with its
+   delay class and emergency eligibility recorded there.
+2. Emit `VRFConfigUpdated` binding the authorizing canonical action ID
+   (ADR 0014 decision V6). `VRFConfigUpdated` is not a GGP family
+   alias — it carries no old value and no floor — so a change touching
+   `callbackGasLimit` additionally emits the canonical
+   `GasParameterUpdated` family event ([LTA-GGP] requirement 4 in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)),
+   bound to the same action ID.
 3. Existing requests retain the provenance values emitted at request time.
 4. Updates affect only future requests.
 5. `keyHash`, `requestConfirmations`, and `numWords` are randomness-identity
@@ -869,6 +884,7 @@ Event ([EP-EVENTS]):
 ```solidity
 event VRFConfigUpdated(
     uint16 schemaVersion,
+    bytes32 indexed actionId,
     uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
@@ -1559,7 +1575,11 @@ VRF tests:
    confirmations, callback gas limit, and number of words.
 3. VRF callback compresses returned words deterministically.
 4. VRF callback calls coordinator with request key and raw randomness.
-5. VRF config updates are admin-only and evented.
+5. VRF config updates are admin-only, execute as canonical ADR 0004
+   governance actions, and are evented with the authorizing `actionId`;
+   a `callbackGasLimit` change additionally emits the canonical GGP
+   family event bound to the same action ID ([LTA-GGP] requirement 4;
+   ADR 0014 decision V6).
 6. Existing requests retain request-time provenance after config updates.
 7. Wrong-epoch callback path is rejected by the coordinator and remains
    auditable in adapter events.

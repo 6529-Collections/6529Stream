@@ -27,7 +27,16 @@ genesis floor and a day-one monitored operator-only state, every
 render-path read gains a per-read returndata cap, the attribution
 object pins the `attribution_unavailable` registry-read failure
 posture, and the enumeration-posture restatement is repaired into a
-citation of its home.
+citation of its home. It is further amended by
+[ADR 0014](adr/0014-world-class-pass-round-5.md): the `ENDOWED`-family
+archive receipt moves to the sale itself (the coverage window keeps
+only the second family and the first fixity record), `ONCHAIN` and
+hybrid collections gain the script-work sale-follows coverage lane
+[MRR-SCRIPT-COVERAGE], the attribution mirror carries the
+registry-sourced artist display name and identity-document linkage,
+the first-release content ratification reaches the router's
+content-affecting surfaces, and the strictly-`STATIC` genesis renderer
+posture is recorded with its rationale.
 
 This document specifies how Stream metadata rendering and script assembly move
 out of `StreamCore` into dedicated metadata contracts. 6529Stream is permanent
@@ -346,8 +355,9 @@ home,
 5. The parameter's release-manifest failure-direction class is
    `FORWARDING_CAP` ([LTA-GGP] requirement 10): it bounds the fail-safe
    `tokenURI()`/`contractURI()` routing read, raising restores metadata
-   service, and it is a permissionless conditional-raise member per
-   [LTA-GGP] requirement 11 (ADR 0012 decision T1). Its named probe is
+   service, and it is a permissionless conditional-raise and
+   conditional-re-lower member per [LTA-GGP] requirement 11
+   (ADR 0012 decision T1; ADR 0014 decision V7). Its named probe is
    a Permanent-class probe contract ([LTA-GGP-PROBES]) executing the
    rule 2 read sweep — Core's bounded router-call frame replicated over
    the deepest known routes for pinned fixture tokens under exactly the
@@ -584,8 +594,9 @@ tokens. Entropy read rules [MRR-ENTROPY-READ]:
    `FORWARDING_CAP` ([LTA-GGP] requirement 10): it bounds the fail-safe
    coordinator status read behind rendering (rule 3 renders
    `PENDING_UNKNOWN` instead of reverting), raising restores live
-   entropy display, and it is a permissionless conditional-raise member
-   per [LTA-GGP] requirement 11 (ADR 0012 decision T1). Its named probe
+   entropy display, and it is a permissionless conditional-raise and
+   conditional-re-lower member per [LTA-GGP] requirement 11
+   (ADR 0012 decision T1; ADR 0014 decision V7). Its named probe
    is a Permanent-class probe contract ([LTA-GGP-PROBES]) executing the
    router's bounded coordinator read frame for a pinned fixture token
    corpus under exactly the probed cap, with no caller-supplied gas
@@ -806,7 +817,7 @@ Storage shape ownership [MRR-STORAGE-HOMES]:
    [MPA-CORE-ABI], where `tokenData` is opaque `bytes` end to end — V1
    Core stores the renderer-visible `tokenData` bytes and their hash — and the
    renderer reads the mint-time bytes from Core, not from the metadata
-   contract (ADR 0010 decision 3; typing drift repaired by ADR 0012
+   contract (ADR 0010 decision D3; typing drift repaired by ADR 0012
    decision T7). `StreamCollectionMetadata` stores only token-level
    display metadata that Core deliberately does not store.
 3. Script chunk mutation operations (append, replace-at-index,
@@ -855,7 +866,7 @@ Renderer behavior:
 
 The renderer is the contract that produces the permanent artwork bytes, so
 its determinism is enforced at the same rigor as the royalty resolver's
-static-analysis gate, not left as guidance (ADR 0010 decision 4).
+static-analysis gate, not left as guidance (ADR 0010 decision D4).
 
 Determinism requirements [MRR-DETERMINISM]:
 
@@ -1105,7 +1116,7 @@ Rules:
 11. `citation` must carry the canonical citation string for the work, in the
     format owned by the Canonical Citation Profile in
     [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-    (ADR 0010 decision 6), including the typed record-state qualifier
+    (ADR 0010 decision D6), including the typed record-state qualifier
     prefixes when a record state is cited, so scholarly and registrar
     references converge on one blessed identifier instead of marketplace
     URLs.
@@ -1163,7 +1174,7 @@ Known namespace meanings:
 
 Marketplaces, wallets, and archives consume `tokenURI()`, not contract
 internals, so the default JSON must distinguish artist-attested attribution
-from platform-claimed attribution (ADR 0010 decision 2). The attribution
+from platform-claimed attribution (ADR 0010 decision D2). The attribution
 JSON schema has exactly one normative home:
 [`docs/stream-artist-authority.md`](stream-artist-authority.md)
 [AA-DISPLAY] (ADR 0011 decision R7). This section owns only the JSON
@@ -1191,7 +1202,18 @@ Attribution disclosure requirements [MRR-ATTRIBUTION]:
    `attestation_authority_class` when an attestation exists,
    `sanction_record` and `sanction_authority_class` when a sanction
    covers the token, and the collaborator listing with role and
-   verification state. The authority-class fields carry the [AA-DISPLAY]
+   verification state. For artist-bound collections with an accepted
+   binding, the object also carries `artist_display_name` and
+   `identity_record_hash` — the display name sourced from the operative
+   identity document and the operative `identityRecordHash`, both
+   pinned at the [AA-DISPLAY] home under [AA-IDENTITY]
+   (ADR 0014 decision V3) — so the human-readable name a marketplace
+   renders is registry-sourced and consumer-verifiable against
+   `identityRecordBytes`, never operator display copy; the
+   operator-writable display fields ([CMC-PEOPLE] in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
+   are supplemental credits, never the verified-name source. The
+   authority-class fields carry the [AA-DISPLAY]
    signing-authority vocabulary (`artist | delegate | successor |
    steward`, lowercase, in the home's order) so a steward-, successor-,
    or delegate-signed
@@ -1353,7 +1375,7 @@ AGENT            agent-readable schema and tool context
 
 Large onchain generative works must be reconstructable from chain state by
 live reads at genesis, not only by hash-committed offchain mirrors
-(ADR 0010 decision 4). The default `tokenURI()` stays marketplace-sized;
+(ADR 0010 decision D4). The default `tokenURI()` stays marketplace-sized;
 this section is the documented over-cap serving story.
 
 Full-view requirements [MRR-FULL-VIEW]:
@@ -1437,7 +1459,7 @@ Offchain content binding [MRR-OFFCHAIN-BINDING]:
    content root covering every token in the finality scope, per the Token
    Content Root requirements in
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-   (ADR 0010 decision 4). Finality over `baseURI + tokenId` strings without
+   (ADR 0010 decision D4). Finality over `baseURI + tokenId` strings without
    per-token content hashes is nonconformant: in 2075 the chain would prove
    which URI was frozen but not which artwork it named.
 2. Collection-scope finality is forbidden while any render-critical payload
@@ -1473,26 +1495,35 @@ Offchain content binding [MRR-OFFCHAIN-BINDING]:
    never a silent lapse.
    (a) Sold-token lane: for every `HASH_BOUND` `OFFCHAIN`-mode
    collection — open or closed — each sold token's render-critical
-   payloads must have dual-family archive receipts, at least one from an
-   `ENDOWED`-economics storage family ([LTA-ARCHIVE] requirements 2
-   and 3 in
-   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)),
-   and must join the fixity program's sold-token population
-   ([CMC-FIXITY-PROGRAM] rule 6 in
-   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)),
-   all within `OFFCHAIN_SOLD_TOKEN_COVERAGE_SECONDS` of that token's
-   first sale settlement — per token, or per release batch where a
-   release sells together. Rule 4 binds the bytes at sale; this lane
-   replicates and audits them, because a hash commitment without an
-   enforced replica verifies loss instead of preventing it, and an
-   uncapped open series that never reaches `CLOSED` accrues coverage
-   token by token instead of never. The operator-infrastructure-only
-   period between a token's first sale settlement and its receipt and
-   fixity coverage is a monitored state from day one (ADR 0013
-   decision U3): monitoring enumerates the in-window sold-token
-   population (`uncovered_within_window`, [CMC-FIXITY-PROGRAM] rule 6)
-   as a published operational artifact from the first sale onward,
-   never only after a deadline lapses.
+   payloads must have, at or before that token's first sale settlement,
+   at least one archive receipt from an `ENDOWED`-economics storage
+   family ([LTA-ARCHIVE] requirements 2 and 3 in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md))
+   whose evidence class is cryptographically verifiable —
+   `CONTENT_ADDRESSED_INCLUSION` or `ATTESTED_POSSESSION`, never
+   `OPERATOR_ASSERTED` ([CMC-RECEIPTS] in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
+   (ADR 0014 decision V1). The bytes are already fixed and hashed
+   before sale under rule 4, so the Arweave-class upload precedes the
+   sale; settling a sale whose render-critical payloads carry no such
+   receipt is nonconformant, exactly like selling unbound bytes. The
+   second-family archive receipt, and the token's entry into the fixity
+   program's sold-token population ([CMC-FIXITY-PROGRAM] rule 6 in the
+   same document) with its first passing fixity record, follow within
+   `OFFCHAIN_SOLD_TOKEN_COVERAGE_SECONDS` of that settlement — per
+   token, or per release batch where a release sells together. Rule 4
+   binds the bytes at sale and the settlement-time `ENDOWED` receipt
+   replicates them at sale, because a hash commitment without an
+   enforced replica verifies loss instead of preventing it; this lane
+   completes and audits the coverage, and an uncapped open series that
+   never reaches `CLOSED` accrues coverage token by token instead of
+   never. The single-family period between a token's first sale
+   settlement and its second-family receipt and first fixity record is
+   a monitored state from day one (ADR 0013 decision U3; split
+   restated by ADR 0014 decision V1): monitoring enumerates the
+   in-window sold-token population (`uncovered_within_window`,
+   [CMC-FIXITY-PROGRAM] rule 6) as a published operational artifact
+   from the first sale onward, never only after a deadline lapses.
    (b) Close-out lane: a token content root covering the full collection
    plus dual-family archive receipts for its render-critical payloads
    must be recorded within `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` of
@@ -1506,9 +1537,11 @@ Offchain content binding [MRR-OFFCHAIN-BINDING]:
    (ADR 0013 decision U9). Two values exist, each recorded in the
    release manifest:
    (a) `OFFCHAIN_SOLD_TOKEN_COVERAGE_SECONDS` — the sold-token lane of
-   rule 6(a): genesis value `2,592,000` seconds (30 days), the
-   sold-work coverage floor (ADR 0013 decision U3), with deploy-time
-   immutable ceiling
+   rule 6(a), covering only the second-family receipt and the first
+   fixity record (the `ENDOWED` receipt is due at settlement itself,
+   ADR 0014 decision V1): genesis value `2,592,000` seconds (30 days),
+   the sold-work coverage floor (ADR 0013 decision U3), with
+   deploy-time immutable ceiling
    `OFFCHAIN_SOLD_TOKEN_COVERAGE_MAX_SECONDS = 7,776,000` (90 days).
    (b) `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` — the close-out lane of
    rule 6(b): genesis value `7,776,000` seconds (90 days), with
@@ -1520,7 +1553,12 @@ Offchain content binding [MRR-OFFCHAIN-BINDING]:
    may never exceed its ceiling. Every change emits a parameter-change
    event and is recorded in the release manifest; a release-manifest
    edit is never a change path, so neither coverage window can be
-   quietly hollowed out across a 50-year operator lineage.
+   quietly hollowed out across a 50-year operator lineage. The
+   script-work sale-follows lane's sibling deadline,
+   `SCRIPT_SOLD_WORK_COVERAGE_SECONDS`, is defined once at
+   [MRR-SCRIPT-COVERAGE] under this same floor-and-ceiling discipline
+   and is recorded in the release manifest alongside these two values
+   (ADR 0014 decision V1).
 
 ### Onchain Mode
 
@@ -1586,6 +1624,8 @@ namespaces when useful:
         "works_class": "artist_bound",
         "artist_id": "0x...",
         "artist_address": "0x...",
+        "artist_display_name": "...",
+        "identity_record_hash": "0x...",
         "binding_generation": "1",
         "attestation_status": "attested_current",
         "attestation_record": "0x...",
@@ -1630,6 +1670,55 @@ namespaces when useful:
   }
 }
 ```
+
+Script-work preservation coverage [MRR-SCRIPT-COVERAGE]:
+
+For script-based works the bytes survive by construction — they are
+contract state — but appearance does not: browsers and engines drift
+within a decade, and a version string without a preserved runtime is a
+citation, not an environment. Reference-render captures and the
+archived execution-environment artifact therefore follow the sale, not
+the finality ceremony, exactly as offchain byte coverage does
+(ADR 0014 decision V1):
+
+1. For every `ONCHAIN`-mode or hybrid collection, a reference-render
+   capture set and the archived, fixity-covered execution-environment
+   artifact — the record content of [CMC-FINALITY-INPUTS] rules
+   5(a)-(c) in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md),
+   under the pinned `STREAM_REFERENCE_RENDER_V1` schema — must be
+   recorded within `SCRIPT_SOLD_WORK_COVERAGE_SECONDS` of the
+   collection's first primary-sale settlement. The capture set covers
+   the tokens minted by recording time under the rule 5(a) sampling
+   rules; for open collections the record is superseded with lineage
+   as the series grows, and each later release's captures follow that
+   release's own first sale settlement under the same window.
+2. The lane is a monitored conformance gate under the same regime as
+   the rule 6 offchain lanes: monitoring enumerates sold script-work
+   collections whose captures or environment artifact are outstanding
+   (`uncovered_within_window`) from the first sale settlement onward,
+   and a missed deadline is a monitored incident with an alert
+   (`uncovered_overdue`), never a silent lapse. Recorded captures and
+   environment artifacts join the fixity program's covered population
+   ([CMC-FIXITY-PROGRAM] rule 1 in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)).
+3. Finality verifies rather than first creates these records
+   ([MRR-FINALITY] rule 9; [CMC-FINALITY-INPUTS] rule 5): a sold
+   collection reaches any later finality ceremony with the captures
+   and environment artifact already recorded. The museum-grade
+   pre-first-sale floor additionally requires them before the first
+   sale ([CMC-MUSEUM-GRADE] in the same document).
+4. `SCRIPT_SOLD_WORK_COVERAGE_SECONDS` is a governed wall-clock
+   deadline parameter under the [MRR-OFFCHAIN-BINDING] rule 7
+   discipline — seconds-denominated, floor-and-ceiling family, never a
+   [LTA-GTP] member: genesis value `2,592,000` seconds (30 days), with
+   deploy-time immutable ceiling
+   `SCRIPT_SOLD_WORK_COVERAGE_MAX_SECONDS = 7,776,000` (90 days). It
+   may be shortened through ordinary parameter governance, lengthened
+   only through the ADR 0004 `DELAYED_LOOSENING` class, and never
+   beyond its ceiling; every change emits a parameter-change event,
+   and the value and ceiling are recorded in the release manifest — a
+   release-manifest edit is never a change path.
 
 ### Hybrid Mode
 
@@ -1877,7 +1966,7 @@ Guidance:
 2. `INLINE_CHUNKS` remains supported for small collection scripts because it
    is simple and auditable.
 3. `SSTORE2` chunked write-once blob storage is a genesis capability, not a
-   later addition (ADR 0010 decision 4): the genesis metadata contract must
+   later addition (ADR 0010 decision D4): the genesis metadata contract must
    accept SSTORE2-backed script chunks so serious long-form generative works
    can be fully onchain from launch. Chunk sizes and the total script cap
    are specified in Canonicalization And Size Limits and in
@@ -2003,7 +2092,7 @@ Rules:
    emitter address.
 
 Protocol v1 enforces explicit upper bounds. Normative v1 hard maxima
-(ADR 0009 decision 14, script totals raised by ADR 0010 decision 4):
+(ADR 0009 decision 14, script totals raised by ADR 0010 decision D4):
 
 ```text
 MAX_SHORT_STRING_BYTES       1,024
@@ -2024,7 +2113,7 @@ MAX_ARCHIVE_VIEW_BYTES      65,536
 
 These values are the normative v1 limits (ADR 0009 decision 14, with
 `MAX_TOTAL_ONCHAIN_SCRIPT_BYTES` raised to 786,432 — 32 SSTORE2 chunks of
-24,576 bytes — by ADR 0010 decision 4), subject only to pre-deployment
+24,576 bytes — by ADR 0010 decision D4), subject only to pre-deployment
 measurement that pins the deployed constants in the release manifest.
 Writes that exceed storage limits must revert with specific errors.
 Rendering that would exceed renderer limits must fail predictably and be
@@ -2141,7 +2230,7 @@ Refresh emitter authorization [MRR-REFRESH-EMITTERS]:
    `emitMetadataUpdate`/`emitBatchMetadataUpdate` helpers is owned by the
    Core Hook Budget table in
    [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
-   (ADR 0009 decision 5; ADR 0010 decision 10): the current metadata router,
+   (ADR 0009 decision 5; ADR 0010 decision D10): the current metadata router,
    the artwork finality registry, and the entropy coordinator, each resolved
    from Core's own cached satellite pointers at call time. This document
    cites that home and must not narrow or extend the set. The restricted
@@ -2320,7 +2409,7 @@ Renderer and router rules after finality [MRR-FINALITY]:
    finality scope has been recorded, per the Token Content Root
    requirements in
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-   (ADR 0010 decision 4). Finality without per-token content binding is
+   (ADR 0010 decision D4). Finality without per-token content binding is
    nonconformant.
 9. Finality for script-based works (`ONCHAIN` and hybrid modes) requires a
    `REFERENCE_RENDER` component: hash-committed reference output captures
@@ -2328,7 +2417,7 @@ Renderer and router rules after finality [MRR-FINALITY]:
    manifest naming renderer version, render context version, browser/engine
    build, viewport, color space, and capture toolchain, recorded as a
    collection record before `finalizeCollectionArtwork` executes
-   (ADR 0010 decision 4). The record schema — including the archived
+   (ADR 0010 decision D4). The record schema — including the archived
    execution-environment artifact and the pinned per-work re-render
    acceptance mode — is owned by
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
@@ -2341,7 +2430,11 @@ Renderer and router rules after finality [MRR-FINALITY]:
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md).
    Re-render verification follows the pinned acceptance mode, never an
    implied byte-equality default; `DYNAMIC`-class renderers are excluded
-   from `BYTE_EXACT` [MRR-DETERMINISM]. For `OFFCHAIN` collections the
+   from `BYTE_EXACT` [MRR-DETERMINISM]. For a collection that has sold,
+   the captures and archived environment artifact are already due under
+   the script-work sale-follows lane [MRR-SCRIPT-COVERAGE], so finality
+   verifies the recorded component rather than first creating it
+   (ADR 0014 decision V1). For `OFFCHAIN` collections the
    component is optional but tooling-warned; non-script media works
    carry the media-conservation finality gate of [CMC-FINALITY-INPUTS]
    rule 12 in the same document instead, so byte fixity is never their
@@ -2350,7 +2443,7 @@ Renderer and router rules after finality [MRR-FINALITY]:
     sanction and artist-intent preconditions defined in
     [`docs/stream-artist-authority.md`](stream-artist-authority.md) and in the Artwork Finality Inputs of
     [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-    (ADR 0010 decisions 2 and 6): an `ARTIST_SANCTION` finality component
+    (ADR 0010 decisions D2 and D6): an `ARTIST_SANCTION` finality component
     and an `ARTIST_INTENT` record or its explicit recorded waiver. The
     router only surfaces these states; it does not own them.
 
@@ -2426,7 +2519,14 @@ surface under the artist content veto: it requires artist co-signature or
 is artist-freezable per consent mode, as specified in
 [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
 [CMC-ARTIST-CONTENT-VETO] (ADR 0011 decision R7). Metadata admin authority
-alone cannot rewrite what a sold artist-attributed work renders.
+alone cannot rewrite what a sold artist-attributed work renders. The same
+router surfaces are part of the content state the artist ratifies before
+the first mint under the first-release content ratification
+([CMC-ARTIST-CONTENT-VETO] rule 6; ADR 0014 decision V3): once the
+ratification exists, changing the resolved renderer, metadata mode, or
+render context for the ratified scope requires artist co-signature even
+before the first token mints, so the drop that sells is the drop the
+artist signed.
 
 ## Expected Core Interaction
 
@@ -2519,7 +2619,24 @@ declared read-set extension of [MRR-DETERMINISM] (ADR 0011 decision R3),
 assembled end to end by the Evolving Works Extension Recipe
 [MRR-EVOLVING-RECIPE] (ADR 0012 decision T6) — the extension path exists
 at genesis, so this exclusion list precludes no art category on this
-Core line:
+Core line.
+
+The launch posture is stated honestly rather than implied (ADR 0014
+decision V9): the genesis renderer class is strictly `STATIC` — no
+`DYNAMIC`-class renderer, no post-mint-parameter satellite, and no
+assembled evolving-work module deploys at genesis, and no launch surface
+may market dynamic or reactive formats as a genesis capability. As with
+the dormant `HYBRID` mode, the dormancy carries a recorded rationale: a
+genesis `DYNAMIC` renderer would enlarge the audited genesis render path
+and its golden-vector corpus for a class no launch collection requires,
+while the machinery a dynamic module needs — the renderer registry, the
+per-version read-set gate, the finality acceptance modes, and the consent
+binding — is Permanent and final now. The declared activation path is
+the recipe [MRR-EVOLVING-RECIPE]: the first `DYNAMIC`-class renderer
+version and the `StreamTokenParams` satellite (item 1 below) arrive as
+post-genesis module specs composing that recipe, through the same
+registry, determinism static gate, and golden-vector discipline as
+every renderer version:
 
 1. `StreamTokenParams`: artist-approved post-mint parameters inspired by Art
    Blocks PostParams. This should define parameter types, bounds, update
@@ -2678,11 +2795,15 @@ Router tests:
     paged chunk path reproduces byte-identical payloads [MRR-FULL-VIEW].
 19. Offchain binding gates: an `OFFCHAIN` collection without per-token
     content commitments and without the declared service-backed-mutable
-    class fails the pre-sale conformance gate; a declared collection is
+    class fails the pre-sale conformance gate; a settlement whose
+    render-critical payloads carry no cryptographically verifiable
+    `ENDOWED`-family receipt fails the sale-boundary gate (ADR 0014
+    decision V1); a declared collection is
     rejected at every finality scope while unbound; the
     preservation-coverage deadline alert fires when a `HASH_BOUND`
     collection closes without full coverage, and the sold-token-lane
-    alert fires when a sold token's receipts or fixity coverage miss the
+    alert fires when a sold token's second-family receipt or fixity
+    coverage misses the
     per-sale `OFFCHAIN_SOLD_TOKEN_COVERAGE_SECONDS` window; monitoring
     enumerates the in-window sold-token population from the first sale
     settlement onward (day-one monitored state, ADR 0013 decision U3)
@@ -2691,6 +2812,14 @@ Router tests:
     final artwork with `properties.stream.render_state = "burned"`, and
     `tokenURIStatus` reports `BURNED` without reverting
     [MRR-FULL-VIEW].
+21. Script-work coverage lane: a first sale in an `ONCHAIN` collection
+    starts the `SCRIPT_SOLD_WORK_COVERAGE_SECONDS` window; monitoring
+    enumerates the outstanding population from settlement onward; a
+    recorded `STREAM_REFERENCE_RENDER_V1` record with the archived
+    environment artifact inside the window yields `covered`; a lapsed
+    window fires the monitored-incident alert; and finality verifies
+    the lane-recorded component rather than creating it
+    [MRR-SCRIPT-COVERAGE].
 
 Renderer tests:
 
@@ -2738,7 +2867,10 @@ Renderer tests:
     artist authority registry state; asserts presence of `artist_id`,
     `artist_address`, `binding_generation`, `sanction_record`,
     `sanction_authority_class`, `attestation_authority_class`, and
-    `works_class` where required, with each authority class
+    `works_class` where required, plus `artist_display_name` and
+    `identity_record_hash` rendered from the operative identity
+    document for accepted bindings — never from operator display
+    fields (ADR 0014 decision V3) — with each authority class
     (`artist | delegate | successor | steward`, the [AA-DISPLAY]
     order) rendered from the
     corresponding registry authority (ADR 0012 decision T4); reports
@@ -2806,6 +2938,21 @@ returndata cap declared with the read set (decision U7)
 `attribution_unavailable` registry-read failure posture (decision U4)
 [MRR-ATTRIBUTION]; and the enumeration posture is cited from
 [LTA-ENUMERATION] instead of restated (decision U9).
+[ADR 0014](adr/0014-world-class-pass-round-5.md) further amends five
+postures: the cryptographically verifiable `ENDOWED`-family receipt is
+due at each token's first sale settlement, leaving the coverage window
+to the second family and the first fixity record (decision V1)
+[MRR-OFFCHAIN-BINDING]; `ONCHAIN` and hybrid collections carry the
+script-work sale-follows coverage lane under
+`SCRIPT_SOLD_WORK_COVERAGE_SECONDS`, which finality verifies rather
+than first creates (decision V1) [MRR-SCRIPT-COVERAGE] [MRR-FINALITY];
+the attribution mirror adds the registry-sourced
+`artist_display_name` and `identity_record_hash` (decision V3)
+[MRR-ATTRIBUTION]; the first-release content ratification binds the
+router's content-affecting surfaces from ratification onward
+(decision V3) [MRR-ADMIN]; and the strictly-`STATIC` genesis renderer
+posture is recorded with its dormancy rationale and the
+[MRR-EVOLVING-RECIPE] activation path (decision V9).
 The only open decision touching this document is OQ-X8 (the marketplace
 collection-identity signal and its reserved-scope satellites), reserved
 in the register; it blocks Review entry for this document and the
@@ -2897,3 +3044,6 @@ The genesis deployment should support:
     default token JSON [MRR-STREAM-PROPS].
 31. Burned-token serving through the full-view reads with burned-state
     disclosure [MRR-FULL-VIEW] (ADR 0012 decision T3).
+32. The script-work sale-follows coverage lane for `ONCHAIN` and hybrid
+    collections, with its governed deadline and monitoring
+    [MRR-SCRIPT-COVERAGE] (ADR 0014 decision V1).
