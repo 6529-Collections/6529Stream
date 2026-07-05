@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Aligned seven ADR 0010 citations in the collection-metadata and
+  metadata-router specifications with the D-prefixed decision-id format and
+  refreshed the hash-bound release evidence; this is documentation-only and
+  does not change deployed protocol behavior.
 - Hardened release mode so expired, future, or inverted risk-acceptance windows
   fail; external-audit evidence and all production evidence are non-waivable;
   local release targets run the aggregate check; and the manual workflow fails

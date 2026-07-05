@@ -1595,7 +1595,7 @@ what may vary, what must not — while the artist can still say so
 Art history is full of misattribution; a permanent record system will face
 it. Dispute authority — who may file, arbiter roles, evidence and appeal
 semantics — is owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010
-decision 2). This contract's side:
+decision D2.7). This contract's side:
 
 1. Dispute state is mirrored as `ATTRIBUTION_DISPUTE` records with pinned
    statuses `ACTIVE`, `SUPERSEDED`, `DISPUTED`, `REPUDIATED_BY_ARTIST`, and
@@ -2588,7 +2588,7 @@ C2PA rules [CMC-C2PA]:
 2. Claims, assertions, ingredients, actions, and signatures should be recorded
    in offchain manifests and committed by hashes onchain.
 3. C2PA binds to the token's actual media or it binds nothing (ADR 0010
-   decision 6). For any collection or token opting into C2PA provenance,
+   decision D6). For any collection or token opting into C2PA provenance,
    the referenced C2PA manifest's hard-binding asset hash must equal the
    committed media hash (`MediaManifest.imageHash`, `contentHash`, or the
    token-level media hash it documents). Pre-freeze tooling and the
@@ -2720,7 +2720,7 @@ IIIF rules [CMC-IIIF]:
    collections.
 2. Stream pins a minimal IIIF Presentation 3 profile,
    `STREAM_IIIF_P3_MIN_V1`, registered as a schema ID (ADR 0010
-   decision 6). A conformant manifest is a IIIF Presentation 3 Manifest
+   decision D6). A conformant manifest is a IIIF Presentation 3 Manifest
    whose painting-annotation content resources are content-addressed
    (`ipfs://` or `ar://`, never bare HTTPS), each carrying a
    cross-reference to the committed media hash it depicts
@@ -5538,7 +5538,7 @@ Finality rules [CMC-FINALITY-INPUTS]:
    required.
 6. Collections with a bound artist require the `ARTIST_SANCTION` finality
    component defined in [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010
-   decision 2) and an `ARTIST_INTENT` record or artist-signed waiver
+   decision D2) and an `ARTIST_INTENT` record or artist-signed waiver
    [CMC-ARTIST-INTENT]. For artist-bound script-based works (`ONCHAIN`
    and hybrid), the interview escalates from warning to blocking at
    finality (ADR 0014 decision V8): the scope must carry a resolved
