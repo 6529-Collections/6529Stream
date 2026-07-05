@@ -1032,6 +1032,23 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Pinned Solidity metadata off in `foundry.toml` (`bytecode_hash = "none"`,
+  `cbor_metadata = false`) so contract creation and runtime bytecode is
+  deterministic and self-contained, with no embedded IPFS metadata-hash
+  pointer to off-chain metadata. This removes the incidental metadata churn
+  whereby adding an unrelated source file perturbed the embedded metadata of
+  unrelated curated contracts and staled their release-artifact checksums.
+  All release artifacts (release-artifact catalog, protocol surface, custom
+  error catalog, source-verification inputs, deployment and broadcast
+  manifests, address books, dependency and provenance attestations, risk
+  register, release notes, one-of-one permanence/provenance manifests,
+  release manifest, bytecode release proof, release-candidate lockfile, and
+  release checksums) were regenerated from a clean production `--via-ir`
+  build, and the offline deployment rehearsal suite was re-run to confirm the
+  contracts still deploy in-memory under the new build settings. This is a
+  deployment-semantics change aligned with the project's on-chain permanence
+  doctrine: verified bytecode no longer depends on any off-chain metadata
+  artifact.
 - Applied the nine-lens round-5 resolutions through accepted
   `docs/adr/0014-world-class-pass-round-5.md`: preservation now attaches
   fully to the sale (ENDOWED archive receipt at or before first sale;
