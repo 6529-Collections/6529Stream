@@ -2912,6 +2912,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0012 World-class pass round 3 | Protocol design request | Accepted | `docs/adr/0012-world-class-pass-round-3.md` | Nine-lens round-3 resolutions |
 | 0013 World-class pass round 4 | Protocol design request | Accepted | `docs/adr/0013-world-class-pass-round-4.md` | Nine-lens round-4 resolutions |
 | 0014 World-class pass round 5 | Protocol design request | Accepted | `docs/adr/0014-world-class-pass-round-5.md` | Nine-lens round-5 resolutions |
+| 0015 Collection identity and facade readiness | Protocol design request | Accepted | `docs/adr/0015-collection-identity-and-facade-readiness.md` | OQ-X8 resolution; facade-readiness genesis surfaces; commitment gate |
 
 ## Appendix D: Issue Template
 

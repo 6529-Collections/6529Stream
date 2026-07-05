@@ -258,6 +258,52 @@ Requirements [SSA-IDENTITY]:
    boundary is disclosed in the artist-authority onboarding surface
    (same home). This rule governs primary sale records; consignment
    sales are outside primary economics per [SSA-CONSIGN].
+9. Identity-mode configuration gate (ADR 0015 decision W3). The
+   custody and burn shapes of this document execute native Core
+   ERC-721 mutation entries on already-minted tokens — custody entry
+   `transferFrom` ([SSA-CUSTODY-ENTRY] rule 2), the bounded
+   custody-to-recipient delivery, custody release, and pull NFT claim
+   ([SSA-ENGLISH] rules 7(d), 10, and 11; [SSA-INVENTORY] rules 3
+   and 5; [SSA-AIRDROP] rule 2 failure-isolated shape) — or
+   `Core.burn` on burn-program sources ([SSA-BURN] rule 1;
+   [SSA-REDEEM] rule 1), and every one of those entries reverts
+   `NativeTransferPathClosed` for an `EXTERNAL_FACADE` collection
+   ([PV1-TRANSFER-CONTROLLER] requirement 8 in
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)).
+   The combination is excluded at configuration, never discovered at
+   settlement: sale, gate, and distribution configuration must
+   resolve `collectionIdentityMode` for every collection whose
+   already-minted tokens the configured flow would custody, deliver,
+   release, or burn through a native Core entry, and must revert with
+   `SaleFlowClosedForFacadeCollection` when any resolved mode is
+   `EXTERNAL_FACADE`. Concretely: `ENGLISH_AUCTION` (every variant
+   runs a custody-and-native-delivery leg — custody-held tokens,
+   `AUCTION_START_CUSTODY`, and mint-at-settlement's
+   custody-then-deliver shape alike), `CUSTODY_INVENTORY_FIXED_PRICE`
+   and its consignment form, `PRIVATE_SALE` and `OFFER_SALE` records
+   binding a custody-held token (for offer acceptance of an
+   owner-held token the check runs before any signature consumption
+   or custody effect of the acceptance transaction; a custody-entry
+   attempt outside a configured sale fail-fasts atomically at Core
+   with no funds at risk), the [SSA-AIRDROP] rule 2 failure-isolated
+   shape, and `BURN_TO_MINT` and `BURN_TO_REDEEM` programs whose
+   Stream source set ([SSA-BURN] rule 3) or redeemed collection
+   includes an `EXTERNAL_FACADE` collection. Kinds whose only Core
+   mutation is mint delivery are unaffected in both modes — minting
+   routes the manager path and the terminal controller callback
+   mode-independently ([PV1-TRANSFER-CONTROLLER] requirement 12) —
+   so `FIXED_PRICE`, `OPEN_EDITION`, the Dutch kinds,
+   `REFUND_WINDOW`, `ZERO_PRICE_CLAIM`, `PAY_WHAT_YOU_WANT`,
+   direct-shape airdrops, and mint-settling private sales and offers
+   configure and settle identically for `EXTERNAL_FACADE`
+   collections. Facade-aware adapter profiles that route custody
+   mutation through the facade's ERC-721 entries are the only path
+   that lifts this exclusion; their acceptance is a mandatory scope
+   item of the facade tripwire review ([FCP-DEPLOYMENT] rule 2 in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md);
+   ADR 0015 decision W3), and until such a profile is accepted this
+   gate is the complete sale-layer posture for `EXTERNAL_FACADE`
+   collections, verified by the [SSA-GATES] item 22 suite.
 
 ## Sale Adapter Conformance Profile
 
@@ -774,7 +820,14 @@ Requirements [SSA-AIRDROP]:
      key the beneficiaries in both shapes (mint spec `[MPA-COUNTERS]`),
      so the custody leg changes delivery mechanics, never accounting.
      Distributions whose recipient set may contain contract accounts
-     must use this shape.
+     must use this shape. The failure-isolated shape configures only
+     for `CORE_NATIVE` collections — its custody leg exits through a
+     native Core entry that facade mode closes ([SSA-IDENTITY]
+     rule 9; ADR 0015 decision W3); for an `EXTERNAL_FACADE`
+     collection the direct shape is the conformant shape and carries
+     no rejecting-receiver risk, because facade-mode mint delivery
+     performs no receiver callback ([PV1-TRANSFER-CONTROLLER]
+     requirement 12).
 3. Executor: the phase declares no payment settlement, so the executor
    may be an operator EOA or a registered adapter — the [SSA-REGISTRY]
    rule 2 EOA prohibition binds paid phases only. Operator-key hygiene
@@ -863,7 +916,11 @@ Requirements [SSA-ENGLISH]:
    from `Created` until settlement, cancellation, or no-bid claim.
    `Created -> Active` fires only when custody is confirmed; bids before
    custody confirmation revert. `payOutAddress`-style payment identities
-   are never custody.
+   are never custody. English auctions configure only for `CORE_NATIVE`
+   collections: every variant runs a custody-and-native-delivery leg
+   that Core closes for `EXTERNAL_FACADE` collections, so configuration
+   reverts per the [SSA-IDENTITY] rule 9 identity-mode gate (ADR 0015
+   decision W3).
 2. Bid validity: bids are native ETH in protocol v1 (ERC-20 bidding has no
    genesis implementation; its frozen extension profile is
    [SSA-ERC20-BID]); a bid is valid only while `Active` and
@@ -1471,7 +1528,11 @@ Requirements [SSA-CUSTODY-ENTRY]:
    after both signatures verify and both digests are consumed
    ([SSA-OFFER] rules 3 and 4), before the `AUCTION_SETTLEMENT_TRANSFER`
    ordering runs — so custody entry, settlement, and delivery are one
-   transaction with no interim custody state.
+   transaction with no interim custody state. Custody entry exists
+   only for `CORE_NATIVE` collections: the [SSA-IDENTITY] rule 9
+   identity-mode gate excludes every custody flow for
+   `EXTERNAL_FACADE` collections at configuration (ADR 0015 decision
+   W3).
 3. Consignment deposits — custody entered ahead of a sale opening
    (custody-inventory listings, pre-listed auction pieces) — are
    evented `SaleCustodyDeposited` and recorded against the sale
@@ -1804,7 +1865,10 @@ Requirements [SSA-BURN]:
 3. The source-collection set, conversion ratio (sources burned per token
    minted), and any burn-window bounds must be pinned in the gate config
    hash inside the phase policy hash, so the burn program is part of the
-   frozen mint policy.
+   frozen mint policy. A source set containing an `EXTERNAL_FACADE`
+   collection reverts at configuration — Core's native burn entry is
+   closed for facade-mode sources — per the [SSA-IDENTITY] rule 9
+   identity-mode gate (ADR 0015 decision W3).
 4. Claiming credit for tokens burned outside the executing transaction
    (pre-burned claims) is excluded from protocol v1: retained identity does
    not attribute the burner, so an attributable burn-claim registry
@@ -3475,6 +3539,7 @@ error NothingClaimable(bytes32 saleId, address account);
 error AuctionArtworkMismatch(bytes32 expected, bytes32 actual);
 error CustodyGrantInvalid();
 error SaleAttributionContested(uint256 collectionId);
+error SaleFlowClosedForFacadeCollection(uint256 collectionId);
 error SaleArtistConsentMissing(bytes32 saleConfigHash);
 error SaleConsignmentDeclarationInvalid(uint256 tokenId);
 error AdapterSurplusUnderfunded(address asset);
@@ -3760,6 +3825,16 @@ Requirements [SSA-GATES]:
     rule 4), the budget-exhausted hard-close display ([SSA-ENGLISH]
     rule 4), and the FCFS default statement ([SSA-RAFFLE] rule 6) —
     exactly as item 18 covers the consignment disclosure fields.
+22. Identity-mode configuration gate (ADR 0015 decision W3): the
+    [SSA-IDENTITY] rule 9 suite — configuration of each excluded
+    custody or burn flow against an `EXTERNAL_FACADE` collection
+    reverts `SaleFlowClosedForFacadeCollection` (English auction in
+    every variant, custody-inventory and consignment, custody-held
+    private sale and offer acceptance, the failure-isolated airdrop
+    shape, and burn programs with a facade-mode Stream source or
+    redeemed collection); identical configurations succeed for
+    `CORE_NATIVE` collections; and a mint-delivery kind configures
+    and settles identically in both modes.
 
 ## Protocol v1 Exclusions
 

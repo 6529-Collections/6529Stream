@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:bf308e591793e432b85f860c7ccd26839eacae59b7c29c1604a2a77a5edf26db",
-      "size_bytes": 88590
+      "sha256": "sha256:956e15f44c3553c1c5d0bcf8b6e3f9710addc1f75fedf0d11bf12fb0e39a2c94",
+      "size_bytes": 89377
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:dc06123f01548e93d4d298c94447961d97ff6554c9b56083bd7423b13c4c977a",
+      "sha256": "sha256:724fd0b53c349decdd3b5677803fa7a53a7a0beb29a35e8f1ee1b17aad3d83c9",
       "size_bytes": 24573
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the on-chain collection-metadata reads plus `properties.stream.collection` token JSON are the normative marketplace collection-identity signal, a two-named-signed-commitments gate precedes public sale, and the per-collection ERC-721 facade line is specified as a dormant extension profile (`docs/stream-collection-facade-profile.md`) with its facade-readiness genesis surfaces (per-collection identity mode, one-way pre-first-mint transfer-controller registry, controlled mutation path, event-doctrine carve-out, finality identity binding) carved into the protocol v1 spec, umbrella doctrine, metadata specs, artist consent surface, and conformance-matrix gates, closing the open-question register.",
       "Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.",
       "Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.",
       "Added the first outside-Core split factory and split wallet skeleton with deterministic fixed-profile wallet deployment, immutable entry validation, native ETH pull-release accounting, and release-artifact surface coverage.",

@@ -14,78 +14,73 @@ policy/accounting, `MR` metadata router/renderer, `CM` collection metadata,
 
 ## Open
 
-### OQ-X8: Marketplace-consumable collection identity signal
-
-The one question the protocol owner has reserved (ADR 0010 decision D11).
-Sequential global token IDs (ADR 0009 decision 1) plus a shared
-multi-collection Core contract leave marketplaces and indexers no
-consumable signal for grouping tokens into collections — the range
-heuristic is gone by design, and nothing standard replaced it.
-
-- Why it blocks: collector-facing collection pages, marketplace search,
-  and third-party analytics all need a grouping signal; without a specified
-  one, every integrator invents their own and the ecosystem fragments.
-- Lifecycle gate (restated decidably per ADR 0013 decision U9): OQ-X8
-  blocks Review entry for
-  [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
-  and [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-  only. Every other document may enter Review with X8 open; no document
-  reaches `Final` while a question it depends on is open, per
-  [`spec-policy.md`](spec-policy.md).
-- Reserved-scope satellites (round-3/4 review findings that ride on X8 and
-  are reserved with it): the secondary-market life of every drop pattern
-  under a shared contract, marketplace-native artist identity verification
-  insofar as it depends on collection pages, and the per-collection facade
-  option. The machine path shipped so far (per-collection `contractURI`
-  through the router, `properties.stream.collection` fields, the
-  collection-display evidence gate with standing-commitment hardening) is
-  the interim posture, not the resolution.
-- Blast-radius honesty (ADR 0014 decision V9): the candidate resolutions
-  are not equally contained. Options (a), (b), and (d) are additive to the
-  shipped machine path. Option (c) — the per-collection ERC-721 facade
-  line — is invasive: it would touch Core mint delivery, marketplace
-  approvals, royalty resolution addressing, finality component identity,
-  and the export/event-history model, and its containment has not been
-  demonstrated. If (c) is the owner's direction, a dedicated design spec
-  and a fresh review round precede any adoption.
-- Options: (a) per-collection contract-metadata surfaces (an ERC-7572-style
-  collection-scoped `contractURI` read exposed through the router);
-  (b) ERC-7496 dynamic traits carrying collection identity; (c) a pinned
-  indexer-facing collection registry read plus documented integration
-  guidance; (d) marketplace-standard sub-collection metadata in token JSON
-  (`properties.stream.collection`) plus outreach to major marketplaces.
-- Recommendation: none recorded — reserved to the protocol owner. For the
-  owner's consideration, the round-2 best-in-world reviewer proposed a
-  layered resolution: (a) commit the per-collection ERC-7572 `contractURI`
-  read plus `properties.stream.collection` fields as the normative signal;
-  (b) pursue a standards-track EIP for sub-collection identity with named
-  marketplace co-sponsors; (c) evaluate a thin immutable per-collection
-  ERC-721 facade line (address-per-series fronting Core identity) as an
-  extension profile; (d) convert the display-evidence gate into named,
-  signed integration commitments from at least two major
-  marketplaces/indexers before public sale.
-- Decision owner: protocol owner.
-
-All 25 other questions raised by the permanence reframe were resolved on
-2026-07-04 through
+None. Every question this register has tracked is resolved. The 25
+permanence-reframe questions were resolved on 2026-07-04 through
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) (count
 corrected from 24 per ADR 0010). The successive nine-lens review rounds
 were resolved through [ADR 0010](adr/0010-world-class-spec-pass.md)
 (round 1, 112 findings), [ADR 0011](adr/0011-world-class-pass-round-2.md)
 (round 2, 98), [ADR 0012](adr/0012-world-class-pass-round-3.md)
-(round 3, 86), and [ADR 0013](adr/0013-world-class-pass-round-4.md)
-(round 4, 92) — every finding resolved except the OQ-X8 family above.
+(round 3, 86), [ADR 0013](adr/0013-world-class-pass-round-4.md)
+(round 4, 92), and [ADR 0014](adr/0014-world-class-pass-round-5.md)
+(round 5, 83). OQ-X8, the single question the protocol owner reserved,
+was resolved on 2026-07-05 through
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md).
 
 ## Resolved
 
-The 25 entries below were resolved 2026-07-04. The decision record is
+### OQ-X8: Marketplace-consumable collection identity signal
+
+Resolved 2026-07-05 by explicit protocol-owner ratification through
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md). The
+question: sequential global token IDs (ADR 0009 decision 1) plus a
+shared multi-collection Core leave marketplaces and indexers no standard
+signal for grouping tokens into collections.
+
+- Adopted (ADR 0015 decision W1): the on-chain collection-metadata reads
+  — deployment-level ERC-7572 `contractURI()` plus the per-collection
+  collection-metadata read through the router — and the
+  `properties.stream.collection` token-JSON member set are the
+  normative, Permanent collection-identity signal, together with the
+  Core identity reads and documented indexer integration guidance.
+- Adopted (ADR 0015 decision W2): the collection-display evidence gate
+  hardens to at least two named, signed marketplace/indexer integration
+  commitments recorded in the release evidence set before the first
+  public sale.
+- Tripwired (ADR 0015 decisions W3-W5): the per-collection ERC-721
+  facade line is a fully specified dormant extension profile
+  ([`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)),
+  never a launch dependency; its Core-side preconditions ship at genesis
+  so the fallback never requires a Core redeployment; if the W2 gate is
+  unmet at the public-sale boundary the profile advances to a dedicated
+  adversarial review and owner go/no-go. Retrofit of `CORE_NATIVE`
+  collections is excluded by construction.
+- Rejected: ERC-7496 dynamic traits as an identity carrier (off-label;
+  adds no capability beyond the token-JSON member set); a facade line at
+  genesis (first-of-kind composite, ADR 0014 decision V9); a bare
+  tripwire with no genesis surfaces (the fallback would be decorative).
+- Lettering note: earlier revisions of this entry used two conflicting
+  option letterings — the register's option list labeled an additive
+  indexer-registry read "(c)" while the blast-radius note (ADR 0014
+  decision V9) used "(c)" for the facade line from the layered
+  recommendation. The resolution above names options outright instead of
+  by letter; the V9 blast-radius finding applies to the facade line.
+- Lifecycle effect: the Review-entry blocker on
+  [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+  and
+  [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+  is removed; ordinary Review-entry conditions of
+  [`spec-policy.md`](spec-policy.md) continue to apply.
+
+The 25 entries below were resolved earlier, on 2026-07-04. Their decision
+record is
 [ADR 0009: Protocol V1 Open-Question Resolutions](adr/0009-protocol-v1-open-question-resolutions.md);
 decision numbers refer to it. OQ-X5 and OQ-X6 were ratified explicitly by
 the protocol owner; the rest were delegated under the review lens "the most
 world-class approach, not the most convenient for us now." The subsequent
 nine-lens review findings were resolved through
 [ADR 0010: World-Class Specification Pass](adr/0010-world-class-spec-pass.md),
-which also opened OQ-X8 above as the single reserved question.
+which also opened OQ-X8 as the single reserved question, resolved above.
 
 ### Cross-cutting
 

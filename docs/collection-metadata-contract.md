@@ -61,7 +61,16 @@ profile crosswalks to persistent identifiers and authority files, the
 institutional-validation floor rises to two ingests and two reviews,
 and the acquisition packet completes (entropy-provenance pinning,
 total coverage vocabulary, recovery lineage, platform-sustainability
-evidence).
+evidence). It is further amended by
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md): the
+collection-identity token-JSON member set is pinned as a normative
+schema with this document as home ([CMC-COLLECTION-IDENTITY-JSON]),
+the facade identity binding record family joins the finality inputs
+for `EXTERNAL_FACADE` collections ([CMC-FACADE-BINDING]), and the
+acquisition packet gains the identity-mode item. OQ-X8 is resolved
+(ADR 0015 decision W6) and no longer blocks this document's entry into
+Review, which follows the ordinary conditions of
+[`docs/spec-policy.md`](spec-policy.md).
 
 This document specifies moving collection metadata storage out of
 `StreamCore` into a dedicated `StreamCollectionMetadata` contract.
@@ -3040,10 +3049,19 @@ schema-identified, hash-committed packet a registrar verifies at closing:
    ADR 0013 decision U8);
 9. the legal instrument hash recorded (or to be recorded) in
    `ACCESSION`;
-10. the ownership-provenance chain: the token's complete ERC-721
-    `Transfer` history from mint to present — `from`, `to`, block
-    number, and transaction hash per hop — cross-referenced to the
-    covering event-history snapshot hash ([LTA-EVENT-HISTORY] in
+10. the ownership-provenance chain, identity-mode-aware (ADR 0015
+    decision W4): the token's complete ownership history from mint to
+    present — `from`, `to`, block number, and transaction hash per
+    hop — built from the mode's authoritative carrier: the ERC-721
+    `Transfer` history for `CORE_NATIVE` tokens, and the Core
+    `ControlledOwnershipChanged` history for `EXTERNAL_FACADE` tokens
+    ([PV1-RECON] item 13 in
+    [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)),
+    whose facade ERC-721 `Transfer` stream is reported beside the
+    chain as a convenience-mirror cross-check — never the carrier —
+    with any divergence between the two streams flagged in a typed
+    packet field; the chain is cross-referenced to the covering
+    event-history snapshot hash ([LTA-EVENT-HISTORY] in
     [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md))
     and to any `ACCESSION`/`DEACCESSION` `TITLE_BINDING` records bound
     to specific hops, so title continuity is a verifiable packet field
@@ -3092,7 +3110,17 @@ schema-identified, hash-committed packet a registrar verifies at closing:
     the age of the latest state export ([LTA-EXPORT]), and the latest
     zero-signer museum-mode drill report hash — the
     platform-dependence facts a committee must underwrite, in the
-    packet instead of scattered release artifacts.
+    packet instead of scattered release artifacts; and
+19. the collection identity mode (ADR 0015 decisions W1 and W4): the
+    declared or defaulted (`CORE_NATIVE`) identity mode from the Core
+    read, and, for `EXTERNAL_FACADE` collections, the facade (transfer
+    controller) address with the recorded `IDENTITY_FACADE_BINDING`
+    record reference [CMC-FACADE-BINDING] — or an explicit
+    not-yet-recorded status where the binding record does not yet
+    exist, a state possible only before the finality hook of
+    [CMC-FINALITY-INPUTS] rule 14 enforces it — so the address and
+    token numbering under which the work is listed, traded, and cited
+    is a typed packet field rather than marketplace inference.
 
 Dossier tooling [CMC-OBJECT-DOSSIER] emits the packet, a registrar can
 regenerate and verify it against chain state with no operator involvement,
@@ -3470,8 +3498,8 @@ Scholarly and registrar reference needs one blessed citation form
 The registrar surface is only as durable as its schemas: two institutions
 writing against unpinned families produce mutually unintelligible dossiers,
 and a 2075 archivist must inherit a data dictionary, not a list of family
-names. Every named museum record family therefore ships pinned
-(ADR 0011 decision R11):
+names. Every named record family in the genesis schema set — museum
+and identity alike — therefore ships pinned (ADR 0011 decision R11):
 
 1. For each family below, genesis pins: a schema ID (the `keccak256` of
    the listed name string, entering the record-type and numeric ID
@@ -3510,6 +3538,8 @@ names. Every named museum record family therefore ships pinned
    | `STREAM_WORK_DESCRIPTION_V1` | the tombstone fields of [CMC-TOMBSTONE] rule 1 (ADR 0012 decision T8) |
    | `STREAM_LIDO_PROFILE_V1` | the tombstone-to-LIDO crosswalk of [CMC-TOMBSTONE] rule 4 (ADR 0013 decision U8) |
    | `STREAM_BAGIT_PROFILE_V1` | the packaging profile of [CMC-PACKAGING] (ADR 0012 decision T8) |
+   | `STREAM_COLLECTION_IDENTITY_V1` | the collection-identity token-JSON member set of [CMC-COLLECTION-IDENTITY-JSON]: `id`, `name`, `artist`, `serial`, `catalog_number` (ADR 0015 decision W1) |
+   | `STREAM_FACADE_IDENTITY_BINDING_V1` | the facade identity binding payload of [CMC-FACADE-BINDING]: chain ID, Core address, collection ID, facade address, local-ID rule identifier (ADR 0015 decision W4) |
 
 3. `STREAM_CONDITION_REPORT_V1` anchors every condition report to
    reproducible protocol state, so outbound and return condition records
@@ -4888,6 +4918,84 @@ refresh events (ADR 0009 decision 5). Collection-level contract metadata
 remains available through `StreamCollectionMetadata.contractURI(collectionId)`
 and token JSON references.
 
+## Collection Identity Token JSON [CMC-COLLECTION-IDENTITY-JSON]
+
+Sequential global token IDs carry no collection meaning (ADR 0009
+decision 1), and Ethereum has no sub-collection identity standard, so
+every default token JSON carries a pinned collection-identity member
+set as part of the Permanent, normative marketplace collection-identity
+signal (ADR 0015 decision W1). This section is the normative schema
+home of that member set. The signal's read surfaces — the
+deployment-level ERC-7572 `contractURI()` on Core and the
+collection-scoped contract-metadata read through the router — are owned
+by [MRR-COLLECTION-DISCOVERY] in
+[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md);
+the router renders this member set and must not restate the schema.
+
+The pinned member set, carried in every default token JSON under
+`properties.stream.collection`:
+
+```json
+{
+  "properties": {
+    "stream": {
+      "collection": {
+        "id": "1",
+        "name": "Example Collection",
+        "artist": "Example Artist",
+        "serial": "23",
+        "catalog_number": "123"
+      }
+    }
+  }
+}
+```
+
+Member rules:
+
+1. All five members — `id`, `name`, `artist`, `serial`, and
+   `catalog_number` — are required in every default token JSON, for
+   every collection, in both identity modes (`CORE_NATIVE` and
+   `EXTERNAL_FACADE`); no member's presence, name, or value depends on
+   identity mode (ADR 0015 decision W4). Numeric values are decimal
+   strings per the encoding rules of [MRR-STREAM-PROPS] in
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md).
+2. `id` is the Core collection ID and `serial` is the collection-local
+   serial. Both must recompute from the Core token-identity read
+   `tokenCollectionIdentity(tokenId)`
+   ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+   [MPA-CORE-ABI]); a rendered value that does not recompute from that
+   read is nonconformant.
+3. `catalog_number` is the global catalog number: the global sequential
+   token ID (ADR 0009 decision 1), equal to the ERC-721 token ID at
+   Core. For `EXTERNAL_FACADE` collections the facade-local ERC-721
+   token ID is the collection-local serial and the catalog number
+   remains readable through the facade ([FCP-IDENTITY] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md));
+   the member set itself is identical in both modes.
+4. `name` is the collection name from this contract's typed
+   `CollectionIdentity` metadata for the collection.
+5. `artist` is the human-readable artist attribution line, derived from
+   the attribution object whose single normative home is [AA-DISPLAY]
+   in [`docs/stream-artist-authority.md`](stream-artist-authority.md):
+   the operative `artist_display_name` for artist-bound collections and
+   the platform-works display treatment for `PLATFORM_WORKS`
+   collections. The member must stay consistent with the rendered
+   `properties.provenance.attribution` object; it is a display
+   convenience, never a second attribution authority, and attribution
+   states, disputes, and degraded-read behavior remain owned by
+   [AA-DISPLAY].
+6. The member set is pinned as the genesis schema
+   `STREAM_COLLECTION_IDENTITY_V1` [CMC-GENESIS-SCHEMAS]; the
+   registered JSON Schema document owns the member names and types, and
+   the renderer's pinned golden render vectors validate default token
+   JSON against it ([MRR-DETERMINISM]; conformance-matrix metadata
+   routing gate).
+7. ERC-7496 dynamic traits are not adopted for collection identity
+   (ADR 0015 decision W1): this member set, together with the read
+   surfaces of [MRR-COLLECTION-DISCOVERY] and the Core identity reads,
+   is the whole machine-readable collection-identity signal.
+
 ## Open Series Display
 
 For open-ended collections, metadata should make the collection's public status
@@ -5301,7 +5409,11 @@ address, interface ID, code hash, module version, manifest hash, and one
 7. lock/freeze state for artwork-affecting fields;
 8. the token content root, leaf count, and content-root schema for the
    finality scope [CMC-CONTENT-ROOT];
-9. post-finality exception policy, if any.
+9. post-finality exception policy, if any;
+10. for `EXTERNAL_FACADE` collections, the facade identity binding
+    record hash and its record-chain lane head [CMC-FACADE-BINDING]
+    (ADR 0015 decision W4); for `CORE_NATIVE` collections this
+    component is absent by construction.
 
 The `dataHash` must be reproducible from onchain reads and hash-committed
 manifests. It is the value the finality registry compares against the submitted
@@ -5505,6 +5617,78 @@ Finality rules [CMC-FINALITY-INPUTS]:
     operator can ignore for fifty years is not a record, so absence
     blocks finality and only an explicit, dated, attributed absence
     statement stands in for the description.
+14. Facade identity binding (ADR 0015 decision W4): finality at any
+    scope over an `EXTERNAL_FACADE` collection requires the recorded
+    `IDENTITY_FACADE_BINDING` record of [CMC-FACADE-BINDING], and
+    finality execution verifies that the record's facade address equals
+    the collection's Core-registered transfer controller and that the
+    record hash is committed by the metadata `dataHash` (component
+    item 10 above). A `CORE_NATIVE` collection carries no such record
+    and this rule does not apply to it.
+
+### Facade Identity Binding [CMC-FACADE-BINDING]
+
+For an `EXTERNAL_FACADE` collection the two-address identity — the
+facade address and its local-ID rule — is part of the work's permanent
+identity, not an offchain convention, so it is bound into the
+collection's finality components through a pinned record family
+(ADR 0015 decision W4). The Core-side bindings themselves — the
+identity mode and the transfer-controller registration, both one-way
+and pre-first-mint — are owned by the protocol v1 specification
+([PV1-FACADE-READINESS] in
+[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md));
+the facade's interface obligations are owned by
+[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md).
+This section owns only the metadata-side record family and its finality
+hook.
+
+```solidity
+bytes32 constant RECORD_IDENTITY_FACADE_BINDING =
+    0xb3454197cb151b3305cae7757ccaa671e791eb40902d3aefe6cbaa64d6695087;
+    // keccak256("IDENTITY_FACADE_BINDING")
+```
+
+Binding record rules:
+
+1. `recordType` is `RECORD_IDENTITY_FACADE_BINDING`, entering the
+   record-type catalog like every pinned family; `subjectId` is the
+   collection-scope derivation under `STREAM_SUBJECT_COLLECTION_V1`
+   [CMC-SUBJECT-ID]. The family name carries the `IDENTITY_` prefix, so
+   write authority follows the `IDENTITY_*` row of [CMC-AUTHZ]
+   (collection metadata admin or global admin) with the ordinary
+   authorization rules unchanged.
+2. The family is meaning-bearing and must be written through the
+   payload-carrying form [CMC-RECORD-PAYLOAD] under the pinned genesis
+   schema `STREAM_FACADE_IDENTITY_BINDING_V1` [CMC-GENESIS-SCHEMAS]: a
+   schema-identified JSON payload, canonicalized under `RFC8785_JCS`
+   and hashed `HASH_KECCAK256`, binding the chain ID, the Core address,
+   the `collectionId`, the facade (transfer controller) address, and
+   the local-ID rule identifier. The identifier vocabulary is pinned
+   by the `STREAM_FACADE_IDENTITY_BINDING_V1` schema itself and carries
+   exactly one genesis value, `COLLECTION_SERIAL_V1`; its semantics are
+   owned by the facade profile — the facade-local ERC-721 token ID is
+   the collection-local serial and the global sequential token ID
+   remains the protocol catalog number, readable through the facade
+   ([FCP-IDENTITY]; [FCP-READS]).
+3. The record can never assert a binding Core does not hold: the write
+   reverts unless the collection's Core identity mode is
+   `EXTERNAL_FACADE` and the payload's facade address equals the
+   Core-registered transfer controller at write time. Writing the
+   family for a `CORE_NATIVE` collection reverts, permanently,
+   mirroring the Core-side registration rule (ADR 0015 decision W4).
+4. Exactly one accepted record exists per collection: the Core-side
+   bindings are one-way and immutable, so a second write for the same
+   collection reverts — no superseding revision exists for this family.
+5. The write uses the ordinary record machinery unchanged:
+   `CollectionRecordRecorded` emission with `recorder` and
+   `authorizationClass`, record-chain accumulation in the family's
+   `(collectionId, recordType)` lane [CMC-RECORD-CHAIN], payload
+   pointer registration [CMC-PAYLOAD-POINTERS], and the v1 byte limits.
+   No new event family exists for this record.
+6. The finality hook is rule 14 of [CMC-FINALITY-INPUTS] and `dataHash`
+   component item 10: the recorded binding joins the collection's
+   finality components, so the two-address identity is verified at
+   finality execution and preserved in the work's permanent identity.
 
 ## Multiple Canonical Views
 
