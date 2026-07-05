@@ -13,7 +13,7 @@ contract StreamArtistSignatureTest is CharacterizationTestBase, StreamFixture {
     using Assertions for string;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant ARTIST = address(0xA11CE);
     uint256 private constant ARTIST_PRIVATE_KEY = 0xA11CE;
 

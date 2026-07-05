@@ -63,8 +63,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         public
     {
         CompositionSetup memory setup = _deployComposition();
-        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
-            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 nextTokenId = setup.deployed.core.lastAllocatedTokenId() + 1;
         uint256 supplyBefore = setup.deployed.core.totalSupply();
         uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
         uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
@@ -171,8 +170,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
             _mintFixedPriceDropWithSignature(setup, "request-id-collision-first", 31);
         uint256 requestId = setup.randomizer.tokenToRequest(firstTokenId);
         FixedPriceSnapshot memory beforeCollision = _snapshot(setup, firstTokenId);
-        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
-            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 nextTokenId = setup.deployed.core.lastAllocatedTokenId() + 1;
         uint256 supplyBefore = setup.deployed.core.totalSupply();
         uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
         uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
@@ -218,7 +216,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         FixedPriceSnapshot memory beforeBurn = _snapshot(setup, tokenId);
 
         vm.prank(RECIPIENT);
-        setup.deployed.core.burn(COLLECTION_ID, tokenId);
+        setup.deployed.core.burn(tokenId);
 
         setup.deployed.core.isTokenBurned(tokenId).assertTrue("burned token");
         setup.randomizer.tokenToRequest(tokenId).assertEq(requestId, "burn request binding");
@@ -269,7 +267,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID).assertEq(2, "two pending");
 
         vm.prank(RECIPIENT);
-        setup.deployed.core.burn(COLLECTION_ID, burnedTokenId);
+        setup.deployed.core.burn(burnedTokenId);
         _warpPastFinalSupplyWindow();
 
         vm.expectRevert(
@@ -280,7 +278,7 @@ contract StreamFixedPriceRandomizerCompositionTest is DropAuthTestHelper, Stream
         setup.deployed.core.freezeCollection(COLLECTION_ID);
 
         vm.prank(RECIPIENT);
-        setup.deployed.core.burn(COLLECTION_ID, liveTokenId);
+        setup.deployed.core.burn(liveTokenId);
         // Freeze eligibility is based on live-token metadata state; the
         // randomizer lifecycle counter still tracks fulfillable burned requests.
         setup.randomizer.pendingRandomnessRequests(COLLECTION_ID)

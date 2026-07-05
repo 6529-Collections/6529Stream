@@ -21,7 +21,7 @@ contract StreamMetadataCrossInvariantsTest is
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testFrozenDependencyPinSurvivesVersionDeprecationAndRegistryChurn() public {
@@ -125,7 +125,7 @@ contract StreamMetadataCrossInvariantsTest is
 
         _mintToken(deployed, TOKEN_ID, 7);
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
         _warpPastFinalSupplyWindow();
         bytes32 expectedManifest = deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);

@@ -29,7 +29,7 @@ contract StreamPauseControlsTest is DropAuthTestHelper, StreamFixture {
     address private constant FIRST_BIDDER = address(0x8008);
     address private constant SECOND_BIDDER = address(0x9009);
     address private constant THIRD_BIDDER = address(0xA00A);
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     uint256 private constant RESERVE_PRICE = 5 ether;
     uint256 private constant SECOND_BID = 6 ether;
     uint256 private constant THIRD_BID = 7 ether;

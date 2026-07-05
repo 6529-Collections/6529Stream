@@ -136,7 +136,7 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         );
 
         vm.expectRevert(bytes("No auction"));
-        auctions.minimumNextBid(10_000_000_000);
+        auctions.minimumNextBid(1);
 
         AuctionSetup memory endedNoBidSetup = _createAuction();
         vm.warp(endedNoBidSetup.auctionEndTime + 1);
@@ -635,7 +635,7 @@ contract StreamAuctionPaymentsTest is DropAuthTestHelper, StreamFixture {
         bytes memory signature = signAuthorization(setup.deployed.drops, authorization);
 
         setup.deployed.drops.mintDrop(authorization, "auction-data", signature);
-        setup.tokenId = 10_000_000_000;
+        setup.tokenId = 1;
     }
 
     function _tryDeployAuctions(

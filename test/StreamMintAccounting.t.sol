@@ -75,7 +75,7 @@ contract StreamMintAccountingTest is CharacterizationTestBase, StreamFixture {
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testRetainedAirdropMintCounterStartsAtZeroAndIncrements() public {
@@ -120,7 +120,7 @@ contract StreamMintAccountingTest is CharacterizationTestBase, StreamFixture {
         }
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.CollectionSupplyReached.selector));
         _mintToken(deployed, TOKEN_ID + 10, 11);
@@ -139,7 +139,7 @@ contract StreamMintAccountingTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID + 1, 2);
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
         _warpPastFinalSupplyWindow();
 
         deployed.core.setFinalSupply(COLLECTION_ID);
@@ -148,8 +148,8 @@ contract StreamMintAccountingTest is CharacterizationTestBase, StreamFixture {
             deployed.core.retrieveCollectionAdditionalData(COLLECTION_ID);
         circulationSupply.assertEq(2, "circulation should remain minted-ever");
         collectionTotalSupply.assertEq(2, "final supply should use minted-ever");
-        deployed.core.viewTokensIndexMax(COLLECTION_ID)
-            .assertEq(TOKEN_ID + 1, "max token id should remain minted-ever boundary");
+        deployed.core.lastAllocatedTokenId()
+            .assertEq(TOKEN_ID + 1, "allocator mark should remain minted-ever boundary");
         deployed.core.totalSupplyOfCollection(COLLECTION_ID)
             .assertEq(1, "live supply should exclude burned token");
     }
@@ -160,7 +160,7 @@ contract StreamMintAccountingTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID + 1, 2);
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
         _warpPastFinalSupplyWindow();
 
         deployed.core.setFinalSupply(COLLECTION_ID);
@@ -170,7 +170,7 @@ contract StreamMintAccountingTest is CharacterizationTestBase, StreamFixture {
             deployed.core.retrieveCollectionAdditionalData(COLLECTION_ID);
         circulationSupply.assertEq(2, "circulation drifted");
         collectionTotalSupply.assertEq(2, "final supply drifted");
-        deployed.core.viewTokensIndexMax(COLLECTION_ID).assertEq(TOKEN_ID + 1, "max drifted");
+        deployed.core.lastAllocatedTokenId().assertEq(TOKEN_ID + 1, "allocator mark drifted");
         deployed.core.totalSupplyOfCollection(COLLECTION_ID).assertEq(1, "live supply drifted");
         deployed.core.burnAmount(COLLECTION_ID).assertEq(1, "burn count drifted");
     }

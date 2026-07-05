@@ -18,7 +18,7 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
     bytes32 private constant BATCH_METADATA_UPDATE_TOPIC =
         keccak256("BatchMetadataUpdate(uint256,uint256)");
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testSupportsErc4906Interface() public {
@@ -154,7 +154,7 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
 
         vm.recordLogs();
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "burn emitted metadata update");
@@ -169,7 +169,7 @@ contract StreamMetadataEventsTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID, 7);
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
         bytes32 tokenHash = keccak256("post-burn hash");
 

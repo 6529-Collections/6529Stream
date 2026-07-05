@@ -15,11 +15,16 @@ interface IStreamCore {
 
     function retrievewereDataAdded(uint256 _collectionID) external view returns (bool);
 
-    function viewTokensIndexMin(uint256 _collectionID) external view returns (uint256);
-
-    function viewTokensIndexMax(uint256 _collectionID) external view returns (uint256);
-
     function viewCirSupply(uint256 _collectionID) external view returns (uint256);
+
+    function lastAllocatedTokenId() external view returns (uint256);
+
+    function lastAllocatedCollectionId() external view returns (uint256);
+
+    function retrieveCollectionAdditionalData(uint256 _collectionID)
+        external
+        view
+        returns (address, uint256, uint256, uint256, uint256, address);
 
     function mint(
         uint256 mintIndex,
@@ -61,6 +66,10 @@ interface IStreamCore {
         external
         view
         returns (bool mappingExists, uint256 collectionId, uint256 collectionSerial, bool burned);
+
+    function tokenLifecycle(uint256 tokenId) external view returns (uint8 lifecycle);
+
+    function totalSupplyOfCollection(uint256 collectionId) external view returns (uint256);
 
     function collectionFreezeStatus(uint256 _collectionID) external view returns (bool);
 

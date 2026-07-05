@@ -48,7 +48,7 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
         POSTER.balance.assertEq(posterBalanceBefore, "poster was push-paid");
         PAYOUT.balance.assertEq(payoutBalanceBefore, "protocol was push-paid");
         CURATORS_POOL.balance.assertEq(curatorsBalanceBefore, "curator reserve was push-paid");
-        deployed.core.ownerOf(10_000_000_000).assertEq(RECIPIENT, "recipient");
+        deployed.core.ownerOf(1).assertEq(RECIPIENT, "recipient");
         deployed.drops.fixedPricePosterCredits(POSTER).assertEq(2 ether, "poster credit");
         deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(1 ether, "protocol credit");
         deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)
@@ -73,7 +73,7 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
         );
         _mintFixedPrice(deployed, address(rejectingPoster), RECIPIENT, 4 ether, 2);
 
-        deployed.core.ownerOf(10_000_000_000).assertEq(RECIPIENT, "recipient");
+        deployed.core.ownerOf(1).assertEq(RECIPIENT, "recipient");
         deployed.drops.fixedPricePosterCredits(address(rejectingPoster))
             .assertEq(2 ether, "poster credit");
         deployed.drops.fixedPriceProtocolCredits(address(rejectingPayout))
@@ -190,7 +190,7 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         deployed.drops.updateContractProceedsSplit(5000, 5000, 0);
         deployed.drops.updateCollectionProceedsSplit(1, 4000, 3000, 3000);
-        deployed.drops.updateTokenProceedsSplit(10_000_000_000, 6000, 4000, 0);
+        deployed.drops.updateTokenProceedsSplit(1, 6000, 4000, 0);
 
         _mintFixedPrice(deployed, POSTER, RECIPIENT, 10_000, 13);
         deployed.drops.fixedPricePosterCredits(POSTER).assertEq(6000, "token poster credit");
@@ -198,7 +198,7 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
         deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)
             .assertEq(0, "token curator reserve");
 
-        deployed.drops.clearTokenProceedsSplit(10_000_000_000);
+        deployed.drops.clearTokenProceedsSplit(1);
         _mintFixedPrice(deployed, POSTER, RECIPIENT, 10_000, 14);
         deployed.drops.fixedPricePosterCredits(POSTER).assertEq(10_000, "poster credit");
         deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(7000, "protocol credit");
@@ -207,7 +207,7 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
 
         deployed.drops.clearCollectionProceedsSplit(1);
         (uint16 posterBps, uint16 protocolBps, uint16 curatorBps) =
-            deployed.drops.proceedsSplitFor(1, 10_000_000_001);
+            deployed.drops.proceedsSplitFor(1, 2);
         uint256(posterBps).assertEq(5000, "contract poster bps");
         uint256(protocolBps).assertEq(5000, "contract protocol bps");
         uint256(curatorBps).assertEq(0, "contract curator bps");
@@ -245,7 +245,7 @@ contract StreamFixedPricePaymentsTest is DropAuthTestHelper, StreamFixture {
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         _mintFixedPrice(deployed, POSTER, RECIPIENT, 0, 8);
 
-        deployed.core.ownerOf(10_000_000_000).assertEq(RECIPIENT, "recipient");
+        deployed.core.ownerOf(1).assertEq(RECIPIENT, "recipient");
         deployed.drops.fixedPricePosterCredits(POSTER).assertEq(0, "poster credit");
         deployed.drops.fixedPriceProtocolCredits(PAYOUT).assertEq(0, "protocol credit");
         deployed.drops.fixedPriceCuratorReserveCredits(CURATORS_POOL)

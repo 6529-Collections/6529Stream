@@ -22,8 +22,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
     );
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
-    uint256 private constant OTHER_COLLECTION_TOKEN_ID = 20_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testFreezeStoresManifestEventAndFinalizesSupply() public {
@@ -74,8 +73,8 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         collectionTotalSupply.assertEq(2, "freeze did not finalize supply");
         finalSupplyDelay.assertEq(1 days, "final supply delay changed");
         randomizerContract.assertEq(address(deployed.randomizer), "randomizer changed");
-        deployed.core.viewTokensIndexMax(COLLECTION_ID)
-            .assertEq(TOKEN_ID + 1, "freeze did not tighten max token id");
+        deployed.core.lastAllocatedTokenId()
+            .assertEq(TOKEN_ID + 1, "allocator high-water mark drifted");
     }
 
     function testFreezeRejectsBeforeMintAndFinalSupplyWindowsEnd() public {
@@ -127,7 +126,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID, 7);
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
         _warpPastFinalSupplyWindow();
         deployed.core.freezeCollection(COLLECTION_ID);
@@ -160,7 +159,7 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.MetadataFrozen.selector, COLLECTION_ID));
         vm.prank(address(0xA11CE));
@@ -204,15 +203,32 @@ contract StreamMetadataFreezeTest is CharacterizationTestBase, StreamFixture {
         deployed.core.updateImagesAndAttributes(tokenIds, images, attributes);
     }
 
-    function testSetTokenHashRejectsPremintTokenOutsideCollectionRange() public {
+    function testSetTokenHashRejectsTokenMappedToAnotherCollection() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
-
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
-        vm.prank(address(deployed.randomizer));
+        NoopRandomizer noopRandomizer = new NoopRandomizer();
+        string[] memory scripts = new string[](1);
+        scripts[0] = "function draw(){}";
         deployed.core
-            .setTokenHash(
-                COLLECTION_ID, OTHER_COLLECTION_TOKEN_ID, keccak256("wrong collection hash")
+            .createCollection(
+                "Second",
+                "6529",
+                "Description",
+                "https://6529.io",
+                "CC0",
+                "ipfs://second/",
+                "https://cdn.example/script.js",
+                bytes32(0),
+                scripts
             );
+        deployed.core.setCollectionData(2, address(0xA11CE), 5, 10, 1 days);
+        deployed.core.addRandomizer(2, address(noopRandomizer));
+        deployed.minter.setCollectionPhases(2, block.timestamp, block.timestamp + 30 days);
+        vm.prank(address(deployed.minter));
+        deployed.core.mint(TOKEN_ID, RECIPIENT, "1,2,3", 7, 2);
+
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenIdentityUnknown.selector));
+        vm.prank(address(deployed.randomizer));
+        deployed.core.setTokenHash(COLLECTION_ID, TOKEN_ID, keccak256("wrong collection hash"));
     }
 
     function testFrozenCollectionBlocksDependencyRegistrySwap() public {

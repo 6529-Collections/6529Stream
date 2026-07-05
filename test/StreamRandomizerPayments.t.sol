@@ -19,7 +19,7 @@ contract StreamRandomizerPaymentsTest is CharacterizationTestBase {
     address private constant UNAUTHORIZED = address(0xBAD);
     address private constant EMERGENCY_RECIPIENT = address(0xE001);
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     uint256 private constant SECOND_TOKEN_ID = TOKEN_ID + 1;
     uint256 private constant THIRD_TOKEN_ID = TOKEN_ID + 2;
 

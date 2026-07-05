@@ -128,15 +128,13 @@ contract RevertingPreparedMintReceiver is IERC721Receiver {
 
 contract BurningPreparedMintReceiver is IERC721Receiver {
     StreamCore private immutable core;
-    uint256 private immutable collectionId;
 
     uint256 public observedTokenId;
     bool public burnRejected;
     bytes4 public burnRevertSelector;
 
-    constructor(StreamCore core_, uint256 collectionId_) {
+    constructor(StreamCore core_) {
         core = core_;
-        collectionId = collectionId_;
     }
 
     function onERC721Received(address, address, uint256 tokenId, bytes calldata)
@@ -144,7 +142,7 @@ contract BurningPreparedMintReceiver is IERC721Receiver {
         returns (bytes4)
     {
         observedTokenId = tokenId;
-        try core.burn(collectionId, tokenId) { }
+        try core.burn(tokenId) { }
         catch (bytes memory revertData) {
             burnRejected = true;
             bytes4 selector;
@@ -162,12 +160,9 @@ contract BurningPreparedMintReceiver is IERC721Receiver {
 contract ReentrantPreparedMintReceiver is IERC721Receiver {
     StreamCore private immutable core;
 
-    bool public approveRejected;
-    bool public setApprovalForAllRejected;
-    bool public transferRejected;
-    bytes4 public approveRevertSelector;
-    bytes4 public setApprovalForAllRevertSelector;
-    bytes4 public transferRevertSelector;
+    bool public approveSucceeded;
+    bool public setApprovalForAllSucceeded;
+    bool public transferSucceeded;
 
     constructor(StreamCore core_) {
         core = core_;
@@ -177,39 +172,15 @@ contract ReentrantPreparedMintReceiver is IERC721Receiver {
         external
         returns (bytes4)
     {
-        (approveRejected, approveRevertSelector) = _tryApprove(tokenId);
-        (setApprovalForAllRejected, setApprovalForAllRevertSelector) = _trySetApprovalForAll();
-        (transferRejected, transferRevertSelector) = _tryTransfer(tokenId);
+        // Transfer openness: approvals and transfers are unconditioned even while the
+        // completion sentinel is active, so all three owner actions must succeed here.
+        core.approve(address(0xB0B), tokenId);
+        approveSucceeded = true;
+        core.setApprovalForAll(address(0xB0B), true);
+        setApprovalForAllSucceeded = true;
+        core.transferFrom(address(this), address(0xB0B), tokenId);
+        transferSucceeded = true;
         return IERC721Receiver.onERC721Received.selector;
-    }
-
-    function _tryApprove(uint256 tokenId) private returns (bool rejected, bytes4 selector) {
-        try core.approve(address(0xB0B), tokenId) { }
-        catch (bytes memory revertData) {
-            return (true, _selectorFrom(revertData));
-        }
-    }
-
-    function _trySetApprovalForAll() private returns (bool rejected, bytes4 selector) {
-        try core.setApprovalForAll(address(0xB0B), true) { }
-        catch (bytes memory revertData) {
-            return (true, _selectorFrom(revertData));
-        }
-    }
-
-    function _tryTransfer(uint256 tokenId) private returns (bool rejected, bytes4 selector) {
-        try core.transferFrom(address(this), address(0xB0B), tokenId) { }
-        catch (bytes memory revertData) {
-            return (true, _selectorFrom(revertData));
-        }
-    }
-
-    function _selectorFrom(bytes memory revertData) private pure returns (bytes4 selector) {
-        if (revertData.length >= 4) {
-            assembly {
-                selector := mload(add(revertData, 32))
-            }
-        }
     }
 }
 
@@ -276,7 +247,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
+    uint256 private constant FIRST_TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
     string private constant TOKEN_DATA = "manager-token";
     uint256 private constant SALT = 777;
@@ -534,11 +505,8 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         serial.assertEq(0, "abort serial");
         burned.assertFalse("abort burned");
         deployed.core.viewColIDforTokenID(tokenId)
-            .assertEq(COLLECTION_ID, "legacy lookup should retain stale sentinel");
-
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
-        vm.prank(address(deployed.randomizer));
-        deployed.core.setTokenHash(COLLECTION_ID, tokenId, bytes32(uint256(0xCAFE)));
+            .assertEq(0, "legacy lookup should clear with the identity record");
+        deployed.core.lastAllocatedTokenId().assertEq(0, "abort did not rewind allocator");
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintOperationReused.selector));
         manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, tokenDataHash, OPERATION_ID);
@@ -555,11 +523,11 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         (uint256 tokenId,) =
             manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenIdentityUnknown.selector));
         vm.prank(address(deployed.randomizer));
         deployed.core.setTokenHash(COLLECTION_ID, tokenId, bytes32(uint256(0xCAFE)));
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenIdentityUnknown.selector));
         vm.prank(address(deployed.randomizer));
         deployed.core.setTokenHash(2, tokenId, bytes32(uint256(0xD00D)));
 
@@ -601,7 +569,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
             .assertEq(bytes32(0), "vrf hash set before fulfillment");
     }
 
-    function testPreparedMintBlocksTransfersAndApprovalsUntilAbort() public {
+    function testPreparedMintBlocksMintsAndBurnsButLeavesTransfersOpenUntilAbort() public {
         (DeployedStream memory deployed, MockMintManager manager) = _deployWithManager();
         vm.prank(address(deployed.minter));
         deployed.core.mint(FIRST_TOKEN_ID, RECIPIENT, "legacy-token", 1, COLLECTION_ID);
@@ -614,31 +582,42 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         vm.prank(address(deployed.minter));
-        deployed.core.mint(FIRST_TOKEN_ID + 1, RECIPIENT, "legacy-token-2", 2, COLLECTION_ID);
+        deployed.core.mint(preparedTokenId + 1, RECIPIENT, "legacy-token-2", 2, COLLECTION_ID);
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, FIRST_TOKEN_ID);
+        deployed.core.burn(FIRST_TOKEN_ID);
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
+        // Transfer openness: approvals and transfers of unrelated minted tokens are never
+        // conditioned on prepared-mint state, locks, or pauses.
         vm.prank(RECIPIENT);
         deployed.core.approve(address(0xB0B), FIRST_TOKEN_ID);
+        deployed.core.getApproved(FIRST_TOKEN_ID).assertEq(address(0xB0B), "open approval");
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         vm.prank(RECIPIENT);
         deployed.core.setApprovalForAll(address(0xB0B), true);
+        deployed.core.isApprovedForAll(RECIPIENT, address(0xB0B)).assertTrue("open operator");
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         vm.prank(RECIPIENT);
         deployed.core.transferFrom(RECIPIENT, address(0xB0B), FIRST_TOKEN_ID);
+        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(address(0xB0B), "open transfer");
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
-        vm.prank(RECIPIENT);
-        deployed.core.safeTransferFrom(RECIPIENT, address(0xB0B), FIRST_TOKEN_ID);
+        vm.prank(address(0xB0B));
+        deployed.core.safeTransferFrom(address(0xB0B), RECIPIENT, FIRST_TOKEN_ID);
+        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "open safe transfer");
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         vm.prank(RECIPIENT);
         deployed.core.safeTransferFrom(RECIPIENT, address(0xB0B), FIRST_TOKEN_ID, "");
+        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(address(0xB0B), "open safe transfer data");
+
+        // The prepared-incomplete token itself has no owner, so ERC-721's own checks reject
+        // transfers and approvals for it without any Core conditioning.
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "ERC721: invalid token ID"));
+        vm.prank(RECIPIENT);
+        deployed.core.approve(address(0xB0B), preparedTokenId);
+        vm.expectRevert(abi.encodeWithSignature("Error(string)", "ERC721: invalid token ID"));
+        vm.prank(RECIPIENT);
+        deployed.core.transferFrom(RECIPIENT, address(0xB0B), preparedTokenId);
 
         vm.expectRevert(abi.encodeWithSelector(StreamCore.PreparedMintAlreadyPending.selector));
         deployed.core.updateContracts(2, address(deployed.minter));
@@ -661,14 +640,12 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
 
         replacement.abort(preparedTokenId, OPERATION_ID);
 
-        vm.prank(RECIPIENT);
-        deployed.core.approve(address(0xB0B), FIRST_TOKEN_ID);
-        vm.prank(RECIPIENT);
-        deployed.core.transferFrom(RECIPIENT, address(0xB0B), FIRST_TOKEN_ID);
-        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(address(0xB0B), "transfer after abort");
+        vm.prank(address(0xB0B));
+        deployed.core.transferFrom(address(0xB0B), RECIPIENT, FIRST_TOKEN_ID);
+        deployed.core.ownerOf(FIRST_TOKEN_ID).assertEq(RECIPIENT, "transfer after abort");
     }
 
-    function testPreparedMintBlocksReceiverApprovalsAndTransfersDuringCallback() public {
+    function testPreparedMintCompletionCallbackLeavesApprovalsAndTransfersOpen() public {
         (DeployedStream memory deployed, MockMintManager manager) = _deployWithManager();
         (uint256 tokenId,) =
             manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
@@ -676,22 +653,10 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
 
         manager.complete(tokenId, address(receiver), OPERATION_ID, SALT);
 
-        receiver.approveRejected().assertTrue("callback approve was not rejected");
-        receiver.setApprovalForAllRejected().assertTrue("callback operator was not rejected");
-        receiver.transferRejected().assertTrue("callback transfer was not rejected");
-        uint256(uint32(receiver.approveRevertSelector()))
-            .assertEq(
-                uint256(uint32(StreamCore.PreparedMintAlreadyPending.selector)), "approve selector"
-            );
-        uint256(uint32(receiver.setApprovalForAllRevertSelector()))
-            .assertEq(
-                uint256(uint32(StreamCore.PreparedMintAlreadyPending.selector)), "operator selector"
-            );
-        uint256(uint32(receiver.transferRevertSelector()))
-            .assertEq(
-                uint256(uint32(StreamCore.PreparedMintAlreadyPending.selector)), "transfer selector"
-            );
-        deployed.core.ownerOf(tokenId).assertEq(address(receiver), "owner drifted");
+        receiver.approveSucceeded().assertTrue("callback approve was conditioned");
+        receiver.setApprovalForAllSucceeded().assertTrue("callback operator was conditioned");
+        receiver.transferSucceeded().assertTrue("callback transfer was conditioned");
+        deployed.core.ownerOf(tokenId).assertEq(address(0xB0B), "callback transfer owner");
         deployed.core.pendingPreparedMintTokenId().assertEq(0, "pending not cleared");
     }
 
@@ -726,12 +691,11 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
     function testPreparedMintWithoutRandomizerCanAbortAndRetryAfterRandomizerConfigured() public {
         (DeployedStream memory deployed, MockMintManager manager) = _deployWithManager();
         uint256 collectionId = 2;
-        uint256 tokenIdBase = collectionId * 10_000_000_000;
         _createSecondCollectionWithoutRandomizer(deployed);
 
         (uint256 tokenId,) =
             manager.prepare(collectionId, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
-        tokenId.assertEq(tokenIdBase, "prepared token id");
+        tokenId.assertEq(FIRST_TOKEN_ID, "prepared token id");
 
         vm.expectRevert(
             abi.encodeWithSignature(
@@ -801,8 +765,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         (DeployedStream memory deployed, MockMintManager manager) = _deployWithManager();
         (uint256 tokenId,) =
             manager.prepare(COLLECTION_ID, TOKEN_DATA, SALT, _tokenDataHash(), OPERATION_ID);
-        BurningPreparedMintReceiver receiver =
-            new BurningPreparedMintReceiver(deployed.core, COLLECTION_ID);
+        BurningPreparedMintReceiver receiver = new BurningPreparedMintReceiver(deployed.core);
 
         manager.complete(tokenId, address(receiver), OPERATION_ID, SALT);
 
@@ -827,7 +790,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         burned.assertFalse("completed burned flag");
 
         vm.prank(address(receiver));
-        deployed.core.burn(COLLECTION_ID, tokenId);
+        deployed.core.burn(tokenId);
         deployed.core.totalSupply().assertEq(0, "post-complete burn live supply");
         deployed.core.burnAmount(COLLECTION_ID).assertEq(1, "post-complete burn count");
         deployed.core.isTokenBurned(tokenId).assertTrue("post-complete burn audit");
@@ -940,7 +903,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
     function testLegacyMintRejectsNonSequentialMintIndexWithoutCounterDrift() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenIdentityUnknown.selector));
         vm.prank(address(deployed.minter));
         deployed.core.mint(FIRST_TOKEN_ID + 1, RECIPIENT, "legacy-token", 1, COLLECTION_ID);
 
@@ -983,7 +946,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
         (uint256 firstTokenId,) =
             manager.mint(COLLECTION_ID, RECIPIENT, TOKEN_DATA, SALT, _tokenDataHash());
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, firstTokenId);
+        deployed.core.burn(firstTokenId);
 
         (uint256 secondTokenId, uint256 secondSerial) =
             manager.mint(COLLECTION_ID, RECIPIENT, TOKEN_DATA, SALT + 1, _tokenDataHash());
@@ -1004,7 +967,7 @@ contract StreamMintManagerCoreHooksTest is CharacterizationTestBase, StreamFixtu
             manager.mint(COLLECTION_ID, RECIPIENT, TOKEN_DATA, SALT, _tokenDataHash());
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, tokenId);
+        deployed.core.burn(tokenId);
 
         (bool mappingExists, uint256 collectionId, uint256 serial, bool burned) =
             deployed.core.tokenCollectionIdentity(tokenId);

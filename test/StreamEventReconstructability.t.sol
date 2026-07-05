@@ -21,6 +21,8 @@ contract StreamEventReconstructabilityTest is DropAuthTestHelper, StreamFixture 
     bytes32 private constant FIXED_PRICE_CREDIT_CREATED_TOPIC =
         keccak256("FixedPriceCreditCreated(address,bytes32,uint8,uint256)");
     bytes32 private constant TRANSFER_TOPIC = keccak256("Transfer(address,address,uint256)");
+    bytes32 private constant TOKEN_COLLECTION_REGISTERED_TOPIC =
+        keccak256("TokenCollectionRegistered(uint16,uint256,uint256,uint256)");
     bytes32 private constant MINTER_TOKENS_MINTED_TOPIC =
         keccak256("MinterTokensMinted(uint256,uint256,address,uint256,uint256)");
     bytes32 private constant MINTER_AUCTION_MINTED_TOPIC =
@@ -45,7 +47,7 @@ contract StreamEventReconstructabilityTest is DropAuthTestHelper, StreamFixture 
     bytes32 private constant CLAIM_AUCTION_TOPIC = keccak256("ClaimAuction(uint256,uint256)");
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
+    uint256 private constant FIRST_TOKEN_ID = 1;
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
     address private constant POSTER = address(0x4004);
@@ -73,6 +75,11 @@ contract StreamEventReconstructabilityTest is DropAuthTestHelper, StreamFixture 
         uint256 signerEpoch;
         uint256 tokenId;
         address transferRecipient;
+        bool identityRegistered;
+        uint256 identityTokenId;
+        uint256 identityCollectionId;
+        uint256 identitySerial;
+        uint256 identitySchemaVersion;
         uint256 minterCollectionId;
         uint256 minterTokenId;
         address minterRecipient;
@@ -170,6 +177,11 @@ contract StreamEventReconstructabilityTest is DropAuthTestHelper, StreamFixture 
         model.signerEpoch.assertEq(authorization.signerEpoch, "signer epoch");
         model.tokenId.assertEq(FIRST_TOKEN_ID, "token id");
         model.transferRecipient.assertEq(model.recipient, "transfer recipient");
+        model.identityRegistered.assertTrue("token identity event");
+        model.identityTokenId.assertEq(FIRST_TOKEN_ID, "identity token id");
+        model.identityCollectionId.assertEq(COLLECTION_ID, "identity collection");
+        model.identitySerial.assertEq(1, "identity serial");
+        model.identitySchemaVersion.assertEq(1, "identity schema version");
         model.minterCollectionId.assertEq(model.collectionId, "minter collection");
         model.minterTokenId.assertEq(model.tokenId, "minter token");
         model.minterRecipient.assertEq(model.recipient, "minter recipient");
@@ -367,6 +379,17 @@ contract StreamEventReconstructabilityTest is DropAuthTestHelper, StreamFixture 
                     model.transferRecipient = _topicAddress(log.topics[2]);
                     model.tokenId = uint256(log.topics[3]);
                 }
+            } else if (
+                log.emitter == address(deployed.core)
+                    && _matches(log, TOKEN_COLLECTION_REGISTERED_TOPIC, 3, 64)
+            ) {
+                model.identityRegistered = true;
+                model.identityTokenId = uint256(log.topics[1]);
+                model.identityCollectionId = uint256(log.topics[2]);
+                (uint16 schemaVersion, uint256 collectionSerial) =
+                    abi.decode(log.data, (uint16, uint256));
+                model.identitySchemaVersion = schemaVersion;
+                model.identitySerial = collectionSerial;
             } else if (
                 log.emitter == address(deployed.minter)
                     && _matches(log, MINTER_TOKENS_MINTED_TOPIC, 4, 64)

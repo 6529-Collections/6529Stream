@@ -282,8 +282,8 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
 
     uint256 private constant COLLECTION_ID = 1;
     uint256 private constant SECOND_COLLECTION_ID = 2;
-    uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
-    uint256 private constant SECOND_FIRST_TOKEN_ID = 20_000_000_000;
+    uint256 private constant FIRST_TOKEN_ID = 1;
+    uint256 private constant SECOND_FIRST_TOKEN_ID = FIRST_TOKEN_ID + 1;
     address private constant PAYER = address(0xCAFE);
     address private constant RECIPIENT = address(0xA11CE);
     address private constant OTHER_RECIPIENT = address(0xB0B);
@@ -1905,9 +1905,9 @@ contract StreamMintManagerTest is CharacterizationTestBase, StreamFixture {
             .assertFalse("auth rolled back");
         core.viewCirSupply(collectionId).assertEq(0, "circulation rolled back");
         core.pendingPreparedMintTokenId().assertEq(0, "pending cleared");
-        core.preparedMint(SECOND_FIRST_TOKEN_ID).exists.assertFalse("first prepared rolled back");
-        core.preparedMint(SECOND_FIRST_TOKEN_ID + 1).exists
-            .assertFalse("second prepared rolled back");
+        core.preparedMint(FIRST_TOKEN_ID).exists.assertFalse("first prepared rolled back");
+        core.preparedMint(FIRST_TOKEN_ID + 1).exists.assertFalse("second prepared rolled back");
+        core.lastAllocatedTokenId().assertEq(0, "allocator rolled back");
     }
 
     function _configurePhase(uint64 supplyCap, uint64 recipientCap, uint32 maxBatchQuantity)

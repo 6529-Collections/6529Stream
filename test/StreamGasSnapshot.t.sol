@@ -27,7 +27,7 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
     address payable private constant WITHDRAW_RECIPIENT = payable(address(0x8008));
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     uint256 private constant FIXED_PRICE = 4 ether;
     uint256 private constant RESERVE_PRICE = 5 ether;
     uint256 private constant SECOND_BID = 6 ether;
@@ -309,7 +309,7 @@ contract StreamGasSnapshotTest is DropAuthTestHelper, StreamFixture {
         string[] memory attributes = new string[](1);
 
         tokenIds[0] = TOKEN_ID;
-        images[0] = "ipfs://image/10000000000.png";
+        images[0] = "ipfs://image/1.png";
         attributes[0] = "{\"trait_type\":\"Gas\",\"value\":\"Snapshot\"}";
 
         core.updateImagesAndAttributes(tokenIds, images, attributes);

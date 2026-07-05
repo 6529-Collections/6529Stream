@@ -24,7 +24,7 @@ contract StreamMEVTimingTest is DropAuthTestHelper, StreamFixture {
 
     uint256 private constant RESERVE_PRICE = 5 ether;
     uint256 private constant SECOND_BID = 6 ether;
-    uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
+    uint256 private constant FIRST_TOKEN_ID = 1;
     bytes4 private constant ERROR_STRING_SELECTOR = bytes4(keccak256("Error(string)"));
 
     function testThirdPartyCanSubmitFreeDropButCannotStealRecipient() public {
