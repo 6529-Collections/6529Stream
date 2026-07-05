@@ -403,6 +403,45 @@
       ]
     },
     {
+      "topic0": "0x134ea0c85775a433c3b06f6e426d6da62c5397a6932ad57006e98e96c72a21f0",
+      "signature": "StreamTokenBurned(uint256,uint256,uint256,uint16)",
+      "name": "StreamTokenBurned",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 1,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "collectionSerial",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
       "topic0": "0x16d3a734de15430b6ad9fd83e96b7c3cfba5273b1df717ec0d7c6a7f2e82c9d9",
       "signature": "MintLedgerCounterConsumed(bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32)",
       "name": "MintLedgerCounterConsumed",
@@ -1115,6 +1154,45 @@
       ],
       "emitted_by": [
         "StreamPrimarySaleSettlement"
+      ]
+    },
+    {
+      "topic0": "0x317801bca186064bc3c786ae0ab9d99863f1a9b56589bd5bd7eabecee366fe23",
+      "signature": "TokenCollectionRegistered(uint16,uint256,uint256,uint256)",
+      "name": "TokenCollectionRegistered",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 3,
+          "name": "collectionSerial",
+          "type": "uint256",
+          "indexed": false,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
       ]
     },
     {
@@ -6958,6 +7036,42 @@
           ]
         },
         {
+          "name": "StreamTokenBurned",
+          "signature": "StreamTokenBurned(uint256,uint256,uint256,uint16)",
+          "topic0": "0x134ea0c85775a433c3b06f6e426d6da62c5397a6932ad57006e98e96c72a21f0",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 1,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionSerial",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            }
+          ]
+        },
+        {
           "name": "TokenBurned",
           "signature": "TokenBurned(uint256,uint256,address,address)",
           "topic0": "0x88e4cc622e8085aee6ea05a4954b24e3bc91085a6b1cc3d037904a1259a43708",
@@ -6990,6 +7104,42 @@
               "type": "address",
               "indexed": false,
               "internal_type": "address"
+            }
+          ]
+        },
+        {
+          "name": "TokenCollectionRegistered",
+          "signature": "TokenCollectionRegistered(uint16,uint256,uint256,uint256)",
+          "topic0": "0x317801bca186064bc3c786ae0ab9d99863f1a9b56589bd5bd7eabecee366fe23",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 3,
+              "name": "collectionSerial",
+              "type": "uint256",
+              "indexed": false,
+              "internal_type": "uint256"
             }
           ]
         },

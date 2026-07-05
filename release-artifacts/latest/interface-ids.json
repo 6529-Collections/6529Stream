@@ -11,7 +11,6 @@
     "IERC2981": "0x2a55205a",
     "IERC4906": "0x49064906",
     "IERC721": "0x80ac58cd",
-    "IERC721Enumerable": "0x780e9d63",
     "IERC721Metadata": "0x5b5e139f",
     "IERC7572": "0xe8a3d485",
     "IRandomizer": "0xf3eb4f44",
@@ -22,7 +21,7 @@
     "IStreamCollectionMetadata": "0x6e0fb84e",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
-    "IStreamCore": "0x2cfff1d3",
+    "IStreamCore": "0xba77d620",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamMintGate": "0xa5d7921d",
     "IStreamMintLedger": "0x79bc7192",
@@ -190,68 +189,6 @@
         {
           "signature": "supportsInterface(bytes4)",
           "selector": "0x01ffc9a7"
-        },
-        {
-          "signature": "transferFrom(address,address,uint256)",
-          "selector": "0x23b872dd"
-        }
-      ]
-    },
-    "IERC721Enumerable": {
-      "source": "smart-contracts/IERC721Enumerable.sol",
-      "artifact_path": "out/IERC721Enumerable.sol/IERC721Enumerable.json",
-      "abi_sha256": "sha256:29401ee0adf93b0723768caad48fdbd58bf96db33ea1759e4390e7dc53850944",
-      "interface_id": "0x780e9d63",
-      "interface_id_source": "configured",
-      "computed_selector_xor": "0xf95d0c09",
-      "function_selectors": [
-        {
-          "signature": "approve(address,uint256)",
-          "selector": "0x095ea7b3"
-        },
-        {
-          "signature": "balanceOf(address)",
-          "selector": "0x70a08231"
-        },
-        {
-          "signature": "getApproved(uint256)",
-          "selector": "0x081812fc"
-        },
-        {
-          "signature": "isApprovedForAll(address,address)",
-          "selector": "0xe985e9c5"
-        },
-        {
-          "signature": "ownerOf(uint256)",
-          "selector": "0x6352211e"
-        },
-        {
-          "signature": "safeTransferFrom(address,address,uint256)",
-          "selector": "0x42842e0e"
-        },
-        {
-          "signature": "safeTransferFrom(address,address,uint256,bytes)",
-          "selector": "0xb88d4fde"
-        },
-        {
-          "signature": "setApprovalForAll(address,bool)",
-          "selector": "0xa22cb465"
-        },
-        {
-          "signature": "supportsInterface(bytes4)",
-          "selector": "0x01ffc9a7"
-        },
-        {
-          "signature": "tokenByIndex(uint256)",
-          "selector": "0x4f6ccce7"
-        },
-        {
-          "signature": "tokenOfOwnerByIndex(address,uint256)",
-          "selector": "0x2f745c59"
-        },
-        {
-          "signature": "totalSupply()",
-          "selector": "0x18160ddd"
         },
         {
           "signature": "transferFrom(address,address,uint256)",
@@ -698,10 +635,10 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:ddfd53045cf443235a2dfa1f38cd16b476bb306438c9640ab435c72d23590604",
-      "interface_id": "0x2cfff1d3",
+      "abi_sha256": "sha256:0759b6e80838c59125302f7945db41b712ecfbee169b364eb52560341aac4791",
+      "interface_id": "0xba77d620",
       "interface_id_source": "selector_xor",
-      "computed_selector_xor": "0x2cfff1d3",
+      "computed_selector_xor": "0xba77d620",
       "function_selectors": [
         {
           "signature": "abortPreparedMintFromManager(uint256,bytes32)",
@@ -736,6 +673,14 @@
           "selector": "0x3a87d454"
         },
         {
+          "signature": "lastAllocatedCollectionId()",
+          "selector": "0x174a3aaf"
+        },
+        {
+          "signature": "lastAllocatedTokenId()",
+          "selector": "0x254b22bc"
+        },
+        {
           "signature": "mint(uint256,address,string,uint256,uint256)",
           "selector": "0xdabb57ca"
         },
@@ -768,6 +713,10 @@
           "selector": "0xb9902968"
         },
         {
+          "signature": "retrieveCollectionAdditionalData(uint256)",
+          "selector": "0x5c91d74a"
+        },
+        {
           "signature": "retrieveTokenHash(uint256)",
           "selector": "0x4ab6897c"
         },
@@ -782,6 +731,14 @@
         {
           "signature": "tokenCollectionIdentity(uint256)",
           "selector": "0xa6b638c9"
+        },
+        {
+          "signature": "tokenLifecycle(uint256)",
+          "selector": "0x8c46d901"
+        },
+        {
+          "signature": "totalSupplyOfCollection(uint256)",
+          "selector": "0xf18332dd"
         },
         {
           "signature": "viewCirSupply(uint256)",
@@ -802,14 +759,6 @@
         {
           "signature": "viewRandomizerEpoch(uint256)",
           "selector": "0xd2af7046"
-        },
-        {
-          "signature": "viewTokensIndexMax(uint256)",
-          "selector": "0x6c6aab16"
-        },
-        {
-          "signature": "viewTokensIndexMin(uint256)",
-          "selector": "0xe9b7a860"
         }
       ]
     },

@@ -2769,12 +2769,12 @@
       }
     },
     {
-      "id": "StreamCore:TokenNotMinted()",
+      "id": "StreamCore:TokenIdentityUnknown()",
       "contract": "StreamCore",
       "source": "smart-contracts/StreamCore.sol",
-      "name": "TokenNotMinted",
-      "signature": "TokenNotMinted()",
-      "selector": "0xd03ce9df",
+      "name": "TokenIdentityUnknown",
+      "signature": "TokenIdentityUnknown()",
+      "selector": "0xc09045b3",
       "category": "supply_minting",
       "severity": "medium",
       "inputs": [],
@@ -2789,12 +2789,12 @@
       }
     },
     {
-      "id": "StreamCore:TokenOutsideCollectionRange()",
+      "id": "StreamCore:TokenNotMinted()",
       "contract": "StreamCore",
       "source": "smart-contracts/StreamCore.sol",
-      "name": "TokenOutsideCollectionRange",
-      "signature": "TokenOutsideCollectionRange()",
-      "selector": "0x4f4749ec",
+      "name": "TokenNotMinted",
+      "signature": "TokenNotMinted()",
+      "selector": "0xd03ce9df",
       "category": "supply_minting",
       "severity": "medium",
       "inputs": [],

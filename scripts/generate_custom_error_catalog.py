@@ -177,7 +177,7 @@ CATEGORY_BY_ERROR_NAME = {
     "SplitWalletAddressPoisoned": "split_payment_safety",
     "StaleRandomnessRequest": "randomness_lifecycle",
     "TokenNotMinted": "supply_minting",
-    "TokenOutsideCollectionRange": "supply_minting",
+    "TokenIdentityUnknown": "supply_minting",
     "TokenDataHashMismatch": "metadata_integrity",
     "TokenRandomnessRequestAlreadyExists": "randomness_lifecycle",
     "UnauthorizedInitializer": "access_control",

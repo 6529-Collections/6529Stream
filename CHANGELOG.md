@@ -5,6 +5,24 @@ the release policy in `docs/release-policy.md`.
 
 ## Unreleased
 
+### Changed
+
+- Rebuilt `StreamCore` token identity onto the specification's sequential
+  model: one monotone global token ID counter starting at 1 replaces the
+  reserved-range allocator, per-token `(collectionId, collectionSerial)`
+  identity records are written at allocation and retained across burns,
+  `TokenCollectionRegistered` (leading `uint16 schemaVersion`) is emitted at
+  every authoritative identity write before dependent effects, burn is
+  reshaped to `burn(uint256)` with the `StreamTokenBurned` event and the
+  `collectionBurnsBlockedAtBlock` height read, the Permanent identity and
+  enumeration reads land (`tokenLifecycle`, `lastAllocatedTokenId`,
+  `lastAllocatedCollectionId`, storage-backed `tokenCollectionIdentity`),
+  transfer/approval conditioning overrides are removed so ERC-721 transfers
+  stay unconditioned, the vendored `ERC721Enumerable` pair is deleted, and
+  every `10^10` range derivation is purged from Core, the minter read path,
+  and the metadata renderer (`TokenOutsideCollectionRange` is renamed to
+  `TokenIdentityUnknown`).
+
 ### Added
 
 - Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the

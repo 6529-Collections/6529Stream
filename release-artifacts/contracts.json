@@ -181,11 +181,6 @@
       "interface_id": "0x80ac58cd"
     },
     {
-      "name": "IERC721Enumerable",
-      "source": "smart-contracts/IERC721Enumerable.sol",
-      "interface_id": "0x780e9d63"
-    },
-    {
       "name": "IERC721Metadata",
       "source": "smart-contracts/IERC721Metadata.sol",
       "interface_id": "0x5b5e139f"
