@@ -50,6 +50,13 @@ abstract contract StreamGasProbe is IStreamGasParameterProbe {
     ///         genuinely receive `probedValue` ([LTA-GGP-PROBES] rule 5). Nothing
     ///         is recorded.
     error StreamGasProbeUnderfunded(uint256 requiredGas, uint256 availableGas);
+    /// @notice Reverts when the guarded call's target has no code at run time.
+    ///         A staticcall to a codeless account vacuously succeeds, so a pinned
+    ///         target that lost its code (destroyed implementation, future-fork
+    ///         code removal) would otherwise forge passing runs at any candidate
+    ///         value — arming permissionless re-lowers on false evidence — while
+    ///         making genuine failing runs unrecordable. Nothing is recorded.
+    error StreamGasProbeCodelessTarget(address target);
     /// @notice Reverts when a probe is constructed with an invalid pinned scenario.
     error StreamGasProbeInvalidScenario();
 
@@ -132,11 +139,23 @@ abstract contract StreamGasProbe is IStreamGasParameterProbe {
     ///      received the full `probedValue`. A caller that under-funds the run
     ///      trips `StreamGasProbeUnderfunded` before the call executes and nothing
     ///      is recorded ([LTA-GGP-PROBES] rule 5).
+    ///
+    ///      Genuine-execution precondition, inherited by every derived probe: a
+    ///      codeless account cannot execute the guarded operation, yet the EVM
+    ///      reports its staticcall as a vacuous success. If the pinned target
+    ///      ever loses its code, every run reverts here — no forged pass can be
+    ///      recorded and the probe never reports the guarded path healthy. The
+    ///      check runs before the gas snapshot so its EXTCODESIZE cost never
+    ///      skews the delivery proof (it also warms the account, keeping the
+    ///      pinned overhead margin conservative).
     function _provedStaticcall(address target, bytes memory callData, uint256 probedValue)
         internal
         view
         returns (bool success, bytes memory returndata, uint256 gasUsed)
     {
+        if (target.code.length == 0) {
+            revert StreamGasProbeCodelessTarget(target);
+        }
         uint256 requiredGas = ((probedValue + _callAccountingOverheadGas()) * 64) / 63;
         uint256 availableGas = gasleft();
         if (availableGas < requiredGas) {

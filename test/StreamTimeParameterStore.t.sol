@@ -37,6 +37,9 @@ contract StreamTimeParameterStoreTest is CharacterizationTestBase {
     // keccak256("TimeParameterProbed(uint16,bytes32,bytes32,bool,uint256,bytes32)")
     bytes32 private constant TIME_PARAMETER_PROBED_TOPIC =
         0x2c09274a7cd758a564107cad1417a20af410c1640238892465a511f1a8d53b62;
+    // keccak256("TimeParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)")
+    bytes32 private constant TIME_PARAMETER_PROBE_REBOUND_TOPIC =
+        0xfc09efe81fbda50f25673f8de2b4d15983946c16724f27baff1b7c3e21dbc7f4;
 
     MockGovernedParameterAuthority private _authority;
     StreamCadenceProbe private _cadenceProbe;
@@ -715,6 +718,147 @@ contract StreamTimeParameterStoreTest is CharacterizationTestBase {
     }
 
     // ------------------------------------------------------------------
+    // Governed cadence-probe rebinding ([LTA-GGP-PROBES] rule 3)
+    // ------------------------------------------------------------------
+
+    function testCadenceProbeRebindRejections() public {
+        StreamCadenceProbe successor = _newProbe();
+        address stranger = vm.addr(0x888);
+
+        // Authority-only.
+        vm.prank(stranger);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterNotAuthority.selector, stranger
+            )
+        );
+        _store.rebindTimeParameterProbe(TIMEOUT_ID, address(successor), ACTION_ID);
+
+        // Unknown parameter.
+        bytes32 unknownId = keccak256("unknown");
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterUnknown.selector, unknownId
+            )
+        );
+        _store.rebindTimeParameterProbe(unknownId, address(successor), ACTION_ID);
+
+        // Zero successor.
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterProbeMismatch.selector,
+                TIMEOUT_ID,
+                address(0)
+            )
+        );
+        _store.rebindTimeParameterProbe(TIMEOUT_ID, address(0), ACTION_ID);
+
+        // A successor pinning a different wall-clock floor for the row cannot be
+        // bound: the width a candidate must prove can never drift.
+        StreamCadenceProbe wrongPinProbe =
+            _singleRowProbe("ENTROPY_REQUEST_TIMEOUT_BLOCKS", 9_999);
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterProbeMismatch.selector,
+                TIMEOUT_ID,
+                address(wrongPinProbe)
+            )
+        );
+        _store.rebindTimeParameterProbe(TIMEOUT_ID, address(wrongPinProbe), ACTION_ID);
+
+        // A probe not serving the row at all is likewise rejected.
+        StreamCadenceProbe unservingProbe = _singleRowProbe("ENTROPY_REVEAL_SLO_BLOCKS", 7_200);
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterProbeMismatch.selector,
+                TIMEOUT_ID,
+                address(unservingProbe)
+            )
+        );
+        _store.rebindTimeParameterProbe(TIMEOUT_ID, address(unservingProbe), ACTION_ID);
+    }
+
+    function testCadenceProbeRebindGovernedPathAndEventSchema() public {
+        StreamCadenceProbe successor = _newProbe();
+
+        // Governed rebind executes, moves the binding, and emits the
+        // schema-versioned rebind event.
+        vm.recordLogs();
+        vm.prank(address(_authority));
+        _store.rebindTimeParameterProbe(TIMEOUT_ID, address(successor), ACTION_ID);
+        (,,, address boundProbe,) = _store.timeParameterInfo(TIMEOUT_ID);
+        Assertions.assertEq(boundProbe, address(successor), "binding moved");
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        Assertions.assertEq(logs.length, 1, "single rebind event");
+        Assertions.assertEq(logs[0].emitter, address(_store), "emitted by host");
+        Assertions.assertEq(logs[0].topics.length, 4, "three indexed topics");
+        Assertions.assertEq(
+            logs[0].topics[0], TIME_PARAMETER_PROBE_REBOUND_TOPIC, "rebind signature"
+        );
+        Assertions.assertEq(logs[0].topics[1], TIMEOUT_ID, "parameterId topic");
+        Assertions.assertEq(
+            logs[0].topics[2], bytes32(uint256(uint160(address(_store)))), "host topic"
+        );
+        Assertions.assertEq(logs[0].topics[3], ACTION_ID, "actionId topic");
+        (uint16 schemaVersion, address oldProbe, address newProbe) =
+            abi.decode(logs[0].data, (uint16, address, address));
+        Assertions.assertEq(uint256(schemaVersion), 1, "schema version");
+        Assertions.assertEq(oldProbe, address(_cadenceProbe), "old probe");
+        Assertions.assertEq(newProbe, address(successor), "new probe");
+
+        // Execution rechecks consult the successor: a passing record on the OLD
+        // probe no longer admits a lower...
+        _finalizeSample(12);
+        _cadenceProbe.recordCadenceRun(TIMEOUT_ID, 400);
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterProbeRecordMissing.selector,
+                TIMEOUT_ID,
+                uint256(400)
+            )
+        );
+        _store.lowerTimeParameter(TIMEOUT_ID, 400, ACTION_ID);
+
+        // ...while a passing record on the successor does.
+        successor.startCadenceSample();
+        vm.roll(block.number + WINDOW);
+        vm.warp(block.timestamp + WINDOW * 12);
+        successor.finalizeCadenceSample();
+        (, bool passed) = successor.recordCadenceRun(TIMEOUT_ID, 400);
+        Assertions.assertTrue(passed, "successor run passes");
+        vm.prank(address(_authority));
+        _store.lowerTimeParameter(TIMEOUT_ID, 400, ACTION_ID);
+        Assertions.assertEq(_store.timeParameter(TIMEOUT_ID), 400, "successor drives gates");
+    }
+
+    function testCadenceProbeRebindDeadWithGovernanceLost() public {
+        // With governance lost (zero authority) the binding is frozen — which is
+        // why every cadence probe is Permanent-class ([LTA-GGP-PROBES] rule 3).
+        StreamCadenceProbe successor = _newProbe();
+        address stranger = vm.addr(0x889);
+        IStreamTimeParameterHost.TimeParameterConfig[] memory configs =
+            new IStreamTimeParameterHost.TimeParameterConfig[](1);
+        configs[0] = _config("ENTROPY_REQUEST_TIMEOUT_BLOCKS", 600, 300, 3_600);
+        StreamTimeParameterStore zeroStore = this.deployStore(address(0), configs);
+
+        vm.prank(stranger);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterNotAuthority.selector, stranger
+            )
+        );
+        zeroStore.rebindTimeParameterProbe(TIMEOUT_ID, address(successor), ACTION_ID);
+        (,,, address frozenProbe,) = zeroStore.timeParameterInfo(TIMEOUT_ID);
+        Assertions.assertEq(frozenProbe, address(_cadenceProbe), "binding frozen");
+    }
+
+    // ------------------------------------------------------------------
     // No emergency / no permissionless conditional path exists for GTPs
     // ([LTA-GTP] change discipline 1; ADR 0012 decision T1)
     // ------------------------------------------------------------------
@@ -753,6 +897,17 @@ contract StreamTimeParameterStoreTest is CharacterizationTestBase {
         floors[0] = 3_600;
         floors[1] = 7_200;
         floors[2] = 1_800;
+        return new StreamCadenceProbe(names, floors, WINDOW, MAX_AGE);
+    }
+
+    function _singleRowProbe(string memory name, uint64 wallClockFloorSeconds)
+        private
+        returns (StreamCadenceProbe)
+    {
+        string[] memory names = new string[](1);
+        names[0] = name;
+        uint64[] memory floors = new uint64[](1);
+        floors[0] = wallClockFloorSeconds;
         return new StreamCadenceProbe(names, floors, WINDOW, MAX_AGE);
     }
 

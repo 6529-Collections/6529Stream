@@ -139,6 +139,45 @@ contract StreamGasProbeTest is CharacterizationTestBase {
         Assertions.assertTrue(secondRunId != probeRunId, "unique run ids");
     }
 
+    function testCodelessTargetRunRevertsWithoutRecording() public {
+        // A genuine failing record exists first: the raise arm is live.
+        _consumer.setBurnGas(300_000);
+        (bytes32 failingRunId, bool passed) = _probe.recordProbeRun(60_000);
+        Assertions.assertFalse(passed, "genuine failure recorded first");
+
+        // The pinned scenario target loses its code (destroyed implementation,
+        // SELFDESTRUCT-era target, future-fork code removal). A staticcall to a
+        // codeless account vacuously succeeds, so without the guard every run
+        // would record a forged PASS at any probedValue — arming permissionless
+        // re-lowers on false evidence and making failing runs unrecordable. The
+        // run must instead revert with nothing recorded.
+        vm.etch(address(_consumer), "");
+        Assertions.assertEq(
+            uint256(address(_consumer).code.length), 0, "target code cleared"
+        );
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamGasProbe.StreamGasProbeCodelessTarget.selector, address(_consumer)
+            )
+        );
+        _probe.recordProbeRun(60_000);
+
+        // The earlier genuine failing record is untouched.
+        (bytes32 runId, bool storedPassed, ) = _probe.lastProbeRun(ROYALTY_RESOLVER_ID, 60_000);
+        Assertions.assertEq(runId, failingRunId, "record unchanged");
+        Assertions.assertFalse(storedPassed, "still a failing record");
+
+        // Nor can a forged pass be minted at any other candidate value.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamGasProbe.StreamGasProbeCodelessTarget.selector, address(_consumer)
+            )
+        );
+        _probe.recordProbeRun(1_000_000);
+        (runId,,) = _probe.lastProbeRun(ROYALTY_RESOLVER_ID, 1_000_000);
+        Assertions.assertEq(runId, bytes32(0), "no forged record");
+    }
+
     // ------------------------------------------------------------------
     // Genuine-failure rule ([LTA-GGP-PROBES] rule 5)
     // ------------------------------------------------------------------

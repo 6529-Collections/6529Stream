@@ -52,6 +52,17 @@ interface IStreamGasParameterHost {
         bytes32 conditionalRelowerActionId
     );
 
+    /// @notice Emitted when a parameter's probe binding moves to a successor
+    ///         Permanent-class probe through governance ([LTA-GGP-PROBES] rule 3).
+    event GasParameterProbeRebound(
+        uint16 schemaVersion,
+        bytes32 indexed parameterId,
+        address indexed host,
+        bytes32 indexed actionId,
+        address oldProbe,
+        address newProbe
+    );
+
     /// @notice Reverts when a parameterId is not registered on this host.
     error GasParameterUnknown(bytes32 parameterId);
     /// @notice Reverts when a parameter name is registered twice.
@@ -150,6 +161,15 @@ interface IStreamGasParameterHost {
     ///         requires a recorded passing run at exactly `newValue` within
     ///         `probeMaxAgeBlocks`.
     function lowerGasParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
+
+    /// @notice Moves the parameter's probe binding to a successor Permanent-class
+    ///         probe on the normal delay class ([LTA-GGP-PROBES] rule 3).
+    ///         Authority-only — with governance lost the binding is frozen, which
+    ///         is why every probe is Permanent-class. The successor must serve the
+    ///         same parameterId (`probedParameterId()` recheck), so a binding can
+    ///         never move to a probe that does not execute this row's guarded path.
+    function rebindGasParameterProbe(bytes32 parameterId, address newProbe, bytes32 actionId)
+        external;
 
     /// @notice Permissionless conditional raise ([LTA-GGP] requirement 11),
     ///         `FORWARDING_CAP` rows only. Callable by anyone with no governance

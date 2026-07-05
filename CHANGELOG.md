@@ -32,11 +32,15 @@ the release policy in `docs/release-policy.md`.
   values, immutable floors, derived `keccak256("6529STREAM_GGP_"||name)` ids,
   2x-per-action raise bounds, probe-gated emergency raise and exact-value
   probe-gated lowering, `FORWARDING_CAP`-only permissionless conditional
-  raise/re-lower standing actions registered at deployment, canonical
+  raise/re-lower standing actions registered at deployment, governed
+  rebinding of probe bindings to successor Permanent-class probes with
+  `GasParameterProbeRebound`/`TimeParameterProbeRebound` events, canonical
   `GasParameterUpdated`/`TimeParameterUpdated` events, and
   `gasParameterInfo`/`timeParameterInfo` introspection), the Permanent-class
   probe family (`StreamGasProbe` base enforcing the genuine-failure
-  gas-delivery proof, `StreamForwardingCapProbe` reference probe,
+  gas-delivery proof and a run-time codeless-target guard so a scenario
+  target that loses its code can never record a vacuous pass,
+  `StreamForwardingCapProbe` reference probe,
   `StreamCadenceProbe` for block-cadence observation with pinned wall-clock
   floors), the `IStreamGovernedParameterAuthority` governance-executor wiring
   seam, and the requirement 9 conformance suites including parameterId

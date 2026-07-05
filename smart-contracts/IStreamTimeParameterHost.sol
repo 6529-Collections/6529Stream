@@ -46,6 +46,18 @@ interface IStreamTimeParameterHost {
         uint64 probeMaxAgeBlocks
     );
 
+    /// @notice Emitted when a parameter's cadence-probe binding moves to a
+    ///         successor Permanent-class probe through governance
+    ///         ([LTA-GGP-PROBES] rule 3, inherited by GTP cadence probes).
+    event TimeParameterProbeRebound(
+        uint16 schemaVersion,
+        bytes32 indexed parameterId,
+        address indexed host,
+        bytes32 indexed actionId,
+        address oldCadenceProbe,
+        address newCadenceProbe
+    );
+
     /// @notice Reverts when a parameterId is not registered on this host.
     error TimeParameterUnknown(bytes32 parameterId);
     /// @notice Reverts when a parameter name is registered twice.
@@ -124,5 +136,15 @@ interface IStreamTimeParameterHost {
     ///         within `probeMaxAgeBlocks` proving the proposed count still covers
     ///         the pinned wall-clock floor at the observed cadence.
     function lowerTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId)
+        external;
+
+    /// @notice Moves the parameter's cadence-probe binding to a successor
+    ///         Permanent-class probe on the normal delay class
+    ///         ([LTA-GGP-PROBES] rule 3). Authority-only — with governance lost
+    ///         the binding is frozen. The successor must pin the identical
+    ///         wall-clock floor for this row (`pinnedWallClockFloorSeconds`
+    ///         recheck), so a rebind can never change the width a candidate must
+    ///         prove.
+    function rebindTimeParameterProbe(bytes32 parameterId, address newCadenceProbe, bytes32 actionId)
         external;
 }

@@ -43,6 +43,9 @@ contract StreamGasParameterStoreTest is CharacterizationTestBase {
     // keccak256("GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)")
     bytes32 private constant GAS_PARAMETER_UPDATED_TOPIC =
         0x587835584450495af0ebae742cc2f7c3927ade7498ab91baaebb9525d68e14dc;
+    // keccak256("GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)")
+    bytes32 private constant GAS_PARAMETER_PROBE_REBOUND_TOPIC =
+        0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c;
 
     MockGovernedParameterAuthority private _authority;
     MockGasProbe private _forwardingProbe;
@@ -968,6 +971,119 @@ contract StreamGasParameterStoreTest is CharacterizationTestBase {
         Assertions.assertEq(raiseId, expectedRaise, "raise action id derivation");
         Assertions.assertEq(relowerId, expectedRelower, "re-lower action id derivation");
         Assertions.assertTrue(raiseId != relowerId, "direction-distinct ids");
+    }
+
+    // ------------------------------------------------------------------
+    // Governed probe rebinding ([LTA-GGP-PROBES] rule 3)
+    // ------------------------------------------------------------------
+
+    function testProbeRebindGovernedPath() public {
+        MockGasProbe successor = new MockGasProbe("ROYALTY_RESOLVER_GAS_LIMIT");
+        address stranger = vm.addr(0x777);
+
+        // Authority-only.
+        vm.prank(stranger);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterNotAuthority.selector, stranger
+            )
+        );
+        _store.rebindGasParameterProbe(ROYALTY_RESOLVER_ID, address(successor), ACTION_ID);
+
+        // Unknown parameter.
+        bytes32 unknownId = keccak256("unknown");
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGasParameterHost.GasParameterUnknown.selector, unknownId)
+        );
+        _store.rebindGasParameterProbe(unknownId, address(successor), ACTION_ID);
+
+        // Zero successor.
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterProbeMismatch.selector,
+                ROYALTY_RESOLVER_ID,
+                address(0)
+            )
+        );
+        _store.rebindGasParameterProbe(ROYALTY_RESOLVER_ID, address(0), ACTION_ID);
+
+        // A successor serving a different inventory row cannot be bound.
+        MockGasProbe wrongProbe = new MockGasProbe("VRF_CALLBACK_GAS_LIMIT");
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterProbeMismatch.selector,
+                ROYALTY_RESOLVER_ID,
+                address(wrongProbe)
+            )
+        );
+        _store.rebindGasParameterProbe(ROYALTY_RESOLVER_ID, address(wrongProbe), ACTION_ID);
+
+        // Governed rebind executes and moves the introspected binding.
+        vm.recordLogs();
+        vm.prank(address(_authority));
+        _store.rebindGasParameterProbe(ROYALTY_RESOLVER_ID, address(successor), ACTION_ID);
+        (,, address boundProbe,,) = _store.gasParameterInfo(ROYALTY_RESOLVER_ID);
+        Assertions.assertEq(boundProbe, address(successor), "binding moved");
+
+        // Rebind event schema golden.
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        Assertions.assertEq(logs.length, 1, "single rebind event");
+        Assertions.assertEq(logs[0].emitter, address(_store), "emitted by host");
+        Assertions.assertEq(logs[0].topics.length, 4, "three indexed topics");
+        Assertions.assertEq(
+            logs[0].topics[0], GAS_PARAMETER_PROBE_REBOUND_TOPIC, "rebind signature"
+        );
+        Assertions.assertEq(logs[0].topics[1], ROYALTY_RESOLVER_ID, "parameterId topic");
+        Assertions.assertEq(
+            logs[0].topics[2], bytes32(uint256(uint160(address(_store)))), "host topic"
+        );
+        Assertions.assertEq(logs[0].topics[3], ACTION_ID, "actionId topic");
+        (uint16 schemaVersion, address oldProbe, address newProbe) =
+            abi.decode(logs[0].data, (uint16, address, address));
+        Assertions.assertEq(uint256(schemaVersion), 1, "schema version");
+        Assertions.assertEq(oldProbe, address(_forwardingProbe), "old probe");
+        Assertions.assertEq(newProbe, address(successor), "new probe");
+
+        // Execution rechecks consult the successor: a failing record on the OLD
+        // probe no longer admits an emergency raise...
+        _forwardingProbe.setRun(50_000, false, uint64(block.number));
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterProbeRecordMissing.selector,
+                ROYALTY_RESOLVER_ID,
+                uint256(50_000)
+            )
+        );
+        _store.emergencyRaiseGasParameter(ROYALTY_RESOLVER_ID, 100_000, ACTION_ID);
+        // ...while a failing record on the successor does.
+        successor.setRun(50_000, false, uint64(block.number));
+        vm.prank(address(_authority));
+        _store.emergencyRaiseGasParameter(ROYALTY_RESOLVER_ID, 100_000, ACTION_ID);
+        Assertions.assertEq(
+            _store.gasParameter(ROYALTY_RESOLVER_ID), 100_000, "successor drives gates"
+        );
+    }
+
+    function testProbeRebindDeadWithGovernanceLost() public {
+        // With governance lost (zero authority) the binding is frozen — which is
+        // why every probe is Permanent-class ([LTA-GGP-PROBES] rule 3).
+        MockGasProbe successor = new MockGasProbe("ROYALTY_RESOLVER_GAS_LIMIT");
+        address stranger = vm.addr(0x778);
+        vm.prank(stranger);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterNotAuthority.selector, stranger
+            )
+        );
+        _zeroAuthorityStore.rebindGasParameterProbe(
+            ROYALTY_RESOLVER_ID, address(successor), ACTION_ID
+        );
+        (,, address boundProbe,,) = _zeroAuthorityStore.gasParameterInfo(ROYALTY_RESOLVER_ID);
+        Assertions.assertEq(boundProbe, address(_zeroStoreProbe), "binding frozen");
     }
 
     // ------------------------------------------------------------------

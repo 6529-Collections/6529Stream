@@ -265,6 +265,30 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         _setValue(parameterId, parameter, newValue, actionId);
     }
 
+    /// @inheritdoc IStreamGasParameterHost
+    function rebindGasParameterProbe(bytes32 parameterId, address newProbe, bytes32 actionId)
+        external
+        override
+    {
+        // [LTA-GGP-PROBES] rule 3: while governance functions, the binding may
+        // move to a successor Permanent-class probe through the normal delay
+        // class; with governance lost (zero authority) this path is dead and the
+        // binding is frozen.
+        _requireAuthority();
+        GasParameterData storage parameter = _requireRegistered(parameterId);
+        if (newProbe == address(0)) {
+            revert GasParameterProbeMismatch(parameterId, newProbe);
+        }
+        if (IStreamGasParameterProbe(newProbe).probedParameterId() != parameterId) {
+            revert GasParameterProbeMismatch(parameterId, newProbe);
+        }
+        address oldProbe = parameter.probe;
+        parameter.probe = newProbe;
+        emit GasParameterProbeRebound(
+            GAS_PARAMETER_SCHEMA_VERSION, parameterId, address(this), actionId, oldProbe, newProbe
+        );
+    }
+
     // ---------------------------------------------------------------------
     // Permissionless conditional paths ([LTA-GGP] requirement 11,
     // FORWARDING_CAP only)

@@ -213,6 +213,41 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
         _setValue(parameterId, parameter, newValue, actionId);
     }
 
+    /// @inheritdoc IStreamTimeParameterHost
+    function rebindTimeParameterProbe(
+        bytes32 parameterId,
+        address newCadenceProbe,
+        bytes32 actionId
+    ) external override {
+        // [LTA-GGP-PROBES] rule 3 (cadence probes are members of that rule set):
+        // while governance functions, the binding may move to a successor
+        // Permanent-class probe through the normal delay class; with governance
+        // lost (zero authority) this path is dead and the binding is frozen.
+        _requireAuthority();
+        TimeParameterData storage parameter = _requireRegistered(parameterId);
+        if (newCadenceProbe == address(0)) {
+            revert TimeParameterProbeMismatch(parameterId, newCadenceProbe);
+        }
+        // The successor must pin the identical wall-clock floor, so the width a
+        // candidate must prove can never drift across a rebind.
+        if (
+            IStreamTimeParameterProbe(newCadenceProbe).pinnedWallClockFloorSeconds(parameterId)
+                != parameter.wallClockFloorSeconds
+        ) {
+            revert TimeParameterProbeMismatch(parameterId, newCadenceProbe);
+        }
+        address oldCadenceProbe = parameter.cadenceProbe;
+        parameter.cadenceProbe = newCadenceProbe;
+        emit TimeParameterProbeRebound(
+            TIME_PARAMETER_SCHEMA_VERSION,
+            parameterId,
+            address(this),
+            actionId,
+            oldCadenceProbe,
+            newCadenceProbe
+        );
+    }
+
     // ---------------------------------------------------------------------
     // Internal helpers
     // ---------------------------------------------------------------------
