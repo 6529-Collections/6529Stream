@@ -10,7 +10,7 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
+      "sha256": "sha256:01832d84a1e02182da1cca6456d247314451759e86e1391efe7416002e8663b1"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
@@ -238,7 +238,7 @@
       "evidence": [
         {
           "path": "docs/collection-metadata-contract.md",
-          "sha256": "sha256:01db680b049fbb38e8c6ff5a84b26f34b2072721935f5a46e77088ba1df6de30"
+          "sha256": "sha256:74e4a1007f1b12889ed4c517881f53b468c7238ee9a567783ad85bcddb3ed7f3"
         },
         {
           "path": "docs/deployment.md",
@@ -330,7 +330,7 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
+          "sha256": "sha256:01832d84a1e02182da1cca6456d247314451759e86e1391efe7416002e8663b1"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -447,7 +447,7 @@
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
+          "sha256": "sha256:01832d84a1e02182da1cca6456d247314451759e86e1391efe7416002e8663b1"
         },
         {
           "path": "docs/status.md",
@@ -514,7 +514,7 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
+          "sha256": "sha256:01832d84a1e02182da1cca6456d247314451759e86e1391efe7416002e8663b1"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",

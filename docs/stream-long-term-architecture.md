@@ -7,8 +7,10 @@ inline are resolved by
 [ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
-[ADR 0013](adr/0013-world-class-pass-round-4.md), and
-[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded in
+[ADR 0013](adr/0013-world-class-pass-round-4.md),
+[ADR 0014](adr/0014-world-class-pass-round-5.md), and
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md) and
+recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the umbrella architecture specification for making
@@ -31,15 +33,17 @@ Companion specs:
 - `docs/launch-conformance-matrix.md` (deployment conformance gates)
 - `docs/metadata-router-and-renderer.md`
 - `docs/collection-metadata-contract.md`
+- `docs/stream-collection-facade-profile.md` (dormant facade extension
+  profile)
 - `docs/stream-entropy-coordinator.md`
 - `docs/stream-entropy-providers.md`
 
 This document is the normative home of the cross-cutting patterns:
 the Governed Gas Parameter model and its probe permanence rules, the
 Governed Time Parameter model, the module registry record shape, the
-Core satellite pointer policy, the token identity model, the token
-enumeration posture, the freeze model, the artwork finality model, the
-guardian module pattern, the state export
+Core satellite pointer policy, the token identity model, the collection
+identity-mode doctrine, the token enumeration posture, the freeze model,
+the artwork finality model, the guardian module pattern, the state export
 profile, the state-readable payload discovery pattern, and the hash and
 manifest discipline. Subsystem specs instantiate these patterns and cite
 this document; per the precedence rule in
@@ -87,7 +91,10 @@ version or manifest hashes.
    resolver.
 4. Keep marketplace-facing surfaces stable: `ownerOf`, `tokenURI`,
    `royaltyInfo`, `supportsInterface`, transfer, approval, and
-   `totalSupply` reads.
+   `totalSupply` reads. For `EXTERNAL_FACADE` collections the stable
+   marketplace surface — ERC-721 `Transfer` emission and approvals
+   included — is the collection's facade, backed by the same Core
+   reads ([LTA-IDENTITY-MODE]).
 5. Keep mutable economic, rendering, and entropy policy out of Core.
 6. Prefer immutable profiles, immutable implementation versions, and mutable
    assignments over mutable internals.
@@ -1253,13 +1260,19 @@ The baseline implementation's collection-range allocator must be replaced by
 the sequential global allocator; the explicit mapping model above is the
 long-term identity surface either way (ADR 0009 decision 1).
 
-Sequential IDs inside one shared contract leave no marketplace-consumable
-collection identity signal; that is the single reserved open question
-(OQ-X8 in [`docs/spec-open-questions.md`](spec-open-questions.md)), and
-the candidate directions live in
+Sequential IDs inside one shared contract leave no address-keyed
+collection grouping signal; that formerly reserved decision is resolved
+(ADR 0015 decision W1): the normative, Permanent collection-identity
+signal is the collection-identity read path owned by
 [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
-(collection discovery). The onchain identity model above is complete and
-unaffected by how OQ-X8 resolves.
+(collection discovery), the `properties.stream.collection` token-JSON
+member set owned by
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md),
+and the Core identity reads above. The per-collection ERC-721 facade
+line is a dormant extension profile behind a pre-public-sale tripwire,
+never a launch dependency; its identity-mode doctrine is
+[LTA-IDENTITY-MODE] (ADR 0015 decision W3). The onchain identity model
+above is complete and identical in both identity modes.
 
 Canonical Core read surface:
 
@@ -1346,6 +1359,15 @@ Core enumeration surface:
    owner-index or global-index storage, and
    `supportsInterface(0x780e9d63)` returns false, permanently. Adding
    the enumerable standard back is a successor-line decision.
+4. The enumeration posture is identity-mode-independent
+   ([LTA-IDENTITY-MODE]; ADR 0015 decision W4): dense global
+   allocation, the rule 2 lifecycle walks, and the
+   `totalSupply()`/`lastAllocatedTokenId()` reads are identical for
+   `CORE_NATIVE` and `EXTERNAL_FACADE` collections. Facade-local
+   serial enumeration is a facade-layer concern owned by the facade
+   profile ([FCP-IDENTITY] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md));
+   it adds no Core enumeration surface.
 
 Museum-mode and archival enumeration is served by three independent
 lanes, each exercised by the museum-mode drill: state exports (ownership
@@ -1396,6 +1418,92 @@ Lens rules:
    profile; a deployment that omits it must record the rationale in the
    deployment manifest. Anyone may deploy a replacement lens
    permissionlessly forever.
+
+## Collection Identity Modes [LTA-IDENTITY-MODE]
+
+Ethereum's only native marketplace grouping key is a contract address,
+and this Core line serves every collection from one address. Collection
+identity is therefore two-layer by doctrine (ADR 0015 decisions W3 and
+W4): the state layer — ownership, identity, lifecycle, records — is
+always Core, and the marketplace-identity layer is per-collection,
+carried as an identity mode. This section is the normative home of the
+identity-mode doctrine. The protocol v1 specification owns the concrete
+Core surface shapes, constants, and event signatures
+([PV1-IDENTITY-MODE] in
+[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md));
+the facade contract line is specified as a dormant extension profile by
+[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
+(ADR 0015 decision W5).
+
+Doctrine requirements:
+
+1. Closed mode vocabulary. Every collection carries an identity mode
+   from the closed vocabulary `CORE_NATIVE` (the default; an undeclared
+   collection is `CORE_NATIVE` by construction) and `EXTERNAL_FACADE`
+   (dormant; no facade deploys at genesis). The facade line is a named
+   extension profile behind the pre-public-sale marketplace-commitment
+   tripwire, never a launch dependency (ADR 0015 decision W3).
+2. One-way pre-first-mint binding. Declaring the mode and, for an
+   `EXTERNAL_FACADE` collection, binding exactly one facade are
+   governed actions allowed only before the collection's first mint
+   and immutable from that mint onward. A collection that minted
+   `CORE_NATIVE` can never migrate to a facade; if facades ever
+   deploy, they apply only to collections created after the deployment
+   decision (ADR 0015 decisions W3 and W4).
+3. Authority split. For an `EXTERNAL_FACADE` collection the facade — a
+   Permanent-class contract conforming to the facade profile — is the
+   marketplace-authoritative ERC-721: the address venues key on, the
+   approval surface, and the exclusive ERC-721 `Transfer` emitter for
+   its tokens ([LTA-EVENT-HISTORY] rule 6; emission rules at
+   [FCP-EXCLUSIVITY] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
+   Core remains the state-authoritative record: every ownership fact
+   settles in Core state, and the facade holds no ownership state of
+   its own (ADR 0015 decision W4).
+4. Exactly one live mutation path. Per collection, in either mode,
+   exactly one ownership-mutation path is live — the native ERC-721
+   entries for `CORE_NATIVE`, the facade-called controlled path for
+   `EXTERNAL_FACADE` — and the controlled path enforces exactly the
+   native open-transfer invariant set: owner match and a nonzero
+   recipient for a transfer, the native burn-precondition suite only
+   for the burn case. Native transfers on this Core line are
+   unconditioned ([LTA-STANDARDS]): locks, finality components, and
+   pause never gate ownership transfer, in either mode — finality
+   freezes artwork bytes, never ownership — so the controlled path
+   checks none of them for transfers. The path settles all Core state
+   and record-chain writes before any callback into the facade
+   (ADR 0015 decision W4); the entry shapes, revert conditions, and
+   CEI ordering are owned by [PV1-TRANSFER-CONTROLLER] (requirements
+   6–9). Transfer openness ([LTA-STANDARDS]) is mode-independent:
+   neither mode adds a transfer-conditioning mechanic, and the
+   [LTA-STANDARDS] preclusions bind the facade profile equally.
+5. Mode independence. State reads, record chains, and state exports
+   are mode-independent: `ownerOf`, `totalSupply`, lifecycle, and
+   identity reads answer identically in both modes; enumeration is
+   unchanged ([LTA-ENUMERATION] rule 4); no [LTA-EXPORT] leaf and no
+   record-chain preimage keys on identity mode; and freeze, finality,
+   and recovery semantics are unchanged. A 2075 archivist reconstructs
+   ownership, identity, and provenance from state and exports without
+   ever needing to know a collection's mode (ADR 0015 decision W4).
+   The event layer is the single mode-visible surface, carved out at
+   [LTA-EVENT-HISTORY] rule 6.
+6. Token identity across the layers. The facade-local ERC-721 token ID
+   is the collection-local serial, and the global sequential token ID
+   remains the protocol catalog number in both modes, readable through
+   the facade and carried in token JSON and state exports; global
+   allocation order is untouched (ADR 0009 decision 1; ADR 0015
+   decision W4; facade-side reads at [FCP-IDENTITY]). For an
+   `EXTERNAL_FACADE` collection the facade identity binding joins the
+   collection's finality components ([LTA-FINALITY] requirement 16).
+7. Zero-governance inertness. Mode declaration and facade binding are
+   governed actions; with governance lost neither is possible and the
+   dormant surfaces are inert — a `CORE_NATIVE`-only deployment is
+   identical on every pre-ADR-0015 surface, with the facade-readiness
+   reads answering their dormant defaults (`CORE_NATIVE` mode, zero
+   controller) and the governed entries reverting for every caller.
+   The single scoping home of that claim is [PV1-FACADE-READINESS]
+   requirement 1; the zero-signer museum-mode drill proves it (State
+   Export And Archival Operations; ADR 0015 decision W4.7).
 
 ## Assignment Hierarchy
 
@@ -2058,6 +2166,14 @@ Finality requirements:
     state export that includes the new finality record and content root
     leaves (State Export And Archival Operations); the export-at-finality
     cadence is a conformance gate (ADR 0010 decision D4.4).
+16. For an `EXTERNAL_FACADE` collection ([LTA-IDENTITY-MODE]) the
+    facade identity binding — the facade address and its local-ID
+    rule — is bound into the collection's finality components through
+    the pinned record family owned by
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+    [CMC-FACADE-BINDING] (ADR 0015 decision W4): the two-address
+    identity is part of the work's permanent identity, never an
+    offchain convention.
 
 ### Scoped Finality For Open Series
 
@@ -3671,6 +3787,23 @@ history expiry cannot be cross-verified.
    `StateExportSuperseded`, never corrected in place. An export or
    successor manifest whose event-history snapshot hash is computed
    over any other serialization is nonconformant.
+6. Identity-mode carve-out (ADR 0015 decision W4). For an
+   `EXTERNAL_FACADE` collection ([LTA-IDENTITY-MODE]), Core emits the
+   controlled-ownership-change event family in place of ERC-721
+   `Transfer` — the family's signature is owned by the protocol v1
+   specification ([PV1-TRANSFER-CONTROLLER] requirement 11 in
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md))
+   — and the collection's facade is the exclusive ERC-721 `Transfer`
+   emitter for its tokens ([FCP-EXCLUSIVITY] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
+   Event-history reproduction for such a collection derives from both
+   streams: Core's controlled family plus the facade's `Transfer`
+   stream. No new address-set mechanism exists for this: every facade
+   is registered through a genesis-profile module registry at
+   deployment, appending to the registration record-chain lane
+   ([LTA-REGISTRY] requirements 6–7), so the rule 1 address-set
+   derivation already covers every facade's log stream from state
+   alone. `CORE_NATIVE` collections are unchanged.
 
 Dual-family archival rule [LTA-ARCHIVE] (ADR 0010 decision D4.6;
 ADR 0011 decision R4; ADR 0014 decision V2):
@@ -4049,7 +4182,21 @@ Zero-admin and lost-quorum drills must cover the complete satellite set, not
 only Core. The runbook should periodically prove degraded-mode reads and
 operations for metadata router failure, finality verification, pending entropy,
 split-wallet release, escrow flush, state export publication, event-catalog
-reconstruction, and the permissionless probe-gated conditional-raise
+reconstruction, the zero-signer inertness of the dormant identity-mode
+surfaces — scoped by [PV1-FACADE-READINESS] requirement 1: the drill
+proves a `CORE_NATIVE`-only deployment is identical on every
+pre-ADR-0015 surface by asserting each of (a)
+`declareCollectionIdentityMode` and
+`registerCollectionTransferController` attempted from a non-governance
+sender revert, so with governance lost no identity mode can be declared
+and no facade can ever be registered, (b) the governance role reads
+show zero signers and no signer-replacement path, (c) sampled
+`CORE_NATIVE` reads, writes, and events match pre-ADR-0015 golden
+vectors, and (d) `collectionIdentityMode` and
+`collectionTransferController` answer their dormant defaults,
+`IDENTITY_MODE_CORE_NATIVE` and `address(0)`
+([LTA-IDENTITY-MODE] rule 7; ADR 0015 decision W4.7) — and
+the permissionless probe-gated conditional-raise
 and conditional-re-lower paths for
 `FORWARDING_CAP` Governed Gas Parameters, executed end to end against the
 deployed Permanent-class probe contracts with zero governance signers,

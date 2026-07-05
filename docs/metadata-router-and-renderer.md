@@ -36,7 +36,14 @@ hybrid collections gain the script-work sale-follows coverage lane
 registry-sourced artist display name and identity-document linkage,
 the first-release content ratification reaches the router's
 content-affecting surfaces, and the strictly-`STATIC` genesis renderer
-posture is recorded with its rationale.
+posture is recorded with its rationale. It is further amended by
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md): the
+per-collection contract-metadata read path is promoted to the Permanent,
+normative marketplace collection-identity signal, the collection-display
+evidence gate hardens to named signed integration commitments, OQ-X8 is
+resolved and its Review-entry blocker on this document is removed, and
+the router's facade-mode serving and refresh-authority posture is
+recorded.
 
 This document specifies how Stream metadata rendering and script assembly move
 out of `StreamCore` into dedicated metadata contracts. 6529Stream is permanent
@@ -432,16 +439,25 @@ metadata reads (ADR 0009 decision 4).
 
 Collection discovery contract [MRR-COLLECTION-DISCOVERY]:
 
-1. Token ID arithmetic carries no collection meaning (ADR 0009 decision 1),
-   so the published machine path for per-collection identity is normative:
-   `StreamCollectionCreated(collectionId, ...)` events enumerate
-   collections, `tokenCollectionIdentity(tokenId)` maps any token to its
-   collection and collection-local serial,
-   `StreamCollectionMetadata.contractURI(collectionId)` serves
-   ERC-7572-shaped per-collection metadata, and
-   `properties.stream.collection_id` / `collection_serial` restate the
-   mapping inside every default token JSON. Indexers must never be asked to
-   infer collection membership from token ID ranges.
+1. Token ID arithmetic carries no collection meaning (ADR 0009 decision 1).
+   The published machine path for per-collection identity is the
+   Permanent, normative marketplace collection-identity signal
+   (ADR 0015 decision W1), and this section is its normative home for
+   the read surfaces: the deployment-level ERC-7572 `contractURI()` on
+   Core plus the collection-scoped contract-metadata read exposed
+   through the router — `contractURIForCollection(core, collectionId)`,
+   delegating to `StreamCollectionMetadata.contractURI(collectionId)`
+   under the router read discipline of [MRR-DETERMINISM] rules 2-3.
+   Alongside the reads, `StreamCollectionCreated(collectionId, ...)`
+   events enumerate collections, `tokenCollectionIdentity(tokenId)` maps
+   any token to its collection and collection-local serial, and every
+   default token JSON carries the `properties.stream` collection-identity
+   member set whose normative schema home is
+   [CMC-COLLECTION-IDENTITY-JSON] in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   (ADR 0015 decision W1). Indexers must never be asked to infer
+   collection membership from token ID ranges. ERC-7496 dynamic traits
+   are not adopted for collection identity (ADR 0015 decision W1).
 2. Marketplace and indexer discovery guidance: call Core `contractURI()` for
    ERC-7572 contract-level metadata, read the Core-hosted
    `streamSystemManifest()` to discover the current metadata router and
@@ -451,23 +467,52 @@ Collection discovery contract [MRR-COLLECTION-DISCOVERY]:
    `StreamCollectionMetadata.contractURI(collectionId)` for
    collection-specific contract metadata.
 3. Per-collection marketplace display is a launch condition, not an
-   operational hope: the conformance matrix carries a gate requiring
-   retained evidence that each artist series resolves as its own collection
-   on the major marketplaces/indexers targeted at launch, using the machine
-   path above as the published integration contract.
-4. The remaining decision — a marketplace-native, standards-track
-   collection-identity signal under sequential token IDs, together with
-   the reserved-scope satellites that ride on it: marketplace creator
-   verification and explorer attribution under the shared
-   platform-deployed Core, the secondary-market implications, and the
-   per-collection facade option — is the single reserved open question
-   of the spec set, tracked as OQ-X8 in
-   [`docs/spec-open-questions.md`](spec-open-questions.md) (ADR 0010
-   decision 11; lifecycle gate and reserved scope restated by ADR 0013
-   decision U9). It does not block Draft-stage work; it blocks Review
-   entry for this document and for
-   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-   only.
+   operational hope: before the first public sale, at least two named,
+   major marketplaces or indexers must have recorded, signed integration
+   commitments to consume the rule 1 signal and render per-collection
+   identity (ADR 0015 decision W2). The gate row, its evidence class,
+   and its verification mechanics are owned by the conformance matrix
+   ([LCM-MARKETPLACE] in
+   [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md));
+   this document does not restate them.
+4. The formerly reserved decision — a marketplace-native collection-identity
+   signal under sequential token IDs, together with its reserved-scope
+   satellites — is resolved (ADR 0015 decision W6): the
+   reads-plus-token-JSON path of rule 1 is the adopted Permanent signal
+   (ADR 0015 decision W1), and the per-collection ERC-721 facade line is
+   a dormant extension profile with a pre-public-sale tripwire, specified
+   in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
+   (ADR 0015 decisions W3 and W5). OQ-X8 no longer blocks Review entry
+   for this document or for
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
+   Review entry follows the ordinary conditions of
+   [`docs/spec-policy.md`](spec-policy.md).
+
+Facade-mode serving [MRR-FACADE-SERVING]:
+
+1. The router serves `EXTERNAL_FACADE` collections identically to
+   `CORE_NATIVE` collections: `tokenURI()` routing, renderer resolution,
+   metadata-mode resolution, freeze policy, and the full-view reads are
+   keyed by the global token ID in both identity modes, and no router or
+   renderer read path branches on identity mode (ADR 0015 decision W4).
+   A facade maps its collection-local ERC-721 token ID to the global
+   token ID and delegates `tokenURI`/`contractURI` to Core and the
+   router per the facade profile ([FCP-READS] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
+2. Metadata-refresh authority is mode-independent: the Core-originated
+   restricted refresh emitters of [MRR-REFRESH-EMITTERS] remain the
+   canonical ERC-4906 authority for every collection, and a
+   facade-relayed refresh event for the facade's local id-space is
+   authorized only against the exact per-caller derivations the facade
+   profile pins for each relay entry, never from a separately mutable
+   allowlist. The genesis satellite implementations carry no relay
+   duty: the relay's producer obligation lands with the facade-aware
+   satellite versions whose acceptance is a named precondition of the
+   deployment-decision procedure ([FCP-DEPLOYMENT]; ADR 0015 decision
+   W3). The relay mechanics are owned by the facade profile
+   ([`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md));
+   this document does not restate them.
 
 Core should emit an event when the router changes:
 
@@ -1061,6 +1106,13 @@ Recommended default:
       "citation": "eip155:1/erc721:0x.../123",
       "collection_id": "1",
       "collection_serial": "23",
+      "collection": {
+        "id": "1",
+        "name": "Example Collection",
+        "artist": "Example Artist",
+        "serial": "23",
+        "catalog_number": "123"
+      },
       "collection_supply_mode": "UNCAPPED_OPEN",
       "collection_status": "ACTIVE",
       "collection_minted_ever": "23",
@@ -1137,6 +1189,25 @@ Rules:
 14. `renderer_class` must mirror the resolved renderer version's declared
     determinism class (`STATIC` or `DYNAMIC`) from its renderer manifest
     [MRR-DETERMINISM].
+15. The collection-identity member set carried in default token JSON —
+    collection ID, collection name, artist attribution, collection-local
+    serial, and the global catalog number — is part of the Permanent
+    collection-identity signal (ADR 0015 decision W1). Its normative
+    schema home is [CMC-COLLECTION-IDENTITY-JSON] in
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
+    this document renders the member set and must not restate the
+    schema.
+16. The flat `collection_id` and `collection_serial` fields are required
+    duplicates of `properties.stream.collection.id` and
+    `properties.stream.collection.serial`, retained for consumers keyed
+    to the flat shape — they are not retired. Both shapes must
+    recompute from the same Core token-identity read,
+    `tokenCollectionIdentity(tokenId)`
+    ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+    [MPA-CORE-ABI]): a rendered value under either shape that does not
+    recompute from that read, or a divergence between the two shapes,
+    is nonconformant, and the pinned golden render vectors validate
+    both shapes together ([MRR-DETERMINISM]; ADR 0015 decision W1).
 
 Additional Stream namespaces may be introduced through separate accepted
 schema versions:
@@ -1265,10 +1336,12 @@ Attribution disclosure requirements [MRR-ATTRIBUTION]:
    disclosure, never address identity: it does not by itself make an
    artist the verified creator in marketplace creator-verification
    pipelines or explorer attribution heuristics that key on deployer
-   addresses. The per-collection facade question — and the marketplace
+   addresses. The per-collection facade line — and the marketplace
    creator-verification and explorer-attribution gap that rides on it —
-   remains inside OQ-X8 ([MRR-COLLECTION-DISCOVERY]; reserved scope
-   listed in the register entry).
+   is resolved as a dormant extension profile with a pre-public-sale
+   tripwire (ADR 0015 decisions W3 and W5); its mechanics are owned by
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
+   ([MRR-COLLECTION-DISCOVERY]).
 8. Registry-read failure posture (ADR 0013 decision U4): the
    attribution object derives from bounded fail-safe reads of the
    artist registry and the attestation surfaces, under the read-set and
@@ -2294,7 +2367,11 @@ ERC-7572 exposes one `contractURI()` without a collection argument,
 collection-specific contract metadata is discovered through
 `StreamCollectionMetadata.contractURI(collectionId)`, collection metadata
 events, and the default token metadata's `properties.stream.collection_uri`
-field.
+field. Of these, the collection-scoped contract-metadata read served
+through the router is the collection-scoped half of the Permanent
+collection-identity signal ([MRR-COLLECTION-DISCOVERY]; ADR 0015
+decision W1); the collection metadata events and the `collection_uri`
+field are discovery conveniences, not members of the pinned signal.
 
 ## Freeze Policy
 
@@ -2953,11 +3030,21 @@ router's content-affecting surfaces from ratification onward
 (decision V3) [MRR-ADMIN]; and the strictly-`STATIC` genesis renderer
 posture is recorded with its dormancy rationale and the
 [MRR-EVOLVING-RECIPE] activation path (decision V9).
-The only open decision touching this document is OQ-X8 (the marketplace
-collection-identity signal and its reserved-scope satellites), reserved
-in the register; it blocks Review entry for this document and the
-collection metadata contract only (ADR 0013 decision U9)
-[MRR-COLLECTION-DISCOVERY].
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md) further
+amends three postures: the per-collection contract-metadata read path —
+the deployment-level ERC-7572 `contractURI()` on Core plus the
+collection-scoped read through the router — is the Permanent, normative
+marketplace collection-identity signal (decision W1)
+[MRR-COLLECTION-DISCOVERY]; the collection-display evidence gate hardens
+to named, signed marketplace/indexer integration commitments before the
+first public sale, with the gate row owned by the conformance matrix
+(decision W2); and the router serves `EXTERNAL_FACADE` collections
+identically to `CORE_NATIVE` collections, with Core-originated
+metadata-refresh authority mode-independent (decision W4)
+[MRR-FACADE-SERVING].
+OQ-X8 is resolved (ADR 0015 decision W6): no open decision touches this
+document, and its Review entry follows the ordinary conditions of
+[`docs/spec-policy.md`](spec-policy.md).
 
 1. Core `contractURI()` is a mandatory Core hook: a thin, bounded delegated
    read to the contract-metadata satellite through the cached pointer

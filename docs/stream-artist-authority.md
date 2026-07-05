@@ -92,6 +92,8 @@ Consumers
     template sources through the AA-PAYOUT typed reads at settlement
   - StreamEntropyCoordinator: enforces artist content consent for
     entropy configuration changes and fresh-entropy redraws (AA-CONTENT)
+  - StreamCore: refuses artist-bound identity-mode declarations without
+    verified artist content consent (AA-CONTENT)
   - StreamArtworkFinalityRegistry: requires the artist sanction component;
     requires artist recovery approval for artwork-bytes-changing recovery
   - StreamMetadataRouter / renderers: expose attribution state in token JSON
@@ -1470,8 +1472,9 @@ interface IStreamArtistConsent {
     ) external view returns (bool);
 
     // content authority reads consumed by the collection metadata
-    // contract, its satellites, and the entropy coordinator
-    // (AA-CONTENT; ADR 0013 decision U4)
+    // contract, its satellites, the entropy coordinator
+    // (AA-CONTENT; ADR 0013 decision U4), and Core's identity-mode
+    // declaration path (ADR 0015 decision W4)
     function requireContentConsent(
         uint256 collectionId,
         bytes32 familyId,
@@ -2197,8 +2200,12 @@ address. The artist-signed deployment attestation is the address-level
 provenance record (ADR 0012 decision T9): the artist's own signature
 asserting that this collection at this Core address is their authorized
 deployment. The per-collection facade profile — an address-per-series
-front for Core identity — remains reserved in the open-questions
-register (OQ-X8, option (c)) and is not decided here.
+front for Core identity — is resolved as a dormant extension profile
+with a pre-public-sale tripwire (ADR 0015 decisions W3 and W5): its
+home is
+[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md),
+and any deployment decision advances only through that document's
+tripwire procedure ([FCP-DEPLOYMENT]).
 
 Requirements:
 
@@ -2253,7 +2260,8 @@ bytes32 deploymentFactsHash = keccak256(abi.encode(
    an explicit disclosed term alongside the royalty term
    (`AA-TOOLING` requirement 2).
 5. Creator-verification posture (ADR 0013 decision U4). Independent of
-   the reserved facade decision (OQ-X8), the registry attests three
+   whether the dormant facade extension profile ever deploys
+   (ADR 0015 decision W3), the registry attests three
    creator-verification facts an external marketplace or explorer can
    consume with no bespoke integration: the two-sided binding — an
    artist-accepted attribution, address-verifiable and evented
@@ -2263,7 +2271,11 @@ bytes32 deploymentFactsHash = keccak256(abi.encode(
    reachable from token JSON and `contractURI`. What the registry
    cannot supply on a shared Core is a per-series deployer address for
    pipelines that verify creators by deployer key alone; that gap is
-   exactly OQ-X8 option (c) and stays owner-reserved. Launch-evidence
+   exactly the one the dormant per-collection facade line closes if it
+   ever deploys, and the deployment decision advances only through the
+   tripwire procedure of [FCP-DEPLOYMENT] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
+   (ADR 0015 decision W3). Launch-evidence
    enforcement — per pinned marketplace target, proof that the launch
    artist displays as the verified creator or a recorded target
    limitation — is owned by the conformance matrix
@@ -2639,6 +2651,44 @@ when no artist authority is live, and the unilateral content freeze
 (requirement 3) may pin entropy lock classes like any other family — the
 consent reads are `bytes32`-generic by construction, so no new registry
 surface is needed.
+
+The collection identity mode joins the same boundary (ADR 0015 decision
+W4): the identity mode — `CORE_NATIVE` or `EXTERNAL_FACADE` — decides
+the marketplace identity of the work, the address and token numbering
+under which the work is listed, traded, and cited, so for artist-bound
+collections the identity-mode declaration is consent-gated at the same
+authority level as a content-affecting write. The identity-mode
+vocabulary, declaration surface, family identifier, canonical mode
+state hash, and Core-side enforcement are owned by the protocol v1
+specification
+([`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+[PV1-IDENTITY-MODE]), which mirrors this section: Core must verify
+`requireContentConsent` over the exact declared mode state before
+recording an identity-mode declaration for an artist-bound collection.
+Because the facade address is the thing that actually fixes that
+marketplace identity, an `EXTERNAL_FACADE` declaration on an
+artist-bound collection binds the mode and the controller together in
+the consented state — the canonical mode state hash for an
+`EXTERNAL_FACADE` declaration commits to the mode and the controller
+address, while a `CORE_NATIVE` declaration commits to the bare mode,
+per the state-hash definitions of [PV1-IDENTITY-MODE] — and the
+declaration and the controller registration execute in one atomic
+governed batch
+([`adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+[GOV-BATCH]; ADR 0015 decision W4), so the artist's consent covers the
+concrete two-address identity, never a facade address chosen later.
+Authority, record mechanics, and the `DISPUTED` block follow
+requirements 2 and 5 unchanged. Because the declaration is one-way,
+allowed only before the collection's first mint, and immutable from
+that mint onward (ADR 0015 decision W4), the requirement 1 window
+structurally cannot cover it: the consent obligation attaches to the
+declaration act itself, from binding acceptance until the first mint,
+and the artist-unavailability fallback of `AA-RECOVERY` requirement 2
+does not apply — an undeclared collection is `CORE_NATIVE` by
+construction, so where no artist authority is live the declaration
+waits and the collection loses nothing. The consent reads are
+`bytes32`-generic by construction, so no new registry surface is
+needed.
 
 Pinned typed payloads:
 
@@ -5217,7 +5267,13 @@ Requirements:
    `ARTIST_REGISTRY` pointer freeze state and the registry-immutability
    election (`AA-MODULE` requirement 2, `AA-BINDING` requirement 10),
    of the sale-parameter consent election and its boundary
-   (`AA-ECON` requirement 7), and of the guardian holder-latency check
+   (`AA-ECON` requirement 7), of the operative collection identity mode
+   for every bound collection — declared, or `CORE_NATIVE` by
+   construction ([PV1-IDENTITY-MODE] in
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md);
+   ADR 0015 decision W4) — so a declaration that predates the binding
+   is disclosed at the one moment the artist's acceptance is the
+   protection, and of the guardian holder-latency check
    against the effective contest window (`AA-GUARD` requirement 10);
    every acknowledgment record enters the
    same rehearsal artifact.
@@ -5547,7 +5603,12 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
     content consent over the exact resulting entropy state, with the
     coordinator-side enforcement mirrored in
     [`stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
-    (ADR 0013 decision U4).
+    (ADR 0013 decision U4); an identity-mode declaration for an
+    artist-bound collection reverts without verified content consent
+    over the exact declared mode state, with the Core-side enforcement
+    mirrored in
+    [`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+    (ADR 0015 decision W4).
 12. Recovery-approval gate: an `artworkBytesChanged = true` recovery for
     an artist-bound collection reverts without a verified
     `StreamArtistRecoveryApproval` over the exact finality record and
@@ -5567,9 +5628,10 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
     contract-wallet artist leg with separately recorded latencies at
     or under `ARTIST_CEREMONY_SAFE_MAX_ACTIVE_COORDINATION_MINUTES`
     (ADR 0014 decision V4) and
-    the tool's supported wallet classes, carries every required
-    acknowledgment record (royalty term, shared-contract posture,
-    pointer freeze state, sale-consent election), the named signing
+    the tool's supported wallet classes, carries every acknowledgment
+    record required by `AA-TOOLING` requirement 2 (that requirement's
+    acknowledgment set is the single source; this gate does not
+    restate it), the named signing
     tool renders every typed
     payload family human-readable, and the independent recomputation
     tool reproduces `sanctionSubjectHash` and `bindingHash` from public

@@ -41,7 +41,7 @@ year contract life through the frozen extension mechanisms only:
 
 | Area | Protocol v1 requirement | Extension surface (Permanent from v1) |
 | --- | --- | --- |
-| Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, and Core-native ERC-2981 | None. Core gains no new semantics after deployment; no mutable policy or rendering logic in Core. Changing Core surfaces means a successor Core line |
+| Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, Core-native ERC-2981, and the dormant facade-readiness surfaces — per-collection identity mode, transfer-controller registry, and controlled mutation path ([PV1-FACADE-READINESS]; ADR 0015 decision W4) | None. Core gains no new semantics after deployment; no mutable policy or rendering logic in Core. Changing Core surfaces means a successor Core line |
 | Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, approved-standard ERC-20 primary settlement through outside-Core adapters, passive royalty receipt, and native/approved-asset revenue escrow | New settlement or recovery adapters are new Replaceable modules with their own accepted specs; non-standard ERC-20 behavior stays excluded until a spec accepts it |
 | Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Resolver implementations rotate behind the frozen resolver interface; marketplace registry overrides remain outside protocol semantics, but launch royalty-resolution coverage is deployment-gated release evidence ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) [LCM-MARKETPLACE]; ADR 0011 decision R12) |
 | Minting | `StreamMintManager` policy plus `StreamMintLedger` accounting with many counters, aggregate-only consumption, signed tickets, and module-checked gates/resolvers | New counter resolvers and gates register through the frozen module registry and gate/resolver interfaces |
@@ -233,6 +233,481 @@ Point-in-time implementation caveats do not belong in this section;
 as-built deviations are recorded as labeled non-normative evidence in the
 documents that own the affected path.
 
+## Facade-Readiness Genesis Surfaces
+
+Requirements [PV1-FACADE-READINESS]:
+
+Core ships the facade-readiness surfaces at genesis, dormant, so the
+facade tripwire (ADR 0015 decision W3) can never require a Core
+redeployment (ADR 0015 decision W4): a per-collection identity mode, a
+transfer-controller registry, a controlled ownership-mutation path, a
+controlled-ownership-change event family, and a per-collection supply
+read. The per-collection ERC-721
+facade line itself is a dormant extension profile, never a launch
+dependency; its contract requirements, local-serial identity rules,
+emission-exclusivity rules, and deployment-decision procedure are owned
+by
+[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
+(ADR 0015 decision W5). The umbrella owns the facade-readiness doctrine
+([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+[LTA-IDENTITY-MODE]); this section owns the Core surface shapes,
+constants, and events, with every new keccak ID pinned in the
+[Domain-Constants Mirror](#domain-constants-mirror) under the
+unpinned-placeholder rule ([PV1-MIRROR] rule 2). This is Permanent
+semantics. Cross-cutting requirements:
+
+1. `CORE_NATIVE` equivalence is scoped to observable outcomes: no
+   state outcome, return value, event, or revert of any pre-ADR-0015
+   entry differs for a `CORE_NATIVE` collection from pre-ADR-0015
+   behavior, and the mode resolution on native entries adds no
+   observable behavior change for `CORE_NATIVE` collections — the
+   equivalence is behavioral, never a bytecode or gas identity claim.
+   On a `CORE_NATIVE`-only deployment the facade-readiness reads
+   answer their dormant defaults — `collectionIdentityMode` returns
+   `IDENTITY_MODE_CORE_NATIVE` and `collectionTransferController`
+   returns `address(0)` ([PV1-IDENTITY-MODE] requirement 2;
+   [PV1-TRANSFER-CONTROLLER] requirement 1) —
+   `controlledOwnershipChange` reverts for every caller
+   ([PV1-TRANSFER-CONTROLLER] requirement 6), and the only other
+   reachable facade-readiness entries are the governed declaration
+   and registration surfaces themselves ([PV1-IDENTITY-MODE]
+   requirement 3; [PV1-TRANSFER-CONTROLLER] requirement 2), inert
+   without governance per requirement 5. This requirement is the
+   single scoping home of the facades-dormant equivalence claim,
+   cited by the umbrella doctrine and drill roster
+   ([LTA-IDENTITY-MODE] rule 7), the facade profile, and the matrix
+   gate row. ERC-721 conformance statements across this spec set —
+   interface advertisement, `Transfer` emission, approval semantics,
+   and safe-transfer recipient checks — are scoped to `CORE_NATIVE`
+   collections' tokens; for an `EXTERNAL_FACADE` collection the
+   registered facade is the ERC-721 surface for its tokens
+   ([FCP-SCOPE] in the facade profile).
+2. State reads are mode-independent: `ownerOf`, `balanceOf`,
+   `totalSupply`, lifecycle, and token/collection identity reads
+   answer identically in both modes, and record chains and state
+   exports are mode-independent ([LTA-EXPORT]; [LTA-EVENT-HISTORY]).
+   Metadata serving is mode-independent
+   ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   [MRR-FACADE-SERVING]). The surfaces that differ by mode are the
+   live ownership-mutation entry set, the per-mutation event family,
+   and the mint-time recipient callback: mint delivery performs the
+   ERC-721 safe-transfer recipient check for `CORE_NATIVE`
+   collections and no recipient callback for `EXTERNAL_FACADE`
+   collections, whose terminal notification goes to the controller
+   instead ([PV1-TRANSFER-CONTROLLER] requirement 12).
+3. Event exclusivity. Per ownership mutation Core emits exactly one of
+   ERC-721 `Transfer` (`CORE_NATIVE`) or `ControlledOwnershipChanged`
+   (`EXTERNAL_FACADE`; [PV1-TRANSFER-CONTROLLER] requirement 11), and
+   the registered facade is the exclusive ERC-721 `Transfer` emitter
+   for its collection's tokens (emission-exclusivity rules owned by
+   the facade profile). Core-address log replay therefore remains a
+   complete ownership record in both modes ([PV1-RECON] item 13;
+   [LTA-EVENT-HISTORY]).
+4. No policy surface. The identity mode relocates which contract
+   serves the ERC-721 surface for a collection; it conditions nothing.
+   [PV1-EXCL] items 1-3 bind in both modes — disclosure-only
+   royalties, no soulbound or lockable tokens, no rental or
+   transfer-conditioned behavior. A controller that conditions
+   ownership mutation on payment, lock state, or user roles is
+   nonconformant with the facade profile ([FCP-PERMANENCE]), and the
+   controlled path enforces exactly the native open-transfer
+   invariant set — owner match and a nonzero recipient for a
+   transfer, the native burn-precondition suite only for the burn
+   case — and nothing more: locks, finality components, and pause
+   never gate ownership transfer on this Core line, in either mode
+   ([LTA-STANDARDS]; [PV1-TRANSFER-CONTROLLER] requirement 6).
+5. Zero-governance inertness. Mode declaration and controller
+   registration execute only as canonical staged governance actions of
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   ([GOV-ACTION-ID]); with governance lost neither is possible, no
+   other code path writes facade-readiness state, and the dormant
+   surfaces have no effect on a `CORE_NATIVE`-only deployment —
+   equivalence scoped by requirement 1 (ADR 0015 decision W4). The zero-signer museum-mode drill extension
+   that proves this inertness is owned by the conformance matrix
+   (Collection identity mode gate,
+   [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md))
+   and the umbrella drill roster ([LTA-IDENTITY-MODE];
+   [LTA-GGP-PROBES] rule 9); this section cites it and restates
+   nothing.
+6. Mint ordering is unchanged. The [PV1-MINT-ORDER] invariants and the
+   two blessed paid-path realizations ([RSR-ORCHESTRATION]) hold
+   verbatim in both modes; the sole mode-dependent step is the
+   terminal delivery notification of [PV1-TRANSFER-CONTROLLER]
+   requirement 12, and `CORE_NATIVE` mint execution follows the
+   pre-ADR-0015 ordering unchanged.
+7. Retrofit is excluded (ADR 0015 decision W3). The identity mode is
+   one-way and pre-first-mint, so a collection that reached its first
+   mint under `CORE_NATIVE` identity can never migrate to a facade; if
+   facades ever deploy, they apply only to collections declared
+   `EXTERNAL_FACADE` before their first mint.
+8. Per-collection supply read. Core exposes
+   `totalSupplyOfCollection(uint256 collectionId) returns (uint256)`
+   at genesis: a Permanent, non-reverting storage read returning the
+   collection's live token count — minted-ever minus burned, the
+   counts Core owns per [PV1-IDENTITY] item 5 — zero for a collection
+   with no minted tokens, created or not, and mode-independent per
+   requirement 2. A registered facade serves its ERC-721
+   `totalSupply()` by delegating to this read with no facade-local
+   supply storage ([FCP-IDENTITY] in the facade profile), so no
+   facade deployment ever requires a Core redeployment for a supply
+   surface (ADR 0015 decision W4). The read enters the Core hook
+   budget ([PV1-HOOKS]) and its golden coverage rides the
+   conformance-matrix identity-mode golden test (golden test 29).
+
+### Collection Identity Mode
+
+Requirements [PV1-IDENTITY-MODE]:
+
+Every collection carries an identity mode from the closed two-member
+vocabulary `CORE_NATIVE` and `EXTERNAL_FACADE` (ADR 0015 decision W4).
+Mode IDs are `bytes32` values, the `keccak256` of the ASCII mode name,
+following the conservation-tier vocabulary style
+([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-MUSEUM-GRADE]); the vocabulary is pinned in the
+[mirror](#collection-identity-and-facade-readiness-mirror-rows) under
+the CI recomputation discipline ([PV1-MIRROR]). No Solidity enum and no
+Numeric ID Catalog entry exists for the modes, exactly as for the
+conservation tiers, so no parallel numeric ID space is ever created;
+the mode and controller reads keep their golden coverage
+([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+[LCM-GOLDEN]).
+
+```solidity
+bytes32 constant IDENTITY_MODE_CORE_NATIVE =
+    0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1;
+// keccak256("CORE_NATIVE")
+
+bytes32 constant IDENTITY_MODE_EXTERNAL_FACADE =
+    0xc7dd233bcf9b505ac7e2ab434d9e6af7bc663d64e2d983f1dd6d77668b578656;
+// keccak256("EXTERNAL_FACADE")
+
+function collectionIdentityMode(uint256 collectionId)
+    external
+    view
+    returns (bytes32 mode);
+
+function declareCollectionIdentityMode(
+    uint256 collectionId,
+    bytes32 mode
+) external;
+```
+
+1. Closed vocabulary. The only mode IDs are
+   `IDENTITY_MODE_CORE_NATIVE` and `IDENTITY_MODE_EXTERNAL_FACADE`,
+   pinned in the
+   [mirror](#collection-identity-and-facade-readiness-mirror-rows);
+   `declareCollectionIdentityMode` reverts with the typed error
+   `UnknownCollectionIdentityMode` for every other `mode` value.
+2. `CORE_NATIVE` is the default by construction.
+   `collectionIdentityMode` is a non-reverting Core storage read: it
+   returns `IDENTITY_MODE_CORE_NATIVE` for every collection with no
+   recorded declaration — created or not — and the mode is never
+   derived from token-ID shape, facade state, or offchain convention.
+3. Declaration is governed, one-way, and pre-first-mint.
+   `declareCollectionIdentityMode` executes only through the canonical
+   staged governance action ([GOV-ACTION-ID]) on the normal delay
+   class ([GOV-WINDOWS]), and reverts with the typed error
+   `CollectionUnknown` when `collectionId` is outside
+   `[1, lastAllocatedCollectionId()]` ([PV1-IDENTITY] item 7); with
+   `IdentityModeAlreadyDeclared` when a declaration is already
+   recorded for the collection — one declaration per collection, ever,
+   in either mode; and with `IdentityModeDeclarationClosed` at or
+   after the collection's first mint. The first-mint boundary is the
+   collection's first Core token-identity allocation — the
+   [PV1-MINT-ORDER] invariant 3 write, single-step and prepared alike
+   — so a collection with any allocated identity, including a
+   prepared, uncompleted mint, can never change mode.
+4. Artist consent gates the declaration for artist-bound collections
+   (ADR 0015 decision W4). The identity mode decides the marketplace
+   identity of the work, so for a collection with an accepted artist
+   binding
+   ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-BINDING]) the declaration is consent-gated at the
+   content-affecting authority level. Binding status is read, never
+   assumed: Core consults the registry's
+   `attributionState(collectionId)` read ([AA-STATE] requirement 6;
+   mirrored at [AA-INTERFACES]) before the gated write — when the
+   read reports `ATTR_NONE`, `CLAIMED`, or `REVOKED`, no accepted
+   artist binding exists, Core does not call the consent read, and
+   the declaration proceeds on governance authority alone
+   (`requireContentConsent` reverts on absent consent, so an
+   unconditional call would wrongly block unbound collections). For
+   every other reported state Core must verify the registry's
+   `requireContentConsent(collectionId, familyId, newStateHash)` read
+   ([AA-CONTENT]) with `familyId` equal to
+   `COLLECTION_IDENTITY_MODE_FAMILY_ID` — the content-consent family
+   identifier owned by this section, the `keccak256` of the ASCII
+   name `COLLECTION_IDENTITY_MODE`, pinned in the mirror. The
+   family's canonical state hash is per-mode (ADR 0015 decision W4):
+   for a `CORE_NATIVE` declaration `newStateHash` is the bare mode ID
+   `IDENTITY_MODE_CORE_NATIVE`, verified before recording the
+   declaration; for an `EXTERNAL_FACADE` declaration it is
+   `keccak256(abi.encode(IDENTITY_MODE_EXTERNAL_FACADE, controller))`
+   — the facade address is the thing that actually fixes the
+   marketplace identity, so the artist consents to the concrete
+   two-address identity, never to a facade chosen later. An
+   artist-bound `EXTERNAL_FACADE` declaration therefore executes only
+   as one atomic canonical governed batch ([GOV-BATCH] in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
+   staging exactly the declaration followed by the controller
+   registration under one action identity: Core verifies the pair
+   consent at the registration entry — the first point the controller
+   address is call input ([PV1-TRANSFER-CONTROLLER] requirement 2) —
+   and batch atomicity extends a consent revert to the whole batch,
+   so the mode record and the controller binding land together,
+   consented, or not at all. A declaration-only staging of an
+   artist-bound `EXTERNAL_FACADE` declaration is nonconformant. The
+   consent read reverts on refusal, dispute, or absent consent and
+   the gated action reverts with it; authority, record mechanics, and
+   the `DISPUTED` block are owned by [AA-CONTENT] (requirements 2
+   and 5) and its identity-mode join paragraph, which cites this
+   section for the mechanics. An undeclared collection is
+   `CORE_NATIVE` by construction, so where no artist authority is
+   live the declaration waits and the collection loses nothing.
+5. Declaration is evented:
+
+   ```solidity
+   event CollectionIdentityModeDeclared(
+       uint16 schemaVersion,
+       uint256 indexed collectionId,
+       bytes32 indexed mode,
+       bytes32 indexed actionId
+   );
+   ```
+
+   `schemaVersion` is `1`, and `actionId` binds the authorizing
+   ADR 0004 action identity ([GOV-ACTION-ID]) per the uniform
+   governance-evidence rule. The signature enters the machine-readable
+   event catalog and its golden tests
+   ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+   [LCM-EVENTS]), which are authoritative over this prose snippet.
+6. `EXTERNAL_FACADE` allocation precondition. Core token-identity
+   allocation for an `EXTERNAL_FACADE` collection reverts with the
+   typed error `TransferControllerUnregistered` until the collection's
+   transfer controller is registered ([PV1-TRANSFER-CONTROLLER]
+   requirement 2), so no facade-mode token ever exists without a live
+   mutation path and a live ERC-721 `Transfer` emitter.
+7. Verification. The mode read, the declaration path, and the three
+   negative gates — post-first-mint declaration, redeclaration, and
+   unknown-mode rejection — are deployment-gated by the conformance
+   matrix (Collection identity mode gate), and the artist-consent join
+   — including the requirement 4 per-mode state hashes and the atomic
+   declaration-and-registration batch shape — is exercised per its
+   artist-authority home.
+
+### Transfer Controller Registry And Controlled Mutation
+
+Requirements [PV1-TRANSFER-CONTROLLER]:
+
+An `EXTERNAL_FACADE` collection binds exactly one transfer controller —
+its facade — before its first mint; the binding is one-way and
+immutable, and the controller-called path is the collection's sole
+ownership-mutation entry (ADR 0015 decision W4).
+
+```solidity
+interface IStreamTransferController {
+    function onStreamOwnershipChange(
+        uint256 collectionId,
+        uint256 tokenId,
+        uint256 collectionSerial,
+        address from,
+        address to,
+        bytes calldata data
+    ) external returns (bytes4);
+}
+
+bytes4 constant ON_STREAM_OWNERSHIP_CHANGE_SELECTOR = 0xdaee0572;
+// bytes4 of keccak256("onStreamOwnershipChange(uint256,uint256,uint256,address,address,bytes)")
+
+function collectionTransferController(uint256 collectionId)
+    external
+    view
+    returns (address controller);
+
+function registerCollectionTransferController(
+    uint256 collectionId,
+    address controller
+) external;
+
+function controlledOwnershipChange(
+    uint256 collectionId,
+    uint256 tokenId,
+    address from,
+    address to,
+    bytes calldata data
+) external;
+```
+
+1. Registry read. `collectionTransferController` is a non-reverting
+   Core storage read: it returns the one registered controller for an
+   `EXTERNAL_FACADE` collection and `address(0)` otherwise —
+   `CORE_NATIVE`, undeclared, and not-yet-registered collections
+   alike.
+2. Registration is governed, one-way, and pre-first-mint.
+   `registerCollectionTransferController` executes only through the
+   canonical staged governance action ([GOV-ACTION-ID]) on the normal
+   delay class ([GOV-WINDOWS]), and reverts with the typed error
+   `IdentityModeNotExternalFacade` unless
+   `collectionIdentityMode(collectionId)` is
+   `IDENTITY_MODE_EXTERNAL_FACADE` — permanent for `CORE_NATIVE`
+   collections, where no code path ever admits a controller; with
+   `TransferControllerAlreadyRegistered` when a controller is already
+   registered — the binding is immutable once set; with
+   `TransferControllerRegistrationClosed` at or after the collection's
+   first token-identity allocation (the [PV1-IDENTITY-MODE]
+   requirement 3 boundary); and with `InvalidTransferController` for
+   `address(0)`, an address with no deployed code, or an address not
+   registered in the module registry at binding time ([LTA-REGISTRY];
+   ADR 0015 decision W4). For an
+   artist-bound collection this entry is additionally where the
+   identity-mode consent verifies over the `(mode, controller)` state
+   hash, inside the atomic declaration-and-registration batch — the
+   mechanics are owned by [PV1-IDENTITY-MODE] requirement 4; this
+   requirement cites them and restates nothing.
+3. Controller conformance. The registered controller must be a
+   Permanent-class contract conforming to the facade profile
+   ([FCP-PERMANENCE] in
+   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
+   Core cannot prove profile conformance from an address; deployment
+   conformance must enforce it through controller code-hash approval,
+   static analysis, tests, and the matrix gates, mirroring the
+   resolver-binding posture of [PV1-2981].
+4. Registration is evented:
+
+   ```solidity
+   event CollectionTransferControllerRegistered(
+       uint16 schemaVersion,
+       uint256 indexed collectionId,
+       address indexed controller,
+       bytes32 indexed actionId
+   );
+   ```
+
+   `schemaVersion` is `1`, `actionId` binds the authorizing action
+   identity ([GOV-ACTION-ID]), and the signature enters the event
+   catalog and its golden tests ([LCM-EVENTS]).
+5. Finality identity binding. For `EXTERNAL_FACADE` collections the
+   registered controller address and its facade-local ID rule are
+   bound into the collection's finality components through the pinned
+   record family owned by [CMC-FACADE-BINDING] in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md),
+   a finality component per [LTA-FINALITY] requirement 16
+   ([LTA-IDENTITY-MODE]; ADR 0015 decision W4), so the two-address
+   identity is part of the work's permanent identity; this section
+   cites that binding and restates nothing.
+6. Controlled mutation path with invariant parity.
+   `controlledOwnershipChange` is the sole ownership-mutation entry
+   for `EXTERNAL_FACADE` collections. It is callable only by the
+   collection's registered controller — every other caller reverts
+   with the typed error `CallerNotTransferController`, and every call
+   for a `CORE_NATIVE` collection reverts with
+   `IdentityModeNotExternalFacade` — and for a transfer it enforces
+   exactly the native open-transfer invariant set: owner match
+   (`from` must equal `ownerOf(tokenId)`) and a nonzero recipient,
+   nothing else. Native transfers on this Core line are unconditioned
+   ([LTA-STANDARDS]; [PV1-EXCL] items 1-3): locks, finality
+   components, and pause never gate ownership transfer, in either
+   mode — finality freezes artwork bytes, never ownership — so the
+   controlled path checks none of them for transfers, and the native
+   burn-precondition suite applies only to the `to == address(0)`
+   burn case (requirement 7). No additional checks and no omitted
+   checks, verified by running the native-transfer invariant suite —
+   the open-transfer set above, positive and negative cases alike,
+   including transfers that must succeed under live locks, finality
+   components, and pause — against the controlled path (conformance
+   matrix, Transfer controller and controlled mutation gate). Core's
+   native approval state is not consulted: controller authorization
+   replaces the owner/approved check, and facade-local approval
+   semantics are owned by the facade profile.
+7. Path semantics. `collectionId` must match the token's stored
+   collection identity or the call reverts with the typed error
+   `TokenCollectionMismatch` ([PV1-IDENTITY]). `to == address(0)` is a
+   burn and enforces the identical preconditions as the native burn
+   path, including the one-way collection burn block
+   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-BURN]). `from == address(0)` reverts with the typed error
+   `ControlledMintForbidden`: minting remains manager-only through the
+   [MPA-CORE-ABI] entries in both modes.
+8. Native-entry closure. For an `EXTERNAL_FACADE` collection's tokens,
+   `approve`, `transferFrom`, both `safeTransferFrom` overloads, and
+   the native burn entry revert with the typed error
+   `NativeTransferPathClosed`, and `getApproved` returns `address(0)`
+   because no per-token approval can ever be recorded.
+   `setApprovalForAll` and `isApprovedForAll` are owner-scoped,
+   contract-wide ERC-721 surfaces and remain callable for
+   `CORE_NATIVE` use; an operator grant conveys no authority over
+   `EXTERNAL_FACADE` tokens because every native entry that would
+   consume it reverts per-token. Exactly one live ownership-mutation
+   path exists per collection in either mode.
+9. Checks-effects-interactions ordering. In every controlled mutation,
+   and in the facade-mode delivery of requirement 12, all Core state
+   writes and record-chain writes of the operation — ownership,
+   supply and burn accounting, burn audit, and the requirement 11
+   emission — settle before the ownership-change callback to the
+   controller; the callback is the operation's only external call to
+   the controller and its terminal step; a reentrant call from the
+   callback observes fully settled state, and reentry into any
+   ownership-mutation entry within the callback reverts. A callback
+   revert reverts the whole operation ([PV1-MINT-ORDER] invariant 1
+   atomicity).
+10. Terminal callback. The callback is
+    `IStreamTransferController.onStreamOwnershipChange`, covering mint
+    (`from == address(0)`), transfer, and burn (`to == address(0)`);
+    `collectionSerial` carries the facade-local ERC-721 token ID
+    ([FCP-IDENTITY] in the facade profile), and `data` is opaque
+    controller context, empty bytes for manager-path mints. The
+    callback must return `ON_STREAM_OWNERSHIP_CHANGE_SELECTOR` — the
+    `bytes4` selector of `onStreamOwnershipChange`, pinned in the
+    mirror — and any other returndata reverts the operation with the
+    typed error `InvalidTransferControllerAck`. The interface is
+    golden-tested by selector alongside the [PV1-MODULE-ID] surface.
+11. Controlled-ownership-change event family:
+
+    ```solidity
+    event ControlledOwnershipChanged(
+        uint16 schemaVersion,
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId,
+        uint256 collectionId,
+        uint256 collectionSerial
+    );
+    ```
+
+    Core emits `ControlledOwnershipChanged` in place of ERC-721
+    `Transfer` for every `EXTERNAL_FACADE` ownership mutation — mint,
+    transfer, and burn, with the zero-address conventions of ERC-721
+    `Transfer` — carrying the same indexed triple as `Transfer` so
+    indexers retarget by topic shape, plus the collection grouping key
+    and the collection-local serial. `schemaVersion` is `1`; the
+    signature enters the event catalog and its golden tests
+    ([LCM-EVENTS]). `CORE_NATIVE` mutations emit ERC-721 `Transfer`
+    unchanged, and identity events (`TokenCollectionRegistered`,
+    [MPA-CORE-ABI]) are mode-independent.
+12. Mint and burn delivery. For `EXTERNAL_FACADE` collections every
+    mint execution routes the same terminal callback — at single-step
+    mint and at prepared-mint completion alike, the point where
+    ERC-721 ownership materializes ([MPA-CORE-ABI]) — and every burn
+    routes it, with the requirement 10 zero-address semantics. The
+    callback executes after every [PV1-MINT-ORDER] invariant is
+    satisfied and every write of requirement 9 has settled.
+    `StreamMintManager`'s canonical mint ordering [PV1-MINT-ORDER] is
+    otherwise unchanged: the invariants, the two blessed realizations,
+    and every `CORE_NATIVE` behavior are untouched — the delivery
+    notification is an appended terminal step for facade-mode
+    collections only. Core performs no ERC-721 safe-transfer recipient
+    callback for `EXTERNAL_FACADE` operations; recipient-safety
+    semantics for facade tokens are owned by the facade profile, and
+    [PV1-MINT-ORDER] invariant 6 holds by construction because the
+    controller is called only after full settlement.
+13. Verification. The registry read, registration path, negative
+    gates, invariant parity, adversarial CEI reentrancy test, and
+    per-mode event-exclusivity assertions are deployment-gated by the
+    conformance matrix (Transfer controller and controlled mutation
+    gate), with the controller-registration and
+    controlled-ownership-change families asserted against the event
+    catalog ([LCM-EVENTS]).
+
 ## Core Hook Budget
 
 Requirements [PV1-HOOKS]:
@@ -269,6 +744,9 @@ paths:
 | entropy registration call during mint | Core to coordinator | Mint path |
 | Core-originated ERC-4906 refresh emitters callable by authorized satellites (ADR 0009 decision 5) | Core | Metadata router, finality registry, entropy coordinator |
 | Core-originated ERC-7572 `ContractURIUpdated()` emitter callable by one authorized satellite (ADR 0012 decision T9) | Core | Metadata router only |
+| `collectionIdentityMode(uint256)` and `collectionTransferController(uint256)` storage reads plus the governed one-way `declareCollectionIdentityMode` and `registerCollectionTransferController` entries ([PV1-FACADE-READINESS]; ADR 0015 decision W4) | Core | Marketplaces, indexers, and governance tooling |
+| `controlledOwnershipChange(...)` controller-only mutation entry with the terminal `IStreamTransferController` delivery callback and `ControlledOwnershipChanged` emission for `EXTERNAL_FACADE` collections ([PV1-TRANSFER-CONTROLLER]; ADR 0015 decision W4) | Core | Registered transfer controllers only |
+| `totalSupplyOfCollection(uint256)` per-collection live-supply storage read — minted-ever minus burned, non-reverting, mode-independent — the pinned Core read a registered facade's `totalSupply()` delegates to ([PV1-FACADE-READINESS] requirement 8; ADR 0015 decision W4) | Core | Marketplaces, indexers, and registered facades |
 
 This hook table is the normative home of the Core refresh-emitter caller
 set (ADR 0010 decision D3.6): the restricted ERC-4906 helpers are callable
@@ -933,6 +1411,32 @@ inputs, replay semantics, and window floors.
 | `STREAM_GOVERNANCE_ACTION_V1` | `6529STREAM_GOVERNANCE_ACTION_V1` | 0xda01e91bb5de11674cef69c6774002280d75bcb43cd9c78413c4b94d5d14249b | ADR 0004 governance timelock layer | `1` | ADR 0004 `[GOV-ACTION-ID]` |
 | `STREAM_GOVERNANCE_CALLS_V1` | `6529STREAM_GOVERNANCE_CALLS_V1` | 0x51c60c7ea5577cbf0c5157f544a7de1a186ae82b6fc4df6a626b9c8d1d3a0b61 | ADR 0004 governance timelock layer | `1` | ADR 0004 `[GOV-ACTION-ID]`, `[GOV-BATCH]` |
 
+### Collection Identity And Facade-Readiness Mirror Rows
+
+Homes: this document ([PV1-IDENTITY-MODE], [PV1-TRANSFER-CONTROLLER]),
+the facade profile ([FCP-PERMANENCE] rule 4 in
+[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)),
+and the collection metadata contract ([CMC-FACADE-BINDING] in
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
+(ADR 0015 decisions W4 and W5). The identity-mode vocabulary IDs and the
+content-consent family identifier are each the `keccak256` of the ASCII
+name with no `abi.encode` inputs, following the conservation-tier
+vocabulary style
+([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-MUSEUM-GRADE]); the interface selector is the first four bytes of
+the `keccak256` of the canonical signature string. The hash values are
+computed from the adjacent preimages; the CI recomputation checker
+re-derives each one under [PV1-MIRROR] rule 2, failing on drift.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `IDENTITY_MODE_CORE_NATIVE` | `CORE_NATIVE` | 0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1 | `StreamCore` | `1` | identity-mode vocabulary ID; this document `[PV1-IDENTITY-MODE]` requirement 1 (ADR 0015 decision W4) |
+| `IDENTITY_MODE_EXTERNAL_FACADE` | `EXTERNAL_FACADE` | 0xc7dd233bcf9b505ac7e2ab434d9e6af7bc663d64e2d983f1dd6d77668b578656 | `StreamCore` | `1` | identity-mode vocabulary ID; this document `[PV1-IDENTITY-MODE]` requirement 1 (ADR 0015 decision W4) |
+| `COLLECTION_IDENTITY_MODE_FAMILY_ID` | `COLLECTION_IDENTITY_MODE` | 0x2066df294ae5c31dd9fb618d99b6691f986f542e81b225382082dfca99030ce1 | `StreamCore` | `1` | content-consent family identifier consumed by `requireContentConsent`; this document `[PV1-IDENTITY-MODE]` requirement 4; artist spec `[AA-CONTENT]` (ADR 0015 decision W4) |
+| `ON_STREAM_OWNERSHIP_CHANGE_SELECTOR` | `onStreamOwnershipChange(uint256,uint256,uint256,address,address,bytes)` | 0xdaee0572 | registered transfer controllers | `1` | `bytes4` interface selector — the first four bytes of the `keccak256` of the signature string; this document `[PV1-TRANSFER-CONTROLLER]` requirement 10 (ADR 0015 decision W4) |
+| `STREAM_COLLECTION_FACADE` | `STREAM_COLLECTION_FACADE` | 0x10f31f822ddc93e9cc5b5b8696166e94f953b83c514ca790ae0bbc83acf8ded8 | collection facades | `1` | facade module type; home `[FCP-PERMANENCE]` rule 4 in [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md) (ADR 0015 decision W5) |
+| `RECORD_IDENTITY_FACADE_BINDING` | `IDENTITY_FACADE_BINDING` | 0xb3454197cb151b3305cae7757ccaa671e791eb40902d3aefe6cbaa64d6695087 | `StreamCollectionMetadata` | `1` | facade identity binding record type; home `[CMC-FACADE-BINDING]` in [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) (ADR 0015 decision W4) |
+
 ### Governed Gas Parameter Identifier Mirror Rows
 
 Pattern home:
@@ -1048,6 +1552,13 @@ the following from emitted events and compares against direct reads:
     proving record-stream completeness for any replica
     ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
     [CMC-OWNER-RECORDS], [CMC-RECORD-CHAIN]).
+13. For `EXTERNAL_FACADE` collections, complete per-token ownership
+    from `ControlledOwnershipChanged` replay alone — Core-address logs
+    only, no facade logs — compared against `ownerOf`, proving the
+    Core-side controlled-ownership-change family is a complete
+    ownership record and facade emission is a convenience mirror,
+    never the carrier ([PV1-FACADE-READINESS] requirement 3; ADR 0015
+    decision W4).
 
 State reads remain useful for live tooling, but event replay must be
 sufficient for long-lived indexers and archive reconstruction.
@@ -1136,7 +1647,11 @@ mechanisms.
    [CMC-MEMENTO] (ADR 0011 decision R9) — never as Core token properties.
 3. Rental and user-role mechanics (ERC-4907-class) and any other
    transfer-conditioned or transfer-hooked token behavior — successor
-   line only, same invariant.
+   line only, same invariant. The facade-readiness controlled mutation
+   path is not such a hook: it relocates which contract serves the
+   ERC-721 surface for `EXTERNAL_FACADE` collections and conditions
+   nothing ([PV1-FACADE-READINESS] requirement 4; ADR 0015 decision
+   W4).
 4. General onchain policy VM behavior.
 5. Transfer of arbitrary museum, rights, legal, VC/DID, EAS, or
    institution-specific graph logic into `StreamCore`.

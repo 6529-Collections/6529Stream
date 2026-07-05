@@ -7,6 +7,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the
+  on-chain collection-metadata reads plus `properties.stream.collection`
+  token JSON are the normative marketplace collection-identity signal, a
+  two-named-signed-commitments gate precedes public sale, and the
+  per-collection ERC-721 facade line is specified as a dormant extension
+  profile (`docs/stream-collection-facade-profile.md`) with its
+  facade-readiness genesis surfaces (per-collection identity mode,
+  one-way pre-first-mint transfer-controller registry, controlled
+  mutation path, event-doctrine carve-out, finality identity binding)
+  carved into the protocol v1 spec, umbrella doctrine, metadata specs,
+  artist consent surface, and conformance-matrix gates, closing the
+  open-question register.
 - Added the launch v1 target architecture spec and hardened the payment,
   royalty, mint, metadata, and entropy specs for Core-native ERC-2981,
   event-sourced reconstruction, and long-lived module boundaries.

@@ -136,7 +136,8 @@ Review-entry condition tracked by the conformance matrix.
 ## Decision Citation Format
 
 Decisions are cited uniformly as `(ADR <number> decision <id>)` — for
-example `(ADR 0010 decision D2.3)` or `(ADR 0011 decision R6)`. ADR 0009
+example `(ADR 0010 decision D2.3)`, `(ADR 0011 decision R6)`, or
+`(ADR 0015 decision W4)`. ADR 0009
 predates lettered ids and its decisions are plain numerals by
 construction: `(ADR 0009 decision 21)` is the conformant shape for that
 one record (ADR 0014 decision V9). No other citation shape is conformant;
@@ -221,6 +222,7 @@ requirement; only the amendment process changes requirements.
 | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) | Replaceable (provider adapters) | Draft |
 | [`docs/stream-artist-authority.md`](stream-artist-authority.md) | Permanent interfaces + Replaceable genesis modules (artist authority) | Draft |
 | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) | Permanent interfaces + Replaceable genesis modules (sales and auctions) | Draft |
+| [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md) | Permanent interfaces (dormant extension profile; physically absent at genesis) | Draft |
 | [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) | Deployment gate over all layers | Draft |
 | [`docs/adr/`](adr/README.md) | Decision records / amendment mechanism | Per-ADR status |
 
