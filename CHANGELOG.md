@@ -7,6 +7,23 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Built the sixteen missing Verification Tooling Backlog checkers
+  (`docs/launch-conformance-matrix.md` [LCM-TOOLING]) as standalone
+  `scripts/check_*.py` tools with focused self-tests: baseline-record
+  headers, decision citation format, requirement anchors, domain-constant
+  recomputation across every home and protocol v1 mirror table, GGP/GTP
+  identifier mirror completeness, probe definitions, prose counts,
+  normative-language lint, enum-literal cross-check, cross-document
+  mirrors, and the artifact validators for the v1 event catalog, Numeric
+  ID Catalog, W1-signal marketplace commitments, genesis spec bundle,
+  requirement traceability, and the metadata aggregate ceilings.
+  Artifact validators pass vacuously until their subjects exist. The
+  checkers are standalone (`--repo-root`) and intentionally not wired
+  into `make check` yet; the baseline-record header, citation-format,
+  and normative-language checkers currently fail on pre-existing
+  documentation defects (missing header blocks, plain-numeral ADR 0010
+  citations, unresolved must-ward `should` candidates) and stay staged
+  until those documentation fixes land.
 - Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the
   on-chain collection-metadata reads plus `properties.stream.collection`
   token JSON are the normative marketplace collection-identity signal, a
