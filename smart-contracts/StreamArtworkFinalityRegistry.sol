@@ -73,14 +73,6 @@ contract StreamArtworkFinalityRegistry is
         bool exactLeafCount;
     }
 
-    /// @dev Bundles range-diagnostic values so deep call frames stay under stack limits.
-    struct RangeObservation {
-        bool matches;
-        bytes32 expectedRangeHash;
-        bytes32 observedRangeHash;
-        uint256 nextStart;
-    }
-
     constructor(
         address coreReads_,
         address metadataReads_,
@@ -377,12 +369,16 @@ contract StreamArtworkFinalityRegistry is
         _requireComponentListWellFormed(components);
         _requireManifestValid(manifest);
 
+        uint8 metadataMode = metadataReads.collectionMetadataMode(scope.collectionId);
+        _requireSnapshotManifestForScriptWorks(scope.collectionId, metadataMode);
+
         (ctx.coreFactsHash, ctx.expectedLeafCount, ctx.exactLeafCount) =
             _verifyCoreGatesAndFacts(scope);
         _verifyContentRoot(scope, ctx.expectedLeafCount, ctx.exactLeafCount);
-        _verifyFacadeBinding(scope.collectionId);
+        _verifyFacadeBindingComponent(scope, components);
 
         ctx.componentsHash = _componentsHash(components);
+        _requireMandatoryComponents(components, metadataMode);
         _verifySanctionComponent(scope, components, ctx.coreFactsHash, manifest);
         _verifyComponentsLiveStrict(components, _componentCallData(scope));
         _verifyDiscovery(scope, components.length, ctx.componentsHash);
@@ -667,6 +663,13 @@ contract StreamArtworkFinalityRegistry is
                 action.expectedFinalityRecordHash, expectedFinalityRecordHash
             );
         }
+        // Defense in depth ([LTA-FREEZE] rule 4): an irreversible terminal freeze must retain an
+        // exercisable veto through its whole window. If the guardian was cleared after
+        // scheduling, block execution rather than finalize with no live veto authority.
+        (address guardian,) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey);
+        if (guardian == address(0)) {
+            revert FinalityFreezeGuardianUnset(scopeKey);
+        }
     }
 
     function _requireFinalityAdmin(address account) private view {
@@ -894,25 +897,89 @@ contract StreamArtworkFinalityRegistry is
         }
     }
 
-    /// @dev [LTA-FINALITY] requirement 16 / [CMC-FINALITY-INPUTS] rule 14: EXTERNAL_FACADE
-    ///      collections require the recorded facade identity binding whose facade address
-    ///      equals the Core-registered transfer controller; CORE_NATIVE collections carry no
-    ///      binding component by construction and skip this gate.
-    function _verifyFacadeBinding(uint256 collectionId) private view {
+    /// @dev [LTA-FINALITY] requirement 16 / [CMC-FINALITY-INPUTS] rule 14 / [CMC-FACADE-BINDING]
+    ///      rule 6: for EXTERNAL_FACADE collections the two-address identity is part of the
+    ///      work's permanent identity, so the submitted component list must carry an
+    ///      IDENTITY_FACADE_BINDING component whose dataHash equals the CMC facade-binding
+    ///      recordHash — this enters componentsHash and therefore the immutable
+    ///      finalityRecordHash, and is re-surfaceable through verifyFinality/frozenRouteForScope.
+    ///      The live gate stays the satisfaction check (recorded binding, facade == registered
+    ///      transfer controller). CORE_NATIVE collections carry no binding by construction and
+    ///      must not submit the component (a spurious one reverts).
+    function _verifyFacadeBindingComponent(
+        StreamFinalityScope memory scope,
+        StreamFinalityComponentExpectation[] calldata components
+    ) private view {
+        (uint256 index, uint256 occurrences) =
+            StreamFinalityComponentSet.locateFacadeBindingSlot(components);
+        bool externalFacade = coreReads.collectionIdentityMode(scope.collectionId)
+            == StreamFinalityDomains.IDENTITY_MODE_EXTERNAL_FACADE;
+
+        if (!externalFacade) {
+            if (occurrences != 0) {
+                revert FinalityFacadeBindingComponentForbidden(scope.collectionId);
+            }
+            return;
+        }
+
+        // EXTERNAL_FACADE: the live binding must exist and match the registered controller.
+        (bool recorded, address facadeAddress, bytes32 recordHash) =
+            metadataReads.facadeIdentityBindingRecord(scope.collectionId);
+        if (!recorded) {
+            revert FinalityFacadeBindingMissing(scope.collectionId);
+        }
+        address controller = coreReads.collectionTransferController(scope.collectionId);
+        if (facadeAddress == address(0) || facadeAddress != controller) {
+            revert FinalityFacadeBindingControllerMismatch(facadeAddress, controller);
+        }
+
+        // And it must be bound into the permanent record via a submitted component.
+        if (occurrences == 0) {
+            revert FinalityFacadeBindingComponentMissing(scope.collectionId);
+        }
+        if (occurrences > 1) {
+            revert FinalityFacadeBindingComponentForbidden(scope.collectionId);
+        }
+        if (components[index].dataHash != recordHash) {
+            revert FinalityFacadeBindingComponentDataHashMismatch(
+                components[index].dataHash, recordHash
+            );
+        }
+    }
+
+    /// @dev [LTA-FINALITY] requirement 1 / MRR-FINALITY rules 6-9 / [CMC-FINALITY-INPUTS]:
+    ///      the mandatory component-type floor enforced ONCHAIN, independent of the optional
+    ///      discovery module (address(0) at genesis). Delegated to the library so the check does
+    ///      not inflate registry bytecode; reverts FinalityMissingRequiredComponent on the first
+    ///      missing type.
+    function _requireMandatoryComponents(
+        StreamFinalityComponentExpectation[] calldata components,
+        uint8 metadataMode
+    ) private pure {
+        bytes32 missing = StreamFinalityComponentSet.firstMissingMandatory(components, metadataMode);
+        if (missing != bytes32(0)) {
+            revert FinalityMissingRequiredComponent(missing);
+        }
+        // The exactly-one artist-sanction/platform-works floor is enforced by
+        // _verifySanctionComponent; the EXTERNAL_FACADE identity-binding floor by
+        // _verifyFacadeBindingComponent.
+    }
+
+    /// @dev [LTA-FINALITY] requirement 6 / MRR-FINALITY rule 7 / [CMC-FINALITY-INPUTS] rule 3:
+    ///      ONCHAIN and hybrid collections cannot finalize unless an assembled snapshot
+    ///      manifest hash was already recorded. OFFCHAIN is unaffected.
+    function _requireSnapshotManifestForScriptWorks(uint256 collectionId, uint8 metadataMode)
+        private
+        view
+    {
         if (
-            coreReads.collectionIdentityMode(collectionId)
-                != StreamFinalityDomains.IDENTITY_MODE_EXTERNAL_FACADE
+            metadataMode != StreamFinalityDomains.METADATA_MODE_ONCHAIN
+                && metadataMode != StreamFinalityDomains.METADATA_MODE_HYBRID
         ) {
             return;
         }
-        (bool recorded, address facadeAddress,) =
-            metadataReads.facadeIdentityBindingRecord(collectionId);
-        if (!recorded) {
-            revert FinalityFacadeBindingMissing(collectionId);
-        }
-        address controller = coreReads.collectionTransferController(collectionId);
-        if (facadeAddress == address(0) || facadeAddress != controller) {
-            revert FinalityFacadeBindingControllerMismatch(facadeAddress, controller);
+        if (metadataReads.latestCollectionSnapshotHash(collectionId) == bytes32(0)) {
+            revert FinalitySnapshotManifestMissing(collectionId, metadataMode);
         }
     }
 
@@ -926,7 +993,8 @@ contract StreamArtworkFinalityRegistry is
         bytes32 coreFactsHash,
         StreamFinalityManifestRef calldata manifest
     ) private view {
-        (uint256 index, uint256 occurrences) = _locateSanctionSlot(components);
+        (uint256 index, uint256 occurrences) =
+            StreamFinalityComponentSet.locateSanctionSlot(components);
         if (occurrences == 0) {
             revert FinalitySanctionComponentMissing();
         }
@@ -978,46 +1046,23 @@ contract StreamArtworkFinalityRegistry is
         );
     }
 
-    function _locateSanctionSlot(StreamFinalityComponentExpectation[] calldata components)
-        private
-        pure
-        returns (uint256 index, uint256 occurrences)
-    {
-        uint256 count = components.length;
-        for (uint256 i = 0; i < count; i++) {
-            bytes32 componentType = components[i].componentType;
-            if (
-                componentType == StreamFinalityDomains.COMPONENT_ARTIST_SANCTION
-                    || componentType == StreamFinalityDomains.COMPONENT_PLATFORM_WORKS_DECLARATION
-            ) {
-                index = i;
-                occurrences++;
-            }
-        }
-    }
-
     function _verifyComponentsLiveStrict(
         StreamFinalityComponentExpectation[] calldata components,
         bytes memory componentCallData
     ) private view {
-        uint256 count = components.length;
-        for (uint256 i = 0; i < count; i++) {
-            address component = components[i].component;
-            if (component.code.length == 0) {
-                revert FinalityComponentUnreadable(i);
-            }
-            if (component.codehash != components[i].codeHash) {
-                revert FinalityComponentCodeHashMismatch(i);
-            }
-            (bool readable, StreamFinalityComponentState memory state) =
-                _observeComponent(component, componentCallData, 0);
-            if (!readable) {
-                revert FinalityComponentUnreadable(i);
-            }
-            if (!_stateMatchesExpectation(state, components[i])) {
-                revert FinalityComponentMismatch(i);
-            }
+        (uint8 failCode, uint256 failIndex) = StreamFinalityComponentSet.verifyComponentsStrict(
+            components, componentCallData
+        );
+        if (failCode == StreamFinalityComponentSet.STRICT_OK) {
+            return;
         }
+        if (failCode == StreamFinalityComponentSet.STRICT_CODEHASH_MISMATCH) {
+            revert FinalityComponentCodeHashMismatch(failIndex);
+        }
+        if (failCode == StreamFinalityComponentSet.STRICT_STATE_MISMATCH) {
+            revert FinalityComponentMismatch(failIndex);
+        }
+        revert FinalityComponentUnreadable(failIndex);
     }
 
     function _verifyDiscovery(
@@ -1073,98 +1118,6 @@ contract StreamArtworkFinalityRegistry is
         return abi.encodeWithSelector(
             IStreamArtworkScopedFinalityComponent.finalityStateForScope.selector, scope
         );
-    }
-
-    function _componentStillMatches(
-        StreamFinalityComponentExpectation memory expectation,
-        bytes memory componentCallData,
-        uint256 gasCap
-    ) private view returns (bool) {
-        address component = expectation.component;
-        if (component.code.length == 0 || component.codehash != expectation.codeHash) {
-            return false;
-        }
-        (bool readable, StreamFinalityComponentState memory state) =
-            _observeComponent(component, componentCallData, gasCap);
-        if (!readable) {
-            return false;
-        }
-        return _stateMatchesExpectation(state, expectation);
-    }
-
-    /// @dev Bounded staticcall with a fixed-size returndata copy; never reverts on component
-    ///      misbehavior ([LTA-FINALITY] diagnostic-read semantics).
-    function _observeComponent(address component, bytes memory componentCallData, uint256 gasCap)
-        private
-        view
-        returns (bool readable, StreamFinalityComponentState memory state)
-    {
-        bool success;
-        bytes memory returndata;
-        if (gasCap == 0) {
-            (success, returndata) = component.staticcall(componentCallData);
-        } else {
-            (success, returndata) = component.staticcall{ gas: gasCap }(componentCallData);
-        }
-        if (!success || returndata.length != 256) {
-            return (false, state);
-        }
-        return _decodeComponentState(returndata);
-    }
-
-    function _decodeComponentState(bytes memory returndata)
-        private
-        pure
-        returns (bool ok, StreamFinalityComponentState memory state)
-    {
-        uint256 rawFrozen;
-        bytes32 componentType;
-        uint256 rawComponent;
-        uint256 rawInterfaceId;
-        bytes32 codeHash;
-        bytes32 moduleVersion;
-        bytes32 manifestHash;
-        bytes32 dataHash;
-        assembly {
-            rawFrozen := mload(add(returndata, 0x20))
-            componentType := mload(add(returndata, 0x40))
-            rawComponent := mload(add(returndata, 0x60))
-            rawInterfaceId := mload(add(returndata, 0x80))
-            codeHash := mload(add(returndata, 0xa0))
-            moduleVersion := mload(add(returndata, 0xc0))
-            manifestHash := mload(add(returndata, 0xe0))
-            dataHash := mload(add(returndata, 0x100))
-        }
-        if (rawFrozen > 1 || rawComponent > type(uint160).max) {
-            return (false, state);
-        }
-        if (rawInterfaceId & ((uint256(1) << 224) - 1) != 0) {
-            return (false, state);
-        }
-        state = StreamFinalityComponentState({
-            frozen: rawFrozen == 1,
-            componentType: componentType,
-            component: address(uint160(rawComponent)),
-            interfaceId: bytes4(bytes32(rawInterfaceId)),
-            codeHash: codeHash,
-            moduleVersion: moduleVersion,
-            manifestHash: manifestHash,
-            dataHash: dataHash
-        });
-        return (true, state);
-    }
-
-    function _stateMatchesExpectation(
-        StreamFinalityComponentState memory state,
-        StreamFinalityComponentExpectation memory expectation
-    ) private pure returns (bool) {
-        return state.frozen && state.componentType == expectation.componentType
-            && state.component == expectation.component
-            && state.interfaceId == expectation.interfaceId
-            && state.codeHash == expectation.codeHash
-            && state.moduleVersion == expectation.moduleVersion
-            && state.manifestHash == expectation.manifestHash
-            && state.dataHash == expectation.dataHash;
     }
 
     // ------------------------------------------------------------------
@@ -1498,13 +1451,7 @@ contract StreamArtworkFinalityRegistry is
         if (!finalized) {
             return (false, bytes32(0), bytes32(0));
         }
-        bytes memory componentCallData = _componentCallData(scope);
-        bool matches = true;
-        uint256 count = stored.length;
-        for (uint256 i = 0; i < count && matches; i++) {
-            matches =
-                _componentStillMatches(stored[i], componentCallData, FINALITY_COMPONENT_READ_GAS);
-        }
+        (bool matches,,) = _diagnoseSlice(_sliceComponents(stored, 0, stored.length), scope);
         return (matches, recHash, compHash);
     }
 
@@ -1524,68 +1471,23 @@ contract StreamArtworkFinalityRegistry is
         if (!finalized) {
             return (false, bytes32(0), bytes32(0), bytes32(0), 0);
         }
-        RangeObservation memory result =
-            _observeRange(stored, _componentCallData(scope), start, limit);
-        return (
-            result.matches,
-            recHash,
-            result.expectedRangeHash,
-            result.observedRangeHash,
-            result.nextStart
-        );
-    }
-
-    function _observeRange(
-        StreamFinalityComponentExpectation[] storage stored,
-        bytes memory componentCallData,
-        uint256 start,
-        uint256 limit
-    ) private view returns (RangeObservation memory result) {
+        finalityRecordHash = recHash;
         uint256 count = stored.length;
         uint256 from = start > count ? count : start;
-        uint256 end = limit >= count - from ? count : from + limit;
-        result.nextStart = end;
-        result.matches = true;
-        StreamFinalityComponentExpectation[] memory expected =
-            new StreamFinalityComponentExpectation[](end - from);
-        StreamFinalityComponentExpectation[] memory observed =
-            new StreamFinalityComponentExpectation[](end - from);
-        for (uint256 i = 0; i < expected.length; i++) {
-            expected[i] = stored[from + i];
-            (bool readable, StreamFinalityComponentState memory state) = _observeComponent(
-                expected[i].component, componentCallData, FINALITY_COMPONENT_READ_GAS
-            );
-            if (readable) {
-                observed[i] = StreamFinalityComponentExpectation({
-                    componentType: state.componentType,
-                    component: state.component,
-                    interfaceId: state.interfaceId,
-                    codeHash: state.codeHash,
-                    moduleVersion: state.moduleVersion,
-                    manifestHash: state.manifestHash,
-                    dataHash: state.dataHash
-                });
-            }
-            if (!_observationMatches(expected[i], readable, state)) {
-                result.matches = false;
-            }
-        }
-        result.expectedRangeHash = _componentsHashMemory(expected);
-        result.observedRangeHash = _componentsHashMemory(observed);
+        nextStart = limit >= count - from ? count : from + limit;
+        (rangeMatches, expectedRangeHash, observedRangeHash) =
+            _diagnoseSlice(_sliceComponents(stored, from, nextStart - from), scope);
     }
 
-    function _observationMatches(
-        StreamFinalityComponentExpectation memory expectation,
-        bool readable,
-        StreamFinalityComponentState memory state
-    ) private view returns (bool) {
-        if (!readable) {
-            return false;
-        }
-        address component = expectation.component;
-        if (component.code.length == 0 || component.codehash != expectation.codeHash) {
-            return false;
-        }
-        return _stateMatchesExpectation(state, expectation);
+    function _diagnoseSlice(
+        StreamFinalityComponentExpectation[] memory slice,
+        StreamFinalityScope memory scope
+    ) private view returns (bool matches, bytes32 expectedHash, bytes32 observedHash) {
+        return StreamFinalityComponentSet.diagnoseRange(
+            slice,
+            _componentCallData(scope),
+            FINALITY_COMPONENT_READ_GAS,
+            StreamFinalityDomains.STREAM_FINALITY_COMPONENTS_V1
+        );
     }
 }

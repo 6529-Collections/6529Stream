@@ -123,9 +123,8 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         registry.scheduleArtworkTerminalFreeze(scope, EXPECTED_HASH, notBefore, expiresAfter);
 
         StreamTerminalFreezeAction memory action = registry.artworkTerminalFreezeAction(scope);
-        uint256(uint8(action.status)).assertEq(
-            uint256(uint8(StreamTerminalFreezeStatus.SCHEDULED)), "scheduled"
-        );
+        uint256(uint8(action.status))
+            .assertEq(uint256(uint8(StreamTerminalFreezeStatus.SCHEDULED)), "scheduled");
         action.expectedFinalityRecordHash.assertEq(EXPECTED_HASH, "staged hash");
         uint256(action.notBefore).assertEq(notBefore, "notBefore");
         uint256(action.expiresAfter).assertEq(expiresAfter, "expiresAfter");
@@ -209,9 +208,8 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         registry.vetoArtworkTerminalFreeze(scope, keccak256("compromised key"));
 
         StreamTerminalFreezeAction memory action = registry.artworkTerminalFreezeAction(scope);
-        uint256(uint8(action.status)).assertEq(
-            uint256(uint8(StreamTerminalFreezeStatus.VETOED)), "vetoed"
-        );
+        uint256(uint8(action.status))
+            .assertEq(uint256(uint8(StreamTerminalFreezeStatus.VETOED)), "vetoed");
 
         // A vetoed action is terminal: no second veto, no cancel, no execution.
         vm.prank(guardian);
@@ -287,9 +285,8 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         vm.prank(finalityAdmin);
         registry.cancelArtworkTerminalFreeze(scope, keccak256("changed plans"));
 
-        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status)).assertEq(
-            uint256(uint8(StreamTerminalFreezeStatus.CANCELLED)), "cancelled"
-        );
+        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status))
+            .assertEq(uint256(uint8(StreamTerminalFreezeStatus.CANCELLED)), "cancelled");
 
         vm.prank(finalityAdmin);
         vm.expectRevert(
@@ -328,15 +325,13 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         emit ArtworkTerminalFreezeExpired(1, _scopeKeyOf(scope), EXPECTED_HASH);
         vm.prank(outsider); // permissionless materialization
         registry.materializeExpiredArtworkTerminalFreeze(scope);
-        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status)).assertEq(
-            uint256(uint8(StreamTerminalFreezeStatus.EXPIRED)), "expired"
-        );
+        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status))
+            .assertEq(uint256(uint8(StreamTerminalFreezeStatus.EXPIRED)), "expired");
 
         // Re-staging after expiry works.
         _schedule(scope);
-        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status)).assertEq(
-            uint256(uint8(StreamTerminalFreezeStatus.SCHEDULED)), "re-staged"
-        );
+        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status))
+            .assertEq(uint256(uint8(StreamTerminalFreezeStatus.SCHEDULED)), "re-staged");
     }
 
     function testScheduleAutoMaterializesOverdueAction() public {
@@ -350,9 +345,10 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         emit ArtworkTerminalFreezeExpired(1, _scopeKeyOf(scope), EXPECTED_HASH);
         vm.prank(finalityAdmin);
         registry.scheduleArtworkTerminalFreeze(scope, EXPECTED_HASH, notBefore2, expiresAfter2);
-        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status)).assertEq(
-            uint256(uint8(StreamTerminalFreezeStatus.SCHEDULED)), "restaged after auto-expiry"
-        );
+        uint256(uint8(registry.artworkTerminalFreezeAction(scope).status))
+            .assertEq(
+                uint256(uint8(StreamTerminalFreezeStatus.SCHEDULED)), "restaged after auto-expiry"
+            );
     }
 
     // ------------------------------------------------------------------
@@ -366,8 +362,7 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFreezeNotScheduled.selector,
-                fixture.scopeKey
+                IStreamArtworkFinalityRegistry.FinalityFreezeNotScheduled.selector, fixture.scopeKey
             )
         );
         registry.finalizeCollectionArtwork(
@@ -430,6 +425,40 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         );
     }
 
+    function testExecutionBlockedIfGuardianClearedAfterScheduling() public {
+        // Defense in depth ([LTA-FREEZE] rule 4): an irreversible terminal freeze must retain an
+        // exercisable veto through its whole window. Clearing the guardian after scheduling must
+        // block execution, not let it finalize with no live veto authority.
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        uint64 nb = uint64(block.timestamp) + registry.TERMINAL_FREEZE_VETO_FLOOR();
+        uint64 ea = nb + registry.TERMINAL_FREEZE_EXECUTION_WINDOW_FLOOR();
+        vm.prank(finalityAdmin);
+        registry.scheduleArtworkTerminalFreeze(
+            fixture.scope, fixture.expectedFinalityRecordHash, nb, ea
+        );
+        authority.setDefaultGuardian(address(0));
+        vm.warp(nb);
+        vm.prank(finalityAdmin);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityFreezeGuardianUnset.selector,
+                fixture.scopeKey
+            )
+        );
+        registry.finalizeCollectionArtwork(
+            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+        );
+
+        // Restoring a guardian lets execution proceed.
+        authority.setDefaultGuardian(guardian);
+        vm.prank(finalityAdmin);
+        registry.finalizeCollectionArtwork(
+            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+        );
+        registry.collectionFinalityRecord(COLLECTION_ID).finalized
+            .assertTrue("finalized once guardian restored");
+    }
+
     function testVetoedActionBlocksExecutionForever() public {
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
         uint64 notBefore = uint64(block.timestamp) + registry.TERMINAL_FREEZE_VETO_FLOOR();
@@ -444,8 +473,7 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFreezeNotScheduled.selector,
-                fixture.scopeKey
+                IStreamArtworkFinalityRegistry.FinalityFreezeNotScheduled.selector, fixture.scopeKey
             )
         );
         registry.finalizeCollectionArtwork(
@@ -464,44 +492,35 @@ contract StreamArtworkFinalityFreezeTest is FinalityTestBase {
             _idScope(StreamFinalityScopeType.RELEASE, COLLECTION_ID, keccak256("release-1"));
 
         // NONE before any record exists.
-        uint256(uint8(registry.artworkFreezeMode(collectionScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.NONE)), "collection NONE"
-        );
-        uint256(uint8(registry.artworkFreezeMode(tokenScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.NONE)), "token NONE"
-        );
+        uint256(uint8(registry.artworkFreezeMode(collectionScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.NONE)), "collection NONE");
+        uint256(uint8(registry.artworkFreezeMode(tokenScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.NONE)), "token NONE");
 
         // TOKEN-scope finality freezes exactly that key.
         Fixture memory tokenFixture = _buildFixture(tokenScope, true);
         _executeFixture(tokenFixture);
-        uint256(uint8(registry.artworkFreezeMode(tokenScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.EXACT)), "token EXACT"
-        );
-        uint256(uint8(registry.artworkFreezeMode(releaseScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.NONE)), "release still NONE"
-        );
-        uint256(uint8(registry.artworkFreezeMode(collectionScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.NONE)), "collection still NONE"
-        );
+        uint256(uint8(registry.artworkFreezeMode(tokenScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.EXACT)), "token EXACT");
+        uint256(uint8(registry.artworkFreezeMode(releaseScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.NONE)), "release still NONE");
+        uint256(uint8(registry.artworkFreezeMode(collectionScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.NONE)), "collection still NONE");
 
         // Collection finality freezes the exact key and blocks every lower scope: INHERITED.
         Fixture memory collectionFixture = _buildFixture(collectionScope, true);
         _executeFixture(collectionFixture);
-        uint256(uint8(registry.artworkFreezeMode(collectionScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.INHERITED)), "collection INHERITED"
-        );
-        uint256(uint8(registry.artworkFreezeMode(releaseScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.INHERITED)), "release INHERITED"
-        );
+        uint256(uint8(registry.artworkFreezeMode(collectionScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.INHERITED)), "collection INHERITED");
+        uint256(uint8(registry.artworkFreezeMode(releaseScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.INHERITED)), "release INHERITED");
         // A scope with its own executed record reports EXACT over the inherited freeze.
-        uint256(uint8(registry.artworkFreezeMode(tokenScope))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.EXACT)), "token EXACT precedence"
-        );
+        uint256(uint8(registry.artworkFreezeMode(tokenScope)))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.EXACT)), "token EXACT precedence");
 
         // Unrelated collections stay NONE.
-        uint256(uint8(registry.artworkFreezeMode(_collectionScope(COLLECTION_ID + 1)))).assertEq(
-            uint256(uint8(StreamArtworkFreezeMode.NONE)), "other collection NONE"
-        );
+        uint256(uint8(registry.artworkFreezeMode(_collectionScope(COLLECTION_ID + 1))))
+            .assertEq(uint256(uint8(StreamArtworkFreezeMode.NONE)), "other collection NONE");
     }
 
     function testScheduleBlockedOnceScopeFinalized() public {

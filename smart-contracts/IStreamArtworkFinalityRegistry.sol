@@ -133,6 +133,13 @@ interface IStreamArtworkFinalityRegistry {
     error FinalityScopedFactsMismatch();
     error FinalityFacadeBindingMissing(uint256 collectionId);
     error FinalityFacadeBindingControllerMismatch(address boundFacade, address transferController);
+    error FinalityFacadeBindingComponentMissing(uint256 collectionId);
+    error FinalityFacadeBindingComponentDataHashMismatch(
+        bytes32 componentDataHash, bytes32 recordHash
+    );
+    error FinalityFacadeBindingComponentForbidden(uint256 collectionId);
+    error FinalityMissingRequiredComponent(bytes32 componentType);
+    error FinalitySnapshotManifestMissing(uint256 collectionId, uint8 metadataMode);
     error FinalityDiscoveryCountMismatch(uint256 discoveredCount, uint256 submittedCount);
     error FinalityDiscoveryHashMismatch(bytes32 discoveredHash, bytes32 submittedHash);
 

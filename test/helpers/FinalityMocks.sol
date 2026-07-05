@@ -144,6 +144,16 @@ contract MockFinalityMetadata {
     mapping(uint256 => bytes32) private _snapshotHashes;
     mapping(uint256 => mapping(bytes32 => bool)) private _locks;
     mapping(uint256 => mapping(bytes32 => ScopeManifest)) private _scopeManifests;
+    mapping(uint256 => uint8) private _metadataMode;
+
+    /// @notice Sets the collection metadata mode (OFFCHAIN=0 by default, ONCHAIN=1, HYBRID=2).
+    function setMetadataMode(uint256 collectionId, uint8 mode) external {
+        _metadataMode[collectionId] = mode;
+    }
+
+    function collectionMetadataMode(uint256 collectionId) external view returns (uint8) {
+        return _metadataMode[collectionId];
+    }
 
     function setContentRoot(
         uint256 collectionId,
@@ -246,15 +256,12 @@ contract MockFinalitySanction {
         bool valid,
         bytes32 sanctionRecordHash
     ) external {
-        _responses[_queryKey(scopeType, collectionId, tokenId, scopeId, sanctionSubjectHash)] =
-            SanctionResponse(valid, sanctionRecordHash, address(0xA271), 1);
+        _responses[
+            _queryKey(scopeType, collectionId, tokenId, scopeId, sanctionSubjectHash)
+        ] = SanctionResponse(valid, sanctionRecordHash, address(0xA271), 1);
     }
 
-    function collectionSanctionComponentType(uint256 collectionId)
-        external
-        view
-        returns (bytes32)
-    {
+    function collectionSanctionComponentType(uint256 collectionId) external view returns (bytes32) {
         return _requiredType[collectionId];
     }
 
@@ -269,8 +276,10 @@ contract MockFinalitySanction {
         view
         returns (bool valid, bytes32 sanctionRecordHash, address signer, uint8 authorityClass)
     {
-        SanctionResponse memory response =
-            _responses[_queryKey(scopeType, collectionId, tokenId, scopeId, sanctionSubjectHash)];
+        SanctionResponse memory
+            response = _responses[
+                _queryKey(scopeType, collectionId, tokenId, scopeId, sanctionSubjectHash)
+            ];
         return
             (response.valid, response.sanctionRecordHash, response.signer, response.authorityClass);
     }
@@ -282,9 +291,7 @@ contract MockFinalitySanction {
         bytes32 scopeId,
         bytes32 sanctionSubjectHash
     ) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(scopeType, collectionId, tokenId, scopeId, sanctionSubjectHash)
-        );
+        return keccak256(abi.encode(scopeType, collectionId, tokenId, scopeId, sanctionSubjectHash));
     }
 }
 

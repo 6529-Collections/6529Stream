@@ -330,4 +330,293 @@ library StreamFinalityDomains {
     ///      MINTED=2, BURNED=3).
     uint8 internal constant TOKEN_LIFECYCLE_MINTED = 2;
     uint8 internal constant TOKEN_LIFECYCLE_BURNED = 3;
+
+    /// @dev MetadataMode numeric IDs (the `MetadataMode` enum owned by the metadata router,
+    ///      docs/metadata-router-and-renderer.md; Numeric ID Catalog): OFFCHAIN=0, ONCHAIN=1,
+    ///      HYBRID=2. ONCHAIN and HYBRID are the script-work modes that carry the extra
+    ///      SCRIPT_SOURCE/DEPENDENCY_SOURCE/REFERENCE_RENDER floor and the snapshot-manifest gate.
+    uint8 internal constant METADATA_MODE_OFFCHAIN = 0;
+    uint8 internal constant METADATA_MODE_ONCHAIN = 1;
+    uint8 internal constant METADATA_MODE_HYBRID = 2;
+}
+
+/// @notice Mandatory finality component-set logic ([LTA-FINALITY] requirement 1, MRR-FINALITY
+///         rules 6-9, [CMC-FINALITY-INPUTS]).
+/// @dev Hosted as a library so the mandatory-floor check is shared byte-for-byte between the
+///      registry (execution) and the preview periphery, and does not inflate either contract's
+///      own bytecode. The floor is enforced onchain independent of the optional discovery
+///      module, which is `address(0)` at genesis.
+library StreamFinalityComponentSet {
+    /// @notice Returns the first mandatory componentType missing from `components` for the
+    ///         collection's `metadataMode`, or `bytes32(0)` when all are present.
+    /// @dev Base floor (every mode): COLLECTION_METADATA, METADATA_ROUTER, RENDERER,
+    ///      RENDER_CONTEXT, MEDIA_MANIFEST, ENTROPY_COORDINATOR ([LTA-FINALITY] "Required
+    ///      component types include at least"). Script-work modes (ONCHAIN/HYBRID) additionally
+    ///      require SCRIPT_SOURCE, DEPENDENCY_SOURCE, and REFERENCE_RENDER (MRR-FINALITY rule 9,
+    ///      [CMC-FINALITY-INPUTS] rule 5). The sorted-unique list guarantee makes each present
+    ///      type a distinct entry; live frozen state is verified separately by the caller.
+    function firstMissingMandatory(
+        StreamFinalityComponentExpectation[] memory components,
+        uint8 metadataMode
+    ) public pure returns (bytes32) {
+        uint256 seen = _presenceMask(components);
+        // Bit layout matches _requiredMask ordering below.
+        uint256 required = _requiredMask(metadataMode);
+        uint256 missing = required & ~seen;
+        if (missing == 0) {
+            return bytes32(0);
+        }
+        // Return the lowest-set missing bit's componentType, matching declaration order.
+        if (missing & 0x001 != 0) return StreamFinalityDomains.COMPONENT_COLLECTION_METADATA;
+        if (missing & 0x002 != 0) return StreamFinalityDomains.COMPONENT_METADATA_ROUTER;
+        if (missing & 0x004 != 0) return StreamFinalityDomains.COMPONENT_RENDERER;
+        if (missing & 0x008 != 0) return StreamFinalityDomains.COMPONENT_RENDER_CONTEXT;
+        if (missing & 0x010 != 0) return StreamFinalityDomains.COMPONENT_MEDIA_MANIFEST;
+        if (missing & 0x020 != 0) return StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR;
+        if (missing & 0x040 != 0) return StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE;
+        if (missing & 0x080 != 0) return StreamFinalityDomains.COMPONENT_DEPENDENCY_SOURCE;
+        return StreamFinalityDomains.COMPONENT_REFERENCE_RENDER;
+    }
+
+    /// @notice True when every mandatory componentType for `metadataMode` is present.
+    function hasAllMandatory(
+        StreamFinalityComponentExpectation[] memory components,
+        uint8 metadataMode
+    ) public pure returns (bool) {
+        return firstMissingMandatory(components, metadataMode) == bytes32(0);
+    }
+
+    /// @notice Locates the single artist-sanction / platform-works declaration slot
+    ///         ([LTA-FINALITY] requirement 9, [AA-SANCTION] requirement 3: exactly one applies).
+    function locateSanctionSlot(StreamFinalityComponentExpectation[] memory components)
+        public
+        pure
+        returns (uint256 index, uint256 occurrences)
+    {
+        for (uint256 i = 0; i < components.length; i++) {
+            bytes32 t = components[i].componentType;
+            if (
+                t == StreamFinalityDomains.COMPONENT_ARTIST_SANCTION
+                    || t == StreamFinalityDomains.COMPONENT_PLATFORM_WORKS_DECLARATION
+            ) {
+                index = i;
+                occurrences++;
+            }
+        }
+    }
+
+    /// @notice Locates the IDENTITY_FACADE_BINDING component slot ([LTA-FINALITY] requirement 16,
+    ///         [CMC-FACADE-BINDING] rule 6).
+    function locateFacadeBindingSlot(StreamFinalityComponentExpectation[] memory components)
+        public
+        pure
+        returns (uint256 index, uint256 occurrences)
+    {
+        for (uint256 i = 0; i < components.length; i++) {
+            if (components[i].componentType == StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING)
+            {
+                index = i;
+                occurrences++;
+            }
+        }
+    }
+
+    /// @notice Bounded staticcall to a component's finality read plus a fixed-size returndata
+    ///         decode; never reverts on component misbehavior ([LTA-FINALITY] diagnostic-read
+    ///         semantics). `gasCap == 0` forwards all remaining gas (execution path);
+    ///         nonzero caps the forwarded gas (diagnostic path, FINALITY_COMPONENT_READ_GAS).
+    function observeComponent(address component, bytes memory componentCallData, uint256 gasCap)
+        public
+        view
+        returns (bool readable, StreamFinalityComponentState memory state)
+    {
+        bool success;
+        bytes memory returndata;
+        if (gasCap == 0) {
+            (success, returndata) = component.staticcall(componentCallData);
+        } else {
+            (success, returndata) = component.staticcall{ gas: gasCap }(componentCallData);
+        }
+        if (!success || returndata.length != 256) {
+            return (false, state);
+        }
+        uint256 rawFrozen;
+        bytes32 componentType;
+        uint256 rawComponent;
+        uint256 rawInterfaceId;
+        bytes32 codeHash;
+        bytes32 moduleVersion;
+        bytes32 manifestHash;
+        bytes32 dataHash;
+        assembly {
+            rawFrozen := mload(add(returndata, 0x20))
+            componentType := mload(add(returndata, 0x40))
+            rawComponent := mload(add(returndata, 0x60))
+            rawInterfaceId := mload(add(returndata, 0x80))
+            codeHash := mload(add(returndata, 0xa0))
+            moduleVersion := mload(add(returndata, 0xc0))
+            manifestHash := mload(add(returndata, 0xe0))
+            dataHash := mload(add(returndata, 0x100))
+        }
+        if (rawFrozen > 1 || rawComponent > type(uint160).max) {
+            return (false, state);
+        }
+        if (rawInterfaceId & ((uint256(1) << 224) - 1) != 0) {
+            return (false, state);
+        }
+        state = StreamFinalityComponentState({
+            frozen: rawFrozen == 1,
+            componentType: componentType,
+            component: address(uint160(rawComponent)),
+            interfaceId: bytes4(bytes32(rawInterfaceId)),
+            codeHash: codeHash,
+            moduleVersion: moduleVersion,
+            manifestHash: manifestHash,
+            dataHash: dataHash
+        });
+        return (true, state);
+    }
+
+    /// @notice True when a live component `state` exactly matches the submitted `expectation`
+    ///         and reports `frozen = true`.
+    function stateMatchesExpectation(
+        StreamFinalityComponentState memory state,
+        StreamFinalityComponentExpectation memory expectation
+    ) public pure returns (bool) {
+        return state.frozen && state.componentType == expectation.componentType
+            && state.component == expectation.component
+            && state.interfaceId == expectation.interfaceId
+            && state.codeHash == expectation.codeHash
+            && state.moduleVersion == expectation.moduleVersion
+            && state.manifestHash == expectation.manifestHash
+            && state.dataHash == expectation.dataHash;
+    }
+
+    /// @notice Live-match check for a stored expectation under an optional gas cap: false when
+    ///         the component has no code, its codehash drifted, the read failed, or state
+    ///         diverged. Used by the diagnostic reads.
+    function componentStillMatches(
+        StreamFinalityComponentExpectation memory expectation,
+        bytes memory componentCallData,
+        uint256 gasCap
+    ) public view returns (bool) {
+        address component = expectation.component;
+        if (component.code.length == 0 || component.codehash != expectation.codeHash) {
+            return false;
+        }
+        (bool readable, StreamFinalityComponentState memory state) =
+            observeComponent(component, componentCallData, gasCap);
+        return readable && stateMatchesExpectation(state, expectation);
+    }
+
+    /// @notice Failure codes returned by verifyComponentsStrict.
+    uint8 internal constant STRICT_OK = 0;
+    uint8 internal constant STRICT_UNREADABLE = 1;
+    uint8 internal constant STRICT_CODEHASH_MISMATCH = 2;
+    uint8 internal constant STRICT_STATE_MISMATCH = 3;
+
+    /// @notice Batch diagnostic over a stored expectation slice under a per-read gas cap:
+    ///         returns whether every entry still matches live state, plus the components hash of
+    ///         the expected slice and of the observed slice. Never reverts on component
+    ///         misbehavior ([LTA-FINALITY] diagnostic-read semantics); one library call covers
+    ///         the whole slice.
+    /// @dev `expectedSlice` is the pre-sliced stored expectations; `componentsDomain` is
+    ///      STREAM_FINALITY_COMPONENTS_V1 so the observed hash uses the identical domain/order
+    ///      as the expected hash. An unreadable, code-drifted, or diverged entry sets
+    ///      matches=false and leaves its observed entry zeroed.
+    function diagnoseRange(
+        StreamFinalityComponentExpectation[] memory expectedSlice,
+        bytes memory componentCallData,
+        uint256 gasCap,
+        bytes32 componentsDomain
+    ) public view returns (bool matches, bytes32 expectedHash, bytes32 observedHash) {
+        matches = true;
+        StreamFinalityComponentExpectation[] memory observed =
+            new StreamFinalityComponentExpectation[](expectedSlice.length);
+        for (uint256 i = 0; i < expectedSlice.length; i++) {
+            StreamFinalityComponentExpectation memory expectation = expectedSlice[i];
+            (bool readable, StreamFinalityComponentState memory state) =
+                observeComponent(expectation.component, componentCallData, gasCap);
+            if (readable) {
+                observed[i] = StreamFinalityComponentExpectation({
+                    componentType: state.componentType,
+                    component: state.component,
+                    interfaceId: state.interfaceId,
+                    codeHash: state.codeHash,
+                    moduleVersion: state.moduleVersion,
+                    manifestHash: state.manifestHash,
+                    dataHash: state.dataHash
+                });
+            }
+            bool ok = readable && expectation.component.code.length != 0
+                && expectation.component.codehash == expectation.codeHash
+                && stateMatchesExpectation(state, expectation);
+            if (!ok) {
+                matches = false;
+            }
+        }
+        expectedHash = keccak256(abi.encode(componentsDomain, expectedSlice));
+        observedHash = keccak256(abi.encode(componentsDomain, observed));
+    }
+
+    /// @notice Strict all-gas verification of the full submitted component list against live
+    ///         reads ([LTA-FINALITY] recording semantics: revert if any component read fails,
+    ///         returns malformed data, reports frozen=false, or differs from the expectation).
+    /// @dev One library call verifies every component so the registry incurs a single
+    ///      delegatecall for the whole list. `componentCallData` is the ABI-encoded
+    ///      finalityState/finalityStateForScope call. Returns STRICT_OK with failIndex 0 on
+    ///      success, else the first failing index and its failure code.
+    function verifyComponentsStrict(
+        StreamFinalityComponentExpectation[] memory components,
+        bytes memory componentCallData
+    ) public view returns (uint8 failCode, uint256 failIndex) {
+        for (uint256 i = 0; i < components.length; i++) {
+            address component = components[i].component;
+            if (component.code.length == 0) {
+                return (STRICT_UNREADABLE, i);
+            }
+            if (component.codehash != components[i].codeHash) {
+                return (STRICT_CODEHASH_MISMATCH, i);
+            }
+            (bool readable, StreamFinalityComponentState memory state) =
+                observeComponent(component, componentCallData, 0);
+            if (!readable) {
+                return (STRICT_UNREADABLE, i);
+            }
+            if (!stateMatchesExpectation(state, components[i])) {
+                return (STRICT_STATE_MISMATCH, i);
+            }
+        }
+        return (STRICT_OK, 0);
+    }
+
+    function _requiredMask(uint8 metadataMode) private pure returns (uint256) {
+        uint256 base = 0x03F; // bits 0-5: the six base-floor types
+        if (
+            metadataMode == StreamFinalityDomains.METADATA_MODE_ONCHAIN
+                || metadataMode == StreamFinalityDomains.METADATA_MODE_HYBRID
+        ) {
+            return base | 0x1C0; // add bits 6-8: script/dependency/reference-render
+        }
+        return base;
+    }
+
+    function _presenceMask(StreamFinalityComponentExpectation[] memory components)
+        private
+        pure
+        returns (uint256 seen)
+    {
+        for (uint256 i = 0; i < components.length; i++) {
+            bytes32 t = components[i].componentType;
+            if (t == StreamFinalityDomains.COMPONENT_COLLECTION_METADATA) seen |= 0x001;
+            else if (t == StreamFinalityDomains.COMPONENT_METADATA_ROUTER) seen |= 0x002;
+            else if (t == StreamFinalityDomains.COMPONENT_RENDERER) seen |= 0x004;
+            else if (t == StreamFinalityDomains.COMPONENT_RENDER_CONTEXT) seen |= 0x008;
+            else if (t == StreamFinalityDomains.COMPONENT_MEDIA_MANIFEST) seen |= 0x010;
+            else if (t == StreamFinalityDomains.COMPONENT_ENTROPY_COORDINATOR) seen |= 0x020;
+            else if (t == StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE) seen |= 0x040;
+            else if (t == StreamFinalityDomains.COMPONENT_DEPENDENCY_SOURCE) seen |= 0x080;
+            else if (t == StreamFinalityDomains.COMPONENT_REFERENCE_RENDER) seen |= 0x100;
+        }
+    }
 }

@@ -11,6 +11,13 @@ pragma solidity ^0.8.19;
 ///      submitted finality components; that surface lives in
 ///      IStreamArtworkFinalityComponents.sol.
 interface IStreamFinalityMetadataReads {
+    /// @notice Collection metadata mode, pinned numeric IDs `OFFCHAIN = 0`, `ONCHAIN = 1`,
+    ///         `HYBRID = 2` (the `MetadataMode` enum owned by the metadata router,
+    ///         docs/metadata-router-and-renderer.md; Numeric ID Catalog). The finality registry
+    ///         consumes it to pick the mandatory component floor per [LTA-FINALITY] req 1/6 and
+    ///         to apply the [CMC-FINALITY-INPUTS] rule 3 onchain/hybrid snapshot-manifest gate.
+    function collectionMetadataMode(uint256 collectionId) external view returns (uint8 mode);
+
     /// @notice Recorded token content root for a [CMC-SUBJECT-ID] scope subject.
     function tokenContentRoot(uint256 collectionId, bytes32 scopeSubject)
         external
