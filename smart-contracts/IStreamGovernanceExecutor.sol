@@ -130,7 +130,8 @@ interface IStreamGovernanceExecutor {
     error GovernanceCallFailed(bytes32 actionId, uint256 callIndex);
     /// @notice Reverts when execution leaves surplus value in the executor.
     error BatchValueSurplus(uint256 surplus);
-    /// @notice Reverts when the veto caller does not hold ROLE_TERMINAL_FREEZE_VETO.
+    /// @notice Reverts when the veto caller does not hold the per-scope or
+    ///         global ROLE_TERMINAL_FREEZE_VETO authority.
     error NotTerminalFreezeVetoGuardian(address actor);
     /// @notice Reverts when vetoing a non-terminal-freeze action.
     error NotTerminalFreezeAction(bytes32 actionId);
@@ -138,6 +139,15 @@ interface IStreamGovernanceExecutor {
     error VetoDeadlinePassed(bytes32 actionId, uint64 vetoDeadline);
     /// @notice Reverts when materializing expiry before `expiresAfter`.
     error GovernanceActionNotExpired(bytes32 actionId, uint64 expiresAfter);
+    /// @notice Reverts when a batch containing a registered freeze
+    ///         `(target, selector)` is scheduled under any class other than
+    ///         TERMINAL_FREEZE (executor-side veto-floor backstop).
+    error TerminalFreezeClassRequired(address target, bytes4 selector);
+    /// @notice Reverts when scheduling a TERMINAL_FREEZE action while no
+    ///         ROLE_TERMINAL_FREEZE_VETO holder exists to exercise the veto.
+    error NoTerminalFreezeVetoGuardianConfigured(bytes32 scopeHash);
+    /// @notice Reverts on a live-terminal-freeze enumeration index out of bounds.
+    error LiveTerminalFreezeIndexOutOfBounds(bytes32 scopeHash, uint256 index);
 
     event GovernanceActionScheduled(
         uint16 schemaVersion,
@@ -217,6 +227,11 @@ interface IStreamGovernanceExecutor {
     event ApprovedNativeReceiverUpdated(
         address indexed receiver, bool approved, address indexed admin
     );
+    /// @notice Emitted when a known-irreversible freeze `(target, selector)` is
+    ///         registered or cleared for the executor-side veto-floor backstop.
+    event FreezeSelectorUpdated(
+        address indexed target, bytes4 indexed selector, bool freeze, address indexed admin
+    );
 
     /// @notice Returns the stored action; while `SCHEDULED` and past
     ///         `expiresAfter`, the returned status is virtually `EXPIRED`.
@@ -288,15 +303,46 @@ interface IStreamGovernanceExecutor {
     /// @notice Materializes `EXPIRED` for a scheduled action past `expiresAfter`.
     function materializeExpiredAction(bytes32 actionId) external;
 
-    /// @notice Returns the veto guardian resolved through the role registry and
-    ///         the veto deadline of the scope's live terminal-freeze action.
+    /// @notice Returns the scope's veto guardian and the veto deadline of the
+    ///         EARLIEST-deadline live terminal-freeze action for that scope.
+    /// @dev The guardian is resolved per-scope
+    ///     (`keccak256(ROLE_TERMINAL_FREEZE_VETO, scopeHash)`) with fallback to
+    ///     the global `ROLE_TERMINAL_FREEZE_VETO` holders; a single per-scope or
+    ///     global holder resolves to that address, otherwise `guardian` is the
+    ///     zero-address sentinel. `vetoDeadline` is zero when the scope has no
+    ///     live (scheduled, pre-`notBefore`) terminal-freeze action. Because a
+    ///     scope may have several live actions, use
+    ///     `liveTerminalFreezeActionCount`/`liveTerminalFreezeActionAt` to
+    ///     enumerate them all; this read never hides a live action behind a
+    ///     later-scheduled decoy.
     function terminalFreezeVetoGuardian(bytes32 scopeHash)
         external
         view
         returns (address guardian, uint64 vetoDeadline);
 
-    /// @notice Vetoes a scheduled terminal-freeze action before its veto deadline.
+    /// @notice Returns the number of live (scheduled, pre-`notBefore`)
+    ///         terminal-freeze actions for `scopeHash`.
+    function liveTerminalFreezeActionCount(bytes32 scopeHash) external view returns (uint256);
+
+    /// @notice Returns the `index`-th live terminal-freeze action for
+    ///         `scopeHash` and its veto deadline (`notBefore`).
+    function liveTerminalFreezeActionAt(bytes32 scopeHash, uint256 index)
+        external
+        view
+        returns (bytes32 actionId, uint64 vetoDeadline);
+
+    /// @notice Per-scope veto role constant:
+    ///         `keccak256(abi.encode(ROLE_TERMINAL_FREEZE_VETO, scopeHash))`.
+    function terminalFreezeVetoRole(bytes32 scopeHash) external pure returns (bytes32);
+
+    /// @notice Vetoes a scheduled terminal-freeze action before its veto
+    ///         deadline. The caller must hold the per-scope veto role or the
+    ///         global `ROLE_TERMINAL_FREEZE_VETO`.
     function vetoTerminalFreeze(bytes32 actionId, bytes32 reasonHash) external;
+
+    /// @notice Returns true when `(target, selector)` is a registered
+    ///         known-irreversible freeze for the veto-floor backstop.
+    function isFreezeSelector(address target, bytes4 selector) external view returns (bool);
 
     /// @notice Returns the in-flight action context during batch execution so
     ///         governed targets can verify the executing action class.

@@ -24,7 +24,39 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
 
     /// @inheritdoc IStreamRoleRegistry
     function grantRole(bytes32 role, address holder) external override {
-        _checkRoleActor(role);
+        uint8 grantClass = roleGrantClass(role);
+        _checkRoleActor(role, grantClass);
+        _grant(role, holder, grantClass);
+    }
+
+    /// @inheritdoc IStreamRoleRegistry
+    function revokeRole(bytes32 role, address holder) external override {
+        uint8 grantClass = roleGrantClass(role);
+        _checkRoleActor(role, grantClass);
+        _revoke(role, holder, grantClass);
+    }
+
+    /// @inheritdoc IStreamRoleRegistry
+    function grantScopedRole(bytes32 baseRole, bytes32 scopeHash, address holder)
+        external
+        override
+    {
+        uint8 grantClass = _scopableGrantClass(baseRole);
+        _checkRoleActor(baseRole, grantClass);
+        _grant(scopedRole(baseRole, scopeHash), holder, grantClass);
+    }
+
+    /// @inheritdoc IStreamRoleRegistry
+    function revokeScopedRole(bytes32 baseRole, bytes32 scopeHash, address holder)
+        external
+        override
+    {
+        uint8 grantClass = _scopableGrantClass(baseRole);
+        _checkRoleActor(baseRole, grantClass);
+        _revoke(scopedRole(baseRole, scopeHash), holder, grantClass);
+    }
+
+    function _grant(bytes32 role, address holder, uint8 grantClass) private {
         if (holder == address(0)) {
             revert ZeroRoleHolder(role);
         }
@@ -34,12 +66,10 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         _checkDisjointness(role, holder);
         _roleHolders[role].push(holder);
         _roleHolderIndex[role][holder] = _roleHolders[role].length;
-        emit StreamRoleGranted(SCHEMA_VERSION, role, holder, _grantClass(role), msg.sender);
+        emit StreamRoleGranted(SCHEMA_VERSION, role, holder, grantClass, msg.sender);
     }
 
-    /// @inheritdoc IStreamRoleRegistry
-    function revokeRole(bytes32 role, address holder) external override {
-        _checkRoleActor(role);
+    function _revoke(bytes32 role, address holder, uint8 grantClass) private {
         uint256 indexPlusOne = _roleHolderIndex[role][holder];
         if (indexPlusOne == 0) {
             revert RoleNotGranted(role, holder);
@@ -54,7 +84,7 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         }
         holders.pop();
         delete _roleHolderIndex[role][holder];
-        emit StreamRoleRevoked(SCHEMA_VERSION, role, holder, _grantClass(role), msg.sender);
+        emit StreamRoleRevoked(SCHEMA_VERSION, role, holder, grantClass, msg.sender);
     }
 
     /// @notice Registers or removes an operational-role manager.
@@ -142,8 +172,31 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         return _roleManagers[account];
     }
 
-    function _checkRoleActor(bytes32 role) private view {
-        uint8 grantClass = roleGrantClass(role);
+    /// @inheritdoc IStreamRoleRegistry
+    function scopedRole(bytes32 baseRole, bytes32 scopeHash)
+        public
+        pure
+        override
+        returns (bytes32)
+    {
+        return keccak256(abi.encode(baseRole, scopeHash));
+    }
+
+    /// @inheritdoc IStreamRoleRegistry
+    function isScopableRole(bytes32 baseRole) public pure override returns (bool) {
+        // Only per-scope terminal-freeze veto guardians are scopable today
+        // (ADR 0004 [GOV-WINDOWS] veto surface). Extending the set amends this.
+        return baseRole == StreamRoles.ROLE_TERMINAL_FREEZE_VETO;
+    }
+
+    function _scopableGrantClass(bytes32 baseRole) private pure returns (uint8) {
+        if (!isScopableRole(baseRole)) {
+            revert UnknownRole(baseRole);
+        }
+        return roleGrantClass(baseRole);
+    }
+
+    function _checkRoleActor(bytes32 role, uint8 grantClass) private view {
         if (msg.sender == owner()) {
             return;
         }
@@ -162,10 +215,6 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         if (role == StreamRoles.ROLE_UNPAUSE && hasRole(StreamRoles.ROLE_PAUSE_GUARDIAN, holder)) {
             revert DisjointRoleConflict(role, StreamRoles.ROLE_PAUSE_GUARDIAN, holder);
         }
-    }
-
-    function _grantClass(bytes32 role) private pure returns (uint8) {
-        return _grantClassOrZero(role);
     }
 
     function _grantClassOrZero(bytes32 role) private pure returns (uint8) {

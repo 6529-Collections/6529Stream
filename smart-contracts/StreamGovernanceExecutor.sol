@@ -26,6 +26,8 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     /// @notice Action identity domain pinned by ADR 0004 [GOV-ACTION-ID].
     bytes32 public constant STREAM_GOVERNANCE_ACTION_V1 =
         keccak256("6529STREAM_GOVERNANCE_ACTION_V1");
+    /// @notice Base role for per-scope terminal-freeze veto derivation.
+    bytes32 public constant ROLE_TERMINAL_FREEZE_VETO = StreamRoles.ROLE_TERMINAL_FREEZE_VETO;
 
     /// @notice Schema version carried by governance events.
     uint16 public constant SCHEMA_VERSION = 1;
@@ -69,8 +71,14 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     mapping(address => bool) private _cancellers;
     mapping(address => mapping(bytes4 => bool)) private _tighteningCalls;
     mapping(address => bool) private _approvedNativeReceivers;
-    // scopeHash => action ID of the latest scheduled terminal-freeze action.
-    mapping(bytes32 => bytes32) private _latestTerminalFreezeAction;
+    // known-irreversible freeze (target => selector => registered) for the
+    // executor-side veto-floor backstop (FIX A).
+    mapping(address => mapping(bytes4 => bool)) private _freezeSelectors;
+    // scopeHash => set of live (scheduled, pre-notBefore) terminal-freeze
+    // action IDs; pruned on veto/cancel/execute/expire (FIX B).
+    mapping(bytes32 => bytes32[]) private _liveTerminalFreezeActions;
+    // actionId => (index + 1) into its scope's live set; zero means not live.
+    mapping(bytes32 => uint256) private _liveTerminalFreezeIndex;
 
     uint256 private _nonce;
     bool private _executing;
@@ -119,13 +127,40 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     /// @notice Tightening classifier: registers `(target, selector)` pairs
     ///         proven unable to loosen policy, eligible for zero-delay
     ///         IMMEDIATE_TIGHTENING scheduling (ADR 0004 execution rule 2).
+    /// @dev Owner-only, never governed-self-call (FIX C): the fast-path
+    ///     classifier must not be widenable through a staged self-call, and it
+    ///     is advisory only — the durable guard is target-side class
+    ///     enforcement (each governed target asserting
+    ///     `currentAction().actionClass`), which lands as a protocol invariant
+    ///     in the finality/Core waves.
     function setTighteningCall(address target, bytes4 selector, bool tightening)
         external
-        onlyOwnerOrSelf
+        onlyOwner
     {
         require(target != address(0), "Zero target");
         _tighteningCalls[target][selector] = tightening;
         emit TighteningCallUpdated(target, selector, tightening, msg.sender);
+    }
+
+    /// @notice Registers or clears a known-irreversible freeze
+    ///         `(target, selector)` for the executor-side veto-floor backstop
+    ///         (FIX A). While registered, any batch containing a call to that
+    ///         `(target, selector)` must be scheduled as `TERMINAL_FREEZE`,
+    ///         forcing the [GOV-WINDOWS] rule 2 72h veto floor regardless of
+    ///         the proposer-declared class.
+    /// @dev Owner-only, never governed-self-call: a proposer-declared action
+    ///     class is not trustworthy for veto-critical decisions, so the
+    ///     backstop must not be self-widenable. This covers the
+    ///     registered-selector subset at the executor; the primary guard is
+    ///     target-side class enforcement in the finality/Core waves.
+    function registerFreezeSelector(address target, bytes4 selector, bool freeze)
+        external
+        onlyOwner
+    {
+        require(target != address(0), "Zero target");
+        require(selector != bytes4(0), "Zero selector");
+        _freezeSelectors[target][selector] = freeze;
+        emit FreezeSelectorUpdated(target, selector, freeze, msg.sender);
     }
 
     /// @notice Approves a receiver for empty-calldata native ETH transfer calls
@@ -253,6 +288,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         }
         action.status = GovernanceActionStatus.CANCELLED;
         action.canceller = msg.sender;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
         emit GovernanceActionCancelled(
             SCHEMA_VERSION,
             actionId,
@@ -282,11 +318,18 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         if (block.timestamp >= action.notBefore) {
             revert VetoDeadlinePassed(actionId, action.notBefore);
         }
-        if (!roleRegistry.hasRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, msg.sender)) {
+        // FIX B: per-scope veto authority with fallback to the global holders;
+        // global holders may veto any scope (vetoing is protective), per-scope
+        // designation is additive.
+        if (
+            !roleRegistry.hasRole(terminalFreezeVetoRole(action.scopeHash), msg.sender)
+                && !roleRegistry.hasRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, msg.sender)
+        ) {
             revert NotTerminalFreezeVetoGuardian(msg.sender);
         }
         action.status = GovernanceActionStatus.VETOED;
         action.vetoer = msg.sender;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
         emit GovernanceActionVetoed(
             SCHEMA_VERSION, actionId, action.actionClass, msg.sender, action.scopeHash, reasonHash
         );
@@ -305,6 +348,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
             revert GovernanceActionNotExpired(actionId, action.expiresAfter);
         }
         action.status = GovernanceActionStatus.EXPIRED;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
         emit GovernanceActionExpired(SCHEMA_VERSION, actionId, action.actionClass, msg.sender);
     }
 
@@ -354,25 +398,66 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
+    function terminalFreezeVetoRole(bytes32 scopeHash) public pure override returns (bytes32) {
+        return keccak256(abi.encode(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeHash));
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
     function terminalFreezeVetoGuardian(bytes32 scopeHash)
         external
         view
         override
         returns (address guardian, uint64 vetoDeadline)
     {
-        if (roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) > 0) {
-            guardian = roleRegistry.roleHolderAt(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, 0);
-        }
-        bytes32 actionId = _latestTerminalFreezeAction[scopeHash];
-        if (actionId != bytes32(0)) {
-            GovernanceAction storage action = _actions[actionId];
-            if (
-                action.status == GovernanceActionStatus.SCHEDULED
-                    && block.timestamp < action.notBefore
-            ) {
-                vetoDeadline = action.notBefore;
+        // Per-scope holder resolves first; fall back to a single global holder.
+        // Anything other than exactly one candidate returns the zero-address
+        // sentinel (never holder[0] paired with a live deadline).
+        bytes32 scopeRole = terminalFreezeVetoRole(scopeHash);
+        uint256 scopeHolders = roleRegistry.roleHolderCount(scopeRole);
+        if (scopeHolders == 1) {
+            guardian = roleRegistry.roleHolderAt(scopeRole, 0);
+        } else if (scopeHolders == 0) {
+            if (roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 1) {
+                guardian = roleRegistry.roleHolderAt(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, 0);
             }
         }
+        // Earliest-deadline live action so a later decoy never shadows it.
+        vetoDeadline = _earliestLiveTerminalFreezeDeadline(scopeHash);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function liveTerminalFreezeActionCount(bytes32 scopeHash)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _liveTerminalFreezeActions[scopeHash].length;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function liveTerminalFreezeActionAt(bytes32 scopeHash, uint256 index)
+        external
+        view
+        override
+        returns (bytes32 actionId, uint64 vetoDeadline)
+    {
+        bytes32[] storage live = _liveTerminalFreezeActions[scopeHash];
+        if (index >= live.length) {
+            revert LiveTerminalFreezeIndexOutOfBounds(scopeHash, index);
+        }
+        actionId = live[index];
+        vetoDeadline = _actions[actionId].notBefore;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function isFreezeSelector(address target, bytes4 selector)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return _freezeSelectors[target][selector];
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -435,6 +520,17 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         );
         _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
 
+        if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
+            // FIX B: never schedule an irreversible op with no holder able to
+            // exercise the 72h veto. Per-scope holders or global holders count.
+            if (
+                roleRegistry.roleHolderCount(terminalFreezeVetoRole(ctx.scopeHash)) == 0
+                    && roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 0
+            ) {
+                revert NoTerminalFreezeVetoGuardianConfigured(ctx.scopeHash);
+            }
+        }
+
         bytes32 callsHash = keccak256(abi.encode(STREAM_GOVERNANCE_CALLS_V1, calls));
         uint256 nonceUsed = _nonce;
         _nonce = nonceUsed + 1;
@@ -464,7 +560,10 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         _callDataPointers[actionId] = callDataPointer;
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            _latestTerminalFreezeAction[ctx.scopeHash] = actionId;
+            // FIX B: append to the scope's live set so no live action is ever
+            // shadowed by a later-scheduled decoy.
+            _liveTerminalFreezeActions[ctx.scopeHash].push(actionId);
+            _liveTerminalFreezeIndex[actionId] = _liveTerminalFreezeActions[ctx.scopeHash].length;
         }
 
         _emitActionScheduled(
@@ -506,6 +605,50 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         pointer = _publishedCallData[callDataKey];
         if (pointer == address(0)) {
             revert CallDataNotPublished(callDataKey);
+        }
+    }
+
+    /// @dev Removes a terminal-freeze action from its scope's live set on any
+    ///     terminal transition (veto/cancel/execute/expire), swap-removing to
+    ///     keep the enumeration dense (FIX B). No-op for non-terminal-freeze
+    ///     actions and for actions already pruned.
+    function _pruneLiveTerminalFreeze(bytes32 actionId, uint8 actionClass, bytes32 scopeHash)
+        private
+    {
+        if (actionClass != StreamGovernanceActionClasses.TERMINAL_FREEZE) {
+            return;
+        }
+        uint256 indexPlusOne = _liveTerminalFreezeIndex[actionId];
+        if (indexPlusOne == 0) {
+            return;
+        }
+        bytes32[] storage live = _liveTerminalFreezeActions[scopeHash];
+        uint256 index = indexPlusOne - 1;
+        uint256 lastIndex = live.length - 1;
+        if (index != lastIndex) {
+            bytes32 moved = live[lastIndex];
+            live[index] = moved;
+            _liveTerminalFreezeIndex[moved] = indexPlusOne;
+        }
+        live.pop();
+        delete _liveTerminalFreezeIndex[actionId];
+    }
+
+    /// @dev Returns the soonest `notBefore` among the scope's still-vetoable
+    ///     (scheduled, pre-`notBefore`) live terminal-freeze actions, or zero
+    ///     when none is vetoable. The live set only ever holds SCHEDULED
+    ///     actions, so this filters purely on the deadline.
+    function _earliestLiveTerminalFreezeDeadline(bytes32 scopeHash)
+        private
+        view
+        returns (uint64 deadline)
+    {
+        bytes32[] storage live = _liveTerminalFreezeActions[scopeHash];
+        for (uint256 i = 0; i < live.length; i++) {
+            uint64 notBefore = _actions[live[i]].notBefore;
+            if (block.timestamp < notBefore && (deadline == 0 || notBefore < deadline)) {
+                deadline = notBefore;
+            }
         }
     }
 
@@ -599,6 +742,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
 
         action.status = GovernanceActionStatus.EXECUTED;
         action.executor = msg.sender;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
         _executing = true;
         _currentActionId = actionId;
         _currentActionClass = action.actionClass;
@@ -670,6 +814,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
             revert CallDataCountMismatch(calls.length, callDatas.length);
         }
         bool immediate = actionClass == StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING;
+        bool terminalFreeze = actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE;
         for (uint256 i = 0; i < calls.length; i++) {
             GovernanceCall memory call_ = calls[i];
             bytes memory callData = callDatas[i];
@@ -690,6 +835,12 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
             }
             if (immediate && !_tighteningCalls[call_.target][call_.selector]) {
                 revert NotClassifiedTightening(call_.target, call_.selector);
+            }
+            // FIX A: a batch touching a registered known-irreversible freeze
+            // must ride the TERMINAL_FREEZE class so the 72h veto floor applies
+            // regardless of the proposer-declared label.
+            if (!terminalFreeze && _freezeSelectors[call_.target][call_.selector]) {
+                revert TerminalFreezeClassRequired(call_.target, call_.selector);
             }
             totalValue += call_.value;
         }

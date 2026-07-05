@@ -1282,13 +1282,16 @@ contract StreamGovernanceExecutorTest is CharacterizationTestBase {
         vm.prank(stranger);
         executor.registerCanceller(stranger, true);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.GovernanceActorNotAuthorized.selector, stranger
-            )
-        );
+        // FIX C: setTighteningCall is owner-only (not self-callable), so a
+        // stranger hits the Ownable guard.
+        vm.expectRevert(bytes("Ownable: caller is not the owner"));
         vm.prank(stranger);
         executor.setTighteningCall(address(target), GovernedTargetMock.setValue.selector, true);
+
+        // FIX A: registerFreezeSelector is owner-only for the same reason.
+        vm.expectRevert(bytes("Ownable: caller is not the owner"));
+        vm.prank(stranger);
+        executor.registerFreezeSelector(address(target), GovernedTargetMock.setValue.selector, true);
 
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1334,5 +1337,323 @@ contract StreamGovernanceExecutorTest is CharacterizationTestBase {
         executing.assertFalse("context cleared after execution");
         idAfter.assertEq(bytes32(0), "action id cleared");
         uint256(classAfter).assertEq(0, "action class cleared");
+    }
+
+    // -------------------------------------------------- FIX A: freeze backstop
+
+    function _grantGlobalVetoGuardian() private {
+        roleRegistry.grantRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, guardian);
+    }
+
+    function testFreezeSelectorForcesTerminalFreezeClass() public {
+        _grantGlobalVetoGuardian();
+        // Register setValue as a known-irreversible freeze on target.
+        executor.registerFreezeSelector(address(target), GovernedTargetMock.setValue.selector, true);
+        executor.isFreezeSelector(address(target), GovernedTargetMock.setValue.selector)
+            .assertTrue("freeze selector registered");
+
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (1));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        executor.publishGovernanceCallData(callDatas);
+
+        // A freeze scheduled under DELAYED_LOOSENING (48h, no veto) is rejected.
+        uint64 delayedNotBefore = uint64(block.timestamp) + 48 hours;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeClassRequired.selector,
+                address(target),
+                GovernedTargetMock.setValue.selector
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            delayedNotBefore,
+            delayedNotBefore + 7 days
+        );
+
+        // A classifier-approved IMMEDIATE_TIGHTENING (0 delay) is also rejected,
+        // even though the tightening classifier would otherwise allow it.
+        executor.setTighteningCall(address(target), GovernedTargetMock.setValue.selector, true);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeClassRequired.selector,
+                address(target),
+                GovernedTargetMock.setValue.selector
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING,
+            calls,
+            uint64(block.timestamp),
+            uint64(block.timestamp) + 1 days
+        );
+
+        // Under TERMINAL_FREEZE the 72h floor applies and scheduling succeeds.
+        uint64 freezeNotBefore = uint64(block.timestamp) + 72 hours;
+        bytes32 actionId = _scheduleClass(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            freezeNotBefore,
+            freezeNotBefore + 7 days
+        );
+        uint256(uint8(executor.governanceAction(actionId).status))
+            .assertEq(
+                uint256(uint8(GovernanceActionStatus.SCHEDULED)),
+                "freeze scheduled under terminal class"
+            );
+    }
+
+    function testFreezeSelectorInAnyBatchPositionForcesTerminalFreeze() public {
+        _grantGlobalVetoGuardian();
+        GovernedTargetMock freezeTarget = new GovernedTargetMock();
+        executor.registerFreezeSelector(
+            address(freezeTarget), GovernedTargetMock.setValue.selector, true
+        );
+
+        // A two-call batch where only the SECOND call is a freeze still forces
+        // the terminal-freeze class.
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (1));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (2));
+        calls[0] = GovernanceCall({
+            target: address(target),
+            value: 0,
+            selector: GovernedTargetMock.setValue.selector,
+            callDataHash: keccak256(callDatas[0])
+        });
+        calls[1] = GovernanceCall({
+            target: address(freezeTarget),
+            value: 0,
+            selector: GovernedTargetMock.setValue.selector,
+            callDataHash: keccak256(callDatas[1])
+        });
+        executor.publishGovernanceCallData(callDatas);
+        uint64 notBefore = uint64(block.timestamp) + 48 hours;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeClassRequired.selector,
+                address(freezeTarget),
+                GovernedTargetMock.setValue.selector
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, notBefore + 7 days
+        );
+    }
+
+    function testClearingFreezeSelectorRestoresNormalClassing() public {
+        executor.registerFreezeSelector(address(target), GovernedTargetMock.setValue.selector, true);
+        executor.registerFreezeSelector(
+            address(target), GovernedTargetMock.setValue.selector, false
+        );
+        executor.isFreezeSelector(address(target), GovernedTargetMock.setValue.selector)
+            .assertFalse("freeze selector cleared");
+
+        // With the flag cleared, a DELAYED_LOOSENING freeze-free call schedules.
+        bytes32 actionId = _scheduleDefault(abi.encodeCall(GovernedTargetMock.setValue, (1)));
+        uint256(uint8(executor.governanceAction(actionId).status))
+            .assertEq(
+                uint256(uint8(GovernanceActionStatus.SCHEDULED)), "scheduled after clearing freeze"
+            );
+    }
+
+    // ---------------------------------- FIX B: per-scope multi-action veto set
+
+    function _scheduleFreeze(bytes32 scope, uint64 notBefore) private returns (bytes32 actionId) {
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(notBefore)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        executor.publishGovernanceCallData(callDatas);
+        return executor.scheduleGovernanceBatch(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            scope,
+            OLD_VALUE,
+            NEW_VALUE,
+            notBefore,
+            notBefore + 7 days,
+            REASON,
+            REASON_URI,
+            MANIFEST
+        );
+    }
+
+    function testDecoyFreezeDoesNotShadowEarlierLiveAction() public {
+        _grantGlobalVetoGuardian();
+        // First: a live freeze at the 72h floor.
+        uint64 earlyDeadline = uint64(block.timestamp) + 72 hours;
+        bytes32 earlyAction = _scheduleFreeze(SCOPE, earlyDeadline);
+
+        // Then: a far-future decoy freeze on the SAME scope.
+        uint64 lateDeadline = uint64(block.timestamp) + 300 days;
+        bytes32 lateAction = _scheduleFreeze(SCOPE, lateDeadline);
+
+        // The guardian view reports the EARLIEST live deadline, never the decoy.
+        (address resolvedGuardian, uint64 vetoDeadline) = executor.terminalFreezeVetoGuardian(SCOPE);
+        resolvedGuardian.assertEq(guardian, "global guardian resolved");
+        uint256(vetoDeadline)
+            .assertEq(uint256(earlyDeadline), "earliest live deadline, decoy does not shadow");
+
+        // Enumeration exposes BOTH live actions so none is hidden.
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(2, "two live freezes");
+        (bytes32 id0, uint64 d0) = executor.liveTerminalFreezeActionAt(SCOPE, 0);
+        (bytes32 id1, uint64 d1) = executor.liveTerminalFreezeActionAt(SCOPE, 1);
+        id0.assertEq(earlyAction, "index 0 is early action");
+        uint256(d0).assertEq(uint256(earlyDeadline), "index 0 deadline");
+        id1.assertEq(lateAction, "index 1 is late action");
+        uint256(d1).assertEq(uint256(lateDeadline), "index 1 deadline");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.LiveTerminalFreezeIndexOutOfBounds.selector, SCOPE, 2
+            )
+        );
+        executor.liveTerminalFreezeActionAt(SCOPE, 2);
+    }
+
+    function testLiveSetPrunedOnEveryTerminalTransition() public {
+        _grantGlobalVetoGuardian();
+        uint64 d1 = uint64(block.timestamp) + 72 hours;
+        uint64 d2 = uint64(block.timestamp) + 80 hours;
+        uint64 d3 = uint64(block.timestamp) + 90 hours;
+        uint64 d4 = uint64(block.timestamp) + 100 hours;
+        bytes32 a1 = _scheduleFreeze(SCOPE, d1);
+        bytes32 a2 = _scheduleFreeze(SCOPE, d2);
+        bytes32 a3 = _scheduleFreeze(SCOPE, d3);
+        bytes32 a4 = _scheduleFreeze(SCOPE, d4);
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(4, "four live");
+
+        // Veto prunes a1.
+        vm.prank(guardian);
+        executor.vetoTerminalFreeze(a1, keccak256("veto"));
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(3, "after veto");
+
+        // Cancel prunes a2.
+        executor.cancelGovernanceAction(a2, keccak256("cancel"));
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(2, "after cancel");
+
+        // Execute prunes a3.
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) =
+            _singleCall(0, abi.encodeCall(GovernedTargetMock.setValue, (uint256(d3))));
+        vm.warp(d3);
+        executor.executeGovernanceBatch(a3, calls, callDatas);
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(1, "after execute");
+
+        // Materialized expiry prunes a4.
+        (GovernanceAction memory a4Action) = executor.governanceAction(a4);
+        vm.warp(uint256(a4Action.expiresAfter) + 1);
+        executor.materializeExpiredAction(a4);
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(0, "after expiry");
+
+        // With no live actions the deadline is zero.
+        (, uint64 vetoDeadline) = executor.terminalFreezeVetoGuardian(SCOPE);
+        uint256(vetoDeadline).assertEq(0, "no live freezes -> zero deadline");
+    }
+
+    function testScheduleTerminalFreezeRevertsWithNoVetoGuardian() public {
+        // No ROLE_TERMINAL_FREEZE_VETO holder for the scope or globally.
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (1));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        executor.publishGovernanceCallData(callDatas);
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.NoTerminalFreezeVetoGuardianConfigured.selector, SCOPE
+            )
+        );
+        _scheduleClass(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE, calls, notBefore, notBefore + 7 days
+        );
+
+        // A per-scope holder alone satisfies the requirement.
+        roleRegistry.grantScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, SCOPE, guardian);
+        bytes32 actionId = _scheduleClass(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE, calls, notBefore, notBefore + 7 days
+        );
+        uint256(uint8(executor.governanceAction(actionId).status))
+            .assertEq(
+                uint256(uint8(GovernanceActionStatus.SCHEDULED)),
+                "scheduled with per-scope guardian"
+            );
+    }
+
+    function testEmptyVetoRoleReturnsSentinelNotHolderZero() public {
+        _grantGlobalVetoGuardian();
+        bytes32 freezeScope = keccak256("freeze-scope");
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        _scheduleFreeze(freezeScope, notBefore);
+
+        // Now revoke the only global holder while an action is live.
+        roleRegistry.revokeRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, guardian);
+        (address resolvedGuardian, uint64 vetoDeadline) =
+            executor.terminalFreezeVetoGuardian(freezeScope);
+        resolvedGuardian.assertEq(address(0), "sentinel guardian when role empty");
+        // The live action's deadline is still surfaced (a broken guardian set
+        // is a monitored incident, not a hidden window).
+        uint256(vetoDeadline).assertEq(uint256(notBefore), "live deadline still visible");
+    }
+
+    function testPerScopeVetoAuthorityAndGlobalFallback() public {
+        address scopeGuardian = address(0x5C09E);
+        // Only a per-scope holder set; no global holder.
+        roleRegistry.grantScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, SCOPE, scopeGuardian);
+
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        bytes32 actionId = _scheduleFreeze(SCOPE, notBefore);
+
+        (address resolvedGuardian,) = executor.terminalFreezeVetoGuardian(SCOPE);
+        resolvedGuardian.assertEq(scopeGuardian, "per-scope guardian resolved");
+
+        // A stranger cannot veto.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.NotTerminalFreezeVetoGuardian.selector, stranger
+            )
+        );
+        vm.prank(stranger);
+        executor.vetoTerminalFreeze(actionId, keccak256("no"));
+
+        // The per-scope holder can veto.
+        vm.prank(scopeGuardian);
+        executor.vetoTerminalFreeze(actionId, keccak256("scope veto"));
+        executor.governanceAction(actionId).vetoer.assertEq(scopeGuardian, "scope holder vetoed");
+
+        // Now a second scope with only a GLOBAL holder: the global holder may
+        // veto any scope (fallback), proving global authority is additive.
+        _grantGlobalVetoGuardian();
+        bytes32 otherScope = keccak256("other-scope");
+        uint64 nb2 = uint64(block.timestamp) + 72 hours;
+        bytes32 action2 = _scheduleFreeze(otherScope, nb2);
+        (address resolved2,) = executor.terminalFreezeVetoGuardian(otherScope);
+        resolved2.assertEq(guardian, "global fallback guardian resolved");
+        vm.prank(guardian);
+        executor.vetoTerminalFreeze(action2, keccak256("global veto"));
+        executor.governanceAction(action2).vetoer.assertEq(guardian, "global holder vetoed");
+    }
+
+    function testTerminalFreezeVetoRoleDerivation() public {
+        // Per-scope role is keccak256(ROLE_TERMINAL_FREEZE_VETO, scopeHash).
+        executor.terminalFreezeVetoRole(SCOPE)
+            .assertEq(
+                keccak256(abi.encode(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, SCOPE)),
+                "per-scope veto role derivation"
+            );
+        (executor.terminalFreezeVetoRole(SCOPE)
+                != executor.terminalFreezeVetoRole(keccak256("other")))
+        .assertTrue("distinct scopes yield distinct roles");
+    }
+
+    function testMultipleGlobalHoldersReturnSentinel() public {
+        // Two global holders: single-address resolution is ambiguous, so the
+        // view returns the zero-address sentinel (enumeration remains the
+        // authoritative path).
+        roleRegistry.grantRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, guardian);
+        roleRegistry.grantRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, address(0x6A0E));
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        _scheduleFreeze(SCOPE, notBefore);
+        (address resolvedGuardian, uint64 vetoDeadline) = executor.terminalFreezeVetoGuardian(SCOPE);
+        resolvedGuardian.assertEq(address(0), "ambiguous global holders -> sentinel");
+        uint256(vetoDeadline).assertEq(uint256(notBefore), "deadline still surfaced");
     }
 }

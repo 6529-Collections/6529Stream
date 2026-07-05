@@ -17,6 +17,7 @@ contract RoleHolderContractMock {
 contract StreamRoleRegistryTest is CharacterizationTestBase {
     using Assertions for address;
     using Assertions for bool;
+    using Assertions for bytes32;
     using Assertions for uint256;
 
     event StreamRoleGranted(
@@ -327,5 +328,68 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
         );
         vm.prank(roleManager);
         registry.grantRole(StreamRoles.ROLE_EXPORT_PUBLISHER, holder);
+    }
+
+    // ------------------------------------------- FIX B: per-scope veto roles
+
+    function testScopableRoleVocabularyIsClosed() public {
+        // Only ROLE_TERMINAL_FREEZE_VETO is scopable today.
+        registry.isScopableRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO)
+            .assertTrue("terminal-freeze veto scopable");
+        registry.isScopableRole(StreamRoles.ROLE_TREASURY).assertFalse("treasury not scopable");
+        registry.isScopableRole(StreamRoles.ROLE_PAUSE_GUARDIAN)
+            .assertFalse("pause guardian not scopable");
+    }
+
+    function testScopedRoleDerivationAndGrant() public {
+        bytes32 scope = keccak256("freeze-scope");
+        bytes32 derived = registry.scopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope);
+        derived.assertEq(
+            keccak256(abi.encode(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope)),
+            "scoped role derivation"
+        );
+
+        // A closed-world direct grant of the derived key reverts (it is not a
+        // base vocabulary member); the scoped API is the only path.
+        vm.expectRevert(abi.encodeWithSelector(IStreamRoleRegistry.UnknownRole.selector, derived));
+        registry.grantRole(derived, holder);
+
+        // Root-class scoped grant is owner-only.
+        registry.grantScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope, holder);
+        registry.hasRole(derived, holder).assertTrue("scoped role granted");
+        registry.roleHolderCount(derived).assertEq(1, "scoped holder count");
+        registry.roleHolderAt(derived, 0).assertEq(holder, "scoped holder enumerated");
+
+        // A different scope is a distinct role.
+        registry.hasRole(
+                registry.scopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, keccak256("other")),
+                holder
+            ).assertFalse("other scope not granted");
+
+        // Revoke through the scoped API.
+        registry.revokeScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope, holder);
+        registry.hasRole(derived, holder).assertFalse("scoped role revoked");
+    }
+
+    function testScopedGrantRejectsNonScopableBaseAndUnauthorized() public {
+        bytes32 scope = keccak256("scope");
+        // Non-scopable base reverts UnknownRole.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRoleRegistry.UnknownRole.selector, StreamRoles.ROLE_TREASURY
+            )
+        );
+        registry.grantScopedRole(StreamRoles.ROLE_TREASURY, scope, holder);
+
+        // Root-class scoped grants are owner-only: a role manager cannot.
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamRoleRegistry.RoleActorNotAuthorized.selector,
+                StreamRoles.ROLE_TERMINAL_FREEZE_VETO,
+                roleManager
+            )
+        );
+        vm.prank(roleManager);
+        registry.grantScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope, holder);
     }
 }
