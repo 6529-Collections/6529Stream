@@ -52,6 +52,8 @@ specs are written against permanence classes per
 - [docs/collection-metadata-contract.md](docs/collection-metadata-contract.md)
 - [docs/stream-entropy-coordinator.md](docs/stream-entropy-coordinator.md)
 - [docs/stream-entropy-providers.md](docs/stream-entropy-providers.md)
+- [docs/stream-artist-authority.md](docs/stream-artist-authority.md)
+- [docs/stream-sales-and-auctions.md](docs/stream-sales-and-auctions.md)
 - [docs/adr/0008-revenue-splits-and-royalty-resolver.md](docs/adr/0008-revenue-splits-and-royalty-resolver.md)
 - [docs/spec-open-questions.md](docs/spec-open-questions.md)
 
@@ -220,6 +222,8 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 - [docs/collection-metadata-contract.md](docs/collection-metadata-contract.md)
 - [docs/stream-entropy-coordinator.md](docs/stream-entropy-coordinator.md)
 - [docs/stream-entropy-providers.md](docs/stream-entropy-providers.md)
+- [docs/stream-artist-authority.md](docs/stream-artist-authority.md)
+- [docs/stream-sales-and-auctions.md](docs/stream-sales-and-auctions.md)
 - [docs/audit-package.md](docs/audit-package.md)
 - [docs/adr/README.md](docs/adr/README.md)
 - [docs/slither.md](docs/slither.md)

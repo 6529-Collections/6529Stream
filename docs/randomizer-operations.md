@@ -1,5 +1,12 @@
 # Randomizer Operations
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins. For
+target entropy behavior this document is superseded by
+[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md).
+
 6529Stream treats randomizer configuration as deployment evidence, not as a
 tribal-knowledge checklist. Every fork, testnet, and production release should
 retain a public, no-secret randomizer operations evidence bundle under

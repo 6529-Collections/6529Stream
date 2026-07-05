@@ -3,7 +3,12 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
+[ADR 0010](adr/0010-world-class-spec-pass.md),
+[ADR 0011](adr/0011-world-class-pass-round-2.md),
+[ADR 0012](adr/0012-world-class-pass-round-3.md),
+[ADR 0013](adr/0013-world-class-pass-round-4.md), and
+[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the Stream-native entropy provider adapter contracts
@@ -70,6 +75,10 @@ StreamEntropyCoordinator
 Provider adapters must not write to `StreamCore`, must not expose
 `setTokenHash`-style callbacks, and must not define the final artist-facing
 token hash.
+
+The coordinator's token-keyed and scope-keyed request kinds (ADR 0011
+decision R8) share this one adapter boundary: adapters serve both
+identically and never distinguish them [EP-CONTEXT].
 
 The current `NextGenRandomizerNXT`, `NextGenRandomizerRNG`, and
 `NextGenRandomizerVRF` contracts are reference material only. The production
@@ -191,6 +200,26 @@ enum ProviderResultStatus {
 
 Only `StreamEntropyCoordinator` may call `requestEntropy`.
 
+Fee quoting requirements [EP-QUOTE]:
+
+1. `quoteRequest(context)` must return the exact fee that `requestEntropy`
+   will require for the same context in the same transaction. The
+   coordinator quotes, checks the caller's `msg.value` bound, and forwards
+   exactly the quoted amount within one transaction (ADR 0010 decision
+   D8.7); adapters must not derive the required fee from state that can
+   change between the quote and the request call inside one transaction.
+2. Fee changes — admin updates or upstream fee moves — apply to future
+   transactions only. They can never make a same-transaction
+   quote-then-request pair disagree, so provider fee drift can only
+   affect callers whose `msg.value` no longer covers the new fee.
+3. Adapters must require exact payment at their boundary
+   (`msg.value == quoteRequest(context)`) and reject excess. Caller
+   overpayment tolerance and pull-credit refunds are coordinator-side:
+   [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+   [EC-FEEBIND].
+4. Fee-free adapters must return zero from `quoteRequest` and reject
+   nonzero `msg.value`.
+
 `context` is coordinator-defined and versioned. Recommended v1 encoding:
 
 ```solidity
@@ -205,14 +234,34 @@ abi.encode(
 )
 ```
 
-Adapters may decode the context for events, request metadata, or source-specific
-payloads. They must not use decoded context as authority in place of the
-coordinator request key.
+Context handling requirements [EP-CONTEXT]:
+
+1. The version prefix is the leading `uint16`. Schema version 1 is the
+   token-request context above; schema version 2 is the scope-request
+   context, carrying the coordinator `scopeId` in place of a token ID.
+   Both encodings are owned by the coordinator spec
+   ([`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+   Request Flow and [EC-SCOPE]; ADR 0011 decision R8).
+2. Adapters must treat `requestKey` and `context` as opaque: token-keyed
+   and scope-keyed requests are indistinguishable at the adapter boundary
+   and flow through identical request, callback, storage, retry, and
+   status-probe paths.
+3. Adapters may decode context versions they recognize for events,
+   request metadata, or source-specific payloads. They must not use
+   decoded context as authority in place of the coordinator request key,
+   and they must not reject or special-case a request because its
+   context schema version is unrecognized.
 
 `providerResultStatus` is the shared audit and recovery probe. It must remain
 queryable after delivery, stale marking, failed delivery, or incident handling.
 Fresh entropy recovery for a token is forbidden when the old adapter reports
-`rawRandomnessReceived = true`, even if coordinator delivery failed.
+`rawRandomnessReceived = true`, even if coordinator delivery failed. The
+probe is one-directional evidence: a `true` report blocks fresh recovery
+absolutely, while a `false` report alone never licenses it — the
+coordinator corroborates a negative report against its own request state
+and requires an independent-evidence commitment before any fresh draw
+([`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+[EC-INCIDENT] rule 3; ADR 0011 decision R12).
 
 ## Common Adapter Requirements
 
@@ -222,9 +271,11 @@ Fresh entropy recovery for a token is forbidden when the old adapter reports
    coordinator `requestKey`.
 4. Each provider callback must store raw randomness or enough source data to
    reconstruct it before attempting coordinator fulfillment.
-5. If coordinator fulfillment fails during a provider callback, the adapter must
-   retain the raw randomness and expose a retry path for coordinator
-   fulfillment.
+5. Provider callbacks must deliver to the coordinator through try/catch or
+   a checked low-level call; if coordinator fulfillment fails during a
+   provider callback, the adapter must retain the raw randomness and
+   expose a retry path for coordinator fulfillment [EP-CALLBACK]
+   (ADR 0010 decision D8.1).
 6. Provider callbacks must not write to Core.
 7. Provider callbacks must not derive the final Stream seed.
 8. Provider callbacks must not silently discard unknown provider request IDs.
@@ -249,17 +300,70 @@ Fresh entropy recovery for a token is forbidden when the old adapter reports
     after fulfillment, failure, stale marking, or config migration.
 20. Adapters must set `rawRandomnessReceived = true` before attempting
     coordinator fulfillment.
-21. Adapters must document operational key custody for provider subscriptions,
-    payment wallets, callback authorities, and adapter admins.
-22. Adapters must support a rotation plan for compromised or lost provider
-    operational keys without changing already-recorded request commitments.
+21. Adapter operational authorities must be contract-held governed
+    configuration, not documented key custody [EP-CUSTODY] (ADR 0010
+    decision D7.5).
+22. Adapters must support rotation of operational authorities by contract
+    execution without changing already-recorded request commitments
+    [EP-CUSTODY].
 
-Provider key runbooks should name the responsible governance role, rotation
-cadence or review cadence, loss procedure, compromise procedure, and expected
-collection impact. For VRF, this includes subscription ownership, consumer
-registration authority, LINK/native funding account, callback gas settings, and
-the process for moving future requests to a new subscription without altering
-old request provenance.
+## Operational Authority Custody
+
+Entropy is provenance-critical, and the external dependency's control
+plane must meet the same custody bar as protocol roles: no single EOA may
+be able to execute a material action, and no single lost key may stall the
+subsystem (ADR 0010 decision D7.5).
+
+Requirements [EP-CUSTODY]:
+
+1. Every adapter operational authority must be contract-holdable and
+   contract-held: provider subscription owners (for VRF, the Chainlink
+   subscription owner), consumer registration authorities, LINK/native
+   funding wallets, payment configuration admins, and withdrawal
+   destinations must be Safe/multisig or governance contracts, never
+   long-lived EOAs.
+2. These authorities are governed configuration, not documentation: each
+   is recorded in the deployment manifest alongside protocol role
+   assignments and verified by the governance conformance gate before
+   production deployment.
+3. Rotation of a compromised or lost operational authority must be
+   executable by contract (for example, a Safe-executed VRF subscription
+   ownership transfer) without changing already-recorded request
+   commitments, and a rehearsed contract-executed rotation is required
+   release evidence.
+4. Custody and funding parameters are Operational-layer values excluded
+   from `streamEntropyProviderConfigHash()` [EP-CONFIGHASH]: rotating an
+   authority or moving future requests to a new subscription never alters
+   old request provenance, entropy identity, or provider epochs.
+5. Provider key runbooks name the responsible governance role, review
+   cadence, loss procedure, compromise procedure, and expected collection
+   impact for each authority. For VRF this covers subscription ownership,
+   consumer registration, funding, callback gas settings, and the
+   new-subscription migration procedure. Runbooks describe how the
+   contract-held authorities are exercised; they never substitute for
+   contract custody.
+
+## Provider Config Hash Contents
+
+`streamEntropyProviderConfigHash()` is entropy identity: it is snapshotted
+into requests, bound into `requestKey` and seed derivation, and pinned by
+provider epochs and finality manifests.
+
+Requirements [EP-CONFIGHASH]:
+
+1. The config hash must bind every randomness-identity parameter: for
+   VRF-class adapters at least the VRF coordinator address, key hash,
+   `requestConfirmations`, and `numWords`; for other families the
+   equivalent source-identity and security parameters.
+2. The config hash must exclude Operational-layer parameters: callback
+   gas limits, subscription IDs, funding and custody addresses, payment
+   amounts, and withdrawal destinations (ADR 0010 decisions D1.3 and
+   D7.5). Retuning gas, fees, funding, or custody never changes entropy
+   identity, never increments a collection provider epoch, and never
+   disturbs a frozen collection.
+3. Changing any bound identity parameter changes the config hash and is a
+   provider config change under the coordinator's epoch rules; changing
+   an excluded Operational parameter is not.
 
 The provider-family identity surface is the one already declared on
 `IStreamEntropyProvider`:
@@ -282,13 +386,30 @@ STREAM_ENTROPY_PROVIDER_INSTANT
 STREAM_ENTROPY_PROVIDER_MOCK
 ```
 
-## Common Events
+## Common Events [EP-EVENTS]
 
-Every provider should emit source-specific request and callback events. The
+This document is the normative home of the provider-adapter event
+vocabulary it defines. Every non-standard event schema in this document
+carries `uint16 schemaVersion` as its leading declaration field —
+declared before every indexed parameter, so it is also the first
+data-section field — and declares at most three indexed parameters;
+genesis emits every such event with `schemaVersion = 1` (ADR 0013
+decision U7). For the genesis adapters these blocks are the
+production-exact signatures the machine-readable event catalog must
+reproduce; extension-family blocks bind their separately accepted
+adapter specs the same way. The conformance-matrix "snippet is
+shorthand" rule covers citations of these events in other documents,
+never this home. Host events of adapter mutations that execute as
+canonical ADR 0004 governance actions bind the authorizing
+`bytes32 actionId` (ADR 0014 decision V6); in the genesis adapter set
+that is `VRFConfigUpdated` [EP-VRF-CONFIG].
+
+Every provider must emit source-specific request and callback events. The
 minimum shared shape is:
 
 ```solidity
 event ProviderEntropyRequested(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     address indexed coordinator,
@@ -296,12 +417,14 @@ event ProviderEntropyRequested(
 );
 
 event ProviderEntropyReceived(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bytes32 rawRandomness
 );
 
 event ProviderCoordinatorFulfillmentAttempted(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bool success,
@@ -313,9 +436,10 @@ Provider-specific events should include source configuration such as VRF key
 hash, subscription ID, request confirmations, or ARRNG payment amount when
 useful.
 
-## Raw Randomness Compression
+## Raw Randomness Compression [EP-RAW]
 
-Adapters should report one `bytes32 rawRandomness` value to the coordinator.
+Adapters should report one `bytes32 rawRandomness` value to the coordinator
+(anchor per ADR 0013 decision U9).
 When the upstream source returns multiple words or a complex payload, compress
 it with a provider-specific domain:
 
@@ -336,12 +460,163 @@ The coordinator will include `rawRandomness`, `requestKey`,
 collection ID, token ID, collection salt, and mint commitment in the final seed
 derivation.
 
+This document is the normative home of the provider-side raw compression
+domains (ADR 0010 decision D3.1); the input lists are the `abi.encode`
+blocks in each owning adapter section, and the checked domain-constants
+table in
+[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+mirrors these rows. Release tooling computes and pins the hash values.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Scope |
+| --- | --- | --- | --- | --- | --- |
+| `STREAM_PROVIDER_RAW_V1` | `6529STREAM_PROVIDER_RAW_V1` | 0x9d25920cde651730cff9eacf736aaa7aa2f6d1f22e948f5d5e362fb181a5bee1 | provider adapters (generic) | `1` | genesis |
+| `STREAM_VRF_RAW_V1` | `6529STREAM_VRF_RAW_V1` | 0x9aec1af5d92901527f48ea05f0779a6d6cd5153a45cb99ffa4383b1b4beea311 | `StreamEntropyProviderVRF` | `1` | genesis |
+| `STREAM_ARRNG_RAW_V1` | `6529STREAM_ARRNG_RAW_V1` | 0xa7c608806995e034e71d26ec44e96245b593a47fe673f8f1d8e33cde02c3bf86 | `StreamEntropyProviderARRNG` | `1` | genesis if selected fallback |
+| `STREAM_PYTH_RAW_V1` | `6529STREAM_PYTH_RAW_V1` | 0x904dfcae5221db62594fb78af05341a66a4e8d649ec151a90cee174eecf6e246 | `StreamEntropyProviderPyth` | `1` | genesis if selected fallback |
+| `STREAM_DRAND_RAW_V1` | `6529STREAM_DRAND_RAW_V1` | 0x81d2ca2a7da654d7cfe760fac3c357e03fc212d4790b5277459b5717b3f46201 | `StreamEntropyProviderDrand` | `1` | extension |
+| `STREAM_MULTI_SOURCE_RAW_V1` | `6529STREAM_MULTI_SOURCE_RAW_V1` | 0x94257c55589ad53441c332497f043fbe4820fe5089152303939a0aaba1f8f4f0 | multi-source mixer adapters | `1` | extension |
+| `GGP_VRF_CALLBACK_GAS_LIMIT` | `6529STREAM_GGP_VRF_CALLBACK_GAS_LIMIT` | 0xb54bc37de6ab63d94434a3fb47e0b24ad67118105c91c59db7b1c58d482f5491 | provider adapters | `1` | genesis (Governed Gas Parameter identifier per [LTA-GGP]; [EP-VRF-CONFIG]) |
+
+## Callback Delivery Discipline
+
+Upstream randomness callbacks are one-shot: Chainlink-class coordinators
+mark a request fulfilled when the consumer callback runs, whether or not
+the consumer's downstream logic succeeded, and never redeliver. A
+coordinator revert that unwinds the adapter's stored randomness therefore
+loses the randomness forever and strands the token `REQUESTED` under the
+default no-fresh-recovery policy. Callback delivery is store-first,
+try/catch-second (ADR 0010 decision D8.1).
+
+Requirements [EP-CALLBACK]:
+
+1. A provider callback must validate the provider request ID, then persist
+   the `ProviderResult` — including the raw randomness and
+   `rawRandomnessReceived = true` — before any call to
+   `coordinator.fulfillEntropy`.
+2. The callback must invoke `coordinator.fulfillEntropy` through Solidity
+   `try/catch` or a checked low-level call. A coordinator revert, a
+   subcall out-of-gas, or malformed return data must be caught inside the
+   adapter frame; it must never bubble a revert into the upstream
+   randomness callback.
+3. On a caught failure the adapter emits
+   `ProviderCoordinatorFulfillmentAttempted` with `success = false` and
+   retains the result unchanged; `retryCoordinatorFulfillment` then
+   re-delivers the identical stored randomness. On a `FINALIZED` outcome
+   the adapter marks the result delivered.
+4. A benign rejection outcome follows the terminal-stale rule in the
+   Coordinator Fulfillment Retry section. `REJECTED_PROVIDER_REVOKED`
+   must not mark the result terminal: the retained result is the
+   `rawRandomnessReceived` evidence that keeps unsafe fresh recovery
+   blocked while incident policy resolves the request.
+5. Callback gas limits must be sized from the measured coordinator
+   fulfillment envelope — `fulfillEntropy` including the restricted Core
+   refresh emitter call — plus the adapter's own persistence writes and
+   outcome handling, with a margin published in the release manifest.
+   The margin must include the governance-published worst-case
+   repricing headroom recorded in the release manifest and remeasured
+   by every hard-fork/repricing review, and must reserve the
+   adapter-local persistence-and-outcome budget separately from the
+   coordinator envelope, so envelope growth exhausts the retryable
+   coordinator subcall before it can reach the store-first writes
+   [EP-INFLIGHT] (ADR 0012 decision T1). Monitoring must alert when the
+   measured envelope exceeds two-thirds of the configured callback gas
+   limit.
+6. These rules apply to every callback-receiving adapter family — VRF,
+   ARRNG, Pyth, drand, Randcast, Supra, Witnet, and all future adapters —
+   and to permissionless retry paths.
+
+## In-Flight Requests Under Raises And Repricings [EP-INFLIGHT]
+
+Chainlink-class upstreams bind the callback gas limit per request at
+submission time. Raising `VRF_CALLBACK_GAS_LIMIT` — or any adapter
+callback-gas configuration — therefore protects future requests only
+([EP-VRF-CONFIG] rule 4): every in-flight request executes under the
+limit it was submitted with, and the upstream coordinator additionally
+enforces its own maximum callback gas above which no raise can go. This
+section pins what happens to requests in flight when the fulfillment
+envelope grows — through a gas-schedule repricing or a measured-envelope
+increase — faster than their submitted limits (ADR 0012 decision T1).
+
+Requirements [EP-INFLIGHT]:
+
+1. Two failure classes are distinguished, and only the first is
+   recoverable:
+   1. Coordinator-frame failure: the callback frame completes the
+      adapter's own persist writes, and the `fulfillEntropy` subcall
+      reverts or runs out of gas inside the [EP-CALLBACK] try/catch.
+      The stored result survives, and `retryCoordinatorFulfillment`
+      re-delivers the identical randomness in a later transaction with
+      fresh gas, regardless of the original request's submitted limit.
+      The [EP-CALLBACK] rule 5 adapter-local reserve exists precisely
+      so envelope growth lands in this class.
+   2. Frame-level loss: a repricing inflates the adapter's own persist
+      writes beyond an in-flight request's submitted limit, the
+      one-shot callback reverts before storing, the upstream marks the
+      request fulfilled and never redelivers, and the raw output stands
+      publicly revealed in the upstream fulfillment transaction while
+      the adapter holds nothing.
+2. The frame-level-loss outcome is pinned, not improvised: the adapter
+   probe truthfully reports no randomness received, but the
+   [EC-INCIDENT] rule 3 evidence bundle can never corroborate that no
+   upstream fulfillment occurred (ADR 0011 decision R12), so fresh
+   recovery is blocked by construction for every collection — with or
+   without a frozen fresh-recovery policy — because a fresh draw after
+   a publicly revealed output is a reroll. The request stays
+   `REQUESTED`, and its token or scope renders honest pending state
+   indefinitely: a disclosed permanence limit of one-shot upstream
+   callbacks. A separately accepted Replaceable replay adapter behind
+   the frozen provider interface may later make the already-revealed
+   upstream output deliverable again under a frozen recovery policy —
+   delivering the identical value is delivery, not a reroll — but no
+   such module ships at genesis and nothing in this spec depends on
+   one. Collection finality over a permanently pending token follows
+   the never-finalized-entropy content-root semantics owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   (ADR 0012 decision T3).
+3. There is no pre-emptive re-request: creating a second live draw for
+   a subject whose first request can still fulfill is exactly the
+   reroll surface the coordinator's Request Commitment Finality rules
+   exclude. The protections are preventive:
+   1. headroom — the [EP-CALLBACK] rule 5 margin includes the published
+      worst-case repricing headroom, remeasured by every
+      hard-fork/repricing review before activation;
+   2. activation-boundary drain — where a scheduled gas-schedule change
+      would push the measured envelope past the submitted limit of any
+      in-flight request class, operations must raise the parameter
+      ahead of activation for new requests, alert on every request
+      still pending across the activation boundary whose submitted
+      limit the post-fork envelope would exceed, and complete or
+      retry-deliver those requests before activation where possible.
+      Healthy VRF in-flight windows are minutes long, so the straddle
+      set is small by construction; the drain obligation and its alert
+      join the release-manifest monitoring plan beside the
+      [EP-CALLBACK] rule 5 alert.
+4. Upstream ceiling and migration ladder: when the measured envelope
+   plus margin approaches the upstream coordinator's own maximum
+   callback gas, raising the adapter parameter is no longer a remedy.
+   The remediation is migrating future requests to an upstream
+   coordinator version (or provider family) with a sufficient ceiling —
+   a randomness-identity change under [EP-CONFIGHASH] and the
+   coordinator's provider-epoch rules, never a silent config drift.
+   Subscription-level settings (`subscriptionId`, funding) stay
+   Operational and never gate this ladder.
+5. These rules apply to every callback-receiving adapter family whose
+   upstream binds per-request callback gas and does not redeliver —
+   VRF, ARRNG, Pyth, drand, Randcast, Supra, Witnet, and future
+   adapters. Each adapter spec must state its upstream's callback-gas
+   ceiling, its redelivery posture, and which of the failure classes
+   above its upstream can produce.
+
 ## Coordinator Fulfillment Retry
 
 External randomness callbacks are valuable. If a callback receives valid
-randomness but the coordinator call fails, the adapter should not lose it.
+randomness but the coordinator call fails, the adapter must not lose it
+(ADR 0010 decision D8.1). Persistent result storage and a retry surface
+are mandatory for every callback-receiving adapter; the storage layout
+below is the reference shape, and any equivalent must preserve every
+distinction the status probe reports.
 
-Recommended storage:
+Required result storage (reference shape):
 
 ```solidity
 struct ProviderResult {
@@ -356,13 +631,13 @@ struct ProviderResult {
 mapping(uint256 providerRequestId => ProviderResult) results;
 ```
 
-Recommended retry function:
+The retry surface is part of the frozen provider interface:
 
 ```solidity
 function retryCoordinatorFulfillment(uint256 providerRequestId) external;
 ```
 
-Rules:
+Rules [EP-RETRY]:
 
 1. Provider result must exist and be received.
 2. Result must not already be delivered.
@@ -372,7 +647,10 @@ Rules:
    `uint8 outcome = coordinator.fulfillEntropy(requestKey, rawRandomness);`
    and inspects the returned outcome.
 5. On a `FINALIZED` outcome, marks result delivered.
-6. On a revert, emits failure and keeps result available for later retry.
+6. On a caught revert, emits `ProviderCoordinatorFulfillmentAttempted` with
+   `success = false` and keeps the result available for later retry. The
+   stored `requestKey`, raw randomness, epoch, and config hash are
+   immutable across attempts.
 7. On a benign rejection outcome, applies the terminal-stale rule below.
 
 `fulfillEntropy` returns a pinned `EntropyFulfillmentOutcome` code instead of
@@ -383,7 +661,9 @@ should retain the result. An adapter may mark a delivered result
 `TERMINAL_STALE` only when `fulfillEntropy` returned `REJECTED_STALE_EPOCH`
 or `REJECTED_INACTIVE_REQUEST`, or when the coordinator's request-status
 read shows that the adapter's stored (epoch, attempt) pair is no longer
-active.
+active. `REJECTED_PROVIDER_REVOKED` never authorizes terminal marking: the
+request is still active, and the retained result is recovery evidence
+[EP-CALLBACK].
 
 ## StreamEntropyProviderVRF
 
@@ -410,7 +690,7 @@ constructor(
     address streamEntropyCoordinator,
     address streamAdmins,
     address vrfCoordinator,
-    uint64 subscriptionId,
+    uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
     uint32 callbackGasLimit,
@@ -418,10 +698,15 @@ constructor(
 )
 ```
 
-If the deployment uses a newer VRF coordinator interface, use a versioned
-adapter name such as `StreamEntropyProviderVRFV2` or
-`StreamEntropyProviderVRFv25`. The Stream adapter boundary should stay the
-same.
+This reference shape targets the recommended upstream version, Chainlink
+VRF v2.5, whose subscription IDs are `uint256` (Research Findings;
+ADR 0013 decision U7). A deployment against a different upstream
+coordinator version uses a versioned adapter name — for example
+`StreamEntropyProviderVRFV2` for the v2-era `uint64`-subscription shape —
+and retypes the subscription field to that version's width:
+subscription-ID width is upstream-version-specific Operational
+configuration, excluded from the config hash like the subscription value
+itself [EP-CONFIGHASH]. The Stream adapter boundary stays the same.
 
 ### State
 
@@ -430,7 +715,7 @@ Recommended state:
 ```solidity
 address public immutable coordinator;
 address public vrfCoordinator;
-uint64 public subscriptionId;
+uint256 public subscriptionId;
 bytes32 public keyHash;
 uint16 public requestConfirmations;
 uint32 public callbackGasLimit;
@@ -470,13 +755,14 @@ StreamEntropyCoordinator.requestEntropy(tokenId)
        return vrfRequestId
 ```
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event VRFEntropyRequested(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed vrfRequestId,
-    uint64 indexed subscriptionId,
+    uint256 indexed subscriptionId,
     uint32 providerEpoch,
     bytes32 keyHash,
     uint16 requestConfirmations,
@@ -488,13 +774,21 @@ event VRFEntropyRequested(
 ### Callback Flow
 
 ```text
-VRF coordinator callback
+VRF coordinator callback [must never revert; EP-CALLBACK]
   -> adapter verifies known vrfRequestId
   -> adapter compresses random words to rawRandomness
   -> adapter stores result and marks RAW_RANDOMNESS_RECEIVED
-  -> uint8 outcome = coordinator.fulfillEntropy(requestKey, rawRandomness)
-  -> adapter marks delivered only on a FINALIZED outcome
+  -> try coordinator.fulfillEntropy(requestKey, rawRandomness)
+       returns outcome: adapter marks delivered only on FINALIZED;
+       benign rejections follow the terminal-stale rule [EP-RETRY]
+     catch (coordinator revert or subcall out-of-gas):
+       adapter emits ProviderCoordinatorFulfillmentAttempted(success=false)
+       stored result survives for retryCoordinatorFulfillment
 ```
+
+The callback frame must satisfy [EP-CALLBACK]: the stored raw randomness
+survives every coordinator failure, and the upstream VRF coordinator never
+observes a revert (ADR 0010 decision D8.1).
 
 Recommended raw compression:
 
@@ -507,10 +801,11 @@ bytes32 rawRandomness = keccak256(abi.encode(
 ));
 ```
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event VRFEntropyReceived(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed vrfRequestId,
     bytes32 rawRandomness
@@ -523,7 +818,7 @@ Admins may need to update VRF operational settings:
 
 ```solidity
 function updateVRFConfig(
-    uint64 subscriptionId,
+    uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
     uint32 callbackGasLimit,
@@ -531,19 +826,66 @@ function updateVRFConfig(
 ) external;
 ```
 
-Rules:
+Rules [EP-VRF-CONFIG]:
 
 1. Admin-only through ADR 0004 governance/action roles. Legacy selector-map
    `StreamAdmins` authorization is nonconformant for production deployment.
-2. Emit `VRFConfigUpdated`.
+   `updateVRFConfig` is one protected selector in the governance action
+   policy catalog; because its parameter set spans randomness identity
+   (rule 5) and a Governed Gas Parameter (rule 6), the selector is
+   catalog-classed as a canonical ADR 0004 governance action, with its
+   delay class and emergency eligibility recorded there.
+2. Emit `VRFConfigUpdated` binding the authorizing canonical action ID
+   (ADR 0014 decision V6). `VRFConfigUpdated` is not a GGP family
+   alias — it carries no old value and no floor — so a change touching
+   `callbackGasLimit` additionally emits the canonical
+   `GasParameterUpdated` family event ([LTA-GGP] requirement 4 in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)),
+   bound to the same action ID.
 3. Existing requests retain the provenance values emitted at request time.
 4. Updates affect only future requests.
+5. `keyHash`, `requestConfirmations`, and `numWords` are randomness-identity
+   parameters bound by `streamEntropyProviderConfigHash()`; updating any of
+   them is a provider config change under the coordinator's epoch rules.
+   `subscriptionId` and `callbackGasLimit` are Operational parameters
+   excluded from the config hash [EP-CONFIGHASH].
+6. `callbackGasLimit` is the adapter-hosted `VRF_CALLBACK_GAS_LIMIT`
+   Governed Gas Parameter
+   ([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   [LTA-GGP]): it must never be set below its immutable floor
+   `VRF_CALLBACK_GAS_FLOOR`, sized from the measured fulfillment envelope
+   with margin [EP-CALLBACK item 5]; raising it is a service-restoring
+   action, and the floor, genesis value, and measured envelope are
+   recorded in the release manifest. A raise binds future requests only
+   — in-flight requests keep their submitted limit — and the upstream
+   coordinator's own maximum callback gas bounds every raise; the
+   in-flight, drain, and ceiling semantics are pinned in [EP-INFLIGHT]
+   (ADR 0012 decision T1).
+7. Subscription ownership, consumer registration, and funding follow the
+   contract-held custody requirements [EP-CUSTODY] (ADR 0010 decision
+   D7.5).
+8. The parameter's release-manifest failure-direction class is
+   `FORWARDING_CAP` ([LTA-GGP] requirement 10): it caps the gas the
+   upstream forwards to the adapter callback, and raising it restores
+   delivery for future requests. Its named probe — a Permanent-class
+   probe contract ([LTA-GGP-PROBES] in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md);
+   ADR 0012 decision T1) — executes a faithful equivalent of the
+   callback frame: the persist writes plus a fulfillment-shaped subcall
+   replicating the published coordinator envelope ([EC-FULFILL]
+   rule 13), under exactly the probed value against a pinned fixture
+   corpus with no caller-supplied gas shaping. It records each run on
+   itself and commits measurements through `evidenceHash`; a release
+   golden test asserts probe gas matches the measured production
+   envelope within the recorded tolerance.
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event VRFConfigUpdated(
-    uint64 subscriptionId,
+    uint16 schemaVersion,
+    bytes32 indexed actionId,
+    uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
     uint32 callbackGasLimit,
@@ -557,10 +899,13 @@ event VRFConfigUpdated(
 2. Callback must not trust token ID from external calldata.
 3. Callback must not call Core.
 4. Callback must not derive the final seed.
-5. Callback should not permanently lose randomness if coordinator fulfillment
-   fails.
+5. Callback must not permanently lose randomness if coordinator fulfillment
+   fails: store-first persistence, try/catch delivery, and permissionless
+   retry are mandatory [EP-CALLBACK] (ADR 0010 decision D8.1).
 6. Admin config updates must be visible in events.
-7. Subscription and funding operations should be covered by deployment runbooks.
+7. Subscription ownership, consumer registration, and funding authorities
+   are contract-held governed configuration [EP-CUSTODY]; deployment
+   runbooks describe how those contract-held authorities are exercised.
 
 ## StreamEntropyProviderARRNG
 
@@ -619,10 +964,11 @@ StreamEntropyCoordinator.requestEntropy(tokenId)
        return arrngRequestId
 ```
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event ARRNGEntropyRequested(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed arrngRequestId,
     uint32 providerEpoch,
@@ -643,12 +989,14 @@ bytes32 rawRandomness = keccak256(abi.encode(
 ));
 ```
 
-Then it follows the same store-first, fulfill-second pattern as VRF.
+Then it follows the same store-first, try/catch-delivery pattern as VRF
+[EP-CALLBACK].
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event ARRNGEntropyReceived(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed arrngRequestId,
     bytes32 rawRandomness
@@ -657,21 +1005,42 @@ event ARRNGEntropyReceived(
 
 ### Payment And Recovery
 
-ARRNG payment behavior must be explicit:
+ARRNG payment behavior must be explicit [EP-ARRNG-PAY]:
 
-1. `requestPaymentWei` updates are admin-only and evented.
-2. V1 should require exact native ETH payment and reject excess payment rather
-   than refunding from the request path.
-3. Adapter balances should not silently accumulate.
-4. Withdrawals should send only to a configured protocol treasury or admin
-   owner and emit an event.
-5. Forced ETH should be recoverable through an explicit admin path.
+1. `requestPaymentWei` updates are admin-only, evented, and apply to future
+   transactions only. The payment amount is an Operational parameter
+   excluded from `streamEntropyProviderConfigHash()` [EP-CONFIGHASH], and
+   `quoteRequest` must return the live `requestPaymentWei` so the
+   same-transaction quote rule holds [EP-QUOTE].
+2. The adapter must require exact native ETH payment at its boundary and
+   reject excess. A conformant coordinator never sends excess: it binds
+   the caller's `msg.value` as `maxFeeWei`, forwards exactly the
+   same-transaction quote, and refunds caller excess as a pull credit
+   ([EC-FEEBIND] in
+   [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md),
+   ADR 0010 decision D8.7). Fee updates therefore cannot grief in-flight
+   requests whose `msg.value` still covers the new fee.
+3. Adapter balances must not silently accumulate.
+4. Withdrawals must send only to the configured withdrawal destination — a
+   Safe/multisig or governance treasury contract recorded as governed
+   configuration [EP-CUSTODY] — and emit an event.
+5. Forced ETH must be recoverable through an explicit admin path to the
+   same governed destination.
 
-Recommended events:
+Events ([EP-EVENTS]):
 
 ```solidity
-event ARRNGPaymentUpdated(uint256 oldPaymentWei, uint256 newPaymentWei);
-event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
+event ARRNGPaymentUpdated(
+    uint16 schemaVersion,
+    uint256 oldPaymentWei,
+    uint256 newPaymentWei
+);
+
+event ProviderFundsWithdrawn(
+    uint16 schemaVersion,
+    address indexed to,
+    uint256 amountWei
+);
 ```
 
 ### ARRNG Security Requirements
@@ -680,8 +1049,9 @@ event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
 2. Callback must not trust token ID from external calldata.
 3. Callback must not call Core.
 4. Callback must not derive the final seed.
-5. Callback should not permanently lose randomness if coordinator fulfillment
-   fails.
+5. Callback must not permanently lose randomness if coordinator fulfillment
+   fails: store-first persistence, try/catch delivery, and retry are
+   mandatory [EP-CALLBACK] (ADR 0010 decision D8.1).
 6. Payment handling must be tested for exact payment, excess-payment rejection,
    failed external request, and withdrawal.
 7. If the ARRNG controller returns the request ID only after an external
@@ -689,6 +1059,10 @@ event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
    reentrant callback attempts.
 8. The adapter must record the ARRNG request ID to `requestKey` binding before
    any valid callback can be accepted.
+9. The fallback review must record the ARRNG controller's callback-gas
+   provisioning, ceiling, and redelivery posture, and which
+   [EP-INFLIGHT] failure classes the upstream can produce, in the
+   `StreamEntropyLaunchDecision` manifest.
 
 ## StreamEntropyProviderPyth
 
@@ -716,7 +1090,12 @@ side's reveal.
    coordinator fulfillment.
 6. Report raw randomness to the coordinator.
 7. Provide retry for coordinator fulfillment.
-8. Make native fee estimation, excess-payment rejection, and failures explicit.
+8. Make native fee estimation, excess-payment rejection, and failures
+   explicit. Pyth fees are quote-dependent: `quoteRequest` must read the
+   live upstream fee so the same-transaction quote rule holds [EP-QUOTE],
+   and upstream fee drift is absorbed by the coordinator's `maxFeeWei`
+   binding ([EC-FEEBIND], ADR 0010 decision D8.7), never by failing
+   in-flight requests whose `msg.value` still covers the new fee.
 
 ### Security Requirements
 
@@ -729,8 +1108,15 @@ side's reveal.
 6. Callback must not derive final Stream seed.
 7. The adapter must document whether Pyth callbacks can be delivered by
    anyone, by Pyth contracts, or by a provider-specific relayer.
-8. Payment handling must be tested for exact fee, excess-fee rejection, stale
-   fee quote, failed request, and withdrawal.
+8. Payment handling must be tested for exact fee, excess-fee rejection at
+   the adapter boundary, upstream fee drift between quote observation and
+   execution (absorbed by the coordinator fee binding, never a stranded
+   request), failed request, and withdrawal to the governed destination
+   [EP-CUSTODY].
+9. The fallback review must record the Pyth Entropy callback-gas
+   provisioning, ceiling, and redelivery posture, and which
+   [EP-INFLIGHT] failure classes the upstream can produce, in the
+   `StreamEntropyLaunchDecision` manifest.
 
 Recommended raw compression:
 
@@ -969,6 +1355,41 @@ Instant randomness can be manipulable if it relies on block data, caller data,
 admin-selected salts, or minter-selected inputs. It should not be marketed as
 equivalent to VRF.
 
+### Timing-Grinding Exposure
+
+`instantEntropy` is a synchronous view finalized inside `requestEntropy`.
+That call shape is Permanent and frozen, and it structurally permits
+request-timing grinding for any mode whose output varies across the blocks
+in which the request transaction could land (ADR 0010 decision D8.8): a
+requester can simulate the view offchain each block and submit only when
+the derived seed is favorable. The selection is free, leaves no onchain
+trace, and is available to any caller on public-request collections. No
+rule behind this interface can prevent it, because the interface has no
+commit-then-finalize split; the exposure is disclosed and restricted
+rather than papered over.
+
+Requirements [EP-INSTANT-TIMING]:
+
+1. The exposure must be disclosed in the adapter's provider metadata, in
+   its emitted mode assumptions, and in the provenance notes of every
+   collection configured to use an instant provider.
+2. Instant providers may be configured only for collections whose frozen
+   entropy config declares `EntropySecurityClass.LOW_SECURITY`; the
+   coordinator enforces the restriction
+   ([`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+   [EC-CONFIG], ADR 0010 decision D8.8).
+3. A mode is timing-invariant only if its raw randomness derives solely
+   from request-key-committed inputs that are identical across every block
+   in which the request could land. `DELAYED_BLOCKHASH` is not
+   timing-invariant and is therefore low-assurance by construction;
+   `DETERMINISTIC_TEST_ONLY` is timing-invariant but remains excluded from
+   production.
+4. Anti-grinding review of any instant provider must name request-timing
+   selection explicitly alongside input-choice grinding; a review that
+   covers only input choice is incomplete.
+5. The genesis exclusion stands: no instant provider ships at genesis
+   (ADR 0009 decision 24).
+
 ### Possible Modes
 
 If implemented, use explicit modes:
@@ -1020,10 +1441,11 @@ The provider does not choose it. It must be deterministic for
 must match the active request record used by the coordinator to finalize the
 seed.
 
-Recommended event:
+Recommended event ([EP-EVENTS] binds the future accepted spec):
 
 ```solidity
 event InstantEntropyProduced(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bytes32 rawRandomness,
@@ -1040,7 +1462,10 @@ event InstantEntropyProduced(
 4. Must not call Core.
 5. Must not derive final seed.
 6. Must not allow buyer, minter, artist, or admin grinding after seeing partial
-   outcomes.
+   outcomes, and must treat request-timing selection as a named grinding
+   vector [EP-INSTANT-TIMING].
+7. May be configured only for collections that declare
+   `EntropySecurityClass.LOW_SECURITY` (ADR 0010 decision D8.8).
 
 ## StreamEntropyProviderMock
 
@@ -1113,6 +1538,35 @@ Common provider tests:
 13. Fulfilled or stale request bindings remain queryable for audit.
 14. Provider epoch is emitted or reconstructable for every request.
 15. Received-not-delivered results are monitorable.
+16. A coordinator revert during a callback is caught inside the adapter
+    frame: the upstream callback does not revert, the stored result
+    survives unchanged, and
+    `ProviderCoordinatorFulfillmentAttempted(success = false)` is emitted
+    [EP-CALLBACK].
+17. `quoteRequest` equals the fee `requestEntropy` requires in the same
+    transaction for identical context; a fee update in a prior transaction
+    changes both together [EP-QUOTE].
+18. Operational parameter updates (callback gas limit, subscription,
+    payment amount, custody destinations) leave
+    `streamEntropyProviderConfigHash()` unchanged; identity parameter
+    updates change it [EP-CONFIGHASH].
+19. Deployment manifest records contract-held operational authorities, and
+    a contract-executed rotation (for example, Safe-executed subscription
+    ownership transfer) is rehearsed and retained as release evidence
+    [EP-CUSTODY].
+20. `REJECTED_PROVIDER_REVOKED` outcomes never mark a stored result
+    terminal; the result remains queryable as recovery evidence.
+21. Token-keyed (context schema version 1) and scope-keyed (schema
+    version 2) requests flow through identical adapter paths, and an
+    unrecognized context schema version is accepted and treated opaquely
+    [EP-CONTEXT].
+22. The published callback-gas margin separates the adapter-local
+    persistence reserve from the coordinator envelope and includes the
+    recorded worst-case repricing headroom [EP-INFLIGHT].
+23. Every non-standard adapter event carries `uint16 schemaVersion` as
+    its leading declaration field and at most three indexed parameters,
+    and the golden event tests match the catalog rows to these homes
+    exactly [EP-EVENTS] (ADR 0013 decision U7).
 
 VRF tests:
 
@@ -1121,10 +1575,36 @@ VRF tests:
    confirmations, callback gas limit, and number of words.
 3. VRF callback compresses returned words deterministically.
 4. VRF callback calls coordinator with request key and raw randomness.
-5. VRF config updates are admin-only and evented.
+5. VRF config updates are admin-only, execute as canonical ADR 0004
+   governance actions, and are evented with the authorizing `actionId`;
+   a `callbackGasLimit` change additionally emits the canonical GGP
+   family event bound to the same action ID ([LTA-GGP] requirement 4;
+   ADR 0014 decision V6).
 6. Existing requests retain request-time provenance after config updates.
 7. Wrong-epoch callback path is rejected by the coordinator and remains
    auditable in adapter events.
+8. A VRF callback whose coordinator delivery reverts persists the result,
+   does not revert the VRF coordinator frame, and a later
+   `retryCoordinatorFulfillment` delivers the identical randomness
+   [EP-CALLBACK].
+9. `callbackGasLimit` covers the measured fulfillment envelope with the
+   published margin; an artificially undersized limit proves store-first
+   persistence still holds and delivery is retryable [EP-VRF-CONFIG].
+10. In-flight discipline [EP-INFLIGHT]: a request submitted before a
+    `callbackGasLimit` raise executes under its submitted limit; an
+    induced coordinator-frame failure persists the result and remains
+    retryable; a simulated frame-level loss leaves the adapter with no
+    result, the probe reporting `rawRandomnessReceived = false`, and
+    coordinator fresh recovery blocked by the [EC-INCIDENT] rule 3
+    evidence requirements.
+11. The callback-gas probe reproduces the published fulfillment
+    envelope within the recorded tolerance, and its failing and passing
+    runs gate the parameter's raise and lower paths per [LTA-GGP]
+    [EP-VRF-CONFIG].
+12. The adapter's subscription-ID typing matches the bound upstream
+    coordinator version — `uint256` for the recommended v2.5 reference
+    shape — and integration tests request and receive against that
+    upstream interface (ADR 0013 decision U7).
 
 ARRNG tests:
 
@@ -1132,9 +1612,13 @@ ARRNG tests:
 2. ARRNG request emits request key, request ID, and payment.
 3. ARRNG callback compresses returned payload deterministically.
 4. ARRNG callback calls coordinator with request key and raw randomness.
-5. Payment updates are admin-only and evented.
-6. Excess payment is rejected in v1.
-7. Withdrawal path is admin-only and evented.
+5. Payment updates are admin-only, evented, and leave the provider config
+   hash unchanged [EP-CONFIGHASH].
+6. Excess payment is rejected at the adapter boundary; caller overpayment
+   is absorbed by the coordinator fee binding and never reaches the
+   adapter [EP-QUOTE].
+7. Withdrawal path is admin-only, evented, and pays only the governed
+   destination [EP-CUSTODY].
 8. Reentrant callback during request submission cannot fulfill or corrupt the
    request mapping.
 9. Existing requests retain request-time payment and controller provenance
@@ -1148,8 +1632,9 @@ Pyth tests:
 3. Pyth callback rejects unknown request IDs.
 4. Callback stores provider contribution and raw randomness before coordinator
    fulfillment.
-5. Fee quote, exact payment, excess-payment rejection, and failed request
-   behavior match the v1 policy.
+5. Fee quote, exact payment at the adapter boundary, excess rejection,
+   upstream fee drift absorption through the coordinator fee binding, and
+   failed request behavior match [EP-QUOTE] and [EC-FEEBIND].
 
 Drand tests:
 
@@ -1168,6 +1653,10 @@ Instant provider tests:
 4. Request-time synchronous fulfillment is safe or disabled, and the instant
    provider is never called from `onTokenMinted`.
 5. It never calls Core or derives final seed.
+6. Configuration is rejected for collections that do not declare
+   `EntropySecurityClass.LOW_SECURITY`, and the timing-grinding disclosure
+   is present in provider metadata and provenance notes
+   [EP-INSTANT-TIMING].
 
 Multi-source mixer tests:
 

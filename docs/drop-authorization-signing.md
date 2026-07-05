@@ -1,5 +1,11 @@
 # Drop Authorization Signing
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
+
 This guide documents the current no-secret local examples for signing
 `StreamDrops.DropAuthorization` payloads. It is pre-audit, not production-ready,
 and not a security claim. The fixtures use placeholder Anvil

@@ -100,6 +100,48 @@ specifications, but the Permanent interfaces they cite may not drift, and
 existing module specs for deployed implementations become historical records
 under the same errata-only rule.
 
+## Normative Precedence And Single Sourcing
+
+Amended by ADR 0010 (decision D3). Every Permanent definition — hash
+preimage, interface, enum, event schema, canonical ordering — has exactly
+one owning document section, its normative home. Every other document cites
+the home instead of restating it; a checker-verified mirror table (such as
+the domain-constants tables in the protocol v1 specification) is a mirror,
+not a second home.
+
+If two documents conflict, the owning home wins and the conflict is a
+defect to repair, never an interpretation choice. ADRs are decision
+records: the specs they amend are the homes, and ADR text that drifts from
+its spec is corrected to cite the spec. One ADR is itself a designated
+home, by owner decision (ADR 0010 decision D3.4; ADR 0011 decision R10):
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md) owns
+the governance surfaces its bracketed anchors name — the canonical
+governance action identity and batch domains ([GOV-ACTION-ID],
+[GOV-BATCH]), the window floors ([GOV-WINDOWS]), the material-action
+holder classes ([GOV-MATERIAL]), the `ROLE_*` vocabulary ([GOV-ROLES]),
+and the supported ERC-1271 wallet class ([GOV-1271-CLASS]) — and every
+spec cites those sections instead of restating them. Event snippets
+inside spec prose are illustrative; the machine-readable event catalog
+and its golden tests are the authoritative event signatures.
+
+## Requirement Anchors
+
+Normative sections carry stable bracketed anchors on or directly beneath
+their headings (for example `[MPA-COUNTERS]`), with binding requirements
+numbered inside the section so gates, tests, reviews, and other documents
+can cite a requirement precisely and durably. New and edited normative
+sections must carry anchors; full backfill across the older documents is a
+Review-entry condition tracked by the conformance matrix.
+
+## Decision Citation Format
+
+Decisions are cited uniformly as `(ADR <number> decision <id>)` — for
+example `(ADR 0010 decision D2.3)` or `(ADR 0011 decision R6)`. ADR 0009
+predates lettered ids and its decisions are plain numerals by
+construction: `(ADR 0009 decision 21)` is the conformant shape for that
+one record (ADR 0014 decision V9). No other citation shape is conformant;
+mixed formats are defects.
+
 ## Amendment Process
 
 Accepted ADRs under [`docs/adr/`](adr/README.md) are the only mechanism that
@@ -177,6 +219,8 @@ requirement; only the amendment process changes requirements.
 | [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) | Permanent interfaces + Replaceable genesis modules | Draft |
 | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) | Replaceable (provider adapters) | Draft |
+| [`docs/stream-artist-authority.md`](stream-artist-authority.md) | Permanent interfaces + Replaceable genesis modules (artist authority) | Draft |
+| [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) | Permanent interfaces + Replaceable genesis modules (sales and auctions) | Draft |
 | [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) | Deployment gate over all layers | Draft |
 | [`docs/adr/`](adr/README.md) | Decision records / amendment mechanism | Per-ADR status |
 
@@ -185,8 +229,24 @@ and checksum artifacts reference them; document titles and content are
 authoritative for framing. Renames, if desired, are a separate mechanical
 change coordinated with the release-artifact generators.
 
-Documents that describe the current as-built baseline —
-[`docs/architecture.md`](architecture.md), [`docs/status.md`](status.md),
-[`docs/metadata.md`](metadata.md) and related operational docs — are not
-specifications. They map what exists today and must stay honest about every
-divergence from the specs above until the implementation conforms.
+Every Markdown document under `docs/` outside the inventory above —
+excluding ADRs under `docs/adr/` (decision records governed by this
+policy), this policy itself, the open-question register, and index or
+README files — is a baseline or operational record, not a specification,
+and must carry this header block directly beneath its title (ADR 0012
+decision T9):
+
+```text
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in docs/spec-policy.md, and where this document conflicts with a
+specification home, the specification wins.
+```
+
+Documents superseded by a specific spec name it in the header (for
+example, `docs/royalty-policy.md` names
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)).
+Baseline records map what exists today and must stay honest about every
+divergence from the specs until the implementation conforms. A release
+checker enforcing header presence across the non-inventory set is a
+Review-entry condition tracked by the conformance matrix.

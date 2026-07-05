@@ -1,5 +1,11 @@
 # Metadata Renderer Research Notes
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins. This
+document is research material, not target behavior.
+
 This note collects external patterns worth borrowing for the Stream metadata
 router, renderer, and collection metadata contracts. It is not a final spec.
 It is a source-backed idea bank for deciding what to fold into the production

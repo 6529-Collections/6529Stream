@@ -1,5 +1,12 @@
 # Auction Custody And Settlement
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins. For
+target sale and auction behavior this document is superseded by
+[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+
 6529Stream auction drops use explicit protocol escrow custody.
 
 This document describes the current target-state implementation for

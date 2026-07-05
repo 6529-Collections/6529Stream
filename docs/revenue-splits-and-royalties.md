@@ -3,8 +3,13 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
-in [`docs/spec-open-questions.md`](spec-open-questions.md).
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
+[ADR 0010](adr/0010-world-class-spec-pass.md),
+[ADR 0011](adr/0011-world-class-pass-round-2.md),
+[ADR 0012](adr/0012-world-class-pass-round-3.md),
+[ADR 0013](adr/0013-world-class-pass-round-4.md), and
+[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded in
+[`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for
 6529Stream. 6529Stream is permanent infrastructure for the 6529 network: the
@@ -13,12 +18,33 @@ is that system's revenue and royalty layer from genesis, not a retrofit.
 Requirements are classified by permanence class — Permanent, Replaceable, or
 Operational — as defined in `docs/spec-policy.md`.
 
-The architecture is captured as ADR
-`docs/adr/0008-revenue-splits-and-royalty-resolver.md`, Accepted and amended
-by `docs/adr/0009-protocol-v1-open-question-resolutions.md` decisions 8
-and 9.
-The cross-cutting 50+ year architecture principles live in
-`docs/stream-long-term-architecture.md`.
+Under the single-sourcing rule (ADR 0010 decision D3), this document is the
+normative home for every revenue, royalty, settlement, and escrow
+definition: split profile and template preimages, assignment and policy
+hashes, `saleContextHash`, settlement keys, release and payment typehashes,
+asset-policy semantics, escrow lifecycle, and the revenue event schemas.
+Other documents — including ADR 0008 — cite these definitions and must not
+restate them. Where an older document conflicts, this document wins and the
+conflict is a defect to fix (ADR 0010 decision D3.2).
+
+The architecture decision record is
+`docs/adr/0008-revenue-splits-and-royalty-resolver.md`, Accepted, amended by
+`docs/adr/0009-protocol-v1-open-question-resolutions.md` decisions 8 and 9,
+by [ADR 0010](adr/0010-world-class-spec-pass.md) decisions D1, D2.5,
+D5, D7.3, D8.2, D8.6, D9.2, and D10.6, by
+[ADR 0011](adr/0011-world-class-pass-round-2.md) decisions R6, R9, R10,
+and R12, by
+[ADR 0012](adr/0012-world-class-pass-round-3.md) decisions T3, T6,
+and T7, by
+[ADR 0013](adr/0013-world-class-pass-round-4.md) decisions U1, U6,
+and U7, and by
+[ADR 0014](adr/0014-world-class-pass-round-5.md) decisions V4, V5,
+V6, and V9.
+The cross-cutting 50+ year architecture principles, including the Governed
+Gas Parameter model, live in `docs/stream-long-term-architecture.md`. Sale
+and auction mechanics live in `docs/stream-sales-and-auctions.md` (ADR 0010
+decision D5). The artist identity, consent, and sanction model lives in
+[`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010 decision D2).
 
 ## Design Summary
 
@@ -34,7 +60,8 @@ StreamCore
 StreamRevenueResolver
   - default, collection, and token assignment resolution
   - primary sale profile resolution
-  - primary sale templates with SALE_POSTER materialization
+  - primary sale templates with COLLECTION_ARTIST and SALE_POSTER
+    materialization
   - royalty profile and bps resolution
 
 StreamPrimarySaleSettlement
@@ -59,7 +86,16 @@ StreamAssetPolicyRegistry
 StreamLabelRegistry
   - optional human-readable label metadata
   - no accounting authority
+
+StreamClaimRouter
+  - permissionless batched release-to-self across wallets
+  - stateless, holds no funds, preserves pull semantics
 ```
+
+Every external-call gas bound in this layer is a Governed Gas Parameter
+(ADR 0010 decision D1): a governed storage value above an immutable floor,
+never an immutable cap. See
+[Governed Gas Parameters In The Revenue Layer](#governed-gas-parameters-in-the-revenue-layer).
 
 The design uses immutable split profiles and mutable assignments. Profiles say
 who gets paid. Assignments say which profile applies to a default, collection,
@@ -79,6 +115,12 @@ Protocol v1 scope is deliberately narrower than the long-term design surface:
 7. Core-native resolver-backed ERC-2981.
 8. Mint-time token royalty snapshots when a collection policy requires
    mint-time economics to persist.
+9. Payer-signed EIP-712 `PaymentIntent` verification at the ERC-20
+   settlement adapter boundary (ADR 0010 decision D8.2), with the
+   payer-is-caller by-construction intent of [RSR-PAYMENT-INTENT].5
+   (ADR 0011 decision R10).
+10. A permissionless claim-aggregation periphery preserving pull semantics
+    (ADR 0010 decision D10.6).
 
 Excluded from protocol v1 — intentional absence, not deferral. Adding any of
 these requires a separately accepted module or adapter spec that accepts the
@@ -89,8 +131,21 @@ Permanent surfaces are affected:
    other non-standard ERC-20 primary-sale adapters.
 2. Merkle/accounting adapters for very large split distributions.
 3. Ordinary dust sweeps or decommission withdrawals.
-4. Royalty enforcement by transfer restriction.
+4. Royalty enforcement by transfer restriction. This exclusion is permanent
+   for this Core line, not module-addressable: ERC-721 transfer is a
+   Permanent Core surface with no transfer validator hook, so no module,
+   adapter, or registry can ever add enforcement to this deployment. The
+   only path to enforced royalties is a declared successor Core line
+   (ADR 0010 decision D9.2); the transfer-openness preclusions and the
+   successor-line enforcement path are owned by
+   `docs/stream-long-term-architecture.md` [LTA-STANDARDS]. Disclosure-only
+   ERC-2981 is a deliberate, permanent, artist-facing term of this protocol
+   and must be presented as such wherever royalty expectations are set,
+   under the artist-acknowledgment and marketplace royalty-resolution
+   gates of [RSR-MARKETPLACE-ROYALTY] (ADR 0011 decision R12).
 5. Marketplace registry override as the primary royalty path.
+6. Post-mint refunds of officially settled primary revenue (see
+   [Normative Paid Mint Orchestration](#normative-paid-mint-orchestration)).
 
 ## Implementation Status
 
@@ -136,9 +191,20 @@ pull release from split wallets:
   assets, and requires exact transfer deltas.
 - The slice spends no `StreamCore` bytecode and does not wire into fixed-price
   drops, auctions, escrow, or ERC-2981.
-- Fixed-price adapter integration, auction adapter integration, escrow fallback,
-  and Core-native resolver-backed ERC-2981 remain outstanding implementation
-  work.
+- The implemented `StreamPrimarySaleSettlement` slice does not yet verify a
+  payer-signed `PaymentIntent` or an EIP-712/ERC-1271 sale authorization at
+  the adapter boundary; it trusts enabled settlement callers to supply the
+  `expectedPrimaryPolicyHash` from the upstream authorization flow. That
+  slice is not deployment-conformant against the payer-intent requirements
+  of this spec until the `PaymentIntent` boundary lands.
+- Fixed-price adapter integration, auction adapter integration, escrow
+  fallback, Core-native resolver-backed ERC-2981, Governed Gas Parameter
+  hosts, deprecated-asset release-grace reads, the claim router, artist
+  account-source resolution, the factory profile enumeration index
+  ([RSR-FACTORY-ENUM]), the assignment-policy loosening commitment
+  (`assignmentPolicyHash`), and the
+  release-authorization/`PaymentIntent` typed-data surfaces remain
+  outstanding implementation work.
 
 ## Long-Term Principles
 
@@ -161,6 +227,129 @@ pull release from split wallets:
     OpenZeppelin `ERC2981` storage.
 14. Every contract pointer that can affect revenue resolution must follow ADR
     0004 pointer governance before it can be changed or frozen.
+15. External-call gas bounds in the revenue layer are Governed Gas
+    Parameters with immutable floors, never immutable caps (ADR 0010
+    decision D1). Gas retuning is Operational-layer and never touches
+    artwork or economic identity.
+
+## Governed Gas Parameters In The Revenue Layer
+
+The Governed Gas Parameter (GGP) model — storage-backed governed values,
+immutable per-parameter floors, staged raise/lower classes, health probes,
+change events, release-manifest recording, and exclusion from finality and
+frozen-route identity — is defined once in
+`docs/stream-long-term-architecture.md` (ADR 0010 decision D1). This
+section applies that model to the revenue layer; it does not restate the
+model.
+
+Revenue-layer GGPs and their hosts:
+
+| Parameter | Host | Guards | Genesis planning value |
+| --- | --- | --- | --- |
+| `ROYALTY_RESOLVER_GAS_LIMIT` | `StreamCore` storage | resolver `staticcall` in `royaltyInfo()` | 50,000 |
+| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` storage | parent-side decode reserve in `royaltyInfo()` | 15,000 |
+| `ERC_1271_GAS_LIMIT` | split factory parameter store | `isValidSignature` staticcalls for release authorizations, sale authorizations, and `PaymentIntent`s | 400,000 |
+| `ASSET_POLICY_GAS_LIMIT` | split factory parameter store | asset-policy registry staticcalls from wallets, adapters, and escrow | 30,000 |
+| `WALLET_DEPOSIT_GAS_LIMIT` | split factory parameter store | gas-bounded split-wallet deposits from settlement and escrow flush | 50,000 |
+| `FLUSH_GAS_FLOOR` | revenue escrow storage | minimum `gasleft()` before escrow flush zeroes owed credit | 300,000–500,000 |
+
+Requirements [RSR-GGP]:
+
+1. Each parameter above is a Governed Gas Parameter exactly as defined by
+   the model home, `docs/stream-long-term-architecture.md` [LTA-GGP]. No
+   revenue-layer contract may hard-code an external-call gas cap, and this
+   document adds no pattern rules of its own — rules 2, 3, 4, 7, 8, and 10
+   below bind the model's rules to this layer by citation.
+2. Raise and lower governance follows [LTA-GGP] requirements 1–2 unchanged
+   (ADR 0011 decision R5): every raise is bounded to at most 2x the
+   current value per action and staged raises use the normal delay class;
+   the emergency path is raise-only and executes only against a recorded
+   failing probe run at the current value; lowers use the normal delay
+   class with a recorded passing probe run at the proposed value and
+   revert below the immutable floor. Lowers stage through
+   [RSR-STAGED-GOVERNANCE] rule 1.
+3. GGP values are Operational-layer per [LTA-GGP] requirement 3; in this
+   layer the exclusion covers `assignmentHash` and every economic preimage
+   in this document.
+4. Every revenue-layer GGP change emits the canonical change event and
+   records genesis value and floor in the release manifest per [LTA-GGP]
+   requirement 4.
+5. Health probes are parameter-specific and must be recorded as release or
+   governance evidence: `probeRoyaltyInfo` runs for
+   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` (probe
+   locus and probe-event home:
+   [Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events));
+   a
+   maximum-supported-class ERC-1271 verification (rule [RSR-1271].2) for
+   `ERC_1271_GAS_LIMIT`; an all-cold `assetStatus` read for
+   `ASSET_POLICY_GAS_LIMIT`; and a measured worst-case undeployed-wallet
+   flush for `FLUSH_GAS_FLOOR`. Each probe above lives in the named
+   per-parameter probe contract recorded in the release manifest with its
+   `probeMaxAgeBlocks` ([LTA-GGP] definition item 6; ADR 0011 decision
+   R5), emitting the canonical `GasParameterProbed` record that gates
+   lowering, emergency raising, and the permissionless conditional raise.
+   Probe placement follows [LTA-GGP] requirement 2.
+6. Split wallets, settlement adapters, and the escrow must read the current
+   values of `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
+   `WALLET_DEPOSIT_GAS_LIMIT` from the
+   split factory parameter store of their deployment line through the
+   factory pointer they already immutably pin. That read is a
+   trusted-infrastructure read of immutable protocol code: it may forward
+   unrestricted gas, must be a `staticcall`, and must fail closed for only
+   the guarded operation if it reverts or returns malformed data. Untrusted
+   external calls remain capped; only the parameter fetch from the pinned
+   factory is uncapped.
+7. Every EIP-150 63/64 parent-gas precheck in this layer reads the current
+   GGP value per [LTA-GGP] requirement 5.
+8. Each revenue-layer GGP is a named member of the hard-fork/repricing
+   review checklist with the model home's monitoring threshold ([LTA-GGP]
+   requirement 6).
+9. Genesis sizing gates. For the read-path caps —
+   `ROYALTY_RESOLVER_GAS_LIMIT`, `ROYALTY_RETURN_GAS_BUFFER`,
+   `ASSET_POLICY_GAS_LIMIT`, and `WALLET_DEPOSIT_GAS_LIMIT` — the genesis
+   value must be at least four times the deepest measured all-cold guarded
+   path, and the immutable floor must be at least twice that measured path
+   and at most the genesis value. `ERC_1271_GAS_LIMIT` is sized against
+   the heaviest named wallet class per [RSR-1271].2, and
+   `FLUSH_GAS_FLOOR` against measured worst-case flush, each with recorded
+   margin rather than the 4x multiple. All measurements, multiples, and
+   floors are release artifacts.
+10. Remediation for a guarded path outgrowing its cap follows the
+    [LTA-GGP] requirement 7 order (raise first, compressed successor
+    second, new deployment line last): cap exhaustion is a recoverable
+    operational incident, never a permanent outage of royalty disclosure,
+    release, or flush.
+11. Failure-direction classes and probe discipline (ADR 0012 decision
+    T1). Every revenue-layer GGP release-manifest entry records its
+    failure-direction class per [LTA-GGP] requirement 10, and each named
+    probe of rule 5 is a Permanent-class probe contract under
+    [LTA-GGP-PROBES]: pinned caller-independent inputs, run records
+    hosted on the probe, and an `evidenceHash` committing to the run's
+    measurement artifact. `ROYALTY_RESOLVER_GAS_LIMIT` and
+    `ROYALTY_RETURN_GAS_BUFFER` are `FORWARDING_CAP` — they bound the
+    fail-safe `royaltyInfo()` read path, raising restores disclosure,
+    and each is a permissionless conditional-raise and
+    conditional-re-lower member per [LTA-GGP] requirement 11
+    (ADR 0014 decision V7): the host registers both pre-approved
+    actions at deployment — the raise gated on a recorded failing
+    probe run at the current value, the re-lower gated on a recorded
+    passing probe run at exactly the proposed lower value, bounded per
+    action and never below the floor — probed by `probeRoyaltyInfo`
+    exactly as rule 5 states, so a post-governance-loss raise chain is
+    walkable back down when a repricing reverses. `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
+    `WALLET_DEPOSIT_GAS_LIMIT` are `FAIL_CLOSED_PRECHECK` — signature
+    verification, asset-status resolution, and wallet deposits fail
+    closed for the guarded operation, so raises are governance-only and
+    registering a conditional raise is nonconformant. `FLUSH_GAS_FLOOR`
+    is `MIN_GAS_GATE` (the minimum-gasleft admission gate named at the
+    model home; governance-only raises). For the fail-closed and
+    minimum-gas parameters the rule 5 probes prove the guarded operation
+    itself succeeds at the probed value — a maximum-supported-class
+    ERC-1271 verification completes with the magic value, an all-cold
+    `assetStatus` read completes with well-formed returndata, a
+    measured worst-case undeployed-wallet flush (deposit included) is
+    admitted — replicated as a faithful probe-owned equivalent where the
+    production path is permissioned, never merely that a call returns.
 
 ## Split Profile Model
 
@@ -224,6 +413,7 @@ sum(aggregateSharePpm(account)) = 1_000_000
 The profile ID preimage is fixed for this wallet version:
 
 ```solidity
+// PROFILE_DOMAIN string preimage and hash: [RSR-DOMAINS]
 bytes32 profileId = keccak256(abi.encode(
     PROFILE_DOMAIN,
     uint256(block.chainid),
@@ -257,6 +447,38 @@ A verified split wallet means all of the following are true: the wallet equals
 wallet was deployed through the bound factory init code, `wallet.profileId()`
 equals the expected profile ID, and the runtime code hash is active or otherwise
 eligible for the specific escrow credit being flushed.
+
+### Factory Profile Enumeration
+
+Split wallets are the deployment's revenue-bearing address set, and their
+discovery must not depend on expirable logs or offchain artifact lineage
+(ADR 0012 decision T3).
+
+Requirements [RSR-FACTORY-ENUM]:
+
+1. The factory must maintain an append-only onchain profile index:
+   `profileCount()` returns the total number of profiles ever created
+   through the factory; `profileAt(index)` returns the `profileId`
+   created at the zero-based creation index; `walletAt(index)` returns
+   the deterministic `walletFor(profileAt(index))` whether or not that
+   wallet is deployed. Every profile creation appends exactly one index
+   entry; entries are never mutated, reordered, or removed, and
+   out-of-range reads revert.
+2. The index is the state-side derivation of the complete split-wallet
+   address set for the deployment line: a state-only reader with no
+   logs, no export artifacts, and no offchain index must be able to
+   enumerate every profile and every deterministic wallet address from
+   `profileCount()`/`profileAt`/`walletAt` alone.
+   `docs/stream-long-term-architecture.md` [LTA-EVENT-HISTORY] derives
+   its "every factory-deployed split wallet" address-set member from
+   this read, and the enumeration index joins the `STATE_EXPORT` leaf
+   surface owned by that spec (ADR 0012 decision T3).
+3. A golden interface test must prove index/append consistency:
+   `profileCount()` increases by exactly one per profile creation,
+   `profileAt(i)` is stable across later creations, `walletAt(i)`
+   equals `walletFor(profileAt(i))` for every index, and full
+   enumeration matches the `SplitProfileCreated` event stream over the
+   test corpus.
 
 ## Payment Accounting
 
@@ -327,27 +549,171 @@ The wallet uses one release reentrancy guard across all assets and recipients,
 not a per-asset lock. A native ETH recipient cannot reenter to release ERC-20s,
 and an ERC-20 callback cannot reenter to release native ETH or another token.
 
-Release authorization:
+### Release Authorization
+
+Requirements [RSR-RELEASE-AUTH]:
 
 1. Anyone may call `release(asset, account, account)` to move an entitled
-   account's releasable funds to that same account. This supports keepers and
-   recipient discovery without creating theft risk.
-2. Releasing to any alternate recipient requires `msg.sender == account` or a
-   valid EIP-712/ERC-1271 `ReleaseAuthorization` signed by the entitled account
-   with asset, account, recipient, wallet, chain ID, nonce, and deadline.
-3. The wallet consumes release-authorization nonces before transfer under CEI.
-4. A relayer cannot change the asset, account, recipient, amount mode, nonce,
-   deadline, or destination wallet named by the authorization.
-5. ERC-1271 verification for alternate-recipient release uses a deploy-time
-   immutable `ERC_1271_GAS_LIMIT`, `staticcall`, and bounded returndata
-   decoding. A failed, out-of-gas, malformed, or wrong-magic-value
-   `isValidSignature` staticcall reverts the alternate release before nonce
-   consumption or transfer. The initial
-   planning cap is 50,000 gas, but the deployed artifact uses measured gas
-   plus margin and records it in the release manifest.
+   account's releasable funds to that same account. This supports keepers
+   and recipient discovery without creating theft risk.
+2. Releasing to any alternate recipient must require `msg.sender == account`
+   or a valid EIP-712/ERC-1271 `ReleaseAuthorization` signed by the entitled
+   account. The pinned typed-data surface is:
+
+   ```solidity
+   bytes32 constant RELEASE_AUTHORIZATION_TYPEHASH = keccak256(
+       "StreamReleaseAuthorization(address asset,address account,"
+       "address recipient,uint256 releasableSnapshot,bytes32 nonce,"
+       "uint64 deadline)"
+   );
+   ```
+
+   Field inventory: `asset` (native sentinel `address(0)` allowed),
+   `account` (the entitled account and required signer), `recipient`
+   (non-zero payout destination), `releasableSnapshot` (the exact full
+   releasable amount the signer authorized — the wallet-accounting
+   epoch binding of rule 4; ADR 0014 decision V5), `nonce` (single-use
+   per signer:
+   consumed-nonce state is keyed by `(account, nonce)`, ADR 0011 decision
+   R10), and
+   `deadline` (unix seconds; expired authorizations revert). The EIP-712
+   domain is `name = "6529StreamSplitWallet"`, `version = "1"`,
+   `chainId = block.chainid`, `verifyingContract = address(wallet)`, so the
+   destination wallet and chain are bound by the domain separator rather
+   than duplicated in the struct. Wallets must expose ERC-5267 domain
+   introspection. The typehash and domain are recorded in
+   [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes).
+   Supersession note: an earlier revision pinned this struct without
+   the `releasableSnapshot` field (typehash
+   `0xfc0465fe58ded163aac5c6c38a2171d353d941f9fbc8a1af61e5c309f87f680c`);
+   that payload let the released amount float to execution time, and it
+   is superseded and void (ADR 0014 decision V5).
+3. The wallet must consume the release-authorization nonce before transfer
+   under CEI. Consumed-nonce state is keyed by `(account, nonce)` — the
+   entitled signing account plus the nonce, never a bare wallet-wide nonce
+   set — so no account can consume, revoke, or invalidate another
+   account's nonce value (ADR 0011 decision R10). A consumed or revoked
+   `(account, nonce)` pair is invalid forever. The wallet must expose the
+   explicit-address replay view
+   `isReleaseAuthorizationNonceUsed(address account, bytes32 nonce)`;
+   caller-relative (`msg.sender`-scoped) replay views are nonconformant
+   (ADR 0011 decision R12).
+4. A relayer cannot change the asset, account, recipient,
+   `releasableSnapshot`, nonce, deadline, or destination wallet named by
+   the authorization. Releases in this wallet version always release the
+   full releasable amount computed at execution time; there is no
+   partial-release mode. Because receipts and permissionless
+   release-to-self can land between signature and relay, that
+   execution-time amount is not constant, so the authorization binds
+   the wallet-accounting epoch it was signed against (ADR 0014 decision
+   V5): execution recomputes `releasable(account, asset)` after the
+   normal pre-release observation and reverts unless it exactly equals
+   the signed `releasableSnapshot`. The snapshot is a guard, never an
+   amount selector — it selects no partial amount, and on mismatch the
+   signer re-signs against the current epoch — so the amount an
+   authorization can move can never drift between signature and
+   execution, and receipts landing after signature stay claimable under
+   a fresh authorization. Signing UIs must display `releasableSnapshot`
+   as the exact amount the authorization will move, and signing tools
+   should `syncAsset` before quoting it so lazily observed receipts do
+   not invalidate the authorization at relay.
+5. The entitled account must be able to revoke an unused authorization
+   before its deadline, either by calling
+   `revokeReleaseAuthorization(nonce)` from the account or by any caller
+   presenting an account-signed EIP-712/ERC-1271 revocation over the same
+   nonce (ADR 0010 decision D10.4). The pinned revocation typed-data
+   surface is (ADR 0014 decision V6):
+
+   ```solidity
+   bytes32 constant RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH = keccak256(
+       "StreamReleaseAuthorizationRevocation(address account,"
+       "bytes32 nonce,uint64 deadline)"
+   );
+   ```
+
+   Field inventory: `account` (the entitled account and required
+   signer), `nonce` (the `(account, nonce)` pair being revoked), and
+   `deadline` (unix seconds; expired revocations revert at submission —
+   the deadline bounds only the relay window and never re-validates an
+   already consumed or revoked nonce). The payload verifies under the
+   same rule 2 split-wallet EIP-712 domain, so wallet and chain are
+   bound by the domain separator; like its parent family it is
+   domain-only under the in-struct chainId discipline of
+   `docs/launch-v1-target-architecture.md` [PV1-DOMAINS] (no domain
+   material is duplicated in the struct). Verification follows
+   [RSR-1271], the [MPA-AUTHZ] rule 5 golden negative tests run against
+   this payload per [RSR-1271].1, and the typehash is recorded in
+   [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes).
+   Revocation is signer-scoped: the
+   direct call consumes `(msg.sender, nonce)` and a signed revocation
+   consumes the signer's own `(account, nonce)` pair, so revocation can
+   never consume a nonce outside the caller's or signer's own scope
+   (ADR 0011 decision R10). Revocation emits
+   `ReleaseAuthorizationRevoked`.
 6. `syncAsset` shares the same wallet-wide reentrancy guard as `release`.
    Operators should sync before release when they want a clean observation
    transaction; reentrant sync during an active release reverts.
+
+### ERC-1271 Verification Class
+
+Requirements [RSR-1271]:
+
+1. Every ERC-1271 `isValidSignature` staticcall in the revenue layer —
+   alternate-recipient release, sale authorization, `PaymentIntent`, and
+   revocation verification — must forward exactly the current
+   `ERC_1271_GAS_LIMIT` Governed Gas Parameter
+   ([RSR-GGP]), use `staticcall`, and use bounded returndata decoding. A
+   failed, out-of-gas, malformed, or wrong-magic-value staticcall reverts
+   the guarded operation before nonce consumption or transfer. EOA
+   signatures on every revenue-layer signed surface —
+   `ReleaseAuthorization`, `PaymentIntent`, and their revocation
+   payloads — follow the canonical-signature rules of
+   `docs/mint-policy-and-accounting.md` [MPA-AUTHZ] rule 2, cited here
+   and not restated (ADR 0012 decision T7): recovery must yield a
+   nonzero address exactly matching the required signer (`ecrecover`
+   returning `address(0)` is always invalid, ADR 0010 decision D8.3),
+   and non-canonical signatures — `s` above the secp256k1 half-order
+   (EIP-2) or `v` outside `{27, 28}` — are rejected. The [MPA-AUTHZ]
+   rule 5 golden negative tests (zero recovery, non-canonical s/v) run
+   against each of these surfaces, so every EOA-signature layer in the
+   protocol enforces identical canonical-signature discipline.
+2. The supported contract-wallet class posture and its named class set
+   have exactly one home: ADR 0004 [GOV-1271-CLASS] (ADR 0010 decision
+   D7.3; ADR 0011 decision R10). This layer cites that home and defines no
+   wallet-class prose of its own. The `ERC_1271_GAS_LIMIT` genesis value
+   must cover the measured heaviest class named by that home with margin —
+   hence the 400,000 gas planning value — the immutable floor must be at
+   least the measured heaviest named class, and the measured classes,
+   genesis value, and floor must be recorded in the release manifest.
+3. Conformance tests must prove that a maximum-supported legitimate wallet
+   of each class named by ADR 0004 [GOV-1271-CLASS] verifies successfully
+   at the deployed genesis value,
+   and that a malicious gas-consuming wallet cannot grief past the cap.
+   Testing only a malicious wallet is nonconformant.
+4. Because `ERC_1271_GAS_LIMIT` is a GGP, a future heavier legitimate
+   scheme (post-quantum verifiers, deeper nesting) is handled by a staged
+   raise, not a new wallet line. Entitlements can therefore never be
+   permanently stranded by signature-verification cost.
+5. Cap-independent path: the ERC-1271 relay path is a convenience, not the
+   only escape for contract accounts. Any entitled contract account that
+   can execute calls releases to an arbitrary recipient with
+   `msg.sender == account` and no signature verification at all, and
+   `release(asset, account, account)` remains permissionless. The release
+   manifest and recipient documentation must state this cap-independent
+   path explicitly so ETH-rejecting contract recipients know the
+   self-execution recipe.
+6. EIP-7702 delegated EOAs (ADR 0013 decision U6). A revenue-layer
+   signer account bearing an EIP-7702 delegation designation is
+   classified per the wallet-class home, ADR 0004 [GOV-1271-CLASS]:
+   classification is observed at verification time — code presence is a
+   per-observation fact, never a cached account-type fact — and the
+   home's 7702 posture (delegated-EOA classification, with a canonical
+   ECDSA signature from the account's own key remaining valid alongside
+   ERC-1271 verification) applies unchanged to every rule 1 surface.
+   No revenue-layer contract may branch on code presence for any
+   purpose other than the signature-verification selection that home
+   pins; this document's deterministic-wallet code checks classify
+   protocol `CREATE2` targets, never accounts.
 
 ### Native ETH Observation Lifecycle
 
@@ -461,72 +827,104 @@ This deliberately excludes USDT-style no-return transfer tokens from the v1
 split-wallet ERC-20 path even if their `balanceOf` surface is otherwise
 readable; listing them requires a separate accepted adapter or wallet version.
 
-ERC-20 assets are default-deny. Asset policy is deployment-wide, not per wallet.
-The split factory records the immutable `assetPolicyRegistry` for its wallet
-line, and v1 wallets consult that registry during non-native `syncAsset` and
-`release`. Native ETH is always supported without a registry read. If the
-registry is unavailable or an asset is unknown, non-native sync/release reverts
-safely for that asset only; native ETH and other active assets remain
-unaffected.
+### Asset Policy
 
-The registry read is a bounded external read. The genesis wallet line uses a
-30,000 gas `staticcall` for the registry `assetStatus(address)` check and
-requires exactly 32 bytes of return data. Malformed return data, no code at
-the registry, registry revert, or under-forwarded gas makes the specific
-non-native `syncAsset` or `release` revert before ledger mutation. The wallet
-must not substitute "active" or "native" semantics when the asset policy read
-fails.
-Because the factory binds `assetPolicyRegistry` immutably for a wallet line, an
-asset-policy registry that no longer satisfies future EVM or gas-schedule
-constraints is handled by a new split-wallet/factory deployment line and
-governed reassignment for future receipts. Existing wallet balances remain in
-the old wallet line; there is no hidden mutable registry pointer inside
-deployed wallets.
+Requirements [RSR-ASSET-POLICY]:
 
-Registry policy surface:
+1. ERC-20 assets are default-deny. Asset policy is deployment-wide, not per
+   wallet. The split factory records the immutable `assetPolicyRegistry`
+   for its wallet line, and v1 wallets consult that registry during
+   non-native `syncAsset` and `release`. Native ETH is always supported
+   without a registry read. If the registry is unavailable or an asset is
+   `UNKNOWN`, non-native sync/release reverts safely for that asset only;
+   native ETH and other active assets remain unaffected.
+2. The registry read is a bounded external read. Each registry `staticcall`
+   forwards the current `ASSET_POLICY_GAS_LIMIT` Governed Gas Parameter
+   ([RSR-GGP]; genesis planning value 30,000 gas for an all-cold lookup,
+   deployed value from measured gas plus margin under the [RSR-GGP].9
+   multiples) and requires exactly 32 bytes of return data per view read.
+   Malformed return data, no code at the registry, registry revert, or
+   under-forwarded gas makes the specific non-native `syncAsset` or
+   `release` revert before ledger mutation. The wallet must not substitute
+   "active" or "native" semantics when the asset policy read fails.
+3. Because `ASSET_POLICY_GAS_LIMIT` is a GGP, a gas-schedule change that
+   outgrows the read budget is remediated by a staged (or emergency
+   raise-only) GGP raise on the factory parameter store — no wallet
+   redeployment. A new split-wallet/factory deployment line is required
+   only if the registry code itself no longer satisfies future EVM
+   constraints; existing wallet balances remain in the old wallet line, and
+   there is no hidden mutable registry pointer inside deployed wallets.
+   Accepted residual risk: if a repricing outruns the read budget while
+   governance quorum is simultaneously lost, non-native release in
+   deployed wallets stays frozen (fail closed, funds intact, native ETH
+   unaffected) until quorum or a social successor process restores the
+   raise path. Monitoring must alert on read-gas margin per [RSR-GGP].8,
+   and operators must publish pre-emptive migration guidance for
+   recipients if margin decays.
+   The registry read surface is the canonical
+   `IStreamAssetPolicyRegistry` interface in
+   [Canonical v1 Interfaces](#canonical-v1-interfaces); wallets use its
+   `assetStatus` and `assetReleaseGraceUntil` views.
+4. Asset state is explicit and five-valued. The numeric IDs below are the
+   normative v1 assignment and must be recorded in the numeric ID catalog:
 
-```solidity
-interface IStreamAssetPolicyRegistry {
-    function assetStatus(address asset) external view returns (uint8);
+   ```text
+   0 UNKNOWN       never configured; fail closed for adapters, sync, release
+   1 ACTIVE        official adapters may accept; sync/release allowed
+   2 INACTIVE      under review or temporarily disabled; fail closed
+   3 DEPRECATED    retired for new official acceptance; releasable under
+                   the observation and grace rules below
+   4 UNSUPPORTED   incident freeze; sync/release disabled until a
+                   separately accepted adapter or recovery spec accepts
+                   the asset; creates no sweep right, blocks no other asset
+   ```
 
-    function assetPolicy(address asset)
-        external
-        view
-        returns (
-            uint8 status,
-            bytes32 policyHash,
-            uint64 effectiveAt
-        );
-}
-```
-
-An asset admin can approve a standard ERC-20, move an approved asset out of
-active status, or mark an observed asset unsupported. Asset state is explicit,
-but v1 split wallets accept only `ACTIVE` for non-native sync and release:
-
-- `ACTIVE`: official adapters may accept the asset, and sync/release is allowed.
-- `INACTIVE`: reviewed or temporarily disabled assets are not accepted by v1
-  split wallets.
-- `DEPRECATED`: previously approved assets are disabled for v1 sync and
-  release.
-- `UNSUPPORTED`: release and sync for that asset are disabled until a
-  separately accepted adapter or recovery spec accepts the asset. Unsupported
-  marking creates no sweep right and blocks no other asset.
-
-Moving an ERC-20 asset to `ACTIVE` is an asset-policy decision, not an automatic
-token-interface check. The policy admin should record evidence that the token
-has no transfer fees, rebases, confiscation mechanics, balance-decreasing hooks,
-callback surprises, no-return transfer semantics, or no-op transfer behavior
-that would violate the monotonic-balance and exact-delta assumptions.
-Unsupported-asset recoverability is excluded from v1 and requires a
-separately accepted state-transition, adapter, or recovery spec; the v1
-unsupported state is not a sweep authority.
-
-If an ERC-20 moves back to `ACTIVE` after a period of inactive, deprecated, or
-unsupported operation, equality conservation is re-established only after the
-next successful `syncAsset(asset)` observation. Between transitions, the
-required safety property is no over-release; exact equality to external ground
-truth may require indexer/operator reconciliation.
+5. `DEPRECATED` semantics (ADR 0010 decision D8.6, resolving the
+   ADR 0008/spec contradiction in favor of releasable-under-grace):
+   deprecation retires an asset for new official acceptance — adapters must
+   reject new primary payments and the escrow must reject new credits —
+   but it does not strand owed funds. A wallet must allow `syncAsset` and
+   `release` for a `DEPRECATED` asset when either condition holds:
+   `lastObservedReceived(asset)` was initialized in that wallet (observed
+   balances and their later passive receipts stay releasable forever under
+   the same monotonic-token assumptions), or
+   `block.timestamp < assetReleaseGraceUntil(asset)` (the per-wallet
+   release grace, letting never-observed wallets — including wallets
+   receiving escrow flushes of credits created while the asset was
+   `ACTIVE` — initialize observation after deprecation). After the grace
+   expires, a wallet that never observed the asset fails closed for it.
+6. Every deprecation action must set
+   `releaseGraceUntil >= effectiveAt + 180 days`. Operations must flush or
+   pre-sync all outstanding non-native escrow credits and notify indexed
+   recipients within the grace window, so no officially settled funds
+   arrive at a wallet that can no longer initialize observation.
+7. Asset-status transitions away from `ACTIVE` (to `INACTIVE`,
+   `DEPRECATED`, or `UNSUPPORTED`) are economically material governance
+   actions and must use the ADR 0004 staged action-ID model with timelock
+   or two-step staging, exactly like default-scope assignment changes
+   (ADR 0010 decision D8.6). One exception: marking an asset `UNSUPPORTED`
+   in response to detected unsupported behavior may use the narrower
+   emergency class, and must publish an incident reason hash/URI in the
+   same action. Approvals to `ACTIVE` follow normal asset-policy review.
+   The registry must be operated under the same ADR 0004 action-ID and
+   staging events as other economically material changes; a bare
+   single-transaction admin write for a tightening transition is
+   nonconformant.
+8. Moving an ERC-20 asset to `ACTIVE` is an asset-policy decision, not an
+   automatic token-interface check. The policy admin must record evidence
+   that the token has no transfer fees, rebases, confiscation mechanics,
+   balance-decreasing hooks, callback surprises, no-return transfer
+   semantics, or no-op transfer behavior that would violate the
+   monotonic-balance and exact-delta assumptions.
+   Unsupported-asset recoverability is excluded from v1 and requires a
+   separately accepted state-transition, adapter, or recovery spec; the v1
+   unsupported state is not a sweep authority.
+9. If an ERC-20 moves back to `ACTIVE` after a period of inactive,
+   deprecated, or unsupported operation, equality conservation is
+   re-established only after the next successful `syncAsset(asset)`
+   observation. Between transitions, the required safety property is no
+   over-release; exact equality to external ground truth may require
+   indexer/operator reconciliation.
 
 `syncAsset(asset)` uses this ordering: initialize and emit on the first call
 even at zero balance; otherwise revert if
@@ -586,9 +984,9 @@ Rules:
    `royaltyInfo()` implementation remains outstanding resolver work.
 5. Unmapped token IDs fall back only to default royalty assignment or zero.
 6. Burned tokens keep their last token-to-collection mapping for historical
-   royalty disclosure. Burning removes ERC-721 ownership and enumerable
-   membership, but Core must not clear retained collection identity or burned
-   audit state.
+   royalty disclosure. Burning removes ERC-721 ownership (no enumerable
+   storage exists to update; ADR 0012 decision T10), but Core must not
+   clear retained collection identity or burned audit state.
 
 Rules:
 
@@ -606,7 +1004,9 @@ Rules:
 6. Closing a collection does not itself freeze revenue policy. Revenue freezes
    are explicit resolver actions.
 7. Sale IDs identify drops, auctions, or other primary events inside a
-   collection. They are not collection IDs and must not imply final supply.
+   collection; sale identity is owned by `docs/stream-sales-and-auctions.md`
+   [SSA-IDENTITY]. They are not collection IDs and must not imply final
+   supply.
 8. Assignment and revenue events must include both `collectionId` and `tokenId`
    when a token is known. For collection-level sale events before token
    allocation, the event must include a later token allocation event or a
@@ -637,9 +1037,14 @@ function snapshotTokenRoyaltyAtMint(
     uint256 tokenId,
     uint256 collectionId,
     bytes32 revenueClass,
-    bytes32 expectedCollectionAssignmentHash
-) external returns (bytes32 tokenAssignmentHash);
+    bytes32 expectedRoyaltyAssignmentHash
+) external returns (bytes32 tokenRoyaltyAssignmentHash);
 ```
+
+`expectedRoyaltyAssignmentHash` and the returned
+`tokenRoyaltyAssignmentHash` are canonical `royaltyAssignmentHash` values
+under [RSR-ROYALTY-HASH]; the hook reverts if the resolved
+collection/default royalty policy hash does not equal the expected value.
 
 Rules:
 
@@ -686,56 +1091,83 @@ collection assignment
 contract default assignment
 ```
 
-Signed sale authority must bind the economic policy being used. For fixed-price
-drops and auctions, the signed authorization should include:
+### Sale Authorization
 
-```text
-revenueClass
-expectedPrimaryPolicyHash
-primaryPolicyMode
-initialRecipientsHash
-beneficiariesHash
-payer
-executor
-saleId or authorization nonce
-```
+Requirements [RSR-SALE-AUTH]:
 
-`expectedPrimaryPolicyHash` is the resolved primary policy hash expected by the
-signer at authorization time. It binds the resolver, revenue class,
-collection/token context, template/profile, verified wallet, and resolver
-assignment hash. `primaryPolicyMode`
-should be one of:
+1. Signed sale authority must bind the economic policy being used. The
+   pinned `SALE_AUTHORIZATION_TYPEHASH`, its full field inventory —
+   including asset, unit price, quantity, nonce, and deadline — its
+   EIP-712 domain, its ERC-1271/ECDSA verification rules, its
+   mint-ledger `authorizationId` derivation, and its revocation surface
+   are owned by `docs/stream-sales-and-auctions.md` [SSA-AUTH]
+   (ADR 0010 decisions D3.5 and D5); this document defines no second sale
+   payload. Every primary sale program — fixed price, auction, private
+   sale, refund window — must use that authorization, and the sale adapter
+   must verify it, recompute every hash from calldata and chain state, and
+   consume the nonce before settlement effects. This section owns the
+   revenue-policy semantics the payload's `expectedPrimaryPolicyHash` and
+   `primaryPolicyMode` fields carry.
+2. `expectedPrimaryPolicyHash` is the resolved primary policy hash expected
+   by the signer at authorization time. It binds the resolver, revenue
+   class, collection/token context, template/profile, verified wallet, and
+   resolver assignment hash through the canonical
+   `resolvedPrimaryPolicyHash` preimage in
+   [Assignment Semantics](#assignment-semantics).
+3. `primaryPolicyMode` must be one of:
 
-```text
-STRICT_MATCH      settlement reverts unless the resolved policy hash matches
-ALLOW_CURRENT     signer explicitly accepts settlement-time current policy
-```
+   ```text
+   STRICT_MATCH      settlement reverts unless the resolved policy hash matches
+   ALLOW_CURRENT     signer explicitly accepts settlement-time current policy
+   ```
 
-The v1 default should be `STRICT_MATCH` for economically material sales.
-`ALLOW_CURRENT` is useful only for intentionally mutable sale programs and must
-be visible in the signed payload and settlement event. This prevents governance
-or operators from changing primary-sale economics between signature and
-settlement without the signer having opted into that mutability.
-The current `StreamPrimarySaleSettlement` foundation adapter does not verify an
-EIP-712 or ERC-1271 sale authorization itself. It trusts enabled settlement
-callers to supply the `expectedPrimaryPolicyHash` that came from the upstream
-sale authorization or custody flow. Therefore `STRICT_MATCH` is a resolver-drift
-check against the caller-supplied expected hash; it is not payer intent,
-signature, permit, price, quantity, deadline, or nonce enforcement at the
-adapter boundary. Any production sale path that uses the adapter must bind those
-fields before calling settlement and should prefer one-time or tightly scoped
-allowances for ERC-20 payment flows.
-If a scope freezes between signature and settlement, `ALLOW_CURRENT` resolves
-the then-current frozen assignment. That is acceptable only because the signer
-explicitly chose current-policy drift; `STRICT_MATCH` remains the default for
-economically material sales.
+   The v1 default is `STRICT_MATCH` for economically material sales that
+   settle in the authorization's own flow.
+   `ALLOW_CURRENT` is for intentionally mutable sale programs and for the
+   envelope-bounded deferred leg of escrow-holding sale modes (rule 5),
+   and must be visible in the signed payload and settlement event. This
+   prevents governance or operators from changing primary-sale economics
+   between signature and settlement without the signer having opted into
+   that mutability.
+   If a scope freezes between signature and settlement, `ALLOW_CURRENT`
+   resolves the then-current frozen assignment. That is acceptable only
+   because the signer explicitly chose current-policy drift.
+4. `StreamPrimarySaleSettlement` accepts calls only from enabled settlement
+   callers, and each enabled caller must be a sale adapter that performed
+   the rule 1 verification in the same call frame as settlement. For
+   ERC-20 settlement, the adapter must additionally satisfy the
+   payer-intent requirement of [RSR-PAYMENT-INTENT] — a payer-signed
+   `PaymentIntent` or a rule 5 by-construction intent — before any
+   allowance pull.
+   `STRICT_MATCH` at the settlement contract is a resolver-drift check
+   against the adapter-supplied expected hash; the payer-intent, price,
+   quantity, deadline, and nonce enforcement lives at the adapter boundary
+   and is mandatory, not operational advice.
+5. Deferred-settlement drift envelopes (ADR 0011 decision R6). The
+   `STRICT_MATCH` default of rule 3 applies to settlements that execute in
+   the authorization's own flow, where a drift revert is recoverable by
+   re-signing. Escrow-holding sale modes — refund-window sales, Dutch
+   uniform clearing, mint-at-settlement auctions, and accepted offers —
+   settle later against an immutable sale record that no party can
+   re-sign, so they must not bind `STRICT_MATCH` for the deferred leg.
+   Instead the buyer's signed sale surface binds a drift envelope —
+   maximum price, sale reference, and finalize-by deadline; the envelope
+   payload and the mode state machines are owned by
+   `docs/stream-sales-and-auctions.md` — and the deferred official
+   settlement executes under `ALLOW_CURRENT` within that envelope with
+   the observed `policyDrift` evented. Past the finalize-by deadline, a
+   permissionless sale-side refund path unlocks the escrowed funds.
+   Resolved-policy drift between purchase and finalization — including an
+   assignment change or a freeze flipping the `assignmentHash` frozen bit
+   — is therefore never a terminal settlement failure and can never
+   strand escrowed buyer funds.
 Settlement events must expose whether drift was observed between the signed
 `expectedPrimaryPolicyHash` and the resolved settlement policy.
 The resolved primary policy hash binds the assignment's frozen bit through
 the canonical `assignmentHash` preimage (ADR 0009 decision 9); it does not
 bind `freezeMode` or `permanentFreeze`, because freeze-mode transitions
 between frozen states do not change economics and must not invalidate
-outstanding signed authorizations. The foundation adapter binds the
+outstanding signed authorizations. The settlement contract binds the
 resolver assignment hash, and that assignment hash changes when its exact-key
 frozen bit changes.
 Therefore a freeze between signature and settlement changes the resolved policy
@@ -753,12 +1185,52 @@ mint path reads `tx.origin`.
 
 ### Normative Paid Mint Orchestration
 
-Every paid primary mint must use exactly one of these v1 paths. No third
-paid mint order is deployment-conformant.
-A collection configured for `ROYALTY_SNAPSHOT_AT_MINT` must reject binding to a
-sale adapter that supports only `PRE_REVENUE_SINGLE_STEP`. Snapshot-at-mint
-collections require `PREPARED_MINT` or a separately accepted orchestration
-that writes the snapshot before any untrusted receiver callback.
+Requirements [RSR-ORCHESTRATION]:
+
+1. The two-path rule governs the transaction in which a token is minted
+   against payment: every such transaction must use exactly one of the two
+   v1 paths below, and no third paid mint order is deployment-conformant
+   for minting against payment. Paid transfer of an already-minted
+   custody-held token is a settlement order, not a mint order, and uses
+   `CUSTODY_SETTLEMENT_TRANSFER` under
+   [Sale And Auction Settlement Boundary](#sale-and-auction-settlement-boundary).
+2. Both paths must satisfy the canonical protocol v1 mint ordering
+   invariants defined once in `docs/launch-v1-target-architecture.md`
+   [PV1-MINT-ORDER]. This section does not restate that
+   ordering; the per-step lists below are the two blessed realizations of
+   it, and the [PV1-MINT-ORDER] invariants — layer-scoped validation
+   before that layer's effects, with no effect observable by an
+   untrusted party before all validation completes and no effect
+   surviving a later validation failure; consent precedes creation (the
+   once-per-transaction `requireMintConsent` read reverts before ledger
+   consumption and Core allocation, [PV1-MINT-ORDER] invariant 7);
+   identity and required
+   accounting before entropy registration; entropy registration before
+   any untrusted recipient callback — govern where the lists are silent
+   (ADR 0010 decision D3.6; ADR 0012 decision T7; ADR 0014 decision V9).
+3. A collection configured for `ROYALTY_SNAPSHOT_AT_MINT` must reject
+   binding to a sale adapter that supports only `PRE_REVENUE_SINGLE_STEP`.
+   Snapshot-at-mint collections require `PREPARED_MINT` or a separately
+   accepted orchestration that writes the snapshot before any untrusted
+   receiver callback.
+4. Sale adapters may custody buyer funds before official settlement:
+   holding payments in adapter custody — for refund-window sales, Dutch
+   uniform-clearing rebates, or delayed acceptance — and settling the
+   official sale later (minting at settlement through one of the two
+   paths) is conformant and is not a third paid mint order. Custodial
+   adapters must bind the buyer's drift envelope — maximum price, sale
+   reference, and finalize-by deadline — plus the refund path in the
+   signed sale surface (ADR 0011 decision R6), the deferred official
+   settlement follows [RSR-SALE-AUTH].5, and the escrow-holding sale
+   modes themselves are specified in `docs/stream-sales-and-auctions.md`
+   (ADR 0010 decision D5.4).
+5. Post-mint refunds of officially settled revenue are impossible by
+   design: both paths deposit revenue to the split wallet or protocol
+   escrow before mint completion, and escrow is permissionlessly
+   flushable, so there is no refundable-revenue state after settlement.
+   Refundability must be implemented adapter-side before official
+   settlement per rule 4; changing this requires a new accepted
+   orchestration spec.
 
 `PRE_REVENUE_SINGLE_STEP`:
 
@@ -767,37 +1239,100 @@ that writes the snapshot before any untrusted receiver callback.
 2. Sale adapter resolves only collection/default primary policy. Token-level
    primary overrides and required mint-time royalty snapshots are unavailable in
    this path.
-3. Sale adapter materializes the split profile if needed and deposits native
-   ETH into the verified split wallet or records escrowed revenue under
-   `(revenueClass, profileId, wallet, asset)`.
+3. Sale adapter materializes the split profile if needed and deposits the
+   accepted settlement asset — native ETH, or an approved standard
+   ERC-20 pulled under the [RSR-PAYMENT-INTENT] payer-intent rules —
+   into the verified split wallet, or records escrowed revenue under the
+   asset-keyed `(revenueClass, profileId, wallet, asset)` credit
+   (ADR 0014 decision V5).
 4. Sale adapter calls the mint manager.
-5. Mint manager validates the phase, computes active `policyHash`, verifies the
-   signed `MintTicket` or equivalent sale authorization, and binds the exact
-   `mintCommitmentsHash`.
-6. Mint ledger verifies the manager-registered policy hash and consumes
+5. Mint manager validates the phase and computes active `policyHash`.
+6. Mint manager calls `requireMintConsent(collectionId, phaseId,
+   policyHash)` on the artist authority registry — the
+   once-per-mint-transaction consent and contest check placed by the
+   mint spec's Mint Execution Order step 9, executed after the active
+   `policyHash` is computed and before any gate, counter, ledger, or
+   Core step — and reverts on refusal (consent precedes creation,
+   [PV1-MINT-ORDER] invariant 7; ADR 0014 decision V9).
+7. Mint manager verifies the signed `MintTicket` or equivalent sale
+   authorization and binds the exact `mintCommitmentsHash`.
+8. Mint ledger verifies the manager-registered policy hash and consumes
    counters, authorization IDs, and nullifiers.
-7. Core executes `mintFromManager`, writes token identity and `_safeMint`s to
-   the initial recipient. In the current direct-randomizer slice, the token hash
-   boundary is reached after `_safeMint`; pre-callback entropy registration is
-   reserved for the entropy-coordinator target.
+9. Core executes `mintFromManager`, writes token identity, registers the
+   token's entropy request context with the entropy coordinator, and only
+   then `_safeMint`s to the initial recipient. Entropy registration must
+   precede any untrusted recipient callback; the conformance-matrix entropy
+   gate enforces this ordering at deployment.
+
+The step 3 deposit deliberately precedes manager validation, the consent
+check, and ledger consumption
+(steps 5–8), and that ordering satisfies [PV1-MINT-ORDER] invariant 1,
+whose validation-before-effects rule is scoped per layer and per
+observability (ADR 0012 decision T7): the sale adapter completes its own
+layer's validation (steps 1–2) before its deposit effect; the deposit
+executes no untrusted code — split-wallet `receive` is non-reverting,
+storage-free, and recipient-code-free, and an escrow credit is internal
+accounting — so no untrusted party can observe the deposit before
+manager, ledger, and Core validation complete; and a validation failure
+at any later step reverts the deposit atomically under this section's
+single-transaction rule, so no effect survives a later validation
+failure.
+
+The ERC-20 realization of step 3 carries its own stated justification,
+never one inherited by argument from enabled-caller or asset vetting —
+the same anti-inheritance discipline [RSR-SETTLEMENT-BOUNDARY].11
+applies to guards (ADR 0014 decision V5). The only external code an
+ERC-20 single-step deposit executes is the settlement asset's own
+transfer code: the pull is payer-authorized in the same call frame
+under [RSR-PAYMENT-INTENT] (a signed `PaymentIntent` or the rule 5
+payer-is-caller exemption), bounded by the sale authorization's asset
+and amount, proven by the exact-delta checks of [RSR-PAYMENT-INTENT].1,
+and available only for `ACTIVE` assets whose recorded
+[RSR-ASSET-POLICY].8 activation evidence excludes callback, hook,
+fee-on-transfer, and other observation or reentry channels — so the
+observability claim above holds for the approved-asset transfer exactly
+as for the native `receive`. The [RSR-SETTLEMENT-BOUNDARY].11
+reentrancy guard on the settlement surface holds independently of that
+evidence, so even a mis-approved callback asset cannot double-record a
+`settlementKey` or leave any partially validated effect standing: any
+interference reverts the single transaction, restoring every effect.
+An earlier revision stated step 3 for native ETH only; that reading —
+which would have forced every ERC-20 fixed-price sale into
+`PREPARED_MINT` — is superseded, both blessed paths deposit the
+accepted settlement asset, and the conformance matrix's paid-mint suite
+must include an ERC-20 `PRE_REVENUE_SINGLE_STEP` vector proving the
+deposit-before-manager/ledger ordering and its atomic revert on a later
+validation failure.
+
+Non-normative implementation evidence: the current direct-randomizer Core
+slice reaches its legacy randomizer/hash boundary after `_safeMint`. That
+interim ordering is as-built evidence only — it is not a permitted variant
+of this sequence, is purged from every normative sequence (ADR 0010
+decision D10.6), and fails the matrix entropy gate until the
+entropy-coordinator boundary lands.
 
 `PREPARED_MINT`:
 
 1. Sale adapter validates payment, sale authorization, price, quantity, payer,
    recipients, beneficiaries, deadline, nonce, and `expectedPrimaryPolicyHash`.
-2. Mint manager validates the phase, computes active `policyHash`, verifies the
-   signed `MintTicket` or equivalent sale authorization, and binds the exact
-   `mintCommitmentsHash`.
-3. Mint ledger verifies the manager-registered policy hash and consumes
+2. Mint manager validates the phase and computes active `policyHash`.
+3. Mint manager calls `requireMintConsent(collectionId, phaseId,
+   policyHash)` — the same Mint Execution Order step 9 consent and
+   contest check as `PRE_REVENUE_SINGLE_STEP` step 6, in the same
+   placement — and reverts on refusal ([PV1-MINT-ORDER] invariant 7;
+   ADR 0014 decision V9).
+4. Mint manager verifies the signed `MintTicket` or equivalent sale
+   authorization and binds the exact `mintCommitmentsHash`.
+5. Mint ledger verifies the manager-registered policy hash and consumes
    counters, authorization IDs, and nullifiers.
-4. Core executes `prepareMintFromManager`, creating authoritative token identity
+6. Core executes `prepareMintFromManager`, creating authoritative token identity
    but no entropy/randomizer request and no ERC-721 transfer.
-5. Resolver snapshots any required token-level primary or royalty assignment
+7. Resolver snapshots any required token-level primary or royalty assignment
    from Core's authoritative mapping.
-6. Sale adapter deposits the accepted settlement asset into the verified split
+8. Sale adapter deposits the accepted settlement asset into the verified split
    wallet or records escrowed revenue under
    `(revenueClass, profileId, wallet, asset)`.
-7. Core executes `completePreparedMintFromManager`, clears the prepared record,
+9. Core executes `completePreparedMintFromManager`, clears the prepared record,
    `_safeMint`s to the initial recipient while keeping the Core completion
    sentinel active, and clears that sentinel only after the token's normal
    entropy/randomizer boundary returns.
@@ -805,9 +1340,9 @@ that writes the snapshot before any untrusted receiver callback.
 Token-level economic snapshots written during `PREPARED_MINT` must be
 derivable solely from Core token identity, collection/default assignment state,
 the signed sale or mint authorization, and the active policy hashes. They must
-   not read, branch on, or depend on entropy seed, entropy request status, provider
-   result status, or renderer output, because entropy is unavailable or not
-   finalized when the snapshot is written. For a collection using
+not read, branch on, or depend on entropy seed, entropy request status,
+provider result status, or renderer output, because entropy is unavailable
+or not finalized when the snapshot is written. For a collection using
 `ROYALTY_SNAPSHOT_AT_MINT`, the snapshot records the economic policy that was
 authorized for the token; it does not wait for or incorporate randomness.
 
@@ -832,57 +1367,239 @@ wallets can also release approved standard ERC-20 assets received passively.
 Fee-on-transfer, rebasing, callback, or otherwise non-standard ERC-20 behavior
 is unsupported unless a separate adapter spec accepts it.
 
-ERC-20 primary adapters must read the same deployment-wide
-`IStreamAssetPolicyRegistry` pinned by the split factory and accept new primary
-payments only for `ACTIVE` assets. The adapter must perform safe-transfer
-handling, measure its own asset balance before and after payer transfer, and
-revert unless the received amount exactly equals the expected sale amount.
-Authorized settlement callers are a strong trust boundary: once enabled, they
-can stamp native payments as official primary-sale evidence, and ERC-20 callers
-can pull approved payer allowances into verified split wallets as official
-primary-sale evidence. Operators must keep the caller set minimal and bind sale
-authorizations or upstream custody/permit flows so broad token approvals cannot
-be used outside the intended sale path.
-Allowance failure, transfer failure, no-op transfer, fee-on-transfer behavior,
-rebasing balance movement, callback-dependent behavior, malformed token return
-data, or an unavailable asset-policy registry all revert before minting or
-revenue recording. Passive split-wallet ERC-20 receipts can be observed and
-released under the split-wallet accounting rules, but they are not primary-sale
-settlement evidence and do not relax the adapter's exact-delta requirement.
+### ERC-20 Payer Intent Binding
 
-The current three-bucket default maps naturally to a primary split template:
+Requirements [RSR-PAYMENT-INTENT]:
 
-```text
-500000 ppm dynamic SALE_POSTER
-250000 ppm static protocol
-250000 ppm static curators pool
-```
+1. ERC-20 primary adapters must read the same deployment-wide
+   `IStreamAssetPolicyRegistry` pinned by the split factory and accept new
+   primary payments only for `ACTIVE` assets. The adapter must perform
+   safe-transfer handling, measure its own asset balance before and after
+   payer transfer, and revert unless the received amount exactly equals the
+   expected sale amount.
+2. A standing ERC-20 allowance alone is never spendable as official
+   revenue (ADR 0010 decision D8.2). Before pulling any payer allowance,
+   the settlement path must verify — in the same call frame — a
+   payer-signed EIP-712/ERC-1271 `PaymentIntent`, unless a rule 5
+   by-construction intent applies:
 
-For long-term flexibility, a future collection might instead use:
+   ```solidity
+   bytes32 constant PAYMENT_INTENT_TYPEHASH = keccak256(
+       "StreamPaymentIntent(address payer,address asset,"
+       "uint256 maxAmount,bytes32 saleRef,"
+       "bytes32 expectedPrimaryPolicyHash,bytes32 nonce,uint64 deadline)"
+   );
+   ```
 
-```text
-700000 ppm artist
-100000 ppm artist-estate
-100000 ppm 6529
-050000 ppm curator-pool
-050000 ppm preservation-fund
-```
+   Field inventory: `payer` (the account whose allowance is pulled and the
+   required signer); `asset`; `maxAmount` (the pull must not exceed it);
+   `saleRef` (exactly the `settlementKey` preimage's `settlementId` — the
+   sales-spec `saleId` under the [RSR-SETTLEMENT-BOUNDARY].5 mapping rule
+   — binding the intent to one sale; no alternate derivation is
+   conformant, ADR 0011 decision R9);
+   `expectedPrimaryPolicyHash` (the payer's view of the economics being
+   paid into); `nonce` (single-use per signer: consumed-intent state is
+   keyed by `(payer, nonce)` in the verifying contract, ADR 0011 decision
+   R10); `deadline`.
+   The EIP-712 domain is `name = "6529StreamPaymentIntentVerifier"`,
+   `version = "1"`, `chainId`, `verifyingContract` = the contract that
+   performs the allowance pull, with ERC-5267 introspection. The typehash
+   and domain are recorded in
+   [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes);
+   the domain-name family rule and the named genesis verifier are pinned
+   in [RSR-DOMAINS].2 (ADR 0012 decision T7; family renamed
+   verifier-neutral by ADR 0014 decision V6).
+3. The verifier must consume the `PaymentIntent` `(payer, nonce)` pair
+   before the allowance
+   pull under CEI, verify contract-wallet signatures under [RSR-1271],
+   reject expired deadlines, reject pulls above `maxAmount`, and reject a
+   `saleRef` or `expectedPrimaryPolicyHash` that does not match the sale
+   being settled. Consumed-intent state is keyed by `(payer, nonce)`,
+   never by a bare contract-wide nonce set, so no payer can consume,
+   revoke, or invalidate another payer's nonce value (ADR 0011 decision
+   R10). The payer must be able to revoke an unused intent by
+   nonce (payer-sent revocation consumes `(msg.sender, nonce)`;
+   payer-signed revocation consumes the signer's own pair; evented;
+   ADR 0010 decision D10.4). The pinned intent-revocation typed-data
+   surface is (ADR 0014 decision V6):
 
-The protocol should not need a new Solidity struct for that policy. It should
-only need a new split profile or primary split template and assignment.
+   ```solidity
+   bytes32 constant PAYMENT_INTENT_REVOCATION_TYPEHASH = keccak256(
+       "StreamPaymentIntentRevocation(address payer,bytes32 nonce,"
+       "uint64 deadline)"
+   );
+   ```
 
-The current poster share is dynamic: it pays the poster attached to a specific
-drop or auction, not a fixed address in a default profile. Primary assignments
-therefore support primary split templates. A template entry has either a static
-account or an open `bytes32 accountSource` such as `keccak256("SALE_POSTER")`.
-At settlement, the sale contract resolves supported account sources from sale
+   Field inventory: `payer` (the intent signer and required revocation
+   signer), `nonce` (the `(payer, nonce)` pair being revoked), and
+   `deadline` (unix seconds; expired revocations revert at submission —
+   the deadline bounds only the relay window and never re-validates an
+   already consumed or revoked nonce). The payload verifies under the
+   rule 2 verifier domain — the same `verifyingContract` that would
+   consume the intent — and, like its parent family, is domain-only
+   under the in-struct chainId discipline of
+   `docs/launch-v1-target-architecture.md` [PV1-DOMAINS] (no domain
+   material is duplicated in the struct). Verification follows
+   [RSR-1271], the [MPA-AUTHZ] rule 5 golden negative tests run against
+   this payload per [RSR-1271].1, and the typehash is recorded in
+   [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes).
+   The verifier must expose the
+   explicit-address replay view
+   `isPaymentIntentNonceUsed(address payer, bytes32 nonce)`;
+   caller-relative replay views are nonconformant (ADR 0011 decision
+   R12).
+4. Exact-amount Permit2 or EIP-2612 permits signed over the same sale
+   reference may satisfy rule 2 only when the permit's signed payload
+   binds payer, asset, exact amount, spender, and deadline and the adapter
+   binds the remaining `PaymentIntent` fields in the same call frame; a
+   permit that merely sets a standing allowance does not.
+5. Two intents exist by construction and need no signed `PaymentIntent`.
+   Native ETH settlement: the payer's `msg.value`
+   in the settlement transaction is the intent by construction, and the
+   sale authorization under [RSR-SALE-AUTH] binds its amount.
+   Payer-is-caller ERC-20 settlement (ADR 0011 decision R10): a pull from
+   `payer == msg.sender` within the settlement call frame is consent by
+   construction, exactly like `msg.value`, and satisfies the payer-intent
+   requirement without a signed `PaymentIntent`, provided the pull is
+   bounded by the asset and amount of the [RSR-SALE-AUTH] authorization
+   for the sale being settled. The exemption never extends further:
+   whenever the pull is initiated by a relayer, executor, or any caller
+   other than the payer itself in the same call frame, the signed
+   `PaymentIntent` remains mandatory.
+6. Enabled settlement callers remain a governed trust boundary and the
+   caller set must stay minimal, but caller discipline is defense in
+   depth, not the defense: with rules 2–4, a compromised or buggy enabled
+   caller cannot convert any standing allowance into official settlement
+   without a matching payer signature. Conformance tests must prove that
+   settlement initiated by any caller other than the payer itself without
+   a valid `PaymentIntent` reverts before any allowance
+   pull, template materialization, escrow credit, or mint effect, and
+   that the rule 5 payer-is-caller path cannot pull an asset or amount
+   beyond the sale authorization's binding.
+7. Allowance failure, transfer failure, no-op transfer, fee-on-transfer
+   behavior, rebasing balance movement, callback-dependent behavior,
+   malformed token return data, or an unavailable asset-policy registry
+   all revert before minting or revenue recording. Passive split-wallet
+   ERC-20 receipts can be observed and released under the split-wallet
+   accounting rules, but they are not primary-sale settlement evidence and
+   do not relax the adapter's exact-delta requirement.
+
+### Primary Split Templates And The Artist Take
+
+Primary assignments support primary split templates because some recipients
+are dynamic sale participants known only at settlement. A template entry
+has either a static account or an open `bytes32 accountSource`. At
+settlement, the sale contract resolves supported account sources from sale
 context, materializes a fixed split profile, and then funds or escrows that
 profile's wallet. Royalty assignments do not use dynamic account sources
 because ERC-2981 does not pass sale context to the receiver.
 
+Requirements [RSR-TEMPLATES]:
+
+1. `ARTIST` is a first-class beneficiary class (ADR 0010 decision D2.5),
+   identified in profiles and templates by the `keccak256("artist")` label
+   class ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-ECON] rule 1). The dynamic account source
+   `keccak256("COLLECTION_ARTIST")` resolves through the artist
+   registry's typed payout read `artistPayoutAccount(artistId)` for the
+   collection's accepted artist binding — the Permanent registry surface
+   owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-PAYOUT], backed by an artist-signed, identity-revision-class
+   payout designation record (ADR 0013 decision U1) — and entries it
+   materializes carry an `artist`-class label. Settlement time is the one
+   resolution moment: the read executes in the materialization call frame
+   of the sale being settled, the [AA-ECON] economics consent binds the
+   payout designation revision in force when consent is recorded, and a
+   later artist-signed designation revision re-points future settlements
+   through the same read without re-consent; no consent-time address is
+   cached into the template. Resolution must use the accepted binding
+   only — a proposed-but-unaccepted, disputed, or revoked binding must
+   revert artist-sourced materialization before any settlement effect —
+   and the payout read is typed and fail-closed: an unset payout
+   designation, a zero returned address, or a failed or malformed
+   registry read makes the source unresolvable and settlement reverts
+   before any state change. `authorityAddress` — the registry signing
+   key — is never a payout fallback and never a payout source; paying
+   the signing key because a designation is missing is nonconformant
+   (registry authority and payment entitlement are deliberately separate
+   systems, [AA-SPLITS] rule 4). Multi-artist collections resolve each
+   collaborator entry through
+   `collaboratorPayoutAccount(artistId, collaborator)` and the typed
+   collaborator list and share references of the artist authority spec
+   ([AA-PAYOUT], [AA-COLLAB]); the same settlement-time moment,
+   fail-closed posture, and no-fallback rule apply per collaborator.
+2. `keccak256("SALE_POSTER")` remains a supported dynamic source paying
+   the poster attached to a specific drop or auction. Where the poster is
+   the collection's accepted artist, the `COLLECTION_ARTIST` source and
+   the artist-take posture below apply instead. `SALE_POSTER` resolves
+   primary-sale proceeds only: consignor payouts for owner-held tokens
+   sold under the consignment boundary of
+   [RSR-SETTLEMENT-BOUNDARY].10 are sale-side liabilities and must not
+   be expressed through primary templates (ADR 0012 decision T6).
+3. Genesis artist-take posture: the genesis default primary template for
+   artist-bound collections is:
+
+   ```text
+   900000 ppm dynamic COLLECTION_ARTIST
+   100000 ppm static protocol
+   ```
+
+   The `COLLECTION_ARTIST` entry resolves through the rule 1 typed
+   payout read at settlement time. Because the [AA-ECON] economics
+   consent binds the payout designation revision in force at consent
+   ([AA-PAYOUT]), an artist-bound collection cannot record the
+   [RSR-ARTIST-ECONOMICS].3 pre-mint consents while its payout
+   designation is unset; the settlement-time revert of rule 1 is the
+   terminal backstop, never the discovery path (ADR 0013 decision U1).
+   The genesis default template carries no curators bucket (ADR 0011
+   decision R12). Curator classes are deployment configuration, never a
+   protocol default: a template or profile may carry curator-class
+   entries only when the deployment manifest names the receiving curator
+   pool contract and that contract satisfies the
+   [StreamCuratorsPool](#streamcuratorspool) conformance rules.
+   For any artist-bound collection, the aggregate share of ARTIST-class
+   entries (the accepted artist plus typed collaborators) must be at least
+   500,000 ppm unless the accepted artist has co-signed the assignment
+   under [RSR-ARTIST-ECONOMICS]. Artist-less default splits are not a
+   normalized posture: a collection without a bound artist must carry the
+   immutable `PLATFORM_WORKS` declaration from
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md), and only `PLATFORM_WORKS`
+   collections may use templates with no ARTIST-class entry.
+4. Protocol fee posture: the static protocol share in genesis default
+   templates is 100,000 ppm (10%) and must not exceed that value in any
+   default template without a recorded governance rationale. Per-sale
+   templates may choose lower protocol shares freely. The static
+   protocol account recorded in a genesis default template must be
+   resolved at template registration through the admin registry's
+   `ROLE_TREASURY` reference — the value-receiving role of the
+   [GOV-ROLES] vocabulary in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   — never hand-entered as a raw address, and the resolved account must
+   hold that role home's value-receiving rehearsal evidence (proved
+   capable of receiving ETH) before the template's first sale
+   (ADR 0014 decision V4). Because profiles are immutable, a later
+   `ROLE_TREASURY` rotation re-points only templates registered after
+   the rotation; profiles already materialized keep their recorded
+   account, exactly like every other immutable entry ([RSR-ESTATE]).
+5. Disclosure: every collection's resolved primary split — entries, shares,
+   template or profile ID, and artist share — must be surfaced through the
+   collection metadata surface (`docs/collection-metadata-contract.md`)
+   and operator UX before its first public sale starts. Selling against an
+   undisclosed split is nonconformant.
+6. Historical context (non-normative): the pre-specification three-bucket
+   deployment used `500000 ppm dynamic SALE_POSTER / 250000 ppm static
+   protocol / 250000 ppm static curators pool`. That mapping is retained
+   here only as history for event archaeology; it is not a genesis
+   default and must not be presented as the protocol's economics.
+
+The protocol does not need a new Solidity struct to express a new policy —
+an estate share, a preservation fund, a museum endowment. It only needs a
+new split profile or primary split template and assignment.
+
 Template IDs are deterministic:
 
 ```solidity
+// PRIMARY_TEMPLATE_DOMAIN string preimage and hash: [RSR-DOMAINS]
 bytes32 templateId = keccak256(abi.encode(
     PRIMARY_TEMPLATE_DOMAIN,
     uint256(block.chainid),
@@ -906,6 +1623,8 @@ resolved recipient set, not from an individual sale. The materialized metadata
 hash is:
 
 ```solidity
+// MATERIALIZED_PRIMARY_PROFILE_METADATA_DOMAIN string preimage
+// and hash: [RSR-DOMAINS]
 bytes32 materializedMetadataURIHash = keccak256(abi.encode(
     MATERIALIZED_PRIMARY_PROFILE_METADATA_DOMAIN,
     uint256(block.chainid),
@@ -927,20 +1646,29 @@ revenue settlement:
 
 ```solidity
 bytes32 settlementKey = keccak256(abi.encode(
-    keccak256("6529STREAM_PRIMARY_SETTLEMENT_KEY_V1"),
+    SETTLEMENT_KEY_DOMAIN, // string preimage and hash: [RSR-DOMAINS]
     uint256(block.chainid),
     address(settlementContract),
     bytes32(settlementId),
     bytes32(revenueClass),
     uint256(collectionId),
     uint256(tokenId),
-    uint256(saleId),
+    uint256(saleNonce),
     address(payer),
     address(poster),
     address(beneficiary),
     uint256(amount)
 ));
 ```
+
+Sale-identity mapping rule (ADR 0011 decision R9): `settlementId` is
+exactly the sales-spec `bytes32 saleId` of the sale being settled,
+computed under `docs/stream-sales-and-auctions.md` [SSA-IDENTITY], and
+`saleNonce` is the adapter-local `saleNonce` bound inside that same
+[SSA-IDENTITY] preimage. This document defines no sale-identity preimage
+of its own, and no other value may be supplied for either field; an
+earlier draft's `uint256 saleId` field ("drop ID", "may be the token ID")
+is renamed and retyped by this rule.
 
 `primaryPolicyMode`, `expectedPrimaryPolicyHash`, resolved policy evidence,
 settlement caller, and asset address are deliberately excluded from
@@ -951,17 +1679,19 @@ Sale context is emitted for reconstruction only:
 
 ```solidity
 bytes32 saleContextHash = keccak256(abi.encode(
-    keccak256("6529STREAM_PRIMARY_SALE_CONTEXT_V1"),
+    SALE_CONTEXT_DOMAIN, // string preimage and hash: [RSR-DOMAINS]
     uint256(block.chainid),
     address(settlementContract),
     bytes32(revenueClass),
     keccak256(abi.encode(
+        SALE_CONTEXT_IDENTITY_DOMAIN, // [RSR-DOMAINS]
         bytes32(settlementId),
         uint256(collectionId),
         uint256(tokenId),
-        uint256(saleId)
+        uint256(saleNonce)
     )),
     keccak256(abi.encode(
+        SALE_CONTEXT_PARTIES_DOMAIN, // [RSR-DOMAINS]
         address(settlementCaller),
         address(payer),
         address(poster),
@@ -970,6 +1700,7 @@ bytes32 saleContextHash = keccak256(abi.encode(
     address(asset),
     uint256(amount),
     keccak256(abi.encode(
+        SALE_CONTEXT_POLICY_DOMAIN, // [RSR-DOMAINS]
         uint8(primaryPolicyMode),
         bytes32(expectedPrimaryPolicyHash),
         bytes32(resolvedPrimaryPolicyHash),
@@ -980,6 +1711,13 @@ bytes32 saleContextHash = keccak256(abi.encode(
     address(wallet)
 ));
 ```
+
+Each interior composite carries its own versioned domain constant
+(`SALE_CONTEXT_IDENTITY_DOMAIN`, `SALE_CONTEXT_PARTIES_DOMAIN`,
+`SALE_CONTEXT_POLICY_DOMAIN`; [RSR-DOMAINS]) so no bare `abi.encode`
+hash is ambiguous across preimage families — the same interior-hash
+discipline the mint layer applies to its batch and operation composites
+(ADR 0012 decision T6).
 
 `saleContextHash` is an event reconstruction and replay aid, not a source of
 on-chain payment authority. Consumers should verify the emitted sale fields and
@@ -995,7 +1733,12 @@ profile entry materialized from supported account sources such as
 entries and wallet deposits, not the display-only event fields alone.
 
 Materialization resolves all dynamic sources before mint or settlement state
-changes. Zero or unsupported dynamic accounts revert. Entries that materialize
+changes. Zero, unset-designation, or unsupported dynamic accounts revert.
+Dynamic-source registry reads — the [AA-PAYOUT] typed payout reads of
+[RSR-TEMPLATES].1 — follow the artist spec's bounded-read and
+capped-returndata discipline and fail closed: a failed, malformed, or
+unset read reverts materialization before any mint, escrow, or settlement
+write (ADR 0013 decision U1). Entries that materialize
 to the same `(account, labelId)` pair are aggregated before fixed-profile
 validation; same-account entries under different labels remain separate.
 Template materialization is a public deterministic cache: any caller can
@@ -1120,6 +1863,12 @@ address-collision incidents. The future deployment is non-malicious because the
 deterministic address binds the factory address, profile ID salt, and
 factory-controlled init code hash; any different code at that address fails the
 existing-code check.
+Code-presence checks in this layer classify protocol `CREATE2` targets,
+never account types: any nonzero code at a predicted wallet address —
+including an EIP-7702 delegation designation — is code, so the no-code
+escrow precondition fails and unexpected code takes the wrong-code
+poisoned-address path, never a code-free classification (ADR 0013
+decision U6).
 
 If the deterministic address contains wrong code, the incident class is
 `ESCROW_ADDRESS_POISONED`. `flushEscrow` must revert with a distinct
@@ -1149,7 +1898,10 @@ asset is `ACTIVE`, even if the calling adapter already checked the same asset.
 This defense-in-depth check happens before owed-credit mutation. Existing escrow
 credits keep their captured `asset`; later `DEPRECATED` status blocks new
 official primary credits but does not by itself make already-recorded owed funds
-unflushable.
+unflushable. Recipients of a flushed `DEPRECATED` asset release under the
+observation and grace rules of [RSR-ASSET-POLICY].5, and operations must
+flush or pre-sync outstanding non-native credits within the grace window
+per [RSR-ASSET-POLICY].6.
 Escrow credits may only be created for a deployed correct wallet or for an
 undeployed deterministic wallet whose profile was created through the factory,
 whose predicted address has no code, and whose expected runtime code hash is
@@ -1203,11 +1955,13 @@ factory and then flush the already-deployed path.
 Initial target range is 300,000 to 500,000 gas for the undeployed-wallet path,
 but the deployed artifact must use measured gas plus margin rather than this
 rough planning range.
-For v1, `FLUSH_GAS_FLOOR` must be a deploy-time immutable or an equivalent
-manifest-pinned constant for the escrow implementation, not mutable governance
-state. A later escrow version may choose a different measured floor, but it must
-publish the new value, bytecode hash, factory line, and gas evidence in the
-release manifest before activation.
+`FLUSH_GAS_FLOOR` is a Governed Gas Parameter hosted in escrow storage
+under [RSR-GGP] (ADR 0010 decision D1): its deploy-time immutable floor is
+the genesis measured minimum, raises use the service-restoring class when a
+gas-schedule change makes the current value insufficient, and lowers
+require a recorded passing worst-case flush measurement at the proposed
+value. Every change publishes the new value and gas evidence in the release
+manifest.
 The floor calculation must account for EIP-150's 63/64 gas forwarding rule for
 each external subcall. Tests must measure the actual gas delivered to
 `deployWallet` and to the wallet deposit/receive path, not merely the parent
@@ -1226,21 +1980,23 @@ events as provisional until their normal confirmation depth, and then reconcile
 against onchain owed balances. A reorg cannot create or destroy contractual owed
 balances on the canonical chain, but offchain reports must be able to roll back
 or replay escrow events deterministically.
-If a future gas-schedule change makes the immutable `FLUSH_GAS_FLOOR`
-incorrect, the correction path is a new escrow deployment line plus governed
-successor-wallet or escrow-credit recovery for affected credits. Monitoring
-must alert when measured flush gas approaches the immutable floor with
-insufficient margin. Production operations should alert when measured
-worst-case undeployed-wallet flush gas exceeds two-thirds of
+If a future gas-schedule change makes the current `FLUSH_GAS_FLOOR`
+insufficient, the correction path is a staged (or emergency) GGP raise on
+the deployed escrow — not a new deployment line. Successor-wallet or
+escrow-credit recovery remains reserved for incident-class failures.
+Monitoring must alert when measured flush gas approaches the current value
+with insufficient margin: production operations alert when measured
+worst-case undeployed-wallet flush gas exceeds two-thirds of the current
 `FLUSH_GAS_FLOOR` or when the margin falls below the release-manifest SLO,
-whichever is stricter.
-Accepted terminal risk: if a future gas-schedule change makes
-`FLUSH_GAS_FLOOR` permanently unreachable, a wallet was never deployed, and
-governance quorum is also lost so escrow recovery cannot execute, that owed
-escrow may be unavailable until a social successor process outside the old
-escrow contract is accepted. This risk is bounded by encouraging
-permissionless pre-deployment of split wallets and by the already-deployed
-best-effort flush path above; it is not solved by hidden admin sweep power.
+whichever is stricter ([RSR-GGP].8).
+Accepted residual risk: if a gas-schedule change outruns the current floor
+while governance quorum is simultaneously lost so no raise can execute, and
+a credit's wallet was never deployed, that owed escrow may be unavailable
+until quorum or a social successor process outside the old escrow contract
+is restored. This risk is bounded by the raise-only emergency path, by
+encouraging permissionless pre-deployment of split wallets, and by the
+already-deployed best-effort flush path above; it is not solved by hidden
+admin sweep power.
 Operations should pre-deploy all materialized template wallets for sale programs
 expected to create meaningful escrow, converting those credits to the
 already-deployed best-effort flushable class before any future gas-schedule
@@ -1347,7 +2103,72 @@ function escrowRecoveryRecord(bytes32 recoveryId)
     external
     view
     returns (EscrowRecoveryRecord memory);
+
+// Affected-recipient consent surface for economics-changing recovery
+// (rule 6; ADR 0013 decision U7). Field inventory: account (the
+// affected entitled account and required signer), recoveryId (the
+// rule 9 recovery ID, which binds the credit key, successor, expected
+// amount, manifest content hash, executeAfter, and reason hash),
+// nonce (single-use per signer; consumed-nonce state is keyed by
+// (account, nonce)), deadline (unix seconds; expired consents revert
+// at submission). Typehash and escrow EIP-712 domain: [RSR-DOMAINS].
+bytes32 constant ESCROW_RECOVERY_CONSENT_TYPEHASH = keccak256(
+    "StreamEscrowRecoveryConsent(address account,bytes32 recoveryId,"
+    "bytes32 nonce,uint64 deadline)"
+);
+
+event EscrowRecoveryConsentRecorded(
+    uint16 schemaVersion,
+    bytes32 indexed recoveryId,
+    address indexed account,
+    bytes32 nonce
+);
+
+event EscrowRecoveryConsentRevoked(
+    uint16 schemaVersion,
+    bytes32 indexed recoveryId,
+    address indexed account
+);
+
+// Anyone may relay an affected account's signed consent; verification
+// follows [RSR-1271] and consumes the signer's own (account, nonce)
+// pair before recording (CEI).
+function submitEscrowRecoveryConsent(
+    address account,
+    bytes32 recoveryId,
+    bytes32 nonce,
+    uint64 deadline,
+    bytes calldata signature
+) external;
+
+// Direct recording path (ADR 0014 decision V4): callable only by the
+// affected account itself (msg.sender == account), so a contract
+// account without ERC-1271 support can consent with no signature at
+// all — the cap-independent principle of [RSR-1271].5, mirroring the
+// direct-call revocation symmetry. Consumes the caller's own
+// (account, nonce) pair before recording (CEI) and records the same
+// consent fact, emitting EscrowRecoveryConsentRecorded.
+function recordEscrowRecoveryConsent(bytes32 recoveryId, bytes32 nonce)
+    external;
+
+// Callable only by the consenting account while the recovery is not
+// yet executed.
+function revokeEscrowRecoveryConsent(bytes32 recoveryId) external;
+
+// Explicit-address views; caller-relative variants are nonconformant
+// (ADR 0011 decision R12).
+function escrowRecoveryConsentRecorded(bytes32 recoveryId, address account)
+    external
+    view
+    returns (bool);
+
+function isEscrowRecoveryConsentNonceUsed(address account, bytes32 nonce)
+    external
+    view
+    returns (bool);
 ```
+
+Requirements [RSR-ESCROW-RECOVERY]:
 
 1. Incident revocation blocks new credits and normal flush for the revoked
    runtime hash.
@@ -1361,63 +2182,281 @@ function escrowRecoveryRecord(bytes32 recoveryId)
 5. For `ESCROW_ADDRESS_POISONED`, the successor profile ID must use a new salt
    and deterministic wallet address; the old poisoned wallet remains evented as
    the failed destination and cannot receive normal flushes.
-6. If the successor profile has identical canonical entries, the normal
-   recovery delay may be used. If economics change, the reason must be explicit
-   and the delay should be longer than ordinary config changes.
+6. Recovery must default to an identical-entries successor (ADR 0013
+   decision U7). Every recovery schedule is an ADR 0004
+   `FUNDS_RECOVERY`-floor action ([RSR-STAGED-GOVERNANCE].1). When the
+   successor profile's canonical entries hash equals the affected
+   credit's old profile entries hash, that floor alone applies. A
+   successor whose canonical entries differ in any way — accounts,
+   shares, or labels — redirects owed funds and must satisfy exactly one
+   of the two paths below; no shorter or hedged path is conformant:
+   - Consent path: a recorded, unrevoked consent from every affected
+     account — every account with a nonzero
+     aggregate share in the old profile whose aggregate share in the
+     successor profile is lower, including removal. Consent recording
+     has two equivalent paths (ADR 0014 decision V4): a
+     `StreamEscrowRecoveryConsent` relayable by any caller through
+     `submitEscrowRecoveryConsent`,
+     verified under [RSR-1271] against the pinned
+     `ESCROW_RECOVERY_CONSENT_TYPEHASH` and escrow EIP-712 domain
+     ([RSR-DOMAINS]); or the affected account's own direct call to
+     `recordEscrowRecoveryConsent(recoveryId, nonce)` with
+     `msg.sender == account` and no signature — the cap-independent
+     recording path for contract accounts without ERC-1271 support.
+     Both paths consume the signer's or caller's own `(account, nonce)`
+     pair before recording, reject expired deadlines (signed path), and
+     bind one
+     `recoveryId` (which itself binds the credit key, successor,
+     expected amount, manifest content hash, `executeAfter`, and reason
+     hash through rule 9). A consenting account may revoke its unused
+     consent until execution. With full affected-set coverage the
+     `FUNDS_RECOVERY` floor applies.
+   - Terminal-delay path: absent full consent coverage, the schedule
+     must additionally pass through the ADR 0004 `TERMINAL_FREEZE`
+     veto/guardian delay class — the same class
+     [RSR-STAGED-GOVERNANCE].2 requires for irreversible freezes — on
+     top of the `FUNDS_RECOVERY` floor, with `executeAfter` no earlier
+     than both allow. The recovery manifest must enumerate the affected
+     accounts, and operations must deliver notice to every affected
+     account — and, where the credit belongs to an artist-bound
+     collection's revenue, to the artist authority — at scheduling,
+     recorded as governance evidence before execution; the guardian/veto
+     window is the objection channel.
+   The affected set and the entries comparison are verified onchain: the
+   scheduler (or execution recheck) validates supplied old and successor
+   canonical entries against the factory-stored
+   `profileEntriesHash(profileId)` values before classifying the
+   recovery as identical-entries or economics-changing.
 7. Reroute moves only escrow-held owed funds and escrow accounting. It cannot
    seize or move funds already resident in the old split wallet.
 8. A later re-enablement of the old runtime hash may restore normal flush, but
    it must be evented and reasoned.
-9. `recoveryId` is `keccak256(abi.encode(STREAM_ESCROW_RECOVERY_V1,
+9. `recoveryId` is `keccak256(abi.encode(ESCROW_RECOVERY_DOMAIN,
    block.chainid, address(escrow), creditKey.revenueClass, creditKey.profileId,
    creditKey.wallet, creditKey.asset, successorWallet, successorProfileId,
    successorRuntimeCodeHash, expectedAmount, recoveryManifest.contentHash,
-   executeAfter, reasonHash))`.
+   executeAfter, reasonHash))`. The `ESCROW_RECOVERY_DOMAIN` string
+   preimage and hash are pinned in [RSR-DOMAINS].
 10. Execution rechecks status `SCHEDULED`, delay, current owed amount equals
     `expectedAmount`, the credit's stored factory, incident status, successor
     profile/wallet/codehash validity, and whether the recovery manifest claims
     identical or changed economics before moving escrow-held owed funds.
+    For an economics-changing recovery the recheck must also prove the
+    rule 6 path condition still holds at execution time: identical
+    canonical entries, or a recorded, unrevoked consent for every
+    affected account (recorded through either rule 6 consent path,
+    ADR 0014 decision V4), or a schedule that passed the
+    `TERMINAL_FREEZE`
+    veto/guardian class with the notice evidence recorded. A revoked
+    consent after scheduling fails the consent path and the execution
+    reverts (ADR 0013 decision U7).
 
-### Auction Settlement State Machine
+### Sale And Auction Settlement Boundary
 
-Production auctions are not allowed to rely on the current `StreamDrops`
-opt-in auction placeholder. A production `StreamAuctions` or equivalent
-settlement contract must own the full bid-custody state machine before
-auctions are production-ready.
+Sale and auction mechanics — the English auction state machine with
+reserve, minimum bid increments, and anti-snipe extension; Dutch decay and
+uniform-clearing rebates; offers and private/direct sales; refund-window
+escrow modes; burn-to-mint gates; allowlists; delegated minting; sealed-bid
+extension profiles; and the sale adapter conformance profile and registry —
+are owned by `docs/stream-sales-and-auctions.md` (ADR 0010 decision D5).
+This document does not define auction mechanics; the sketch auction model
+formerly in this section is superseded by that spec, which also carries
+forward and re-decides the legacy `StreamAuctions` behavioral surface
+(increments, anti-snipe, cancellation, no-bid claims). This section defines
+only the revenue-side settlement boundary every sale adapter must satisfy.
 
-Minimum auction model:
+Requirements [RSR-SETTLEMENT-BOUNDARY]:
 
-1. Each auction has a unique `auctionId`, collection ID, optional known token
-   ID when the auction settles a pre-allocated or custody-held token,
-   seller/beneficiary policy, accepted asset, reserve, start/end time,
-   primary revenue class, and expected primary policy hash.
-2. Bids are native ETH in v1 unless a reviewed auction-specific ERC-20 adapter
-   is accepted. The v1 approved-standard ERC-20 primary settlement
-   requirement does not by itself make ERC-20 auction bidding
-   production-ready.
-3. Losing-bid refunds are pull-based. Outbid funds become refundable credit;
-   auction settlement never pushes ETH to losing bidders.
-4. Settlement first marks the auction settled, records the winning payer,
-   beneficiary, amount, policy hash, and sale ID, then records primary revenue
-   into a split wallet or escrow before any external NFT recipient callback.
-5. Minting to a contract recipient uses the same rule as fixed-price primary
-   sales: revenue is recorded before safe recipient callbacks, or the token is
-   minted to custody and transferred after settlement effects.
-6. Failed split-wallet deposit uses the same owed escrow path as fixed-price
-   primary sales. A split-recipient receive hook cannot revert settlement.
-7. Refund claims use checks-effects-interactions, are non-reentrant, and remain
-   claimable forever unless a separately accepted decommissioning spec
-   handles uneconomic dust.
-8. Auction cancellation, reserve failure, and no-bid expiry are evented and
-   release any bidder credits through the same pull refund path.
-9. `auctionId` and `saleId` are domain-separated by chain ID, auction contract,
-   collection ID, local auction nonce, and token ID when known.
-10. Settlement rejects if the signed policy hash, payer, recipient, executor,
-    or amount does not match the auction state.
+1. Settlement of any sale or auction must first mark the sale settled and
+   record the winning payer, beneficiary, amount, policy hash, and sale ID,
+   then record primary revenue into a verified split wallet or the owed
+   escrow, before any external NFT recipient callback executes.
+2. Minting to a contract recipient uses the same rule as fixed-price
+   primary sales: revenue is recorded before safe recipient callbacks, or
+   the token is minted to custody and transferred after settlement effects.
+3. Failed split-wallet deposit uses the same owed escrow path as
+   fixed-price primary sales. A split-recipient receive hook cannot revert
+   settlement.
+4. Bid custody, losing-bid pull refunds, cancellation, reserve failure,
+   and no-bid expiry live sale-side per `docs/stream-sales-and-auctions.md`
+   and must never push value to recipients from the settlement path.
+   Refund credits are sale-contract liabilities, are never split-wallet or
+   revenue-escrow balances, and remain claimable forever unless a
+   separately accepted decommissioning spec handles uneconomic dust.
+   Every sale-side custody and refund-liability surface must satisfy the
+   owed-funds conservation and claim discipline of [RSR-OWED-FUNDS]
+   (ADR 0012 decision T7).
+5. Sale and auction identity is owned by
+   `docs/stream-sales-and-auctions.md` [SSA-IDENTITY]; this document does
+   not restate those preimages. The pinned mapping rule into the revenue
+   layer (ADR 0011 decision R9) is: the `settlementKey` preimage's
+   `settlementId` is the [SSA-IDENTITY] `bytes32 saleId` of the sale
+   being settled; its `saleNonce` is the adapter-local `saleNonce` bound
+   inside that `saleId`; and the [RSR-PAYMENT-INTENT] `saleRef` equals
+   `settlementId` exactly. Supplying any divergent sale reference on any
+   of the three surfaces is nonconformant.
+6. Settlement must reject if the signed policy hash, payer, recipient,
+   executor, asset, or amount does not match the sale state and the
+   [RSR-SALE-AUTH] authorization.
+7. `CUSTODY_SETTLEMENT_TRANSFER` is the named settlement order for paid
+   transfer of an already-minted custody-held token (for example a token
+   minted to auction custody at auction start and sold at settlement).
+   Order: validate the [RSR-SALE-AUTH] authorization and sale state; mark
+   settled and debit sale-side custody; resolve the primary assignment and
+   materialize any template; deposit to the verified split wallet or
+   record owed escrow; emit settlement evidence; and only then transfer
+   the token from custody to the recipient. No mint-ledger consumption
+   occurs — token identity already exists — and the transfer callback is
+   the last external interaction. Sale-side realizations, such as the
+   `AUCTION_SETTLEMENT_TRANSFER` order of
+   `docs/stream-sales-and-auctions.md` [SSA-ENGLISH], are conformant
+   exactly when they preserve this ordering. The custody mint itself
+   (minting into sale custody before bidding) is an unpaid custody mint —
+   `AUCTION_START_CUSTODY` in the sales spec — with the custody contract
+   as both initial recipient and beneficiary; its counter semantics are
+   owned by `docs/mint-policy-and-accounting.md` and
+   `docs/stream-sales-and-auctions.md`.
+8. Until a sale adapter passes the conformance profile in
+   `docs/stream-sales-and-auctions.md` and the gates above, that adapter
+   is not production-ready. Fixed-price primary sales can enter production
+   independently if their native ETH pull-payment path satisfies this
+   spec.
+9. Escrow-holding sale modes settle their deferred leg under the
+   [RSR-SALE-AUTH].5 drift envelope (ADR 0011 decision R6): the
+   settlement contract must accept `ALLOW_CURRENT` finalization within
+   the buyer's envelope — maximum price, sale reference, finalize-by
+   deadline — must emit the observed `policyDrift`, and must not treat
+   resolved-policy-hash drift as a terminal failure for those modes.
+   After the finalize-by deadline, the permissionless sale-side refund
+   path of `docs/stream-sales-and-auctions.md` unlocks the escrowed
+   funds under rule 4's refund-liability accounting; no escrow-holding
+   mode may leave buyer funds with neither a finalization nor a refund
+   exit.
+10. Consignment boundary (ADR 0012 decision T6). Primary revenue exists
+    only for the first sale of a token by its collection's primary sale
+    program — a token minted against payment, or first sold from
+    program custody under rule 7. A consigned owner-held token — an
+    already-minted token held by an owner and placed into sale custody
+    through the sales spec's owner-signed custody grant, including
+    estate sales, museum deaccessions, and artist resales of retained
+    works — settles as a secondary transfer executed by the sale layer:
+    sale proceeds are sale-side liabilities owed to the consignor under
+    rule 4 and [RSR-OWED-FUNDS], and the settlement must record no
+    primary revenue fact — no `PrimaryRevenueSettled`-family event, no
+    `settlementKey` consumption, no primary template materialization,
+    no split-wallet official deposit, and no revenue-escrow credit.
+    The [RSR-TEMPLATES].3 artist-share floor governs primary revenue
+    only and does not constrain consignor proceeds. ERC-2981 royalty
+    disclosure under [Royalties](#royalties) applies to a consigned
+    sale exactly as to any secondary transfer, and the sale surface
+    must present the disclosed receiver and amount; whether and how the
+    sale layer remits the disclosed amount is owned by
+    `docs/stream-sales-and-auctions.md`'s consignment order.
+    `CUSTODY_SETTLEMENT_TRANSFER` (rule 7) remains a primary-revenue
+    order: it covers tokens minted into program custody and first sold
+    from it, never consigned resales. Routing consignor proceeds
+    through a primary template, split-wallet official deposit, or
+    escrow credit is nonconformant.
+11. Reentrancy-guard mandate (ADR 0013 decision U7). Every settlement
+    entry point on `StreamPrimarySaleSettlement` and on every ERC-20
+    primary settlement adapter that writes official-revenue counters,
+    consumes a `settlementKey`, or performs asset transfers — wallet
+    deposits, allowance pulls, escrow credits — must be non-reentrant
+    with checks-effects-interactions ordering, as a guard requirement
+    stated on this surface itself, never inherited by argument from
+    enabled-caller vetting, the approved-asset no-callback policy, or
+    upstream manager guards. A conformance test must prove that a
+    reentrant enabled caller and a reentrant token callback each fail
+    to double-record the same `settlementKey` or double-deposit
+    official revenue; the matching deployment gate lives in the
+    pull-split-wallets / primary-settlement gate family of
+    `docs/launch-conformance-matrix.md`.
 
-Until that state machine is implemented and tested, auctions are explicitly
-not production-ready. Fixed-price primary sales can enter production
-independently if their native ETH pull-payment path satisfies this spec.
+### Owed-Funds Conservation And Claim Discipline
+
+Every contract in this architecture that holds owed funds must make its
+solvency provable and its claim surface unambiguous for the life of the
+deployment. This section is the normative pattern home (ADR 0012
+decision T7): the split wallet and the revenue escrow instantiate it in
+this document; the sale layer instantiates it for adapter escrow and
+refund liabilities in `docs/stream-sales-and-auctions.md` [SSA-ADAPTER]
+and [SSA-GATES]; the entropy coordinator's fee custody states the same
+discipline in `docs/stream-entropy-coordinator.md` [EC-FEEBIND].
+
+Requirements [RSR-OWED-FUNDS]:
+
+1. Scope. A custody surface is any contract that records value owed to
+   a counterparty: split wallets (entitlements), the revenue escrow
+   (owed credits), sale adapters (refundable credits, outbid credits,
+   uniform-clearing overage, refund-window and commit-reveal deposits,
+   maximum-price excess), and any later accepted custody module. Each
+   custody surface must state, in its owning spec, all four elements
+   below, each with a named verification gate; a custody surface
+   without them is not deployment-conformant.
+2. Per-asset solvency invariant. For every asset independently, the sum
+   of all outstanding owed obligations across every credit class must
+   never exceed the contract's balance of that asset:
+
+   ```text
+   sum(outstanding owed obligations, all credit classes and keys)
+     <= contractBalance(asset)
+   ```
+
+   with the obligation classes enumerated explicitly by the owning
+   spec (for a sale adapter: refundable credits + pending purchase
+   escrow + unfinalized clearing overage + unexpired deposits; for the
+   revenue escrow: owed credits; for a split wallet: releasable
+   entitlements plus bounded rounding dust under the
+   [Split Wallet Conservation Proof](#split-wallet-conservation-proof)
+   and the wallet+escrow system inequality). No asset balance may
+   satisfy another asset's obligation, and no payout may debit any key
+   other than the one being claimed: one sale's, one account's, or one
+   credit key's funds can never satisfy another's obligation (per-key
+   accounting isolation).
+3. Forced and direct value posture. Value arriving outside a specified
+   deposit path — forced ETH, direct sends, unsolicited ERC-20
+   transfers — must enter no owed credit, no refundable balance, and no
+   official-revenue computation. Exactly one of two named postures
+   applies, and the owning spec must state which: (a)
+   cumulative-observation attribution — the split-wallet posture, where
+   every receipt joins the immutable profile's cumulative accounting;
+   or (b) surplus-classified — the credit-ledger posture for the
+   revenue escrow and sale adapters, where the excess of balance over
+   total owed obligations is ADR 0003 surplus, recoverable only through
+   the documented, evented surplus path and never spendable against
+   owed obligations or reportable as official revenue. Silent
+   absorption into credits, or a posture left unstated, is
+   nonconformant.
+4. Claim discipline. Every claim function over an owed balance carries
+   Permanent interface semantics and must pin all three rules:
+   (a) debit account — a claim debits exactly the entitled account's
+   own recorded balance for the claimed key; no argument of the call,
+   including a recipient argument, selects whose balance is debited;
+   (b) authorization — a claim paying the entitled account itself may
+   be permissionless (the keeper pattern of [RSR-RELEASE-AUTH].1);
+   paying any alternate recipient requires `msg.sender == account` or
+   an entitled-account-signed EIP-712/ERC-1271 authorization with nonce
+   and deadline verified under [RSR-1271], mirroring
+   [RSR-RELEASE-AUTH]; a surface that offers no signed
+   alternate-recipient path must state that absence explicitly;
+   (c) replay views — consumed nonce/digest state must be exposed
+   through explicit-address views, never caller-relative views
+   (ADR 0011 decision R12).
+   For `IStreamSaleAdapter.claimRefund(saleId, to)` these rules derive
+   the pinned semantics: the entitled account is `msg.sender`, whose
+   refundable balance for `saleId` is the only balance debited, and
+   `to` is the entitled caller's chosen payout destination; the sales
+   spec pins that reading, the NFT pull-claim authorization, and the
+   adapter consumed-digest views at [SSA-ADAPTER] (ADR 0012 decision
+   T7).
+5. Verification gates. Each instantiation names a conservation-fuzz
+   gate proving rules 2–3 under randomized deposit/claim/refund/
+   settlement sequences with forced-ETH injection — for split wallets,
+   the external-ground-truth conservation fuzz of this document's
+   validation checklist; for sale adapters, the cross-mode conservation
+   suite of `docs/stream-sales-and-auctions.md` [SSA-GATES] — plus
+   negative claim tests proving rule 4's debit-account and
+   authorization rules.
 
 ## Royalties
 
@@ -1449,6 +2488,48 @@ royaltyInfo(tokenId, salePrice)
 
 If `royaltyBps` is zero, `royaltyInfo()` should return `(address(0), 0)`.
 
+### Canonical Royalty Policy Hash
+
+Requirements [RSR-ROYALTY-HASH]:
+
+1. The canonical royalty policy hash for a resolved royalty assignment is:
+
+   ```solidity
+   // ROYALTY_POLICY_DOMAIN string preimage and hash: [RSR-DOMAINS]
+   bytes32 royaltyAssignmentHash = keccak256(abi.encode(
+       keccak256("6529STREAM_ROYALTY_POLICY_V1"),
+       uint256(block.chainid),
+       address(resolver),
+       uint256(collectionId),
+       uint256(tokenId),
+       bytes32(profileId),
+       address(splitWallet),
+       uint16(royaltyBps),
+       bytes32(assignmentHash)
+   ));
+   ```
+
+   `collectionId` and `tokenId` are the resolution context (zero where the
+   resolved scope binds no token or collection), and `assignmentHash` is
+   the canonical per-key assignment hash of the resolved royalty
+   assignment computed under
+   [Assignment Semantics](#assignment-semantics) with
+   `revenueClass = ROYALTY_ERC2981` scope context. Because `royaltyBps` is
+   bound here, any bps change — even one that keeps the same profile and
+   wallet — changes the royalty policy hash.
+2. `probeRoyaltyInfo`, mint-time royalty snapshots, royalty-side signed
+   surfaces, and royalty assignment events must use this preimage or a
+   later versioned replacement. The `assignmentHash` returned by
+   `probeRoyaltyInfo` is this `royaltyAssignmentHash`.
+3. The mint-time snapshot hook's expected-hash argument is this
+   `royaltyAssignmentHash` of the resolved collection/default assignment;
+   the hook must revert on mismatch so royalty economics cannot drift
+   between sale authorization and mint (see
+   [Mint-Time Royalty Snapshots](#mint-time-royalty-snapshots)).
+4. This section is the single normative home for the royalty policy hash
+   (ADR 0010 decision D3; GOOD-02 election). ADR 0008 cites it and defines
+   no preimage of its own.
+
 ### StreamCore ERC-2981 Implementation
 
 Core should not inherit OpenZeppelin `ERC2981` storage. The inherited
@@ -1461,9 +2542,10 @@ Normative Core posture:
 1. Remove the OZ `ERC2981` base from `StreamCore`.
 2. Keep direct `IERC2981` support.
 3. Add a `revenueResolver` pointer governed by ADR 0004 pointer rules.
-4. Implement `supportsInterface` for ERC-721, ERC-721 metadata,
-   ERC-721 enumerable, ERC-2981, and ERC-4906 if Core-originated refresh events
-   are implemented.
+4. Implement `supportsInterface` for ERC-721, ERC-721 metadata, ERC-2981,
+   and ERC-4906 if Core-originated refresh events are implemented; the
+   ERC-721 enumerable interface (`0x780e9d63`) is not advertised
+   (ADR 0012 decision T10; [LTA-ENUMERATION]).
 5. Do not keep `_setDefaultRoyalty`, `_setTokenRoyalty`, or equivalent Core
    royalty storage.
 
@@ -1497,7 +2579,16 @@ function royaltyInfo(uint256 tokenId, uint256 salePrice)
         return (address(0), 0);
     }
 
-    if (gasleft() <= ROYALTY_RESOLVER_GAS_LIMIT + ROYALTY_RETURN_GAS_BUFFER) {
+    // EIP-150 parent-gas precheck ([RSR-2981-GAS].2): the 64/63 term
+    // guarantees the resolver can receive the full current limit after
+    // the caller's one-64th retention; the buffer covers Core's own
+    // pre-call reads and post-call decode and is coupled to the limit
+    // by [RSR-2981-GAS].6. Both values are read as current GGP values.
+    if (
+        gasleft()
+            < (ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63
+                + ROYALTY_RETURN_GAS_BUFFER
+    ) {
         return (address(0), 0);
     }
 
@@ -1560,8 +2651,11 @@ If a resolver-backed Core cannot reach the resolver, receives malformed return
 data, or receives a zero receiver or zero bps, it should return
 `(address(0), 0)` rather than revert. Wallet/code-hash validity is enforced at
 assignment time by the resolver; Core's read path validates only cheap return
-shape and zero-value conditions. Monitoring should treat fallback-to-zero as an
-incident.
+shape and zero-value conditions. Monitoring must treat fallback-to-zero as an
+incident with a defined remediation: gas-margin incidents resolve through the
+[RSR-GGP].10 raise chain, and resolver-fault incidents resolve through
+pointer governance. Fallback-to-zero is never a permanent state on this Core
+line.
 `royaltyInfo()` must be total over every `uint256 salePrice`, including
 `type(uint256).max`, and must not revert because of royalty multiplication.
 The resolver never returns the final amount. Core computes
@@ -1571,65 +2665,105 @@ equivalent `mulDiv` implementation after validating the returned bps. Returning
 is reserved for resolver unavailability, malformed return data, zero receiver,
 zero bps, bps above `MAX_ROYALTY_BPS`, or explicit no-royalty configuration.
 Because `royaltyInfo()` is `view`, it cannot emit fallback events. Monitoring
-must use off-chain calls, indexer comparisons, and a non-view diagnostic probe
-in a satellite contract.
+must use off-chain calls, indexer comparisons, and the non-view
+`probeRoyaltyInfo` diagnostic hosted on the two Permanent-class royalty
+probe contracts
+([Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events));
+it does not live on Core (ADR 0013 decision U7).
 
-Recommended diagnostic probe:
+A resolver-backed Core path must use explicit gas and return-shape limits.
 
-```solidity
-function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
-    external
-    returns (
-        bool resolverCallSucceeded,
-        address receiver,
-        uint256 royaltyAmount,
-        bytes32 assignmentHash,
-        bytes32 failureReason
-    );
-```
+Requirements [RSR-2981-GAS]:
 
-`probeRoyaltyInfo` lives on the approved revenue diagnostics satellite or on
-the revenue resolver if the resolver implementation includes diagnostics. It
-does not live on Core. The probe emits resolver health and fallback evidence for
-operators. It is not used by marketplaces, but it is a deployment gate so
-fallback-to-zero cannot remain invisible during public sale readiness checks.
-The probe must use the exact same resolver selector, gas cap, parent gas
-precheck, returndata-size limit, and decode rules as production
-`royaltyInfo()`. A diagnostic path with a looser cap is not a valid readiness
-signal.
+1. Gas and return-shape parameters:
 
-```solidity
-event RoyaltyInfoProbed(
-    uint16 schemaVersion,
-    uint256 indexed tokenId,
-    address indexed receiver,
-    uint256 royaltyAmount,
-    bool resolverCallSucceeded,
-    bytes32 assignmentHash,
-    bytes32 failureReason
-);
-```
+   ```text
+   ROYALTY_RESOLVER_GAS_LIMIT   Governed Gas Parameter, genesis planning 50,000
+   ROYALTY_RETURN_GAS_BUFFER    Governed Gas Parameter, genesis planning 15,000
+   resolver.staticcall{gas: current ROYALTY_RESOLVER_GAS_LIMIT}
+   expected return length = 64 bytes
+   failure fallback = (address(0), 0)
+   ```
 
-A resolver-backed Core path must use explicit gas and return-shape limits:
-
-```text
-ROYALTY_RESOLVER_GAS_LIMIT = 50_000
-ROYALTY_RETURN_GAS_BUFFER = 15_000
-resolver.staticcall{gas: ROYALTY_RESOLVER_GAS_LIMIT}
-expected return length = 64 bytes
-failure fallback = (address(0), 0)
-```
-
-The parent gas precheck must account for EIP-150's 63/64 gas forwarding rule so
-a caller cannot pass the precheck while the resolver receives less than
-`ROYALTY_RESOLVER_GAS_LIMIT`. CI must test calls just below, at, and above the
-precheck threshold and prove ordinary all-cold resolver reads do not
-fallback-to-zero because of under-forwarded gas.
-
-`ROYALTY_RESOLVER_GAS_LIMIT` should be a deploy-time immutable for a Core
-release, not mutable governance state. A new Core deployment may choose a new
-immutable gas limit for a new resolver implementation, but there should be no
-runtime setter that changes marketplace read behavior after deployment.
+2. The parent gas precheck must account for EIP-150's 63/64 gas forwarding
+   rule so a caller cannot pass the precheck while the resolver receives
+   less than the current `ROYALTY_RESOLVER_GAS_LIMIT`, and the precheck
+   must read the current GGP values, not compiled-in constants. The
+   normative reference realization is the multiplicative form of the
+   reference shape above (ADR 0013 decision U7):
+   `gasleft() < (ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63 +
+   ROYALTY_RETURN_GAS_BUFFER` falls back to `(address(0), 0)` — the
+   64/63 term guarantees full-limit delivery through the caller's
+   one-64th retention at every reachable limit value, and the buffer
+   covers Core's parent-side work. An additive `LIMIT + BUFFER`
+   comparison guarantees full forwarding only while the buffer
+   separately covers the one-64th retention, so an additive realization
+   is conformant only with the rule 6 coupling floor enforced by the
+   host at every value change; the earlier uncoupled sum form is
+   superseded and nonconformant. CI must
+   test calls just below, at, and above the precheck threshold and prove
+   ordinary all-cold resolver reads do not fallback-to-zero because of
+   under-forwarded gas.
+3. `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
+   Governed Gas Parameters hosted in `StreamCore` storage under [RSR-GGP]
+   (ADR 0010 decision D1): staged raise with a raise-only emergency path,
+   probe-gated lower, immutable floors, change events, and manifest
+   recording. They are not deploy-time immutables and there is no
+   unreviewed runtime setter: every change flows through the GGP
+   governance classes, is evented, and never changes economic or artwork
+   identity because GGP values are excluded from every economic preimage
+   ([RSR-GGP].3). Frozen and finalized collections keep answering
+   marketplace reads under any future gas schedule because the cap can
+   always be raised; a gas repricing can therefore never permanently zero
+   royalty disclosure for this Core line.
+4. The health probe for both parameters is `probeRoyaltyInfo` run against
+   representative default, collection, token, premint, burned, and
+   malformed cases; a lower executes only after a recorded passing probe
+   run at the proposed value ([RSR-GGP].5). Probe locus and probe-event
+   schema are owned by
+   [Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events).
+5. The resolver must keep the default-scope royalty assignment readable
+   from a single packed storage slot so the deepest default-fallback
+   answer stays servable at the immutable floor even if intermediate-scope
+   reads outgrow the current value between repricing and the corrective
+   raise.
+6. Buffer-limit coupling invariant (ADR 0013 decision U7).
+   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
+   independently governed, so the pair's soundness is an explicit
+   invariant, never an accident of genesis sizing: at every reachable
+   value pair — not only at genesis — a call passing the precheck must
+   deliver the full current limit to the resolver and leave Core enough
+   gas to finish the 64-byte decode, validation, and `mulDiv` return.
+   Concretely:
+   - The release manifest records the measured parent-side work —
+     pre-call resolver-pointer and token-identity reads plus call setup,
+     and post-call decode, validation, `mulDiv`, and return — and
+     `ROYALTY_RETURN_GAS_BUFFER` must never be set below that recorded
+     work; buffer margin decay from repricing is remediated by raising
+     the buffer ([RSR-GGP].10; both parameters are `FORWARDING_CAP`
+     conditional-raise and conditional-re-lower members, [RSR-GGP].11;
+     ADR 0014 decision V7).
+   - An implementation realizing the precheck as the additive sum
+     `LIMIT + BUFFER` must enforce, in the host at every set of either
+     parameter (staged, emergency, or conditional),
+     `ROYALTY_RETURN_GAS_BUFFER >= ceil(ROYALTY_RESOLVER_GAS_LIMIT / 63)
+     + the recorded parent-side work`; without that host-enforced floor
+     a legitimate 2x raise chain of the limit with an unchanged buffer
+     re-opens the silent under-forwarding fallback-to-zero this section
+     exists to prevent, and such an implementation is nonconformant.
+   - Every staged raise or lower of either parameter records, as change
+     evidence, a passing `probeRoyaltyInfo` threshold run at the
+     proposed value pair ([RSR-GGP].5); emergency and conditional raises
+     keep their failing-run gates unchanged, and the conditional
+     re-lower keeps its passing-run gate at exactly the proposed value
+     pair (ADR 0014 decision V7).
+   - CI must include a golden test replaying the rule 2 threshold suite
+     across simulated multi-step raise chains — repeated 2x raises of
+     the limit with unchanged and with re-verified buffers — proving
+     that whenever the precheck passes, the resolver receives the full
+     current limit and the parent completes decode, at every step; the
+     threshold tests pinned only at deployed genesis values are not
+     sufficient.
 
 The resolver read must be O(1). Wallet deployment, `walletFor(profileId)`,
 `wallet.profileId()`, and runtime-code-hash checks happen when assignments are
@@ -1666,11 +2800,18 @@ total parent + resolver path                   < 50,000 resolver cap plus buffer
 ```
 
 The exact deployed implementation must publish measured gas for all-cold
-token, collection, and default fallback cases. If the deepest cold path exceeds
-35,000 gas inside the resolver on the target compiler/EVM, the implementation
-must either compress assignment storage, raise the immutable resolver gas cap
-before deployment, or reduce resolver work. It must not deploy with a cap
-that causes ordinary cold reads to silently return `(address(0), 0)`.
+token, collection, and default fallback cases, and the genesis cap must
+satisfy the [RSR-GGP].9 sizing gates: genesis `ROYALTY_RESOLVER_GAS_LIMIT`
+at least four times the deepest measured all-cold resolver path, immutable
+floor at least twice that measured path. If the deepest cold path exceeds
+35,000 gas inside the resolver on the target compiler/EVM, the
+implementation must compress assignment storage, set a higher genesis cap
+that preserves the required multiple, or reduce resolver work. It must not
+deploy with a cap that causes ordinary cold reads to silently return
+`(address(0), 0)`. After deployment, the remediation order for margin decay
+is the [RSR-GGP].10 chain: staged or emergency GGP raise first,
+compressed-storage successor resolver second, successor Core line never
+required for gas alone.
 
 Production Core must use capped assembly returndata handling, not a
 high-level `bytes memory` decode that can allocate unbounded returndata. The
@@ -1702,7 +2843,13 @@ standalone premint reservations; premint or nonexistent tokens without the
 Core mapping are unmapped for royalty resolution.
 
 This is still disclosure. Royalty enforcement is excluded from protocol v1;
-marketplaces can ignore the royalty.
+marketplaces can ignore the royalty. That exclusion is permanent for this
+Core line — ERC-721 transfer carries no validator hook, so no later module
+can add enforcement, and a successor Core line is the only enforcement path
+(ADR 0010 decision D9.2). Artist-facing materials must present
+disclosure-only royalties as a deliberate, permanent term, never as a
+temporary limitation, with the recorded onboarding acknowledgment of
+[RSR-MARKETPLACE-ROYALTY].3.
 
 Marketplaces may cache receiver or bps results, may ignore token-varying
 receivers, or may only honor a default receiver. The production contract
@@ -1711,6 +2858,95 @@ portable royalty disclosure surface.
 There is no Core-local fixed receiver fallback in the v1 architecture. If
 the resolver returns zero, malformed data, or no configured default assignment,
 `royaltyInfo()` returns `(address(0), 0)`.
+
+### Royalty Probe Contracts And Probe Events
+
+This section is the single normative home for the royalty probe locus and
+the `RoyaltyInfoProbed` event schema; `docs/stream-long-term-architecture.md`
+and ADR 0008 cite it and define no second location or schema.
+
+Requirements [RSR-2981-PROBE] (ADR 0013 decision U7):
+
+1. Locus. The non-view royalty diagnostic `probeRoyaltyInfo` is hosted
+   exclusively on the two named Permanent-class probe contracts for the
+   royalty Governed Gas Parameters — the per-parameter probe contracts
+   for `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` in
+   the genesis deployment profile of `docs/launch-conformance-matrix.md`,
+   recorded per parameter in the release manifest with their
+   `probeMaxAgeBlocks` ([RSR-GGP].5 and [RSR-GGP].11) — each satisfying
+   every `docs/stream-long-term-architecture.md` [LTA-GGP-PROBES] rule
+   (immutable, ownerless, permissionless, pinned caller-independent
+   inputs, probe-run records hosted on the probe, and no production
+   authority). The probe does not live on Core, on the
+   revenue resolver, or on any governed satellite: a governed
+   Replaceable module cannot satisfy the Permanent-class probe model,
+   and no revenue diagnostics satellite exists in the genesis inventory.
+   An earlier revision placing `probeRoyaltyInfo` on "the approved
+   revenue diagnostics satellite or on the revenue resolver" is
+   superseded and void.
+2. Probe body parity. The probe surface is:
+
+   ```solidity
+   function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
+       external
+       returns (
+           bool resolverCallSucceeded,
+           address receiver,
+           uint256 royaltyAmount,
+           bytes32 assignmentHash,
+           bytes32 failureReason
+       );
+   ```
+
+   The probe must use the exact same resolver selector, gas cap, parent
+   gas precheck ([RSR-2981-GAS].2 shape under the [RSR-2981-GAS].6
+   coupling), returndata-size limit, and decode rules as production
+   `royaltyInfo()`, executed at the probed value pair under the
+   [LTA-GGP-PROBES] rule 5 genuine-failure discipline: a run that did
+   not actually deliver the probed values must revert without recording.
+   A diagnostic path with a looser cap is not a valid readiness signal.
+   The representative case corpus — default, collection, token, premint,
+   burned, and malformed cases ([RSR-2981-GAS].4) — is the probe's
+   pinned caller-independent input set per [LTA-GGP-PROBES] rule 4.
+   `assignmentHash` is the canonical `royaltyAssignmentHash` of
+   [RSR-ROYALTY-HASH].
+3. Probe-run event split. The gate record — the only evidence that gates
+   probe-gated lowering, emergency raising, and the permissionless
+   conditional raise for the two royalty GGPs — is the canonical
+   `GasParameterProbed` record and `lastProbeRun` read hosted on each
+   probe contract ([LTA-GGP] definition item 6; [LTA-GGP-PROBES]
+   rule 3). `RoyaltyInfoProbed` is the royalty-resolution detail record
+   of the same run:
+
+   ```solidity
+   event RoyaltyInfoProbed(
+       uint16 schemaVersion,
+       uint256 indexed tokenId,
+       address indexed receiver,
+       uint256 royaltyAmount,
+       bool resolverCallSucceeded,
+       bytes32 assignmentHash,
+       bytes32 failureReason
+   );
+   ```
+
+   It is emitted by the same probe contracts, carries the per-case
+   receiver, amount, canonical assignment hash, and failure reason that
+   the generic gate record does not, and is catalog-tagged in the
+   machine-readable event catalog as a parameter-named alias member of
+   the probe-record family. It is never a substitute for
+   `GasParameterProbed`: indexers
+   read raise/lower/conditional-raise evidence exclusively from
+   `GasParameterProbed` and read fallback-to-zero diagnosis from
+   `RoyaltyInfoProbed`. Emitting one family without the other for the
+   same run, or hosting either record anywhere but the probe contract,
+   is nonconformant.
+4. Gate. Running the rule 2 case corpus on both probe contracts is a
+   deployment gate so fallback-to-zero cannot remain invisible during
+   public sale readiness checks. The probe is not a marketplace surface,
+   holds no pointer, funds, or protocol authority beyond its own probe
+   records ([LTA-GGP-PROBES] rule 8), and its results gate parameter
+   governance and release readiness only.
 
 ### Resolver Replacement And Frozen Economic Continuity
 
@@ -1805,8 +3041,10 @@ token -> collection -> default
 Canonical v1 primary assignment hashes:
 
 ```solidity
+// Every *_DOMAIN constant below has its string preimage and hash
+// pinned in [RSR-DOMAINS].
 bytes32 resolverContextHash = keccak256(abi.encode(
-    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1"),
+    ASSIGNMENT_RESOLVER_CONTEXT_DOMAIN,
     address(resolver),
     address(splitFactory),
     address(assetPolicyRegistry),
@@ -1814,7 +3052,7 @@ bytes32 resolverContextHash = keccak256(abi.encode(
 ));
 
 bytes32 scopeContextHash = keccak256(abi.encode(
-    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1"),
+    ASSIGNMENT_SCOPE_CONTEXT_DOMAIN,
     bytes32(revenueClass),
     uint8(scope),
     uint256(scopeId),
@@ -1823,7 +3061,7 @@ bytes32 scopeContextHash = keccak256(abi.encode(
 
 bytes32 profileContextHash = assignmentType == ASSIGNMENT_TYPE_PROFILE
     ? keccak256(abi.encode(
-        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_V1"),
+        ASSIGNMENT_PROFILE_CONTEXT_DOMAIN,
         address(splitWallet),
         bytes32(profileEntriesHash),
         bytes32(profileMetadataURIHash)
@@ -1832,32 +3070,45 @@ bytes32 profileContextHash = assignmentType == ASSIGNMENT_TYPE_PROFILE
 
 bytes32 templateContextHash = assignmentType == ASSIGNMENT_TYPE_TEMPLATE
     ? keccak256(abi.encode(
-        keccak256("6529STREAM_PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_V1"),
+        ASSIGNMENT_TEMPLATE_CONTEXT_DOMAIN,
         bytes32(templateEntriesHash),
         bytes32(templateMetadataURIHash)
     ))
     : bytes32(0);
 
 bytes32 pointerContextHash = keccak256(abi.encode(
-    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1"),
+    ASSIGNMENT_POINTER_CONTEXT_DOMAIN,
     bytes32(profileId),
     bytes32(profileContextHash),
     bytes32(templateId),
     bytes32(templateContextHash)
 ));
 
+// assignmentPolicyHash is the immutable assignment-policy commitment
+// recorded at assignment creation (ADR 0012 decision T7): bytes32(0)
+// for the default one-way posture (no advertised loosening), otherwise
+// the domain-separated hash of the advertised-loosening terms of
+// docs/stream-long-term-architecture.md [LTA-FREEZE] rule 1.
+bytes32 assignmentPolicyHash = looseningAdvertised
+    ? keccak256(abi.encode(
+        ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN,
+        bytes32(looseningTermsHash)
+      ))
+    : bytes32(0);
+
 bytes32 assignmentHash = keccak256(abi.encode(
-    keccak256("6529STREAM_PRIMARY_ASSIGNMENT_V1"),
+    ASSIGNMENT_DOMAIN,
     uint256(block.chainid),
     bytes32(resolverContextHash),
     bytes32(scopeContextHash),
     bytes32(pointerContextHash),
-    bytes32(policyHash),
+    bytes32(assignmentPolicyHash),
     bool(frozen)
 ));
 
+// PRIMARY_POLICY_DOMAIN string preimage and hash: [RSR-DOMAINS]
 bytes32 resolvedPrimaryPolicyHash = keccak256(abi.encode(
-    keccak256("STREAM_PRIMARY_POLICY_V1"),
+    keccak256("6529STREAM_PRIMARY_POLICY_V1"),
     uint256(block.chainid),
     address(resolver),
     bytes32(revenueClass),
@@ -1870,10 +3121,65 @@ bytes32 resolvedPrimaryPolicyHash = keccak256(abi.encode(
 ));
 ```
 
+`assignmentPolicyHash` input definition (ADR 0012 decision T7).
+`looseningAdvertised` is the advertised-loosening marker of
+`docs/stream-long-term-architecture.md` [LTA-FREEZE] rule 1, recorded
+immutably when the assignment key is set and exposed in
+`RevenueAssignmentSet` ([RSR-EVENTS]); `looseningTermsHash` is the
+`keccak256` content hash of the loosening-terms artifact named by the
+assignment action — the document stating which scopes may loosen and
+under what conditions — and must be nonzero exactly when
+`looseningAdvertised` is true. An assignment that advertises no
+loosening (the protocol default) commits
+`assignmentPolicyHash = bytes32(0)`. Because the marker and terms hash
+are immutable for the life of the assignment key, this input can never
+drift between signature and settlement; only the `frozen` bit toggles
+(ADR 0009 decision 9), and the [LTA-FREEZE] rule 3 hash-equality rule
+for loosening and byte-identical re-freeze holds because this term is
+constant across the toggle. Signers of artist economics consents,
+`STRICT_MATCH` sale authorizations, and artist royalty freezes therefore
+commit to whether the frozen promise can ever loosen. The [RSR-DOMAINS]
+CI recomputation suite must include an `assignmentHash` vector for each
+branch (no-loosening zero and advertised-loosening nonzero) so this
+input can never regress into ambiguity. An earlier revision of this
+preimage carried the same slot as an undefined `policyHash` input; this
+definition is its single normative meaning, and no other derivation is
+conformant.
+
 `expectedPrimaryPolicyHash`, primary resolver probes, and assignment events must
 all use these preimages or a later versioned replacement.
 Event-only display fields, human labels, and mutable URIs are excluded from
 economic authority unless their hashes are explicitly included above.
+
+The `assignmentHash` family above is class-generic: it computes the per-key
+assignment hash for every revenue class, including `ROYALTY_ERC2981`,
+because `scopeContextHash` binds the actual `revenueClass`. The `PRIMARY`
+token in the domain strings is historical naming, not a scope restriction.
+Royalty assignments always use `ASSIGNMENT_TYPE_PROFILE` (zero
+`templateId`/`templateContextHash`) and substitute a royalty pointer
+context that additionally binds the bps economics, so a bps-only change
+always changes the per-key hash — and therefore invalidates outstanding
+artist economics consents signed over it
+([`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-ECON]):
+
+```solidity
+// ROYALTY_ASSIGNMENT_POINTER_CONTEXT_DOMAIN string preimage and
+// hash: [RSR-DOMAINS]
+bytes32 royaltyPointerContextHash = keccak256(abi.encode(
+    ROYALTY_ASSIGNMENT_POINTER_CONTEXT_DOMAIN,
+    bytes32(profileId),
+    bytes32(profileContextHash),
+    uint16(royaltyBps)
+));
+// Royalty-class keys use royaltyPointerContextHash as the
+// pointerContextHash input of the assignmentHash preimage above.
+```
+
+The full resolution context (collection, token) and the per-key hash are
+bound together one level up by the canonical `royaltyAssignmentHash`
+([RSR-ROYALTY-HASH]). This section is the single normative home for the
+assignment-hash and resolved-policy-hash preimages; ADR 0008 cites it
+(GOOD-02 election, ADR 0010 decision D3).
 
 For open-ended collections, collection scope remains valid even when max supply
 is unknown. The resolver never needs final supply to resolve an assignment.
@@ -1900,19 +3206,42 @@ freezeAllRevenue()
 
 Assignment storage must not collapse freeze state into a single `bool`.
 Implementations need enough state to distinguish unfrozen, exact frozen,
-inherited frozen, global frozen, permanent, and timelocked-unfreezeable states.
+inherited frozen, global frozen, and permanent states, plus the
+advertised-loosening marker recorded at assignment time — the only state
+eligible for the one loosening rule in the spec set, owned by
+`docs/stream-long-term-architecture.md` [LTA-FREEZE] rule 1.
 Frozen assignments cannot be changed or cleared.
 
 Primary assignments may resolve to a fixed profile or a primary split template.
 Template assignments materialize into fixed profiles during settlement; royalty
 assignments always resolve to fixed profiles.
 
-Default-scope assignment changes, default royalty changes, global freezes, and
-resolver cap replacement actions must use timelock or two-step staging. A global freeze
-is terminal and should be used only when that irreversibility is part of the
-product promise. Non-global unfreeze should exist only if the product
-explicitly advertises mutable economics and the event history makes the change
-obvious.
+Requirements [RSR-STAGED-GOVERNANCE]:
+
+1. The following actions must use the ADR 0004 staged action-ID model with
+   timelock or two-step staging: default-scope assignment changes, default
+   royalty changes, global freezes, resolver pointer replacement,
+   asset-policy status transitions away from `ACTIVE`
+   ([RSR-ASSET-POLICY].7), Governed Gas Parameter lowers ([RSR-GGP].2),
+   and escrow recovery scheduling — an ADR 0004 `FUNDS_RECOVERY`-floor
+   action; an economics-changing recovery additionally satisfies the
+   consent-or-terminal-delay requirement of [RSR-ESCROW-RECOVERY]
+   rule 6 (ADR 0013 decision U7).
+2. Irreversible freezes — permanent global freezes and any
+   `permanentFreeze` — must additionally pass through the ADR 0004
+   `TERMINAL_FREEZE` veto/guardian delay class per
+   `docs/stream-long-term-architecture.md` [LTA-FREEZE] rule 4, so one
+   compromised key cannot instantly and permanently freeze economics
+   (ADR 0010 decision D8.9). A permanent global freeze is terminal and must
+   be used only when that irreversibility is part of the product promise.
+3. Loosening any non-permanent freeze is governed exclusively by the
+   one-way freeze home, `docs/stream-long-term-architecture.md`
+   [LTA-FREEZE] rule 1 (advertised at assignment time, ADR 0004
+   `DELAYED_LOOSENING` class, before/after policy hashes in the execution
+   event). This spec defines no loosening path of its own.
+4. For artist-bound collections, economically material changes to the
+   artist's assignments additionally require artist co-signature under
+   [RSR-ARTIST-ECONOMICS].
 
 Freezes use `freezeMode`: `EXACT` blocks only the exact key, while `INHERITED`
 blocks lower-scope set and clear operations under the frozen ancestor. In
@@ -1953,13 +3282,119 @@ operation exact-freezes every descendant whose mutability made the counter
 nonzero.
 
 A global freeze is implicitly `freezeMode = INHERITED` across every default,
-collection, and token scope for the affected revenue class. It blocks set,
-clear, and unfreeze operations for any assignment in that revenue class,
-including creation of new assignments after the freeze.
+collection, and token scope for the affected revenue class. While it is in
+effect it blocks set, clear, and loosening operations for any assignment in
+that revenue class, including creation of new assignments after the freeze;
+whether the global freeze itself can ever loosen is governed solely by
+`docs/stream-long-term-architecture.md` [LTA-FREEZE] rule 1.
 A deployment-wide global freeze blocks both all existing keys and the
 creation of entirely new revenue classes (ADR 0009 decision 8);
 `freezeAllRevenue()` must enforce both, because a global freeze bypassable
 by minting a new class is not a credible freeze.
+
+## Artist Economics Binding
+
+The artist identity model — proposal and acceptance, consent modes
+(`ARTIST_SIGNED_POLICY`, `ARTIST_DELEGATED`, `PLATFORM_WORKS`),
+collaborator lists, key lifecycle, sanction, and onchain signature
+verification — is owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010
+decision D2). This section defines what the revenue layer must enforce for
+collections with a bound artist, so artist economics never rest on platform
+goodwill alone (ADR 0010 decision D2.5).
+
+Requirements [RSR-ARTIST-ECONOMICS]:
+
+1. An artist-bound collection is one whose artist binding has been accepted
+   under [`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-BINDING]. Collections
+   without a bound artist carry the immutable `PLATFORM_WORKS`
+   declaration; this section does not apply to them.
+2. Setting, clearing, or replacing a primary or royalty assignment at
+   collection or token scope for an artist-bound collection requires a
+   verified `StreamArtistEconomicsConsent` over the exact resulting
+   per-key `assignmentHash`, satisfying the collaborator policy: the
+   resolver must call the artist registry's `requireEconomicsConsent`
+   before applying the change ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-ECON] rule 3, which owns the consent payload and verification).
+   Because royalty-class keys bind `royaltyBps` in their pointer context
+   ([Assignment Semantics](#assignment-semantics)), a bps-only change also
+   requires fresh consent. Governance staging remains
+   ([RSR-STAGED-GOVERNANCE]); artist consent is additive, never a
+   replacement for it, and governance cannot repoint an artist-bound
+   collection's economics unilaterally.
+3. Public mint of an artist-bound collection additionally requires
+   recorded economics consent for the active primary revenue class
+   assignment and the `ROYALTY_ERC2981` assignment that will govern its
+   tokens ([`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-ECON] rule 4 and
+   [AA-CONSENT]). Sale adapters and the resolver must refuse to open
+   public mint without those records: economics are artist-ratified
+   before the first sale, not after. That ratification covers the
+   revenue and royalty assignments only — sale price and sale mechanics
+   sit outside the economics-consent boundary unless the binding pins
+   the optional sale-parameter consent scope, exactly as the boundary
+   home states ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-ECON] rule 7, [AA-SALE-CONSENT]; ADR 0012 decision T4), with
+   sale-side enforcement owned by [SSA-IDENTITY] rule 8 in
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+4. The artist authority may unilaterally freeze the royalty assignment for
+   their own collection: a verified `StreamArtistRoyaltyFreeze` is
+   relayable by any caller, and the resolver must verify
+   `isRoyaltyFreezeAuthorized` and apply an `EXACT` freeze on the
+   `ROYALTY_ERC2981` collection-scope assignment whose current hash equals
+   the authorized `expectedAssignmentHash`. The right is freeze-only —
+   it cannot change the receiver, cannot unfreeze, and cannot touch other
+   collections ([`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-ECON] rule 5).
+5. The collection's royalty policy mode (`ROYALTY_SNAPSHOT_AT_MINT`
+   versus `ROYALTY_LIVE_COLLECTION`) must be configured before the rule 3
+   consents are recorded, so the choice between live and snapshotted
+   economics is artist-visible and artist-ratified for artist-bound
+   collections, not an operator-only configuration.
+
+## Estate And Succession For Entitled Accounts
+
+Split entitlements bind addresses forever: profiles are immutable, and the
+release ledger is keyed by the entitled account. Over a 50+ year horizon,
+key loss and death are certainties, so the succession posture must be
+explicit (ADR 0010 decision D2.2). Artist identity succession — key
+rotation, successor designation, estate directives, dormancy — is owned by
+[`docs/stream-artist-authority.md`](stream-artist-authority.md); this section covers the revenue-side
+consequences for any entitled account.
+
+Requirements [RSR-ESTATE]:
+
+1. Operator tooling and profile-creation UX must default to recommending
+   rotatable smart-contract accounts (Safe-class, ERC-1271-capable under
+   [RSR-1271]) for artist, estate, museum, and institutional entries, and
+   must record in the profile metadata manifest whether each entry is a
+   rotatable account. An EOA entry is allowed but must be an explicit,
+   recorded choice. An EIP-7702 delegated EOA is an EOA for this rule
+   (ADR 0013 decision U6): delegation attaches code, but the root key
+   remains the account's sole ultimate authority and its loss is
+   unrecoverable, so a delegated-EOA entry must be recorded as an EOA
+   choice, never as a rotatable account.
+2. Future receipts are repointable: the estate flow for a lost or
+   deceased recipient is a new split profile (successor entries) plus a
+   staged assignment repoint for future receipts, subject to freeze state
+   and, for artist-bound collections, to the artist authority spec's
+   successor verification. For artists, the accepted successor or estate
+   authority inherits the [RSR-ARTIST-ECONOMICS] co-signature and freeze
+   rights.
+3. Funds already attributable to an entitled account in existing wallets
+   follow the account: a rotatable contract account continues to release
+   through self-execution or rotated keys ([RSR-1271].5). For an EOA whose
+   key is lost, that account's entitlements in existing wallets are
+   permanently unclaimable — anyone may still push them to the dead
+   address via `release(asset, account, account)`, but no authority,
+   including governance, can redirect them. This irrecoverability is a
+   deliberate consequence of immutable profiles and the no-sweep rule.
+4. Disclosure: recipient onboarding and the release manifest must state
+   rule 3 plainly so artists and institutions consent to the EOA risk
+   knowingly, and must document the succession recipe (successor profile
+   plus repoint for future receipts; smart-account rotation for existing
+   entitlements).
+5. Frozen assignments interact with succession as frozen: a frozen
+   assignment's future receipts cannot be repointed to a successor
+   profile. Products that promise frozen economics to recipients with
+   EOA entries must disclose that combination as doubly irrecoverable.
 
 ## Canonical v1 Interfaces
 
@@ -1974,6 +3409,13 @@ interface IStreamSplitFactory {
     function profileExists(bytes32 profileId) external view returns (bool);
     function profileEntriesHash(bytes32 profileId) external view returns (bytes32);
     function splitWalletRuntimeCodeHash() external view returns (bytes32);
+    // Append-only profile enumeration index ([RSR-FACTORY-ENUM]).
+    function profileCount() external view returns (uint256);
+    function profileAt(uint256 index) external view returns (bytes32 profileId);
+    function walletAt(uint256 index) external view returns (address wallet);
+    // Governed Gas Parameter store for the wallet line ([RSR-GGP]).
+    function gasParameter(bytes32 parameterId) external view returns (uint256);
+    function gasParameterFloor(bytes32 parameterId) external view returns (uint256);
 }
 
 interface IStreamSplitWallet {
@@ -1987,14 +3429,39 @@ interface IStreamSplitWallet {
     function accountReleased(address asset, address account) external view returns (uint256);
     function totalReleased(address asset) external view returns (uint256);
     function syncAsset(address asset) external returns (uint256);
+    // Consumes the caller's own (account, nonce) pair
+    // ([RSR-RELEASE-AUTH].5).
+    function revokeReleaseAuthorization(bytes32 nonce) external;
+    // Explicit-address replay view keyed by (account, nonce); never
+    // caller-relative ([RSR-RELEASE-AUTH].3).
+    function isReleaseAuthorizationNonceUsed(address account, bytes32 nonce)
+        external
+        view
+        returns (bool);
 }
 
 interface IStreamAssetPolicyRegistry {
     function assetStatus(address asset) external view returns (uint8);
     function assetPolicyHash(address asset) external view returns (bytes32);
     function assetPolicyEffectiveAt(address asset) external view returns (uint64);
+    function assetReleaseGraceUntil(address asset) external view returns (uint64);
+    function assetPolicy(address asset)
+        external
+        view
+        returns (
+            uint8 status,
+            bytes32 policyHash,
+            uint64 effectiveAt,
+            uint64 releaseGraceUntil
+        );
     function isAssetActive(address asset) external view returns (bool);
-    function setAssetStatus(address asset, uint8 status, bytes32 policyHash) external;
+    // Executes a staged asset-policy action ([RSR-ASSET-POLICY].7).
+    function setAssetStatus(
+        address asset,
+        uint8 status,
+        bytes32 policyHash,
+        uint64 releaseGraceUntil
+    ) external;
 }
 
 interface IStreamRevenueEscrow {
@@ -2043,9 +3510,91 @@ interfaces must remain selector-stable when they are promoted from this target
 sketch into code. The interfaces above are intentionally value-type heavy; rich
 display metadata stays in manifests and events.
 
+## Claim Aggregation Periphery
+
+Recipients accumulate entitlements across many wallets: every distinct
+concrete recipient set materializes its own immutable split wallet, and
+economically identical concrete splits from different templates resolve to
+different wallets. Per-wallet, per-asset pull claims are the correct
+invariant, but claim friction must not be left to unspecified frontends
+(ADR 0010 decision D10.6).
+
+Requirements [RSR-CLAIM-ROUTER]:
+
+1. The genesis deployment set must include a permissionless, stateless
+   claim-router satellite:
+
+   ```solidity
+   interface IStreamClaimRouter {
+       struct ClaimCall {
+           address wallet;
+           address asset;
+           address account;
+       }
+
+       function claimMany(
+           ClaimCall[] calldata claims,
+           bool continueOnFailure
+       ) external returns (uint256[] memory releasedAmounts);
+
+       function syncAndClaimMany(
+           ClaimCall[] calldata claims,
+           bool continueOnFailure
+       ) external returns (uint256[] memory releasedAmounts);
+   }
+   ```
+
+2. The router preserves pull semantics exactly: it holds no funds, takes no
+   approvals, has no owner, and may call only
+   `wallet.release(asset, account, account)` (release to the entitled
+   account itself) and `wallet.syncAsset(asset)`. Alternate-recipient
+   release stays wallet-level under [RSR-RELEASE-AUTH] and is deliberately
+   not routable.
+3. `continueOnFailure = false` reverts the whole batch on the first failed
+   item; `continueOnFailure = true` records a zero released amount for a
+   failed item and continues, so one paused asset or unsynced wallet
+   cannot block a recipient's other claims. Per-item failures must be
+   evented with wallet, asset, account, and a bounded failure reason.
+4. Batch size must be bounded by calldata and the block gas limit only;
+   the router adds no per-item storage.
+5. Entitlement discovery is an indexer requirement: recipient tooling must
+   enumerate a recipient's wallets from `SplitProfileCreated`/
+   `SplitProfileEntry` events and ERC-20 `Transfer` logs, then feed
+   `claimMany`. Recipient UX conformance gates on one-transaction
+   aggregated claiming across at least 20 wallets.
+6. Recipient-experience gate (ADR 0011 decision R12). Deployment gates on
+   a rehearsed recipient claim flow recorded as release evidence:
+   starting from events alone, discover every wallet where a test
+   recipient is entitled, sync at least one directly received ERC-20
+   through `syncAsset`, and claim across at least 20 wallets in one
+   `claimMany` transaction. The funding/endowment manifest required by
+   ADR 0010 decision D4.8 must name the party operating the recipient
+   entitlement indexer and its coverage horizon; that operating party —
+   the holder of the rehearsal and UX-gate evidence obligations — is
+   `ROLE_CLAIM_ROUTER_OPERATOR`, an operational role of the
+   [GOV-ROLES] vocabulary in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md),
+   resolved through the admin registry, never a raw stored address
+   (ADR 0013 decision U5). An unrehearsed claim
+   flow or an unnamed indexer operator is nonconformant; the matching
+   gate lives in `docs/launch-conformance-matrix.md`.
+
 ## Events
 
-The event surface should be indexer-first. At minimum:
+This section is the single normative home for the revenue event schemas
+(ADR 0010 decision D10.6). The event surface is indexer-first and applies
+the genesis-wide one-event-per-fact policy: optional mirror events are
+banned uniformly at genesis across every subsystem, and that ban is owned
+by the conformance-matrix event policy in
+`docs/launch-conformance-matrix.md` (ADR 0011 decision R12), not stated
+here as a revenue-local rule. Accordingly v1 defines no optional mirror
+events, and a duplicated name, a second event family, or an
+implementation-optional mirror for the same fact is a defect.
+Every non-standard event carries `uint16 schemaVersion`; only the
+standard-signature events named in the conformance-matrix exemption list
+(ERC-721, ERC-4906, ERC-7572 `ContractURIUpdated()`, and peers) omit it.
+
+Requirements [RSR-EVENTS]:
 
 ```solidity
 event SplitProfileCreated(
@@ -2061,6 +3610,7 @@ event SplitProfileEntry(
     bytes32 indexed profileId,
     uint16 indexed index,
     address indexed account,
+    uint16 schemaVersion,
     uint32 sharePpm,
     bytes32 labelId
 );
@@ -2069,6 +3619,7 @@ event SplitWalletDeployed(
     bytes32 indexed profileId,
     address indexed wallet,
     uint16 indexed walletVersion,
+    uint16 schemaVersion,
     bytes32 initCodeHash,
     bytes32 runtimeCodeHash
 );
@@ -2077,6 +3628,7 @@ event SplitWalletDiscovered(
     bytes32 indexed profileId,
     address indexed wallet,
     uint16 indexed walletVersion,
+    uint16 schemaVersion,
     bytes32 initCodeHash,
     bytes32 runtimeCodeHash
 );
@@ -2084,12 +3636,14 @@ event SplitWalletDiscovered(
 event AssetObservationInitialized(
     bytes32 indexed profileId,
     address indexed asset,
+    uint16 schemaVersion,
     uint256 observedReceived
 );
 
 event AssetSynced(
     bytes32 indexed profileId,
     address indexed asset,
+    uint16 schemaVersion,
     uint256 previousObservedReceived,
     uint256 observedReceived
 );
@@ -2098,6 +3652,7 @@ event NativeReleased(
     bytes32 indexed profileId,
     address indexed account,
     address indexed recipient,
+    uint16 schemaVersion,
     uint256 amount,
     uint256 totalReleased,
     uint256 observedReceived
@@ -2107,18 +3662,29 @@ event ERC20Released(
     bytes32 indexed profileId,
     address indexed asset,
     address indexed account,
+    uint16 schemaVersion,
     address recipient,
     uint256 amount,
     uint256 totalReleased,
     uint256 observedReceived
 );
 
+event ReleaseAuthorizationRevoked(
+    address indexed account,
+    bytes32 indexed nonce,
+    uint16 schemaVersion
+);
+
 event AssetPolicyUpdated(
     address indexed asset,
     uint8 indexed previousStatus,
     uint8 indexed status,
+    uint16 schemaVersion,
     bytes32 previousPolicyHash,
     bytes32 policyHash,
+    uint64 effectiveAt,
+    uint64 releaseGraceUntil,
+    bytes32 actionId,
     address admin
 );
 
@@ -2126,6 +3692,7 @@ event RevenueAssignmentSet(
     bytes32 indexed revenueClass,
     uint8 indexed scope,
     uint256 indexed scopeId,
+    uint16 schemaVersion,
     address actor,
     bytes32 previousProfileOrTemplateId,
     address previousWallet,
@@ -2133,13 +3700,16 @@ event RevenueAssignmentSet(
     bytes32 profileOrTemplateId,
     address wallet,
     uint16 royaltyBps,
-    bool isTemplate
+    bool isTemplate,
+    bool looseningAdvertised,
+    bytes32 looseningTermsHash
 );
 
 event RevenueAssignmentCleared(
     bytes32 indexed revenueClass,
     uint8 indexed scope,
     uint256 indexed scopeId,
+    uint16 schemaVersion,
     address actor,
     bytes32 previousProfileOrTemplateId,
     address previousWallet,
@@ -2151,6 +3721,7 @@ event RevenueAssignmentFrozen(
     bytes32 indexed revenueClass,
     uint8 indexed scope,
     uint256 indexed scopeId,
+    uint16 schemaVersion,
     bool permanent,
     uint8 freezeMode
 );
@@ -2159,6 +3730,7 @@ event PrimaryRevenueSettled(
     bytes32 indexed settlementKey,
     bytes32 indexed revenueClass,
     bytes32 indexed profileId,
+    uint16 schemaVersion,
     address wallet,
     address asset,
     address payer,
@@ -2172,12 +3744,13 @@ event PrimaryRevenueSettlementContext(
     bytes32 indexed settlementKey,
     bytes32 indexed revenueClass,
     bytes32 indexed profileId,
+    uint16 schemaVersion,
     address settlementCaller,
     bytes32 settlementId,
     uint8 policyMode,
     uint256 collectionId,
     uint256 tokenId,
-    uint256 saleId,
+    uint256 saleNonce,
     address poster,
     address beneficiary,
     bytes32 templateId
@@ -2187,16 +3760,33 @@ event PrimaryRevenueSettlementPolicy(
     bytes32 indexed settlementKey,
     bytes32 indexed revenueClass,
     bytes32 indexed profileId,
+    uint16 schemaVersion,
     bytes32 expectedPrimaryPolicyHash,
     bytes32 resolvedPrimaryPolicyHash,
     bytes32 resolvedAssignmentHash,
     bytes32 templateId
 );
 
+event PaymentIntentConsumed(
+    address indexed payer,
+    bytes32 indexed saleRef,
+    bytes32 indexed nonce,
+    uint16 schemaVersion,
+    address asset,
+    uint256 amount
+);
+
+event PaymentIntentRevoked(
+    address indexed payer,
+    bytes32 indexed nonce,
+    uint16 schemaVersion
+);
+
 event PrimaryTemplateMaterialized(
     bytes32 indexed templateId,
     bytes32 indexed profileId,
     address indexed wallet,
+    uint16 schemaVersion,
     bytes32 entriesHash,
     bytes32 metadataURIHash,
     address salePoster
@@ -2206,6 +3796,7 @@ event EscrowCreditCreated(
     bytes32 indexed revenueClass,
     bytes32 indexed profileId,
     address indexed wallet,
+    uint16 schemaVersion,
     address asset,
     uint256 amount,
     uint256 totalOwed,
@@ -2216,84 +3807,174 @@ event EscrowFlushed(
     bytes32 indexed revenueClass,
     bytes32 indexed profileId,
     address indexed wallet,
+    uint16 schemaVersion,
     address asset,
     uint256 amount,
     uint256 remainingOwed
 );
 
-event SplitReleased(
-    bytes32 indexed profileId,
-    address indexed account,
-    address indexed recipient,
-    address asset,
-    uint256 amount,
-    uint256 accountReleased,
-    uint256 totalAccountReleased
-);
-
-event SplitAssetObserved(
-    bytes32 indexed profileId,
-    address indexed wallet,
-    address indexed asset,
-    uint256 balance,
-    uint256 totalAccountReleased
-);
-
-event AssetApprovalSet(
-    address indexed asset,
-    uint8 state,
-    address indexed actor,
-    string reason
-);
-
-event AssetMarkedUnsupported(
-    address indexed asset,
-    address indexed actor,
-    string reason
-);
-
-event AssetObservationInitialized(
-    bytes32 indexed profileId,
-    address indexed wallet,
-    address indexed asset,
-    uint256 observedReceived
-);
-
 event WalletCodeHashApprovalSet(
     bytes32 indexed runtimeCodeHash,
-    uint8 state,
-    address indexed actor
+    address indexed actor,
+    uint16 schemaVersion,
+    uint8 state
 );
 
 event GlobalRevenueFreezeSet(
     bytes32 indexed revenueClass,
     address indexed actor,
+    uint16 schemaVersion,
     bool permanent,
     uint8 freezeMode
 );
 ```
 
-The implementation may refine names, but each event can have at most three
-indexed fields. Fields that are not indexed must still be present where needed
-for wallets, indexers, operator tools, and release evidence to reconstruct
-policy.
-The indexed fields shown above are the normative v1 allocation. Changing an
-indexed field after deployment is an indexer-breaking event schema change
-and requires a new event name or a new accepted ADR. Do not "optimize" event
-indexing per implementation after downstream tooling has been built.
-The intended escrow query path is to index escrow credit/flush events by
-`revenueClass`, `profileId`, and `wallet`; `asset`, amount, and remaining owed
-balance remain present as unindexed event data. Indexers that need asset-first
-lookup should maintain a secondary index from the full event stream.
-Profile creation should emit `SplitProfileCreated`, then entries in canonical
-index order, then `SplitWalletDeployed` if deployment happens in the same
-transaction.
+1. Each event has at most three indexed fields, and the indexed fields
+   shown above are the normative v1 allocation. Changing an indexed field
+   after deployment is an indexer-breaking event schema change and
+   requires a new event name or a new accepted ADR. Implementations must
+   not "optimize" event indexing after downstream tooling has been built.
+2. Superseded event families from earlier drafts — `SplitReleased`,
+   `SplitAssetObserved`, `AssetApprovalSet`, `AssetMarkedUnsupported`, the
+   four-field `AssetObservationInitialized` variant, and ADR 0008's
+   `PrimaryRevenueDeposited` sketch — are removed, not optional: release
+   facts are `NativeReleased`/`ERC20Released`, observation facts are
+   `AssetObservationInitialized`/`AssetSynced`, asset-policy facts are
+   `AssetPolicyUpdated`, and settlement facts are the
+   `PrimaryRevenueSettled` family.
+3. Fields that are not indexed must still be present where needed for
+   wallets, indexers, operator tools, and release evidence to reconstruct
+   policy. The intended escrow query path is to index escrow credit/flush
+   events by `revenueClass`, `profileId`, and `wallet`; `asset`, amount,
+   and remaining owed balance remain present as unindexed event data.
+   Indexers that need asset-first lookup maintain a secondary index from
+   the full event stream. `RevenueAssignmentSet` carries the
+   advertised-loosening marker and terms hash so the canonical
+   `assignmentHash` of [Assignment Semantics](#assignment-semantics) is
+   reconstructable from events alone (ADR 0012 decision T7).
+4. Profile creation must emit `SplitProfileCreated`, then entries in
+   canonical index order, then `SplitWalletDeployed` if deployment happens
+   in the same transaction.
+5. Sale identity in settlement events follows the
+   [RSR-SETTLEMENT-BOUNDARY].5 mapping rule (ADR 0011 decision R9):
+   `settlementId` is the sales-spec `saleId` and `saleNonce` is that
+   identity's adapter-local nonce. This document defines no second
+   sale-identity vocabulary. `beneficiary` is the token recipient.
+   Sale-kind discriminators and sale-side event schemas are owned by
+   `docs/stream-sales-and-auctions.md`; the v1 `saleContextHash` preimage
+   deliberately binds no `saleKind`.
+6. Governed Gas Parameter changes emit the canonical GGP change event
+   defined in the model home ([RSR-GGP].4); this document defines no
+   duplicate event for them.
 
-`saleKind` is a `bytes32` discriminator such as `keccak256("FIXED_PRICE")` or
-`keccak256("AUCTION")`. `saleId` is the drop ID for fixed-price drops. For
-auctions, `saleId` may be the token ID only if a token can have at most one
-primary auction in that sale contract; otherwise it must include or point to an
-auction nonce. `beneficiary` is the token recipient.
+## Revenue Domain Constants And Typehashes
+
+Requirements [RSR-DOMAINS]:
+
+1. This table is the single normative home for every revenue-layer hash
+   domain and EIP-712 typehash (ADR 0010 decisions D3.1 and D3.5). The
+   domain-constants table in `docs/launch-v1-target-architecture.md`
+   carries a checker-verified mirror, never a second home. CI must include
+   a checked test that recomputes every hash below from its string
+   preimage and fails on drift between Solidity constants, this table, and
+   release artifacts. Every hash value is pinned from its string preimage
+   and recomputed by CI.
+
+| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
+| --- | --- | --- | --- | --- | --- |
+| `PROFILE_DOMAIN` | `6529STREAM_SPLIT_PROFILE_V1` | `0xb53022be9545b47b00a7734af5a745b97c90c992af3e767f478a185fc8f16819` | `StreamSplitFactory` | `1` | see [Split Profile Model](#split-profile-model) |
+| `PRIMARY_TEMPLATE_DOMAIN` | `6529STREAM_PRIMARY_TEMPLATE_V1` | `0x1ebb9a3ca8927ebbb825122e47537ab869c305e8890801a106585bb8c22b3418` | `StreamRevenueResolver` | `1` | see [Primary Sales](#primary-sales) |
+| `MATERIALIZED_PRIMARY_PROFILE_METADATA_DOMAIN` | `6529STREAM_MATERIALIZED_PRIMARY_PROFILE_METADATA_V1` | `0x822635189d2b2692303c74e15626423b71b5c9b37ec5edc48509fb84c3deb16c` | `StreamRevenueResolver` | `1` | see [Primary Sales](#primary-sales) |
+| `SETTLEMENT_KEY_DOMAIN` | `6529STREAM_PRIMARY_SETTLEMENT_KEY_V1` | `0x4945dcd8f47145aa24f651df85cfa03bab9d532e51bf130ada9ed9b6426676af` | `StreamPrimarySaleSettlement` | `1` | see [Primary Sales](#primary-sales) |
+| `SALE_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_SALE_CONTEXT_V1` | `0x0cd71db86a370c54e870584c8b64e50ed454640a3e0a81601d3db439a5c27de4` | `StreamPrimarySaleSettlement` | `1` | see [Primary Sales](#primary-sales) |
+| `SALE_CONTEXT_IDENTITY_DOMAIN` | `6529STREAM_PRIMARY_SALE_CONTEXT_IDENTITY_V1` | `0xff655a4bf4a6f80e629e6b7994c540c884a357bd7b65a4127393355251839a53` | `StreamPrimarySaleSettlement` | `1` | interior composite; see [Primary Sales](#primary-sales) (ADR 0012 decision T6) |
+| `SALE_CONTEXT_PARTIES_DOMAIN` | `6529STREAM_PRIMARY_SALE_CONTEXT_PARTIES_V1` | `0x6a7cdc3c00b80957b7e85d8bd3e0e021e1940978b85f248da33876cab8696629` | `StreamPrimarySaleSettlement` | `1` | interior composite; see [Primary Sales](#primary-sales) (ADR 0012 decision T6) |
+| `SALE_CONTEXT_POLICY_DOMAIN` | `6529STREAM_PRIMARY_SALE_CONTEXT_POLICY_V1` | `0xcb4c73505e4f884f11c829537d12700446d6d2ad309a822b0929fc6ccdf2c795` | `StreamPrimarySaleSettlement` | `1` | interior composite; see [Primary Sales](#primary-sales) (ADR 0012 decision T6) |
+| `ASSIGNMENT_RESOLVER_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_RESOLVER_CONTEXT_V1` | `0xa691283227162c15f9cd2977f1e5995b03b315a3da9086cc469559e3d2e0889b` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ASSIGNMENT_SCOPE_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_SCOPE_CONTEXT_V1` | `0x607a80155d92fe41598bff2f18342fe5510a5d77533ae17b87774f1a511ea1ba` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ASSIGNMENT_PROFILE_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_PROFILE_CONTEXT_V1` | `0xbad938700010817dc9392e428003b03d8d16eaf6b5e0bf35dc03f60ec5eba4a1` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ASSIGNMENT_TEMPLATE_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_V1` | `0x6f884400dcd82040221802f0143cae9405afe344a8471b8e4be6c57e87af3443` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ASSIGNMENT_POINTER_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1` | `0xc96172afc4e32013f5189d2ac0fb5758ee908ce97051d18f5043370a090a0b97` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ROYALTY_ASSIGNMENT_POINTER_CONTEXT_DOMAIN` | `6529STREAM_ROYALTY_ASSIGNMENT_POINTER_CONTEXT_V1` | `0xe02b9a1db06245707414f3be94c4005d9332ede9187a9fe5baacf54853ab4ba0` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_LOOSENING_POLICY_CONTEXT_V1` | `0x61951eb6d957b0ebe19a5f808b9a9925046a1cd43b22a3a55e012c60b09d7638` | `StreamRevenueResolver` | `1` | `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN; bytes32(looseningTermsHash)` — see [Assignment Semantics](#assignment-semantics) (ADR 0012 decision T7) |
+| `ASSIGNMENT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_V1` | `0x3d35bd72bf32163018d9b660465fde3bf2bc092b1fb09047dd0621fc6b8d7164` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `PRIMARY_POLICY_DOMAIN` | `6529STREAM_PRIMARY_POLICY_V1` | `0x53c5c8e8dcd97f4f6a66557a6ede68c0798afd999c1cce5807f27d151fb50f12` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ROYALTY_POLICY_DOMAIN` | `6529STREAM_ROYALTY_POLICY_V1` | `0x672cda40f3f95b129db3b9262cfb581cbe26ea0e95cb09b958ca58ebf62ba54a` | `StreamRevenueResolver` | `1` | see [Canonical Royalty Policy Hash](#canonical-royalty-policy-hash) |
+| `ESCROW_RECOVERY_DOMAIN` | `6529STREAM_ESCROW_RECOVERY_V1` | `0xd2477116ef00eff9b80dc97ae00c04faec607b7609301cced9041de52f32243c` | revenue escrow | `1` | see [Primary Sales](#primary-sales) [RSR-ESCROW-RECOVERY] rule 9 |
+| `ESCROW_RECOVERY_CONSENT_TYPEHASH` | struct type string pinned in the [RSR-ESCROW-RECOVERY] consent surface: `StreamEscrowRecoveryConsent(address account,bytes32 recoveryId,bytes32 nonce,uint64 deadline)` | `0xff4cafe3ce3dbf31056d40511f4344d6c8070efc8f6eaf284d2c5366514ede2e` | revenue escrow | `1` | see [RSR-ESCROW-RECOVERY] rule 6 (ADR 0013 decision U7) |
+| `RELEASE_AUTHORIZATION_TYPEHASH` | struct type string pinned in [RSR-RELEASE-AUTH].2: `StreamReleaseAuthorization(address asset,address account,address recipient,uint256 releasableSnapshot,bytes32 nonce,uint64 deadline)` | 0x6d1a151c75313442dbdc6436c69f78a6976bd8aa729b510f6e538487f3b93109 | `StreamSplitWallet` | `1` | see [RSR-RELEASE-AUTH].2 (`releasableSnapshot` added by ADR 0014 decision V5; the snapshot-less predecessor hash is recorded only in that rule's supersession note) |
+| `RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH` | struct type string pinned in [RSR-RELEASE-AUTH].5: `StreamReleaseAuthorizationRevocation(address account,bytes32 nonce,uint64 deadline)` | 0xb4240d33db7140e28e850f33c2d22b71ae26cea8a0a8dafdce603a056c81e295 | `StreamSplitWallet` | `1` | see [RSR-RELEASE-AUTH].5 (ADR 0014 decision V6) |
+| `PAYMENT_INTENT_TYPEHASH` | struct type string pinned in [RSR-PAYMENT-INTENT].2 | `0x72c99e6f6f9e2422510a5dd5c2dc2f9ffd83c776670a8de4ffab990e45f825cd` | ERC-20 settlement verifier | `1` | see [RSR-PAYMENT-INTENT].2 |
+| `PAYMENT_INTENT_REVOCATION_TYPEHASH` | struct type string pinned in [RSR-PAYMENT-INTENT].3: `StreamPaymentIntentRevocation(address payer,bytes32 nonce,uint64 deadline)` | 0x3a5991afab010b2aa3f78362da982cf536e46d406a9e205c1f27b0f0e4c42e50 | ERC-20 settlement verifier | `1` | see [RSR-PAYMENT-INTENT].3 (ADR 0014 decision V6) |
+| `GGP_ERC_1271_GAS_LIMIT` | `6529STREAM_GGP_ERC_1271_GAS_LIMIT` | `0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
+| `GGP_ASSET_POLICY_GAS_LIMIT` | `6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT` | `0xbfc1f824948b8dc9573791fa40eeb403e7322af41d0967f90518dbbb531bf648` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
+| `GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `6529STREAM_GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda` | `StreamCore` | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP], [RSR-2981-GAS]) |
+| `GGP_ROYALTY_RETURN_GAS_BUFFER` | `6529STREAM_GGP_ROYALTY_RETURN_GAS_BUFFER` | `0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7` | `StreamCore` | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
+| `GGP_WALLET_DEPOSIT_GAS_LIMIT` | `6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT` | `0xd208e16b8676adecbbdd17f529a9effcb9153af90ac08886fb2906298206ff45` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
+| `GGP_FLUSH_GAS_FLOOR` | `6529STREAM_GGP_FLUSH_GAS_FLOOR` | `0x99168b87a7d39f5ba4862568c012ad3b51c552ec78108b88c6be5f5a6426ebe6` | revenue escrow | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
+
+   The three rows above were pinned from their inline struct strings
+   of `docs/launch-v1-target-architecture.md` [PV1-MIRROR].2 — the
+   `RELEASE_AUTHORIZATION_TYPEHASH` preimage revised by ADR 0014
+   decision V5 and the two revocation typehashes added by ADR 0014
+   decision V6. Each exact struct string preimage is adjacent in its
+   row and at its rule home, the CI recomputation run pins the values
+   from those preimages, and an unpinned value fails the Review-entry
+   condition of `docs/launch-conformance-matrix.md` ([LCM-REVIEW-ENTRY]
+   condition 4).
+
+2. EIP-712 domains for the five typehashes above are pinned as: split
+   wallets verify `StreamReleaseAuthorization` and
+   `StreamReleaseAuthorizationRevocation` under
+   `("6529StreamSplitWallet", "1", chainId, wallet)`; the
+   `PaymentIntent` verifier verifies `StreamPaymentIntent` and
+   `StreamPaymentIntentRevocation` under
+   `("6529StreamPaymentIntentVerifier", "1", chainId, verifier)`; the
+   revenue escrow verifies `StreamEscrowRecoveryConsent` under
+   `("6529StreamRevenueEscrow", "1", chainId, escrow)` (ADR 0013
+   decision U7). Every
+   verifying contract must expose ERC-5267 `eip712Domain()`.
+   `PaymentIntent` domain-name family rule (ADR 0012 decision T7;
+   family renamed by ADR 0014 decision V6):
+   `"6529StreamPaymentIntentVerifier"` is the permanent family name for
+   every conformant `PaymentIntent` verifier. The name names the
+   verifying settlement contract class generically — never any single
+   deployed contract — and each adapter binds the domain with its own
+   address (the per-adapter domain binding rule): distinctness between
+   verifiers is guaranteed solely by `verifyingContract`, never by name
+   or version edits, and renaming the family for a later
+   pull-performing adapter is a domain-separator change and
+   nonconformant. The superseded family name
+   `"6529StreamPrimarySaleSettlement"` asserted the identity of a
+   contract that is not a verifier; the rename is Draft-stage, re-pins
+   no deployed surface, and the superseded name must never be deployed
+   (ADR 0014 decision V6). The verifier is always the contract that
+   performs the
+   payer allowance pull: at genesis that is the ERC-20 primary
+   settlement adapter (genesis inventory contract 20 of
+   `docs/launch-conformance-matrix.md`); `StreamPrimarySaleSettlement`
+   (genesis inventory contract 9) performs no payer allowance pull and
+   is not a `PaymentIntent` verifier at genesis. The release manifest
+   records each verifier's address and ERC-5267 domain, and the
+   wallet-audit release evidence must record that wallet-UI and audit
+   tooling key on the `(name, verifyingContract)` pair, never the name
+   alone.
+3. The `MintTicket` typehash and domain are owned by
+   `docs/mint-policy-and-accounting.md`; artist consent, sanction,
+   economics-consent, royalty-freeze, and delegation typehashes are owned
+   by [`docs/stream-artist-authority.md`](stream-artist-authority.md); the sale authorization and
+   sale-side bid/offer payloads are owned by
+   `docs/stream-sales-and-auctions.md` [SSA-AUTH]. They are deliberately
+   absent here.
+4. Namespace rule (ADR 0011 decision R12): every revenue-layer domain
+   string carries the `6529STREAM_` namespace prefix. The three formerly
+   `STREAM_`-prefixed constants — `PRIMARY_POLICY_DOMAIN`
+   (`6529STREAM_PRIMARY_POLICY_V1`), `ROYALTY_POLICY_DOMAIN`
+   (`6529STREAM_ROYALTY_POLICY_V1`), and `ESCROW_RECOVERY_DOMAIN`
+   (`6529STREAM_ESCROW_RECOVERY_V1`) — are renamed to the namespaced
+   preimages above with their hashes recomputed and re-pinned. The
+   domain-constants checker must reject any new revenue-layer domain
+   string that does not start with `6529STREAM_`.
 
 ## Implementation Requirements
 
@@ -2335,7 +4016,8 @@ auction nonce. `beneficiary` is the token recipient.
 - ERC-20 release support.
 - ERC-20 releases limited to approved standard assets or separately accepted
   adapters.
-- Evented asset approval, approval deprecation, and unsupported marking.
+- Evented asset approval, approval deprecation, and unsupported marking
+  through the single `AssetPolicyUpdated` fact ([RSR-EVENTS]).
 - Reentrancy protection on release.
 - Alternate recipient release.
 - Rounding dust bounded and non-withdrawable in v1.
@@ -2363,20 +4045,30 @@ auction nonce. `beneficiary` is the token recipient.
 - Royalty bps cap mirrored from Core's immutable `maxRoyaltyBps`.
 - Core owns the hard immutable `maxRoyaltyBps` of 1000
   (ADR 0009 decision 7). A resolver may impose the same or a lower cap,
-  but it cannot raise the Core cap.
-  Raising the Core cap after deployment requires a new Core deployment line
-  and explicit rollout plan; lowering resolver policy can use a new resolver
-  deployment and rollout plan.
-- Resolver cap rollout runbook: deploy new resolver, register and approve its
-  module identity/code hash/manifest hash, stage the Core resolver pointer
-  update, replay or intentionally remap default and collection assignments,
-  run `probeRoyaltyInfo` against representative default, collection, token,
-  premint, burned, and malformed cases, emit a manifest-backed reason, execute
-  after the delay, monitor fallback-to-zero diagnostics, and optionally freeze
-  the new pointer after operational confidence. Cap changes must not mutate
-  old resolver state in place.
+  but it cannot raise the Core cap. `maxRoyaltyBps` is an economic promise,
+  not a gas bound, so it is deliberately outside the Governed Gas Parameter
+  model: raising the Core cap after deployment requires a new Core
+  deployment line and explicit rollout plan; lowering resolver policy can
+  use a new resolver deployment and rollout plan.
+- Gas-limit retuning is a GGP action under [RSR-GGP] and [RSR-2981-GAS];
+  it never requires a resolver redeploy.
+- Resolver replacement runbook (for implementation or storage changes, not
+  gas retuning): deploy new resolver, register and approve its module
+  identity/code hash/manifest hash, stage the Core resolver pointer update,
+  replay or intentionally remap default and collection assignments, run
+  `probeRoyaltyInfo` against representative default, collection, token,
+  premint, burned, and malformed cases, emit a manifest-backed reason,
+  execute after the delay, monitor fallback-to-zero diagnostics, and
+  optionally freeze the new pointer after operational confidence.
+  Replacement must not mutate old resolver state in place and must satisfy
+  the frozen-economic continuity rules above.
 - Assignment-time wallet deployment, factory, profile ID, and code-hash
   validation.
+- Settlement-time `COLLECTION_ARTIST` and collaborator resolution through
+  the artist registry's [AA-PAYOUT] typed payout reads
+  ([RSR-TEMPLATES].1): `authorityAddress` is never a payout fallback,
+  and an unset designation or failed read reverts materialization
+  (ADR 0013 decision U1).
 - Direct view for `primaryRevenueWallet(collectionId, tokenId, revenueClass)`.
 - Direct view for `royaltyInfo(tokenId, salePrice)`.
 - Direct view for `royaltyReceiver(collectionId)` for marketplace and operator
@@ -2396,8 +4088,9 @@ auction nonce. `beneficiary` is the token recipient.
   protocol-owned revenue escrow with ADR 0003 owed/surplus guarantees.
 - Use deterministic direct-deposit-then-escrow fallback so split wallet deposit
   failure cannot revert minting or auction settlement.
-- Do not ship auction settlement until the full bid-custody, pull-refund, and
-  settlement state machine above is implemented. The current drop-side auction
+- Do not ship auction settlement until the sale contract passes the
+  conformance profile of `docs/stream-sales-and-auctions.md` and the
+  [RSR-SETTLEMENT-BOUNDARY] gates. The current drop-side auction
   placeholder is not a production settlement path.
 - Keep v1 primary settlement limited to native ETH and approved standard ERC-20
   adapters; non-standard ERC-20 behavior requires a separate accepted adapter
@@ -2407,12 +4100,25 @@ auction nonce. `beneficiary` is the token recipient.
 
 ### StreamCuratorsPool
 
-Any curator reward or pool contract that can hold owed funds must follow the
-same owed/surplus boundary as the primary splitter architecture. Push payments
-and unrestricted emergency sweeps are not deployment-conformant for owed
-rewards. Either rewrite curator rewards to pull accounting with explicit
-surplus proofs or mark the current pool as excluded from protocol v1, outside
-the Stream payment conformance boundary.
+Resolved (ADR 0011 decision R12): the legacy curators pool is excluded
+from protocol v1. It sits outside the Stream payment conformance boundary,
+is not part of the genesis contract inventory in
+`docs/launch-conformance-matrix.md`, and no genesis default template
+routes revenue to it ([RSR-TEMPLATES].3). Curator classes are deployment
+configuration when a conformant pool contract exists: a curator reward or
+pool contract may receive template or profile revenue only when all of
+the following hold:
+
+1. It follows the same owed/surplus boundary as the primary splitter
+   architecture — push payments and unrestricted emergency sweeps are not
+   deployment-conformant for owed rewards.
+2. It enters through its own accepted module spec with pull accounting
+   and explicit surplus proofs.
+3. The deployment manifest names it as the receiving contract.
+
+Until such a contract exists, curator-class labels remain usable on
+ordinary split profile entries (a curator's account is simply an entry);
+no pool recipient exists in the genesis economics.
 
 ### StreamCore
 
@@ -2438,6 +4144,8 @@ Operator tools should show:
 - explicit ERC-20 asset search and sync;
 - releasable amounts by account;
 - royalty bps by scope;
+- artist economics attestation status, artist share, and artist freeze
+  state for artist-bound collections;
 - policy history from events.
 
 Operator tools must not imply that ERC-2981 royalties are enforced.
@@ -2449,7 +4157,8 @@ Recipient tools should show:
 - every split wallet where the connected account has releasable funds;
 - source profile and labels for each entitlement;
 - the possibility that economically identical concrete splits from different
-  templates resolve to different wallets and require separate claims;
+  templates resolve to different wallets, with one-transaction aggregated
+  claiming across them through the [RSR-CLAIM-ROUTER] `claimMany` surface;
 - asset type;
 - explicit asset refresh for ERC-20s that were sent directly to a wallet;
 - release-to-self and release-to-recipient actions;
@@ -2465,6 +4174,11 @@ profile and wallet creation events, `walletFor(profileId)`, and
 events and profile entries; recipients can verify membership from immutable
 profile data and call release directly.
 
+The display guidance above is should-level; the rehearsed claim flow and
+the named entitlement-indexer operator are must-gated under
+[RSR-CLAIM-ROUTER].6 (ADR 0011 decision R12), so recipient discovery
+cannot silently decay into an unfunded, unowned dependency.
+
 ## Marketplace And Indexer UX
 
 Marketplace and indexer integrations should:
@@ -2476,6 +4190,37 @@ Marketplace and indexer integrations should:
 - avoid claims that payment is guaranteed;
 - retain platform-specific evidence before public release claims.
 
+Requirements [RSR-MARKETPLACE-ROYALTY]:
+
+1. Marketplace royalty-resolution coverage is a named deployment gate,
+   not an integration extra (ADR 0011 decision R12). Before the first
+   public sale, release evidence must record, for each marketplace named
+   in the release manifest's marketplace evidence list, where that
+   marketplace actually resolves royalties for shared multi-collection
+   contracts — direct ERC-2981 read, marketplace-side royalty
+   configuration, or the community Royalty Registry — and proof that
+   this deployment resolves correctly there: a Royalty Registry entry
+   where the marketplace consults one (the entry must mirror Core-native
+   ERC-2981 and never diverge from it), and per-marketplace royalty
+   configuration verification for the majors. Core-native ERC-2981
+   remains the base truth; registry and config entries are plumbing to
+   it, never a second source.
+2. The coverage evidence must be re-verified on the recurring
+   post-launch obligation cadence of `docs/launch-conformance-matrix.md`;
+   a missed cadence is a monitored incident (ADR 0011 decision R12).
+3. Artist acknowledgment: the artist onboarding artifact of
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md) must
+   present the disclosure-only, permanently unenforceable royalty
+   posture of this Core line as an explicit term, and a recorded artist
+   acknowledgment of that term is required before an artist-bound
+   collection's first public sale (ADR 0011 decision R12). Setting
+   royalty expectations without that acknowledgment is nonconformant.
+4. The transfer-openness preclusions behind this posture and the
+   successor-line enforcement path — including what a declared successor
+   Core line with enforcement preserves — are owned by
+   `docs/stream-long-term-architecture.md` [LTA-STANDARDS]; this
+   document does not restate them.
+
 ## Pre-Deployment Implementation Sequence
 
 1. Implement the split wallet factory and immutable split wallets.
@@ -2485,8 +4230,9 @@ Marketplace and indexer integrations should:
    event reconstruction.
 4. Wire fixed-price primary settlement through resolver-backed fixed profiles
    or primary split templates.
-5. Wire auction primary settlement only after the bid-custody and pull-refund
-   state machine in this spec is implemented.
+5. Wire auction primary settlement only after the sale contract passes the
+   `docs/stream-sales-and-auctions.md` conformance profile and the
+   [RSR-SETTLEMENT-BOUNDARY] gates.
 6. Implement royalty assignments and split-wallet royalty receiver resolution.
 7. Add minimal resolver-backed `royaltyInfo()` to `StreamCore` before
    production deployment.
@@ -2494,13 +4240,15 @@ Marketplace and indexer integrations should:
    fails, refactor non-essential Core logic into satellites or compress helper
    code until Core-native ERC-2981 fits.
 9. Retain marketplace/indexer evidence for Core-native ERC-2981 behavior and
-   split-wallet receiver display.
+   split-wallet receiver display, including the [RSR-MARKETPLACE-ROYALTY]
+   royalty-resolution coverage gate.
 10. Update docs, release artifacts, event catalogs, ABI checksums, and retained
    marketplace evidence.
 
 ## Known Risks
 
-- Pull-based split wallets require recipients to claim.
+- Pull-based split wallets require recipients to claim; the claim router
+  reduces but does not remove that responsibility.
 - Passive royalty receipts can create tiny bounded rounding dust that remains
   in the wallet under v1 accounting.
 - Forced ETH sent to a counterfactual wallet before deployment is attributed to
@@ -2509,7 +4257,15 @@ Marketplace and indexer integrations should:
   balance-decrease guard detects it; approved assets must exclude that class.
 - Incident-revoking a wallet runtime code hash can freeze owed escrow for that
   hash until the timelocked successor-wallet recovery path is executed.
-- Marketplace royalty behavior remains external, uneven, and cache-prone.
+- Governed Gas Parameters reintroduce a governance dependency into read and
+  release paths that were fully static; accepted for survivability, bounded
+  by immutable floors, staged delays, and health probes (ADR 0010
+  decision D1).
+- Entitlements of lost-key EOA accounts in existing wallets are permanently
+  unclaimable ([RSR-ESTATE].3); disclosed, not mitigated.
+- Marketplace royalty behavior remains external, uneven, and cache-prone;
+  the [RSR-MARKETPLACE-ROYALTY] coverage gate keeps resolution verified
+  where marketplaces actually look, without promising payment.
 
 ## Validation Checklist
 
@@ -2561,6 +4317,12 @@ Marketplace and indexer integrations should:
   can claim from both and conservation holds per wallet.
 - `PrimaryTemplateMaterialized` links template ID to profile ID and wallet.
 - Unsupported primary template account sources revert before state changes.
+- `COLLECTION_ARTIST` and collaborator sources resolve through the
+  [AA-PAYOUT] typed payout reads at settlement time; an unset payout
+  designation, zero returned address, or failed registry read reverts
+  settlement before state changes; `authorityAddress` is never paid as a
+  fallback; and an artist-signed designation revision after consent
+  re-points the next settlement without re-consent ([RSR-TEMPLATES].1).
 - Template materialization gas is bounded independently of resolved account
   values.
 - Zero dynamic accounts and dynamic/static `(account, labelId)` collisions are
@@ -2581,12 +4343,15 @@ Marketplace and indexer integrations should:
   resolver consumes all gas, returns too little data, returns too much data,
   returns a zero receiver, returns zero bps, attempts an external-call path,
   or is incident-revoked.
-- All-cold deepest-scope resolver gas is measured against the immutable cap with
-  documented margin.
+- All-cold deepest-scope resolver gas is measured against the genesis
+  `ROYALTY_RESOLVER_GAS_LIMIT` value and floor, satisfying the [RSR-GGP].9
+  multiples with documented margin.
 - Static analysis proves the production resolver royalty path contains no
   external-call or creation opcodes.
-- Core royalty resolver gas limit is deploy-time immutable and fallback
-  behavior is deterministic just below and above that limit.
+- Core royalty resolver gas parameters are Governed Gas Parameters:
+  raise, emergency raise, probe-gated lower, below-floor rejection, change
+  events, and manifest recording are all tested, and fallback behavior is
+  deterministic just below and above the current limit.
 - Huge resolver returndata cannot make Core OOG.
 - Core royalty math returns the exact `floor(salePrice * royaltyBps / 10_000)` for
   every `uint256 salePrice` and allowed bps using full-precision arithmetic;
@@ -2621,6 +4386,9 @@ Marketplace and indexer integrations should:
   covers them.
 - Auction settlement records settlement state and revenue before external NFT
   recipient callbacks.
+- Settlement entry points are non-reentrant: a reentrant enabled caller or
+  a reentrant token callback cannot double-record a `settlementKey` or
+  double-deposit official revenue ([RSR-SETTLEMENT-BOUNDARY].11).
 - Fixed-price token-level primary overrides are used only when token ID is known
   before external callbacks.
 - If a signed sale authorization expects a token-level primary override but the
@@ -2634,20 +4402,36 @@ Marketplace and indexer integrations should:
   expected assignment, and O(1).
 - If token-level royalty snapshots are not used, open-ended collection tokens
   follow the current collection assignment at `royaltyInfo()` time.
-- Auction `saleId` is unique per primary auction or includes an auction nonce.
+- Settlement surfaces carry `settlementId` equal to the sales-spec
+  `saleId` and `saleNonce` equal to its adapter-local nonce per the
+  [RSR-SETTLEMENT-BOUNDARY].5 mapping rule; divergent sale references
+  fail conformance.
 - Escrow flush is permissionless, idempotent, cannot double-credit, and cannot
   make owed funds emergency-withdrawable.
 - Escrow flush sets owed credit to zero before factory deployment or transfer,
   and EVM revert restores the credit on failure.
 - Escrow flush tests include a wallet/factory harness that reverts on the Nth
   deposit or deployment step and proves the cached owed amount is restored.
-- Escrow flush rejects early when `gasleft()` is below the published
-  `FLUSH_GAS_FLOOR`.
+- Escrow flush rejects early when `gasleft()` is below the current
+  `FLUSH_GAS_FLOOR` Governed Gas Parameter value, and floor raise/lower
+  governance is tested against the immutable minimum.
 - Escrow can be credited against an undeployed official wallet only when the
   profile exists in the factory, the predicted address has no code, and the
   factory exposes permissionless deployment.
 - Escrow flush accepts the runtime code hash captured at credit time after that
   hash is deprecated, unless it has been explicitly incident-revoked.
+- Economics-changing escrow recovery executes only with a recorded,
+  unrevoked consent from every affected account or
+  through the `TERMINAL_FREEZE`-grade veto/guardian schedule with
+  recorded artist/recipient notice; identical-entries recovery uses the
+  `FUNDS_RECOVERY` floor alone; consent records through both rule 6
+  paths — the relayed signed payload and the affected account's direct
+  `recordEscrowRecoveryConsent` call — and consent nonces are per-signer
+  with
+  explicit-address replay views ([RSR-ESCROW-RECOVERY] rules 6 and 10).
+- An EIP-7702 delegation designation at a predicted wallet address is
+  classified as code: the no-code escrow precondition fails and the
+  wrong-code poisoned-address path applies (ADR 0013 decision U6).
 - Escrow keys and events include `revenueClass`.
 - Inherited-freeze descendant counters or dirty bits enforce preconditions
   without enumeration.
@@ -2655,9 +4439,15 @@ Marketplace and indexer integrations should:
   sweep.
 - Asset approval, deprecation, unsupported marking, and observation
   initialization events are emitted.
-- Only `ACTIVE` ERC-20 assets are syncable and releasable. `UNKNOWN`,
-  `INACTIVE`, `DEPRECATED`, and `UNSUPPORTED` assets fail closed without
-  mutating wallet accounting.
+- `ACTIVE` ERC-20 assets are syncable and releasable; `UNKNOWN`,
+  `INACTIVE`, and `UNSUPPORTED` assets fail closed without mutating wallet
+  accounting; `DEPRECATED` assets sync and release exactly per the
+  [RSR-ASSET-POLICY].5 observation and grace rules, including the
+  escrow-flush-then-release case inside the grace window and the fail-closed
+  case after it.
+- Asset-status transitions away from `ACTIVE` execute only through the
+  ADR 0004 staged action-ID model; emergency `UNSUPPORTED` marking carries a
+  published incident reason.
 - ERC-20 activation records evidence for standard monotonic-balance behavior.
 - ERC-20 asset policy is read from the factory-bound deployment-wide asset
   policy registry; registry failure blocks only non-native assets.
@@ -2677,6 +4467,14 @@ Marketplace and indexer integrations should:
   and deployment readiness gate.
 - `probeRoyaltyInfo` uses the same selector, gas cap, parent gas precheck,
   returndata cap, and decode rules as production `royaltyInfo()`.
+- `probeRoyaltyInfo` is hosted only on the two Permanent-class royalty
+  probe contracts; each run records the `GasParameterProbed` gate fact
+  and the `RoyaltyInfoProbed` detail fact on the probe contract, and the
+  event catalog tags them as one probe-record family ([RSR-2981-PROBE]).
+- The [RSR-2981-GAS].6 buffer-limit coupling holds across simulated
+  multi-step raise chains: the golden threshold suite passes at every
+  step, and an additive-precheck implementation rejects any value change
+  violating the host-enforced buffer floor.
 - Receipts smaller than the unique-account count remain bounded rounding dust
   until later receipts make entitlements claimable.
 - External-ground-truth conservation fuzz invariant holds: the test harness
@@ -2689,4 +4487,94 @@ Marketplace and indexer integrations should:
 - `observedReceived` never decreases after first observation for supported
   assets.
 - Existing primary-sale pull-payment invariants remain true.
+- ERC-20 settlement initiated by any caller other than the payer itself
+  without a valid payer-signed `PaymentIntent` reverts
+  before any allowance pull, template materialization, escrow credit, or
+  mint effect; replayed, expired, over-`maxAmount`, wrong-`saleRef`, and
+  revoked intents all revert; the payer-is-caller path
+  ([RSR-PAYMENT-INTENT].5) cannot pull an asset or amount beyond the sale
+  authorization's binding.
+- Release-authorization and `PaymentIntent` consumed-nonce state is keyed
+  per signer: one account cannot consume, revoke, or invalidate another
+  account's nonce value, and the explicit-address replay views report
+  consumption correctly for any queried signer.
+- Escrow-holding sale modes finalize under `ALLOW_CURRENT` within the
+  buyer's drift envelope after resolved-policy drift, and past the
+  finalize-by deadline the permissionless sale-side refund path unlocks
+  escrowed funds; drift can never strand deferred-settlement buyer funds
+  ([RSR-SALE-AUTH].5, [RSR-SETTLEMENT-BOUNDARY].9).
+- Sale authorization signatures bind every field of the
+  `docs/stream-sales-and-auctions.md` [SSA-AUTH] payload; changing asset,
+  price, quantity, program, recipients, nonce, or deadline invalidates the
+  signature, and revocation consumes the ledger authorization ID.
+- Release authorizations verify under the pinned
+  `RELEASE_AUTHORIZATION_TYPEHASH` and domain; revocation consumes the
+  nonce before any later use, and signed revocations verify under the
+  pinned `RELEASE_AUTHORIZATION_REVOCATION_TYPEHASH` at the split-wallet
+  domain while signed `PaymentIntent` revocations verify under the
+  pinned `PAYMENT_INTENT_REVOCATION_TYPEHASH` at the verifier domain
+  ([RSR-RELEASE-AUTH].5, [RSR-PAYMENT-INTENT].3).
+- An alternate-recipient release authorization whose
+  `releasableSnapshot` does not equal the execution-time full releasable
+  amount reverts; a matching snapshot releases exactly that amount, and
+  a receipt or release-to-self landing between signature and relay
+  forces a re-sign rather than a drifted release ([RSR-RELEASE-AUTH].4).
+- An ERC-20 `PRE_REVENUE_SINGLE_STEP` paid mint deposits the approved
+  settlement asset (or records the asset-keyed escrow credit) before
+  manager and ledger validation and reverts atomically on a later
+  validation failure ([RSR-ORCHESTRATION] step 3 ERC-20 realization).
+- `requireMintConsent` executes exactly once per paid mint transaction
+  in each blessed path, after active `policyHash` computation and before
+  ticket verification, ledger consumption, and Core allocation
+  ([RSR-ORCHESTRATION]; [PV1-MINT-ORDER] invariant 7).
+- EOA signatures on `ReleaseAuthorization`, `PaymentIntent`, and their
+  revocation payloads reject zero recovery, high-`s` (EIP-2), and `v`
+  outside `{27, 28}` under the [MPA-AUTHZ] rule 2 discipline cited by
+  [RSR-1271].1, with the rule 5 golden negative tests run per surface.
+- CI recomputes every hash and typehash in
+  [Revenue Domain Constants And Typehashes](#revenue-domain-constants-and-typehashes)
+  from its string preimage and fails on drift.
+- The [RSR-DOMAINS] CI suite includes `assignmentHash` recomputation
+  vectors for both `assignmentPolicyHash` branches (no-loosening zero
+  and advertised-loosening nonzero), the advertised-loosening marker and
+  terms hash are immutable after assignment creation, and
+  `RevenueAssignmentSet` data reconstructs the canonical
+  `assignmentHash` exactly.
+- ERC-1271 verification passes for a maximum-supported wallet of each
+  class named by ADR 0004 [GOV-1271-CLASS] ([RSR-1271].2) at the deployed
+  genesis `ERC_1271_GAS_LIMIT`
+  and fails cleanly for a malicious gas-consuming wallet.
+- The claim router batches release-to-self across at least 20 wallets in
+  one transaction, holds no funds, cannot route alternate-recipient
+  releases, and isolates per-item failures under `continueOnFailure`.
+- The factory profile enumeration index passes the [RSR-FACTORY-ENUM]
+  golden test: append-only creation-order indices, `walletAt(i)` equal
+  to `walletFor(profileAt(i))`, and state-only enumeration matching the
+  `SplitProfileCreated` event stream.
+- The rehearsed recipient claim flow of [RSR-CLAIM-ROUTER].6 is recorded
+  as release evidence and the funding/endowment manifest names the
+  entitlement-indexer operator.
+- Marketplace royalty-resolution coverage evidence exists for every
+  marketplace in the release manifest's evidence list, and the artist
+  onboarding acknowledgment of the disclosure-only royalty term is
+  recorded before an artist-bound collection's first public sale
+  ([RSR-MARKETPLACE-ROYALTY]).
+- Artist-bound collections cannot open public mint without the
+  [RSR-ARTIST-ECONOMICS].2 artist economics attestation; artist-share
+  reductions without artist co-signature revert; the artist royalty
+  freeze right executes without platform countersignature.
+- `CUSTODY_SETTLEMENT_TRANSFER` records settlement state and revenue
+  before the custody-to-recipient transfer callback.
+- Consigned owner-held token settlement produces no primary revenue
+  fact — no `PrimaryRevenueSettled`-family event, `settlementKey`
+  consumption, template materialization, split-wallet official deposit,
+  or escrow credit — and surfaces ERC-2981 disclosure for the consigned
+  sale ([RSR-SETTLEMENT-BOUNDARY].10).
+- Every owed-funds custody surface names its [RSR-OWED-FUNDS] solvency
+  invariant, forced/direct-value posture, and claim-discipline gates;
+  the sale-adapter instantiation is verified by the cross-mode
+  conservation suite of `docs/stream-sales-and-auctions.md` [SSA-GATES].
+- Golden event tests cover the deduplicated [RSR-EVENTS] surface: one
+  signature per event name, `schemaVersion` on every non-standard event,
+  and the normative indexed allocation.
 - Core size-budget gate is run for any Core change.

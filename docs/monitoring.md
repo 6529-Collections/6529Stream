@@ -1,5 +1,11 @@
 # Protocol Monitoring Specification
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
+
 This `GOV-009` specification is a pre-audit local baseline for monitoring
 6529Stream operations. It is not production-ready, not a security claim, and
 does not replace fork/testnet/live evidence, reviewed deployment evidence,

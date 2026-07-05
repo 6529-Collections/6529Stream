@@ -10,7 +10,7 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:12016e9341ceeb38fb9874c4e6f4309d8818d66dce43b138d8f099c25643fa6f"
+      "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
@@ -30,7 +30,7 @@
     },
     {
       "path": "docs/royalty-policy.md",
-      "sha256": "sha256:b57fb883d6c99e7c61b13d8aaa3dbf152a24349c77c16078a91fb8ba3c5f83be"
+      "sha256": "sha256:06b1262c1ba25f22071b70a6c57e4f476eb9f2394c54b24cfda3a507283719a3"
     },
     {
       "path": "docs/warning-dispositions.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:1a894e0b2e8f93a5e3604394c6754fb5ae9fcac2cdf7b21351df59049cce8047"
+      "sha256": "sha256:99488d732200eed7dcc03028e4f9f83b3d2bb8009c257e0610ef7b2d3ecff98c"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -238,11 +238,11 @@
       "evidence": [
         {
           "path": "docs/collection-metadata-contract.md",
-          "sha256": "sha256:429364bdd2e747e105bd6b827e5aab6e46762933dbd7255bb5e2f0f81d252695"
+          "sha256": "sha256:01db680b049fbb38e8c6ff5a84b26f34b2072721935f5a46e77088ba1df6de30"
         },
         {
           "path": "docs/deployment.md",
-          "sha256": "sha256:3ca2b661ab1786864e4892cf52a7bd3a448890262f5d9b1a04b79ac2f59d5b89"
+          "sha256": "sha256:2848cf24054b9b37060c08a4a9443629e57ab7e5552e567aff119b5bf5bda369"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -279,7 +279,7 @@
       "evidence": [
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:1b50e330c091a4cb63f364c03b09e0d06133772d59bfccf9d2b06d7b3828775d"
+          "sha256": "sha256:7ca42c4ccc78e1717f6156d5728c02685638552d52b531810d206bba5aa00b0c"
         },
         {
           "path": "docs/integrations/marketplace-indexer-evidence.md",
@@ -330,7 +330,7 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:12016e9341ceeb38fb9874c4e6f4309d8818d66dce43b138d8f099c25643fa6f"
+          "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -338,7 +338,7 @@
         },
         {
           "path": "docs/metadata.md",
-          "sha256": "sha256:1b50e330c091a4cb63f364c03b09e0d06133772d59bfccf9d2b06d7b3828775d"
+          "sha256": "sha256:7ca42c4ccc78e1717f6156d5728c02685638552d52b531810d206bba5aa00b0c"
         },
         {
           "path": "docs/permanence-packages.md",
@@ -346,7 +346,7 @@
         },
         {
           "path": "docs/royalty-policy.md",
-          "sha256": "sha256:b57fb883d6c99e7c61b13d8aaa3dbf152a24349c77c16078a91fb8ba3c5f83be"
+          "sha256": "sha256:06b1262c1ba25f22071b70a6c57e4f476eb9f2394c54b24cfda3a507283719a3"
         }
       ],
       "risk_acceptance": null
@@ -373,7 +373,7 @@
       "evidence": [
         {
           "path": "docs/randomizer-operations.md",
-          "sha256": "sha256:c683ffb29f93a541e7e1650a29d078adc4fb6ff3db4df2e297e36e019f248018"
+          "sha256": "sha256:107a2f76f9c4e258a4a24ca4e63db2cec805b4066d435677d652b47aa0556efe"
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
@@ -443,15 +443,15 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:1a894e0b2e8f93a5e3604394c6754fb5ae9fcac2cdf7b21351df59049cce8047"
+          "sha256": "sha256:99488d732200eed7dcc03028e4f9f83b3d2bb8009c257e0610ef7b2d3ecff98c"
         },
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:12016e9341ceeb38fb9874c4e6f4309d8818d66dce43b138d8f099c25643fa6f"
+          "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:0e65e5a44ae18a7a3a676351be19a2a864406bed05bc4e96aefaa6c562267baf"
+          "sha256": "sha256:6ccb6008dc90823825e07ab918bff7b291149097174cbc7e54195c35ff2d2ba4"
         }
       ],
       "risk_acceptance": null
@@ -514,7 +514,7 @@
       "evidence": [
         {
           "path": "ops/ROADMAP.md",
-          "sha256": "sha256:12016e9341ceeb38fb9874c4e6f4309d8818d66dce43b138d8f099c25643fa6f"
+          "sha256": "sha256:c93cdbbcfa1289c4558bced1bed997fb3b1743e6d12768bf11e5601be2e924f5"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",

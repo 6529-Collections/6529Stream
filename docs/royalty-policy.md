@@ -1,5 +1,13 @@
 # Royalty Policy
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins. For
+target royalty behavior this document is superseded by
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md).
+
+
 This document records the `ONE-003` royalty philosophy and enforcement boundary
 for the current 6529Stream local baseline.
 
@@ -41,7 +49,7 @@ Use the following tracked sources before making any royalty claim:
 | Release readiness | [`docs/release-readiness.md`](release-readiness.md), [`docs/public-beta-evidence.md`](public-beta-evidence.md), [`docs/non-local-release-evidence.md`](non-local-release-evidence.md) | Public beta and production claims need reviewed retained evidence |
 | Release policy | [`docs/release-policy.md`](release-policy.md) | Changed royalty behavior is release-impacting and may be breaking |
 | Upgrade and redeployment | [`docs/adr/0007-upgrade-redeployment.md`](adr/0007-upgrade-redeployment.md) | Changed royalty behavior belongs in versioned release/redeployment planning |
-| Proposed pre-launch revenue and royalty target | [`docs/adr/0008-revenue-splits-and-royalty-resolver.md`](adr/0008-revenue-splits-and-royalty-resolver.md), [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) | Proposed target for arbitrary split profiles, primary-sale templates, split-wallet royalty receivers, and Core-native resolver-backed ERC-2981 before launch |
+| Accepted revenue and royalty specification target | [`docs/adr/0008-revenue-splits-and-royalty-resolver.md`](adr/0008-revenue-splits-and-royalty-resolver.md), [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) | Accepted specification target for arbitrary split profiles, primary-sale templates, split-wallet royalty receivers, and Core-native resolver-backed ERC-2981 from the genesis deployment |
 | Release artifacts | [`release-artifacts/contracts.json`](../release-artifacts/contracts.json), [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json), [`release-artifacts/latest/abi-checksums.json`](../release-artifacts/latest/abi-checksums.json), [`release-artifacts/latest/interface-ids.json`](../release-artifacts/latest/interface-ids.json), [`release-artifacts/latest/event-topic-catalog.json`](../release-artifacts/latest/event-topic-catalog.json), [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json) | Generated artifacts define the reviewed local release surface |
 
 ## Current ERC-2981 Behavior

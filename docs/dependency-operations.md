@@ -1,5 +1,11 @@
 # Dependency Operations Runbook
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
+
 This runbook defines how production dependency script versions are proposed,
 reviewed, packaged, retained, registered, pinned, deprecated, and rolled back
 for 6529Stream.

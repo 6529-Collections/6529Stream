@@ -2907,6 +2907,11 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0007 Upgrade/redeployment | [`P2-UPGRADE-ADR`](https://github.com/6529-Collections/6529Stream/issues/53) | Accepted | `docs/adr/0007-upgrade-redeployment.md` | Gate B2, deployment/release |
 | 0008 Revenue splits and royalty resolver | Protocol design request | Accepted | `docs/adr/0008-revenue-splits-and-royalty-resolver.md` | Revenue split wallet and Core-native ERC-2981 implementation planning |
 | 0009 Protocol v1 open-question resolutions | Protocol design request | Accepted | `docs/adr/0009-protocol-v1-open-question-resolutions.md` | Spec finalization; conformance-matrix gate updates |
+| 0010 World-class spec pass | Protocol design request | Accepted | `docs/adr/0010-world-class-spec-pass.md` | Nine-lens review resolutions; spec hardening |
+| 0011 World-class pass round 2 | Protocol design request | Accepted | `docs/adr/0011-world-class-pass-round-2.md` | Nine-lens round-2 resolutions |
+| 0012 World-class pass round 3 | Protocol design request | Accepted | `docs/adr/0012-world-class-pass-round-3.md` | Nine-lens round-3 resolutions |
+| 0013 World-class pass round 4 | Protocol design request | Accepted | `docs/adr/0013-world-class-pass-round-4.md` | Nine-lens round-4 resolutions |
+| 0014 World-class pass round 5 | Protocol design request | Accepted | `docs/adr/0014-world-class-pass-round-5.md` | Nine-lens round-5 resolutions |
 
 ## Appendix D: Issue Template
 
