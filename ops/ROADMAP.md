@@ -2909,6 +2909,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0009 Protocol v1 open-question resolutions | Protocol design request | Accepted | `docs/adr/0009-protocol-v1-open-question-resolutions.md` | Spec finalization; conformance-matrix gate updates |
 | 0010 World-class spec pass | Protocol design request | Accepted | `docs/adr/0010-world-class-spec-pass.md` | Nine-lens review resolutions; spec hardening |
 | 0011 World-class pass round 2 | Protocol design request | Accepted | `docs/adr/0011-world-class-pass-round-2.md` | Nine-lens round-2 resolutions |
+| 0012 World-class pass round 3 | Protocol design request | Accepted | `docs/adr/0012-world-class-pass-round-3.md` | Nine-lens round-3 resolutions |
 
 ## Appendix D: Issue Template
 

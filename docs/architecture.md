@@ -1,5 +1,10 @@
 # Architecture
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 6529Stream is a pre-audit local baseline for 6529 NFT drops. This document is
 not a security claim and is not production-ready documentation. It gives
 auditors a single map of the current contract system, trust boundaries, value

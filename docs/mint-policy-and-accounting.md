@@ -4,9 +4,11 @@ Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
-[ADR 0010](adr/0010-world-class-spec-pass.md), and
+[ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md) (decisions R6, R9, and
-R12 amend this document) and recorded in
+R12 amend this document), and
+[ADR 0012](adr/0012-world-class-pass-round-3.md) (decisions T6 and T7
+amend this document) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -26,8 +28,10 @@ network: the first production deployment is the permanent system, and every
 requirement here is classified by what can ever change about it — Permanent,
 Replaceable, or Operational per [`docs/spec-policy.md`](spec-policy.md) —
 rather than by launch phase. `StreamCore` should remain the canonical ERC-721
-contract, keep `ERC721Enumerable`, and mint only after an authorized mint
-manager has validated policy and consumed allowance through the ledger.
+contract — with no `ERC721Enumerable` storage; `totalSupply()` stays and
+enumeration derives from `Transfer` events (ADR 0012 decision T10) — and
+mint only after an authorized mint manager has validated policy and consumed
+allowance through the ledger.
 The cross-cutting 50+ year architecture principles live in
 `docs/stream-long-term-architecture.md`.
 
@@ -320,7 +324,11 @@ Requirements [MPA-CORE-ABI]:
 1. `tokenData` is opaque `bytes` end to end: `MintBatch.tokenData[i]`,
    the Core parameter, and Core storage use the same `bytes` typing.
    Renderer/schema code may interpret it as UTF-8, JSON, CBOR, or another
-   format; Core and the manager never parse it.
+   format; Core and the manager never parse it. How a render context
+   serializes or parses these bytes for collection scripts is owned by
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   and never changes this `bytes` typing or adds a Core/manager parse
+   step (ADR 0012 decision T7).
 2. `tokenDataHash` must equal `keccak256(tokenData)`; Core must verify and
    revert on mismatch. V1 Core stores the renderer-visible `tokenData`
    bytes because the genesis metadata renderer consumes them; the hash is
@@ -513,7 +521,10 @@ bytes32 operationRoot = keccak256(abi.encode(
 ));
 
 // Per-token operation IDs bind each prepared token to the root.
+// OPERATION_ID_DOMAIN =
+//     keccak256("6529STREAM_PREPARED_MINT_OPERATION_ID_V1")
 bytes32 operationId = keccak256(abi.encode(
+    OPERATION_ID_DOMAIN,
     bytes32(operationRoot),
     uint256(operationNonce),
     uint256(tokenIndex),
@@ -555,13 +566,19 @@ Requirements [MPA-OPERATION]:
    `REQUEST_COMMITMENT_DOMAIN`, because every named composite hash is
    domain-separated even when it is only consumed inside a domained
    outer preimage (ADR 0011 decision R12); it remains an interior value —
-   never a standalone key, event topic, or signed field.
+   never a standalone key, event topic, or signed field. The per-token
+   `operationId` — a named composite stored as Core's
+   `PreparedMintRecord` lock key and indexed in prepared-mint events —
+   carries its own versioned domain, `OPERATION_ID_DOMAIN`, under the
+   same rule (ADR 0012 decision T6); both domains are mirrored in the
+   protocol v1 domain-constants table.
 
    Implementation evidence (non-normative). The CON-014 slice computes
-   the request commitment without the leading domain, and the
-   checker-pinned `OPERATION_DOMAIN` mirror row describes that as-built
-   interior shape. Deployment requires the domained form above; the
-   mirror row and manager constant re-pin together at implementation
+   the request commitment without the leading domain and the per-token
+   operation ID without `OPERATION_ID_DOMAIN`, and the checker-pinned
+   `OPERATION_DOMAIN` mirror row describes that as-built interior
+   shape. Deployment requires the domained forms above; the mirror
+   rows and manager constants re-pin together at implementation
    alignment.
 2. Deadline, sale adapter identity, price, asset, and the primary/royalty
    policy hashes are bound transitively, not restated at the root: they
@@ -714,8 +731,10 @@ The existing `StreamCore.mint(uint256,address,string,uint256,uint256)` entrypoin
 should be replaced by `mintFromManager` before production deployment.
 
 Burn behavior must preserve the identity mapping used by royalties and audits.
-If a token is burned, Core removes ERC-721 ownership and enumerable membership
-but must not clear `tokenCollectionId`, the stored collection-local serial,
+If a token is burned, Core removes ERC-721 ownership (enumeration is
+event-derived, so no enumerable storage exists to update; ADR 0012
+decision T10) but must not clear `tokenCollectionId`, the stored
+collection-local serial,
 or burned-token audit identity. The serial is read from the retained
 identity record — no range or token-ID arithmetic exists to derive it
 (ADR 0009 decision 1) — and `tokenCollectionIdentity` reports mapping
@@ -897,6 +916,9 @@ COLLECTION        RECIPIENT                 PER_TOKEN     STATIC          STATIC
 COLLECTION        PAYER                     PER_TOKEN     STATIC          STATIC
 GLOBAL            RECIPIENT                 PER_TOKEN     STATIC          STATIC
 GLOBAL            PAYER                     PER_TOKEN     STATIC          STATIC
+PHASE             EXECUTOR                  PER_TOKEN     STATIC          STATIC
+COLLECTION        EXECUTOR                  PER_TOKEN     STATIC          STATIC
+GLOBAL            EXECUTOR                  PER_TOKEN     STATIC          STATIC
 PHASE             RECIPIENT                 PER_TOKEN     MERKLE_STATIC   STATIC
 PHASE             PAYER                     PER_TOKEN     MERKLE_STATIC   STATIC
 COLLECTION        RECIPIENT                 PER_TOKEN     MERKLE_STATIC   STATIC
@@ -909,6 +931,13 @@ Any other combination reverts at configuration time unless a separate accepted
 ADR expands the allowed set. This table bounds the v1 test matrix.
 `GLOBAL` scope is a supported v1 static scope (ADR 0010 decision D5.9);
 its value-key derivation is pinned in `Counter Key Derivation`.
+The `EXECUTOR` rows are v1 members (ADR 0012 decision T6): custody-mint
+phases count the executing custody/adapter address
+(`AUCTION_START_CUSTODY`,
+[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+`[SSA-ENGLISH]` rule 9), so the sales spec's custody-phase counter
+instruction and this table agree, and the manager/ledger test matrix
+covers the `EXECUTOR` combinations exactly like every other row.
 There is no separate `BENEFICIARY` enum in v1: `RECIPIENT` means the
 intended beneficiary as defined below, not the temporary initial recipient.
 
@@ -940,6 +969,15 @@ one execution per signed drop context
   update     = PER_BATCH
   cap mode   = STATIC
   cap        = 1
+
+per-executor allocation on a custody-mint phase (no final owner exists
+yet, so the counter keys the executing custody adapter; see
+docs/stream-sales-and-auctions.md [SSA-ENGLISH] rule 9)
+  scope      = PHASE
+  key mode   = EXECUTOR
+  update     = PER_TOKEN
+  cap mode   = STATIC
+  cap        = custody allocation for that executor
 
 tiered allowlist from a Merkle leaf (v1, no resolver)
   scope      = PHASE
@@ -1075,7 +1113,9 @@ ledger, the canonical key is manager-scoped and uses the resolved phase/counter
 subject:
 
 ```solidity
+// VALUE_KEY_DOMAIN = keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1")
 bytes32 valueKey = keccak256(abi.encode(
+    VALUE_KEY_DOMAIN,
     manager,
     collectionId,
     phaseId,
@@ -1376,7 +1416,9 @@ re-registered. For the CON-013 genesis ledger, the canonical value key is keyed
 by the authorized manager and the resolved phase/counter subject:
 
 ```solidity
+// VALUE_KEY_DOMAIN = keccak256("6529STREAM_MINT_COUNTER_VALUE_KEY_V1")
 bytes32 valueKey = keccak256(abi.encode(
+    VALUE_KEY_DOMAIN,
     manager,
     collectionId,
     phaseId,
@@ -1384,6 +1426,17 @@ bytes32 valueKey = keccak256(abi.encode(
     subjectKey
 ));
 ```
+
+`VALUE_KEY_DOMAIN` joins the derivation by ADR 0012 decision T6:
+`valueKey` crosses the export/archival boundary in the `STATE_EXPORT`
+mint-counter leaf
+([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+`[LTA-EXPORT]`), where every exported identity is domain-tagged, so the
+one undomained key shape is retired under the `[MPA-OPERATION]` rule 1
+composite-hash discipline. Implementation evidence (non-normative): the
+CON-013 ledger slice derives the bare five-field key; deployment
+requires the domained form above, and the ledger constant, mirror row,
+and export tooling re-pin together at implementation alignment.
 
 The ledger exposes `deriveCounterValueKey` and rejects any supplied `valueKey`
 that does not match this derivation. Manager-level scopes such as
@@ -2075,7 +2128,15 @@ Requirements [MPA-AUTHZ]:
 3. `ERC1271_712` verification is a bounded `staticcall` to
    `isValidSignature` under the `TICKET_ERC1271_GAS_LIMIT` Governed Gas
    Parameter with the 63/64 parent-gas precheck; anything but the exact
-   magic value is invalid.
+   magic value is invalid. The parameter's release-manifest
+   failure-direction class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP]
+   requirement 10): raises are governance-only, with no permissionless
+   conditional raise (ADR 0012 decision T1), and its named
+   Permanent-class probe ([LTA-GGP-PROBES]) proves a
+   maximum-supported-class ([GOV-1271-CLASS]) `isValidSignature`
+   verification completes with the magic value under exactly the probed
+   cap against pinned fixture inputs, recording runs on itself with
+   `evidenceHash` committing to the measurement artifact.
 4. `CALLER_ADAPTER` requires `authorizer == msg.sender` and that the
    caller is a registry-`ACTIVE` sale adapter per
    `docs/stream-sales-and-auctions.md` `[SSA-REGISTRY]`.
@@ -2167,7 +2228,40 @@ Requirements [MPA-TICKET] (pinned EIP-712 surface, ADR 0010 decision D3.5):
    The manager must void the authorization when called by the ticket's
    `authorizer` directly, or by anyone presenting the authorizer's valid
    EIP-712/ERC-1271 revocation signature; verification follows
-   `[MPA-AUTHZ]`.
+   `[MPA-AUTHZ]`. The call mechanics are pinned (ADR 0012 decision T6),
+   because the ledger stores only `authorizationId` and the manager must
+   prove who the authorizer is:
+
+   - Presentation: both paths present the full `MintTicket` struct plus
+     the verifying ticket gate address. The manager requires
+     `ticket.manager == address(this)` and `ticket.ledger` equal to its
+     configured ledger (rule 2), recomputes the EIP-712 digest locally
+     under the pinned rule 2 domain with
+     `verifyingContract = ticket gate` (no gate call is needed), and
+     derives `authorizationId` per rule 4 from that digest.
+   - Direct path: the void executes when
+     `msg.sender == ticket.authorizer`.
+   - Signed path: the void executes when the call carries a valid
+     authorizer signature over the `MintTicketRevocation` payload above
+     — its `authorizationId` field must equal the recomputed value —
+     verified per `[MPA-AUTHZ]` under the same EIP-712 domain as the
+     ticket.
+   - Safety of presentation: revealing an unleaked ticket in revocation
+     calldata is safe by construction. The ticket authorizes only its
+     bound executor, payer, recipients, and policy, so an observer gains
+     no authority the bound parties did not already hold; and the void
+     consumes the ID in the same transaction, so nothing can execute
+     after it lands. Where the bound counterparty is actively racing to
+     execute, revocation is a mempool race the revoker should close with
+     private submission. Implementations must not instead require an
+     `authorizationId`-to-authorizer storage mapping or accept bare
+     digests: the presentation shape above is the only conformant one,
+     so revocation security is uniform across implementations.
+
+   The sales spec mirrors this presentation shape for custody-path offer
+   and sale-authorization revocation
+   ([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+   `[SSA-OFFER]` rule 5).
 6. Sale/drop adapters that do not use signed tickets must still pass
    explicit `payer`, `initialRecipients`, and `beneficiaries` and must
    emit the authority source used.
@@ -2293,7 +2387,17 @@ Gate behavior [MPA-GATES]:
    always receives at least it — while the GGP lets governance restore
    service after opcode repricing without touching policy identity. The
    63/64 parent-gas precheck applies; insufficient parent gas reverts
-   (fail closed).
+   (fail closed). The parameter's release-manifest failure-direction
+   class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10, which
+   names it): raises are governance-only, with no permissionless
+   conditional raise (ADR 0012 decision T1). Its named probe is a
+   Permanent-class probe contract ([LTA-GGP-PROBES]) that proves the
+   guarded operation itself succeeds at the probed value: it executes
+   the manager's gate-call frame as a faithful probe-owned equivalent —
+   a `staticcall` forwarding exactly the probed value to a
+   production-depth reference gate over pinned fixture inputs, with no
+   caller-supplied gas shaping — records each run on itself, and
+   commits the measurement artifact through `evidenceHash`.
 7. Gate returndata is bounded: the manager must reject returndata larger
    than `MAX_GATE_RETURNDATA_BYTES = 2_048` or more than
    `MAX_GATE_NULLIFIERS = 16` nullifiers, with typed errors. A failed,
@@ -2472,7 +2576,15 @@ Requirements [MPA-CONSENT]:
 2. Verification is a bounded read against the artist authority registry
    under the `ARTIST_AUTHORITY_GAS_LIMIT` Governed Gas Parameter (genesis
    value `150_000`); an unavailable registry fails closed for
-   consent-bound configuration.
+   consent-bound configuration. The parameter's release-manifest
+   failure-direction class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP]
+   requirement 10): raises are governance-only, with no permissionless
+   conditional raise (ADR 0012 decision T1), and its named
+   Permanent-class probe ([LTA-GGP-PROBES]) proves the consent
+   verification read completes for a pinned fixture binding under
+   exactly the probed cap — a faithful probe-owned equivalent of the
+   manager's bounded registry read — recording runs on itself with
+   `evidenceHash` committing to the measurement artifact.
 3. Consent evidence is evented: the manager emits
    `MintPhaseConsentRecorded` (Events) binding the consent mode, the
    consent evidence hash, and the consented `policyHash`, so every
@@ -2480,14 +2592,24 @@ Requirements [MPA-CONSENT]:
    token -> phase -> policyHash -> consent record.
 4. `PLATFORM_WORKS` collections carry the immutable declaration made at
    creation (artist authority spec); the manager treats them as
-   consent-unconstrained and surfaces the class in phase metadata.
+   consent-unconstrained for configuration and surfaces the class in
+   phase metadata. The platform-works contest stop still binds the mint
+   path: `requireMintConsent` fails closed while the declaration's
+   contest state is `CONTESTED` and permanently after
+   `CONTEST_SUSTAINED` ([AA-CONSENT] requirement 5; ADR 0012 decision
+   T4), so consent-unconstrained never means contest-exempt.
 5. Per-token content commitment under a consented policy comes from the
    existing bindings: tickets bind `tokenDataArrayHash` and
-   `mintCommitmentsHash`, and content manifests
+   `mintCommitmentsHash`, content manifests
    ([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
-   `[SSA-CONTENT]`) pin curated sets, all under the consented
-   `policyHash`. An operator cannot swap content without rotating the
-   hash and re-triggering rule 1.
+   `[SSA-CONTENT]`) pin curated sets, and mint-at-settlement auctions
+   bind an artwork commitment at auction creation that settlement
+   re-verifies against the minted bytes
+   ([`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+   `[SSA-ENGLISH]` rule 8; ADR 0012 decision T6), all under the
+   consented `policyHash`. An operator cannot swap content without
+   rotating the hash and re-triggering rule 1 — on every mint path,
+   including auction settlement of an unminted work.
 6. Artist standing over live phases follows the artist authority spec's
    pause/dispute surfaces; nothing in the mint path may bypass a
    registry-recorded `DISPUTED` or `REVOKED` state for consent-bound
@@ -3185,7 +3307,10 @@ Status: CON-013 and CON-014 implement the static v1 foundation:
    prepare/complete execution.
 3. The implemented manager supports static counter increments, static or
    uncapped counters, and subject modes for constant, payer, recipient,
-   executor, authorizer, and context-derived keys.
+   executor, and context-derived keys — the five address/context modes
+   of `CounterKeyMode`. (An earlier revision of this note claimed an
+   `authorizer` key mode; no such mode exists in `CounterKeyMode`, and
+   the claim was a defect, ADR 0012 decision T6.)
 4. `mintPrepared` requires a nonzero `expectedPolicyHash` and nonzero
    `authorizationId` so production execution cannot bypass stale-policy
    detection or ledger replay protection. `authorizationId` is a replay key
@@ -3282,9 +3407,11 @@ Requirements [MPA-GAS-BUDGET]:
    envelopes inside the ceilings for regression tracking.
 3. The report must include side-by-side measured comparisons against
    named competitor primary-mint paths (at minimum one Manifold, one
-   Zora, and one Art Blocks mint) and the measured `ERC721Enumerable`
-   transfer overhead, so the platform's cost position is owned and
-   published, not discovered by competitors.
+   Zora, and one Art Blocks mint) and the measured all-cold per-mint and
+   per-transfer gas of the enumerable-free Core ([LTA-TRADEOFFS] item 2;
+   ADR 0012 decision T10, superseding the ADR 0010 decision D9.3
+   enumerable-overhead artifact), so the platform's cost position is
+   owned and published, not discovered by competitors.
 4. The measurement harness is reproducible from the repository (foundry
    gas snapshots over the rehearsal deployment) and the artifact is
    checksum-covered like every other release manifest entry.
@@ -3379,6 +3506,17 @@ Manager tests:
     nonzero codehash, and `UNPINNED` against a registry record carrying
     a `runtimeCodeHash` pin all revert at configuration; a nonzero-pin
     module never mints unverified (ADR 0011 decision R12).
+39. `EXECUTOR`-keyed counters enforce per-executor caps in all three v1
+    scopes, key the executing address on custody-mint phases
+    (`AUCTION_START_CUSTODY` shape, sales spec `[SSA-ENGLISH]` rule 9),
+    and compose with `CONSTANT` supply counters in one batch
+    (ADR 0012 decision T6).
+40. Ticket revocation presentation shapes (`[MPA-TICKET]` rule 5): the
+    authorizer voids directly by presenting the full ticket plus gate;
+    anyone voids with a valid `MintTicketRevocation` signature; a
+    non-authorizer caller without that signature is refused; a
+    presentation whose `ticket.manager` or `ticket.ledger` mismatches is
+    refused; a voided ticket can never mint (ADR 0012 decision T6).
 
 Resolver/nullifier extension tests:
 
@@ -3435,6 +3573,12 @@ Integration tests:
 9. Smart-account signed tickets can mint through an authorized executor.
 10. Fixed-price/drop executors pass explicit payer, initial recipients, and
     beneficiaries and never depend on `tx.origin`.
+11. Airdrop distribution: one free-phase batch mints to N distinct
+    recipients under a phase-supply counter and per-recipient caps,
+    executed by an EOA executor on the unpaid phase, with no settlement
+    record emitted (pattern home:
+    [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+    `[SSA-AIRDROP]`; ADR 0012 decision T6).
 
 ## Acceptance Criteria
 

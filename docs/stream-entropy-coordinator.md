@@ -13,9 +13,11 @@ the first production deployment is the permanent system, and the requirements
 below are classified by permanence class per `docs/spec-policy.md`, not by
 launch phase.
 
-`StreamCore` should remain the canonical ERC-721 contract, keep
-`ERC721Enumerable`, and own token minting, ownership, approvals, enumeration,
-and token-to-collection identity. Entropy generation, provider callbacks,
+`StreamCore` should remain the canonical ERC-721 contract — with no
+`ERC721Enumerable` storage; `totalSupply()` stays and enumeration derives
+from `Transfer` events (ADR 0012 decision T10) — and own token minting,
+ownership, approvals, and token-to-collection identity. Entropy
+generation, provider callbacks,
 request lifecycle, delivery retries, recovery policy, and final token seed
 provenance should live outside Core.
 The cross-cutting 50+ year architecture principles live in
@@ -210,7 +212,8 @@ Required lessons to preserve:
 ## Goals
 
 1. Keep `StreamCore` small and stable.
-2. Keep `ERC721Enumerable` in Core.
+2. Keep Core enumeration-free: `totalSupply()` stays, and no
+   `ERC721Enumerable` index storage exists (ADR 0012 decision T10).
 3. Remove randomizer provider details from Core.
 4. Remove token seed/hash storage from Core.
 5. Avoid using `bytes32(0)` as a pending sentinel.
@@ -370,6 +373,20 @@ event EntropyRegistrationGasLimitUpdated(
     uint256 floor
 );
 ```
+
+The parameter's release-manifest failure-direction class is
+`FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10): raises are
+governance-only, and it is not a permissionless conditional-raise member
+(ADR 0012 decision T1). Its named probe is a Permanent-class probe
+contract ([LTA-GGP-PROBES]) that executes a faithful equivalent of the
+guarded operation: the coordinator's all-cold registration write
+sequence, replicated in probe-owned storage with the production struct
+packing and slot shape, run under exactly the probed stipend against a
+pinned input corpus with no caller-supplied gas shaping. The probe
+records each run on itself, and `evidenceHash` commits to the run's
+measurement artifact. A release golden test asserts probe equivalence:
+probe-path gas must match measured production registration gas within
+the tolerance recorded in the release manifest.
 
 Registration failure can never permanently brick minting. The recovery
 chain is explicit (ADR 0010 decision D1.5): the registration cap is
@@ -797,11 +814,20 @@ mirrors these rows, and release tooling computes and pins the hash values.
 | `STREAM_ENTROPY_SCOPE_SEED_V1` | `6529STREAM_ENTROPY_SCOPE_SEED_V1` | 0x6111edc8a4ae25589e49af170892e9083107d07df6b48b7201458e32ba38365b | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 | `GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | 0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17 | `StreamCore` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-REGGAS] |
 | `GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | 0xaf00713aa70c259c23836c61245814e6e3b5fab1fe61b8879c0bd5450f23537c | `StreamEntropyCoordinator` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-INCIDENT-ROLE] |
+| `GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS` | `6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS` | 0x63722ca7b016ab346b7839fe4e01fa7e0627bd5fb99531f7dbe5ec8c34e35c8d | `StreamEntropyCoordinator` | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
+| `GTP_ENTROPY_REVEAL_SLO_BLOCKS` | `6529STREAM_GTP_ENTROPY_REVEAL_SLO_BLOCKS` | 0x823057688d7c18dca4c528004d7912dfe0a32c36528a2cff1eb0e2a9164ab5e0 | `StreamEntropyCoordinator` | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
+| `GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `6529STREAM_GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | 0x0be33ccf48a79079b125936b770c51cdd786fd29d574ce9071323b86838bccd8 | `StreamEntropyCoordinator` | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
+| `STREAM_ENTROPY_SCOPE_RANKING_V1` | `6529STREAM_ENTROPY_SCOPE_RANKING_V1` | 0x395f4d0c11d290e3bb32531f328ce6129c034100a89d45d65d1c55d248a6b0d3 | fair-allocation consumers ([EC-SCOPE-RAFFLE]) | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 
 The three scope-request rows (ADR 0011 decision R8) carry values pinned
 from exactly the string preimages shown; the rows join the checked mirror
 table like every other
 coordinator domain.
+
+The `GTP_*` parameter-identifier rows and the scope-ranking row
+(ADR 0012 decisions T1 and T6) carry values pinned from exactly the
+string preimages shown, and the rows join the checked mirror table like
+every other coordinator domain.
 
 Provider-side raw randomness compression domains are owned by
 [`docs/stream-entropy-providers.md`](stream-entropy-providers.md).
@@ -826,6 +852,11 @@ struct CollectionEntropyConfig {
     bytes32 freshRecoveryPolicyHash;
 }
 ```
+
+Every lifecycle block-count window in this storage model —
+`requestTimeoutBlocks`, `FreshRecoveryStep.notBeforeBlocks`, and the
+reveal policy's `requestSLOBlocks` — is a frozen declared floor applied
+through the effective-window rule of [EC-TIME] (ADR 0012 decision T1).
 
 Fresh recovery policy is separate from the main config because most genesis
 collections should not use it. If `maxFreshRecoveryAttempts > 0`, the linked
@@ -1130,7 +1161,9 @@ function configureCollectionEntropy(
 Rules [EC-CONFIG]:
 
 1. `provider` must be active unless `mode == DISABLED`.
-2. `requestTimeoutBlocks` must be nonzero for async providers.
+2. `requestTimeoutBlocks` must be nonzero for async providers. It is the
+   collection's declared incident-timeout floor; the operative window is
+   the effective request timeout of [EC-TIME] (ADR 0012 decision T1).
 3. `maxFreshRecoveryAttempts` must be bounded and should default to zero for
    high-value VRF collections.
 4. If `maxFreshRecoveryAttempts > 0`, `freshRecoveryPolicyId` must point to an
@@ -1176,8 +1209,114 @@ Freeze:
 function freezeCollectionEntropy(uint256 collectionId) external;
 ```
 
-Freezing prevents provider, salt, mode, timeout, recovery policy, and
-reveal policy changes for the collection.
+Freezing prevents provider, salt, mode, recovery policy, reveal policy,
+and declared lifecycle-window changes for the collection. Two named
+Operational overlays remain governable after freeze without touching any
+frozen declaration: the governed time parameters, which can never
+shorten an effective window below the frozen declaration ([EC-TIME],
+ADR 0012 decision T1), and the reveal-fee funding value ([EC-REVEAL]
+rule 9, ADR 0012 decision T7).
+
+## Governed Time Parameters [EC-TIME]
+
+Entropy lifecycle windows are block-denominated liveness gates, and a
+frozen block count silently rescales its wall-clock meaning with every
+consensus-timing change. They are therefore Governed Time Parameters
+(GTPs) under the pattern home
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+[LTA-GTP] (ADR 0012 decision T1); this section instantiates the
+coordinator-hosted parameters and the per-collection freeze semantics
+the pattern home delegates here.
+
+| Parameter | Immutable floor | Window it governs |
+| --- | --- | --- |
+| `ENTROPY_REQUEST_TIMEOUT_BLOCKS` | `ENTROPY_REQUEST_TIMEOUT_FLOOR` | Unrecoverable-marking eligibility ([EC-INCIDENT] rule 2) |
+| `ENTROPY_REVEAL_SLO_BLOCKS` | `ENTROPY_REVEAL_SLO_FLOOR` | Reveal SLO and permissionless-fallback lapse ([EC-REVEAL] rules 3–4) |
+| `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `ENTROPY_RECOVERY_STEP_DELAY_FLOOR` | Fresh-recovery step eligibility (`FreshRecoveryStep.notBeforeBlocks`) |
+
+Requirements [EC-TIME]:
+
+1. `ENTROPY_REQUEST_TIMEOUT_BLOCKS`, `ENTROPY_REVEAL_SLO_BLOCKS`, and
+   `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` are coordinator-hosted GTPs
+   under the [LTA-GTP] pattern: storage-backed host values paired with
+   deploy-time immutable floors, identified by the `GTP_`-prefixed
+   parameter identifiers in the [Domain Constants](#domain-constants)
+   table, recorded in the release manifest with genesis value, floor,
+   host, and pinned wall-clock intent (seconds at the genesis cadence),
+   and named members of the repricing/consensus-timing review checklist
+   — all per the pattern home, which this section instantiates rather
+   than restates.
+2. Effective-window rule — the per-collection config-freeze semantics
+   that [LTA-GTP] definition item 1 delegates to this document. At
+   every evaluation the coordinator reads the live host value and
+   applies the maximum of it and the collection's frozen declaration,
+   token-keyed and scope-keyed alike:
+   1. the effective request timeout is `max(requestTimeoutBlocks,
+      ENTROPY_REQUEST_TIMEOUT_BLOCKS)`, consumed by [EC-INCIDENT]
+      rule 2;
+   2. the effective reveal SLO is `max(requestSLOBlocks,
+      ENTROPY_REVEAL_SLO_BLOCKS)`, consumed by [EC-REVEAL] rules 3–4;
+   3. the effective recovery-step delay is `max(notBeforeBlocks,
+      ENTROPY_RECOVERY_STEP_DELAY_BLOCKS)` for each
+      `FreshRecoveryStep`, counted from the block of the incident
+      action (or exhausted prior step) that made the step eligible.
+   The frozen declaration is never the parameter: it is the
+   collection's promised minimum, bounding every retune from below, so
+   the pre-lapse public-request exclusivity (ADR 0009 decision 22) and
+   the original provider's declared patience hold for the life of the
+   collection.
+3. Escalation gates open late, never early. Every window above gates an
+   escalation — an unrecoverable declaration, a public request, a
+   fallback-provider draw — whose premature firing is a reroll or
+   exclusivity hazard and whose late firing is a bounded liveness cost.
+   The immutable floors, the frozen declarations, and the max() rule
+   enforce onchain that no retune opens a gate earlier than both allow;
+   a governed lower restores a cadence-inflated window only down to
+   those bounds.
+4. Change discipline is the pattern home's, cited not restated: the
+   canonical governance action on the normal delay class, per-action
+   raise and lower bounds, cadence-probe-gated lowers, and no emergency
+   or permissionless conditional path for any time parameter
+   ([LTA-GTP]; ADR 0012 decision T1).
+5. The values are Operational-layer ([LTA-GTP]): excluded from entropy
+   identity, policy manifests, provider config hashes, seed derivation,
+   and provider epochs, exactly as [EC-CONFIG] rule 12 excludes gas
+   (ADR 0010 decision D1.3). Retuning a window never disturbs a frozen
+   collection and never changes any seed.
+6. Cadence probe: the three parameters share the coordinator's named
+   cadence probe — a Permanent-class probe contract under
+   [LTA-GGP-PROBES], recorded per parameter in the release manifest
+   with its `probeMaxAgeBlocks` — whose recorded observed-cadence runs
+   gate lowers and feed the review ([LTA-GTP]). Observed cadence drift
+   beyond the manifest tolerance is a monitored review trigger under
+   the same incident regime as [EC-REVEAL] rule 8.
+7. Genesis posture: each genesis value equals its floor, so the overlay
+   is inert — every effective window equals the collection's declared
+   value wherever that declaration meets the floor — until a cadence
+   change justifies a staged raise. Planning targets for the pinned
+   wall-clock intents at the 12s deployment cadence: 24 hours for the
+   request timeout and one hour each for the reveal SLO and the
+   recovery-step delay. The deployed floors come from the recorded
+   sizing rationale, not from this prose.
+8. Accepted residual (ADR 0012 decision T1): block-cadence slowdown
+   lengthens frozen declared windows in wall-clock terms, and no
+   governance action may shorten a window below a collection's frozen
+   declaration. Escalations arrive late, never early; delivery retry,
+   reveal-owner and admin requests, and incident handling all remain
+   available throughout the longer wait.
+9. Every change emits the parameter-named alias event below — an alias
+   member of the canonical `TimeParameterUpdated` change-event family
+   per [LTA-GTP], tagged as such in the event catalog:
+
+```solidity
+event EntropyTimeParameterUpdated(
+    uint16 schemaVersion,
+    bytes32 indexed parameterId,
+    uint256 oldValueBlocks,
+    uint256 newValueBlocks,
+    uint256 floorBlocks
+);
+```
 
 ## Token Registration Flow
 
@@ -1597,8 +1736,9 @@ Requirements [EC-SCOPE]:
    window opens, so the drawing mechanism is committed before anyone
    enters.
 3. Scope requests use the collection's frozen entropy config: provider,
-   provider epoch, provider config hash, `collectionSalt`,
-   `requestTimeoutBlocks`, and fresh-recovery policy. The collection's
+   provider epoch, provider config hash, `collectionSalt`, the declared
+   `requestTimeoutBlocks` (applied as the effective window, [EC-TIME]
+   rule 2), and fresh-recovery policy. The collection's
    `mode` must be `ASYNC`: scope entropy is async-only, and no instant
    path may finalize a scope seed for any security class.
    `requestScopeEntropy` must satisfy the [EC-REQUEST-GUARDS] reentrancy
@@ -1645,8 +1785,8 @@ Requirements [EC-SCOPE]:
     records stay pinned to, and readable from, the coordinator that
     registered them under the coordinator replacement rules.
 11. Consumers must resolve outcomes from the finalized scope seed and the
-    committed inputs deterministically — for example, ranking entries by
-    `keccak256(abi.encode(seed, entryIndex))` — with the exact derivation
+    committed inputs deterministically — the canonical fair-allocation
+    ranking is pinned in [EC-SCOPE-RAFFLE] — with the exact derivation
     pinned in the consuming spec so any party can recompute the result.
     Consumers must not mix a scope seed with inputs chosen after the
     request.
@@ -1687,6 +1827,66 @@ event ScopeEntropyFinalized(
 );
 ```
 
+### Fair-Allocation Scope Recipe [EC-SCOPE-RAFFLE]
+
+Oversubscribed-drop fair allocation — raffle winner selection and
+duplicate-free random assignment of a pre-committed curated set — is a
+frozen recipe over this surface (ADR 0012 decision T6), so a future
+raffle or random-allocation adapter inherits committed safety semantics
+instead of reconstructing intent decades later. The sale-side extension
+profile — entry windows, escrowed entry deposits, refunds, winner
+claims, and the entry-set closing rules — is owned by
+[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md);
+the coordinator-side sequence below is the part that profile consumes
+and cites. The coordinator still resolves no outcome itself (Non-Goals
+item 7): this recipe pins the derivation consumers must apply.
+
+Requirements [EC-SCOPE-RAFFLE]:
+
+1. Commitment before entries: the consuming sale registers its
+   `SALE`-kind scope before the entry window opens — the [EC-SCOPE]
+   rule 2 "should" is a "must" for this recipe — so the drawing
+   mechanism (provider, epoch, config hash, salt) is committed onchain
+   before the first entry exists.
+2. Entry-root closure: `scopeInputsHash` must commit to the complete
+   closed subject set — the root of the ordered entry list for a
+   raffle, or the assignment manifest hash for a curated set — computed
+   only after the entry window has closed. `requestScopeEntropy` must
+   not be called while entries can still change, and the stored root is
+   immutable across recovery re-requests ([EC-SCOPE] rule 4), so no
+   path can add, remove, or reorder entrants after the request.
+   Preimage publication and availability rules for the entry list are
+   owned by the sale-side profile.
+3. Canonical ranking: outcomes derive from exactly the finalized scope
+   seed and the committed entry list. The canonical rank key of the
+   0-based `entryIndex` into the committed ordered entry list is
+
+   ```solidity
+   bytes32 rankKey = keccak256(abi.encode(
+       STREAM_ENTROPY_SCOPE_RANKING_V1,
+       seed,
+       uint256(entryIndex)
+   ));
+   ```
+
+   with entries ordered by ascending `rankKey`: the first `W` ranked
+   entries win a `W`-winner raffle, and curated-set assignment maps
+   ranked entries to manifest slots in committed order. Distinct entry
+   indexes make ties impossible. A consuming profile must pin this
+   derivation, or a stricter refinement of it, verbatim; every outcome
+   must be recomputable by any party from onchain data alone
+   ([EC-SCOPE] rule 11), and no input chosen after the request may
+   enter it.
+4. One draw per sale: the raffle scope is one commitment ([EC-SCOPE]
+   rule 6). A stalled, stale, or failed draw follows [EC-INCIDENT]
+   through the scope-keyed path under the effective windows [EC-TIME];
+   the sale-side profile must declare its abort remedy (refund every
+   entry) rather than redraw outside the frozen fresh-recovery policy.
+5. Separation from token seeds: allocation is a sale-layer outcome. The
+   scope seed must not enter any token seed derivation; winning entries
+   mint through the normal sale and mint path, and their tokens draw
+   token-keyed entropy as usual.
+
 ## Reveal Ownership And Funding
 
 Registration at mint is not a reveal. For async collections the visible
@@ -1720,6 +1920,11 @@ function configureCollectionRevealPolicy(
     uint256 revealFeePerTokenWei
 ) external;
 
+function updateRevealFeePerToken(
+    uint256 collectionId,
+    uint256 newRevealFeePerTokenWei
+) external;
+
 function fundRevealFeeEscrow(uint256 collectionId) external payable;
 ```
 
@@ -1727,7 +1932,9 @@ Requirements [EC-REVEAL]:
 
 1. Every collection configured with `mode == ASYNC` must declare a reveal
    policy before public mint; the policy freezes with the collection
-   entropy config [EC-CONFIG] rule 13. `revealOwnerRole` is an ADR 0004
+   entropy config [EC-CONFIG] rule 13 — every field except the
+   Operational `revealFeePerTokenWei` funding value (rule 9; ADR 0012
+   decision T7). `revealOwnerRole` is an ADR 0004
    role identifier resolved through the registry at call time, never a
    raw address, under the same discipline as [EC-INCIDENT-ROLE]; the
    genesis vocabulary entry is `ROLE_ENTROPY_REVEAL_OWNER`, owned by
@@ -1747,18 +1954,28 @@ Requirements [EC-REVEAL]:
    collections; declaring `OWNER_WINDOW` instead requires a recorded
    rationale in the reveal operations manifest.
 3. `OWNER_WINDOW` mode: the reveal owner must request entropy for each
-   registered token within `requestSLOBlocks` of that token's
-   `registeredAtBlock`. `requestSLOBlocks` must be nonzero in every
-   declared policy.
+   registered token within the effective reveal-SLO window ([EC-TIME]
+   rule 2) of that token's `registeredAtBlock`. `requestSLOBlocks` is
+   the declared floor of that window: it must be nonzero in every
+   declared policy and must be at least the reveal owner's recorded
+   worst-case holder latency plus margin, per the window-sizing rule of
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   [LTA-GOV] rule 6; the reveal-operations-manifest gate checks the
+   declared SLO against that recorded latency (ADR 0012 decision T5).
 4. Permissionless fallback: once `block.number` exceeds
-   `registeredAtBlock + requestSLOBlocks` for a token that is still
-   `REGISTERED`, anyone may call `requestEntropy(tokenId)` for it,
-   regardless of `publicRequestsEnabled`. This time-gated lapse remedy is
-   the decided exception to opt-in public requests (ADR 0011 decision
-   R8); ADR 0009 decision 22 continues to govern the pre-lapse window.
-   The fallback pays the provider fee from the reveal-fee escrow
-   [EC-FEEBIND] rule 9, so a lapsed reveal costs the fallback caller only
-   gas.
+   `registeredAtBlock` plus the effective reveal-SLO window ([EC-TIME]
+   rule 2) for a token that is still `REGISTERED`, anyone may call
+   `requestEntropy(tokenId)` for it, regardless of
+   `publicRequestsEnabled`. This time-gated lapse remedy is the decided
+   exception to opt-in public requests (ADR 0011 decision R8); ADR 0009
+   decision 22 continues to govern the pre-lapse window. The fallback
+   pays the provider fee from the reveal-fee escrow [EC-FEEBIND] rule 9,
+   so a lapsed reveal costs the fallback caller only gas while the
+   escrow covers the live quote; if provider fee drift has outrun the
+   escrow, the fallback stays available with the shortfall payable from
+   `msg.value` — a monitored, remediable funding condition under
+   rules 8–9 (ADR 0012 decision T7), never a spec-accepted steady
+   state.
 5. Funding: for priced sale kinds, the sale layer escrows
    `revealFeePerTokenWei` per minted token into the coordinator's
    per-collection reveal-fee escrow through `fundRevealFeeEscrow`; the
@@ -1775,8 +1992,9 @@ Requirements [EC-REVEAL]:
    zero request fee [EP-QUOTE], so `revealFeePerTokenWei` may be zero.
    Where the configured provider quotes a nonzero native fee, the
    declared `revealFeePerTokenWei` must cover the provider's quoted fee
-   at configuration time. In both postures the reveal operations manifest
-   names the funding source.
+   at configuration time and at every rule 9 update, so per-token
+   accrual keeps pace with provider fee drift. In both postures the
+   reveal operations manifest names the funding source.
 7. Escrow discipline: escrow draws never exceed the same-transaction
    provider quote, every draw is evented, and escrow balances are
    Operational — excluded from entropy identity, policy manifests, and
@@ -1785,13 +2003,32 @@ Requirements [EC-REVEAL]:
    and only when the collection has no non-terminal token entropy
    records.
 8. The reveal operations manifest is a checked release artifact recording
-   the reveal owner role and holder, the declared request mode and
-   `requestSLOBlocks`, the target mint-to-`FINALIZED` latency, the keeper
-   obligation and monitoring alerts (tokens `REGISTERED` past the SLO;
-   requests `REQUESTED` beyond provider norms; escrow or subscription
-   float below the exhaustion threshold), the funded float, and a
-   rehearsed end-to-end reveal run as release evidence. A missed SLO or
-   exhausted float is a monitored incident (ADR 0011 decision R12).
+   the reveal owner role and holder, the holder's recorded worst-case
+   latency against the declared SLO (rule 3; ADR 0012 decision T5), the
+   declared request mode and `requestSLOBlocks`, the target
+   mint-to-`FINALIZED` latency, the keeper obligation and monitoring
+   alerts (tokens `REGISTERED` past the effective SLO; requests
+   `REQUESTED` beyond provider norms; escrow or subscription float below
+   the exhaustion threshold; the live escrow-versus-quoted-fee margin of
+   rule 9 below its recorded threshold), the funded float and the named
+   top-up obligation, and a rehearsed end-to-end reveal run as release
+   evidence. A missed SLO, exhausted float, or breached fee margin is a
+   monitored incident (ADR 0011 decision R12; ADR 0012 decision T7).
+9. `revealFeePerTokenWei` is an Operational funding parameter, never
+   entropy identity (ADR 0012 decision T7). After the policy freezes,
+   entropy admins may retune it through
+   `updateRevealFeePerToken(collectionId, newRevealFeePerTokenWei)`:
+   admin-only, evented via `RevealFeePerTokenUpdated`, applying to
+   future mints only, and re-sized against the configured provider's
+   live quoted fee (rule 6). The frozen promises — request mode, reveal
+   owner role, declared SLO — never move with it, already-accrued
+   escrow is never restated, and the sale layer charges the live
+   declared value per mint; the priced line item is owned by
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   Where drift outruns accrual, the remedy chain is the rule 8 margin
+   alarm, a fee update for future mints, and the permissionless
+   `fundRevealFeeEscrow` top-up for the shortfall — a monitored, funded
+   condition, never a silent fallback failure.
 
 Events:
 
@@ -1803,6 +2040,13 @@ event RevealPolicyConfigured(
     bytes32 revealOwnerRole,
     uint64 requestSLOBlocks,
     uint256 revealFeePerTokenWei
+);
+
+event RevealFeePerTokenUpdated(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    uint256 oldRevealFeePerTokenWei,
+    uint256 newRevealFeePerTokenWei
 );
 
 event RevealFeeEscrowFunded(
@@ -2035,9 +2279,9 @@ function markEntropyRequestUnrecoverable(
 Rules [EC-INCIDENT]:
 
 1. Token must be `REQUESTED`.
-2. `block.number` must be greater than
-   `requestedAtBlock + requestTimeoutBlocks`, unless a provider is
-   `INCIDENT_REVOKED`.
+2. `block.number` must be greater than `requestedAtBlock` plus the
+   effective request-timeout window ([EC-TIME] rule 2; ADR 0012
+   decision T1), unless a provider is `INCIDENT_REVOKED`.
 3. No-reroll proof is coordinator-state evidence first, adapter testimony
    second (ADR 0011 decision R12). All three parts are required:
    1. Coordinator-state check: the coordinator must verify from its own
@@ -2085,6 +2329,31 @@ Rules [EC-INCIDENT]:
 11. Scope entropy incidents follow every rule above through the
     scope-keyed equivalents [EC-SCOPE], with the same coordinator-state,
     probe, and evidence requirements.
+
+`ENTROPY_RESULT_PROBE_GAS_LIMIT` carries the release-manifest
+failure-direction class `FORWARDING_CAP` ([LTA-GGP] requirement 10): it
+bounds a fail-safe staticcall whose failure reads as "not safe to
+recover," and raising it restores recovery capability. Its named health
+probe — a Permanent-class probe contract ([LTA-GGP-PROBES]; ADR 0012
+decision T1) — executes `providerResultStatus` staticcalls against each
+registered production adapter for a pinned fixture corpus of request
+IDs under exactly the probed cap, with no caller-supplied gas shaping;
+it records each run on itself, treats out-of-gas, revert, or malformed
+returndata as failure, and commits the measurement artifact through
+`evidenceHash`.
+
+One provider-side condition deserves explicit statement: a frame-level
+callback loss after upstream fulfillment — the in-flight repricing mode
+pinned in
+[`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+[EP-INFLIGHT] — leaves rule 3 permanently unsatisfiable by design. The
+adapter truthfully reports no randomness received, but the upstream
+output stands publicly revealed, so the rule 3.3 evidence bundle can
+never corroborate that no upstream fulfillment occurred. Such a request
+stays `REQUESTED` forever unless a separately accepted replay path
+re-delivers the identical revealed output; a fresh draw after a public
+reveal is a reroll and stays blocked for every collection, with or
+without a fresh-recovery policy.
 
 Event:
 
@@ -2136,7 +2405,12 @@ For Chainlink-style VRF, the v1 default should be no fresh token-level
 request after the VRF request is accepted. Operational protection should come
 from funding monitors, provider health checks, callback gas runbooks, and
 delivery retry of already received randomness. Fresh recovery should be a rare
-public incident process.
+public incident process. In-flight callback-gas semantics across raises
+and gas-schedule repricings — including the frame-level loss mode that
+[EC-INCIDENT] rule 3 blocks from fresh draws — are provider-side and
+pinned in
+[`docs/stream-entropy-providers.md`](stream-entropy-providers.md)
+[EP-INFLIGHT] (ADR 0012 decision T1).
 
 ## Instant Providers
 
@@ -2283,11 +2557,14 @@ Recommended admin roles:
 
 ```text
 global admin             emergency authority through ADR 0004 governance/action roles
-entropy config admin     configure collection entropy before freeze
+entropy config admin     configure collection entropy before freeze;
+                         retune the Operational reveal fee after freeze
+                         [EC-REVEAL] rule 9
 provider admin           approve, deprecate, or revoke providers
 request operator         request entropy or trigger delivery retry where allowed
 metadata refresh admin   coordinate refresh events if required
-gas parameter admin      stage GGP raises/lowers through ADR 0004 action classes
+gas/time parameter admin stage GGP and GTP raises/lowers through ADR 0004
+                         action classes [EC-REGGAS] [EC-TIME]
 incident declarer        declare entropy incidents through the frozen role
                          reference [EC-INCIDENT-ROLE]
 reveal owner             request entropy for reveal-declared collections
@@ -2349,8 +2626,16 @@ practical.
     quote, and forced ETH recovery can reduce neither tracked refund
     credits nor tracked reveal-fee escrows [EC-REVEAL].
 27. The permissionless reveal fallback is reachable for a token only
-    after that token's declared SLO window has lapsed [EC-REVEAL]
-    (ADR 0011 decision R8).
+    after that token's effective reveal-SLO window has lapsed
+    [EC-REVEAL] (ADR 0011 decision R8).
+28. Effective lifecycle windows are never shorter than the collection's
+    frozen declarations or the immutable parameter floors, and governed
+    time retuning never changes entropy identity, policy manifests,
+    seeds, or provider epochs [EC-TIME] (ADR 0012 decision T1).
+29. Reveal-fee retuning changes only the Operational funding value:
+    frozen reveal promises and accrued escrow are untouched, and a
+    fee-drift shortfall is a monitored, permissionlessly fundable
+    condition [EC-REVEAL] (ADR 0012 decision T7).
 
 ## Security Considerations
 
@@ -2424,8 +2709,10 @@ Collectors and auditors should be able to reconstruct:
 8. final metadata refresh trigger;
 9. scope registration, request, inputs commitment, and finalization
    history [EC-SCOPE];
-10. reveal policy, escrow funding, escrow draws, and fallback engagement
-    [EC-REVEAL].
+10. reveal policy, escrow funding, escrow draws, fee retuning, and
+    fallback engagement [EC-REVEAL];
+11. governed gas and time parameter value history [EC-REGGAS]
+    [EC-TIME].
 
 ## Bytecode Impact
 
@@ -2505,7 +2792,9 @@ Core integration tests:
 3. Core emits `EntropyCoordinatorUpdated`.
 4. Updating coordinator requires admin authority.
 5. Core no longer stores token hash or randomizer address.
-6. `ERC721Enumerable` behavior remains unchanged.
+6. Core carries no `ERC721Enumerable` surface:
+   `supportsInterface(0x780e9d63)` is false and the index selectors are
+   absent (ADR 0012 decision T10; [LTA-ENUMERATION]).
 7. If `onTokenMinted` reverts, the whole mint reverts and no token is minted.
 8. Emergency switch to a pre-approved safe-mode coordinator preserves
    registration semantics.
@@ -2520,6 +2809,10 @@ Core integration tests:
     threshold and reads the live parameter value after a raise.
 11. Gas parameter values appear in no finality manifest, frozen-route
     identity, entropy policy manifest, or seed derivation input.
+12. The registration-gas probe satisfies its golden equivalence test,
+    records failing and passing runs on itself, and the parameter's
+    `FAIL_CLOSED_PRECHECK` class excludes it from permissionless
+    conditional-raise registration (ADR 0012 decision T1).
 
 Coordinator config tests:
 
@@ -2540,6 +2833,16 @@ Coordinator config tests:
 10. Rotating the holder behind a frozen `incidentDeclarerRole` through
     ADR 0004 governance requires no policy or config change, and incident
     declaration honors the post-rotation holder.
+11. Governed time parameters [EC-TIME]: values below their immutable
+    floors are rejected; raises and lowers respect the per-action bounds
+    and the normal delay class; every change emits
+    `EntropyTimeParameterUpdated`; no emergency or permissionless
+    conditional path exists for a time parameter.
+12. Effective windows apply the max() rule: a governed raise lengthens
+    the effective timeout, SLO, and recovery-step delay for a frozen
+    collection without touching its config, policy hashes, provider
+    epoch, or seeds, and no action shortens any window below the frozen
+    declaration or the floor.
 
 Request tests:
 
@@ -2633,6 +2936,13 @@ Incident recovery tests:
     original callback remains a stale, audit-visible event that cannot
     finalize, and the declared evidence commitment is retained for
     incident review.
+16. Unrecoverable marking honors the effective request-timeout window:
+    eligibility opens only after the maximum of the frozen declaration
+    and the live governed value [EC-TIME], and a governed raise defers
+    an otherwise-eligible declaration.
+17. The result-probe parameter's named health probe records runs on
+    itself and treats out-of-gas, revert, and malformed returndata as
+    failing runs (ADR 0012 decision T1).
 
 Scope entropy tests:
 
@@ -2658,6 +2968,11 @@ Scope entropy tests:
    restricted Core refresh emitter.
 9. Scope requests are caller-funded under [EC-FEEBIND] and never draw
    from the reveal-fee escrow.
+10. Fair-allocation golden vectors: a fixed seed and committed entry
+    list reproduce the pinned `STREAM_ENTROPY_SCOPE_RANKING_V1` winner
+    order and curated-set assignment [EC-SCOPE-RAFFLE], and the
+    derivation consumes only the finalized seed and the committed
+    inputs.
 
 Reveal operation tests:
 
@@ -2677,9 +2992,22 @@ Reveal operation tests:
    aggregates.
 6. The reveal owner role resolves through ADR 0004 at call time, and
    holder rotation requires no policy change.
-7. The reveal operations manifest — SLO target, keeper obligation,
-   monitoring thresholds, funded float, rehearsal evidence — is present
-   and checksum-covered in the release artifacts.
+7. The reveal operations manifest — SLO target, holder-latency check,
+   keeper obligation, monitoring thresholds including the
+   escrow-versus-quote margin, funded float and top-up obligation,
+   rehearsal evidence — is present and checksum-covered in the release
+   artifacts.
+8. `updateRevealFeePerToken` is admin-only, evented via
+   `RevealFeePerTokenUpdated`, applies to future mints only, and leaves
+   request mode, reveal owner role, declared SLO, and accrued escrow
+   untouched; frozen-policy field changes still revert.
+9. With the live provider quote above the accrued per-token fee, the
+   lapse fallback draws the escrow first and requires only the
+   shortfall from `msg.value`; a permissionless `fundRevealFeeEscrow`
+   top-up restores gas-only fallback calls.
+10. A declared `requestSLOBlocks` below the reveal owner's recorded
+    worst-case holder latency plus margin fails the
+    reveal-operations-manifest gate (ADR 0012 decision T5).
 
 Provider adapter tests:
 
@@ -2784,6 +3112,22 @@ Renderer integration tests:
     home, including `REJECTED_PROVIDER_REVOKED = 5` (ADR 0010 decision
     D8.1); decision-record text restating the five-member pre-extension
     enum is corrected to cite this home (ADR 0011 decision R12).
+17. Entropy lifecycle block-count windows are Governed Time Parameters:
+    coordinator-hosted values with immutable floors, applied through
+    the effective-window max() rule over frozen per-collection
+    declarations, retunable on the normal delay class, members of the
+    cadence review, and excluded from entropy identity [EC-TIME]
+    (ADR 0012 decision T1).
+18. `revealFeePerTokenWei` is Operational funding, updatable after
+    policy freeze with evented, future-mints-only effect and a
+    monitored escrow-margin top-up obligation; the frozen reveal
+    promises never move with it [EC-REVEAL] (ADR 0012 decision T7).
+19. Oversubscribed-drop fair allocation is a frozen recipe over the
+    scope surface — pre-entry scope registration, post-closure
+    committed entry roots, and the canonical domain-separated ranking
+    derivation [EC-SCOPE-RAFFLE] — with the sale-side profile home in
+    [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+    (ADR 0012 decision T6).
 
 These resolutions are normative; the requirements in the body of this
 document already state each decided behavior.

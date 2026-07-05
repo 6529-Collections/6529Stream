@@ -1,5 +1,11 @@
 # Operator Dashboard Query Model
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
+
 This `GOV-010` query model is a pre-audit local baseline for teams building a
 6529Stream operator dashboard, monitoring console, indexer view, or internal
 6529.io operations surface. It is not production-ready, not a security claim,

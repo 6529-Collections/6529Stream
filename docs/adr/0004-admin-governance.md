@@ -4,7 +4,10 @@
 
 Accepted.
 
-Implementation status: P0-ADMIN-001 implements target-scoped function-admin
+Implementation status (labeled non-normative implementation evidence:
+this paragraph records the as-built P0-ADMIN baseline, and the normative
+sections below win wherever the baseline diverges — ADR 0012 decision
+T9): P0-ADMIN-001 implements target-scoped function-admin
 permission checks for the current protected-function surface, fixes the
 `setCollectionData`, `updateCollectionInfo`, and `setMultipleMerkleRoots`
 selector mismatches, adds owner/root role-management recovery, and adds
@@ -155,7 +158,7 @@ roles or stricter equivalents.
 | `FunctionAdmin` | Calls one protected function on one target contract | Safe/multisig or documented operations wallet | Keyed by target contract and selector |
 | `CollectionAdmin` | Mutates approved fields for one collection before freeze | Artist/team Safe, if used | Cannot affect other collections |
 | `SignerManager` | Adds/removes drop signers, increments signer epochs, cancels signed drops | Safe/multisig | Separate from drop signer addresses |
-| `PauseGuardian` | Immediately pauses approved domains | Safe/multisig or monitored hot wallet | Cannot unpause unless also granted unpause authority |
+| `PauseGuardian` | Immediately pauses approved domains | Safe/multisig, or a registered governance-guardian module per [LTA-GUARDIAN]; a monitored hot wallet only as a documented bootstrap exception with a recorded sunset | Cannot unpause unless also granted unpause authority |
 | `UnpauseAdmin` | Unpauses domains after incident review | Safe/multisig | May be `GovernanceRoot` |
 | `EmergencyAdmin` | Executes surplus-only emergency withdrawals and documented emergency actions | Safe/multisig | Cannot withdraw owed or reserved funds |
 | `DeploymentOperator` | Performs deployment-time wiring before ownership/role transfer | Temporary deployer wallet | Must be removed during ceremony |
@@ -529,7 +532,10 @@ FUNDS_RECOVERY
 SUCCESSOR_DECLARATION
 ```
 
-Launch may simplify this into a two-tier delay model:
+The deployed enforcement model is definitively the two-tier delay model
+below plus the named exception floors (ADR 0012 decision T9); the richer
+action-class taxonomy above is catalog and manifest vocabulary until a
+separately accepted ADR implements it onchain:
 
 ```text
 IMMEDIATE tightening actions only, 0 delay
@@ -746,7 +752,13 @@ and treasury or endowment movements. Material actions must be executable
 by Safe multisigs and governor contracts. EOA-class holders may hold
 material-action roles only during a time-boxed deployment bootstrap whose
 sunset (transfer of every material role to Safe or governor holders) is a
-deployment gate recorded in the ceremony evidence.
+deployment gate recorded in the ceremony evidence. Executability is
+verified, not assumed: a deployment-gated rehearsal executes at least one
+action of every material class from a Safe multisig and one from a
+governor contract, with the transcripts retained as release evidence
+(ADR 0012 decision T5). Non-material operational grants held by EOA-class
+wallets are reviewed on the funding-renewal cadence and either
+re-justified in the ceremony evidence or sunset (ADR 0012 decision T5).
 
 ### ERC-1271 Wallet Class [GOV-1271-CLASS]
 
@@ -863,6 +875,7 @@ Safe/multisig or governance contract per the Role Model above.
 
 | Role constant | Authority | Grant class | Normative home |
 | --- | --- | --- | --- |
+| `ROLE_PAUSE_GUARDIAN` | Immediately pauses approved domains (tightening only); disjoint from unpause (ADR 0012 decision T5) | root | this ADR (Role Model, [GOV-ROLES]); guardian-module holders per [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) [LTA-GUARDIAN] |
 | `ROLE_UNPAUSE` | Executes unpause with no timelock and an evented reason; disjoint from pause guardians | root | this ADR, [GOV-WINDOWS].3 |
 | `ROLE_COLLECTION_FINALITY_ADMIN` | Executes `finalizeCollectionArtwork` / scoped finality subject to component verification | root | [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) (Artwork Finality Freeze [LTA-FINALITY]) |
 | `ROLE_TERMINAL_FREEZE_VETO` | Per-scope terminal-freeze veto guardian resolved through `terminalFreezeVetoGuardian`; independent of scheduling roles | root | this ADR ([GOV-WINDOWS] veto surface); [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) [LTA-FREEZE] rule 4 |
@@ -876,8 +889,10 @@ The legacy CamelCase names in the Role Model table (for example
 `UnpauseAdmin`, `PauseGuardian`) are the P0 authority descriptions; where a
 production surface binds an authority into storage, an event, or a policy
 hash, it binds the `ROLE_*` constant, and the registry maps the constant to
-its current holder. Pause-guardian authority remains a Role Model grant and
-gains no `ROLE_*` storage binding in v1 because no spec stores it.
+its current holder. Pause-guardian authority binds `ROLE_PAUSE_GUARDIAN`
+(ADR 0012 decision T5); every surface that stores, events, or grants pause
+authority uses the constant, and the registry maps it to the current
+holder set.
 
 ### Future Governance Events
 

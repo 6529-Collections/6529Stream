@@ -226,8 +226,21 @@ and checksum artifacts reference them; document titles and content are
 authoritative for framing. Renames, if desired, are a separate mechanical
 change coordinated with the release-artifact generators.
 
-Documents that describe the current as-built baseline —
-[`docs/architecture.md`](architecture.md), [`docs/status.md`](status.md),
-[`docs/metadata.md`](metadata.md) and related operational docs — are not
-specifications. They map what exists today and must stay honest about every
-divergence from the specs above until the implementation conforms.
+Every repository document outside the inventory above is a baseline or
+operational record, not a specification, and must carry this header block
+directly beneath its title (ADR 0012 decision T9):
+
+```text
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in docs/spec-policy.md, and where this document conflicts with a
+specification home, the specification wins.
+```
+
+Documents superseded by a specific spec name it in the header (for
+example, `docs/royalty-policy.md` names
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)).
+Baseline records map what exists today and must stay honest about every
+divergence from the specs until the implementation conforms. A release
+checker enforcing header presence across the non-inventory set is a
+Review-entry condition tracked by the conformance matrix.

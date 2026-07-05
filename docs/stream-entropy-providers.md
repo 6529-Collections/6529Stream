@@ -487,11 +487,100 @@ Requirements [EP-CALLBACK]:
    fulfillment envelope — `fulfillEntropy` including the restricted Core
    refresh emitter call — plus the adapter's own persistence writes and
    outcome handling, with a margin published in the release manifest.
-   Monitoring must alert when the measured envelope exceeds two-thirds of
-   the configured callback gas limit.
+   The margin must include the governance-published worst-case
+   repricing headroom recorded in the release manifest and remeasured
+   by every hard-fork/repricing review, and must reserve the
+   adapter-local persistence-and-outcome budget separately from the
+   coordinator envelope, so envelope growth exhausts the retryable
+   coordinator subcall before it can reach the store-first writes
+   [EP-INFLIGHT] (ADR 0012 decision T1). Monitoring must alert when the
+   measured envelope exceeds two-thirds of the configured callback gas
+   limit.
 6. These rules apply to every callback-receiving adapter family — VRF,
    ARRNG, Pyth, drand, Randcast, Supra, Witnet, and all future adapters —
    and to permissionless retry paths.
+
+## In-Flight Requests Under Raises And Repricings [EP-INFLIGHT]
+
+Chainlink-class upstreams bind the callback gas limit per request at
+submission time. Raising `VRF_CALLBACK_GAS_LIMIT` — or any adapter
+callback-gas configuration — therefore protects future requests only
+([EP-VRF-CONFIG] rule 4): every in-flight request executes under the
+limit it was submitted with, and the upstream coordinator additionally
+enforces its own maximum callback gas above which no raise can go. This
+section pins what happens to requests in flight when the fulfillment
+envelope grows — through a gas-schedule repricing or a measured-envelope
+increase — faster than their submitted limits (ADR 0012 decision T1).
+
+Requirements [EP-INFLIGHT]:
+
+1. Two failure classes are distinguished, and only the first is
+   recoverable:
+   1. Coordinator-frame failure: the callback frame completes the
+      adapter's own persist writes, and the `fulfillEntropy` subcall
+      reverts or runs out of gas inside the [EP-CALLBACK] try/catch.
+      The stored result survives, and `retryCoordinatorFulfillment`
+      re-delivers the identical randomness in a later transaction with
+      fresh gas, regardless of the original request's submitted limit.
+      The [EP-CALLBACK] rule 5 adapter-local reserve exists precisely
+      so envelope growth lands in this class.
+   2. Frame-level loss: a repricing inflates the adapter's own persist
+      writes beyond an in-flight request's submitted limit, the
+      one-shot callback reverts before storing, the upstream marks the
+      request fulfilled and never redelivers, and the raw output stands
+      publicly revealed in the upstream fulfillment transaction while
+      the adapter holds nothing.
+2. The frame-level-loss outcome is pinned, not improvised: the adapter
+   probe truthfully reports no randomness received, but the
+   [EC-INCIDENT] rule 3 evidence bundle can never corroborate that no
+   upstream fulfillment occurred (ADR 0011 decision R12), so fresh
+   recovery is blocked by construction for every collection — with or
+   without a frozen fresh-recovery policy — because a fresh draw after
+   a publicly revealed output is a reroll. The request stays
+   `REQUESTED`, and its token or scope renders honest pending state
+   indefinitely: a disclosed permanence limit of one-shot upstream
+   callbacks. A separately accepted Replaceable replay adapter behind
+   the frozen provider interface may later make the already-revealed
+   upstream output deliverable again under a frozen recovery policy —
+   delivering the identical value is delivery, not a reroll — but no
+   such module ships at genesis and nothing in this spec depends on
+   one. Collection finality over a permanently pending token follows
+   the never-finalized-entropy content-root semantics owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   (ADR 0012 decision T3).
+3. There is no pre-emptive re-request: creating a second live draw for
+   a subject whose first request can still fulfill is exactly the
+   reroll surface the coordinator's Request Commitment Finality rules
+   exclude. The protections are preventive:
+   1. headroom — the [EP-CALLBACK] rule 5 margin includes the published
+      worst-case repricing headroom, remeasured by every
+      hard-fork/repricing review before activation;
+   2. activation-boundary drain — where a scheduled gas-schedule change
+      would push the measured envelope past the submitted limit of any
+      in-flight request class, operations must raise the parameter
+      ahead of activation for new requests, alert on every request
+      still pending across the activation boundary whose submitted
+      limit the post-fork envelope would exceed, and complete or
+      retry-deliver those requests before activation where possible.
+      Healthy VRF in-flight windows are minutes long, so the straddle
+      set is small by construction; the drain obligation and its alert
+      join the release-manifest monitoring plan beside the
+      [EP-CALLBACK] rule 5 alert.
+4. Upstream ceiling and migration ladder: when the measured envelope
+   plus margin approaches the upstream coordinator's own maximum
+   callback gas, raising the adapter parameter is no longer a remedy.
+   The remediation is migrating future requests to an upstream
+   coordinator version (or provider family) with a sufficient ceiling —
+   a randomness-identity change under [EP-CONFIGHASH] and the
+   coordinator's provider-epoch rules, never a silent config drift.
+   Subscription-level settings (`subscriptionId`, funding) stay
+   Operational and never gate this ladder.
+5. These rules apply to every callback-receiving adapter family whose
+   upstream binds per-request callback gas and does not redeliver —
+   VRF, ARRNG, Pyth, drand, Randcast, Supra, Witnet, and future
+   adapters. Each adapter spec must state its upstream's callback-gas
+   ceiling, its redelivery posture, and which of the failure classes
+   above its upstream can produce.
 
 ## Coordinator Fulfillment Retry
 
@@ -724,10 +813,28 @@ Rules [EP-VRF-CONFIG]:
    `VRF_CALLBACK_GAS_FLOOR`, sized from the measured fulfillment envelope
    with margin [EP-CALLBACK item 5]; raising it is a service-restoring
    action, and the floor, genesis value, and measured envelope are
-   recorded in the release manifest.
+   recorded in the release manifest. A raise binds future requests only
+   — in-flight requests keep their submitted limit — and the upstream
+   coordinator's own maximum callback gas bounds every raise; the
+   in-flight, drain, and ceiling semantics are pinned in [EP-INFLIGHT]
+   (ADR 0012 decision T1).
 7. Subscription ownership, consumer registration, and funding follow the
    contract-held custody requirements [EP-CUSTODY] (ADR 0010 decision
    D7.5).
+8. The parameter's release-manifest failure-direction class is
+   `FORWARDING_CAP` ([LTA-GGP] requirement 10): it caps the gas the
+   upstream forwards to the adapter callback, and raising it restores
+   delivery for future requests. Its named probe — a Permanent-class
+   probe contract ([LTA-GGP-PROBES] in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md);
+   ADR 0012 decision T1) — executes a faithful equivalent of the
+   callback frame: the persist writes plus a fulfillment-shaped subcall
+   replicating the published coordinator envelope ([EC-FULFILL]
+   rule 13), under exactly the probed value against a pinned fixture
+   corpus with no caller-supplied gas shaping. It records each run on
+   itself and commits measurements through `evidenceHash`; a release
+   golden test asserts probe gas matches the measured production
+   envelope within the recorded tolerance.
 
 Recommended event:
 
@@ -896,6 +1003,10 @@ event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
    reentrant callback attempts.
 8. The adapter must record the ARRNG request ID to `requestKey` binding before
    any valid callback can be accepted.
+9. The fallback review must record the ARRNG controller's callback-gas
+   provisioning, ceiling, and redelivery posture, and which
+   [EP-INFLIGHT] failure classes the upstream can produce, in the
+   `StreamEntropyLaunchDecision` manifest.
 
 ## StreamEntropyProviderPyth
 
@@ -946,6 +1057,10 @@ side's reveal.
    execution (absorbed by the coordinator fee binding, never a stranded
    request), failed request, and withdrawal to the governed destination
    [EP-CUSTODY].
+9. The fallback review must record the Pyth Entropy callback-gas
+   provisioning, ceiling, and redelivery posture, and which
+   [EP-INFLIGHT] failure classes the upstream can produce, in the
+   `StreamEntropyLaunchDecision` manifest.
 
 Recommended raw compression:
 
@@ -1388,6 +1503,9 @@ Common provider tests:
     version 2) requests flow through identical adapter paths, and an
     unrecognized context schema version is accepted and treated opaquely
     [EP-CONTEXT].
+22. The published callback-gas margin separates the adapter-local
+    persistence reserve from the coordinator envelope and includes the
+    recorded worst-case repricing headroom [EP-INFLIGHT].
 
 VRF tests:
 
@@ -1407,6 +1525,17 @@ VRF tests:
 9. `callbackGasLimit` covers the measured fulfillment envelope with the
    published margin; an artificially undersized limit proves store-first
    persistence still holds and delivery is retryable [EP-VRF-CONFIG].
+10. In-flight discipline [EP-INFLIGHT]: a request submitted before a
+    `callbackGasLimit` raise executes under its submitted limit; an
+    induced coordinator-frame failure persists the result and remains
+    retryable; a simulated frame-level loss leaves the adapter with no
+    result, the probe reporting `rawRandomnessReceived = false`, and
+    coordinator fresh recovery blocked by the [EC-INCIDENT] rule 3
+    evidence requirements.
+11. The callback-gas probe reproduces the published fulfillment
+    envelope within the recorded tolerance, and its failing and passing
+    runs gate the parameter's raise and lower paths per [LTA-GGP]
+    [EP-VRF-CONFIG].
 
 ARRNG tests:
 

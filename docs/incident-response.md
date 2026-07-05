@@ -1,5 +1,11 @@
 # Protocol Incident Response
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
+
 This runbook is the operator-facing incident response guide for 6529Stream.
 The repository is pre-audit and not production-ready. It is not a security claim.
 It gives maintainers a no-secret procedure for triage, containment,

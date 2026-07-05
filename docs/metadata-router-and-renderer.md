@@ -12,29 +12,40 @@ It is further amended by
 [ADR 0011](adr/0011-world-class-pass-round-2.md): mint-time content
 binding for offchain collections, renderer classes with per-version read
 sets and re-render acceptance modes, the single-sourced attribution JSON
-schema, mandatory event mirrors, and entropy-class disclosure.
+schema, mandatory event mirrors, and entropy-class disclosure. It is
+further amended by
+[ADR 0012](adr/0012-world-class-pass-round-3.md): the sold-token
+preservation lane with a ceilinged coverage window, burned-token
+full-view serving, the consolidated evolving-works extension recipe,
+tokenData bytes-typing alignment, authority-class and
+deployment-attestation display fields, the `ContractURIUpdated()`
+caller-set pin at the hook-table home, and removal of
+`ERC721Enumerable` storage from Core.
 
 This document specifies how Stream metadata rendering and script assembly move
 out of `StreamCore` into dedicated metadata contracts. 6529Stream is permanent
 infrastructure for the 6529 network: the first production deployment is the
 permanent system, and the requirements below are classified by permanence
 class per `docs/spec-policy.md`, not by launch phase. `StreamCore` should
-remain the canonical ERC-721 contract, keep `ERC721Enumerable`, and expose
-`tokenURI(uint256)` as required by ERC-721 metadata. The heavy metadata
+remain the canonical ERC-721 contract and expose `tokenURI(uint256)` as
+required by ERC-721 metadata; Core carries no `ERC721Enumerable` storage —
+`totalSupply()` stays, and enumeration derives from `Transfer` events
+(ADR 0012 decision T10). The heavy metadata
 construction logic should live outside Core. The cross-cutting 50+ year
 architecture principles live in `docs/stream-long-term-architecture.md`.
 
 ## Design Summary
 
-`StreamCore` should keep ownership, approvals, enumeration, token-to-collection
-identity, mint finality, and minimal external hooks. The new metadata layer
+`StreamCore` should keep ownership, approvals, `totalSupply()`,
+token-to-collection identity, mint finality, and minimal external hooks
+(ADR 0012 decision T10). The new metadata layer
 should own token URI routing, metadata mode selection, JSON construction, HTML
 construction, script assembly, dependency assembly, renderer versioning, and
 metadata refresh events.
 
 ```text
 StreamCore
-  - ERC-721 ownership and enumeration
+  - ERC-721 ownership and totalSupply()
   - token existence checks
   - token to collection identity
   - collection supply facts needed by token naming
@@ -167,7 +178,10 @@ pollute trait filters or depend on every marketplace recognizing new fields.
 
 1. Keep `StreamCore` small enough to support Core-native ERC-2981 and
    long-term ERC-721 behavior without bytecode pressure.
-2. Keep `ERC721Enumerable` in Core.
+2. Keep Core enumeration-free: `totalSupply()` stays, and
+   `tokenOfOwnerByIndex`/`tokenByIndex` storage does not; indexers derive
+   enumeration from `Transfer` events, and live enumeration reads are a
+   periphery enumerator module (ADR 0012 decision T10).
 3. Keep `tokenURI(uint256)` Core-native from the caller's perspective.
 4. Make metadata rendering a first-class module with explicit versioning.
 5. Support default, collection-level, and token-level renderer configuration.
@@ -314,6 +328,18 @@ home,
    | --- | --- | --- | --- | --- | --- |
    | `GGP_METADATA_ROUTER_GAS_LIMIT` | `6529STREAM_GGP_METADATA_ROUTER_GAS_LIMIT` | 0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93 | `StreamCore` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [MRR-ROUTER-GGP] |
    | `GGP_ENTROPY_VIEW_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_VIEW_GAS_LIMIT` | 0x2bef811c095d83c93627f797c5c71bc97b747ab91fba78266f8f86513f50f5f6 | metadata router | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [MRR-ENTROPY-READ] |
+
+5. The parameter's release-manifest failure-direction class is
+   `FORWARDING_CAP` ([LTA-GGP] requirement 10): it bounds the fail-safe
+   `tokenURI()`/`contractURI()` routing read, raising restores metadata
+   service, and it is a permissionless conditional-raise member per
+   [LTA-GGP] requirement 11 (ADR 0012 decision T1). Its named probe is
+   a Permanent-class probe contract ([LTA-GGP-PROBES]) executing the
+   rule 2 read sweep — Core's bounded router-call frame replicated over
+   the deepest known routes for pinned fixture tokens under exactly the
+   probed cap, with no caller-supplied gas shaping — recording runs on
+   itself and committing the measurement artifact through
+   `evidenceHash`.
 
 The fallback JSON schema must be canonicalized and hash-committed in the
 release manifest. The schema defines exact required fields, optional fields,
@@ -527,6 +553,17 @@ tokens. Entropy read rules [MRR-ENTROPY-READ]:
    pending without inventing additional status values.
 5. The genesis value and floor of `ENTROPY_VIEW_GAS_LIMIT`, and the
    returndata cap, are recorded in the release manifest.
+6. The parameter's release-manifest failure-direction class is
+   `FORWARDING_CAP` ([LTA-GGP] requirement 10): it bounds the fail-safe
+   coordinator status read behind rendering (rule 3 renders
+   `PENDING_UNKNOWN` instead of reverting), raising restores live
+   entropy display, and it is a permissionless conditional-raise member
+   per [LTA-GGP] requirement 11 (ADR 0012 decision T1). Its named probe
+   is a Permanent-class probe contract ([LTA-GGP-PROBES]) executing the
+   router's bounded coordinator read frame for a pinned fixture token
+   corpus under exactly the probed cap, with no caller-supplied gas
+   shaping, recording runs on itself and committing the measurement
+   artifact through `evidenceHash`.
 
 ## Metadata Router Responsibilities
 
@@ -596,10 +633,11 @@ enum TokenRenderState {
 }
 ```
 
-For Phase 1, burned-token behavior may be limited to normal ERC-721 behavior:
-`StreamCore.tokenURI()` reverts because `_requireMinted(tokenId)` fails. The
-enum is still useful for renderer APIs and for explicit burned-token view
-modules added under separate accepted specs.
+`StreamCore.tokenURI()` reverts for burned tokens because
+`_requireMinted(tokenId)` fails — ordinary ERC-721 behavior — while the
+genesis full-view reads keep serving the burned work's final artwork with
+burned-state disclosure ([MRR-FULL-VIEW] rule 6; ADR 0012 decision T3).
+The enum carries the burned disposition through renderer APIs.
 
 ## Renderer Responsibilities
 
@@ -737,11 +775,13 @@ Storage shape ownership [MRR-STORAGE-HOMES]:
    decision 3).
 2. Mint-time `tokenData` and its `tokenDataHash` commitment are owned by the
    Core mint ABI in
-   [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md):
-   V1 Core stores the renderer-visible `tokenData` string and its hash, and
-   the renderer reads mint-time token data from Core, not from the metadata
-   contract (ADR 0010 decision 3). `StreamCollectionMetadata` stores only
-   token-level display metadata that Core deliberately does not store.
+   [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
+   [MPA-CORE-ABI], where `tokenData` is opaque `bytes` end to end — V1
+   Core stores the renderer-visible `tokenData` bytes and their hash — and the
+   renderer reads the mint-time bytes from Core, not from the metadata
+   contract (ADR 0010 decision 3; typing drift repaired by ADR 0012
+   decision T7). `StreamCollectionMetadata` stores only token-level
+   display metadata that Core deliberately does not store.
 3. Script chunk mutation operations (append, replace-at-index,
    clear-and-replace, subject to freeze policy, each emitting an event) are
    specified in the collection metadata contract; the router only resolves
@@ -847,6 +887,59 @@ Determinism requirements [MRR-DETERMINISM]:
    `Date`, or unseeded entropy sources, and the artist-intent record
    ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
    is the place to declare intended variability.
+
+## Evolving Works Extension Recipe [MRR-EVOLVING-RECIPE]
+
+Dynamic and evolving works — post-mint parameters, oracle-fed state,
+ownership-history-reactive rendering, artist/collector co-creation — are
+an enumerated extension category whose pieces exist across four
+documents. This section is the one assembled recipe a future module spec
+composes, in the [SSA-HOLDER]/[CMC-MEMENTO] pattern-recipe style, so a
+2030 module author inherits the composition instead of reverse-engineering
+it (ADR 0012 decision T6). A conformant evolving-work module supplies all
+four pieces; nothing here adds a new rule — the recipe fixes the
+composition of rules that already bind:
+
+1. Renderer: a `DYNAMIC`-class renderer version registered through the
+   renderer registry with its declared read set pinned at registration
+   ([MRR-DETERMINISM] rules 3-5). Every declared read target must
+   qualify: an append-only, hash-disciplined metadata satellite whose
+   writes are evented and record-chained
+   ([CMC-RECORD-CHAIN] in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)),
+   and freeze-respecting — for a frozen or finalized scope the renderer
+   reads only values pinned at or before the freeze, so finality still
+   fixes output. The registration static-analysis gate verifies the read
+   set, and golden vectors pin the declared-read state alongside each
+   `RenderRequest` ([MRR-DETERMINISM] rule 6).
+2. Mutable-state carrier: a post-mint-parameter satellite under its own
+   accepted spec — the `StreamTokenParams` shape of Protocol v1
+   Exclusions item 1 — defining parameter types, bounds, update
+   authority, lock dates, and refresh-event behavior, byte-limited and
+   evented. `StreamOwnerRecords` never qualifies for a default
+   `MARKETPLACE` read set (the owner-record render firewall,
+   [MRR-DETERMINISM] rule 4).
+3. Finality acceptance mode: collections rendered by a `DYNAMIC`-class
+   renderer are excluded from `BYTE_EXACT` and must pin
+   `PERCEPTUAL_TOLERANCE` or `CURATED_EQUIVALENCE` at finality
+   ([CMC-FINALITY-INPUTS] rule 5 in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
+   mode vocabulary owned by [LTA-FINALITY] requirement 12 in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)).
+   The finality manifest must state the allowed post-finality state —
+   which declared-read values the renderer may still consume — and
+   content-root leaves obey the finalized-entropy rule
+   ([CMC-CONTENT-ROOT] rule 3).
+4. Artist consent binding: ongoing-work co-creation mechanics are
+   excluded from the genesis artist registry ([AA-EXCL] item 7 in
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md)), so
+   the module spec must define the artist's consent surface for
+   post-mint state changes — and between mint and executed finality the
+   artist content veto binds every content-affecting surface regardless
+   ([CMC-ARTIST-CONTENT-VETO]).
+
+A module that omits any piece fails registration or finality under the
+cited rules.
 
 ## Default Token Metadata Schema
 
@@ -1047,7 +1140,9 @@ Attribution disclosure requirements [MRR-ATTRIBUTION]:
 
 1. Default token JSON for every collection must emit the nested
    `properties.provenance.attribution` object carrying exactly the field
-   set required by [AA-DISPLAY] requirements 2, 3, and 5: `works_class`
+   set required by [AA-DISPLAY] requirements 2, 3, and 5, together with
+   the authority-class fields that home pins under ADR 0012 decision T4:
+   `works_class`
    (`artist_bound` or `platform_works`) for every collection, and, for
    artist-bound collections, `state` (one of the pinned lowercase strings
    `claimed | artist_accepted | artist_sanctioned | disputed | revoked`,
@@ -1055,9 +1150,17 @@ Attribution disclosure requirements [MRR-ATTRIBUTION]:
    `artist_id`, `artist_address`, `binding_generation` (decimal string),
    `attestation_status`
    (`none | attested_current | attested_stale | disputed`, lowercase),
-   `attestation_record` and `attested_state_hash` when an attestation
-   exists, `sanction_record` when a sanction covers the token, and the
-   collaborator listing with role and verification state. Flat
+   `attestation_record`, `attested_state_hash`, and
+   `attestation_authority_class` when an attestation exists,
+   `sanction_record` and `sanction_authority_class` when a sanction
+   covers the token, and the collaborator listing with role and
+   verification state. The authority-class fields carry the [AA-DISPLAY]
+   signing-authority vocabulary (`artist | delegate | successor |
+   steward`, lowercase, in the home's order) so a steward-, successor-,
+   or delegate-signed
+   act is never displayed indistinguishably from the artist's own
+   signature on the one surface marketplaces and archives consume
+   (ADR 0012 decision T4). Flat
    `attribution_status`/`artist_attestation_status` fields and uppercase
    attestation vocabulary are nonconformant; a conformance checker row
    asserts this field mirror matches [AA-DISPLAY] and fails on drift.
@@ -1090,6 +1193,18 @@ Attribution disclosure requirements [MRR-ATTRIBUTION]:
    `properties.provenance.c2pa_attribution_divergence = true` plus the
    divergence record reference; it is never silently omitted while the
    conflict record stands.
+7. Address-level deployer provenance is served on the display surface by
+   the artist-signed deployment attestation record family whose normative
+   home is
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   (ADR 0012 decision T9): when a deployment attestation exists for the
+   collection, default token JSON must reference it as
+   `properties.provenance.attribution.deployment_attestation` (the
+   record hash), so a marketplace, explorer, or archive reading
+   `tokenURI()` sees artist-attested deployment provenance despite the
+   platform-deployed shared Core address. The field is display
+   disclosure, never address identity; the per-collection facade
+   question remains inside OQ-X8 ([MRR-COLLECTION-DISCOVERY]).
 
 ## Attribute Policy
 
@@ -1220,6 +1335,18 @@ Full-view requirements [MRR-FULL-VIEW]:
    selection) remains a Replaceable extension module under a separate
    accepted spec; only the two raw full-view reads above are genesis
    requirements.
+6. The full-view reads are burned-token capable, and that is a genesis
+   requirement, not an option (ADR 0012 decision T3): `tokenJSON` and
+   `tokenHTML` must keep serving a burned token whose retained Core
+   identity mapping exists (`tokenCollectionIdentity` returns
+   `mappingExists = true`, `burned = true`), assembling the final
+   artwork from the retained `tokenData` bytes, manifests, and entropy
+   record, with the burned state disclosed
+   (`properties.stream.render_state = "burned"`). Router
+   `tokenURIStatus` reports `BURNED` for such tokens rather than
+   reverting. Core's ERC-721 `tokenURI()` may still revert for burned
+   tokens; these reads are the required archival serving surface, and a
+   conformance test renders a burned token through both reads.
 
 ## Metadata Modes
 
@@ -1282,16 +1409,44 @@ Offchain content binding [MRR-OFFCHAIN-BINDING]:
    [MRR-STREAM-PROPS]. Declared collections are excluded from artwork
    finality at every scope while unbound; every other collection is
    `HASH_BOUND`.
-6. Preservation coverage has a deadline, not a hope (ADR 0011 decision
-   R2): for every `HASH_BOUND` `OFFCHAIN`-mode collection, a token content
-   root covering the full collection plus dual-family archive receipts for
-   its render-critical payloads must be recorded within
-   `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` of the collection reaching
-   Core status `CLOSED` (genesis value `7,776,000` — 90 days — recorded
-   with any changes in the release manifest). The deadline is a monitored
-   conformance gate: a missed deadline is a monitored incident with an
-   alert, never a silent lapse. Open collections remain covered
-   sale-by-sale through rule 4.
+6. Preservation coverage has a deadline, not a hope, and the deadline
+   follows the sale, not the ceremony (ADR 0011 decision R2; ADR 0012
+   decision T2). Both lanes below are monitored conformance gates: a
+   missed deadline in either lane is a monitored incident with an alert,
+   never a silent lapse.
+   (a) Sold-token lane: for every `HASH_BOUND` `OFFCHAIN`-mode
+   collection — open or closed — each sold token's render-critical
+   payloads must have dual-family archive receipts, at least one from an
+   `ENDOWED`-economics storage family ([LTA-ARCHIVE] requirements 2
+   and 3 in
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)),
+   and must join the fixity program's sold-token population
+   ([CMC-FIXITY-PROGRAM] rule 6 in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)),
+   all within `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` of that token's
+   first sale settlement — per token, or per release batch where a
+   release sells together. Rule 4 binds the bytes at sale; this lane
+   replicates and audits them, because a hash commitment without an
+   enforced replica verifies loss instead of preventing it, and an
+   uncapped open series that never reaches `CLOSED` accrues coverage
+   token by token instead of never.
+   (b) Close-out lane: a token content root covering the full collection
+   plus dual-family archive receipts for its render-critical payloads
+   must be recorded within `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` of
+   the collection reaching Core status `CLOSED`.
+7. `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` is a governed time parameter
+   hardened in the direction that matters for a deadline (ADR 0012
+   decision T2), under the same floor-and-probe discipline family as the
+   [LTA-GGP] parameters: genesis value `7,776,000` seconds (90 days),
+   recorded in the release manifest. It may be shortened through
+   ordinary parameter governance, may be lengthened only through the
+   ADR 0004 `DELAYED_LOOSENING` class, and may never exceed the
+   deploy-time immutable ceiling
+   `OFFCHAIN_PRESERVATION_COVERAGE_MAX_SECONDS = 15,552,000` (180 days).
+   Every change emits a parameter-change event and is recorded in the
+   release manifest; a release-manifest edit is never a change path, so
+   the coverage window cannot be quietly hollowed out across a 50-year
+   operator lineage.
 
 ### Onchain Mode
 
@@ -1361,7 +1516,10 @@ namespaces when useful:
         "attestation_status": "attested_current",
         "attestation_record": "0x...",
         "attested_state_hash": "0x...",
+        "attestation_authority_class": "artist",
         "sanction_record": "0x...",
+        "sanction_authority_class": "artist",
+        "deployment_attestation": "0x...",
         "consent_mode": "ARTIST_SIGNED_POLICY",
         "collaborators": [
           {"address": "0x...", "role": "co-artist", "state": "accepted"}
@@ -1419,6 +1577,23 @@ rejection. Renderers are Replaceable modules behind frozen interfaces, so
 hybrid rendering arrives, if ever, as a new renderer version through the
 registry without touching Core.
 
+The dormancy carries a recorded rationale rather than an implied one:
+a genesis hybrid renderer would enlarge the audited genesis render path
+for a mode no launch collection requires, while mixed-media 1/1 works —
+onchain scripts paired with offchain photographic or video masters — are
+already expressible at genesis: `ONCHAIN` mode composes the hash-pinned
+script with hash-committed offchain masters through the media manifest
+(`MediaManifest` and token-level media in
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)),
+and `OFFCHAIN` mode binds bytes at sale time [MRR-OFFCHAIN-BINDING].
+What `HYBRID` adds is mode-level routing convenience, not a new art
+capability, so it is dormant scope, not a precluded category. The
+activation path is the ordinary renderer-version mechanism — the same
+registry, determinism static gate, and golden-vector discipline the
+Evolving Works Extension Recipe [MRR-EVOLVING-RECIPE] walks through —
+and a hybrid renderer version proposal follows that recipe's
+registration steps with `STATIC`-class reads.
+
 ## Script Assembly
 
 The renderer should not inject loose top-level variables as the primary API.
@@ -1440,7 +1615,7 @@ window.__STREAM_TOKEN__ = {
   viewId: "MARKETPLACE",
   viewManifestHash: "0x...",
   metadataSnapshotHash: "0x...",
-  tokenData: [...],
+  tokenData: "0x...",
   dependencyScript: "..."
 };
 </script>
@@ -1474,7 +1649,8 @@ renderContextVersion    string  "STREAM_CONTEXT_V1"
 scriptHash              string  0x bytes32 or omitted
 dependencyHash          string  0x bytes32 or omitted
 mediaManifestHash       string  0x bytes32 or omitted
-tokenData               array   parsed token data values
+tokenData               string  0x-prefixed lowercase hex of the exact
+                                Core tokenData bytes; "0x" when empty
 dependencyScript        string  exact dependency JavaScript bytes as text
 ```
 
@@ -1497,10 +1673,18 @@ Rules:
    used by the token metadata JSON encoder. Snapshot and view manifest hashes
    should be recomputable by third-party tools from the documented canonical
    inputs.
-8. `tokenData` values are read from Core's renderer-visible `tokenData`
-   storage, whose locus and hash binding are owned by the Core mint ABI in
+8. `tokenData` is read from Core's renderer-visible `tokenData` bytes,
+   whose typing (opaque `bytes` end to end), locus, and hash binding are
+   owned by the Core mint ABI in
    [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
-   [MRR-STORAGE-HOMES].
+   [MRR-STORAGE-HOMES]. The renderer never parses the bytes: it emits
+   them as the 0x-prefixed lowercase-hex string pinned above — `"0x"`
+   for empty bytes, and the key is always emitted — and the collection
+   script parses them client-side under the interpretation the
+   collection's renderer/schema declares (ADR 0012 decision T7). A
+   renderer that parses opaque token data into structured values is
+   nonconformant: two implementations could parse the same bytes
+   differently and fork the golden vectors and the frozen artwork.
 
 For compatibility with simple sketches, `StreamRendererV1` also provides
 legacy-style local variables inside the generated shell:
@@ -1886,7 +2070,12 @@ Refresh emitter authorization [MRR-REFRESH-EMITTERS]:
    (ADR 0009 decision 5; ADR 0010 decision 10): the current metadata router,
    the artwork finality registry, and the entropy coordinator, each resolved
    from Core's own cached satellite pointers at call time. This document
-   cites that home and must not narrow or extend the set.
+   cites that home and must not narrow or extend the set. The restricted
+   `ContractURIUpdated()` helper is pinned in the same hook-table home
+   with its own caller set — the current metadata router, resolved from
+   the cached pointer — and its own golden caller-set test; "same
+   posture" prose never substitutes for the pinned set (ADR 0012
+   decision T9).
 2. The caller check derives from Core's satellite pointer storage, never
    from a separately mutable allowlist: a caller is authorized exactly when
    it equals the current `metadataRouter`, the current finality registry
@@ -1923,9 +2112,17 @@ unless a separate explicitly versioned archive view changes.
 For ERC-7572-style contract metadata, Core exposes `contractURI()` in
 protocol v1 (ADR 0009 decision 4), and the same Core-origination rationale
 applies as for ERC-4906 refresh: marketplaces watch the ERC-721 contract.
-Global contract metadata updates should therefore cause Core to emit
-`ContractURIUpdated()` through the same restricted router-callable helper
-posture; the release manifest records the emitter address. Core is the
+Global contract metadata updates therefore cause Core to emit
+`ContractURIUpdated()` through a restricted helper whose authorized
+caller set is pinned — not analogized — at the Core Hook Budget table
+home, [PV1-HOOKS] in
+[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+(ADR 0012 decision T9): the current metadata router only, resolved from
+Core's cached satellite pointer at call time, never a separately mutable
+allowlist, with a golden caller-set test proving acceptance for the
+router and rejection for every other caller class alongside the ERC-4906
+helper test [MRR-REFRESH-EMITTERS]. The release manifest records the
+emitter address. Core is the
 only `ContractURIUpdated()` emitter — a supplementary satellite mirror of
 the same fact is banned at genesis (ADR 0011 decision R12).
 Collection-scoped contract URI updates are a distinct fact and emit
@@ -2071,7 +2268,10 @@ Renderer and router rules after finality [MRR-FINALITY]:
    Re-render verification follows the pinned acceptance mode, never an
    implied byte-equality default; `DYNAMIC`-class renderers are excluded
    from `BYTE_EXACT` [MRR-DETERMINISM]. For `OFFCHAIN` collections the
-   component is optional but tooling-warned.
+   component is optional but tooling-warned; non-script media works
+   carry the media-conservation finality gate of [CMC-FINALITY-INPUTS]
+   rule 12 in the same document instead, so byte fixity is never their
+   only conservation surface (ADR 0012 decision T2).
 10. Finality for a collection with a bound artist requires the artist
     sanction and artist-intent preconditions defined in
     [`docs/stream-artist-authority.md`](stream-artist-authority.md) and in the Artwork Finality Inputs of
@@ -2083,8 +2283,11 @@ Renderer and router rules after finality [MRR-FINALITY]:
 Burned token behavior remains asymmetric by design: `StreamCore.tokenURI()` may
 revert for burned tokens because ERC-721 ownership no longer exists, while
 royalty resolution can still retain token-to-collection mapping for ERC-2981
-queries. Archival burned-token metadata, if desired, should be exposed through
-router or metadata read functions outside Core's ERC-721 `tokenURI()`.
+queries. Archival burned-token metadata is served — not merely retained —
+through the burned-token-capable full-view reads ([MRR-FULL-VIEW] rule 6)
+outside Core's ERC-721 `tokenURI()` (ADR 0012 decision T3): a destroyed
+work's appearance stays reproducible by a specified read, never by
+reimplementing renderer assembly from raw storage.
 
 ## Metadata Failure Behavior
 
@@ -2238,9 +2441,11 @@ candidate Replaceable-layer module, added through the frozen interfaces and
 registries under its own separate accepted spec. Modules whose state must
 reach rendered output (post-mint parameters, dynamic traits, token-bound
 account references) qualify through the `DYNAMIC` renderer class and
-declared read-set extension of [MRR-DETERMINISM] (ADR 0011 decision R3) —
-the extension path exists at genesis, so this exclusion list precludes no
-art category on this Core line:
+declared read-set extension of [MRR-DETERMINISM] (ADR 0011 decision R3),
+assembled end to end by the Evolving Works Extension Recipe
+[MRR-EVOLVING-RECIPE] (ADR 0012 decision T6) — the extension path exists
+at genesis, so this exclusion list precludes no art category on this
+Core line:
 
 1. `StreamTokenParams`: artist-approved post-mint parameters inspired by Art
    Blocks PostParams. This should define parameter types, bounds, update
@@ -2274,8 +2479,8 @@ art category on this Core line:
    verified by hash, signature, Merkle proof, or L2 state proof.
 
 All of these modules should consume Core and metadata-layer read interfaces.
-None should require changing ERC-721 ownership, enumerable behavior, or the
-base token identity model.
+None should require changing ERC-721 ownership behavior or the base token
+identity model.
 
 ## Implementation Phases
 
@@ -2344,7 +2549,8 @@ Core tests:
 4. Router update emits canonical `CoreSatellitePointerUpdated` and the
    required `MetadataRouterUpdated` mirror in the same execution
    [MRR-ROUTER-EVENTS].
-5. Core still reports ERC-721 enumerable behavior.
+5. Core exposes `totalSupply()`, and `tokenOfOwnerByIndex`/`tokenByIndex`
+   are absent from the Core interface (ADR 0012 decision T10).
 6. Core advertises ERC-4906 support if Core-originated metadata update events
    are implemented.
 7. Core `contractURI()` returns the delegated contract metadata through the
@@ -2362,6 +2568,10 @@ Core tests:
     authorized caller set — metadata router, finality registry, entropy
     coordinator — and proves rejection for every other caller class
     [MRR-REFRESH-EMITTERS].
+12. The restricted `ContractURIUpdated()` helper golden test enumerates
+    its pinned caller set — the current metadata router, per [PV1-HOOKS]
+    — proving acceptance for the router and rejection for every other
+    caller class (ADR 0012 decision T9).
 
 Router tests:
 
@@ -2397,7 +2607,13 @@ Router tests:
     class fails the pre-sale conformance gate; a declared collection is
     rejected at every finality scope while unbound; the
     preservation-coverage deadline alert fires when a `HASH_BOUND`
-    collection closes without full coverage [MRR-OFFCHAIN-BINDING].
+    collection closes without full coverage, and the sold-token-lane
+    alert fires when a sold token's receipts or fixity coverage miss the
+    per-sale window [MRR-OFFCHAIN-BINDING].
+20. Burned-token serving: `tokenJSON`/`tokenHTML` serve a burned token's
+    final artwork with `properties.stream.render_state = "burned"`, and
+    `tokenURIStatus` reports `BURNED` without reverting
+    [MRR-FULL-VIEW].
 
 Renderer tests:
 
@@ -2443,10 +2659,14 @@ Renderer tests:
     pinned state — `claimed`, `artist_accepted`, `artist_sanctioned`,
     `disputed`, `revoked` — and both works classes from the corresponding
     artist authority registry state; asserts presence of `artist_id`,
-    `artist_address`, `binding_generation`, `sanction_record`, and
-    `works_class` where required; reports stale attestations as
-    `attested_stale`; and matches the [AA-DISPLAY] field inventory via the
-    checker row [MRR-ATTRIBUTION].
+    `artist_address`, `binding_generation`, `sanction_record`,
+    `sanction_authority_class`, `attestation_authority_class`, and
+    `works_class` where required, with each authority class
+    (`artist | delegate | successor | steward`, the [AA-DISPLAY]
+    order) rendered from the
+    corresponding registry authority (ADR 0012 decision T4); reports
+    stale attestations as `attested_stale`; and matches the [AA-DISPLAY]
+    field inventory via the checker row [MRR-ATTRIBUTION].
 27. `properties.stream.citation` matches the Canonical Citation Profile
     format for the rendered token, including the typed record-state
     qualifier prefixes when a record state is cited.
@@ -2483,6 +2703,18 @@ single-sourced from the artist authority home (decision R7)
 [MRR-ROUTER-EVENTS]; and entropy-security and content-binding classes are
 pinned default token JSON fields (decisions R12 and R2)
 [MRR-STREAM-PROPS].
+[ADR 0012](adr/0012-world-class-pass-round-3.md) further amends seven
+postures: preservation coverage follows each sold token's sale under a
+ceilinged governed window (decision T2) [MRR-OFFCHAIN-BINDING]; the
+full-view reads serve burned tokens (decision T3) [MRR-FULL-VIEW]; the
+evolving-works extension recipe is consolidated here (decision T6)
+[MRR-EVOLVING-RECIPE]; attribution JSON carries the authority-class
+fields (decision T4) and the deployment-attestation reference
+(decision T9) [MRR-ATTRIBUTION]; the `ContractURIUpdated()` caller set
+is pinned at the hook-table home (decision T9); non-script media works
+carry the media-conservation gate of the collection metadata contract
+(decision T2) [MRR-FINALITY]; and Core drops `ERC721Enumerable` storage
+(decision T10).
 The only open decision touching this document is OQ-X8 (marketplace
 collection-identity signal), reserved in the register and blocking Final,
 not Draft [MRR-COLLECTION-DISCOVERY].
@@ -2570,3 +2802,5 @@ The genesis deployment should support:
     deadline [MRR-OFFCHAIN-BINDING].
 30. Entropy-security, content-binding, and renderer-class disclosure in
     default token JSON [MRR-STREAM-PROPS].
+31. Burned-token serving through the full-view reads with burned-state
+    disclosure [MRR-FULL-VIEW] (ADR 0012 decision T3).

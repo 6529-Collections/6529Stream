@@ -32,6 +32,23 @@ drops the curators bucket from the genesis default template, and gates
 marketplace royalty-resolution coverage and the rehearsed recipient claim
 flow.
 
+Further amended by [ADR 0012](0012-world-class-pass-round-3.md): decision
+T3 adds the split factory's append-only profile/wallet enumeration index
+([RSR-FACTORY-ENUM]) as the state-side discovery surface for the
+revenue-bearing address set; T6 restates the primary-sale-only boundary
+against consignment — consigned owner-held tokens settle as secondary
+transfers with royalty disclosure, never as primary revenue
+([RSR-SETTLEMENT-BOUNDARY].10); and T7 pins the owed-funds conservation
+and claim-discipline pattern home ([RSR-OWED-FUNDS]) that sale-adapter
+escrow instantiates, extends the [MPA-AUTHZ] canonical-signature rules
+(EIP-2 low-s, `v` in `{27, 28}`, nonzero exact-match recovery) to every
+revenue-layer EOA signature by citation, binds the `PaymentIntent`
+EIP-712 domain to the actual pull-performing verifier under a permanent
+family name, defines the `assignmentHash` preimage's assignment-policy
+input (`assignmentPolicyHash`, the advertised-loosening commitment), and
+reconciles the paid-mint validation-before-effects wording with the
+layer-scoped [PV1-MINT-ORDER] home.
+
 This ADR is the design record for the revenue and royalty architecture of
 the first production deployment, which is the permanent system. Under the
 single-sourcing rule (ADR 0010 decision D3), the companion specification
@@ -102,7 +119,8 @@ No revenue, royalty, freeze, or metadata rule may infer collection identity
 from token ID ranges. The authoritative source is the explicit Core mapping for
 minted, same-transaction allocated, custody-held, and burned tokens that retain
 collection identity.
-Burning removes ERC-721 ownership and enumerable membership, but it must not
+Burning removes ERC-721 ownership (enumerable membership no longer exists
+in Core; ADR 0012 decision T10), but it must not
 clear retained collection identity or burned-token audit state; royalty
 disclosure for burned tokens continues to resolve token, collection, then
 default scope through `tokenCollectionIdentity`.
@@ -567,6 +585,11 @@ existing wallet when already deployed with the expected profile ID and runtime
 code hash, and revert on wrong code. Unknown profiles and wrong-code predicted
 addresses must use distinct custom errors so operators and indexers can
 distinguish ordinary missing-profile mistakes from address-collision incidents.
+The factory also maintains the append-only profile enumeration index —
+`profileCount()`, `profileAt(index)`, `walletAt(index)` — so a state-only
+reader can enumerate every profile and deterministic wallet address without
+logs or export artifacts; the normative home is the revenue spec
+[RSR-FACTORY-ENUM] (ADR 0012 decision T3).
 Wrong code at the deterministic wallet address is
 `ESCROW_ADDRESS_POISONED`. Normal `flushEscrow` must revert with a distinct
 wrong-code error and leave owed credit intact. The intended wallet can never be
@@ -817,8 +840,13 @@ decision D3; GOOD-02 election):
   under `ASSIGNMENT_DOMAIN` and its context domains (string preimages
   pinned in [RSR-DOMAINS]), class-generic across primary and royalty
   revenue classes — in Assignment
-  Semantics. It binds the frozen bit only (ADR 0009 decision 9);
-  freeze-mode transitions between frozen states do not change the hash. An
+  Semantics. Of the freeze state machine it binds the frozen bit only
+  (ADR 0009 decision 9); freeze-mode transitions between frozen states
+  do not change the hash. It additionally binds the immutable
+  assignment-policy commitment `assignmentPolicyHash` — `bytes32(0)`
+  for the default one-way posture, otherwise the domain-separated hash
+  of the advertised-loosening terms recorded at assignment creation —
+  defined in Assignment Semantics (ADR 0012 decision T7). An
   earlier revision of this ADR sketched a divergent flat
   `STREAM_REVENUE_ASSIGNMENT_V1` preimage; the spec's family governs and
   the flat sketch is void.
@@ -943,7 +971,11 @@ decision R10). The pinned `PAYMENT_INTENT_TYPEHASH`, domain, and
 verification rules — including `(payer, nonce)` consumed-intent keying —
 are defined in `docs/revenue-splits-and-royalties.md`
 [RSR-PAYMENT-INTENT]; a compromised enabled caller therefore cannot drain
-standing approvals into official settlement.
+standing approvals into official settlement. The `PaymentIntent` EIP-712
+domain binds the actual pull-performing verifier under the permanent
+family name pinned in the revenue spec [RSR-DOMAINS].2 — at genesis the
+ERC-20 primary settlement adapter, with verifier distinctness carried by
+`verifyingContract` alone (ADR 0012 decision T7).
 Passive split-wallet ERC-20 receipts remain releasable under wallet accounting,
 but they are not primary-sale settlement evidence and do not relax the
 adapter-level exact-delta requirement.
@@ -1062,6 +1094,12 @@ order for paid transfer of custody-held tokens — is defined in
 `docs/revenue-splits-and-royalties.md` [RSR-SETTLEMENT-BOUNDARY]. The
 current drop-side auction placeholder is not a launch auction settlement
 path.
+Consigned owner-held tokens — already-minted tokens placed into sale
+custody by their owner under the sales spec's owner-signed custody
+grant — settle as secondary transfers with ERC-2981 royalty disclosure,
+never as primary revenue; the boundary rule is
+`docs/revenue-splits-and-royalties.md` [RSR-SETTLEMENT-BOUNDARY].10 and
+the custody-grant mechanics are sale-side (ADR 0012 decision T6).
 
 The direct-deposit gas bound is the `WALLET_DEPOSIT_GAS_LIMIT` Governed Gas
 Parameter (ADR 0010 decision D1; see
@@ -1213,6 +1251,11 @@ Revenue escrow lifecycle:
 - Wallet-observed release accounting excludes escrow-owed balances until a
   flush or recovery transfer actually reaches a split wallet. System
   conservation includes both wallet-observed balances and escrow-owed balances.
+- Every custody surface holding owed funds — split wallets, the revenue
+  escrow, and sale-adapter escrow/refund liabilities — carries the per-asset
+  solvency invariant, forced/direct-value posture, and claim discipline of
+  the revenue spec's owed-funds pattern home, [RSR-OWED-FUNDS], each with a
+  named verification gate (ADR 0012 decision T7).
 
 The implementation must preserve current ADR 0003 invariants:
 

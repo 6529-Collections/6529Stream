@@ -1020,6 +1020,30 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Applied the nine-lens round-3 resolutions through accepted
+  `docs/adr/0012-world-class-pass-round-3.md`: GGP probe contracts become
+  Permanent-class genesis inventory with a zero-signer museum drill, and
+  permissionless conditional raises are restricted to read-survival
+  parameters (killing the fail-closed DoS ratchet); entropy block-count
+  windows become Governed Time Parameters; preservation follows the sale
+  (sold tokens in open offchain collections require endowed dual-family
+  receipts and fixity within a pinned window of each sale); every onchain
+  payload family gains state-readable pointer discovery and exports gain
+  their own archival mandate; ERC721Enumerable is removed from Core
+  (periphery enumeration lens specified; totalSupply retained); artist
+  estate flows gain third-party contest paths, identity-document revisions,
+  sanction authority classes, platform-works sale stops, and
+  successor-registry history import; the sales layer adds airdrop, raffle,
+  consignment/custody-grant, cross-sale content uniqueness, and editions
+  posture with revocation typehashes pinned; claimRefund semantics, escrow
+  conservation invariants, and PaymentIntent domain binding are pinned;
+  the museum dossier adds the ownership-provenance chain, a tombstone
+  cataloguing schema, packaging mappings, and rights floors; ADR 0004 gains
+  ROLE_PAUSE_GUARDIAN, the definitive two-tier enforcement statement, and
+  material-action executability rehearsals; a baseline-record header now
+  quarantines all fourteen legacy operational documents from the
+  specification set; and the deployment chain posture (Ethereum mainnet L1)
+  plus a vulnerability-disclosure obligation are stated normatively.
 - Applied the nine-lens round-2 resolutions through accepted
   `docs/adr/0011-world-class-pass-round-2.md`: onchain bytes now means
   contract storage or SSTORE2 (event data demoted to discovery pointers);

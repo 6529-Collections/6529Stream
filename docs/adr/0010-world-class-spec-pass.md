@@ -305,6 +305,10 @@ Decision numbers below are cited from the specs as "(ADR 0010 decision N)".
    add it; a successor line is the only path.
 3. The ERC721Enumerable per-transfer cost is quantified in Accepted
    Tradeoffs with measured numbers and the retention rationale.
+   (Superseded by ADR 0012 decision T10: `ERC721Enumerable` is removed
+   from Core, and the enumeration posture home is [LTA-ENUMERATION] in
+   `docs/stream-long-term-architecture.md`; the retention rationale no
+   longer applies.)
 
 ### D10. Cross-cutting corrections
 

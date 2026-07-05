@@ -3,8 +3,10 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and
-[ADR 0010](adr/0010-world-class-spec-pass.md) and recorded in
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
+[ADR 0010](adr/0010-world-class-spec-pass.md),
+[ADR 0011](adr/0011-world-class-pass-round-2.md), and
+[ADR 0012](adr/0012-world-class-pass-round-3.md) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the umbrella architecture specification for making
@@ -31,9 +33,12 @@ Companion specs:
 - `docs/stream-entropy-providers.md`
 
 This document is the normative home of the cross-cutting patterns:
-the Governed Gas Parameter model, the module registry record shape, the
-Core satellite pointer policy, the token identity model, the freeze model,
-the artwork finality model, the state export profile, and the hash and
+the Governed Gas Parameter model and its probe permanence rules, the
+Governed Time Parameter model, the module registry record shape, the
+Core satellite pointer policy, the token identity model, the token
+enumeration posture, the freeze model, the artwork finality model, the
+guardian module pattern, the state export
+profile, the state-readable payload discovery pattern, and the hash and
 manifest discipline. Subsystem specs instantiate these patterns and cite
 this document; per the precedence rule in
 [`docs/spec-policy.md`](spec-policy.md), restating a pattern is a defect.
@@ -49,7 +54,7 @@ The durable boundary is:
 
 ```text
 StreamCore
-  - ERC-721 ownership, approvals, enumerable supply, burn/mint facts
+  - ERC-721 ownership, approvals, total supply, burn/mint facts
   - token ID to collection ID truth
   - Core-native ERC-2981 surface
   - tokenURI public surface
@@ -72,12 +77,15 @@ version or manifest hashes.
 ## Long-Term Principles
 
 1. Keep Core permanent, small, and boring.
-2. Keep `ERC721Enumerable` in Core.
+2. Keep `totalSupply()` in Core; keep `ERC721Enumerable` index storage out
+   of Core. Enumeration is served by state exports, dense sequential IDs,
+   and periphery lenses ([LTA-ENUMERATION]; ADR 0012 decision T10,
+   superseding ADR 0010 decision D9.3).
 3. Keep Core-native ERC-2981 in Core, but put mutable royalty policy in a
    resolver.
 4. Keep marketplace-facing surfaces stable: `ownerOf`, `tokenURI`,
-   `royaltyInfo`, `supportsInterface`, transfer, approval, and enumerable
-   reads.
+   `royaltyInfo`, `supportsInterface`, transfer, approval, and
+   `totalSupply` reads.
 5. Keep mutable economic, rendering, and entropy policy out of Core.
 6. Prefer immutable profiles, immutable implementation versions, and mutable
    assignments over mutable internals.
@@ -108,7 +116,8 @@ Core should own only facts that define the NFT:
 
 - token existence;
 - owner and approvals;
-- enumerable global and per-owner state;
+- global live-supply and allocation counters (`totalSupply()`,
+  `lastAllocatedTokenId()`; [LTA-ENUMERATION]);
 - collection ID for a token;
 - collection-local serial when needed for names and open-ended collections;
 - mint/burn audit facts;
@@ -128,7 +137,7 @@ Core should not own:
 - future optional display or agent metadata modules.
 
 If Core bytecode becomes tight, the rule is not "drop Core-native ERC-2981" or
-"drop enumerable." The rule is: move non-essential rendering, collection
+"drop `totalSupply()`." The rule is: move non-essential rendering, collection
 metadata, entropy coordination, and other mutable policy out of Core until the
 permanent surfaces fit with headroom.
 
@@ -164,6 +173,8 @@ STREAM_RENDERER
 STREAM_COLLECTION_METADATA
 STREAM_ENTROPY_COORDINATOR
 STREAM_ENTROPY_PROVIDER
+STREAM_GOVERNANCE_GUARDIAN
+STREAM_ENUMERATION_LENS
 ```
 
 Implementation contracts should expose enough immutable or read-only facts for
@@ -530,14 +541,15 @@ A Governed Gas Parameter is:
 5. identified by
    `parameterId = keccak256("6529STREAM_GGP_" || <constant name>)`,
    recorded in the owning subsystem's domain table;
-6. paired with a named probe contract — a diagnostics satellite or
-   operator-tooling contract recorded per parameter in the release
-   manifest, never a production read path — that anyone can call to
-   execute the guarded path (or a faithful equivalent of it) at a
-   candidate value and record the outcome onchain. The probe record is
-   the verification locus for probe-gated lowering, emergency raising,
-   and the permissionless conditional raise (requirements 1–2 and 11;
-   ADR 0011 decision R5).
+6. paired with a named probe contract — a Permanent-class genesis
+   inventory member under the probe permanence rules of
+   [LTA-GGP-PROBES], recorded per parameter in the release manifest,
+   never a production read path — that anyone can call to execute the
+   guarded path (or a faithful equivalent of it) at a candidate value
+   and record the outcome onchain. The probe record is the verification
+   locus for probe-gated lowering, emergency raising, and the
+   permissionless conditional raise (requirements 1–2 and 11;
+   ADR 0011 decision R5; ADR 0012 decision T1).
 
 The probe surface is canonical so that a Safe, an autonomous governor,
 and a 2075 archivist verify the same onchain evidence:
@@ -560,10 +572,67 @@ function lastProbeRun(bytes32 parameterId, uint256 probedValue)
 
 A probe run must execute the guarded operation itself, or a faithful
 equivalent measured on the production path, at `probedValue`;
-`evidenceHash` commits to the run's measurement artifact. Each
+`evidenceHash` commits to the run's measurement artifact. The
+`GasParameterProbed` event and the `lastProbeRun` read are hosted on
+the probe contract itself — the probe-run record lives on the probe,
+never on the host (ADR 0012 decision T1) — and hosts consume the record
+through the probe address bound at parameter registration. Each
 parameter's release-manifest entry records its probe contract and the
 probe recency bound `probeMaxAgeBlocks` consumed by the execution
 rechecks below.
+
+### GGP Probe Contracts [LTA-GGP-PROBES]
+
+The probe record is the only evidence that can move a parameter after
+total governance loss, so the probe is hardened like the surfaces it
+protects (ADR 0012 decision T1):
+
+1. Probe contracts are Permanent-class members of the genesis
+   deployment inventory: named in the conformance-matrix genesis
+   deployment profile, deployed deterministically ([LTA-DEPLOY]), and
+   covered by the matrix static permanence checks, the golden interface
+   tests, and the audit plan. A probe outside the production inventory
+   is nonconformant.
+2. Probes are immutable and permissionless: no owner, no upgrade path,
+   no selfdestruct, no pause switch, and callable by anyone forever.
+   A probe run must be executable with no role, allowlist, or fee.
+3. The probe-run record — `GasParameterProbed` and `lastProbeRun` —
+   lives on the probe contract. The host verifies probe records at
+   execution rechecks through the probe address bound at parameter
+   registration. While governance functions, a parameter's probe
+   binding may move to a successor Permanent-class probe through the
+   normal delay class with staging events and cancellation; with
+   governance lost the binding is frozen, which is why every probe is
+   Permanent-class.
+4. Probe inputs are pinned per parameter: each probe executes a fixed,
+   caller-independent scenario whose input corpus is recorded in the
+   release manifest and committed by `evidenceHash`. No caller-supplied
+   argument may select code paths, shape contract state, or alter the
+   measured gas of the guarded execution.
+5. Genuine-failure rule: before recording any outcome, the probe must
+   prove the guarded execution actually received `probedValue` (or the
+   live current value, for current-value runs). A run the prober
+   under-funded, gas-shaped, or otherwise starved must revert without
+   recording. A recordable failing run exists only when the guarded
+   operation was genuinely given the probed value and still failed.
+6. `probeMaxAgeBlocks` is recorded per parameter in the release
+   manifest, enforced by the host at execution rechecks, and must be at
+   least `PROBE_MAX_AGE_FLOOR_BLOCKS`. The planning floor is 50,400
+   blocks (roughly seven days at twelve-second cadence); the deployed
+   floor is pinned in the release manifest. The floor is generous by
+   design: with governance gone nobody can widen the recency bound, and
+   an over-tight bound would strand the conditional raise it exists to
+   serve.
+7. A probe's own executability must not depend on a healthy value of
+   any parameter it probes; a probe callable only when the guarded path
+   is already healthy is nonconformant.
+8. Probes hold no pointer, no funds, and no protocol authority beyond
+   writing their own probe records; no production read path routes
+   through a probe.
+9. The zero-signer museum-mode drill executes the
+   probe-and-conditional-raise path end to end against the deployed
+   probe contracts with no governance signer (State Export And Archival
+   Operations).
 
 Requirements:
 
@@ -577,9 +646,11 @@ Requirements:
    `probeMaxAgeBlocks`, a failing run at the current value — proof that
    the guarded path is actually degraded — and it may repeat, one
    bounded step at a time, while fresh probe runs keep proving failure.
-   An emergency path that could raise a healthy parameter is
-   nonconformant; requirement 10 states why the raise direction needs
-   this guard.
+   A failing run is recordable only under the genuine-failure rule
+   ([LTA-GGP-PROBES] rule 5), so a manufactured under-funded call can
+   never arm this path. An emergency path that could raise a healthy
+   parameter is nonconformant; requirement 10 states why the raise
+   direction needs this guard.
 2. Lowering a GGP must use the normal delay class, must revert below the
    immutable floor, and is probe-gated at the named locus: the lower's
    execution recheck must verify, through the parameter's named probe
@@ -588,9 +659,9 @@ Requirements:
    record is onchain evidence — a lower whose probe obligation is
    satisfiable only by an offchain artifact is nonconformant, because an
    autonomous governor could not verify it and a Safe could not prove
-   it. Probe variants that execute at a candidate value live in
-   diagnostics satellites or operator tooling, never in production
-   read paths.
+   it. Probe executions at candidate values live on the parameter's
+   Permanent-class probe contract ([LTA-GGP-PROBES]), never in
+   production read paths.
 3. GGP values are Operational-layer. They must be excluded from finality
    manifests, frozen-route identity, policy hashes, assignment hashes, and
    every Permanent preimage, so retuning gas never touches artwork or
@@ -631,12 +702,17 @@ Requirements:
 8. The mint-path never-brick chain is explicit (ADR 0010 decision D1.5):
    entropy registration failure cannot permanently brick minting, because
    `ENTROPY_REGISTRATION_GAS_LIMIT` has no ceiling above its floor — any
-   needed value is reachable in bounded 2x-per-action steps, and the
-   emergency and conditional raise paths stay available while the probe
-   proves failure (requirements 1 and 11) — ([EC-REGGAS] in
+   needed value is reachable in bounded 2x-per-action steps through
+   staged governance, and the governed emergency raise path stays
+   available while the probe proves failure (requirement 1) — ([EC-REGGAS]
+   in
    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md))
    and the `ENTROPY_COORDINATOR` pointer is replaceable under the Core
-   Satellite Pointer Policy. The same two-step recovery chain — raise the
+   Satellite Pointer Policy. As a `FAIL_CLOSED_PRECHECK` parameter it has
+   no permissionless conditional raise — requirement 11 is
+   `FORWARDING_CAP`-only (ADR 0012 decision T1): mint liveness is a
+   governed-liveness guarantee, while read survival is the permissionless
+   museum-mode guarantee. The same two-step recovery chain — raise the
    cap, then replace the pointer — applies to every guarded satellite
    read.
 9. GGP floor/raise/lower/probe behavior is conformance-gated: the matrix
@@ -644,7 +720,14 @@ Requirements:
    test with a per-action raise-bound rejection, an emergency-raise
    probe-gate test (a healthy probe record blocks; a failing record
    admits), a probe-gated lower test, a permissionless conditional-raise
-   test executed with no governance signer (requirement 11), and
+   test executed with no governance signer for every `FORWARDING_CAP`
+   parameter (requirement 11), a scope-rejection test proving no
+   conditional-raise action exists — or that its execution reverts —
+   for every `FAIL_CLOSED_PRECHECK` and `MIN_GAS_GATE` parameter, a
+   forged-failure probe-integrity test proving an under-funded or
+   input-shaped probe call reverts without recording a failing run
+   ([LTA-GGP-PROBES] rules 4–5), the [LTA-GGP-PROBES] permanence checks
+   (static permanence, golden interface, museum-mode drill), and
    change-event assertions for every deployed GGP.
 10. Raise direction is not uniformly safe, and each parameter says so
     (ADR 0011 decision R5). Every release-manifest GGP entry records the
@@ -669,13 +752,16 @@ Requirements:
     read returns, and the staging artifact for any raise of such a
     parameter must record the proposed value as a fraction of the
     current block gas limit so reviewers see the halt threshold
-    approaching.
-11. Lost-governance survivability: permissionless conditional raises
-    (ADR 0011 decision R5). Each GGP host must register at deployment a
-    pre-approved conditional-raise action — a standing guardian action
-    in the sense of [LTA-GOV] rule 7 — executable by anyone, with no
-    live governance signer, when the parameter's named probe has
-    recorded a failing run at the current value within
+    approaching. The permissionless conditional raise of requirement 11
+    never applies to these two classes (ADR 0012 decision T1).
+11. Lost-governance survivability: permissionless conditional raises,
+    for `FORWARDING_CAP` parameters only (ADR 0011 decision R5;
+    ADR 0012 decision T1). The host of every `FORWARDING_CAP` parameter
+    must register at deployment a pre-approved conditional-raise action
+    — a standing pre-authorized action in the spirit of the
+    guardian-module pattern ([LTA-GUARDIAN]) — executable by anyone,
+    with no live governance signer, when the parameter's named probe
+    has recorded a failing run at the current value within
     `probeMaxAgeBlocks`. A conditional raise takes the same bounded
     per-action step as every other raise, may repeat while fresh probe
     runs keep proving failure, can never lower a value or touch any
@@ -688,11 +774,30 @@ Requirements:
     museum mode (State Export And Archival Operations) lists this as a
     surviving mechanism, and the museum-mode drills exercise it.
 
+    No permissionless raise exists for `FAIL_CLOSED_PRECHECK` or
+    `MIN_GAS_GATE` parameters: registering a conditional-raise action
+    for either class is nonconformant, and those parameters raise only
+    through governance (staged, or the requirement 1 emergency path).
+    For a fail-closed or minimum-gas parameter the raise direction is a
+    denial-of-service lever (requirement 10) — a manufactured failing
+    run would let anyone ratchet a mint precheck or flush floor past
+    what parent transactions can supply, and the corrective lower is a
+    delayed governed action. The museum-mode guarantee never depended on
+    those classes: with governance gone, reads survive permissionlessly;
+    minting and flushing are governed-liveness surfaces (ADR 0012
+    decision T1).
+
 GGP inventory. The model is instantiated by the parameters below; each
-home owns host, genesis value, floor sizing, and probe definition. For
-every row the release manifest records the probe contract,
-`probeMaxAgeBlocks`, failure-direction class, and conditional-raise
-registration (requirements 10–11):
+home owns host, genesis value, floor sizing, failure-direction class,
+and probe definition — what the probe executes, what the faithful
+equivalent is for permissioned guarded paths, and what `evidenceHash`
+commits to. An inventory row whose home lacks a probe definition or a
+pinned failure-direction class is nonconformant; the matrix verifies
+one probe definition and one class per row, mirroring the
+GGP-identifier completeness rule (ADR 0012 decision T1). For every row
+the release manifest records the probe contract, `probeMaxAgeBlocks`,
+failure-direction class, and — for `FORWARDING_CAP` rows — the
+conditional-raise registration (requirements 10–11):
 
 | Parameter | Host | Normative home |
 | --- | --- | --- |
@@ -707,6 +812,7 @@ registration (requirements 10–11):
 | `ARTIST_AUTHORITY_GAS_LIMIT` | mint manager | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CONSENT] |
 | `SALE_ERC1271_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
 | `DELEGATE_REGISTRY_GAS_LIMIT` | delegate gate | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
+| `SALE_ARTIST_AUTHORITY_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS], [SSA-CONTEST-STOP] |
 | `METADATA_ROUTER_GAS_LIMIT` | `StreamCore` | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ROUTER-GGP] |
 | `ENTROPY_VIEW_GAS_LIMIT` | metadata router | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ENTROPY-READ] |
 | `ENTROPY_REGISTRATION_GAS_LIMIT` | `StreamCore` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-REGGAS] |
@@ -724,6 +830,112 @@ The repricing-review membership is bidirectional: every hard-fork or
 gas-schedule review (State Export And Archival Operations) remeasures every
 inventory row against its current value and floor, and publishes raise
 recommendations in the compatibility report before user impact, not after.
+
+### Governed Time Parameters [LTA-GTP]
+
+A frozen block count is the temporal twin of an immutable gas cap: block
+cadence is not stable over 50 years, and a block-denominated liveness
+window frozen at configuration time silently rescales its wall-clock
+meaning with every consensus-timing change. Every protocol block-count
+window that gates a liveness, recovery, or SLO path — entropy request
+timeouts, reveal SLO windows, fresh-recovery waiting periods, and any
+future block-denominated window — is therefore a Governed Time
+Parameter (GTP) under the same floor/raise/probe discipline as gas
+(ADR 0012 decision T1). This subsection is the single normative home of
+the GTP pattern; subsystem homes instantiate parameters and cite it.
+
+A Governed Time Parameter is:
+
+1. a named constant whose current value is a storage-backed read on its
+   host, never a deploy-time immutable, a compiled-in constant, or a
+   per-collection frozen declaration. Where a collection freezes a
+   declared window, the declaration is a promised minimum that bounds
+   the effective window from below, and the host GTP overlays it at
+   evaluation time — the effective-window and config-freeze semantics
+   are owned by the instantiating home ([EC-TIME] in
+   [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md))
+   — so cadence drift is correctable even for collections that can
+   never be reconfigured;
+2. paired with an immutable per-parameter floor (in blocks) plus a
+   pinned wall-clock floor: the host stores, immutably per parameter,
+   the minimum wall-clock width in seconds the window must cover — the
+   value the cadence probe verifies candidates against — and the
+   release manifest records genesis value, block floor, wall-clock
+   floor, host, and sizing evidence;
+3. identified by
+   `parameterId = keccak256("6529STREAM_GTP_" || <constant name>)`,
+   recorded in the owning subsystem's domain table;
+4. Operational-layer, like GGP values (requirement 3 above): excluded
+   from finality manifests, frozen-route identity, policy hashes,
+   assignment hashes, and every Permanent preimage, so retuning a
+   window never touches artwork or economic identity;
+5. a named member of the repricing/consensus-timing review checklist:
+   every review that observes a material block-time, timestamp, or
+   finality change remeasures every GTP row against its wall-clock
+   intent and publishes raise/lower recommendations before user impact;
+6. paired with a named cadence probe — a Permanent-class probe contract
+   under [LTA-GGP-PROBES], with its own release-manifest entry and
+   `probeMaxAgeBlocks` under those rules — that anyone can call to
+   record observed block cadence onchain over a sampling window at
+   least `CADENCE_SAMPLE_FLOOR_BLOCKS` wide (planning value 1,000
+   blocks; deployed value pinned in the release manifest) and to record
+   pass/fail for a candidate value against the parameter's pinned
+   wall-clock floor at that observed cadence.
+
+GTP change discipline:
+
+1. Every change executes through the canonical governance action
+   ([GOV-ACTION-ID]) on the normal delay class, with staging events and
+   cancellation. There is no emergency and no permissionless
+   conditional raise for GTPs: the lost-governance raise machinery
+   exists for `FORWARDING_CAP` read survival only (requirement 11),
+   and both GTP directions move liveness semantics — a raise delays
+   recovery and fallback rights; a lower trips them early.
+2. Raises are bounded per action to at most 2x the current value;
+   lowers are bounded per action to no less than half the current
+   value and revert below the floor. Larger moves take multiple
+   staged actions.
+3. A lower is probe-gated at the cadence locus: its execution recheck
+   must verify a recorded cadence-probe run no older than the
+   parameter's `probeMaxAgeBlocks` proving the proposed count still
+   covers the pinned wall-clock floor at the observed cadence.
+4. Every GTP change emits the canonical change event:
+
+   ```solidity
+   event TimeParameterUpdated(
+       uint16 schemaVersion,
+       bytes32 indexed parameterId,
+       address indexed host,
+       bytes32 indexed actionId,
+       uint256 oldValue,
+       uint256 newValue,
+       uint256 floor
+   );
+   ```
+
+   The cadence probe emits `TimeParameterProbed` with the same field
+   shape as `GasParameterProbed`. A host spec may pin parameter-named
+   alias events under the same event-catalog family rule as GGP
+   requirement 4.
+5. The staging artifact for every GTP change records the observed
+   seconds-per-block from the latest cadence-probe run and the implied
+   wall-clock window before and after the change, so reviewers see
+   intent, not raw block counts.
+6. GTP behavior is conformance-gated alongside GGPs: floor rejection,
+   per-action raise and lower bounds, cadence-probe-gated lower, and
+   change-event assertions for every deployed GTP (Release Gates,
+   governance gate 7).
+
+The GTP inventory is owned by the subsystem homes; the genesis rows are
+the coordinator-hosted entropy lifecycle windows —
+`ENTROPY_REQUEST_TIMEOUT_BLOCKS`, `ENTROPY_REVEAL_SLO_BLOCKS`, and
+`ENTROPY_RECOVERY_STEP_DELAY_BLOCKS`, overlaying the per-collection
+declared windows (`requestTimeoutBlocks`, `requestSLOBlocks`,
+`notBeforeBlocks`) — instantiated with their effective-window semantics
+by [EC-TIME] in
+[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md).
+A future block-count liveness window that is not a GTP is nonconformant;
+the release manifest is the authoritative deployed set.
 
 ## Token Identity Model [LTA-IDENTITY]
 
@@ -746,8 +958,8 @@ Normative v1 rule:
    must not be assigned to a collection from a range heuristic.
 5. Burned tokens retain their last authoritative collection mapping for royalty
    disclosure and audit history. Burning removes ERC-721 ownership and
-   enumerable membership, but it must not clear retained collection identity or
-   burned-token audit state. `royaltyInfo()` therefore continues to resolve
+   decrements live supply, but it must not clear retained collection identity
+   or burned-token audit state. `royaltyInfo()` therefore continues to resolve
    token, collection, then default scope for a burned token through
    `tokenCollectionIdentity`, while `tokenURI()` may still revert because the
    token no longer exists for ERC-721 metadata purposes.
@@ -843,6 +1055,87 @@ through to the unmapped `(false, 0, 0, false)` branch.
 The cross-contract ABI returns `uint8`; the numeric values are pinned in the
 Numeric ID Catalog as `UNKNOWN = 0`, `PREPARED_INCOMPLETE = 1`, `MINTED = 2`,
 and `BURNED = 3`.
+
+## Token Enumeration Posture [LTA-ENUMERATION]
+
+Core does not carry `ERC721Enumerable` (ADR 0012 decision T10,
+superseding ADR 0010 decision D9.3 and the pre-review "keep
+`ERC721Enumerable` in Core" principle). The enumerable index structures
+would have added roughly 45,000–50,000 gas to every all-cold mint and
+roughly 60,000–70,000 gas to every all-cold wallet-to-wallet transfer —
+a permanent per-collector tax on every ownership change for the life of
+the system — plus several kilobytes against the Core headroom rule, to
+serve needs that dense sequential IDs, state exports, and event replay
+already serve. The decision is taken before genesis precisely because it
+is irreversible after; it is recorded as an owner-flagged supersession
+in ADR 0012.
+
+Core enumeration surface:
+
+1. Core exposes `totalSupply()` — the live token count, incremented at
+   mint and decremented at burn — and `lastAllocatedTokenId()` — the
+   sequential global allocator's high-water mark, zero before the first
+   allocation — as Permanent reads from genesis, golden-tested and
+   named in the release manifest.
+2. Allocation is dense: every `tokenId` in
+   `[1, lastAllocatedTokenId()]` has an authoritative
+   `tokenLifecycle(tokenId)` and `tokenCollectionIdentity(tokenId)`
+   result ([LTA-IDENTITY]), so a state-only walker enumerates every
+   token that ever existed without logs, indexes, or heuristics.
+3. Core implements no `tokenOfOwnerByIndex`, no `tokenByIndex`, and no
+   owner-index or global-index storage, and
+   `supportsInterface(0x780e9d63)` returns false, permanently. Adding
+   the enumerable standard back is a successor-line decision.
+
+Museum-mode and archival enumeration is served by three independent
+lanes, each exercised by the museum-mode drill: state exports (ownership
+and token-to-collection roots, [LTA-EXPORT]); sequential-ID iteration
+over live state (rule 2 above — `ownerOf`/`tokenLifecycle` walks need
+no operator and no logs); and Transfer/mint/burn event replay through
+the reconstruction client and mirrored event-history snapshots
+([LTA-RECON]; [LTA-EVENT-HISTORY]).
+
+Live per-owner and per-collection reads for integrators are a periphery
+concern, served by a stateless enumeration lens:
+
+```solidity
+interface IStreamEnumerationLens {
+    function tokensOfOwnerInRange(
+        address owner,
+        uint256 startTokenId,
+        uint256 endTokenId
+    ) external view returns (uint256[] memory tokenIds);
+
+    function tokensOfCollectionInRange(
+        uint256 collectionId,
+        uint256 startTokenId,
+        uint256 endTokenId
+    ) external view returns (uint256[] memory tokenIds);
+
+    function liveTokensInRange(uint256 startTokenId, uint256 endTokenId)
+        external
+        view
+        returns (uint256[] memory tokenIds);
+}
+```
+
+Lens rules:
+
+1. The lens is stateless: pure paged view walks over `ownerOf`,
+   `tokenLifecycle`, and `tokenCollectionIdentity`. It holds no
+   pointer, no funds, and no authority, writes nothing, and is never a
+   dependency of any Permanent surface — Core has no transfer hooks
+   ([LTA-STANDARDS]), so no live onchain index can exist, and none is
+   pretended.
+2. Callers choose range widths against their RPC budget; ranges are
+   `[startTokenId, endTokenId]` inclusive with `endTokenId` capped by
+   the caller at `lastAllocatedTokenId()`.
+3. The lens registers under module type `STREAM_ENUMERATION_LENS`
+   through the module registry ([LTA-REGISTRY]). The genesis deployment
+   should deploy and register one lens, named in the genesis deployment
+   profile; a deployment that omits it must record the rationale in the
+   deployment manifest. Anyone may deploy a replacement lens
+   permissionlessly forever.
 
 ## Assignment Hierarchy
 
@@ -1060,12 +1353,22 @@ struct CollectionFinalityRecord {
     bytes32 manifestURIHash;
     string finalityManifestURI;
     bytes32 componentsHash;
+    address manifestPointer;
     uint64 finalizedAt;
 }
 
 mapping(uint256 collectionId => CollectionFinalityRecord) finalityRecords;
 mapping(uint256 collectionId => FinalityComponentExpectation[]) finalityComponents;
 ```
+
+`manifestPointer` is the storage-backed discovery pointer for the
+canonical manifest bytes required onchain by finality requirement 14:
+the SSTORE2 blob address holding those bytes, or the registry's own
+address when the bytes live in registry storage behind a typed
+accessor. It is part of the state-readable payload discovery surface
+([LTA-PAYLOAD-DISCOVERY]; ADR 0012 decision T3), so a post-expiry
+archivist locates the bytes from state reads alone. It is discovery
+data, not identity: it is not an input to `finalityRecordHash`.
 
 `interfaceId` is the ERC-165-style four-byte interface identifier for the
 component's finality read surface. If a component does not have an ERC-165
@@ -1302,7 +1605,10 @@ Finality requirements:
    been recorded in the collection metadata contract. Finality is
    forbidden while any render-critical payload resolves through mutable
    transport without a content-hash commitment; a frozen `baseURI` proves
-   which URI was promised, never which artwork.
+   which URI was promised, never which artwork. Content-root leaf
+   semantics for tokens whose entropy was never finalized are pinned at
+   [CMC-CONTENT-ROOT] (ADR 0012 decision T3); the finality scope binds
+   those pinned semantics, never an implementation guess.
 7. Collection-level artwork finality that binds `mintedSupply`,
    `burnedSupply`, and `nextCollectionSerial` requires Core collection
    status `CLOSED` plus the one-way Core burn block, verified through
@@ -1396,7 +1702,11 @@ Finality requirements:
       the `REFERENCE_RENDER` record.
     - `CURATED_EQUIVALENCE`: acceptance is a conservator attestation
       against the significant properties of the `ARTIST_INTENT` record,
-      recorded as an attestation.
+      recorded as an attestation under the pinned attestor class and
+      examiner-evidence requirements of [CMC-FINALITY-INPUTS] rule 5(d)
+      in
+      [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+      (ADR 0012 decision T8).
 
     A renderer that declares the `DYNAMIC` class (declared, per-version
     frozen external reads;
@@ -1415,9 +1725,13 @@ Finality requirements:
     manifest it binds) must be stored onchain in contract storage or an
     SSTORE2 blob — a state-trie carrier, never only event data
     ([LTA-CATALOGS] rule 6; ADR 0011 decision R1) — at or before
-    finality execution, with the pointer evented (ADR 0010 decision
+    finality execution, with the pointer stored in the finality record
+    (`manifestPointer`) and exposed through the state-readable payload
+    discovery surface ([LTA-PAYLOAD-DISCOVERY]; ADR 0012 decision T3),
+    and with the pointer evented for indexers (ADR 0010 decision
     D4.5). `manifest.uri` remains display and mirroring data; the
-    onchain bytes are the recoverable truth.
+    onchain bytes are the recoverable truth, locatable from state
+    reads alone.
 15. Every executed finality (collection or scoped) must be followed by a
     state export that includes the new finality record and content root
     leaves (State Export And Archival Operations); the export-at-finality
@@ -1455,6 +1769,7 @@ struct ScopedFinalityRecord {
     bytes32 manifestURIHash;
     bytes32 componentsHash;
     string finalityManifestURI;
+    address manifestPointer;
     uint64 finalizedAt;
 }
 
@@ -1814,7 +2129,17 @@ finality registry ([LTA-GGP]): its genesis value is measured at deployment,
 its immutable floor is at least twice the deepest measured all-cold
 component read, and future repricing is remediated by raising the value —
 archival verification never becomes permanently impractical behind a fixed
-cap. If any component read reverts,
+cap. Its failure-direction class is `FORWARDING_CAP` (it bounds gas
+forwarded to fail-safe diagnostic reads; raising restores the
+diagnostic), so it carries a conditional-raise registration
+([LTA-GGP] requirement 11). Its probe definition: the probe executes
+`verifyFinalityRange` at the candidate value against a
+release-manifest-pinned reference set of finalized collections
+(including the deepest-component collection at pinning time), with
+`evidenceHash` committing to the pinned collection set, range bounds,
+and per-component gas measurements; the probe records a failing run
+only when a pinned component read that received the probed value ran
+out of that budget ([LTA-GGP-PROBES]). If any component read reverts,
 runs out of its gas cap, returns malformed data, has no code, or no longer
 matches the expected code hash, the read returns `currentRouteMatches = false`
 or `false` and still returns the stored finality hash. It must not revert merely
@@ -2006,7 +2331,11 @@ defined once in
 [GOV-ACTION-ID], [GOV-BATCH], and [GOV-WINDOWS] (ADR 0010 decisions D3.4,
 D7.1, D7.2). Subsystem specs fold domain-specific fields into
 `scopeHash`/`newValueHash` of that one preimage; defining a second
-staged-operation preimage anywhere is nonconformant.
+staged-operation preimage anywhere is nonconformant. The launch
+enforcement model for action classes — which delay tiers the bytecode
+enforces and which class labels are catalog vocabulary — is likewise
+owned definitively by ADR 0004; class assignments in this document cite
+that model (ADR 0012 decision T9).
 
 Rules:
 
@@ -2028,17 +2357,26 @@ Rules:
    ledger registration — must be satisfied either by one externally
    callable entrypoint on one target or by one atomic [GOV-BATCH] batch;
    partial application must never be observable (ADR 0010 decision D7.1).
-6. Windows must be sized for the actual holder. For every role that must
-   act inside a window — canceller, vetoer, pause guardian, unpause admin,
-   emergency admin — the deployment manifest must record the holder's
-   worst-case execution latency (multisig coordination, governor
-   proposal-to-execution time), and the configured window must be at least
-   that latency plus margin, never below the [GOV-WINDOWS] floors
+6. Windows must be sized for the actual holder. The obligated-role set
+   is expressly non-exhaustive: it covers every role any spec obligates
+   to act inside a window — the staged-action canceller, terminal-freeze
+   vetoer, pause guardian, unpause admin, and emergency admin, and
+   equally every subsystem obligation window, such as the entropy reveal
+   SLO (`requestSLOBlocks`, [EC-REVEAL] in
+   [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md))
+   and arbiter/contest response windows (ADR 0012 decision T5). For each
+   such role the deployment manifest must record the holder's worst-case
+   execution latency (multisig coordination, governor
+   proposal-to-execution time), and the configured window must be at
+   least that latency plus margin, never below the [GOV-WINDOWS] floors
    (ADR 0010 decision D7.2). A veto window a governor cannot physically
-   meet is a dead control and fails the governance gate.
-7. Governor-held defensive roles should use a guardian-module pattern: the
+   meet — or a declared SLO its holder structurally cannot meet — is a
+   dead control and fails the governance gate.
+7. Governor-held defensive roles must satisfy the guardian-module
+   pattern specified below ([LTA-GUARDIAN]; ADR 0012 decision T5): the
    governor pre-authorizes a narrow, bounded, auto-expiring executor for
-   pause/veto/cancel so defense does not require a full proposal cycle.
+   pause/veto/cancel/incident-revoke so defense does not require a full
+   proposal cycle.
    Emergency moves to registry-pre-approved fallback targets must be
    permissionlessly executable once the triggering incident condition is
    onchain-observable (for example a target marked `INCIDENT_REVOKED`).
@@ -2050,7 +2388,158 @@ Rules:
    from pause guardians ([GOV-WINDOWS]).
 9. The role-admin hierarchy and delay values are deployment parameters and
    must be recorded in deployment manifests, together with the governance
-   action policy catalog required by ADR 0004.
+   action policy catalog required by ADR 0004. Every executor named in
+   that catalog or in an action manifest is a [GOV-ROLES] role reference
+   resolved through the admin registry at execution time, never a raw
+   address, per the ADR 0004 execution rules (ADR 0012 decision T5): a
+   raw executor address is a frozen key that strands the scheduled
+   action when its holder rotates between staging and execution.
+
+### Guardian Module Pattern [LTA-GUARDIAN]
+
+A standard governor's proposal-to-execution latency is days; pause,
+veto, cancellation, and incident revocation have no configurable window
+to widen — their window is the attack's duration. Where a governor (or
+any holder whose recorded latency exceeds the emergency assumption)
+holds a defensive role, the deployment must register a guardian module
+so the defense is exercisable inside the emergency window
+(ADR 0012 decision T5). This subsection is the pattern's normative
+home.
+
+```solidity
+interface IStreamGovernanceGuardian {
+    function guardianAuthorization(bytes32 authorizationId)
+        external
+        view
+        returns (
+            address agent,
+            uint8 capabilityMask,
+            bytes32 scopeHash,
+            uint64 notAfter,
+            uint64 usesRemaining,
+            bool revoked
+        );
+
+    function executeGuardedAction(
+        bytes32 authorizationId,
+        uint8 capability,
+        address target,
+        bytes calldata callData
+    ) external;
+
+    function revokeGuardianAuthorization(
+        bytes32 authorizationId,
+        bytes32 reasonHash,
+        string calldata reasonURI
+    ) external;
+}
+
+event GuardianAuthorized(
+    uint16 schemaVersion,
+    bytes32 indexed authorizationId,
+    address indexed agent,
+    uint8 capabilityMask,
+    bytes32 scopeHash,
+    uint64 notAfter,
+    uint64 maxUses
+);
+
+event GuardianActionExecuted(
+    uint16 schemaVersion,
+    bytes32 indexed authorizationId,
+    address indexed agent,
+    address indexed target,
+    uint8 capability,
+    bytes32 callDataHash
+);
+
+event GuardianRevoked(
+    uint16 schemaVersion,
+    bytes32 indexed authorizationId,
+    bytes32 reasonHash,
+    string reasonURI
+);
+```
+
+Guardian rules:
+
+1. The guardian module is a Replaceable module behind this frozen
+   interface, registered under module type `STREAM_GOVERNANCE_GUARDIAN`
+   through the module registry ([LTA-REGISTRY]). The admin registry
+   grants the defensive roles to the module; the governor is the
+   module's only authorizer and revoker.
+2. The capability set is closed and tightening-only: `PAUSE` (bit 0),
+   `VETO_TERMINAL_FREEZE` (bit 1), `CANCEL_STAGED_ACTION` (bit 2), and
+   `INCIDENT_REVOKE` (bit 3), encoded in `capabilityMask`; the bit
+   assignments are Permanent and mirrored in the Numeric ID Catalog. A
+   guardian authorization can never unpause, loosen, move a pointer,
+   grant a role, or touch funds — the [LTA-GOV] rule 8 narrowness
+   applies by construction, and unpause remains its own role
+   ([GOV-WINDOWS]).
+3. Every authorization is bounded: a mandatory expiry `notAfter`, an
+   optional bounded use count `maxUses` (zero means unlimited until
+   expiry), and a `scopeHash` binding the exact target set. The agent
+   can never extend, widen, or renew its own authorization; renewal is
+   a fresh governor action. `executeGuardedAction` reverts when the
+   authorization is expired, revoked, exhausted, out of scope, or
+   carries a capability bit the mask does not grant.
+4. `scopeHash` and `authorizationId` are domain-separated:
+
+   ```solidity
+   bytes32 scopeHash = keccak256(abi.encode(
+       STREAM_GUARDIAN_SCOPE_V1,
+       block.chainid,
+       address(guardianModule),
+       targets            // address[], ascending, no duplicates
+   ));
+
+   bytes32 authorizationId = keccak256(abi.encode(
+       STREAM_GUARDIAN_AUTHORIZATION_V1,
+       block.chainid,
+       address(guardianModule),
+       agent,
+       capabilityMask,
+       scopeHash,
+       notAfter,
+       maxUses,
+       grantNonce         // governor-chosen, unique per grant
+   ));
+   ```
+
+5. Every grant, use, and revocation is evented (`GuardianAuthorized`,
+   `GuardianActionExecuted`, `GuardianRevoked`); `callDataHash` is
+   `keccak256` of the executed calldata so incident forensics replay
+   exactly what the agent did.
+6. Gating: the governance gate must verify that every governor-held
+   defensive role either (a) has a registered guardian module with a
+   live authorization covering that capability, exercised in rehearsal,
+   or (b) is held by a holder whose recorded worst-case latency meets
+   the emergency assumption under [LTA-GOV] rule 6 (Release Gates,
+   governance gate 11). Guardian authorizations expire; after expiry
+   with governance gone, defensive controls halt — consistent with
+   read-only museum mode, which needs no defensive mutations.
+
+## Deployment Chain Posture [LTA-CHAIN]
+
+The normative chain posture is owned by the protocol v1 specification
+([PV1-SCOPE] in
+[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md);
+ADR 0012 decision T9), and this umbrella consumes it rather than
+restating it: this Core line deploys on Ethereum mainnet — L1,
+`block.chainid == 1` — and on no other chain. The architecture-level
+consequences are owned here:
+
+1. Every permanence figure in this document — gas ceilings,
+   storage-growth economics, history-expiry posture, museum-mode read
+   survival — is an Ethereum L1 figure; evidence captured on any other
+   network is rehearsal input, never a product fact.
+2. An L2, sidechain, or alternate-L1 deployment of this system is a
+   declared successor-line decision through the successor machinery of
+   [LTA-MANIFEST], never a redeployment of this line. The protocol
+   recognizes no bridged or wrapped representation of these tokens as
+   canonical: ownership truth is this chain's Core, and fork
+   canonicality follows [LTA-HASH] (chain ID is replay protection,
+   not fork choice).
 
 ## System Manifest And Successor Declaration [LTA-MANIFEST]
 
@@ -2250,6 +2739,9 @@ collection facts root
 entropy seed/status root
 revenue assignment root
 split profile root
+sale credit root              sale-adapter pull credits: outbid refunds,
+                              clearing rebates, drift-envelope refunds,
+                              maximum-price excess
 finality record root
 collection record-chain root   metadata, attestation, preservation,
                                owner-record, and artist-registry lanes
@@ -2287,6 +2779,15 @@ Export cadence requirements:
    reproduces the stored accumulator. Latest-hash reads alone cannot prove
    a recovered history is complete; the accumulator closes that gap even
    under full log expiry with operators gone.
+5. Every published export is itself a preservation-critical payload
+   (ADR 0012 decision T3): the export artifact, its event-history
+   chunks, and its manifest must be archived under the dual-family
+   archival rule [LTA-ARCHIVE] — two independent storage families, at
+   least one `ENDOWED`, with onchain archive receipts and fixity-program
+   coverage — before the export satisfies any cadence obligation, and a
+   published export lacking its receipts is a monitored incident. The
+   export bridge across history expiry is worthless if the bridge itself
+   decays with its operator.
 
 Discoverable export publication surface:
 
@@ -2460,6 +2961,15 @@ bytes32 escrowCreditLeaf = keccak256(abi.encode(
     bytes32(escrowRuntimeCodeHash)
 ));
 
+bytes32 saleCreditLeaf = keccak256(abi.encode(
+    STREAM_EXPORT_SALE_CREDIT_LEAF_V1,
+    address(adapter),
+    bytes32(saleId),
+    address(account),
+    address(asset),
+    uint256(owed)
+));
+
 bytes32 mintCounterLeaf = keccak256(abi.encode(
     STREAM_EXPORT_MINT_COUNTER_LEAF_V1,
     bytes32(valueKey),
@@ -2572,9 +3082,26 @@ Finality leaves are sorted by
 Record-chain leaves are sorted by `(laneHost, scopeKey, recordType)`;
 artwork manifest leaves by `(collectionId, manifestType, subjectId,
 contentHash)`; lock leaves by `(collectionId, lockId)`.
+Sale-credit leaves cover every unclaimed sale-adapter pull credit —
+outbid refunds, Dutch clearing rebates, drift-envelope refunds, and
+maximum-price excess, which the sales layer makes claimable forever —
+and are sorted by `(adapter, saleId, account, asset)`
+(ADR 0012 decision T3); the credit surfaces are owned by
+[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+Split-profile leaf completeness is checkable against state: the export
+manifest records the split factory's `profileCount()` at the export
+block, read from the factory's append-only onchain enumeration index
+(Split Profile Model in
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)).
 Each additional root defines a deterministic sort key in the export manifest;
 the field lists above are minimum v1 leaves and may be extended only by a new
 leaf version.
+
+Export bundles and object-dossier bundles are packaged for repository
+ingest under the pinned BagIt/OCFL packaging profile owned by
+[`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+[CMC-PACKAGING] (ADR 0012 decision T8); an export published outside the
+pinned packaging profile does not satisfy the cadence obligation.
 
 Event-history snapshot serialization [LTA-EVENT-HISTORY] (ADR 0011
 decision R12):
@@ -2591,7 +3118,14 @@ history expiry cannot be cross-verified.
    every genesis-profile contract, every module ever registered in a
    genesis-profile registry, and every factory-deployed split wallet.
    The address-set derivation rule is recorded in the export manifest
-   so an independent indexer reproduces the same set.
+   so an independent indexer reproduces the same set. The split-wallet
+   members are derivable from state alone through the split factory's
+   append-only onchain enumeration index —
+   `profileCount()`/`profileAt(index)`/`walletAt(index)`, owned by
+   [RSR-FACTORY-ENUM] in
+   [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+   — so deriving the address set never depends on prior export
+   artifacts or expired logs (ADR 0012 decision T3).
 2. Record encoding. Each log is one RFC 8785 (JCS) canonical JSON
    object with exactly these members and no others: `address`,
    `blockHash`, `blockNumber`, `data`, `logIndex`, `topics`,
@@ -2687,6 +3221,17 @@ ADR 0011 decision R4):
 6. HTTPS-only render-critical payloads are allowed only when the
    collection intentionally accepts service-backed mutability, and such
    collections can never satisfy the finality preconditions above.
+7. State exports, event-history snapshot chunks, deployment and release
+   manifests, and the reconstruction-client source archive are
+   preservation-critical payloads under rule 1 (ADR 0012 decision T3):
+   each published artifact carries dual-family receipts (one `ENDOWED`)
+   and fixity-program coverage per [LTA-EXPORT] cadence requirement 5,
+   the Operations gate verifies the receipts, and the funding manifest
+   records the export-storage families and their economics classes
+   ([LTA-FUNDING]). Event-history chunks are the only artifact class
+   carrying event payload content after history expiry — artist-registry
+   record contents, sale history, and assignment mutations reconstruct
+   from them — so their mirroring is mandated, never assumed.
 
 Every Ethereum hard fork, L2 migration, or material gas-schedule change must
 trigger a protocol-parameter review — the repricing review checklist that
@@ -2701,8 +3246,9 @@ marketplace, wallet, indexer, archive-node, and metadata-cache behavior for
 ERC-2981, ERC-4906, tokenURI fallback handling, contract metadata discovery,
 and frozen/recovered collection display.
 If average block time, timestamp behavior, finality assumptions, or block-count
-semantics materially change, the review must re-evaluate entropy
-`requestTimeoutBlocks`, governance delay UX, stale request windows, and any
+semantics materially change, the review must remeasure every Governed
+Time Parameter row against its pinned wall-clock intent ([LTA-GTP]) and
+re-evaluate governance delay UX, stale request windows, and any
 block-number-based archival/export policy.
 
 Reconstruction client requirements [LTA-RECON] (ADR 0010 decision D4.8):
@@ -2748,6 +3294,22 @@ Reconstruction client requirements [LTA-RECON] (ADR 0010 decision D4.8):
    instructions on contemporary tooling or in a preserved build container.
    If it does not, the replacement client and migration notes become
    preservation artifacts with their own URI/hash.
+6. Environment artifacts get the same remediation rule as the client
+   (ADR 0012 decision T8): a failed execution-environment boot check
+   (requirement 4) must produce, within the remediation window recorded
+   in the operations runbook, either a migrated or re-hosted environment
+   artifact — hashed, archived under [LTA-ARCHIVE], and recorded as a
+   preservation `MIGRATION` event linking the failed and replacement
+   artifacts under the PREMIS profile of
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-PREMIS-PROFILE] — or a recorded infeasibility finding with the
+   conservation options considered; the remediation workflow itself is
+   owned by [CMC-ENV-REMEDIATION] in the same document. The drill report must reference the
+   remediation artifact or finding; a boot failure that produces neither
+   is a monitored incident. Detection without a mandated re-hosting
+   deliverable would convert drills into documentation of loss, and the
+   re-render verification and every `ARTIST_INTENT` emulation preference
+   depend on an obtainable runtime, not a once-archived one.
 
 Unfunded storage is the most common real-world cause of NFT permanence
 failure, so the funding posture is a checked deployment artifact, not a
@@ -2756,8 +3318,11 @@ runbook note. Funding requirements [LTA-FUNDING] (ADR 0010 decision D4.8):
 1. Genesis requires a published funding/endowment manifest hashed into the
    release manifest: funding source and parties, coverage horizon or term,
    covered payload and service classes (keepers, entropy request payments,
-   monitoring, storage pinning/mirroring, domain/ENS renewal, fixity
-   cycles, preservation drills), the economics class of every storage
+   monitoring, storage pinning/mirroring, state-export and event-history
+   mirroring ([LTA-ARCHIVE] requirement 7), domain/ENS renewal, fixity
+   cycles, preservation drills, and vulnerability-disclosure intake and
+   bounty administration ([LTA-DISCLOSURE])), the economics class of
+   every storage
    family in use — `ENDOWED` (pay-once permanence) or `RENEWAL_FUNDED` —
    and exhaustion alarm thresholds with alert routing. The
    conformance-matrix Operations gate fails if the manifest is missing
@@ -2777,6 +3342,19 @@ runbook note. Funding requirements [LTA-FUNDING] (ADR 0010 decision D4.8):
    regardless ([LTA-ARCHIVE] requirement 3), so no deployment's entire
    offchain payload layer can depend on recurring payments by a mortal
    operating entity (ADR 0011 decision R4).
+4. The manifest must include a costed operating model
+   (ADR 0012 decision T9): for every recurring obligation the spec set
+   creates — fixity sweeps and sampling, export cadence, preservation
+   and museum-mode drills, ceremony rehearsals, repricing and
+   consensus-timing reviews, marketplace royalty re-verification,
+   funding-manifest renewal, disclosure intake and response — the
+   estimated person-hours and third-party fees per year, the staffing
+   or contracting assumption behind them, and the aggregate annual
+   cost. The coverage horizon of rule 1 must be computed against this
+   costed total, never asserted, so the exhaustion alarms guard a
+   number that was actually computed. Unfunded recurring labor — not
+   design — is the most common failure of preservation programs, and
+   every missed obligation here is a publicly computable incident.
 
 The specs, ADRs, event catalogs, release manifests, and reconstruction-client
 source archives are themselves preservation objects. Each deployment and material
@@ -2823,7 +3401,9 @@ Monitoring operations should define alert routing and escalation for:
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
    [CMC-FIXITY-PROGRAM];
 9. Governed Gas Parameter margin breaches ([LTA-GGP] requirement 6);
-10. missed state exports past the published cadence ([LTA-EXPORT]);
+10. missed state exports past the published cadence, and published
+    exports missing their [LTA-ARCHIVE] receipts ([LTA-EXPORT]
+    requirement 5);
 11. marketplace cache divergence.
 
 If immutable Core is found to have a critical bug, the default incident posture
@@ -2837,17 +3417,21 @@ only Core. The runbook should periodically prove degraded-mode reads and
 operations for metadata router failure, finality verification, pending entropy,
 split-wallet release, escrow flush, state export publication, event-catalog
 reconstruction, and the permissionless probe-and-conditional-raise path for
-Governed Gas Parameters ([LTA-GGP] requirement 11). If a degraded-mode
+`FORWARDING_CAP` Governed Gas Parameters, executed end to end against the
+deployed Permanent-class probe contracts with zero governance signers
+([LTA-GGP] requirement 11; [LTA-GGP-PROBES] rule 9). If a degraded-mode
 item depends on immutable gas assumptions that can fail under a future
 gas schedule, the drill report must say so rather than treating the
 guarantee as absolute.
 
 Read-only museum mode is the explicit posture when all governance is lost.
-Ownership, transfer, approvals, enumerable reads, retained token identity,
+Ownership, transfer, approvals, supply and sequential-ID iteration reads
+([LTA-ENUMERATION]), retained token identity,
 frozen/finalized metadata reads, royalty disclosure as configured, split-wallet
 release, already-deployed-wallet escrow flush, finality verification ranges,
 state-export discovery, permissionless GGP probe runs with their
-pre-approved conditional raises ([LTA-GGP] requirement 11) — so a later
+pre-approved conditional raises for `FORWARDING_CAP` read-survival
+parameters ([LTA-GGP] requirement 11) — so a later
 gas repricing cannot permanently zero `tokenURI()`/`royaltyInfo()` for
 frozen collections — the permissionless independent preservation and
 fixity lanes, which keep accepting institution-signed records with no
@@ -2957,9 +3541,40 @@ Rosetta stone to social mirroring. Onchain catalog requirements
    assumption that EIP-4444-style history expiry can remove
    ([LTA-EXPORT]): a post-expiry node holding only state could prove
    such bytes missing — the record-chain accumulators still verify — yet
-   recover nothing. Events remain discovery pointers to the stored
-   bytes, and the with-operators-gone recovery guarantee may cite only
-   state-trie carriers.
+   recover nothing. Events remain indexer-convenience discovery
+   pointers to the stored bytes; the normative discovery surface is the
+   state-readable pointer index below ([LTA-PAYLOAD-DISCOVERY]), and
+   the with-operators-gone recovery guarantee may cite only state-trie
+   carriers.
+
+State-readable payload discovery [LTA-PAYLOAD-DISCOVERY]
+(ADR 0012 decision T3). Stored bytes that only an expired log can
+locate are bytes a stranger cannot recover: the payload survives in the
+state trie, but finding the SSTORE2 blob without the pointer event
+means brute-force scanning every contract account. Discovery therefore
+rides state, not logs:
+
+1. Every contract that stores payload bytes onchain under rule 6 —
+   SSTORE2 blobs or typed contract-storage payloads — must expose a
+   storage-backed discovery surface on the same host: either the
+   enumerable pointer registry (count plus paged pointer/family/hash
+   rows) whose canonical read signatures are owned by
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-PAYLOAD-POINTERS], or, where the host's records are already
+   exhaustively keyed, a typed pointer field or accessor on the keyed
+   record read (the finality registry's `manifestPointer`, the catalog
+   registry's stored-bytes references under rules 1–2 above).
+2. The discovery surface is append-only: supersession adds rows or
+   records (lineage by content hash); pointers are never edited or
+   deleted, matching the record-chain posture.
+3. A state-only archivist must be able to locate every onchain payload
+   byte of the deployment from `streamSystemManifest()`, the genesis
+   deployment profile, and storage-backed reads alone — no logs, no
+   prior exports, no operator. The conformance matrix gates this with a
+   golden test that walks every onchain-bytes surface from state reads
+   only.
+4. Events keep firing for indexers; they are convenience, never the
+   recovery path.
 
 Manifest canonicalization:
 
@@ -3101,8 +3716,8 @@ Rules:
    as Core rewrites.
 
 Open-ended collections create unbounded state by design. Core stores
-token-to-collection mappings, collection serials, enumerable ownership state,
-and entropy/request facts for every token. Token-level royalty snapshots,
+token-to-collection mappings, collection serials, and entropy/request
+facts for every token. Token-level royalty snapshots,
 token-level metadata overrides, and token-level preservation records should be
 opt-in because they add per-token storage for potentially decades. Release
 manifests should publish expected per-token storage writes and gas for the
@@ -3248,7 +3863,9 @@ Over 50 years, standards and marketplace behavior will change.
 The architecture should support:
 
 - ERC-165 interface discovery;
-- ERC-721 and ERC-721 Enumerable;
+- ERC-721 (the ERC-721 Enumerable index standard is permanently absent
+  from Core; enumeration is periphery- and export-served,
+  [LTA-ENUMERATION]);
 - ERC-721 Metadata;
 - ERC-2981 royalty disclosure;
 - ERC-4906 metadata updates;
@@ -3355,6 +3972,34 @@ or offchain-verifiable replacement, and keep old selectors documented for
 historical deployments. Production `royaltyInfo()` and `tokenURI()` behavior
 must not depend on deprecated diagnostics.
 
+### Vulnerability Disclosure And Bounty Posture [LTA-DISCLOSURE]
+
+The incident playbook — pause, incident revocation, successor
+declaration — depends on early discovery, so the intake channel for
+third-party researchers is permanent operational surface, not repo
+hygiene (ADR 0012 decision T9):
+
+1. A standing vulnerability-disclosure channel must exist from genesis:
+   a published security contact carried in `SECURITY.md`, in a
+   `security.txt` at the operator domain, and as a security-contact
+   field in the release manifest and in the content-addressed system
+   manifest payload named by `streamSystemManifest()`'s `manifestURI` —
+   so the contact survives frontend and domain turnover and is
+   discoverable from chain state plus the mirrored manifest.
+2. The disclosure policy records a response SLO (acknowledgment and
+   triage targets) and the escalation route into the incident runbook;
+   intake is exercised periodically as a drill, and a missed
+   acknowledgment SLO is a monitored incident.
+3. The bounty posture is decided explicitly, either way: a funded bounty
+   program with scope and payout policy, or a recorded no-bounty
+   decision with rationale, revisited at every funding-manifest renewal.
+   Silence is nonconformant.
+4. Disclosure intake and bounty administration are funded obligations
+   with a named owner and horizon in the funding manifest
+   ([LTA-FUNDING] rule 1), and the disclosure-policy artifact is
+   hash-committed release evidence verified by the conformance-matrix
+   Operations gate.
+
 ### Institutional Custody Guidance [LTA-CUSTODY]
 
 Owner-side custody is outside protocol control, but a spec this candid
@@ -3448,14 +4093,16 @@ Recovery principles:
 
 ## Umbrella Domain Constants [LTA-DOMAINS]
 
-This document is the normative home of the finality and state-export hash
-domains. Every constant is Permanent: recorded here with its string
-preimage and ordered inputs, mirrored as checker-verified rows in the
-protocol v1 domain-constants table, and recomputed by CI, which fails on
-drift between constants, homes, mirrors, and release artifacts. The
-ordered `abi.encode` input lists are pinned by the code blocks in Artwork
-Finality Freeze and State Export And Archival Operations; the table names
-them without restating.
+This document is the normative home of the finality, state-export, and
+governance-guardian hash domains. Every constant is Permanent: recorded
+here with its string preimage and ordered inputs, mirrored as
+checker-verified rows in the protocol v1 domain-constants table, and
+recomputed by CI, which fails on drift between constants, homes,
+mirrors, and release artifacts. The ordered `abi.encode` input lists are
+pinned by the code blocks in Artwork Finality Freeze, State Export And
+Archival Operations, and the Guardian Module Pattern; the table names
+them without restating. New rows are computed and pinned by the
+same CI recomputation before any gate consumes them.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
@@ -3475,6 +4122,7 @@ them without restating.
 | `STREAM_EXPORT_SPLIT_ENTRY_LEAF_V1` | `6529STREAM_EXPORT_SPLIT_ENTRY_LEAF_V1` | 0x63ac827ee22adfd396ab63e6c8e4a3bca7e4a645c6141abeb1bd36805095cc42 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_REVENUE_ASSIGNMENT_LEAF_V1` | `6529STREAM_EXPORT_REVENUE_ASSIGNMENT_LEAF_V1` | 0x063c43d4dce1eebd74b009c22e301aa2d76fdc560665c8bbc24daa19a801a2ad | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_ESCROW_CREDIT_LEAF_V1` | `6529STREAM_EXPORT_ESCROW_CREDIT_LEAF_V1` | 0x943bff9afcadeec1628590d3b88f68d5aea504c1ba5256b4333f3a7dd1db7af2 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
+| `STREAM_EXPORT_SALE_CREDIT_LEAF_V1` | `6529STREAM_EXPORT_SALE_CREDIT_LEAF_V1` | 0x4713509255935af0a6981e3a2eb9948df2dc272218d10db479716667ca9c280b | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; credit surfaces per [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) |
 | `STREAM_EXPORT_MINT_COUNTER_LEAF_V1` | `6529STREAM_EXPORT_MINT_COUNTER_LEAF_V1` | 0xda394087539bfc7283e4d78855493bf4c1ef26a24f2074a930b51aff26cf2bf9 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_AUTHORIZATION_LEAF_V1` | `6529STREAM_EXPORT_AUTHORIZATION_LEAF_V1` | 0x8feca7dbfefa49f93018dd146f49b466753e8d55d2cfe1ddd455b87875411edf | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_REGISTRY_RECORD_LEAF_V1` | `6529STREAM_EXPORT_REGISTRY_RECORD_LEAF_V1` | 0x65511c163de32ba01544ff43eb9f587576c93f3682cf25798d4b19155ad5a338 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
@@ -3486,6 +4134,8 @@ them without restating.
 | `STREAM_EXPORT_TOKEN_DATA_LEAF_V1` | `6529STREAM_EXPORT_TOKEN_DATA_LEAF_V1` | 0x0c586b41736dd3049878e98663002a07e79c06ab6ab5f49c09f03c0e44fa4610 | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT]; retention per [MPA-CORE-ABI]/[CMC-BURN] |
 | `STREAM_EXPORT_EVENT_HISTORY_V1` | `6529STREAM_EXPORT_EVENT_HISTORY_V1` | 0xde2f44be2a232fbd4b086150b751c9483f78c1de4779a09d9d2acc84d4ac76ae | `STATE_EXPORT_V1` profile | `1` | domain; chainId; core; startBlock; endBlock; recordCount; `EventHistoryChunk[]` ([LTA-EVENT-HISTORY]) |
 | `GGP_FINALITY_COMPONENT_READ_GAS_ID` | `6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS` | 0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221 | finality registry | `1` | `keccak256` of the string preimage; no `abi.encode` inputs ([LTA-GGP]) |
+| `STREAM_GUARDIAN_SCOPE_V1` | `6529STREAM_GUARDIAN_SCOPE_V1` | 0x411f2ec1515973db8ec5774ffd6b9e7fbcd8e9c0fb9ffc2b8de7eab7f4325433 | guardian module | `1` | domain; chainid; guardianModule; ascending unique `targets` address array ([LTA-GUARDIAN]) |
+| `STREAM_GUARDIAN_AUTHORIZATION_V1` | `6529STREAM_GUARDIAN_AUTHORIZATION_V1` | 0x1d7c055e54305625ad501d8d2766e4a0af244277f03ea3ce785360e63ef118fd | guardian module | `1` | domain; chainid; guardianModule; agent; capabilityMask; scopeHash; notAfter; maxUses; grantNonce ([LTA-GUARDIAN]) |
 
 Component-type and manifest-type vocabularies (`keccak256` of the ASCII
 name) are pinned by their owning sections: finality component types in
@@ -3511,7 +4161,10 @@ Core gates:
    remain the pre-deployment development control; interim exceptions cannot
    survive to the deployment gate.
 3. interface IDs verified.
-4. ERC-721 enumerable behavior unchanged.
+4. `totalSupply()`, `lastAllocatedTokenId()`, and dense sequential
+   allocation verified; the `ERC721Enumerable` index surface is absent —
+   no per-index selectors, no index storage, and
+   `supportsInterface(0x780e9d63) == false` ([LTA-ENUMERATION]).
 5. Core-native ERC-2981 tested under resolver failure.
 
 Revenue gates:
@@ -3567,44 +4220,65 @@ Governance gates:
    the deterministic-deployment factory, salts, and init-code hashes
    ([LTA-DEPLOY]);
 7. GGP floor-rejection, raise-bound, emergency and conditional
-   probe-gated raise, probe-gated-lower, and change-event tests for
-   every deployed parameter ([LTA-GGP] requirement 9);
+   probe-gated raise, probe-gated-lower, conditional-raise
+   scope-rejection, forged-failure probe-integrity, and change-event
+   tests for every deployed parameter, plus the [LTA-GGP-PROBES]
+   permanence checks and the [LTA-GTP] floor/bound/cadence-probe/
+   change-event suite for every deployed Governed Time Parameter
+   ([LTA-GGP] requirement 9; [LTA-GTP]);
 8. terminal-freeze veto path exercised, and window widths verified against
    the recorded worst-case holder latencies ([LTA-GOV] rules 4 and 6);
 9. batch-action atomicity tests for every cross-contract "same governed
    execution" obligation ([LTA-GOV] rule 5);
 10. registry-`ACTIVE` pre-approved fallback targets verified for every
     critical pointer family, with a rehearsed permissionless emergency
-    move as release evidence ([LTA-POINTERS] rule 11).
+    move as release evidence ([LTA-POINTERS] rule 11);
+11. every governor-held defensive role proves either a registered
+    guardian module with a live authorization exercised in rehearsal or
+    a holder latency within the emergency assumption ([LTA-GUARDIAN]
+    rule 6).
 
 Operations gates:
 
 1. genesis state export produced and reproduced by an independent indexer;
 2. export cadence, fixity program manifest, and funding/endowment manifest
-   published and hashed ([LTA-EXPORT], [LTA-ARCHIVE], [LTA-FUNDING]);
+   — including the costed operating model — published and hashed
+   ([LTA-EXPORT], [LTA-ARCHIVE], [LTA-FUNDING]);
 3. reconstruction client build, replay vectors, and manifest hash match
    ([LTA-RECON]);
-4. degraded-admin and museum-mode drill artifacts.
+4. degraded-admin and museum-mode drill artifacts;
+5. dual-family archive receipts with fixity coverage verified for the
+   genesis state export and its event-history chunks ([LTA-EXPORT]
+   requirement 5; [LTA-ARCHIVE] requirement 7);
+6. the vulnerability-disclosure policy artifact published, hash-committed,
+   and carried in the release and system manifests ([LTA-DISCLOSURE]).
 
 ## Accepted Tradeoffs [LTA-TRADEOFFS]
 
 1. Satellite contracts add integration complexity, but protect Core from
    decades of changing policy.
-2. `ERC721Enumerable` is a permanent per-transfer gas tax, accepted with
-   open eyes (ADR 0010 decision D9.3). The enumerable bookkeeping adds
-   roughly 45,000–50,000 gas to an all-cold mint and roughly
-   60,000–70,000 gas to an all-cold wallet-to-wallet transfer versus a
-   plain ERC-721 — several cold `SSTORE`s for the owner-index and
-   global-index structures on every ownership change, paid by collectors
-   on every marketplace sale for the life of the system. Modern flagship
-   contracts drop enumerable and lean on indexers; Stream keeps it because
-   onchain enumeration without indexers is load-bearing for read-only
-   museum mode and degraded-governance reconstruction, and state-export
-   roots complement but cannot serve live wallet reads. The release
-   manifest must publish the measured per-mint and per-transfer overhead
-   for the deployed bytecode as a gate artifact so the cost stays
-   quantified, not folkloric. Dropping enumerable is a successor-line
-   decision.
+2. Dropping `ERC721Enumerable` from Core trades onchain per-index
+   enumeration for a permanently cheaper Core (ADR 0012 decision T10,
+   superseding ADR 0010 decision D9.3). The index bookkeeping would
+   have added roughly 45,000–50,000 gas to every all-cold mint and
+   roughly 60,000–70,000 gas to every all-cold wallet-to-wallet
+   transfer — several cold `SSTORE`s on every ownership change, paid by
+   collectors on every marketplace sale for the life of the system —
+   plus several kilobytes against the Core headroom rule, to serve an
+   archival need that state exports, dense sequential IDs with the
+   iteration surface, Transfer replay, and the conformance-gated
+   reconstruction client already serve ([LTA-ENUMERATION]).
+   `totalSupply()` stays. The costs of removal are accepted with open
+   eyes: integrators that would have called
+   `tokenOfOwnerByIndex`/`tokenByIndex` onchain must use the periphery
+   enumeration lens or indexers (no such integrator is known), and
+   museum-mode per-owner walks become paged range reads instead of O(1)
+   index reads. The release manifest publishes the measured per-mint
+   and per-transfer gas of the deployed lean bytecode as a gate
+   artifact so the recovered cost stays quantified, not folkloric.
+   Taken now, before genesis, precisely because it becomes irreversible
+   at deployment; re-adding enumerable is a successor-line decision,
+   and the supersession is owner-flagged in ADR 0012.
 3. Pull payments require recipients to claim, but protect settlement from
    recipient behavior.
 4. Core-native ERC-2981 costs bytecode, but is necessary for marketplace
