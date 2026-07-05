@@ -1724,7 +1724,7 @@ Required event families:
 - revenue assignment set;
 - revenue assignment cleared;
 - revenue assignment frozen;
-- primary revenue deposited;
+- primary revenue settled;
 - escrow credit created;
 - escrow flushed;
 - royalty revenue received or observed when detectable;
