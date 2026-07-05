@@ -1361,6 +1361,13 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         }
         _lastAllocatedTokenId = tokenId;
         collectionData.collectionCirculationSupply = collectionSerial;
+        // Sequential IDs are predictable, so a legacy premint randomizer callback could have
+        // pre-set this token's hash before allocation. Clear any such stale hash here so the
+        // authoritative mint-path randomizer callback can write it and cannot be griefed into
+        // reverting at its own require(tokenToHash == 0) guard.
+        if (tokenToHash[tokenId] != bytes32(0)) {
+            delete tokenToHash[tokenId];
+        }
         // Widths are bounded: collection IDs are dense counter values and serials are capped
         // by _MAX_COLLECTION_TOTAL_SUPPLY, so both casts are lossless.
         tokenIdentityRecords[tokenId] = TokenIdentityRecord({

@@ -281,6 +281,33 @@ contract StreamCoreIdentityTest is CharacterizationTestBase, StreamFixture {
         deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "safe transfer under freeze and pause");
     }
 
+    function testPresetHashOnNextSequentialIdDoesNotBlockItsMint() public {
+        (DeployedStream memory deployed, IdentityMintManager manager) = _deployWithManager();
+
+        // The next sequential ID is fully predictable under the global allocator.
+        uint256 nextTokenId = deployed.core.lastAllocatedTokenId() + 1;
+        nextTokenId.assertEq(1, "next sequential id");
+
+        // A collection randomizer pre-sets a hash on that not-yet-allocated ID (legacy premint
+        // path). Under sequential IDs this is a griefing surface: without the mint-path clear it
+        // would trip the randomizer's require(tokenToHash == 0) and revert the mint.
+        vm.prank(address(deployed.randomizer));
+        deployed.core.setTokenHash(COLLECTION_A, nextTokenId, keccak256("grief-preset"));
+        deployed.core.retrieveTokenHash(nextTokenId)
+            .assertEq(keccak256("grief-preset"), "preset hash not stored");
+
+        // Minting that ID succeeds and the authoritative mint-path randomizer hash overwrites the
+        // stale preset, so no liveness is lost.
+        (uint256 tokenId,) = manager.mint(COLLECTION_A, RECIPIENT, "grief-resist");
+        tokenId.assertEq(nextTokenId, "griefed id not minted");
+        deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "griefed mint owner");
+        (deployed.core.retrieveTokenHash(tokenId) != keccak256("grief-preset"))
+        .assertTrue("stale preset hash survived mint");
+        (deployed.core.retrieveTokenHash(tokenId) != bytes32(0))
+        .assertTrue("authoritative hash not written");
+        _assertIdentity(deployed.core, tokenId, COLLECTION_A, 1, false);
+    }
+
     function testSupportsInterfaceMatrixExcludesEnumerable() public {
         (DeployedStream memory deployed,) = _deployWithManager();
 
