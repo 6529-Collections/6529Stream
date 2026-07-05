@@ -47,6 +47,31 @@ the release policy in `docs/release-policy.md`.
   derivation goldens against the spec-pinned catalog, scope-rejection tests,
   forged-failure probe-integrity tests, and the zero-signer museum-mode
   conditional raise/re-lower drill.
+- Added the staged-governance machinery and canonical module registry:
+  `StreamGovernanceExecutor` implements the ADR 0004 [GOV-ACTION-ID] and
+  [GOV-BATCH] canonical action identity (golden-tested
+  `STREAM_GOVERNANCE_ACTION_V1`/`STREAM_GOVERNANCE_CALLS_V1` typehashes,
+  byte-identical single-call wrappers, atomic payable batches with exact
+  per-call value sums and surplus rejection, onchain SSTORE2 calldata
+  preimage publication), the [GOV-WINDOWS] delay and window floors (48h
+  delayed, 72h terminal-freeze veto with `terminalFreezeVetoGuardian`/
+  `vetoTerminalFreeze`, 14d funds recovery, 30d successor declaration, 7d
+  open-to-execute floor), and the scheduled-action transition table with
+  cancellation, veto, and expiry materialization; `StreamRoleRegistry`
+  pins the [GOV-ROLES] `ROLE_*` vocabulary as keccak-of-own-name
+  constants with root/operational grant classes, registry-resolved
+  `emergencyRecipient()`, pause/unpause disjointness, and role-redundancy
+  views; `StreamModuleRegistry` + `IStreamModuleRegistry` implement the
+  canonical [LTA-REGISTRY] record shape with append-only
+  `moduleCount()`/`moduleAt()` enumeration, the
+  `registrationChainHash()` record-chain lane under
+  `STREAM_MODULE_REGISTRATION_RECORD_V1`, `INCIDENT_REVOKED` status
+  vocabulary, zero-means-unbounded `moduleGasLimit`, and lifecycle
+  changes gated through governed action classes; plus the canonical
+  eight-function `IStreamModule` [LTA-MODULE-ID] identity surface with a
+  `StreamModuleBase` adoption base and a minimal `SSTORE2` helper, all
+  covered by golden typehash, lifecycle, batch-semantics, window-floor,
+  role-resolution, and registry append-only/chain-hash test suites.
 - Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the
   on-chain collection-metadata reads plus `properties.stream.collection`
   token JSON are the normative marketplace collection-identity signal, a
