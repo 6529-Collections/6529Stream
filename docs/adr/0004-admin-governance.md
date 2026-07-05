@@ -113,7 +113,9 @@ The public-beta target design is:
 
 1. `StreamAdmins` or its replacement is the single access-control source for
    first-party contracts.
-2. The production root authority must be a Safe or equivalent multisig. EOAs may
+2. The production root authority must be a Safe, an equivalent multisig, or
+   a governor contract satisfying [GOV-1271-CLASS] and [GOV-MATERIAL]
+   (ADR 0013 decision U5). EOAs may
    be used only during local tests, deployment rehearsal, or documented
    bootstrap ceremonies.
 3. The deployer must not retain lasting production authority after the admin
@@ -148,19 +150,25 @@ The public-beta target design is:
 ## Role Model
 
 The implementation may choose exact Solidity names, but it must preserve these
-roles or stricter equivalents.
+roles or stricter equivalents. Production-holder classes follow
+[GOV-MATERIAL] (ADR 0013 decision U5): a Safe multisig and a governor
+contract satisfying [GOV-1271-CLASS] are equally valid holders for every
+row below, EOA-class holders appear only under the [GOV-MATERIAL]
+time-boxed bootstrap with its recorded sunset, and latency-sensitive
+roles size their holders against [GOV-WINDOWS] and the guardian-module
+rules of [LTA-GUARDIAN].
 
 | Role | Authority | Production holder | Notes |
 | --- | --- | --- | --- |
-| `GovernanceRoot` | Owns the admin contract, grants critical roles, can recover from compromised operational roles | Safe/multisig | Final authority after deployment ceremony |
-| `GlobalAdmin` | Break-glass access to protected operational functions | Safe/multisig only | Must be minimized and monitored |
-| `RoleManager` | Grants and revokes non-root roles according to the ADR | Safe/multisig or narrowly scoped operations Safe | May be the same as `GovernanceRoot` for P0 |
-| `FunctionAdmin` | Calls one protected function on one target contract | Safe/multisig or documented operations wallet | Keyed by target contract and selector |
+| `GovernanceRoot` | Owns the admin contract, grants critical roles, can recover from compromised operational roles | Safe multisig or governor contract | Final authority after deployment ceremony |
+| `GlobalAdmin` | Break-glass access to protected operational functions | Safe multisig or governor contract | Must be minimized and monitored |
+| `RoleManager` | Grants and revokes non-root roles according to the ADR | Safe multisig or governor contract; may be a narrowly scoped operations Safe | May be the same as `GovernanceRoot` for P0 |
+| `FunctionAdmin` | Calls one protected function on one target contract | Safe multisig, governor contract, or documented operations wallet | Keyed by target contract and selector |
 | `CollectionAdmin` | Mutates approved fields for one collection before freeze | Artist/team Safe, if used | Cannot affect other collections |
-| `SignerManager` | Adds/removes drop signers, increments signer epochs, cancels signed drops | Safe/multisig | Separate from drop signer addresses |
-| `PauseGuardian` | Immediately pauses approved domains | Safe/multisig, or a registered governance-guardian module per [LTA-GUARDIAN]; a monitored hot wallet only as a documented bootstrap exception with a recorded sunset | Cannot unpause unless also granted unpause authority |
-| `UnpauseAdmin` | Unpauses domains after incident review | Safe/multisig | May be `GovernanceRoot` |
-| `EmergencyAdmin` | Executes surplus-only emergency withdrawals and documented emergency actions | Safe/multisig | Cannot withdraw owed or reserved funds |
+| `SignerManager` | Adds/removes drop signers, increments signer epochs, cancels signed drops | Safe multisig or governor contract | Separate from drop signer addresses |
+| `PauseGuardian` | Immediately pauses approved domains | Safe multisig, governor contract, or a registered governance-guardian module per [LTA-GUARDIAN]; a monitored hot wallet only as a documented bootstrap exception with a recorded sunset | Cannot unpause unless also granted unpause authority |
+| `UnpauseAdmin` | Unpauses domains after incident review | Safe multisig or governor contract | May be `GovernanceRoot` |
+| `EmergencyAdmin` | Executes surplus-only emergency withdrawals and documented emergency actions | Safe multisig or governor contract | Cannot withdraw owed or reserved funds |
 | `DeploymentOperator` | Performs deployment-time wiring before ownership/role transfer | Temporary deployer wallet | Must be removed during ceremony |
 
 ### Governance Root
@@ -548,7 +556,8 @@ two-tier model:
 ```text
 FUNDS_RECOVERY          at least 14 days
 SUCCESSOR_DECLARATION   at least 30 days
-TERMINAL_FREEZE         guardian/veto window or at least 24 hours
+TERMINAL_FREEZE         guardian/veto window of at least 72 hours
+                        ([GOV-WINDOWS] floor; ADR 0013 decision U5)
 ```
 
 Critical pointer changes must be staged with old address, new address, code
@@ -727,13 +736,23 @@ function executeGovernanceBatch(
 ) external payable;
 ```
 
+The batch entrypoints are the canonical scheduling and execution ABI
+(ADR 0013 decision U5): a single-call action is the batch of one, and
+`scheduleGovernanceAction`/`executeGovernanceAction` are thin wrappers that
+must produce byte-identical action IDs to the equivalent one-call batch.
+Tooling and specs cite the batch ABI.
+
 Batch rules [GOV-BATCH]:
 
 1. Execution supplies the full ordered `GovernanceCall[]` plus each call's
    `callData`; every `callDataHash` must match, and the recomputed
    `callsHash` and `actionId` must match the stored action.
 2. Batch execution is atomic: every call succeeds or the whole action
-   reverts. Partial application is never observable.
+   reverts. Partial application is never observable. Payable semantics are
+   pinned (ADR 0013 decision U5): each `GovernanceCall.value` is the exact
+   wei forwarded to that call, execution requires
+   `msg.value == sum(calls[].value)`, and any refunded surplus reverts the
+   batch rather than stranding in the governance contract.
 3. The single-call `GovernanceAction` storage shape remains valid: it
    stores `callsHash` in `callHash` for batches, and the stored
    `target`/`selector` are those of the first call for indexing.
@@ -741,6 +760,11 @@ Batch rules [GOV-BATCH]:
    updates, GGP changes, registry lifecycle) fold their fields into
    `scopeHash`/`newValueHash` and this one preimage; defining a second
    staged-operation preimage is nonconformant (ADR 0010 decision D3.4).
+5. Scheduled calldata is published onchain for the full open-to-execute
+   window (ADR 0013 decision U5): scheduling stores an SSTORE2 pointer to
+   the exact `callDatas` bytes in the action record, so executors and
+   verifiers never depend on an offchain preimage to exercise or audit a
+   scheduled action.
 
 ### Material Actions And Holder Classes [GOV-MATERIAL]
 
@@ -772,6 +796,20 @@ class — nested Safe n-of-m, pure-Solidity P-256/WebAuthn verifiers, and
 governor contracts — and recorded in the release manifest. Verifying
 layers cite this class; none defines its own.
 
+This subsection also pins the EIP-7702 posture once for every signature
+surface (ADR 0013 decision U6). An EOA bearing an EIP-7702 delegation
+designation is a delegated EOA: its account-type classification is
+observed at verification time — code presence is a per-observation
+fact, never a cached account-type fact — and while designated, ERC-1271
+verification targets whatever code the account exposes at that
+observation. A canonical ECDSA signature from the account's own key
+remains valid alongside ERC-1271 verification for every verifying
+layer, so delegation never strands a signer. No verifying layer may
+branch on code presence for any purpose other than selecting the
+signature-verification path this class pins, and wallet-class
+enumerations in subsystem specs note 7702 delegated EOAs as members of
+the class.
+
 ### Governance Window Floors And Unpause [GOV-WINDOWS]
 
 Amended by ADR 0010 (decisions D7.2). Windows are sized for multisig and
@@ -779,9 +817,11 @@ governor-contract latency, not for fast single signers:
 
 1. Delayed action classes must keep an open-to-execute window
    (`expiresAfter - notBefore`) of at least 7 days.
-2. Emergency classes must be executable by role-redundant holders and
-   assume at least 4 hours of coordination latency; no emergency path may
-   presume a single hot key. The terminal-freeze veto window floor is 72
+2. Emergency classes must be executable by role-redundant holders —
+   defined testably (ADR 0013 decision U5) as at least two independently
+   controlled holders per emergency role, neither of which is a
+   single-signer EOA — and assume at least 4 hours of coordination
+   latency; no emergency path may presume a single hot key. The terminal-freeze veto window floor is 72
    hours (ADR 0011 decision R10) so governor-contract holders can
    realistically exercise it.
 3. Unpause is a dedicated operational class: a distinct `ROLE_UNPAUSE`
@@ -884,6 +924,16 @@ Safe/multisig or governance contract per the Role Model above.
 | `ROLE_ARTIST_REGISTRY_ADMIN` | Proposes artist bindings, declares platform works, withdraws unaccepted proposals | operational | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-ROLES] |
 | `ROLE_ATTRIBUTION_ARBITER` | Governed arbiter for attribution disputes and post-revocation rebinding approval | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DISPUTE] |
 | `ROLE_ARTIST_DORMANCY_ADMIN` | Initiates and completes the governed artist-dormancy procedure | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DORMANCY] |
+| `ROLE_ATTRIBUTION_APPEAL` | Second-tier review of arbiter actions (ADR 0011 decision R7) | root | [`docs/stream-artist-authority.md`](../stream-artist-authority.md) [AA-DISPUTE] |
+| `ROLE_FIXITY_OPERATOR` | Executes the mandated fixity program cadence and records cycle attestations | operational | [`docs/collection-metadata-contract.md`](../collection-metadata-contract.md) [CMC-FIXITY-PROGRAM] |
+| `ROLE_EXPORT_PUBLISHER` | Publishes state exports and event-history snapshots on the mandated cadence | operational | [`docs/stream-long-term-architecture.md`](../stream-long-term-architecture.md) [LTA-EXPORT] |
+| `ROLE_CLAIM_ROUTER_OPERATOR` | Operates the recipient claim-aggregation rehearsals and UX gate evidence | operational | [`docs/revenue-splits-and-royalties.md`](../revenue-splits-and-royalties.md) [RSR-CLAIM-ROUTER] |
+| `ROLE_EMERGENCY_RECIPIENT` | Receives emergency-withdrawal surplus; resolved through the admin registry, never a stored raw address (ADR 0013 decision U5) | root | this ADR (emergency-withdrawal rules) |
+
+Every authority any Stream specification references by role must appear in
+this table (ADR 0013 decision U5); an authority exercised through a raw
+stored address is nonconformant, and `emergencyRecipient()` reads resolve
+`ROLE_EMERGENCY_RECIPIENT` through the registry.
 
 The legacy CamelCase names in the Role Model table (for example
 `UnpauseAdmin`, `PauseGuardian`) are the P0 authority descriptions; where a

@@ -3,7 +3,11 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
+[ADR 0010](adr/0010-world-class-spec-pass.md),
+[ADR 0011](adr/0011-world-class-pass-round-2.md),
+[ADR 0012](adr/0012-world-class-pass-round-3.md), and
+[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the Stream-native entropy provider adapter contracts
@@ -381,13 +385,27 @@ STREAM_ENTROPY_PROVIDER_INSTANT
 STREAM_ENTROPY_PROVIDER_MOCK
 ```
 
-## Common Events
+## Common Events [EP-EVENTS]
 
-Every provider should emit source-specific request and callback events. The
+This document is the normative home of the provider-adapter event
+vocabulary it defines. Every non-standard event schema in this document
+carries `uint16 schemaVersion` as its leading declaration field —
+declared before every indexed parameter, so it is also the first
+data-section field — and declares at most three indexed parameters;
+genesis emits every such event with `schemaVersion = 1` (ADR 0013
+decision U7). For the genesis adapters these blocks are the
+production-exact signatures the machine-readable event catalog must
+reproduce; extension-family blocks bind their separately accepted
+adapter specs the same way. The conformance-matrix "snippet is
+shorthand" rule covers citations of these events in other documents,
+never this home.
+
+Every provider must emit source-specific request and callback events. The
 minimum shared shape is:
 
 ```solidity
 event ProviderEntropyRequested(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     address indexed coordinator,
@@ -395,12 +413,14 @@ event ProviderEntropyRequested(
 );
 
 event ProviderEntropyReceived(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bytes32 rawRandomness
 );
 
 event ProviderCoordinatorFulfillmentAttempted(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bool success,
@@ -412,9 +432,10 @@ Provider-specific events should include source configuration such as VRF key
 hash, subscription ID, request confirmations, or ARRNG payment amount when
 useful.
 
-## Raw Randomness Compression
+## Raw Randomness Compression [EP-RAW]
 
-Adapters should report one `bytes32 rawRandomness` value to the coordinator.
+Adapters should report one `bytes32 rawRandomness` value to the coordinator
+(anchor per ADR 0013 decision U9).
 When the upstream source returns multiple words or a complex payload, compress
 it with a provider-specific domain:
 
@@ -665,7 +686,7 @@ constructor(
     address streamEntropyCoordinator,
     address streamAdmins,
     address vrfCoordinator,
-    uint64 subscriptionId,
+    uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
     uint32 callbackGasLimit,
@@ -673,10 +694,15 @@ constructor(
 )
 ```
 
-If the deployment uses a newer VRF coordinator interface, use a versioned
-adapter name such as `StreamEntropyProviderVRFV2` or
-`StreamEntropyProviderVRFv25`. The Stream adapter boundary should stay the
-same.
+This reference shape targets the recommended upstream version, Chainlink
+VRF v2.5, whose subscription IDs are `uint256` (Research Findings;
+ADR 0013 decision U7). A deployment against a different upstream
+coordinator version uses a versioned adapter name — for example
+`StreamEntropyProviderVRFV2` for the v2-era `uint64`-subscription shape —
+and retypes the subscription field to that version's width:
+subscription-ID width is upstream-version-specific Operational
+configuration, excluded from the config hash like the subscription value
+itself [EP-CONFIGHASH]. The Stream adapter boundary stays the same.
 
 ### State
 
@@ -685,7 +711,7 @@ Recommended state:
 ```solidity
 address public immutable coordinator;
 address public vrfCoordinator;
-uint64 public subscriptionId;
+uint256 public subscriptionId;
 bytes32 public keyHash;
 uint16 public requestConfirmations;
 uint32 public callbackGasLimit;
@@ -725,13 +751,14 @@ StreamEntropyCoordinator.requestEntropy(tokenId)
        return vrfRequestId
 ```
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event VRFEntropyRequested(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed vrfRequestId,
-    uint64 indexed subscriptionId,
+    uint256 indexed subscriptionId,
     uint32 providerEpoch,
     bytes32 keyHash,
     uint16 requestConfirmations,
@@ -770,10 +797,11 @@ bytes32 rawRandomness = keccak256(abi.encode(
 ));
 ```
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event VRFEntropyReceived(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed vrfRequestId,
     bytes32 rawRandomness
@@ -786,7 +814,7 @@ Admins may need to update VRF operational settings:
 
 ```solidity
 function updateVRFConfig(
-    uint64 subscriptionId,
+    uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
     uint32 callbackGasLimit,
@@ -836,11 +864,12 @@ Rules [EP-VRF-CONFIG]:
    golden test asserts probe gas matches the measured production
    envelope within the recorded tolerance.
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event VRFConfigUpdated(
-    uint64 subscriptionId,
+    uint16 schemaVersion,
+    uint256 subscriptionId,
     bytes32 keyHash,
     uint16 requestConfirmations,
     uint32 callbackGasLimit,
@@ -919,10 +948,11 @@ StreamEntropyCoordinator.requestEntropy(tokenId)
        return arrngRequestId
 ```
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event ARRNGEntropyRequested(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed arrngRequestId,
     uint32 providerEpoch,
@@ -946,10 +976,11 @@ bytes32 rawRandomness = keccak256(abi.encode(
 Then it follows the same store-first, try/catch-delivery pattern as VRF
 [EP-CALLBACK].
 
-Recommended event:
+Event ([EP-EVENTS]):
 
 ```solidity
 event ARRNGEntropyReceived(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed arrngRequestId,
     bytes32 rawRandomness
@@ -980,11 +1011,20 @@ ARRNG payment behavior must be explicit [EP-ARRNG-PAY]:
 5. Forced ETH must be recoverable through an explicit admin path to the
    same governed destination.
 
-Recommended events:
+Events ([EP-EVENTS]):
 
 ```solidity
-event ARRNGPaymentUpdated(uint256 oldPaymentWei, uint256 newPaymentWei);
-event ProviderFundsWithdrawn(address indexed to, uint256 amountWei);
+event ARRNGPaymentUpdated(
+    uint16 schemaVersion,
+    uint256 oldPaymentWei,
+    uint256 newPaymentWei
+);
+
+event ProviderFundsWithdrawn(
+    uint16 schemaVersion,
+    address indexed to,
+    uint256 amountWei
+);
 ```
 
 ### ARRNG Security Requirements
@@ -1385,10 +1425,11 @@ The provider does not choose it. It must be deterministic for
 must match the active request record used by the coordinator to finalize the
 seed.
 
-Recommended event:
+Recommended event ([EP-EVENTS] binds the future accepted spec):
 
 ```solidity
 event InstantEntropyProduced(
+    uint16 schemaVersion,
     bytes32 indexed requestKey,
     uint256 indexed providerRequestId,
     bytes32 rawRandomness,
@@ -1506,6 +1547,10 @@ Common provider tests:
 22. The published callback-gas margin separates the adapter-local
     persistence reserve from the coordinator envelope and includes the
     recorded worst-case repricing headroom [EP-INFLIGHT].
+23. Every non-standard adapter event carries `uint16 schemaVersion` as
+    its leading declaration field and at most three indexed parameters,
+    and the golden event tests match the catalog rows to these homes
+    exactly [EP-EVENTS] (ADR 0013 decision U7).
 
 VRF tests:
 
@@ -1536,6 +1581,10 @@ VRF tests:
     envelope within the recorded tolerance, and its failing and passing
     runs gate the parameter's raise and lower paths per [LTA-GGP]
     [EP-VRF-CONFIG].
+12. The adapter's subscription-ID typing matches the bound upstream
+    coordinator version — `uint256` for the recommended v2.5 reference
+    shape — and integration tests request and receive against that
+    upstream interface (ADR 0013 decision U7).
 
 ARRNG tests:
 

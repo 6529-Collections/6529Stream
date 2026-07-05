@@ -1020,6 +1020,25 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Applied the nine-lens round-4 resolutions through accepted
+  `docs/adr/0013-world-class-pass-round-4.md`: typed artist payout
+  resolution (`artistPayoutAccount` reads with artist-signed designation
+  records) fixes the mechanically unimplementable `COLLECTION_ARTIST`
+  template source; the module registry gains state enumeration and a
+  registration record-chain lane and the system-manifest payload joins the
+  onchain-bytes class; the ENDOWED archival slot requires cryptoeconomic
+  storage; heirless-artist steward authority, guardian-veto survival,
+  permissionless attribution claims, a pinned identity-document schema,
+  and entropy-consent scope land in the artist spec; governance gains
+  batch payable semantics, a completed role vocabulary with the emergency
+  recipient as a role reference, onchain scheduled-calldata publication,
+  and the 72-hour terminal-freeze floor everywhere; the sales layer pins
+  reveal-fee escrow, Dutch price floors, external burn-to-mint, airdrop
+  failure isolation, EIP-7702-safe claim paths, and waivable auction
+  floors; the museum conservation floor moves to before-first-sale for
+  museum-grade collections with preservation masters, capture semantics
+  for time-based works, and an institutional-validation gate; and the
+  open-questions register restates OQ-X8's lifecycle gate decidably.
 - Applied the nine-lens round-3 resolutions through accepted
   `docs/adr/0012-world-class-pass-round-3.md`: GGP probe contracts become
   Permanent-class genesis inventory with a zero-signer museum drill, and

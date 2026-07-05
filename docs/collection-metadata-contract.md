@@ -27,7 +27,21 @@ revocation and replay views, the independent lane gains exhibition and
 condition types, and the museum dossier completes (ownership-provenance
 chain, tombstone schema, BagIt/OCFL packaging, rights floor for platform
 works, equivalence attestor class, drill outcomes, gated registrar
-tooling, environment remediation).
+tooling, environment remediation). It is further amended by
+[ADR 0013](adr/0013-world-class-pass-round-4.md): the museum-grade
+conservation floor moves to the first sale (declared tier;
+intent, interview, rights, and time-based masters before sale),
+reference-render capture classes and a registered SSIM default are
+pinned, preservation masters become record-or-waiver for time-based
+media, dossier bags embed render-critical bytes, the independent lane
+gains conservation-treatment and environment-migration types, the
+genesis schema set gains interview, master-waiver,
+identity-notarization, LIDO-crosswalk, and SSIM-metric entries,
+token-scoped rights variance and condition captures join the
+acquisition packet, `CollectionMetadataLocked` carries authority
+fields, the Core burn-height read lands at [CMC-BURN], and the
+sold-token coverage window tightens to a 30-day floor with day-one
+monitoring.
 
 This document specifies moving collection metadata storage out of
 `StreamCore` into a dedicated `StreamCollectionMetadata` contract.
@@ -38,7 +52,10 @@ Replaceable genesis modules, Operational practice — not by delivery phase.
 
 `StreamCore` should remain the canonical ERC-721 contract; per-transfer
 `ERC721Enumerable` storage is removed from Core — `totalSupply()` stays,
-and enumeration derives from `Transfer` events (ADR 0012 decision T10).
+and enumeration follows [LTA-ENUMERATION] in
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md):
+the state-only sequential-ID walk, state exports, and `Transfer`-event
+replay (ADR 0012 decision T10).
 Collection identity, ownership, transfers, approvals,
 balances, and token existence stay in Core. Human-facing collection metadata,
 script manifests, dependency configuration, and long-lived collection display
@@ -493,6 +510,10 @@ function collectionBurnsBlocked(uint256 collectionId)
     external
     view
     returns (bool);
+function collectionBurnsBlockedAtBlock(uint256 collectionId)
+    external
+    view
+    returns (uint64);
 
 event CollectionBurnsBlocked(
     uint256 indexed collectionId,
@@ -506,8 +527,9 @@ Burn rules [CMC-BURN]:
 1. Caller must be owner or approved.
 2. Core validates the token's collection through `tokenCollectionId[tokenId]`,
    never through token ID range arithmetic.
-3. Burn removes ERC-721 ownership; enumeration is event-derived, so no
-   enumerable storage exists to update (ADR 0012 decision T10).
+3. Burn removes ERC-721 ownership; Core carries no enumerable storage
+   to update, and archival enumeration follows [LTA-ENUMERATION]
+   (ADR 0012 decision T10).
 4. Burn retains `tokenCollectionId`, `tokenCollectionSerial`, and the mapping
    existence bit for royalty disclosure, archives, and state exports. Core
    also retains the token's renderer-visible `tokenData` bytes after burn
@@ -524,6 +546,24 @@ Burn rules [CMC-BURN]:
    `CLOSED`, and executes only through ADR 0004 staged governance. After it
    executes, `burn` reverts for every token of the collection, so
    `mintedEver`, `burned`, and `nextSerial` are immutable thereafter.
+   Core stores the executing block height and exposes it through the
+   Permanent read `collectionBurnsBlockedAtBlock(collectionId)`:
+   `uint64`, zero until the burn block executes, set exactly once in
+   the executing transaction, and immutable thereafter (ADR 0013
+   decision U4). The invariant `collectionBurnsBlocked(collectionId)
+   == (collectionBurnsBlockedAtBlock(collectionId) != 0)` is
+   golden-tested. The boolean read remains the finality-registry
+   surface (rule 7); the height read is the comparison surface for
+   steward minted-before enforcement — a steward collection sanction
+   is valid only when the height is nonzero and at or before
+   `stewardAppointedAtBlock` ([AA-SANCTION] requirement 5 and
+   [AA-MODULE] requirement 4 in
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   consume exactly this read; because the burn block requires
+   `CLOSED`, no mint can postdate the recorded height). The height
+   read joins the Core hook table and planning budget in
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+   alongside the boolean read.
 7. Collection-scope artwork finality requires `CLOSED` and
    `collectionBurnsBlocked(collectionId) == true`, verified by the finality
    registry in the same staged action that records finality. Burns between
@@ -1482,9 +1522,11 @@ what may vary, what must not — while the artist can still say so
    reinterpretation), significant properties, and the artist interview
    entry — each as URI-plus-`HashRef` entries with small canonical
    payloads onchain. The interview entry is a named schema field, not an
-   optional attachment: it carries either an archived, dual-family
-   mirrored interview reference or an explicit `interview_waived`
-   statement, so its absence is always a visible, deliberate choice
+   optional attachment: it carries either a reference to an archived,
+   dual-family mirrored interview record under the pinned
+   `STREAM_ARTIST_INTERVIEW_V1` schema ([CMC-GENESIS-SCHEMAS] rule 5;
+   ADR 0013 decision U8) or an explicit `interview_waived` statement,
+   so its absence is always a visible, deliberate choice
    (ADR 0011 decision R11).
 2. Finality for a collection with a bound artist requires either a recorded
    `ARTIST_INTENT` record or an explicit artist-signed
@@ -1613,6 +1655,24 @@ Attestation rules [CMC-ATTESTATIONS]:
     trust exactly when operators are gone (ADR 0011 decision R1). Events
     remain discovery pointers to the stored bytes. A conformance gate
     enforces this; it is not optional operational practice.
+11. Identity notarization at acquisition standard (ADR 0013 decision
+    U8): binding an `artistId` to a legal person — the chain an
+    acquisition committee needs for title, moral-rights, and estate
+    analysis — has a named verification pattern, never improvised
+    linkage evidence: an `INSTITUTIONAL_VERIFICATION` or
+    `ESTATE_VERIFICATION` attestation (`SIGNER_VERIFIED`, rule 3)
+    whose payload uses the pinned `STREAM_IDENTITY_NOTARIZATION_V1`
+    schema [CMC-GENESIS-SCHEMAS]: the `artistId`; the attested
+    operative `identityRecordHash` ([AA-IDENTITY] in
+    [`docs/stream-artist-authority.md`](stream-artist-authority.md));
+    the legal-person identification reference; the notarized or
+    jurisdiction-equivalent instrument as URI plus `HashRef`, with the
+    officiating authority's identity; and the verifying institution's
+    own identity evidence. Two-sided binding proves address consent,
+    not personhood; this record class carries the personhood evidence,
+    typed, discoverable, and weightable like every other attestation,
+    and the acquisition packet references the latest one
+    ([CMC-ACQUISITION-PACKET] item 6).
 
 The genesis implementation stores the latest attestation hash per type plus
 append-only events carrying the payload commitments above. Full onchain
@@ -2021,6 +2081,14 @@ Accumulator rules:
    schema and cadence gates are owned by
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
    and the conformance matrix.
+5. Lane hosts outside collection scope pin their own `scopeKey`
+   semantics in their home sections (ADR 0013 decision U2): the
+   `scopeKey` slot is the lane's subject key, `collectionId` for
+   collection lanes and `tokenId` for owner-record lanes, and a
+   non-collection lane — the module registry's registration lane uses
+   `scopeKey = 0` ([LTA-REGISTRY] requirement 7) — declares its
+   constant or derivation where the lane is defined. The preimage
+   shape above is shared verbatim by every host.
 
 Record rules:
 
@@ -2196,7 +2264,20 @@ R11):
    JSON serialization) from Stream records through this profile, so an
    OAIS-modeled repository ingests the dossier without bespoke
    translation. Round-trip validation — Stream records to PREMIS export
-   to a PREMIS validator — is a conformance gate.
+   to a PREMIS validator — is a conformance gate, and the gate covers
+   three exports (ADR 0013 decision U8): the preservation shapes above;
+   the `STREAM_RIGHTS_V1` rights serialization — the registered profile
+   document maps each per-use-class grant into PREMIS `rightsGranted`
+   act/restriction pairs, the rights basis into `rightsBasis`, the
+   licensor into `rightsHolder`, effective dates into
+   `startDate`/`endDate`, and the instrument reference into
+   `licenseDocumentationIdentifier`, so rights records ingest as
+   rights, not as opaque URIs — and the
+   `STREAM_WORK_DESCRIPTION_V1`-to-LIDO export of [CMC-TOMBSTONE]
+   rule 4, validated against the LIDO schema. Validator round-trips
+   remain synthetic checks; the named-repository ingest test and
+   practitioner review of [CMC-OBJECT-DOSSIER] item 4 stand above
+   them.
 3. Every "PREMIS-style" claim in the spec set means conformance to this
    profile; the protocol v1 scope table cites it (mirror note in
    [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)).
@@ -2271,7 +2352,13 @@ deployment-gated:
    storage family is verified between sweeps.
 2. Coverage and cadence are published per storage family in the release
    manifest's fixity operational manifest, and the deployment gate fails if
-   the manifest is missing, stale, or narrower than rule 1.
+   the manifest is missing, stale, or narrower than rule 1. The program
+   executor is `ROLE_FIXITY_OPERATOR` — an operational role of the
+   [GOV-ROLES] vocabulary in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md),
+   resolved through the admin registry, never a raw stored address
+   (ADR 0013 decision U5) — and the fixity operational manifest names
+   the role, not a wallet.
 3. Each completed cycle records a `FIXITY_CYCLE_COMPLETED` record —
    token/media subjects covered, cycle window, per-family coverage counts,
    failure count, and report hash — through the record primitive, so cycle
@@ -2297,14 +2384,19 @@ deployment-gated:
    one from an `ENDOWED`-economics storage family, [LTA-ARCHIVE]
    requirements 2-3) plus a first passing fixity record for its
    render-critical payloads, within
-   `OFFCHAIN_PRESERVATION_COVERAGE_SECONDS` of its first sale
+   `OFFCHAIN_SOLD_TOKEN_COVERAGE_SECONDS` of its first sale
    settlement, per token or per release batch where a release sells
-   together ([MRR-OFFCHAIN-BINDING] rule 6 in
+   together ([MRR-OFFCHAIN-BINDING] rules 6 and 7 in
    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
-   owns the deadline parameter and its ceiling). Coverage status is
-   typed per token — `covered`, `uncovered_within_window`,
-   `uncovered_overdue` — and `uncovered_overdue` is a monitored incident
-   with an alert under the same regime as a missed close-out deadline.
+   own the deadline parameters and their ceilings; the sold-token
+   window carries the 30-day genesis floor of ADR 0013 decision U3).
+   Coverage status is typed per token — `covered`,
+   `uncovered_within_window`, `uncovered_overdue` — and the
+   operator-infrastructure-only period is a monitored state from day
+   one (ADR 0013 decision U3): monitoring enumerates the in-window
+   population as a published operational artifact from the first sale
+   onward, and `uncovered_overdue` is a monitored incident with an
+   alert under the same regime as a missed close-out deadline.
    The per-token status is a required acquisition-packet field
    ([CMC-ACQUISITION-PACKET] item 8), so a registrar sees the exposure
    as typed data, never as an absence, and a work sold from year six of
@@ -2328,8 +2420,9 @@ and 5 in
    artifact — re-containerized, emulator-wrapped, or rebuilt — must be
    produced that boots and reproduces a reference capture under the
    work's pinned acceptance mode. Post-operator, any institution may
-   produce and record one through the independent lane
-   [CMC-INDEPENDENT-ATTESTOR].
+   produce and record one through the independent lane's typed
+   `INDEPENDENT_ENVIRONMENT_MIGRATION` record
+   ([CMC-INDEPENDENT-ATTESTOR]; ADR 0013 decision U8).
 2. The replacement is a preservation object: hash-committed,
    fixity-covered, mirrored under the dual-family archival rule
    ([LTA-ARCHIVE]), and linked to the original by a `MIGRATION`
@@ -2764,17 +2857,25 @@ schema-identified, hash-committed packet a registrar verifies at closing:
    [CMC-RECORD-CHAIN];
 6. the attribution state — binding generation, attestation status, and
    sanction record where one exists, each with its signing authority
-   class (ADR 0012 decision T4);
+   class (ADR 0012 decision T4) — and the latest notarized
+   identity-verification attestation binding the `artistId` to a legal
+   person where one exists ([CMC-ATTESTATIONS] rule 11; ADR 0013
+   decision U8);
 7. the collection's rights record under `STREAM_RIGHTS_V1`
-   [CMC-RIGHTS-SCHEMA], with the typed rights-completeness status
+   [CMC-RIGHTS-SCHEMA], the token-scope rights record where one exists
+   — reported alongside the collection record, with
+   token-over-collection precedence per [CMC-RIGHTS-SCHEMA] rule 5
+   (ADR 0013 decision U8) — and the typed rights-completeness status
    (`specified | partially_specified | unspecified | absent`) derived
-   from its per-use-class grants (ADR 0012 decision T8);
+   from the per-use-class grants under that precedence (ADR 0012
+   decision T8);
 8. the latest fixity-cycle status covering the token's payloads
    [CMC-FIXITY-PROGRAM], including the token's typed
    preservation-coverage status (`covered | uncovered_within_window |
    uncovered_overdue`, the sold-token lane of [CMC-FIXITY-PROGRAM]
-   rule 6; ADR 0012 decision T2) and, for time-based media, the
-   preservation-master presence status ([CMC-FINALITY-INPUTS] rule 12);
+   rule 6; ADR 0012 decision T2) and, for time-based media, the typed
+   preservation-master status (`present | waived | absent`,
+   [CMC-FINALITY-INPUTS] rule 12(c); ADR 0013 decision U8);
 9. the legal instrument hash recorded (or to be recorded) in
    `ACCESSION`;
 10. the ownership-provenance chain: the token's complete ERC-721
@@ -2791,9 +2892,27 @@ schema-identified, hash-committed packet a registrar verifies at closing:
     `MATCH | TOLERABLE_VARIANCE | DIVERGENT` classification under the
     work's pinned acceptance mode ([LTA-RECON] requirement 4) — or an
     explicit never-drilled status, so a committee sees renderability as
-    well as byte integrity (ADR 0012 decision T8); and
+    well as byte integrity (ADR 0012 decision T8);
 12. the work-description (tombstone) record reference [CMC-TOMBSTONE],
-    or its explicit absence (ADR 0012 decision T8).
+    or its explicit absence (ADR 0012 decision T8);
+13. the collection's conservation-tier declaration where one exists
+    ([CMC-MUSEUM-GRADE]), the `ARTIST_INTENT` record or
+    `ARTIST_INTENT_WAIVER` reference with the typed interview status
+    (`present | waived | absent`), the interview record reference under
+    `STREAM_ARTIST_INTERVIEW_V1` where present, and the signing
+    authority class of each record (ADR 0013 decision U8);
+14. where the collection or token opts into C2PA provenance, the latest
+    `C2PA_REFERENCE` with its validation status and validator class
+    [CMC-C2PA], or an explicit no-C2PA statement (ADR 0013 decision
+    U8);
+15. the latest `CONDITION_REPORT` (owner lane) and
+    `INDEPENDENT_CONDITION` record references where any exist, with
+    their hash-committed examination-capture entries
+    ([CMC-GENESIS-SCHEMAS] rule 3), or an explicit none-recorded
+    status (ADR 0013 decision U8); and
+16. where a dossier bag accompanies the packet, the bag's typed
+    self-containment status ([CMC-PACKAGING] rule 3; ADR 0013 decision
+    U8).
 
 Dossier tooling [CMC-OBJECT-DOSSIER] emits the packet, a registrar can
 regenerate and verify it against chain state with no operator involvement,
@@ -2815,11 +2934,14 @@ at operator death.
 
 1. Hosting and entry: `StreamCollectionAttestations` hosts the lane. Any
    address may write append-only `INDEPENDENT_FIXITY`,
-   `INDEPENDENT_PRESERVATION_EVENT`, `INDEPENDENT_EXHIBITION`, and
-   `INDEPENDENT_CONDITION` records (record types catalogued in
-   the record-type catalog; the exhibition and condition types added by
-   ADR 0012 decision T8) against any token, media, or collection
-   subject derived per [CMC-SUBJECT-ID]. Entry is permissionless by
+   `INDEPENDENT_PRESERVATION_EVENT`, `INDEPENDENT_EXHIBITION`,
+   `INDEPENDENT_CONDITION`, `INDEPENDENT_CONSERVATION_TREATMENT`, and
+   `INDEPENDENT_ENVIRONMENT_MIGRATION` records (record types catalogued
+   in the record-type catalog; the exhibition and condition types added
+   by ADR 0012 decision T8, the conservation-treatment and
+   environment-migration types by ADR 0013 decision U8) against any
+   token, media, or collection subject derived per [CMC-SUBJECT-ID].
+   Entry is permissionless by
    design: no role grant, allowlist, collection policy, lock, freeze, or
    finality state can block the lane, and it keeps working in read-only
    museum mode with governance gone.
@@ -2875,13 +2997,27 @@ at operator death.
    profile [CMC-PREMIS-PROFILE]; exhibition payloads use the
    `STREAM_EXHIBITION_V1` schema and condition payloads the
    `STREAM_CONDITION_REPORT_V1` schema ([CMC-GENESIS-SCHEMAS]),
-   attestor-attributed (ADR 0012 decision T8). A museum running its own
+   attestor-attributed (ADR 0012 decision T8). Conservation-treatment
+   payloads use the PREMIS profile [CMC-PREMIS-PROFILE] event shape
+   (`CONSERVATION_NOTE` and treatment-class events) to document
+   interventions performed on preserved artifacts, and
+   environment-migration payloads carry the migrated or re-hosted
+   execution-environment artifact of [CMC-ENV-REMEDIATION] — both
+   artifact hashes, the `MIGRATION` linkage, and the boot/acceptance
+   evidence — so post-operator re-hosting has a typed home instead of
+   masquerading as a generic preservation event (ADR 0013 decision
+   U8). Post-operator descriptive and IIIF re-manifestation statements
+   ride `INDEPENDENT_PRESERVATION_EVENT` with `schemaId` naming the
+   pinned payload schema they carry (`STREAM_WORK_DESCRIPTION_V1`,
+   `STREAM_IIIF_P3_MIN_V1`), so those payloads stay
+   machine-classifiable by schema ID. A museum running its own
    fixity program on mirrored payloads has a protocol home for the
    results, the evidence round-trips into OAIS-modeled repositories, and
-   a borrowing or post-operator institution documents its own display
-   and examination of a work in its own lane — no owner cooperation, no
+   a borrowing or post-operator institution documents its own display,
+   examination, treatment, and re-hosting of a work in its own lane —
+   no owner cooperation, no
    operator-configured `INSTITUTION_SIGNER` grant, and no live
-   governance required for exhibition history to keep accruing.
+   governance required for stewardship history to keep accruing.
 5. Firewall: independent records are firewalled exactly like owner records
    ([CMC-OWNER-RECORDS] rule 4) — they cannot change default `tokenURI()`
    output, renderer resolution, artwork finality, royalties, minting,
@@ -2955,7 +3091,12 @@ The per-object dossier is exportable without bespoke tooling: the
 manifest for one token bundling: canonical identity (chain ID, Core,
 token ID, collection ID, serial, citation string), finality and
 content-root proofs, entropy provenance, the token's collection-level
-manifests (script, dependency, media), all records and attestations keyed
+manifests (script, dependency, media), the collection-scoped
+conservation records of the token's collection — the `ARTIST_INTENT`
+record or waiver with its interview record, `RIGHTS_STATEMENT` records
+(collection- and token-scope), C2PA references, IIIF manifests, and
+significant-properties records, keyed by their collection or scope
+subjects (ADR 0013 decision U8) — all records and attestations keyed
 by the token's subject ID with their record-chain heads, owner records,
 independent-lane records, the ownership-provenance chain
 ([CMC-ACQUISITION-PACKET] item 10), the work-description (tombstone)
@@ -2990,6 +3131,17 @@ decision T8):
    verification including record-chain heads, the content-root proof,
    the ownership-provenance chain, and the drill outcome — never only
    static worked-example schema validation.
+4. Institutional validation is release evidence, not synthetic-only
+   checks (ADR 0013 decision U8): before this document reaches Review
+   status, (a) a generated `OBJECT_DOSSIER_V1` bag must be ingested
+   end to end into at least one named open-source repository stack
+   (OCFL/Fedora/Archivematica class), with the ingest report
+   hash-committed as release evidence, and (b) at least one named
+   external conservation or registrar review of the genesis museum
+   schema set, the packaging profile, and the acquisition-packet
+   workflow must be recorded, with findings dispositioned. The
+   conformance matrix hosts the gate row; validator round-trips and
+   worked examples never substitute for this gate.
 
 ### Dossier And Export Packaging [CMC-PACKAGING]
 
@@ -3012,12 +3164,20 @@ pinned genesis packaging profile [CMC-GENESIS-SCHEMAS] for
    `stream-manifest.json` (RFC 8785-canonical) carries the dossier or
    export manifest hash, the record-chain heads at packaging time, and
    the packaging tool reference.
-3. `fetch.txt` may reference content-addressed payloads (`ipfs://`,
-   `ar://`) instead of embedding them only where each entry's bytes are
-   committed in the payload manifest rows and covered by the
-   dual-family archival rule; the packaged work's render-critical
-   payloads must be embedded or dual-family mirrored, never fetch-only
-   against a single storage family.
+3. For `OBJECT_DOSSIER_V1` bags, the packaged token's render-critical
+   payload bytes must be embedded in `data/` — fetch-only packaging is
+   nonconformant for render-critical payloads, whatever their mirror
+   coverage, because an accessioned bag of pointers is not an
+   accessioned work (ADR 0013 decision U8). `fetch.txt` may reference
+   content-addressed payloads (`ipfs://`, `ar://`) instead of
+   embedding them only for non-render-critical payloads (preservation
+   masters, high-resolution captures, archive packages) whose bytes
+   are committed in the payload manifest rows and covered by the
+   dual-family archival rule. `bag-info.txt` carries a typed
+   `Stream-Self-Containment` status — `self_contained` (every
+   referenced payload embedded) or `fetch_dependent` (any `fetch.txt`
+   entry present) — mirrored in `stream-manifest.json` and surfaced in
+   the acquisition packet ([CMC-ACQUISITION-PACKET] item 16).
 4. OCFL mapping: one dossier bag maps to one OCFL object whose object
    ID is the canonical citation; each superseding dossier export is a
    new OCFL version whose content is the bag payload, so registrars on
@@ -3034,7 +3194,11 @@ pinned genesis packaging profile [CMC-GENESIS-SCHEMAS] for
 5. The registered profile document ([CMC-GENESIS-SCHEMAS] rule 1)
    carries the full element-by-element profile with a worked example
    bag, and the packet-regeneration matrix row ([CMC-OBJECT-DOSSIER])
-   validates emitted bags against the profile.
+   validates emitted bags against the profile. Profile validation
+   against a worked example is necessary, never sufficient: the
+   institutional-validation gate of [CMC-OBJECT-DOSSIER] item 4
+   additionally requires the named-repository ingest test and the
+   recorded practitioner review (ADR 0013 decision U8).
 
 ### Canonical Citation Profile [CMC-CITATION]
 
@@ -3096,13 +3260,18 @@ names. Every named museum record family therefore ships pinned
    | `STREAM_CITATION_RECORD_V1` | the cited work's canonical citation with typed record-state qualifier [CMC-CITATION], citing-work reference, and context note |
    | `STREAM_ARTIST_INTENT_V1` | the intent fields of [CMC-ARTIST-INTENT] rule 1, including the interview entry |
    | `STREAM_ARTIST_INTENT_WAIVER_V1` | waiver statement hash and scope, per [CMC-ARTIST-INTENT] rule 2 |
+   | `STREAM_ARTIST_INTERVIEW_V1` | the interview record of rule 5 below (ADR 0013 decision U8) |
+   | `STREAM_MASTER_WAIVER_V1` | artist-signed waiver statement hash and scope for the preservation-master slot of [CMC-FINALITY-INPUTS] rule 12(c) (ADR 0013 decision U8) |
+   | `STREAM_IDENTITY_NOTARIZATION_V1` | the notarized identity-verification payload of [CMC-ATTESTATIONS] rule 11 (ADR 0013 decision U8) |
    | `STREAM_OBJECT_DOSSIER_V1` | the dossier bundle of [CMC-OBJECT-DOSSIER] |
    | `STREAM_ACQUISITION_PACKET_V1` | the packet contents of [CMC-ACQUISITION-PACKET] |
    | `STREAM_RIGHTS_V1` | the rights record of [CMC-RIGHTS-SCHEMA] |
    | `STREAM_PREMIS_V3_PROFILE` | the crosswalk of [CMC-PREMIS-PROFILE] |
-   | `STREAM_REFERENCE_RENDER_V1` | the reference-render record of [CMC-FINALITY-INPUTS] rule 5: captures, execution-environment manifest, archived environment artifact references, and the pinned acceptance mode |
+   | `STREAM_REFERENCE_RENDER_V1` | the reference-render record of [CMC-FINALITY-INPUTS] rule 5: captures with pinned capture classes and capture parameters, the explicit token sample, execution-environment manifest, archived environment artifact references, and the pinned acceptance mode with its registered metric (ADR 0013 decision U8) |
+   | `STREAM_METRIC_SSIM_V1` | the registered perceptual-metric entry of [CMC-FINALITY-INPUTS] rule 5(d): algorithm, reference tool, and tool version (ADR 0013 decision U8) |
    | `STREAM_IIIF_P3_MIN_V1` | the archival IIIF profile of [CMC-IIIF] |
    | `STREAM_WORK_DESCRIPTION_V1` | the tombstone fields of [CMC-TOMBSTONE] rule 1 (ADR 0012 decision T8) |
+   | `STREAM_LIDO_PROFILE_V1` | the tombstone-to-LIDO crosswalk of [CMC-TOMBSTONE] rule 4 (ADR 0013 decision U8) |
    | `STREAM_BAGIT_PROFILE_V1` | the packaging profile of [CMC-PACKAGING] (ADR 0012 decision T8) |
 
 3. `STREAM_CONDITION_REPORT_V1` anchors every condition report to
@@ -3117,10 +3286,35 @@ names. Every named museum record family therefore ships pinned
    ([CMC-FINALITY-INPUTS] rule 5), or an explicit not-verified statement;
    and the free-text condition narrative. A digital condition report that
    omits the verifiable state is a free-text opinion, not a conformant
-   record.
+   record. The schema additionally pins optional repeating
+   examination-capture entries (ADR 0013 decision U8) — each carrying a
+   capture class from the `still | frame_sequence | av_container |
+   scripted_session` vocabulary of [CMC-FINALITY-INPUTS] rule 5(a), a
+   URI plus `HashRef`, a registry-linked format ID
+   ([CMC-PREMIS-PROFILE] rule 4), and a display-hardware/installation
+   note — so outbound/return loan comparison can rest on hash-committed
+   observed-rendering evidence, not only protocol-state hashes and
+   prose; for `CURATED_EQUIVALENCE` works the observed output is
+   exactly what is judged. `INDEPENDENT_CONDITION` payloads share the
+   entry shape verbatim.
 4. Schema documents are versioned and superseded through the schema
    registry lineage rules; a revised family is a new schema ID, and old
    payloads keep verifying under the schema they named.
+5. `STREAM_ARTIST_INTERVIEW_V1` pins the interview instrument
+   (ADR 0013 decision U8), so interview corpora stay comparable,
+   indexable, and migratable across artists and decades instead of an
+   unhashed-structure pile. Required fields: the questionnaire
+   instrument reference (the Variable Media Questionnaire or a named
+   derivative, as URI plus `HashRef`); participants with roles
+   (artist, interviewer, others) and identity references; the
+   interview date; BCP 47 language tags; and the transcript reference
+   — required, as URI plus `HashRef` with a registry-linked format ID
+   ([CMC-PREMIS-PROFILE] rule 4). Optional fields: audio/video capture
+   references, each with URI, `HashRef`, and registry-linked format
+   ID. Every referenced payload is mirrored under the dual-family
+   archival rule. The `ARTIST_INTENT` interview entry
+   ([CMC-ARTIST-INTENT] rule 1) references a record under this schema
+   or carries the explicit `interview_waived` statement.
 
 ### Rights Records [CMC-RIGHTS-SCHEMA]
 
@@ -3162,6 +3356,18 @@ machine-readable genesis rights schema (ADR 0011 decision R11), written as
    posture and moral-rights statement of the Rights And Provenance
    guidance apply unchanged, and material changes publish superseding
    records with snapshot coverage rather than overwrites.
+5. Token-scoped rights variance (ADR 0013 decision U8):
+   `RIGHTS_STATEMENT` records may bind token-scoped subjects
+   ([CMC-SUBJECT-ID] token derivation) to carry work-specific grants —
+   deed-of-gift riders, acquisition-license schedules — alongside the
+   collection record. For that token, a token-scope record takes
+   precedence over the collection record, per use class, for the
+   machine-readable rights status and for the packet's derived
+   completeness status, and the acquisition packet reports both
+   records ([CMC-ACQUISITION-PACKET] item 7). Token-scope records
+   supplement the finality existence rule (rule 3) — they never remove
+   the finality scope's own record requirement — and are append-only
+   with supersession like every rights record.
 
 ### Work Description (Tombstone) Records [CMC-TOMBSTONE]
 
@@ -3199,6 +3405,74 @@ or collection-scoped subjects [CMC-SUBJECT-ID]:
    [CMC-OBJECT-DOSSIER] and the acquisition packet
    ([CMC-ACQUISITION-PACKET] item 12), and pre-finality tooling warns
    when an artist-bound collection approaches finality without one.
+4. Ingest crosswalk (ADR 0013 decision U8): `STREAM_LIDO_PROFILE_V1`
+   is a genesis schema registered with onchain document bytes
+   [CMC-SCHEMA-REGISTRY] [CMC-GENESIS-SCHEMAS], defining the
+   field-level crosswalk from `STREAM_WORK_DESCRIPTION_V1` to LIDO
+   descriptive units (CDWA-Lite-informed) — the same
+   permanent-translation-burden rationale that pinned the PREMIS
+   crosswalk applies to the first fields a collections-management
+   system ingests. Dossier export tooling must emit valid LIDO through
+   the profile, and the [CMC-PREMIS-PROFILE] rule 2 round-trip gate
+   covers the export.
+
+### Museum-Grade Conservation Floor [CMC-MUSEUM-GRADE]
+
+Finality is voluntary and unscheduled, so a conservation floor gated
+only on the finality ceremony can be missed forever: an artist can die,
+lose keys, or go dormant before any ceremony, and works sold for years
+from a live open series would carry none of the guarantees this
+document builds — the estate can add statements but never retroactive
+artist intent. The museum-grade tier moves the cheap record obligations
+to the sale boundary (ADR 0013 decision U8). The tier is optional per
+collection — that optionality is an accepted risk recorded in ADR 0013
+— but once declared it binds:
+
+1. Declaration: a collection may declare the `MUSEUM_GRADE`
+   conservation tier (tier IDs are the `keccak256` of the ASCII name
+   and enter the record-type and numeric ID catalogs) at creation or
+   at any time before its first mint, through:
+
+   ```solidity
+   function declareConservationTier(
+       uint256 collectionId,
+       bytes32 tier
+   ) external;
+   ```
+
+   The declaration is one-way, immutable from the collection's first
+   mint, and emits `CollectionConservationTierDeclared` ([CMC-EVENTS]).
+   Operator UX discloses it, and the acquisition packet carries it
+   ([CMC-ACQUISITION-PACKET] item 13).
+2. Pre-first-sale floor: before the collection's first primary-sale
+   settlement, a museum-grade collection must have recorded, through
+   the ordinary record machinery of this document: (a) an
+   `ARTIST_INTENT` record or explicit artist-signed
+   `ARTIST_INTENT_WAIVER` [CMC-ARTIST-INTENT]; (b) the interview entry
+   — a `STREAM_ARTIST_INTERVIEW_V1` record reference or the explicit
+   `interview_waived` statement ([CMC-GENESIS-SCHEMAS] rule 5); (c) a
+   `RIGHTS_STATEMENT` under `STREAM_RIGHTS_V1` for the collection
+   [CMC-RIGHTS-SCHEMA]; and (d) for every time-based-media
+   render-critical payload recorded by then, the preservation-master
+   object or the artist-signed `STREAM_MASTER_WAIVER_V1` record
+   ([CMC-FINALITY-INPUTS] rule 12(c)) — display derivatives never
+   satisfy the master slot.
+3. Open series stay covered as they grow: time-based media added after
+   the collection's first sale joins rule 2(d) at its own sale
+   boundary — each release's masters or waiver must be recorded before
+   that release's first sale settlement.
+4. Enforcement follows the sale-boundary gate pattern of
+   [MRR-OFFCHAIN-BINDING] rule 4 in
+   [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md):
+   selling from a museum-grade collection whose floor records are
+   missing is nonconformant, the pre-sale conformance gate verifies
+   the floor, and a sale that settles without it is a monitored
+   incident with an alert, never a silent lapse.
+5. The floor changes timing, never substance: finality-time
+   verification under [CMC-FINALITY-INPUTS] is unchanged; early
+   records remain supersedable under their own rules until locked; and
+   non-museum-grade collections keep the finality-time obligations and
+   pre-finality tooling warnings unchanged.
 
 ## Lock Model [CMC-LOCKS]
 
@@ -3322,9 +3596,12 @@ artist-bound collection.
    Model.
 5. Every veto surface is evented: co-signed mutations record the artist
    authorization reference in the mutation event, and artist-applied
-   locks emit `CollectionMetadataLocked` with the artist's authority
-   class, so a 2075 reader can distinguish operator-sealed from
-   artist-sealed content.
+   locks emit `CollectionMetadataLocked` carrying the actor, the
+   acting `ArtistAuthorityClass`, and the verified content-freeze
+   authorization hash ([CMC-EVENTS]; ADR 0013 decision U7), so a 2075
+   reader can distinguish operator-sealed from artist-sealed content
+   from the event record alone. A conformance checker row ties this
+   rule to the event catalog entry and fails on drift.
 
 ## Mutation API [CMC-MUTATIONS]
 
@@ -3485,6 +3762,11 @@ function publishTokenContentRoot(
     bytes32 schemaId,
     string calldata manifestURI,
     bytes32 manifestHash
+) external;
+
+function declareConservationTier(
+    uint256 collectionId,
+    bytes32 tier
 ) external;
 
 function lockCollectionField(
@@ -3836,7 +4118,17 @@ event TokenContentRootPublished(
 
 event CollectionMetadataLocked(
     uint256 indexed collectionId,
-    bytes32 indexed lockId
+    bytes32 indexed lockId,
+    address actor,
+    uint8 authorityClass,
+    bytes32 freezeAuthorizationHash,
+    uint16 schemaVersion
+);
+
+event CollectionConservationTierDeclared(
+    uint256 indexed collectionId,
+    bytes32 indexed tier,
+    uint16 schemaVersion
 );
 
 event CollectionCoreStatusObserved(
@@ -3848,6 +4140,21 @@ event CollectionCoreStatusObserved(
     uint256 mintedEver
 );
 ```
+
+`CollectionMetadataLocked` carries the lock's authority context, not
+only its subject (ADR 0013 decision U7): `actor` is the applying
+caller; `authorityClass` carries the acting `ArtistAuthorityClass`
+numeric ID ([AA-ROLES] in
+[`docs/stream-artist-authority.md`](stream-artist-authority.md)) for
+locks applied under artist authority through
+[CMC-ARTIST-CONTENT-VETO], and `AUTH_NONE` (`0`) for operator-applied
+locks; `freezeAuthorizationHash` is the verified artist content-freeze
+authorization hash (zero for operator locks). A 2075 reader therefore
+distinguishes operator-sealed from artist-sealed content from the
+event record alone, and event-only reconstruction of who sealed
+content is possible [CMC-RECONSTRUCTION]. A conformance checker row
+ties [CMC-ARTIST-CONTENT-VETO] rule 5 to this event catalog entry and
+fails on drift.
 
 The global `ContractURIUpdated()` is emitted by Core only, through the
 restricted emitter posture of
@@ -3958,6 +4265,8 @@ publishCollectionSnapshot   collection metadata admin with authority over
 publishTokenContentRoot     collection metadata admin or global admin
 recordOwnerRecord           current token owner per [CMC-OWNER-RECORDS]
 recordOwnerRecordFor        anyone, with the owner's verified signature
+declareConservationTier     collection metadata admin or global admin,
+                            pre-first-mint one-way [CMC-MUSEUM-GRADE]
 lockCollectionField         freeze admin or global admin
 ```
 
@@ -4088,9 +4397,11 @@ cap:
 5. The parameter identifier follows [LTA-GGP]:
 
    ```solidity
-   bytes32 constant GGP_METADATA_ERC1271_VERIFY_GAS_ID =
+   bytes32 constant GGP_METADATA_ERC1271_VERIFY_GAS =
        0x3ca324ef8262b1ff4cb8753a082cd8780e50f754c1a323a433e0e7665a5ec9f9;
        // keccak256("6529STREAM_GGP_METADATA_ERC1271_VERIFY_GAS")
+       // (uniform GGP_ constant naming, `_ID` suffix retired;
+       // ADR 0013 decision U9)
    ```
 
    The parameter joins the [LTA-GGP] inventory (hosts: the three
@@ -4168,6 +4479,13 @@ Recommended v1 validations:
     submitted bytes, respect `MAX_RECORD_PAYLOAD_BYTES`, and register
     the blob pointer; meaning-bearing families reject bytes-less writes
     [CMC-RECORD-PAYLOAD].
+29. `declareConservationTier` reverts after the collection's first mint,
+    reverts for unknown tier IDs, and is one-way [CMC-MUSEUM-GRADE].
+30. Reference-render records validate capture semantics: unknown capture
+    classes revert; non-still classes without their capture parameters
+    revert; `scripted_session` without the input-script hash reverts;
+    and a `PERCEPTUAL_TOLERANCE` metric that does not resolve to a
+    registered metric entry is rejected [CMC-FINALITY-INPUTS].
 
 JSON and JavaScript escaping should happen in the renderer, not in this storage
 contract. This contract should store canonical values.
@@ -4676,9 +4994,29 @@ Finality rules [CMC-FINALITY-INPUTS]:
    [CMC-GENESIS-SCHEMAS] — before finality (ADR 0010 decision 6;
    ADR 0011 decision R3). The record binds four things:
 
-   (a) Captures: at least one hash-committed reference output capture per
-   pinned token sample (or all tokens), mirrored across two storage
-   families.
+   (a) Captures: at least one hash-committed reference output capture
+   per pinned token sample (or all tokens), mirrored across two storage
+   families. Capture semantics are typed, never inferred (ADR 0013
+   decision U8): every capture carries a capture class from the closed
+   v1 vocabulary `still | frame_sequence | av_container |
+   scripted_session`, and non-still classes carry their capture
+   parameters — duration and frame rate/timing for `frame_sequence`
+   and `av_container` (plus audio characteristics where the work is
+   audio-bearing), and a hash-committed input script/log for
+   `scripted_session` — with each captured artifact carrying a
+   registry-linked format ID ([CMC-PREMIS-PROFILE] rule 4). Class
+   selection follows the work: a static work may pin `still`; a
+   time-based work (animated or audio-bearing) must pin
+   `frame_sequence` or `av_container`; an interactive work must pin
+   `scripted_session`. Still-only captures for a time-based or
+   interactive work are nonconformant — drills against stills would
+   classify motion or interaction divergence `MATCH` forever, the
+   exact silent-loss mode this record exists to catch. The record
+   states its token sample explicitly (token list or sampling rule);
+   the sample must include the scope's first and last collection
+   serials and must exercise every capture class the scope's works
+   require. Drill re-render comparison runs per capture class against
+   that class's artifacts, never against a substitute still.
 
    (b) Execution-environment manifest: renderer build, render context
    version, browser/engine version, viewport, device pixel ratio, color
@@ -4699,10 +5037,17 @@ Finality rules [CMC-FINALITY-INPUTS]:
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
    (ADR 0011 decision R3) — `BYTE_EXACT`, `PERCEPTUAL_TOLERANCE`, or
    `CURATED_EQUIVALENCE`. The record stores the mode plus its
-   parameters: the named perceptual/structural metric and threshold for
-   `PERCEPTUAL_TOLERANCE`, and the conservator-attestation reference
-   against the `ARTIST_INTENT` significant properties for
-   `CURATED_EQUIVALENCE`. The `CURATED_EQUIVALENCE` conservator
+   parameters: for `PERCEPTUAL_TOLERANCE`, a registered metric
+   identifier with a pinned per-work threshold — the metric is a
+   schema-registry entry ([CMC-SCHEMA-REGISTRY]) naming the algorithm,
+   reference tool, and tool version, never a free-form name, so drill
+   outcomes stay comparable across the corpus and the metric stays
+   reproducible in 2075; the genesis entry is `STREAM_METRIC_SSIM_V1`
+   (SSIM), the v1 default metric for `PERCEPTUAL_TOLERANCE`
+   (ADR 0013 decision U8), with further metrics admitted append-only
+   through the registry — and, for `CURATED_EQUIVALENCE`, the
+   conservator-attestation reference against the `ARTIST_INTENT`
+   significant properties. The `CURATED_EQUIVALENCE` conservator
    attestation carries a pinned evidentiary class (ADR 0012 decision
    T8): it is `SIGNER_VERIFIED`, recorded either as an
    `INSTITUTIONAL_VERIFICATION` attestation under a configured
@@ -4770,11 +5115,21 @@ Finality rules [CMC-FINALITY-INPUTS]:
     space, audio characteristics, duration, interaction affordances,
     and display parameters — must be recorded before finality, so the
     "should" of the PREMIS guidance is a "must" for time-based media at
-    finality; and (c) the collection should record a
-    preservation-master object (`SOURCE_MASTER`/`PRINT_MASTER` role)
-    distinct from the display derivative, with its presence or absence
-    surfaced as a typed acquisition-packet field
-    ([CMC-ACQUISITION-PACKET] item 8).
+    finality; and (c) the finality scope must carry, for its
+    time-based media, either a recorded preservation-master object
+    (`SOURCE_MASTER`/`PRINT_MASTER` role) distinct from the display
+    derivative — a display derivative never satisfies the master slot
+    — with fixity and dual-family archive coverage, or an explicit
+    artist-signed `STREAM_MASTER_WAIVER_V1` record
+    ([CMC-GENESIS-SCHEMAS]), the same record-or-waiver pattern as
+    interviews (ADR 0013 decision U8): a delivery-bitrate derivative
+    preserved alone is the canonical time-based-media collecting
+    mistake, and once the artist is gone no master can ever be added
+    under artist authority. The typed master status
+    (`present | waived | absent`) is an acquisition-packet field
+    ([CMC-ACQUISITION-PACKET] item 8); `absent` blocks finality for
+    the scope and can appear in packets only for not-yet-finalized
+    works.
 
 ## Multiple Canonical Views
 
@@ -4990,6 +5345,10 @@ Core integration tests:
    one-way, and makes `burn` revert for the collection [CMC-BURN].
 6. Collection-scope finality is rejected without the burn block; burns
    between `CLOSED` and the burn block are captured in finality facts.
+7. `collectionBurnsBlockedAtBlock` returns zero before the burn block,
+   equals the executing block height afterward, is set exactly once,
+   and satisfies the boolean-equivalence invariant of [CMC-BURN]
+   rule 6.
 
 Metadata write tests:
 
@@ -5077,9 +5436,13 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
 42. `ARTIST_INTENT`: finality for artist-bound collections reverts without
     an intent record or signed waiver [CMC-ARTIST-INTENT].
 43. Independent lane: any address writes fixity, preservation-event,
-    exhibition, and condition records in its own name, direct and
+    exhibition, condition, conservation-treatment, and
+    environment-migration records in its own name, direct and
     relayed, with the exhibition/condition payloads validating against
-    `STREAM_EXHIBITION_V1`/`STREAM_CONDITION_REPORT_V1`; impersonation
+    `STREAM_EXHIBITION_V1`/`STREAM_CONDITION_REPORT_V1` (including
+    examination-capture entries with registry-linked format IDs) and
+    environment-migration payloads carrying both artifact hashes and
+    the `MIGRATION` linkage (ADR 0013 decision U8); impersonation
     reverts; attestor nonces are unordered with signer-scoped
     revocation and the explicit-address replay view;
     no lock, freeze, finality state, or admin role blocks or forges the
@@ -5087,13 +5450,22 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
 44. Rights: finality for any collection — artist-bound or
     `PLATFORM_WORKS` — reverts without a
     `STREAM_RIGHTS_V1` record; closed-vocabulary validation rejects
-    unknown grant values; the packet derives the rights-completeness
-    status [CMC-RIGHTS-SCHEMA].
+    unknown grant values; a token-scope record takes per-use-class
+    precedence over the collection record for that token's packet
+    status, and the packet reports both records (ADR 0013 decision
+    U8) [CMC-RIGHTS-SCHEMA].
 45. Reference render: finality reverts without the archived
     execution-environment artifact and a pinned acceptance mode;
     `BYTE_EXACT` without pinned software rasterization is rejected;
-    `DYNAMIC`-class works cannot pin `BYTE_EXACT`; the drill artifact
-    classifies outcomes `MATCH`/`TOLERABLE_VARIANCE`/`DIVERGENT` and
+    `DYNAMIC`-class works cannot pin `BYTE_EXACT`; still-only captures
+    for a time-based or interactive work are rejected, non-still
+    classes require capture parameters and `scripted_session` the
+    input-script hash, the token sample covers first and last serials
+    and every required capture class, and `PERCEPTUAL_TOLERANCE`
+    requires a registered metric entry (`STREAM_METRIC_SSIM_V1` at
+    genesis; ADR 0013 decision U8); the drill artifact
+    classifies outcomes `MATCH`/`TOLERABLE_VARIANCE`/`DIVERGENT` per
+    capture class and
     boots an archived environment [CMC-FINALITY-INPUTS].
 46. Genesis schema set: every schema named in [CMC-GENESIS-SCHEMAS]
     resolves to registered onchain document bytes whose hashes match the
@@ -5101,8 +5473,12 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
 47. Artist content veto: post-first-mint content-affecting writes for an
     `ARTIST_SIGNED_POLICY` collection revert without verified artist
     co-signature; the relayed artist content freeze applies the `SCRIPT`,
-    `DEPENDENCIES`, and `MEDIA_MANIFEST` locks and records the artist
-    authority class [CMC-ARTIST-CONTENT-VETO].
+    `DEPENDENCIES`, and `MEDIA_MANIFEST` locks, and the emitted
+    `CollectionMetadataLocked` carries the actor, the acting
+    `ArtistAuthorityClass`, and the freeze authorization hash, while an
+    operator lock emits `AUTH_NONE` and a zero authorization hash
+    (checker row against the event catalog; ADR 0013 decision U7)
+    [CMC-ARTIST-CONTENT-VETO].
 48. Attestation mirror: the checker row comparing this document's artist
     attestation field inventory against [AA-ATTEST] passes, and the
     metadata GGP tests (floor/raise/lower/probe) run for
@@ -5119,20 +5495,30 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
     script chunks, owner-record and independent-lane payloads — through
     the pointer registry reads alone [CMC-PAYLOAD-POINTERS].
 51. Sold-token lane: a sale in an open `OFFCHAIN` collection starts the
-    coverage window; receipts (one `ENDOWED` family) plus a passing
+    `OFFCHAIN_SOLD_TOKEN_COVERAGE_SECONDS` window (30-day genesis
+    floor); the in-window population is enumerated by monitoring from
+    the first sale settlement (day-one monitored state, ADR 0013
+    decision U3); receipts (one `ENDOWED` family) plus a passing
     fixity record inside the window yield `covered`; a lapsed window
     yields `uncovered_overdue`, fires the monitored-incident alert, and
     surfaces in the acquisition packet [CMC-FIXITY-PROGRAM].
 52. Packet and dossier regeneration: `STREAM_ACQUISITION_PACKET_V1` and
     `OBJECT_DOSSIER_V1` regenerate from chain state with no operator
     involvement and verify component by component, including the
-    ownership-provenance chain, rights-completeness status, coverage
-    status, drill outcome, and tombstone reference
-    [CMC-ACQUISITION-PACKET] [CMC-OBJECT-DOSSIER].
+    ownership-provenance chain, rights-completeness status (with
+    token-scope precedence), coverage
+    status, drill outcome, tombstone reference, conservation-tier and
+    interview status, C2PA validation status, condition-report
+    captures, and the dossier bag's embedded render-critical bytes and
+    self-containment status (ADR 0013 decision U8)
+    [CMC-ACQUISITION-PACKET] [CMC-OBJECT-DOSSIER] [CMC-PACKAGING].
 53. Media conservation gate: finality over time-based media reverts
     without registry-linked `formatId` and a significant-properties
-    record; the preservation-master presence status round-trips into
-    the packet [CMC-FINALITY-INPUTS] [CMC-PREMIS-PROFILE].
+    record, and reverts without a preservation-master object or the
+    artist-signed `STREAM_MASTER_WAIVER_V1` record (ADR 0013 decision
+    U8); the typed master status (`present | waived | absent`)
+    round-trips into the packet [CMC-FINALITY-INPUTS]
+    [CMC-PREMIS-PROFILE].
 54. Environment remediation: a failed drill boot check without a
     recorded migrated artifact or infeasibility finding fails the drill
     gate; a recorded remediation links old and new artifact hashes
@@ -5140,6 +5526,28 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
 55. Tombstone records: `WORK_DESCRIPTION` writes validate the required
     field set, accept artist and curator authority, reject others, and
     carry payload bytes [CMC-TOMBSTONE].
+56. Museum-grade floor: `declareConservationTier` is one-way and
+    rejected after first mint; the pre-sale gate fails a museum-grade
+    collection selling without the intent/waiver, interview entry,
+    rights record, or time-based masters/waiver, and a settlement
+    without the floor raises the monitored-incident alert; a
+    non-museum-grade collection is unaffected [CMC-MUSEUM-GRADE].
+57. Ingest crosswalks: rights records export into the PREMIS rights
+    serialization and tombstones into LIDO through the registered
+    profiles, both passing schema validation in the round-trip gate;
+    the institutional-validation evidence (named-repository ingest
+    report, practitioner review) is present and hash-committed before
+    Review [CMC-PREMIS-PROFILE] [CMC-TOMBSTONE] [CMC-OBJECT-DOSSIER].
+58. Interview records: `STREAM_ARTIST_INTERVIEW_V1` payloads validate
+    the instrument reference, participants and roles, date, language
+    tags, and required transcript reference with registry-linked
+    format IDs; an `ARTIST_INTENT` interview entry resolves to a
+    conformant record or the explicit waiver
+    ([CMC-GENESIS-SCHEMAS] rule 5).
+59. Identity notarization: `STREAM_IDENTITY_NOTARIZATION_V1` payloads
+    validate the artistId, attested identity-record hash, legal-person
+    reference, and instrument fields; the latest record surfaces in
+    packet item 6 ([CMC-ATTESTATIONS] rule 11).
 
 Renderer integration tests:
 
@@ -5184,8 +5592,11 @@ sold-token lane and environment remediation,
 media-hash-bound C2PA references with attribution reconciliation, the
 pinned IIIF profiles, media relationship records, owner records and the
 object dossier with its packaging profile, the independent preservation
-lane with exhibition and condition types, the genesis museum
-schema set with pinned rights and tombstone records, state-bound artist
+lane with exhibition, condition, conservation-treatment, and
+environment-migration types, the genesis museum
+schema set with pinned rights, tombstone, interview, master-waiver,
+identity-notarization, and crosswalk records, the museum-grade
+conservation floor, state-bound artist
 attestations
 and intent records with interview coverage, the artist content veto,
 generalized attestations under the metadata verification gas parameter,

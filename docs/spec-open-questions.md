@@ -25,8 +25,21 @@ heuristic is gone by design, and nothing standard replaced it.
 - Why it blocks: collector-facing collection pages, marketplace search,
   and third-party analytics all need a grouping signal; without a specified
   one, every integrator invents their own and the ecosystem fragments.
-  Must be resolved before the metadata specs reach `Final`; does not block
-  Draft-stage work.
+- Lifecycle gate (restated decidably per ADR 0013 decision U9): OQ-X8
+  blocks Review entry for
+  [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+  and [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
+  only. Every other document may enter Review with X8 open; no document
+  reaches `Final` while a question it depends on is open, per
+  [`spec-policy.md`](spec-policy.md).
+- Reserved-scope satellites (round-3/4 review findings that ride on X8 and
+  are reserved with it): the secondary-market life of every drop pattern
+  under a shared contract, marketplace-native artist identity verification
+  insofar as it depends on collection pages, and the per-collection facade
+  option. The machine path shipped so far (per-collection `contractURI`
+  through the router, `properties.stream.collection` fields, the
+  collection-display evidence gate with standing-commitment hardening) is
+  the interim posture, not the resolution.
 - Options: (a) per-collection contract-metadata surfaces (an ERC-7572-style
   collection-scoped `contractURI` read exposed through the router);
   (b) ERC-7496 dynamic traits carrying collection identity; (c) a pinned
@@ -48,9 +61,12 @@ heuristic is gone by design, and nothing standard replaced it.
 All 25 other questions raised by the permanence reframe were resolved on
 2026-07-04 through
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) (count
-corrected from 24 per ADR 0010), in the same PR that removed the inline
-markers. The nine-lens review findings were resolved through
-[ADR 0010](adr/0010-world-class-spec-pass.md).
+corrected from 24 per ADR 0010). The successive nine-lens review rounds
+were resolved through [ADR 0010](adr/0010-world-class-spec-pass.md)
+(round 1, 112 findings), [ADR 0011](adr/0011-world-class-pass-round-2.md)
+(round 2, 98), [ADR 0012](adr/0012-world-class-pass-round-3.md)
+(round 3, 86), and [ADR 0013](adr/0013-world-class-pass-round-4.md)
+(round 4, 92) — every finding resolved except the OQ-X8 family above.
 
 ## Resolved
 

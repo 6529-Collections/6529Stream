@@ -6,9 +6,11 @@ inline are resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
 [ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md) (decisions R6, R9, and
-R12 amend this document), and
+R12 amend this document),
 [ADR 0012](adr/0012-world-class-pass-round-3.md) (decisions T6 and T7
-amend this document) and recorded in
+amend this document), and
+[ADR 0013](adr/0013-world-class-pass-round-4.md) (decisions U2, U6, U7,
+and U9 amend this document) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -28,8 +30,12 @@ network: the first production deployment is the permanent system, and every
 requirement here is classified by what can ever change about it — Permanent,
 Replaceable, or Operational per [`docs/spec-policy.md`](spec-policy.md) —
 rather than by launch phase. `StreamCore` should remain the canonical ERC-721
-contract — with no `ERC721Enumerable` storage; `totalSupply()` stays and
-enumeration derives from `Transfer` events (ADR 0012 decision T10) — and
+contract — with no `ERC721Enumerable` storage; `totalSupply()` stays, and
+archival enumeration is served by the three state-only lanes of the
+enumeration posture home, [LTA-ENUMERATION] in
+[`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md):
+state exports, sequential-ID iteration over live state, and event
+replay (ADR 0012 decision T10) — and
 mint only after an authorized mint manager has validated policy and consumed
 allowance through the ledger.
 The cross-cutting 50+ year architecture principles live in
@@ -642,7 +648,8 @@ Escrow/deposit path    emits or stores operationId with the payment settlement r
 Core complete         clears PreparedMintRecord only when operationId matches; clears completion sentinel after entropy/randomizer boundary
 ```
 
-Recommended manager, ledger, or settlement events:
+Manager prepared-mint events (production signatures, ADR 0013
+decision U7):
 
 ```solidity
 event PreparedMintStarted(
@@ -782,6 +789,7 @@ large mutable display strings as authoritative accounting state.
 
 ```solidity
 event MintPhaseMetadata(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 metadataHash,
@@ -1049,10 +1057,14 @@ Requirements [MPA-MERKLE]:
    exceeds it or is zero. Cap checks then run against the supplied leaf
    cap exactly as for `STATIC`.
 5. `priceOverride` is sale policy, not accounting: when
-   `hasPriceOverride` is true, the sale adapter must charge
-   `priceOverride` after verifying the same leaf
-   (`docs/stream-sales-and-auctions.md` `[SSA-AUTH]`); the manager and
-   ledger ignore price.
+   `hasPriceOverride` is true, the sale adapter must charge per the
+   override's kind role after verifying the same leaf — the exact
+   charged price on fixed-price kinds, and on time-varying Dutch kinds
+   a charging ceiling, `min(currentSchedulePrice, priceOverride)`,
+   never below the clearing floor (ADR 0013 decision U6; the
+   kind-role table is owned by
+   `docs/stream-sales-and-auctions.md` `[SSA-AUTH]` rule 3). The
+   manager and ledger ignore price.
 6. `capRoot` is bound into the counter's binding commitment and therefore
    into `policyHash`; changing the allowlist is a policy change
    (loosening rules apply), and a frozen phase pins its allowlist
@@ -1136,6 +1148,16 @@ constants, never inferred sentinels [MPA-SCOPES]:
    `phaseId = 0`. Real collections must have `collectionId >= 1`, and the
    manager and ledger must reject phase or counter registration for
    collection 0. One derivation function serves all three scopes.
+   Collection IDs are themselves allocated densely sequential from 1
+   with the Permanent `lastAllocatedCollectionId()` count read
+   (ADR 0013 decision U2; allocation pin:
+   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
+   [PV1-IDENTITY] item 7, mirroring the [LTA-ENUMERATION] posture of
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md),
+   with the `createCollection` surface in
+   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)),
+   so the reserved value can never collide with an allocated ID and a
+   state-only walker can bound every collection-scoped key space.
 3. Both reserved constants are documented in the protocol v1
    domain-constants table inputs and covered by a golden test.
 
@@ -1214,7 +1236,9 @@ the hashed `PHASE_CONFIG_DOMAIN_V2` and `GATE_CONFIG_DOMAIN_V2` preimages
 in `Policy Fingerprints` (ADR 0010 decision D3.6; ADR 0011 decision R6):
 the gate lives in its own hashed config struct, phase metadata is a real
 config field, and the per-phase counter-count bound is the reviewed
-manager constant `MAX_PHASE_COUNTERS` rather than per-phase state (the
+manager constant `MAX_PHASE_COUNTERS` — planning value `16`, recorded
+in the release manifest like every reviewed named constant (ADR 0013
+decision U9) — rather than per-phase state (the
 ordered counter set is already fully committed by the policy hash). Phase
 pause state is deliberately not a config field: it is a separate
 Operational flag outside policy identity (ADR 0011 decision R6).
@@ -1598,10 +1622,14 @@ yet route existing `StreamDrops` or auction flows, execute payment settlement,
 or consult gates; dynamic resolver caps/deltas and callable nullifiers are
 protocol v1 exclusions until their own ADRs are accepted.
 
-Ledger events:
+Ledger events. These are production-exact signatures (ADR 0013
+decision U7): every event carries a leading `uint16 schemaVersion` and
+at most three indexed fields, and the event-catalog rows mirror this
+home rather than deciding signatures at catalog-generation time:
 
 ```solidity
 event MintLedgerCounterConsumed(
+    uint16 schemaVersion,
     bytes32 indexed valueKey,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
@@ -1615,6 +1643,7 @@ event MintLedgerCounterConsumed(
 );
 
 event MintLedgerCounterConsumptionContext(
+    uint16 schemaVersion,
     bytes32 indexed valueKey,
     bytes32 indexed counterId,
     bytes32 indexed subjectKey,
@@ -1628,12 +1657,14 @@ event MintLedgerCounterConsumptionContext(
 );
 
 event MintLedgerAuthorizationConsumed(
+    uint16 schemaVersion,
     bytes32 indexed authorizationId,
     bytes32 indexed policyHash,
     address indexed manager
 );
 
 event MintLedgerNullifierConsumed(
+    uint16 schemaVersion,
     bytes32 indexed nullifier,
     bytes32 indexed policyHash,
     address indexed manager
@@ -1684,7 +1715,11 @@ event MintLedgerNullifierImported(
     address indexed successorManager
 );
 
-event MintLedgerWriterUpdated(address indexed writer, bool allowed);
+event MintLedgerWriterUpdated(
+    uint16 schemaVersion,
+    address indexed writer,
+    bool allowed
+);
 ```
 
 Indexers reconstruct one consumption from the adjacent primary and context
@@ -2142,6 +2177,17 @@ Requirements [MPA-AUTHZ]:
    `docs/stream-sales-and-auctions.md` `[SSA-REGISTRY]`.
 5. Both rejection cases in rule 2 (zero recovery, non-canonical s/v) are
    golden negative tests in the conformance matrix mint-accounting gate.
+6. `AuthorizerKind` is a declared verification path, never a
+   code-presence inference (ADR 0013 decision U6): no verifier may
+   select or gate a kind on `extcodesize` or any other code-presence
+   heuristic. An EIP-7702-delegated EOA — an account with nonzero
+   delegated code — remains a valid `EOA_712` authorizer under its own
+   key, and `ERC1271_712` verification targets whatever code the named
+   authorizer account exposes at verification time. Wallet
+   classification follows the wallet-class home,
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
+   [GOV-1271-CLASS], which pins the 7702 posture once for every
+   signature surface.
 
 ### Canonical Signed Ticket
 
@@ -2214,7 +2260,15 @@ Requirements [MPA-TICKET] (pinned EIP-712 surface, ADR 0010 decision D3.5):
 
    Consuming the ticket and consuming the ledger replay key are the same
    fact; sale authorizations derive theirs identically
-   (`docs/stream-sales-and-auctions.md` `[SSA-AUTH]`).
+   (`docs/stream-sales-and-auctions.md` `[SSA-AUTH]`). For
+   mint-executing offer acceptance the digest fed into this derivation
+   is the buyer's offer digest — the offer is the ledger-consumed
+   replay fact, and the matching sale-authorization digest is consumed
+   in the same transaction through the adapter's append-only
+   consumed-digest store (`docs/stream-sales-and-auctions.md`
+   `[SSA-OFFER]` rule 4; ADR 0013 decision U6) — so one `consume` call
+   still carries exactly one `authorizationId` and a consumed offer can
+   never re-execute under a freshly signed authorization.
 5. Ticket revocation (`[MPA-LEDGER]` rule 3) uses a pinned payload the
    authorizer signs or sends:
 
@@ -2575,7 +2629,11 @@ Requirements [MPA-CONSENT]:
    platform signer inside a live, scoped, unexpired artist delegation.
 2. Verification is a bounded read against the artist authority registry
    under the `ARTIST_AUTHORITY_GAS_LIMIT` Governed Gas Parameter (genesis
-   value `150_000`); an unavailable registry fails closed for
+   value `150_000`), with returndata copied only to the read's exact
+   ABI shape — returndata longer or shorter than the declared return
+   tuple is a failed read (ADR 0013 decision U7, the capped-returndata
+   discipline of `[MPA-GATES]` rule 7 applied to registry reads); an
+   unavailable registry fails closed for
    consent-bound configuration. The parameter's release-manifest
    failure-direction class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP]
    requirement 10): raises are governance-only, with no permissionless
@@ -2641,29 +2699,50 @@ Canonical state-changing mint sequence:
 6. Check array lengths and nonzero initial recipients and beneficiaries.
 7. Check `maxBatchQuantity`.
 8. Compute active `policyHash`.
-9. Check configured gate and resolver modules against the module registry.
-10. Call optional gate and validate returned constraints.
-11. Load all enabled counters for the phase.
-12. Resolve counter keys, dynamic caps, and dynamic increments for every counter
+9. Call `requireMintConsent(collectionId, phaseId, policyHash)` on the
+   artist authority registry — the once-per-mint-transaction artist
+   consent and contest check, executed before any counter, ledger, or
+   token state is written — as a bounded read under
+   `ARTIST_AUTHORITY_GAS_LIMIT` per `[MPA-CONSENT]` rule 2, and revert
+   on failure. This is the mint-path realization of the serve-time
+   cadence owned by
+   [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   `[AA-CONSENT]` requirement 6, and it also enforces the
+   platform-works contest stop of `[MPA-CONSENT]` rule 4 (ADR 0013
+   decision U6).
+10. Check configured gate and resolver modules against the module registry.
+11. Call optional gate and validate returned constraints.
+12. Load all enabled counters for the phase.
+13. Resolve counter keys, dynamic caps, and dynamic increments for every counter
     and every relevant token or batch.
-13. Aggregate projected increments by `(counterId, valueKey)`.
-14. Check every projected counter value against its cap using current ledger
+14. Aggregate projected increments by `(counterId, valueKey)`.
+15. Check every projected counter value against its cap using current ledger
     values.
-15. Ask `StreamMintLedger` to verify `policyHash` against the ledger's
+16. Ask `StreamMintLedger` to verify `policyHash` against the ledger's
     registered hash for `(manager, collectionId, phaseId)`, repeat cap checks,
     and consume counter increments, authorization ID, and nullifiers.
-16. For each token, Core writes token identity, collection serial, and
+17. For each token, Core writes token identity, collection serial, and
     renderer-visible `tokenData` verified against `tokenDataHash`, and
     emits `TokenCollectionRegistered`.
-17. The authorized mint manager, sale adapter, or resolver hook records any
+18. The authorized mint manager, sale adapter, or resolver hook records any
     required token-level primary or royalty snapshot after Core has created
     authoritative token identity and before any untrusted receiver callback.
     Core stores no revenue assignment or snapshot state.
-18. Core registers bounded entropy state through the entropy coordinator
+19. Core registers bounded entropy state through the entropy coordinator
     boundary, without calling external randomness providers.
-19. Core calls `_safeMint(initialRecipient, tokenId)`. This is the first point
+20. Core calls `_safeMint(initialRecipient, tokenId)`. This is the first point
     where an untrusted recipient callback can run.
-20. Emit manager mint events with `policyHash`.
+21. Emit manager mint events with `policyHash`.
+
+Step 9 is mandatory on every mint path — including auction settlement,
+prepared mints, and free phases — and its placement is normative: after
+the active `policyHash` is computed (the consent read binds it) and
+before the module, gate, counter, ledger, and Core steps, so a
+`DISPUTED`, `REVOKED`, or `CONTESTED` state stops the transaction
+before any irreversible-looking effect. The
+`PRE_REVENUE_SINGLE_STEP` and `PREPARED_MINT` realizations in
+[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+traverse this sequence and inherit the step unchanged.
 
 Ledger accounting should happen before the Core mint calls. If any Core mint
 reverts, EVM rollback reverts the ledger updates too.
@@ -2728,10 +2807,20 @@ separate accepted ADR defines and tests it.
 
 ## Events
 
+Event schemas in this document are production-exact (ADR 0013 decision
+U7): every non-standard event carries a leading `uint16 schemaVersion`
+— the leading position is this home's pinned convention, matching the
+sales and entropy homes — and at most three indexed fields, registered
+in the event catalog of
+[`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
+[LCM-EVENTS]. The catalog mirrors these signatures; it never decides
+them.
+
 Configuration events:
 
 ```solidity
 event MintPhaseConfigured(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 configHash,
@@ -2739,6 +2828,7 @@ event MintPhaseConfigured(
 );
 
 event MintPhasePausedEvent(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bool paused,
@@ -2747,6 +2837,7 @@ event MintPhasePausedEvent(
 );
 
 event MintPhaseFrozen(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bool frozen,
@@ -2754,6 +2845,7 @@ event MintPhaseFrozen(
 );
 
 event MintPhaseExecutorUpdated(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     address indexed executor,
@@ -2763,6 +2855,7 @@ event MintPhaseExecutorUpdated(
 );
 
 event MintPhaseGateUpdated(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     address indexed gate,
@@ -2779,6 +2872,7 @@ event MintPhaseConsentRecorded(
 );
 
 event MintCounterConfigured(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed counterId,
@@ -2796,6 +2890,7 @@ event MintCounterConfigured(
 );
 
 event MintCounterEnabled(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed counterId,
@@ -2804,6 +2899,7 @@ event MintCounterEnabled(
 );
 
 event MintCounterResolverUpdated(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed counterId,
@@ -2812,11 +2908,13 @@ event MintCounterResolverUpdated(
 );
 
 event MintLedgerUpdated(
+    uint16 schemaVersion,
     address indexed oldLedger,
     address indexed newLedger
 );
 
 event MintModuleRegistryUpdated(
+    uint16 schemaVersion,
     address indexed oldRegistry,
     address indexed newRegistry
 );
@@ -2844,6 +2942,7 @@ ledger's scoped consumption event:
 
 ```solidity
 event MintBatchExecuted(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     address indexed executor,
@@ -2857,6 +2956,7 @@ event MintBatchExecuted(
 );
 
 event MintAuthorizationConsumed(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed authorizationId,
@@ -3517,6 +3617,12 @@ Manager tests:
     non-authorizer caller without that signature is refused; a
     presentation whose `ticket.manager` or `ticket.ledger` mismatches is
     refused; a voided ticket can never mint (ADR 0012 decision T6).
+41. The Mint Execution Order step 9 consent check executes exactly once
+    per mint transaction before any ledger or Core write, on paid,
+    free, and prepared paths alike; a `DISPUTED`, `REVOKED`, or
+    platform-works `CONTESTED` state blocks the next mint with no
+    operator action, mirroring the artist-authority gate suite
+    (ADR 0013 decision U6).
 
 Resolver/nullifier extension tests:
 
@@ -3578,7 +3684,12 @@ Integration tests:
     executed by an EOA executor on the unpaid phase, with no settlement
     record emitted (pattern home:
     [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
-    `[SSA-AIRDROP]`; ADR 0012 decision T6).
+    `[SSA-AIRDROP]`; ADR 0012 decision T6). The failure-isolated
+    adapter-executed shape mints the batch to adapter custody with the
+    committed recipients as beneficiaries, `RECIPIENT`-keyed counters
+    keying the beneficiaries, and a rejecting contract recipient
+    diverting only its own element to a pull NFT claim
+    (`[SSA-AIRDROP]` rule 2; ADR 0013 decision U6).
 
 ## Acceptance Criteria
 

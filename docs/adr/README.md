@@ -26,6 +26,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0010-world-class-spec-pass.md`](0010-world-class-spec-pass.md) | Accepted | Nine-lens review resolutions |
 | [`0011-world-class-pass-round-2.md`](0011-world-class-pass-round-2.md) | Accepted | Nine-lens round-2 resolutions |
 | [`0012-world-class-pass-round-3.md`](0012-world-class-pass-round-3.md) | Accepted | Nine-lens round-3 resolutions |
+| [`0013-world-class-pass-round-4.md`](0013-world-class-pass-round-4.md) | Accepted | Nine-lens round-4 resolutions |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

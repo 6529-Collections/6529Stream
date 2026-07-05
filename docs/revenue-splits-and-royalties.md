@@ -5,8 +5,9 @@ Specification status: Draft. This document follows
 inline are resolved by
 [ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
 [ADR 0010](adr/0010-world-class-spec-pass.md),
-[ADR 0011](adr/0011-world-class-pass-round-2.md), and
-[ADR 0012](adr/0012-world-class-pass-round-3.md) and recorded in
+[ADR 0011](adr/0011-world-class-pass-round-2.md),
+[ADR 0012](adr/0012-world-class-pass-round-3.md), and
+[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for
@@ -31,9 +32,11 @@ The architecture decision record is
 by [ADR 0010](adr/0010-world-class-spec-pass.md) decisions D1, D2.5,
 D5, D7.3, D8.2, D8.6, D9.2, and D10.6, by
 [ADR 0011](adr/0011-world-class-pass-round-2.md) decisions R6, R9, R10,
-and R12, and by
+and R12, by
 [ADR 0012](adr/0012-world-class-pass-round-3.md) decisions T3, T6,
-and T7.
+and T7, and by
+[ADR 0013](adr/0013-world-class-pass-round-4.md) decisions U1, U6,
+and U7.
 The cross-cutting 50+ year architecture principles, including the Governed
 Gas Parameter model, live in `docs/stream-long-term-architecture.md`. Sale
 and auction mechanics live in `docs/stream-sales-and-auctions.md` (ADR 0010
@@ -270,7 +273,10 @@ Requirements [RSR-GGP]:
    requirement 4.
 5. Health probes are parameter-specific and must be recorded as release or
    governance evidence: `probeRoyaltyInfo` runs for
-   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER`; a
+   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` (probe
+   locus and probe-event home:
+   [Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events));
+   a
    maximum-supported-class ERC-1271 verification (rule [RSR-1271].2) for
    `ERC_1271_GAS_LIMIT`; an all-cold `assetStatus` read for
    `ASSET_POLICY_GAS_LIMIT`; and a measured worst-case undeployed-wallet
@@ -642,6 +648,18 @@ Requirements [RSR-1271]:
    manifest and recipient documentation must state this cap-independent
    path explicitly so ETH-rejecting contract recipients know the
    self-execution recipe.
+6. EIP-7702 delegated EOAs (ADR 0013 decision U6). A revenue-layer
+   signer account bearing an EIP-7702 delegation designation is
+   classified per the wallet-class home, ADR 0004 [GOV-1271-CLASS]:
+   classification is observed at verification time — code presence is a
+   per-observation fact, never a cached account-type fact — and the
+   home's 7702 posture (delegated-EOA classification, with a canonical
+   ECDSA signature from the account's own key remaining valid alongside
+   ERC-1271 verification) applies unchanged to every rule 1 surface.
+   No revenue-layer contract may branch on code presence for any
+   purpose other than the signature-verification selection that home
+   pins; this document's deterministic-wallet code checks classify
+   protocol `CREATE2` targets, never accounts.
 
 ### Native ETH Observation Lifecycle
 
@@ -1357,15 +1375,36 @@ Requirements [RSR-TEMPLATES]:
 
 1. `ARTIST` is a first-class beneficiary class (ADR 0010 decision D2.5),
    identified in profiles and templates by the `keccak256("artist")` label
-   class ([`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-ECON] rule 1). The dynamic
-   account source `keccak256("COLLECTION_ARTIST")` resolves to the
-   collection's accepted artist payout address recorded under
-   [`docs/stream-artist-authority.md`](stream-artist-authority.md), and entries it materializes carry an
-   `artist`-class label. Resolution must use the accepted binding only: a
-   proposed-but-unaccepted, disputed, or revoked binding must revert
-   artist-sourced materialization before any settlement effect.
-   Multi-artist collections resolve through the typed collaborator list
-   and its share references defined in the artist authority spec.
+   class ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-ECON] rule 1). The dynamic account source
+   `keccak256("COLLECTION_ARTIST")` resolves through the artist
+   registry's typed payout read `artistPayoutAccount(artistId)` for the
+   collection's accepted artist binding — the Permanent registry surface
+   owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md)
+   [AA-PAYOUT], backed by an artist-signed, identity-revision-class
+   payout designation record (ADR 0013 decision U1) — and entries it
+   materializes carry an `artist`-class label. Settlement time is the one
+   resolution moment: the read executes in the materialization call frame
+   of the sale being settled, the [AA-ECON] economics consent binds the
+   payout designation revision in force when consent is recorded, and a
+   later artist-signed designation revision re-points future settlements
+   through the same read without re-consent; no consent-time address is
+   cached into the template. Resolution must use the accepted binding
+   only — a proposed-but-unaccepted, disputed, or revoked binding must
+   revert artist-sourced materialization before any settlement effect —
+   and the payout read is typed and fail-closed: an unset payout
+   designation, a zero returned address, or a failed or malformed
+   registry read makes the source unresolvable and settlement reverts
+   before any state change. `authorityAddress` — the registry signing
+   key — is never a payout fallback and never a payout source; paying
+   the signing key because a designation is missing is nonconformant
+   (registry authority and payment entitlement are deliberately separate
+   systems, [AA-SPLITS] rule 4). Multi-artist collections resolve each
+   collaborator entry through
+   `collaboratorPayoutAccount(artistId, collaborator)` and the typed
+   collaborator list and share references of the artist authority spec
+   ([AA-PAYOUT], [AA-COLLAB]); the same settlement-time moment,
+   fail-closed posture, and no-fallback rule apply per collaborator.
 2. `keccak256("SALE_POSTER")` remains a supported dynamic source paying
    the poster attached to a specific drop or auction. Where the poster is
    the collection's accepted artist, the `COLLECTION_ARTIST` source and
@@ -1382,6 +1421,13 @@ Requirements [RSR-TEMPLATES]:
    100000 ppm static protocol
    ```
 
+   The `COLLECTION_ARTIST` entry resolves through the rule 1 typed
+   payout read at settlement time. Because the [AA-ECON] economics
+   consent binds the payout designation revision in force at consent
+   ([AA-PAYOUT]), an artist-bound collection cannot record the
+   [RSR-ARTIST-ECONOMICS].3 pre-mint consents while its payout
+   designation is unset; the settlement-time revert of rule 1 is the
+   terminal backstop, never the discovery path (ADR 0013 decision U1).
    The genesis default template carries no curators bucket (ADR 0011
    decision R12). Curator classes are deployment configuration, never a
    protocol default: a template or profile may carry curator-class
@@ -1552,7 +1598,12 @@ profile entry materialized from supported account sources such as
 entries and wallet deposits, not the display-only event fields alone.
 
 Materialization resolves all dynamic sources before mint or settlement state
-changes. Zero or unsupported dynamic accounts revert. Entries that materialize
+changes. Zero, unset-designation, or unsupported dynamic accounts revert.
+Dynamic-source registry reads — the [AA-PAYOUT] typed payout reads of
+[RSR-TEMPLATES].1 — follow the artist spec's bounded-read and
+capped-returndata discipline and fail closed: a failed, malformed, or
+unset read reverts materialization before any mint, escrow, or settlement
+write (ADR 0013 decision U1). Entries that materialize
 to the same `(account, labelId)` pair are aggregated before fixed-profile
 validation; same-account entries under different labels remain separate.
 Template materialization is a public deterministic cache: any caller can
@@ -1677,6 +1728,12 @@ address-collision incidents. The future deployment is non-malicious because the
 deterministic address binds the factory address, profile ID salt, and
 factory-controlled init code hash; any different code at that address fails the
 existing-code check.
+Code-presence checks in this layer classify protocol `CREATE2` targets,
+never account types: any nonzero code at a predicted wallet address —
+including an EIP-7702 delegation designation — is code, so the no-code
+escrow precondition fails and unexpected code takes the wrong-code
+poisoned-address path, never a code-free classification (ADR 0013
+decision U6).
 
 If the deterministic address contains wrong code, the incident class is
 `ESCROW_ADDRESS_POISONED`. `flushEscrow` must revert with a distinct
@@ -1911,7 +1968,62 @@ function escrowRecoveryRecord(bytes32 recoveryId)
     external
     view
     returns (EscrowRecoveryRecord memory);
+
+// Affected-recipient consent surface for economics-changing recovery
+// (rule 6; ADR 0013 decision U7). Field inventory: account (the
+// affected entitled account and required signer), recoveryId (the
+// rule 9 recovery ID, which binds the credit key, successor, expected
+// amount, manifest content hash, executeAfter, and reason hash),
+// nonce (single-use per signer; consumed-nonce state is keyed by
+// (account, nonce)), deadline (unix seconds; expired consents revert
+// at submission). Typehash and escrow EIP-712 domain: [RSR-DOMAINS].
+bytes32 constant ESCROW_RECOVERY_CONSENT_TYPEHASH = keccak256(
+    "StreamEscrowRecoveryConsent(address account,bytes32 recoveryId,"
+    "bytes32 nonce,uint64 deadline)"
+);
+
+event EscrowRecoveryConsentRecorded(
+    uint16 schemaVersion,
+    bytes32 indexed recoveryId,
+    address indexed account,
+    bytes32 nonce
+);
+
+event EscrowRecoveryConsentRevoked(
+    uint16 schemaVersion,
+    bytes32 indexed recoveryId,
+    address indexed account
+);
+
+// Anyone may relay an affected account's signed consent; verification
+// follows [RSR-1271] and consumes the signer's own (account, nonce)
+// pair before recording (CEI).
+function submitEscrowRecoveryConsent(
+    address account,
+    bytes32 recoveryId,
+    bytes32 nonce,
+    uint64 deadline,
+    bytes calldata signature
+) external;
+
+// Callable only by the consenting account while the recovery is not
+// yet executed.
+function revokeEscrowRecoveryConsent(bytes32 recoveryId) external;
+
+// Explicit-address views; caller-relative variants are nonconformant
+// (ADR 0011 decision R12).
+function escrowRecoveryConsentRecorded(bytes32 recoveryId, address account)
+    external
+    view
+    returns (bool);
+
+function isEscrowRecoveryConsentNonceUsed(address account, bytes32 nonce)
+    external
+    view
+    returns (bool);
 ```
+
+Requirements [RSR-ESCROW-RECOVERY]:
 
 1. Incident revocation blocks new credits and normal flush for the revoked
    runtime hash.
@@ -1925,9 +2037,44 @@ function escrowRecoveryRecord(bytes32 recoveryId)
 5. For `ESCROW_ADDRESS_POISONED`, the successor profile ID must use a new salt
    and deterministic wallet address; the old poisoned wallet remains evented as
    the failed destination and cannot receive normal flushes.
-6. If the successor profile has identical canonical entries, the normal
-   recovery delay may be used. If economics change, the reason must be explicit
-   and the delay should be longer than ordinary config changes.
+6. Recovery must default to an identical-entries successor (ADR 0013
+   decision U7). Every recovery schedule is an ADR 0004
+   `FUNDS_RECOVERY`-floor action ([RSR-STAGED-GOVERNANCE].1). When the
+   successor profile's canonical entries hash equals the affected
+   credit's old profile entries hash, that floor alone applies. A
+   successor whose canonical entries differ in any way — accounts,
+   shares, or labels — redirects owed funds and must satisfy exactly one
+   of the two paths below; no shorter or hedged path is conformant:
+   - Consent path: a recorded, unrevoked `StreamEscrowRecoveryConsent`
+     from every affected account — every account with a nonzero
+     aggregate share in the old profile whose aggregate share in the
+     successor profile is lower, including removal. Consents are
+     relayable by any caller through `submitEscrowRecoveryConsent`,
+     verified under [RSR-1271] against the pinned
+     `ESCROW_RECOVERY_CONSENT_TYPEHASH` and escrow EIP-712 domain
+     ([RSR-DOMAINS]), consume the signer's own `(account, nonce)` pair
+     before recording, reject expired deadlines, and bind one
+     `recoveryId` (which itself binds the credit key, successor,
+     expected amount, manifest content hash, `executeAfter`, and reason
+     hash through rule 9). A consenting account may revoke its unused
+     consent until execution. With full affected-set coverage the
+     `FUNDS_RECOVERY` floor applies.
+   - Terminal-delay path: absent full consent coverage, the schedule
+     must additionally pass through the ADR 0004 `TERMINAL_FREEZE`
+     veto/guardian delay class — the same class
+     [RSR-STAGED-GOVERNANCE].2 requires for irreversible freezes — on
+     top of the `FUNDS_RECOVERY` floor, with `executeAfter` no earlier
+     than both allow. The recovery manifest must enumerate the affected
+     accounts, and operations must deliver notice to every affected
+     account — and, where the credit belongs to an artist-bound
+     collection's revenue, to the artist authority — at scheduling,
+     recorded as governance evidence before execution; the guardian/veto
+     window is the objection channel.
+   The affected set and the entries comparison are verified onchain: the
+   scheduler (or execution recheck) validates supplied old and successor
+   canonical entries against the factory-stored
+   `profileEntriesHash(profileId)` values before classifying the
+   recovery as identical-entries or economics-changing.
 7. Reroute moves only escrow-held owed funds and escrow accounting. It cannot
    seize or move funds already resident in the old split wallet.
 8. A later re-enablement of the old runtime hash may restore normal flush, but
@@ -1942,6 +2089,13 @@ function escrowRecoveryRecord(bytes32 recoveryId)
     `expectedAmount`, the credit's stored factory, incident status, successor
     profile/wallet/codehash validity, and whether the recovery manifest claims
     identical or changed economics before moving escrow-held owed funds.
+    For an economics-changing recovery the recheck must also prove the
+    rule 6 path condition still holds at execution time: identical
+    canonical entries, or a recorded, unrevoked consent for every
+    affected account, or a schedule that passed the `TERMINAL_FREEZE`
+    veto/guardian class with the notice evidence recorded. A revoked
+    consent after scheduling fails the consent path and the execution
+    reverts (ADR 0013 decision U7).
 
 ### Sale And Auction Settlement Boundary
 
@@ -2049,6 +2203,20 @@ Requirements [RSR-SETTLEMENT-BOUNDARY]:
     from it, never consigned resales. Routing consignor proceeds
     through a primary template, split-wallet official deposit, or
     escrow credit is nonconformant.
+11. Reentrancy-guard mandate (ADR 0013 decision U7). Every settlement
+    entry point on `StreamPrimarySaleSettlement` and on every ERC-20
+    primary settlement adapter that writes official-revenue counters,
+    consumes a `settlementKey`, or performs asset transfers — wallet
+    deposits, allowance pulls, escrow credits — must be non-reentrant
+    with checks-effects-interactions ordering, as a guard requirement
+    stated on this surface itself, never inherited by argument from
+    enabled-caller vetting, the approved-asset no-callback policy, or
+    upstream manager guards. A conformance test must prove that a
+    reentrant enabled caller and a reentrant token callback each fail
+    to double-record the same `settlementKey` or double-deposit
+    official revenue; the matching deployment gate lives in the
+    pull-split-wallets / primary-settlement gate family of
+    `docs/launch-conformance-matrix.md`.
 
 ### Owed-Funds Conservation And Claim Discipline
 
@@ -2257,7 +2425,16 @@ function royaltyInfo(uint256 tokenId, uint256 salePrice)
         return (address(0), 0);
     }
 
-    if (gasleft() <= ROYALTY_RESOLVER_GAS_LIMIT + ROYALTY_RETURN_GAS_BUFFER) {
+    // EIP-150 parent-gas precheck ([RSR-2981-GAS].2): the 64/63 term
+    // guarantees the resolver can receive the full current limit after
+    // the caller's one-64th retention; the buffer covers Core's own
+    // pre-call reads and post-call decode and is coupled to the limit
+    // by [RSR-2981-GAS].6. Both values are read as current GGP values.
+    if (
+        gasleft()
+            < (ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63
+                + ROYALTY_RETURN_GAS_BUFFER
+    ) {
         return (address(0), 0);
     }
 
@@ -2334,44 +2511,11 @@ equivalent `mulDiv` implementation after validating the returned bps. Returning
 is reserved for resolver unavailability, malformed return data, zero receiver,
 zero bps, bps above `MAX_ROYALTY_BPS`, or explicit no-royalty configuration.
 Because `royaltyInfo()` is `view`, it cannot emit fallback events. Monitoring
-must use off-chain calls, indexer comparisons, and a non-view diagnostic probe
-in a satellite contract.
-
-Recommended diagnostic probe:
-
-```solidity
-function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
-    external
-    returns (
-        bool resolverCallSucceeded,
-        address receiver,
-        uint256 royaltyAmount,
-        bytes32 assignmentHash,
-        bytes32 failureReason
-    );
-```
-
-`probeRoyaltyInfo` lives on the approved revenue diagnostics satellite or on
-the revenue resolver if the resolver implementation includes diagnostics. It
-does not live on Core. The probe emits resolver health and fallback evidence for
-operators. It is not used by marketplaces, but it is a deployment gate so
-fallback-to-zero cannot remain invisible during public sale readiness checks.
-The probe must use the exact same resolver selector, gas cap, parent gas
-precheck, returndata-size limit, and decode rules as production
-`royaltyInfo()`. A diagnostic path with a looser cap is not a valid readiness
-signal.
-
-```solidity
-event RoyaltyInfoProbed(
-    uint16 schemaVersion,
-    uint256 indexed tokenId,
-    address indexed receiver,
-    uint256 royaltyAmount,
-    bool resolverCallSucceeded,
-    bytes32 assignmentHash,
-    bytes32 failureReason
-);
-```
+must use off-chain calls, indexer comparisons, and the non-view
+`probeRoyaltyInfo` diagnostic hosted on the two Permanent-class royalty
+probe contracts
+([Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events));
+it does not live on Core (ADR 0013 decision U7).
 
 A resolver-backed Core path must use explicit gas and return-shape limits.
 
@@ -2390,7 +2534,19 @@ Requirements [RSR-2981-GAS]:
 2. The parent gas precheck must account for EIP-150's 63/64 gas forwarding
    rule so a caller cannot pass the precheck while the resolver receives
    less than the current `ROYALTY_RESOLVER_GAS_LIMIT`, and the precheck
-   must read the current GGP values, not compiled-in constants. CI must
+   must read the current GGP values, not compiled-in constants. The
+   normative reference realization is the multiplicative form of the
+   reference shape above (ADR 0013 decision U7):
+   `gasleft() < (ROYALTY_RESOLVER_GAS_LIMIT * 64) / 63 +
+   ROYALTY_RETURN_GAS_BUFFER` falls back to `(address(0), 0)` — the
+   64/63 term guarantees full-limit delivery through the caller's
+   one-64th retention at every reachable limit value, and the buffer
+   covers Core's parent-side work. An additive `LIMIT + BUFFER`
+   comparison guarantees full forwarding only while the buffer
+   separately covers the one-64th retention, so an additive realization
+   is conformant only with the rule 6 coupling floor enforced by the
+   host at every value change; the earlier uncoupled sum form is
+   superseded and nonconformant. CI must
    test calls just below, at, and above the precheck threshold and prove
    ordinary all-cold resolver reads do not fallback-to-zero because of
    under-forwarded gas.
@@ -2409,12 +2565,48 @@ Requirements [RSR-2981-GAS]:
 4. The health probe for both parameters is `probeRoyaltyInfo` run against
    representative default, collection, token, premint, burned, and
    malformed cases; a lower executes only after a recorded passing probe
-   run at the proposed value ([RSR-GGP].5).
+   run at the proposed value ([RSR-GGP].5). Probe locus and probe-event
+   schema are owned by
+   [Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events).
 5. The resolver must keep the default-scope royalty assignment readable
    from a single packed storage slot so the deepest default-fallback
    answer stays servable at the immutable floor even if intermediate-scope
    reads outgrow the current value between repricing and the corrective
    raise.
+6. Buffer-limit coupling invariant (ADR 0013 decision U7).
+   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
+   independently governed, so the pair's soundness is an explicit
+   invariant, never an accident of genesis sizing: at every reachable
+   value pair — not only at genesis — a call passing the precheck must
+   deliver the full current limit to the resolver and leave Core enough
+   gas to finish the 64-byte decode, validation, and `mulDiv` return.
+   Concretely:
+   - The release manifest records the measured parent-side work —
+     pre-call resolver-pointer and token-identity reads plus call setup,
+     and post-call decode, validation, `mulDiv`, and return — and
+     `ROYALTY_RETURN_GAS_BUFFER` must never be set below that recorded
+     work; buffer margin decay from repricing is remediated by raising
+     the buffer ([RSR-GGP].10; both parameters are `FORWARDING_CAP`
+     conditional-raise members, [RSR-GGP].11).
+   - An implementation realizing the precheck as the additive sum
+     `LIMIT + BUFFER` must enforce, in the host at every set of either
+     parameter (staged, emergency, or conditional),
+     `ROYALTY_RETURN_GAS_BUFFER >= ceil(ROYALTY_RESOLVER_GAS_LIMIT / 63)
+     + the recorded parent-side work`; without that host-enforced floor
+     a legitimate 2x raise chain of the limit with an unchanged buffer
+     re-opens the silent under-forwarding fallback-to-zero this section
+     exists to prevent, and such an implementation is nonconformant.
+   - Every staged raise or lower of either parameter records, as change
+     evidence, a passing `probeRoyaltyInfo` threshold run at the
+     proposed value pair ([RSR-GGP].5); emergency and conditional raises
+     keep their failing-run gates unchanged.
+   - CI must include a golden test replaying the rule 2 threshold suite
+     across simulated multi-step raise chains — repeated 2x raises of
+     the limit with unchanged and with re-verified buffers — proving
+     that whenever the precheck passes, the resolver receives the full
+     current limit and the parent completes decode, at every step; the
+     threshold tests pinned only at deployed genesis values are not
+     sufficient.
 
 The resolver read must be O(1). Wallet deployment, `walletFor(profileId)`,
 `wallet.profileId()`, and runtime-code-hash checks happen when assignments are
@@ -2509,6 +2701,95 @@ portable royalty disclosure surface.
 There is no Core-local fixed receiver fallback in the v1 architecture. If
 the resolver returns zero, malformed data, or no configured default assignment,
 `royaltyInfo()` returns `(address(0), 0)`.
+
+### Royalty Probe Contracts And Probe Events
+
+This section is the single normative home for the royalty probe locus and
+the `RoyaltyInfoProbed` event schema; `docs/stream-long-term-architecture.md`
+and ADR 0008 cite it and define no second location or schema.
+
+Requirements [RSR-2981-PROBE] (ADR 0013 decision U7):
+
+1. Locus. The non-view royalty diagnostic `probeRoyaltyInfo` is hosted
+   exclusively on the two named Permanent-class probe contracts for the
+   royalty Governed Gas Parameters — the per-parameter probe contracts
+   for `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` in
+   the genesis deployment profile of `docs/launch-conformance-matrix.md`,
+   recorded per parameter in the release manifest with their
+   `probeMaxAgeBlocks` ([RSR-GGP].5 and [RSR-GGP].11) — each satisfying
+   every `docs/stream-long-term-architecture.md` [LTA-GGP-PROBES] rule
+   (immutable, ownerless, permissionless, pinned caller-independent
+   inputs, probe-run records hosted on the probe, and no production
+   authority). The probe does not live on Core, on the
+   revenue resolver, or on any governed satellite: a governed
+   Replaceable module cannot satisfy the Permanent-class probe model,
+   and no revenue diagnostics satellite exists in the genesis inventory.
+   An earlier revision placing `probeRoyaltyInfo` on "the approved
+   revenue diagnostics satellite or on the revenue resolver" is
+   superseded and void.
+2. Probe body parity. The probe surface is:
+
+   ```solidity
+   function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
+       external
+       returns (
+           bool resolverCallSucceeded,
+           address receiver,
+           uint256 royaltyAmount,
+           bytes32 assignmentHash,
+           bytes32 failureReason
+       );
+   ```
+
+   The probe must use the exact same resolver selector, gas cap, parent
+   gas precheck ([RSR-2981-GAS].2 shape under the [RSR-2981-GAS].6
+   coupling), returndata-size limit, and decode rules as production
+   `royaltyInfo()`, executed at the probed value pair under the
+   [LTA-GGP-PROBES] rule 5 genuine-failure discipline: a run that did
+   not actually deliver the probed values must revert without recording.
+   A diagnostic path with a looser cap is not a valid readiness signal.
+   The representative case corpus — default, collection, token, premint,
+   burned, and malformed cases ([RSR-2981-GAS].4) — is the probe's
+   pinned caller-independent input set per [LTA-GGP-PROBES] rule 4.
+   `assignmentHash` is the canonical `royaltyAssignmentHash` of
+   [RSR-ROYALTY-HASH].
+3. Probe-run event split. The gate record — the only evidence that gates
+   probe-gated lowering, emergency raising, and the permissionless
+   conditional raise for the two royalty GGPs — is the canonical
+   `GasParameterProbed` record and `lastProbeRun` read hosted on each
+   probe contract ([LTA-GGP] definition item 6; [LTA-GGP-PROBES]
+   rule 3). `RoyaltyInfoProbed` is the royalty-resolution detail record
+   of the same run:
+
+   ```solidity
+   event RoyaltyInfoProbed(
+       uint16 schemaVersion,
+       uint256 indexed tokenId,
+       address indexed receiver,
+       uint256 royaltyAmount,
+       bool resolverCallSucceeded,
+       bytes32 assignmentHash,
+       bytes32 failureReason
+   );
+   ```
+
+   It is emitted by the same probe contracts, carries the per-case
+   receiver, amount, canonical assignment hash, and failure reason that
+   the generic gate record does not, and is catalog-tagged in the
+   machine-readable event catalog as a parameter-named alias member of
+   the probe-record family. It is never a substitute for
+   `GasParameterProbed`: indexers
+   read raise/lower/conditional-raise evidence exclusively from
+   `GasParameterProbed` and read fallback-to-zero diagnosis from
+   `RoyaltyInfoProbed`. Emitting one family without the other for the
+   same run, or hosting either record anywhere but the probe contract,
+   is nonconformant.
+4. Gate. Running the rule 2 case corpus on both probe contracts is a
+   deployment gate so fallback-to-zero cannot remain invisible during
+   public sale readiness checks. The probe is not a marketplace surface,
+   holds no pointer, funds, or protocol authority beyond its own probe
+   records ([LTA-GGP-PROBES] rule 8), and its results gate parameter
+   governance and release readiness only.
 
 ### Resolver Replacement And Frozen Economic Continuity
 
@@ -2785,7 +3066,10 @@ Requirements [RSR-STAGED-GOVERNANCE]:
    royalty changes, global freezes, resolver pointer replacement,
    asset-policy status transitions away from `ACTIVE`
    ([RSR-ASSET-POLICY].7), Governed Gas Parameter lowers ([RSR-GGP].2),
-   and escrow recovery scheduling.
+   and escrow recovery scheduling — an ADR 0004 `FUNDS_RECOVERY`-floor
+   action; an economics-changing recovery additionally satisfies the
+   consent-or-terminal-delay requirement of [RSR-ESCROW-RECOVERY]
+   rule 6 (ADR 0013 decision U7).
 2. Irreversible freezes — permanent global freezes and any
    `permanentFreeze` — must additionally pass through the ADR 0004
    `TERMINAL_FREEZE` veto/guardian delay class per
@@ -2925,7 +3209,11 @@ Requirements [RSR-ESTATE]:
    [RSR-1271]) for artist, estate, museum, and institutional entries, and
    must record in the profile metadata manifest whether each entry is a
    rotatable account. An EOA entry is allowed but must be an explicit,
-   recorded choice.
+   recorded choice. An EIP-7702 delegated EOA is an EOA for this rule
+   (ADR 0013 decision U6): delegation attaches code, but the root key
+   remains the account's sole ultimate authority and its loss is
+   unrecoverable, so a delegated-EOA entry must be recorded as an EOA
+   choice, never as a rotatable account.
 2. Future receipts are repointable: the estate flow for a lost or
    deceased recipient is a new split profile (successor entries) plus a
    staged assignment repoint for future receipts, subject to freeze state
@@ -3124,7 +3412,13 @@ Requirements [RSR-CLAIM-ROUTER]:
    through `syncAsset`, and claim across at least 20 wallets in one
    `claimMany` transaction. The funding/endowment manifest required by
    ADR 0010 decision D4.8 must name the party operating the recipient
-   entitlement indexer and its coverage horizon. An unrehearsed claim
+   entitlement indexer and its coverage horizon; that operating party —
+   the holder of the rehearsal and UX-gate evidence obligations — is
+   `ROLE_CLAIM_ROUTER_OPERATOR`, an operational role of the
+   [GOV-ROLES] vocabulary in
+   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md),
+   resolved through the admin registry, never a raw stored address
+   (ADR 0013 decision U5). An unrehearsed claim
    flow or an unnamed indexer operator is nonconformant; the matching
    gate lives in `docs/launch-conformance-matrix.md`.
 
@@ -3445,11 +3739,12 @@ Requirements [RSR-DOMAINS]:
 | `ASSIGNMENT_TEMPLATE_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_TEMPLATE_CONTEXT_V1` | `0x6f884400dcd82040221802f0143cae9405afe344a8471b8e4be6c57e87af3443` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
 | `ASSIGNMENT_POINTER_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_POINTER_CONTEXT_V1` | `0xc96172afc4e32013f5189d2ac0fb5758ee908ce97051d18f5043370a090a0b97` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
 | `ROYALTY_ASSIGNMENT_POINTER_CONTEXT_DOMAIN` | `6529STREAM_ROYALTY_ASSIGNMENT_POINTER_CONTEXT_V1` | `0xe02b9a1db06245707414f3be94c4005d9332ede9187a9fe5baacf54853ab4ba0` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
-| `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_LOOSENING_POLICY_CONTEXT_V1` | 0x61951eb6d957b0ebe19a5f808b9a9925046a1cd43b22a3a55e012c60b09d7638 | `StreamRevenueResolver` | `1` | `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN; bytes32(looseningTermsHash)` — see [Assignment Semantics](#assignment-semantics) (ADR 0012 decision T7) |
+| `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_LOOSENING_POLICY_CONTEXT_V1` | `0x61951eb6d957b0ebe19a5f808b9a9925046a1cd43b22a3a55e012c60b09d7638` | `StreamRevenueResolver` | `1` | `ASSIGNMENT_LOOSENING_POLICY_CONTEXT_DOMAIN; bytes32(looseningTermsHash)` — see [Assignment Semantics](#assignment-semantics) (ADR 0012 decision T7) |
 | `ASSIGNMENT_DOMAIN` | `6529STREAM_PRIMARY_ASSIGNMENT_V1` | `0x3d35bd72bf32163018d9b660465fde3bf2bc092b1fb09047dd0621fc6b8d7164` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
-| `PRIMARY_POLICY_DOMAIN` | `6529STREAM_PRIMARY_POLICY_V1` | 0x53c5c8e8dcd97f4f6a66557a6ede68c0798afd999c1cce5807f27d151fb50f12 | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
-| `ROYALTY_POLICY_DOMAIN` | `6529STREAM_ROYALTY_POLICY_V1` | 0x672cda40f3f95b129db3b9262cfb581cbe26ea0e95cb09b958ca58ebf62ba54a | `StreamRevenueResolver` | `1` | see [Canonical Royalty Policy Hash](#canonical-royalty-policy-hash) |
-| `ESCROW_RECOVERY_DOMAIN` | `6529STREAM_ESCROW_RECOVERY_V1` | 0xd2477116ef00eff9b80dc97ae00c04faec607b7609301cced9041de52f32243c | revenue escrow | `1` | see [Primary Sales](#primary-sales) escrow recovery rule 9 |
+| `PRIMARY_POLICY_DOMAIN` | `6529STREAM_PRIMARY_POLICY_V1` | `0x53c5c8e8dcd97f4f6a66557a6ede68c0798afd999c1cce5807f27d151fb50f12` | `StreamRevenueResolver` | `1` | see [Assignment Semantics](#assignment-semantics) |
+| `ROYALTY_POLICY_DOMAIN` | `6529STREAM_ROYALTY_POLICY_V1` | `0x672cda40f3f95b129db3b9262cfb581cbe26ea0e95cb09b958ca58ebf62ba54a` | `StreamRevenueResolver` | `1` | see [Canonical Royalty Policy Hash](#canonical-royalty-policy-hash) |
+| `ESCROW_RECOVERY_DOMAIN` | `6529STREAM_ESCROW_RECOVERY_V1` | `0xd2477116ef00eff9b80dc97ae00c04faec607b7609301cced9041de52f32243c` | revenue escrow | `1` | see [Primary Sales](#primary-sales) [RSR-ESCROW-RECOVERY] rule 9 |
+| `ESCROW_RECOVERY_CONSENT_TYPEHASH` | struct type string pinned in the [RSR-ESCROW-RECOVERY] consent surface: `StreamEscrowRecoveryConsent(address account,bytes32 recoveryId,bytes32 nonce,uint64 deadline)` | `0xff4cafe3ce3dbf31056d40511f4344d6c8070efc8f6eaf284d2c5366514ede2e` | revenue escrow | `1` | see [RSR-ESCROW-RECOVERY] rule 6 (ADR 0013 decision U7) |
 | `RELEASE_AUTHORIZATION_TYPEHASH` | struct type string pinned in [RSR-RELEASE-AUTH].2 | `0xfc0465fe58ded163aac5c6c38a2171d353d941f9fbc8a1af61e5c309f87f680c` | `StreamSplitWallet` | `1` | see [RSR-RELEASE-AUTH].2 |
 | `PAYMENT_INTENT_TYPEHASH` | struct type string pinned in [RSR-PAYMENT-INTENT].2 | `0x72c99e6f6f9e2422510a5dd5c2dc2f9ffd83c776670a8de4ffab990e45f825cd` | ERC-20 settlement verifier | `1` | see [RSR-PAYMENT-INTENT].2 |
 | `GGP_ERC_1271_GAS_LIMIT` | `6529STREAM_GGP_ERC_1271_GAS_LIMIT` | `0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
@@ -3459,10 +3754,13 @@ Requirements [RSR-DOMAINS]:
 | `GGP_WALLET_DEPOSIT_GAS_LIMIT` | `6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT` | `0xd208e16b8676adecbbdd17f529a9effcb9153af90ac08886fb2906298206ff45` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_FLUSH_GAS_FLOOR` | `6529STREAM_GGP_FLUSH_GAS_FLOOR` | `0x99168b87a7d39f5ba4862568c012ad3b51c552ec78108b88c6be5f5a6426ebe6` | revenue escrow | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 
-2. EIP-712 domains for the two typehashes above are pinned as: split
+2. EIP-712 domains for the three typehashes above are pinned as: split
    wallets use `("6529StreamSplitWallet", "1", chainId, wallet)`; the
    ERC-20 settlement verifier uses
-   `("6529StreamPrimarySaleSettlement", "1", chainId, verifier)`. Every
+   `("6529StreamPrimarySaleSettlement", "1", chainId, verifier)`; the
+   revenue escrow verifies `StreamEscrowRecoveryConsent` under
+   `("6529StreamRevenueEscrow", "1", chainId, escrow)` (ADR 0013
+   decision U7). Every
    verifying contract must expose ERC-5267 `eip712Domain()`.
    `PaymentIntent` domain-name family rule (ADR 0012 decision T7):
    `"6529StreamPrimarySaleSettlement"` is the permanent family name for
@@ -3584,6 +3882,11 @@ Requirements [RSR-DOMAINS]:
   the frozen-economic continuity rules above.
 - Assignment-time wallet deployment, factory, profile ID, and code-hash
   validation.
+- Settlement-time `COLLECTION_ARTIST` and collaborator resolution through
+  the artist registry's [AA-PAYOUT] typed payout reads
+  ([RSR-TEMPLATES].1): `authorityAddress` is never a payout fallback,
+  and an unset designation or failed read reverts materialization
+  (ADR 0013 decision U1).
 - Direct view for `primaryRevenueWallet(collectionId, tokenId, revenueClass)`.
 - Direct view for `royaltyInfo(tokenId, salePrice)`.
 - Direct view for `royaltyReceiver(collectionId)` for marketplace and operator
@@ -3832,6 +4135,12 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   can claim from both and conservation holds per wallet.
 - `PrimaryTemplateMaterialized` links template ID to profile ID and wallet.
 - Unsupported primary template account sources revert before state changes.
+- `COLLECTION_ARTIST` and collaborator sources resolve through the
+  [AA-PAYOUT] typed payout reads at settlement time; an unset payout
+  designation, zero returned address, or failed registry read reverts
+  settlement before state changes; `authorityAddress` is never paid as a
+  fallback; and an artist-signed designation revision after consent
+  re-points the next settlement without re-consent ([RSR-TEMPLATES].1).
 - Template materialization gas is bounded independently of resolved account
   values.
 - Zero dynamic accounts and dynamic/static `(account, labelId)` collisions are
@@ -3895,6 +4204,9 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   covers them.
 - Auction settlement records settlement state and revenue before external NFT
   recipient callbacks.
+- Settlement entry points are non-reentrant: a reentrant enabled caller or
+  a reentrant token callback cannot double-record a `settlementKey` or
+  double-deposit official revenue ([RSR-SETTLEMENT-BOUNDARY].11).
 - Fixed-price token-level primary overrides are used only when token ID is known
   before external callbacks.
 - If a signed sale authorization expects a token-level primary override but the
@@ -3926,6 +4238,15 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   factory exposes permissionless deployment.
 - Escrow flush accepts the runtime code hash captured at credit time after that
   hash is deprecated, unless it has been explicitly incident-revoked.
+- Economics-changing escrow recovery executes only with a recorded,
+  unrevoked `StreamEscrowRecoveryConsent` from every affected account or
+  through the `TERMINAL_FREEZE`-grade veto/guardian schedule with
+  recorded artist/recipient notice; identical-entries recovery uses the
+  `FUNDS_RECOVERY` floor alone; consent nonces are per-signer with
+  explicit-address replay views ([RSR-ESCROW-RECOVERY] rules 6 and 10).
+- An EIP-7702 delegation designation at a predicted wallet address is
+  classified as code: the no-code escrow precondition fails and the
+  wrong-code poisoned-address path applies (ADR 0013 decision U6).
 - Escrow keys and events include `revenueClass`.
 - Inherited-freeze descendant counters or dirty bits enforce preconditions
   without enumeration.
@@ -3961,6 +4282,14 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   and deployment readiness gate.
 - `probeRoyaltyInfo` uses the same selector, gas cap, parent gas precheck,
   returndata cap, and decode rules as production `royaltyInfo()`.
+- `probeRoyaltyInfo` is hosted only on the two Permanent-class royalty
+  probe contracts; each run records the `GasParameterProbed` gate fact
+  and the `RoyaltyInfoProbed` detail fact on the probe contract, and the
+  event catalog tags them as one probe-record family ([RSR-2981-PROBE]).
+- The [RSR-2981-GAS].6 buffer-limit coupling holds across simulated
+  multi-step raise chains: the golden threshold suite passes at every
+  step, and an additive-precheck implementation rejects any value change
+  violating the host-enforced buffer floor.
 - Receipts smaller than the unique-account count remain bounded rounding dust
   until later receipts make entitlements claimable.
 - External-ground-truth conservation fuzz invariant holds: the test harness

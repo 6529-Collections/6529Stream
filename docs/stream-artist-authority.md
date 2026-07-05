@@ -5,7 +5,9 @@ Specification status: Draft. This document follows
 [ADR 0010](adr/0010-world-class-spec-pass.md) (decision D2),
 [ADR 0011](adr/0011-world-class-pass-round-2.md) (decision R7), and
 [ADR 0012](adr/0012-world-class-pass-round-3.md) (decision T4, plus the
-artist-side items of decisions T3, T5, and T9); it contains no open
+artist-side items of decisions T3, T5, and T9), and
+[ADR 0013](adr/0013-world-class-pass-round-4.md) (decisions U1 and U4,
+plus the artist-side item of decision U8); it contains no open
 questions.
 
 This document is the normative home of the 6529Stream artist authority
@@ -30,8 +32,13 @@ StreamArtistRegistry (genesis satellite)
   - artist identity objects (artistId, current authority address, status)
   - append-only identity-document revisions (registration document
     immutable; the operative document carries payout and key history)
-  - two-sided collection bindings (operator proposes, artist accepts)
-  - typed collaborator sets with per-collaborator acceptance
+  - typed, artist-signed payout designations resolved by settlement
+    contracts at settlement time (AA-PAYOUT); the signing key is never
+    the payment address
+  - two-sided collection bindings (operator proposes, artist accepts),
+    with an optional per-binding registry-immutability election
+  - typed collaborator sets with per-collaborator acceptance and
+    collaborator identity registration
   - attribution state machine per collection binding
   - consent modes: ARTIST_SIGNED_POLICY | ARTIST_DELEGATED | PLATFORM_WORKS
   - optional sale-parameter consent scope pinned per binding
@@ -49,14 +56,17 @@ StreamArtistRegistry (genesis satellite)
     artist guardian set and arbiter-adjudicated identity recovery
   - guardian/arbiter contest path over pending and executed estate
     activations and dormancy completions
-  - successor designation, pre-signed estate directives, and
-    permissionless estate activation after public notice
+  - successor designation, pre-signed estate directives and steward
+    sanction grants, and permissionless estate activation after public
+    notice
   - governed dormancy procedure with long public notice
   - append-only dispute, counter-statement, and revocation records with a
     governed, delay-classed, appealable arbiter
-  - append-only third-party platform-works claims, surfaced in token
-    JSON without arbiter action, with an arbiter CONTESTED state that
-    stops further minting
+  - append-only third-party claims for both works classes —
+    platform-works claims and artist-bound attribution claims —
+    surfaced in token JSON without arbiter action, with an arbiter
+    CONTESTED state that stops further minting of contested platform
+    works
   - artist-side approval of artwork-bytes-affecting finality recovery
   - onchain signature verification (EIP-712 + ERC-1271, GGP-governed gas)
   - onchain storage of verified signature bytes, identity documents, and
@@ -70,6 +80,10 @@ Consumers
     consent where the binding elects it (AA-SALE-CONSENT)
   - Revenue resolver: refuses artist-bound assignment changes without
     verified artist co-signature; applies artist royalty freezes
+  - Settlement contracts: resolve COLLECTION_ARTIST and collaborator
+    template sources through the AA-PAYOUT typed reads at settlement
+  - StreamEntropyCoordinator: enforces artist content consent for
+    entropy configuration changes and fresh-entropy redraws (AA-CONTENT)
   - StreamArtworkFinalityRegistry: requires the artist sanction component;
     requires artist recovery approval for artwork-bytes-changing recovery
   - StreamMetadataRouter / renderers: expose attribution state in token JSON
@@ -89,7 +103,7 @@ Requirements are classified per [`docs/spec-policy.md`](spec-policy.md):
 
 | Surface | Class |
 | --- | --- |
-| Artist identity semantics: `artistId` derivation, binding preimages, acceptance semantics, attribution states and numeric values, consent-mode semantics and numeric values, sale-consent-scope semantics and numeric values, authority classes, identity-revision semantics, sanction subject and record preimages, steward minted-before enforcement semantics, typehash strings, event schemas, canonical orderings, rotation contest and guardian semantics, estate/dormancy contest semantics, content consent/freeze semantics, recovery-approval semantics, estate-activation semantics, platform-works claim semantics, deployment-attestation semantics, history-import leaf and binding semantics, the normative attribution JSON schema (`AA-DISPLAY`) | Permanent |
+| Artist identity semantics: `artistId` derivation, binding preimages, acceptance semantics, attribution states and numeric values, consent-mode semantics and numeric values, sale-consent-scope semantics and numeric values, registry-immutability-election semantics and numeric values, authority classes, identity-revision semantics, the pinned identity-document schema, payout-designation semantics (`AA-PAYOUT`), steward-sanction-grant semantics, collaborator identity registration semantics, sanction subject and record preimages, steward minted-before enforcement semantics, typehash strings, event schemas, canonical orderings, rotation contest and guardian semantics, estate/dormancy contest semantics, content consent/freeze semantics, recovery-approval semantics, estate-activation semantics, platform-works and artist-bound third-party claim semantics, deployment-attestation semantics, history-import leaf and binding semantics, the normative attribution JSON schema (`AA-DISPLAY`) | Permanent |
 | `IStreamArtistRegistry`, `IStreamArtistConsent`, and the finality component read surfaces this registry implements | Permanent |
 | The two-sided binding rule, the unverified-attribution display rule, the artist-sanction finality requirement, the platform-works immutability rule, the append-only record discipline | Permanent |
 | `StreamArtistRegistry` genesis implementation, its storage layout, and its byte limits | Replaceable (genesis module behind the Permanent interfaces) |
@@ -206,8 +220,10 @@ Requirements:
 1. Every artist-side record must store and emit the acting address and its
    `ArtistAuthorityClass` so consumers can permanently distinguish
    artist-authored, delegated, estate, and steward authority.
-2. `AUTH_STEWARD` authority is restricted to `STEWARD_CAPABILITIES`
-   (`AA-DORMANCY`); it must never satisfy new-work policy consent.
+2. `AUTH_STEWARD` authority is restricted to the steward's effective
+   capability mask (`AA-DORMANCY` requirement 6: the
+   `STEWARD_CAPABILITIES` default plus explicitly granted bits, minus
+   forbidden bits); it must never satisfy new-work policy consent.
 3. `AUTH_SUCCESSOR` authority is bounded by the capabilities granted in the
    activating designation or estate directive (`AA-ESTATE`).
 4. Numeric values of `ArtistAuthorityClass` are pinned above, enter the
@@ -221,7 +237,7 @@ Requirements:
 `StreamArtistRegistry` is a genesis satellite in the mandatory deployment
 profile. It exposes the canonical module identity surface defined in
 [`stream-long-term-architecture.md`](stream-long-term-architecture.md)
-(Satellite Versioning) with:
+([LTA-MODULE-ID], Satellite Versioning) with:
 
 ```text
 streamModuleType() = keccak256("STREAM_ARTIST_REGISTRY")
@@ -245,7 +261,12 @@ Requirements:
    pointer's current freeze state and any operator commitment to freeze
    it (`AA-TOOLING` requirement 2), so an artist for whom registry
    mutability is unacceptable can see, before binding, exactly what
-   guarantee they are getting.
+   guarantee they are getting — and can make the guarantee binding
+   rather than disclosed: the per-binding registry-immutability
+   election of `AA-BINDING` requirement 10 obligates the pointer-freeze
+   path before the electing collection can mint, so the meta-level
+   consent guarantee never has to rest on an operator promise
+   (ADR 0013 decision U4).
 3. The registry must implement `IStreamFinalityComponent` and
    `IStreamScopedFinalityComponent` (owned by the umbrella spec) for the
    component semantics in `AA-SANCTION`.
@@ -253,9 +274,17 @@ Requirements:
    and a registry-wide reentrancy guard. The only external calls the
    registry makes are bounded ERC-1271 `staticcall`s (`AA-SIGVER`) and
    bounded `staticcall`s to the bound Core's pinned read surface —
-   collection existence (requirement 1), the finality facts read, and
-   the one-way collection mint burn block consumed by the steward
-   minted-before check (`AA-SANCTION` requirement 5).
+   collection existence (requirement 1), the finality facts read, the
+   one-way collection burn-block activation height
+   (`collectionBurnsBlockedAtBlock`, home
+   [`collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-BURN]; ADR 0013 decision U4) consumed by the steward
+   minted-before check (`AA-SANCTION` requirement 5), and the
+   `ARTIST_REGISTRY` pointer's one-way freeze state
+   ([LTA-POINTERS] rule 7) consumed by the registry-immutability
+   election (`AA-BINDING` requirement 10). Because the burn-block
+   height and the pointer freeze are both one-way, the registry may
+   latch an observed value and never re-read it.
 5. All registry writes are append-only records: no record is ever deleted
    or mutated; later records supersede earlier ones through the state
    machine and generation rules below.
@@ -310,11 +339,53 @@ Requirements:
 1. `artistId` never changes across rotation, succession, dormancy, or
    registry succession. It is the durable join key for catalogues,
    museums, and indexers.
-2. `identityRecordHash` commits to a canonical identity document (RFC 8785
-   JSON) containing display name, biographical references, public-key
-   history references, and — where the artist uses C2PA — the C2PA signing
-   credential enumeration (`AA-C2PA`). The hash, not the URI, is
-   authoritative. The identity document is the onchain commitment mapping
+2. `identityRecordHash` commits to a canonical identity document under
+   the pinned schema `keccak256("6529STREAM_ARTIST_IDENTITY_V1")`
+   (`AA-DOMAINS`; ADR 0013 decision U4): RFC 8785 canonical JSON whose
+   required top-level members are `schema` (the exact schema string),
+   `displayName`, `biographicalRefs` (array; may be empty),
+   `publicKeyHistory` (array of key references with validity periods),
+   `c2paCredentials` (the `AA-C2PA` signing-credential enumeration; may
+   be empty), and `payoutAccounts` (a human-readable mirror of the
+   operative typed payout designation — `AA-PAYOUT` requirement 6 owns
+   the settlement-authoritative record). Any additional material lives
+   only under an `extensions` member, so two tooling generations can
+   never produce structurally incompatible documents, and revision
+   documents (requirement 6) are complete documents under the same
+   schema, never diffs. The schema document itself is registered as
+   onchain schema-registry bytes exactly like the
+   [`collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-GENESIS-SCHEMAS] families (that document owns the registration
+   mechanism). Worked example (non-normative values, normative shape):
+
+```json
+{
+  "schema": "6529STREAM_ARTIST_IDENTITY_V1",
+  "displayName": "Alice Example",
+  "biographicalRefs": [
+    {"kind": "website", "uri": "https://alice.example",
+     "hash": "0x5d41..."}
+  ],
+  "publicKeyHistory": [
+    {"scheme": "secp256k1-eth", "address": "0xa11c...",
+     "validFrom": 1750000000, "validTo": 0}
+  ],
+  "c2paCredentials": [],
+  "payoutAccounts": {
+    "primary": "0xdefa...",
+    "designationRecordHash": "0x91b2..."
+  },
+  "extensions": {}
+}
+```
+
+   The registry verifies bytes, bound, and hash; it never parses JSON
+   onchain. Schema conformance is enforced by submission tooling
+   (`AA-TOOLING` requirement 1) and by the identity-archival gate
+   (`AA-GATES` gate 10), which validates every stored document —
+   registration and revision — against the pinned schema. The hash, not
+   the URI, is authoritative. The identity document is the onchain
+   commitment mapping
    an `artistId` to a human, so it joins the onchain-bytes and dual-family
    archival rules (ADR 0011 decision R7.10): the canonical document bytes
    must be stored in registry contract storage (SSTORE2-style permitted)
@@ -326,13 +397,15 @@ Requirements:
    must additionally be mirrored under the dual-family archival rule with
    at least one verifiable receipt class
    ([`stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-ARCHIVE]; ADR 0011 decisions R1 and R4) before any binding
-   acceptance for the identity completes; the identity-archival gate
+   [LTA-ARCHIVE]; ADR 0011 decisions R1 and R4) before any binding or
+   collaborator acceptance for the identity completes; the
+   identity-archival gate
    (`AA-GATES`) enforces both halves. Log data never substitutes for the
    stored bytes.
 3. Every authenticated artist-side action (acceptance, sanction, consent,
    attestation, delegation grant or revocation, rotation, designation,
-   directive, dispute action) must update `lastAuthorityActionAt`.
+   directive, payout designation, steward sanction grant, dispute
+   action) must update `lastAuthorityActionAt`.
 4. Nonces are per-identity and unordered (ADR 0011 decision R10). Every
    typed payload in this document names a `uint256` nonce; the registry
    keeps a per-`artistId` consumed-value map (bitmap representation
@@ -393,6 +466,21 @@ StreamArtistIdentityRevision(
    (`AA-ECON` requirement 1) and key-history currency (`AA-C2PA`) read
    the operative document; `artistId` derivation and executed history
    keep reading the documents they bound at the time.
+7. Legal-person verification pattern (ADR 0013 decision U8). The
+   registry proves address control and consent chains, never
+   personhood (`AA-EXCL` item 2). The blessed pattern for third-party
+   verification of the `artistId`-to-legal-person mapping at
+   acquisition standard is a notarized attestation record of the
+   `INSTITUTIONAL_VERIFICATION` or `ESTATE_VERIFICATION` classes —
+   record family and verification mechanics owned by
+   [`collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-ATTESTATIONS] — recorded over the identity's operative
+   `identityRecordHash`, so identity-verification evidence is typed,
+   discoverable, and weightable like every other attestation, and a
+   registrar or acquisition committee follows a named pattern instead
+   of improvising the linkage evidence. Acquisition-packet surfaces
+   cite this pattern from the museum side; the registry side is only
+   the subject hash the attestation binds.
 
 ## Two-Sided Artist Binding [AA-BINDING]
 
@@ -428,6 +516,13 @@ enum SaleConsentScope {
                             //   (AA-SALE-CONSENT; ADR 0012 decision T4)
 }
 
+enum RegistryImmutabilityElection {
+    REGISTRY_MUTABLE_OK,     // 0 the pointer policy alone governs
+    REGISTRY_FREEZE_REQUIRED // 1 the ARTIST_REGISTRY pointer freeze must
+                             //   execute before the collection can mint
+                             //   (requirement 10; ADR 0013 decision U4)
+}
+
 struct CollaboratorRecord {
     address account;      // collaborator authority address
     bytes32 role;         // open vocabulary, see AA-COLLAB
@@ -447,6 +542,7 @@ struct ArtistBindingProposal {
     string identityRecordURI;
     ArtistConsentMode consentMode;      // must not be CONSENT_UNSET
     SaleConsentScope saleConsentScope;  // AA-SALE-CONSENT election
+    RegistryImmutabilityElection registryImmutabilityElection;
     CollabPolicyMode collabPolicyMode;
     uint32 collabThreshold;             // THRESHOLD / QUORUM modes only
     CollaboratorRecord[] collaborators; // sorted, see AA-COLLAB
@@ -482,6 +578,7 @@ bytes32 bindingHash = keccak256(abi.encode(
     bytes32(identityRecordHash),
     uint8(consentMode),
     uint8(saleConsentScope),
+    uint8(registryImmutabilityElection),
     uint8(collabPolicyMode),
     uint32(collabThreshold),
     bytes32(collaboratorSetHash),
@@ -515,7 +612,8 @@ Requirements:
    `ARTIST_ACCEPTED`, `ARTIST_SANCTIONED`, or `DISPUTED` state.
 2. Acceptance must verify against the exact stored `bindingHash`. The
    acceptance therefore ratifies the artist address, identity record,
-   consent mode, sale-parameter consent scope, collaborator policy,
+   consent mode, sale-parameter consent scope, registry-immutability
+   election, collaborator policy,
    capability policy overrides, and full collaborator set in one
    signature. Any change to any of those fields before acceptance
    requires a new generation. For a proposal naming an existing
@@ -549,6 +647,36 @@ Requirements:
 9. Binding acceptance must exist (or `PLATFORM_WORKS` must be declared)
    before any mint phase policy for the collection can be registered
    (`AA-CONSENT`); attribution can never be pending while works are sold.
+10. Registry-immutability election (ADR 0013 decision U4). A binding
+    whose accepted proposal pins `REGISTRY_FREEZE_REQUIRED` obligates
+    the pointer-freeze path: `requireMintConsent` — and therefore every
+    phase policy registration and every mint — must revert for the
+    collection until the one-way `ARTIST_REGISTRY` pointer freeze of
+    [LTA-POINTERS] rule 7 has executed, read per `AA-MODULE`
+    requirement 4. The election is ratified inside `bindingHash`,
+    immutable per generation, and readable via
+    `registryImmutabilityElection(collectionId)`; an operator who never
+    freezes simply never mints the electing collection, so the artist's
+    protection cannot be waited out. `REGISTRY_MUTABLE_OK` leaves the
+    pointer under the ordinary [LTA-POINTERS] policy and the `AA-MODULE`
+    requirement 2 disclosure. Numeric values of
+    `RegistryImmutabilityElection` are pinned above, enter the numeric
+    ID catalog, and are never reused with different meaning. Operator
+    tooling must present the election in the binding proposal flow
+    exactly like the sale-consent election (`AA-SALE-CONSENT`
+    requirement 5).
+
+Artist-initiated proposals are a named extension profile, not a genesis
+capability (ADR 0013 decision U4): the `ARTIST_INITIATED_BINDING`
+profile — a future Replaceable module behind these same Permanent
+interfaces under which an artist proposes their own binding and the
+operator-side role accepts, the exact mirror image of this section's
+two-sidedness — is pre-shaped here so the protocol v1 exclusion is
+provably intentional and a genesis-adjacent module spec can ship against
+stable semantics; its activation remains governed. Nothing in this
+section's preimages or events assumes the proposer is an operator role:
+`ArtistBindingProposed` carries the proposer address, and acceptance
+semantics are proposer-independent.
 
 ## Collaborator Sets [AA-COLLAB]
 
@@ -590,8 +718,10 @@ Requirements:
 2. Each collaborator must accept individually, by direct call from
    `collaborator` or by verified `StreamCollaboratorAcceptance` signature.
    Collaborator identities are `ArtistIdentity` objects with the same
-   rotation, succession, dormancy, and delegation rights as the primary
-   artist, scoped to their collaborator standing.
+   rotation, succession, dormancy, delegation, and payout-designation
+   rights as the primary artist, scoped to their collaborator standing,
+   and are created through the registration flow of requirement 7 —
+   never implied into existence.
 3. Each collaborator may submit state-bound attestations (`AA-ATTEST`) for
    the collection and appears in attribution displays with role and
    verification state. An unaccepted collaborator renders as unverified.
@@ -628,6 +758,48 @@ Requirements:
    collaborator requires a new generation accepted by everyone, and is
    blocked once the collection has an executed finality record, because the
    sanctioned attribution set is part of the finalized promise.
+7. Collaborator identity registration (ADR 0013 decision U4). A
+   collaborator identity is allocated through the same two-sided
+   discipline as a primary identity, collaborator-scoped:
+   `proposeCollaboratorIdentity(account, identityRecordHash,
+   identityRecordURI, reasonHash, reasonURI)` requires
+   `ROLE_ARTIST_REGISTRY_ADMIN` and stages the registration; acceptance
+   — by direct call from `account` or a verified signature over the
+   pinned payload below — allocates the `artistId` under the
+   `AA-IDENTITY` derivation (with `account` as `firstAddress` and the
+   registry-wide `registrationNonce`), stores the identity document
+   bytes under `AA-IDENTITY` requirement 2 (pinned schema, byte bound,
+   `keccak256` equality, dual-family mirroring before any acceptance
+   for the identity completes), and emits the ordinary
+   `ArtistIdentityRegistered` event. No other collaborator identity
+   creation path exists, so every implementation derives the same
+   `artistId` for the same collaborator.
+
+```text
+StreamCollaboratorIdentityAcceptance(
+    address account,
+    bytes32 identityRecordHash,
+    uint256 nonce,
+    uint64 deadline
+)
+```
+
+   A `StreamCollaboratorAcceptance` (the per-binding acceptance of
+   requirement 2) completes only when `collaborator` holds an
+   `IDENTITY_ACTIVE` identity — pre-existing or allocated in the same
+   transaction (identity acceptance and collaborator acceptance may
+   land together, exactly like the two rotation sides in `AA-ROTATE`).
+   Completion permanently links the pair
+   `(collaboratorArtistId, account)` in registry state and records the
+   collaborator's `artistId` on the stored collaborator row
+   (`collaboratorAt` returns it, and `CollaboratorAccepted` emits it),
+   so every collaborative work has a durable per-collaborator join key
+   and the payout read `collaboratorPayoutAccount` (`AA-PAYOUT`
+   requirement 5) can verify acceptance-ratified account-identity
+   linkage. Collaborator identity registration is rejected while the
+   named account already controls an `IDENTITY_ACTIVE` identity
+   (`AA-IDENTITY` requirement 5); the flow then simply names the
+   existing identity instead.
 
 ## Attribution State Machine [AA-STATE]
 
@@ -765,7 +937,12 @@ hashes and addresses are 0x-prefixed lowercase hex):
 ```text
 properties.provenance.attribution = {
   state:               claimed | artist_accepted | artist_sanctioned |
-                       disputed | revoked            (always present)
+                       disputed | revoked            (always present;
+                                           attribution_unavailable is
+                                           the sole degraded value,
+                                           requirement 8 — a read
+                                           posture, never a stored
+                                           AttributionState)
   works_class:         artist_bound | platform_works (always present)
   consent_mode:        artist_signed_policy | artist_delegated |
                        platform_works               (always present)
@@ -791,12 +968,16 @@ properties.provenance.attribution = {
                                            while or after a sustained
                                            contest, AA-PLATFORM)
   contest_record:      bytes32 hex        (when contested is true)
-  claim_count:         integer            (platform_works only; total
-                                           filed claims, AA-PLATFORM
-                                           requirement 4; zero when
+  claim_count:         integer            (always present; total filed
+                                           third-party claims for the
+                                           collection — platform-works
+                                           claims, AA-PLATFORM
+                                           requirement 4, or
+                                           artist-bound attribution
+                                           claims, AA-DISPUTE
+                                           requirement 10; zero when
                                            none)
-  latest_claim_record: bytes32 hex        (platform_works only, when
-                                           claim_count > 0)
+  latest_claim_record: bytes32 hex        (when claim_count > 0)
   c2pa_authorship_status: consistent | divergent | unevaluated
                                           (when stored C2PA records
                                            carry authorship assertions,
@@ -827,9 +1008,15 @@ Requirements:
    `artistAttestationStatus` return it), so a catalogue can never read a
    steward, successor, or delegate signature as the living artist's own
    hand (ADR 0012 decision T4). `deployment_attestation` carries the
-   `AA-DEPLOY` attestation record hash when one exists. Platform
+   `AA-DEPLOY` attestation record hash when one exists, and
+   `claim_count` (plus `latest_claim_record` when nonzero) is emitted
+   directly from the permissionless artist-bound claim read of
+   `AA-DISPUTE` requirement 10 — a misappropriation victim's filing
+   reaches token JSON with no arbiter action, exactly as it does for
+   platform works (ADR 0013 decision U4). Platform
    assertion is never rendered as artist fact, and no conformant surface
-   may omit, rename, re-case, or flatten these fields.
+   may omit, rename, re-case, or flatten these fields, except under the
+   registry-read-failure posture of requirement 8.
 3. For `PLATFORM_WORKS` collections, default token JSON must include the
    attribution object with `works_class = "platform_works"`, must omit
    artist fields rather than fabricate them (`AA-PLATFORM`), must emit
@@ -855,7 +1042,9 @@ Requirements:
    unverifiable offchain note.
 6. Renderer conformance tests must cover all five states, both works
    classes, staleness, the disputed override, the contested
-   platform-works display, the filed-claim display, and — as golden
+   platform-works display, the filed-claim display for both works
+   classes, the registry-unreachable degraded object of requirement 8,
+   and — as golden
    assertions — the presence and exact paths of `artist_id`,
    `binding_generation`, `sanction_record`, `sanction_authority_class`,
    `attestation_authority_class`, `claim_count`, `latest_claim_record`,
@@ -876,6 +1065,28 @@ Requirements:
    never retroactive); and a locked-but-fraudulent display identity is
    repudiable through `AA-DISPUTE` with the registry state overriding the
    locked display field on every conformant surface.
+8. Registry-read failure posture (ADR 0013 decision U4). This section
+   is the normative home of the degraded output; the router's bounded
+   fail-safe read mechanics mirror it
+   ([`metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
+   [MRR-ATTRIBUTION]). When the bounded artist-registry read fails
+   during token JSON assembly — out of gas inside its bound, a pointer
+   mid-incident, malformed returndata — the renderer must emit the
+   attribution object as exactly:
+
+```text
+properties.provenance.attribution = { state: "attribution_unavailable" }
+```
+
+   It must not omit the object (requirement 2), must not revert
+   `tokenURI` for this cause alone (the router's fail-safe posture),
+   and must not emit any other attribution member from stale, cached,
+   or default values — in particular it must never present a sanctioned
+   work as `claimed`. `attribution_unavailable` is a transient read
+   posture, never a stored `AttributionState`, never enters the numeric
+   ID catalog, and consumer surfaces must re-resolve rather than cache
+   it as attribution truth. A golden renderer test covers the
+   registry-unreachable case (`AA-GATES` gate 8).
 
 ## Signature Verification [AA-SIGVER]
 
@@ -936,7 +1147,8 @@ Requirements:
    future heavier wallet in that class can be supported without a
    registry redeploy.
 5. Every typed payload includes `nonce` (consumed from the identity's nonce
-   space) and, except long-lived designations and directives, `deadline`.
+   space) and, except long-lived designations, directives, steward
+   sanction grants, and payout designations, `deadline`.
    Expired payloads revert. Replay across chains and registries is blocked
    by the EIP-712 domain; replay across Cores by the `core` field.
 6. Verified signature bytes are stored onchain at submission, bounded by
@@ -976,8 +1188,9 @@ CAP_GUARDIAN_SET      = 1 << 8   guardian-set maintenance (AA-GUARD
                                  requirement 1; designations, directives,
                                  and steward masks only — never grantable
                                  by delegation, requirement 7)
-CAP_IDENTITY_REVISION = 1 << 9   identity-document revisions
-                                 (AA-IDENTITY requirement 6;
+CAP_IDENTITY_REVISION = 1 << 9   identity-document revisions and payout
+                                 designations (AA-IDENTITY requirement
+                                 6; AA-PAYOUT requirement 1;
                                  designations and directives only —
                                  never delegable, never steward)
 CAP_SALE_CONSENT      = 1 << 10  sale-parameter consent
@@ -1029,6 +1242,7 @@ Requirements:
    it undelegated. The sanction record's authority class makes any
    delegated sanction permanently visible.
 7. Delegates never gain rotation, guardian-set, identity-revision,
+   payout-designation, steward-sanction-grant,
    successor-designation, directive, delegation-granting, or
    revocation-of-attribution powers; those are non-delegable. A
    delegation payload naming `CAP_GUARDIAN_SET` or
@@ -1122,7 +1336,8 @@ interface IStreamArtistConsent {
     ) external view returns (bool);
 
     // content authority reads consumed by the collection metadata
-    // contract and its satellites (AA-CONTENT)
+    // contract, its satellites, and the entropy coordinator
+    // (AA-CONTENT; ADR 0013 decision U4)
     function requireContentConsent(
         uint256 collectionId,
         bytes32 familyId,
@@ -1177,8 +1392,11 @@ Requirements:
 6. `requireMintConsent` must revert unless all of the following hold for
    artist-bound collections: attribution state is `ARTIST_ACCEPTED` or
    `ARTIST_SANCTIONED` (never `CLAIMED`, `DISPUTED`, or `REVOKED`); a
-   consent record matches the exact active `policyHash`; and the economics
-   prerequisite of `AA-ECON` requirement 4 is satisfied. For
+   consent record matches the exact active `policyHash`; the economics
+   prerequisite of `AA-ECON` requirement 4 is satisfied; and, where the
+   operative binding pins `REGISTRY_FREEZE_REQUIRED`, the
+   `ARTIST_REGISTRY` pointer freeze has executed (`AA-BINDING`
+   requirement 10). For
    `PLATFORM_WORKS` collections it must revert per the contest rule of
    requirement 5. The calling
    cadence is pinned (ADR 0011 decision R6): the mint manager must call it
@@ -1256,6 +1474,10 @@ Requirements:
    are an accepted cost: claims are evidence-committed, append-only, and
    permanently attributed to their claimant, and a raw claim count
    asserts only that claims exist, never that they are true.
+   Artist-bound collections carry the parallel permissionless claim
+   surface under `AA-DISPUTE` requirement 10 (ADR 0013 decision U4);
+   neither works class is ever the one a wronged third party cannot
+   reach.
 5. `ROLE_ATTRIBUTION_ARBITER` may elevate a filed claim by setting the
    declaration's contest state to `CONTESTED`, and must later resolve it
    to `CONTEST_DISMISSED` (restoring normal display) or
@@ -1414,18 +1636,27 @@ Requirements:
    sanctions — posthumous authority is clearly marked and never
    retroactive, and every consumer surface names the class beside the
    record (`AA-DISPLAY` `sanction_authority_class`; ADR 0012 decision
-   T4). A steward sanction is valid only for works minted before the
-   steward's appointment, enforced by a specified read (ADR 0012
-   decision T4), never left to intent: dormancy completion records
-   `stewardAppointedAtBlock` (`AA-DORMANCY` requirement 3), and
-   `recordArtistSanction` must revert for an `AUTH_STEWARD` signer
-   unless `scopeType` is `COLLECTION` and the collection's one-way Core
-   mint burn block
-   ([`collection-metadata-contract.md`](collection-metadata-contract.md)
-   [CMC-BURN]; the same read collection finality already requires) is
-   nonzero and at or before `stewardAppointedAtBlock` — every token in
-   scope was then provably minted while artist-side authority governed,
-   because no mint can postdate the burn block. Both reads are
+   T4). A steward sanction exists only where the artist-side record
+   trail authorizes it and only for works minted before the steward's
+   appointment, enforced by specified reads (ADR 0012 decision T4;
+   ADR 0013 decision U4), never left to intent. `recordArtistSanction`
+   must revert for an `AUTH_STEWARD` signer unless all three hold:
+   the steward's effective capabilities include `CAP_SANCTION` — an
+   operative artist-signed steward sanction grant (`AA-ESTATE`
+   requirement 7) or the explicit `TERMINAL_FREEZE`-class governance
+   grant of `AA-DORMANCY` requirement 6; `scopeType` is `COLLECTION`;
+   and the collection's one-way collection burn block ([CMC-BURN]
+   vocabulary) is active with its activation height at or before
+   `stewardAppointedAtBlock` (`AA-DORMANCY` requirement 3), read from
+   the bound Core's `collectionBurnsBlockedAtBlock(collectionId)`
+   (nonzero exactly when the burn block is active; home
+   [`collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-BURN]; ADR 0013 decision U4). The minted-before inference is
+   stated, not implied: activating the collection burn block requires
+   Core collection status `CLOSED` ([CMC-BURN] rule 6), `CLOSED` ends
+   minting permanently, so no mint can postdate the recorded activation
+   height — every token in scope was provably minted while artist-side
+   authority governed. Both reads are
    append-only/one-way, so a sanction that passes at recording can never
    retroactively fail. Scoped (`TOKEN`, `RELEASE`, `SEASON`, `VIEW`)
    `AUTH_STEWARD` sanctions are intentionally absent on this registry
@@ -1450,7 +1681,10 @@ Requirements:
 8. There is no unsigned finalization path for artist-bound collections.
    Key loss and death do not soften this rule; they route through
    succession and dormancy (`AA-ESTATE`, `AA-DORMANCY`), which produce an
-   authorized, clearly-classified signer. Absence of artist sanction is
+   authorized, clearly-classified signer — for stewards, sanction
+   authority arrives only through the artist's pre-signed grant or the
+   explicit veto-checked governance grant of `AA-DORMANCY`
+   requirement 6 (ADR 0013 decision U4). Absence of artist sanction is
    therefore always provable intent (`PLATFORM_WORKS`), never silence.
 9. The sanction ceremony must be human-readable, and that readability
    must be provable later (ADR 0011 decision R7.7). `statementHash` must
@@ -1484,14 +1718,36 @@ This section owns who may author it and when finality may proceed.
 Requirements:
 
 1. An `ARTIST_INTENT` record for an artist-bound collection is valid only
-   when authored under artist authority: `AUTH_ARTIST`, an activated
-   `AUTH_SUCCESSOR`, or a delegation carrying `CAP_INTENT_RECORDS`.
+   when authored under artist-side authority: `AUTH_ARTIST`, an
+   activated `AUTH_SUCCESSOR` whose effective capabilities include
+   `CAP_INTENT_RECORDS`, an `AUTH_STEWARD` (`STEWARD_CAPABILITIES`
+   carries `CAP_INTENT_RECORDS` — a steward completes conservation
+   documentation, with the stored authority class permanently marking
+   it; ADR 0013 decision U4), or a delegation carrying
+   `CAP_INTENT_RECORDS`. The authority lists here and in the storage
+   mirrors ([CMC-ARTIST-INTENT], [CMC-ARTIST-ATTESTATION] rule 3)
+   follow the capability model exactly; a capability the mask grants is
+   never silently withheld by a per-section list.
 2. Finality for an artist-bound collection requires either a recorded
    `ARTIST_INTENT` record referenced in the finality manifest, or an
-   explicit artist-signed intent waiver recorded as a state-bound
+   explicit intent waiver recorded as a state-bound
    attestation with `subjectKind = SUBJECT_ARTIST_INTENT` and a
-   waiver statement hash. Absence of both blocks finality; the waiver
-   makes the absence provable intent (ADR 0010 decision D6.4).
+   waiver statement hash, authored under requirement 1 authority.
+   Absence of both blocks finality; the waiver
+   makes the absence provable intent (ADR 0010 decision D6.4). For a
+   posthumous authority the waiver takes the form of an intent-absence
+   statement (ADR 0013 decision U4): an activated `AUTH_SUCCESSOR` or
+   `AUTH_STEWARD` holding `CAP_INTENT_RECORDS` records the
+   `SUBJECT_ARTIST_INTENT` attestation whose statement asserts that no
+   artist intent record or waiver exists to complete. Its stored
+   authority class permanently marks that the artist's own voice is
+   absent, it is never retroactive artist intent
+   ([`collection-metadata-contract.md`](collection-metadata-contract.md)
+   [CMC-ARTIST-INTENT] rule 4 owns the never-retroactive marking), and
+   finality then proceeds with the absence provable rather than the
+   collection deadlocked — an artist who dies intestate having recorded
+   neither intent nor waiver no longer blocks posthumous finality
+   forever.
 3. Finality recovery manifests for artist-bound collections must state
    conformance or documented deviation from the recorded intent, per the
    recovery rules of the umbrella spec, and artwork-bytes-changing
@@ -1506,8 +1762,11 @@ Requirements:
    authority-side rule: pre-finality tooling must emit a distinct warning
    — separate from the missing-intent warning — whenever an artist-bound
    script-based collection approaches finality without an archived
-   interview reference, and museum-grade finality requires an interview
-   reference or a recorded waiver per that home. Absence of an interview
+   interview reference. For museum-grade collections the interview entry
+   (or its recorded waiver) is a pre-first-sale floor record, required
+   before the first primary-sale settlement under [CMC-MUSEUM-GRADE]
+   rule 2 in that home (ADR 0013 decision U8), never a finality-time
+   add-on. Absence of an interview
    is therefore always a visible, deliberate choice, never an oversight
    default.
 
@@ -1555,10 +1814,22 @@ Requirements:
    over the exact `finalityRecordHash` being recovered and the exact
    `recoveryManifestHash` being executed. Approval is sanction-class
    authority: `AUTH_ARTIST`, an activated `AUTH_SUCCESSOR` whose grant
-   includes `CAP_SANCTION`, `AUTH_STEWARD` (stewards hold `CAP_SANCTION`
-   under the scope and minted-before limits of `AA-SANCTION`
-   requirement 5), or a delegation carrying `CAP_SANCTION`;
-   the collaborator policy (`AA-COLLAB` requirement 4) applies. The
+   includes `CAP_SANCTION`, an `AUTH_STEWARD` whose effective
+   capabilities include `CAP_SANCTION` (`AA-DORMANCY` requirement 6),
+   or a delegation carrying `CAP_SANCTION`;
+   the collaborator policy (`AA-COLLAB` requirement 4) applies.
+   Steward reach follows the sanction authority table exactly
+   (ADR 0013 decision U4): an `AUTH_STEWARD` recovery approval is
+   valid only for a collection-scope finality record of a collection
+   satisfying the `AA-SANCTION` requirement 5 burn-block/appointment
+   check, and reverts for `TOKEN`, `RELEASE`, `SEASON`, and `VIEW`
+   scoped finality records — the same unprovability that bars scoped
+   steward sanctions (`AA-EXCL` item 9) bars scoped steward recovery
+   approvals, so which bytes are served for a scoped sanctioned work
+   is never decided by an authority whose boundary no state read can
+   prove. Scoped recovery approvals therefore require an activated
+   `AUTH_SUCCESSOR` or delegation with `CAP_SANCTION`, or the
+   requirement 2 fallback. The
    finality registry must call `verifyRecoveryApproval` before executing
    such a recovery and revert on mismatch; the umbrella spec mirrors this
    as a recovery-path requirement. Recoveries with
@@ -1648,8 +1919,13 @@ Requirements:
 1. `recordArtistAttestation` verifies the signature onchain under
    `AA-SIGVER` (EOA and ERC-1271 alike, from genesis), stores the record
    and signature bytes, and emits `ArtistAttestationRecorded`. Authority is
-   `AUTH_ARTIST`, an activated `AUTH_SUCCESSOR`, or a delegation with
-   `CAP_ATTEST`; the record stores the authority class.
+   `AUTH_ARTIST`, an activated `AUTH_SUCCESSOR` whose effective
+   capabilities include `CAP_ATTEST`, an `AUTH_STEWARD`
+   (`STEWARD_CAPABILITIES` carries `CAP_ATTEST` — steward-completed
+   preservation attestations are first-class and permanently
+   class-marked; ADR 0013 decision U4), or a delegation with
+   `CAP_ATTEST`; the record stores the authority class, and the storage
+   mirror ([CMC-ARTIST-ATTESTATION] rule 3) follows the same list.
 2. `subjectStateHash` must be the canonical hash the subject kind names
    (snapshot manifest hash, script hash, media manifest hash, finality
    record hash, policy hash, assignment hash, or deployment facts hash,
@@ -1741,6 +2017,23 @@ bytes32 deploymentFactsHash = keccak256(abi.encode(
    registry and this attestation rather than by a deployer field — as
    an explicit disclosed term alongside the royalty term
    (`AA-TOOLING` requirement 2).
+5. Creator-verification posture (ADR 0013 decision U4). Independent of
+   the reserved facade decision (OQ-X8), the registry attests three
+   creator-verification facts an external marketplace or explorer can
+   consume with no bespoke integration: the two-sided binding — an
+   artist-accepted attribution, address-verifiable and evented
+   (`AA-BINDING`); this section's deployment attestation — the
+   artist's own signature over exactly this Core address and
+   collection; and sanction records (`AA-SANCTION`) — each typed and
+   reachable from token JSON and `contractURI`. What the registry
+   cannot supply on a shared Core is a per-series deployer address for
+   pipelines that verify creators by deployer key alone; that gap is
+   exactly OQ-X8 option (c) and stays owner-reserved. Launch-evidence
+   enforcement — per pinned marketplace target, proof that the launch
+   artist displays as the verified creator or a recorded target
+   limitation — is owned by the conformance matrix
+   ([`launch-conformance-matrix.md`](launch-conformance-matrix.md)
+   [LCM-MARKETPLACE]); this section owns what the registry can attest.
 
 ## C2PA Authorship Reconciliation [AA-C2PA]
 
@@ -1775,6 +2068,108 @@ Requirements:
    registry binding, and the dispute path for a genuinely contested
    authorship is `AA-DISPUTE` (artist-bound) with the divergence record
    as evidence.
+
+## Artist Payout Designation [AA-PAYOUT]
+
+Settlement contracts pay the artist for the life of the Core line, so
+the payout entitlement must be a typed state read — never a parsed
+document, and never the signing key (ADR 0013 decision U1). This section
+is the single payout-resolution surface: `COLLECTION_ARTIST` and
+collaborator template sources
+([`revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
+[RSR-TEMPLATES];
+[ADR 0008](adr/0008-revenue-splits-and-royalty-resolver.md)), and
+`AA-ECON` requirement 1, all cite these
+reads and this one resolution moment.
+
+Pinned typed payload (long-lived; the chain rule below picks the
+operative record):
+
+```text
+StreamArtistPayoutDesignation(
+    bytes32 artistId,
+    address payoutAccount,          // nonzero settlement recipient
+    bytes32 previousDesignationRecordHash, // zero for the first
+    uint256 nonce,
+    uint64 signedAt
+)
+```
+
+Payout reads (Permanent):
+
+```solidity
+function artistPayoutAccount(bytes32 artistId)
+    external view
+    returns (address payoutAccount, bytes32 designationRecordHash);
+
+function collaboratorPayoutAccount(bytes32 artistId, address collaborator)
+    external view
+    returns (address payoutAccount, bytes32 designationRecordHash);
+```
+
+Requirements:
+
+1. `recordPayoutDesignation` verifies the payload under `AA-SIGVER`,
+   stores the record and signature bytes, emits
+   `ArtistPayoutDesignationRecorded`, and hashes the record under
+   `PAYOUT_DESIGNATION_RECORD_DOMAIN` (`AA-DOMAINS`). Authority is
+   identity-revision-class (`AA-IDENTITY` requirement 6): `AUTH_ARTIST`
+   or an activated `AUTH_SUCCESSOR` whose effective capabilities
+   include `CAP_IDENTITY_REVISION`; designations are never delegable
+   and never available to `AUTH_STEWARD` — a governance-appointed
+   steward must never be able to re-point an artist's money.
+   `payoutAccount` must be nonzero.
+2. Designations form one linear chain per identity, exactly like
+   identity-document revisions: `previousDesignationRecordHash` must
+   equal the operative designation record hash at submission (zero for
+   the first designation) and forks revert, so an old signed-but-unused
+   designation payload can never re-point payouts after a newer one is
+   recorded. The operative designation is the tip of the chain that is
+   not adjudicated-superseded (`AA-GUARD` requirement 7) and not
+   provisional (`AA-GUARD` requirement 8) — payout-designation records
+   join both lists, because re-pointing revenue is a thief's first
+   move. While the identity is `IDENTITY_CONTESTED`, new designations
+   are rejected (`AA-GUARD` requirement 4).
+3. Resolution is at settlement time (ADR 0013 decision U1): settlement
+   contracts materializing an artist-bound template resolve these reads
+   in the settlement call, so every settlement pays the operative
+   designation then in force. The economics consent of `AA-ECON` binds
+   the designation revision in force at consent as evidence (the
+   consent record and event carry its record hash), and a later
+   designation revision re-points future settlements without
+   re-consent — revisions are themselves artist-signed records of this
+   section, so currency never requires a new economics ceremony.
+   Executed settlements keep the accounts resolution produced; nothing
+   re-points retroactively.
+4. `authorityAddress` is never a payout account source or fallback, at
+   any layer, under any failure (ADR 0013 decision U1): the signing key
+   and the payment entitlement are deliberately separate systems
+   (`AA-SPLITS` requirement 4), and a key rotation must never move
+   money. An identity with no operative designation resolves to
+   `(address(0), bytes32(0))`; consumers must treat the zero account as
+   unresolvable — an artist-bound template then fails to materialize
+   and settlement reverts before any state change ([RSR-TEMPLATES] owns
+   the settlement-side revert; the registry never substitutes a
+   default). `recordEconomicsConsent` must revert for an artist-bound
+   collection while the primary identity, or any accepted collaborator
+   with a nonzero `shareLabelId`, has no operative designation, so the
+   unresolvable case is caught at the consent ceremony rather than
+   discovered at first sale.
+5. `collaboratorPayoutAccount(artistId, collaborator)` resolves the
+   operative designation of the collaborator identity `artistId` and
+   additionally requires the pair `(artistId, collaborator)` to be
+   acceptance-linked (`AA-COLLAB` requirement 7); it returns
+   `(address(0), bytes32(0))` otherwise. Settlement resolves the whole
+   collaborator path from typed reads alone: `attributionState` gives
+   the operative generation, `collaboratorAt` gives each accepted
+   collaborator's account, `shareLabelId`, and `collaboratorArtistId`,
+   and this read gives the payout — with the pair check proving the
+   account-identity association the artist's binding ratified.
+6. The identity document's `payoutAccounts` member (`AA-IDENTITY`
+   requirement 2) is a human-readable mirror for archives and
+   onboarding; the typed designation record is the sole
+   settlement-authoritative source, and on any divergence the typed
+   record wins. One home, one read path, one resolution moment.
 
 ## Artist Economics Rights [AA-ECON]
 
@@ -1819,16 +2214,26 @@ Requirements:
 1. The canonical `ARTIST` beneficiary class is the split-profile label
    `keccak256("artist")` (matching the label vocabulary of the revenue
    spec). Split profiles and primary templates serving an artist-bound
-   collection must include at least one `artist`-labeled entry whose
-   account is the artist payout address stated in the identity's
-   operative identity document (`AA-IDENTITY` requirement 6; ADR 0012
-   decision T4) at the time the assignment's economics consent is
-   recorded, and one entry per collaborator with a nonzero
-   `shareLabelId` (`AA-COLLAB`). Anchoring payout to the operative —
-   not the frozen registration — document means an artist who rotates
-   their payout Safe records one signed identity revision and every
-   later split conforms against the new address; executed assignments
-   keep the addresses their consents ratified.
+   collection must include at least one `artist`-labeled entry and one
+   entry per collaborator with a nonzero `shareLabelId` (`AA-COLLAB`).
+   Artist-class payout addresses resolve through the typed payout
+   designation surface of `AA-PAYOUT` (ADR 0013 decision U1): dynamic
+   `COLLECTION_ARTIST` and collaborator sources resolve
+   `artistPayoutAccount` / `collaboratorPayoutAccount` at settlement
+   time, and a static artist-class entry is conformant only when its
+   account equals the relevant operative designation at the moment the
+   assignment's economics consent is recorded (tooling-checked; static
+   entries deliberately do not track later designation revisions, which
+   is why templates should carry the dynamic sources). The consent
+   record binds the primary identity's operative
+   `payoutDesignationRecordHash` in force at consent, and
+   `recordEconomicsConsent` reverts while any required designation is
+   unset (`AA-PAYOUT` requirements 3 and 4). Anchoring payout to the
+   operative typed designation means an artist who rotates their payout
+   Safe records one signed designation and every later settlement pays
+   the new account with no re-consent; executed settlements keep the
+   accounts resolution produced, and `authorityAddress` is never a
+   payout fallback (`AA-PAYOUT` requirement 4).
 2. The artist-take posture is explicit: genesis default primary templates
    for artist-bound collections must be artist-majority — aggregate
    `artist`-labeled shares of at least `500_000` ppm — and every
@@ -1962,6 +2367,24 @@ owned by [`collection-metadata-contract.md`](collection-metadata-contract.md)
 (Lock Model and record families); that document owns the exact family
 list and mirrors the storage-side enforcement of this section.
 
+Entropy joins the same boundary (ADR 0013 decision U4): on a generative
+platform the seed is the work's genome, so for artist-bound collections
+whose tokens derive from coordinator-served entropy, the per-collection
+entropy configuration (provider assignment, security class,
+fresh-recovery policy) and any fresh-entropy redraw of a minted token's
+pending entropy are content-affecting writes. The entropy family
+identifiers, canonical entropy state hashes, and caller-side enforcement
+are owned by
+[`stream-entropy-coordinator.md`](stream-entropy-coordinator.md), which
+mirrors this section: between the first mint and executed finality the
+coordinator must verify `requireContentConsent` over the exact resulting
+entropy state before applying such a change, with the
+artist-unavailability fallback of `AA-RECOVERY` requirement 2 available
+when no artist authority is live, and the unilateral content freeze
+(requirement 3) may pin entropy lock classes like any other family — the
+consent reads are `bytes32`-generic by construction, so no new registry
+surface is needed.
+
 Pinned typed payloads:
 
 ```text
@@ -1980,7 +2403,8 @@ StreamArtistContentFreeze(
     address metadataContract,
     uint256 collectionId,
     bytes32[] lockClasses,   // sorted ascending, unique, nonzero;
-                             // metadata-contract lock vocabulary
+                             // metadata-contract lock vocabulary plus
+                             // coordinator-owned entropy lock classes
     bytes32 expectedStateHash, // current collection content state pinned
     uint256 nonce,
     uint64 deadline
@@ -2044,7 +2468,8 @@ consent knowingly.
 Requirements:
 
 1. Normative guidance, enforced by operator tooling defaults and stated in
-   artist onboarding: artist and collaborator payout accounts should be
+   artist onboarding: artist and collaborator payout accounts — the
+   accounts payout designations name (`AA-PAYOUT`) — should be
    ERC-1271 smart accounts (Safe-class) with documented owner rotation and
    estate procedures, not raw EOAs. The registry supports EOAs, but the
    irrecoverability below is the cost.
@@ -2065,7 +2490,10 @@ Requirements:
    rotates the account's owners and signs ordinary `ReleaseAuthorization`
    payloads per the revenue spec. Registry authority (this document) and
    payment entitlement (the account) are deliberately separate systems;
-   rotating one never silently moves the other.
+   rotating one never silently moves the other. The payout designation
+   (`AA-PAYOUT`) moves future settlement resolution only; balances
+   already owed inside deployed split wallets stay address-bound per
+   requirement 3.
 5. Pre-signed estate directives (`AA-ESTATE`) may include payout-routing
    instructions for future assignments as directive payload content; they
    cannot and do not override split-wallet release authorization, and the
@@ -2109,8 +2537,10 @@ Requirements:
    `StreamArtistRotationAcceptance`); both may land in one transaction.
    Satisfying both sides stages the rotation — it does not execute it:
    the registry records the pending rotation under
-   `ROTATION_RECORD_DOMAIN`, sets
-   `contestEndsAt = block.timestamp + ARTIST_ROTATION_CONTEST_SECONDS`,
+   `ROTATION_RECORD_DOMAIN`, sets `contestEndsAt = block.timestamp +`
+   the identity's effective rotation-contest window (`AA-GUARD`
+   requirement 10; the global `ARTIST_ROTATION_CONTEST_SECONDS` unless
+   the operative guardian-set record pins a higher per-identity floor),
    and emits `ArtistRotationStaged`. At most one rotation may be pending
    per identity.
 2. A staged rotation executes through exactly one of two evented paths
@@ -2163,6 +2593,10 @@ StreamArtistGuardianSet(
     uint32 approvalThreshold, // guardian approvals that execute a staged
                               // rotation immediately; 1..guardians.length;
                               // 0 only with an empty guardian list
+    uint64 minContestSeconds, // per-identity contest-window floor;
+                              // 0 adopts the global value; bounded by
+                              // MAX_GUARDIAN_MIN_CONTEST_SECONDS
+                              // (requirement 10; ADR 0013 decision U4)
     uint256 nonce,
     uint64 signedAt
 )
@@ -2214,7 +2648,8 @@ Requirements:
    acceptances, sanctions, policy/economics/sale/content consents,
    delegation
    grants, designations, directives, guardian-set updates, identity
-   revisions, estate activations, dormancy
+   revisions, payout designations, steward sanction grants, estate
+   activations, dormancy
    initiation and completion, and further rotation staging for the
    identity. Defensive
    actions remain available: authorization revocations (`AA-REVOKE`),
@@ -2279,10 +2714,27 @@ Requirements:
    resolution is staged, is evented
    (`ArtistIdentityRecoveryVetoed`), and permanently blocks that
    staged action (a fresh resolution may be staged, each publicly
-   delayed). A veto from a guardian whose guardian-set
-   record the staged resolution itself enumerates as
-   adjudicated-superseded does not count, so an attacker-installed
-   guardian set cannot veto the recovery that unseats it. The
+   delayed). Supersession never silences the artist's own installed
+   check (ADR 0013 decision U4): a staged resolution may enumerate as
+   adjudicated-superseded — and thereby disqualify from this veto —
+   only guardian-set records recorded at or after the earliest
+   authority-vesting transition the resolution's evidence contests, or
+   still provisional under requirement 8. An attacker-installed
+   guardian set therefore cannot veto the recovery that unseats it,
+   while every guardian-set record predating the contested transition —
+   the artist's lifetime guardians above all — retains full veto
+   standing regardless of enumeration. Disqualifying a pre-transition
+   guardian set is possible only when the guardians themselves are the
+   disputed party, and then only by the appeal tier: the resolution
+   must be staged by the governance tier holding role-admin authority
+   over `ROLE_ATTRIBUTION_ARBITER` (`AA-DISPUTE` requirement 9), never
+   by the arbiter alone, still under `TERMINAL_FREEZE` with the
+   independent veto guardian, with the hostile-guardian evidence
+   linked. A directive forbidding `CAP_GUARDIAN_SET` (`AA-ESTATE`
+   requirement 4) also forbids supersession of pre-transition
+   guardian-set records at every tier — supersession is adjudication,
+   not a capability exercise, and the artist's forbiddance reaches
+   both. The
    resolution names the vested authority class: `AUTH_ARTIST` (status
    `IDENTITY_ACTIVE`) for a living artist's replacement key, or
    `AUTH_SUCCESSOR` (status `IDENTITY_SUCCEEDED`, capabilities bounded
@@ -2292,29 +2744,59 @@ Requirements:
    living-artist authority for an estate. Recovery revokes all
    outstanding
    delegations, and the resolution may enumerate attacker-era
-   designation, directive, guardian-set, and identity-revision records
+   designation, directive, guardian-set, identity-revision,
+   payout-designation, and steward-sanction-grant records
    as adjudicated-superseded
    (`IDENTITY_RECOVERY_SUPERSESSION_DOMAIN` over the sorted
-   record-hash list): superseded records stay in history but stop being
+   record-hash list; guardian-set enumeration bounded as above): superseded
+   records stay in history but stop being
    operative, so "highest nonce is operative" (`AA-ESTATE`) reads
-   "highest nonce not adjudicated-superseded". Recovery never rewrites
+   "highest nonce not adjudicated-superseded" and chain-tip rules
+   (`AA-IDENTITY` requirement 6, `AA-PAYOUT` requirement 2) rewind to
+   the last non-superseded link. Recovery never rewrites
    consumed consents, sanctions, or any executed history.
 8. Records authored in a takeover window are provisional: a successor
-   designation, estate directive, guardian-set, or identity-revision
-   record recorded within
-   `ARTIST_ROTATION_CONTEST_SECONDS` after any authority-vesting
+   designation, estate directive, guardian-set, identity-revision,
+   payout-designation, or steward-sanction-grant
+   record recorded within the identity's effective rotation-contest
+   window (requirement 10) after any authority-vesting
    transition executes (a rotation, estate activation, dormancy
    completion, or identity recovery) becomes
    operative only when that same window elapses without an
    identity-compromise contest. A genuine artist or estate waits days;
    a thief's
-   rewrite of the estate plan never outruns the contest.
+   rewrite of the estate plan — or of where the money goes — never
+   outruns the contest.
 9. Dormancy and the contest window interact conservatively: dormancy must
    not initiate while a rotation is pending or the identity status is
    `IDENTITY_CONTESTED`, and any veto, approval, or contest filing counts as
    activity for nobody — guardian actions never update
    `lastAuthorityActionAt`, which tracks artist-side authority only
    (`AA-IDENTITY` requirement 3).
+10. Guardian holder latency is sized, not assumed (ADR 0013 decision
+    U4; the deployment-side analogue is [LTA-GOV] rule 6 as extended
+    by ADR 0012 decision T5). Guardians may be governor-class
+    contracts whose own proposal-and-execution cycle takes days; a
+    guardian that cannot physically act inside the contest window is
+    the dead-control pattern the governance layer already forbids for
+    its own roles. Two rules close it. First, the guardian-set record
+    pins `minContestSeconds`, a per-identity contest-window floor:
+    the identity's effective rotation-contest window is the greater of
+    the global `ARTIST_ROTATION_CONTEST_SECONDS` and the operative
+    guardian-set record's `minContestSeconds` (zero adopts the global
+    value; values above `MAX_GUARDIAN_MIN_CONTEST_SECONDS`,
+    `AA-LIMITS`, revert), so a later global lowering toward the
+    72-hour floor can never undercut the window a slow guardian set
+    was registered against. The effective window governs rotation
+    `contestEndsAt` (`AA-ROTATE` requirement 1) and the requirement 8
+    provisional window. Second, onboarding tooling must check every
+    declared guardian's account class against the effective contest
+    window and against the [GOV-WINDOWS] terminal-freeze veto floor
+    (the identity-recovery veto of requirement 7 runs on
+    governance-side timing this record cannot extend), and must warn —
+    and, for a guardian set whose every member is slower than the
+    effective window, block — before registration (`AA-TOOLING`
+    requirement 2).
 
 ## Successor Designation And Estate Directives [AA-ESTATE]
 
@@ -2356,6 +2838,19 @@ StreamArtistEstateActivation(
     bytes32 evidenceHash,
     uint256 nonce,
     uint64 deadline
+)
+```
+
+Steward sanction grant payload (long-lived; requirement 7;
+ADR 0013 decision U4):
+
+```text
+StreamStewardSanctionGrant(
+    bytes32 artistId,
+    bool granted,            // true grants; false withdraws
+    bytes32 statementHash,   // canonical grant statement document
+    uint256 nonce,
+    uint64 signedAt
 )
 ```
 
@@ -2428,6 +2923,29 @@ Requirements:
 6. Successor contracts (estates, foundations, DAOs) act through ERC-1271;
    the GGP-governed verification gas (`AA-SIGVER` requirement 2) keeps
    heavy estate governance contracts verifiable decades from now.
+7. Pre-signed steward sanction grant (ADR 0013 decision U4). The
+   sanction is the strongest provenance statement a signer can make in
+   an artist's name, so a governance-appointed steward holds it only
+   with the artist's own pre-authorization or a veto-checked
+   governance grant (`AA-DORMANCY` requirement 6). While alive and in
+   control, the artist may record a `StreamStewardSanctionGrant`:
+   `recordStewardSanctionGrant` accepts `AUTH_ARTIST` authority only —
+   successors, stewards, and delegates can never grant it, because the
+   grant exists precisely to carry the artist's voice past them —
+   verified under `AA-SIGVER`, hashed under
+   `STEWARD_SANCTION_GRANT_RECORD_DOMAIN` (`AA-DOMAINS`), evented
+   (`StewardSanctionGrantRecorded`), and append-only. The record with
+   the highest nonce that is not adjudicated-superseded (`AA-GUARD`
+   requirement 7) and not provisional (`AA-GUARD` requirement 8) is
+   operative; `granted = false` withdraws a prior grant.
+   `statementHash` commits to a canonical RFC 8785 statement of what
+   the artist is authorizing, rendered human-readable at signing
+   (`AA-TOOLING` requirement 1). A directive forbidding `CAP_SANCTION`
+   (requirement 4) overrides any grant — forbidden capabilities stay
+   absolute — and the dormancy-completing action's evidence must
+   reference the operative grant record hash it relied on. The grant
+   affects steward masks only; successor capabilities come from
+   designations and directives alone.
 
 ## Governed Dormancy Procedure [AA-DORMANCY]
 
@@ -2436,8 +2954,12 @@ and the recovery must be impossible to abuse quietly (ADR 0010 decision
 D2.2). Dormancy is slow, loud, cancellable by any sign of life, and staged
 through the canonical governance action.
 
-Governed time parameters (staged-governance values with immutable floors,
-following the Governed Gas Parameter change discipline of ADR 0010
+Governed dormancy windows (seconds-denominated staged-governance values
+with immutable floors owned by this home — not Governed Time
+Parameters, per the [LTA-GTP] closed-world rule in
+[`stream-long-term-architecture.md`](stream-long-term-architecture.md)
+(ADR 0013 decision U9) — following the Governed Gas Parameter change
+discipline of ADR 0010
 decision D1; time floors protect artists, so values may be raised freely
 and lowered only through the normal delay class, never below the floor):
 
@@ -2492,29 +3014,44 @@ Requirements:
    and attestations made before dormancy stand unchanged with their
    original authority classes.
 6. Absent any operative designation, completion appoints the steward named
-   in the completing governance action with `AUTH_STEWARD` limited to:
+   in the completing governance action with `AUTH_STEWARD` limited to
+   an effective capability mask built from:
 
 ```text
-STEWARD_CAPABILITIES = CAP_SANCTION | CAP_ATTEST | CAP_ROYALTY_FREEZE
-                     | CAP_DISPUTE | CAP_INTENT_RECORDS
-                     | CAP_GUARDIAN_SET
+STEWARD_CAPABILITIES = CAP_ATTEST | CAP_ROYALTY_FREEZE | CAP_DISPUTE
+                     | CAP_INTENT_RECORDS | CAP_GUARDIAN_SET
 ```
 
    `CAP_POLICY_CONSENT` is permanently excluded: a steward can complete
-   preservation, sanction finality of already-minted works, and defend
-   economics, but can never authorize new works in the artist's name.
+   preservation documentation, defend economics, and — when sanction
+   authority is granted below — sanction finality of already-minted
+   works, but can never authorize new works in the artist's name.
+   `CAP_SANCTION` is not in the default mask (ADR 0013 decision U4):
+   signing finality in a dead artist's name is the strongest provenance
+   statement the registry knows, so the completing action includes
+   `CAP_SANCTION` in the steward's effective mask exactly when an
+   operative artist-signed steward sanction grant exists (`AA-ESTATE`
+   requirement 7, referenced in the completing action's evidence);
+   absent a grant, `CAP_SANCTION` may be added only by a later,
+   explicit, reasoned governance action of the `TERMINAL_FREEZE` class
+   — its independent veto guardian standing in as the non-platform
+   check the missing artist consent would have been — never silently
+   inside the completing action, and steward sanctions stay bounded by
+   `AA-SANCTION` requirement 5 regardless of grant source.
    `CAP_ECONOMICS_CONSENT` is likewise excluded from the default
    (ADR 0012 decision T4): for a heirless dead artist, governance both
    appoints the steward and stages assignment changes, so a default
    economics grant would collapse both halves of the economics
    handshake into platform-chosen parties. The defensive
    `CAP_ROYALTY_FREEZE` is retained. `CAP_ECONOMICS_CONSENT` may be
-   granted to a steward only by a later, explicit, reasoned governance
-   action of the `TERMINAL_FREEZE` class — its independent veto
-   guardian is the missing non-platform check — never silently inside
+   granted to a steward only by the same later, explicit,
+   `TERMINAL_FREEZE`-class governance action, never silently inside
    the completing action. `CAP_GUARDIAN_SET` is included so the steward
    can maintain the guardian set that polices its own tenure
-   (`AA-GUARD` requirement 1). Both exclusions are Permanent semantics
+   (`AA-GUARD` requirement 1). A directive's `forbiddenCapabilities`
+   override every grant path (`AA-ESTATE` requirement 4). The
+   policy-consent exclusion, the economics-consent exclusion, and the
+   grant-gated sanction rule are Permanent semantics
    of `AUTH_STEWARD`.
 7. All dormancy governance actions use the canonical
    `STREAM_GOVERNANCE_ACTION_V1` action ID with dormancy fields folded
@@ -2526,11 +3063,13 @@ STEWARD_CAPABILITIES = CAP_SANCTION | CAP_ATTEST | CAP_ROYALTY_FREEZE
    stays `ARTIST_ACCEPTED`, and `requireMintConsent` keeps passing —
    because a standing authorization does not lapse with liveness. The
    artist-era/steward-era boundary is therefore not the appointment
-   itself but the collection's one-way Core mint burn block, and
-   steward-completed collection finality requires that burn to predate
+   itself but the collection's one-way collection burn block
+   ([CMC-BURN] vocabulary; ADR 0013 decision U4), and
+   steward-completed collection finality requires the burn-block
+   activation height to be at or before
    the appointment (`AA-SANCTION` requirement 5). Operational runbooks
-   must order the two staged actions accordingly — execute the
-   collection mint burn before completing dormancy wherever steward-led
+   must order the two staged actions accordingly — activate the
+   collection burn block before completing dormancy wherever steward-led
    collection finality is the goal — and the completing action's
    evidence should record the open-phase disposition so the boundary
    scholars will interrogate is a documented decision, not an accident
@@ -2584,7 +3123,16 @@ Requirements:
    the strongest thing the platform can do to an artist — must use the
    `TERMINAL_FREEZE` class, whose independent veto guardian checks the
    arbiter's own hierarchy in addition to the requirement 9 appeal tier
-   (ADR 0012 decision T4). The staged action is public for at least its
+   (ADR 0012 decision T4). An `UPHELD` resolution of a reopened
+   `ARBITER_REVOKED` generation (requirement 9) must use the
+   `TERMINAL_FREEZE` class as well (ADR 0013 decision U4): re-vesting
+   adjudicated-away provenance is symmetric in consequence to
+   revocation — for the true author and for everyone who relied on the
+   earlier adjudication — so reinstatement is never procedurally
+   cheaper than the revocation it reverses, and a later captured or
+   negligent arbiter cannot resurrect a forger's verified attribution
+   under the ordinary delay class. The staged action is public for at
+   least its
    full delay
    as the evidence window, and the resolution record must link the
    latest counter-statement record for the dispute (or zero when none
@@ -2613,21 +3161,57 @@ Requirements:
    evented via `AttributionCounterStatementRecorded`, and append-only.
    Counter-statements are exempt from the `AA-STATE` requirement 4
    blocks; silencing the accused is never a dispute feature.
-9. Appeal and reopening (ADR 0011 decision R7.7): the governance tier
-   holding role-admin authority over `ROLE_ATTRIBUTION_ARBITER`
+9. Appeal and reopening (ADR 0011 decision R7.7): the appeal tier is
+   `ROLE_ATTRIBUTION_APPEAL`
    ([`adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
-   [GOV-ROLES] root) is the appeal tier — it may cancel a staged
+   [GOV-ROLES] root; ADR 0013 decision U5) — the governance tier
+   holding role-admin authority over `ROLE_ATTRIBUTION_ARBITER`,
+   resolved through the admin registry — and it may cancel a staged
    resolution before execution through the ordinary staged-action cancel
    path, on the record and reasoned. After execution, a `REVOKE`
    resolved by the arbiter (`ARBITER_REVOKED`) is not epoch-final: a
    later arbiter may reopen the same generation by opening a new dispute
    carrying new evidence (`AA-STATE` transition `REVOKED -> DISPUTED`);
    resolving that reopened dispute `UPHELD` restores the pre-revocation
-   state, and `REVOKE` re-affirms. Reopening is append-only — every
+   state — under the `TERMINAL_FREEZE` class of requirement 4, because
+   reinstatement carries revocation's weight (ADR 0013 decision U4) —
+   and `REVOKE` re-affirms. Reopening is append-only — every
    opinion every arbiter ever held remains in the record. Terminations
    the artist chose (`REPUDIATED_BY_ARTIST`) or that ended an unaccepted
    proposal (`REFUSED`, `WITHDRAWN`) are never reopenable against the
    artist's exit.
+10. Permissionless third-party attribution claims (ADR 0013 decision
+    U4). Requirement 1 standing is deliberately narrow, which would
+    leave the most damaging 50-year attack — a third party's work
+    misappropriated into an artist-bound collection by an impostor —
+    with no onchain record once the bound artist line is dead,
+    captured, or complicit, while `PLATFORM_WORKS` victims keep a
+    permanent filing path. Artist-bound collections therefore carry
+    the same surface: `fileAttributionClaim(collectionId,
+    evidenceHash, reasonHash, reasonURI)` lets any address assert
+    third-party authorship of an artist-bound collection's works.
+    Claims are append-only, permissionless, evented
+    (`AttributionClaimFiled`), hashed under
+    `ATTRIBUTION_CLAIM_RECORD_DOMAIN`; both hashes must be nonzero and
+    commit to canonical evidence documents under the `AA-PLATFORM`
+    requirement 4 evidence discipline (metadata record satellites,
+    dual-family mirrored). Claims are display-only records: they never
+    change attribution state, grant the claimant no authority and no
+    requirement 1 standing, and are fileable in every attribution
+    state — the `AA-STATE` requirement 4 blocks never apply to them,
+    exactly as counter-statements are never blocked. The registry
+    maintains a per-collection claim count and latest claim record
+    hash readable via `attributionClaims(collectionId)`, and every
+    conformant display surface emits them through the attribution
+    object (`AA-DISPLAY` `claim_count` / `latest_claim_record`) with
+    no arbiter action — the wronged party's evidence reaches
+    marketplaces and archives even when nobody with standing ever
+    acts. The only state-changing path remains requirement 1: an
+    arbiter-opened dispute, whose record should link the claim records
+    it elevates. Spam filings are accepted on `AA-PLATFORM`
+    requirement 4 terms: evidence-committed, append-only, permanently
+    attributed to their claimant, and a raw count asserts only that
+    claims exist, never that they are true.
 
 ## Authorization Revocation [AA-REVOKE]
 
@@ -2654,9 +3238,11 @@ Requirements:
    `ArtistAuthorizationRevoked`. Exactly one of `revokedDigest` and
    `revokedNonce` must be nonzero.
 2. Revocation applies to every typed payload family in this document
-   (acceptances, sanctions, consents — policy, economics, sale, and
+   (acceptances — binding, collaborator, and collaborator-identity —
+   sanctions, consents — policy, economics, sale, and
    content — freezes, delegations, rotations, recovery approvals,
-   designations, directives, estate activations, identity revisions,
+   designations, directives, steward sanction grants, payout
+   designations, estate activations, identity revisions,
    disputes). A revoked-then-submitted
    payload reverts.
 3. Already-consumed authorizations cannot be revoked; revocation is
@@ -2678,11 +3264,14 @@ The CON-015 whole-module writer exception is retired for artist authority
 Requirements:
 
 1. Every artist-authority record family defined here (bindings,
-   acceptances, sanctions, consents — policy, economics, sale, and
-   content — delegations, guardian sets, identity revisions, rotations
+   acceptances — binding, collaborator, and collaborator-identity —
+   sanctions, consents — policy, economics, sale, and
+   content — delegations, guardian sets, identity revisions, payout
+   designations, steward sanction grants, rotations
    and rotation contests, identity
    recoveries, designations, directives, estate activations, dormancy
-   records, disputes and counter-statements, platform-works claims and
+   records, disputes and counter-statements, third-party claims —
+   platform-works and artist-bound attribution claims — and
    contests, recovery approvals, unavailability findings, attestations,
    freeze authorizations, revocations) is writable only through the
    authenticated paths of this registry. No safe-operator,
@@ -2869,6 +3458,7 @@ Requirements:
 ```text
 MAX_COLLABORATORS                 32
 MAX_ARTIST_GUARDIANS              8
+MAX_GUARDIAN_MIN_CONTEST_SECONDS  2,592,000 (30 days; AA-GUARD req 10)
 MAX_FREEZE_LOCK_CLASSES           16
 MAX_STORED_SIGNATURE_BYTES        4,096
 MAX_DIRECTIVE_PAYLOAD_BYTES       8,192
@@ -2902,9 +3492,13 @@ Requirements:
    genesis value are sized against the heaviest named wallet class of
    the one wallet-class home, ADR 0004 [GOV-1271-CLASS] (ADR 0011
    decision R10).
-3. Every governed time parameter above (dormancy inactivity and notice,
-   rotation contest, estate-activation notice, unavailability-recovery
-   notice) follows the same staged change discipline with immutable
+3. Every seconds-denominated governed window above (dormancy inactivity
+   and notice, rotation contest, estate-activation notice,
+   unavailability-recovery notice) is owned by this home under the
+   [LTA-GTP] closed-world rule — these windows are never Governed Time
+   Parameters and claim none of that pattern's identifier, probe, or
+   mirror obligations (ADR 0013 decision U9) — and
+   follows the same staged change discipline with immutable
    floors; time floors protect artists, so values may be raised freely
    and lowered only through the `DELAYED` class, never below the floor.
    Floors and genesis values are recorded in the release manifest and
@@ -2953,6 +3547,7 @@ interface IStreamArtistRegistry {
         returns (
             address[] memory guardians,
             uint32 approvalThreshold,
+            uint64 minContestSeconds,
             bytes32 guardianSetRecordHash
         );
     function pendingRotation(bytes32 artistId)
@@ -2992,8 +3587,22 @@ interface IStreamArtistRegistry {
             address account,
             bytes32 role,
             bytes32 shareLabelId,
-            bool accepted
+            bool accepted,
+            bytes32 collaboratorArtistId // zero until accepted
         );
+    function registryImmutabilityElection(uint256 collectionId)
+        external view returns (uint8); // AA-BINDING requirement 10
+
+    // payout designation (AA-PAYOUT; ADR 0013 decision U1)
+    function artistPayoutAccount(bytes32 artistId)
+        external view
+        returns (address payoutAccount, bytes32 designationRecordHash);
+    function collaboratorPayoutAccount(
+        bytes32 artistId,
+        address collaborator
+    )
+        external view
+        returns (address payoutAccount, bytes32 designationRecordHash);
 
     // sanctions and finality
     function verifySanctionForSubject(
@@ -3017,6 +3626,9 @@ interface IStreamArtistRegistry {
         external view
         returns (uint8 contestState, bytes32 claimRecordHash);
     function platformWorksClaims(uint256 collectionId)
+        external view
+        returns (uint256 claimCount, bytes32 latestClaimRecordHash);
+    function attributionClaims(uint256 collectionId)
         external view
         returns (uint256 claimCount, bytes32 latestClaimRecordHash);
     function verifyRecoveryApproval(
@@ -3072,6 +3684,10 @@ interface IStreamArtistRegistry {
             bytes32 directiveHash,
             uint256 designationNonce
         );
+    function stewardSanctionGrant(bytes32 artistId)
+        external view
+        returns (bool granted, bytes32 grantRecordHash);
+        // operative grant per AA-ESTATE requirement 7
     function dormancyState(bytes32 artistId)
         external view
         returns (
@@ -3108,10 +3724,14 @@ interface IStreamArtistRegistry {
 `IStreamArtistConsent` is defined in `AA-CONSENT`; the history-import
 surface is defined in `AA-IMPORT`. Write functions
 (`proposeArtistBinding`, `acceptArtistBinding`, `refuseArtistBinding`,
-`withdrawArtistBinding`, `acceptCollaborator`, `declarePlatformWorks`,
-`filePlatformWorksClaim`, `setPlatformWorksContest`,
+`withdrawArtistBinding`, `proposeCollaboratorIdentity`,
+`acceptCollaboratorIdentity`, `acceptCollaborator`,
+`declarePlatformWorks`,
+`filePlatformWorksClaim`, `fileAttributionClaim`,
+`setPlatformWorksContest`,
 `recordArtistSanction`, `confirmSanctionFinalized`, `recordPolicyConsent`,
 `recordEconomicsConsent`, `recordSaleConsent`, `recordContentConsent`,
+`recordPayoutDesignation`, `recordStewardSanctionGrant`,
 `authorizeArtistRoyaltyFreeze`, `authorizeArtistContentFreeze`,
 `recordRecoveryApproval`, `recordUnavailabilityFinding`,
 `recordArtistAttestation`, `recordIdentityRevision`,
@@ -3162,6 +3782,18 @@ event ArtistIdentityRevisionRecorded(
     bytes32 revisionRecordHash
 );
 
+event ArtistPayoutDesignationRecorded(
+    uint16 schemaVersion,
+    bytes32 indexed artistId,
+    address indexed payoutAccount,
+    address indexed signer,
+    bytes32 previousDesignationRecordHash,
+    uint8 authorityClass,
+    uint256 nonce,
+    uint64 signedAt,
+    bytes32 designationRecordHash
+);
+
 event ArtistBindingProposed(
     uint16 schemaVersion,
     uint256 indexed collectionId,
@@ -3171,6 +3803,7 @@ event ArtistBindingProposed(
     bytes32 bindingHash,
     uint8 consentMode,
     uint8 saleConsentScope,
+    uint8 registryImmutabilityElection,
     uint8 collabPolicyMode,
     uint32 collabThreshold,
     bytes32 collaboratorSetHash,
@@ -3193,10 +3826,21 @@ event ArtistBindingAccepted(
     bytes32 acceptanceRecordHash
 );
 
+event CollaboratorIdentityProposed(
+    uint16 schemaVersion,
+    address indexed account,
+    bytes32 identityRecordHash,
+    string identityRecordURI,
+    address proposer,
+    bytes32 reasonHash,
+    string reasonURI
+);
+
 event CollaboratorAccepted(
     uint16 schemaVersion,
     uint256 indexed collectionId,
     address indexed collaborator,
+    bytes32 indexed collaboratorArtistId,
     uint64 bindingGeneration,
     bytes32 role,
     bytes32 shareLabelId,
@@ -3229,6 +3873,17 @@ event PlatformWorksDeclared(
 );
 
 event PlatformWorksClaimFiled(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    address indexed claimant,
+    bytes32 evidenceHash,
+    bytes32 reasonHash,
+    string reasonURI,
+    uint64 filedAt,
+    bytes32 claimRecordHash
+);
+
+event AttributionClaimFiled(
     uint16 schemaVersion,
     uint256 indexed collectionId,
     address indexed claimant,
@@ -3285,6 +3940,8 @@ event ArtistEconomicsConsentRecorded(
     bytes32 revenueClass,
     uint8 scope,
     uint256 scopeId,
+    bytes32 payoutDesignationRecordHash, // operative at consent
+                                         // (AA-PAYOUT requirement 3)
     uint8 authorityClass,
     uint256 nonce,
     uint64 signedAt,
@@ -3405,6 +4062,7 @@ event ArtistGuardianSetUpdated(
     bytes32 indexed artistId,
     address[] guardians,
     uint32 approvalThreshold,
+    uint64 minContestSeconds,
     uint8 authorityClass,
     uint256 nonce,
     uint64 signedAt,
@@ -3505,6 +4163,18 @@ event ArtistEstateDirectiveRecorded(
     uint256 nonce,
     uint64 signedAt,
     bytes32 directiveRecordHash
+);
+
+event StewardSanctionGrantRecorded(
+    uint16 schemaVersion,
+    bytes32 indexed artistId,
+    address indexed signer,
+    bool granted,
+    bytes32 statementHash,
+    uint8 authorityClass,
+    uint256 nonce,
+    uint64 signedAt,
+    bytes32 grantRecordHash
 );
 
 event ArtistEstateActivationRequested(
@@ -3640,20 +4310,24 @@ introduced in this revision were pinned from their exact adjacent string
 preimages at authoring time; CI recomputes every value, and an unpinned
 hash reaching a release manifest is a conformance failure. For rows
 newly pinned in this revision, the exact string preimage in the adjacent
-column is normative and the value was computed from it directly.
+column is normative and the value was computed from it directly. Rows
+introduced by ADR 0013 with unpinned hash values are transitional: the
+adjacent string preimage is normative, and the value is computed from
+it by the domain-constants sweep before merge — an unpinned hash reaching a
+release manifest is a conformance failure.
 
 ### StreamArtistRegistry Hash Domains
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
 | `ARTIST_ID_DOMAIN` | `6529STREAM_ARTIST_ID_V1` | 0x17025ea630b7c9d1ea5b6bf0e6375e9190581d7ef45b70c5244b82e48143e3df | `StreamArtistRegistry` | `1` | `ARTIST_ID_DOMAIN; uint256(block.chainid); address(registry); address(firstAddress); bytes32(identityRecordHash); uint256(registrationNonce)` |
-| `ARTIST_BINDING_DOMAIN` | `6529STREAM_ARTIST_BINDING_V1` | 0x2ecc91c2aabdb535f25312ccca9a9f7f4ccda08dbaff9fac0423f236562918a0 | `StreamArtistRegistry` | `1` | `ARTIST_BINDING_DOMAIN; uint256(block.chainid); address(registry); address(core); uint256(collectionId); uint64(bindingGeneration); bytes32(artistId); address(artistAddress); bytes32(identityRecordHash); uint8(consentMode); uint8(saleConsentScope); uint8(collabPolicyMode); uint32(collabThreshold); bytes32(collaboratorSetHash); bytes32(capabilityPolicySetHash)` |
+| `ARTIST_BINDING_DOMAIN` | `6529STREAM_ARTIST_BINDING_V1` | 0x2ecc91c2aabdb535f25312ccca9a9f7f4ccda08dbaff9fac0423f236562918a0 | `StreamArtistRegistry` | `1` | `ARTIST_BINDING_DOMAIN; uint256(block.chainid); address(registry); address(core); uint256(collectionId); uint64(bindingGeneration); bytes32(artistId); address(artistAddress); bytes32(identityRecordHash); uint8(consentMode); uint8(saleConsentScope); uint8(registryImmutabilityElection); uint8(collabPolicyMode); uint32(collabThreshold); bytes32(collaboratorSetHash); bytes32(capabilityPolicySetHash)` |
 | `COLLABORATOR_SET_DOMAIN` | `6529STREAM_ARTIST_COLLABORATOR_SET_V1` | 0x8e6d305019215c4390d1d804fef71d54d3b43e361f66837f5476ecfaf83c4289 | `StreamArtistRegistry` | `1` | `COLLABORATOR_SET_DOMAIN; CollaboratorRecord[] sorted ascending by (account, role, shareLabelId)` |
 | `SANCTION_SUBJECT_DOMAIN` | `6529STREAM_ARTIST_SANCTION_SUBJECT_V1` | 0x47c9894872096248b3971f1551b555619aea8b63903f526c2da354a7286bb473 | `StreamArtistRegistry` | `1` | `SANCTION_SUBJECT_DOMAIN; uint256(block.chainid); address(core); address(finalityRegistry); uint8(scopeType); uint256(collectionId); uint256(tokenId); bytes32(scopeId); bytes32(coreFactsHash); bytes32(nonSanctionComponentsHash); bytes32(manifestURIHash); bytes32(manifestContentHash); bytes32(manifestSchemaId); bytes32(manifestCanonicalizationHash)` |
 | `SANCTION_RECORD_DOMAIN` | `6529STREAM_ARTIST_SANCTION_RECORD_V1` | 0xc41417c9bc70713f2cd138ca6fa362e0868076b835d53f51e6d710a2be40dc6b | `StreamArtistRegistry` | `1` | `SANCTION_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address(signer); uint8(authorityClass); uint8(scopeType); uint256(collectionId); uint256(tokenId); bytes32(scopeId); bytes32(sanctionSubjectHash); bytes32(statementHash); uint256(nonce); uint64(signedAt)` |
 | `PLATFORM_WORKS_DOMAIN` | `6529STREAM_PLATFORM_WORKS_DECLARATION_V1` | 0x6e2c16c800cfbfb61e5796751c487517f39063218731ac94bdf06929ec6c4441 | `StreamArtistRegistry` | `1` | `PLATFORM_WORKS_DOMAIN; uint256(block.chainid); address(registry); address(core); uint256(collectionId); bytes32(statementHash); uint64(declaredAt)` |
 | `POLICY_CONSENT_RECORD_DOMAIN` | `6529STREAM_ARTIST_POLICY_CONSENT_RECORD_V1` | 0x2eebbe574cd30197850ff70c0036755a29224da718226068ffc4d1ea2f1f45a6 | `StreamArtistRegistry` | `1` | `POLICY_CONSENT_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(mintManager); uint256(collectionId); bytes32(phaseId); bytes32(policyHash); bytes32(artistId); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
-| `ECONOMICS_CONSENT_RECORD_DOMAIN` | `6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1` | 0xc8480bd8b314f13ce90d2a190a53f2b0423cd8325d1080113867b79b79ed6fd3 | `StreamArtistRegistry` | `1` | `ECONOMICS_CONSENT_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(resolver); bytes32(revenueClass); uint8(scope); uint256(scopeId); bytes32(assignmentHash); bytes32(artistId); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
+| `ECONOMICS_CONSENT_RECORD_DOMAIN` | `6529STREAM_ARTIST_ECONOMICS_CONSENT_RECORD_V1` | 0xc8480bd8b314f13ce90d2a190a53f2b0423cd8325d1080113867b79b79ed6fd3 | `StreamArtistRegistry` | `1` | `ECONOMICS_CONSENT_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(resolver); bytes32(revenueClass); uint8(scope); uint256(scopeId); bytes32(assignmentHash); bytes32(payoutDesignationRecordHash); bytes32(artistId); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
 | `ROYALTY_FREEZE_RECORD_DOMAIN` | `6529STREAM_ARTIST_ROYALTY_FREEZE_RECORD_V1` | 0x4008ba56591f508aff1cc667a65013859ee45bb7abd5506a6176389b97e32b9c | `StreamArtistRegistry` | `1` | `ROYALTY_FREEZE_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(resolver); uint256(collectionId); bytes32(revenueClass); bytes32(expectedAssignmentHash); bytes32(artistId); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
 | `DELEGATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_DELEGATION_RECORD_V1` | 0xf6aa4346269e975cd2ca6f06c3e610c53b2e6f6505d0707ed8c3661300151bbb | `StreamArtistRegistry` | `1` | `DELEGATION_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address(delegate); uint256(collectionId); uint32(capabilities); uint64(notBefore); uint64(expiresAt); uint64(maxUses); bytes32(constraintsHash); uint256(nonce)` |
 | `ATTESTATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_ATTESTATION_RECORD_V1` | 0xa5320c9a6c82fac30567d7843275acca4cb9f68fd5bccff12411115bd197e512 | `StreamArtistRegistry` | `1` | `ATTESTATION_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(core); uint256(collectionId); uint8(subjectKind); bytes32(subjectId); bytes32(subjectStateHash); bytes32(schemaId); bytes32(statementHash); bytes32(statementURIHash); bytes32(artistId); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
@@ -3663,7 +4337,7 @@ column is normative and the value was computed from it directly.
 | `RECORD_CHAIN_DOMAIN` | `6529STREAM_ARTIST_RECORD_CHAIN_V1` | 0x2eac9cfc5ca84fbeed56ef1741255e2ec7e45f48bc5c5ceda94397aa23d2f23e | `StreamArtistRegistry` | `1` | `RECORD_CHAIN_DOMAIN; bytes32(previousRecordChainHash); bytes32(recordHash)` |
 | `CAPABILITY_POLICY_SET_DOMAIN` | `6529STREAM_ARTIST_CAPABILITY_POLICY_SET_V1` | 0x87c9af42ac310f72fd69d92f1c290288dcf159f63ed2a1fc75c7e66cc55704d0 | `StreamArtistRegistry` | `1` | `CAPABILITY_POLICY_SET_DOMAIN; CapabilityPolicyOverride[] sorted ascending by capabilityMask (disjoint, nonzero masks)` |
 | `ACCEPTANCE_RECORD_DOMAIN` | `6529STREAM_ARTIST_ACCEPTANCE_RECORD_V1` | 0x4b6ab2e018b05a2ca441cf6b0bc3e12a4674b70fd785051a0536faf074f995b4 | `StreamArtistRegistry` | `1` | `ACCEPTANCE_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(core); uint256(collectionId); uint64(bindingGeneration); bytes32(bindingHash); uint8(acceptanceKind: 1 artist, 2 collaborator); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
-| `GUARDIAN_SET_RECORD_DOMAIN` | `6529STREAM_ARTIST_GUARDIAN_SET_RECORD_V1` | 0xfb979fce9edd361cf23ba8baee900f7054451db7b563ba0ab11a5ef3621cd297 | `StreamArtistRegistry` | `1` | `GUARDIAN_SET_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address[] guardians strictly ascending; uint32(approvalThreshold); uint256(nonce); uint64(signedAt)` |
+| `GUARDIAN_SET_RECORD_DOMAIN` | `6529STREAM_ARTIST_GUARDIAN_SET_RECORD_V1` | 0xfb979fce9edd361cf23ba8baee900f7054451db7b563ba0ab11a5ef3621cd297 | `StreamArtistRegistry` | `1` | `GUARDIAN_SET_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address[] guardians strictly ascending; uint32(approvalThreshold); uint64(minContestSeconds); uint256(nonce); uint64(signedAt)` |
 | `ROTATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_ROTATION_RECORD_V1` | 0x8d7c32ae357c27253fd4480fe9d411cefc64a5634952ed8c8ebe7dcf63257ea5 | `StreamArtistRegistry` | `1` | `ROTATION_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address(oldAddress); address(newAddress); bytes32(reasonHash); uint256(nonce); uint64(stagedAt); uint64(contestEndsAt)` |
 | `IDENTITY_CONTEST_RECORD_DOMAIN` | `6529STREAM_ARTIST_IDENTITY_CONTEST_RECORD_V1` | 0x26a4221cd1625ab88b1ac279e1708a73efa176e486242b26832cdc94fe25e6bb | `StreamArtistRegistry` | `1` | `IDENTITY_CONTEST_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address(contester); bytes32(subjectRecordHash); bytes32(evidenceHash); bytes32(reasonHash); uint64(contestedAt)` |
 | `IDENTITY_RECOVERY_RECORD_DOMAIN` | `6529STREAM_ARTIST_IDENTITY_RECOVERY_RECORD_V1` | 0x459749364fd07c3a8f1998b82d893d33ef0942c30d94666b42dac1e37ba5feff | `StreamArtistRegistry` | `1` | `IDENTITY_RECOVERY_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address(oldAddress); address(newAddress); uint8(vestedAuthorityClass); bytes32(evidenceHash); bytes32(reasonHash); bytes32(supersededRecordsHash); bytes32(governanceActionId); uint64(recoveredAt)` |
@@ -3680,6 +4354,9 @@ column is normative and the value was computed from it directly.
 | `SALE_CONSENT_RECORD_DOMAIN` | `6529STREAM_ARTIST_SALE_CONSENT_RECORD_V1` | 0xf30702786801bdda286e4555272eb70024e76bd156af98fab2513886e5bdcfd1 | `StreamArtistRegistry` | `1` | `SALE_CONSENT_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(saleAdapter); address(core); uint256(collectionId); bytes32(saleId); bytes32(saleConfigHash); bytes32(artistId); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` |
 | `DEPLOYMENT_FACTS_DOMAIN` | `6529STREAM_ARTIST_DEPLOYMENT_FACTS_V1` | 0x4ee364f5ea4a8329db8f1dd8aa0877f59a6c2c9878f7239266911d7b56dd3bd7 | `StreamArtistRegistry` | `1` | `DEPLOYMENT_FACTS_DOMAIN; uint256(block.chainid); address(core); uint256(collectionId); bytes32(artistId); uint64(bindingGeneration); bytes32(bindingHash)` ([AA-DEPLOY]) |
 | `ARTIST_HISTORY_IMPORT_LEAF_DOMAIN` | `6529STREAM_ARTIST_HISTORY_IMPORT_LEAF_V1` | 0xea04da6644046a7c731e99312c32df311e81aa7e137dfc2a49c2116bb325195d | `StreamArtistRegistry` | `1` | double-hashed leaf per [AA-IMPORT]: `ARTIST_HISTORY_IMPORT_LEAF_DOMAIN; uint256(block.chainid); address(predecessorRegistry); uint8(laneKind); bytes32(laneKey); uint64(sequence); bytes32(recordHash); bytes32(recordChainHash)` |
+| `PAYOUT_DESIGNATION_RECORD_DOMAIN` | `6529STREAM_ARTIST_PAYOUT_DESIGNATION_RECORD_V1` | 0x522d15b3feccd38d699443377aff30a2f429ead391a74f9106313a0fd900379b | `StreamArtistRegistry` | `1` | `PAYOUT_DESIGNATION_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); address(payoutAccount); bytes32(previousDesignationRecordHash); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` ([AA-PAYOUT]) |
+| `STEWARD_SANCTION_GRANT_RECORD_DOMAIN` | `6529STREAM_ARTIST_STEWARD_SANCTION_GRANT_RECORD_V1` | 0x8e938520f64582e71a67db13c1e692945f6168798f060033fffca4ad733798b4 | `StreamArtistRegistry` | `1` | `STEWARD_SANCTION_GRANT_RECORD_DOMAIN; uint256(block.chainid); address(registry); bytes32(artistId); bool(granted); bytes32(statementHash); address(signer); uint8(authorityClass); uint256(nonce); uint64(signedAt)` ([AA-ESTATE] requirement 7) |
+| `ATTRIBUTION_CLAIM_RECORD_DOMAIN` | `6529STREAM_ARTIST_ATTRIBUTION_CLAIM_RECORD_V1` | 0x1680e7a03051474bbcc02fca6246f1703a2728f81a8997930877a706e2eae063 | `StreamArtistRegistry` | `1` | `ATTRIBUTION_CLAIM_RECORD_DOMAIN; uint256(block.chainid); address(registry); address(core); uint256(collectionId); address(claimant); bytes32(evidenceHash); bytes32(reasonHash); uint64(filedAt)` ([AA-DISPUTE] requirement 10) |
 
 ### StreamArtistRegistry EIP-712 Typehashes
 
@@ -3704,13 +4381,16 @@ EIP-712 domain: `name = "6529StreamArtistRegistry"`, `version = "1"`,
 | `STREAM_ARTIST_ESTATE_DIRECTIVE_TYPEHASH` | `StreamArtistEstateDirective(bytes32 artistId,uint32 grantedCapabilities,uint32 forbiddenCapabilities,bytes32 directivePayloadHash,uint256 nonce,uint64 signedAt)` | 0xa1f146b360069294c6453e91242bb36bb0245545d57b3c89e1cc73c25e953d31 | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_ATTRIBUTION_DISPUTE_TYPEHASH` | `StreamArtistAttributionDispute(address core,uint256 collectionId,uint64 bindingGeneration,uint8 disputeAction,bytes32 evidenceHash,bytes32 reasonHash,uint256 nonce,uint64 deadline)` | 0x8b535108c442947650eb1dec541e1e10f715f240a1554e488f2d4a51afb31541 | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_AUTHORIZATION_REVOCATION_TYPEHASH` | `StreamArtistAuthorizationRevocation(bytes32 artistId,bytes32 revokedDigest,uint256 revokedNonce,uint256 nonce,uint64 deadline)` | 0xd1d93f1d81c2c2b5353543093ebfca89c460de55b540dfed4a019c7ac448f214 | `StreamArtistRegistry` | `1` |
-| `STREAM_ARTIST_GUARDIAN_SET_TYPEHASH` | `StreamArtistGuardianSet(bytes32 artistId,address[] guardians,uint32 approvalThreshold,uint256 nonce,uint64 signedAt)` | 0xc1d4df790f8ec0e3a2f9171e160c06485194d9257a8f13d97c206eedfeffe7b3 | `StreamArtistRegistry` | `1` |
+| `STREAM_ARTIST_GUARDIAN_SET_TYPEHASH` | `StreamArtistGuardianSet(bytes32 artistId,address[] guardians,uint32 approvalThreshold,uint64 minContestSeconds,uint256 nonce,uint64 signedAt)` | 0x397aa6a887bb93367eab618ebf56732031f29da75f932c71ea556746542ebafe | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_CONTENT_CONSENT_TYPEHASH` | `StreamArtistContentConsent(address core,address metadataContract,uint256 collectionId,bytes32 familyId,bytes32 newStateHash,uint256 nonce,uint64 deadline)` | 0x7908964dc70554ffd5c82353690255d1a8c338be77ffc0f8fb925a27d890587d | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_CONTENT_FREEZE_TYPEHASH` | `StreamArtistContentFreeze(address core,address metadataContract,uint256 collectionId,bytes32[] lockClasses,bytes32 expectedStateHash,uint256 nonce,uint64 deadline)` | 0xfcb15d96b29996a5852bf06058ae82a7e8acaf7d7601b13fe881ada5d30fc63b | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_RECOVERY_APPROVAL_TYPEHASH` | `StreamArtistRecoveryApproval(address core,address finalityRegistry,uint256 collectionId,bytes32 finalityRecordHash,bytes32 recoveryManifestHash,uint256 nonce,uint64 deadline)` | 0x242bffdf15416a6743c57bd362683aa2933edcd42a4ef176f4e983a745eee511 | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_ESTATE_ACTIVATION_TYPEHASH` | `StreamArtistEstateActivation(bytes32 artistId,address successor,bytes32 evidenceHash,uint256 nonce,uint64 deadline)` | 0x35ad5d0278eb067119334d7d4fddd596cad723598851900a95e6ad9a94e51a8a | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_IDENTITY_REVISION_TYPEHASH` | `StreamArtistIdentityRevision(bytes32 artistId,bytes32 previousRecordHash,bytes32 revisedRecordHash,uint256 nonce,uint64 signedAt)` | 0xbfb7a5d3bc248c8eefbe4f8dfc2ea7d75d18c5cb3f2ab0d56000fd87f4b58603 | `StreamArtistRegistry` | `1` |
 | `STREAM_ARTIST_SALE_CONSENT_TYPEHASH` | `StreamArtistSaleConsent(address core,address saleAdapter,uint256 collectionId,bytes32 saleId,bytes32 saleConfigHash,uint256 nonce,uint64 deadline)` | 0x5a0d2fee9c2248ad2b0735d54beb28b1decdd1adeb65c63c4016da70ec399045 | `StreamArtistRegistry` | `1` |
+| `STREAM_ARTIST_PAYOUT_DESIGNATION_TYPEHASH` | `StreamArtistPayoutDesignation(bytes32 artistId,address payoutAccount,bytes32 previousDesignationRecordHash,uint256 nonce,uint64 signedAt)` | 0xfd30c946c20c3c9415f06991c291231ff12c255c9cc849164de44f91cb72c213 | `StreamArtistRegistry` | `1` |
+| `STREAM_STEWARD_SANCTION_GRANT_TYPEHASH` | `StreamStewardSanctionGrant(bytes32 artistId,bool granted,bytes32 statementHash,uint256 nonce,uint64 signedAt)` | 0xb48c9f264543966930485ab31e707d91b18c4f9e8644f8dd4a8cbb38c2aea9f2 | `StreamArtistRegistry` | `1` |
+| `STREAM_COLLABORATOR_IDENTITY_ACCEPTANCE_TYPEHASH` | `StreamCollaboratorIdentityAcceptance(address account,bytes32 identityRecordHash,uint256 nonce,uint64 deadline)` | 0x9a40f74dcb1bb82d3fa4b33ed2dedc82fab75d7dd6c4b04f86cf263a0b867380 | `StreamArtistRegistry` | `1` |
 
 Component type constants (values enter the same table):
 
@@ -3741,6 +4421,10 @@ keccak256("6529STREAM_ARTIST_C2PA_CREDENTIALS_V1")    0x89276c3535c7321ce7f36b82
     C2PA credential enumeration attestation schemaId (AA-C2PA)
 keccak256("6529STREAM_ARTIST_DEPLOYMENT_ATTESTATION_V1")  0x033054525a5800f9c570932b5b51ed66f5e8a0f1e7622b490ea3d5611bd08025
     deployment attestation document schemaId (AA-DEPLOY)
+keccak256("6529STREAM_ARTIST_IDENTITY_V1")            0x513c1691fa38db92e21766dd1b22bc43dfb88d3f422917796fba5bcec0bb4c17
+    artist identity document schema (AA-IDENTITY requirement 2;
+    revision documents use the same schema; registered as onchain
+    schema-registry bytes per [CMC-GENESIS-SCHEMAS])
 ```
 
 ## Event Reconstruction [AA-RECON]
@@ -3752,16 +4436,19 @@ Requirements:
    identities and authority addresses through every staged rotation,
    contest, recovery, and succession; guardian sets and rotation
    contest timelines; binding generations, collaborator sets, capability
-   policy overrides, and acceptance states; the attribution state
+   policy overrides, collaborator identity registrations and
+   acceptance links, and acceptance states; the attribution state
    timeline per collection; consent modes, sale-consent scopes,
-   platform-works declarations,
-   claims and claim counts, and contest states; policy, economics,
+   registry-immutability elections, platform-works declarations,
+   third-party claims and claim counts for both works classes, and
+   contest states; policy, economics,
    sale, and content consent
    records keyed by their hashes; content freezes; sanction records and
    their subjects; recovery approvals and unavailability findings;
    attestations with staleness inputs, including deployment
    attestations; identity revisions and the operative-document
-   timeline; delegations with grant, use, and
+   timeline; payout designations and the operative-designation
+   timeline; steward sanction grants; delegations with grant, use, and
    revocation state; successor designations, directives, and estate
    activation timelines; dormancy timelines and steward appointment
    blocks; disputes,
@@ -3835,9 +4522,12 @@ Requirements:
    ([`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
    [RSR-MARKETPLACE-ROYALTY] rule 3; protocol v1 exclusions item 1),
    of the shared-contract posture (`AA-DEPLOY` requirement 4), of the
-   `ARTIST_REGISTRY` pointer freeze state (`AA-MODULE` requirement 2),
-   and of the sale-parameter consent election and its boundary
-   (`AA-ECON` requirement 7); every acknowledgment record enters the
+   `ARTIST_REGISTRY` pointer freeze state and the registry-immutability
+   election (`AA-MODULE` requirement 2, `AA-BINDING` requirement 10),
+   of the sale-parameter consent election and its boundary
+   (`AA-ECON` requirement 7), and of the guardian holder-latency check
+   against the effective contest window (`AA-GUARD` requirement 10);
+   every acknowledgment record enters the
    same rehearsal artifact.
 3. Tooling must handle consent churn: when a `policyHash` or
    `assignmentHash` changes after a consent was gathered but before
@@ -3868,28 +4558,49 @@ Requirements:
 
 ```text
 ARTIST_CEREMONY_MAX_SIGNATURES              9
+ARTIST_CEREMONY_MAX_SIGNING_SESSIONS        4
 ARTIST_CEREMONY_MAX_ACTIVE_SIGNING_MINUTES  60 (cumulative)
 ```
 
-   The canonical ledger is: binding acceptance (1), phase policy
-   consent (2), primary economics consent (3), royalty economics
-   consent (4), intent record or waiver (5), royalty acknowledgment
-   (6), finality sanction (7), plus the recommended guardian-set
-   registration (8) and one signature of headroom (9). Active signing
+   The canonical ledger is: binding acceptance (1), guardian-set
+   registration (2), payout designation (3), phase policy consent (4),
+   primary economics consent (5), royalty economics consent (6),
+   intent record or waiver (7), royalty acknowledgment (8), finality
+   sanction (9). Sessions are the consolidation instrument
+   (ADR 0013 decision U4): a signing session is one continuous
+   tool-guided sitting in which consecutive payloads are presented and
+   signed with no out-of-band waits between them, and session-batching
+   is permitted exactly where it is security-equivalent — every
+   batched payload is separately rendered human-readable
+   (requirement 1), separately signed, and separately verified
+   onchain, so batching changes when ceremonies happen, never what a
+   signature covers. The canonical session plan is: session 1 —
+   binding acceptance, guardian set, payout designation (plus the
+   optional steward sanction grant election, `AA-ESTATE`
+   requirement 7, when taken); session 2 — policy and economics
+   consents; session 3 — intent record or waiver and the disclosure
+   acknowledgments; session 4 — the finality sanction, alone, because
+   it binds a `previewFinality`-computed subject that exists only at
+   finality time. Active signing
    time is measured from payload presentation to signature completion
-   and excludes out-of-band coordination waits, so the budget binds the
+   and excludes out-of-band coordination waits, so the budgets bind the
    EOA rehearsal leg; the contract-wallet leg (requirement 2) records
    its measurements as disclosure without a pinned budget, because
    n-of-m coordination latency is the artist's own governance. The
    budgets are Operational release-evidence ceilings: the ceremony
-   gate fails when the rehearsed canonical run exceeds either number,
+   gate (`AA-GATES` gate 13) fails when the rehearsed canonical run
+   exceeds any of the three numbers,
    and raising a budget requires an ADR, so consent friction can never
    silently grow into operator pressure to weaken consent. No combined
    mega-payload exists and none is planned: each record keeps its own
    signature so 50-year evidence stays granular, and tooling meets the
-   budget by presenting ceremonies in one sitting and submitting
+   budget by presenting ceremonies in the pinned sessions and
+   submitting
    multiple verified payloads in one transaction where the owning
-   sections permit it.
+   sections permit it. The artist-initiated proposal path stays a
+   named extension profile (`AA-BINDING`; ADR 0013 decision U4), so
+   the friction ceiling and the onboarding entry point are both
+   product facts with recorded owners, not aspirations.
 
 ## Conformance Gates [AA-GATES]
 
@@ -3898,17 +4609,31 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
 
 1. Artist binding gate: two-sided acceptance required; admin cannot
    self-accept; unverified display until acceptance; generation history
-   reconstructs from events.
+   reconstructs from events; collaborator identity registration is
+   two-sided, permanently links the `(collaboratorArtistId, account)`
+   pair at acceptance, rejects registration for an account already
+   controlling an `IDENTITY_ACTIVE` identity, and a collaborator
+   acceptance without an active collaborator identity reverts
+   (`AA-COLLAB` requirement 7).
 2. Artist sanction gate: `finalizeCollectionArtwork` and
    `finalizeArtworkScope` revert for artist-bound collections without a
    verified sanction over the exact computed subject hash; subject drift
    invalidates; `PLATFORM_WORKS` collections bind the declaration
    component; no collection finalizes with neither component; an
-   `AUTH_STEWARD` sanction records only at `COLLECTION` scope with the
-   Core mint burn block at or before `stewardAppointedAtBlock`, reverts
-   for every scoped shape and for post-appointment burn blocks, and an
+   `AUTH_STEWARD` sanction records only at `COLLECTION` scope, only
+   when the steward's effective mask includes `CAP_SANCTION` (operative
+   artist grant and explicit `TERMINAL_FREEZE`-class governance grant
+   both exercised in test), with the
+   collection burn-block activation height
+   (`collectionBurnsBlockedAtBlock`, [CMC-BURN]) nonzero and at or
+   before `stewardAppointedAtBlock`; reverts
+   for every scoped shape, for a steward without `CAP_SANCTION`, and
+   for post-appointment activation heights; an
    `AUTH_SUCCESSOR` sanction carries no such restriction
-   (`AA-SANCTION` requirement 5).
+   (`AA-SANCTION` requirement 5); and steward-completed finality of an
+   intent-less collection is exercised end to end — intent-absence
+   statement, grant-carried sanction, burn-block boundary
+   (ADR 0013 decision U4).
 3. Consent-mode gate: phase policy registration reverts for
    `CONSENT_UNSET`; `ARTIST_SIGNED_POLICY` rejects delegated consent;
    stale policy hashes authorize nothing; mint events chain to consent
@@ -3919,11 +4644,26 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
    (`AA-CONSENT` requirement 5); pause and unpause of an
    `ARTIST_SIGNED_POLICY` phase execute with no artist signature and no
    policy re-registration, in every attribution state including
-   `DISPUTED` (golden pause-then-resume test, ADR 0011 decision R6).
+   `DISPUTED` (golden pause-then-resume test, ADR 0011 decision R6);
+   a `REGISTRY_FREEZE_REQUIRED` binding blocks phase registration and
+   minting until the `ARTIST_REGISTRY` pointer freeze executes, and a
+   `REGISTRY_MUTABLE_OK` binding is unaffected (`AA-BINDING`
+   requirement 10).
 4. Economics gate: artist-bound assignment changes revert without verified
    economics consent; artist royalty freeze applies exactly once against
    the expected assignment hash; artist-majority default template and
-   split disclosure verified; where a binding elects
+   split disclosure verified; payout designation suite (`AA-PAYOUT`;
+   ADR 0013 decision U1): designation chains reject forks and stale
+   previous hashes, a designation revision re-points the next
+   settlement resolution with no re-consent, economics consent reverts
+   while a required designation is unset and binds the operative
+   designation record hash, unset designations resolve to zero and the
+   settlement mirror reverts, authority rotation changes
+   `authorityAddress` while both payout reads return the unchanged
+   designated account (the never-a-fallback negative test),
+   provisional-window designations are not operative, steward and
+   delegate designations revert, and `collaboratorPayoutAccount`
+   returns zero for an unlinked pair; where a binding elects
    `SALE_CONSENT_REQUIRED`, sale activation reverts without a verified
    sale consent over the exact `(saleId, saleConfigHash)`, a changed
    configuration invalidates, delegated sale consent is rejected on
@@ -3939,16 +4679,28 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
    verify, and consuming or revoking a nonce value in one identity's
    space never affects another identity's payloads.
 6. Lifecycle gate: rotation requires both sides and stages behind the
-   contest window; guardian approval executes early, a single-guardian
+   identity's effective contest window (the guardian-set
+   `minContestSeconds` floor raises it, a later global lowering never
+   undercuts it, and values above `MAX_GUARDIAN_MIN_CONTEST_SECONDS`
+   revert — `AA-GUARD` requirement 10); guardian approval executes
+   early, a single-guardian
    veto cancels and contests, prior-address contests stand after
-   execution, provisional records wait out the window after every
+   execution, provisional records — including payout designations and
+   steward sanction grants — wait out the window after every
    authority-vesting transition, and
    identity recovery preserves `artistId` while superseding adjudicated
    records, stages under `TERMINAL_FREEZE` with both the independent
    veto guardian and non-superseded registered guardians able to veto,
    and vests the named class (`AUTH_ARTIST` to `IDENTITY_ACTIVE`,
    `AUTH_SUCCESSOR` to `IDENTITY_SUCCEEDED` with designation-bounded
-   capabilities); guardian and arbiter contests filed during estate
+   capabilities); supersession scope is tested both ways (`AA-GUARD`
+   requirement 7): a pre-transition guardian's recovery veto counts
+   even when an arbiter-staged resolution enumerates its record, an
+   arbiter-alone resolution enumerating a pre-transition guardian set
+   is refused, the appeal-tier path for hostile pre-transition
+   guardians is exercised, and a directive forbidding
+   `CAP_GUARDIAN_SET` blocks pre-transition supersession at every
+   tier; guardian and arbiter contests filed during estate
    and dormancy notice windows void the pending vesting, contests
    filed after execution reach `IDENTITY_CONTESTED` from
    `IDENTITY_SUCCEEDED`, and dismissal restores the pre-contest
@@ -3958,14 +4710,16 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
    governance confirmation; dormancy respects inactivity and notice
    floors, cancels on any liveness, refuses completion while
    contested, records `stewardAppointedAtBlock`, and appoints stewards
-   without `CAP_POLICY_CONSENT` or `CAP_ECONOMICS_CONSENT` (the
-   explicit `TERMINAL_FREEZE`-class economics grant is exercised in
-   test); guardian sets are maintainable under `AUTH_SUCCESSOR` and
+   without `CAP_POLICY_CONSENT`, `CAP_ECONOMICS_CONSENT`, or — absent
+   an operative artist grant — `CAP_SANCTION` (both explicit
+   `TERMINAL_FREEZE`-class grants exercised in
+   test, and the artist grant path exercised with a withdrawn grant
+   rejected); guardian sets are maintainable under `AUTH_SUCCESSOR` and
    `AUTH_STEWARD` with `CAP_GUARDIAN_SET` and rejected without it;
    identity revisions chain from the operative document, reject forks,
    follow the provisional window, and drive the operative reads of
    `AA-IDENTITY` requirement 6; forbidden capability masks are
-   absolute;
+   absolute, including over steward sanction grants;
    `COLLABORATOR_QUORUM` and capability-policy overrides execute
    without the primary where designated.
 7. Dispute gate: standing enforcement, evidence requirement, blocking
@@ -3974,10 +4728,17 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
    independent veto —
    with counter-statement linkage, appeal-tier cancel of a staged
    resolution, reopen of an `ARBITER_REVOKED` generation with new
-   evidence, prospective-only revocation, arbiter-gated rebinding after
-   revocation; platform-works claims file permissionlessly with
-   evidence, update the claim count and latest-claim reads with no
-   arbiter action, `CONTESTED` blocks finality and minting, and
+   evidence and its `UPHELD` reinstatement rejected under any class
+   weaker than `TERMINAL_FREEZE` (`AA-DISPUTE` requirement 4;
+   ADR 0013 decision U4), prospective-only revocation, arbiter-gated
+   rebinding after
+   revocation; third-party claims file permissionlessly with evidence
+   for both works classes — platform-works claims and artist-bound
+   attribution claims (`AA-DISPUTE` requirement 10) — update the claim
+   count and latest-claim reads with no
+   arbiter action, stay fileable in every attribution state, never
+   change attribution state, `CONTESTED` blocks finality and minting
+   of platform works, and
    sustained contests display
    permanently.
 8. Display gate: renderer emits the `AA-DISPLAY` attribution object with
@@ -3989,7 +4750,10 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
    `latest_claim_record`, and
    `c2pa_authorship_status` across all five states, both works classes,
    staleness, the disputed override, the contested and claimed
-   platform-works cases, and one golden case per `ArtistAuthorityClass`
+   platform-works cases, the artist-bound filed-claim case, the
+   registry-unreachable golden case emitting exactly
+   `{ state: "attribution_unavailable" }` (`AA-DISPLAY` requirement 8),
+   and one golden case per `ArtistAuthorityClass`
    display string, verified against registry reads; no surface emits
    the retired
    flat fields.
@@ -4004,7 +4768,12 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
 10. Identity-archival gate: identity registration and every identity
     revision store canonical
     document bytes onchain whose keccak256 equals the committed hash;
-    oversized documents revert; binding acceptance refuses to complete
+    oversized documents revert; every stored document — registration
+    and revision, primary and collaborator — validates against the
+    pinned `6529STREAM_ARTIST_IDENTITY_V1` schema with all required
+    members and no unknown top-level members, with the worked example
+    as a fixture (`AA-IDENTITY` requirement 2; ADR 0013 decision U4);
+    binding and collaborator acceptances refuse to complete
     without the stored bytes plus a dual-family archival record with a
     verifiable receipt for the identity document (`AA-IDENTITY`
     requirements 2 and 6); binding proposals for existing identities
@@ -4015,17 +4784,28 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
     writes need none; the artist content freeze applies the named locks
     exactly once against the expected state hash; delegated content
     consent is rejected on `ARTIST_SIGNED_POLICY` collections
-    (`AA-CONTENT`).
+    (`AA-CONTENT`); entropy configuration changes and fresh-entropy
+    redraws for minted artist-bound tokens revert without verified
+    content consent over the exact resulting entropy state, with the
+    coordinator-side enforcement mirrored in
+    [`stream-entropy-coordinator.md`](stream-entropy-coordinator.md)
+    (ADR 0013 decision U4).
 12. Recovery-approval gate: an `artworkBytesChanged = true` recovery for
     an artist-bound collection reverts without a verified
     `StreamArtistRecoveryApproval` over the exact finality record and
     recovery manifest, or a recorded unavailability finding plus its
     notice window; an artist-authority action during the window voids
-    the fallback (`AA-RECOVERY`).
+    the fallback (`AA-RECOVERY`); an `AUTH_STEWARD` approval for a
+    `TOKEN`, `RELEASE`, `SEASON`, or `VIEW` scoped finality record
+    reverts, and a collection-scope steward approval reverts absent
+    `CAP_SANCTION` or the burn-block/appointment check
+    (ADR 0013 decision U4).
 13. Ceremony-tooling gate: the rehearsed end-to-end onboarding artifact
-    of `AA-TOOLING` exists in release evidence with ceremony-count and
+    of `AA-TOOLING` exists in release evidence with ceremony-count,
+    signing-session, and
     latency measurements at or under the pinned ceremony budgets
-    (`AA-TOOLING` requirement 6), includes the Safe-class
+    (`AA-TOOLING` requirement 6; ADR 0013 decision U4), includes the
+    Safe-class
     contract-wallet artist leg with separately recorded latencies and
     the tool's supported wallet classes, carries every required
     acknowledgment record (royalty term, shared-contract posture,
@@ -4056,7 +4836,8 @@ intentional absence, not deferral (per
 2. Identity vetting. The registry proves address control and consent
    chains; it does not prove that a human is who a display name claims.
    Institutional verification lives in attestation records and offchain
-   diligence.
+   diligence; the blessed evidence pattern is `AA-IDENTITY`
+   requirement 7.
 3. Payment custody. The registry never holds, routes, or releases funds;
    split wallets and escrow are owned by
    [`revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md),

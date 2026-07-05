@@ -3,7 +3,11 @@
 Specification status: Draft. This document follows
 [`docs/spec-policy.md`](spec-policy.md); the decisions formerly tracked
 inline are resolved by
-[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md) and recorded
+[ADR 0009](adr/0009-protocol-v1-open-question-resolutions.md),
+[ADR 0010](adr/0010-world-class-spec-pass.md),
+[ADR 0011](adr/0011-world-class-pass-round-2.md),
+[ADR 0012](adr/0012-world-class-pass-round-3.md), and
+[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the dedicated entropy subsystem that moves
@@ -14,8 +18,12 @@ below are classified by permanence class per `docs/spec-policy.md`, not by
 launch phase.
 
 `StreamCore` should remain the canonical ERC-721 contract — with no
-`ERC721Enumerable` storage; `totalSupply()` stays and enumeration derives
-from `Transfer` events (ADR 0012 decision T10) — and own token minting,
+`ERC721Enumerable` storage; `totalSupply()` stays, and archival
+enumeration is served by the three state-only lanes of the enumeration
+posture home, [LTA-ENUMERATION] in
+`docs/stream-long-term-architecture.md`: state exports, sequential-ID
+iteration over live state, and event replay (ADR 0012 decision T10) —
+and own token minting,
 ownership, approvals, and token-to-collection identity. Entropy
 generation, provider callbacks,
 request lifecycle, delivery retries, recovery policy, and final token seed
@@ -273,6 +281,7 @@ Core should emit:
 
 ```solidity
 event EntropyCoordinatorUpdated(
+    uint16 schemaVersion,
     address indexed oldCoordinator,
     address indexed newCoordinator
 );
@@ -795,10 +804,11 @@ the entropy request in the mint transaction) or `OWNER_WINDOW = 1` (the
 reveal owner requests within the SLO window). The mode values are pinned
 in the Numeric ID Catalog.
 
-## Domain Constants
+## Domain Constants [EC-DOMAINS]
 
 This document is the normative home of the coordinator-owned hashing
-domains (ADR 0010 decision D3.1). Ordered `abi.encode` input lists are
+domains (ADR 0010 decision D3.1; anchor per ADR 0013 decision U9).
+Ordered `abi.encode` input lists are
 defined once, in the owning sections referenced below; the checked
 domain-constants table in
 [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
@@ -809,6 +819,7 @@ mirrors these rows, and release tooling computes and pins the hash values.
 | `STREAM_ENTROPY_REQUEST_V1` | `6529STREAM_ENTROPY_REQUEST_V1` | 0xf8ea7ebca4196e280c0b42e55e16736c8e836382a8859d151eb826edbecb7106 | `StreamEntropyCoordinator` | `1` | [Request Flow](#request-flow) |
 | `STREAM_ENTROPY_SEED_V1` | `6529STREAM_ENTROPY_SEED_V1` | 0x88e816cf6b63abe50b33fdfd5033b9e0f12b8e8ba3925c57c3954ecf8caca69f | `StreamEntropyCoordinator` | `1` | [Fulfillment Flow](#fulfillment-flow) |
 | `FRESH_RECOVERY_POLICY_DOMAIN` | `6529STREAM_ENTROPY_FRESH_RECOVERY_POLICY_V1` | 0x903ca537e686c7d615b886dbd8d81e240e58123e9918bc89ccabb64f2fe9a327 | `StreamEntropyCoordinator` | `1` | [Storage Model](#storage-model) |
+| `FRESH_RECOVERY_STEPS_DOMAIN` | `6529STREAM_ENTROPY_FRESH_RECOVERY_STEPS_V1` | 0x8a9c948a061bd07713c5f797237b5d213f2f7cd133ea20f9e7a51af3fb204b9e | `StreamEntropyCoordinator` | `1` | interior composite; [Storage Model](#storage-model) |
 | `STREAM_ENTROPY_SCOPE_SUBJECT_V1` | `6529STREAM_ENTROPY_SCOPE_SUBJECT_V1` | 0xef9a2afab4bd9a15841ca37c46b3cdb891a47121a1bfab0201f386d0a7b77490 | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 | `STREAM_ENTROPY_SCOPE_REQUEST_V1` | `6529STREAM_ENTROPY_SCOPE_REQUEST_V1` | 0xda5ba2e7e598a368f9e05c751fa0bbce4620c6fe030d47737c9eeb15099a3b81 | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 | `STREAM_ENTROPY_SCOPE_SEED_V1` | `6529STREAM_ENTROPY_SCOPE_SEED_V1` | 0x6111edc8a4ae25589e49af170892e9083107d07df6b48b7201458e32ba38365b | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
@@ -829,8 +840,42 @@ The `GTP_*` parameter-identifier rows and the scope-ranking row
 string preimages shown, and the rows join the checked mirror table like
 every other coordinator domain.
 
+The `FRESH_RECOVERY_STEPS_DOMAIN` row (ADR 0013 decision U7) is an
+interior-composite domain whose hash value release tooling computes and
+pins from exactly the string preimage shown; the row joins the checked
+mirror table like every other coordinator domain.
+
 Provider-side raw randomness compression domains are owned by
 [`docs/stream-entropy-providers.md`](stream-entropy-providers.md).
+
+## Event Schemas [EC-EVENTS]
+
+This document is the normative home of the entropy-subsystem event
+vocabulary it defines, including the Core-emitted
+`EntropyCoordinatorUpdated` and the parameter-named GGP/GTP alias
+events. Every event block in this document is the production-exact
+signature of its event, and the machine-readable event catalog must
+reproduce these
+signatures — `schemaVersion` position, field order, and indexed
+allocation — exactly (ADR 0013 decision U7). The conformance-matrix
+"snippet is shorthand" rule covers citations of these events in other
+documents, never this home.
+
+Requirements [EC-EVENTS]:
+
+1. Every non-standard event carries `uint16 schemaVersion` as its
+   leading declaration field — declared before every indexed parameter,
+   so it is also the first data-section field — and declares at most
+   three indexed parameters. Genesis emits every such event with
+   `schemaVersion = 1`.
+2. The only exempt signatures are the standard ERC-4906 refresh events
+   (`MetadataUpdate` / `BatchMetadataUpdate`), emitted by Core with
+   their standard signatures and named in the conformance-matrix
+   standard-event exemption list.
+3. The scope-keyed mirror events named by [EC-SCOPE] rule 6
+   (`ScopeEntropyRequestFailed`, `StaleScopeEntropyFulfillment`) carry
+   their token event's exact field shape — `schemaVersion` included —
+   with `scopeId` in place of `tokenId`.
 
 ## Storage Model
 
@@ -855,8 +900,12 @@ struct CollectionEntropyConfig {
 
 Every lifecycle block-count window in this storage model —
 `requestTimeoutBlocks`, `FreshRecoveryStep.notBeforeBlocks`, and the
-reveal policy's `requestSLOBlocks` — is a frozen declared floor applied
-through the effective-window rule of [EC-TIME] (ADR 0012 decision T1).
+reveal policy's `requestSLOBlocks` — is a collection timing policy: a
+frozen declared floor applied through the effective-window rule of
+[EC-TIME] (ADR 0012 decision T1). Collection timing policies are not
+Governed Time Parameters and sit outside the GTP closed world: no
+parameter identifier, cadence probe, or mirror-row obligation attaches
+to a frozen per-collection declaration (ADR 0013 decision U9).
 
 Fresh recovery policy is separate from the main config because most genesis
 collections should not use it. If `maxFreshRecoveryAttempts > 0`, the linked
@@ -885,7 +934,10 @@ struct FreshRecoveryPolicy {
 The policy hash is deterministic:
 
 ```solidity
-bytes32 stepsHash = keccak256(abi.encode(steps));
+bytes32 stepsHash = keccak256(abi.encode(
+    FRESH_RECOVERY_STEPS_DOMAIN,
+    steps
+));
 
 bytes32 freshRecoveryPolicyHash = keccak256(abi.encode(
     FRESH_RECOVERY_POLICY_DOMAIN,
@@ -903,6 +955,15 @@ bytes32 freshRecoveryPolicyHash = keccak256(abi.encode(
 `steps` must be encoded as an ordered `FreshRecoveryStep[]` with `abi.encode`.
 Packed encodings, JSON encodings, and display-order-dependent hashes are not
 valid.
+
+`stepsHash` is a named interior composite and carries its own versioned
+domain, `FRESH_RECOVERY_STEPS_DOMAIN`, bound as the leading field of the
+steps encoding, because every named composite hash is domain-separated
+even when it is consumed only inside a domained outer preimage — the
+same interior-composite discipline the mint and revenue layers apply
+(ADR 0011 decision R12; ADR 0012 decision T6; ADR 0013 decision U7). It
+remains an interior value: never a standalone key, event topic, or
+signed field.
 
 Incident declarer requirements [EC-INCIDENT-ROLE]:
 
@@ -1015,6 +1076,7 @@ The coordinator should maintain provider lifecycle state:
 
 ```solidity
 event EntropyProviderStateUpdated(
+    uint16 schemaVersion,
     address indexed provider,
     ProviderState oldState,
     ProviderState newState,
@@ -1131,6 +1193,7 @@ event FreshRecoveryPolicyConfigured(
 );
 
 event FreshRecoveryPolicyFrozen(
+    uint16 schemaVersion,
     bytes32 indexed policyId,
     bytes32 indexed policyHash
 );
@@ -1202,6 +1265,28 @@ Rules [EC-CONFIG]:
     must reject an `ASYNC` collection whose reveal policy is undeclared
     (ADR 0011 decision R8). The reveal policy freezes with the entropy
     config.
+14. Artist consent boundary (ADR 0013 decision U4). For an artist-bound
+    collection
+    ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+    [AA-BINDING]), the entropy configuration is content, not operations:
+    the values it fixes — provider, security class, `collectionSalt`,
+    `providerConfigHash`, and the linked fresh-recovery policy — are
+    seed inputs that determine what sold generative tokens render. The
+    artist's recorded collection consent must bind the entropy
+    configuration hash in force at consent; the binding mechanism and
+    consent payloads are owned by the artist-authority home. From the
+    first minted token until executed finality, the coordinator must
+    apply an entropy config change — ordinary or incident-path — only
+    with a verified artist content consent over the resulting config
+    state, checked through the consent surface owned by [AA-CONTENT]
+    (storage-side mirror [CMC-ARTIST-CONTENT-VETO] in
+    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md));
+    where no artist authority is live, the [AA-RECOVERY] requirement 2
+    unavailability-finding fallback applies. Entropy-admin authority
+    alone never suffices for these collections. Operational overlays
+    stay outside this boundary: GGP/GTP retunes (rule 12, [EC-TIME]
+    rule 5), reveal-fee retuning ([EC-REVEAL] rule 9), and escrow
+    funding change no seed input and need no consent.
 
 Freeze:
 
@@ -1240,7 +1325,8 @@ Requirements [EC-TIME]:
    `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` are coordinator-hosted GTPs
    under the [LTA-GTP] pattern: storage-backed host values paired with
    deploy-time immutable floors, identified by the `GTP_`-prefixed
-   parameter identifiers in the [Domain Constants](#domain-constants)
+   parameter identifiers in the
+   [Domain Constants](#domain-constants-ec-domains)
    table, recorded in the release manifest with genesis value, floor,
    host, and pinned wall-clock intent (seconds at the genesis cadence),
    and named members of the repricing/consensus-timing review checklist
@@ -1260,8 +1346,10 @@ Requirements [EC-TIME]:
       ENTROPY_RECOVERY_STEP_DELAY_BLOCKS)` for each
       `FreshRecoveryStep`, counted from the block of the incident
       action (or exhausted prior step) that made the step eligible.
-   The frozen declaration is never the parameter: it is the
-   collection's promised minimum, bounding every retune from below, so
+   The frozen declaration is never the parameter: it is a collection
+   timing policy (ADR 0013 decision U9) — the collection's promised
+   minimum, bounding every retune from below, with none of the GTP
+   closed world's identifier, probe, or mirror-row obligations — so
    the pre-lapse public-request exclusivity (ADR 0009 decision 22) and
    the original provider's declared patience hold for the life of the
    collection.
@@ -1369,6 +1457,7 @@ Event:
 
 ```solidity
 event EntropyRegistered(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     uint256 indexed tokenId,
     address indexed mintedTo,
@@ -1453,6 +1542,7 @@ Event:
 
 ```solidity
 event EntropyRequested(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     uint256 indexed tokenId,
     address indexed provider,
@@ -1947,9 +2037,24 @@ Requirements [EC-REVEAL]:
    the token remains `REGISTERED`, enters the SLO window, and the reveal
    owner or fallback completes the request. This preserves the
    never-brick posture — mint success never depends on provider uptime.
-   Sale-adapter conformance for the attempt-and-catch call shape is
-   owned by
-   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   The attempt is a named bounded call, never an adjective (ADR 0013
+   decision U7): because its call chain — adapter to coordinator to
+   provider adapter to upstream source — reaches third-party provider
+   code inside the collector's purchase transaction, the sale adapter
+   forwards at most the adapter-held `REVEAL_ATTEMPT_GAS_LIMIT`
+   Governed Gas Parameter, with the EIP-150 63/64 parent precheck and
+   try/catch isolation, per the adapter external-call rule
+   [SSA-ADAPTER] rule 9. Sale-adapter conformance for the
+   attempt-and-catch call shape and that parameter's normative home,
+   floor, and manifest pinning are owned by
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+   [SSA-REVEAL]; this document guarantees the coordinator side: the
+   full `requestEntropy` gas envelope — including the configured
+   provider's quote and request calls through upstream request
+   submission — is measured per genesis provider and published in the
+   release manifest, so the bound and its floor are sized with a
+   stated margin and a pathological upstream cannot inflate purchase
+   gas beyond the cap.
    `AT_MINT` is the default posture for priced sales of `ASYNC`
    collections; declaring `OWNER_WINDOW` instead requires a recorded
    rationale in the reveal operations manifest.
@@ -1979,8 +2084,10 @@ Requirements [EC-REVEAL]:
 5. Funding: for priced sale kinds, the sale layer escrows
    `revealFeePerTokenWei` per minted token into the coordinator's
    per-collection reveal-fee escrow through `fundRevealFeeEscrow`; the
-   priced line item, its interaction with exact-payment rules, and
-   settlement ordering are owned by
+   priced line item, its buyer-side maxFee/pull-credit binding under
+   fee drift (ADR 0013 decision U6), and settlement ordering — for
+   escrow-holding and deferred sale kinds, escrowed at purchase and
+   reconciled at finalization — are owned by
    [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
    Escrow funding flows from the settlement adapter directly to the
    coordinator, keeping the mint manager non-payable
@@ -2023,8 +2130,14 @@ Requirements [EC-REVEAL]:
    live quoted fee (rule 6). The frozen promises — request mode, reveal
    owner role, declared SLO — never move with it, already-accrued
    escrow is never restated, and the sale layer charges the live
-   declared value per mint; the priced line item is owned by
-   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md).
+   declared value per mint under its buyer-side maxFee/pull-credit
+   binding: the mutable fee never sits inside an exact-match
+   `msg.value` equation, so a retune landing between a buyer's offchain
+   quote and inclusion cannot fail a purchase whose payment still
+   covers the live value (ADR 0013 decision U6). The priced line item
+   and that binding are owned by
+   [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
+   [SSA-REVEAL].
    Where drift outruns accrual, the remedy chain is the rule 8 margin
    alarm, a fee update for future mints, and the permissionless
    `fundRevealFeeEscrow` top-up for the shortfall — a monitored, funded
@@ -2177,6 +2290,7 @@ Event:
 
 ```solidity
 event EntropyFinalized(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
     uint256 indexed tokenId,
     address indexed provider,
@@ -2329,6 +2443,21 @@ Rules [EC-INCIDENT]:
 11. Scope entropy incidents follow every rule above through the
     scope-keyed equivalents [EC-SCOPE], with the same coordinator-state,
     probe, and evidence requirements.
+12. Artist consent for fresh redraws (ADR 0013 decision U4). A fresh
+    recovery request re-randomizes what a sold generative token — or a
+    committed scope outcome — renders or resolves to. For an
+    artist-bound collection
+    ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
+    [AA-BINDING]), creating the fresh request, token-keyed or
+    scope-keyed, requires — in addition to every rule above and the
+    frozen policy's declarer role — a verified artist content consent
+    over the redraw through the consent surface owned by [AA-CONTENT],
+    or the [AA-RECOVERY] requirement 2 unavailability-finding fallback
+    when no artist authority is live. The consent or finding record
+    hash must be part of the evidence bundle committed by the
+    `EntropyRecoveryRequested` event's `evidenceHash`. The frozen
+    fresh-recovery policy and the incident declarer role alone never
+    authorize a redraw of an artist-bound work.
 
 `ENTROPY_RESULT_PROBE_GAS_LIMIT` carries the release-manifest
 failure-direction class `FORWARDING_CAP` ([LTA-GGP] requirement 10): it
@@ -2389,6 +2518,7 @@ Stale fulfillments after incident recovery should not mutate token seed:
 
 ```solidity
 event StaleEntropyFulfillment(
+    uint16 schemaVersion,
     uint256 indexed tokenId,
     address indexed provider,
     bytes32 requestKey,
@@ -2636,6 +2766,11 @@ practical.
     frozen reveal promises and accrued escrow are untouched, and a
     fee-drift shortfall is a monitored, permissionlessly fundable
     condition [EC-REVEAL] (ADR 0012 decision T7).
+30. For an artist-bound collection, no entropy config change after the
+    first minted token and no fresh recovery request executes without
+    a verified artist content consent or the recorded
+    unavailability-finding fallback [EC-CONFIG] rule 14, [EC-INCIDENT]
+    rule 12 (ADR 0013 decision U4).
 
 ## Security Considerations
 
@@ -2712,7 +2847,10 @@ Collectors and auditors should be able to reconstruct:
 10. reveal policy, escrow funding, escrow draws, fee retuning, and
     fallback engagement [EC-REVEAL];
 11. governed gas and time parameter value history [EC-REGGAS]
-    [EC-TIME].
+    [EC-TIME];
+12. for artist-bound collections, the artist consent or
+    unavailability-finding evidence behind every entropy config change
+    and fresh redraw [EC-CONFIG] rule 14, [EC-INCIDENT] rule 12.
 
 ## Bytecode Impact
 
@@ -2826,7 +2964,10 @@ Coordinator config tests:
 7. `maxFreshRecoveryAttempts > 0` is rejected unless a frozen
    `FreshRecoveryPolicy` exists and its hash matches collection config.
 8. Fresh recovery policy steps, incident declarer role, provider epochs, and
-   reason schema are included in the policy hash.
+   reason schema are included in the policy hash; `stepsHash` binds
+   `FRESH_RECOVERY_STEPS_DOMAIN` as the leading field of the steps
+   encoding, and an undomained steps encoding fails the golden preimage
+   test (ADR 0013 decision U7).
 9. `INSTANT` configuration is rejected unless the collection declares
    `EntropySecurityClass.LOW_SECURITY`; the declared class freezes with
    the config and is readable through `collectionEntropyConfig`.
@@ -2843,6 +2984,12 @@ Coordinator config tests:
     collection without touching its config, policy hashes, provider
     epoch, or seeds, and no action shortens any window below the frozen
     declaration or the floor.
+13. Artist consent boundary: on an artist-bound collection, an entropy
+    config change after the first minted token without a verified
+    artist content consent reverts; the same change with consent (or a
+    recorded unavailability finding) proceeds; Operational retunes —
+    GGP/GTP values and the reveal fee — need no consent [EC-CONFIG]
+    rule 14 (ADR 0013 decision U4).
 
 Request tests:
 
@@ -2943,6 +3090,11 @@ Incident recovery tests:
 17. The result-probe parameter's named health probe records runs on
     itself and treats out-of-gas, revert, and malformed returndata as
     failing runs (ADR 0012 decision T1).
+18. For an artist-bound collection, a fresh recovery request without a
+    verified artist content consent or a recorded unavailability
+    finding reverts; with one, the consent or finding record hash is
+    part of the bundle committed by the emitted `evidenceHash`
+    [EC-INCIDENT] rule 12 (ADR 0013 decision U4).
 
 Scope entropy tests:
 
@@ -3008,6 +3160,13 @@ Reveal operation tests:
 10. A declared `requestSLOBlocks` below the reveal owner's recorded
     worst-case holder latency plus margin fails the
     reveal-operations-manifest gate (ADR 0012 decision T5).
+11. The measured `requestEntropy` gas envelope — through the configured
+    provider's quote and request calls to upstream submission — is
+    published per genesis provider in the release manifest, and the
+    sale-side `REVEAL_ATTEMPT_GAS_LIMIT` bound sized from it caps the
+    at-mint attempt: an attempt under the cap with a pathological
+    upstream still fails caught, leaving the token `REGISTERED`
+    [EC-REVEAL] rule 2 (ADR 0013 decision U7).
 
 Provider adapter tests:
 
@@ -3128,6 +3287,23 @@ Renderer integration tests:
     derivation [EC-SCOPE-RAFFLE] — with the sale-side profile home in
     [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md)
     (ADR 0012 decision T6).
+20. Event schemas in this home are production-exact with a leading
+    `uint16 schemaVersion` on every non-standard event [EC-EVENTS];
+    `stepsHash` carries its own interior-composite domain
+    `FRESH_RECOVERY_STEPS_DOMAIN`; per-collection frozen lifecycle
+    declarations are collection timing policies outside the GTP closed
+    world; and the at-mint reveal attempt is bounded by the sale-side
+    `REVEAL_ATTEMPT_GAS_LIMIT` Governed Gas Parameter with the
+    coordinator's measured `requestEntropy` envelope published for its
+    sizing [EC-REVEAL] rule 2 (ADR 0013 decisions U7 and U9).
+21. Entropy configuration and fresh redraws for artist-bound
+    collections join the artist consent/veto surface: config changes
+    after first mint and fresh recovery requests require verified
+    artist content consent or the recorded unavailability-finding
+    fallback, and the reveal-fee line item binds buyer-side as
+    maxFee/pull-credit in the sales home [EC-CONFIG] rule 14,
+    [EC-INCIDENT] rule 12, [EC-REVEAL] rules 5 and 9 (ADR 0013
+    decisions U4 and U6).
 
 These resolutions are normative; the requirements in the body of this
 document already state each decided behavior.
