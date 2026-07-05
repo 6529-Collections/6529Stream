@@ -229,9 +229,12 @@ and checksum artifacts reference them; document titles and content are
 authoritative for framing. Renames, if desired, are a separate mechanical
 change coordinated with the release-artifact generators.
 
-Every repository document outside the inventory above is a baseline or
-operational record, not a specification, and must carry this header block
-directly beneath its title (ADR 0012 decision T9):
+Every Markdown document under `docs/` outside the inventory above —
+excluding ADRs under `docs/adr/` (decision records governed by this
+policy), this policy itself, the open-question register, and index or
+README files — is a baseline or operational record, not a specification,
+and must carry this header block directly beneath its title (ADR 0012
+decision T9):
 
 ```text
 Baseline record — not a specification. This document describes as-built

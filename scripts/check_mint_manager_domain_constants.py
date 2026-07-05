@@ -270,7 +270,11 @@ def _extract_marked_section(markdown: str, start_marker: str, end_marker: str) -
     if start == -1:
         raise MintManagerDomainError(f"missing section marker: {start_marker}")
     end = markdown.find(end_marker, start + len(start_marker))
-    return markdown[start:] if end == -1 else markdown[start:end]
+    if end == -1:
+        raise MintManagerDomainError(
+            f"missing section end marker {end_marker!r} after {start_marker!r}"
+        )
+    return markdown[start:end]
 
 
 def validate_revenue_domain_prefixes(repo_root: Path) -> None:
@@ -289,6 +293,11 @@ def validate_revenue_domain_prefixes(repo_root: Path) -> None:
             if headers is None or "String preimage" not in headers:
                 headers = cells
                 continue
+            if len(cells) != len(headers):
+                raise MintManagerDomainError(
+                    f"malformed table row in {doc_path}: expected "
+                    f"{len(headers)} cells, got {len(cells)}: {line!r}"
+                )
             row = dict(zip(headers, cells))
             preimage = row.get("String preimage", "")
             if re.fullmatch(r"[A-Z0-9_]+", preimage) and not preimage.startswith(
