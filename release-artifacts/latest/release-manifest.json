@@ -71,14 +71,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:4cec8934e7078c9c9df560c386bf378fb62096f8807adb0b593644c35b3b16a9",
-        "size_bytes": 95092,
+        "sha256": "sha256:b1df1227194b98655428c485184f26639957f888801776bcc26d19f6d4229ef2",
+        "size_bytes": 96749,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:b5c23361702460464888b7d47cbb2c9ee1629b0b339896e1ce5ddacbab674a62",
-        "size_bytes": 91912
+        "sha256": "sha256:022b210edf23758648c0cd9c01bf51cfbd683ef964ddf60988e17eb5cc9539ca",
+        "size_bytes": 93562
       }
     },
     "release_candidate_lockfile": {
@@ -122,7 +122,7 @@
     },
     "source_verification_inputs": {
       "path": "release-artifacts/latest/source-verification-inputs.json",
-      "sha256": "sha256:e517b2ff5b2a78ecd42bec4775d152a0dffc223732b56740266cbc5edae91c2e",
+      "sha256": "sha256:a497666d5b942bf68722e42e1123e9c3bcfbc2ea47f620539fae08aeeee50e4f",
       "size_bytes": 95203,
       "schema_version": "6529stream.source-verification-inputs.v1"
     },
@@ -155,7 +155,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f3d08e0cae4f67d36589f30d65e744c325d4e41f188f6fb4653b8bdeeed84ffc",
+      "sha256": "sha256:ddc367618deaac94692d906c0dbe196d16b5ab53b5ec1dd5d9096c4eadef9232",
       "size_bytes": 24573,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2323,8 +2323,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:f2bc1a3dce691c0347e0c75fc21604cb487057048d16f2f399beb0953cb63353",
-      "size_bytes": 93172
+      "sha256": "sha256:65989dd28ebfdefa3bc14f53a742017cd1591a9f9ec617a9256730b34cea8577",
+      "size_bytes": 94870
     },
     "governance_docs": [
       {

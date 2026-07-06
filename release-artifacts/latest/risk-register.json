@@ -413,7 +413,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:e517b2ff5b2a78ecd42bec4775d152a0dffc223732b56740266cbc5edae91c2e"
+          "sha256": "sha256:a497666d5b942bf68722e42e1123e9c3bcfbc2ea47f620539fae08aeeee50e4f"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
