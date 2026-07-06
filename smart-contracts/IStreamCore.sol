@@ -9,6 +9,14 @@ interface IStreamCore {
         uint256 collectionId;
     }
 
+    /// @notice Emitted when a prepared-mint abort rolls back a prior token identity registration.
+    /// @dev Compensates the earlier `TokenCollectionRegistered`: an event-only reconstructor
+    ///      reverses that registration for the reused token ID. A later re-allocation of the
+    ///      same ID emits a fresh `TokenCollectionRegistered` for its new collection.
+    event TokenCollectionRegistrationReverted(
+        uint16 schemaVersion, uint256 indexed tokenId, uint256 indexed collectionId
+    );
+
     function isCoreContract() external view returns (bool);
 
     function newCollectionIndex() external view returns (uint256);

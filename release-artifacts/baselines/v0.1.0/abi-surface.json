@@ -8204,12 +8204,12 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "artifact_path": "out/StreamCore.sol/StreamCore.json",
-      "abi_sha256": "sha256:012450e5b583df5c698220d412d7882eed3f3a9a4788d913c5f861e76889319f",
-      "abi_entries": 142,
+      "abi_sha256": "sha256:3fac75f1ecce40be43b8dc5ae7a91f77d3566213634c6242eb1ce93332edf1bc",
+      "abi_entries": 143,
       "entry_counts": {
         "constructors": 1,
         "functions": 87,
-        "events": 13,
+        "events": 14,
         "errors": 41,
         "fallbacks": 0,
         "receives": 0
@@ -10598,6 +10598,33 @@
                 "type": "uint256",
                 "internal_type": "uint256",
                 "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+            "kind": "event",
+            "name": "TokenCollectionRegistrationReverted",
+            "signature": "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
               }
             ]
           },
@@ -26842,12 +26869,12 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:0759b6e80838c59125302f7945db41b712ecfbee169b364eb52560341aac4791",
-      "abi_entries": 30,
+      "abi_sha256": "sha256:4d66ce46e274843c05cbdf32acf8ccbac22629f7af612e1a98fd59f426777c7f",
+      "abi_entries": 31,
       "entry_counts": {
         "constructors": 0,
         "functions": 30,
-        "events": 0,
+        "events": 1,
         "errors": 0,
         "fallbacks": 0,
         "receives": 0
@@ -27599,7 +27626,35 @@
             "state_mutability": "view"
           }
         ],
-        "events": [],
+        "events": [
+          {
+            "key": "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+            "kind": "event",
+            "name": "TokenCollectionRegistrationReverted",
+            "signature": "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              }
+            ]
+          }
+        ],
         "errors": [],
         "fallbacks": [],
         "receives": []

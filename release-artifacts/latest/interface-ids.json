@@ -635,7 +635,7 @@
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
       "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
-      "abi_sha256": "sha256:0759b6e80838c59125302f7945db41b712ecfbee169b364eb52560341aac4791",
+      "abi_sha256": "sha256:4d66ce46e274843c05cbdf32acf8ccbac22629f7af612e1a98fd59f426777c7f",
       "interface_id": "0xba77d620",
       "interface_id_source": "selector_xor",
       "computed_selector_xor": "0xba77d620",

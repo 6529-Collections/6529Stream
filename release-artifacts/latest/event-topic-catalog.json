@@ -113,6 +113,38 @@
       ]
     },
     {
+      "topic0": "0x07f05274cbe2dc6ec5d7f13cc31ed27bbaa2350da4d7fc3e254e220a1109dd81",
+      "signature": "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+      "name": "TokenCollectionRegistrationReverted",
+      "anonymous": false,
+      "inputs": [
+        {
+          "index": 0,
+          "name": "schemaVersion",
+          "type": "uint16",
+          "indexed": false,
+          "internal_type": "uint16"
+        },
+        {
+          "index": 1,
+          "name": "tokenId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        },
+        {
+          "index": 2,
+          "name": "collectionId",
+          "type": "uint256",
+          "indexed": true,
+          "internal_type": "uint256"
+        }
+      ],
+      "emitted_by": [
+        "StreamCore"
+      ]
+    },
+    {
       "topic0": "0x08d3619b7b7042b0abc676395bb4c030f0ffdc15d2e1ecdd507e6c933fd5a5f1",
       "signature": "ERC20Released(bytes32,address,address,address,uint256,uint256,uint256)",
       "name": "ERC20Released",
@@ -7139,6 +7171,35 @@
               "name": "collectionSerial",
               "type": "uint256",
               "indexed": false,
+              "internal_type": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "TokenCollectionRegistrationReverted",
+          "signature": "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+          "topic0": "0x07f05274cbe2dc6ec5d7f13cc31ed27bbaa2350da4d7fc3e254e220a1109dd81",
+          "anonymous": false,
+          "inputs": [
+            {
+              "index": 0,
+              "name": "schemaVersion",
+              "type": "uint16",
+              "indexed": false,
+              "internal_type": "uint16"
+            },
+            {
+              "index": 1,
+              "name": "tokenId",
+              "type": "uint256",
+              "indexed": true,
+              "internal_type": "uint256"
+            },
+            {
+              "index": 2,
+              "name": "collectionId",
+              "type": "uint256",
+              "indexed": true,
               "internal_type": "uint256"
             }
           ]

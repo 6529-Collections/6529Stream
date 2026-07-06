@@ -301,6 +301,13 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         uint256 collectionSerial,
         uint16 schemaVersion
     );
+    /// @notice Emitted when a prepared-mint abort rolls back a prior token identity registration.
+    /// @dev Compensates the earlier `TokenCollectionRegistered`: an event-only reconstructor
+    ///      reverses that registration for the reused token ID. A later re-allocation of the
+    ///      same ID emits a fresh `TokenCollectionRegistered` for its new collection.
+    event TokenCollectionRegistrationReverted(
+        uint16 schemaVersion, uint256 indexed tokenId, uint256 indexed collectionId
+    );
 
     // constructor
     constructor(
@@ -556,6 +563,9 @@ contract StreamCore is ERC721, Ownable, IERC4906, IERC2981 {
         delete tokenIdentityRecords[tokenId];
         delete tokenData[tokenId];
         delete tokenToHash[tokenId];
+        emit TokenCollectionRegistrationReverted(
+            _IDENTITY_EVENT_SCHEMA_VERSION, tokenId, collectionId
+        );
     }
 
     /// @notice Returns pending prepared-mint state for a token, if any.

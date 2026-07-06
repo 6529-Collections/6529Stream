@@ -60,6 +60,8 @@ contract StreamCoreIdentityTest is CharacterizationTestBase, StreamFixture {
         keccak256("TokenCollectionRegistered(uint16,uint256,uint256,uint256)");
     bytes32 private constant STREAM_TOKEN_BURNED_TOPIC =
         keccak256("StreamTokenBurned(uint256,uint256,uint256,uint16)");
+    bytes32 private constant TOKEN_COLLECTION_REGISTRATION_REVERTED_TOPIC =
+        keccak256("TokenCollectionRegistrationReverted(uint16,uint256,uint256)");
 
     uint256 private constant COLLECTION_A = 1;
     uint256 private constant COLLECTION_B = 2;
@@ -144,6 +146,69 @@ contract StreamCoreIdentityTest is CharacterizationTestBase, StreamFixture {
             manager.mint(COLLECTION_A, RECIPIENT, "vector-abort-retry");
         reusedTokenId.assertEq(1, "aborted id not reused");
         reusedSerial.assertEq(1, "aborted serial not reused");
+    }
+
+    /// A prepared-mint abort emits TokenCollectionRegistrationReverted so an event-only
+    /// reconstructor reverses the earlier registration for the reused ID; re-allocating the same
+    /// ID to a different collection emits a fresh TokenCollectionRegistered, and replaying the
+    /// Registered/Reverted/Registered stream in order yields the correct final mapping and supply.
+    function testAbortRevertEventCompensatesRegistrationAcrossReuse() public {
+        (DeployedStream memory deployed, IdentityMintManager manager) = _deployWithManager();
+        _createCollectionB(deployed);
+        bytes32 operationId = bytes32(uint256(0xAB0A7));
+        address core = address(deployed.core);
+
+        // Record the whole prepare -> abort -> reuse sequence so the reconstruction below can
+        // replay the complete Registered/Reverted/Registered event stream for the reused id.
+        vm.recordLogs();
+
+        // 1. Prepare on collection A: TokenCollectionRegistered(tokenId=1, collection=A, serial=1).
+        (uint256 tokenId,) = manager.prepare(COLLECTION_A, "revert-prepare", operationId);
+        tokenId.assertEq(1, "prepared token id");
+        uint256(deployed.core.tokenLifecycle(tokenId))
+            .assertEq(LIFECYCLE_PREPARED_INCOMPLETE, "prepared lifecycle");
+        // Prepare reserves circulation supply for the pending token; abort must rewind it.
+        deployed.core.totalSupplyOfCollection(COLLECTION_A)
+            .assertEq(1, "A supply reserved on prepare");
+
+        // 2. Abort: TokenCollectionRegistrationReverted(tokenId=1, collection=A), schema 1.
+        manager.abort(tokenId, operationId);
+        uint256(deployed.core.tokenLifecycle(tokenId))
+            .assertEq(LIFECYCLE_UNKNOWN, "aborted lifecycle");
+        (bool mappingExists,,,) = deployed.core.tokenCollectionIdentity(tokenId);
+        mappingExists.assertFalse("aborted identity retained");
+        deployed.core.totalSupplyOfCollection(COLLECTION_A).assertEq(0, "A supply after abort");
+
+        // 3. Re-mint the SAME reused id to a DIFFERENT collection: fresh TokenCollectionRegistered.
+        (uint256 reusedTokenId, uint256 reusedSerial) =
+            manager.mint(COLLECTION_B, RECIPIENT, "revert-reuse-b");
+        reusedTokenId.assertEq(tokenId, "aborted id reused for new mint");
+        reusedSerial.assertEq(1, "reused serial is collection B first");
+
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        // The event stream carries: Registered(A) then Reverted(A) then Registered(B), in order.
+        uint256 registeredA = _findRegisteredEventIndex(logs, core, tokenId, COLLECTION_A, 1);
+        uint256 reverted = _assertRegistrationRevertedEvent(logs, core, tokenId, COLLECTION_A);
+        uint256 registeredB =
+            _findRegisteredEventIndex(logs, core, reusedTokenId, COLLECTION_B, reusedSerial);
+        (registeredA < reverted).assertTrue("revert must follow the registration it compensates");
+        (reverted < registeredB).assertTrue("re-registration must follow the revert");
+
+        // 4/5. Final on-chain state and supply reflect collection B only; A never accrues supply.
+        _assertIdentity(deployed.core, reusedTokenId, COLLECTION_B, reusedSerial, false);
+        uint256(deployed.core.tokenLifecycle(reusedTokenId))
+            .assertEq(LIFECYCLE_MINTED, "reused lifecycle minted");
+        deployed.core.totalSupplyOfCollection(COLLECTION_A).assertEq(0, "A never supplied");
+        deployed.core.totalSupplyOfCollection(COLLECTION_B).assertEq(1, "B supplied once");
+        deployed.core.totalSupply().assertEq(1, "global supply not double-counted");
+
+        // Replay reconstruction: an event-only indexer applying the stream in order resolves the
+        // reused id to collection B with exactly one live registration (no stale A, no double-count).
+        (uint256 reconstructedCollection, uint256 liveRegistrations) =
+            _reconstructTokenCollection(logs, core, tokenId);
+        reconstructedCollection.assertEq(COLLECTION_B, "reconstructed final collection");
+        liveRegistrations.assertEq(1, "reconstructed live registration count");
     }
 
     function testEveryAllocatedTokenIdAnswersIdentityAndLifecycleDensely() public {
@@ -411,6 +476,86 @@ contract StreamCoreIdentityTest is CharacterizationTestBase, StreamFixture {
             }
         }
         found.assertTrue("TokenCollectionRegistered missing");
+    }
+
+    /// Locate a TokenCollectionRegistered log for a specific (tokenId, collectionId) pair.
+    /// Unlike _findIdentityEventIndex this tolerates multiple registrations in one stream
+    /// (e.g. an aborted id later re-registered to a different collection).
+    function _findRegisteredEventIndex(
+        Vm.Log[] memory logs,
+        address core,
+        uint256 tokenId,
+        uint256 collectionId,
+        uint256 serial
+    ) private pure returns (uint256 index) {
+        bool found;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == core && logs[i].topics.length == 3
+                    && logs[i].topics[0] == TOKEN_COLLECTION_REGISTERED_TOPIC
+                    && uint256(logs[i].topics[1]) == tokenId
+                    && uint256(logs[i].topics[2]) == collectionId
+            ) {
+                (uint16 schemaVersion, uint256 eventSerial) =
+                    abi.decode(logs[i].data, (uint16, uint256));
+                uint256(schemaVersion).assertEq(1, "registered event schema version");
+                eventSerial.assertEq(serial, "registered event serial");
+                (!found).assertTrue("duplicate registered event for pair");
+                index = i;
+                found = true;
+            }
+        }
+        found.assertTrue("TokenCollectionRegistered for pair missing");
+    }
+
+    /// Assert exactly one TokenCollectionRegistrationReverted for (tokenId, collectionId).
+    function _assertRegistrationRevertedEvent(
+        Vm.Log[] memory logs,
+        address core,
+        uint256 tokenId,
+        uint256 collectionId
+    ) private pure returns (uint256 index) {
+        bool found;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == core && logs[i].topics.length == 3
+                    && logs[i].topics[0] == TOKEN_COLLECTION_REGISTRATION_REVERTED_TOPIC
+            ) {
+                uint256(logs[i].topics[1]).assertEq(tokenId, "reverted event token id");
+                uint256(logs[i].topics[2]).assertEq(collectionId, "reverted event collection");
+                uint16 schemaVersion = abi.decode(logs[i].data, (uint16));
+                uint256(schemaVersion).assertEq(1, "reverted event schema version");
+                (!found).assertTrue("duplicate reverted event");
+                index = i;
+                found = true;
+            }
+        }
+        found.assertTrue("TokenCollectionRegistrationReverted missing");
+    }
+
+    /// Event-only reconstruction: apply TokenCollectionRegistered (set mapping, +1 live) and
+    /// TokenCollectionRegistrationReverted (clear mapping, -1 live) in log order for one tokenId,
+    /// returning the final collection and the number of live registrations that remain.
+    function _reconstructTokenCollection(Vm.Log[] memory logs, address core, uint256 tokenId)
+        private
+        pure
+        returns (uint256 collection, uint256 liveRegistrations)
+    {
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (logs[i].emitter != core || logs[i].topics.length != 3) {
+                continue;
+            }
+            if (uint256(logs[i].topics[1]) != tokenId) {
+                continue;
+            }
+            if (logs[i].topics[0] == TOKEN_COLLECTION_REGISTERED_TOPIC) {
+                collection = uint256(logs[i].topics[2]);
+                liveRegistrations += 1;
+            } else if (logs[i].topics[0] == TOKEN_COLLECTION_REGISTRATION_REVERTED_TOPIC) {
+                collection = 0;
+                liveRegistrations -= 1;
+            }
+        }
     }
 
     function _warpPastFinalSupplyWindow() private {
