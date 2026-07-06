@@ -72,6 +72,37 @@ the release policy in `docs/release-policy.md`.
   `StreamModuleBase` adoption base and a minimal `SSTORE2` helper, all
   covered by golden typehash, lifecycle, batch-semantics, window-floor,
   role-resolution, and registry append-only/chain-hash test suites.
+- Added the `StreamArtworkFinalityRegistry` satellite with all five finality
+  scopes at genesis (COLLECTION, TOKEN, RELEASE, SEASON, VIEW per ADR 0009
+  decision 6): onchain finality-record-hash recomputation over the pinned
+  `STREAM_FINALITY_V1`/`STREAM_SCOPED_FINALITY_V1` preimages; sorted-unique
+  component manifests verified against live
+  `finalityState`/`finalityStateForScope` reads; the mandatory
+  component-type floor enforced onchain per collection metadata mode
+  ([LTA-FINALITY] requirement 1 — COLLECTION_METADATA, METADATA_ROUTER,
+  RENDERER, RENDER_CONTEXT, MEDIA_MANIFEST, ENTROPY_COORDINATOR for every
+  mode, plus SCRIPT_SOURCE, DEPENDENCY_SOURCE, REFERENCE_RENDER for
+  ONCHAIN/hybrid script works) independent of the optional discovery module,
+  which layers an exact-match superset gate on top when bound; the
+  artist-sanction and platform-works exactly-one component rule with onchain
+  `SANCTION_SUBJECT_DOMAIN` subject-hash computation; the CLOSED-plus-burn-block
+  collection gate; token content-root and leaf-count verification; the
+  ONCHAIN/hybrid assembled-snapshot-manifest gate ([CMC-FINALITY-INPUTS]
+  rule 3); the `EXTERNAL_FACADE` identity binding carried as a submitted
+  `IDENTITY_FACADE_BINDING` finality component (entering `componentsHash` and
+  the permanent `finalityRecordHash`, re-surfaceable through
+  `verifyFinality`/`frozenRouteForScope`) with the `CORE_NATIVE` no-component
+  rule; registry-stored canonical manifest bytes behind `manifestPointer`;
+  never-revert bounded diagnostics (`verifyFinality`/`verifyFinalityRange`
+  under the genesis `FINALITY_COMPONENT_READ_GAS` budget); the [LTA-FREEZE]
+  freeze-mode vocabulary with a single staged TERMINAL_FREEZE path (72-hour
+  veto floor, an independent guardian re-resolved at veto and execution time,
+  7-day open-to-execute floor); a bound `StreamArtworkFinalityPreview`
+  periphery exposing every execution comparison plus the computed sanction
+  subject hash; narrow `IStreamFinality*` consumer seams for the Core,
+  metadata, artist-registry, and governance surfaces built in parallel; and
+  golden tests recomputing every pinned finality domain constant from its
+  spec preimage.
 - Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the
   on-chain collection-metadata reads plus `properties.stream.collection`
   token JSON are the normative marketplace collection-identity signal, a
