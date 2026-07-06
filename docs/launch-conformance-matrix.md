@@ -701,7 +701,7 @@ named compression strategies is a design failure that blocks deployment;
 editing the allocation table is a spec amendment through the normal
 process, never a gate-time remediation.
 
-Non-normative reconciliation note: the CON-012 measured baseline (24,150
+Non-normative reconciliation note: the CON-012 measured baseline (24,097
 runtime bytes; protocol v1 [PV1-HOOKS] implementation evidence) predates
 ADR 0012 decision T10 — it was compiled with the since-removed
 `ERC721Enumerable` extension — and exceeds the 22,576-byte ceiling by
