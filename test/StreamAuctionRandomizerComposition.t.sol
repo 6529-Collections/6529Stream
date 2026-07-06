@@ -79,8 +79,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
 
     function testPausedRandomnessRequestRejectsAuctionDropWithoutConsumingAuthorization() public {
         CompositionSetup memory setup = _deployComposition();
-        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
-            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 nextTokenId = setup.deployed.core.lastAllocatedTokenId() + 1;
         uint256 supplyBefore = setup.deployed.core.totalSupply();
         uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
         uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
@@ -317,8 +316,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         public
     {
         CompositionSetup memory setup = _deployComposition();
-        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
-            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 nextTokenId = setup.deployed.core.lastAllocatedTokenId() + 1;
         uint256 supplyBefore = setup.deployed.core.totalSupply();
         uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
         uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
@@ -352,8 +350,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
             _mintAuctionDrop(setup, "request-id-collision-auction-first", 91);
         uint256 requestId = setup.randomizer.tokenToRequest(firstTokenId);
         AuctionSnapshot memory beforeCollision = _snapshot(setup, firstTokenId);
-        uint256 nextTokenId = setup.deployed.core.viewTokensIndexMin(COLLECTION_ID)
-            + setup.deployed.core.viewCirSupply(COLLECTION_ID);
+        uint256 nextTokenId = setup.deployed.core.lastAllocatedTokenId() + 1;
         uint256 supplyBefore = setup.deployed.core.totalSupply();
         uint256 circulationBefore = setup.deployed.core.viewCirSupply(COLLECTION_ID);
         uint256 dropCountBefore = setup.deployed.drops.retrieveDrops().length;
@@ -416,7 +413,7 @@ contract StreamAuctionRandomizerCompositionTest is DropAuthTestHelper, StreamFix
         AuctionAccountingSnapshot memory beforeBurn = _snapshotAuctionAccounting(setup);
 
         vm.prank(SECOND_BIDDER);
-        setup.deployed.core.burn(COLLECTION_ID, tokenId);
+        setup.deployed.core.burn(tokenId);
 
         setup.deployed.core.isTokenBurned(tokenId).assertTrue("burned token");
         uint256(setup.auctions.retrieveAuctionStatus(tokenId))

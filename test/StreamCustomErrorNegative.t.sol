@@ -12,7 +12,7 @@ import "./mocks/MockRandomizerCore.sol";
 
 contract StreamCustomErrorNegativeTest is CharacterizationTestBase, StreamFixture {
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
     address private constant UNAUTHORIZED = address(0xBAD);

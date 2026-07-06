@@ -152,20 +152,19 @@ contract StreamMinter {
                 && block.timestamp <= collectionPhases[_collectionID].publicEndTime,
             "Ended"
         );
-        uint256 collectionTokenMintIndex;
         uint256 mintIndex = 0;
         for (uint256 y = 0; y < _recipients.length; y++) {
             require(_numberOfTokens[y] > 0, "Zero quantity");
-            collectionTokenMintIndex = gencore.viewTokensIndexMin(_collectionID)
-                + gencore.viewCirSupply(_collectionID) + _numberOfTokens[y] - 1;
             require(
-                collectionTokenMintIndex <= gencore.viewTokensIndexMax(_collectionID), "No supply"
+                gencore.viewCirSupply(_collectionID) + _numberOfTokens[y]
+                    <= _collectionTotalSupply(_collectionID),
+                "No supply"
             );
-            uint256 firstTokenId =
-                gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
+            // Core allocates sequential global token IDs; the next ID is the high-water mark
+            // plus one, read from Core state rather than derived from any range arithmetic.
+            uint256 firstTokenId = gencore.lastAllocatedTokenId() + 1;
             for (uint256 i = 0; i < _numberOfTokens[y]; i++) {
-                mintIndex = gencore.viewTokensIndexMin(_collectionID)
-                    + gencore.viewCirSupply(_collectionID);
+                mintIndex = gencore.lastAllocatedTokenId() + 1;
                 gencore.mint(mintIndex, _recipients[y], _tokenData[y], _saltfun_o[y], _collectionID);
             }
             emit MinterTokensMinted(
@@ -173,6 +172,11 @@ contract StreamMinter {
             );
         }
         return mintIndex;
+    }
+
+    function _collectionTotalSupply(uint256 _collectionID) private view returns (uint256) {
+        (,,, uint256 totalSupply,,) = gencore.retrieveCollectionAdditionalData(_collectionID);
+        return totalSupply;
     }
 
     // mint and auction
@@ -194,12 +198,11 @@ contract StreamMinter {
                 && block.timestamp <= collectionPhases[_collectionID].publicEndTime,
             "Ended"
         );
-        uint256 collectionTokenMintIndex;
-        collectionTokenMintIndex =
-            gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
-        require(collectionTokenMintIndex <= gencore.viewTokensIndexMax(_collectionID), "No supply");
-        uint256 mintIndex =
-            gencore.viewTokensIndexMin(_collectionID) + gencore.viewCirSupply(_collectionID);
+        require(
+            gencore.viewCirSupply(_collectionID) < _collectionTotalSupply(_collectionID),
+            "No supply"
+        );
+        uint256 mintIndex = gencore.lastAllocatedTokenId() + 1;
         require(_auctionEndTime >= block.timestamp + 600); // 10mins min auction
         mintToAuctionData[mintIndex] = _auctionEndTime;
         mintToAuctionStatus[mintIndex] = true;

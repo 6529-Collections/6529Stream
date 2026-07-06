@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:b348e87d846dfb6f668a952eeca4f217658355b4aba3a72e637507facefcf7dc"
+      "sha256": "sha256:7651ed77d9791df1ece6542d99ec10aa36ca96ab343f4d86ff87bc6dc3fd3437"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -46,7 +46,7 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:871c84b0ae189ed709a4dc0a74417fe57749abb47edb5a874e2542662fd7c304"
+      "sha256": "sha256:2c31d46215bda0ea000f4b5ba92fcd1c8014217d52e9489facd838992923ea69"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -171,7 +171,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:871c84b0ae189ed709a4dc0a74417fe57749abb47edb5a874e2542662fd7c304"
+          "sha256": "sha256:2c31d46215bda0ea000f4b5ba92fcd1c8014217d52e9489facd838992923ea69"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -377,7 +377,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:8001c69660101edc07e9209ae1ea821b996bc8d41e6f343a4877f5615b861317"
+          "sha256": "sha256:bdd02b23e835c301ba64ac086a0753ce6bb3079ab4044cceab4defbe3967a01d"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -413,7 +413,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:cb34e4916e2ca939d4893ff707278857c4e8ff345227ece4e25a9a7d1ef51d75"
+          "sha256": "sha256:86b375256ccb41e4aa4928e8e4ea8bff8ff35e161879e736d4ae4424e88b2408"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -443,7 +443,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:b348e87d846dfb6f668a952eeca4f217658355b4aba3a72e637507facefcf7dc"
+          "sha256": "sha256:7651ed77d9791df1ece6542d99ec10aa36ca96ab343f4d86ff87bc6dc3fd3437"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -451,7 +451,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:6d385cae73d90092a0b666a6b0886df4bce06b317fdbc1c187af730914116321"
+          "sha256": "sha256:5f9b30c8a848a4edc9b854d12dee0685b374974c4ecf058ed001cf7764427ca9"
         }
       ],
       "risk_acceptance": null
@@ -485,7 +485,7 @@
         },
         {
           "path": "docs/vendored-libraries.md",
-          "sha256": "sha256:532b029087cef2b1173e6e824e8abd21d5d2439f89e95fe0ff7013cdb3d9daff"
+          "sha256": "sha256:6da7adb5dd5fcdb4930eed7e37cd4e649622d53e949c34b3bffa272e701a68bf"
         }
       ],
       "risk_acceptance": null
@@ -522,7 +522,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:f7a859b5bb9e8da4b65e29645faeb20a62684e4ca25332df39daf1e49a2d1a01"
+          "sha256": "sha256:34f3c564ae227a786e3e67f87875680e9d69b1f3dfdf07ebc2c03e900db5498e"
         },
         {
           "path": "docs/warning-dispositions.md",

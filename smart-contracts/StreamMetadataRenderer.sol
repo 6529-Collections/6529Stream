@@ -333,12 +333,14 @@ library StreamMetadataRenderer {
         );
     }
 
-    function tokenName(string memory collectionName, uint256 tokenId, uint256 firstTokenId)
+    function tokenName(string memory collectionName, uint256 collectionSerial)
         public
         pure
         returns (string memory)
     {
-        return string(abi.encodePacked(collectionName, " #", (tokenId - firstTokenId).toString()));
+        // Display indexes stay zero-based; the serial answers from the stored identity
+        // record, never from token ID arithmetic.
+        return string(abi.encodePacked(collectionName, " #", (collectionSerial - 1).toString()));
     }
 
     function tokenMetadataState(address randomizer, uint256 tokenId, bytes32 tokenHash)
@@ -357,7 +359,7 @@ library StreamMetadataRenderer {
         string memory schemaVersion,
         string memory collectionName,
         uint256 tokenId,
-        uint256 firstTokenId,
+        uint256 collectionSerial,
         string memory description,
         string memory image,
         string memory attributes,
@@ -370,7 +372,7 @@ library StreamMetadataRenderer {
         return onchainTokenURIWithDefaultLimit(
             schemaVersion,
             tokenMetadataState(randomizer, tokenId, tokenHash),
-            tokenName(collectionName, tokenId, firstTokenId),
+            tokenName(collectionName, collectionSerial),
             description,
             image,
             attributes,

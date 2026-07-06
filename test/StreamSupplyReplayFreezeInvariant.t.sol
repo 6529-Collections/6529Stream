@@ -206,7 +206,7 @@ contract SupplyReplayFreezeInvariantHandler is DropAuthTestHelper, StreamFixture
         }
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, tokenId);
+        deployed.core.burn(tokenId);
         tokenBurned[tokenId] = true;
         liveTokens--;
         burnedTokens++;
@@ -287,7 +287,7 @@ contract SupplyReplayFreezeInvariantHandler is DropAuthTestHelper, StreamFixture
 
         vm.prank(RECIPIENT);
         (bool success,) = address(deployed.core)
-            .call(abi.encodeWithSelector(deployed.core.burn.selector, COLLECTION_ID, tokenId));
+            .call(abi.encodeWithSelector(deployed.core.burn.selector, tokenId));
         success.assertFalse("post-freeze burn succeeded");
     }
 
@@ -340,16 +340,14 @@ contract SupplyReplayFreezeInvariantHandler is DropAuthTestHelper, StreamFixture
                 .assertEq(frozenManifestHash, "stored freeze manifest mismatch");
             deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID)
                 .assertEq(frozenManifestHash, "freeze manifest drifted");
-            deployed.core.viewTokensIndexMax(COLLECTION_ID)
-                .assertEq(
-                    deployed.core.viewTokensIndexMin(COLLECTION_ID) + mintedEver - 1,
-                    "frozen max token id mismatch"
-                );
         } else {
             collectionTotalSupply.assertEq(COLLECTION_SUPPLY, "mutable total supply changed");
             deployed.core.collectionFreezeStatus(COLLECTION_ID)
                 .assertFalse("collection unexpectedly frozen");
         }
+
+        deployed.core.lastAllocatedTokenId()
+            .assertEq(mintedEver, "sequential allocator mark mismatch");
 
         uint256 observedLiveTokens;
         uint256 observedBurnedTokens;
@@ -357,6 +355,13 @@ contract SupplyReplayFreezeInvariantHandler is DropAuthTestHelper, StreamFixture
             uint256 tokenId = tokenIds[i];
             deployed.core.viewColIDforTokenID(tokenId)
                 .assertEq(COLLECTION_ID, "token collection mismatch");
+            (bool mappingExists,, uint256 collectionSerial, bool identityBurned) =
+                deployed.core.tokenCollectionIdentity(tokenId);
+            mappingExists.assertTrue("identity mapping missing");
+            collectionSerial.assertEq(i + 1, "stored serial mismatch");
+            (identityBurned == tokenBurned[tokenId]).assertTrue("identity burn flag mismatch");
+            uint256(deployed.core.tokenLifecycle(tokenId))
+                .assertEq(tokenBurned[tokenId] ? 3 : 2, "lifecycle mismatch");
             if (tokenBurned[tokenId]) {
                 observedBurnedTokens++;
                 deployed.core.isTokenBurned(tokenId).assertTrue("burn flag missing");

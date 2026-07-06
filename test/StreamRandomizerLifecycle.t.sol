@@ -55,7 +55,7 @@ contract StreamRandomizerLifecycleTest is CharacterizationTestBase, StreamFixtur
 
     address private constant PAYOUT = address(0x2002);
     address private constant CURATORS_POOL = address(0x3003);
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     uint256 private constant SECOND_TOKEN_ID = TOKEN_ID + 1;
     uint256 private constant COLLECTION_ID = 1;
     bytes32 private constant PAUSE_REASON = keccak256("randomness-incident");

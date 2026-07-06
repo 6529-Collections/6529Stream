@@ -23,7 +23,7 @@ contract StreamDependencyRegistryTest is CharacterizationTestBase, StreamFixture
         keccak256("DependencyVersionPinned(uint256,bytes32,uint256,bytes32,address)");
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testDependencyVersionsAreImmutableAndExposeProvenance() public {

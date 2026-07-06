@@ -15,7 +15,7 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
     address private constant PAYOUT = address(0xBEEF);
     address private constant CURATORS_POOL = address(0xCAFE);
@@ -25,6 +25,8 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
     bytes32 private constant TRANSFER_TOPIC = keccak256("Transfer(address,address,uint256)");
     bytes32 private constant TOKEN_BURNED_TOPIC =
         keccak256("TokenBurned(uint256,uint256,address,address)");
+    bytes32 private constant STREAM_TOKEN_BURNED_TOPIC =
+        keccak256("StreamTokenBurned(uint256,uint256,uint256,uint16)");
     bytes32 private constant METADATA_UPDATE_TOPIC = keccak256("MetadataUpdate(uint256)");
     bytes32 private constant BURNED_TOKEN_RANDOMNESS_RECORDED_TOPIC = keccak256(
         "BurnedTokenRandomnessRecorded(uint256,uint256,uint256,address,uint256,bytes32,bytes32)"
@@ -44,13 +46,14 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
         uint256 expectedTimestamp = block.timestamp;
         vm.recordLogs();
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
         Vm.Log[] memory logs = vm.getRecordedLogs();
 
         _assertTransferToZero(logs, address(deployed.core), RECIPIENT, TOKEN_ID);
         _assertTokenBurned(
             logs, address(deployed.core), COLLECTION_ID, TOKEN_ID, RECIPIENT, RECIPIENT
         );
+        _assertStreamTokenBurned(logs, address(deployed.core), TOKEN_ID, COLLECTION_ID, 1);
         _countTopic(logs, METADATA_UPDATE_TOPIC).assertEq(0, "burn emitted metadata update");
 
         deployed.core.totalSupply().assertEq(0, "global supply after burn");
@@ -106,9 +109,9 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID, 7);
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
-        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenOutsideCollectionRange.selector));
+        vm.expectRevert(abi.encodeWithSelector(StreamCore.TokenIdentityUnknown.selector));
         vm.prank(address(deployed.minter));
         deployed.core.mint(TOKEN_ID, RECIPIENT, "data", 8, COLLECTION_ID);
 
@@ -128,7 +131,7 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
         deployed.core.retrieveTokenHash(TOKEN_ID).assertEq(bytes32(0), "expected pending token");
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
         _warpPastFinalSupplyWindow();
         bytes32 expectedManifest = deployed.core.previewCollectionFreezeManifestHash(COLLECTION_ID);
         deployed.core.freezeCollection(COLLECTION_ID);
@@ -189,7 +192,7 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
         _mintToken(deployed, TOKEN_ID, 7);
 
         vm.prank(RECIPIENT);
-        deployed.core.burn(COLLECTION_ID, TOKEN_ID);
+        deployed.core.burn(TOKEN_ID);
 
         uint256[] memory words = _words(999);
         bytes32 rawOutputHash = _rawOutputHash(words);
@@ -387,6 +390,29 @@ contract StreamCoreBurnTest is CharacterizationTestBase, StreamFixture {
             }
         }
         found.assertTrue("burned-token randomness event");
+    }
+
+    function _assertStreamTokenBurned(
+        Vm.Log[] memory logs,
+        address emitter,
+        uint256 tokenId,
+        uint256 collectionId,
+        uint256 collectionSerial
+    ) private pure {
+        bool found = false;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == emitter && logs[i].topics.length == 3
+                    && logs[i].topics[0] == STREAM_TOKEN_BURNED_TOPIC
+                    && uint256(logs[i].topics[1]) == tokenId
+                    && uint256(logs[i].topics[2]) == collectionId
+            ) {
+                (uint256 actualSerial, uint16 schemaVersion) =
+                    abi.decode(logs[i].data, (uint256, uint16));
+                found = actualSerial == collectionSerial && schemaVersion == 1;
+            }
+        }
+        found.assertTrue("stream token burned event");
     }
 
     function _countTopic(Vm.Log[] memory logs, bytes32 topic) private pure returns (uint256 count) {

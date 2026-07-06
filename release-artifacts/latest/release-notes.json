@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:2068bba212ad3b32c13111171ebb0207d249bc70451d8f4249f4f5228855f0da",
-      "size_bytes": 90580
+      "sha256": "sha256:915ab7a3308af4bfd1078f66f7a9ee1a3983332cf8652d99fce5a716c538cb13",
+      "size_bytes": 91650
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:52aae31dbc368d1eac964c4669c8eea5fd4bc6b4f6c4b337ef6877387f73247a",
+      "sha256": "sha256:5dac92658040df05fe01aab5e4a7e96bd4676c6ea3af140ac80233233e27dc02",
       "size_bytes": 24573
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Rebuilt `StreamCore` token identity onto the specification's sequential model: one monotone global token ID counter starting at 1 replaces the reserved-range allocator, per-token `(collectionId, collectionSerial)` identity records are written at allocation and retained across burns, `TokenCollectionRegistered` (leading `uint16 schemaVersion`) is emitted at every authoritative identity write before dependent effects, burn is reshaped to `burn(uint256)` with the `StreamTokenBurned` event and the `collectionBurnsBlockedAtBlock` height read, the Permanent identity and enumeration reads land (`tokenLifecycle`, `lastAllocatedTokenId`, `lastAllocatedCollectionId`, storage-backed `tokenCollectionIdentity`), transfer/approval conditioning overrides are removed so ERC-721 transfers stay unconditioned, the vendored `ERC721Enumerable` pair is deleted, and every `10^10` range derivation is purged from Core, the minter read path, and the metadata renderer (`TokenOutsideCollectionRange` is renamed to `TokenIdentityUnknown`).",
       "Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the on-chain collection-metadata reads plus `properties.stream.collection` token JSON are the normative marketplace collection-identity signal, a two-named-signed-commitments gate precedes public sale, and the per-collection ERC-721 facade line is specified as a dormant extension profile (`docs/stream-collection-facade-profile.md`) with its facade-readiness genesis surfaces (per-collection identity mode, one-way pre-first-mint transfer-controller registry, controlled mutation path, event-doctrine carve-out, finality identity binding) carved into the protocol v1 spec, umbrella doctrine, metadata specs, artist consent surface, and conformance-matrix gates, closing the open-question register.",
       "Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.",
       "Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.",

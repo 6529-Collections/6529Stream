@@ -24,7 +24,7 @@ contract StreamMinterEventsTest is DropAuthTestHelper, StreamFixture {
         keccak256("MinterContractReferenceUpdated(uint8,address,address,address)");
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant FIRST_TOKEN_ID = 10_000_000_000;
+    uint256 private constant FIRST_TOKEN_ID = 1;
     address private constant FIRST_RECIPIENT = address(0xA11CE);
     address private constant SECOND_RECIPIENT = address(0xB0B);
     address private constant PAYOUT = address(0x2002);

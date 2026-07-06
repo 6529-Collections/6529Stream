@@ -22,7 +22,6 @@ VENDORED_FORMATTING_EXEMPTIONS = frozenset(
         "smart-contracts/ERC165.sol",
         "smart-contracts/ERC2981.sol",
         "smart-contracts/ERC721.sol",
-        "smart-contracts/ERC721Enumerable.sol",
         "smart-contracts/IERC165.sol",
         "smart-contracts/IERC2981.sol",
         "smart-contracts/IERC721.sol",

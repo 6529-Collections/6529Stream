@@ -47,7 +47,7 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
 
         vm.prank(BIDDER);
         (bool success,) = address(auctions).call{ value: RESERVE_PRICE }(
-            abi.encodeWithSelector(auctions.participateToAuction.selector, 10_000_000_000)
+            abi.encodeWithSelector(auctions.participateToAuction.selector, 1)
         );
 
         success.assertFalse("unregistered bid accepted");
@@ -261,7 +261,7 @@ contract StreamAuctionCustodyTest is DropAuthTestHelper, StreamFixture {
         bytes memory signature = signAuthorization(setup.deployed.drops, authorization);
 
         setup.deployed.drops.mintDrop(authorization, "auction-data", signature);
-        setup.tokenId = 10_000_000_000;
+        setup.tokenId = 1;
     }
 
     function deployedMinterEnd(AuctionSetup memory setup) private view returns (uint256) {

@@ -16,7 +16,7 @@ contract StreamRandomizerAdversarialTest is CharacterizationTestBase {
     using Assertions for uint256;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     bytes32 private constant RANDOMNESS_SEED_TYPEHASH = keccak256(
         "6529StreamRandomnessSeed(address provider,uint256 requestId,uint256 collectionId,uint256 tokenId,uint256 randomizerEpoch,bytes32 rawOutputHash)"
     );

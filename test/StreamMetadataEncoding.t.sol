@@ -14,7 +14,7 @@ contract StreamMetadataEncodingTest is CharacterizationTestBase, StreamFixture, 
     function testDependencyScriptHashSeparatesAmbiguousChunkBoundaries() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         bytes32 dependencyKey = keccak256("ambiguous-boundary-library");
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         string[] memory firstChunks = new string[](2);
         firstChunks[0] = "ab";
         firstChunks[1] = "c";

@@ -284,7 +284,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         Assertions.assertTrue(result.deploymentManifestHash != bytes32(0), "manifest hash missing");
         Assertions.assertEq(result.collectionId, 1, "collection id");
         Assertions.assertTrue(result.dropId != bytes32(0), "drop id missing");
-        Assertions.assertEq(result.tokenId, 10_000_000_000, "token id");
+        Assertions.assertEq(result.tokenId, 1, "token id");
         Assertions.assertEq(
             result.finalOwner, address(0x00000000000000000000000000000000000065A2), "final owner"
         );
@@ -356,7 +356,7 @@ contract StreamDeploymentManifestTest is CharacterizationTestBase {
         Assertions.assertTrue(result.oldAuctions != result.replacementAuctions, "auctions reused");
         Assertions.assertEq(result.oldCollectionId, 1, "old collection");
         Assertions.assertEq(result.replacementCollectionId, 1, "replacement collection");
-        Assertions.assertEq(result.replacementTokenId, 10_000_000_000, "replacement token");
+        Assertions.assertEq(result.replacementTokenId, 1, "replacement token");
         Assertions.assertEq(
             result.replacementTokenOwner,
             address(0x00000000000000000000000000000000000065E2),

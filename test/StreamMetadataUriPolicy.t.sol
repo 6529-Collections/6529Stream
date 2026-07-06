@@ -12,13 +12,13 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
     using Assertions for string;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
 
     function testRendererUriPolicyHelpers() public pure {
         StreamMetadataRenderer.isSafeContentUri("https://metadata.example/base/", false)
             .assertTrue("https content uri rejected");
-        StreamMetadataRenderer.isSafeContentUri("ipfs://image/10000000000.png", false)
+        StreamMetadataRenderer.isSafeContentUri("ipfs://image/1.png", false)
             .assertTrue("ipfs content uri rejected");
         StreamMetadataRenderer.isSafeContentUri("ar://transaction-id", false)
             .assertTrue("ar content uri rejected");
@@ -102,7 +102,7 @@ contract StreamMetadataUriPolicyTest is CharacterizationTestBase, StreamFixture 
         _mintToken(deployed);
 
         _updateTokenImage(deployed.core, "https://image.example/token.png");
-        _updateTokenImage(deployed.core, "ipfs://image/10000000000.png");
+        _updateTokenImage(deployed.core, "ipfs://image/1.png");
         _updateTokenImage(deployed.core, "ar://image-transaction-id");
     }
 

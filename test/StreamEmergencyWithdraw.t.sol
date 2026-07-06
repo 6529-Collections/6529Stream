@@ -19,7 +19,7 @@ contract StreamEmergencyWithdrawTest is CharacterizationTestBase {
     address private constant STREAM_DROPS = address(0xD012);
     address private constant UNAUTHORIZED = address(0xBAD);
     address private constant EMERGENCY_RECIPIENT = address(0xE001);
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
 
     function testStreamMinterRejectsNormalEthTransfers() public {
         MinterSetup memory setup = _deployMinter();

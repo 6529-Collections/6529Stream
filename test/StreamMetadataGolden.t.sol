@@ -146,7 +146,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
     using Assertions for string;
 
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
     string private constant TOKEN_DATA = "1,2,3";
     uint256 private constant TOKEN_SALT = 7;
@@ -237,7 +237,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
 
         deployed.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
         deployed.core.tokenURI(TOKEN_ID)
-            .assertEq("ipfs://base/10000000000", "off-chain final URI changed");
+            .assertEq("ipfs://base/1", "off-chain final URI changed");
     }
 
     function testFinalTokenHashDoesNotRequireLifecycleLookup() public {
@@ -255,7 +255,7 @@ contract StreamMetadataGoldenTest is CharacterizationTestBase, StreamFixture {
 
         deployed.core.tokenMetadataState(TOKEN_ID).assertEq("final", "final state changed");
         deployed.core.tokenURI(TOKEN_ID)
-            .assertEq("ipfs://base/10000000000", "off-chain final URI changed");
+            .assertEq("ipfs://base/1", "off-chain final URI changed");
     }
 
     function testEmptyOffchainBaseUriReturnsEmptyForPendingAndFinalTokens() public {

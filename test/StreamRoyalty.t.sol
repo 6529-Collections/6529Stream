@@ -43,7 +43,7 @@ contract StreamRoyaltyTest is CharacterizationTestBase, StreamFixture {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
 
         (address receiver, uint256 royaltyAmount) =
-            deployed.core.royaltyInfo(10_000_000_000, 1 ether);
+            deployed.core.royaltyInfo(1, 1 ether);
 
         receiver.assertEq(ROYALTY_RECEIVER, "royalty receiver");
         royaltyAmount.assertEq(0.069 ether, "royalty amount");

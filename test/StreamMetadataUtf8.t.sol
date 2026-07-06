@@ -26,7 +26,7 @@ contract StreamMetadataUtf8Test is CharacterizationTestBase, StreamFixture {
     bytes32 private constant TOKEN_IMAGE_FIELD = "token.image";
     bytes32 private constant TOKEN_ATTRIBUTES_FIELD = "token.attributes";
     uint256 private constant COLLECTION_ID = 1;
-    uint256 private constant TOKEN_ID = 10_000_000_000;
+    uint256 private constant TOKEN_ID = 1;
     address private constant RECIPIENT = address(0xA11CE);
     uint256 private constant BASE_URI_UPDATE_INDEX = FULL_COLLECTION_UPDATE_INDEX - 1;
 

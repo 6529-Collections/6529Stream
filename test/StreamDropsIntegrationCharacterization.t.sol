@@ -43,7 +43,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
 
         deployed.drops.mintDrop{ value: 4 ether }(authorization, "data", signature);
 
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         POSTER.balance.assertEq(posterBalanceBefore, "poster was push-paid");
         PAYOUT.balance.assertEq(payoutBalanceBefore, "protocol was push-paid");
         CURATORS_POOL.balance.assertEq(curatorsBalanceBefore, "curator was push-paid");
@@ -57,7 +57,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
         deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "recipient changed");
         deployed.core.retrieveTokenHash(tokenId)
             .assertEq(keccak256(abi.encode(uint256(1), tokenId, uint256(0))), "token hash changed");
-        deployed.core.tokenURI(tokenId).assertEq("ipfs://base/10000000000", "tokenURI changed");
+        deployed.core.tokenURI(tokenId).assertEq("ipfs://base/1", "tokenURI changed");
         deployed.drops.retrieveDropID(tokenId).assertEq(authorization.dropId, "drop id changed");
     }
 
@@ -183,7 +183,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
 
         deployed.drops.mintDrop(authorization, "auction-data", signature);
 
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         deployed.core.ownerOf(tokenId).assertEq(address(auctions), "auction custody changed");
         deployed.minter.getAuctionStatus(tokenId).assertTrue("auction status changed");
         deployed.minter.getAuctionEndTime(tokenId)
@@ -258,7 +258,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
 
         deployed.drops.mintDrop(authorization, "auction-data", signature);
 
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         deployed.drops.retrieveExecutionAddress(tokenId)
             .assertEq(POSTER, "no-bid execution address changed");
         vm.warp(auctionEndTime + 1);
@@ -291,7 +291,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
 
         executor.mintFixedPrice{ value: 4 ether }(deployed.drops, authorization, "data", signature);
 
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         deployed.core.ownerOf(tokenId).assertEq(RECIPIENT, "contract execution recipient changed");
         deployed.drops.retrieveExecutionAddress(tokenId)
             .assertEq(RECIPIENT, "contract execution address changed");
@@ -318,7 +318,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
 
         deployed.drops.mintDrop(authorization, "data", signature);
 
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         deployed.core.retrieveTokenHash(tokenId).assertEq(bytes32(0), "noop hash changed");
         deployed.core.tokenURI(tokenId).assertEq("ipfs://base/pending", "pending URI changed");
     }
@@ -328,7 +328,7 @@ contract StreamDropsIntegrationCharacterizationTest is DropAuthTestHelper, Strea
             deployStreamWithSigner(PAYOUT, CURATORS_POOL, signerAddress());
         NoopRandomizer noopRandomizer = new NoopRandomizer();
         deployed.core.addRandomizer(1, address(noopRandomizer));
-        uint256 tokenId = 10_000_000_000;
+        uint256 tokenId = 1;
         StreamDrops.DropAuthorization memory authorization = buildFixedPriceAuthorization(
             deployed.drops,
             POSTER,

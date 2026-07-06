@@ -118,7 +118,7 @@ contract StreamInitializationTest is CharacterizationTestBase, StreamFixture {
     function testGenerativeScriptAccumulatorStartsEmptyForEmptyCollectionScript() public {
         DeployedStream memory deployed = deployStream(address(0xBEEF), address(0xCAFE));
         uint256 collectionId = 2;
-        uint256 tokenId = 20_000_000_000;
+        uint256 tokenId = 1;
         uint256 salt = 99;
         string[] memory emptyScripts = new string[](0);
 
@@ -189,7 +189,7 @@ contract StreamInitializationTest is CharacterizationTestBase, StreamFixture {
         vm.prank(address(deployed.drops));
         uint256 lastMintedIndex = deployed.minter.mint(recipients, tokenData, salts, 1, quantities);
 
-        lastMintedIndex.assertEq(10_000_000_002, "wrong last minted index");
+        lastMintedIndex.assertEq(3, "wrong last minted index");
     }
 
     function _expectedGenerativeScript(uint256 tokenId, uint256 collectionId, uint256 salt)

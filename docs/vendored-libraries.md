@@ -72,7 +72,6 @@ gate.
 | `smart-contracts/ERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/ERC165.sol` | Retain upstream-style layout for the local ERC165 base. |
 | `smart-contracts/ERC2981.sol` | OpenZeppelin Contracts v5.0.0 `token/common/ERC2981.sol` | Retain upstream-style layout for royalty-standard behavior review. |
 | `smart-contracts/ERC721.sol` | OpenZeppelin Contracts v4.8.2 `token/ERC721/ERC721.sol` | Retain upstream-style layout for the local ERC721 base. |
-| `smart-contracts/ERC721Enumerable.sol` | OpenZeppelin Contracts v4.8.0 `token/ERC721/extensions/ERC721Enumerable.sol` | Retain upstream-style layout for enumerable-extension review. |
 | `smart-contracts/IERC165.sol` | OpenZeppelin Contracts v4.4.1 `utils/introspection/IERC165.sol` | Retain upstream-style layout for the ERC165 interface. |
 | `smart-contracts/IERC2981.sol` | OpenZeppelin Contracts v5.0.0 `interfaces/IERC2981.sol` | Retain upstream-style layout for royalty-interface review. |
 | `smart-contracts/IERC721.sol` | OpenZeppelin Contracts v4.8.0 `token/ERC721/IERC721.sol` | Retain upstream-style layout for the ERC721 interface. |
