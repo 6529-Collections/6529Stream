@@ -98,6 +98,21 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         bytes32 manifestHash;
     }
 
+    /// @notice Reverts when constructed with a zero role registry.
+    error ZeroRoleRegistry();
+    /// @notice Reverts when registering a zero-address proposer.
+    error ZeroProposer();
+    /// @notice Reverts when registering a zero-address canceller.
+    error ZeroCanceller();
+    /// @notice Reverts when a tightening-classifier target is the zero address.
+    error ZeroTighteningTarget();
+    /// @notice Reverts when a freeze-selector target is the zero address.
+    error ZeroFreezeTarget();
+    /// @notice Reverts when a freeze-selector selector is the zero selector.
+    error ZeroFreezeSelector();
+    /// @notice Reverts when an approved native receiver is the zero address.
+    error ZeroNativeReceiver();
+
     modifier onlyOwnerOrSelf() {
         if (msg.sender != owner() && msg.sender != address(this)) {
             revert GovernanceActorNotAuthorized(msg.sender);
@@ -106,20 +121,26 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     }
 
     constructor(IStreamRoleRegistry roleRegistry_) {
-        require(address(roleRegistry_) != address(0), "Zero role registry");
+        if (address(roleRegistry_) == address(0)) {
+            revert ZeroRoleRegistry();
+        }
         roleRegistry = roleRegistry_;
     }
 
     /// @notice Registers or removes a scheduling proposer.
     function registerProposer(address account, bool enabled) external onlyOwnerOrSelf {
-        require(account != address(0), "Zero proposer");
+        if (account == address(0)) {
+            revert ZeroProposer();
+        }
         _proposers[account] = enabled;
         emit GovernanceProposerUpdated(account, enabled, msg.sender);
     }
 
     /// @notice Registers or removes a canceller (for example a guardian module).
     function registerCanceller(address account, bool enabled) external onlyOwnerOrSelf {
-        require(account != address(0), "Zero canceller");
+        if (account == address(0)) {
+            revert ZeroCanceller();
+        }
         _cancellers[account] = enabled;
         emit GovernanceCancellerUpdated(account, enabled, msg.sender);
     }
@@ -137,7 +158,9 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         external
         onlyOwner
     {
-        require(target != address(0), "Zero target");
+        if (target == address(0)) {
+            revert ZeroTighteningTarget();
+        }
         _tighteningCalls[target][selector] = tightening;
         emit TighteningCallUpdated(target, selector, tightening, msg.sender);
     }
@@ -157,8 +180,12 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         external
         onlyOwner
     {
-        require(target != address(0), "Zero target");
-        require(selector != bytes4(0), "Zero selector");
+        if (target == address(0)) {
+            revert ZeroFreezeTarget();
+        }
+        if (selector == bytes4(0)) {
+            revert ZeroFreezeSelector();
+        }
         _freezeSelectors[target][selector] = freeze;
         emit FreezeSelectorUpdated(target, selector, freeze, msg.sender);
     }
@@ -166,7 +193,9 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     /// @notice Approves a receiver for empty-calldata native ETH transfer calls
     ///         (ADR 0004 execution rule 4).
     function setApprovedNativeReceiver(address receiver, bool approved) external onlyOwnerOrSelf {
-        require(receiver != address(0), "Zero receiver");
+        if (receiver == address(0)) {
+            revert ZeroNativeReceiver();
+        }
         _approvedNativeReceivers[receiver] = approved;
         emit ApprovedNativeReceiverUpdated(receiver, approved, msg.sender);
     }

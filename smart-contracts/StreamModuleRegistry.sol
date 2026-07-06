@@ -62,6 +62,8 @@ contract StreamModuleRegistry is ERC165, IStreamModuleRegistry {
     error WrongGovernanceActionClass(uint8 actionClass);
     /// @notice Reverts when an enumeration index is out of bounds.
     error ModuleIndexOutOfBounds(uint256 index);
+    /// @notice Reverts when constructed with a zero governance executor.
+    error ZeroGovernanceExecutor();
 
     /// @notice Emitted when the registry's own manifest commitment changes.
     event StreamModuleRegistryManifestUpdated(
@@ -83,7 +85,9 @@ contract StreamModuleRegistry is ERC165, IStreamModuleRegistry {
         bytes32 manifestHash_,
         string memory manifestURI_
     ) {
-        require(address(governanceExecutor_) != address(0), "Zero governance executor");
+        if (address(governanceExecutor_) == address(0)) {
+            revert ZeroGovernanceExecutor();
+        }
         governanceExecutor = governanceExecutor_;
         _manifestHash = manifestHash_;
         _manifestURI = manifestURI_;
