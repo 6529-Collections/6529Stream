@@ -68,7 +68,7 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
         )
 
         self.assertTrue(fixture.animation_url.startswith("data:text/html;base64,"))
-        self.assertIn("let tokenId=10000000000", fixture.animation_html)
+        self.assertIn("let tokenId=1", fixture.animation_html)
         self.assertEqual(fixture.external_script_url, "https://cdn.example/script.js")
 
     def test_harness_uses_script_only_sandbox(self) -> None:
@@ -163,7 +163,7 @@ class MetadataBrowserSandboxTests(unittest.TestCase):
 
         with self.assertRaisesRegex(sandbox_checker.BrowserSandboxError, "tokenId"):
             sandbox_checker.validate_sandbox_result(
-                passing_result(token_id=1),
+                passing_result(token_id=10_000_000_000),
                 expected_external_script_url="https://cdn.example/script.js",
             )
 
