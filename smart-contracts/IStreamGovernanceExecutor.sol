@@ -241,7 +241,7 @@ interface IStreamGovernanceExecutor {
     function governanceNonce() external view returns (uint256);
 
     /// @notice Returns the launch-pinned minimum delay for `actionClass`.
-    function minimumDelay(uint8 actionClass) external view returns (uint64);
+    function minimumDelay(uint8 actionClass) external pure returns (uint64);
 
     /// @notice Publishes the exact ordered calldata preimages for a batch as an
     ///         SSTORE2 blob ([GOV-BATCH] rule 5; ADR 0013 decision U5).

@@ -375,7 +375,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
-    function minimumDelay(uint8 actionClass) public view override returns (uint64) {
+    function minimumDelay(uint8 actionClass) public pure override returns (uint64) {
         if (actionClass == StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING) {
             return 0;
         }
