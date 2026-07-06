@@ -108,8 +108,8 @@ increase above the approved baseline requires an accepted exception record in
 The current production profile is:
 
 - command: `forge build --sizes --via-ir --skip test --skip script --force`;
-- current `StreamCore` runtime: 24,152 bytes;
-- current EIP-170 margin: 424 bytes;
+- current `StreamCore` runtime: 24,159 bytes;
+- current EIP-170 margin: 417 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
 - approved baseline EIP-170 margin: 2,392 bytes;
 - minimum release floor: 384-byte minimum runtime margin;
@@ -149,7 +149,7 @@ The default classification for future feature work is:
 
 This policy is intentionally conservative even when an accepted exception keeps
 the current runtime above the approved baseline. CON-012 spends Core bytecode on
-the mint-manager boundary and explicit token identity reads, leaving 424 bytes
+the mint-manager boundary and explicit token identity reads, leaving 417 bytes
 of current EIP-170 margin; future Core work should recover headroom before
 adding more behavior. The approved bytecode-spend baseline remains 22,184 bytes
 with 2,392 bytes of EIP-170 margin, so future Core growth above that ceiling
