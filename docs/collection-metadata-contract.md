@@ -2403,8 +2403,8 @@ Rules:
 
 Fixity is a program — schedule, coverage, and repair — not a record shape
 (ADR 0010 decision D6). Silent bit-rot of offchain mirrors is the most
-probable long-term loss mode, and "should schedule periodic drills" does not
-survive staff turnover; the program is therefore normative and
+probable long-term loss mode, and a soft recommendation to schedule periodic
+drills does not survive staff turnover; the program is therefore normative and
 deployment-gated:
 
 1. Schedule: every payload of every finalized work, every
@@ -4142,7 +4142,7 @@ blob pointers instead of strings.
 Typed convenience writes such as `recordArchiveReceipt`,
 `recordPreservationEvent`, `recordFixityCheck`, `recordC2PAReference`, and
 `recordMediaRelationship` may be added in a companion module under its own
-accepted spec. In v1 they should be represented through
+accepted spec. In v1 they must be represented through
 `recordCollectionRecord` with a schema ID and content hash — or through
 `recordCollectionRecordWithPayload` where the family is meaning-bearing
 [CMC-RECORD-PAYLOAD].

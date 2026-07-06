@@ -432,7 +432,7 @@ event ProviderCoordinatorFulfillmentAttempted(
 );
 ```
 
-Provider-specific events should include source configuration such as VRF key
+Provider-specific events may include source configuration such as VRF key
 hash, subscription ID, request confirmations, or ARRNG payment amount when
 useful.
 

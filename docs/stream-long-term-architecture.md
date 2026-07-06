@@ -226,7 +226,7 @@ INCIDENT_REVOKED    no new use, and normal use may be blocked pending recovery
 ```
 
 Incident revocation must not imply admin sweep rights, hidden migration, or
-silent policy substitution. It should freeze the affected surface until an
+silent policy substitution. It must freeze the affected surface until an
 accepted recovery or successor path is published.
 
 Canonical v1 registry surface, merging the umbrella and mint-layer draft
@@ -583,8 +583,8 @@ Finality discovery, the system manifest, monitoring, and indexers depend on
 this interface rather than individual public variable getter names. Core must
 not call the registry from this read. `registryStatus` is the cached status
 observed and stored during the latest successful pointer scheduling/execution
-recheck. If tools need the live registry status, they should call the registry
-directly with their own gas policy and compare it with Core's cached value.
+recheck. Tools that need the live registry status call the registry directly
+with their own gas policy and compare it with Core's cached value.
 
 ## Governed Gas Parameters [LTA-GGP]
 
@@ -1532,7 +1532,7 @@ Rules:
 
 ## Freeze Model [LTA-FREEZE]
 
-A 50-year contract needs both flexibility and finality. The system should use
+A 50-year contract needs both flexibility and finality. The system must use
 explicit freeze semantics instead of relying on social promises. This
 section is the single normative home of the freeze-loosening rule
 (ADR 0010 decision D3.6); the protocol v1 Assignment And Freeze State rules
@@ -1581,10 +1581,10 @@ Freeze rules:
    verify the veto path.
 5. Inherited freeze needs O(1) enforcement through counters, dirty bits, or
    explicit descendant materialization, not unbounded enumeration.
-6. Freezing collection metadata should also freeze renderer choice, script
+6. Freezing collection metadata must also freeze renderer choice, script
    manifest, dependency manifest, media manifests, and entropy policy if those
    facts define the final artwork.
-7. Freezing revenue policy should be per revenue class, because primary-sale
+7. Freezing revenue policy must be per revenue class, because primary-sale
    economics and royalties are separate promises.
 8. Global freeze must state whether it also blocks future revenue
    classes, renderer families, provider families, or only existing keys;
@@ -1655,7 +1655,7 @@ struct RecoveryManifestRef {
 ```
 
 `uriHash = keccak256(bytes(uri))`. `contentHash` is the hash of the canonical
-manifest bytes, not the hash of a URL string. The manifest should be
+manifest bytes, not the hash of a URL string. The manifest must be
 canonicalized through the schema named by `schemaId` and
 `canonicalizationHash`, for example RFC 8785/JCS JSON or deterministic CBOR.
 PREMIS, C2PA, IIIF, preservation, recovery, and human-readable reconstruction
@@ -2101,15 +2101,15 @@ Finality requirements:
     decision V8): environment archives should be assembled from
     open-source browsers, engines, codecs, and capture toolchains
     whose licenses permit preservation, redistribution, and future
-    execution, and each proprietary component requires either a
-    preservation-license note recording the license basis under which
-    the archived binaries may be preserved, redeployed, and shared,
-    or a documented open-source substitution. The license-basis field
-    and its vocabulary belong to the `EXECUTION_ENVIRONMENT`
-    preservation-object schema owned by [CMC-FINALITY-INPUTS]
-    rule 5(c), and an undetermined license basis is warned at
-    finality — a museum receiving a dossier bag must know whether it
-    may lawfully run what it holds.
+    execution, and using a proprietary component is a deviation that
+    requires either a preservation-license note recording the license
+    basis under which the archived binaries may be preserved,
+    redeployed, and shared, or a documented open-source substitution.
+    The license-basis field and its vocabulary belong to the
+    `EXECUTION_ENVIRONMENT` preservation-object schema owned by
+    [CMC-FINALITY-INPUTS] rule 5(c), and an undetermined license
+    basis is warned at finality — a museum receiving a dossier bag
+    must know whether it may lawfully run what it holds.
 
     Every `REFERENCE_RENDER` pins exactly one acceptance mode for its
     scope, matching variable-media conservation practice:
@@ -3106,7 +3106,7 @@ drop-order list must not contain it, and the Core Minimalism rule applies —
 under bytecode pressure, other logic moves out until this read fits with
 headroom. The release manifest records its selector,
 interface ID if one is assigned, return shape, and gas measurement. The
-manifest should include module addresses, versions, code hashes, registry
+manifest must include module addresses, versions, code hashes, registry
 states, pointer freeze states, event catalog hash, compatibility matrix hash,
 numeric ID catalog hash, schema catalog hash, canonicalization catalog hash,
 spec bundle hash, reconstruction client hash, and deployment chain IDs.
@@ -3169,7 +3169,7 @@ remains display and mirroring data, and the conformance matrix's
 genesis deployment profile remains the human-readable mirror of this
 payload, never the discovery bootstrap.
 
-Core should also support a non-mutating successor declaration for long-term
+Core must also support a non-mutating successor declaration for long-term
 identity continuity:
 
 ```solidity
@@ -3248,7 +3248,7 @@ Core, ownership snapshot hash, complete event-history snapshot hash (the
 [LTA-EVENT-HISTORY] serialization), collection-snapshot root, activation
 statement, and explicit old-Core status:
 `ACTIVE`, `DEPRECATED_QUERYABLE`, or `DEPRECATED_ZERO_ROYALTIES`. Indexers must
-not infer deprecation from the existence of a successor event alone; they should
+not infer deprecation from the existence of a successor event alone; they must
 read `coreLifecycleStatus()` or the successor manifest status that the read
 hashes.
 
@@ -3324,7 +3324,7 @@ export manifest URI/hash
 
 The export may be produced offchain by indexers, but the format must be
 canonical and independently reproducible from chain data. Successor
-declarations should reference the latest state export hash. Every export —
+declarations must reference the latest state export hash. Every export —
 not only successor manifests — must reference a content-addressed mirror
 of every finalized assembled artwork snapshot for chains hosting onchain
 art.
@@ -3440,7 +3440,7 @@ event StateExportSuperseded(
 );
 ```
 
-The same pattern should be available for recovery manifests and archive/fixity
+The same pattern must be available for recovery manifests and archive/fixity
 receipts when a previously published artifact is found incomplete, corrupted,
 or non-canonical. Supersession does not erase the old artifact; it creates a
 public lineage.
@@ -3449,7 +3449,7 @@ If the state/export publisher becomes obsolete or unavailable, the cached
 data. While governance works, replacement uses delayed pointer/catalog
 governance. If governance is lost, independent archives can still publish
 unofficial exports and challenges offchain, but old Core cannot bless a new
-publisher; consumers should mark those exports as independently reproduced, not
+publisher; those exports are independently reproduced, not
 Core-published.
 Successor manifests must name the proof posture for the state export: Merkle
 inclusion proofs over the exported roots, a future ZK proof if one is adopted,
@@ -3461,7 +3461,7 @@ publish `StreamCoreSuccessorRepudiated` under the same
 declaration; it adds a visible warning and replacement lineage.
 Burned tokens are excluded from ownership roots after burn but included in
 token-to-collection and collection-serial roots when Core retains their mapping.
-Roots should be Merkle roots over sorted `(key, valueHash)` leaves with the leaf
+Roots must be Merkle roots over sorted `(key, valueHash)` leaves with the leaf
 schema named in the export manifest. The reference exporter can be maintained
 offchain, but no export is canonical unless an independent indexer can reproduce
 the same roots from archived chain data and the published event catalog.
@@ -3931,7 +3931,7 @@ resolver gas, `SLOAD`/`STATICCALL` assumptions, split-wallet release gas,
 metadata rendering limits, and any SSTORE2 or chunk-read assumptions,
 remeasures every GGP inventory row against its current value and floor,
 and publishes a compatibility report hash with raise recommendations
-before user impact. Periodic reviews should also sample
+before user impact. Periodic reviews also sample
 marketplace, wallet, indexer, archive-node, and metadata-cache behavior for
 ERC-2981, ERC-4906, tokenURI fallback handling, contract metadata discovery,
 and frozen/recovered collection display.
@@ -4114,10 +4114,10 @@ recorded corpus and its verification surfaces stand.
 
 The specs, ADRs, event catalogs, release manifests, and reconstruction-client
 source archives are themselves preservation objects. Each deployment and material
-upgrade should publish a content-addressed spec bundle hash in the deployment
+upgrade must publish a content-addressed spec bundle hash in the deployment
 manifest and mirror it across independent storage families. Governance runbooks
-should also name legal-entity succession and dissolution risks; the contracts do
-not solve legal continuity, but operators should document who can act if the
+must also name legal-entity succession and dissolution risks; the contracts do
+not solve legal continuity, but operators must document who can act if the
 original operating entity ceases to exist.
 Event-log and state availability are operational assumptions, not protocol
 guarantees. If EIP-4444-style history expiry, log pruning, state expiry, or RPC
@@ -4142,7 +4142,7 @@ state: v1 keeps them live where the protocol requires live reads, and any
 future proof-backed cold-storage model is a successor-line decision with state
 export roots and explicit user-facing tradeoffs.
 
-Monitoring operations should define alert routing and escalation for:
+Monitoring operations must define alert routing and escalation for:
 
 1. resolver fallback-to-zero;
 2. metadata router failure;
@@ -4179,7 +4179,7 @@ or social-canonical successor must carry ownership and event-history snapshot
 hashes plus a clear statement of old-Core status.
 
 Zero-admin and lost-quorum drills must cover the complete satellite set, not
-only Core. The runbook should periodically prove degraded-mode reads and
+only Core. The runbook must periodically prove degraded-mode reads and
 operations for metadata router failure, finality verification, pending entropy,
 split-wallet release, escrow flush, state export publication, event-catalog
 reconstruction, the zero-signer inertness of the dormant identity-mode
@@ -4225,7 +4225,7 @@ fixity lanes, which keep accepting institution-signed records with no
 operator or governance
 ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
 [CMC-INDEPENDENT-ATTESTOR]; ADR 0011 decision R11), and archived
-reconstruction should continue where their immutable dependencies still
+reconstruction continues where their immutable dependencies still
 work. New mint programs, pointer
 moves, economic changes, metadata mutations, provider recovery, registry
 replacement, and economics/artwork-affecting recovery halt unless fully
@@ -5120,7 +5120,7 @@ Operations gates:
 3. Pull payments require recipients to claim, but protect settlement from
    recipient behavior.
 4. Core-native ERC-2981 costs bytecode, but is necessary for marketplace
-   compatibility and should be protected by moving other logic out.
+   compatibility and must be protected by moving other logic out.
 5. Freeze controls reduce future flexibility, but create credible permanence
    when used.
 6. Hash commitments make offchain artifacts verifiable, but do not guarantee
@@ -5151,12 +5151,12 @@ Operations gates:
     payloads, and redaction design of [LTA-HASH] is the only
     mitigation. Rights records are informational documentation, never
     legal instruments. Compliance therefore lives at the operational
-    edge, never in a protocol mutation path: operators should screen
-    split recipients and record subjects at profile and record creation
-    time, apply jurisdiction-specific policy only in operator-run
-    frontends and services, and must disclose this posture in writing
-    to artists, recipients, and institutions in the same instrument as
-    the estate-loss disclosure
+    edge, never in a protocol mutation path: at their operational
+    discretion operators screen split recipients and record subjects
+    at profile and record creation time and apply jurisdiction-specific
+    policy only in operator-run frontends and services, and must
+    disclose this posture in writing to artists, recipients, and
+    institutions in the same instrument as the estate-loss disclosure
     ([`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
     [RSR-ESTATE]).
 11. Curated onboarding is a disclosed liveness assumption, not an
