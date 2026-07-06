@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:915ab7a3308af4bfd1078f66f7a9ee1a3983332cf8652d99fce5a716c538cb13",
-      "size_bytes": 91650
+      "sha256": "sha256:f2bc1a3dce691c0347e0c75fc21604cb487057048d16f2f399beb0953cb63353",
+      "size_bytes": 93172
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:5dac92658040df05fe01aab5e4a7e96bd4676c6ea3af140ac80233233e27dc02",
+      "sha256": "sha256:f3d08e0cae4f67d36589f30d65e744c325d4e41f188f6fb4653b8bdeeed84ffc",
       "size_bytes": 24573
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -46,6 +46,7 @@
     "section": "Unreleased",
     "entries": [
       "Rebuilt `StreamCore` token identity onto the specification's sequential model: one monotone global token ID counter starting at 1 replaces the reserved-range allocator, per-token `(collectionId, collectionSerial)` identity records are written at allocation and retained across burns, `TokenCollectionRegistered` (leading `uint16 schemaVersion`) is emitted at every authoritative identity write before dependent effects, burn is reshaped to `burn(uint256)` with the `StreamTokenBurned` event and the `collectionBurnsBlockedAtBlock` height read, the Permanent identity and enumeration reads land (`tokenLifecycle`, `lastAllocatedTokenId`, `lastAllocatedCollectionId`, storage-backed `tokenCollectionIdentity`), transfer/approval conditioning overrides are removed so ERC-721 transfers stay unconditioned, the vendored `ERC721Enumerable` pair is deleted, and every `10^10` range derivation is purged from Core, the minter read path, and the metadata renderer (`TokenOutsideCollectionRange` is renamed to `TokenIdentityUnknown`).",
+      "Added the Governed Gas Parameter and Governed Time Parameter machinery per `[LTA-GGP]`/`[LTA-GGP-PROBES]`/`[LTA-GTP]`: reusable `StreamGasParameterHost`/`StreamTimeParameterHost` bases with concrete `StreamGasParameterStore`/`StreamTimeParameterStore` deployables (storage-backed values, immutable floors, derived `keccak256(\"6529STREAM_GGP_\"||name)` ids, 2x-per-action raise bounds, probe-gated emergency raise and exact-value probe-gated lowering, `FORWARDING_CAP`-only permissionless conditional raise/re-lower standing actions registered at deployment, governed rebinding of probe bindings to successor Permanent-class probes with `GasParameterProbeRebound`/`TimeParameterProbeRebound` events, canonical `GasParameterUpdated`/`TimeParameterUpdated` events, and `gasParameterInfo`/`timeParameterInfo` introspection), the Permanent-class probe family (`StreamGasProbe` base enforcing the genuine-failure gas-delivery proof and a run-time codeless-target guard so a scenario target that loses its code can never record a vacuous pass, `StreamForwardingCapProbe` reference probe, `StreamCadenceProbe` for block-cadence observation with pinned wall-clock floors), the `IStreamGovernedParameterAuthority` governance-executor wiring seam, and the requirement 9 conformance suites including parameterId derivation goldens against the spec-pinned catalog, scope-rejection tests, forged-failure probe-integrity tests, and the zero-signer museum-mode conditional raise/re-lower drill.",
       "Resolved OQ-X8 through ADR 0015 by protocol-owner ratification: the on-chain collection-metadata reads plus `properties.stream.collection` token JSON are the normative marketplace collection-identity signal, a two-named-signed-commitments gate precedes public sale, and the per-collection ERC-721 facade line is specified as a dormant extension profile (`docs/stream-collection-facade-profile.md`) with its facade-readiness genesis surfaces (per-collection identity mode, one-way pre-first-mint transfer-controller registry, controlled mutation path, event-doctrine carve-out, finality identity binding) carved into the protocol v1 spec, umbrella doctrine, metadata specs, artist consent surface, and conformance-matrix gates, closing the open-question register.",
       "Added the launch v1 target architecture spec and hardened the payment, royalty, mint, metadata, and entropy specs for Core-native ERC-2981, event-sourced reconstruction, and long-lived module boundaries.",
       "Expanded the launch v1 outside-Core scope to require approved-standard ERC-20 primary settlement, museum-grade C2PA/IIIF/PREMIS-style preservation surfaces, richer preservation satellites, and an explicit ARRNG/Pyth fallback versus VRF-only entropy decision.",
