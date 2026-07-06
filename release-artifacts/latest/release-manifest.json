@@ -1869,7 +1869,7 @@
     },
     "gas_snapshot_baseline": {
       "path": "release-artifacts/baselines/v0.1.0/gas-snapshot.snap",
-      "sha256": "sha256:7ada774caa34fbac4e7295d4e7919bf275f4786a65d8a4dab24ac64ebe024f19",
+      "sha256": "sha256:779fd6636d3c645a417cb9a737e17a240ce53ed660bd901510498aed7e7602b7",
       "size_bytes": 866
     },
     "gas_envelope_baseline": {
