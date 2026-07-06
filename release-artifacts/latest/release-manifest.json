@@ -71,7 +71,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:102d85757465d4462ac2a48a54cb241e77e533c3af4e2f2affa6959acb4b2f1d",
+        "sha256": "sha256:55601bceebbbc7893ba04447353e568712b911b0f989b6dc4946e900a17c5441",
         "size_bytes": 92568,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -155,7 +155,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:ba70cfba708788849cc583dc19e7fa1d928954ffc6a885dc5075d630717c5cb0",
+      "sha256": "sha256:52aae31dbc368d1eac964c4669c8eea5fd4bc6b4f6c4b337ef6877387f73247a",
       "size_bytes": 24573,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2374,7 +2374,7 @@
       },
       {
         "path": "docs/release-policy.md",
-        "sha256": "sha256:02a55f19c913117212fefa8eb1a8ea8c167cd2b7be6f374ca5da77ea014affc8",
+        "sha256": "sha256:e8381460fa0e6ec26bfa249dfe2c7c9ffcbe847f5d68956fbf6ac0eab72526d0",
         "size_bytes": 12100
       },
       {
@@ -2409,12 +2409,12 @@
       },
       {
         "path": "docs/architecture.md",
-        "sha256": "sha256:c89451b385f7144734042290c4ab75f28b683a10763537f35b5d8544b52aef98",
+        "sha256": "sha256:0d9641ab34debcd86fdf21cc78e75d9f81d1f6000363afec9ec462766524efec",
         "size_bytes": 18877
       },
       {
         "path": "docs/launch-v1-target-architecture.md",
-        "sha256": "sha256:db800e5d09bd5718cd35c08e978db1ba3404338895af1d77055889be46aa3303",
+        "sha256": "sha256:43cf333d0fcb90f5312518270b9a52e439248175f82647c48518fe80d8e3d13f",
         "size_bytes": 151386
       },
       {
@@ -2605,12 +2605,12 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:bacdf8fe3e293b7f400d91d94f1c0d517644f2e19bb0b90c5fd3209ef5851261",
+        "sha256": "sha256:f7a859b5bb9e8da4b65e29645faeb20a62684e4ca25332df39daf1e49a2d1a01",
         "size_bytes": 72079
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:6ccb6008dc90823825e07ab918bff7b291149097174cbc7e54195c35ff2d2ba4",
+        "sha256": "sha256:6d385cae73d90092a0b666a6b0886df4bce06b317fdbc1c187af730914116321",
         "size_bytes": 31758
       }
     ]

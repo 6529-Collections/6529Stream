@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:99488d732200eed7dcc03028e4f9f83b3d2bb8009c257e0610ef7b2d3ecff98c"
+      "sha256": "sha256:b348e87d846dfb6f668a952eeca4f217658355b4aba3a72e637507facefcf7dc"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -443,7 +443,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:99488d732200eed7dcc03028e4f9f83b3d2bb8009c257e0610ef7b2d3ecff98c"
+          "sha256": "sha256:b348e87d846dfb6f668a952eeca4f217658355b4aba3a72e637507facefcf7dc"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -451,7 +451,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:6ccb6008dc90823825e07ab918bff7b291149097174cbc7e54195c35ff2d2ba4"
+          "sha256": "sha256:6d385cae73d90092a0b666a6b0886df4bce06b317fdbc1c187af730914116321"
         }
       ],
       "risk_acceptance": null
@@ -522,7 +522,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:bacdf8fe3e293b7f400d91d94f1c0d517644f2e19bb0b90c5fd3209ef5851261"
+          "sha256": "sha256:f7a859b5bb9e8da4b65e29645faeb20a62684e4ca25332df39daf1e49a2d1a01"
         },
         {
           "path": "docs/warning-dispositions.md",
