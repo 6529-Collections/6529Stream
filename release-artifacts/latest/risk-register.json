@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:b348e87d846dfb6f668a952eeca4f217658355b4aba3a72e637507facefcf7dc"
+      "sha256": "sha256:9549242f566003ec20d2c83acd8c0d42044cabdd3b55e5cf0a5c828ed1522c75"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -413,7 +413,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:cb34e4916e2ca939d4893ff707278857c4e8ff345227ece4e25a9a7d1ef51d75"
+          "sha256": "sha256:98c91b2e65adf1425ddb8e2eec5ef3f12806240b96d2720ed9c54855c8a82d86"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -443,7 +443,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:b348e87d846dfb6f668a952eeca4f217658355b4aba3a72e637507facefcf7dc"
+          "sha256": "sha256:9549242f566003ec20d2c83acd8c0d42044cabdd3b55e5cf0a5c828ed1522c75"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -451,7 +451,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:6d385cae73d90092a0b666a6b0886df4bce06b317fdbc1c187af730914116321"
+          "sha256": "sha256:390ff4a627936f87459a2ff1d097e5e2d2727e9acd717f66b844081cdcb6877a"
         }
       ],
       "risk_acceptance": null
@@ -485,7 +485,7 @@
         },
         {
           "path": "docs/vendored-libraries.md",
-          "sha256": "sha256:532b029087cef2b1173e6e824e8abd21d5d2439f89e95fe0ff7013cdb3d9daff"
+          "sha256": "sha256:6da7adb5dd5fcdb4930eed7e37cd4e649622d53e949c34b3bffa272e701a68bf"
         }
       ],
       "risk_acceptance": null
@@ -522,7 +522,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:f7a859b5bb9e8da4b65e29645faeb20a62684e4ca25332df39daf1e49a2d1a01"
+          "sha256": "sha256:d11a9d74f11c16d6f6485f92ab2e2addbb397e82dd26c7c8067d0de527b2369e"
         },
         {
           "path": "docs/warning-dispositions.md",
