@@ -133,7 +133,7 @@ contributors who start from the README.
   view, and has a production-only size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. The
   committed `release-artifacts/latest/bytecode-release-proof.json` currently
-  records `StreamCore` runtime size at 24,121 bytes with 455 bytes of EIP-170 headroom,
+  records `StreamCore` runtime size at 24,111 bytes with 465 bytes of EIP-170 headroom,
   which passes deployability and the documented 384-byte minimum release floor
   but sits below the 512-byte warning threshold under the accepted CON-012
   bytecode-spend exception. Large non-trivial Core feature work still needs

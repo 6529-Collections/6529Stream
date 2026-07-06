@@ -4515,7 +4515,7 @@
       "follow_up": "CON-006 follow-up NatSpec burn-down or accepted exclusion review.",
       "id": "StreamCore:function:retrievetokenImageAndAttributes(uint256)",
       "kind": "function",
-      "line": 1646,
+      "line": 1653,
       "reason": "Current first-party release surface lacks nearby NatSpec; keep explicit until the Solidity declaration receives NatSpec.",
       "signature": "retrievetokenImageAndAttributes(uint256)",
       "source": "smart-contracts/StreamCore.sol",

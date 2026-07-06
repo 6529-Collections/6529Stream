@@ -215,8 +215,8 @@ negative and bytecode spend positive.
 The current approved `StreamCore` runtime baseline is 22,184 bytes with
 2,392 bytes of EIP-170 margin. The current measured proof is above that baseline
 under the accepted CON-012 exception:
-`release-artifacts/latest/bytecode-release-proof.json` records 24,097 bytes
-with 479 bytes of EIP-170 margin.
+`release-artifacts/latest/bytecode-release-proof.json` records 24,111 bytes
+with 465 bytes of EIP-170 margin.
 This CON-014 branch also refreshes via-IR bytecode hashes for contracts whose
 source files are otherwise unchanged in the diff. `StreamCore` changes because
 its imported `IStreamMintManager` source expands from the prior marker-only
