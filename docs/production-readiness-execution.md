@@ -1,5 +1,10 @@
 # Production Readiness Execution Packet
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This packet records the current production-readiness execution state for the
 remote `main` release candidate. It is not a production-readiness claim and it
 does not replace the generated release evidence status manifest in

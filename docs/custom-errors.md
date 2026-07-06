@@ -1,5 +1,10 @@
 # Custom Error Catalog
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 6529Stream treats custom errors as part of the external protocol surface.
 Auditors, operators, indexers, wallets, and frontend clients should decode
 custom errors from the ABI before falling back to raw revert bytes.

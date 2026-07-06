@@ -1,5 +1,10 @@
 # Protocol Surface Report
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document describes the generated protocol surface report for the current
 6529Stream local baseline. The report is pre-audit evidence only: it is not a
 production-readiness claim, a security claim, or a substitute for ABI review,

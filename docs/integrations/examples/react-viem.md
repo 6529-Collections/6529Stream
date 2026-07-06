@@ -1,5 +1,10 @@
 # React/Viem Pseudocode Examples
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 These INT-007 examples are non-runnable pseudocode for a 6529.io-style
 React/Next frontend. They show architecture shape only. They are not a
 generated SDK, not a dependency recommendation, not maintained app code, not

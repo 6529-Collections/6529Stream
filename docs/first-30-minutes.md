@@ -1,5 +1,10 @@
 # First 30 Minutes
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This guide is the fresh-contributor path for 6529Stream. It turns a new
 checkout into a useful local validation run without production secrets and
 without overstating what the current repository proves.

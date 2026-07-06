@@ -1,5 +1,10 @@
 # Curator Rewards
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document is the integration flow spec for curator reward claims through
 `StreamCuratorsPool`. It is for React, mobile, Electron, indexer, operator UI,
 and backend reward-service teams that need to show reward eligibility, submit

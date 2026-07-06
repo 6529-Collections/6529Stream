@@ -1,5 +1,10 @@
 # External Audit Package
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This is the auditor-facing index for the current 6529Stream repository state.
 It is a pre-audit local baseline, not production-ready, and not a security claim.
 It exists so reviewers can find the current scope, decisions, evidence, known

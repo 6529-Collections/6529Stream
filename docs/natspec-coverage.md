@@ -1,5 +1,10 @@
 # NatSpec Coverage
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document describes the checked `CON-006` NatSpec coverage gate for the
 release-relevant Solidity protocol surface. It is a pre-audit local baseline,
 not production-ready, and not a claim that the current API documentation is

@@ -1,5 +1,10 @@
 # Non-Local Release Evidence
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This runbook defines how maintainers collect and review fork, testnet, live,
 audit, and signed-release evidence before a public beta or production release.
 

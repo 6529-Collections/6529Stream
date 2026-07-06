@@ -1,5 +1,10 @@
 # Public Beta Evidence
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document defines the no-secret evidence status manifest for public beta and
 production release readiness.
 

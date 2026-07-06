@@ -1,5 +1,10 @@
 # Wallets And Signatures
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document is the integration guide for wallet, EIP-712, ERC-1271, Safe,
 WalletConnect, and backend signing-service handling around
 `StreamDrops.DropAuthorization`. It is a pre-audit local baseline, not

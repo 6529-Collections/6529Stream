@@ -1,5 +1,10 @@
 # React/Next Frontend Reference Architecture
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This is the INT-007 reference architecture for a 6529.io-style React and Next
 frontend that consumes 6529Stream release artifacts. It is a pre-audit local
 baseline, not production-ready, and not a security claim. Local evidence does

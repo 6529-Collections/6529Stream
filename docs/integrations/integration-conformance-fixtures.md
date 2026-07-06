@@ -1,5 +1,10 @@
 # Integration Conformance Fixtures
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 ## Maturity And Scope
 
 These INT-016 integration conformance fixtures are a pre-audit local baseline

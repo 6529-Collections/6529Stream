@@ -1,5 +1,10 @@
 # Operator Admin UI Specification
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This is the INT-010 integration guide for teams building a 6529.io operator UI
 or internal admin dashboard around 6529Stream. It is a pre-audit local baseline,
 not production-ready, and not a security claim. Local evidence does not replace

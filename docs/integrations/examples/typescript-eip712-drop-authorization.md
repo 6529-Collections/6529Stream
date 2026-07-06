@@ -1,5 +1,10 @@
 # TypeScript EIP-712 Drop Authorization Snippets
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 These INT-014 TypeScript snippets show how a 6529.io-style React, Next,
 mobile, Electron, operator UI, or backend signing-service codebase can build
 and validate `StreamDrops.DropAuthorization` typed data. They are pre-audit

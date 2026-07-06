@@ -1,5 +1,10 @@
 # 1/1 Provenance Manifests
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document defines the current 6529Stream 1/1 provenance manifest model.
 The repository remains a pre-audit local baseline, not production-ready, and
 not a security claim. Local provenance templates do not replace fork, testnet,

@@ -1,5 +1,10 @@
 # Interface And Version Compatibility
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document describes the `CON-007` compatibility surface for frontend,
 mobile, Electron, indexer, and operator UI consumers. It is a pre-audit local
 baseline, not production-ready, and not a security claim. Local compatibility

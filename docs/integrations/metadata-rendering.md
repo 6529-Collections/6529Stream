@@ -1,5 +1,12 @@
 # Metadata Rendering
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins. For
+target metadata rendering behavior this document is superseded by
+[`docs/metadata-router-and-renderer.md`](../metadata-router-and-renderer.md).
+
 This document is the metadata rendering, cache, animation sandbox, and
 marketplace integration guide for 6529Stream and completes the current
 `INT-006` local documentation slice. It is for React, mobile, Electron,

@@ -1,5 +1,10 @@
 # TypeScript Artifact And Chain Config Snippets
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 These INT-013 TypeScript snippets show how a 6529.io-style React, Next,
 mobile, Electron, indexer, or operator UI codebase can perform artifact loading
 for 6529Stream release artifacts and build fail-closed chain config. They are

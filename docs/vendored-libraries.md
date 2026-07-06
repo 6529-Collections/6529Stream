@@ -1,5 +1,10 @@
 # Vendored Libraries
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This repository currently keeps a small set of OpenZeppelin contracts,
 interfaces, and utilities under `smart-contracts/` instead of importing them
 from a package manager. Vendored files are allowed only when their provenance,

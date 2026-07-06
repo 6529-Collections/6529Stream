@@ -1,5 +1,10 @@
 # External Audit Finding Workflow
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This is the public-safe workflow for receiving, triaging, remediating,
 retesting, risk-accepting, and closing external audit findings for 6529Stream.
 It is a pre-audit local baseline, not a completed audit report, and not a

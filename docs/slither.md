@@ -1,5 +1,10 @@
 # Slither Baseline
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 Slither is pinned through `requirements-tools.txt` and is currently a
 non-gating diagnostic. It is expected to report high and medium findings until
 the roadmap triage work fixes, accepts, or scopes each row.

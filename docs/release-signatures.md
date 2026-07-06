@@ -1,5 +1,10 @@
 # Release Signatures
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 6529Stream treats release signatures as public release evidence. The committed
 local evidence proves the repository has a deterministic format for retaining
 that evidence, but it does not claim production signing has happened.

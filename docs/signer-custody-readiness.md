@@ -1,5 +1,10 @@
 # Signer Custody Readiness
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This guide defines the no-secret evidence format for production, fork, or
 testnet drop authorization signer custody readiness. It is pre-audit and not a
 security claim. The committed template proves only that the repository can

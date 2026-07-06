@@ -1,5 +1,10 @@
 # Release Readiness
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This dashboard is the Gate G release-readiness entry point for 6529Stream.
 It is a pre-audit local baseline, not production-ready, and not a security claim.
 Local evidence does not replace fork/testnet/live evidence for public beta or

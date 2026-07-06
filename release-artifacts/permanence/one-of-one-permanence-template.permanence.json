@@ -146,7 +146,7 @@
     },
     "one_of_one_provenance_manifest": {
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:6f42a099913d82db6d6aaa238a2ff597eb7b11d3a8cc2fe247e717eaf8f84ebe",
+      "sha256": "sha256:ec26a3f74b1868dd7926c3d9a537e57de21cdfc20038bf7ef7a98b384ea80f06",
       "status": "template"
     }
   },
@@ -177,7 +177,7 @@
     {
       "category": "permanence_runbook",
       "path": "docs/permanence-packages.md",
-      "sha256": "sha256:9d1b600d3162e151558a64009dee3a7f25977b0fbe9fc07266379ca4ee27b8f6"
+      "sha256": "sha256:9e8ff5d77a2fe3f596d534a88ba79228381c730b00173e4eb403147b9ce6ec90"
     },
     {
       "category": "dependency_artifact_manifest",
@@ -187,7 +187,7 @@
     {
       "category": "provenance_manifest",
       "path": "release-artifacts/latest/one-of-one-provenance-manifest.json",
-      "sha256": "sha256:6f42a099913d82db6d6aaa238a2ff597eb7b11d3a8cc2fe247e717eaf8f84ebe"
+      "sha256": "sha256:ec26a3f74b1868dd7926c3d9a537e57de21cdfc20038bf7ef7a98b384ea80f06"
     }
   ],
   "redaction_policy": {

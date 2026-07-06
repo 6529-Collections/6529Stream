@@ -1,5 +1,10 @@
 # Marketplace And Indexer Evidence
 
+Baseline record — not a specification. This document describes as-built
+or operational state; the normative target is the specification set
+indexed in [`docs/spec-policy.md`](../spec-policy.md), and where this
+document conflicts with a specification home, the specification wins.
+
 This document is the `ONE-005` retained marketplace/indexer evidence guide for
 6529Stream. It tells frontend, marketplace, analytics, collector-tool, and
 indexer teams what must be proven before the project can make collector-facing
