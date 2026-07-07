@@ -1420,4 +1420,47 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         _finalizeFixtureCall(fixture);
         registry.artworkScopeFinalityRecord(scope).finalized.assertTrue("executed after preview");
     }
+
+    /// @notice Preview mirrors the [LTA-FREEZE] rule 4 live-guardian gate: clearing the veto
+    ///         guardian after scheduling makes previewFinality.stagedFreezeReady and the real
+    ///         finalize call reject together, so preview and execution never diverge on it.
+    function testPreviewStagedFreezeMirrorsGuardianGate() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        _scheduleAndOpen(fixture);
+
+        // Guardian live: the staged freeze previews ready and would execute.
+        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+            COLLECTION_ID, fixture.components, fixture.manifest
+        );
+        p.stagedFreezeReady.assertTrue("guardian live: staged ready");
+        p.wouldExecute.assertTrue("guardian live: would execute");
+
+        // Clear the veto guardian after scheduling; the scheduled action itself is untouched.
+        authority.setDefaultGuardian(address(0));
+        p = previewer.previewCollectionFinality(COLLECTION_ID, fixture.components, fixture.manifest);
+        p.stagedFreezeReady.assertFalse("guardian cleared: staged not ready");
+        p.wouldExecute.assertFalse("guardian cleared: would not execute");
+
+        // Execution rejects on the same cleared-guardian gate: the preview matched reality.
+        vm.prank(finalityAdmin);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityFreezeGuardianUnset.selector,
+                fixture.scopeKey
+            )
+        );
+        registry.finalizeCollectionArtwork(
+            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+        );
+
+        // Restoring the guardian re-opens both preview and execution — the gate reads the live
+        // guardian each call, never the action's scheduling-time snapshot.
+        authority.setDefaultGuardian(guardian);
+        p = previewer.previewCollectionFinality(COLLECTION_ID, fixture.components, fixture.manifest);
+        p.stagedFreezeReady.assertTrue("guardian restored: staged ready");
+        p.wouldExecute.assertTrue("guardian restored: would execute");
+        _finalizeFixtureCall(fixture);
+        registry.artworkScopeFinalityRecord(fixture.scope).finalized
+            .assertTrue("executed after guardian restored");
+    }
 }

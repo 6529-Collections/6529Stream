@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "./IStreamArtworkFinalityComponents.sol";
 import "./IStreamFinalityCoreReads.sol";
+import "./IStreamFinalityGovernanceAuthority.sol";
 import "./IStreamFinalityMetadataReads.sol";
 import "./IStreamFinalitySanctionReads.sol";
 import "./StreamArtworkFinalityRegistry.sol";
@@ -23,6 +24,7 @@ contract StreamArtworkFinalityPreview {
     IStreamFinalityCoreReads public immutable coreReads;
     IStreamFinalityMetadataReads public immutable metadataReads;
     IStreamFinalitySanctionReads public immutable sanctionReads;
+    IStreamFinalityGovernanceAuthority public immutable governanceAuthority;
     address public immutable finalityDiscovery;
 
     constructor(StreamArtworkFinalityRegistry registry_) {
@@ -33,6 +35,7 @@ contract StreamArtworkFinalityPreview {
         coreReads = registry_.coreReads();
         metadataReads = registry_.metadataReads();
         sanctionReads = registry_.sanctionReads();
+        governanceAuthority = registry_.governanceAuthority();
         finalityDiscovery = registry_.finalityDiscovery();
     }
 
@@ -119,9 +122,24 @@ contract StreamArtworkFinalityPreview {
         returns (bool)
     {
         StreamTerminalFreezeAction memory action = registry.artworkTerminalFreezeAction(scope);
-        return action.status == StreamTerminalFreezeStatus.SCHEDULED
-            && block.timestamp >= action.notBefore && block.timestamp <= action.expiresAfter
-            && action.expectedFinalityRecordHash == computedRecordHash;
+        if (
+            action.status != StreamTerminalFreezeStatus.SCHEDULED
+                || block.timestamp < action.notBefore || block.timestamp > action.expiresAfter
+                || action.expectedFinalityRecordHash != computedRecordHash
+        ) {
+            return false;
+        }
+        // Defense in depth ([LTA-FREEZE] rule 4): execution re-resolves the live veto guardian and
+        // reverts FinalityFreezeGuardianUnset when it was cleared after scheduling
+        // (StreamArtworkFinalityRegistry._requireExecutableFreeze). Mirror that gate so a freeze
+        // that would revert is never previewed as ready. scopeKey mirrors the registry's
+        // _scopeKey; the guardian is read live from the same authority, never the action's
+        // scheduling-time snapshot.
+        bytes32 scopeKey = keccak256(
+            abi.encode(uint8(scope.scopeType), scope.collectionId, scope.tokenId, scope.scopeId)
+        );
+        (address guardian,) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey);
+        return guardian != address(0);
     }
 
     function _manifestSatisfied(StreamFinalityManifestRef calldata manifest)
