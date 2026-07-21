@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:9c640d5e99f18ada0f2c8be6effcc01d05df2a82caa800a91638bcb785917c48",
-      "size_bytes": 97064
+      "sha256": "sha256:0149ef0798d41788da6a0ab3f1ea43d7452ceb6c1318bcd17bce0e4e068f48c9",
+      "size_bytes": 98059
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d89ab84d33c2e861ca8a8dd63da320a7910b34cb2c168ee02c7da3a7c0328471",
+      "sha256": "sha256:9380122b608e67150e564e834abcd8e009a6bdc73fe33bb35cce5a7007a6e92a",
       "size_bytes": 24573
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -278,6 +278,7 @@
       "Resolved all 24 open questions raised by the specification permanence reframe through accepted `docs/adr/0009-protocol-v1-open-question-resolutions.md` and accepted ADR 0008 (amended by ADR 0009 decisions 8 and 9): sequential global token IDs with stored collection serials, the 2,000-byte Core headroom rule as the governing size gate, dual genesis entropy providers (VRF plus reviewed ARRNG/Pyth fallback; VRF-only nonconformant), the full five-scope genesis finality registry, one canonical `stream`-prefixed module identity surface, mandatory Core `contractURI()` and Core-originated ERC-4906 refresh emitters, `maxRoyaltyBps = 1000`, frozen-bit-only assignment-hash binding, deployment-wide global freeze blocking new revenue classes, `COLLECTION_SCOPE_PHASE_ID = 0` cross-phase counter derivation, `fulfillEntropy` outcome codes for stale-result handling, and the metadata/collection-metadata decisions recorded in the ADR. Removed every inline `OQ-*` marker and moved the register to Resolved.",
       "Reframed the Stream specification set from launch-phase language onto permanence classes for permanent 6529-network infrastructure: added `docs/spec-policy.md` (Permanent/Replaceable/Operational taxonomy, Draft/Review/Final lifecycle, ADR-gated amendments) and `docs/spec-open-questions.md` (tracked `OQ-*` decisions), retitled the launch v1 target architecture to the Stream protocol v1 specification and the launch conformance matrix to the deployment conformance matrix, swept launch/pre-launch/future-module wording from the umbrella, revenue, mint, metadata, collection metadata, and entropy specs, canonicalized the `royaltyReceiverAndBps` (`0x54f77a09`) resolver selector across the matrix and umbrella spec, and marked genuinely open decisions with inline `OQ-*` markers instead of deferral hedges. Spec file names are unchanged; normative requirements are unchanged except where hedges became tracked open questions.",
       "Recovered 392 bytes of measured `StreamCore` runtime headroom with behavior-preserving storage caching and invariant-bounded unchecked counter arithmetic; that release step measured production via-IR runtime at 21,831 bytes with 2,745 bytes of EIP-170 margin under the then-current 22,184-byte approved ceiling. Later Core mint-manager hook work supersedes the current runtime measurement and approved exception ceiling in the Unreleased section. Added explicit mint/burn/final-supply counter regressions and a checked negative-delta convention for accepted headroom-recovery records.",
+      "Aligned `StreamArtworkFinalityPreview` finality preview with execution by mirroring the `[LTA-FREEZE]` rule 4 live veto-guardian gate in `_stagedFreezeReady`: the preview now re-resolves the terminal-freeze veto guardian through the registry governance authority and reports a staged freeze as not-ready (`stagedFreezeReady`/`wouldExecute` false) when the guardian was cleared after scheduling, matching the `FinalityFreezeGuardianUnset` revert in `StreamArtworkFinalityRegistry._requireExecutableFreeze` so `previewFinality(...).wouldExecute` can no longer report an unexecutable freeze as ready. The view-only edit shifted the IR-optimized `StreamCore` runtime to 24,152 bytes with 424 bytes of EIP-170 headroom via the whole-program optimizer, and the release-artifact, deployment, and evidence pin chain plus the `StreamCore` size figures in the architecture, status, known-blockers, release-policy, tooling, and target-architecture docs were regenerated to match.",
       "Hardened the Windows checked-native helper so successful commands that write accepted warning output to stderr still pass based on exit code, with runtime harness coverage for stderr-on-success behavior, and taught the Solidity formatting checker to ignore CRLF-only diffs for formatting-required files while preserving the documented vendored exemption set.",
       "Corrected reviewed fork metadata browser evidence so non-local retained `tokenURI` metadata self-describes the fork/testnet rehearsal, and hardened Forge broadcast return parsing to validate decoded field shapes and skip malformed `returns` records before retaining evidence.",
       "Reconciled stale autonomous backlog status rows for previously merged integration, 1/1 product-readiness, contract-size, and randomizer test work, and refreshed the dependent risk-register and release-artifact hashes.",
