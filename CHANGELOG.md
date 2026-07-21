@@ -1302,6 +1302,19 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Aligned `StreamArtworkFinalityPreview` finality preview with execution by
+  mirroring the `[LTA-FREEZE]` rule 4 live veto-guardian gate in
+  `_stagedFreezeReady`: the preview now re-resolves the terminal-freeze veto
+  guardian through the registry governance authority and reports a staged freeze
+  as not-ready (`stagedFreezeReady`/`wouldExecute` false) when the guardian was
+  cleared after scheduling, matching the `FinalityFreezeGuardianUnset` revert in
+  `StreamArtworkFinalityRegistry._requireExecutableFreeze` so
+  `previewFinality(...).wouldExecute` can no longer report an unexecutable freeze
+  as ready. The view-only edit shifted the IR-optimized `StreamCore` runtime to
+  24,152 bytes with 424 bytes of EIP-170 headroom via the whole-program
+  optimizer, and the release-artifact, deployment, and evidence pin chain plus
+  the `StreamCore` size figures in the architecture, status, known-blockers,
+  release-policy, tooling, and target-architecture docs were regenerated to match.
 - Hardened the Windows checked-native helper so successful commands that write
   accepted warning output to stderr still pass based on exit code, with runtime
   harness coverage for stderr-on-success behavior, and taught the Solidity
