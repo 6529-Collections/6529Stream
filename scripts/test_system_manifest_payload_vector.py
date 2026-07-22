@@ -130,6 +130,21 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
                 ):
                     generator._require_profile(mutated)
 
+        for field in ("required_interfaces", "required_markers"):
+            with self.subTest(field=field, malformed_member=True):
+                mutated = copy.deepcopy(self.profile)
+                mutated_governance = next(
+                    entry
+                    for entry in mutated["entries"]
+                    if entry["key"] == "GOVERNANCE_LAYER"
+                )
+                mutated_governance[field][0] = {}
+                with self.assertRaisesRegex(
+                    generator.ManifestVectorError,
+                    "state-export publisher interface",
+                ):
+                    generator._require_profile(mutated)
+
     def test_checker_rejects_full_publisher_abi_and_synthetic_interface_id_drift(self) -> None:
         surface_mutations = (
             (

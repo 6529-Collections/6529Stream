@@ -703,8 +703,10 @@ def _require_profile(profile: Any) -> list[dict[str, Any]]:
     governance_markers = governance.get("required_markers")
     if (
         not isinstance(governance_interfaces, list)
+        or not all(isinstance(item, str) for item in governance_interfaces)
         or STATE_EXPORT_PUBLISHER_INTERFACE not in governance_interfaces
         or not isinstance(governance_markers, list)
+        or not all(isinstance(marker, str) for marker in governance_markers)
         or not set(STATE_EXPORT_PUBLISHER_MARKERS).issubset(governance_markers)
     ):
         raise ManifestVectorError(
