@@ -118,6 +118,7 @@ YAML_ESCAPE_RE = re.compile(
     r"\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 )
 SHELL_CONTINUATION_RE = re.compile(r"\\[ \t]*\r?\n[ \t]*")
+SHELL_ESCAPED_ALNUM_RE = re.compile(r"\\(?=[A-Za-z0-9])")
 SENSITIVE_PACKAGE_TOOL_RE = re.compile(
     r"(?:\bpip(?:3(?:\.\d+)?)?(?:\.__main__)?\b|\bpipx\b|\buv\b|"
     r"\bpoetry\b|\bensurepip\b)",
@@ -148,6 +149,13 @@ def normalize_shell_continuations(text: str) -> str:
     """Remove shell continuations without inserting token-separating spaces."""
 
     return SHELL_CONTINUATION_RE.sub("", text)
+
+
+def normalize_shell_tokens(text: str) -> str:
+    """Expose shell words split with quotes or escaped alphanumeric characters."""
+
+    without_quotes = normalize_shell_continuations(text).replace("'", "").replace('"', "")
+    return SHELL_ESCAPED_ALNUM_RE.sub("", without_quotes)
 
 
 def parse_direct_requirements(text: str) -> dict[str, str]:
@@ -416,7 +424,8 @@ def check_workflow(path: Path, text: str) -> list[str]:
             )
 
     logical_text = normalize_shell_continuations(text)
-    for logical_line_number, raw_line in enumerate(logical_text.splitlines(), start=1):
+    shell_text = normalize_shell_tokens(text)
+    for logical_line_number, raw_line in enumerate(shell_text.splitlines(), start=1):
         stripped = raw_line.strip()
         if not stripped or stripped.startswith("#"):
             continue

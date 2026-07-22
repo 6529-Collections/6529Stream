@@ -271,6 +271,14 @@ class PythonToolchainTests(unittest.TestCase):
             "pip install extra-package",
             checker.normalize_shell_continuations(quoted_continuation),
         )
+        self.assertIn(
+            "pip install extra-package",
+            checker.normalize_shell_tokens("p''ip in''stall extra-package"),
+        )
+        self.assertIn(
+            "pip install extra-package",
+            checker.normalize_shell_tokens(r"p\ip i\nstall extra-package"),
+        )
         cases = {
             "folded-split-install": base.replace("  - run: |", "  - run: >").replace(
                 checker.LOCK_INSTALL_COMMAND,
@@ -296,6 +304,14 @@ class PythonToolchainTests(unittest.TestCase):
             "literal-continuation-install": base.replace(
                 "  - run: |",
                 f"{literal_continuation}\n  - run: |",
+            ),
+            "quoted-token-install": base.replace(
+                before_check,
+                f"      p''ip in''stall extra-package\n{before_check}",
+            ),
+            "escaped-token-install": base.replace(
+                before_check,
+                f"      p\\ip i\\nstall extra-package\n{before_check}",
             ),
             "shell-wrapper": base.replace(
                 before_check,

@@ -83,6 +83,12 @@ checker plus its tests. This binds the reviewed install policy without storing
 credentials or private-index configuration. It improves reproducibility only
 and does not promote release maturity.
 
+The checker is a static declaration guard for the reviewed workflow grammar,
+canonical installer commands, lock closure, and workflow inventory. It is not
+a shell sandbox and does not prove the absence of commands assembled dynamically
+through variables, `eval`, or equivalent runtime construction. Full-workflow
+checksum binding and PR review remain the controls for arbitrary command changes.
+
 ## Local Checks
 
 Fresh contributors should start with
