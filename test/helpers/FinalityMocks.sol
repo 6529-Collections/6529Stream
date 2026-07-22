@@ -40,83 +40,149 @@ contract MockFinalityAuthority {
     }
 }
 
-/// @notice Core-facts mock for the IStreamFinalityCoreReads seam.
+/// @notice Granular target-Core mock consumed by StreamCoreFinalityAdapter.
 contract MockFinalityCore {
-    mapping(uint256 => StreamCoreCollectionFinalityFacts) private _collectionFacts;
-    mapping(bytes32 => StreamScopedCoreFinalityFacts) private _scopedFacts;
-    mapping(uint256 => bool) private _burnsBlocked;
-    mapping(uint256 => uint64) private _burnsBlockedAtBlock;
-    mapping(uint256 => bytes32) private _identityMode;
-    mapping(uint256 => address) private _transferController;
+    struct TokenIdentity {
+        bool mappingExists;
+        uint256 collectionId;
+        uint256 collectionSerial;
+        bool burned;
+    }
 
-    /// @dev keccak256("CORE_NATIVE"); the spec default for undeclared collections.
-    bytes32 private constant IDENTITY_MODE_CORE_NATIVE =
-        0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1;
+    mapping(uint256 => bool) private _collectionExists;
+    mapping(uint256 => bool) private _collectionHasMaxSupply;
+    mapping(uint256 => uint8) private _collectionStatus;
+    mapping(uint256 => uint8) private _collectionSupplyMode;
+    mapping(uint256 => uint256) private _collectionMaxSupply;
+    mapping(uint256 => uint256) private _collectionMintedEver;
+    mapping(uint256 => uint256) private _collectionNextSerial;
+    mapping(uint256 => uint256) private _liveSupply;
+    mapping(uint256 => bool) private _burnsBlocked;
+    mapping(uint256 => bool) private _collectionFrozen;
+    mapping(uint256 => TokenIdentity) private _tokenIdentities;
+    mapping(uint256 => uint8) private _tokenLifecycles;
 
     function setCollectionFacts(
         uint256 collectionId,
         StreamCoreCollectionFinalityFacts calldata facts
     ) external {
-        _collectionFacts[collectionId] = facts;
+        _collectionExists[collectionId] = facts.exists;
+        _collectionHasMaxSupply[collectionId] = facts.hasMaxSupply;
+        _collectionStatus[collectionId] = facts.status;
+        _collectionSupplyMode[collectionId] = facts.supplyMode;
+        _collectionMaxSupply[collectionId] = facts.maxSupply;
+        _collectionMintedEver[collectionId] = facts.mintedSupply;
+        _collectionNextSerial[collectionId] = facts.nextCollectionSerial;
+        _liveSupply[collectionId] = facts.mintedSupply - facts.burnedSupply;
     }
 
-    function setScopedFacts(
-        StreamFinalityScope calldata scope,
-        StreamScopedCoreFinalityFacts calldata facts
+    function setCollectionExists(uint256 collectionId, bool exists) external {
+        _collectionExists[collectionId] = exists;
+    }
+
+    function setCollectionStatus(uint256 collectionId, uint8 status) external {
+        _collectionStatus[collectionId] = status;
+    }
+
+    function setCollectionSupply(
+        uint256 collectionId,
+        bool hasMaxSupply,
+        uint8 supplyMode,
+        uint256 maxSupply,
+        uint256 mintedSupply,
+        uint256 nextCollectionSerial
     ) external {
-        _scopedFacts[_scopeKey(scope)] = facts;
+        _collectionHasMaxSupply[collectionId] = hasMaxSupply;
+        _collectionSupplyMode[collectionId] = supplyMode;
+        _collectionMaxSupply[collectionId] = maxSupply;
+        _collectionMintedEver[collectionId] = mintedSupply;
+        _collectionNextSerial[collectionId] = nextCollectionSerial;
     }
 
-    function setBurnsBlocked(uint256 collectionId, bool blocked, uint64 atBlock) external {
+    function setLiveSupply(uint256 collectionId, uint256 liveSupply) external {
+        _liveSupply[collectionId] = liveSupply;
+    }
+
+    function setBurnsBlocked(uint256 collectionId, bool blocked) external {
         _burnsBlocked[collectionId] = blocked;
-        _burnsBlockedAtBlock[collectionId] = atBlock;
     }
 
-    function setIdentityMode(uint256 collectionId, bytes32 mode) external {
-        _identityMode[collectionId] = mode;
+    function setCollectionFrozen(uint256 collectionId, bool frozen) external {
+        _collectionFrozen[collectionId] = frozen;
     }
 
-    function setTransferController(uint256 collectionId, address controller) external {
-        _transferController[collectionId] = controller;
+    function setTokenIdentity(
+        uint256 tokenId,
+        bool mappingExists,
+        uint256 collectionId,
+        uint256 collectionSerial,
+        bool burned
+    ) external {
+        _tokenIdentities[tokenId] = TokenIdentity(
+            mappingExists, collectionId, collectionSerial, burned
+        );
     }
 
-    function coreCollectionFinalityFacts(uint256 collectionId)
+    function setTokenLifecycle(uint256 tokenId, uint8 lifecycle) external {
+        _tokenLifecycles[tokenId] = lifecycle;
+    }
+
+    function collectionExists(uint256 collectionId) external view returns (bool) {
+        return _collectionExists[collectionId];
+    }
+
+    function collectionHasMaxSupply(uint256 collectionId) external view returns (bool) {
+        return _collectionHasMaxSupply[collectionId];
+    }
+
+    function collectionStatus(uint256 collectionId) external view returns (uint8) {
+        return _collectionStatus[collectionId];
+    }
+
+    function collectionSupplyMode(uint256 collectionId) external view returns (uint8) {
+        return _collectionSupplyMode[collectionId];
+    }
+
+    function collectionMaxSupply(uint256 collectionId) external view returns (uint256) {
+        return _collectionMaxSupply[collectionId];
+    }
+
+    function collectionMintedEver(uint256 collectionId) external view returns (uint256) {
+        return _collectionMintedEver[collectionId];
+    }
+
+    function collectionNextSerial(uint256 collectionId) external view returns (uint256) {
+        return _collectionNextSerial[collectionId];
+    }
+
+    function totalSupplyOfCollection(uint256 collectionId) external view returns (uint256) {
+        return _liveSupply[collectionId];
+    }
+
+    function tokenCollectionIdentity(uint256 tokenId)
         external
         view
-        returns (StreamCoreCollectionFinalityFacts memory)
+        returns (bool mappingExists, uint256 collectionId, uint256 collectionSerial, bool burned)
     {
-        return _collectionFacts[collectionId];
+        TokenIdentity memory identity = _tokenIdentities[tokenId];
+        return (
+            identity.mappingExists,
+            identity.collectionId,
+            identity.collectionSerial,
+            identity.burned
+        );
     }
 
-    function scopedCoreFinalityFacts(StreamFinalityScope calldata scope)
-        external
-        view
-        returns (StreamScopedCoreFinalityFacts memory)
-    {
-        return _scopedFacts[_scopeKey(scope)];
+    function tokenLifecycle(uint256 tokenId) external view returns (uint8) {
+        return _tokenLifecycles[tokenId];
     }
 
     function collectionBurnsBlocked(uint256 collectionId) external view returns (bool) {
         return _burnsBlocked[collectionId];
     }
 
-    function collectionBurnsBlockedAtBlock(uint256 collectionId) external view returns (uint64) {
-        return _burnsBlockedAtBlock[collectionId];
-    }
-
-    function collectionIdentityMode(uint256 collectionId) external view returns (bytes32) {
-        bytes32 mode = _identityMode[collectionId];
-        return mode == bytes32(0) ? IDENTITY_MODE_CORE_NATIVE : mode;
-    }
-
-    function collectionTransferController(uint256 collectionId) external view returns (address) {
-        return _transferController[collectionId];
-    }
-
-    function _scopeKey(StreamFinalityScope calldata scope) private pure returns (bytes32) {
-        return keccak256(
-            abi.encode(uint8(scope.scopeType), scope.collectionId, scope.tokenId, scope.scopeId)
-        );
+    function collectionFreezeStatus(uint256 collectionId) external view returns (bool) {
+        return _collectionFrozen[collectionId];
     }
 }
 
@@ -128,19 +194,12 @@ contract MockFinalityMetadata {
         bytes32 schemaId;
     }
 
-    struct FacadeBinding {
-        bool recorded;
-        address facadeAddress;
-        bytes32 recordHash;
-    }
-
     struct ScopeManifest {
         bool published;
         bytes32 manifestHash;
     }
 
     mapping(uint256 => mapping(bytes32 => ContentRoot)) private _contentRoots;
-    mapping(uint256 => FacadeBinding) private _facadeBindings;
     mapping(uint256 => bytes32) private _snapshotHashes;
     mapping(uint256 => mapping(bytes32 => bool)) private _locks;
     mapping(uint256 => mapping(bytes32 => ScopeManifest)) private _scopeManifests;
@@ -163,15 +222,6 @@ contract MockFinalityMetadata {
         bytes32 schemaId
     ) external {
         _contentRoots[collectionId][scopeSubject] = ContentRoot(contentRoot, leafCount, schemaId);
-    }
-
-    function setFacadeBinding(
-        uint256 collectionId,
-        bool recorded,
-        address facadeAddress,
-        bytes32 recordHash
-    ) external {
-        _facadeBindings[collectionId] = FacadeBinding(recorded, facadeAddress, recordHash);
     }
 
     function setSnapshotHash(uint256 collectionId, bytes32 snapshotHash) external {
@@ -207,15 +257,6 @@ contract MockFinalityMetadata {
         returns (bool)
     {
         return _locks[collectionId][recordType];
-    }
-
-    function facadeIdentityBindingRecord(uint256 collectionId)
-        external
-        view
-        returns (bool recorded, address facadeAddress, bytes32 recordHash)
-    {
-        FacadeBinding memory binding = _facadeBindings[collectionId];
-        return (binding.recorded, binding.facadeAddress, binding.recordHash);
     }
 
     function scopeManifest(uint256 collectionId, bytes32 scopeId)
@@ -302,6 +343,8 @@ contract MockFinalityComponent {
     uint8 public constant MODE_REVERT = 1;
     uint8 public constant MODE_SHORT_RETURN = 2;
     uint8 public constant MODE_GAS_BURN = 3;
+    uint8 public constant MODE_OVERSIZED_RETURN = 4;
+    uint8 public constant MODE_SLOW_SUCCESS = 5;
 
     uint8 private _mode;
     mapping(uint256 => StreamFinalityComponentState) private _collectionStates;
@@ -327,37 +370,55 @@ contract MockFinalityComponent {
     function finalityState(uint256 collectionId)
         external
         view
-        returns (StreamFinalityComponentState memory)
+        returns (StreamFinalityComponentState memory state)
     {
-        _applyMode();
-        return _collectionStates[collectionId];
+        state = _collectionStates[collectionId];
+        _applyMode(state);
     }
 
     function finalityStateForScope(StreamFinalityScope calldata scope)
         external
         view
-        returns (StreamFinalityComponentState memory)
+        returns (StreamFinalityComponentState memory state)
     {
-        _applyMode();
-        return _scopedStates[_scopeKey(scope)];
+        state = _scopedStates[_scopeKey(scope)];
+        _applyMode(state);
     }
 
-    function _applyMode() private view {
+    function _applyMode(StreamFinalityComponentState memory state) private view {
         uint8 mode = _mode;
         if (mode == MODE_REVERT) {
             revert("component reverted");
         }
         if (mode == MODE_SHORT_RETURN) {
-            assembly {
-                mstore(0x0, 1)
-                return(0x0, 0x20)
+            assembly ("memory-safe") {
+                return(state, 0x20)
             }
         }
         if (mode == MODE_GAS_BURN) {
-            uint256 accumulator = 1;
-            for (uint256 i = 0; i < 100_000; i++) {
-                accumulator = uint256(keccak256(abi.encode(accumulator, i)));
+            assembly ("memory-safe") {
+                for { } 1 { } { }
             }
+        }
+        if (mode == MODE_OVERSIZED_RETURN) {
+            assembly ("memory-safe") {
+                mstore(add(state, 0x100), 0xfeed)
+                return(state, 0x120)
+            }
+        }
+        if (mode == MODE_SLOW_SUCCESS) {
+            _burnGas(45_000);
+        }
+    }
+
+    function _burnGas(uint256 amount) private view {
+        assembly ("memory-safe") {
+            let available := gas()
+            if iszero(gt(available, amount)) {
+                for { } 1 { } { }
+            }
+            let threshold := sub(available, amount)
+            for { } gt(gas(), threshold) { } { }
         }
     }
 
@@ -377,13 +438,29 @@ contract MockFinalityDiscovery {
 
     mapping(uint256 => DiscoveryFacts) private _collectionFacts;
     mapping(bytes32 => DiscoveryFacts) private _scopedFacts;
+    mapping(uint256 => StreamFinalityComponentExpectation[]) private _collectionComponents;
+    mapping(bytes32 => StreamFinalityComponentExpectation[]) private _scopedComponents;
     uint8 private _readMode;
+    uint8 private _hashReadMode;
+    uint8 private _componentReadMode;
 
     /// @notice Configures discovery read behavior for diagnostic failure-path tests:
     ///         0 = normal, 1 = revert, 2 = malformed short return, 3 = oversized return,
     ///         4 = exhaust the caller-provided gas budget.
     function setReadMode(uint8 readMode) external {
         _readMode = readMode;
+    }
+
+    /// @notice Configures hash-only behavior so count can return its exact passing word first.
+    function setHashReadMode(uint8 readMode) external {
+        _hashReadMode = readMode;
+    }
+
+    /// @notice Configures component-enumeration behavior without perturbing the count/hash reads:
+    ///         0 = exact 224-byte return, 1 = revert, 2 = one-byte-short return,
+    ///         3 = one-word-oversized return, 4 = exhaust the caller-provided gas budget.
+    function setComponentReadMode(uint8 readMode) external {
+        _componentReadMode = readMode;
     }
 
     function setCollectionDiscovery(uint256 collectionId, uint256 count, bytes32 discoveryHash)
@@ -400,6 +477,32 @@ contract MockFinalityDiscovery {
         _scopedFacts[_scopeKey(scope)] = DiscoveryFacts(count, discoveryHash);
     }
 
+    function setCollectionComponent(
+        uint256 collectionId,
+        uint256 index,
+        StreamFinalityComponentExpectation calldata component
+    ) external {
+        StreamFinalityComponentExpectation[] storage components =
+            _collectionComponents[collectionId];
+        while (components.length <= index) {
+            components.push();
+        }
+        components[index] = component;
+    }
+
+    function setScopedComponent(
+        StreamFinalityScope calldata scope,
+        uint256 index,
+        StreamFinalityComponentExpectation calldata component
+    ) external {
+        StreamFinalityComponentExpectation[] storage components =
+            _scopedComponents[_scopeKey(scope)];
+        while (components.length <= index) {
+            components.push();
+        }
+        components[index] = component;
+    }
+
     function finalityComponentCount(uint256 collectionId) external view returns (uint256) {
         _applyReadMode();
         return _collectionFacts[collectionId].count;
@@ -407,7 +510,17 @@ contract MockFinalityDiscovery {
 
     function finalityDiscoveryHash(uint256 collectionId) external view returns (bytes32) {
         _applyReadMode();
+        _applyWordReadMode(_hashReadMode);
         return _collectionFacts[collectionId].discoveryHash;
+    }
+
+    function finalityComponentAt(uint256 collectionId, uint256 index)
+        external
+        view
+        returns (StreamFinalityComponentExpectation memory component)
+    {
+        component = _collectionComponents[collectionId][index];
+        _applyComponentReadMode(component);
     }
 
     function finalityComponentCountForScope(StreamFinalityScope calldata scope)
@@ -425,11 +538,24 @@ contract MockFinalityDiscovery {
         returns (bytes32)
     {
         _applyReadMode();
+        _applyWordReadMode(_hashReadMode);
         return _scopedFacts[_scopeKey(scope)].discoveryHash;
     }
 
+    function finalityComponentAtForScope(StreamFinalityScope calldata scope, uint256 index)
+        external
+        view
+        returns (StreamFinalityComponentExpectation memory component)
+    {
+        component = _scopedComponents[_scopeKey(scope)][index];
+        _applyComponentReadMode(component);
+    }
+
     function _applyReadMode() private view {
-        uint8 readMode = _readMode;
+        _applyWordReadMode(_readMode);
+    }
+
+    function _applyWordReadMode(uint8 readMode) private view {
         if (readMode == 1) {
             assembly ("memory-safe") {
                 revert(0, 0)
@@ -449,6 +575,51 @@ contract MockFinalityDiscovery {
             assembly ("memory-safe") {
                 for { } 1 { } { }
             }
+        }
+        if (readMode == 5) {
+            _burnGas(45_000);
+        }
+    }
+
+    function _applyComponentReadMode(StreamFinalityComponentExpectation memory component)
+        private
+        view
+    {
+        uint8 readMode = _componentReadMode;
+        if (readMode == 1) {
+            assembly ("memory-safe") {
+                revert(0, 0)
+            }
+        }
+        if (readMode == 2) {
+            assembly ("memory-safe") {
+                return(component, 0xdf)
+            }
+        }
+        if (readMode == 3) {
+            assembly ("memory-safe") {
+                mstore(add(component, 0xe0), 0xfeed)
+                return(component, 0x100)
+            }
+        }
+        if (readMode == 4) {
+            assembly ("memory-safe") {
+                for { } 1 { } { }
+            }
+        }
+        if (readMode == 5) {
+            _burnGas(45_000);
+        }
+    }
+
+    function _burnGas(uint256 amount) private view {
+        assembly ("memory-safe") {
+            let available := gas()
+            if iszero(gt(available, amount)) {
+                for { } 1 { } { }
+            }
+            let threshold := sub(available, amount)
+            for { } gt(gas(), threshold) { } { }
         }
     }
 

@@ -1183,11 +1183,13 @@ deployment where it conflicts with this matrix:
 8. `freezeCollection` is not cross-module artwork finality.
 9. `StreamCuratorsPool` push payments or unrestricted sweeps are not
    deployment-conformant if the pool holds owed rewards.
-10. `IStreamFinalityCoreReads`, `StreamArtworkFinalityRegistry`, and
-    `StreamArtworkFinalityPreview` still consume aggregate/facade reads absent
-    from the Permanent Core target, narrow supply facts to `uint64`, and expose
-    a retired `facadeBindingSatisfied` gate; they must be cut over to the
-    immutable `StreamCoreFinalityAdapter` and ADR 0016 Core-native-only model.
+10. `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` now
+    consume the immutable `StreamCoreFinalityAdapter`, use `uint256` aggregate
+    supply facts, and expose none of the retired aggregate/facade/controller
+    seam. The remaining contradiction is at the bound dependencies: the
+    checked-in Core, collection-metadata, discovery, and sanction
+    implementations do not yet provide the complete target-compatible
+    production path required by this matrix.
 
 ## Event Catalog Schema
 

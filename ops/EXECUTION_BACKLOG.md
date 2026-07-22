@@ -1785,7 +1785,9 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: Active PR #663 / issue #654 on branch `codex/core-cutover-abi-lock`.
+Status: Active issue #654 on branch `codex/finality-adapter-cutover`; the target
+lock is merged and the adapter cutover is pending local validation and
+publication.
 
 Gate: C/E/G.
 
@@ -1834,6 +1836,24 @@ and a global active-incomplete count plus exact same-batch zero-count assertion
 blocks finality-registry pointer cutover from stranding old-registry plans.
 These close review gaps without claiming the target implementation or issue
 #654 is complete.
+
+PR #663 merged the machine-checked permanent target lock. The active
+zero-Core-delta cutover now implements `StreamCoreFinalityAdapter` and migrates
+the finality registry, preview, and tests away from the retired aggregate and
+facade seams. Discovery is mandatory; burn and freeze gates are read from the
+actual Core; collection supply and expected leaf counts remain `uint256`; and
+the registry binds the actual Core, metadata, and adapter independently. The
+focused 97-test finality set and full 891-test Foundry suite pass, while the
+production-profile `StreamCore` remains exactly 24,152 runtime bytes with 424
+bytes of EIP-170 margin.
+
+This evidence does not make the system production- or audit-ready. The current
+Core lacks the granular target getters and target one-way freeze semantic, the
+current collection metadata contract lacks the target finality reads, and
+concrete discovery, sanction, and deployment candidates remain incomplete.
+After this cutover is reviewed and merged, issue #665 is the next planned slice
+for governance V2 and exact module-registry binding; measured net-negative Core
+cutover work remains required to complete #654.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3997,7 +4017,7 @@ unless an external dependency changes.
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
 | `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
-| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Active PR #663 / issue #654 on branch `codex/core-cutover-abi-lock`; target lock first, then caller migration and measured implementation slices |
+| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Active issue #654 on branch `codex/finality-adapter-cutover`; target lock merged in PR #663, zero-Core-delta adapter/caller cutover pending local validation and publication, then governance V2 under #665 and measured net-negative Core slices |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |

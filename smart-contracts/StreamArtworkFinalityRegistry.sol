@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 
 import "./IStreamArtworkFinalityComponents.sol";
 import "./IStreamArtworkFinalityRegistry.sol";
-import "./IStreamFinalityCoreReads.sol";
+import "./IERC165.sol";
+import "./IStreamCoreFinalityAdapter.sol";
+import "./IStreamCoreFinalitySource.sol";
 import "./IStreamFinalityGovernanceAuthority.sol";
 import "./IStreamFinalityMetadataReads.sol";
 import "./IStreamFinalitySanctionReads.sol";
@@ -14,7 +16,7 @@ import "./StreamArtworkFinalityTypes.sol";
 ///      genesis per ADR 0009 decision 6), the [LTA-FREEZE] rule 4 TERMINAL_FREEZE staging with
 ///      a 72-hour veto floor and an independent guardian ([GOV-WINDOWS]), the
 ///      [CMC-FINALITY-INPUTS] execution gates this registry owns (content root, sanction,
-///      burn block, facade identity binding), and the never-revert diagnostic reads. Consumer
+///      burn/freeze gates), and the never-revert diagnostic reads. Consumer
 ///      surfaces built in parallel worktrees (Core facts, metadata satellite, artist registry,
 ///      governed admin registry) are bound through the narrow IStreamFinality* seams.
 contract StreamArtworkFinalityRegistry is
@@ -22,6 +24,13 @@ contract StreamArtworkFinalityRegistry is
     IStreamArtworkScopedFrozenRouteRegistry
 {
     error FinalityZeroAddress();
+    error FinalityDependencyHasNoCode(address dependency);
+    error FinalityAdapterInterfaceUnsupported(address adapter);
+    error FinalityAdapterBindingMismatch(
+        address expectedCore, address actualCore, address expectedMetadata, address actualMetadata
+    );
+    error FinalityAdapterReturnShapeInvalid(bytes4 selector, uint256 byteLength);
+    error FinalityAdapterSemanticProbeInvalid(bytes4 selector);
 
     /// @notice Event schema version carried by every registry event.
     uint16 public constant FINALITY_EVENT_SCHEMA_VERSION = 1;
@@ -43,21 +52,22 @@ contract StreamArtworkFinalityRegistry is
     ///         the GGP host framework binds the pinned key below when it lands).
     uint256 public constant FINALITY_COMPONENT_READ_GAS = 30_000;
 
-    /// @dev Parent-frame reserve covering the cold code check, call overhead, and fail-closed
-    ///      return path when a diagnostic target exhausts its forwarded gas under EIP-150.
+    /// @dev Strict reads retain enough gas to decode or emit a typed failure. Capped diagnostics
+    ///      retain only the smaller reserve required for their compact false return.
+    uint256 private constant FINALITY_STRICT_PARENT_GAS_RESERVE = 100_000;
     uint256 private constant FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE = 10_000;
 
     /// @notice Pinned GGP key for the diagnostic read budget.
     bytes32 public constant GGP_FINALITY_COMPONENT_READ_GAS_KEY =
         StreamFinalityDomains.GGP_FINALITY_COMPONENT_READ_GAS;
 
-    IStreamFinalityCoreReads public immutable coreReads;
+    IStreamCoreFinalitySource public immutable coreReads;
+    IStreamCoreFinalityAdapter public immutable coreFinalityAdapter;
     IStreamFinalityMetadataReads public immutable metadataReads;
     IStreamFinalitySanctionReads public immutable sanctionReads;
     IStreamFinalityGovernanceAuthority public immutable governanceAuthority;
 
-    /// @notice Optional discovery module (the metadata router); zero until the router wave
-    ///         lands, at which point deployment binds it and the discovery gate activates.
+    /// @notice Mandatory discovery module (the metadata router).
     address public immutable finalityDiscovery;
 
     mapping(uint256 => StreamCollectionFinalityRecord) private _collectionRecords;
@@ -73,28 +83,199 @@ contract StreamArtworkFinalityRegistry is
         bytes32 coreFactsHash;
         bytes32 componentsHash;
         bytes32 finalityRecordHash;
-        uint64 expectedLeafCount;
+        uint256 expectedLeafCount;
         bool exactLeafCount;
     }
 
     constructor(
         address coreReads_,
         address metadataReads_,
+        address coreFinalityAdapter_,
         address sanctionReads_,
         address governanceAuthority_,
         address finalityDiscovery_
     ) {
         if (
-            coreReads_ == address(0) || metadataReads_ == address(0) || sanctionReads_ == address(0)
-                || governanceAuthority_ == address(0)
+            coreReads_ == address(0) || metadataReads_ == address(0)
+                || coreFinalityAdapter_ == address(0) || sanctionReads_ == address(0)
+                || governanceAuthority_ == address(0) || finalityDiscovery_ == address(0)
         ) {
             revert FinalityZeroAddress();
         }
-        coreReads = IStreamFinalityCoreReads(coreReads_);
+        _requireCode(coreReads_);
+        _requireCode(metadataReads_);
+        _requireCode(coreFinalityAdapter_);
+        _requireCode(sanctionReads_);
+        _requireCode(governanceAuthority_);
+        _requireCode(finalityDiscovery_);
+        _requireAdapter(coreFinalityAdapter_, coreReads_, metadataReads_);
+        coreReads = IStreamCoreFinalitySource(coreReads_);
         metadataReads = IStreamFinalityMetadataReads(metadataReads_);
+        coreFinalityAdapter = IStreamCoreFinalityAdapter(coreFinalityAdapter_);
         sanctionReads = IStreamFinalitySanctionReads(sanctionReads_);
         governanceAuthority = IStreamFinalityGovernanceAuthority(governanceAuthority_);
         finalityDiscovery = finalityDiscovery_;
+    }
+
+    function _requireCode(address dependency) private view {
+        if (dependency.code.length == 0) {
+            revert FinalityDependencyHasNoCode(dependency);
+        }
+    }
+
+    function _requireAdapter(address adapter, address expectedCore, address expectedMetadata)
+        private
+        view
+    {
+        if (
+            !_readExactInterfaceSupport(adapter, type(IERC165).interfaceId)
+                || !_readExactInterfaceSupport(
+                    adapter, type(IStreamCoreFinalityAdapter).interfaceId
+                ) || _readExactInterfaceSupport(adapter, 0xffffffff)
+        ) {
+            revert FinalityAdapterInterfaceUnsupported(adapter);
+        }
+        address actualCore = _readExactAddress(adapter, IStreamCoreFinalityAdapter.core.selector);
+        address actualMetadata =
+            _readExactAddress(adapter, IStreamCoreFinalityAdapter.collectionMetadata.selector);
+        if (actualCore != expectedCore || actualMetadata != expectedMetadata) {
+            revert FinalityAdapterBindingMismatch(
+                expectedCore, actualCore, expectedMetadata, actualMetadata
+            );
+        }
+        bytes4 collectionSelector = IStreamCoreFinalityAdapter.coreCollectionFinalityFacts.selector;
+        bytes memory collectionResult = _readExactAdapterResult(
+            adapter,
+            collectionSelector,
+            abi.encodeWithSelector(collectionSelector, uint256(0)),
+            9 * 32
+        );
+        _requireCanonicalCollectionProbe(collectionSelector, collectionResult);
+
+        bytes4 scopedSelector = IStreamCoreFinalityAdapter.scopedCoreFinalityFacts.selector;
+        bytes memory scopedResult = _readExactAdapterResult(
+            adapter,
+            scopedSelector,
+            abi.encodeWithSelector(
+                scopedSelector,
+                StreamCoreFinalityScopeQuery({
+                    scopeType: type(uint8).max, collectionId: 0, tokenId: 0, scopeId: bytes32(0)
+                })
+            ),
+            13 * 32
+        );
+        _requireCanonicalInvalidScopeProbe(scopedSelector, scopedResult);
+    }
+
+    function _readExactInterfaceSupport(address adapter, bytes4 interfaceId)
+        private
+        view
+        returns (bool supported)
+    {
+        (bool success,, bytes memory result) = _readExactStatic(
+            adapter, abi.encodeWithSelector(IERC165.supportsInterface.selector, interfaceId), 32
+        );
+        if (!success) {
+            revert FinalityAdapterInterfaceUnsupported(adapter);
+        }
+        uint256 word;
+        assembly ("memory-safe") {
+            word := mload(add(result, 0x20))
+        }
+        if (word > 1) {
+            revert FinalityAdapterInterfaceUnsupported(adapter);
+        }
+        return word == 1;
+    }
+
+    function _readExactAddress(address adapter, bytes4 selector)
+        private
+        view
+        returns (address value)
+    {
+        (bool success, uint256 actualLength, bytes memory result) =
+            _readExactStatic(adapter, abi.encodeWithSelector(selector), 32);
+        if (!success) {
+            revert FinalityAdapterReturnShapeInvalid(selector, actualLength);
+        }
+        uint256 rawAddress = _adapterResultWord(result, 0);
+        if (rawAddress > type(uint160).max) {
+            revert FinalityAdapterSemanticProbeInvalid(selector);
+        }
+        value = address(uint160(rawAddress));
+    }
+
+    function _readExactAdapterResult(
+        address adapter,
+        bytes4 selector,
+        bytes memory callData,
+        uint256 expectedLength
+    ) private view returns (bytes memory) {
+        (bool success, uint256 actualLength, bytes memory result) =
+            _readExactStatic(adapter, callData, expectedLength);
+        if (!success) {
+            revert FinalityAdapterReturnShapeInvalid(selector, actualLength);
+        }
+        return result;
+    }
+
+    /// @dev Exact fixed-buffer admission read. Returndata beyond `expectedLength` is never copied,
+    ///      so an untrusted constructor dependency cannot force attacker-sized memory expansion.
+    function _readExactStatic(address target, bytes memory callData, uint256 expectedLength)
+        private
+        view
+        returns (bool readable, uint256 actualLength, bytes memory result)
+    {
+        result = new bytes(expectedLength);
+        uint256 availableGas = gasleft();
+        if (availableGas <= FINALITY_STRICT_PARENT_GAS_RESERVE) {
+            return (false, 0, result);
+        }
+        uint256 forwardedGas = availableGas - FINALITY_STRICT_PARENT_GAS_RESERVE;
+        assembly ("memory-safe") {
+            readable := staticcall(
+                forwardedGas,
+                target,
+                add(callData, 0x20),
+                mload(callData),
+                add(result, 0x20),
+                expectedLength
+            )
+            actualLength := returndatasize()
+            if iszero(eq(actualLength, expectedLength)) { readable := 0 }
+        }
+    }
+
+    function _requireCanonicalCollectionProbe(bytes4 selector, bytes memory result) private pure {
+        if (
+            _adapterResultWord(result, 0) > 1 || _adapterResultWord(result, 1) > 1
+                || _adapterResultWord(result, 2) > type(uint8).max
+                || _adapterResultWord(result, 3) > type(uint8).max
+        ) {
+            revert FinalityAdapterSemanticProbeInvalid(selector);
+        }
+    }
+
+    function _requireCanonicalInvalidScopeProbe(bytes4 selector, bytes memory result) private pure {
+        if (_adapterResultWord(result, 0) != 0 || _adapterResultWord(result, 1) != type(uint8).max)
+        {
+            revert FinalityAdapterSemanticProbeInvalid(selector);
+        }
+        for (uint256 i = 2; i < 13; i++) {
+            if (_adapterResultWord(result, i) != 0) {
+                revert FinalityAdapterSemanticProbeInvalid(selector);
+            }
+        }
+    }
+
+    function _adapterResultWord(bytes memory result, uint256 index)
+        private
+        pure
+        returns (uint256 word)
+    {
+        assembly ("memory-safe") {
+            word := mload(add(add(result, 0x20), mul(index, 0x20)))
+        }
     }
 
     /// @notice Returns true for deployment validation.
@@ -374,18 +555,19 @@ contract StreamArtworkFinalityRegistry is
         _requireManifestValid(manifest);
 
         uint8 metadataMode = metadataReads.collectionMetadataMode(scope.collectionId);
+        if (metadataMode > StreamFinalityDomains.METADATA_MODE_HYBRID) {
+            revert FinalityMetadataModeInvalid(metadataMode);
+        }
         _requireSnapshotManifestForScriptWorks(scope.collectionId, metadataMode);
 
         (ctx.coreFactsHash, ctx.expectedLeafCount, ctx.exactLeafCount) =
             _verifyCoreGatesAndFacts(scope);
         _verifyContentRoot(scope, ctx.expectedLeafCount, ctx.exactLeafCount);
-        _verifyFacadeBindingComponent(scope, components);
-
         ctx.componentsHash = _componentsHash(components);
         _requireMandatoryComponents(components, metadataMode);
         _verifySanctionComponent(scope, components, ctx.coreFactsHash, manifest);
         _verifyComponentsLiveStrict(components, _componentCallData(scope));
-        _verifyDiscovery(scope, components.length, ctx.componentsHash);
+        _verifyDiscovery(scope, components, ctx.componentsHash);
 
         ctx.finalityRecordHash =
             _finalityRecordHash(scope, ctx.coreFactsHash, ctx.componentsHash, manifest);
@@ -431,7 +613,7 @@ contract StreamArtworkFinalityRegistry is
         returns (bytes32)
     {
         return _coreCollectionFactsHash(
-            collectionId, coreReads.coreCollectionFinalityFacts(collectionId)
+            collectionId, coreFinalityAdapter.coreCollectionFinalityFacts(collectionId)
         );
     }
 
@@ -442,7 +624,9 @@ contract StreamArtworkFinalityRegistry is
         override
         returns (bytes32)
     {
-        return _scopedCoreFactsHash(scope, coreReads.scopedCoreFinalityFacts(scope));
+        return _scopedCoreFactsHash(
+            scope, coreFinalityAdapter.scopedCoreFinalityFacts(_adapterScope(scope))
+        );
     }
 
     /// @inheritdoc IStreamArtworkFinalityRegistry
@@ -707,6 +891,19 @@ contract StreamArtworkFinalityRegistry is
         );
     }
 
+    function _adapterScope(StreamFinalityScope memory scope)
+        private
+        pure
+        returns (StreamCoreFinalityScopeQuery memory)
+    {
+        return StreamCoreFinalityScopeQuery({
+            scopeType: uint8(scope.scopeType),
+            collectionId: scope.collectionId,
+            tokenId: scope.tokenId,
+            scopeId: scope.scopeId
+        });
+    }
+
     function _isCanonicalScopeShape(StreamFinalityScope memory scope) private pure returns (bool) {
         if (scope.collectionId == 0) {
             return false;
@@ -829,17 +1026,18 @@ contract StreamArtworkFinalityRegistry is
         }
     }
 
-    /// @dev Collection scope: existence, CLOSED status, and the one-way burn block
-    ///      ([LTA-FINALITY] requirement 7, [CMC-BURN] rule 7). Scoped: scope existence and
-    ///      the TOKEN minted-or-burned rule (scope rules 2-3).
+    /// @dev Collection scope: existence, CLOSED status, the one-way burn block, and the
+    ///      terminal collection freeze. Scoped: scope existence and the TOKEN
+    ///      minted-or-burned rule (scope rules 2-3).
     function _verifyCoreGatesAndFacts(StreamFinalityScope memory scope)
         private
         view
-        returns (bytes32 factsHash, uint64 expectedLeafCount, bool exactLeafCount)
+        returns (bytes32 factsHash, uint256 expectedLeafCount, bool exactLeafCount)
     {
         if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
             StreamCoreCollectionFinalityFacts memory facts =
-                coreReads.coreCollectionFinalityFacts(scope.collectionId);
+                coreFinalityAdapter.coreCollectionFinalityFacts(scope.collectionId);
+            _requireCoreCollectionDomains(scope.collectionId, facts.status, facts.supplyMode);
             if (!facts.exists) {
                 revert FinalityCollectionUnknown(scope.collectionId);
             }
@@ -849,9 +1047,16 @@ contract StreamArtworkFinalityRegistry is
             if (!coreReads.collectionBurnsBlocked(scope.collectionId)) {
                 revert FinalityCollectionBurnsNotBlocked(scope.collectionId);
             }
+            if (!coreReads.collectionFreezeStatus(scope.collectionId)) {
+                revert FinalityCollectionNotFrozen(scope.collectionId);
+            }
             return (_coreCollectionFactsHash(scope.collectionId, facts), facts.mintedSupply, true);
         }
-        StreamScopedCoreFinalityFacts memory scopedFacts = coreReads.scopedCoreFinalityFacts(scope);
+        StreamScopedCoreFinalityFacts memory scopedFacts =
+            coreFinalityAdapter.scopedCoreFinalityFacts(_adapterScope(scope));
+        _requireCoreCollectionDomains(
+            scope.collectionId, scopedFacts.collectionStatus, scopedFacts.collectionSupplyMode
+        );
         if (!scopedFacts.scopeExists) {
             revert FinalityScopeUnknown();
         }
@@ -876,6 +1081,20 @@ contract StreamArtworkFinalityRegistry is
         return (_scopedCoreFactsHash(scope, scopedFacts), 0, false);
     }
 
+    function _requireCoreCollectionDomains(
+        uint256 collectionId,
+        uint8 collectionStatus,
+        uint8 collectionSupplyMode
+    ) private pure {
+        if (collectionStatus > StreamFinalityDomains.CORE_COLLECTION_STATUS_CLOSED) {
+            revert FinalityCollectionStatusInvalid(collectionId, collectionStatus);
+        }
+        if (collectionSupplyMode > StreamFinalityDomains.CORE_COLLECTION_SUPPLY_MODE_UNCAPPED_OPEN)
+        {
+            revert FinalityCollectionSupplyModeInvalid(collectionId, collectionSupplyMode);
+        }
+    }
+
     /// @dev [CMC-FINALITY-INPUTS] rule 4 / [CMC-CONTENT-ROOT] rule 4: the recorded token
     ///      content root and leaf count verify at execution. Collection scope binds the exact
     ///      minted-ever count (burned tokens retain archival content, [CMC-BURN] rule 4);
@@ -883,7 +1102,7 @@ contract StreamArtworkFinalityRegistry is
     ///      whose exact token set is pinned by the metadata scope manifest.
     function _verifyContentRoot(
         StreamFinalityScope memory scope,
-        uint64 expectedLeafCount,
+        uint256 expectedLeafCount,
         bool exactLeafCount
     ) private view {
         bytes32 scopeSubject = _contentRootSubject(scope);
@@ -893,67 +1112,17 @@ contract StreamArtworkFinalityRegistry is
             revert FinalityContentRootMissing(scopeSubject);
         }
         if (exactLeafCount) {
-            if (leafCount != expectedLeafCount) {
-                revert FinalityContentRootLeafCountMismatch(expectedLeafCount, leafCount);
+            if (uint256(leafCount) != expectedLeafCount) {
+                revert FinalityContentRootLeafCountMismatch(expectedLeafCount, uint256(leafCount));
             }
         } else if (leafCount == 0) {
             revert FinalityContentRootLeafCountMismatch(1, leafCount);
         }
     }
 
-    /// @dev [LTA-FINALITY] requirement 16 / [CMC-FINALITY-INPUTS] rule 14 / [CMC-FACADE-BINDING]
-    ///      rule 6: for EXTERNAL_FACADE collections the two-address identity is part of the
-    ///      work's permanent identity, so the submitted component list must carry an
-    ///      IDENTITY_FACADE_BINDING component whose dataHash equals the CMC facade-binding
-    ///      recordHash — this enters componentsHash and therefore the immutable
-    ///      finalityRecordHash, and is re-surfaceable through verifyFinality/frozenRouteForScope.
-    ///      The live gate stays the satisfaction check (recorded binding, facade == registered
-    ///      transfer controller). CORE_NATIVE collections carry no binding by construction and
-    ///      must not submit the component (a spurious one reverts).
-    function _verifyFacadeBindingComponent(
-        StreamFinalityScope memory scope,
-        StreamFinalityComponentExpectation[] calldata components
-    ) private view {
-        (uint256 index, uint256 occurrences) =
-            StreamFinalityComponentSet.locateFacadeBindingSlot(components);
-        bool externalFacade = coreReads.collectionIdentityMode(scope.collectionId)
-            == StreamFinalityDomains.IDENTITY_MODE_EXTERNAL_FACADE;
-
-        if (!externalFacade) {
-            if (occurrences != 0) {
-                revert FinalityFacadeBindingComponentForbidden(scope.collectionId);
-            }
-            return;
-        }
-
-        // EXTERNAL_FACADE: the live binding must exist and match the registered controller.
-        (bool recorded, address facadeAddress, bytes32 recordHash) =
-            metadataReads.facadeIdentityBindingRecord(scope.collectionId);
-        if (!recorded) {
-            revert FinalityFacadeBindingMissing(scope.collectionId);
-        }
-        address controller = coreReads.collectionTransferController(scope.collectionId);
-        if (facadeAddress == address(0) || facadeAddress != controller) {
-            revert FinalityFacadeBindingControllerMismatch(facadeAddress, controller);
-        }
-
-        // And it must be bound into the permanent record via a submitted component.
-        if (occurrences == 0) {
-            revert FinalityFacadeBindingComponentMissing(scope.collectionId);
-        }
-        if (occurrences > 1) {
-            revert FinalityFacadeBindingComponentForbidden(scope.collectionId);
-        }
-        if (components[index].dataHash != recordHash) {
-            revert FinalityFacadeBindingComponentDataHashMismatch(
-                components[index].dataHash, recordHash
-            );
-        }
-    }
-
     /// @dev [LTA-FINALITY] requirement 1 / MRR-FINALITY rules 6-9 / [CMC-FINALITY-INPUTS]:
-    ///      the mandatory component-type floor enforced ONCHAIN, independent of the optional
-    ///      discovery module (address(0) at genesis). Delegated to the library so the check does
+    ///      the mandatory component-type floor enforced ONCHAIN, independent of discovery's
+    ///      exact submitted-route check. Delegated to the library so the check does
     ///      not inflate registry bytecode; reverts FinalityMissingRequiredComponent on the first
     ///      missing type.
     function _requireMandatoryComponents(
@@ -965,8 +1134,7 @@ contract StreamArtworkFinalityRegistry is
             revert FinalityMissingRequiredComponent(missing);
         }
         // The exactly-one artist-sanction/platform-works floor is enforced by
-        // _verifySanctionComponent; the EXTERNAL_FACADE identity-binding floor by
-        // _verifyFacadeBindingComponent.
+        // _verifySanctionComponent.
     }
 
     /// @dev [LTA-FINALITY] requirement 6 / MRR-FINALITY rule 7 / [CMC-FINALITY-INPUTS] rule 3:
@@ -1071,38 +1239,97 @@ contract StreamArtworkFinalityRegistry is
 
     function _verifyDiscovery(
         StreamFinalityScope memory scope,
-        uint256 submittedCount,
+        StreamFinalityComponentExpectation[] calldata components,
         bytes32 submittedHash
     ) private view {
+        uint256 submittedCount = components.length;
         address discovery = finalityDiscovery;
-        if (discovery == address(0)) {
-            return;
+        (bool factsReadable, uint256 discoveredCount, bytes32 discoveredHash) =
+            _discoveryFacts(discovery, scope);
+        if (!factsReadable) {
+            revert FinalityDiscoveryFactsUnreadable();
         }
-        (uint256 discoveredCount, bytes32 discoveredHash) = _discoveryFacts(discovery, scope);
         if (discoveredCount != submittedCount) {
             revert FinalityDiscoveryCountMismatch(discoveredCount, submittedCount);
         }
         if (discoveredHash != submittedHash) {
             revert FinalityDiscoveryHashMismatch(discoveredHash, submittedHash);
         }
+        for (uint256 i = 0; i < submittedCount; i++) {
+            (bool componentReadable, StreamFinalityComponentExpectation memory discovered) =
+                _discoveryComponent(discovery, scope, i);
+            if (!componentReadable) {
+                revert FinalityDiscoveryComponentUnreadable(i);
+            }
+            if (!_sameExpectation(discovered, components[i])) {
+                revert FinalityDiscoveryComponentMismatch(i);
+            }
+        }
+    }
+
+    function _discoveryComponent(address discovery, StreamFinalityScope memory scope, uint256 index)
+        private
+        view
+        returns (bool readable, StreamFinalityComponentExpectation memory component)
+    {
+        bytes memory callData;
+        if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            callData = abi.encodeWithSelector(
+                IStreamArtworkFinalityDiscovery.finalityComponentAt.selector,
+                scope.collectionId,
+                index
+            );
+        } else {
+            callData = abi.encodeWithSelector(
+                IStreamArtworkScopedFinalityDiscovery.finalityComponentAtForScope.selector,
+                scope,
+                index
+            );
+        }
+        return _readDiscoveryComponent(discovery, callData, 0);
+    }
+
+    function _sameExpectation(
+        StreamFinalityComponentExpectation memory discovered,
+        StreamFinalityComponentExpectation calldata submitted
+    ) private pure returns (bool) {
+        return discovered.componentType == submitted.componentType
+            && discovered.component == submitted.component
+            && discovered.interfaceId == submitted.interfaceId
+            && discovered.codeHash == submitted.codeHash
+            && discovered.moduleVersion == submitted.moduleVersion
+            && discovered.manifestHash == submitted.manifestHash
+            && discovered.dataHash == submitted.dataHash;
     }
 
     function _discoveryFacts(address discovery, StreamFinalityScope memory scope)
         private
         view
-        returns (uint256 discoveredCount, bytes32 discoveredHash)
+        returns (bool readable, uint256 discoveredCount, bytes32 discoveredHash)
     {
+        bytes memory countCallData;
+        bytes memory hashCallData;
         if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
-            discoveredCount = IStreamArtworkFinalityDiscovery(discovery)
-                .finalityComponentCount(scope.collectionId);
-            discoveredHash = IStreamArtworkFinalityDiscovery(discovery)
-                .finalityDiscoveryHash(scope.collectionId);
+            countCallData = abi.encodeWithSelector(
+                IStreamArtworkFinalityDiscovery.finalityComponentCount.selector, scope.collectionId
+            );
+            hashCallData = abi.encodeWithSelector(
+                IStreamArtworkFinalityDiscovery.finalityDiscoveryHash.selector, scope.collectionId
+            );
         } else {
-            discoveredCount = IStreamArtworkScopedFinalityDiscovery(discovery)
-                .finalityComponentCountForScope(scope);
-            discoveredHash = IStreamArtworkScopedFinalityDiscovery(discovery)
-                .finalityDiscoveryHashForScope(scope);
+            countCallData = abi.encodeWithSelector(
+                IStreamArtworkScopedFinalityDiscovery.finalityComponentCountForScope.selector, scope
+            );
+            hashCallData = abi.encodeWithSelector(
+                IStreamArtworkScopedFinalityDiscovery.finalityDiscoveryHashForScope.selector, scope
+            );
         }
+        (bool countReadable, bytes32 rawCount) = _readDiscoveryWord(discovery, countCallData, 0);
+        if (!countReadable) {
+            return (false, 0, bytes32(0));
+        }
+        (bool hashReadable, bytes32 rawHash) = _readDiscoveryWord(discovery, hashCallData, 0);
+        return (hashReadable, uint256(rawCount), rawHash);
     }
 
     /// @dev Fail-closed post-finality comparison against the currently discovered route. Unlike
@@ -1110,14 +1337,10 @@ contract StreamArtworkFinalityRegistry is
     ///      contract when discovery has no code, reverts, or returns malformed/oversized data.
     function _diagnosticDiscoveryMatches(
         StreamFinalityScope memory scope,
-        uint256 expectedCount,
+        StreamFinalityComponentExpectation[] storage expected,
         bytes32 expectedHash
     ) private view returns (bool) {
         address discovery = finalityDiscovery;
-        if (discovery == address(0)) {
-            return true;
-        }
-
         bytes memory countCallData;
         bytes memory hashCallData;
         if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
@@ -1136,32 +1359,70 @@ contract StreamArtworkFinalityRegistry is
             );
         }
 
-        (bool countReadable, bytes32 discoveredCount) = _readDiscoveryWord(discovery, countCallData);
+        (bool countReadable, bytes32 discoveredCount) =
+            _readDiscoveryWord(discovery, countCallData, FINALITY_COMPONENT_READ_GAS);
+        uint256 expectedCount = expected.length;
         if (!countReadable || uint256(discoveredCount) != expectedCount) {
             return false;
         }
-        (bool hashReadable, bytes32 discoveredHash) = _readDiscoveryWord(discovery, hashCallData);
-        return hashReadable && discoveredHash == expectedHash;
+        (bool hashReadable, bytes32 discoveredHash) =
+            _readDiscoveryWord(discovery, hashCallData, FINALITY_COMPONENT_READ_GAS);
+        if (!hashReadable || discoveredHash != expectedHash) {
+            return false;
+        }
+        for (uint256 i = 0; i < expectedCount; i++) {
+            bytes memory componentCallData;
+            if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+                componentCallData = abi.encodeWithSelector(
+                    IStreamArtworkFinalityDiscovery.finalityComponentAt.selector,
+                    scope.collectionId,
+                    i
+                );
+            } else {
+                componentCallData = abi.encodeWithSelector(
+                    IStreamArtworkScopedFinalityDiscovery.finalityComponentAtForScope.selector,
+                    scope,
+                    i
+                );
+            }
+            (
+                bool componentReadable,
+                StreamFinalityComponentExpectation memory discoveredComponent
+            ) = _readDiscoveryComponent(discovery, componentCallData, FINALITY_COMPONENT_READ_GAS);
+            if (
+                !componentReadable
+                    || keccak256(abi.encode(discoveredComponent))
+                        != keccak256(abi.encode(expected[i]))
+            ) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    /// @dev Bounded exact-word staticcall used only by never-revert diagnostics. Supplying a
-    ///      fixed output buffer avoids allocating or copying attacker-controlled returndata.
-    function _readDiscoveryWord(address discovery, bytes memory callData)
+    /// @dev Bounded exact-word staticcall. Supplying a fixed output buffer avoids allocating or
+    ///      copying attacker-controlled returndata. `gasCap == 0` forwards available gas less the
+    ///      parent reserve for strict execution; diagnostics supply their governed nonzero cap.
+    function _readDiscoveryWord(address discovery, bytes memory callData, uint256 gasCap)
         private
         view
         returns (bool readable, bytes32 value)
     {
-        uint256 gasCap = FINALITY_COMPONENT_READ_GAS;
-        if (gasleft() <= gasCap + FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE) {
+        uint256 availableGas = gasleft();
+        uint256 parentReserve = gasCap == 0
+            ? FINALITY_STRICT_PARENT_GAS_RESERVE
+            : FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE;
+        if (discovery.code.length == 0 || availableGas <= parentReserve) {
             return (false, bytes32(0));
         }
-        if (discovery.code.length == 0) {
-            return (false, bytes32(0));
+        uint256 forwardedGas = availableGas - parentReserve;
+        if (gasCap != 0 && gasCap < forwardedGas) {
+            forwardedGas = gasCap;
         }
         assembly ("memory-safe") {
             let output := mload(0x40)
             readable := staticcall(
-                gasCap,
+                forwardedGas,
                 discovery,
                 add(callData, 0x20),
                 mload(callData),
@@ -1171,6 +1432,50 @@ contract StreamArtworkFinalityRegistry is
             if iszero(eq(returndatasize(), 0x20)) { readable := 0 }
             if readable { value := mload(output) }
         }
+    }
+
+    function _readDiscoveryComponent(address discovery, bytes memory callData, uint256 gasCap)
+        private
+        view
+        returns (bool readable, StreamFinalityComponentExpectation memory component)
+    {
+        uint256 availableGas = gasleft();
+        uint256 parentReserve = gasCap == 0
+            ? FINALITY_STRICT_PARENT_GAS_RESERVE
+            : FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE;
+        if (discovery.code.length == 0 || availableGas <= parentReserve) {
+            return (false, component);
+        }
+        uint256 forwardedGas = availableGas - parentReserve;
+        if (gasCap != 0 && gasCap < forwardedGas) {
+            forwardedGas = gasCap;
+        }
+        bytes memory result = new bytes(7 * 32);
+        assembly ("memory-safe") {
+            readable := staticcall(
+                forwardedGas,
+                discovery,
+                add(callData, 0x20),
+                mload(callData),
+                add(result, 0x20),
+                0xe0
+            )
+            if iszero(eq(returndatasize(), 0xe0)) { readable := 0 }
+        }
+        if (!readable) {
+            return (false, component);
+        }
+        uint256 rawComponent;
+        uint256 rawInterfaceId;
+        assembly ("memory-safe") {
+            rawComponent := mload(add(result, 0x40))
+            rawInterfaceId := mload(add(result, 0x60))
+        }
+        if (rawComponent > type(uint160).max || rawInterfaceId & ((uint256(1) << 224) - 1) != 0) {
+            return (false, component);
+        }
+        component = abi.decode(result, (StreamFinalityComponentExpectation));
+        return (true, component);
     }
 
     // ------------------------------------------------------------------
@@ -1263,7 +1568,6 @@ contract StreamArtworkFinalityRegistry is
                 ),
                 abi.encode(
                     facts.supplyMode,
-                    facts.createdAt,
                     facts.maxSupply,
                     facts.mintedSupply,
                     facts.burnedSupply,
@@ -1525,7 +1829,7 @@ contract StreamArtworkFinalityRegistry is
         }
         (bool matches,,) = _diagnoseSlice(_sliceComponents(stored, 0, stored.length), scope);
         if (matches) {
-            matches = _diagnosticDiscoveryMatches(scope, stored.length, compHash);
+            matches = _diagnosticDiscoveryMatches(scope, stored, compHash);
         }
         return (matches, recHash, compHash);
     }

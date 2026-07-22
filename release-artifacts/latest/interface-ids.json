@@ -16,12 +16,14 @@
     "IRandomizer": "0xf3eb4f44",
     "IRandomizerLifecycle": "0xaabe1a0d",
     "IStreamAdmins": "0x00ddd221",
+    "IStreamArtworkFinalityRegistry": "0x47291ea1",
     "IStreamAssetPolicyRegistry": "0x5a37a79e",
     "IStreamAuctions": "0xb109bb30",
     "IStreamCollectionMetadata": "0x6e0fb84e",
     "IStreamCompatibility": "0x205fac5d",
     "IStreamContractMetadata": "0x88369d44",
     "IStreamCore": "0xba77d620",
+    "IStreamCoreFinalityAdapter": "0xebf35615",
     "IStreamDrops": "0xd7c2abe3",
     "IStreamMintGate": "0xa5d7921d",
     "IStreamMintLedger": "0x79bc7192",
@@ -375,6 +377,132 @@
         {
           "signature": "retrieveGlobalAdmin(address)",
           "selector": "0xb3076d55"
+        }
+      ]
+    },
+    "IStreamArtworkFinalityRegistry": {
+      "source": "smart-contracts/IStreamArtworkFinalityRegistry.sol",
+      "artifact_path": "out/IStreamArtworkFinalityRegistry.sol/IStreamArtworkFinalityRegistry.json",
+      "abi_sha256": "sha256:92a1df8b5622d7985c54d4bf7f6cb590dc34d8148056d3aa908f1d9f8366313a",
+      "interface_id": "0x47291ea1",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x47291ea1",
+      "function_selectors": [
+        {
+          "signature": "artworkFreezeMode((uint8,uint256,uint256,bytes32))",
+          "selector": "0x489f1438"
+        },
+        {
+          "signature": "artworkScopeFinalityRecord((uint8,uint256,uint256,bytes32))",
+          "selector": "0x5e46a6e8"
+        },
+        {
+          "signature": "artworkTerminalFreezeAction((uint8,uint256,uint256,bytes32))",
+          "selector": "0x2f11e121"
+        },
+        {
+          "signature": "cancelArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32)",
+          "selector": "0x4d7bbf4a"
+        },
+        {
+          "signature": "collectionFinalityRecord(uint256)",
+          "selector": "0x980d80c5"
+        },
+        {
+          "signature": "computeCollectionCoreFactsHash(uint256)",
+          "selector": "0x931cf7aa"
+        },
+        {
+          "signature": "computeComponentsHash((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+          "selector": "0x0eca93cd"
+        },
+        {
+          "signature": "computeFinalityRecordHash((uint8,uint256,uint256,bytes32),bytes32,bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+          "selector": "0xe5a3b01e"
+        },
+        {
+          "signature": "computeNonSanctionComponentsHash((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+          "selector": "0x67f05aa7"
+        },
+        {
+          "signature": "computeSanctionSubjectHash((uint8,uint256,uint256,bytes32),bytes32,bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+          "selector": "0x74082248"
+        },
+        {
+          "signature": "computeScopedCoreFactsHash((uint8,uint256,uint256,bytes32))",
+          "selector": "0x500db0aa"
+        },
+        {
+          "signature": "contentRootScopeSubject((uint8,uint256,uint256,bytes32))",
+          "selector": "0x566d71f3"
+        },
+        {
+          "signature": "finalityComponentCount(uint256)",
+          "selector": "0x880b294f"
+        },
+        {
+          "signature": "finalityComponentCountForScope((uint8,uint256,uint256,bytes32))",
+          "selector": "0x16fe5370"
+        },
+        {
+          "signature": "finalityComponents(uint256,uint256,uint256)",
+          "selector": "0x1825f65a"
+        },
+        {
+          "signature": "finalityComponentsForScope((uint8,uint256,uint256,bytes32),uint256,uint256)",
+          "selector": "0xec50b7fb"
+        },
+        {
+          "signature": "finalityManifestBytes(bytes32)",
+          "selector": "0xd5fe9f85"
+        },
+        {
+          "signature": "finalityManifestStored(bytes32)",
+          "selector": "0xa1d25f7d"
+        },
+        {
+          "signature": "finalityStillMatches(uint256)",
+          "selector": "0x2f9c247f"
+        },
+        {
+          "signature": "finalizeArtworkScope((uint8,uint256,uint256,bytes32),(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+          "selector": "0xcd2a94a8"
+        },
+        {
+          "signature": "finalizeCollectionArtwork(uint256,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+          "selector": "0x53742883"
+        },
+        {
+          "signature": "materializeExpiredArtworkTerminalFreeze((uint8,uint256,uint256,bytes32))",
+          "selector": "0xf1205ba2"
+        },
+        {
+          "signature": "scheduleArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32,uint64,uint64)",
+          "selector": "0xc6f1fbda"
+        },
+        {
+          "signature": "stageFinalityManifest(bytes)",
+          "selector": "0x58490e22"
+        },
+        {
+          "signature": "verifyArtworkScopeFinality((uint8,uint256,uint256,bytes32))",
+          "selector": "0x53b7eb26"
+        },
+        {
+          "signature": "verifyArtworkScopeFinalityRange((uint8,uint256,uint256,bytes32),uint256,uint256)",
+          "selector": "0x3cfddd1a"
+        },
+        {
+          "signature": "verifyFinality(uint256)",
+          "selector": "0xf060d767"
+        },
+        {
+          "signature": "verifyFinalityRange(uint256,uint256,uint256)",
+          "selector": "0xb5cc884b"
+        },
+        {
+          "signature": "vetoArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32)",
+          "selector": "0x2c6abb68"
         }
       ]
     },
@@ -759,6 +887,36 @@
         {
           "signature": "viewRandomizerEpoch(uint256)",
           "selector": "0xd2af7046"
+        }
+      ]
+    },
+    "IStreamCoreFinalityAdapter": {
+      "source": "smart-contracts/IStreamCoreFinalityAdapter.sol",
+      "artifact_path": "out/IStreamCoreFinalityAdapter.sol/IStreamCoreFinalityAdapter.json",
+      "abi_sha256": "sha256:1b9e23a6f40bf0e378eac5d10f6bf910416de2df14284803717333a8a0fad562",
+      "interface_id": "0xebf35615",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xea0c9fb2",
+      "function_selectors": [
+        {
+          "signature": "collectionMetadata()",
+          "selector": "0x89ed2edf"
+        },
+        {
+          "signature": "core()",
+          "selector": "0xf2f4eb26"
+        },
+        {
+          "signature": "coreCollectionFinalityFacts(uint256)",
+          "selector": "0x4eb4b6dc"
+        },
+        {
+          "signature": "scopedCoreFinalityFacts((uint8,uint256,uint256,bytes32))",
+          "selector": "0xde5e2530"
+        },
+        {
+          "signature": "supportsInterface(bytes4)",
+          "selector": "0x01ffc9a7"
         }
       ]
     },

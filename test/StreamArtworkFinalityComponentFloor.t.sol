@@ -9,8 +9,8 @@ import "./helpers/FinalityTestBase.sol";
 
 /// @notice Mandatory-component-floor and snapshot-manifest-gate coverage
 ///         ([LTA-FINALITY] requirement 1/6, MRR-FINALITY rules 6-9, [CMC-FINALITY-INPUTS]
-///         rules 3 and 5). These gates are enforced onchain independent of the optional
-///         discovery module, which is address(0) at genesis.
+///         rules 3 and 5). These gates are enforced alongside the mandatory discovery
+///         module bound at construction.
 contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
     using Assertions for bool;
     using Assertions for bytes32;
@@ -70,10 +70,8 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
         registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("full set finalized");
     }
 
-    function testBaseFloorHoldsAtGenesisWithoutDiscovery() public {
-        // The registry under test is constructed with finalityDiscovery == address(0), so this
-        // proves the floor is enforced with no discovery module bound (the FIX 1 gap).
-        registry.finalityDiscovery().assertEq(address(0), "discovery unbound");
+    function testBaseFloorHoldsWithMandatoryDiscovery() public {
+        registry.finalityDiscovery().assertEq(address(discoveryMock), "discovery bound");
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
         _scheduleAndOpen(fixture);
         _expectMissing(fixture, StreamFinalityDomains.COMPONENT_RENDERER);
@@ -98,10 +96,7 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
 
     function testOnchainRequiresScriptComponents() public {
         Fixture memory fixture = _buildFixture(
-            _collectionScope(COLLECTION_ID),
-            true,
-            StreamFinalityDomains.METADATA_MODE_ONCHAIN,
-            false
+            _collectionScope(COLLECTION_ID), true, StreamFinalityDomains.METADATA_MODE_ONCHAIN
         );
         _scheduleAndOpen(fixture);
         _expectMissing(fixture, StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE);
@@ -114,7 +109,7 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
 
     function testHybridRequiresScriptComponents() public {
         Fixture memory fixture = _buildFixture(
-            _collectionScope(COLLECTION_ID), true, StreamFinalityDomains.METADATA_MODE_HYBRID, false
+            _collectionScope(COLLECTION_ID), true, StreamFinalityDomains.METADATA_MODE_HYBRID
         );
         _scheduleAndOpen(fixture);
         _expectMissing(fixture, StreamFinalityDomains.COMPONENT_SCRIPT_SOURCE);
@@ -142,26 +137,16 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
     }
 
     // ------------------------------------------------------------------
-    // Discovery still layered on top of the floor when bound
+    // Mandatory discovery remains layered on top of the floor
     // ------------------------------------------------------------------
 
     function testDiscoveryExactMatchStillEnforcedOnTopOfFloor() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
-        registry = new StreamArtworkFinalityRegistry(
-            address(coreMock),
-            address(metadataMock),
-            address(sanctionMock),
-            address(authority),
-            address(discovery)
-        );
-        previewer = new StreamArtworkFinalityPreview(registry);
-
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
         uint256 total = fixture.components.length;
         _scheduleAndOpen(fixture);
 
         // Floor satisfied, but discovery disagrees on the exact set: still blocks.
-        discovery.setCollectionDiscovery(COLLECTION_ID, total, keccak256("router set"));
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total, keccak256("router set"));
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -175,7 +160,7 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
         );
 
         // Exact discovery agreement passes.
-        discovery.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
         _finalizeFixtureCall(fixture);
         registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
     }
@@ -186,10 +171,7 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
 
     function testOnchainWithoutSnapshotManifestReverts() public {
         Fixture memory fixture = _buildFixture(
-            _collectionScope(COLLECTION_ID),
-            true,
-            StreamFinalityDomains.METADATA_MODE_ONCHAIN,
-            false
+            _collectionScope(COLLECTION_ID), true, StreamFinalityDomains.METADATA_MODE_ONCHAIN
         );
         // Clear the assembled-snapshot-manifest hash the fixture recorded.
         metadataMock.setSnapshotHash(COLLECTION_ID, bytes32(0));
@@ -221,7 +203,7 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
 
     function testHybridWithoutSnapshotManifestReverts() public {
         Fixture memory fixture = _buildFixture(
-            _collectionScope(COLLECTION_ID), true, StreamFinalityDomains.METADATA_MODE_HYBRID, false
+            _collectionScope(COLLECTION_ID), true, StreamFinalityDomains.METADATA_MODE_HYBRID
         );
         metadataMock.setSnapshotHash(COLLECTION_ID, bytes32(0));
         _scheduleAndOpen(fixture);
@@ -246,5 +228,60 @@ contract StreamArtworkFinalityComponentFloorTest is FinalityTestBase {
         _executeFixture(fixture);
         registry.collectionFinalityRecord(COLLECTION_ID).finalized
             .assertTrue("offchain finalized without snapshot manifest");
+    }
+
+    // ------------------------------------------------------------------
+    // Metadata-mode domain guard (only OFFCHAIN=0, ONCHAIN=1, HYBRID=2)
+    // ------------------------------------------------------------------
+
+    function testInvalidMetadataModeThreeCollectionFailsClosed() public {
+        _assertInvalidMetadataModeFailsClosed(_collectionScope(COLLECTION_ID), 3);
+    }
+
+    function testInvalidMetadataModeMaxCollectionFailsClosed() public {
+        _assertInvalidMetadataModeFailsClosed(_collectionScope(COLLECTION_ID), type(uint8).max);
+    }
+
+    function testInvalidMetadataModeThreeScopedFailsClosed() public {
+        _assertInvalidMetadataModeFailsClosed(_tokenScope(COLLECTION_ID, 12), 3);
+    }
+
+    function testInvalidMetadataModeMaxScopedFailsClosed() public {
+        _assertInvalidMetadataModeFailsClosed(_tokenScope(COLLECTION_ID, 12), type(uint8).max);
+    }
+
+    function _assertInvalidMetadataModeFailsClosed(
+        StreamFinalityScope memory scope,
+        uint8 metadataMode
+    ) private {
+        // An unrecognized mode previously inherited both OFFCHAIN bypasses: the base-only
+        // mandatory floor and no snapshot-manifest requirement. Keep those adversarial inputs
+        // to prove execution and preview now reject the raw mode itself.
+        Fixture memory fixture = _buildFixture(scope, true, metadataMode);
+        fixture.components.length.assertEq(7, "adversarial base-only component set");
+        metadataMock.latestCollectionSnapshotHash(COLLECTION_ID)
+            .assertEq(bytes32(0), "adversarial snapshot bypass");
+        StreamFinalityComponentSet.hasAllMandatory(fixture.components, metadataMode)
+            .assertFalse("invalid mode fails closed in shared floor");
+
+        _scheduleAndOpen(fixture);
+        StreamFinalityPreview memory p;
+        if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            p = previewer.previewCollectionFinality(
+                scope.collectionId, fixture.components, fixture.manifest
+            );
+        } else {
+            p = previewer.previewArtworkScopeFinality(scope, fixture.components, fixture.manifest);
+        }
+        p.componentsWellFormed.assertFalse("preview mandatory floor fails closed");
+        p.coreGatesSatisfied.assertFalse("preview snapshot gate fails closed");
+        p.wouldExecute.assertFalse("preview does not execute invalid mode");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityMetadataModeInvalid.selector, metadataMode
+            )
+        );
+        _finalizeFixtureCall(fixture);
     }
 }

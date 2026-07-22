@@ -106,23 +106,30 @@ struct StreamScopedFinalityRecord {
     uint64 finalizedAt;
 }
 
-/// @notice Typed Core collection facts consumed at collection-scope finality
-///         (IStreamCoreFinalityFacts shape in [LTA-FINALITY]).
+/// @notice Typed collection facts derived by the immutable Core finality adapter.
 struct StreamCoreCollectionFinalityFacts {
     bool exists;
     bool hasMaxSupply;
     uint8 status;
     uint8 supplyMode;
-    uint64 createdAt;
-    uint64 maxSupply;
-    uint64 mintedSupply;
-    uint64 burnedSupply;
-    uint64 nextCollectionSerial;
+    uint256 maxSupply;
+    uint256 mintedSupply;
+    uint256 burnedSupply;
+    uint256 nextCollectionSerial;
     bytes32 collectionConfigHash;
 }
 
-/// @notice Typed scoped Core facts consumed at scoped finality
-///         (ScopedCoreFinalityFacts shape in Scoped Finality For Open Series).
+/// @notice Raw scoped query accepted by the adapter.
+/// @dev `scopeType` intentionally is not an enum: unknown numeric values return a negative
+///      semantic result instead of reverting during ABI decoding.
+struct StreamCoreFinalityScopeQuery {
+    uint8 scopeType;
+    uint256 collectionId;
+    uint256 tokenId;
+    bytes32 scopeId;
+}
+
+/// @notice Typed scoped facts derived by the immutable Core finality adapter.
 struct StreamScopedCoreFinalityFacts {
     bool scopeExists;
     uint8 scopeType;
@@ -167,7 +174,6 @@ struct StreamFinalityPreview {
     bool componentsWellFormed;
     bool componentsMatchLive;
     bool sanctionSatisfied;
-    bool facadeBindingSatisfied;
     bool discoveryMatches;
     bytes32 computedCoreFactsHash;
     bytes32 computedComponentsHash;
@@ -288,22 +294,6 @@ library StreamFinalityDomains {
     bytes32 internal constant COMPONENT_OPTIONAL_SNAPSHOT_ROUTE =
         0x31768727f16bb21bf296353a211441c524fc19d478fe73d886555c8a2150ae40;
 
-    // ---- Facade identity binding (home: [CMC-FACADE-BINDING]; [LTA-FINALITY] req 16) ----
-
-    /// @dev keccak256("IDENTITY_FACADE_BINDING")
-    bytes32 internal constant RECORD_IDENTITY_FACADE_BINDING =
-        0xb3454197cb151b3305cae7757ccaa671e791eb40902d3aefe6cbaa64d6695087;
-
-    // ---- Identity mode vocabulary (home: [PV1-IDENTITY-MODE]) ----
-
-    /// @dev keccak256("CORE_NATIVE")
-    bytes32 internal constant IDENTITY_MODE_CORE_NATIVE =
-        0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1;
-
-    /// @dev keccak256("EXTERNAL_FACADE")
-    bytes32 internal constant IDENTITY_MODE_EXTERNAL_FACADE =
-        0xc7dd233bcf9b505ac7e2ab434d9e6af7bc663d64e2d983f1dd6d77668b578656;
-
     // ---- Role vocabulary references (home: ADR 0004 [GOV-ROLES]) ----
 
     /// @dev keccak256("ROLE_COLLECTION_FINALITY_ADMIN")
@@ -326,6 +316,10 @@ library StreamFinalityDomains {
     ///      (docs/collection-metadata-contract.md, Open-Ended Collections).
     uint8 internal constant CORE_COLLECTION_STATUS_CLOSED = 2;
 
+    /// @dev CollectionSupplyMode UNCAPPED_OPEN is the highest valid value in the closed
+    ///      FIXED/CAPPED_OPEN/UNCAPPED_OPEN vocabulary.
+    uint8 internal constant CORE_COLLECTION_SUPPLY_MODE_UNCAPPED_OPEN = 2;
+
     /// @dev tokenLifecycle numeric IDs ([LTA-IDENTITY]: UNKNOWN=0, PREPARED_INCOMPLETE=1,
     ///      MINTED=2, BURNED=3).
     uint8 internal constant TOKEN_LIFECYCLE_MINTED = 2;
@@ -344,9 +338,15 @@ library StreamFinalityDomains {
 ///         rules 6-9, [CMC-FINALITY-INPUTS]).
 /// @dev Hosted as a library so the mandatory-floor check is shared byte-for-byte between the
 ///      registry (execution) and the preview periphery, and does not inflate either contract's
-///      own bytecode. The floor is enforced onchain independent of the optional discovery
-///      module, which is `address(0)` at genesis.
+///      own bytecode. The floor is enforced onchain independently from the mandatory
+///      discovery module's exact-route check.
 library StreamFinalityComponentSet {
+    /// @dev Strict/preview reads need enough gas to decode or emit a typed failure after a target
+    ///      exhausts its forwarded gas. Capped diagnostics need only their compact false path.
+    uint256 private constant STRICT_READ_PARENT_GAS_RESERVE = 100_000;
+    uint256 private constant DIAGNOSTIC_READ_PARENT_GAS_RESERVE = 10_000;
+    bytes32 private constant INVALID_METADATA_MODE_SENTINEL = bytes32(type(uint256).max);
+
     /// @notice Returns the first mandatory componentType missing from `components` for the
     ///         collection's `metadataMode`, or `bytes32(0)` when all are present.
     /// @dev Base floor (every mode): COLLECTION_METADATA, METADATA_ROUTER, RENDERER,
@@ -355,10 +355,15 @@ library StreamFinalityComponentSet {
     ///      require SCRIPT_SOURCE, DEPENDENCY_SOURCE, and REFERENCE_RENDER (MRR-FINALITY rule 9,
     ///      [CMC-FINALITY-INPUTS] rule 5). The sorted-unique list guarantee makes each present
     ///      type a distinct entry; live frozen state is verified separately by the caller.
+    ///      Invalid future/unrecognized mode IDs fail closed with a nonzero sentinel rather than
+    ///      inheriting the less restrictive OFFCHAIN floor.
     function firstMissingMandatory(
         StreamFinalityComponentExpectation[] memory components,
         uint8 metadataMode
     ) public pure returns (bytes32) {
+        if (metadataMode > StreamFinalityDomains.METADATA_MODE_HYBRID) {
+            return INVALID_METADATA_MODE_SENTINEL;
+        }
         uint256 seen = _presenceMask(components);
         // Bit layout matches _requiredMask ordering below.
         uint256 required = _requiredMask(metadataMode);
@@ -405,39 +410,38 @@ library StreamFinalityComponentSet {
         }
     }
 
-    /// @notice Locates the IDENTITY_FACADE_BINDING component slot ([LTA-FINALITY] requirement 16,
-    ///         [CMC-FACADE-BINDING] rule 6).
-    function locateFacadeBindingSlot(StreamFinalityComponentExpectation[] memory components)
-        public
-        pure
-        returns (uint256 index, uint256 occurrences)
-    {
-        for (uint256 i = 0; i < components.length; i++) {
-            if (components[i].componentType == StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING)
-            {
-                index = i;
-                occurrences++;
-            }
-        }
-    }
-
     /// @notice Bounded staticcall to a component's finality read plus a fixed-size returndata
     ///         decode; never reverts on component misbehavior ([LTA-FINALITY] diagnostic-read
-    ///         semantics). `gasCap == 0` forwards all remaining gas (execution path);
-    ///         nonzero caps the forwarded gas (diagnostic path, FINALITY_COMPONENT_READ_GAS).
+    ///         semantics). `gasCap == 0` forwards available gas less a fixed reserve (execution
+    ///         and preview); nonzero caps forwarded gas (diagnostic, FINALITY_COMPONENT_READ_GAS).
     function observeComponent(address component, bytes memory componentCallData, uint256 gasCap)
         public
         view
         returns (bool readable, StreamFinalityComponentState memory state)
     {
-        bool success;
-        bytes memory returndata;
-        if (gasCap == 0) {
-            (success, returndata) = component.staticcall(componentCallData);
-        } else {
-            (success, returndata) = component.staticcall{ gas: gasCap }(componentCallData);
+        uint256 availableGas = gasleft();
+        uint256 parentReserve =
+            gasCap == 0 ? STRICT_READ_PARENT_GAS_RESERVE : DIAGNOSTIC_READ_PARENT_GAS_RESERVE;
+        if (component.code.length == 0 || availableGas <= parentReserve) {
+            return (false, state);
         }
-        if (!success || returndata.length != 256) {
+        uint256 forwardedGas = availableGas - parentReserve;
+        if (gasCap != 0 && gasCap < forwardedGas) {
+            forwardedGas = gasCap;
+        }
+        bytes memory returndata = new bytes(8 * 32);
+        assembly ("memory-safe") {
+            readable := staticcall(
+                forwardedGas,
+                component,
+                add(componentCallData, 0x20),
+                mload(componentCallData),
+                add(returndata, 0x20),
+                0x100
+            )
+            if iszero(eq(returndatasize(), 0x100)) { readable := 0 }
+        }
+        if (!readable) {
             return (false, state);
         }
         uint256 rawFrozen;
@@ -448,7 +452,7 @@ library StreamFinalityComponentSet {
         bytes32 moduleVersion;
         bytes32 manifestHash;
         bytes32 dataHash;
-        assembly {
+        assembly ("memory-safe") {
             rawFrozen := mload(add(returndata, 0x20))
             componentType := mload(add(returndata, 0x40))
             rawComponent := mload(add(returndata, 0x60))
@@ -475,6 +479,86 @@ library StreamFinalityComponentSet {
             dataHash: dataHash
         });
         return (true, state);
+    }
+
+    /// @notice Bounded exact-word discovery read. Rejects codeless targets, failed calls, and
+    ///         short or oversized returndata without copying attacker-controlled returndata.
+    /// @dev `gasCap == 0` forwards the available gas less a fixed parent-frame reserve for strict
+    ///      execution/preview. A nonzero cap is the governed post-finality diagnostic budget.
+    function observeDiscoveryWord(address discovery, bytes memory callData, uint256 gasCap)
+        public
+        view
+        returns (bool readable, bytes32 value)
+    {
+        uint256 availableGas = gasleft();
+        uint256 parentReserve =
+            gasCap == 0 ? STRICT_READ_PARENT_GAS_RESERVE : DIAGNOSTIC_READ_PARENT_GAS_RESERVE;
+        if (discovery.code.length == 0 || availableGas <= parentReserve) {
+            return (false, bytes32(0));
+        }
+        uint256 forwardedGas = availableGas - parentReserve;
+        if (gasCap != 0 && gasCap < forwardedGas) {
+            forwardedGas = gasCap;
+        }
+        assembly ("memory-safe") {
+            let output := mload(0x40)
+            readable := staticcall(
+                forwardedGas,
+                discovery,
+                add(callData, 0x20),
+                mload(callData),
+                output,
+                0x20
+            )
+            if iszero(eq(returndatasize(), 0x20)) { readable := 0 }
+            if readable { value := mload(output) }
+        }
+    }
+
+    /// @notice Bounded exact-seven-word discovery enumeration read. Noncanonical addresses or
+    ///         bytes4 words and any non-224-byte response fail closed without an ABI-decode revert.
+    /// @dev Gas semantics match `observeDiscoveryWord`.
+    function observeDiscoveryComponent(address discovery, bytes memory callData, uint256 gasCap)
+        public
+        view
+        returns (bool readable, StreamFinalityComponentExpectation memory component)
+    {
+        uint256 availableGas = gasleft();
+        uint256 parentReserve =
+            gasCap == 0 ? STRICT_READ_PARENT_GAS_RESERVE : DIAGNOSTIC_READ_PARENT_GAS_RESERVE;
+        if (discovery.code.length == 0 || availableGas <= parentReserve) {
+            return (false, component);
+        }
+        uint256 forwardedGas = availableGas - parentReserve;
+        if (gasCap != 0 && gasCap < forwardedGas) {
+            forwardedGas = gasCap;
+        }
+        bytes memory result = new bytes(7 * 32);
+        assembly ("memory-safe") {
+            readable := staticcall(
+                forwardedGas,
+                discovery,
+                add(callData, 0x20),
+                mload(callData),
+                add(result, 0x20),
+                0xe0
+            )
+            if iszero(eq(returndatasize(), 0xe0)) { readable := 0 }
+        }
+        if (!readable) {
+            return (false, component);
+        }
+        uint256 rawComponent;
+        uint256 rawInterfaceId;
+        assembly ("memory-safe") {
+            rawComponent := mload(add(result, 0x40))
+            rawInterfaceId := mload(add(result, 0x60))
+        }
+        if (rawComponent > type(uint160).max || rawInterfaceId & ((1 << 224) - 1) != 0) {
+            return (false, component);
+        }
+        component = abi.decode(result, (StreamFinalityComponentExpectation));
+        return (true, component);
     }
 
     /// @notice True when a live component `state` exactly matches the submitted `expectation`

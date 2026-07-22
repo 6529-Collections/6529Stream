@@ -124,24 +124,24 @@ interface IStreamArtworkFinalityRegistry {
     error FinalityManifestBytesMissing(bytes32 contentHash);
     error FinalityManifestBytesInvalid();
     error FinalityCollectionUnknown(uint256 collectionId);
+    error FinalityCollectionStatusInvalid(uint256 collectionId, uint8 status);
+    error FinalityCollectionSupplyModeInvalid(uint256 collectionId, uint8 supplyMode);
     error FinalityCollectionNotClosed(uint256 collectionId, uint8 status);
     error FinalityCollectionBurnsNotBlocked(uint256 collectionId);
     error FinalityContentRootMissing(bytes32 scopeSubject);
-    error FinalityContentRootLeafCountMismatch(uint64 expectedLeafCount, uint64 actualLeafCount);
+    error FinalityContentRootLeafCountMismatch(uint256 expectedLeafCount, uint256 actualLeafCount);
     error FinalityScopeUnknown();
     error FinalityTokenNotInScope();
     error FinalityScopedFactsMismatch();
-    error FinalityFacadeBindingMissing(uint256 collectionId);
-    error FinalityFacadeBindingControllerMismatch(address boundFacade, address transferController);
-    error FinalityFacadeBindingComponentMissing(uint256 collectionId);
-    error FinalityFacadeBindingComponentDataHashMismatch(
-        bytes32 componentDataHash, bytes32 recordHash
-    );
-    error FinalityFacadeBindingComponentForbidden(uint256 collectionId);
+    error FinalityCollectionNotFrozen(uint256 collectionId);
     error FinalityMissingRequiredComponent(bytes32 componentType);
     error FinalitySnapshotManifestMissing(uint256 collectionId, uint8 metadataMode);
+    error FinalityMetadataModeInvalid(uint8 metadataMode);
     error FinalityDiscoveryCountMismatch(uint256 discoveredCount, uint256 submittedCount);
     error FinalityDiscoveryHashMismatch(bytes32 discoveredHash, bytes32 submittedHash);
+    error FinalityDiscoveryFactsUnreadable();
+    error FinalityDiscoveryComponentUnreadable(uint256 index);
+    error FinalityDiscoveryComponentMismatch(uint256 index);
 
     // ------------------------------------------------------------------
     // Terminal-freeze staging (single governed freeze path, [LTA-FREEZE] rule 4)

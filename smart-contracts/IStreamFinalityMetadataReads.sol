@@ -5,8 +5,8 @@ pragma solidity ^0.8.19;
 ///         registry (and its preview tooling) reads.
 /// @dev Shapes follow docs/collection-metadata-contract.md: [CMC-CONTENT-ROOT] rule 4 for the
 ///      content-root read, [CMC-LOCKS] for lock state, snapshot publication for the assembled
-///      snapshot hash, [CMC-FACADE-BINDING] for the identity binding record, and the scoped
-///      finality model for scope manifest publication. The satellite additionally serves the
+///      snapshot hash, and the scoped finality model for scope manifest publication. The
+///      satellite additionally serves the
 ///      generic component read (`finalityState`/`finalityStateForScope`) as one of the
 ///      submitted finality components; that surface lives in
 ///      IStreamArtworkFinalityComponents.sol.
@@ -32,13 +32,6 @@ interface IStreamFinalityMetadataReads {
         external
         view
         returns (bool);
-
-    /// @notice Accepted IDENTITY_FACADE_BINDING record ([CMC-FACADE-BINDING]); at most one per
-    ///         collection, absent by construction for CORE_NATIVE collections.
-    function facadeIdentityBindingRecord(uint256 collectionId)
-        external
-        view
-        returns (bool recorded, address facadeAddress, bytes32 recordHash);
 
     /// @notice Published scope manifest for RELEASE/SEASON/VIEW scope IDs
     ///         (Scoped Finality For Open Series, scope rule 3).

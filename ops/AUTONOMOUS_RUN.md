@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/core-cutover-abi-lock` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/660` |
+| Active PR branch | `codex/finality-adapter-cutover` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/663` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/654` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/663` |
-| Next issue | Implement the first satellite-only or measured net-negative Core cutover slice after the permanent ABI target is merged. |
+| Active PR | `TBD` |
+| Next issue | Implement governance V2 and exact module-registry binding under issue #665 after the finality-adapter cutover merges. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 17:44 UTC` |
+| Last updated | `2026-07-22 19:03 UTC` |
 
 ## Current Run Notes
 
@@ -64,16 +64,32 @@ evidence, and audit/readiness gates.
   checksum provenance. Its temporary worktree and local/remote topic branch
   were removed after the reviewed, CI-clean merge; this run now uses one
   worktree.
-- The current topic is issue #654 on branch `codex/core-cutover-abi-lock`.
-  Historical artifacts prove the earlier headroom work reduced Core to 21,792
+- The permanent pre-genesis target lock merged in PR #663 after latest-head CI,
+  CodeRabbit, and independent review were clean. The current topic remains issue
+  #654 on branch `codex/finality-adapter-cutover`; its PR is pending local
+  validation and publication.
+- This zero-Core-delta slice implements `StreamCoreFinalityAdapter` and migrates
+  the finality registry, preview, and tests off the retired aggregate/facade
+  seams. It makes discovery mandatory, reads burn/freeze gates from the actual
+  Core, preserves `uint256` collection supply/leaf-count semantics, and binds
+  the registry to separate actual-Core, metadata, and adapter dependencies.
+  The focused 97-test finality set and full 891-test Foundry suite pass. The
+  production-profile `StreamCore` remains exactly 24,152 runtime bytes with 424
+  bytes of EIP-170 margin, unchanged by this satellite/caller migration.
+- Production and audit readiness remain blocked. The current Core still lacks
+  the granular target getters and target one-way freeze semantic consumed by
+  the adapter; current collection metadata still lacks the target finality
+  reads; and concrete discovery, sanction, and deployment candidates remain
+  incomplete. The next planned slice after this branch is governance V2 and
+  exact module-registry binding under issue #665.
+- Historical artifacts prove the earlier headroom work reduced Core to 21,792
   runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
   hooks while the legacy Drops/Minter path remained live, producing the current
   24,152-byte transitional Core. The current build is already non-enumerable and
   is not a complete mandatory-hook proof.
-- PR #663 is the active target-lock review. Its authoritative final-follow-up
-  local gate passed in 1,021.7 seconds; fresh CI and CodeRabbit review remain
-  required on that follow-up head before merge. The first published head passed
-  Windows, Slither, and Foundry CI. Independent review then found
+- PR #663's authoritative final-follow-up local gate passed in 1,021.7 seconds,
+  and latest-head Windows, Slither, Foundry, CodeRabbit, and independent review
+  were clean before merge. Earlier independent review found
   that count-only target checks did not lock every active ABI shape and that
   the vector's governance-hosted state-export publisher lacked an exact
   publisher-surface proof. The follow-up now pins all 58 function and 19 event
@@ -107,7 +123,7 @@ evidence, and audit/readiness gates.
   independently implemented fixed-golden vector oracle is wired into CI and
   release-checksum provenance. Focused mutation tests, independent
   selector/topic/hash recomputation, and the full final-follow-up local gate
-  pass. Final implementation mapping also closed two V2 ambiguities before
+  passed. Final implementation mapping also closed two V2 ambiguities before
   merge: ordered call index/selector validation is executor-owned and does not
   widen the exact six-return `currentAction()` target context, while module
   registration has its own nonempty strict-UTF-8 2,048-byte manifest-URI bound.
@@ -120,7 +136,7 @@ evidence, and audit/readiness gates.
   production-profile `StreamCore` runtime measures at or below 22,576 bytes, a
   Core-changing PR must be measured net-negative and a satellite slice must
   have zero Core delta.
-- After this ABI lock merges, continue immediately with the satellite/caller
+- With the ABI lock merged, continue immediately with the satellite/caller
   migration sequence. Recovery-driven refresh chunks preserve the zero-Core-
   delta ABI: artwork-changing execution snapshots the token high-water mark and
   stores a monotonic collection/scoped plan; either exact permissionless
