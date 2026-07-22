@@ -509,7 +509,7 @@ Blocking issues: [issue #654](https://github.com/6529-Collections/6529Stream/iss
 for Core production bytecode margin and its confirmed state gap,
 [issue #656](https://github.com/6529-Collections/6529Stream/issues/656) for
 instance-aware genesis evidence, [issue #658](https://github.com/6529-Collections/6529Stream/issues/658)
-for 38 Open first-party production Slither High/Medium findings, production
+for the 38 Open first-party production Slither High/Medium findings. Production
 signatures, signed tags, live explorer verification, verified live addresses,
 production address books,
 fork/testnet/live ceremony evidence, fork/testnet/live randomizer operations

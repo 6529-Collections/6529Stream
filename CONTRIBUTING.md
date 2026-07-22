@@ -48,12 +48,10 @@ Windows PowerShell:
 powershell -ExecutionPolicy Bypass -File scripts\check.ps1
 ```
 
-The smoke check currently proves compilation and test-command execution only.
-Meaningful protocol tests are still roadmap work.
-
-The default check includes the fast Slither baseline metadata gate. For
-Solidity changes, also run the complete live comparison when the pinned Slither
-toolchain is available:
+The canonical check proves compilation, executes the protocol test suite, and
+validates the fast Slither baseline metadata gate plus repository evidence and
+policy gates. For Solidity changes, also run the complete live comparison when
+the pinned Slither toolchain is available:
 
 ```bash
 make fmt-check

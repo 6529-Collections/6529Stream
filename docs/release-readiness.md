@@ -185,13 +185,16 @@ Current maturity:
 - Evidence status: local baseline plus reviewed fork metadata and marketplace
   evidence; current CON-015 fork deployment, fork ceremony, and fork randomizer
   artifacts are pending re-review after deployment/release artifacts changed.
-- Public beta status: blocked by missing external audit, pending fork
-  deployment review, missing testnet deployment evidence, pending fork ceremony
-  review, pending fork randomizer review, verified deployed addresses, and
-  explorer verification.
-- Production release status: blocked by missing production signatures, signed
-  Git tags, verified deployed addresses, explorer verification, non-local
-  retained evidence, and post-audit remediation evidence.
+- Public beta status: blocked by 38 Open first-party production Slither
+  High/Medium findings, missing external audit, pending fork deployment review,
+  missing testnet deployment evidence, pending fork ceremony review, pending
+  fork randomizer review, verified deployed addresses, and explorer
+  verification.
+- Production release status: blocked by the same 38 Open Slither findings,
+  sub-threshold Core headroom and its confirmed state gap, incomplete
+  instance-aware genesis evidence, missing production signatures, signed Git
+  tags, verified deployed addresses, explorer verification, non-local retained
+  evidence, and post-audit remediation evidence.
 
 This dashboard covers release-readiness evidence only. It does not perform a
 real release, does not create production signatures, and does not assert that
@@ -205,17 +208,17 @@ aggregate `check` gate plus the pinned live exact Slither comparison first; the
 manual workflow fails unless it runs from the protected default branch, then
 runs both before evaluating release evidence. The gate is expected to fail
 until retained evidence is complete; an active accepted-risk record may satisfy
-only a waivable public-beta row. External-audit evidence and every production requirement are
-non-waivable. Release mode requires public-beta readiness before
+only a waivable public-beta row. External-audit evidence and every production
+requirement are non-waivable. Release mode requires public-beta readiness before
 production-release readiness, so a production run validates both phases. It
-  also validates the checksum-covered current `StreamCore` size against the
+also validates the checksum-covered current `StreamCore` size against the
 normative 2,000-byte EIP-170 deployment headroom rule from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
 Missing, malformed, inconsistent, or sub-threshold size fields fail closed.
 The current 24,152-byte runtime has only 424 bytes of headroom, so
 [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
-  production release even after evidence rows become complete.
+production release even after evidence rows become complete.
 
 Both release phases validate the canonical normalized
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) and its checked

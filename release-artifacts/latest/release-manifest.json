@@ -71,7 +71,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:f7e864df9b0998f6c7377205939874c3226b8b773aa7fd6cd424d5443a4410ab",
+        "sha256": "sha256:f0409f9e9a9c93caf9e07b7b16b3ba33c821f57f6573a1c9aa22b8f0bfc3966f",
         "size_bytes": 103890,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -155,7 +155,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:23521950bc425864102ebfc3e962ff15bcc5a38fb37fa1a6983289bcd4075cfe",
+      "sha256": "sha256:043620d8062f217179f0afe284fc77eadede982d09cf997f5b77b477f71acaf9",
       "size_bytes": 25459,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2424,8 +2424,8 @@
       },
       {
         "path": "docs/audit-package.md",
-        "sha256": "sha256:948412c47d62f7850bf2cf5aebca56546080ebe557aca3c5f028b90b6d76d923",
-        "size_bytes": 28809
+        "sha256": "sha256:9af7819b3b344f050d2a3d1bc05fc7eb399766fdfc30f8e25291892a463fc937",
+        "size_bytes": 28904
       },
       {
         "path": "docs/audit-finding-workflow.md",
@@ -2489,8 +2489,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:c1ed59dec7f9f08eafd8084e5f07a7aa31adaf0775082bb6431096f79cd08285",
-        "size_bytes": 68119
+        "sha256": "sha256:97e259ff4fc2abfc156cb663a5fa187429e6c69f741aeb0d8c66f548b6660a30",
+        "size_bytes": 68318
       },
       {
         "path": "docs/protocol-surface.md",

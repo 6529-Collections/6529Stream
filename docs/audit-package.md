@@ -275,8 +275,10 @@ deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
 signatures, reviewed signer custody readiness evidence, non-local randomizer
 operations evidence, non-local metadata browser evidence, live bytecode proof,
-post-audit remediation, and external audit completion. The machine-readable
-status for these categories lives in
+post-audit remediation, and external audit completion. The canonical
+machine-readable Slither inventory lives in
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json); external-evidence
+status lives in
 [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 
 Local evidence and accepted non-Slither dispositions are separate from
