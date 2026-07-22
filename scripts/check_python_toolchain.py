@@ -110,6 +110,9 @@ USES_KEY_RE = re.compile(
     re.IGNORECASE,
 )
 FOLDED_RUN_RE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*>", re.IGNORECASE)
+YAML_ESCAPE_RE = re.compile(
+    r"\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+)
 SENSITIVE_PACKAGE_TOOL_RE = re.compile(
     r"(?:\bpip(?:3(?:\.\d+)?)?(?:\.__main__)?\b|\bpipx\b|\buv\b|"
     r"\bpoetry\b|\bensurepip\b)",
@@ -320,6 +323,11 @@ def check_workflow(path: Path, text: str) -> list[str]:
         if FOLDED_RUN_RE.match(raw_line):
             errors.append(
                 f"{path}:{line_number} folded run scalars are not allowed; use run: |"
+            )
+
+        if YAML_ESCAPE_RE.search(raw_line):
+            errors.append(
+                f"{path}:{line_number} YAML hex and Unicode escapes are not allowed"
             )
 
         if USES_KEY_RE.search(raw_line):

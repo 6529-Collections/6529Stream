@@ -227,6 +227,18 @@ class PythonToolchainTests(unittest.TestCase):
                 "python -m pip\n        install --require-hashes -r requirements-tools.lock",
             ),
             "folded-indent-chomp": base.replace("  - run: |", "  - run: >2-"),
+            "unicode-escaped-uses-key": base.replace(
+                f"  - uses: {checkout}",
+                '  - "\\u0075ses": example/action@v1',
+            ),
+            "long-unicode-escaped-uses-key": base.replace(
+                f"  - uses: {checkout}",
+                '  - "\\U00000075ses": example/action@v1',
+            ),
+            "hex-escaped-install": base.replace(
+                "  - run: |",
+                '  - run: "p\\x69p \\x69nstall extra-package"\n  - run: |',
+            ),
             "shell-wrapper": base.replace(
                 before_check,
                 f"      $installer install extra-package\n{before_check}",
