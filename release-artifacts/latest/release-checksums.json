@@ -174,7 +174,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:d09d3a398a262651e1f91c114d376704a25b50e0b957cc1806dbcc0856d35eaa"
+    "sha256": "sha256:19ed91d7c2112ae55e3396ecc432c0a633fc1a2cfa2a7e2f58641a7e3d3f11a4"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -628,8 +628,8 @@
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
-      "sha256": "sha256:29d28eb91e222047c229ac5c8103be289133e2d0c904a66c3b313b44e3f90e9a",
-      "size_bytes": 78398
+      "sha256": "sha256:5da46e022f561d4395a2c188b16205d558471754bc9b5148c66ab0d5acaa3547",
+      "size_bytes": 76577
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
