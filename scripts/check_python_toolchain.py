@@ -21,11 +21,13 @@ PLAYWRIGHT_INSTALL_COMMAND = "python -m playwright install --with-deps chromium"
 
 DIRECT_REQUIREMENTS_PATH = Path("requirements-tools.txt")
 LOCK_PATH = Path("requirements-tools.lock")
-WORKFLOW_PATHS = (
-    Path(".github/workflows/ci.yml"),
-    Path(".github/workflows/release-mode.yml"),
-)
+WORKFLOW_DIRECTORY = Path(".github/workflows")
+CI_WORKFLOW_PATH = Path(".github/workflows/ci.yml")
 RELEASE_WORKFLOW_PATH = Path(".github/workflows/release-mode.yml")
+WORKFLOW_PATHS = (
+    CI_WORKFLOW_PATH,
+    RELEASE_WORKFLOW_PATH,
+)
 RELEASE_BRANCH_GUARD = "- name: Require protected default branch"
 PROVENANCE_PATHS = (
     DIRECT_REQUIREMENTS_PATH,
@@ -40,6 +42,57 @@ EXPECTED_DIRECT_NAMES = {
     "slither-analyzer",
     "solc-select",
 }
+EXPECTED_LOCKED_NAMES = {
+    "aiohappyeyeballs",
+    "aiohttp",
+    "aiosignal",
+    "annotated-types",
+    "attrs",
+    "bitarray",
+    "cbor2",
+    "certifi",
+    "charset-normalizer",
+    "ckzg",
+    "crytic-compile",
+    "cytoolz",
+    "eth-abi",
+    "eth-account",
+    "eth-hash",
+    "eth-keyfile",
+    "eth-keys",
+    "eth-rlp",
+    "eth-typing",
+    "eth-utils",
+    "frozenlist",
+    "greenlet",
+    "hexbytes",
+    "idna",
+    "multidict",
+    "packaging",
+    "parsimonious",
+    "playwright",
+    "prettytable",
+    "propcache",
+    "pycryptodome",
+    "pydantic",
+    "pydantic-core",
+    "pyee",
+    "pyunormalize",
+    "regex",
+    "requests",
+    "rlp",
+    "slither-analyzer",
+    "solc-select",
+    "toolz",
+    "types-requests",
+    "typing-extensions",
+    "typing-inspection",
+    "urllib3",
+    "wcwidth",
+    "web3",
+    "websockets",
+    "yarl",
+}
 
 NAME_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._-]*"
 VERSION_PATTERN = r"[^\s\\;]+"
@@ -48,12 +101,26 @@ LOCK_REQUIREMENT_RE = re.compile(
     rf"^({NAME_PATTERN})==({VERSION_PATTERN})\s+\\$"
 )
 HASH_RE = re.compile(r"^--hash=sha256:([0-9a-f]{64})(?:\s+\\)?$")
-ACTION_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*([^@\s]+)@([^\s#]+)\s*$", re.MULTILINE)
-INSTALL_INVOCATION_RE = re.compile(
-    r"(?:\bpython(?:3(?:\.\d+)?)?\s+-m\s+pip|\bpip(?:3(?:\.\d+)?)?|\buv\s+pip)"
-    r"\s+install\b"
+STRICT_ACTION_RE = re.compile(
+    r"^\s*(?:-\s*)?uses:\s+"
+    r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\s*$"
 )
-PLAYWRIGHT_INSTALL_RE = re.compile(r"\bplaywright\s+install\b")
+USES_TOKEN_RE = re.compile(r"\buses\b", re.IGNORECASE)
+FOLDED_RUN_RE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*>", re.IGNORECASE)
+SENSITIVE_PACKAGE_TOOL_RE = re.compile(
+    r"(?:\bpip(?:3(?:\.\d+)?)?(?:\.__main__)?\b|\bpipx\b|\buv\b|"
+    r"\bpoetry\b|\bensurepip\b)",
+    re.IGNORECASE,
+)
+COMMON_APPROVED_INSTALL_LINES = {
+    "- name: Install Foundry",
+    LOCK_INSTALL_COMMAND,
+    PLAYWRIGHT_INSTALL_COMMAND,
+}
+WORKFLOW_APPROVED_INSTALL_LINES = {
+    CI_WORKFLOW_PATH: {"- name: Install browser test tooling"},
+    RELEASE_WORKFLOW_PATH: {"- name: Install release tooling"},
+}
 
 
 class ToolchainError(RuntimeError):
@@ -192,6 +259,43 @@ def check_lock_matches_direct(
     return errors
 
 
+def check_lock_closure(
+    locked: dict[str, tuple[str, frozenset[str]]],
+) -> list[str]:
+    """Require the deliberately reviewed transitive distribution-name closure."""
+
+    errors: list[str] = []
+    actual_names = set(locked)
+    missing = sorted(EXPECTED_LOCKED_NAMES - actual_names)
+    extra = sorted(actual_names - EXPECTED_LOCKED_NAMES)
+    if missing:
+        errors.append(f"{LOCK_PATH} is missing reviewed locked names: {missing}")
+    if extra:
+        errors.append(f"{LOCK_PATH} has unreviewed extra locked names: {extra}")
+    return errors
+
+
+def check_workflow_inventory(repo_root: Path) -> list[str]:
+    """Reject missing or newly introduced workflow files until explicitly reviewed."""
+
+    workflow_root = repo_root / WORKFLOW_DIRECTORY
+    actual_paths = {
+        path.relative_to(repo_root)
+        for pattern in ("*.yml", "*.yaml")
+        for path in workflow_root.glob(pattern)
+        if path.is_file()
+    }
+    expected_paths = set(WORKFLOW_PATHS)
+    errors: list[str] = []
+    for path in sorted(expected_paths - actual_paths):
+        errors.append(f"required reviewed workflow is missing: {path.as_posix()}")
+    for path in sorted(actual_paths - expected_paths):
+        errors.append(
+            f"unreviewed workflow file is not allowed: {path.as_posix()}"
+        )
+    return errors
+
+
 def check_workflow(path: Path, text: str) -> list[str]:
     """Return CI/release workflow policy violations."""
 
@@ -199,8 +303,45 @@ def check_workflow(path: Path, text: str) -> list[str]:
     setup_ref = f"uses: actions/setup-python@{SETUP_PYTHON_SHA}"
     python_pin = f'python-version: "{PYTHON_VERSION}"'
     foundry_ref = f"uses: foundry-rs/foundry-toolchain@{FOUNDRY_TOOLCHAIN_SHA}"
+    approved_install_lines = set(COMMON_APPROVED_INSTALL_LINES)
+    approved_install_lines.update(WORKFLOW_APPROVED_INSTALL_LINES.get(path, set()))
+    stripped_lines: list[str] = []
+    action_refs: list[tuple[str, str]] = []
 
-    action_refs = ACTION_RE.findall(text)
+    for line_number, raw_line in enumerate(text.splitlines(), start=1):
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        stripped_lines.append(stripped)
+
+        if FOLDED_RUN_RE.match(raw_line):
+            errors.append(
+                f"{path}:{line_number} folded run scalars are not allowed; use run: |"
+            )
+
+        if USES_TOKEN_RE.search(stripped):
+            action_match = STRICT_ACTION_RE.fullmatch(raw_line)
+            if action_match is None:
+                errors.append(
+                    f"{path}:{line_number} every uses line must be a strict external "
+                    "owner/repository@40-character-sha reference"
+                )
+            else:
+                action_refs.append((action_match.group(1), action_match.group(2)))
+
+        if "install" in stripped.casefold() and stripped not in approved_install_lines:
+            errors.append(
+                f"{path}:{line_number} unapproved install line: {stripped!r}"
+            )
+
+        if (
+            SENSITIVE_PACKAGE_TOOL_RE.search(stripped)
+            and stripped not in {LOCK_INSTALL_COMMAND, PIP_CHECK_COMMAND}
+        ):
+            errors.append(
+                f"{path}:{line_number} unapproved Python package-tool line: {stripped!r}"
+            )
+
     setup_refs = [ref for action, ref in action_refs if action == "actions/setup-python"]
     if setup_refs != [SETUP_PYTHON_SHA]:
         errors.append(
@@ -229,7 +370,10 @@ def check_workflow(path: Path, text: str) -> list[str]:
     foundry_pins = [
         line.strip()
         for line in text.splitlines()
-        if re.match(r"^\s*version\s*:\s*v1\.7\.1\s*$", line)
+        if re.match(
+            rf"^\s*version\s*:\s*{re.escape(FOUNDRY_VERSION)}\s*$",
+            line,
+        )
     ]
     if foundry_pins != [f"version: {FOUNDRY_VERSION}"]:
         errors.append(
@@ -237,52 +381,43 @@ def check_workflow(path: Path, text: str) -> list[str]:
             f"version: {FOUNDRY_VERSION}"
         )
 
-    logical_text = re.sub(r"\\\s*\r?\n\s*", " ", text)
-
-    install_commands = [
-        line.strip()
-        for line in logical_text.splitlines()
-        if INSTALL_INVOCATION_RE.search(line)
-    ]
-    if install_commands != [LOCK_INSTALL_COMMAND]:
+    if stripped_lines.count(LOCK_INSTALL_COMMAND) != 1:
         errors.append(
-            f"{path} pip install commands must be exactly [{LOCK_INSTALL_COMMAND!r}], "
-            f"got {install_commands!r}"
+            f"{path} must contain exactly one canonical locked pip install command"
         )
 
-    pip_check_commands = [
-        line.strip()
-        for line in text.splitlines()
-        if re.search(r"\bpython(?:3)?\s+-m\s+pip\s+check\b", line)
-    ]
-    if pip_check_commands != [PIP_CHECK_COMMAND]:
+    if stripped_lines.count(PIP_CHECK_COMMAND) != 1:
         errors.append(
             f"{path} must run the locked environment integrity check "
             f"{PIP_CHECK_COMMAND!r} exactly once"
         )
 
-    playwright_commands = [
-        line.strip()
-        for line in logical_text.splitlines()
-        if PLAYWRIGHT_INSTALL_RE.search(line)
-    ]
-    if playwright_commands != [PLAYWRIGHT_INSTALL_COMMAND]:
+    if stripped_lines.count(PLAYWRIGHT_INSTALL_COMMAND) != 1:
         errors.append(
-            f"{path} Playwright install commands must be exactly "
-            f"[{PLAYWRIGHT_INSTALL_COMMAND!r}], got {playwright_commands!r}"
+            f"{path} must contain exactly one canonical Playwright install command"
         )
 
-    setup_position = text.find(setup_ref)
-    install_position = text.find(LOCK_INSTALL_COMMAND)
-    browser_position = text.find(PLAYWRIGHT_INSTALL_COMMAND)
-    if not (0 <= setup_position < install_position < browser_position):
+    logical_text = re.sub(r"\\\s*\r?\n\s*", " ", text)
+    setup_position = logical_text.find(setup_ref)
+    install_position = logical_text.find(LOCK_INSTALL_COMMAND)
+    pip_check_position = logical_text.find(PIP_CHECK_COMMAND)
+    browser_position = logical_text.find(PLAYWRIGHT_INSTALL_COMMAND)
+    if not (
+        0
+        <= setup_position
+        < install_position
+        < pip_check_position
+        < browser_position
+    ):
         errors.append(
-            f"{path} must set up pinned Python before the locked package and browser installs"
+            f"{path} must order setup-python, locked install, pip check, and "
+            "Playwright install"
         )
 
     if path.as_posix() == RELEASE_WORKFLOW_PATH.as_posix():
         checkout_position = text.find("uses: actions/checkout@")
         guard_position = text.find(RELEASE_BRANCH_GUARD)
+        raw_setup_position = text.find(setup_ref)
         foundry_position = text.find(foundry_ref)
         guard_immediately_follows_checkout = re.search(
             r"- name: Checkout\n"
@@ -297,19 +432,13 @@ def check_workflow(path: Path, text: str) -> list[str]:
             guard_immediately_follows_checkout
             and 0 <= checkout_position
             < guard_position
-            < setup_position
+            < raw_setup_position
             < foundry_position
         ):
             errors.append(
                 f"{path} must run the protected-default-branch guard immediately "
                 "after checkout and before Python or Foundry setup"
             )
-
-    for action, ref in action_refs:
-        if action.startswith("./"):
-            continue
-        if re.fullmatch(r"[0-9a-f]{40}", ref) is None:
-            errors.append(f"{path} action {action}@{ref} is not pinned to a full SHA")
 
     return errors
 
@@ -340,9 +469,11 @@ def check_repository(repo_root: Path) -> tuple[list[str], int]:
         locked = parse_lock((repo_root / LOCK_PATH).read_text(encoding="utf-8"))
         package_count = len(locked)
         errors.extend(check_lock_matches_direct(direct, locked))
+        errors.extend(check_lock_closure(locked))
     except (OSError, ToolchainError) as exc:
         errors.append(str(exc))
 
+    errors.extend(check_workflow_inventory(repo_root))
     for workflow_path in WORKFLOW_PATHS:
         try:
             workflow_text = (repo_root / workflow_path).read_text(encoding="utf-8")

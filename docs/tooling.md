@@ -61,9 +61,12 @@ python scripts/check_python_toolchain.py
 Review the full package/version change and every added or removed hash, not
 only the four direct pins. The generated lock must not contain index URLs,
 trusted-host settings, credentials, or private package references. Record or
-remediate vulnerability findings before acceptance. The expected generated
-diff is the lock plus the downstream release manifest/checksum bundle after
-the normal generator sequence; changes to direct intent also update
+remediate vulnerability findings before acceptance. Update the deliberately
+maintained `EXPECTED_LOCKED_NAMES` closure in
+`scripts/check_python_toolchain.py` in the same reviewed diff; the checker
+rejects either missing or extra resolved distributions. The expected generated
+diff is the lock plus the downstream release manifest/checksum bundle after the
+normal generator sequence; changes to direct intent also update
 `requirements-tools.txt`. Update the pinned Python, setup action, compiler, or
 scanner deliberately in the same focused PR when one of those inputs changes.
 

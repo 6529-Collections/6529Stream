@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -16,6 +17,8 @@ SPEC.loader.exec_module(checker)
 
 
 def hashed_entry(name: str, version: str, digest_character: str = "a") -> str:
+    """Return one syntactically valid hashed lock entry."""
+
     return (
         f"{name}=={version} \\\n"
         f"    --hash=sha256:{digest_character * 64}\n"
@@ -23,6 +26,8 @@ def hashed_entry(name: str, version: str, digest_character: str = "a") -> str:
 
 
 def valid_workflow() -> str:
+    """Return the minimal workflow text accepted by the static policy."""
+
     return f"""\
 steps:
   - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -41,11 +46,15 @@ steps:
 
 class PythonToolchainTests(unittest.TestCase):
     def test_committed_repository_passes(self) -> None:
+        """The committed lock and reviewed workflow inventory pass together."""
+
         errors, package_count = checker.check_repository(SCRIPT_PATH.parent.parent)
         self.assertEqual(errors, [])
         self.assertGreater(package_count, len(checker.EXPECTED_DIRECT_NAMES))
 
     def test_direct_requirements_require_exact_expected_pins(self) -> None:
+        """Range-based direct requirements fail closed."""
+
         with self.assertRaisesRegex(checker.ToolchainError, "exact name==version pin"):
             checker.parse_direct_requirements(
                 "eth-hash>=0.8.0\nplaywright==1.60.0\n"
@@ -53,6 +62,8 @@ class PythonToolchainTests(unittest.TestCase):
             )
 
     def test_direct_requirements_reject_index_urls(self) -> None:
+        """Direct intent cannot persist an index or credential-bearing URL."""
+
         with self.assertRaisesRegex(checker.ToolchainError, "must not contain"):
             checker.parse_direct_requirements(
                 "# --index-url https://user:secret@example.invalid/simple\n"
@@ -61,10 +72,14 @@ class PythonToolchainTests(unittest.TestCase):
             )
 
     def test_lock_requires_hash_for_every_package(self) -> None:
+        """Every locked distribution requires at least one SHA-256 hash."""
+
         with self.assertRaisesRegex(checker.ToolchainError, "has no SHA-256 hash"):
             checker.parse_lock("eth-hash==0.8.0 \\\nplaywright==1.60.0 \\\n")
 
     def test_lock_rejects_index_or_credential_bearing_urls(self) -> None:
+        """The release lock cannot persist package-index configuration."""
+
         with self.assertRaisesRegex(checker.ToolchainError, "must not contain"):
             checker.parse_lock(
                 "--index-url https://user:secret@example.invalid/simple\n"
@@ -72,6 +87,8 @@ class PythonToolchainTests(unittest.TestCase):
             )
 
     def test_lock_must_match_direct_versions(self) -> None:
+        """The resolved lock must retain each human-reviewed direct version."""
+
         direct = {"playwright": "1.60.0"}
         locked = checker.parse_lock(hashed_entry("playwright", "1.59.0"))
         self.assertEqual(
@@ -79,40 +96,71 @@ class PythonToolchainTests(unittest.TestCase):
             ["requirements-tools.lock has playwright==1.59.0, expected direct pin 1.60.0"],
         )
 
+    def test_lock_rejects_unreviewed_extra_distribution(self) -> None:
+        """An extra exact hashed package still fails the reviewed closure."""
+
+        locked = {
+            name: ("1.0.0", frozenset({"a" * 64}))
+            for name in checker.EXPECTED_LOCKED_NAMES
+        }
+        locked["unexpected-package"] = ("1.0.0", frozenset({"b" * 64}))
+        self.assertEqual(
+            checker.check_lock_closure(locked),
+            [
+                "requirements-tools.lock has unreviewed extra locked names: "
+                "['unexpected-package']"
+            ],
+        )
+
+    def test_minimal_workflow_passes(self) -> None:
+        """The exact action and command forms remain accepted."""
+
+        self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
+
     def test_workflow_rejects_floating_or_divergent_install(self) -> None:
+        """A floating pip upgrade and direct-file install both fail closed."""
+
         workflow = valid_workflow().replace(
             checker.LOCK_INSTALL_COMMAND,
             "python -m pip install --upgrade pip\n"
             "      python -m pip install -r requirements-tools.txt",
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
-        self.assertTrue(any("pip install commands" in error for error in errors))
+        self.assertTrue(any("unapproved install line" in error for error in errors))
 
     def test_workflow_rejects_additional_bare_pip_install(self) -> None:
+        """A bare pip install cannot coexist with the canonical command."""
+
         workflow = valid_workflow().replace(
             checker.PIP_CHECK_COMMAND,
             "pip install extra-package\n" f"      {checker.PIP_CHECK_COMMAND}",
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
-        self.assertTrue(any("pip install commands" in error for error in errors))
+        self.assertTrue(any("unapproved install line" in error for error in errors))
 
     def test_workflow_rejects_additional_uv_pip_install(self) -> None:
+        """A uv pip install cannot coexist with the canonical command."""
+
         workflow = valid_workflow().replace(
             checker.PIP_CHECK_COMMAND,
             "uv pip install extra-package\n" f"      {checker.PIP_CHECK_COMMAND}",
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
-        self.assertTrue(any("pip install commands" in error for error in errors))
+        self.assertTrue(any("unapproved install line" in error for error in errors))
 
     def test_workflow_rejects_wrapped_bare_pip_install(self) -> None:
+        """Shell continuation cannot hide an extra pip install."""
+
         workflow = valid_workflow().replace(
             checker.PIP_CHECK_COMMAND,
             "pip \\\n        install extra-package\n" f"      {checker.PIP_CHECK_COMMAND}",
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
-        self.assertTrue(any("pip install commands" in error for error in errors))
+        self.assertTrue(any("unapproved install line" in error for error in errors))
 
     def test_workflow_rejects_additional_setup_python_runtime(self) -> None:
+        """A second full-SHA Python setup and runtime pin still fail."""
+
         workflow = valid_workflow().replace(
             f"  - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}",
             "  - uses: actions/setup-python@1111111111111111111111111111111111111111\n"
@@ -125,14 +173,18 @@ class PythonToolchainTests(unittest.TestCase):
         self.assertTrue(any("Python runtime pins" in error for error in errors))
 
     def test_workflow_rejects_additional_browser_installer(self) -> None:
+        """Only the canonical locked-module browser installer is allowed."""
+
         workflow = valid_workflow().replace(
             checker.PIP_CHECK_COMMAND,
             "playwright install chromium\n" f"      {checker.PIP_CHECK_COMMAND}",
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
-        self.assertTrue(any("Playwright install commands" in error for error in errors))
+        self.assertTrue(any("unapproved install line" in error for error in errors))
 
     def test_release_workflow_requires_branch_guard_before_tool_setup(self) -> None:
+        """Release mode must reject an invalid ref before any tool download."""
+
         workflow = valid_workflow().replace(
             f"  - uses: foundry-rs/foundry-toolchain@{checker.FOUNDRY_TOOLCHAIN_SHA}",
             f"  {checker.RELEASE_BRANCH_GUARD}\n"
@@ -143,17 +195,98 @@ class PythonToolchainTests(unittest.TestCase):
         self.assertTrue(any("protected-default-branch guard" in error for error in errors))
 
     def test_workflow_requires_full_action_sha(self) -> None:
+        """A mutable action tag is not an accepted uses form."""
+
         workflow = valid_workflow().replace(
             "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5",
             "actions/checkout@v6",
         )
         errors = checker.check_workflow(Path("workflow.yml"), workflow)
-        self.assertIn(
-            "workflow.yml action actions/checkout@v6 is not pinned to a full SHA",
-            errors,
+        self.assertTrue(
+            any("every uses line must be a strict external" in error for error in errors)
         )
 
+    def test_workflow_bypass_matrix_fails_closed(self) -> None:
+        """Known YAML, wrapper, package-tool, and ordering bypasses are rejected."""
+
+        base = valid_workflow()
+        checkout = "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"
+        before_check = f"      {checker.PIP_CHECK_COMMAND}"
+        cases = {
+            "folded-split-install": base.replace("  - run: |", "  - run: >").replace(
+                checker.LOCK_INSTALL_COMMAND,
+                "python -m pip\n        install --require-hashes -r requirements-tools.lock",
+            ),
+            "folded-indent-chomp": base.replace("  - run: |", "  - run: >2-"),
+            "shell-wrapper": base.replace(
+                before_check,
+                f"      $installer install extra-package\n{before_check}",
+            ),
+            "pip3": base.replace(
+                before_check,
+                f"      pip3 install extra-package\n{before_check}",
+            ),
+            "pip-main-module": base.replace(
+                before_check,
+                f"      python -m pip.__main__ install extra-package\n{before_check}",
+            ),
+            "pipx": base.replace(
+                before_check,
+                f"      pipx install extra-package\n{before_check}",
+            ),
+            "uv-tool": base.replace(
+                before_check,
+                f"      uv tool install extra-package\n{before_check}",
+            ),
+            "pip-global-option": base.replace(
+                before_check,
+                f"      python -m pip --isolated install extra-package\n{before_check}",
+            ),
+            "uv-global-option": base.replace(
+                before_check,
+                f"      uv --no-cache pip install extra-package\n{before_check}",
+            ),
+            "uses-trailing-comment": base.replace(checkout, f"{checkout} # mutable note"),
+            "uses-spaced-colon": base.replace("uses: actions/checkout", "uses : actions/checkout"),
+            "uses-inline-map": base.replace(
+                f"  - uses: {checkout}",
+                f"  - {{ uses: {checkout} }}",
+            ),
+            "uses-docker": base.replace(checkout, "docker://python:3.12.13"),
+            "pip-check-before-install": base.replace(
+                f"      {checker.LOCK_INSTALL_COMMAND}\n{before_check}",
+                f"{before_check}\n      {checker.LOCK_INSTALL_COMMAND}",
+            ),
+        }
+        for label, workflow in cases.items():
+            with self.subTest(label=label):
+                self.assertNotEqual(
+                    checker.check_workflow(Path("workflow.yml"), workflow),
+                    [],
+                )
+
+    def test_unreviewed_workflow_file_fails_inventory(self) -> None:
+        """A newly added workflow cannot bypass the two reviewed files."""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            workflow_root = repo_root / checker.WORKFLOW_DIRECTORY
+            workflow_root.mkdir(parents=True)
+            for path in checker.WORKFLOW_PATHS:
+                (repo_root / path).write_text("name: reviewed\n", encoding="utf-8")
+            unexpected = workflow_root / "unreviewed.yaml"
+            unexpected.write_text("name: unreviewed\n", encoding="utf-8")
+            self.assertEqual(
+                checker.check_workflow_inventory(repo_root),
+                [
+                    "unreviewed workflow file is not allowed: "
+                    ".github/workflows/unreviewed.yaml"
+                ],
+            )
+
     def test_provenance_requires_every_toolchain_input(self) -> None:
+        """Every toolchain policy input must remain checksum-covered."""
+
         coverage = "\n".join(
             f'Path("{path.as_posix()}")' for path in checker.PROVENANCE_PATHS[:-1]
         )
