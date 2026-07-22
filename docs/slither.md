@@ -1,85 +1,142 @@
 # Slither Baseline
 
-Slither is pinned through `requirements-tools.txt` and is currently a
-non-gating diagnostic. It is expected to report high and medium findings until
-the roadmap triage work fixes, accepts, or scopes each row.
+6529Stream pins its Slither toolchain and tracks a normalized first-party
+high/medium baseline. The current baseline contains 38 open findings: 4 High
+and 34 Medium. Those rows are a review and burn-down queue; they are not proof
+of exploitability, an audit completion claim, or evidence that the protocol is
+ready for public beta or production.
 
 ## Versions
 
 | Tool | Version |
 | --- | --- |
-| Slither | `0.11.5` |
-| solc-select | `1.2.0` |
+| Foundry | `v1.7.1` |
 | Solidity compiler | `0.8.19` |
+| Slither | `0.11.5` |
+| Crytic Compile | `0.3.11` |
+| solc-select | `1.2.0` |
 
-## Local Run
-
-Bootstrap the tools first:
-
-```bash
-bash scripts/bootstrap-ec2.sh
-```
-
-or on Windows:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\bootstrap-windows.ps1
-```
-
-Then run Slither:
+Install the pinned Python tools with:
 
 ```bash
+python3 -m pip install -r requirements-tools.txt
+solc-select install 0.8.19
 solc-select use 0.8.19
+```
+
+The EC2 and Windows bootstrap scripts perform the equivalent setup for their
+supported environments.
+
+The baseline records the analyzed source commit and raw capture identity
+separately from the current live-gate configuration. The
+`requirements-tools.txt` hash therefore identifies the current reproducible
+gate toolchain; it does not claim that those direct pins existed at the older
+analyzed commit.
+
+## Fast Default Gate
+
+The default `make check` includes:
+
+```bash
+make slither-baseline-metadata-check
+```
+
+The Bash and PowerShell check wrappers run the same two commands directly. The
+target runs the checker tests and then
+`scripts/check_slither_baseline.py --baseline-only`. It validates the tracked
+normalized baseline, provenance, counts, and disposition metadata without
+launching Slither. Keeping this path analyzer-free makes the ordinary aggregate
+check fast and deterministic.
+
+## Live CI Gate
+
+Run the complete source-to-baseline comparison with:
+
+```bash
+make slither-baseline-check
+```
+
+The complete target first runs the fast metadata gate, then invokes
+`scripts/check_slither_baseline.py --run-slither` with the pinned toolchain and
+compares the normalized first-party High and Medium rows with the tracked
+baseline. New rows and stale rows fail the check. CI runs this target in a
+dedicated Ubuntu job with a 15-minute timeout so live analyzer cost does not
+make the default wrappers slow.
+
+The canonical machine-readable baseline is
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json). The reviewer-facing
+classification and open-proof appendix is
+[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). Both are checked
+inventory, but neither replaces source review, focused tests, or an independent
+security audit.
+
+## Raw Diagnostic
+
+The existing raw command remains available:
+
+```bash
 make slither
 ```
 
-The target runs:
+It runs:
 
 ```bash
 slither . --config-file slither.config.json --foundry-compile-all
 ```
 
-On Windows without `make`, run the local virtual-environment binary directly:
+This unfiltered diagnostic can exit non-zero while tracked baseline findings
+remain open. Use `make slither-baseline-check` for the fail-on-drift contract.
 
-```powershell
-$env:Path = "$HOME\.foundry\bin;$PWD\.venv-tools\Scripts;$env:Path"
-.\.venv-tools\Scripts\solc-select.exe use 0.8.19
-.\.venv-tools\Scripts\slither.exe . --config-file slither.config.json --foundry-compile-all
-```
-
-Slither currently exits non-zero because findings exist. A non-zero exit from
-this command is expected until the baseline is accepted as a gate.
-
-The bootstrap scripts install and select Solidity `0.8.19`. Run the
-`solc-select use` command explicitly when refreshing the baseline from an
-existing shell or virtual environment.
-
-## JSON Output
-
-Raw JSON output is useful for refreshing the baseline, but it is not committed
-because it is large and noisy.
+Raw JSON is useful while investigating or intentionally refreshing the
+normalized baseline:
 
 ```bash
-slither . --config-file slither.config.json --foundry-compile-all --json slither-baseline.json
+slither . --config-file slither.config.json --foundry-compile-all --json /tmp/slither-report.json
 ```
 
-`slither-baseline.json`, `slither-report.json`, `slither-results.json`, and the
-default Slither triage database are ignored by Git.
+A current raw report is approximately 128 MB. Raw Slither JSON is temporary
+working data and must never be committed; only the compact normalized baseline
+and reviewer-facing Markdown inventory belong in the repository. On Windows, write
+the temporary report outside the repository or to an ignored local path.
 
-## Baseline Process
+## Baseline Review Process
 
-The tracked high/medium baseline lives in
-[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md).
+When source changes intentionally add, remove, or alter a first-party High or
+Medium row:
 
-When refreshing it:
+1. Expect the strict baseline/live gate to fail the production-source provenance
+   check immediately after a `smart-contracts` edit. Generate fresh High/Medium
+   detector JSON in an operating-system temporary directory instead:
 
-1. Run Slither with the pinned toolchain and config.
-2. Record the total count, impact counts, and high/medium detector rows.
-3. Keep production findings `Open` until a PR fixes them or a maintainer
-   accepts them with rationale.
-4. Keep test-only findings separate from production findings.
-5. Add or update the required regression test for every fixed production
-   finding.
+   ```bash
+   python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-slither-json> --fail-none
+   ```
 
-Slither should become a CI gate only after the high/medium baseline is fixed,
-accepted, or explicitly documented as false positive.
+2. Produce a deterministic, non-gating candidate report without weakening or
+   overwriting the canonical baseline:
+
+   ```bash
+   python scripts/check_slither_baseline.py --candidate-slither-json <temp-slither-json> --candidate-output <temp-candidate-json>
+   ```
+
+   The `6529stream.slither-normalized-candidate.v1` output contains semantic
+   identities and scope counts only. It deliberately has no triage status,
+   rationale, owner, issue, or required proof; keep it in the OS temp directory
+   or ignored `cache/`, never commit it, and never use it as release evidence.
+3. Verify each candidate finding against the source rather than accepting analyzer output
+   mechanically.
+4. Fix confirmed defects and add focused regression coverage. For an intentional
+   design or false positive, record a narrow, reviewable disposition instead of
+   adding a broad suppression.
+5. Deliberately update the checker snapshot constants, normalized JSON,
+   provenance, triage metadata, and required proof. Then regenerate the exact
+   Markdown mirror:
+
+   ```bash
+   python scripts/check_slither_baseline.py --render-markdown
+   ```
+
+6. Rerun the focused tests, metadata gate, and full live gate.
+
+Keep production and test-only findings distinct. Do not close the security or
+release-readiness work merely because the baseline is internally consistent.

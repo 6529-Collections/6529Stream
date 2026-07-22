@@ -77,8 +77,9 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   randomizer lifecycle, callback, migration, failed-state, retry, and
   raw-output-hash work now have target-state coverage for VRF and arRNG
   adapters, and P0-RAND-008 removed the concrete `XRandoms` weak helper from
-  production source. P0-INIT-001 fixed the remaining first-party production
-  `uninitialized-local` rows. P0-META-001 dependency script segment-safe
+  production source. P0-INIT-001 fixed the then-known first-party production
+  `uninitialized-local` rows; later-added surfaces now contribute 12 Open rows
+  tracked under issue #658. P0-META-001 dependency script segment-safe
   encoding now has typed chunk/content hash coverage, and P0-CORE-001 removed
   dead always-zero public/allowlist mint-accounting state. P1-META-004
   `StreamCore` ERC-4906 metadata update signaling now has implementation and
@@ -128,12 +129,15 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   discovery proof, 1/1 provenance, collector-verifiable permanence, explicit
   royalty philosophy, quiet warning/lint baselines, and continued `StreamCore`
   size discipline.
-  Public beta is still blocked by missing external audit, testnet/live
-  deployment evidence, verified addresses, explorer verification, metadata
-  browser evidence, and randomizer operations evidence. Production is still
-  blocked by retained live ceremony evidence, production deployment manifests,
-  production signatures, signed tags, explorer verification, live randomizer
-  evidence, and post-audit remediation evidence.
+  Current public beta is still blocked by the 38 Open first-party production
+  Slither High/Medium rows under issue #658, plus missing external audit,
+  testnet/live deployment evidence, verified addresses, explorer verification,
+  metadata browser evidence, and randomizer operations evidence. Production is
+  additionally blocked by issue #654 Core headroom/state work, issue #656
+  instance-aware genesis reconciliation, retained live ceremony evidence,
+  production deployment manifests, production signatures, signed tags,
+  explorer verification, live randomizer evidence, and post-audit remediation
+  evidence.
 - Public docs must describe actual on-chain behavior, not intended product
   behavior.
 
@@ -230,7 +234,7 @@ reference inputs for roadmap quality, not automatic implementation mandates.
 | Unit/integration tests | Tests cover admin guards, target-scoped function-admin permission regressions, domain-scoped pause controls, EIP-712/ERC-1271 drop authorization, auction custody and payment credits, fixed-price pull-payment credits, curator reward credits, current emergency-withdrawal boundaries, randomizer lifecycle/callback validation, request-level randomizer reserve lifecycle accounting, randomness pending/stale/failed/final metadata behavior, ERC-4906 metadata update signaling, raw-output hash storage, dependency-script encoding hashes, supply/replay/freeze invariants, auction-consistency invariants, reusable protocol state-machine smoke coverage, deterministic state-machine adversarial ordering coverage for drop authorization, fixed-price withdrawal failures, auction settlement/payment failures, signer compromise/revocation fuzz coverage, pause/settlement matrix coverage, expanded payment and forced-ETH invariant coverage, event reconstructability coverage, Safe/ERC-1271 fork-aware smoke coverage, MEV/timing coverage for drop submission/deadline/auction boundary behavior, randomizer request-binding parity and core-write reentry regressions, bounded randomizer/admin stateful invariant coverage, auction/drop/arRNG composition regressions, post-execution signer lifecycle composition regressions, auction terminal arRNG composition regressions, fixed-price/drop/arRNG payment composition regressions, request-ID collision rollback composition regressions, burned pending arRNG composition regressions, explicit local-initialization regressions, vendored utility-library regressions, and retained airdrop mint-accounting behavior | `scripts/check.ps1`; `forge test -vvv`; targeted ADV-002 command: `forge test --match-path test/StreamProtocolStateMachine.t.sol -vvv`; targeted ADV-003 command: `forge test --match-path test/StreamSignerCompromiseFuzz.t.sol -vvv`; targeted ADV-004 command: `forge test --match-path test/StreamPauseControls.t.sol -vvv`; targeted ADV-005 command: `forge test --match-path test/StreamPaymentsInvariant.t.sol -vvv`; targeted ADV-010 command: `forge test --match-path test/StreamMEVTiming.t.sol -vvv`; targeted ADV-013 command: `forge test --match-path test/StreamRandomizerAdversarial.t.sol -vvv`; targeted ADV-014 command: `forge test --match-path test/StreamRandomizerStatefulInvariant.t.sol -vvv`; targeted ADV-015/ADV-016/ADV-018/ADV-019/ADV-020 command: `forge test --match-path test/StreamAuctionRandomizerComposition.t.sol -vvv`; targeted ADV-017/ADV-019/ADV-020 command: `forge test --match-path test/StreamFixedPriceRandomizerComposition.t.sol -vvv` | P0 regression and integration suite exists |
 | Production size | The IR-optimized `StreamCore` runtime is 24,152 bytes with 424 bytes of EIP-170 headroom. Prior recovery work and accepted development exception `CORE-SPEND-2026-06-24-001` keep the ordinary 384-byte development floor green, but the governing deployment rule requires at least 2,000 bytes and interim exceptions cannot survive that gate; the approved spend baseline remains 22,184 bytes | `forge build --sizes --via-ir --skip test --skip script --force`; `python scripts/check_contract_size_budget.py`; `python scripts/check_release_mode.py --phase production-release` | Ordinary development size checks pass; production release remains blocked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) until real compression, extraction, or authorized relocation restores the 2,000-byte margin while retaining mandatory Core hooks |
 | Formatting | Merged PR #322 keeps 34 formatting-required files passing `forge fmt --check` and converts the raw all-files diagnostic allowance into 17 explicit vendored/provenance formatting exemptions documented in checker tests, tooling docs, and vendored-library provenance policy | `python scripts/test_solidity_formatting.py`, `python scripts/check_solidity_formatting.py`, `make fmt-check`; raw diagnostic: `forge fmt --check smart-contracts`; CI run `27494893331` | Scoped gate passes in CI; vendored/provenance exemptions are explicit, reviewed, and unable to hide new first-party formatting drift |
-| Static analysis | Runs with a tracked high/medium baseline: 717 total findings, including 4 High, 19 Medium, and 93 Low; current high/medium rows are fixed, accepted, or documented false positives | `slither . --config-file slither.config.json --foundry-compile-all`, `ops/SLITHER_BASELINE.md`, and `docs/vendored-libraries.md` | High/medium findings fixed, accepted, or documented |
+| Static analysis | The normalized first-party production baseline contains 38 open findings: 4 High and 34 Medium. One is a confirmed gap, six require design review, and 31 remain pending disposition; none is accepted or marked false positive | `python scripts/test_slither_baseline.py`; `python scripts/check_slither_baseline.py --baseline-only`; `python scripts/check_slither_baseline.py --run-slither`; `ops/SLITHER_BASELINE.json`; `ops/SLITHER_BASELINE.md` | [Issue #658](https://github.com/6529-Collections/6529Stream/issues/658) remains an explicit public-beta/audit/production blocker until every row has reviewed remediation or disposition proof and the exact drift gate stays green |
 | Deployment | Partial local baseline: deploy-and-wire rehearsal script, local auction ceremony rehearsal, local emergency redeployment rehearsal, deployment-rehearsal generated metadata browser sandbox proof, manifest schema, address-book schema, ceremony evidence schema, randomizer operations evidence schema, generated Anvil manifest config/example, sanitized Foundry broadcast fixture ingestion, generated Anvil and broadcast-derived address books, reviewed fork-mainnet broadcast, generated fork-mainnet broadcast manifest/address book, reviewed fork ceremony evidence bundle, local Anvil ceremony evidence bundle, local Anvil randomizer operations evidence bundle, manifest parsing test, and generated ABI/bytecode checksum inputs exist; testnet rehearsal, production broadcast retention, live ceremony evidence contents, and fork/testnet/live randomizer operations evidence contents remain missing | `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`, `forge script script/RehearseAuctionCeremony.s.sol:RehearseAuctionCeremony --sig "run()" --via-ir`, `forge script script/RehearseEmergencyRedeployment.s.sol:RehearseEmergencyRedeployment --sig "run()" --via-ir`, `scripts/check_rehearsal_metadata_browser_sandbox.py`, `test/StreamDeploymentManifest.t.sol`, `scripts/generate_broadcast_manifest_input.py --check`, `scripts/generate_broadcast_manifest_input.py --template deployments/config/fork-mainnet-6529stream-v0.1.0-001.json --broadcast deployments/broadcasts/fork-mainnet-6529stream-v0.1.0-001-run-latest.json --output deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --manifest-output deployments/examples/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_deployment_manifest.py --check`, `scripts/generate_deployment_manifest.py --config deployments/config/anvil-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_deployment_manifest.py --config deployments/config/fork-mainnet-6529stream-v0.1.0-001-broadcast.json --check`, `scripts/generate_address_books.py --check`, `scripts/test_ceremony_evidence.py`, `scripts/check_ceremony_evidence.py`, `scripts/test_randomizer_operations.py`, `scripts/check_randomizer_operations.py`, `deployments/broadcasts/`, `deployments/schema/deployment-manifest.schema.json`, `deployments/schema/address-book.schema.json`, `deployments/schema/ceremony-evidence.schema.json`, `deployments/schema/randomizer-operations-evidence.schema.json`, `deployments/address-books/`, `deployments/ceremony-evidence/`, `deployments/randomizer-operations/`, and `release-artifacts/latest/abi-checksums.json` | Anvil deployment, local metadata browser rehearsal, local auction ceremony rehearsal, local emergency redeployment rehearsal, local ceremony evidence, local randomizer operations evidence, reviewed fork retained evidence, and fork ceremony evidence pass |
 | Release artifacts | Deterministic local release artifacts include ABI/bytecode checksums, a generated protocol surface report, source verification inputs, dependency manifests, address books, release manifests, checksum bundles, signed-tag/signature gates, a generated risk register, and a bytecode-to-release proof tying committed deployment manifests/address books/source-verification inputs to expected local runtime/creation bytecode hashes; reviewed live bytecode/explorer proof remains future evidence | `python scripts/test_protocol_surface_report.py`, `python scripts/generate_protocol_surface_report.py --check`, `python scripts/test_risk_register.py`, `python scripts/check_risk_register.py`, `python scripts/generate_risk_register.py --check`, `python scripts/generate_release_manifest.py --check`, `python scripts/test_release_manifest.py`, `python scripts/test_bytecode_release_proof.py`, `python scripts/generate_bytecode_release_proof.py --check`, `python scripts/test_release_checksums.py`, `python scripts/generate_release_checksums.py --check`, `release-artifacts/latest/protocol-surface-report.json`, `release-artifacts/latest/risk-register.json`, `release-artifacts/latest/bytecode-release-proof.json` | Local/fork bytecode proof is generated, checksum-covered, and checked without claiming live production verification; the generated protocol surface report keeps functions, selectors, events, topic0 values, custom errors, ABI hashes, bytecode hashes, and runtime sizes visible for reviewers; the generated risk register keeps launch blockers and accepted local-baseline risks visible; public beta still requires reviewed non-local evidence and production requires live bytecode/explorer proof |
 | Docs | Architecture map, threat model, audit package, incident-response runbook, drop authorization signing guide with unsigned payload generator and retained signing evidence template, signer custody readiness guide/template, release-readiness dashboard, public-beta evidence status, generated public-beta and production-release blocker reports, per-requirement public-beta and production-release evidence templates, external audit retained-artifact template/checker, non-local release evidence intake, metadata schema, and metadata generator, status, known blockers, ADRs, security, deployment, release, metadata, dependency, randomizer, auction-custody, tooling, and release-policy docs exist for the local baseline; completed external audit report and actual testnet/live retained evidence remain missing | `python scripts/check_architecture_threat_model.py`, `python scripts/check_audit_package.py`, `python scripts/check_incident_response.py`, `python scripts/check_drop_authorization_fixtures.py`, `python scripts/test_drop_authorization_signing_evidence.py`, `python scripts/check_drop_authorization_signing_evidence.py`, `python scripts/test_signer_custody_readiness.py`, `python scripts/check_signer_custody_readiness.py`, `python scripts/check_release_readiness.py`, `python scripts/test_public_beta_blocker_report.py`, `python scripts/generate_public_beta_blocker_report.py --check`, `python scripts/test_production_release_blocker_report.py`, `python scripts/generate_production_release_blocker_report.py --check`, `python scripts/check_public_beta_evidence.py`, `python scripts/test_non_local_release_evidence_generator.py`, `python scripts/test_external_audit_report_evidence.py`, `python scripts/check_external_audit_report_evidence.py`, `python scripts/check_non_local_release_evidence.py`, `docs/architecture.md`, `docs/threat-model.md`, `docs/audit-package.md`, `docs/incident-response.md`, `docs/drop-authorization-signing.md`, `docs/signer-custody-readiness.md`, `docs/release-readiness.md`, `docs/public-beta-evidence.md`, `docs/non-local-release-evidence.md`, `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`, `release-artifacts/evidence/public-beta-templates/`, `release-artifacts/evidence/production-release-templates/`, `docs/status.md`, `docs/known-blockers.md`, and `SECURITY.md` | Architecture, security, deployment, protocol, operations, incident response, drop authorization signing, payload generation, retained signing evidence, signer custody readiness evidence, public-beta evidence, external audit evidence template/checker, per-requirement public-beta and production-release templates, generated blocker reports, non-local release evidence, release-readiness, and audit docs merged as a local baseline, with completed external audit/review artifacts linked when available |
@@ -274,16 +278,19 @@ intentionally bypassed, the bypass must be documented with owner, reason,
 expiry, and risk.
 
 For production drops or public security claims, Gate B1, Gate C, and Gate E may
-not be bypassed. Any exception requires explicit maintainer, security owner, and
-protocol owner signoff.
+not be bypassed. Only checker-authorized public-beta external-evidence rows may
+use active, explicit risk acceptance; external-audit evidence, the technical
+Slither gate, production Core/genesis rules, and every production requirement
+are non-waivable.
 
 This roadmap distinguishes release modes:
 
 - Public repository publication may happen earlier if maturity warnings are
   prominent and the repo is clearly marked experimental/pre-audit.
-- Production drop launch requires Gates A through F complete.
-- Audited release requires external audit completion or an explicit public
-  rationale for audit waiver.
+- Production drop launch requires Gates A through G complete and the strict
+  production release-mode gate to pass.
+- Audited release requires completed external-audit evidence; an audit waiver
+  cannot satisfy public-beta or production release mode.
 
 ### Gate A: Reproducible Baseline
 
@@ -357,8 +364,12 @@ Required evidence:
 
 Status: In Progress.
 Owner: TBD.
-Blocking issues: TBD.
-Evidence: TBD.
+Blocking issues: [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
+for the confirmed Core state gap and production bytecode margin, and
+[issue #658](https://github.com/6529-Collections/6529Stream/issues/658) for the
+38 Open first-party production Slither High/Medium rows.
+Evidence: `ops/SLITHER_BASELINE.json`, `ops/SLITHER_BASELINE.md`, and the
+issue-linked P0 implementation/test matrix below.
 
 Exit criteria:
 
@@ -370,7 +381,8 @@ Exit criteria:
 - Auction refunds use pull-payment credits.
 - Admin selector mismatch fixed and permission matrix tested.
 - Randomizer callbacks validate request, token, collection, and randomizer epoch.
-- Slither high/medium baseline fixed, accepted, or documented.
+- Every first-party production Slither High/Medium row is remediated or has an
+  issue-linked reviewed disposition; exact normalized drift CI is green.
 - P0 regression tests pass in CI.
 
 Required evidence:
@@ -425,7 +437,9 @@ Owner: TBD.
 Blocking issues: [`P1-DEPLOY-002`](https://github.com/6529-Collections/6529Stream/issues/91),
 [`P1-DEPLOY-003`](https://github.com/6529-Collections/6529Stream/issues/95),
 [`P1-DEPLOY-004`](https://github.com/6529-Collections/6529Stream/issues/109),
-[`Deployment ceremony evidence bundle schema`](https://github.com/6529-Collections/6529Stream/issues/144).
+[`Deployment ceremony evidence bundle schema`](https://github.com/6529-Collections/6529Stream/issues/144),
+and [issue #656](https://github.com/6529-Collections/6529Stream/issues/656) for
+instance-aware genesis manifest, address-book, and verification reconciliation.
 Evidence: local deployment rehearsal script, manifest schema, generated Anvil
 manifest config/example, local auction ceremony rehearsal, local emergency
 redeployment rehearsal, sanitized broadcast fixture ingestion, broadcast-derived
@@ -457,10 +471,12 @@ Required evidence:
 
 ### Gate F: External Audit Package Ready
 
-Status: Complete for local pre-audit audit-package readiness; external audit
-execution remains future release work.
+Status: In Progress. The local package index and scaffolding are complete;
+static-analysis disposition and external audit execution remain open.
 Owner: TBD.
-Blocking issues: None for the local pre-audit package.
+Blocking issues: [issue #658](https://github.com/6529-Collections/6529Stream/issues/658)
+for row-level review and disposition of 38 Open first-party production Slither
+High/Medium findings.
 Evidence: `docs/audit-package.md`, `docs/architecture.md`,
 `docs/threat-model.md`, `scripts/check_audit_package.py`, and
 `scripts/check_architecture_threat_model.py` are merged from PRs #159 and #161;
@@ -471,7 +487,8 @@ Exit criteria:
 - Architecture docs complete.
 - Threat model complete.
 - Protocol invariants documented.
-- Static-analysis baseline complete.
+- Static-analysis inventory is reproducible, and every first-party production
+  High/Medium row is remediated or has an issue-linked reviewed disposition.
 - Test coverage and gas reports attached.
 - Deployment assumptions documented.
 - Known accepted risks separated from unresolved blockers.
@@ -488,8 +505,13 @@ Required evidence:
 
 Status: In Progress.
 Owner: TBD.
-Blocking issues: production signatures, signed tags, live explorer
-verification, verified live addresses, production address books,
+Blocking issues: [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
+for Core production bytecode margin and its confirmed state gap,
+[issue #656](https://github.com/6529-Collections/6529Stream/issues/656) for
+instance-aware genesis evidence, [issue #658](https://github.com/6529-Collections/6529Stream/issues/658)
+for 38 Open first-party production Slither High/Medium findings, production
+signatures, signed tags, live explorer verification, verified live addresses,
+production address books,
 fork/testnet/live ceremony evidence, fork/testnet/live randomizer operations
 evidence, fork/testnet/live deployment and metadata-browser evidence, and
 external audit completion remain future release blockers.
@@ -1803,16 +1825,22 @@ Problem:
 
 Current behavior:
 
-- `slither . --foundry-compile-all` runs but is not yet a CI gate.
+- `ops/SLITHER_BASELINE.json` records the exact normalized first-party
+  production set: 4 High and 34 Medium rows, all Open. A fast metadata/parity
+  gate runs in the aggregate checks and a dedicated CI job reruns the pinned
+  analyzer for exact semantic-set drift. This establishes truthful inventory,
+  not safety or acceptance.
 
 Intended behavior:
 
-- High/medium findings are fixed, accepted with rationale, or excluded as
-  documented false positives.
+- Every first-party production High/Medium finding is remediated with regression
+  proof or receives an explicit, independently reviewable disposition. No row
+  can become accepted or false positive merely because it matches the baseline.
 
 Required code changes:
 
-- None for triage itself; follow-up code issues may be created per finding.
+- Follow-up contract/test PRs are required for confirmed and actionable rows;
+  issue #658 owns baseline-wide closure and issue linkage.
 
 Required tests:
 
@@ -1821,18 +1849,21 @@ Required tests:
 Required docs:
 
 - Appendix A Slither baseline summary.
-- Detailed high/medium baseline in `ops/SLITHER_BASELINE.md`.
-- Slither config after triage for any detector suppressions.
+- Canonical machine-readable high/medium baseline in
+  `ops/SLITHER_BASELINE.json` and its exact reviewer mirror in
+  `ops/SLITHER_BASELINE.md`.
+- Slither config remains free of finding suppressions.
 
 Acceptance criteria:
 
-- Slither baseline table has detector, contract, function, source kind, source
-  location, severity, confidence, status, resolution, required test, issue,
-  gate, and owner.
-- Current high/medium Slither rows are captured in `ops/SLITHER_BASELINE.md`.
-- Every `Open` or `Needs Issue` finding has a canonical GitHub issue link that
-  owns fix, accepted-risk, or false-positive resolution.
-- CI fails on new high/medium findings after baseline is accepted.
+- Normalized rows retain detector, impact, confidence, repo-relative semantic
+  location, classification, owner, rationale, issue, and required proof.
+- JSON and Markdown views agree exactly, all current rows are Open, and the
+  source/config/tool provenance is machine checked.
+- Every Open finding has a canonical GitHub issue link that owns remediation or
+  reviewed disposition.
+- CI fails on added, removed, or changed normalized first-party production
+  High/Medium findings; baseline equality never counts as acceptance.
 
 ## 7. P1 Protocol And Contract Workstreams
 
@@ -2265,7 +2296,9 @@ No P0 contract PR may merge without:
 - Add ShellCheck for shell scripts.
 - Add PowerShell Script Analyzer for PowerShell scripts.
 - Keep `slither.config.json` free of detector suppressions until triage.
-- Fail CI on new high/medium findings after baseline acceptance.
+- Keep the exact normalized first-party production High/Medium drift gate in CI;
+  added, removed, or semantically changed rows fail while row-level disposition
+  remains Open. Baseline equality is inventory consistency, not acceptance.
 
 ### Dependency And Provenance Management
 
@@ -2530,7 +2563,9 @@ No P0 contract PR may merge without:
 ### Release Checklist
 
 - All CI green.
-- Slither baseline accepted.
+- Every first-party production Slither High/Medium finding is remediated or has
+  an issue-linked reviewed disposition, and the exact normalized drift gate is
+  green.
 - Gas snapshot accepted.
 - Deployment rehearsal complete.
 - Manifests generated. Initial local Anvil and sanitized broadcast-derived
@@ -2772,47 +2807,41 @@ Before any "best-in-class 1/1" release claim:
 
 ## Appendix A: Slither Baseline
 
-Source of truth: `ops/SLITHER_BASELINE.md`.
+Source of truth: `ops/SLITHER_BASELINE.json`; the checked reviewer mirror is
+`ops/SLITHER_BASELINE.md`.
 
-Status values: `Open`, `Fixed`, `Accepted`, `False Positive`, `Needs Issue`.
-Every detailed row must record source file and line range, identify whether the
-finding is first-party, vendored, generated, or test-only, and include an issue
-link for each `Open` or `Needs Issue` row before Gate F.
+The current first-party production status is only `Open`. A future PR may move
+a row to a reviewed resolution only with issue-linked proof; matching the
+baseline does not accept a finding. Vendored, test, and script scopes are
+reported separately by the live checker and cannot reduce the production set.
 
 Current capture:
 
 - Tool: Slither `0.11.5`.
 - Compiler: Solidity `0.8.19`.
-- Command: `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>`.
-- Status: high/medium rows triaged, not accepted as a CI gate.
-- Result: 717 findings, including 4 High, 19 Medium, and 93 Low.
+- Toolchain: Slither `0.11.5`, crytic-compile `0.3.11`, solc-select `1.2.0`,
+  Solidity `0.8.19`, and Foundry `1.7.1`.
+- Live gate: `python scripts/check_slither_baseline.py --run-slither`.
+- Status: exact normalized drift is gated; all 38 first-party production rows
+  remain Open under issue #658.
+- Raw analyzed run: 1,974 findings across all impacts/scopes. The release gate
+  isolates first-party production High/Medium findings and reports other scopes
+  separately.
 
 Impact summary:
 
 | Impact | Count |
 | --- | ---: |
 | High | 4 |
-| Medium | 19 |
-| Low | 93 |
-| Informational | 590 |
-| Optimization | 11 |
+| Medium | 34 |
 
-High/medium detector summary:
+Classification summary:
 
-| Detector | Impact | Count | Primary scope | Status | Issue | Required action |
-| --- | --- | ---: | --- | --- | --- | --- |
-| `arbitrary-send-eth` | High | 0 current / 4 fixed | first-party emergency withdrawals | Fixed | [#8](https://github.com/6529-Collections/6529Stream/issues/8) | Current emergency-withdrawal surfaces are bounded: auction, fixed-price drops, curator pool, StreamMinter surplus, and conservative randomizer reserve boundary plus request-lifecycle tests now exist |
-| `encode-packed-collision` | High | 0 current / 3 fixed | drop authorization and dependency/script hashing | Fixed | [#9](https://github.com/6529-Collections/6529Stream/issues/9), [#10](https://github.com/6529-Collections/6529Stream/issues/10) | Drop authorization rows and dependency-script segment hashing are fixed; keep typed hash tests and Slither baseline traceability |
-| `incorrect-exp` | High | 1 | vendored `Math.mulDiv` | False Positive | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | OpenZeppelin provenance and `mulDiv` full-precision regressions are documented in `docs/vendored-libraries.md` and `test/StreamVendoredLibraries.t.sol` |
-| `reentrancy-eth` | High | 0 current / 1 fixed | auction bidding | Fixed | [#12](https://github.com/6529-Collections/6529Stream/issues/12) | Replaced bid-path push refunds with bidder pull credits and state-before-withdrawal flow |
-| `suicidal` | High | 3 | test-only forced-ETH helpers | Accepted | Accepted test-only | Intentionally retained for forced-ETH accounting tests under Solidity 0.8.19 |
-| `uninitialized-state` | High | 0 current / 2 fixed | mint-accounting mappings | Fixed | [#13](https://github.com/6529-Collections/6529Stream/issues/13) | Removed never-written public/allowlist mint-count mappings and kept retained airdrop-counter regression coverage |
-| `weak-prng` | High | 0 current / 2 fixed | word pool randomness helpers | Fixed | [#73](https://github.com/6529-Collections/6529Stream/issues/73) | Removed the concrete `XRandoms` production-source helper and kept `RandomizerNXT` impossible to configure for production collections |
-| `divide-before-multiply` | Medium | 9 | vendored math/base64 helpers | False Positive | [#11](https://github.com/6529-Collections/6529Stream/issues/11) | OpenZeppelin provenance plus Base64 padding and `mulDiv` precision regressions are documented in `docs/vendored-libraries.md` and `test/StreamVendoredLibraries.t.sol` |
-| `incorrect-equality` | Medium | 1 | test-only malleable-signature helper | Accepted | Accepted test-only | Keep scoped to test-only EIP-712 negative coverage |
-| `locked-ether` | Medium | 7 | test-only rejection/reentrancy/mock receivers | Accepted | Accepted test-only | Keep scoped to payment and emergency-withdrawal tests |
-| `uninitialized-local` | Medium | 1 current accepted test-only / 11 fixed | first-party and test helper locals | Fixed for first-party production rows; only the accepted test-only `MockStreamMinter` helper row remains current | [#15](https://github.com/6529-Collections/6529Stream/issues/15), [#9](https://github.com/6529-Collections/6529Stream/issues/9) | Keep production locals explicit and test-only acceptance documented |
-| `unused-return` | Medium | 1 | ERC-1271 test tuple helper | Accepted | Accepted test-only | Keep scoped to test-only assertion helper |
+| Classification | Count | Status | Required action |
+| --- | ---: | --- | --- |
+| Confirmed gap | 1 | Open | Remediate with focused regression and issue-linked evidence |
+| Design review | 6 | Open | Establish intended invariant, then fix or record a reviewed disposition with proof |
+| Pending disposition | 31 | Open | Complete row-level review; no implicit acceptance or suppression |
 
 ## Appendix B: Test Matrix
 
@@ -2878,7 +2907,7 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | Windows PowerShell 5.1 CI harness | The checked native-command wrapper harness runs in a lightweight `windows-latest` CI job under Windows PowerShell semantics without requiring the full Foundry gate | `.github/workflows/ci.yml`, `scripts/test_windows_check_helpers.ps1`, `scripts/windows-check-helpers.ps1`, `scripts/test_windows_check_wrapper.py`, `scripts/test_windows_ci_wrapper.py` | Passing in merged PR #346 / issue #345: CI now has a lightweight `windows-latest` job that parses the wrapper scripts and runs the executable checked-native harness under Windows PowerShell, with a focused workflow-wiring policy test, while preserving the existing Ubuntu PowerShell Core gate. CI run `27501729525` passed jobs `81285737978` and `81285738002` on final head `b70e9592fb6e54dff52ab9937a3b241004d06705`; CodeRabbit status was success with no unresolved review threads; merge-decision comment `4702043390`; squash merge `a35c24a4f3bcbf61db73c78f2e98822f09d17d59`. | [`#345`](https://github.com/6529-Collections/6529Stream/issues/345), [`PR #346`](https://github.com/6529-Collections/6529Stream/pull/346) | Gate A/Gate G | TBD |
 | Release evidence issue label drift | Committed tracker rows keep unique `applied_labels`, labels stay within generated suggestions, and optional live GitHub snapshots surface missing labels with remediation commands | `scripts/test_release_evidence_issue_labels.py`, `scripts/check_release_evidence_issue_labels.py` | Passing locally for committed issue-link labels and an exported live GitHub issue snapshot for tracker issues #215 through #231; CI uses the deterministic no-network mode only | [`#239`](https://github.com/6529-Collections/6529Stream/issues/239) | Gate G | TBD |
 | Mint-accounting state | Dead counters are removed or retained counters initialize and update according to the accepted drop/mint accounting design | `test/StreamMintAccounting.t.sol` | Passing: removed never-written public/allowlist mint-count mappings and retrieval APIs; retained airdrop counter starts at zero, increments on authorized minter calls, and remains unchanged on unauthorized mint attempts | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
-| Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Passing: Bytes32 character counts, missing/matching delegation lookups, subdelegation register/revoke gates, empty-script generative rendering, and multi-recipient minter return indexes cover the remaining first-party production rows; Slither now reports only one accepted test-only `uninitialized-local` row | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
+| Uninitialized local findings | First-party default-local behavior is explicit, removed, or covered by targeted regressions | `test/StreamInitialization.t.sol` | Passing for the then-known P0-INIT-001 rows: Bytes32 character counts, missing/matching delegation lookups, subdelegation register/revoke gates, empty-script generative rendering, and multi-recipient minter return indexes have focused coverage. The current canonical baseline also contains 12 Open first-party production `uninitialized-local` rows on later-added surfaces; issue #658 owns their disposition, so this historical row is not current Slither clearance. | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15), [`#658`](https://github.com/6529-Collections/6529Stream/issues/658) | Gate C / Gate F | TBD |
 | Vendored library Slither findings | Retained OpenZeppelin utility files have provenance, local delta notes, and regressions for flagged math/encoding behavior | `test/StreamVendoredLibraries.t.sol` | Passing: Base64 golden/padding vectors, `Math.mulDiv` full-precision boundaries, rounding-up behavior, overflow, and zero-denominator reverts cover the current vendored false-positive rows | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
 | Curator double claim | Valid claim succeeds once and second claim fails | `test/StreamCuratorsPool.t.sol` | Passing for P0-PAY-005: valid claims create credits and duplicate claims fail without increasing credit | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C/Gate D | TBD |
 | Merkle leaf ambiguity | Duplicate or ambiguous leaves cannot double claim | `test/StreamCuratorsPool.t.sol` | Passing in PR #306 / issue #305: curator reward roots advance `collectionMerkleRootEpoch`; reward leaves bind `CURATOR_REWARD_LEAF_DOMAIN`, chain ID, pool address, collection ID, claimant, amount, and root epoch via `abi.encode`; focused tests cover valid current-epoch claims, stale root-epoch proofs, wrong collection, wrong claimant, wrong amount, duplicate claims without credit inflation, root-update events, exact hash construction, and multi-root length mismatch. Final CI run `27489644258` passed on head `51a4156f1b8de54602da5445b29a787ee638ff23`, CodeRabbit status was success with no unresolved review threads, and PR #306 squash-merged as `e8d0822c7bc357a97b6a761d9126f3787502de8b`. | [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29), [`#305`](https://github.com/6529-Collections/6529Stream/issues/305), [`PR #306`](https://github.com/6529-Collections/6529Stream/pull/306) | Gate D | TBD |

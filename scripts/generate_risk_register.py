@@ -27,6 +27,7 @@ SOURCE_DOCUMENT_PATHS = [
     "docs/royalty-policy.md",
     "docs/warning-dispositions.md",
     "docs/known-blockers.md",
+    "ops/SLITHER_BASELINE.json",
     "ops/SLITHER_BASELINE.md",
     "release-artifacts/latest/public-beta-evidence.json",
     "release-artifacts/latest/public-beta-blockers.md",
@@ -367,30 +368,40 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "id": "RISK-SLITHER-001",
-        "title": "Static-analysis baseline contains accepted local findings",
+        "title": "First-party production Slither findings remain open",
         "area": "static_analysis",
-        "severity": "medium",
-        "status": "accepted_local_baseline",
+        "severity": "high",
+        "status": "open_blocker",
         "owner": "security",
         "target_gate": "Gate F",
-        "source": "Slither baseline and vendored-library provenance docs",
+        "source": "Normalized first-party production Slither high/medium baseline",
         "mitigation": (
-            "Keep high/medium production findings fixed or explicitly accepted, "
-            "retain test-only and vendored-library dispositions, and require future deltas to update the baseline."
+            "Disposition and remediate every open first-party production high/medium "
+            "finding, retain issue-linked proof for each resolution, and keep the "
+            "exact normalized baseline drift gate green."
         ),
         "residual_risk": (
-            "Accepted local findings are audit inputs and should be independently reviewed before launch."
+            "The current normalized baseline contains 4 High and 34 Medium open "
+            "first-party production findings; local normalization and drift detection "
+            "do not establish that any finding is safe."
         ),
         "evidence_paths": [
+            "ops/SLITHER_BASELINE.json",
             "ops/SLITHER_BASELINE.md",
             "docs/slither.md",
-            "docs/vendored-libraries.md",
+            "scripts/check_slither_baseline.py",
         ],
         "checks": [
-            "slither . --config-file slither.config.json --foundry-compile-all",
+            "python scripts/test_slither_baseline.py",
+            "python scripts/check_slither_baseline.py --baseline-only",
+            "python scripts/check_slither_baseline.py --run-slither",
+            "python scripts/test_release_mode.py",
             "python scripts/check_audit_package.py",
         ],
-        "tracking": ["ops/SLITHER_BASELINE.md"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/658",
+            "https://github.com/6529-Collections/6529Stream/issues/654",
+        ],
     },
     {
         "id": "RISK-WARN-001",

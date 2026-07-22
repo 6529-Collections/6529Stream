@@ -245,9 +245,11 @@ commands are documented in [docs/tooling.md](docs/tooling.md).
 
 ## Security
 
-Do not use these contracts for production drops until the public-beta and
-production blocker reports are cleared or explicitly risk-accepted, the external
-audit package is complete, release artifacts are signed, deployment addresses
-are verified, and signer custody is operationally ready.
+Do not use these contracts for production drops until strict production release
+mode passes. Only checker-authorized public-beta external-evidence rows may use
+active risk acceptance; completed external-audit evidence, every production
+requirement, the first-party Slither technical gate, production Core headroom,
+and the genesis deployment profile are non-waivable. Release artifacts must also
+be signed, deployment addresses verified, and signer custody operationally ready.
 
 Report vulnerabilities through [SECURITY.md](SECURITY.md).

@@ -51,13 +51,24 @@ powershell -ExecutionPolicy Bypass -File scripts\check.ps1
 The smoke check currently proves compilation and test-command execution only.
 Meaningful protocol tests are still roadmap work.
 
-Non-gating diagnostics are useful for local review but are not merge gates until
-their roadmap baselines are accepted:
+The default check includes the fast Slither baseline metadata gate. For
+Solidity changes, also run the complete live comparison when the pinned Slither
+toolchain is available:
 
 ```bash
 make fmt-check
+make slither-baseline-check
+```
+
+The raw analyzer command remains useful for investigation:
+
+```bash
 make slither
 ```
+
+The live baseline currently contains 4 High and 34 Medium first-party findings,
+so raw Slither can exit non-zero. The baseline gates detect unreviewed drift;
+they do not establish audit completion or public-beta/production readiness.
 
 ## Pull Request Expectations
 

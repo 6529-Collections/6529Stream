@@ -44,6 +44,18 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added a canonical normalized Slither baseline and fail-closed drift gate for
+  first-party production High/Medium findings. The current 38 rows (4 High and
+  34 Medium) are all explicitly Open: one confirmed gap, six design-review
+  rows, and 31 pending dispositions, with no suppressions, acceptances, or
+  false-positive claims. Fast default checks validate provenance, counts,
+  classifications, and Markdown parity; a dedicated pinned CI job reruns
+  Slither and fails on exact semantic-set drift. The generated risk register now
+  treats the baseline as a high-severity release blocker under issue #658, and
+  both public-beta and production release-mode decisions fail closed while any
+  first-party production High/Medium row remains Open. Release-mode Make targets
+  and the protected-branch workflow also rerun the live exact Slither comparison
+  before evaluating the strict decision.
 - Added the canonical machine-readable Genesis Deployment Profile and a
   structural checker plus catalog-level diagnostics. The profile derives its
   exhaustive count from contiguous entries, pins every contract role and

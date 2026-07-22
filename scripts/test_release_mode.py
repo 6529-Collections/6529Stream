@@ -28,6 +28,7 @@ checker = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(checker)
 
 evidence_checker = checker.evidence_checker
+REAL_SLITHER_BASELINE_BLOCKERS = checker.slither_baseline_blockers
 
 
 def write_text(path: Path, value: str) -> None:
@@ -226,6 +227,71 @@ def replace_requirement_status(
 
 class ReleaseModeTests(unittest.TestCase):
     """Release-mode evidence gate behavior."""
+
+    def setUp(self) -> None:
+        """Keep legacy evidence fixtures focused while testing Slither separately."""
+        self.slither_patcher = mock.patch.object(
+            checker,
+            "slither_baseline_blockers",
+            return_value=[],
+        )
+        self.slither_patcher.start()
+
+    def tearDown(self) -> None:
+        self.slither_patcher.stop()
+
+    def test_committed_slither_baseline_is_a_release_blocker(self) -> None:
+        """A matching 38-row baseline remains blocked rather than accepted."""
+        repo_root = Path(__file__).resolve().parents[1]
+
+        blockers = REAL_SLITHER_BASELINE_BLOCKERS(
+            checker.DEFAULT_SLITHER_BASELINE,
+            checker.DEFAULT_SLITHER_MARKDOWN,
+            repo_root,
+        )
+
+        self.assertEqual(len(blockers), 1)
+        self.assertIn("38 Open High/Medium", blockers[0])
+        self.assertIn("High=4, Medium=34", blockers[0])
+        self.assertIn("issue #658", blockers[0])
+
+    def test_slither_blocker_prevents_otherwise_complete_public_beta(self) -> None:
+        """Ready external evidence cannot bypass open static-analysis rows."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="blocked",
+                    production_requirement_status="missing",
+                ),
+            )
+
+            with mock.patch.object(
+                checker,
+                "slither_baseline_blockers",
+                return_value=["38 Open High/Medium Slither findings"],
+            ):
+                with self.assertRaisesRegex(
+                    checker.ReleaseModeError,
+                    "38 Open High/Medium Slither findings",
+                ):
+                    checker.validate_release_mode(path, root, "public-beta")
+
+    def test_missing_slither_baseline_fails_closed(self) -> None:
+        """The static-analysis release gate rejects absent canonical evidence."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+
+            with self.assertRaises(checker.slither_baseline_checker.SlitherBaselineError):
+                REAL_SLITHER_BASELINE_BLOCKERS(
+                    checker.DEFAULT_SLITHER_BASELINE,
+                    checker.DEFAULT_SLITHER_MARKDOWN,
+                    root,
+                )
 
     def test_rejects_unknown_phase_alias(self) -> None:
         """Phase normalization rejects aliases outside the release-mode allowlist."""

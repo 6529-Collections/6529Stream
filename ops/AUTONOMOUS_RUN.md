@@ -35,53 +35,39 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/mint-gate-registry-foundation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/639` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/640` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/641` |
-| Next issue | Concrete ticket/Merkle/TDH gate implementations and callable nullifier support after the gate/registry foundation slice. |
+| Active PR branch | `codex/slither-baseline-gate` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/661` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/658` |
+| Active PR | `TBD` |
+| Next issue | Begin the safe Core extraction sequence with canonical executor eligibility and a prepared settlement seam, without routing live Drops traffic. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-04 00:00 UTC` |
+| Last updated | `2026-07-22 00:00 UTC` |
 
 ## Current Run Notes
 
 - User authorized autonomous execution without permission prompts.
 - Use heavy subagents for independent review, sequencing, and verification.
-- PR #633 merged the Core mint-manager hook slice and issue #631 is closed
-  completed.
-- PR #635 merged the `StreamMintLedger` static counter accounting foundation
-  and issue #634 is closed completed.
-- PR #637 merged the `StreamMintManager` phase policy and prepared-mint
-  execution slice, and issue #636 is closed completed.
-- PR #639 merged the CON-015 collection metadata and preservation satellites,
-  and issue #638 is closed completed.
-- The current topic is CON-016 on branch
-  `codex/mint-gate-registry-foundation` for issue #640; the local draft is
-  complete and the PR is being opened.
-- Current topic adds `IStreamMintGate`, `IStreamMintModuleRegistry`, and
-  `StreamMintModuleRegistry` as the approved outside-Core module boundary,
-  plus optional phase gate pins in `StreamMintManager` with gate-derived
-  authorization and authorizer accounting, mint-time registry
-  status/interface/codehash/metadata/version/gas-limit revalidation before any
-  ledger or Core mutation, deployment rehearsal wiring, and release-artifact
-  coverage. Gate calls use bounded `staticcall`, non-empty gate nullifier
-  arrays are rejected until the callable-nullifier slice, and ungated phases
-  keep requiring explicit request authorization IDs.
-- Local validation for CON-016: focused `StreamMintModuleRegistry` (4) and
-  `StreamMintManager` (43) suites, deployment manifest and gas snapshot
-  suites, the full release-artifact regeneration chain
-  (`make release-checksums`), and the full Windows check suite pass locally.
-- Remaining CON-016 work: open the PR for issue #640, request CodeRabbit, wait
-  for CI and bot feedback, resolve actionable findings, and merge only when
-  clean per the maintainer's explicit merge authorization.
-- Keep attestations, collection view/reference satellites, typed
-  PREMIS/C2PA/IIIF companion ABIs, custom gates, ERC-20 auction bidding, and
-  royalty resolver integration as follow-up slices unless the current review
-  cycle proves one is required for this PR.
-- Keep GPT-5.5 Pro on high/max reasoning for OpenRouter reviews. Long waits are
-  expected; do not lower reasoning for speed.
+- PR #641 merged the mint gate interface/module registry foundation and issue
+  #640 is closed completed. Later manager, finality, governance, and release
+  work also merged through PR #661.
+- PR #661 merged the fail-closed canonical genesis deployment profile. The
+  current v1 contract catalog cannot prove deployment-instance identity,
+  fallback distinctness, or parameterized probe bindings, so issue #656 remains
+  a production blocker.
+- The current topic is issue #658 on branch
+  `codex/slither-baseline-gate`. A clean pinned run found 38 first-party
+  production High/Medium Slither rows (4 High, 34 Medium), contradicting the
+  historical accepted-baseline narrative.
+- This topic adds a canonical normalized JSON baseline, checked Markdown mirror,
+  fast metadata/parity validation, dedicated live exact-drift CI, and truthful
+  open-blocker risk/readiness language. All 38 rows remain Open: one confirmed
+  gap, six design-review rows, and 31 pending dispositions.
+- After this gate merges, continue issue-linked contract/test remediation and
+  the safe Core extraction sequence. Do not route StreamDrops directly through
+  the manager until an authenticated, operation-bound settlement seam preserves
+  revenue accounting before receiver callbacks.
 
 ## Packaging Notes
 

@@ -325,6 +325,13 @@ calendar date: an inverted window, a future `accepted_at`, or an expired
 `production_release` requirement are non-waivable and must be `complete`;
 `accepted_risk` remains available only for the other public-beta evidence rows.
 
+Both release phases also validate the canonical normalized first-party
+production Slither baseline and its Markdown mirror. Open High/Medium findings
+are technical blockers outside the evidence-manifest requirement rows and
+cannot be waived by marking an external-evidence row `accepted_risk`. The
+current 4 High and 34 Medium rows remain Open under issue #658; an exact live
+baseline match proves inventory consistency, not acceptance.
+
 Production release mode also checks the checksum-covered current `StreamCore`
 measurement in `release-artifacts/latest/abi-checksums.json`. It requires at
 least 2,000 bytes of EIP-170 runtime headroom under the governing

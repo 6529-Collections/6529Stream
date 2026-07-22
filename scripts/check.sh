@@ -36,6 +36,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_core_bytecode_spend_policy.py
 "$python_bin" scripts/test_genesis_deployment_profile.py
 "$python_bin" scripts/check_genesis_deployment_profile.py
+"$python_bin" scripts/test_slither_baseline.py
+"$python_bin" scripts/check_slither_baseline.py --baseline-only
 "$python_bin" scripts/test_solidity_formatting.py
 "$python_bin" scripts/check_solidity_formatting.py
 "$python_bin" scripts/test_windows_check_wrapper.py

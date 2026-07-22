@@ -1,3 +1,4 @@
+crytic-compile==0.3.11
 eth-hash==0.8.0
 playwright==1.60.0
 slither-analyzer==0.11.5
