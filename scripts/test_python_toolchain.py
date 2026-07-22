@@ -117,6 +117,15 @@ class PythonToolchainTests(unittest.TestCase):
 
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
 
+    def test_descriptive_uses_text_is_not_an_action_key(self) -> None:
+        """A step name containing the word uses is ordinary descriptive text."""
+
+        workflow = valid_workflow().replace(
+            "steps:",
+            "steps:\n  - name: Cache step that uses actions/cache\n    run: echo cache",
+        )
+        self.assertEqual(checker.check_workflow(Path("workflow.yml"), workflow), [])
+
     def test_workflow_rejects_floating_or_divergent_install(self) -> None:
         """A floating pip upgrade and direct-file install both fail closed."""
 

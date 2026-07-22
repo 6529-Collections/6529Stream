@@ -105,7 +105,10 @@ STRICT_ACTION_RE = re.compile(
     r"^\s*(?:-\s*)?uses:\s+"
     r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\s*$"
 )
-USES_TOKEN_RE = re.compile(r"\buses\b", re.IGNORECASE)
+USES_KEY_RE = re.compile(
+    r"^\s*(?:(?:-\s*)?uses\s*:|-\s*\{[^}]*\buses\s*:)",
+    re.IGNORECASE,
+)
 FOLDED_RUN_RE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*>", re.IGNORECASE)
 SENSITIVE_PACKAGE_TOOL_RE = re.compile(
     r"(?:\bpip(?:3(?:\.\d+)?)?(?:\.__main__)?\b|\bpipx\b|\buv\b|"
@@ -319,7 +322,7 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 f"{path}:{line_number} folded run scalars are not allowed; use run: |"
             )
 
-        if USES_TOKEN_RE.search(stripped):
+        if USES_KEY_RE.search(raw_line):
             action_match = STRICT_ACTION_RE.fullmatch(raw_line)
             if action_match is None:
                 errors.append(
