@@ -17,6 +17,7 @@ GENERATOR_VERSION = "1"
 
 DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/contracts.json"),
+    Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/dependencies"),
     Path("release-artifacts/schema"),
     Path("release-artifacts/evidence"),
@@ -29,6 +30,9 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/baselines"),
     Path("scripts/generate_dependency_provenance_attestation.py"),
     Path("scripts/check_release_mode.py"),
+    Path("scripts/test_release_mode.py"),
+    Path("scripts/check_genesis_deployment_profile.py"),
+    Path("scripts/test_genesis_deployment_profile.py"),
     Path("scripts/release_evidence_paths.py"),
     Path("scripts/check_production_broadcast_retention.py"),
     Path("scripts/check_production_verified_addresses.py"),
@@ -117,6 +121,8 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/drop-authorization-signing.md"),
     Path("docs/incident-response.md"),
     Path("docs/launch-v1-target-architecture.md"),
+    Path("docs/launch-conformance-matrix.md"),
+    Path("docs/stream-long-term-architecture.md"),
     Path("docs/integrations/README.md"),
     Path("docs/integrations/auction-flows.md"),
     Path("docs/integrations/contract-flows.md"),
