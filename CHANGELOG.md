@@ -1302,6 +1302,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Fixed
 
+- Hardened discovery-bound artwork-finality diagnostics after finalization:
+  `finalityStillMatches`, `verifyFinality`, and `verifyArtworkScopeFinality` now
+  compare the live discovery count and route hash with the stored component set,
+  returning `false` while preserving the stored record and component hashes when
+  discovery drifts, loses its code, reverts, exhausts its bounded gas, or returns
+  malformed or oversized data. Discovery reads use the existing 30,000-gas
+  finality read budget, retain parent-frame gas for fail-closed completion, and
+  use an exact-word return buffer so hostile returndata cannot turn the full
+  diagnostic into an unbounded copy; collection and scoped regressions cover the
+  new behavior without changing paginated component-range semantics.
 - Aligned `StreamArtworkFinalityPreview` finality preview with execution by
   mirroring the `[LTA-FREEZE]` rule 4 live veto-guardian gate in
   `_stagedFreezeReady`: the preview now re-resolves the terminal-freeze veto

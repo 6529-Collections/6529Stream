@@ -43,6 +43,10 @@ contract StreamArtworkFinalityRegistry is
     ///         the GGP host framework binds the pinned key below when it lands).
     uint256 public constant FINALITY_COMPONENT_READ_GAS = 30_000;
 
+    /// @dev Parent-frame reserve covering the cold code check, call overhead, and fail-closed
+    ///      return path when a diagnostic target exhausts its forwarded gas under EIP-150.
+    uint256 private constant FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE = 10_000;
+
     /// @notice Pinned GGP key for the diagnostic read budget.
     bytes32 public constant GGP_FINALITY_COMPONENT_READ_GAS_KEY =
         StreamFinalityDomains.GGP_FINALITY_COMPONENT_READ_GAS;
@@ -1101,6 +1105,74 @@ contract StreamArtworkFinalityRegistry is
         }
     }
 
+    /// @dev Fail-closed post-finality comparison against the currently discovered route. Unlike
+    ///      the strict execution gate above, this path must preserve the diagnostic's never-revert
+    ///      contract when discovery has no code, reverts, or returns malformed/oversized data.
+    function _diagnosticDiscoveryMatches(
+        StreamFinalityScope memory scope,
+        uint256 expectedCount,
+        bytes32 expectedHash
+    ) private view returns (bool) {
+        address discovery = finalityDiscovery;
+        if (discovery == address(0)) {
+            return true;
+        }
+
+        bytes memory countCallData;
+        bytes memory hashCallData;
+        if (scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            countCallData = abi.encodeWithSelector(
+                IStreamArtworkFinalityDiscovery.finalityComponentCount.selector, scope.collectionId
+            );
+            hashCallData = abi.encodeWithSelector(
+                IStreamArtworkFinalityDiscovery.finalityDiscoveryHash.selector, scope.collectionId
+            );
+        } else {
+            countCallData = abi.encodeWithSelector(
+                IStreamArtworkScopedFinalityDiscovery.finalityComponentCountForScope.selector, scope
+            );
+            hashCallData = abi.encodeWithSelector(
+                IStreamArtworkScopedFinalityDiscovery.finalityDiscoveryHashForScope.selector, scope
+            );
+        }
+
+        (bool countReadable, bytes32 discoveredCount) = _readDiscoveryWord(discovery, countCallData);
+        if (!countReadable || uint256(discoveredCount) != expectedCount) {
+            return false;
+        }
+        (bool hashReadable, bytes32 discoveredHash) = _readDiscoveryWord(discovery, hashCallData);
+        return hashReadable && discoveredHash == expectedHash;
+    }
+
+    /// @dev Bounded exact-word staticcall used only by never-revert diagnostics. Supplying a
+    ///      fixed output buffer avoids allocating or copying attacker-controlled returndata.
+    function _readDiscoveryWord(address discovery, bytes memory callData)
+        private
+        view
+        returns (bool readable, bytes32 value)
+    {
+        uint256 gasCap = FINALITY_COMPONENT_READ_GAS;
+        if (gasleft() <= gasCap + FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE) {
+            return (false, bytes32(0));
+        }
+        if (discovery.code.length == 0) {
+            return (false, bytes32(0));
+        }
+        assembly ("memory-safe") {
+            let output := mload(0x40)
+            readable := staticcall(
+                gasCap,
+                discovery,
+                add(callData, 0x20),
+                mload(callData),
+                output,
+                0x20
+            )
+            if iszero(eq(returndatasize(), 0x20)) { readable := 0 }
+            if readable { value := mload(output) }
+        }
+    }
+
     // ------------------------------------------------------------------
     // Internal: component observation shared by execution and diagnostics
     // ------------------------------------------------------------------
@@ -1452,6 +1524,9 @@ contract StreamArtworkFinalityRegistry is
             return (false, bytes32(0), bytes32(0));
         }
         (bool matches,,) = _diagnoseSlice(_sliceComponents(stored, 0, stored.length), scope);
+        if (matches) {
+            matches = _diagnosticDiscoveryMatches(scope, stored.length, compHash);
+        }
         return (matches, recHash, compHash);
     }
 

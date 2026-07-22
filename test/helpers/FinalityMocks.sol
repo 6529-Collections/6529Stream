@@ -377,6 +377,14 @@ contract MockFinalityDiscovery {
 
     mapping(uint256 => DiscoveryFacts) private _collectionFacts;
     mapping(bytes32 => DiscoveryFacts) private _scopedFacts;
+    uint8 private _readMode;
+
+    /// @notice Configures discovery read behavior for diagnostic failure-path tests:
+    ///         0 = normal, 1 = revert, 2 = malformed short return, 3 = oversized return,
+    ///         4 = exhaust the caller-provided gas budget.
+    function setReadMode(uint8 readMode) external {
+        _readMode = readMode;
+    }
 
     function setCollectionDiscovery(uint256 collectionId, uint256 count, bytes32 discoveryHash)
         external
@@ -393,10 +401,12 @@ contract MockFinalityDiscovery {
     }
 
     function finalityComponentCount(uint256 collectionId) external view returns (uint256) {
+        _applyReadMode();
         return _collectionFacts[collectionId].count;
     }
 
     function finalityDiscoveryHash(uint256 collectionId) external view returns (bytes32) {
+        _applyReadMode();
         return _collectionFacts[collectionId].discoveryHash;
     }
 
@@ -405,6 +415,7 @@ contract MockFinalityDiscovery {
         view
         returns (uint256)
     {
+        _applyReadMode();
         return _scopedFacts[_scopeKey(scope)].count;
     }
 
@@ -413,7 +424,32 @@ contract MockFinalityDiscovery {
         view
         returns (bytes32)
     {
+        _applyReadMode();
         return _scopedFacts[_scopeKey(scope)].discoveryHash;
+    }
+
+    function _applyReadMode() private view {
+        uint8 readMode = _readMode;
+        if (readMode == 1) {
+            assembly ("memory-safe") {
+                revert(0, 0)
+            }
+        }
+        if (readMode == 2) {
+            assembly ("memory-safe") {
+                return(0, 0x1f)
+            }
+        }
+        if (readMode == 3) {
+            assembly ("memory-safe") {
+                return(0, 0x40)
+            }
+        }
+        if (readMode == 4) {
+            assembly ("memory-safe") {
+                for { } 1 { } { }
+            }
+        }
     }
 
     function _scopeKey(StreamFinalityScope calldata scope) private pure returns (bytes32) {
