@@ -191,16 +191,39 @@ local tests prove protocol correctness.
 The release-mode CI profile is the opt-in hard gate for public-beta or
 production-release claims. It is exposed as a manual workflow_dispatch workflow
 and local `make release-mode-public-beta-check` /
-`make release-mode-production-release-check` targets, and it is expected to
-fail until retained evidence is complete or explicitly accepted as risk.
-Release mode requires public-beta readiness before production-release
-readiness, so a production run validates both phases.
+`make release-mode-production-release-check` targets. The local targets run the
+aggregate `check` gate first; the manual workflow fails unless it runs from the
+protected default branch, then runs `bash scripts/check.sh` before evaluating
+release evidence. The gate is expected to fail until retained evidence is
+complete; an active accepted-risk record may satisfy only a waivable
+public-beta row. External-audit evidence and every production requirement are
+non-waivable. Release mode requires public-beta readiness before
+production-release readiness, so a production run validates both phases. It
+also validates the checksum-covered current `StreamCore` size against the
+normative 2,000-byte EIP-170 deployment headroom rule from the
+[`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
+and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
+Missing, malformed, inconsistent, or sub-threshold size fields fail closed.
+The current 24,152-byte runtime has only 424 bytes of headroom, so
+[issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
+production release even after evidence rows become complete.
+
+Known limitation: strict release mode does not yet prove that the release
+candidate implements the exhaustive genesis contract inventory. The normative
+[`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
+currently requires 58 production contracts, while
+`release-artifacts/contracts.json` tracks 20 and no fail-closed profile
+completeness checker exists. This remains an independent production blocker
+tracked by [issue #656](https://github.com/6529-Collections/6529Stream/issues/656);
+a green result from the hardened checks in this change cannot satisfy it.
 
 ## Readiness Summary
 
 | Area | Current state | Blocks public beta | Blocks production release |
 | --- | --- | --- | --- |
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
+| StreamCore deployment headroom | The ordinary development size floor passes at 24,152 runtime bytes and 424 bytes of EIP-170 margin, but the normative production deployment gate requires at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
+| Genesis inventory completeness | The launch matrix requires an exhaustive 58-contract candidate, but the current release inventory tracks 20 contracts and has no fail-closed completeness checker; issue #656 tracks the missing gate | No | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |

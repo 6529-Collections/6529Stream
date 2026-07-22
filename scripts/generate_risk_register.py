@@ -334,20 +334,21 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
     },
     {
         "id": "RISK-SIZE-001",
-        "title": "StreamCore bytecode headroom remains finite",
+        "title": "StreamCore misses the normative production headroom gate",
         "area": "core_size",
-        "severity": "medium",
-        "status": "accepted_local_baseline",
+        "severity": "high",
+        "status": "open_blocker",
         "owner": "protocol",
         "target_gate": "Gate G",
-        "source": "clean-main reviewer rebaseline and status docs",
+        "source": "launch conformance matrix, target architecture, and artifact-backed size proof",
         "mitigation": (
-            "Keep non-critical product surfaces in satellite contracts, adapters, "
-            "libraries, release artifacts, or docs unless a measured size-budget exception is accepted."
+            "Recover real Core headroom through measured compression, extraction, or "
+            "authorized relocation while retaining every mandatory hook; keep non-critical "
+            "product surfaces satellite-first."
         ),
         "residual_risk": (
-            "Large future Core feature work could consume the remaining EIP-170 "
-            "headroom and block deployment if size deltas are not measured."
+            "The current 24,152-byte runtime leaves 424 bytes of EIP-170 headroom, "
+            "1,576 bytes below the non-waivable 2,000-byte production deployment minimum."
         ),
         "evidence_paths": [
             "docs/known-blockers.md",
@@ -356,9 +357,13 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ],
         "checks": [
             "forge build --sizes --via-ir --skip test --skip script --force",
+            "python scripts/check_release_mode.py --phase production-release",
             "python scripts/generate_release_manifest.py --check",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/115"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/654",
+            "https://github.com/6529-Collections/6529Stream/issues/115",
+        ],
     },
     {
         "id": "RISK-SLITHER-001",

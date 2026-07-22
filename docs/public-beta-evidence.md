@@ -318,3 +318,20 @@ fields must use real ISO `YYYY-MM-DD` calendar dates, such as `2026-06-12`;
 `scripts/check_public_beta_evidence.py` enforces the format and tests reject
 free-form values. Risk acceptance should be rare, explicit, and tied to a
 public issue, governance decision, or release note.
+
+Release mode also requires the acceptance window to be active on the gate's
+calendar date: an inverted window, a future `accepted_at`, or an expired
+`expires_at` is a blocker. `external_audit_report` and every
+`production_release` requirement are non-waivable and must be `complete`;
+`accepted_risk` remains available only for the other public-beta evidence rows.
+
+Production release mode also checks the checksum-covered current `StreamCore`
+measurement in `release-artifacts/latest/abi-checksums.json`. It requires at
+least 2,000 bytes of EIP-170 runtime headroom under the governing
+[`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
+and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget),
+tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
+The requirement is a non-waivable deployment rule, not an evidence-manifest
+row. Missing, malformed, inconsistent, or sub-threshold artifact fields fail
+closed. The current 24,152-byte runtime leaves 424 bytes and therefore keeps
+production release mode blocked until Core slimming recovers the target.

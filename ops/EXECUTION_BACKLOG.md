@@ -174,7 +174,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has finite EIP-170 headroom: the current CON-012 measurement is 24,150 runtime bytes with 426 bytes of EIP-170 margin under an accepted exception | `ONE-006`, `CON-005`, `P1-SIZE-001` | Prefer satellites/read adapters/libraries/release artifacts; enforce the artifact-backed size budget; require measured size deltas and approved exceptions for non-critical Core bytecode spend |
+| `StreamCore` has 424 bytes of EIP-170 headroom at the current 24,152-byte runtime: the interim development floor passes under an accepted exception, but the normative 2,000-byte production deployment rule fails | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Block production release; recover real headroom through compression, extraction, or authorized relocation while retaining mandatory hooks; keep satellites/read adapters/libraries/release artifacts as the default extension path |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -3687,11 +3687,14 @@ Status: Merged in PR #427; issue #426 closed completed.
 Gate: G.
 
 Problem: `StreamCore` currently has finite EIP-170 bytecode headroom; the
-current CON-012 measurement is 24,150 runtime bytes with 426 bytes of margin
-under accepted exception `CORE-SPEND-2026-06-24-001`, while the approved spend
-ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. Adding
-world-class 1/1 product surfaces directly to Core risks breaking deployment or
-forcing rushed size recovery after feature work is already written.
+current runtime is 24,152 bytes with 424 bytes of margin under accepted
+development exception `CORE-SPEND-2026-06-24-001`, while the approved spend
+ceiling remains the reviewed 22,184-byte / 2,392-byte-margin baseline. The
+normative production deployment gate requires 2,000 bytes and does not admit
+the interim exception, so
+[#654](https://github.com/6529-Collections/6529Stream/issues/654) blocks release
+until real headroom is recovered. Adding world-class 1/1 product surfaces
+directly to Core would deepen that deficit.
 
 Outcome: The repo has a documented architecture policy for future product
 features: prefer satellite contracts, read adapters, libraries, release
@@ -3730,12 +3733,14 @@ Acceptance criteria:
 - Any Core bytecode spend requires an explicit budget, measured delta, and
   release-risk note.
 - The policy aligns with current `StreamCore` headroom measurements and the
-  configured 384-byte floor / 512-byte warning threshold.
+  configured 384-byte development floor / 512-byte warning threshold while
+  preserving the non-waivable 2,000-byte production deployment minimum.
 
 Evidence artifacts: `release-artifacts/contracts.json` runtime-size budget and
 the generated ABI/proof size fields.
 
-Dependencies: `CON-005`, production size gate.
+Dependencies: `CON-005`, production-contract EIP-170 development gate, and the
+strict production release-mode headroom gate tracked by #654.
 
 ### ONE-007: Burn Down Or Disposition Release-Grade Warning Noise
 

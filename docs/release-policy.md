@@ -65,8 +65,8 @@ include:
   linked library, release artifact, or docs-only path is insufficient;
 - the before/after `StreamCore` runtime size from
   `forge build --sizes --via-ir --skip test --skip script --force`;
-- the resulting EIP-170 margin and whether it remains above the 384-byte
-  minimum release floor and 512-byte warning threshold from
+- the resulting EIP-170 margin and whether it remains above the interim
+  384-byte development floor and 512-byte warning threshold from
   [`release-artifacts/contracts.json`](../release-artifacts/contracts.json);
 - a release-risk or explicit size-budget exception note for non-critical
   product functionality; and
@@ -76,13 +76,18 @@ include:
 Current `StreamCore` runtime size is 24,152 bytes with 424 bytes of EIP-170
 headroom in the committed
 [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json).
-That passes the production size gate and 384-byte minimum release floor, but it
-is below the 512-byte warning threshold under the accepted CON-012
-bytecode-spend exception. This does not make Core the default home for future
-marketplace, provenance, permanence, royalty-policy, frontend, indexer, or
-collector-evidence features. The approved bytecode-spend ceiling remains 22,184
-bytes with 2,392 bytes of baseline margin, so future Core growth above that
-ceiling still requires an accepted exception record.
+That passes the ordinary development deployability check and its interim
+384-byte floor, but it fails the normative 2,000-byte production deployment
+headroom rule in the
+[`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
+and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
+The accepted CON-012 bytecode-spend exception cannot survive the deployment
+gate; [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
+tracks the required recovery. This does not make Core the default home for
+future marketplace, provenance, permanence, royalty-policy, frontend, indexer,
+or collector-evidence features. The approved bytecode-spend ceiling remains
+22,184 bytes with 2,392 bytes of baseline margin, so future Core growth above
+that ceiling still requires an accepted exception record during development.
 Accepted headroom-recovery records use `measured_delta_bytes` as
 `runtime_size_bytes - baseline_runtime_size_bytes`, so bytecode reductions are
 negative deltas and bytecode spend remains positive.
@@ -224,8 +229,15 @@ Before a public release tag:
   `python scripts/check_release_mode.py --phase public-beta` or
   `python scripts/check_release_mode.py --phase production-release` only for
   release-candidate evidence review. The default baseline runs
-  `python scripts/test_release_mode.py`; the release-mode checks are expected
-  to fail until retained evidence is complete or explicitly accepted as risk.
+  `python scripts/test_release_mode.py`; local release-mode Make targets run the
+  aggregate `check` gate first, and the manual workflow requires the protected
+  default branch and runs `bash scripts/check.sh`. Release mode rejects expired,
+  future, or inverted risk-acceptance windows. External-audit evidence and every
+  production requirement are non-waivable and must be complete; only the other
+  public-beta rows may use active explicit risk acceptance. Production mode
+  additionally requires the checksum-covered current `StreamCore` build to
+  retain at least 2,000 bytes of EIP-170 runtime headroom; missing, malformed,
+  inconsistent, or sub-threshold size fields fail closed under issue #654.
 - Royalty policy follows `docs/royalty-policy.md` and passes
   `python scripts/check_royalty_policy.py`.
 - `CHANGELOG.md` describes user-visible and release-impacting changes.
