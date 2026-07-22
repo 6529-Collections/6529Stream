@@ -112,9 +112,7 @@ STRICT_RUN_KEY_RE = re.compile(r"^\s*(?:-\s*)?run: \|\s*$")
 FOLDED_RUN_RE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*>", re.IGNORECASE)
 EXPLICIT_MAPPING_KEY_RE = re.compile(r"^\s*(?:-\s*)?\?(?:\s|$)")
 STEP_FLOW_MAPPING_RE = re.compile(r"^\s*-\s*\{")
-YAML_ANCHOR_ALIAS_RE = re.compile(
-    r"(?<![A-Za-z0-9_])(?:&|\*)[A-Za-z0-9_-]+"
-)
+YAML_ANCHOR_ALIAS_RE = re.compile(r"[&*]")
 YAML_ESCAPE_RE = re.compile(
     r"\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 )

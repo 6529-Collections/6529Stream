@@ -243,7 +243,7 @@ class PythonToolchainTests(unittest.TestCase):
         )
         hidden_anchor_alias = (
             "env:\n"
-            f'  HIDDEN_ACTION_KEY: &uk "u{continuation}'
+            f'  HIDDEN_ACTION_KEY: &!k "u{continuation}'
             '    ses"\n'
             "steps:"
         )
@@ -336,7 +336,7 @@ class PythonToolchainTests(unittest.TestCase):
                 hidden_anchor_alias,
             ).replace(
                 f"  - uses: {checkout}",
-                "  - *uk: example/action@v1",
+                "  - *!k: example/action@v1",
             ),
             "uses-docker": base.replace(checkout, "docker://python:3.12.13"),
             "run-spaced-colon": base.replace("  - run: |", "  - run : echo bypass\n  - run: |"),
