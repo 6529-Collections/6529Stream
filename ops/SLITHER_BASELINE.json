@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "712b43f6070af8903cdd33f0c2d05d36cb2d358f",
-    "captured_at_utc": "2026-07-22T10:02:33Z",
+    "analyzed_commit": "ce8fed6d7ec4366c42aab381ad739a00fe08bc08",
+    "captured_at_utc": "2026-07-22T19:23:25Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -12,9 +12,9 @@
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
     "capture_native_exit_code": -1,
     "capture_json_success": true,
-    "raw_json_size_bytes": 128086353,
-    "raw_json_sha256": "sha256:718a2b7c8b18f658032221a71164dda987b9e0b1a83f41547d539625a62cc43a",
-    "solidity_tree_sha256": "sha256:270060616ed8498ac859c097702ae091a7fb6c9dba96fff14f429a1863f27a29",
+    "raw_json_size_bytes": 143333855,
+    "raw_json_sha256": "sha256:d98273df2d70954fd4442b11ca1b628b575788bf93cfc18f8918a91a9323c14c",
+    "solidity_tree_sha256": "sha256:9522faed660b5cfd6c850304bbaef2351f58691b3c748af66cfdd889cd9bdab2",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:155408a77117fe90f39469f1ad0b8f4d817da2fa030a6d850cd9a6c4276cbc02",
     "requirements_tools_sha256": "sha256:4af191d57f4305247c9fc3f97f853e3afb39d07ddd3b7ebde3a89da83384fa3e"
@@ -36,12 +36,12 @@
     "classification_rule": "classify by the primary Slither source element; unknown smart-contracts paths fail closed as first-party production"
   },
   "capture_counts": {
-    "High": 38,
-    "Medium": 573,
-    "Low": 502,
-    "Informational": 831,
-    "Optimization": 30,
-    "total": 1974
+    "High": 46,
+    "Medium": 579,
+    "Low": 692,
+    "Informational": 853,
+    "Optimization": 34,
+    "total": 2204
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
@@ -55,9 +55,9 @@
       "total": 10
     },
     "test": {
-      "High": 33,
-      "Medium": 523,
-      "total": 556
+      "High": 41,
+      "Medium": 529,
+      "total": 570
     },
     "script": {
       "High": 0,
@@ -174,8 +174,8 @@
       "confidence": "High",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 66,
-        "end_line": 66,
+        "start_line": 76,
+        "end_line": 76,
         "element_type": "variable",
         "name": "_scopedComponents",
         "signature": ""
@@ -183,34 +183,34 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 66,
-          "end_line": 66,
+          "start_line": 76,
+          "end_line": 76,
           "element_type": "variable",
           "name": "_scopedComponents",
           "signature": ""
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 736,
-          "end_line": 764,
+          "start_line": 933,
+          "end_line": 961,
           "element_type": "function",
           "name": "_storedRecordFor",
           "signature": "_storedRecordFor(StreamFinalityScope)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1427,
-          "end_line": 1494,
+          "start_line": 1731,
+          "end_line": 1798,
           "element_type": "function",
           "name": "_storeRecordAndEmit",
           "signature": "_storeRecordAndEmit(StreamFinalityScope,StreamArtworkFinalityRegistry.FinalityExecution,StreamFinalityComponentExpectation[],StreamFinalityManifestRef)"
         }
       ],
-      "fingerprint": "sha256:0d21ebacfe96da1e46e24cc1fd53abce15ea345781846317a3f78f4a507002dd",
+      "fingerprint": "sha256:72a1556afb03e730b5aa301499199b27356a55f7ba37edf561c634a5a67a3f8e",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports state variable _scopedComponents as uninitialized at smart-contracts/StreamArtworkFinalityRegistry.sol:66 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open.",
+      "rationale": "Slither reports state variable _scopedComponents as uninitialized at smart-contracts/StreamArtworkFinalityRegistry.sol:76 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -769,8 +769,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 161,
-        "end_line": 161,
+        "start_line": 160,
+        "end_line": 160,
         "element_type": "variable",
         "name": "expectedLeafCount",
         "signature": ""
@@ -778,18 +778,18 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 161,
-          "end_line": 161,
+          "start_line": 160,
+          "end_line": 160,
           "element_type": "variable",
           "name": "expectedLeafCount",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:98d4221ae9004ea09f17422c7557965037dee9f40cd8242ee9b23e20651db441",
+      "fingerprint": "sha256:0faf29efae55392f92126216ce5aa5148dbba6b74e8071b64923baf19b797111",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local expectedLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:161 expectedLeafCount. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local expectedLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:160 expectedLeafCount. All control-flow paths and downstream consumers still need review.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -807,8 +807,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 162,
-        "end_line": 162,
+        "start_line": 161,
+        "end_line": 161,
         "element_type": "variable",
         "name": "exactLeafCount",
         "signature": ""
@@ -816,18 +816,18 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 162,
-          "end_line": 162,
+          "start_line": 161,
+          "end_line": 161,
           "element_type": "variable",
           "name": "exactLeafCount",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:6904ac9b3fbb05430469cb724ae80bd70fa1e2f9b9947d1a5a34dad61fd01519",
+      "fingerprint": "sha256:478b6e2607bb3dde4fb75e2a1f4e6e6aa2995134eada7b592cc25433ed3f878e",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local exactLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:162 exactLeafCount. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local exactLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:161 exactLeafCount. All control-flow paths and downstream consumers still need review.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -845,8 +845,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 364,
-        "end_line": 364,
+        "start_line": 545,
+        "end_line": 545,
         "element_type": "variable",
         "name": "ctx",
         "signature": ""
@@ -854,18 +854,18 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 364,
-          "end_line": 364,
+          "start_line": 545,
+          "end_line": 545,
           "element_type": "variable",
           "name": "ctx",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:a20f41500ce98193729dc371320674b88ecb096016a9f6b6ee9addccb40c7a30",
+      "fingerprint": "sha256:5872c6f6debf48238728556af23ad8d2c235022c9ee503f1a59fe14c25955010",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamArtworkFinalityRegistry.sol:364 ctx. All control-flow paths and downstream consumers still need review.",
+      "rationale": "Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamArtworkFinalityRegistry.sol:545 ctx. All control-flow paths and downstream consumers still need review.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1225,8 +1225,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 119,
-        "end_line": 143,
+        "start_line": 118,
+        "end_line": 142,
         "element_type": "function",
         "name": "_stagedFreezeReady",
         "signature": "_stagedFreezeReady(StreamFinalityScope,bytes32)"
@@ -1234,26 +1234,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 119,
-          "end_line": 143,
+          "start_line": 118,
+          "end_line": 142,
           "element_type": "function",
           "name": "_stagedFreezeReady",
           "signature": "_stagedFreezeReady(StreamFinalityScope,bytes32)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 141,
-          "end_line": 141,
+          "start_line": 140,
+          "end_line": 140,
           "element_type": "node",
           "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:0fb00223d58ba592ef6af6fe2dff03705ea1d462001144779597d12a22bde9aa",
+      "fingerprint": "sha256:b9472a454949542a17882589878bda6341427820d8ec4744e5546fe3f8f4b1dd",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:119 _stagedFreezeReady. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:118 _stagedFreezeReady. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1271,35 +1271,35 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 192,
-        "end_line": 204,
+        "start_line": 199,
+        "end_line": 211,
         "element_type": "function",
         "name": "_contentRootSatisfied",
-        "signature": "_contentRootSatisfied(StreamFinalityScope,uint64,bool)"
+        "signature": "_contentRootSatisfied(StreamFinalityScope,uint256,bool)"
       },
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 192,
-          "end_line": 204,
+          "start_line": 199,
+          "end_line": 211,
           "element_type": "function",
           "name": "_contentRootSatisfied",
-          "signature": "_contentRootSatisfied(StreamFinalityScope,uint64,bool)"
+          "signature": "_contentRootSatisfied(StreamFinalityScope,uint256,bool)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 197,
-          "end_line": 199,
+          "start_line": 204,
+          "end_line": 206,
           "element_type": "node",
           "name": "(contentRoot,leafCount,None) = metadataReads.tokenContentRoot(scope.collectionId,registry.contentRootScopeSubject(scope))",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:861ad65c4c72f5686850adfbdb3a9a20c8cb3eb5b3e7edeb7a6880f3f5834206",
+      "fingerprint": "sha256:3f1de1fc638a9c6355e0aadfa07638f7e1a73af8f9fd750edf5328140ac1d1ba",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:192 _contentRootSatisfied. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:199 _contentRootSatisfied. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1317,8 +1317,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 275,
-        "end_line": 287,
+        "start_line": 261,
+        "end_line": 273,
         "element_type": "function",
         "name": "_sanctionVerification",
         "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
@@ -1326,26 +1326,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 275,
-          "end_line": 287,
+          "start_line": 261,
+          "end_line": 273,
           "element_type": "function",
           "name": "_sanctionVerification",
           "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 280,
-          "end_line": 286,
+          "start_line": 266,
+          "end_line": 272,
           "element_type": "node",
           "name": "(valid,sanctionRecordHash,None,None) = sanctionReads.verifySanctionForSubject(uint8(scope.scopeType),scope.collectionId,scope.tokenId,scope.scopeId,sanctionSubjectHash)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:1da20e8b9fe4421e6586fc3e19394a6447aca9d053be565cbb49976aa4c007cf",
+      "fingerprint": "sha256:4737c59293f6fa6525cde942e97caec733e0b107b35f834197864db2336e5737",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:275 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:261 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1363,8 +1363,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-        "start_line": 334,
-        "end_line": 342,
+        "start_line": 320,
+        "end_line": 328,
         "element_type": "function",
         "name": "_componentsMatchLive",
         "signature": "_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])"
@@ -1372,26 +1372,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 334,
-          "end_line": 342,
+          "start_line": 320,
+          "end_line": 328,
           "element_type": "function",
           "name": "_componentsMatchLive",
           "signature": "_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityPreview.sol",
-          "start_line": 338,
-          "end_line": 340,
+          "start_line": 324,
+          "end_line": 326,
           "element_type": "node",
           "name": "(failCode,None) = StreamFinalityComponentSet.verifyComponentsStrict(components,_componentCallData(scope))",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:5735aee73c891184c03b78f473107dece0a38df3deace4cfe5f6c1167a7057a9",
+      "fingerprint": "sha256:7856903d41fbe26a7ed0873e8a8719bd1e4b4e91f76d141be0b87b75b5fe3440",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:334 _componentsMatchLive. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:320 _componentsMatchLive. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1409,8 +1409,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 116,
-        "end_line": 178,
+        "start_line": 297,
+        "end_line": 359,
         "element_type": "function",
         "name": "scheduleArtworkTerminalFreeze",
         "signature": "scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)"
@@ -1418,26 +1418,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 116,
-          "end_line": 178,
+          "start_line": 297,
+          "end_line": 359,
           "element_type": "function",
           "name": "scheduleArtworkTerminalFreeze",
           "signature": "scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 151,
-          "end_line": 151,
+          "start_line": 332,
+          "end_line": 332,
           "element_type": "node",
           "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:35d3e94ddad1d1ee5b27c61f182ca146f0624e05600d7ce4b25c68f1839ec7c8",
+      "fingerprint": "sha256:d84ef82304be917350ebfc99a6458e0c5c5ef09ce570aca74ab86525aac384ef",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:116 scheduleArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:297 scheduleArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1455,8 +1455,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 183,
-        "end_line": 207,
+        "start_line": 364,
+        "end_line": 388,
         "element_type": "function",
         "name": "vetoArtworkTerminalFreeze",
         "signature": "vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)"
@@ -1464,26 +1464,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 183,
-          "end_line": 207,
+          "start_line": 364,
+          "end_line": 388,
           "element_type": "function",
           "name": "vetoArtworkTerminalFreeze",
           "signature": "vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 195,
-          "end_line": 195,
+          "start_line": 376,
+          "end_line": 376,
           "element_type": "node",
           "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:fcfc29f1d2495fc672fa2969c1e26df5a2be77eb3e952dd92b961bed527d75a3",
+      "fingerprint": "sha256:133f13ed015f00fcd2f32cc22a573530ce987d43c1b31af586563767de112167",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:183 vetoArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:364 vetoArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1501,8 +1501,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 654,
-        "end_line": 677,
+        "start_line": 838,
+        "end_line": 861,
         "element_type": "function",
         "name": "_requireExecutableFreeze",
         "signature": "_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)"
@@ -1510,26 +1510,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 654,
-          "end_line": 677,
+          "start_line": 838,
+          "end_line": 861,
           "element_type": "function",
           "name": "_requireExecutableFreeze",
           "signature": "_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 673,
-          "end_line": 673,
+          "start_line": 857,
+          "end_line": 857,
           "element_type": "node",
           "name": "(guardian,None) = governanceAuthority.terminalFreezeVetoGuardian(scopeKey)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:add60124f1bdc8a9f84ed99486f35eb8de70ca8324772fffc8200cd95e611477",
+      "fingerprint": "sha256:20c847b19bb1a3e30753293ccc7e9fc4cd9df70890c1f908839c3ebe85418437",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:654 _requireExecutableFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:838 _requireExecutableFreeze. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1547,35 +1547,35 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 884,
-        "end_line": 902,
+        "start_line": 1103,
+        "end_line": 1121,
         "element_type": "function",
         "name": "_verifyContentRoot",
-        "signature": "_verifyContentRoot(StreamFinalityScope,uint64,bool)"
+        "signature": "_verifyContentRoot(StreamFinalityScope,uint256,bool)"
       },
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 884,
-          "end_line": 902,
+          "start_line": 1103,
+          "end_line": 1121,
           "element_type": "function",
           "name": "_verifyContentRoot",
-          "signature": "_verifyContentRoot(StreamFinalityScope,uint64,bool)"
+          "signature": "_verifyContentRoot(StreamFinalityScope,uint256,bool)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 890,
-          "end_line": 891,
+          "start_line": 1109,
+          "end_line": 1110,
           "element_type": "node",
           "name": "(contentRoot,leafCount,None) = metadataReads.tokenContentRoot(scope.collectionId,scopeSubject)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:bfc37fd970aab873c3db03cfe1273cd6fa176e1acaf4b3fb668890bfed41e4b5",
+      "fingerprint": "sha256:c9383189f234121652de5663c950ceeef9ad5b6e9565c9c23d800c1f5e259d4e",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:884 _verifyContentRoot. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1103 _verifyContentRoot. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1593,8 +1593,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 1039,
-        "end_line": 1051,
+        "start_line": 1207,
+        "end_line": 1219,
         "element_type": "function",
         "name": "_sanctionVerification",
         "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
@@ -1602,26 +1602,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1039,
-          "end_line": 1051,
+          "start_line": 1207,
+          "end_line": 1219,
           "element_type": "function",
           "name": "_sanctionVerification",
           "signature": "_sanctionVerification(StreamFinalityScope,bytes32)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1044,
-          "end_line": 1050,
+          "start_line": 1212,
+          "end_line": 1218,
           "element_type": "node",
           "name": "(valid,sanctionRecordHash,None,None) = sanctionReads.verifySanctionForSubject(uint8(scope.scopeType),scope.collectionId,scope.tokenId,scope.scopeId,sanctionSubjectHash)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:9fbc40429570cfd209da228870723c5ec534d0a09387f28b7db27ee7339e964c",
+      "fingerprint": "sha256:b8e979c7150059d1866d77ad4c168cd3ceaa4a830637bed3988d79508dbe5ff2",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1039 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1207 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
@@ -1639,8 +1639,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-        "start_line": 1557,
-        "end_line": 1567,
+        "start_line": 1861,
+        "end_line": 1871,
         "element_type": "function",
         "name": "_diagnoseSlice",
         "signature": "_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)"
@@ -1648,26 +1648,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1557,
-          "end_line": 1567,
+          "start_line": 1861,
+          "end_line": 1871,
           "element_type": "function",
           "name": "_diagnoseSlice",
           "signature": "_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)"
         },
         {
           "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
-          "start_line": 1561,
-          "end_line": 1566,
+          "start_line": 1865,
+          "end_line": 1870,
           "element_type": "node",
           "name": "StreamFinalityComponentSet.diagnoseRange(slice,_componentCallData(scope),FINALITY_COMPONENT_READ_GAS,StreamFinalityDomains.STREAM_FINALITY_COMPONENTS_V1)",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:9357ec6811cb61dcce5bb761c0ee00d13d6f8008bd06676eb9ee2a019b6ec45a",
+      "fingerprint": "sha256:1ca830dd89894b54610f262cf8452e7a5fb4dc4ce1f20c940cced8397172774e",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1557 _diagnoseSlice. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1861 _diagnoseSlice. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],
