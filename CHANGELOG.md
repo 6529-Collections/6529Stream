@@ -7,6 +7,25 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
+  from the retired aggregate/facade Core-read seam to separately bound actual
+  Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The
+  registry now validates dependency code, the adapter's exact ERC-165 support,
+  immutable bindings, canonical probe values, and exact 9-word/13-word
+  aggregate returns through fixed-size buffers; hashes the actual Core rather
+  than the adapter; requires exact discovery count, hash, and ordered component
+  enumeration; bounds strict, preview, and diagnostic reads without copying
+  attacker-sized returndata; rejects unknown metadata-mode, collection-status,
+  and supply-mode values; enforces the actual Core's collection burn-block and
+  freeze gates; compares aggregate supply as `uint256`; and removes the
+  controller/facade gate and
+  `facadeBindingSatisfied` preview field. Focused adapter, registry, preview,
+  component-floor, ABI, domain-golden, malformed-dependency, impostor-binding,
+  raw-scope, large-supply, discovery, and gate-parity tests cover the cutover.
+  This is a zero-Core-delta change: `StreamCore` source, ABI, and runtime
+  bytecode remain unchanged. It does not clear production deployment because
+  the current Core, metadata, discovery, and sanction implementations remain
+  incomplete for the target production path.
 - Closed two governance-v2 target ambiguities before implementation: the
   six-return `currentAction()` is now explicitly the complete target-readable
   context while ordered call index/selector validation remains at the
@@ -55,6 +74,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the immutable, read-only `StreamCoreFinalityAdapter` with its exact
+  four-function ERC-165 ABI and fixed Core/collection-metadata bindings. It
+  composes collection facts from granular target-Core reads, derives checked
+  burned supply as minted minus live supply, carries aggregate supply values as
+  `uint256` with no `createdAt`, and resolves canonical TOKEN scopes from
+  retained Core identity/lifecycle state and RELEASE/SEASON/VIEW scopes from
+  metadata manifests while returning semantic negatives for malformed or
+  unknown scope shapes.
 - Closed the finality-recovery refresh executability gap without spending Core
   bytecode: recovery schedules require a nonzero manifest content hash;
   artwork-changing execution snapshots the global token high-water mark and

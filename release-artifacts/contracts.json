@@ -198,6 +198,10 @@
       "source": "smart-contracts/IStreamAdmins.sol"
     },
     {
+      "name": "IStreamArtworkFinalityRegistry",
+      "source": "smart-contracts/IStreamArtworkFinalityRegistry.sol"
+    },
+    {
       "name": "IStreamAssetPolicyRegistry",
       "source": "smart-contracts/IStreamAssetPolicyRegistry.sol"
     },
@@ -220,6 +224,11 @@
     {
       "name": "IStreamCore",
       "source": "smart-contracts/IStreamCore.sol"
+    },
+    {
+      "name": "IStreamCoreFinalityAdapter",
+      "source": "smart-contracts/IStreamCoreFinalityAdapter.sol",
+      "interface_id": "0xebf35615"
     },
     {
       "name": "IStreamDrops",

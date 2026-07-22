@@ -24969,6 +24969,2713 @@
         "receives": []
       }
     },
+    "IStreamArtworkFinalityRegistry": {
+      "source": "smart-contracts/IStreamArtworkFinalityRegistry.sol",
+      "artifact_path": "out/IStreamArtworkFinalityRegistry.sol/IStreamArtworkFinalityRegistry.json",
+      "abi_sha256": "sha256:92a1df8b5622d7985c54d4bf7f6cb590dc34d8148056d3aa908f1d9f8366313a",
+      "abi_entries": 88,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 29,
+        "events": 9,
+        "errors": 50,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "artworkFreezeMode((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "artworkFreezeMode",
+            "signature": "artworkFreezeMode((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint8",
+                "internal_type": "enum StreamArtworkFreezeMode"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artworkScopeFinalityRecord((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "artworkScopeFinalityRecord",
+            "signature": "artworkScopeFinalityRecord((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,(uint8,uint256,uint256,bytes32),bytes32,bytes32,bytes32,bytes32,string,address,uint64)",
+                "internal_type": "struct StreamScopedFinalityRecord",
+                "components": [
+                  {
+                    "name": "finalized",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "scope",
+                    "type": "(uint8,uint256,uint256,bytes32)",
+                    "internal_type": "struct StreamFinalityScope",
+                    "components": [
+                      {
+                        "name": "scopeType",
+                        "type": "uint8",
+                        "internal_type": "enum StreamFinalityScopeType"
+                      },
+                      {
+                        "name": "collectionId",
+                        "type": "uint256",
+                        "internal_type": "uint256"
+                      },
+                      {
+                        "name": "tokenId",
+                        "type": "uint256",
+                        "internal_type": "uint256"
+                      },
+                      {
+                        "name": "scopeId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "finalityRecordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestContentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestURIHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "componentsHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "finalityManifestURI",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "manifestPointer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "finalizedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "artworkTerminalFreezeAction((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "artworkTerminalFreezeAction",
+            "signature": "artworkTerminalFreezeAction((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint8,(uint8,uint256,uint256,bytes32),bytes32,uint64,uint64,uint64,address,address)",
+                "internal_type": "struct StreamTerminalFreezeAction",
+                "components": [
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "enum StreamTerminalFreezeStatus"
+                  },
+                  {
+                    "name": "scope",
+                    "type": "(uint8,uint256,uint256,bytes32)",
+                    "internal_type": "struct StreamFinalityScope",
+                    "components": [
+                      {
+                        "name": "scopeType",
+                        "type": "uint8",
+                        "internal_type": "enum StreamFinalityScopeType"
+                      },
+                      {
+                        "name": "collectionId",
+                        "type": "uint256",
+                        "internal_type": "uint256"
+                      },
+                      {
+                        "name": "tokenId",
+                        "type": "uint256",
+                        "internal_type": "uint256"
+                      },
+                      {
+                        "name": "scopeId",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "expectedFinalityRecordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "scheduledAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "notBefore",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "expiresAfter",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "scheduler",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "vetoGuardianAtScheduling",
+                    "type": "address",
+                    "internal_type": "address"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "cancelArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32)",
+            "kind": "function",
+            "name": "cancelArtworkTerminalFreeze",
+            "signature": "cancelArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "collectionFinalityRecord(uint256)",
+            "kind": "function",
+            "name": "collectionFinalityRecord",
+            "signature": "collectionFinalityRecord(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,bytes32,bytes32,bytes32,string,bytes32,address,uint64)",
+                "internal_type": "struct StreamCollectionFinalityRecord",
+                "components": [
+                  {
+                    "name": "finalized",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "finalityRecordHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestContentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestURIHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "finalityManifestURI",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "componentsHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestPointer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "finalizedAt",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "computeCollectionCoreFactsHash(uint256)",
+            "kind": "function",
+            "name": "computeCollectionCoreFactsHash",
+            "signature": "computeCollectionCoreFactsHash(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "computeComponentsHash((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+            "kind": "function",
+            "name": "computeComponentsHash",
+            "signature": "computeComponentsHash((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+            "inputs": [
+              {
+                "name": "components",
+                "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct StreamFinalityComponentExpectation[]",
+                "components": [
+                  {
+                    "name": "componentType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "component",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "codeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "moduleVersion",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "computeFinalityRecordHash((uint8,uint256,uint256,bytes32),bytes32,bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "kind": "function",
+            "name": "computeFinalityRecordHash",
+            "signature": "computeFinalityRecordHash((uint8,uint256,uint256,bytes32),bytes32,bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "coreFactsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "componentsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "manifest",
+                "type": "(string,bytes32,bytes32,bytes32,bytes32)",
+                "internal_type": "struct StreamFinalityManifestRef",
+                "components": [
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "uriHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "computeNonSanctionComponentsHash((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+            "kind": "function",
+            "name": "computeNonSanctionComponentsHash",
+            "signature": "computeNonSanctionComponentsHash((bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[])",
+            "inputs": [
+              {
+                "name": "components",
+                "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct StreamFinalityComponentExpectation[]",
+                "components": [
+                  {
+                    "name": "componentType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "component",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "codeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "moduleVersion",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "computeSanctionSubjectHash((uint8,uint256,uint256,bytes32),bytes32,bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "kind": "function",
+            "name": "computeSanctionSubjectHash",
+            "signature": "computeSanctionSubjectHash((uint8,uint256,uint256,bytes32),bytes32,bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "coreFactsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "nonSanctionComponentsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "manifest",
+                "type": "(string,bytes32,bytes32,bytes32,bytes32)",
+                "internal_type": "struct StreamFinalityManifestRef",
+                "components": [
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "uriHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "computeScopedCoreFactsHash((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "computeScopedCoreFactsHash",
+            "signature": "computeScopedCoreFactsHash((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "contentRootScopeSubject((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "contentRootScopeSubject",
+            "signature": "contentRootScopeSubject((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityComponentCount(uint256)",
+            "kind": "function",
+            "name": "finalityComponentCount",
+            "signature": "finalityComponentCount(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityComponentCountForScope((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "finalityComponentCountForScope",
+            "signature": "finalityComponentCountForScope((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityComponents(uint256,uint256,uint256)",
+            "kind": "function",
+            "name": "finalityComponents",
+            "signature": "finalityComponents(uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "start",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "limit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct StreamFinalityComponentExpectation[]",
+                "components": [
+                  {
+                    "name": "componentType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "component",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "codeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "moduleVersion",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityComponentsForScope((uint8,uint256,uint256,bytes32),uint256,uint256)",
+            "kind": "function",
+            "name": "finalityComponentsForScope",
+            "signature": "finalityComponentsForScope((uint8,uint256,uint256,bytes32),uint256,uint256)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "start",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "limit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct StreamFinalityComponentExpectation[]",
+                "components": [
+                  {
+                    "name": "componentType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "component",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "codeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "moduleVersion",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityManifestBytes(bytes32)",
+            "kind": "function",
+            "name": "finalityManifestBytes",
+            "signature": "finalityManifestBytes(bytes32)",
+            "inputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityManifestStored(bytes32)",
+            "kind": "function",
+            "name": "finalityManifestStored",
+            "signature": "finalityManifestStored(bytes32)",
+            "inputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalityStillMatches(uint256)",
+            "kind": "function",
+            "name": "finalityStillMatches",
+            "signature": "finalityStillMatches(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "finalizeArtworkScope((uint8,uint256,uint256,bytes32),(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "kind": "function",
+            "name": "finalizeArtworkScope",
+            "signature": "finalizeArtworkScope((uint8,uint256,uint256,bytes32),(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "components",
+                "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct StreamFinalityComponentExpectation[]",
+                "components": [
+                  {
+                    "name": "componentType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "component",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "codeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "moduleVersion",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "manifest",
+                "type": "(string,bytes32,bytes32,bytes32,bytes32)",
+                "internal_type": "struct StreamFinalityManifestRef",
+                "components": [
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "uriHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "finalizeCollectionArtwork(uint256,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "kind": "function",
+            "name": "finalizeCollectionArtwork",
+            "signature": "finalizeCollectionArtwork(uint256,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,(string,bytes32,bytes32,bytes32,bytes32))",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "components",
+                "type": "(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct StreamFinalityComponentExpectation[]",
+                "components": [
+                  {
+                    "name": "componentType",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "component",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "interfaceId",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "codeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "moduleVersion",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "dataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "manifest",
+                "type": "(string,bytes32,bytes32,bytes32,bytes32)",
+                "internal_type": "struct StreamFinalityManifestRef",
+                "components": [
+                  {
+                    "name": "uri",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "uriHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "contentHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "schemaId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "materializeExpiredArtworkTerminalFreeze((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "materializeExpiredArtworkTerminalFreeze",
+            "signature": "materializeExpiredArtworkTerminalFreeze((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "scheduleArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32,uint64,uint64)",
+            "kind": "function",
+            "name": "scheduleArtworkTerminalFreeze",
+            "signature": "scheduleArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32,uint64,uint64)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "stageFinalityManifest(bytes)",
+            "kind": "function",
+            "name": "stageFinalityManifest",
+            "signature": "stageFinalityManifest(bytes)",
+            "inputs": [
+              {
+                "name": "manifestBytes",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "verifyArtworkScopeFinality((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "verifyArtworkScopeFinality",
+            "signature": "verifyArtworkScopeFinality((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "currentRouteMatches",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "componentsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "verifyArtworkScopeFinalityRange((uint8,uint256,uint256,bytes32),uint256,uint256)",
+            "kind": "function",
+            "name": "verifyArtworkScopeFinalityRange",
+            "signature": "verifyArtworkScopeFinalityRange((uint8,uint256,uint256,bytes32),uint256,uint256)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "start",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "limit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "rangeMatches",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedRangeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "observedRangeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "nextStart",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "verifyFinality(uint256)",
+            "kind": "function",
+            "name": "verifyFinality",
+            "signature": "verifyFinality(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "currentRouteMatches",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "componentsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "verifyFinalityRange(uint256,uint256,uint256)",
+            "kind": "function",
+            "name": "verifyFinalityRange",
+            "signature": "verifyFinalityRange(uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "start",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "limit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "rangeMatches",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedRangeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "observedRangeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "nextStart",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "vetoArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32)",
+            "kind": "function",
+            "name": "vetoArtworkTerminalFreeze",
+            "signature": "vetoArtworkTerminalFreeze((uint8,uint256,uint256,bytes32),bytes32)",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamFinalityScope",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "enum StreamFinalityScopeType"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+            "kind": "event",
+            "name": "ArtworkScopeFinalized",
+            "signature": "ArtworkScopeFinalized(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,bytes32,string)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeType",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "scopeId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "componentsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "manifestContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "finalityManifestURI",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "ArtworkTerminalFreezeCancelled(uint16,bytes32,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "ArtworkTerminalFreezeCancelled",
+            "signature": "ArtworkTerminalFreezeCancelled(uint16,bytes32,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "canceller",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "ArtworkTerminalFreezeExecuted",
+            "signature": "ArtworkTerminalFreezeExecuted(uint16,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "ArtworkTerminalFreezeExpired(uint16,bytes32,bytes32)",
+            "kind": "event",
+            "name": "ArtworkTerminalFreezeExpired",
+            "signature": "ArtworkTerminalFreezeExpired(uint16,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "ArtworkTerminalFreezeScheduled(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,uint64,uint64,address,address)",
+            "kind": "event",
+            "name": "ArtworkTerminalFreezeScheduled",
+            "signature": "ArtworkTerminalFreezeScheduled(uint16,uint8,uint256,bytes32,uint256,bytes32,bytes32,uint64,uint64,address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeType",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "tokenId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "scopeId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "vetoGuardian",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "scheduler",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "ArtworkTerminalFreezeVetoed(uint16,bytes32,bytes32,bytes32,address)",
+            "kind": "event",
+            "name": "ArtworkTerminalFreezeVetoed",
+            "signature": "ArtworkTerminalFreezeVetoed(uint16,bytes32,bytes32,bytes32,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "expectedFinalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "guardian",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+            "kind": "event",
+            "name": "CollectionArtworkFinalized",
+            "signature": "CollectionArtworkFinalized(uint16,uint256,bytes32,address,bytes32,bytes32,string)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": true
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "componentsHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "manifestContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "finalityManifestURI",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+            "kind": "event",
+            "name": "FinalityManifestPointerRecorded",
+            "signature": "FinalityManifestPointerRecorded(uint16,bytes32,address,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "finalityRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "manifestPointer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "manifestContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "FinalityManifestStaged(uint16,bytes32,uint256,address)",
+            "kind": "event",
+            "name": "FinalityManifestStaged",
+            "signature": "FinalityManifestStaged(uint16,bytes32,uint256,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "manifestContentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "byteLength",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "FinalityAlreadyFinalized(bytes32)",
+            "kind": "error",
+            "name": "FinalityAlreadyFinalized",
+            "signature": "FinalityAlreadyFinalized(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCalldataTooLarge(uint256,uint256)",
+            "kind": "error",
+            "name": "FinalityCalldataTooLarge",
+            "signature": "FinalityCalldataTooLarge(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "size",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxSize",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCallerNotFinalityAdmin(address)",
+            "kind": "error",
+            "name": "FinalityCallerNotFinalityAdmin",
+            "signature": "FinalityCallerNotFinalityAdmin(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCallerNotVetoGuardian(address,address)",
+            "kind": "error",
+            "name": "FinalityCallerNotVetoGuardian",
+            "signature": "FinalityCallerNotVetoGuardian(address,address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "guardian",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCollectionBurnsNotBlocked(uint256)",
+            "kind": "error",
+            "name": "FinalityCollectionBurnsNotBlocked",
+            "signature": "FinalityCollectionBurnsNotBlocked(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCollectionNotClosed(uint256,uint8)",
+            "kind": "error",
+            "name": "FinalityCollectionNotClosed",
+            "signature": "FinalityCollectionNotClosed(uint256,uint8)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCollectionNotFrozen(uint256)",
+            "kind": "error",
+            "name": "FinalityCollectionNotFrozen",
+            "signature": "FinalityCollectionNotFrozen(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCollectionStatusInvalid(uint256,uint8)",
+            "kind": "error",
+            "name": "FinalityCollectionStatusInvalid",
+            "signature": "FinalityCollectionStatusInvalid(uint256,uint8)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "status",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCollectionSupplyModeInvalid(uint256,uint8)",
+            "kind": "error",
+            "name": "FinalityCollectionSupplyModeInvalid",
+            "signature": "FinalityCollectionSupplyModeInvalid(uint256,uint8)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "supplyMode",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "FinalityCollectionUnknown(uint256)",
+            "kind": "error",
+            "name": "FinalityCollectionUnknown",
+            "signature": "FinalityCollectionUnknown(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityComponentCodeHashMismatch(uint256)",
+            "kind": "error",
+            "name": "FinalityComponentCodeHashMismatch",
+            "signature": "FinalityComponentCodeHashMismatch(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityComponentCountInvalid(uint256,uint256)",
+            "kind": "error",
+            "name": "FinalityComponentCountInvalid",
+            "signature": "FinalityComponentCountInvalid(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityComponentMismatch(uint256)",
+            "kind": "error",
+            "name": "FinalityComponentMismatch",
+            "signature": "FinalityComponentMismatch(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityComponentUnreadable(uint256)",
+            "kind": "error",
+            "name": "FinalityComponentUnreadable",
+            "signature": "FinalityComponentUnreadable(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityComponentsUnsorted(uint256)",
+            "kind": "error",
+            "name": "FinalityComponentsUnsorted",
+            "signature": "FinalityComponentsUnsorted(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityContentRootLeafCountMismatch(uint256,uint256)",
+            "kind": "error",
+            "name": "FinalityContentRootLeafCountMismatch",
+            "signature": "FinalityContentRootLeafCountMismatch(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "expectedLeafCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "actualLeafCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityContentRootMissing(bytes32)",
+            "kind": "error",
+            "name": "FinalityContentRootMissing",
+            "signature": "FinalityContentRootMissing(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeSubject",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityDiscoveryComponentMismatch(uint256)",
+            "kind": "error",
+            "name": "FinalityDiscoveryComponentMismatch",
+            "signature": "FinalityDiscoveryComponentMismatch(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityDiscoveryComponentUnreadable(uint256)",
+            "kind": "error",
+            "name": "FinalityDiscoveryComponentUnreadable",
+            "signature": "FinalityDiscoveryComponentUnreadable(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityDiscoveryCountMismatch(uint256,uint256)",
+            "kind": "error",
+            "name": "FinalityDiscoveryCountMismatch",
+            "signature": "FinalityDiscoveryCountMismatch(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "discoveredCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "submittedCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "FinalityDiscoveryFactsUnreadable()",
+            "kind": "error",
+            "name": "FinalityDiscoveryFactsUnreadable",
+            "signature": "FinalityDiscoveryFactsUnreadable()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityDiscoveryHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "FinalityDiscoveryHashMismatch",
+            "signature": "FinalityDiscoveryHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "discoveredHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "submittedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityExpectedRecordHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "FinalityExpectedRecordHashMismatch",
+            "signature": "FinalityExpectedRecordHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "computed",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityExpectedRecordHashZero()",
+            "kind": "error",
+            "name": "FinalityExpectedRecordHashZero",
+            "signature": "FinalityExpectedRecordHashZero()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityFreezeAlreadyScheduled(bytes32)",
+            "kind": "error",
+            "name": "FinalityFreezeAlreadyScheduled",
+            "signature": "FinalityFreezeAlreadyScheduled(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeDelayTooShort(uint64,uint64)",
+            "kind": "error",
+            "name": "FinalityFreezeDelayTooShort",
+            "signature": "FinalityFreezeDelayTooShort(uint64,uint64)",
+            "inputs": [
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "earliestAllowed",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeGuardianUnset(bytes32)",
+            "kind": "error",
+            "name": "FinalityFreezeGuardianUnset",
+            "signature": "FinalityFreezeGuardianUnset(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeNotExpired(bytes32)",
+            "kind": "error",
+            "name": "FinalityFreezeNotExpired",
+            "signature": "FinalityFreezeNotExpired(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeNotOpen(uint64,uint64)",
+            "kind": "error",
+            "name": "FinalityFreezeNotOpen",
+            "signature": "FinalityFreezeNotOpen(uint64,uint64)",
+            "inputs": [
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeNotScheduled(bytes32)",
+            "kind": "error",
+            "name": "FinalityFreezeNotScheduled",
+            "signature": "FinalityFreezeNotScheduled(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeVetoWindowClosed(uint64)",
+            "kind": "error",
+            "name": "FinalityFreezeVetoWindowClosed",
+            "signature": "FinalityFreezeVetoWindowClosed(uint64)",
+            "inputs": [
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "FinalityFreezeWindowTooShort(uint64,uint64)",
+            "kind": "error",
+            "name": "FinalityFreezeWindowTooShort",
+            "signature": "FinalityFreezeWindowTooShort(uint64,uint64)",
+            "inputs": [
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "earliestAllowed",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "FinalityManifestBytesInvalid()",
+            "kind": "error",
+            "name": "FinalityManifestBytesInvalid",
+            "signature": "FinalityManifestBytesInvalid()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityManifestBytesMissing(bytes32)",
+            "kind": "error",
+            "name": "FinalityManifestBytesMissing",
+            "signature": "FinalityManifestBytesMissing(bytes32)",
+            "inputs": [
+              {
+                "name": "contentHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityManifestFieldZero()",
+            "kind": "error",
+            "name": "FinalityManifestFieldZero",
+            "signature": "FinalityManifestFieldZero()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityManifestURIHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "FinalityManifestURIHashMismatch",
+            "signature": "FinalityManifestURIHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityMetadataModeInvalid(uint8)",
+            "kind": "error",
+            "name": "FinalityMetadataModeInvalid",
+            "signature": "FinalityMetadataModeInvalid(uint8)",
+            "inputs": [
+              {
+                "name": "metadataMode",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "FinalityMissingRequiredComponent(bytes32)",
+            "kind": "error",
+            "name": "FinalityMissingRequiredComponent",
+            "signature": "FinalityMissingRequiredComponent(bytes32)",
+            "inputs": [
+              {
+                "name": "componentType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalitySanctionComponentDuplicated()",
+            "kind": "error",
+            "name": "FinalitySanctionComponentDuplicated",
+            "signature": "FinalitySanctionComponentDuplicated()",
+            "inputs": []
+          },
+          {
+            "key": "FinalitySanctionComponentMissing()",
+            "kind": "error",
+            "name": "FinalitySanctionComponentMissing",
+            "signature": "FinalitySanctionComponentMissing()",
+            "inputs": []
+          },
+          {
+            "key": "FinalitySanctionComponentWrongType(bytes32,bytes32)",
+            "kind": "error",
+            "name": "FinalitySanctionComponentWrongType",
+            "signature": "FinalitySanctionComponentWrongType(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "requiredType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "suppliedType",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalitySanctionInvalid(bytes32)",
+            "kind": "error",
+            "name": "FinalitySanctionInvalid",
+            "signature": "FinalitySanctionInvalid(bytes32)",
+            "inputs": [
+              {
+                "name": "sanctionSubjectHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalitySanctionRecordHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "FinalitySanctionRecordHashMismatch",
+            "signature": "FinalitySanctionRecordHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "componentDataHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "sanctionRecordHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityScopeShapeInvalid()",
+            "kind": "error",
+            "name": "FinalityScopeShapeInvalid",
+            "signature": "FinalityScopeShapeInvalid()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityScopeUnknown()",
+            "kind": "error",
+            "name": "FinalityScopeUnknown",
+            "signature": "FinalityScopeUnknown()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityScopeUsesCollectionEntry()",
+            "kind": "error",
+            "name": "FinalityScopeUsesCollectionEntry",
+            "signature": "FinalityScopeUsesCollectionEntry()",
+            "inputs": []
+          },
+          {
+            "key": "FinalityScopedFactsMismatch()",
+            "kind": "error",
+            "name": "FinalityScopedFactsMismatch",
+            "signature": "FinalityScopedFactsMismatch()",
+            "inputs": []
+          },
+          {
+            "key": "FinalitySnapshotManifestMissing(uint256,uint8)",
+            "kind": "error",
+            "name": "FinalitySnapshotManifestMissing",
+            "signature": "FinalitySnapshotManifestMissing(uint256,uint8)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "metadataMode",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "FinalityStagedHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "FinalityStagedHashMismatch",
+            "signature": "FinalityStagedHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "staged",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "supplied",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "FinalityTokenNotInScope()",
+            "kind": "error",
+            "name": "FinalityTokenNotInScope",
+            "signature": "FinalityTokenNotInScope()",
+            "inputs": []
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "IStreamAssetPolicyRegistry": {
       "source": "smart-contracts/IStreamAssetPolicyRegistry.sol",
       "artifact_path": "out/IStreamAssetPolicyRegistry.sol/IStreamAssetPolicyRegistry.json",
@@ -27655,6 +30362,258 @@
             ]
           }
         ],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamCoreFinalityAdapter": {
+      "source": "smart-contracts/IStreamCoreFinalityAdapter.sol",
+      "artifact_path": "out/IStreamCoreFinalityAdapter.sol/IStreamCoreFinalityAdapter.json",
+      "abi_sha256": "sha256:1b9e23a6f40bf0e378eac5d10f6bf910416de2df14284803717333a8a0fad562",
+      "abi_entries": 5,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 5,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "collectionMetadata()",
+            "kind": "function",
+            "name": "collectionMetadata",
+            "signature": "collectionMetadata()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "core()",
+            "kind": "function",
+            "name": "core",
+            "signature": "core()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "coreCollectionFinalityFacts(uint256)",
+            "kind": "function",
+            "name": "coreCollectionFinalityFacts",
+            "signature": "coreCollectionFinalityFacts(uint256)",
+            "inputs": [
+              {
+                "name": "collectionId",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,bool,uint8,uint8,uint256,uint256,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamCoreCollectionFinalityFacts",
+                "components": [
+                  {
+                    "name": "exists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "hasMaxSupply",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "supplyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "maxSupply",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "mintedSupply",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "burnedSupply",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "nextCollectionSerial",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "collectionConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "scopedCoreFinalityFacts((uint8,uint256,uint256,bytes32))",
+            "kind": "function",
+            "name": "scopedCoreFinalityFacts",
+            "signature": "scopedCoreFinalityFacts((uint8,uint256,uint256,bytes32))",
+            "inputs": [
+              {
+                "name": "scope",
+                "type": "(uint8,uint256,uint256,bytes32)",
+                "internal_type": "struct StreamCoreFinalityScopeQuery",
+                "components": [
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(bool,uint8,uint256,uint256,bytes32,bool,uint256,uint8,bool,uint8,uint8,bytes32,bytes32)",
+                "internal_type": "struct StreamScopedCoreFinalityFacts",
+                "components": [
+                  {
+                    "name": "scopeExists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "scopeType",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenId",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "scopeId",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "tokenMappingExists",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "collectionSerial",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "tokenLifecycle",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "burned",
+                    "type": "bool",
+                    "internal_type": "bool"
+                  },
+                  {
+                    "name": "collectionStatus",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionSupplyMode",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "collectionConfigHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "scopeManifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "supportsInterface(bytes4)",
+            "kind": "function",
+            "name": "supportsInterface",
+            "signature": "supportsInterface(bytes4)",
+            "inputs": [
+              {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
         "errors": [],
         "fallbacks": [],
         "receives": []

@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 
 import "../smart-contracts/StreamArtworkFinalityRegistry.sol";
 import "../smart-contracts/StreamArtworkFinalityTypes.sol";
+import "../smart-contracts/StreamCoreFinalityAdapter.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/FinalityMocks.sol";
@@ -152,22 +153,7 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
         );
     }
 
-    function testIdentityRolesAndRecordFamilies() public {
-        _golden(
-            StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING,
-            "IDENTITY_FACADE_BINDING",
-            0xb3454197cb151b3305cae7757ccaa671e791eb40902d3aefe6cbaa64d6695087
-        );
-        _golden(
-            StreamFinalityDomains.IDENTITY_MODE_CORE_NATIVE,
-            "CORE_NATIVE",
-            0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1
-        );
-        _golden(
-            StreamFinalityDomains.IDENTITY_MODE_EXTERNAL_FACADE,
-            "EXTERNAL_FACADE",
-            0xc7dd233bcf9b505ac7e2ab434d9e6af7bc663d64e2d983f1dd6d77668b578656
-        );
+    function testRolesAndGovernedGasDomain() public {
         _golden(
             StreamFinalityDomains.ROLE_COLLECTION_FINALITY_ADMIN,
             "ROLE_COLLECTION_FINALITY_ADMIN",
@@ -207,13 +193,11 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
         registry.MAX_FINALITY_COMPONENTS().assertEq(32, "MAX_FINALITY_COMPONENTS");
         registry.MAX_FINALITY_CALLDATA_BYTES().assertEq(32_768, "MAX_FINALITY_CALLDATA_BYTES");
         uint256(registry.TERMINAL_FREEZE_VETO_FLOOR()).assertEq(72 hours, "72h veto floor");
-        uint256(registry.TERMINAL_FREEZE_EXECUTION_WINDOW_FLOOR()).assertEq(
-            7 days, "7d open-to-execute floor"
-        );
+        uint256(registry.TERMINAL_FREEZE_EXECUTION_WINDOW_FLOOR())
+            .assertEq(7 days, "7d open-to-execute floor");
         registry.FINALITY_COMPONENT_READ_GAS().assertEq(30_000, "genesis diagnostic gas");
-        registry.GGP_FINALITY_COMPONENT_READ_GAS_KEY().assertEq(
-            StreamFinalityDomains.GGP_FINALITY_COMPONENT_READ_GAS, "GGP key mirror"
-        );
+        registry.GGP_FINALITY_COMPONENT_READ_GAS_KEY()
+            .assertEq(StreamFinalityDomains.GGP_FINALITY_COMPONENT_READ_GAS, "GGP key mirror");
         registry.isStreamArtworkFinalityRegistry().assertTrue("marker");
         uint256(registry.FINALITY_EVENT_SCHEMA_VERSION()).assertEq(1, "event schemaVersion");
     }
@@ -224,19 +208,26 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
     function testSplitPreimagesMatchSingleEncode() public {
         StreamArtworkFinalityRegistry registry = _deployRegistry();
         MockFinalityCore coreMock = MockFinalityCore(registry.core());
+        bytes32 emptyConfigHash = keccak256(
+            abi.encode(
+                StreamFinalityDomains.STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1,
+                block.chainid,
+                address(coreMock),
+                uint256(9)
+            )
+        );
 
-        // Collection facts hash.
+        // Collection facts hash binds the actual Core, not the aggregate adapter.
         StreamCoreCollectionFinalityFacts memory facts = StreamCoreCollectionFinalityFacts({
             exists: true,
             hasMaxSupply: true,
             status: 2,
             supplyMode: 1,
-            createdAt: 111,
             maxSupply: 500,
             mintedSupply: 400,
             burnedSupply: 25,
             nextCollectionSerial: 401,
-            collectionConfigHash: keccak256("config")
+            collectionConfigHash: emptyConfigHash
         });
         coreMock.setCollectionFacts(9, facts);
         bytes32 expectedFactsHash = keccak256(
@@ -249,7 +240,6 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
                 facts.hasMaxSupply,
                 facts.status,
                 facts.supplyMode,
-                facts.createdAt,
                 facts.maxSupply,
                 facts.mintedSupply,
                 facts.burnedSupply,
@@ -257,9 +247,27 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
                 facts.collectionConfigHash
             )
         );
-        registry.computeCollectionCoreFactsHash(9).assertEq(
-            expectedFactsHash, "collection facts hash split == single encode"
+        registry.computeCollectionCoreFactsHash(9)
+            .assertEq(expectedFactsHash, "collection facts hash split == single encode");
+        bytes32 adapterAddressFactsHash = keccak256(
+            abi.encode(
+                StreamFinalityDomains.STREAM_CORE_COLLECTION_FACTS_V1,
+                block.chainid,
+                address(registry.coreFinalityAdapter()),
+                uint256(9),
+                facts.exists,
+                facts.hasMaxSupply,
+                facts.status,
+                facts.supplyMode,
+                facts.maxSupply,
+                facts.mintedSupply,
+                facts.burnedSupply,
+                facts.nextCollectionSerial,
+                facts.collectionConfigHash
+            )
         );
+        (registry.computeCollectionCoreFactsHash(9) != adapterAddressFactsHash)
+        .assertTrue("facts hash must not bind adapter address");
 
         // Scoped facts hash.
         StreamFinalityScope memory scope = StreamFinalityScope({
@@ -280,10 +288,17 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
             burned: false,
             collectionStatus: 0,
             collectionSupplyMode: 2,
-            collectionConfigHash: keccak256("config"),
+            collectionConfigHash: emptyConfigHash,
             scopeManifestHash: keccak256("scope-manifest")
         });
-        coreMock.setScopedFacts(scope, scopedFacts);
+        coreMock.setCollectionStatus(scope.collectionId, scopedFacts.collectionStatus);
+        coreMock.setCollectionSupply(
+            scope.collectionId, true, scopedFacts.collectionSupplyMode, 500, 400, 401
+        );
+        MockFinalityMetadata(address(registry.metadataReads()))
+            .setScopeManifest(
+                scope.collectionId, scope.scopeId, true, scopedFacts.scopeManifestHash
+            );
         // A 16-argument abi.encode cannot compile under legacy codegen (the reason the
         // registry splits it), so the cross-check builds the encoding definitionally: one
         // left-aligned-nothing, right-padded-nothing 32-byte word per static argument, in
@@ -309,12 +324,15 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
             scopedFacts.scopeManifestHash
         );
         (encodedHead.length + encodedTail.length).assertEq(16 * 32, "16 words");
-        registry.computeScopedCoreFactsHash(scope).assertEq(
-            keccak256(bytes.concat(encodedHead, encodedTail)),
-            "scoped facts hash == definitional word encoding"
-        );
+        registry.computeScopedCoreFactsHash(scope)
+            .assertEq(
+                keccak256(bytes.concat(encodedHead, encodedTail)),
+                "scoped facts hash == definitional word encoding"
+            );
 
-        _assertRecordAndSubjectPreimages(registry, scope, registry.computeScopedCoreFactsHash(scope));
+        _assertRecordAndSubjectPreimages(
+            registry, scope, registry.computeScopedCoreFactsHash(scope)
+        );
     }
 
     function _assertRecordAndSubjectPreimages(
@@ -322,13 +340,14 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
         StreamFinalityScope memory scope,
         bytes32 coreFactsHash
     ) private {
-        StreamFinalityManifestRef memory manifest = StreamFinalityManifestRef({
-            uri: "ar://manifest",
-            uriHash: keccak256("ar://manifest"),
-            contentHash: keccak256("content"),
-            schemaId: keccak256("schema"),
-            canonicalizationHash: keccak256("jcs")
-        });
+        StreamFinalityManifestRef memory manifest =
+            StreamFinalityManifestRef({
+                uri: "ar://manifest",
+                uriHash: keccak256("ar://manifest"),
+                contentHash: keccak256("content"),
+                schemaId: keccak256("schema"),
+                canonicalizationHash: keccak256("jcs")
+            });
         bytes32 componentsHash = keccak256("components");
 
         bytes32 expectedScoped = keccak256(
@@ -400,58 +419,61 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
                 )
             )
         );
-        registry.computeSanctionSubjectHash(scope, coreFactsHash, keccak256("non-sanction"), manifest)
-            .assertEq(expectedSubject, "sanction subject hash == definitional word encoding");
+        registry.computeSanctionSubjectHash(
+                scope, coreFactsHash, keccak256("non-sanction"), manifest
+            ).assertEq(expectedSubject, "sanction subject hash == definitional word encoding");
     }
 
     function testContentRootSubjectDerivations() public {
         StreamArtworkFinalityRegistry registry = _deployRegistry();
         address core = registry.core();
 
-        StreamFinalityScope memory collectionScope = StreamFinalityScope(
-            StreamFinalityScopeType.COLLECTION, 7, 0, bytes32(0)
-        );
-        registry.contentRootScopeSubject(collectionScope).assertEq(
-            keccak256(
-                abi.encode(
-                    StreamFinalityDomains.STREAM_SUBJECT_COLLECTION_V1,
-                    block.chainid,
-                    core,
-                    uint256(7)
-                )
-            ),
-            "collection subject"
-        );
+        StreamFinalityScope memory collectionScope =
+            StreamFinalityScope(StreamFinalityScopeType.COLLECTION, 7, 0, bytes32(0));
+        registry.contentRootScopeSubject(collectionScope)
+            .assertEq(
+                keccak256(
+                    abi.encode(
+                        StreamFinalityDomains.STREAM_SUBJECT_COLLECTION_V1,
+                        block.chainid,
+                        core,
+                        uint256(7)
+                    )
+                ),
+                "collection subject"
+            );
 
         StreamFinalityScope memory tokenScope =
             StreamFinalityScope(StreamFinalityScopeType.TOKEN, 7, 4321, bytes32(0));
-        registry.contentRootScopeSubject(tokenScope).assertEq(
-            keccak256(
-                abi.encode(
-                    StreamFinalityDomains.STREAM_SUBJECT_TOKEN_V1,
-                    block.chainid,
-                    core,
-                    uint256(4321)
-                )
-            ),
-            "token subject"
-        );
+        registry.contentRootScopeSubject(tokenScope)
+            .assertEq(
+                keccak256(
+                    abi.encode(
+                        StreamFinalityDomains.STREAM_SUBJECT_TOKEN_V1,
+                        block.chainid,
+                        core,
+                        uint256(4321)
+                    )
+                ),
+                "token subject"
+            );
 
         StreamFinalityScope memory seasonScope =
             StreamFinalityScope(StreamFinalityScopeType.SEASON, 7, 0, keccak256("season-2"));
-        registry.contentRootScopeSubject(seasonScope).assertEq(
-            keccak256(
-                abi.encode(
-                    StreamFinalityDomains.STREAM_SUBJECT_SCOPE_V1,
-                    block.chainid,
-                    core,
-                    uint256(7),
-                    uint8(StreamFinalityScopeType.SEASON),
-                    keccak256("season-2")
-                )
-            ),
-            "season scope subject"
-        );
+        registry.contentRootScopeSubject(seasonScope)
+            .assertEq(
+                keccak256(
+                    abi.encode(
+                        StreamFinalityDomains.STREAM_SUBJECT_SCOPE_V1,
+                        block.chainid,
+                        core,
+                        uint256(7),
+                        uint8(StreamFinalityScopeType.SEASON),
+                        keccak256("season-2")
+                    )
+                ),
+                "season scope subject"
+            );
     }
 
     function _deployRegistry() private returns (StreamArtworkFinalityRegistry) {
@@ -459,12 +481,16 @@ contract StreamFinalityDomainsGoldenTest is CharacterizationTestBase {
         MockFinalityCore coreMock = new MockFinalityCore();
         MockFinalityMetadata metadataMock = new MockFinalityMetadata();
         MockFinalitySanction sanctionMock = new MockFinalitySanction();
+        MockFinalityDiscovery discoveryMock = new MockFinalityDiscovery();
+        StreamCoreFinalityAdapter coreAdapter =
+            new StreamCoreFinalityAdapter(address(coreMock), address(metadataMock));
         return new StreamArtworkFinalityRegistry(
             address(coreMock),
             address(metadataMock),
+            address(coreAdapter),
             address(sanctionMock),
             address(authority),
-            address(0)
+            address(discoveryMock)
         );
     }
 }

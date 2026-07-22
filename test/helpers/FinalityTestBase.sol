@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../smart-contracts/StreamArtworkFinalityPreview.sol";
 import "../../smart-contracts/StreamArtworkFinalityRegistry.sol";
 import "../../smart-contracts/StreamArtworkFinalityTypes.sol";
+import "../../smart-contracts/StreamCoreFinalityAdapter.sol";
 import "./Assertions.sol";
 import "./CharacterizationTestBase.sol";
 import "./FinalityMocks.sol";
@@ -20,8 +21,9 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
     MockFinalityCore internal coreMock;
     MockFinalityMetadata internal metadataMock;
     MockFinalitySanction internal sanctionMock;
+    MockFinalityDiscovery internal discoveryMock;
     // One mock per mandatory component type ([LTA-FINALITY] req 1), plus the sanction/
-    // declaration slot and the optional facade-binding slot.
+    // declaration slot.
     MockFinalityComponent internal metadataComponent;
     MockFinalityComponent internal routerComponent;
     MockFinalityComponent internal rendererComponent;
@@ -32,7 +34,7 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
     MockFinalityComponent internal dependencyComponent;
     MockFinalityComponent internal referenceRenderComponent;
     MockFinalityComponent internal sanctionComponent;
-    MockFinalityComponent internal facadeBindingComponent;
+    StreamCoreFinalityAdapter internal coreAdapter;
     StreamArtworkFinalityRegistry internal registry;
     StreamArtworkFinalityPreview internal previewer;
 
@@ -41,8 +43,8 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
     address internal outsider = address(0x00751D);
 
     uint256 internal constant COLLECTION_ID = 7;
-    uint64 internal constant MINTED_SUPPLY = 10;
-    uint64 internal constant BURNED_SUPPLY = 2;
+    uint256 internal constant MINTED_SUPPLY = 10;
+    uint256 internal constant BURNED_SUPPLY = 2;
 
     struct Fixture {
         StreamFinalityScope scope;
@@ -53,11 +55,9 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
         bytes32 nonSanctionComponentsHash;
         bytes32 sanctionSubjectHash;
         bytes32 sanctionRecordHash;
-        bytes32 facadeRecordHash;
         bytes32 expectedFinalityRecordHash;
         bytes32 scopeKey;
         uint8 metadataMode;
-        bool externalFacade;
     }
 
     function setUp() public virtual {
@@ -65,6 +65,7 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
         coreMock = new MockFinalityCore();
         metadataMock = new MockFinalityMetadata();
         sanctionMock = new MockFinalitySanction();
+        discoveryMock = new MockFinalityDiscovery();
         metadataComponent = new MockFinalityComponent();
         routerComponent = new MockFinalityComponent();
         rendererComponent = new MockFinalityComponent();
@@ -75,13 +76,14 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
         dependencyComponent = new MockFinalityComponent();
         referenceRenderComponent = new MockFinalityComponent();
         sanctionComponent = new MockFinalityComponent();
-        facadeBindingComponent = new MockFinalityComponent();
+        coreAdapter = new StreamCoreFinalityAdapter(address(coreMock), address(metadataMock));
         registry = new StreamArtworkFinalityRegistry(
             address(coreMock),
             address(metadataMock),
+            address(coreAdapter),
             address(sanctionMock),
             address(authority),
-            address(0)
+            address(discoveryMock)
         );
         previewer = new StreamArtworkFinalityPreview(registry);
         authority.setRole(StreamFinalityDomains.ROLE_COLLECTION_FINALITY_ADMIN, finalityAdmin, true);
@@ -160,35 +162,12 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
             hasMaxSupply: true,
             status: StreamFinalityDomains.CORE_COLLECTION_STATUS_CLOSED,
             supplyMode: 0,
-            createdAt: uint64(block.timestamp) - 1000,
             maxSupply: MINTED_SUPPLY,
             mintedSupply: MINTED_SUPPLY,
             burnedSupply: BURNED_SUPPLY,
             nextCollectionSerial: MINTED_SUPPLY + 1,
             collectionConfigHash: _emptyConfigHash(collectionId)
         });
-    }
-
-    function _scopedFactsFor(StreamFinalityScope memory scope)
-        internal
-        view
-        returns (StreamScopedCoreFinalityFacts memory facts)
-    {
-        facts.scopeExists = true;
-        facts.scopeType = uint8(scope.scopeType);
-        facts.collectionId = scope.collectionId;
-        facts.tokenId = scope.tokenId;
-        facts.scopeId = scope.scopeId;
-        facts.collectionStatus = 0;
-        facts.collectionSupplyMode = 2;
-        facts.collectionConfigHash = _emptyConfigHash(scope.collectionId);
-        if (scope.scopeType == StreamFinalityScopeType.TOKEN) {
-            facts.tokenMappingExists = true;
-            facts.collectionSerial = 3;
-            facts.tokenLifecycle = StreamFinalityDomains.TOKEN_LIFECYCLE_MINTED;
-        } else {
-            facts.scopeManifestHash = keccak256(abi.encodePacked("scope-manifest", scope.scopeId));
-        }
     }
 
     // ------------------------------------------------------------------
@@ -309,25 +288,18 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
         internal
         returns (Fixture memory fixture)
     {
-        return _buildFixture(
-            scope, artistBound, StreamFinalityDomains.METADATA_MODE_OFFCHAIN, false
-        );
+        return _buildFixture(scope, artistBound, StreamFinalityDomains.METADATA_MODE_OFFCHAIN);
     }
 
     /// @notice Full-set fixture builder honoring metadata mode (adds SCRIPT_SOURCE,
-    ///         DEPENDENCY_SOURCE, REFERENCE_RENDER for ONCHAIN/HYBRID) and identity mode (adds
-    ///         the IDENTITY_FACADE_BINDING component and configures the live binding + snapshot
-    ///         for EXTERNAL_FACADE / script works).
-    function _buildFixture(
-        StreamFinalityScope memory scope,
-        bool artistBound,
-        uint8 metadataMode,
-        bool externalFacade
-    ) internal returns (Fixture memory fixture) {
+    ///         DEPENDENCY_SOURCE, REFERENCE_RENDER for ONCHAIN/HYBRID).
+    function _buildFixture(StreamFinalityScope memory scope, bool artistBound, uint8 metadataMode)
+        internal
+        returns (Fixture memory fixture)
+    {
         fixture.scope = scope;
         fixture.scopeKey = _scopeKeyOf(scope);
         fixture.metadataMode = metadataMode;
-        fixture.externalFacade = externalFacade;
 
         _configureCoreAndContentRoot(fixture);
         metadataMock.setMetadataMode(scope.collectionId, metadataMode);
@@ -341,18 +313,6 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
                 scope.collectionId, keccak256(abi.encodePacked("snapshot", fixture.scopeKey))
             );
         }
-        if (externalFacade) {
-            coreMock.setIdentityMode(
-                scope.collectionId, StreamFinalityDomains.IDENTITY_MODE_EXTERNAL_FACADE
-            );
-            coreMock.setTransferController(scope.collectionId, address(facadeBindingComponent));
-            fixture.facadeRecordHash =
-                keccak256(abi.encodePacked("facade-binding-record", fixture.scopeKey));
-            metadataMock.setFacadeBinding(
-                scope.collectionId, true, address(facadeBindingComponent), fixture.facadeRecordHash
-            );
-        }
-
         fixture.manifest = _stagedManifest(
             "ar://finality-manifest",
             abi.encodePacked("canonical finality manifest bytes for ", fixture.scopeKey)
@@ -372,6 +332,7 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
         }
 
         fixture.componentsHash = registry.computeComponentsHash(fixture.components);
+        _syncDiscovery(fixture);
         fixture.nonSanctionComponentsHash =
             registry.computeNonSanctionComponentsHash(fixture.components);
         fixture.sanctionSubjectHash = registry.computeSanctionSubjectHash(
@@ -400,14 +361,30 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
             coreMock.setCollectionFacts(
                 scope.collectionId, _closedCollectionFacts(scope.collectionId)
             );
-            coreMock.setBurnsBlocked(scope.collectionId, true, uint64(block.number));
+            coreMock.setBurnsBlocked(scope.collectionId, true);
+            coreMock.setCollectionFrozen(scope.collectionId, true);
             fixture.coreFactsHash = registry.computeCollectionCoreFactsHash(scope.collectionId);
         } else {
-            coreMock.setScopedFacts(scope, _scopedFactsFor(scope));
+            coreMock.setCollectionExists(scope.collectionId, true);
+            coreMock.setCollectionStatus(scope.collectionId, 0);
+            coreMock.setCollectionSupply(scope.collectionId, false, 2, 0, 0, 0);
+            if (scope.scopeType == StreamFinalityScopeType.TOKEN) {
+                coreMock.setTokenIdentity(scope.tokenId, true, scope.collectionId, 3, false);
+                coreMock.setTokenLifecycle(
+                    scope.tokenId, StreamFinalityDomains.TOKEN_LIFECYCLE_MINTED
+                );
+            } else {
+                metadataMock.setScopeManifest(
+                    scope.collectionId,
+                    scope.scopeId,
+                    true,
+                    keccak256(abi.encodePacked("scope-manifest", scope.scopeId))
+                );
+            }
             fixture.coreFactsHash = registry.computeScopedCoreFactsHash(scope);
         }
         uint64 leafCount = scope.scopeType == StreamFinalityScopeType.COLLECTION
-            ? MINTED_SUPPLY
+            ? uint64(MINTED_SUPPLY)
             : scope.scopeType == StreamFinalityScopeType.TOKEN ? 1 : 4;
         metadataMock.setContentRoot(
             scope.collectionId,
@@ -419,7 +396,7 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
     }
 
     /// @notice Assembles the full mandatory component set for the fixture's mode, plus the
-    ///         sanction/declaration slot and (for EXTERNAL_FACADE) the identity-binding slot.
+    ///         sanction/declaration slot.
     function _assembleComponents(Fixture memory fixture, bytes32 sanctionType)
         private
         view
@@ -427,7 +404,7 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
     {
         bool scriptWork = fixture.metadataMode == StreamFinalityDomains.METADATA_MODE_ONCHAIN
             || fixture.metadataMode == StreamFinalityDomains.METADATA_MODE_HYBRID;
-        uint256 count = 6 + 1 + (scriptWork ? 3 : 0) + (fixture.externalFacade ? 1 : 0);
+        uint256 count = 6 + 1 + (scriptWork ? 3 : 0);
         StreamFinalityComponentExpectation[] memory all =
             new StreamFinalityComponentExpectation[](count);
         uint256 c = 0;
@@ -465,13 +442,6 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
             );
         }
         all[c++] = _expectationFor(sanctionComponent, sanctionType, fixture.sanctionRecordHash);
-        if (fixture.externalFacade) {
-            all[c++] = _expectationFor(
-                facadeBindingComponent,
-                StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING,
-                fixture.facadeRecordHash
-            );
-        }
         return _sortComponents(all);
     }
 
@@ -485,6 +455,26 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
             componentType,
             keccak256(abi.encodePacked("datahash", componentType, scopeKey))
         );
+    }
+
+    function _syncDiscovery(Fixture memory fixture) internal {
+        if (fixture.scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            discoveryMock.setCollectionDiscovery(
+                fixture.scope.collectionId, fixture.components.length, fixture.componentsHash
+            );
+            for (uint256 i = 0; i < fixture.components.length; i++) {
+                discoveryMock.setCollectionComponent(
+                    fixture.scope.collectionId, i, fixture.components[i]
+                );
+            }
+        } else {
+            discoveryMock.setScopedDiscovery(
+                fixture.scope, fixture.components.length, fixture.componentsHash
+            );
+            for (uint256 i = 0; i < fixture.components.length; i++) {
+                discoveryMock.setScopedComponent(fixture.scope, i, fixture.components[i]);
+            }
+        }
     }
 
     /// @notice Schedules the terminal freeze for a fixture and warps into the open window.
@@ -541,6 +531,7 @@ abstract contract FinalityTestBase is CharacterizationTestBase {
     /// @notice Rebinds the staged hash and sanction response after fixture mutation.
     function _recomputeFixtureHashes(Fixture memory fixture, bool artistBound) internal {
         fixture.componentsHash = registry.computeComponentsHash(fixture.components);
+        _syncDiscovery(fixture);
         fixture.nonSanctionComponentsHash =
             registry.computeNonSanctionComponentsHash(fixture.components);
         fixture.sanctionSubjectHash = registry.computeSanctionSubjectHash(

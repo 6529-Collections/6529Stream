@@ -2,12 +2,119 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IStreamArtworkFinalityRegistry.sol";
+import "../smart-contracts/IERC165.sol";
+import "../smart-contracts/IStreamCoreFinalityAdapter.sol";
 import "../smart-contracts/StreamArtworkFinalityPreview.sol";
 import "../smart-contracts/StreamArtworkFinalityRegistry.sol";
 import "../smart-contracts/StreamArtworkFinalityTypes.sol";
+import "../smart-contracts/StreamCoreFinalityAdapter.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/FinalityMocks.sol";
 import "./helpers/FinalityTestBase.sol";
+
+contract AdversarialFinalityAdapterERC165 {
+    address private _core;
+    address private _collectionMetadata;
+    uint8 private immutable _mode;
+
+    constructor(address core_, address collectionMetadata_, uint8 mode_) {
+        _core = core_;
+        _collectionMetadata = collectionMetadata_;
+        _mode = mode_;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+        if (_mode == 7) {
+            bool supported = interfaceId == type(IERC165).interfaceId
+                || interfaceId == type(IStreamCoreFinalityAdapter).interfaceId;
+            assembly ("memory-safe") {
+                let output := mload(0x40)
+                mstore(output, supported)
+                mstore(add(output, 0x20), 0xfeed)
+                return(output, 0x40)
+            }
+        }
+        if (interfaceId == 0xffffffff) {
+            if (_mode == 1) {
+                revert("invalid-interface probe reverted");
+            }
+            if (_mode == 2) {
+                assembly ("memory-safe") {
+                    return(0, 0x1f)
+                }
+            }
+            return false;
+        }
+        if (interfaceId == type(IERC165).interfaceId) {
+            return _mode != 3;
+        }
+        return interfaceId == type(IStreamCoreFinalityAdapter).interfaceId;
+    }
+
+    function core() external view returns (address value) {
+        value = _core;
+        if (_mode == 8 || _mode == 9) {
+            uint256 mode = _mode;
+            assembly ("memory-safe") {
+                let output := mload(0x40)
+                let rawAddress := value
+                if eq(mode, 9) { rawAddress := or(rawAddress, shl(160, 1)) }
+                mstore(output, rawAddress)
+                if eq(mode, 8) {
+                    mstore(add(output, 0x20), 0xfeed)
+                    return(output, 0x40)
+                }
+                return(output, 0x20)
+            }
+        }
+    }
+
+    function collectionMetadata() external view returns (address) {
+        return _collectionMetadata;
+    }
+
+    function coreCollectionFinalityFacts(uint256)
+        external
+        view
+        returns (StreamCoreCollectionFinalityFacts memory facts)
+    {
+        if (_mode == 4 || _mode == 5) {
+            uint256 mode = _mode;
+            assembly ("memory-safe") {
+                let output := mload(0x40)
+                let length := 0x120
+                if eq(mode, 4) { length := 0x140 }
+                for { let cursor := 0 } lt(cursor, length) { cursor := add(cursor, 0x20) } {
+                    mstore(add(output, cursor), 0)
+                }
+                if eq(length, 0x120) { mstore(output, 2) }
+                return(output, length)
+            }
+        }
+    }
+
+    function scopedCoreFinalityFacts(StreamCoreFinalityScopeQuery calldata scope)
+        external
+        view
+        returns (StreamScopedCoreFinalityFacts memory facts)
+    {
+        if (_mode == 6) {
+            assembly ("memory-safe") {
+                let output := mload(0x40)
+                for { let cursor := 0 } lt(cursor, 0x1a0) { cursor := add(cursor, 0x20) } {
+                    mstore(add(output, cursor), 0)
+                }
+                mstore(add(output, 0x20), 0xff)
+                mstore(add(output, 0x120), 1)
+                return(output, 0x1a0)
+            }
+        }
+        facts.scopeType = scope.scopeType;
+        facts.collectionId = scope.collectionId;
+        facts.tokenId = scope.tokenId;
+        facts.scopeId = scope.scopeId;
+    }
+}
 
 /// @notice Five-scope lifecycle, execution-gate, diagnostic, and preview coverage for
 ///         StreamArtworkFinalityRegistry ([LTA-FINALITY], [CMC-FINALITY-INPUTS],
@@ -18,6 +125,8 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
     using Assertions for uint256;
     using Assertions for address;
     using Assertions for string;
+
+    uint256 private constant ADVERSARIAL_CALL_GAS = 2_000_000;
 
     event CollectionArtworkFinalized(
         uint16 schemaVersion,
@@ -63,18 +172,209 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
     // Construction
     // ------------------------------------------------------------------
 
-    function testConstructorRejectsZeroSeams() public {
+    function testConstructorBindsActualCoreMetadataAdapterAndMandatoryDiscovery() public view {
+        registry.core().assertEq(address(coreMock), "actual Core binding");
+        address(registry.coreReads()).assertEq(address(coreMock), "granular Core seam");
+        address(registry.metadataReads()).assertEq(address(metadataMock), "metadata seam");
+        address(registry.coreFinalityAdapter()).assertEq(address(coreAdapter), "adapter seam");
+        address(registry.sanctionReads()).assertEq(address(sanctionMock), "sanction seam");
+        address(registry.governanceAuthority()).assertEq(address(authority), "authority seam");
+        registry.finalityDiscovery().assertEq(address(discoveryMock), "mandatory discovery seam");
+    }
+
+    function testConstructorRejectsZeroMandatoryDiscovery() public {
         vm.expectRevert(
             abi.encodeWithSelector(StreamArtworkFinalityRegistry.FinalityZeroAddress.selector)
         );
         new StreamArtworkFinalityRegistry(
-            address(0), address(metadataMock), address(sanctionMock), address(authority), address(0)
+            address(coreMock),
+            address(metadataMock),
+            address(coreAdapter),
+            address(sanctionMock),
+            address(authority),
+            address(0)
         );
-        registry.core().assertEq(address(coreMock), "core binding");
-        address(registry.metadataReads()).assertEq(address(metadataMock), "metadata seam");
-        address(registry.sanctionReads()).assertEq(address(sanctionMock), "sanction seam");
-        address(registry.governanceAuthority()).assertEq(address(authority), "authority seam");
-        registry.finalityDiscovery().assertEq(address(0), "discovery unbound at genesis");
+    }
+
+    function testConstructorRejectsCodelessMandatoryDiscovery() public {
+        address codeless = address(0xD15C0);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityDependencyHasNoCode.selector, codeless
+            )
+        );
+        new StreamArtworkFinalityRegistry(
+            address(coreMock),
+            address(metadataMock),
+            address(coreAdapter),
+            address(sanctionMock),
+            address(authority),
+            codeless
+        );
+    }
+
+    function testConstructorRejectsAdapterCoreBindingMismatch() public {
+        MockFinalityCore otherCore = new MockFinalityCore();
+        StreamCoreFinalityAdapter mismatched =
+            new StreamCoreFinalityAdapter(address(otherCore), address(metadataMock));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterBindingMismatch.selector,
+                address(coreMock),
+                address(otherCore),
+                address(metadataMock),
+                address(metadataMock)
+            )
+        );
+        new StreamArtworkFinalityRegistry(
+            address(coreMock),
+            address(metadataMock),
+            address(mismatched),
+            address(sanctionMock),
+            address(authority),
+            address(discoveryMock)
+        );
+    }
+
+    function testConstructorRejectsAdapterMetadataBindingMismatch() public {
+        MockFinalityMetadata otherMetadata = new MockFinalityMetadata();
+        StreamCoreFinalityAdapter mismatched =
+            new StreamCoreFinalityAdapter(address(coreMock), address(otherMetadata));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterBindingMismatch.selector,
+                address(coreMock),
+                address(coreMock),
+                address(metadataMock),
+                address(otherMetadata)
+            )
+        );
+        new StreamArtworkFinalityRegistry(
+            address(coreMock),
+            address(metadataMock),
+            address(mismatched),
+            address(sanctionMock),
+            address(authority),
+            address(discoveryMock)
+        );
+    }
+
+    function testConstructorRejectsNonAdapterContract() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterInterfaceUnsupported.selector,
+                address(coreMock)
+            )
+        );
+        new StreamArtworkFinalityRegistry(
+            address(coreMock),
+            address(metadataMock),
+            address(coreMock),
+            address(sanctionMock),
+            address(authority),
+            address(discoveryMock)
+        );
+    }
+
+    function testConstructorRequiresCanonicalERC165InvalidInterfaceResponse() public {
+        for (uint8 mode = 1; mode <= 3; mode++) {
+            AdversarialFinalityAdapterERC165 adversarial = new AdversarialFinalityAdapterERC165(
+                address(coreMock), address(metadataMock), mode
+            );
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    StreamArtworkFinalityRegistry.FinalityAdapterInterfaceUnsupported.selector,
+                    address(adversarial)
+                )
+            );
+            new StreamArtworkFinalityRegistry(
+                address(coreMock),
+                address(metadataMock),
+                address(adversarial),
+                address(sanctionMock),
+                address(authority),
+                address(discoveryMock)
+            );
+        }
+    }
+
+    function testConstructorRejectsOversizedInterfaceAndAddressReturns() public {
+        AdversarialFinalityAdapterERC165 oversizedInterface =
+            new AdversarialFinalityAdapterERC165(address(coreMock), address(metadataMock), 7);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterInterfaceUnsupported.selector,
+                address(oversizedInterface)
+            )
+        );
+        _deployRegistryWithAdapter(address(oversizedInterface));
+
+        AdversarialFinalityAdapterERC165 oversizedCore =
+            new AdversarialFinalityAdapterERC165(address(coreMock), address(metadataMock), 8);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterReturnShapeInvalid.selector,
+                IStreamCoreFinalityAdapter.core.selector,
+                uint256(64)
+            )
+        );
+        _deployRegistryWithAdapter(address(oversizedCore));
+    }
+
+    function testConstructorRejectsNoncanonicalAddressReturn() public {
+        AdversarialFinalityAdapterERC165 noncanonicalCore =
+            new AdversarialFinalityAdapterERC165(address(coreMock), address(metadataMock), 9);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterSemanticProbeInvalid.selector,
+                IStreamCoreFinalityAdapter.core.selector
+            )
+        );
+        _deployRegistryWithAdapter(address(noncanonicalCore));
+    }
+
+    function testConstructorRejectsLegacyNoncanonicalAndSemanticAdapterPayloads() public {
+        AdversarialFinalityAdapterERC165 legacyShape =
+            new AdversarialFinalityAdapterERC165(address(coreMock), address(metadataMock), 4);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterReturnShapeInvalid.selector,
+                IStreamCoreFinalityAdapter.coreCollectionFinalityFacts.selector,
+                uint256(10 * 32)
+            )
+        );
+        _deployRegistryWithAdapter(address(legacyShape));
+
+        AdversarialFinalityAdapterERC165 noncanonical =
+            new AdversarialFinalityAdapterERC165(address(coreMock), address(metadataMock), 5);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterSemanticProbeInvalid.selector,
+                IStreamCoreFinalityAdapter.coreCollectionFinalityFacts.selector
+            )
+        );
+        _deployRegistryWithAdapter(address(noncanonical));
+
+        AdversarialFinalityAdapterERC165 semanticImpostor =
+            new AdversarialFinalityAdapterERC165(address(coreMock), address(metadataMock), 6);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.FinalityAdapterSemanticProbeInvalid.selector,
+                IStreamCoreFinalityAdapter.scopedCoreFinalityFacts.selector
+            )
+        );
+        _deployRegistryWithAdapter(address(semanticImpostor));
+    }
+
+    function _deployRegistryWithAdapter(address adapter) private {
+        new StreamArtworkFinalityRegistry(
+            address(coreMock),
+            address(metadataMock),
+            adapter,
+            address(sanctionMock),
+            address(authority),
+            address(discoveryMock)
+        );
     }
 
     // ------------------------------------------------------------------
@@ -357,15 +657,13 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         );
     }
 
-    function testScopedGatesScopeExistenceAndTokenLifecycle() public {
+    function testScopedGatesCollectionExistenceAndTokenLifecycle() public {
         StreamFinalityScope memory scope = _tokenScope(COLLECTION_ID, 77);
         Fixture memory fixture = _buildFixture(scope, true);
         _scheduleAndOpen(fixture);
 
-        // scopeExists = false blocks.
-        StreamScopedCoreFinalityFacts memory facts = _scopedFactsFor(scope);
-        facts.scopeExists = false;
-        coreMock.setScopedFacts(scope, facts);
+        // A missing parent collection produces a negative adapter fact and blocks.
+        coreMock.setCollectionExists(COLLECTION_ID, false);
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(IStreamArtworkFinalityRegistry.FinalityScopeUnknown.selector)
@@ -374,27 +672,23 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
             scope, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
         );
 
-        // A prepared-incomplete token is not a minted-or-burned token (scope rule 2).
-        facts = _scopedFactsFor(scope);
-        facts.tokenLifecycle = 1; // PREPARED_INCOMPLETE
-        coreMock.setScopedFacts(scope, facts);
+        // A prepared-incomplete token is not a valid finality scope (scope rule 2).
+        coreMock.setCollectionExists(COLLECTION_ID, true);
+        coreMock.setTokenLifecycle(scope.tokenId, 1); // PREPARED_INCOMPLETE
         vm.prank(finalityAdmin);
         vm.expectRevert(
-            abi.encodeWithSelector(IStreamArtworkFinalityRegistry.FinalityTokenNotInScope.selector)
+            abi.encodeWithSelector(IStreamArtworkFinalityRegistry.FinalityScopeUnknown.selector)
         );
         registry.finalizeArtworkScope(
             scope, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
         );
 
-        // Echoed scope fields must match the queried scope.
-        facts = _scopedFactsFor(scope);
-        facts.collectionId = COLLECTION_ID + 1;
-        coreMock.setScopedFacts(scope, facts);
+        // A token identity mapped to another collection also returns a negative semantic fact.
+        coreMock.setTokenIdentity(scope.tokenId, true, COLLECTION_ID + 1, 3, false);
+        coreMock.setTokenLifecycle(scope.tokenId, StreamFinalityDomains.TOKEN_LIFECYCLE_MINTED);
         vm.prank(finalityAdmin);
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityScopedFactsMismatch.selector
-            )
+            abi.encodeWithSelector(IStreamArtworkFinalityRegistry.FinalityScopeUnknown.selector)
         );
         registry.finalizeArtworkScope(
             scope, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
@@ -402,10 +696,8 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
 
         // A BURNED token still finalizes (burn-surviving archival identity), after the facts
         // change is rebound into the staged hash.
-        facts = _scopedFactsFor(scope);
-        facts.tokenLifecycle = StreamFinalityDomains.TOKEN_LIFECYCLE_BURNED;
-        facts.burned = true;
-        coreMock.setScopedFacts(scope, facts);
+        coreMock.setTokenIdentity(scope.tokenId, true, COLLECTION_ID, 3, true);
+        coreMock.setTokenLifecycle(scope.tokenId, StreamFinalityDomains.TOKEN_LIFECYCLE_BURNED);
         fixture.coreFactsHash = registry.computeScopedCoreFactsHash(scope);
         _recomputeFixtureHashes(fixture, true);
         vm.prank(finalityAdmin);
@@ -429,8 +721,8 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         vm.expectRevert(
             abi.encodeWithSelector(
                 IStreamArtworkFinalityRegistry.FinalityContentRootLeafCountMismatch.selector,
-                uint64(1),
-                uint64(2)
+                uint256(1),
+                uint256(2)
             )
         );
         registry.finalizeArtworkScope(
@@ -456,17 +748,12 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         );
     }
 
-    function testCollectionGatesExistenceClosedAndBurnBlock() public {
+    function testCollectionGatesExistenceClosedBurnBlockAndFreeze() public {
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
-        // Snapshot the fixture's exact facts before warping: createdAt is timestamp-derived,
-        // and the staged record hash binds the facts hash byte-for-byte.
-        StreamCoreCollectionFinalityFacts memory original = _closedCollectionFacts(COLLECTION_ID);
         _scheduleAndOpen(fixture);
 
         // Unknown collection.
-        StreamCoreCollectionFinalityFacts memory facts = _closedCollectionFacts(COLLECTION_ID);
-        facts.exists = false;
-        coreMock.setCollectionFacts(COLLECTION_ID, facts);
+        coreMock.setCollectionExists(COLLECTION_ID, false);
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -478,9 +765,8 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         );
 
         // ACTIVE (not CLOSED) blocks: CLOSED alone is the minting boundary (requirement 7).
-        facts = _cloneFacts(original);
-        facts.status = 0;
-        coreMock.setCollectionFacts(COLLECTION_ID, facts);
+        coreMock.setCollectionExists(COLLECTION_ID, true);
+        coreMock.setCollectionStatus(COLLECTION_ID, 0);
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -494,8 +780,10 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         );
 
         // CLOSED without the one-way burn block still blocks ([CMC-BURN] rule 7).
-        coreMock.setCollectionFacts(COLLECTION_ID, original);
-        coreMock.setBurnsBlocked(COLLECTION_ID, false, 0);
+        coreMock.setCollectionStatus(
+            COLLECTION_ID, StreamFinalityDomains.CORE_COLLECTION_STATUS_CLOSED
+        );
+        coreMock.setBurnsBlocked(COLLECTION_ID, false);
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -507,10 +795,150 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
             COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
         );
 
+        // The separate one-way collection freeze is equally mandatory and previewed.
+        coreMock.setBurnsBlocked(COLLECTION_ID, true);
+        coreMock.setCollectionFrozen(COLLECTION_ID, false);
+        vm.prank(finalityAdmin);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityCollectionNotFrozen.selector, COLLECTION_ID
+            )
+        );
+        registry.finalizeCollectionArtwork(
+            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+        );
+        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+            COLLECTION_ID, fixture.components, fixture.manifest
+        );
+        p.coreGatesSatisfied.assertFalse("preview mirrors Core freeze gate");
+        p.wouldExecute.assertFalse("unfrozen collection cannot execute");
+
         // Restore and execute to prove the gate matrix was the only blocker.
-        coreMock.setBurnsBlocked(COLLECTION_ID, true, uint64(block.number));
+        coreMock.setCollectionFrozen(COLLECTION_ID, true);
         _finalizeFixtureCall(fixture);
         registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
+    }
+
+    function testCollectionStatusAndSupplyModeDomainsFailClosed() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        _scheduleAndOpen(fixture);
+        uint8[2] memory invalidValues = [uint8(3), type(uint8).max];
+
+        for (uint256 i = 0; i < invalidValues.length; i++) {
+            uint8 invalidStatus = invalidValues[i];
+            coreMock.setCollectionStatus(COLLECTION_ID, invalidStatus);
+
+            StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+                COLLECTION_ID, fixture.components, fixture.manifest
+            );
+            p.coreGatesSatisfied.assertFalse("preview rejects invalid collection status");
+            p.wouldExecute.assertFalse("invalid collection status cannot execute");
+
+            vm.prank(finalityAdmin);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityCollectionStatusInvalid.selector,
+                    COLLECTION_ID,
+                    invalidStatus
+                )
+            );
+            registry.finalizeCollectionArtwork(
+                COLLECTION_ID,
+                fixture.components,
+                fixture.expectedFinalityRecordHash,
+                fixture.manifest
+            );
+        }
+
+        coreMock.setCollectionStatus(
+            COLLECTION_ID, StreamFinalityDomains.CORE_COLLECTION_STATUS_CLOSED
+        );
+        for (uint256 i = 0; i < invalidValues.length; i++) {
+            uint8 invalidSupplyMode = invalidValues[i];
+            coreMock.setCollectionSupply(
+                COLLECTION_ID,
+                true,
+                invalidSupplyMode,
+                MINTED_SUPPLY,
+                MINTED_SUPPLY,
+                MINTED_SUPPLY + 1
+            );
+
+            StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+                COLLECTION_ID, fixture.components, fixture.manifest
+            );
+            p.coreGatesSatisfied.assertFalse("preview rejects invalid collection supply mode");
+            p.wouldExecute.assertFalse("invalid collection supply mode cannot execute");
+
+            vm.prank(finalityAdmin);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityCollectionSupplyModeInvalid.selector,
+                    COLLECTION_ID,
+                    invalidSupplyMode
+                )
+            );
+            registry.finalizeCollectionArtwork(
+                COLLECTION_ID,
+                fixture.components,
+                fixture.expectedFinalityRecordHash,
+                fixture.manifest
+            );
+        }
+    }
+
+    function testScopedCollectionStatusAndSupplyModeDomainsMatchExecutionAndPreview() public {
+        StreamFinalityScope memory scope =
+            _idScope(StreamFinalityScopeType.SEASON, COLLECTION_ID, keccak256("season-1"));
+        Fixture memory fixture = _buildFixture(scope, true);
+        _scheduleAndOpen(fixture);
+        uint8[2] memory invalidValues = [uint8(3), type(uint8).max];
+
+        for (uint256 i = 0; i < invalidValues.length; i++) {
+            uint8 invalidStatus = invalidValues[i];
+            coreMock.setCollectionStatus(COLLECTION_ID, invalidStatus);
+
+            StreamFinalityPreview memory p =
+                previewer.previewArtworkScopeFinality(scope, fixture.components, fixture.manifest);
+            p.coreGatesSatisfied.assertFalse("scoped preview rejects invalid collection status");
+            p.wouldExecute.assertFalse("invalid scoped collection status cannot execute");
+
+            vm.prank(finalityAdmin);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityCollectionStatusInvalid.selector,
+                    COLLECTION_ID,
+                    invalidStatus
+                )
+            );
+            registry.finalizeArtworkScope(
+                scope, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+            );
+        }
+
+        coreMock.setCollectionStatus(COLLECTION_ID, 0);
+        for (uint256 i = 0; i < invalidValues.length; i++) {
+            uint8 invalidSupplyMode = invalidValues[i];
+            coreMock.setCollectionSupply(COLLECTION_ID, false, invalidSupplyMode, 0, 0, 0);
+
+            StreamFinalityPreview memory p =
+                previewer.previewArtworkScopeFinality(scope, fixture.components, fixture.manifest);
+            p.coreGatesSatisfied
+                .assertFalse("scoped preview rejects invalid collection supply mode");
+            p.wouldExecute.assertFalse("invalid scoped collection supply mode cannot execute");
+
+            vm.prank(finalityAdmin);
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityCollectionSupplyModeInvalid.selector,
+                    COLLECTION_ID,
+                    invalidSupplyMode
+                )
+            );
+            registry.finalizeArtworkScope(
+                scope, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+            );
+        }
     }
 
     function testContentRootGates() public {
@@ -532,7 +960,11 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
 
         // Leaf count must equal minted-ever for collection scope.
         metadataMock.setContentRoot(
-            COLLECTION_ID, scopeSubject, keccak256("root"), MINTED_SUPPLY - 1, keccak256("schema")
+            COLLECTION_ID,
+            scopeSubject,
+            keccak256("root"),
+            uint64(MINTED_SUPPLY - 1),
+            keccak256("schema")
         );
         vm.prank(finalityAdmin);
         vm.expectRevert(
@@ -554,23 +986,38 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         p.wouldExecute.assertFalse("preview would not execute");
     }
 
-    function _cloneFacts(StreamCoreCollectionFinalityFacts memory facts)
-        private
-        pure
-        returns (StreamCoreCollectionFinalityFacts memory)
-    {
-        return StreamCoreCollectionFinalityFacts({
-            exists: facts.exists,
-            hasMaxSupply: facts.hasMaxSupply,
-            status: facts.status,
-            supplyMode: facts.supplyMode,
-            createdAt: facts.createdAt,
-            maxSupply: facts.maxSupply,
-            mintedSupply: facts.mintedSupply,
-            burnedSupply: facts.burnedSupply,
-            nextCollectionSerial: facts.nextCollectionSerial,
-            collectionConfigHash: facts.collectionConfigHash
-        });
+    function testCollectionMintedSupplyAboveUint64FailsClosedWithoutDowncast() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        uint256 mintedSupply = uint256(type(uint64).max) + 1;
+        uint64 recordedLeafCount = type(uint64).max;
+        coreMock.setCollectionSupply(
+            COLLECTION_ID, true, 0, mintedSupply, mintedSupply, mintedSupply + 1
+        );
+        coreMock.setLiveSupply(COLLECTION_ID, mintedSupply - BURNED_SUPPLY);
+        fixture.coreFactsHash = registry.computeCollectionCoreFactsHash(COLLECTION_ID);
+        _recomputeFixtureHashes(fixture, true);
+
+        bytes32 scopeSubject = registry.contentRootScopeSubject(fixture.scope);
+        metadataMock.setContentRoot(
+            COLLECTION_ID,
+            scopeSubject,
+            keccak256("large-root"),
+            recordedLeafCount,
+            keccak256("schema")
+        );
+        _scheduleAndOpen(fixture);
+
+        vm.prank(finalityAdmin);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityContentRootLeafCountMismatch.selector,
+                mintedSupply,
+                uint256(recordedLeafCount)
+            )
+        );
+        registry.finalizeCollectionArtwork(
+            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+        );
     }
 
     function _cloneManifest(StreamFinalityManifestRef memory manifest)
@@ -960,224 +1407,16 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
     }
 
     // ------------------------------------------------------------------
-    // Facade identity binding (requirement 16, [CMC-FINALITY-INPUTS] rule 14)
+    // Mandatory discovery seam
     // ------------------------------------------------------------------
 
-    function testCoreNativeCollectionsSkipFacadeBindingComponent() public {
-        // Identity mode defaults to CORE_NATIVE and no binding record/component exists: passes.
-        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
-        (bool recorded,,) = metadataMock.facadeIdentityBindingRecord(COLLECTION_ID);
-        recorded.assertFalse("no binding record for CORE_NATIVE");
-        _executeFixture(fixture);
-        registry.collectionFinalityRecord(COLLECTION_ID).finalized
-            .assertTrue("CORE_NATIVE finalized without facade binding");
-        // The permanent record carries no facade-binding component.
-        (bool pinned,,,) = registry.frozenRouteForScope(
-            StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING, fixture.scope
-        );
-        pinned.assertFalse("no facade route for CORE_NATIVE");
-    }
-
-    function testCoreNativeWithSpuriousFacadeComponentReverts() public {
-        // A CORE_NATIVE collection must not carry an IDENTITY_FACADE_BINDING component.
-        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
-        StreamFinalityComponentExpectation memory spurious = _expectationFor(
-            facadeBindingComponent,
-            StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING,
-            keccak256("spurious-binding")
-        );
-        _installComponentState(fixture.scope, spurious);
-        StreamFinalityComponentExpectation[] memory withSpurious =
-            new StreamFinalityComponentExpectation[](fixture.components.length + 1);
-        for (uint256 i = 0; i < fixture.components.length; i++) {
-            withSpurious[i] = fixture.components[i];
-        }
-        withSpurious[fixture.components.length] = spurious;
-        withSpurious = _sortComponents(withSpurious);
-        _scheduleAndOpen(fixture); // staged hash is the clean fixture's; the gate fires first
-        vm.prank(finalityAdmin);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFacadeBindingComponentForbidden.selector,
-                COLLECTION_ID
-            )
-        );
-        registry.finalizeCollectionArtwork(
-            COLLECTION_ID, withSpurious, fixture.expectedFinalityRecordHash, fixture.manifest
-        );
-    }
-
-    function testExternalFacadeRecordHashDiffersFromCoreNative() public {
-        // Same everything except identity mode: the EXTERNAL_FACADE record binds the facade
-        // component, so its finalityRecordHash differs from the CORE_NATIVE case
-        // ([LTA-FINALITY] req 16 / [CMC-FACADE-BINDING] rule 6: permanent identity).
-        Fixture memory native = _buildFixture(_collectionScope(COLLECTION_ID), true);
-        Fixture memory facadeFixture = _buildFixture(
-            _collectionScope(COLLECTION_ID + 1),
-            true,
-            StreamFinalityDomains.METADATA_MODE_OFFCHAIN,
-            true
-        );
-        (native.expectedFinalityRecordHash != facadeFixture.expectedFinalityRecordHash)
-        .assertTrue("EXTERNAL_FACADE record hash differs from CORE_NATIVE");
-        // The facade fixture carries exactly one extra component (the binding).
-        facadeFixture.components.length
-            .assertEq(native.components.length + 1, "facade fixture has the binding component");
-
-        _executeFixture(facadeFixture);
-        registry.collectionFinalityRecord(COLLECTION_ID + 1).finalized
-            .assertTrue("EXTERNAL_FACADE finalized");
-        // The binding component is re-surfaced post-finalize through the frozen-route registry.
-        (bool pinned, address module,, bytes32 recHash) = registry.frozenRouteForScope(
-            StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING, facadeFixture.scope
-        );
-        pinned.assertTrue("facade route pinned");
-        module.assertEq(address(facadeBindingComponent), "facade route module");
-        recHash.assertEq(facadeFixture.expectedFinalityRecordHash, "facade route record hash");
-    }
-
-    function testExternalFacadeGates() public {
-        Fixture memory fixture = _buildFixture(
-            _collectionScope(COLLECTION_ID),
-            true,
-            StreamFinalityDomains.METADATA_MODE_OFFCHAIN,
-            true
-        );
-        address facade = address(facadeBindingComponent);
-
-        // Missing binding record blocks (clear the record the fixture set).
-        metadataMock.setFacadeBinding(COLLECTION_ID, false, address(0), bytes32(0));
-        _scheduleAndOpen(fixture);
-        vm.prank(finalityAdmin);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFacadeBindingMissing.selector, COLLECTION_ID
-            )
-        );
-        registry.finalizeCollectionArtwork(
-            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
-        );
-        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
-            COLLECTION_ID, fixture.components, fixture.manifest
-        );
-        p.facadeBindingSatisfied.assertFalse("preview facade gate");
-
-        // A binding whose facade address is not the registered controller blocks.
-        address wrongFacade = address(0xBAD0FACADE);
-        metadataMock.setFacadeBinding(COLLECTION_ID, true, wrongFacade, fixture.facadeRecordHash);
-        vm.prank(finalityAdmin);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFacadeBindingControllerMismatch.selector,
-                wrongFacade,
-                facade
-            )
-        );
-        registry.finalizeCollectionArtwork(
-            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
-        );
-
-        // Recorded and controller-matched, but the submitted component dataHash != recordHash.
-        metadataMock.setFacadeBinding(
-            COLLECTION_ID, true, facade, keccak256("some other record hash")
-        );
-        vm.prank(finalityAdmin);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFacadeBindingComponentDataHashMismatch
-                .selector,
-                fixture.facadeRecordHash,
-                keccak256("some other record hash")
-            )
-        );
-        registry.finalizeCollectionArtwork(
-            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
-        );
-
-        // Restore the matching record: finality passes.
-        metadataMock.setFacadeBinding(COLLECTION_ID, true, facade, fixture.facadeRecordHash);
-        _finalizeFixtureCall(fixture);
-        registry.collectionFinalityRecord(COLLECTION_ID).finalized
-            .assertTrue("EXTERNAL_FACADE finalized with verified + bound binding");
-    }
-
-    function testExternalFacadeMissingBindingComponentReverts() public {
-        // EXTERNAL_FACADE with a valid live binding but no submitted binding component blocks:
-        // the two-address identity must enter the permanent record.
-        Fixture memory fixture = _buildFixture(
-            _collectionScope(COLLECTION_ID),
-            true,
-            StreamFinalityDomains.METADATA_MODE_OFFCHAIN,
-            true
-        );
-        // Drop the facade-binding component from the submitted list.
-        StreamFinalityComponentExpectation[] memory withoutBinding =
-            new StreamFinalityComponentExpectation[](fixture.components.length - 1);
-        uint256 cursor = 0;
-        for (uint256 i = 0; i < fixture.components.length; i++) {
-            if (
-                fixture.components[i].componentType
-                    != StreamFinalityDomains.RECORD_IDENTITY_FACADE_BINDING
-            ) {
-                withoutBinding[cursor] = fixture.components[i];
-                cursor++;
-            }
-        }
-        _scheduleAndOpen(fixture);
-        vm.prank(finalityAdmin);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFacadeBindingComponentMissing.selector,
-                COLLECTION_ID
-            )
-        );
-        registry.finalizeCollectionArtwork(
-            COLLECTION_ID, withoutBinding, fixture.expectedFinalityRecordHash, fixture.manifest
-        );
-    }
-
-    function testExternalFacadeBindingRequiredForScopedFinalityToo() public {
-        StreamFinalityScope memory scope = _tokenScope(COLLECTION_ID, 9);
-        Fixture memory fixture =
-            _buildFixture(scope, true, StreamFinalityDomains.METADATA_MODE_OFFCHAIN, true);
-        // Clear the live binding record: scoped finality blocks too.
-        metadataMock.setFacadeBinding(COLLECTION_ID, false, address(0), bytes32(0));
-        _scheduleAndOpen(fixture);
-        vm.prank(finalityAdmin);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamArtworkFinalityRegistry.FinalityFacadeBindingMissing.selector, COLLECTION_ID
-            )
-        );
-        registry.finalizeArtworkScope(
-            scope, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
-        );
-    }
-
-    // ------------------------------------------------------------------
-    // Discovery seam
-    // ------------------------------------------------------------------
-
-    function _bindDiscovery(MockFinalityDiscovery discovery) private {
-        registry = new StreamArtworkFinalityRegistry(
-            address(coreMock),
-            address(metadataMock),
-            address(sanctionMock),
-            address(authority),
-            address(discovery)
-        );
-        previewer = new StreamArtworkFinalityPreview(registry);
-    }
-
-    function testDiscoveryGateWhenBound() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
-        _bindDiscovery(discovery);
-
+    function testMandatoryDiscoveryGate() public {
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
         uint256 total = fixture.components.length;
         _scheduleAndOpen(fixture);
 
-        // Unconfigured discovery (count 0) blocks.
+        // Missing discovery record blocks.
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, 0, bytes32(0));
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1191,7 +1430,7 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         );
 
         // Count match with hash mismatch blocks.
-        discovery.setCollectionDiscovery(COLLECTION_ID, total, keccak256("router disagrees"));
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total, keccak256("router disagrees"));
         vm.prank(finalityAdmin);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1204,48 +1443,418 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
             COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
         );
 
+        // A router cannot advertise the right count/hash while enumerating a different route.
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
+        StreamFinalityComponentExpectation[] memory wrongRoute =
+            _cloneComponents(fixture.components);
+        wrongRoute[0].dataHash = keccak256("different enumerated component");
+        discoveryMock.setCollectionComponent(COLLECTION_ID, 0, wrongRoute[0]);
+        vm.prank(finalityAdmin);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityDiscoveryComponentMismatch.selector,
+                uint256(0)
+            )
+        );
+        registry.finalizeCollectionArtwork(
+            COLLECTION_ID, fixture.components, fixture.expectedFinalityRecordHash, fixture.manifest
+        );
+        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+            COLLECTION_ID, fixture.components, fixture.manifest
+        );
+        p.discoveryMatches.assertFalse("preview rejects enumerated-route mismatch");
+
         // Exact discovery agreement passes.
-        discovery.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
+        discoveryMock.setCollectionComponent(COLLECTION_ID, 0, fixture.components[0]);
         _finalizeFixtureCall(fixture);
         registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
     }
 
-    function testVerifyFinalityDetectsPostFinalizationDiscoveryDrift() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
-        _bindDiscovery(discovery);
+    function testDiscoveryComponentAtExact224ByteReturnPassesExecutionAndPreview() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        (bool countSuccess, bytes memory countReturndata) = address(discoveryMock)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityDiscovery.finalityComponentCount.selector, COLLECTION_ID
+                )
+            );
+        countSuccess.assertTrue("exact count read succeeds");
+        countReturndata.length.assertEq(32, "count read is exactly one word");
 
+        (bool hashSuccess, bytes memory hashReturndata) = address(discoveryMock)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityDiscovery.finalityDiscoveryHash.selector, COLLECTION_ID
+                )
+            );
+        hashSuccess.assertTrue("exact hash read succeeds");
+        hashReturndata.length.assertEq(32, "hash read is exactly one word");
+
+        (bool success, bytes memory returndata) = address(discoveryMock)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityDiscovery.finalityComponentAt.selector,
+                    COLLECTION_ID,
+                    uint256(0)
+                )
+            );
+        success.assertTrue("exact component read succeeds");
+        returndata.length.assertEq(7 * 32, "component read is exactly seven words");
+
+        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+            COLLECTION_ID, fixture.components, fixture.manifest
+        );
+        p.discoveryMatches.assertTrue("preview accepts exact enumerated route");
+
+        _scheduleAndOpen(fixture);
+        _finalizeFixtureCall(fixture);
+        registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
+    }
+
+    function testDiscoveryFactFailuresRejectExecutionAndFailClosedInPreview() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        _scheduleAndOpen(fixture);
+
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setReadMode(readMode);
+            _assertCollectionDiscoveryExecutionUnreadable(fixture);
+        }
+
+        discoveryMock.setReadMode(0);
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setHashReadMode(readMode);
+            _assertCollectionDiscoveryExecutionUnreadable(fixture);
+        }
+
+        discoveryMock.setHashReadMode(0);
+        _finalizeFixtureCall(fixture);
+        registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
+    }
+
+    function _assertCollectionDiscoveryExecutionUnreadable(Fixture memory fixture) private {
+        StreamFinalityPreview memory p = _boundedPreview(fixture);
+        p.discoveryMatches.assertFalse("preview fails closed on discovery fact read failure");
+
+        _assertBoundedFinalizeRevert(
+            fixture,
+            abi.encodeWithSelector(
+                IStreamArtworkFinalityRegistry.FinalityDiscoveryFactsUnreadable.selector
+            )
+        );
+    }
+
+    function testDiscoveryComponentAtFailuresRejectExecutionAndFailClosedInPreview() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        _scheduleAndOpen(fixture);
+
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setComponentReadMode(readMode);
+            StreamFinalityPreview memory p = _boundedPreview(fixture);
+            p.discoveryMatches.assertFalse("preview fails closed on component read failure");
+
+            _assertBoundedFinalizeRevert(
+                fixture,
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityDiscoveryComponentUnreadable.selector,
+                    uint256(0)
+                )
+            );
+        }
+
+        discoveryMock.setComponentReadMode(0);
+        _finalizeFixtureCall(fixture);
+        registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
+    }
+
+    function testSlowDiscoveryReadsPassStrictAndPreviewButExceedDiagnosticBudget() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        discoveryMock.setReadMode(5);
+        discoveryMock.setComponentReadMode(5);
+
+        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+            COLLECTION_ID, fixture.components, fixture.manifest
+        );
+        p.discoveryMatches.assertTrue("preview does not impose diagnostic gas cap");
+
+        _executeFixture(fixture);
+        (bool matches,,) = registry.verifyFinality(COLLECTION_ID);
+        matches.assertFalse("slow discovery facts exceed diagnostic gas cap");
+
+        discoveryMock.setReadMode(0);
+        (matches,,) = registry.verifyFinality(COLLECTION_ID);
+        matches.assertFalse("slow discovery component exceeds diagnostic gas cap");
+
+        discoveryMock.setComponentReadMode(0);
+        (matches,,) = registry.verifyFinality(COLLECTION_ID);
+        matches.assertTrue("normal discovery remains healthy");
+    }
+
+    function testComponentReadBombsFailClosedAcrossStrictPreviewAndDiagnostics() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        MockFinalityComponent adversarial = MockFinalityComponent(fixture.components[0].component);
+        _scheduleAndOpen(fixture);
+
+        for (
+            uint8 mode = adversarial.MODE_GAS_BURN();
+            mode <= adversarial.MODE_OVERSIZED_RETURN();
+            mode++
+        ) {
+            adversarial.setMode(mode);
+            StreamFinalityPreview memory p = _boundedPreview(fixture);
+            p.componentsMatchLive.assertFalse("preview fails closed on component read bomb");
+
+            _assertBoundedFinalizeRevert(
+                fixture,
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityComponentUnreadable.selector, uint256(0)
+                )
+            );
+        }
+
+        adversarial.setMode(adversarial.MODE_NORMAL());
+        _finalizeFixtureCall(fixture);
+        for (
+            uint8 mode = adversarial.MODE_GAS_BURN();
+            mode <= adversarial.MODE_OVERSIZED_RETURN();
+            mode++
+        ) {
+            adversarial.setMode(mode);
+            (bool matches, bytes32 recordHash, bytes32 componentsHash) =
+                registry.verifyFinality(COLLECTION_ID);
+            matches.assertFalse("diagnostic fails closed on component read bomb");
+            recordHash.assertEq(fixture.expectedFinalityRecordHash, "record hash preserved");
+            componentsHash.assertEq(fixture.componentsHash, "components hash preserved");
+        }
+    }
+
+    function testSlowComponentReadPassesStrictAndPreviewButExceedsDiagnosticBudget() public {
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        MockFinalityComponent slow = MockFinalityComponent(fixture.components[0].component);
+        slow.setMode(slow.MODE_SLOW_SUCCESS());
+
+        StreamFinalityPreview memory p = previewer.previewCollectionFinality(
+            COLLECTION_ID, fixture.components, fixture.manifest
+        );
+        p.componentsMatchLive.assertTrue("preview does not impose diagnostic gas cap");
+
+        _executeFixture(fixture);
+        (bool matches,,) = registry.verifyFinality(COLLECTION_ID);
+        matches.assertFalse("slow component exceeds diagnostic gas cap");
+
+        slow.setMode(slow.MODE_NORMAL());
+        (matches,,) = registry.verifyFinality(COLLECTION_ID);
+        matches.assertTrue("normal component remains healthy");
+    }
+
+    function testScopedDiscoveryComponentAtFailuresFailClosedInDiagnosticsAndPreview() public {
+        StreamFinalityScope memory scope =
+            _idScope(StreamFinalityScopeType.SEASON, COLLECTION_ID, keccak256("season-1"));
+        Fixture memory fixture = _buildFixture(scope, true);
+        (bool countSuccess, bytes memory countReturndata) = address(discoveryMock)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamArtworkScopedFinalityDiscovery.finalityComponentCountForScope.selector,
+                    scope
+                )
+            );
+        countSuccess.assertTrue("exact scoped count read succeeds");
+        countReturndata.length.assertEq(32, "scoped count read is exactly one word");
+        (bool hashSuccess, bytes memory hashReturndata) = address(discoveryMock)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamArtworkScopedFinalityDiscovery.finalityDiscoveryHashForScope.selector,
+                    scope
+                )
+            );
+        hashSuccess.assertTrue("exact scoped hash read succeeds");
+        hashReturndata.length.assertEq(32, "scoped hash read is exactly one word");
+        (bool success, bytes memory returndata) = address(discoveryMock)
+            .staticcall(
+                abi.encodeWithSelector(
+                    IStreamArtworkScopedFinalityDiscovery.finalityComponentAtForScope.selector,
+                    scope,
+                    uint256(0)
+                )
+            );
+        success.assertTrue("exact scoped component read succeeds");
+        returndata.length.assertEq(7 * 32, "scoped component read is exactly seven words");
+        _executeFixture(fixture);
+
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setReadMode(readMode);
+            _assertScopedDiscoveryDiagnosticFalse(fixture, "scoped count read fails closed");
+        }
+        discoveryMock.setReadMode(0);
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setHashReadMode(readMode);
+            _assertScopedDiscoveryDiagnosticFalse(fixture, "scoped hash read fails closed");
+        }
+        discoveryMock.setHashReadMode(0);
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setComponentReadMode(readMode);
+            _assertScopedDiscoveryDiagnosticFalse(fixture, "scoped component read fails closed");
+        }
+    }
+
+    function testScopedDiscoveryReadFailuresRejectExecutionAndFailClosedInPreview() public {
+        StreamFinalityScope memory scope =
+            _idScope(StreamFinalityScopeType.SEASON, COLLECTION_ID, keccak256("season-1"));
+        Fixture memory fixture = _buildFixture(scope, true);
+        _scheduleAndOpen(fixture);
+
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setReadMode(readMode);
+            _assertScopedDiscoveryExecutionUnreadable(fixture, false);
+        }
+        discoveryMock.setReadMode(0);
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setHashReadMode(readMode);
+            _assertScopedDiscoveryExecutionUnreadable(fixture, false);
+        }
+        discoveryMock.setHashReadMode(0);
+        for (uint8 readMode = 1; readMode <= 4; readMode++) {
+            discoveryMock.setComponentReadMode(readMode);
+            _assertScopedDiscoveryExecutionUnreadable(fixture, true);
+        }
+
+        discoveryMock.setComponentReadMode(0);
+        _finalizeFixtureCall(fixture);
+        registry.artworkScopeFinalityRecord(scope).finalized.assertTrue("scoped finalized");
+    }
+
+    function _assertScopedDiscoveryExecutionUnreadable(Fixture memory fixture, bool componentRead)
+        private
+    {
+        StreamFinalityPreview memory p = _boundedPreview(fixture);
+        p.discoveryMatches.assertFalse("scoped preview fails closed");
+
+        if (componentRead) {
+            _assertBoundedFinalizeRevert(
+                fixture,
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityDiscoveryComponentUnreadable.selector,
+                    uint256(0)
+                )
+            );
+        } else {
+            _assertBoundedFinalizeRevert(
+                fixture,
+                abi.encodeWithSelector(
+                    IStreamArtworkFinalityRegistry.FinalityDiscoveryFactsUnreadable.selector
+                )
+            );
+        }
+    }
+
+    function _assertScopedDiscoveryDiagnosticFalse(Fixture memory fixture, string memory reason)
+        private
+        view
+    {
+        StreamFinalityPreview memory p = _boundedPreview(fixture);
+        p.discoveryMatches.assertFalse(reason);
+        (bool matches, bytes32 recordHash, bytes32 componentsHash) =
+            registry.verifyArtworkScopeFinality(fixture.scope);
+        matches.assertFalse(reason);
+        recordHash.assertEq(
+            fixture.expectedFinalityRecordHash, "scoped diagnostic preserves record hash"
+        );
+        componentsHash.assertEq(
+            fixture.componentsHash, "scoped diagnostic preserves components hash"
+        );
+    }
+
+    function _boundedPreview(Fixture memory fixture)
+        private
+        view
+        returns (StreamFinalityPreview memory p)
+    {
+        bytes memory payload;
+        if (fixture.scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            payload = abi.encodeWithSelector(
+                StreamArtworkFinalityPreview.previewCollectionFinality.selector,
+                fixture.scope.collectionId,
+                fixture.components,
+                fixture.manifest
+            );
+        } else {
+            payload = abi.encodeWithSelector(
+                StreamArtworkFinalityPreview.previewArtworkScopeFinality.selector,
+                fixture.scope,
+                fixture.components,
+                fixture.manifest
+            );
+        }
+        (bool success, bytes memory returndata) =
+            address(previewer).staticcall{ gas: ADVERSARIAL_CALL_GAS }(payload);
+        success.assertTrue("bounded preview returns a complete result");
+        p = abi.decode(returndata, (StreamFinalityPreview));
+    }
+
+    function _assertBoundedFinalizeRevert(Fixture memory fixture, bytes memory expectedRevert)
+        private
+    {
+        bytes memory payload;
+        if (fixture.scope.scopeType == StreamFinalityScopeType.COLLECTION) {
+            payload = abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.finalizeCollectionArtwork.selector,
+                fixture.scope.collectionId,
+                fixture.components,
+                fixture.expectedFinalityRecordHash,
+                fixture.manifest
+            );
+        } else {
+            payload = abi.encodeWithSelector(
+                StreamArtworkFinalityRegistry.finalizeArtworkScope.selector,
+                fixture.scope,
+                fixture.components,
+                fixture.expectedFinalityRecordHash,
+                fixture.manifest
+            );
+        }
+        vm.prank(finalityAdmin);
+        (bool success, bytes memory returndata) =
+            address(registry).call{ gas: ADVERSARIAL_CALL_GAS }(payload);
+        success.assertFalse("bounded strict execution rejects unreadable target");
+        keccak256(returndata).assertEq(keccak256(expectedRevert), "exact typed execution error");
+    }
+
+    function testVerifyFinalityDetectsPostFinalizationDiscoveryDrift() public {
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
         uint256 total = fixture.components.length;
-        discovery.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
         _executeFixture(fixture);
 
         (bool healthy,,) = registry.verifyFinality(COLLECTION_ID);
         healthy.assertTrue("healthy discovered route");
 
-        discovery.setCollectionDiscovery(COLLECTION_ID, total + 1, fixture.componentsHash);
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total + 1, fixture.componentsHash);
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "post-finality count drift");
 
-        discovery.setCollectionDiscovery(
+        discoveryMock.setCollectionDiscovery(
             COLLECTION_ID, total, keccak256("post-finality discovery drift")
         );
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "post-finality hash drift");
+
+        discoveryMock.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
+        StreamFinalityComponentExpectation[] memory wrongRoute =
+            _cloneComponents(fixture.components);
+        wrongRoute[0].manifestHash = keccak256("post-finality enumerated route drift");
+        discoveryMock.setCollectionComponent(COLLECTION_ID, 0, wrongRoute[0]);
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "post-finality enumeration drift");
     }
 
     function testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
-        _bindDiscovery(discovery);
-
         StreamFinalityScope memory scope =
             _idScope(StreamFinalityScopeType.SEASON, COLLECTION_ID, keccak256("season-1"));
         Fixture memory fixture = _buildFixture(scope, true);
         uint256 total = fixture.components.length;
-        discovery.setScopedDiscovery(scope, total, fixture.componentsHash);
+        discoveryMock.setScopedDiscovery(scope, total, fixture.componentsHash);
         _executeFixture(fixture);
 
         (bool healthy,,) = registry.verifyArtworkScopeFinality(scope);
         healthy.assertTrue("healthy scoped discovered route");
 
-        discovery.setScopedDiscovery(
+        discoveryMock.setScopedDiscovery(
             scope, total, keccak256("post-finality scoped discovery drift")
         );
         (bool matches, bytes32 recordHash, bytes32 componentsHash) =
@@ -1253,44 +1862,48 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         matches.assertFalse("post-finality scoped discovery drift");
         recordHash.assertEq(fixture.expectedFinalityRecordHash, "scoped record hash preserved");
         componentsHash.assertEq(fixture.componentsHash, "scoped components hash preserved");
+
+        discoveryMock.setScopedDiscovery(scope, total, fixture.componentsHash);
+        StreamFinalityComponentExpectation[] memory wrongRoute =
+            _cloneComponents(fixture.components);
+        wrongRoute[0].codeHash = keccak256("scoped enumerated route drift");
+        discoveryMock.setScopedComponent(scope, 0, wrongRoute[0]);
+        (matches, recordHash, componentsHash) = registry.verifyArtworkScopeFinality(scope);
+        matches.assertFalse("post-finality scoped enumeration drift");
+        recordHash.assertEq(fixture.expectedFinalityRecordHash, "scoped record hash preserved");
+        componentsHash.assertEq(fixture.componentsHash, "scoped components hash preserved");
     }
 
     function testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
-        _bindDiscovery(discovery);
-
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
-        discovery.setCollectionDiscovery(
+        discoveryMock.setCollectionDiscovery(
             COLLECTION_ID, fixture.components.length, fixture.componentsHash
         );
         _executeFixture(fixture);
 
-        discovery.setReadMode(1);
+        discoveryMock.setReadMode(1);
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "reverting discovery");
 
-        discovery.setReadMode(2);
+        discoveryMock.setReadMode(2);
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "malformed discovery");
 
-        discovery.setReadMode(3);
+        discoveryMock.setReadMode(3);
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "oversized discovery");
 
-        discovery.setReadMode(4);
+        discoveryMock.setReadMode(4);
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "gas-burning discovery");
 
-        vm.etch(address(discovery), bytes(""));
+        vm.etch(address(discoveryMock), bytes(""));
         _assertCollectionDiscoveryDiagnosticFalse(fixture, "codeless discovery");
     }
 
     function testVerifyFinalityGasBurningDiscoveryPreservesParentGas() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
-        _bindDiscovery(discovery);
-
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
-        discovery.setCollectionDiscovery(
+        discoveryMock.setCollectionDiscovery(
             COLLECTION_ID, fixture.components.length, fixture.componentsHash
         );
         _executeFixture(fixture);
-        discovery.setReadMode(4);
+        discoveryMock.setReadMode(4);
 
         bytes memory payload = abi.encodeWithSelector(
             StreamArtworkFinalityRegistry.verifyFinality.selector, COLLECTION_ID
@@ -1311,6 +1924,8 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         private
         view
     {
+        StreamFinalityPreview memory p = _boundedPreview(fixture);
+        p.discoveryMatches.assertFalse(reason);
         (bool matches, bytes32 recordHash, bytes32 componentsHash) =
             registry.verifyFinality(COLLECTION_ID);
         matches.assertFalse(reason);
@@ -1489,8 +2104,7 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         p.componentsWellFormed.assertTrue("well-formed");
         p.componentsMatchLive.assertTrue("live match");
         p.sanctionSatisfied.assertTrue("sanction");
-        p.facadeBindingSatisfied.assertTrue("facade");
-        p.discoveryMatches.assertTrue("discovery unbound");
+        p.discoveryMatches.assertTrue("mandatory discovery matches");
         p.notAlreadyFinalized.assertTrue("not finalized");
         p.wouldExecute.assertFalse("blocked by staging only");
 
