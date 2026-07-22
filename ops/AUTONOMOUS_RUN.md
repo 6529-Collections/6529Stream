@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/slither-baseline-gate` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/661` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/658` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/662` |
 | Next issue | Begin the safe Core extraction sequence with canonical executor eligibility and a prepared settlement seam, without routing live Drops traffic. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 00:00 UTC` |
+| Last updated | `2026-07-22 11:40 UTC` |
 
 ## Current Run Notes
 
@@ -56,7 +56,7 @@ evidence, and audit/readiness gates.
   current v1 contract catalog cannot prove deployment-instance identity,
   fallback distinctness, or parameterized probe bindings, so issue #656 remains
   a production blocker.
-- The current topic is issue #658 on branch
+- The current topic is issue #658 in PR #662 on branch
   `codex/slither-baseline-gate`. A clean pinned run found 38 first-party
   production High/Medium Slither rows (4 High, 34 Medium), contradicting the
   historical accepted-baseline narrative.

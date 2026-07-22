@@ -4007,7 +4007,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for all 38 open first-party production Slither High/Medium findings while preserving exact normalized drift CI | C/F/G | Active issue #658 on branch `codex/slither-baseline-gate`; one confirmed gap, six design-review rows, and 31 pending dispositions |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for all 38 open first-party production Slither High/Medium findings while preserving exact normalized drift CI | C/F/G | Active PR #662 / issue #658 on branch `codex/slither-baseline-gate` establishes the inventory and gate; all 38 rows remain Open: one confirmed gap, six design-review rows, and 31 pending dispositions |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
