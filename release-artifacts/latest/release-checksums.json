@@ -153,7 +153,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:5676beacd8d721cc6d568467786207a42a3868f2d2697e4fe6ffd50eee65d056"
+    "sha256": "sha256:9b25e562ed9d03068c89a2a3be71885a4c9937debd1260a519b62d62c87fa1c5"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -197,8 +197,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:a1a7dead4246e531cc43da5bc4210e654b60f807d3011c6ead552066e11a84dd",
-      "size_bytes": 101267
+      "sha256": "sha256:11478bebd11244cb848eee11753dbb443c82998e0be5165a02c855ef2537a6f6",
+      "size_bytes": 101288
     },
     {
       "path": "README.md",
@@ -572,8 +572,8 @@
     },
     {
       "path": "docs/tooling.md",
-      "sha256": "sha256:e507041caef8be2d8f07cd5cdbec58eb8afc38ac7f82a24faf9c5a17f0df36d6",
-      "size_bytes": 74884
+      "sha256": "sha256:0ce11044358a3391b821b35a77e6d649ec89396d5bd6a683b60007e8ab9bc48b",
+      "size_bytes": 74892
     },
     {
       "path": "docs/warning-dispositions.md",
@@ -1097,7 +1097,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:26278924922b734edd983708fe97937a3db15a82fdece1ecc44ad8958d9c9831",
+      "sha256": "sha256:da5f1520603ea23e950385215abae74dbe605ee0b56d1e9cdf8a414a606a5c4a",
       "size_bytes": 150235
     },
     {
@@ -1162,7 +1162,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:785f09f036d021f87cd7f818edb16a9e4d88f8449dc400d68b300e800b820e50",
+      "sha256": "sha256:3b57944713e357d89888c194cc064113dbc685af4eae88090dd09251aefd123c",
       "size_bytes": 8997
     },
     {
@@ -1212,22 +1212,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:a07f357295d3b44d087753c35e7f52230b8a772b15e5b7fee8e1af765ae7a173",
+      "sha256": "sha256:dac4fe5a4496abf5ff36fc6eab1347ecacfc57d5b45ac16d07959b53d232a247",
       "size_bytes": 134629
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:5f251a11100d222412cde13673e491a1f1ceefd94fe1144510e9021f05237e3b",
-      "size_bytes": 103025
+      "sha256": "sha256:045058ef4a823b2a53d1fa6a07b48531aaae5558884f1647efb58030201e244c",
+      "size_bytes": 103046
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:1bf9fc2f203ef6b3824469cd30de2fb77a1715c4916eb006270d814a612162f6",
-      "size_bytes": 99795
+      "sha256": "sha256:1836ef22a88f66c02fd12feae4a1e1b1a0ffa2f3b9a4f22863160a46f47ab79d",
+      "size_bytes": 99816
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:9f1e2b87824e91d760b6b13ba7afbe5beae4b7a0e28d15e2c9968cba08dadcc0",
+      "sha256": "sha256:c304bdc0f62e539921e6c83314b8a492fe0fe76be2eb6a82ed1b63af11553c93",
       "size_bytes": 24790
     },
     {
@@ -1352,8 +1352,8 @@
     },
     {
       "path": "scripts/check_genesis_deployment_profile.py",
-      "sha256": "sha256:4319939aebd38bfd3e8836744f79dabb405cc9ef3fe4534f2b4d0a598e733716",
-      "size_bytes": 27130
+      "sha256": "sha256:da0d366f1e33af602afda885d64c69518f5e0066de0255889bbb57c05883c593",
+      "size_bytes": 30033
     },
     {
       "path": "scripts/check_incident_drill_evidence.py",
@@ -1522,8 +1522,8 @@
     },
     {
       "path": "scripts/test_genesis_deployment_profile.py",
-      "sha256": "sha256:3941cf5c21c6ecfbaf5aa71c02b6743aca0151ba2dcd9f59c3c5ceafffebb774",
-      "size_bytes": 17695
+      "sha256": "sha256:69dd9e4e76a0038754965b64f4193ed1cbf43a6696a1cadaca678d839fa85e24",
+      "size_bytes": 19049
     },
     {
       "path": "scripts/test_integration_conformance_fixtures.py",
@@ -1582,8 +1582,8 @@
     },
     {
       "path": "scripts/test_release_mode.py",
-      "sha256": "sha256:6d7f125ce67b526d8070999fbf2100db0d318ec13afb1379e43d8dcc6f45a3d7",
-      "size_bytes": 30846
+      "sha256": "sha256:494cf529081cb050e089dc58cfc9f6959b30d3838c7d8f04b8529351604cd2c9",
+      "size_bytes": 29916
     },
     {
       "path": "scripts/test_signer_compromise_drill_evidence.py",

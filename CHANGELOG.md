@@ -23,9 +23,9 @@ the release policy in `docs/release-policy.md`.
   and confirmed that the measured build already uses plain non-enumerable
   ERC-721, so recovery must come from real compression, extraction, or
   authorized relocation rather than assumed enumerable-removal savings. The
-  readiness surfaces also fail closed on the separate issue #656 genesis
-  inventory limitation while the canonical profile and instance-aware
-  deployment reconciliation are completed.
+  readiness surfaces now expose the canonical profile while keeping the
+  separate issue #656 genesis inventory limitation fail-closed because
+  instance-aware deployment reconciliation remains incomplete.
 - Rebuilt `StreamCore` token identity onto the specification's sequential
   model: one monotone global token ID counter starting at 1 replaces the
   reserved-range allocator, per-token `(collectionId, collectionSerial)`
@@ -55,7 +55,7 @@ the release policy in `docs/release-policy.md`.
   deployment-instance identity, fallback-address distinctness, or probe
   parameter bindings. Production remains fail-closed until a checked,
   instance-aware candidate reconciles deployment manifests, address books,
-  source-verification inputs, the onchain system-manifest payload, retained
+  source-verification inputs, the on-chain system-manifest payload, retained
   rehearsal/live evidence, and the release candidate lockfile. This is a
   permanently production-blocking foundation for issue #656, not completion of
   that issue.

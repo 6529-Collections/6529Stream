@@ -4,24 +4,16 @@
 from __future__ import annotations
 
 import copy
-import importlib.util
 import json
-import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
 
+import check_genesis_deployment_profile as checker
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-SCRIPT_PATH = SCRIPT_DIR / "check_genesis_deployment_profile.py"
-SPEC = importlib.util.spec_from_file_location("check_genesis_deployment_profile", SCRIPT_PATH)
-assert SPEC is not None and SPEC.loader is not None
-checker = importlib.util.module_from_spec(SPEC)
-sys.modules[SPEC.name] = checker
-SPEC.loader.exec_module(checker)
-
 REPO_ROOT = SCRIPT_DIR.parent
 PROFILE_PATH = REPO_ROOT / checker.DEFAULT_PROFILE
 CONTRACTS_PATH = REPO_ROOT / checker.DEFAULT_CONTRACTS
@@ -241,6 +233,46 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         entries[0]["requirement"] = "RenamedCoreWithoutSpecAmendment"
         with self.assertRaisesRegex(checker.GenesisProfileError, "is not mirrored"):
             checker.validate_document_mirrors(entries, REPO_ROOT)
+
+    def test_document_mirror_reports_missing_parser_markers(self) -> None:
+        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
+        cases = (
+            (
+                Path(checker.NORMATIVE_SOURCE),
+                checker.LCM_GENESIS_HEADING,
+                "LCM-GENESIS section heading",
+            ),
+            (
+                checker.GGP_INVENTORY_SOURCE,
+                checker.GGP_INVENTORY_LABEL,
+                "GGP inventory label",
+            ),
+            (
+                checker.GTP_MIRROR_SOURCE,
+                checker.TARGET_PARAMETER_SECTION_HEADING,
+                "target parameter mirror section heading",
+            ),
+            (
+                checker.GTP_MIRROR_SOURCE,
+                checker.TARGET_PARAMETER_TABLE_END,
+                "target parameter table end heading",
+            ),
+        )
+        for relative, marker, diagnostic in cases:
+            with self.subTest(source=str(relative), marker=marker):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    copy_normative_documents(root)
+                    target = root / relative
+                    target.write_text(
+                        target.read_text(encoding="utf-8").replace(
+                            marker, "REMOVED_PARSER_MARKER", 1
+                        ),
+                        encoding="utf-8",
+                        newline="\n",
+                    )
+                    with self.assertRaisesRegex(checker.GenesisProfileError, diagnostic):
+                        checker.validate_document_mirrors(entries, root)
 
     def test_fallbacks_and_split_wallet_scope_are_distinct(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))

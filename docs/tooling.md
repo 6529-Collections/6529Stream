@@ -503,7 +503,7 @@ The canonical
 legacy names non-satisfying, and reports class-level mapping gaps against the
 v1 `release-artifacts/contracts.json` catalog without making ordinary
 development unusable. That catalog is diagnostic only: it has no deployment
-addresses, instance identity, probe-parameter bindings, or onchain manifest
+addresses, instance identity, probe-parameter bindings, or on-chain manifest
 reconciliation and therefore can never clear production mode. The
 local `make release-mode-public-beta-check` and
 `make release-mode-production-release-check` targets run the aggregate `check`
@@ -521,10 +521,11 @@ mode also invokes the genesis checker in strict completeness mode: missing,
 extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
 unapproved-alias, fallback, and probe gaps are production blockers. Even a v1
 catalog with no mapping gaps remains categorically insufficient. Production
-stays fail-closed until a checked, instance-aware genesis deployment candidate
-schema reconciles deployment manifests, address books, source-verification
-inputs, the onchain system-manifest payload, retained rehearsal/live evidence,
-and the release candidate lockfile. That remaining work is tracked by
+stays fail-closed until a checked schema for an instance-aware genesis
+deployment candidate reconciles deployment manifests, address books,
+source-verification inputs, the on-chain system-manifest payload, retained
+rehearsal/live evidence, and the release candidate lockfile. That remaining
+work is tracked by
 [issue #656](https://github.com/6529-Collections/6529Stream/issues/656). The
 non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)

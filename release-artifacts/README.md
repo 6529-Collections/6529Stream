@@ -247,13 +247,13 @@ deployment roles, entries 36-57 are the exact per-parameter GGP probes, and the
 last entry is the one shared entropy cadence probe. The ordinary checker
 validates this requirement artifact and reports class-level mapping diagnostics
 against the v1 `contracts.json` catalog. That catalog has no deployment
-addresses, instance identity, probe-parameter bindings, or onchain manifest
+addresses, instance identity, probe-parameter bindings, or on-chain manifest
 reconciliation, so it is categorically insufficient for production and can
 never clear `--require-complete` or production release mode. Those gates require
-a future checked, instance-aware genesis deployment candidate schema tied to
-deployment manifests, address books, source-verification inputs, the onchain
-system-manifest payload, retained rehearsal/live evidence, and the release
-candidate lockfile. Until that evidence exists and reconciles every role,
+a future checked schema for an instance-aware genesis deployment candidate,
+tied to deployment manifests, address books, source-verification inputs, the
+on-chain system-manifest payload, retained rehearsal/live evidence, and the
+release candidate lockfile. Until that evidence exists and reconciles every role,
 production remains blocked under issue #656. On-demand split-wallet instances
 and the no-authority deployer factory are explicitly outside the numbered
 production inventory.

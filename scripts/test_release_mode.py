@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import importlib.util
-import copy
 import json
 import sys
 import tempfile
@@ -19,6 +18,8 @@ from unittest import mock
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+
+import test_genesis_deployment_profile as genesis_profile_test_support
 
 SCRIPT_PATH = SCRIPT_DIR / "check_release_mode.py"
 SPEC = importlib.util.spec_from_file_location("check_release_mode", SCRIPT_PATH)
@@ -75,40 +76,16 @@ def write_core_size_artifact(
 def write_complete_genesis_candidate(root: Path) -> tuple[Path, Path]:
     """Write an exact synthetic genesis profile candidate for release-mode tests."""
     repo_root = Path(__file__).resolve().parents[1]
-    profile = copy.deepcopy(
-        json.loads((repo_root / checker.DEFAULT_GENESIS_PROFILE).read_text(encoding="utf-8"))
-    )
-    entries = profile["entries"]
-    candidates: list[dict[str, object]] = []
-    for entry in entries:
-        entry_id = entry["id"]
-        name = f"ReleaseModeGenesisEntry{entry_id:02d}"
-        entry["approved_aliases"].append(name)
-        candidates.append(
-            {
-                "name": name,
-                "source": f"smart-contracts/fixtures/Entry{entry_id}.sol",
-                "deployment_scope": entry["deployment_scope"],
-                "verified_interfaces": list(entry["required_interfaces"]),
-                "verified_markers": list(entry["required_markers"]),
-            }
+    profile, contracts = genesis_profile_test_support.complete_fixture(
+        json.loads(
+            (repo_root / checker.DEFAULT_GENESIS_PROFILE).read_text(encoding="utf-8")
         )
+    )
     profile_path = root / checker.DEFAULT_GENESIS_PROFILE
     contracts_path = root / checker.DEFAULT_CONTRACT_CONFIG
     write_json(profile_path, profile)
-    write_json(
-        contracts_path,
-        {
-            "schema_version": checker.genesis_profile_checker.CONTRACTS_SCHEMA,
-            "production_contracts": sorted(candidates, key=lambda candidate: candidate["name"]),
-        },
-    )
-    for relative in (
-        Path(checker.genesis_profile_checker.NORMATIVE_SOURCE),
-        checker.genesis_profile_checker.GGP_INVENTORY_SOURCE,
-        checker.genesis_profile_checker.GTP_MIRROR_SOURCE,
-    ):
-        write_text(root / relative, (repo_root / relative).read_text(encoding="utf-8"))
+    write_json(contracts_path, contracts)
+    genesis_profile_test_support.copy_normative_documents(root)
     return profile_path, contracts_path
 
 

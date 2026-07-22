@@ -28,6 +28,17 @@ NORMATIVE_ANCHOR = "LCM-GENESIS"
 MAINNET_CHAIN_ID = 1
 GGP_INVENTORY_SOURCE = Path("docs/stream-long-term-architecture.md")
 GTP_MIRROR_SOURCE = Path("docs/launch-v1-target-architecture.md")
+LCM_GENESIS_HEADING = "## Genesis Deployment Profile"
+LCM_GENESIS_ANCHOR = "Requirements [LCM-GENESIS]:"
+MANDATORY_GENESIS_LABEL = "Mandatory genesis contracts:"
+GGP_SECTION_HEADING = "## Governed Gas Parameters [LTA-GGP]"
+GGP_INVENTORY_LABEL = "GGP inventory."
+GGP_INVENTORY_END = "A future guarded path that is not in this inventory"
+PARAMETER_TABLE_HEADER = (
+    "| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |"
+)
+TARGET_PARAMETER_SECTION_HEADING = "### Governed Gas Parameter Identifier Mirror Rows"
+TARGET_PARAMETER_TABLE_END = "### Pinned-Name Glossary"
 
 FIXED_CONTRACT_KEYS = (
     "STREAM_CORE",
@@ -175,11 +186,53 @@ def read_text(path: Path) -> str:
         raise GenesisProfileError(f"missing required file: {path}") from exc
 
 
+def require_document_markers(
+    text: str,
+    source: str | Path,
+    markers: tuple[tuple[str, str], ...],
+) -> None:
+    """Fail with a targeted diagnostic when a parser-owned marker moves."""
+    for marker, label in markers:
+        if marker not in text:
+            raise GenesisProfileError(f"{source} is missing the {label}: {marker!r}")
+
+
+def bounded_document_section(
+    text: str,
+    source: str | Path,
+    start_marker: str,
+    end_marker: str,
+    label: str,
+) -> str:
+    """Extract a parser-owned section after validating its stable boundaries."""
+    start = text.find(start_marker)
+    if start < 0:
+        raise GenesisProfileError(
+            f"{source} is missing the {label} start marker: {start_marker!r}"
+        )
+    content_start = start + len(start_marker)
+    end = text.find(end_marker, content_start)
+    if end < 0:
+        raise GenesisProfileError(
+            f"{source} is missing the {label} end marker: {end_marker!r}"
+        )
+    return text[content_start:end]
+
+
 def validate_document_mirrors(entries: list[dict[str, Any]], repo_root: Path) -> None:
     """Require the checked profile to match its three normative inventory mirrors."""
     matrix = read_text(repo_root / NORMATIVE_SOURCE)
+    require_document_markers(
+        matrix,
+        NORMATIVE_SOURCE,
+        (
+            (LCM_GENESIS_HEADING, "LCM-GENESIS section heading"),
+            (LCM_GENESIS_ANCHOR, "LCM-GENESIS requirements anchor"),
+            (MANDATORY_GENESIS_LABEL, "mandatory genesis inventory label"),
+        ),
+    )
     block_match = re.search(
-        r"Mandatory genesis contracts:\s*```text\s*(.*?)\s*```",
+        rf"{re.escape(MANDATORY_GENESIS_LABEL)}\s*```text\s*(.*?)\s*```",
         matrix,
         flags=re.DOTALL,
     )
@@ -215,15 +268,25 @@ def validate_document_mirrors(entries: list[dict[str, Any]], repo_root: Path) ->
             )
 
     architecture = read_text(repo_root / GGP_INVENTORY_SOURCE)
-    ggp_match = re.search(
-        r"GGP inventory\.(.*?)(?:\nA future guarded path)",
+    require_document_markers(
         architecture,
-        flags=re.DOTALL,
+        GGP_INVENTORY_SOURCE,
+        (
+            (GGP_SECTION_HEADING, "LTA-GGP section heading"),
+            (GGP_INVENTORY_LABEL, "GGP inventory label"),
+            (PARAMETER_TABLE_HEADER, "GGP inventory table header"),
+            (GGP_INVENTORY_END, "GGP inventory end marker"),
+        ),
     )
-    if ggp_match is None:
-        raise GenesisProfileError(f"{GGP_INVENTORY_SOURCE} is missing the GGP inventory")
+    ggp_section = bounded_document_section(
+        architecture,
+        GGP_INVENTORY_SOURCE,
+        GGP_INVENTORY_LABEL,
+        GGP_INVENTORY_END,
+        "GGP inventory",
+    )
     ggp_rows = tuple(
-        re.findall(r"^\| `([^`]+)` \|", ggp_match.group(1), flags=re.MULTILINE)
+        re.findall(r"^\| `([^`]+)` \|", ggp_section, flags=re.MULTILINE)
     )
     if ggp_rows != GGP_PARAMETERS:
         raise GenesisProfileError(
@@ -231,8 +294,28 @@ def validate_document_mirrors(entries: list[dict[str, Any]], repo_root: Path) ->
         )
 
     target_architecture = read_text(repo_root / GTP_MIRROR_SOURCE)
+    require_document_markers(
+        target_architecture,
+        GTP_MIRROR_SOURCE,
+        (
+            (TARGET_PARAMETER_SECTION_HEADING, "target parameter mirror section heading"),
+            (TARGET_PARAMETER_TABLE_END, "target parameter table end heading"),
+        ),
+    )
+    target_parameter_section = bounded_document_section(
+        target_architecture,
+        GTP_MIRROR_SOURCE,
+        TARGET_PARAMETER_SECTION_HEADING,
+        TARGET_PARAMETER_TABLE_END,
+        "target parameter mirror section",
+    )
+    require_document_markers(
+        target_parameter_section,
+        GTP_MIRROR_SOURCE,
+        ((PARAMETER_TABLE_HEADER, "target parameter table header"),),
+    )
     gtp_rows = tuple(
-        re.findall(r"^\| `GTP_([^`]+)` \|", target_architecture, flags=re.MULTILINE)
+        re.findall(r"^\| `GTP_([^`]+)` \|", target_parameter_section, flags=re.MULTILINE)
     )
     if gtp_rows != GTP_PARAMETERS:
         raise GenesisProfileError(
