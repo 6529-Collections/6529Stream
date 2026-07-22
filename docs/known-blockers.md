@@ -128,18 +128,26 @@ contributors who start from the README.
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries, plus a Playwright-backed Chromium
   sandbox check for the committed final animation fixture.
-- `StreamCore` now uses a linked metadata renderer library, removes optional
-  ERC-721 Enumerable support, preserves a live `totalSupply()`
-  view, and has a production-only size gate:
+- `StreamCore` now uses a linked metadata renderer library, inherits plain
+  non-enumerable ERC-721 with no enumerable index storage, preserves a live
+  `totalSupply()` view, and has an IR-optimized development size gate:
   `forge build --sizes --via-ir --skip test --skip script --force`. The
   committed `release-artifacts/latest/bytecode-release-proof.json` currently
   records `StreamCore` runtime size at 24,152 bytes with 424 bytes of EIP-170 headroom,
-  which passes deployability and the documented 384-byte minimum release floor
-  but sits below the 512-byte warning threshold under the accepted CON-012
-  bytecode-spend exception. Large non-trivial Core feature work still needs
-  bytecode deltas to be measured or an explicit size-budget exception, and
-  deployment scripts, manifests, and rehearsals still need to use this
-  production profile.
+  which passes deployability and the interim 384-byte development floor but
+  sits below the 512-byte warning threshold and the normative 2,000-byte
+  production deployment minimum. The accepted CON-012 development exception
+  cannot survive the deployment gate;
+  [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
+  production release until real headroom is recovered while every mandatory
+  Core hook is retained.
+- Strict release mode does not yet validate the exhaustive genesis candidate
+  required by the launch conformance matrix. The normative profile lists 58
+  production contracts, while `release-artifacts/contracts.json` tracks 20;
+  no fail-closed profile-completeness checker currently joins release mode.
+  [Issue #656](https://github.com/6529-Collections/6529Stream/issues/656) is an
+  independent production blocker even if all currently implemented
+  release-mode checks pass.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

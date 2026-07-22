@@ -23,9 +23,9 @@ concurrency:
 
 jobs:
   release-mode:
-    name: ${{ inputs.release_phase }} evidence gate
+    name: ${{ inputs.release_phase }} release gate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 45
 
     steps:
       - name: Checkout
@@ -33,6 +33,42 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Require protected default branch
+        shell: bash
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          REF_PROTECTED: ${{ github.ref_protected }}
+        run: |
+          set -euo pipefail
+          if [ "$GITHUB_REF_TYPE" != "branch" ] || [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
+            echo "Release mode must run from the default branch: $DEFAULT_BRANCH" >&2
+            exit 1
+          fi
+          if [ "$REF_PROTECTED" != "true" ]; then
+            echo "Release mode requires branch protection or an active ruleset on $DEFAULT_BRANCH" >&2
+            exit 1
+          fi
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
+        with:
+          version: v1.7.1
+
+      - name: Install release tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements-tools.txt
+          python3 -m playwright install --with-deps chromium
+
+      - name: Run aggregate release checks
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          bash scripts/check.sh 2>&1 | tee ci-logs/aggregate-check.log
 
       - name: Validate release-mode profile
         shell: bash

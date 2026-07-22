@@ -539,11 +539,11 @@ release-readiness-check:
 	$(PYTHON) scripts/check_release_readiness.py
 	$(PYTHON) scripts/test_release_mode.py
 
-release-mode-public-beta-check: public-beta-evidence-check
+release-mode-public-beta-check: check
 	$(PYTHON) scripts/test_release_mode.py
 	$(PYTHON) scripts/check_release_mode.py --phase public-beta
 
-release-mode-production-release-check: public-beta-evidence-check
+release-mode-production-release-check: check
 	$(PYTHON) scripts/test_release_mode.py
 	$(PYTHON) scripts/check_release_mode.py --phase production-release
 

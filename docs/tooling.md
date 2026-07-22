@@ -189,10 +189,11 @@ reason. The current baseline has 648 explicit exclusions, so it is a checked
 burn-down queue rather than proof that API documentation is complete. See
 [`natspec-coverage.md`](natspec-coverage.md).
 
-The size step is the production deployability gate. It skips test and script
-contracts so non-production artifacts do not pollute EIP-170/EIP-3860 evidence,
-and it uses `via_ir` because the current deployable `StreamCore` release profile
-needs the IR optimizer to fit under the runtime limit. The artifact-backed
+The aggregate size step is the ordinary development deployability gate. It
+skips test and script contracts so non-production artifacts do not pollute
+EIP-170/EIP-3860 evidence, and it uses `via_ir` because the current deployable
+`StreamCore` release profile needs the IR optimizer to fit under the runtime
+limit. The artifact-backed
 budget checker reads `release-artifacts/contracts.json`, treats unlinked
 Solidity library placeholders as their 20-byte deployed addresses for size
 counting, fails below the 384-byte `StreamCore` minimum margin, and reports a
@@ -200,7 +201,8 @@ warning below the 512-byte future-work threshold. The checker also validates
 artifact compiler metadata, optimizer settings, EVM version, compilation target,
 and current-source Keccak hashes before trusting any reported runtime size, so
 stale artifacts from earlier local commands fail before they can become release
-evidence.
+evidence. Its 384-byte floor is an interim development control, not the
+governing production deployment threshold.
 
 The Core bytecode-spend policy is stricter than the EIP-170 floor. It reads the
 same production-size artifacts and pins the currently approved `StreamCore`
@@ -490,14 +492,27 @@ dashboard panels, query inputs, source artifacts, freshness states, severity
 mapping, and no-secret telemetry boundaries. It is not a maintained dashboard,
 hosted monitoring service, alert-provider integration, RPC provider, production
 indexer, public beta implementation, or production readiness claim.
-The release-mode CI profile is intentionally separate from `make check`: run
-`python scripts/test_release_mode.py` in the default baseline, then use
-`make release-mode-public-beta-check`,
-`make release-mode-production-release-check`, or the manual GitHub
-`workflow_dispatch` release-mode workflow only for release-candidate evidence
-reviews. Those release-mode commands are expected to fail until retained
-evidence is complete or explicitly accepted as risk, and production release
-mode requires public-beta readiness before production-release readiness.
+The strict release-mode decision remains opt-in rather than part of the default
+`make check` baseline, which runs `python scripts/test_release_mode.py`. The
+local `make release-mode-public-beta-check` and
+`make release-mode-production-release-check` targets run the aggregate `check`
+gate before the strict evidence decision. The manual GitHub `workflow_dispatch`
+profile likewise requires the protected default branch and runs
+`bash scripts/check.sh` before the selected release phase. Release mode accepts
+only active, correctly ordered risk-acceptance windows, permits them only for
+waivable public-beta rows, requires completed external-audit evidence and every
+production evidence row, and requires public-beta readiness before production
+release readiness. Production mode then reads the checksum-covered
+`release-artifacts/latest/abi-checksums.json` measurement, rejects missing,
+malformed, boolean-as-integer, or arithmetically inconsistent `StreamCore` size
+fields, and requires at least 2,000 bytes of EIP-170 runtime headroom. That
+non-waivable threshold comes from the
+[`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
+and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
+is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
+The current 424-byte margin intentionally leaves production release mode red
+until the tracked slimming work lands; ordinary `make check` remains usable for
+development.
 
 The public-beta evidence step validates
 [`public-beta-evidence.md`](public-beta-evidence.md) and

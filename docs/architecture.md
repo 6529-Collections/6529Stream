@@ -91,7 +91,7 @@ release artifacts, or documentation-only evidence unless the feature is a
 Core invariant, token-ownership rule, or security boundary that must live in
 `StreamCore`.
 
-The current production size thresholds are recorded in
+The current development size-budget thresholds are recorded in
 [`release-artifacts/contracts.json`](../release-artifacts/contracts.json). The
 current measured `StreamCore` runtime and EIP-170 margin source of truth is the
 bytecode release proof
@@ -112,8 +112,11 @@ The current production profile is:
 - current EIP-170 margin: 424 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;
 - approved baseline EIP-170 margin: 2,392 bytes;
-- minimum release floor: 384-byte minimum runtime margin;
-- warning threshold: 512-byte warning runtime margin.
+- interim development floor: 384-byte minimum runtime margin;
+- development warning threshold: 512-byte warning runtime margin;
+- production deployment minimum: 2,000-byte runtime margin under the
+  [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
+  and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
 
 Any PR that spends non-trivial `StreamCore` bytecode must include:
 
@@ -121,8 +124,9 @@ Any PR that spends non-trivial `StreamCore` bytecode must include:
   adapter, library, release artifact, or docs-only path is insufficient;
 - a measured before/after `StreamCore` runtime bytecode delta from the
   production profile;
-- the resulting EIP-170 margin and whether it remains above the 384-byte
-  minimum release floor and 512-byte warning threshold;
+- the resulting EIP-170 margin and whether it remains above the interim
+  384-byte development floor, 512-byte warning threshold, and 2,000-byte
+  production deployment minimum;
 - an explicit size-budget exception note in `CHANGELOG.md`,
   `docs/release-policy.md`, or the affected ADR when the change is
   non-critical product functionality;
@@ -150,12 +154,15 @@ The default classification for future feature work is:
 This policy is intentionally conservative even when an accepted exception keeps
 the current runtime above the approved baseline. CON-012 spends Core bytecode on
 the mint-manager boundary and explicit token identity reads, leaving 424 bytes
-of current EIP-170 margin; future Core work should recover headroom before
-adding more behavior. The approved bytecode-spend baseline remains 22,184 bytes
-with 2,392 bytes of EIP-170 margin, so future Core growth above that ceiling
-still needs an accepted exception. The goal is to keep `StreamCore` deployable,
-auditable, and stable while allowing world-class 1/1 drop surfaces to evolve
-through explicit, versioned extension points.
+of current EIP-170 margin. That passes the interim development floor but fails
+the non-waivable 2,000-byte production deployment minimum; interim exception
+records cannot survive the deployment gate. The approved bytecode-spend
+baseline remains 22,184 bytes with 2,392 bytes of EIP-170 margin, and
+[issue #654](https://github.com/6529-Collections/6529Stream/issues/654) tracks
+the required recovery through real compression, extraction, or authorized
+relocation. The goal is to keep `StreamCore` deployable, auditable, and stable
+while allowing world-class 1/1 drop surfaces to evolve through explicit,
+versioned extension points.
 
 ## Actor And Role Boundaries
 

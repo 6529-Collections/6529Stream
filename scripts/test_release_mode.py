@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from datetime import date
 from io import StringIO
 from pathlib import Path
 
@@ -38,6 +39,35 @@ def write_json(path: Path, value: object) -> None:
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(value, handle, indent=2)
         handle.write("\n")
+
+
+def write_core_size_artifact(
+    root: Path,
+    *,
+    runtime_margin: object = checker.PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES,
+) -> Path:
+    """Write the minimal checksum-covered Core size artifact for release mode."""
+    path = root / checker.DEFAULT_ABI_CHECKSUMS
+    runtime_size: object
+    if isinstance(runtime_margin, bool) or not isinstance(runtime_margin, int):
+        runtime_size = 0
+    else:
+        runtime_size = checker.EIP170_RUNTIME_LIMIT_BYTES - runtime_margin
+    write_json(
+        path,
+        {
+            "schema_version": checker.ABI_CHECKSUMS_SCHEMA,
+            "contracts": {
+                checker.STREAM_CORE_NAME: {
+                    "source": checker.STREAM_CORE_SOURCE,
+                    "deployed_bytecode_size_bytes": runtime_size,
+                    "eip170_runtime_limit_bytes": checker.EIP170_RUNTIME_LIMIT_BYTES,
+                    "deployed_runtime_margin_bytes": runtime_margin,
+                }
+            },
+        },
+    )
+    return path
 
 
 def file_ref(root: Path, relative_path: str, content: str) -> dict[str, str]:
@@ -85,8 +115,8 @@ def evidence_row(
     if status == "accepted_risk":
         risk_acceptance = {
             "accepted_by": "protocol-owner",
-            "accepted_at": "2026-06-16",
-            "expires_at": "2026-07-16",
+            "accepted_at": "2026-01-01",
+            "expires_at": "2099-12-31",
             "reference": "docs/release-policy.md#risk-acceptance",
             "notes": "Fixture risk acceptance for release-mode gate coverage.",
         }
@@ -110,6 +140,7 @@ def evidence_document(
     production_requirement_status: str = "complete",
 ) -> dict[str, object]:
     """Build a public-beta evidence document for release-mode tests."""
+    write_core_size_artifact(root)
     schema_ref = {
         **file_ref(root, "release-artifacts/schema/public-beta-evidence.schema.json", "{}\n"),
         "category": "public_beta_evidence_schema",
@@ -152,6 +183,25 @@ def evidence_document(
         },
         "operator_notes": "Release-mode fixture contains no secrets.",
     }
+
+
+def replace_requirement_status(
+    root: Path,
+    document: dict[str, object],
+    requirement_id: str,
+    status: str,
+) -> dict[str, object]:
+    """Replace one requirement row in a release-mode fixture."""
+    requirements = document["requirements"]
+    assert isinstance(requirements, list)
+    for index, requirement in enumerate(requirements):
+        assert isinstance(requirement, dict)
+        if requirement["id"] != requirement_id:
+            continue
+        replacement = evidence_row(root, requirement_id, requirement["phase"], status)
+        requirements[index] = replacement
+        return replacement
+    raise AssertionError(f"missing release-mode fixture requirement: {requirement_id}")
 
 
 class ReleaseModeTests(unittest.TestCase):
@@ -222,8 +272,213 @@ class ReleaseModeTests(unittest.TestCase):
 
             checker.validate_release_mode(path, root, "production-release")
 
-    def test_accepted_risk_rows_can_satisfy_release_mode(self) -> None:
-        """Explicit accepted-risk rows are permitted by release mode."""
+    def test_production_core_headroom_at_deployment_target_passes(self) -> None:
+        """The exact normative 2,000-byte production margin is sufficient."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            write_core_size_artifact(
+                root,
+                runtime_margin=checker.PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES,
+            )
+
+            checker.validate_release_mode(path, root, "production-release")
+
+    def test_production_core_headroom_below_deployment_target_blocks(self) -> None:
+        """A 1,999-byte Core margin fails the governing deployment rule."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            write_core_size_artifact(root, runtime_margin=1_999)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseModeError, "below the production deployment minimum"
+            ):
+                checker.validate_release_mode(path, root, "production-release")
+
+    def test_production_core_headroom_missing_artifact_fails_closed(self) -> None:
+        """Production mode rejects a missing checksum-covered size artifact."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            (root / checker.DEFAULT_ABI_CHECKSUMS).unlink()
+
+            with self.assertRaisesRegex(
+                evidence_checker.PublicBetaEvidenceError, "missing required file"
+            ):
+                checker.validate_release_mode(path, root, "production-release")
+
+    def test_production_core_headroom_missing_field_fails_closed(self) -> None:
+        """Production mode rejects an omitted Core size field."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            artifact_path = root / checker.DEFAULT_ABI_CHECKSUMS
+            artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+            del artifact["contracts"][checker.STREAM_CORE_NAME][
+                "deployed_runtime_margin_bytes"
+            ]
+            write_json(artifact_path, artifact)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseModeError,
+                "deployed_runtime_margin_bytes must be an integer",
+            ):
+                checker.validate_release_mode(path, root, "production-release")
+
+    def test_production_core_headroom_malformed_field_fails_closed(self) -> None:
+        """Production mode rejects stringified numeric artifact fields."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            artifact_path = root / checker.DEFAULT_ABI_CHECKSUMS
+            artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+            artifact["contracts"][checker.STREAM_CORE_NAME][
+                "deployed_bytecode_size_bytes"
+            ] = "22576"
+            write_json(artifact_path, artifact)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseModeError,
+                "deployed_bytecode_size_bytes must be an integer",
+            ):
+                checker.validate_release_mode(path, root, "production-release")
+
+    def test_production_core_headroom_boolean_field_fails_closed(self) -> None:
+        """Production mode does not accept JSON booleans as integer margins."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            write_core_size_artifact(root, runtime_margin=True)
+
+            with self.assertRaisesRegex(
+                checker.ReleaseModeError,
+                "deployed_runtime_margin_bytes must be an integer",
+            ):
+                checker.validate_release_mode(path, root, "production-release")
+
+    def test_production_core_headroom_invalid_metadata_fails_closed(self) -> None:
+        """Production mode rejects invalid Core artifact identity and arithmetic."""
+        cases: tuple[tuple[str, tuple[str, ...], object, str], ...] = (
+            (
+                "wrong_schema",
+                ("schema_version",),
+                "6529stream.abi-checksums.v0",
+                "schema_version must be",
+            ),
+            (
+                "wrong_core_source",
+                ("contracts", checker.STREAM_CORE_NAME, "source"),
+                "smart-contracts/NotStreamCore.sol",
+                "StreamCore.source must be",
+            ),
+            (
+                "wrong_eip170_limit",
+                (
+                    "contracts",
+                    checker.STREAM_CORE_NAME,
+                    "eip170_runtime_limit_bytes",
+                ),
+                checker.EIP170_RUNTIME_LIMIT_BYTES - 1,
+                "eip170_runtime_limit_bytes must be 24576",
+            ),
+            (
+                "inconsistent_margin",
+                (
+                    "contracts",
+                    checker.STREAM_CORE_NAME,
+                    "deployed_runtime_margin_bytes",
+                ),
+                checker.PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES + 1,
+                "expected 2000 from the EIP-170 limit and runtime size",
+            ),
+            (
+                "negative_runtime_size",
+                (
+                    "contracts",
+                    checker.STREAM_CORE_NAME,
+                    "deployed_bytecode_size_bytes",
+                ),
+                -1,
+                "deployed_bytecode_size_bytes must be non-negative",
+            ),
+        )
+
+        for case_name, field_path, invalid_value, expected_error in cases:
+            with self.subTest(case=case_name), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                path = root / checker.DEFAULT_EVIDENCE
+                write_json(
+                    path,
+                    evidence_document(
+                        root,
+                        public_beta_status="ready",
+                        production_status="ready",
+                    ),
+                )
+                artifact_path = root / checker.DEFAULT_ABI_CHECKSUMS
+                artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+                target: object = artifact
+                for field in field_path[:-1]:
+                    assert isinstance(target, dict)
+                    target = target[field]
+                assert isinstance(target, dict)
+                target[field_path[-1]] = invalid_value
+                write_json(artifact_path, artifact)
+
+                with self.assertRaisesRegex(checker.ReleaseModeError, expected_error):
+                    checker.validate_release_mode(path, root, "production-release")
+
+    def test_public_beta_does_not_require_core_headroom_artifact(self) -> None:
+        """The production headroom rule does not broaden the public-beta gate."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             path = root / checker.DEFAULT_EVIDENCE
@@ -233,12 +488,157 @@ class ReleaseModeTests(unittest.TestCase):
                     root,
                     public_beta_status="ready",
                     production_status="blocked",
-                    public_beta_requirement_status="accepted_risk",
                     production_requirement_status="missing",
                 ),
             )
+            (root / checker.DEFAULT_ABI_CHECKSUMS).unlink()
+
+            checker.validate_release_mode(path, root, "public-beta")
+
+    def test_active_accepted_risk_can_satisfy_a_waivable_requirement(self) -> None:
+        """An active risk acceptance remains valid for a non-critical row."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            document = evidence_document(
+                root,
+                public_beta_status="ready",
+                production_status="blocked",
+                production_requirement_status="missing",
+            )
+            replace_requirement_status(
+                root, document, "fork_deployment_rehearsal", "accepted_risk"
+            )
+            write_json(
+                path,
+                document,
+            )
 
             checker.validate_release_mode(path, root, "public_beta")
+
+    def test_expired_accepted_risk_blocks_release_mode(self) -> None:
+        """A risk acceptance cannot satisfy release mode after its expiry date."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            document = evidence_document(
+                root,
+                public_beta_status="ready",
+                production_status="blocked",
+                production_requirement_status="missing",
+            )
+            requirement = replace_requirement_status(
+                root, document, "fork_deployment_rehearsal", "accepted_risk"
+            )
+            risk_acceptance = requirement["risk_acceptance"]
+            assert isinstance(risk_acceptance, dict)
+            risk_acceptance["expires_at"] = "2026-07-20"
+            write_json(path, document)
+
+            with self.assertRaisesRegex(checker.ReleaseModeError, "expired on '2026-07-20'"):
+                checker.validate_release_mode(
+                    path, root, "public_beta", as_of=date(2026, 7, 21)
+                )
+
+    def test_future_accepted_risk_blocks_release_mode(self) -> None:
+        """A risk acceptance cannot satisfy release mode before acceptance."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            document = evidence_document(
+                root,
+                public_beta_status="ready",
+                production_status="blocked",
+                production_requirement_status="missing",
+            )
+            requirement = replace_requirement_status(
+                root, document, "fork_deployment_rehearsal", "accepted_risk"
+            )
+            risk_acceptance = requirement["risk_acceptance"]
+            assert isinstance(risk_acceptance, dict)
+            risk_acceptance["accepted_at"] = "2026-07-22"
+            write_json(path, document)
+
+            with self.assertRaisesRegex(checker.ReleaseModeError, "not active until"):
+                checker.validate_release_mode(
+                    path, root, "public_beta", as_of=date(2026, 7, 21)
+                )
+
+    def test_inverted_accepted_risk_window_blocks_release_mode(self) -> None:
+        """Risk-acceptance expiry cannot precede the acceptance date."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            document = evidence_document(
+                root,
+                public_beta_status="ready",
+                production_status="blocked",
+                production_requirement_status="missing",
+            )
+            requirement = replace_requirement_status(
+                root, document, "fork_deployment_rehearsal", "accepted_risk"
+            )
+            risk_acceptance = requirement["risk_acceptance"]
+            assert isinstance(risk_acceptance, dict)
+            risk_acceptance["accepted_at"] = "2026-07-22"
+            risk_acceptance["expires_at"] = "2026-07-20"
+            write_json(path, document)
+
+            with self.assertRaisesRegex(checker.ReleaseModeError, "invalid risk-acceptance window"):
+                checker.validate_release_mode(
+                    path, root, "public_beta", as_of=date(2026, 7, 21)
+                )
+
+    def test_external_audit_cannot_be_accepted_as_risk(self) -> None:
+        """Public-beta release mode requires completed external-audit evidence."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            document = evidence_document(
+                root,
+                public_beta_status="ready",
+                production_status="blocked",
+                production_requirement_status="missing",
+            )
+            replace_requirement_status(
+                root, document, "external_audit_report", "accepted_risk"
+            )
+            write_json(path, document)
+
+            with self.assertRaisesRegex(checker.ReleaseModeError, "external_audit_report"):
+                checker.validate_release_mode(path, root, "public-beta")
+
+    def test_production_requirements_cannot_be_accepted_as_risk(self) -> None:
+        """Every production evidence requirement is non-waivable."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                    production_requirement_status="accepted_risk",
+                ),
+            )
+
+            with self.assertRaisesRegex(checker.ReleaseModeError, "production_signatures"):
+                checker.validate_release_mode(path, root, "production-release")
+
+    def test_workflow_requires_protected_default_branch_and_full_gate(self) -> None:
+        """The manual workflow rejects unsafe refs and runs the aggregate checker."""
+        repo_root = Path(__file__).resolve().parents[1]
+        workflow = (repo_root / ".github/workflows/release-mode.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("github.event.repository.default_branch", workflow)
+        self.assertIn("github.ref_protected", workflow)
+        self.assertIn("bash scripts/check.sh", workflow)
+
+        makefile = (repo_root / "Makefile").read_text(encoding="utf-8")
+        self.assertIn("release-mode-public-beta-check: check", makefile)
+        self.assertIn("release-mode-production-release-check: check", makefile)
 
     def test_pending_requirement_blocks_release_mode(self) -> None:
         """Pending requirement rows are listed as release-mode blockers."""

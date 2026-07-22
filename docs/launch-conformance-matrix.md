@@ -701,19 +701,21 @@ named compression strategies is a design failure that blocks deployment;
 editing the allocation table is a spec amendment through the normal
 process, never a gate-time remediation.
 
-Non-normative reconciliation note: the CON-012 measured baseline (24,097
-runtime bytes; protocol v1 [PV1-HOOKS] implementation evidence) predates
-ADR 0012 decision T10 — it was compiled with the since-removed
-`ERC721Enumerable` extension — and exceeds the 22,576-byte ceiling by
-1,574 bytes and the post-T10 allocation total by 3,150 bytes. Closing
-that gap is a named engineering workstream with its own measured
-milestone, not a deployment-eve hope (ADR 0012 decision T9): the Core
-size reconciliation workstream removes enumerable index storage
-(1,500 bytes at the planning allocation), applies the named compression
-strategies, and draws on the pre-authorized relocations above (bounded
-up to 1,900 bytes of relief) — together bounding more relief than the
-overage — and publishes the first passing measured build as release
-evidence rather than waiting for the deployment gate to force it.
+Non-normative reconciliation note: the current artifact-backed
+CON-012-lineage build is 24,152 runtime bytes with 424 bytes of EIP-170
+headroom. `StreamCore` inherits plain, non-enumerable `ERC721`; the measured
+build does not contain `ERC721Enumerable` index storage, so ADR 0012 decision
+T10 is already reflected and offers no remaining implementation savings. The
+current build exceeds the 22,576-byte deployment ceiling by 1,576 bytes and
+the 21,000-byte planning allocation total by 3,152 bytes. Closing that gap is
+the measured engineering workstream tracked by
+[#654](https://github.com/6529-Collections/6529Stream/issues/654), not a
+deployment-eve hope (ADR 0012 decision T9): it must recover real bytes through
+the named compression strategies, actual extraction, or the pre-authorized
+relocations above while retaining every permanent Core row and every mandatory
+hook that has not yet landed. The first passing complete build is published as
+release evidence rather than obtained by omitting required surfaces or editing
+the allocation table.
 
 Additional paid-mint/finality/escrow deployment tests:
 

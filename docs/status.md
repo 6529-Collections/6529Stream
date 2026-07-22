@@ -24,18 +24,20 @@ The current Gate A smoke baseline proves:
   breaking-change approval references before review.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
-- `forge build --sizes --via-ir --skip test --skip script --force` runs as the production
-  size gate. `python scripts/check_contract_size_budget.py` checks every
-  production contract against EIP-170 and enforces the configured `StreamCore`
-  release floor from `release-artifacts/contracts.json`. The committed
+- `forge build --sizes --via-ir --skip test --skip script --force` runs as the
+  aggregate development deployability gate. `python
+  scripts/check_contract_size_budget.py` checks every production contract
+  against EIP-170 and enforces the interim `StreamCore` development floor from
+  `release-artifacts/contracts.json`. The committed
   `release-artifacts/latest/bytecode-release-proof.json` records the current
   measured `StreamCore` production runtime size as 24,152 bytes, leaving
   424 bytes of EIP-170
-  headroom under the IR-optimized deployment profile. This passes the EIP-170
-  deployability gate and the current 384-byte minimum release floor, but it is
-  below the 512-byte warning threshold under the accepted CON-012
-  bytecode-spend exception; large non-trivial `StreamCore` feature work should
-  still measure bytecode deltas and explicitly accept any size-budget exception.
+  headroom under the IR-optimized deployment profile. This passes EIP-170 and
+  the interim 384-byte development floor, but it is below the 512-byte warning
+  threshold and fails the normative 2,000-byte production deployment minimum.
+  The accepted CON-012 development exception cannot survive the deployment
+  gate; [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
+  blocks production release until real headroom is recovered.
   The stricter bytecode-spend ceiling remains the reviewed 22,184-byte approved
   baseline with 2,392 bytes of baseline margin.
   The architecture policy in
@@ -44,6 +46,12 @@ The current Gate A smoke baseline proves:
   satellite contracts, read adapters, linked libraries, release artifacts, or
   documentation-only evidence unless Core ownership/security invariants require
   otherwise.
+- The strict release-mode profile still has a known completeness limitation:
+  the normative genesis deployment profile requires an exhaustive 58-contract
+  candidate, while `release-artifacts/contracts.json` tracks 20 and no
+  fail-closed checker compares the two. This keeps production blocked under
+  [issue #656](https://github.com/6529-Collections/6529Stream/issues/656), even
+  if the currently implemented release-mode checks become green.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass

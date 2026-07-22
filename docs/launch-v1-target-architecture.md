@@ -787,25 +787,30 @@ table above. The bytecode-spend baseline and exception ledger in
 `release-artifacts/contracts.json` remain the pre-deployment development
 control; interim exceptions cannot survive to the deployment gate.
 
-Implementation evidence (non-normative). Measured Core hook proof at the
-time of the CON-012 slice:
+Implementation evidence (non-normative). Current artifact-backed
+CON-012-lineage Core hook proof:
 
 1. Approved `StreamCore` bytecode-spend baseline: 22,184 bytes.
 2. New measured `StreamCore` runtime: 24,152 bytes.
 3. EIP-170 margin: 424 bytes.
-4. The margin remains above the 384-byte release floor but below the
-   512-byte warning threshold.
+4. The margin remains above the interim 384-byte development floor but below
+   the 512-byte warning threshold and the normative 2,000-byte production
+   deployment requirement.
 5. The Core hook keeps the immediate manager mint ABI minimal and leaves
    beneficiary/payment evidence, batch commitments, operation events, and
    richer mint policy to the manager, ledger, sale adapter, and settlement
    satellites.
-6. This measurement predates ADR 0012 decision T10 and was compiled with
-   the since-removed `ERC721Enumerable` extension; the deployment-gate
-   build re-baselines without enumerable index storage, and the Core
-   size reconciliation workstream in
+6. This build inherits plain, non-enumerable `ERC721` and contains no
+   `ERC721Enumerable` index storage. ADR 0012 decision T10 is already reflected
+   and offers no remaining implementation savings.
+7. The current build is 1,576 bytes above the 22,576-byte deployment ceiling
+   and 3,152 bytes above the 21,000-byte planning allocation. The Core size
+   reconciliation workstream in
    [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
-   (Genesis Deployment Profile) publishes the first passing post-T10
-   measurement as release evidence.
+   (Genesis Deployment Profile), tracked by
+   [issue #654](https://github.com/6529-Collections/6529Stream/issues/654), must
+   recover real bytes through compression, actual extraction, or authorized
+   relocation while retaining every mandatory hook.
 
 Implementation evidence (non-normative). CON-013 slice:
 

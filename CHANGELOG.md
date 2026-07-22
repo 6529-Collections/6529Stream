@@ -7,6 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Hardened release mode so expired, future, or inverted risk-acceptance windows
+  fail; external-audit evidence and all production evidence are non-waivable;
+  local release targets run the aggregate check; and the manual workflow fails
+  unless invoked from the protected default branch before running the full
+  repository gate. Production release mode also validates the checksum-covered
+  `StreamCore` build measurement against the normative 2,000-byte EIP-170
+  deployment headroom requirement, keeping issue #654 fail-closed while the
+  current 424-byte margin is recovered. Reconciled current roadmap and
+  non-normative architecture notes to the artifact-backed 24,152-byte runtime
+  and confirmed that the measured build already uses plain non-enumerable
+  ERC-721, so recovery must come from real compression, extraction, or
+  authorized relocation rather than assumed enumerable-removal savings. The
+  readiness surfaces now also state the separate issue #656 limitation: strict
+  release mode cannot yet prove the normative exhaustive 58-contract genesis
+  candidate against the current 20-contract release inventory.
 - Rebuilt `StreamCore` token identity onto the specification's sequential
   model: one monotone global token ID counter starting at 1 replaces the
   reserved-range allocator, per-token `(collectionId, collectionSerial)`
