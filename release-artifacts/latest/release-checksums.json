@@ -21,6 +21,8 @@
       "scripts/test_release_mode.py",
       "scripts/check_genesis_deployment_profile.py",
       "scripts/test_genesis_deployment_profile.py",
+      "scripts/check_slither_baseline.py",
+      "scripts/test_slither_baseline.py",
       "scripts/release_evidence_paths.py",
       "scripts/check_production_broadcast_retention.py",
       "scripts/check_production_verified_addresses.py",
@@ -101,6 +103,11 @@
       "test/fixtures/warning-dispositions",
       "CHANGELOG.md",
       "README.md",
+      "requirements-tools.txt",
+      "slither.config.json",
+      "foundry.toml",
+      "ops/SLITHER_BASELINE.json",
+      "ops/SLITHER_BASELINE.md",
       "docs/architecture.md",
       "docs/audit-package.md",
       "docs/custom-errors.md",
@@ -143,6 +150,7 @@
       "docs/release-signatures.md",
       "docs/royalty-policy.md",
       "docs/signer-custody-readiness.md",
+      "docs/slither.md",
       "docs/status.md",
       "docs/threat-model.md",
       "docs/tooling.md",
@@ -153,7 +161,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9b25e562ed9d03068c89a2a3be71885a4c9937debd1260a519b62d62c87fa1c5"
+    "sha256": "sha256:a2db7627444b28bd4dc3cb88078ea2e47c5eba411acfacb25cfc520cc4d5081e"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -197,13 +205,13 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:11478bebd11244cb848eee11753dbb443c82998e0be5165a02c855ef2537a6f6",
-      "size_bytes": 101288
+      "sha256": "sha256:31261a397505bd13964e867f9d5315fc36aaf0fc6af651a2b7fc0ac3eeb1569f",
+      "size_bytes": 102185
     },
     {
       "path": "README.md",
-      "sha256": "sha256:3c43bf35eda0f17c5fd0480421d8ae76d9469cce355bb9d7b135ba53a3a3c892",
-      "size_bytes": 13699
+      "sha256": "sha256:742b98898dbd7d1abc966592b41555ae8af37b215aae78318038c4d2918c0ce6",
+      "size_bytes": 13887
     },
     {
       "path": "deployments/address-books/anvil-6529stream-v0.1.0-001-broadcast.json",
@@ -337,8 +345,8 @@
     },
     {
       "path": "docs/audit-package.md",
-      "sha256": "sha256:3fa8b8bea6fe880d659b6ecf9f95401b5c2b3c4f487e0bfee9744d45306b46a8",
-      "size_bytes": 27471
+      "sha256": "sha256:9af7819b3b344f050d2a3d1bc05fc7eb399766fdfc30f8e25291892a463fc937",
+      "size_bytes": 28904
     },
     {
       "path": "docs/custom-errors.md",
@@ -507,8 +515,8 @@
     },
     {
       "path": "docs/production-readiness-execution.md",
-      "sha256": "sha256:06a065b56bc9a1ab188a9a0f4716713db832ba0aac789f0237eab5c3ee7b7adc",
-      "size_bytes": 6592
+      "sha256": "sha256:9b07db9e8618668c5d7957c1c82a428cfdc8bed384ff6f053dd7f6100b3073a3",
+      "size_bytes": 7176
     },
     {
       "path": "docs/protocol-surface.md",
@@ -522,8 +530,8 @@
     },
     {
       "path": "docs/public-beta-evidence.md",
-      "sha256": "sha256:8ba1a965e6ed8d8e6f32c4e411e56065db5be24dcdd3c31c683dc13c2282f543",
-      "size_bytes": 19028
+      "sha256": "sha256:129f731e6c36542d70c088eac4ce11e52b4aecc55853e73f88ac45a1db480b5c",
+      "size_bytes": 19466
     },
     {
       "path": "docs/randomizer-operations.md",
@@ -532,13 +540,13 @@
     },
     {
       "path": "docs/release-policy.md",
-      "sha256": "sha256:8313dc60b636c5fd36f49d2b9a32fd8c8a913fc827b3da443016df4e068ec8aa",
-      "size_bytes": 13019
+      "sha256": "sha256:4cabc2e919bc363404f50a3ad94e4a7a9a9a8cd141096a92eebf47a13d02a423",
+      "size_bytes": 13430
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:9e819595c3d6f5530e6083c555ce5bd9f85cf51138225307007544c6a5213a4c",
-      "size_bytes": 66614
+      "sha256": "sha256:97e259ff4fc2abfc156cb663a5fa187429e6c69f741aeb0d8c66f548b6660a30",
+      "size_bytes": 68318
     },
     {
       "path": "docs/release-signatures.md",
@@ -556,9 +564,14 @@
       "size_bytes": 4878
     },
     {
+      "path": "docs/slither.md",
+      "sha256": "sha256:ca4feb6b0b26380e97c6484cd5a418b0e3b2a16efa22e3637587357540829e2e",
+      "size_bytes": 5219
+    },
+    {
       "path": "docs/status.md",
-      "sha256": "sha256:d3407b460aaf1d641e1d8169157c927b4935b4a9e754eebc9ccdec95a8f33ac0",
-      "size_bytes": 32343
+      "sha256": "sha256:497253f00a1cd6aaaebd7f3e2a4edc89c489d219d7e463b18fd8737f7549267a",
+      "size_bytes": 32843
     },
     {
       "path": "docs/stream-long-term-architecture.md",
@@ -572,13 +585,28 @@
     },
     {
       "path": "docs/tooling.md",
-      "sha256": "sha256:0ce11044358a3391b821b35a77e6d649ec89396d5bd6a683b60007e8ab9bc48b",
-      "size_bytes": 74892
+      "sha256": "sha256:967bb9e5d51f4f57ab4ce06d04c8391636ebb6e643d01180ac2b401b36b70433",
+      "size_bytes": 76681
     },
     {
       "path": "docs/warning-dispositions.md",
       "sha256": "sha256:5c1f5eddcab495e5d1390f25b2839ed9b43afd18d56bd553a9eb9772cc268857",
       "size_bytes": 17983
+    },
+    {
+      "path": "foundry.toml",
+      "sha256": "sha256:155408a77117fe90f39469f1ad0b8f4d817da2fa030a6d850cd9a6c4276cbc02",
+      "size_bytes": 459
+    },
+    {
+      "path": "ops/SLITHER_BASELINE.json",
+      "sha256": "sha256:a2ccab8fc9b8727d8030c594ac6e135a084add999a36d11b7da625652e860e40",
+      "size_bytes": 76566
+    },
+    {
+      "path": "ops/SLITHER_BASELINE.md",
+      "sha256": "sha256:58c9189d94e49c963f0ef4012012799497e4b85b3a996c544b60bcf3bf774f06",
+      "size_bytes": 36600
     },
     {
       "path": "release-artifacts/baselines/v0.1.0/abi-surface.json",
@@ -1097,7 +1125,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:da5f1520603ea23e950385215abae74dbe605ee0b56d1e9cdf8a414a606a5c4a",
+      "sha256": "sha256:461d3242126cc4c0c7db11bde8466de2daa246ae3958ffba190199ddd1fd6fc1",
       "size_bytes": 150235
     },
     {
@@ -1162,8 +1190,8 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:3b57944713e357d89888c194cc064113dbc685af4eae88090dd09251aefd123c",
-      "size_bytes": 8997
+      "sha256": "sha256:9b0a371d7b55508f8eb2d141d6e3895f79373a5c379d90cfe713279c09a5da12",
+      "size_bytes": 8998
     },
     {
       "path": "release-artifacts/latest/release-evidence-issue-backlog.json",
@@ -1212,23 +1240,23 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:dac4fe5a4496abf5ff36fc6eab1347ecacfc57d5b45ac16d07959b53d232a247",
-      "size_bytes": 134629
+      "sha256": "sha256:3ddd6225f64dab611e311fb17cb408929af5584763b13d98d070166b41cf1713",
+      "size_bytes": 134630
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:045058ef4a823b2a53d1fa6a07b48531aaae5558884f1647efb58030201e244c",
-      "size_bytes": 103046
+      "sha256": "sha256:f0409f9e9a9c93caf9e07b7b16b3ba33c821f57f6573a1c9aa22b8f0bfc3966f",
+      "size_bytes": 103890
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:1836ef22a88f66c02fd12feae4a1e1b1a0ffa2f3b9a4f22863160a46f47ab79d",
-      "size_bytes": 99816
+      "sha256": "sha256:aa09eddbbb7f1ec277349fd8f91a0a8fd001cb6aa6657257b4d821ab6d2bb049",
+      "size_bytes": 100660
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:c304bdc0f62e539921e6c83314b8a492fe0fe76be2eb6a82ed1b63af11553c93",
-      "size_bytes": 24790
+      "sha256": "sha256:043620d8062f217179f0afe284fc77eadede982d09cf997f5b77b477f71acaf9",
+      "size_bytes": 25459
     },
     {
       "path": "release-artifacts/latest/source-verification-inputs.json",
@@ -1319,6 +1347,11 @@
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
       "sha256": "sha256:f7e52cacf645530e30c0d456d78d2e709c6b393ce01c297d8d7e7be7d13f30e3",
       "size_bytes": 3470
+    },
+    {
+      "path": "requirements-tools.txt",
+      "sha256": "sha256:4af191d57f4305247c9fc3f97f853e3afb39d07ddd3b7ebde3a89da83384fa3e",
+      "size_bytes": 102
     },
     {
       "path": "scripts/check_audit_finding_workflow.py",
@@ -1432,13 +1465,18 @@
     },
     {
       "path": "scripts/check_release_mode.py",
-      "sha256": "sha256:173bdea6366bd997c0aef4efd5a35bcbc78acebaf80c6c77a159553d91dfd949",
-      "size_bytes": 11750
+      "sha256": "sha256:c2afd416d53ddfe724dbbc7c565275c2993c08974fb5fe8c63dec37f532332bc",
+      "size_bytes": 13836
     },
     {
       "path": "scripts/check_signer_compromise_drill_evidence.py",
       "sha256": "sha256:2e4dc3403940cbc7ae671d83fffe37cdd340ac92116d4eb44bc91cad06b0f1a5",
       "size_bytes": 16177
+    },
+    {
+      "path": "scripts/check_slither_baseline.py",
+      "sha256": "sha256:ec2103c5cf0fb7153a7f052c17374938e5e93e69a120c8b76cf8c9d1bd1964e3",
+      "size_bytes": 46280
     },
     {
       "path": "scripts/check_stuck_auction_drill_evidence.py",
@@ -1582,13 +1620,18 @@
     },
     {
       "path": "scripts/test_release_mode.py",
-      "sha256": "sha256:494cf529081cb050e089dc58cfc9f6959b30d3838c7d8f04b8529351604cd2c9",
-      "size_bytes": 29916
+      "sha256": "sha256:fd9166761682362d9b5f10d4fc4686b8476b95f09494b0e0d5d599bc2e597c8c",
+      "size_bytes": 32526
     },
     {
       "path": "scripts/test_signer_compromise_drill_evidence.py",
       "sha256": "sha256:d3b58931f863af637f1bbc792291c5ed1f40651505f71e6378b8b64911f33f4b",
       "size_bytes": 16177
+    },
+    {
+      "path": "scripts/test_slither_baseline.py",
+      "sha256": "sha256:c40150e3802a6b5fff7ab7446c81ea996715a5cb7c4058a16b990fbe90354da3",
+      "size_bytes": 19128
     },
     {
       "path": "scripts/test_stuck_auction_drill_evidence.py",
@@ -1624,6 +1667,11 @@
       "path": "scripts/verify_release_artifacts.py",
       "sha256": "sha256:eaab8b9a3d0d4b16667e350a5fce8b3a1a4864af0530a141b136ee9d8ea00913",
       "size_bytes": 22936
+    },
+    {
+      "path": "slither.config.json",
+      "sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
+      "size_bytes": 56
     },
     {
       "path": "test/fixtures/drop-authorization/auction-eoa.json",

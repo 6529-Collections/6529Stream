@@ -1,38 +1,38 @@
 # Production Readiness Execution Packet
 
-This packet records the current production-readiness execution state for the
-remote `main` release candidate. It is not a production-readiness claim and it
-does not replace the generated release evidence status manifest in
+This packet records the current production-readiness execution state starting
+from the remote `main` baseline identified below. It is not a frozen or
+approved release candidate, it is not a production-readiness claim, and it does
+not replace the generated release evidence status manifest in
 [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 
-## Candidate Freeze
+## Candidate Baseline
 
 | Field | Value |
 | --- | --- |
 | Candidate source | `https://github.com/6529-Collections/6529Stream` |
-| Candidate commit | `8d6a90f2539eb22dfa8d5c46d98ae704e5f73efa` |
-| Candidate summary | PR #610 merge: configurable proceeds split, optional curator fund, stronger `StreamMinter.updateContracts` dependency checks, and Slither-outcome cleanup |
-| Execution date | 2026-06-21 |
+| Candidate commit | `8109f8a771315960def875d06ada253737ffa952` |
+| Candidate summary | PR #661 merge: canonical fail-closed genesis deployment profile; the current implementation catalog remains insufficient for production reconciliation |
+| Execution date | 2026-07-22 |
 | Readiness posture | Public beta blocked; production release blocked |
 | No-secret posture | No private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads were used or retained in this packet |
 
-The public ABI, events, roles, deployment order, and release artifacts should
-remain frozen from this commit unless external audit remediation requires a
-documented change. Any contract or release-artifact change after this point must
-rerun the full candidate gate and regenerate affected release artifacts.
+This commit is the comparison baseline for the next remediation PR, not a
+freeze. Any contract or release-artifact change after this point must rerun the
+relevant focused checks, the full candidate gate, and the deterministic
+artifact generators in canonical order.
 
 ## Local Candidate Results
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Foundry test suite | Passed | `forge test -vvv`; 480 tests passed, 0 failed, 0 skipped |
-| Production size build | Passed | `forge build --sizes --via-ir --skip test --skip script --force` |
-| `StreamCore` runtime size | Passed | 21,824 bytes runtime, 2,752 bytes EIP-170 margin |
-| Gas snapshot | Passed | `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap`; 12 tests passed |
-| Gas envelope checks | Passed | Direct `python scripts/test_gas_envelopes.py` and `python scripts/check_gas_envelopes.py` runs passed |
-| Slither | Blocked locally | `slither` is not installed in the execution environment; run the pinned `slither-analyzer==0.11.5` toolchain from `requirements-tools.txt` before release approval |
-| Size-budget Python checks | Blocked locally | `python scripts/test_contract_size_budget.py`, `python scripts/check_contract_size_budget.py`, and `python scripts/check_core_bytecode_spend_policy.py` require Ethereum Keccak support from the tools environment |
-| Full local release gate | Not complete | `make check` was attempted and reached build/test/gas work, then stopped at a Windows sandbox `Access is denied` process-spawn failure on `python scripts/test_gas_envelopes.py`; direct gas-envelope commands passed, but `make check` and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1` must be rerun in a normal shell after the pinned Python tools environment is installed |
+| Full ordinary repository gate | Passed on PR #661 before merge | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; Foundry and Windows CI also passed on the reviewed final head |
+| Production size build | Measured, release-blocking | `forge build --sizes --via-ir --skip test --skip script --force` records `StreamCore` at 24,152 runtime bytes |
+| `StreamCore` production headroom | Blocked | 424 bytes of EIP-170 margin, 1,576 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
+| Genesis deployment profile | Blocked | The canonical 58-entry profile is checked, but the current v1 implementation catalog cannot prove deployment-instance identity, fallback distinctness, or parameterized probe bindings; issue #656 owns reconciliation |
+| Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 38 Open production rows (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending dispositions; issue #658 owns remediation and reviewed disposition |
+| Slither exact drift automation | Implemented on the active remediation branch | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
+| Production release mode | Blocked | External evidence, Core headroom, genesis completeness, and open Slither findings must all fail closed before production release |
 
 The successful local gates are regression evidence only. They do not replace
 external audit, reviewed testnet evidence, production signatures, signed tags,
@@ -41,10 +41,13 @@ post-audit remediation evidence.
 
 ## Public Beta Blockers
 
-The generated public-beta blocker report remains authoritative:
+The generated public-beta blocker report is authoritative for its
+external-evidence requirement set:
 [`release-artifacts/latest/public-beta-blockers.md`](../release-artifacts/latest/public-beta-blockers.md).
-The following rows must be completed or explicitly risk-accepted before public
-beta can be claimed:
+The following external-evidence rows must be completed or explicitly
+risk-accepted before public beta can be claimed. Technical blockers such as
+open Slither findings are enforced and tracked separately; passing this report
+alone is insufficient.
 
 | Issue | Requirement | Required evidence |
 | --- | --- | --- |
@@ -55,10 +58,12 @@ beta can be claimed:
 
 ## Production Release Blockers
 
-The generated production blocker report remains authoritative:
+The generated production blocker report is authoritative for its
+external-evidence requirement set:
 [`release-artifacts/latest/production-release-blockers.md`](../release-artifacts/latest/production-release-blockers.md).
-Production release cannot proceed until public beta readiness is complete and
-the following production rows are complete or explicitly risk-accepted:
+Production release cannot proceed until public beta readiness is complete, all
+technical release blockers are resolved, and the following production evidence
+rows are complete. Every production requirement is non-waivable:
 
 | Issue | Requirement |
 | --- | --- |
@@ -86,17 +91,20 @@ Before any public beta or production-release claim:
 1. Install the pinned tools environment from `requirements-tools.txt` without
    changing readiness claims.
 2. Run `make check` and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
-   on the frozen candidate commit.
-3. Run Slither with `slither . --config-file slither.config.json --foundry-compile-all`
-   and retain the accepted baseline or remediation evidence.
-4. Complete the public-beta evidence rows in the generated blocker report.
-5. Run `python scripts/check_release_mode.py --phase public-beta`; it must pass
+   on the proposed candidate commit.
+3. Run `python scripts/check_slither_baseline.py --run-slither`; remediate or
+   produce issue-linked reviewed proof for every first-party production
+   High/Medium row. Baseline equality alone is not acceptance.
+4. Restore at least 2,000 bytes of `StreamCore` EIP-170 margin under issue #654
+   and complete instance-aware genesis reconciliation under issue #656.
+5. Complete the public-beta evidence rows in the generated blocker report.
+6. Run `python scripts/check_release_mode.py --phase public-beta`; it must pass
    before production-release execution starts.
-6. Complete external audit remediation and regenerate affected release artifacts
+7. Complete external audit remediation and regenerate affected release artifacts
    if audit work changes code, ABI, bytecode, manifests, or release evidence.
-7. Complete production signatures, signed tag, live deployment, retained
+8. Complete production signatures, signed tag, live deployment, retained
    broadcasts, address books, explorer verification, ceremony evidence,
    randomizer operations evidence, metadata-browser evidence, marketplace/indexer
    evidence, and post-audit remediation evidence.
-8. Run `python scripts/check_release_mode.py --phase production-release`; it must
+9. Run `python scripts/check_release_mode.py --phase production-release`; it must
    pass before publishing a production release.

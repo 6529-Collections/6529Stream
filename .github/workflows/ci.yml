@@ -50,6 +50,37 @@ jobs:
           }
           powershell -NoProfile -ExecutionPolicy Bypass -File scripts\test_windows_check_helpers.ps1
 
+  slither-baseline:
+    name: Slither first-party baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
+        with:
+          version: v1.7.1
+
+      - name: Install pinned Slither toolchain
+        shell: bash
+        run: |
+          python3 -m pip install --disable-pip-version-check -r requirements-tools.txt
+          solc-select install 0.8.19
+          solc-select use 0.8.19
+
+      - name: Check live Slither baseline
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          make slither-baseline-check 2>&1 | tee ci-logs/slither-baseline-check.log
+
   foundry:
     name: Foundry smoke
     runs-on: ubuntu-latest
@@ -274,6 +305,8 @@ jobs:
             scripts/test_release_readiness.py \
             scripts/check_genesis_deployment_profile.py \
             scripts/test_genesis_deployment_profile.py \
+            scripts/check_slither_baseline.py \
+            scripts/test_slither_baseline.py \
             scripts/check_release_mode.py \
             scripts/test_release_mode.py \
             scripts/generate_dependency_provenance_attestation.py \
@@ -378,6 +411,14 @@ jobs:
           python3 scripts/check_contract_size_budget.py 2>&1 | tee ci-logs/contract-size-budget-check.log
           python3 scripts/test_core_bytecode_spend_policy.py 2>&1 | tee ci-logs/core-bytecode-spend-policy-tests.log
           python3 scripts/check_core_bytecode_spend_policy.py 2>&1 | tee ci-logs/core-bytecode-spend-policy-check.log
+
+      - name: Slither baseline metadata
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_slither_baseline.py 2>&1 | tee ci-logs/slither-baseline-tests.log
+          python3 scripts/check_slither_baseline.py --baseline-only 2>&1 | tee ci-logs/slither-baseline-metadata-check.log
 
       - name: Solidity formatting
         shell: bash

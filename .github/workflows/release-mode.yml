@@ -61,6 +61,8 @@ jobs:
           set -euo pipefail
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements-tools.txt
+          solc-select install 0.8.19
+          solc-select use 0.8.19
           python3 -m playwright install --with-deps chromium
 
       - name: Run aggregate release checks
@@ -69,6 +71,13 @@ jobs:
           set -o pipefail
           mkdir -p ci-logs
           bash scripts/check.sh 2>&1 | tee ci-logs/aggregate-check.log
+
+      - name: Run live Slither baseline gate
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          make slither-baseline-check 2>&1 | tee ci-logs/slither-baseline-check.log
 
       - name: Validate release-mode profile
         shell: bash

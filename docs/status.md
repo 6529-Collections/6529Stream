@@ -435,11 +435,17 @@ The current Gate A smoke baseline proves:
   maturity language before the audit package and release manifest are checked.
 - `scripts/test_audit_package.py` and `scripts/check_audit_package.py` prove
   `docs/audit-package.md` remains a complete auditor-facing index over current
-  maturity, scope, ADRs, invariants, Slither disposition, local deployment and
-  release evidence, known blockers, accepted local-baseline dispositions, and
+  maturity, scope, ADRs, invariants, the open Slither blocker, local deployment and
+  release evidence, known blockers, accepted non-Slither local-baseline dispositions, and
   security reporting. The generated release manifest records the architecture,
   threat model, and audit package hashes as governance documents before the
   checksum bundle is refreshed.
+- `scripts/check_slither_baseline.py` keeps a canonical normalized first-party
+  production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
+  provenance without invoking Slither during the fast default gate, and runs a
+  dedicated pinned exact-drift analysis in CI. The current set is 38 Open rows
+  (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending
+  dispositions. This is a release blocker and not a risk acceptance.
 - `scripts/test_release_readiness.py` and
   `scripts/check_release_readiness.py` prove
   `docs/release-readiness.md` remains a Gate G dashboard that separates
@@ -460,8 +466,8 @@ The current Gate A smoke baseline proves:
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer,
-canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
-beyond the now-triaged high/medium baseline, fork/testnet deployment
+canonical randomizer lifecycle ownership, remediation or reviewed disposition
+of every open high/medium first-party production Slither row, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,
 production detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated

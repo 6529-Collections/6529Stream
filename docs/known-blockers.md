@@ -154,15 +154,24 @@ contributors who start from the README.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.
-- First-party production `uninitialized-local` Slither rows now initialize their
-  default locals explicitly and have targeted regressions for string counting,
+- P0-INIT-001 explicitly initialized the then-known first-party production
+  `uninitialized-local` defaults and added regressions for string counting,
   delegation status/gating, empty-script rendering, and minter return indexes.
-- Slither high/medium findings are captured in `ops/SLITHER_BASELINE.md`;
-  current high/medium rows are now fixed, documented as false positives for
-  retained OpenZeppelin utility libraries, or accepted as test-only helper
-  findings. Vendored-library provenance is tracked in
-  `docs/vendored-libraries.md`. Low, informational, and optimization findings
-  remain outside the current CI gate.
+  Later-added production surfaces now contribute 12 Open `uninitialized-local`
+  rows to the canonical baseline; those rows remain undispositioned under
+  [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
+  not cleared by the historical regressions.
+- The normalized first-party production Slither baseline contains 38 open
+  findings: 4 High and 34 Medium. One row is a confirmed Core state gap, six
+  rows require design review, and 31 remain pending disposition. None is
+  accepted or classified as a false positive. The machine-readable source is
+  `ops/SLITHER_BASELINE.json`, its reviewer mirror is
+  `ops/SLITHER_BASELINE.md`, and issue
+  [#658](https://github.com/6529-Collections/6529Stream/issues/658) owns the
+  blocker. CI checks metadata on every default run and executes a dedicated
+  exact normalized high/medium drift gate; low, informational, optimization,
+  vendored, test, and script findings remain reported separately and do not
+  reduce the first-party blocker.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback

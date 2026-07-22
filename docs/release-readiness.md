@@ -185,13 +185,16 @@ Current maturity:
 - Evidence status: local baseline plus reviewed fork metadata and marketplace
   evidence; current CON-015 fork deployment, fork ceremony, and fork randomizer
   artifacts are pending re-review after deployment/release artifacts changed.
-- Public beta status: blocked by missing external audit, pending fork
-  deployment review, missing testnet deployment evidence, pending fork ceremony
-  review, pending fork randomizer review, verified deployed addresses, and
-  explorer verification.
-- Production release status: blocked by missing production signatures, signed
-  Git tags, verified deployed addresses, explorer verification, non-local
-  retained evidence, and post-audit remediation evidence.
+- Public beta status: blocked by 38 Open first-party production Slither
+  High/Medium findings, missing external audit, pending fork deployment review,
+  missing testnet deployment evidence, pending fork ceremony review, pending
+  fork randomizer review, verified deployed addresses, and explorer
+  verification.
+- Production release status: blocked by the same 38 Open Slither findings,
+  sub-threshold Core headroom and its confirmed state gap, incomplete
+  instance-aware genesis evidence, missing production signatures, signed Git
+  tags, verified deployed addresses, explorer verification, non-local retained
+  evidence, and post-audit remediation evidence.
 
 This dashboard covers release-readiness evidence only. It does not perform a
 real release, does not create production signatures, and does not assert that
@@ -201,12 +204,12 @@ The release-mode CI profile is the opt-in hard gate for public-beta or
 production-release claims. It is exposed as a manual workflow_dispatch workflow
 and local `make release-mode-public-beta-check` /
 `make release-mode-production-release-check` targets. The local targets run the
-aggregate `check` gate first; the manual workflow fails unless it runs from the
-protected default branch, then runs `bash scripts/check.sh` before evaluating
-release evidence. The gate is expected to fail until retained evidence is
-complete; an active accepted-risk record may satisfy only a waivable
-public-beta row. External-audit evidence and every production requirement are
-non-waivable. Release mode requires public-beta readiness before
+aggregate `check` gate plus the pinned live exact Slither comparison first; the
+manual workflow fails unless it runs from the protected default branch, then
+runs both before evaluating release evidence. The gate is expected to fail
+until retained evidence is complete; an active accepted-risk record may satisfy
+only a waivable public-beta row. External-audit evidence and every production
+requirement are non-waivable. Release mode requires public-beta readiness before
 production-release readiness, so a production run validates both phases. It
 also validates the checksum-covered current `StreamCore` size against the
 normative 2,000-byte EIP-170 deployment headroom rule from the
@@ -216,6 +219,13 @@ Missing, malformed, inconsistent, or sub-threshold size fields fail closed.
 The current 24,152-byte runtime has only 424 bytes of headroom, so
 [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
 production release even after evidence rows become complete.
+
+Both release phases validate the canonical normalized
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) and its checked
+Markdown mirror. Any Open first-party production High/Medium row blocks the
+release decision even when the live analyzer exactly matches the baseline. The
+current 38 Open rows therefore keep public beta and production red under
+[issue #658](https://github.com/6529-Collections/6529Stream/issues/658).
 
 Strict release mode now proves whether the implementation catalog satisfies the
 canonical
@@ -238,7 +248,7 @@ structural profile gate is not concrete deployment evidence.
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
 | Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, production release-signing checker and retained artifact, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, public-beta verified-addresses checker and retained artifact, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
-| Static analysis and tests | Slither baseline, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Testnet/live invariant and gas evidence missing, and NatSpec baseline remains a burn-down queue | External audit and production evidence missing |
+| Static analysis and tests | The normalized first-party production Slither baseline contains 4 High and 34 Medium open findings; an exact metadata/drift gate, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Yes: all 38 Slither rows remain Open, and testnet/live invariant and gas evidence is missing | Yes: open Slither findings, external audit, and production evidence are missing |
 
 ## Local Evidence Already Passing
 
@@ -345,6 +355,16 @@ The current local baseline includes:
   `python scripts/generate_risk_register.py --check`, which summarize launch
   blockers, accepted local-baseline risks, planned mitigations, source-document
   hashes, and evidence links without changing readiness claims;
+- canonical normalized Slither evidence under
+  [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) and its
+  [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) reviewer mirror,
+  checked by
+  [`scripts/check_slither_baseline.py`](../scripts/check_slither_baseline.py)
+  and [`scripts/test_slither_baseline.py`](../scripts/test_slither_baseline.py)
+  with `python scripts/test_slither_baseline.py`,
+  `python scripts/check_slither_baseline.py --baseline-only`, and
+  `python scripts/check_slither_baseline.py --run-slither`; the 4 High and 34
+  Medium first-party production rows remain Open and block release;
 - source verification inputs under
   [`release-artifacts/latest/source-verification-inputs.json`](../release-artifacts/latest/source-verification-inputs.json);
 - ABI compatibility and gas baselines under
@@ -541,8 +561,10 @@ The current local baseline includes:
   [`scripts/check_non_local_release_evidence.py`](../scripts/check_non_local_release_evidence.py),
   and
   [`scripts/check_fork_deployment_rehearsal_evidence.py`](../scripts/check_fork_deployment_rehearsal_evidence.py);
-- Slither baseline evidence in [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md)
-  and [`docs/slither.md`](slither.md);
+- Slither baseline evidence in
+  [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json),
+  [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md), and
+  [`docs/slither.md`](slither.md);
 - the test matrix in [`ops/ROADMAP.md`](../ops/ROADMAP.md#appendix-b-test-matrix);
 - the ADR index in [`docs/adr/README.md`](adr/README.md).
 
@@ -646,6 +668,9 @@ Audit and protocol evidence:
 - [docs/tooling.md](tooling.md)
 - [docs/adr/README.md](adr/README.md)
 - [ops/SLITHER_BASELINE.md](../ops/SLITHER_BASELINE.md)
+- [ops/SLITHER_BASELINE.json](../ops/SLITHER_BASELINE.json)
+- [scripts/check_slither_baseline.py](../scripts/check_slither_baseline.py)
+- [scripts/test_slither_baseline.py](../scripts/test_slither_baseline.py)
 - [docs/integrations/README.md](integrations/README.md)
 - [docs/integrations/contract-flows.md](integrations/contract-flows.md)
 - [docs/integrations/auction-flows.md](integrations/auction-flows.md)
