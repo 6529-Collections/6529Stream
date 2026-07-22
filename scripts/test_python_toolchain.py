@@ -122,7 +122,10 @@ class PythonToolchainTests(unittest.TestCase):
 
         workflow = valid_workflow().replace(
             "steps:",
-            "steps:\n  - name: Cache step that uses actions/cache\n    run: echo cache",
+            "steps:\n"
+            "  - name: Cache step that uses actions/cache\n"
+            "    run: |\n"
+            "      echo cache",
         )
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), workflow), [])
 
@@ -221,6 +224,33 @@ class PythonToolchainTests(unittest.TestCase):
         base = valid_workflow()
         checkout = "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"
         before_check = f"      {checker.PIP_CHECK_COMMAND}"
+        continuation = "\\\n"
+        quoted_continuation = (
+            f'  - run: "p{continuation}'
+            f'    ip i{continuation}'
+            '    nstall extra-package"'
+        )
+        literal_continuation = (
+            "  - run: |\n"
+            f"      p{continuation}"
+            f"      ip i{continuation}"
+            "      nstall extra-package"
+        )
+        escaped_explicit_key = (
+            f'  - ? "u{continuation}'
+            '    ses"\n'
+            "    : example/action@v1"
+        )
+        hidden_anchor_alias = (
+            "env:\n"
+            f'  HIDDEN_ACTION_KEY: &uk "u{continuation}'
+            '    ses"\n'
+            "steps:"
+        )
+        self.assertIn(
+            "pip install extra-package",
+            checker.normalize_shell_continuations(quoted_continuation),
+        )
         cases = {
             "folded-split-install": base.replace("  - run: |", "  - run: >").replace(
                 checker.LOCK_INSTALL_COMMAND,
@@ -238,6 +268,14 @@ class PythonToolchainTests(unittest.TestCase):
             "hex-escaped-install": base.replace(
                 "  - run: |",
                 '  - run: "p\\x69p \\x69nstall extra-package"\n  - run: |',
+            ),
+            "quoted-continuation-install": base.replace(
+                "  - run: |",
+                f"{quoted_continuation}\n  - run: |",
+            ),
+            "literal-continuation-install": base.replace(
+                "  - run: |",
+                f"{literal_continuation}\n  - run: |",
             ),
             "shell-wrapper": base.replace(
                 before_check,
@@ -273,7 +311,47 @@ class PythonToolchainTests(unittest.TestCase):
                 f"  - uses: {checkout}",
                 f"  - {{ uses: {checkout} }}",
             ),
+            "uses-double-quoted-key": base.replace(
+                f"  - uses: {checkout}",
+                '  - "uses": example/action@v1',
+            ),
+            "uses-single-quoted-key": base.replace(
+                f"  - uses: {checkout}",
+                "  - 'uses': example/action@v1",
+            ),
+            "uses-flow-map-quoted-key": base.replace(
+                f"  - uses: {checkout}",
+                '  - { "uses": example/action@v1 }',
+            ),
+            "uses-explicit-key": base.replace(
+                f"  - uses: {checkout}",
+                "  - ? uses\n    : example/action@v1",
+            ),
+            "uses-continued-explicit-key": base.replace(
+                f"  - uses: {checkout}",
+                escaped_explicit_key,
+            ),
+            "uses-hidden-anchor-alias": base.replace(
+                "steps:",
+                hidden_anchor_alias,
+            ).replace(
+                f"  - uses: {checkout}",
+                "  - *uk: example/action@v1",
+            ),
             "uses-docker": base.replace(checkout, "docker://python:3.12.13"),
+            "run-spaced-colon": base.replace("  - run: |", "  - run : echo bypass\n  - run: |"),
+            "run-quoted-key": base.replace(
+                "  - run: |",
+                '  - "run": echo bypass\n  - run: |',
+            ),
+            "run-flow-map": base.replace(
+                "  - run: |",
+                "  - { run: echo bypass }\n  - run: |",
+            ),
+            "run-explicit-key": base.replace(
+                "  - run: |",
+                "  - ? run\n    : echo bypass\n  - run: |",
+            ),
             "pip-check-before-install": base.replace(
                 f"      {checker.LOCK_INSTALL_COMMAND}\n{before_check}",
                 f"{before_check}\n      {checker.LOCK_INSTALL_COMMAND}",

@@ -153,7 +153,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:669f63bae585d4c49ca85daca4cf3cc93e0016030530135ebbed984d0de18580"
+    "sha256": "sha256:66d4fa78ccc2c35234c1f9cd4ddd70d1b01dd4d9197d30d6e009f1f9822a2be8"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1417,8 +1417,8 @@
     },
     {
       "path": "scripts/check_python_toolchain.py",
-      "sha256": "sha256:2ec6a25e610b71f1376cffe55fd2fb20a56e272bd9e985b12b856c6daaa3f352",
-      "size_bytes": 17356
+      "sha256": "sha256:ab1fde1b777e47ea45b1463e40334167bf2ea8b1ff77e9c3fe3a7f558bbd7c60",
+      "size_bytes": 20308
     },
     {
       "path": "scripts/check_react_next_reference.py",
@@ -1567,8 +1567,8 @@
     },
     {
       "path": "scripts/test_python_toolchain.py",
-      "sha256": "sha256:05158a27ad8405a9cd315f44124766db3808b8af6e0da067d32b5c959892c8ee",
-      "size_bytes": 14004
+      "sha256": "sha256:d0aee04b16b5dd325226e0a9a903db5e2651954d8a239a721b03fc5e4f63abe1",
+      "size_bytes": 16769
     },
     {
       "path": "scripts/test_react_next_reference.py",

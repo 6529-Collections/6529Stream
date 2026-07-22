@@ -105,14 +105,20 @@ STRICT_ACTION_RE = re.compile(
     r"^\s*(?:-\s*)?uses:\s+"
     r"([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)@([0-9a-f]{40})\s*$"
 )
-USES_KEY_RE = re.compile(
-    r"^\s*(?:(?:-\s*)?uses\s*:|-\s*\{[^}]*\buses\s*:)",
-    re.IGNORECASE,
-)
+USES_TOKEN_RE = re.compile(r"\buses\b", re.IGNORECASE)
+RUN_TOKEN_RE = re.compile(r"\brun\b", re.IGNORECASE)
+NAME_KEY_RE = re.compile(r"^\s*(?:-\s*)?name\s*:", re.IGNORECASE)
+STRICT_RUN_KEY_RE = re.compile(r"^\s*(?:-\s*)?run: \|\s*$")
 FOLDED_RUN_RE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*>", re.IGNORECASE)
+EXPLICIT_MAPPING_KEY_RE = re.compile(r"^\s*(?:-\s*)?\?(?:\s|$)")
+STEP_FLOW_MAPPING_RE = re.compile(r"^\s*-\s*\{")
+YAML_ANCHOR_ALIAS_RE = re.compile(
+    r"(?<![A-Za-z0-9_])(?:&|\*)[A-Za-z0-9_-]+"
+)
 YAML_ESCAPE_RE = re.compile(
     r"\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 )
+SHELL_CONTINUATION_RE = re.compile(r"\\[ \t]*\r?\n[ \t]*")
 SENSITIVE_PACKAGE_TOOL_RE = re.compile(
     r"(?:\bpip(?:3(?:\.\d+)?)?(?:\.__main__)?\b|\bpipx\b|\buv\b|"
     r"\bpoetry\b|\bensurepip\b)",
@@ -137,6 +143,12 @@ def canonicalize_name(name: str) -> str:
     """Return the PEP 503 normalized distribution name."""
 
     return re.sub(r"[-_.]+", "-", name).lower()
+
+
+def normalize_shell_continuations(text: str) -> str:
+    """Remove shell continuations without inserting token-separating spaces."""
+
+    return SHELL_CONTINUATION_RE.sub("", text)
 
 
 def parse_direct_requirements(text: str) -> dict[str, str]:
@@ -313,16 +325,41 @@ def check_workflow(path: Path, text: str) -> list[str]:
     approved_install_lines.update(WORKFLOW_APPROVED_INSTALL_LINES.get(path, set()))
     stripped_lines: list[str] = []
     action_refs: list[tuple[str, str]] = []
+    literal_run_indent: int | None = None
 
     for line_number, raw_line in enumerate(text.splitlines(), start=1):
         stripped = raw_line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         stripped_lines.append(stripped)
+        indentation = len(raw_line) - len(raw_line.lstrip(" "))
+        in_literal_run_block = (
+            literal_run_indent is not None and indentation > literal_run_indent
+        )
+        if literal_run_indent is not None and not in_literal_run_block:
+            literal_run_indent = None
+        canonical_run_key = STRICT_RUN_KEY_RE.fullmatch(raw_line)
+        name_key = NAME_KEY_RE.match(raw_line)
+        action_match = STRICT_ACTION_RE.fullmatch(raw_line)
 
         if FOLDED_RUN_RE.match(raw_line):
             errors.append(
                 f"{path}:{line_number} folded run scalars are not allowed; use run: |"
+            )
+
+        if not in_literal_run_block and EXPLICIT_MAPPING_KEY_RE.match(raw_line):
+            errors.append(
+                f"{path}:{line_number} explicit YAML mapping keys are not allowed"
+            )
+
+        if not in_literal_run_block and STEP_FLOW_MAPPING_RE.match(raw_line):
+            errors.append(
+                f"{path}:{line_number} flow-style YAML steps are not allowed"
+            )
+
+        if not in_literal_run_block and YAML_ANCHOR_ALIAS_RE.search(raw_line):
+            errors.append(
+                f"{path}:{line_number} YAML anchors and aliases are not allowed"
             )
 
         if YAML_ESCAPE_RE.search(raw_line):
@@ -330,8 +367,7 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 f"{path}:{line_number} YAML hex and Unicode escapes are not allowed"
             )
 
-        if USES_KEY_RE.search(raw_line):
-            action_match = STRICT_ACTION_RE.fullmatch(raw_line)
+        if USES_TOKEN_RE.search(stripped) and name_key is None:
             if action_match is None:
                 errors.append(
                     f"{path}:{line_number} every uses line must be a strict external "
@@ -339,6 +375,19 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 )
             else:
                 action_refs.append((action_match.group(1), action_match.group(2)))
+
+        if (
+            RUN_TOKEN_RE.search(stripped)
+            and not in_literal_run_block
+            and name_key is None
+            and action_match is None
+            and canonical_run_key is None
+        ):
+            errors.append(
+                f"{path}:{line_number} every run key must use canonical run: | syntax"
+            )
+        if canonical_run_key is not None:
+            literal_run_indent = indentation
 
         if "install" in stripped.casefold() and stripped not in approved_install_lines:
             errors.append(
@@ -351,6 +400,26 @@ def check_workflow(path: Path, text: str) -> list[str]:
         ):
             errors.append(
                 f"{path}:{line_number} unapproved Python package-tool line: {stripped!r}"
+            )
+
+    logical_text = normalize_shell_continuations(text)
+    for logical_line_number, raw_line in enumerate(logical_text.splitlines(), start=1):
+        stripped = raw_line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if "install" in stripped.casefold() and stripped not in approved_install_lines:
+            errors.append(
+                f"{path}:logical-line-{logical_line_number} unapproved install line "
+                f"after shell continuation normalization: {stripped!r}"
+            )
+        if (
+            SENSITIVE_PACKAGE_TOOL_RE.search(stripped)
+            and stripped not in {LOCK_INSTALL_COMMAND, PIP_CHECK_COMMAND}
+        ):
+            errors.append(
+                f"{path}:logical-line-{logical_line_number} unapproved Python "
+                "package-tool line after shell continuation normalization: "
+                f"{stripped!r}"
             )
 
     setup_refs = [ref for action, ref in action_refs if action == "actions/setup-python"]
@@ -408,7 +477,6 @@ def check_workflow(path: Path, text: str) -> list[str]:
             f"{path} must contain exactly one canonical Playwright install command"
         )
 
-    logical_text = re.sub(r"\\\s*\r?\n\s*", " ", text)
     setup_position = logical_text.find(setup_ref)
     install_position = logical_text.find(LOCK_INSTALL_COMMAND)
     pip_check_position = logical_text.find(PIP_CHECK_COMMAND)
