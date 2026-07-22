@@ -25,7 +25,9 @@ were resolved through [ADR 0010](adr/0010-world-class-spec-pass.md)
 (round 4, 92), and [ADR 0014](adr/0014-world-class-pass-round-5.md)
 (round 5, 83). OQ-X8, the single question the protocol owner reserved,
 was resolved on 2026-07-05 through
-[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md).
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md). Its
+W3-W5 launch-facade posture was superseded before genesis by
+[ADR 0016](adr/0016-core-native-only-erc721.md); W1/W2 remain in force.
 
 ## Resolved
 
@@ -47,18 +49,17 @@ signal for grouping tokens into collections.
   hardens to at least two named, signed marketplace/indexer integration
   commitments recorded in the release evidence set before the first
   public sale.
-- Tripwired (ADR 0015 decisions W3-W5): the per-collection ERC-721
-  facade line is a fully specified dormant extension profile
-  ([`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)),
-  never a launch dependency; its Core-side preconditions ship at genesis
-  so the fallback never requires a Core redeployment; if the W2 gate is
-  unmet at the public-sale boundary the profile advances to a dedicated
-  adversarial review and owner go/no-go. Retrofit of `CORE_NATIVE`
-  collections is excluded by construction.
+- Superseded before genesis (ADR 0016): ADR 0015 decisions W3-W5 do not
+  authorize launch facade-readiness storage, selectors, events, branches,
+  callbacks, or finality components. Every launch token has Core as its sole
+  ERC-721 identity. The former facade profile is historical successor-line
+  research only; any future wrapper or successor asset model requires a new
+  accepted ADR and cannot weaken the W2 evidence gate.
 - Rejected: ERC-7496 dynamic traits as an identity carrier (off-label;
-  adds no capability beyond the token-JSON member set); a facade line at
-  genesis (first-of-kind composite, ADR 0014 decision V9); a bare
-  tripwire with no genesis surfaces (the fallback would be decorative).
+  adds no capability beyond the token-JSON member set); a facade line or
+  dormant facade preconditions at genesis (first-of-kind composite and
+  contract-wide ERC-721 conformance cost); a bare tripwire with no genesis
+  surfaces (the fallback would be decorative).
 - Lettering note: earlier revisions of this entry used two conflicting
   option letterings — the register's option list labeled an additive
   indexer-registry read "(c)" while the blast-radius note (ADR 0014

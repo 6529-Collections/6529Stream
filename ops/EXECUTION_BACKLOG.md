@@ -149,9 +149,13 @@ The important distinction is:
 - Marketplace/indexer compatibility now has reviewed fork/testnet retained
   evidence; live marketplace/indexer evidence is still required before
   production release claims.
-- `StreamCore` bytecode headroom remains tight, so new feature surfaces should
-  prefer satellite contracts, libraries, adapters, or explicit size-budget
-  exceptions.
+- `StreamCore` bytecode headroom remains below the production threshold. The
+  earlier refactor reached 21,792 runtime bytes, but CON-012 added roughly 2,330
+  bytes of manager/prepared-mint hooks while legacy callers remained live. Until
+  issue #654's complete target-Core build is at or below 22,576 bytes, new work
+  must be satellite-only with zero Core delta or pair a mandatory Core addition
+  with real removal and a measured net-negative delta; a development exception
+  is not a production strategy.
 - Compiler/lint/NatSpec warning noise should be burned down or dispositioned
   before making "world-class" release claims, including unused randomizer
   parameters, pure/view mutability suggestions, invalid NatSpec tags, and
@@ -175,7 +179,7 @@ gap into a bounded issue or evidence artifact.
 | Royalty philosophy is implicit | `ONE-003` | Document ERC-2981 disclosure limits, governance, per-token/per-collection strategy, creator-fee enforcement or ERC721C-style transfer-validator tradeoffs, permissionless-transfer composability impact, and marketplace display evidence |
 | Collector permanence is not independently replayable | `ONE-004`, `REL-007` | Add renderer/dependency/source archive hashes, replay commands, token output hashes, browser proof, and storage-guarantee language; use Art Blocks-style deterministic replayability as the benchmark |
 | Marketplace/indexer compatibility needs live retained proof | `ONE-005`, `INT-005`, `INT-006` | Public-beta fork/testnet evidence is retained for OpenSea/Reservoir/Blur/Manifold or equivalent tooling, token refresh, animation rendering, royalties, transfer/sale path, event replay, and cache invalidation; retain live evidence before production release claims |
-| `StreamCore` has 424 bytes of EIP-170 headroom at the current 24,152-byte runtime: the interim development floor passes under an accepted exception, but the normative 2,000-byte production deployment rule fails | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Block production release; recover real headroom through compression, extraction, or authorized relocation while retaining mandatory hooks; keep satellites/read adapters/libraries/release artifacts as the default extension path |
+| `StreamCore` has 424 bytes of EIP-170 headroom at the current 24,152-byte runtime: the interim development floor passes under an accepted exception, but the normative 2,000-byte production deployment rule fails; historical evidence shows the refactor reached 21,792 bytes before a roughly 2,330-byte manager/prepared-mint addition landed alongside the still-live legacy path | `ONE-006`, `CON-005`, `P1-SIZE-001`, [#654](https://github.com/6529-Collections/6529Stream/issues/654) | Block production release; lock the permanent pre-genesis target ABI, migrate satellites/callers, retire duplicated legacy responsibilities, and compile every mandatory hook together; allow only zero-Core-delta satellite slices or measured net-negative Core slices until the complete build is at or below 22,576 bytes |
 | Compiler/lint/NatSpec noise remains a polish gap | `ONE-007`, `OSS-005` | Capture warning baseline, fix low-risk first-party warnings such as unused randomizer params, pure/view suggestions, and invalid NatSpec tags, disposition accepted noise, and decide whether new warning categories should fail CI |
 
 Benchmark inputs: EIP-712, ERC-1271, ERC-4906, ERC-7572, ERC-2981, Chainlink
@@ -1778,6 +1782,34 @@ Acceptance criteria:
 7. Rehearsal deployment, release artifacts, changelog, and autonomous run state
    include the new registry/interface surfaces without claiming production
    readiness.
+
+### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
+
+Status: PR not opened; active issue #654 on branch
+`codex/core-cutover-abi-lock`.
+
+Gate: C/E/G.
+
+Problem: the current 24,152-byte `StreamCore` is a transitional build. It spent
+roughly 2,330 bytes on the manager/prepared-mint boundary while the legacy mint
+and product path remained live, and it still omits mandatory launch hooks. The
+production ceiling is 22,576 bytes, so neither the temporary size exception nor
+a partial deletion experiment is release evidence.
+
+Acceptance criteria:
+
+1. Lock one complete machine-checked Permanent Core function/event target and
+   explicit pre-genesis retirement disposition for every current surface.
+2. Keep aggregate finality, manifest publication, richer reads, mutable policy,
+   and product behavior in named satellites or adapters, with every current
+   caller migrated before its legacy Core dependency is retired.
+3. Permit only zero-Core-delta satellite slices or measured net-negative Core
+   slices until the complete target is below the production ceiling.
+4. Compile every mandatory Core hook together and prove runtime at or below
+   22,576 bytes with the pinned production profile and artifact-backed checks.
+5. Regenerate release artifacts in canonical order, pass the full repository
+   gate, and keep audit/external-evidence readiness claims blocked until their
+   independent acceptance criteria are satisfied.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -3941,6 +3973,7 @@ unless an external dependency changes.
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
 | `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
+| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Active issue #654 on branch `codex/core-cutover-abi-lock`; PR TBD; target lock first, then caller migration and measured implementation slices |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
@@ -4007,7 +4040,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for all 38 open first-party production Slither High/Medium findings while preserving exact normalized drift CI | C/F/G | Active PR #662 / issue #658 on branch `codex/slither-baseline-gate` establishes the inventory and gate; all 38 rows remain Open: one confirmed gap, six design-review rows, and 31 pending dispositions |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for all 38 open first-party production Slither High/Medium findings while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; issue #658 remains an independent blocker and all 38 rows remain Open: one confirmed gap, six design-review rows, and 31 pending dispositions |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |

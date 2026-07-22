@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/slither-baseline-gate` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/661` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/658` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/662` |
-| Next issue | Begin the safe Core extraction sequence with canonical executor eligibility and a prepared settlement seam, without routing live Drops traffic. |
+| Active PR branch | `codex/core-cutover-abi-lock` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/660` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/654` |
+| Active PR | TBD |
+| Next issue | Implement the first satellite-only or measured net-negative Core cutover slice after the permanent ABI target is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 11:40 UTC` |
+| Last updated | `2026-07-22 14:56 UTC` |
 
 ## Current Run Notes
 
@@ -56,18 +56,30 @@ evidence, and audit/readiness gates.
   current v1 contract catalog cannot prove deployment-instance identity,
   fallback distinctness, or parameterized probe bindings, so issue #656 remains
   a production blocker.
-- The current topic is issue #658 in PR #662 on branch
-  `codex/slither-baseline-gate`. A clean pinned run found 38 first-party
-  production High/Medium Slither rows (4 High, 34 Medium), contradicting the
-  historical accepted-baseline narrative.
-- This topic adds a canonical normalized JSON baseline, checked Markdown mirror,
-  fast metadata/parity validation, dedicated live exact-drift CI, and truthful
-  open-blocker risk/readiness language. All 38 rows remain Open: one confirmed
-  gap, six design-review rows, and 31 pending dispositions.
-- After this gate merges, continue issue-linked contract/test remediation and
-  the safe Core extraction sequence. Do not route StreamDrops directly through
-  the manager until an authenticated, operation-bound settlement seam preserves
-  revenue accounting before receiver callbacks.
+- PR #662 merged the canonical normalized Slither gate. All 38 first-party
+  production High/Medium rows remain Open under issue #658: one confirmed gap,
+  six design-review rows, and 31 pending dispositions. That remains an
+  independent public-beta and production blocker.
+- PR #660 subsequently merged the locked CPython audit/release toolchain and
+  checksum provenance. Its temporary worktree and local/remote topic branch
+  were removed after the reviewed, CI-clean merge; this run now uses one
+  worktree.
+- The current topic is issue #654 on branch `codex/core-cutover-abi-lock`.
+  Historical artifacts prove the earlier headroom work reduced Core to 21,792
+  runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
+  hooks while the legacy Drops/Minter path remained live, producing the current
+  24,152-byte transitional Core. The current build is already non-enumerable and
+  is not a complete mandatory-hook proof.
+- This slice pins the intentional pre-genesis target ABI, one canonical
+  satellite-pointer model, minimal governed-gas/emitter surfaces, terminal burn
+  blocking, and an explicit cutover order. Until the complete target measures at
+  or below 22,576 bytes, a Core-changing PR must be measured net-negative and a
+  satellite slice must have zero Core delta.
+- After this ABI lock merges, continue immediately with the satellite/caller
+  migration sequence. Do not route StreamDrops directly through the manager
+  until an authenticated, operation-bound settlement seam preserves revenue
+  accounting before receiver callbacks, and do not delete the legacy mint path
+  until all production callers and auction timing ownership have migrated.
 
 ## Packaging Notes
 

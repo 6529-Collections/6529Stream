@@ -59,10 +59,15 @@ def complete_fixture(profile: dict[str, object]) -> tuple[dict[str, object], dic
     for entry in entries:
         assert isinstance(entry, dict)
         entry_id = entry["id"]
-        name = f"FixtureGenesisEntry{entry_id:02d}"
+        exact_names = {
+            "STREAM_SYSTEM_MANIFEST": "StreamSystemManifest",
+            "STREAM_CORE_FINALITY_ADAPTER": "StreamCoreFinalityAdapter",
+        }
+        name = exact_names.get(entry["key"], f"FixtureGenesisEntry{entry_id:02d}")
         aliases = entry["approved_aliases"]
         assert isinstance(aliases, list)
-        aliases.append(name)
+        if entry["key"] not in exact_names:
+            aliases.append(name)
         candidates.append(
             {
                 "name": name,
@@ -199,10 +204,101 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
 
     def test_exact_ggp_probe_inventory_includes_newest_rows(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
-        parameters = tuple(entry["parameters"][0] for entry in entries[35:57])
+        parameters = tuple(
+            entry["parameters"][0]
+            for entry in entries[len(checker.FIXED_CONTRACT_KEYS) : -1]
+        )
         self.assertEqual(parameters, checker.GGP_PARAMETERS)
         self.assertIn("REVEAL_ATTEMPT_GAS_LIMIT", parameters)
         self.assertIn("SALE_NFT_DELIVERY_GAS_LIMIT", parameters)
+
+    def test_stream_system_manifest_requirement_is_exact_and_complete(self) -> None:
+        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
+        system_manifest = entries[checker.SYSTEM_MANIFEST_ENTRY_ID - 1]
+        self.assertEqual(system_manifest["id"], 36)
+        self.assertEqual(system_manifest["key"], "STREAM_SYSTEM_MANIFEST")
+        self.assertEqual(system_manifest["requirement"], "StreamSystemManifest")
+        self.assertEqual(
+            system_manifest["implementation"],
+            {"mode": "exact", "names": ["StreamSystemManifest"]},
+        )
+        self.assertEqual(
+            tuple(system_manifest["required_interfaces"]),
+            checker.SYSTEM_MANIFEST_REQUIRED_INTERFACES,
+        )
+        self.assertEqual(
+            tuple(system_manifest["required_markers"]),
+            checker.SYSTEM_MANIFEST_REQUIRED_MARKERS,
+        )
+        self.assertIn(
+            f"MODULE_TYPE_{checker.SYSTEM_MANIFEST_MODULE_TYPE}",
+            system_manifest["required_markers"],
+        )
+        self.assertIn(
+            f"INTERFACE_ID_{checker.SYSTEM_MANIFEST_INTERFACE_ID}",
+            system_manifest["required_markers"],
+        )
+
+    def test_stream_system_manifest_requirement_rejects_marker_or_interface_drift(self) -> None:
+        entry_index = checker.SYSTEM_MANIFEST_ENTRY_ID - 1
+        for field in ("required_interfaces", "required_markers"):
+            with self.subTest(field=field):
+                profile = copy.deepcopy(self.profile)
+                profile["entries"][entry_index][field].pop()
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "canonical Permanent StreamSystemManifest requirement",
+                ):
+                    checker.validate_profile_document(profile)
+
+    def test_stream_core_finality_adapter_requirement_is_exact_and_complete(self) -> None:
+        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
+        adapter = entries[checker.CORE_FINALITY_ADAPTER_ENTRY_ID - 1]
+        self.assertEqual(adapter["id"], 37)
+        self.assertEqual(adapter["key"], "STREAM_CORE_FINALITY_ADAPTER")
+        self.assertEqual(adapter["requirement"], "StreamCoreFinalityAdapter")
+        self.assertEqual(
+            adapter["implementation"],
+            {"mode": "exact", "names": ["StreamCoreFinalityAdapter"]},
+        )
+        self.assertEqual(
+            tuple(adapter["required_interfaces"]),
+            checker.CORE_FINALITY_ADAPTER_REQUIRED_INTERFACES,
+        )
+        self.assertEqual(
+            tuple(adapter["required_markers"]),
+            checker.CORE_FINALITY_ADAPTER_REQUIRED_MARKERS,
+        )
+        self.assertIn(
+            f"MODULE_TYPE_{checker.CORE_FINALITY_ADAPTER_MODULE_TYPE}",
+            adapter["required_markers"],
+        )
+        self.assertIn(
+            f"INTERFACE_ID_{checker.CORE_FINALITY_ADAPTER_INTERFACE_ID}",
+            adapter["required_markers"],
+        )
+
+    def test_stream_core_finality_adapter_rejects_exact_requirement_drift(self) -> None:
+        entry_index = checker.CORE_FINALITY_ADAPTER_ENTRY_ID - 1
+        for field in (
+            "requirement",
+            "implementation",
+            "required_interfaces",
+            "required_markers",
+        ):
+            with self.subTest(field=field):
+                profile = copy.deepcopy(self.profile)
+                if field == "requirement":
+                    profile["entries"][entry_index][field] = "DriftedFinalityAdapter"
+                elif field == "implementation":
+                    profile["entries"][entry_index][field]["names"] = ["DriftedAdapter"]
+                else:
+                    profile["entries"][entry_index][field].pop()
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "canonical Permanent StreamCoreFinalityAdapter requirement",
+                ):
+                    checker.validate_profile_document(profile)
 
     def test_shared_cadence_probe_serves_exact_gtp_inventory(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
@@ -312,6 +408,8 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         joined = "\n".join(audit.blockers)
         self.assertIn("StreamMintManager", joined)
         self.assertIn("StreamSplitWallet", joined)
+        self.assertIn("STREAM_SYSTEM_MANIFEST", joined)
+        self.assertIn("STREAM_CORE_FINALITY_ADAPTER", joined)
         self.assertIn("expected 'implementation'", joined)
         self.assertIn("SHARED_ENTROPY_CADENCE_PROBE", joined)
 
@@ -325,7 +423,12 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
         entries = checker.validate_profile_document(profile)
         candidates = checker.validate_contract_config(contracts)
-        missing = candidates[:-1]
+        cadence_fixture_name = f"FixtureGenesisEntry{len(entries):02d}"
+        missing = [
+            candidate
+            for candidate in candidates
+            if candidate["name"] != cadence_fixture_name
+        ]
         self.assertTrue(
             any("SHARED_ENTROPY_CADENCE_PROBE" in blocker for blocker in checker.completeness_blockers(entries, missing))
         )

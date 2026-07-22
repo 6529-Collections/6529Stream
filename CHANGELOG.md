@@ -44,6 +44,29 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the checksum-covered, normative
+  `stream-core-permanent-interface.json` target for issue #654. It locks the
+  complete Permanent `StreamCore` function/event surface (58 active functions
+  and 19 active events), excludes the five facade-readiness functions and three
+  events deferred by ADR 0016, omits the redundant `MetadataRouterUpdated`
+  alias in favor of `CoreSatellitePointerUpdated`, includes the native
+  `StreamMetadataRefresh` event, moves the system-manifest five-function/event
+  surface to its Permanent satellite, and maps every active entry into a closed
+  bytecode-budget group whose only sizing authority is the complete linked
+  via-IR runtime measurement. It records explicit pre-genesis dispositions for
+  all 60 current functions and 6 current events that do not survive unchanged,
+  and is validated independently of Foundry output with
+  `check_abi_compatibility.py --target-only`. Custom errors, constructor, and
+  Medium/Replaceable surfaces remain separately cataloged; fallback and receive
+  are fail-closed `required_absent` categories enforced against implementation
+  ABI output. The canonical genesis target now contains 60 derived entries:
+  `StreamSystemManifest` is Permanent deployment entry 36,
+  `StreamCoreFinalityAdapter` is immutable Permanent entry 37, the 22
+  per-parameter GGP probes occupy entries 38-59, and the shared cadence probe is
+  entry 60. Checker goldens pin both satellites' module/interface identities
+  and immutable bindings, including the manifest's frozen Core pointer and
+  append-only history and the adapter's Core-native-only finality boundary,
+  without claiming a deployed candidate exists.
 - Added a canonical normalized Slither baseline and fail-closed drift gate for
   first-party production High/Medium findings. The current 38 rows (4 High and
   34 Medium) are all explicitly Open: one confirmed gap, six design-review

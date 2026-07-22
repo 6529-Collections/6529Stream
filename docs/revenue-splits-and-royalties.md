@@ -273,7 +273,8 @@ Requirements [RSR-GGP]:
    in this document.
 4. Every revenue-layer GGP change emits the canonical change event and
    records genesis value and floor in the release manifest per [LTA-GGP]
-   requirement 4.
+   requirement 4. The two Core-hosted royalty rows use the exact seven-function
+   ABI of [LTA-GGP-CORE] and emit no parameter-named Core alias event.
 5. Health probes are parameter-specific and must be recorded as release or
    governance evidence: `probeRoyaltyInfo` runs for
    `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` (probe
@@ -1333,9 +1334,11 @@ entropy-coordinator boundary lands.
    wallet or records escrowed revenue under
    `(revenueClass, profileId, wallet, asset)`.
 9. Core executes `completePreparedMintFromManager`, clears the prepared record,
-   `_safeMint`s to the initial recipient while keeping the Core completion
-   sentinel active, and clears that sentinel only after the token's normal
-   entropy/randomizer boundary returns.
+   registers bounded entropy state for the completed identity, `_safeMint`s to
+   the initial recipient while keeping the Core completion sentinel active, and
+   clears that sentinel only after the ERC-721 receiver callback returns.
+   Actual randomness-provider requests occur only after completion and are not
+   part of this Core call.
 
 Token-level economic snapshots written during `PREPARED_MINT` must be
 derivable solely from Core token identity, collection/default assignment state,
@@ -2706,7 +2709,8 @@ Requirements [RSR-2981-GAS]:
    under-forwarded gas.
 3. `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
    Governed Gas Parameters hosted in `StreamCore` storage under [RSR-GGP]
-   (ADR 0010 decision D1): staged raise with a raise-only emergency path,
+   and the production ABI of [LTA-GGP-CORE] (ADR 0010 decision D1): staged
+   raise with a raise-only emergency path,
    probe-gated lower, immutable floors, change events, and manifest
    recording. They are not deploy-time immutables and there is no
    unreviewed runtime setter: every change flows through the GGP

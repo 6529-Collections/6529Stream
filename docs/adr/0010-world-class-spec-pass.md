@@ -124,7 +124,7 @@ line previously instructed the bare-numeral shape).
    precisely. Full backfill across all documents is a Review-entry
    condition tracked in the conformance matrix.
 4. **Canonical governance action ID.** ADR 0004 gains the definition every
-   spec already cites: the `STREAM_GOVERNANCE_ACTION_V1` preimage, defined
+   spec already cites: the `STREAM_GOVERNANCE_ACTION_V2` preimage, defined
    once in ADR 0004 [GOV-ACTION-ID] (the authoritative field list lives
    there, not here). One preimage, one home.
 5. **Pinned EIP-712 surfaces.** Every signed payload that moves value or
@@ -249,9 +249,11 @@ line previously instructed the bare-numeral shape).
 ### D7. Safe multisig and TDH-governor operability
 
 1. **Governance actions are atomic call batches.** The canonical action
-   schema carries an array of (target, selector, args-hash) with a batch
-   hash in the action ID; cross-contract pointer/catalog updates that must
-   land together execute as one staged batch.
+   schema carries the ADR 0004 V2 seven-word call array — target, value,
+   selector, calldata hash, and target-specific scope/old/new hashes — with a
+   batch hash in the action ID; cross-contract pointer/catalog updates that
+   must land together execute as one staged batch, and manifest-affecting
+   triggers end in the executor-enforced [GOV-MANIFEST-TAIL] writer.
 2. **Windows sized for real governance.** Execution windows get floors
    (≥ 7 days open-to-execute for normal class), emergency classes assume
    multisig latency (≥ 4 hours, role-redundant), and unpause is classified:
@@ -330,11 +332,15 @@ line previously instructed the bare-numeral shape).
    freeze explicit.
 6. The interim randomizer-after-mint ordering is purged from normative
    sequences; the lifecycle matrix aligns with coordinator terminal states;
-   `streamSystemManifest()` is confirmed Core-required (removed from the
-   relocation-candidate list); duplicate revenue event definitions are
-   deduplicated and ERC-7572's event joins the schemaVersion exemption
-   list; recipient-claim aggregation gets a permissionless
-   `claimMany`-style periphery surface preserving pull semantics.
+   the state-only `streamSystemManifest()` aggregate remains mandatory, while
+   its interim Core hosting decision is superseded before genesis by the
+   target-cutover architecture: immutable Permanent `StreamSystemManifest`
+   owns the aggregate/cache/history/publisher surface and Core retains only
+   its generic terminal-frozen `SYSTEM_MANIFEST` pointer; duplicate revenue
+   event definitions are deduplicated and ERC-7572's event joins the
+   schemaVersion exemption list; recipient-claim aggregation gets a
+   permissionless `claimMany`-style periphery surface preserving pull
+   semantics.
 7. The decision-count miscount in ADR 0009 and the register is corrected
    (25 decisions resolving the 25 questions raised alongside the one
    reserved question, OQ-X8).

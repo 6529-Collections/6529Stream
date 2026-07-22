@@ -114,8 +114,15 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   governing production deployment rule requires at least 2,000 bytes of
   headroom and cannot be waived by that exception, so
   [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
-  blocks production release until Core slimming recovers the target. The
-  stricter
+  blocks production release until Core slimming recovers the target. Historical
+  artifact measurements resolve the apparent refactor discrepancy: the earlier
+  headroom sequence reached 21,792 bytes, then CON-012 added roughly 2,330 bytes
+  of manager/prepared-mint hooks before the legacy Drops/Minter path was retired.
+  The resulting 24,152-byte build is transitional and still omits mandatory
+  target hooks. The pre-genesis cutover therefore pins one permanent target ABI,
+  migrates satellites and callers before deleting legacy paths, and permits only
+  zero-Core-delta satellite slices or measured net-negative Core slices until
+  the complete target build passes at or below 22,576 bytes. The stricter
   approved bytecode-spend baseline remains 22,184 bytes with 2,392 bytes of
   baseline EIP-170 margin. The current headroom remains above the interim
   384-byte development floor but below the 512-byte warning threshold.
@@ -133,7 +140,8 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   Slither High/Medium rows under issue #658, plus missing external audit,
   testnet/live deployment evidence, verified addresses, explorer verification,
   metadata browser evidence, and randomizer operations evidence. Production is
-  additionally blocked by issue #654 Core headroom/state work, issue #656
+  additionally blocked by issue #654 Core headroom/state and complete-target-ABI
+  work, issue #656
   instance-aware genesis reconciliation, retained live ceremony evidence,
   production deployment manifests, production signatures, signed tags,
   explorer verification, live randomizer evidence, and post-audit remediation
@@ -2948,7 +2956,8 @@ Status values: `Missing`, `Planned`, `In Progress`, `Passing`, `Blocked`.
 | 0012 World-class pass round 3 | Protocol design request | Accepted | `docs/adr/0012-world-class-pass-round-3.md` | Nine-lens round-3 resolutions |
 | 0013 World-class pass round 4 | Protocol design request | Accepted | `docs/adr/0013-world-class-pass-round-4.md` | Nine-lens round-4 resolutions |
 | 0014 World-class pass round 5 | Protocol design request | Accepted | `docs/adr/0014-world-class-pass-round-5.md` | Nine-lens round-5 resolutions |
-| 0015 Collection identity and facade readiness | Protocol design request | Accepted | `docs/adr/0015-collection-identity-and-facade-readiness.md` | OQ-X8 resolution; facade-readiness genesis surfaces; commitment gate |
+| 0015 Collection identity and facade readiness | Protocol design request | Superseded in part | `docs/adr/0015-collection-identity-and-facade-readiness.md` | OQ-X8 W1/W2 identity signal and commitment gate remain; W3-W5 superseded by ADR 0016 |
+| 0016 Core-native-only ERC-721 launch identity | Protocol conformance correction | Accepted | `docs/adr/0016-core-native-only-erc721.md` | Removes launch facade-readiness surfaces; restores contract-wide ERC-721 semantics; reduces Core bytecode |
 
 ## Appendix D: Issue Template
 

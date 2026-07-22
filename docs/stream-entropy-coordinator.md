@@ -272,29 +272,19 @@ setTokenHash(...)
 retrieveTokenHash(...)
 ```
 
-Core should store one entropy coordinator pointer:
+Core stores the entropy coordinator in its private unified satellite-pointer
+record. External discovery uses
+`getSatellitePointer(ENTROPY_COORDINATOR)` (`0x3528d53c`), and replacement
+uses `updateSatellitePointer(ENTROPY_COORDINATOR, newCoordinator)`
+(`0xac1e5708`) under [LTA-POINTERS]. Core exposes no
+`entropyCoordinator()` getter or entropy-specific setter.
 
-```solidity
-IStreamEntropyCoordinator public entropyCoordinator;
-```
-
-Core should emit:
-
-```solidity
-event EntropyCoordinatorUpdated(
-    uint16 schemaVersion,
-    address indexed oldCoordinator,
-    address indexed newCoordinator,
-    bytes32 indexed actionId
-);
-```
-
-Coordinator pointer replacement executes as a canonical ADR 0004
-governance action, and the event binds that action's `actionId`
-([GOV-ACTION-ID] in
-[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
-per the uniform governance-evidence rule [EC-EVENTS] (ADR 0014
-decision V6).
+Coordinator pointer replacement executes as a canonical ADR 0004 governance
+action and emits Core's canonical `CoreSatellitePointerUpdated` event joined
+to that action's `actionId` ([GOV-ACTION-ID] in
+[`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)). There is
+no duplicate `EntropyCoordinatorUpdated` Core event; entropy tooling filters
+the canonical event by its indexed `ENTROPY_COORDINATOR` pointer type.
 
 Core's mint flow should register the token with the coordinator after the token
 identity is known:
@@ -365,7 +355,7 @@ Requirements [EC-REGGAS]:
    before the coordinator call.
 4. Raise and lower governance follows [LTA-GGP] requirements 1–2
    unchanged; parameter changes execute as canonical ADR 0004 governance
-   actions.
+   actions through the exact Core-minimal entries pinned at [LTA-GGP-CORE].
 5. The parameter is Operational-layer per [LTA-GGP] requirement 3; in
    this subsystem the exclusion additionally covers entropy policy
    manifests and seed derivation, so retuning gas never touches artwork
@@ -379,20 +369,10 @@ Requirements [EC-REGGAS]:
    staged (see [Coordinator Replacement And State
    Continuity](#coordinator-replacement-and-state-continuity)).
 8. The parameter is a member of the hard-fork/repricing review checklist
-   ([LTA-GGP]), and every change emits the parameter-named alias event
-   below — a member of the canonical GGP change-event family per
-   [LTA-GGP] requirement 4, tagged as such in the event catalog and
-   binding the authorizing action ID (ADR 0014 decision V6):
-
-```solidity
-event EntropyRegistrationGasLimitUpdated(
-    uint16 schemaVersion,
-    bytes32 indexed actionId,
-    uint256 oldValue,
-    uint256 newValue,
-    uint256 floor
-);
-```
+   ([LTA-GGP]). Every change emits Core's canonical
+   `GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)`
+   event with the executing `actionId`; Core emits no parameter-named alias
+   event ([LTA-GGP-CORE]; ADR 0014 decision V6).
 
 The parameter's release-manifest failure-direction class is
 `FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10): raises are
@@ -862,9 +842,9 @@ Provider-side raw randomness compression domains are owned by
 ## Event Schemas [EC-EVENTS]
 
 This document is the normative home of the entropy-subsystem event
-vocabulary it defines, including the Core-emitted
-`EntropyCoordinatorUpdated` and the parameter-named GGP/GTP alias
-events. Every event block in this document is the production-exact
+vocabulary it defines. Cross-cutting Core pointer and GGP events remain owned
+by [LTA-POINTERS] and [LTA-GGP-CORE]; this document cites them rather than
+defining entropy-specific Core mirrors. Every event block in this document is the production-exact
 signature of its event, and the machine-readable event catalog must
 reproduce these
 signatures — `schemaVersion` position, field order, and indexed
@@ -892,10 +872,11 @@ Requirements [EC-EVENTS]:
    canonical ADR 0004 governance action carries the authorizing
    `bytes32 actionId` ([GOV-ACTION-ID] in
    [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
-   alongside the governance events themselves. In this vocabulary
-   those hosts are `EntropyCoordinatorUpdated`,
-   `EntropyProviderStateUpdated`, and the parameter-named GGP/GTP
-   alias events, so reconstructing which staged action authorized a
+   alongside the governance events themselves. In this vocabulary the
+   subsystem-owned hosts are `EntropyProviderStateUpdated` and the GTP alias
+   event. Core pointer changes use `CoreSatellitePointerUpdated`, and the
+   Core-hosted registration GGP uses canonical `GasParameterUpdated`; all carry
+   the action ID directly, so reconstructing which staged action authorized a
    change never requires transaction-level correlation. Which
    coordinator selectors execute as canonical actions is stated in
    [EC-ROLES] rule 2.
@@ -1058,14 +1039,21 @@ the source of truth.
 Coordinator pointer replacement is an ADR 0004 `POINTER_REPLACEMENT` action.
 Entropy state must survive pointer changes:
 
-1. Core stores `coordinatorAtMint[tokenId]` when token identity is allocated.
-   This is the authoritative coordinator for that token's entropy reads.
+1. Core leaves `coordinatorAtMint[tokenId]` zero while an identity is only
+   prepared. During completion it resolves the live nonzero coordinator,
+   stores that address immediately before calling its bounded `onTokenMinted`
+   registration hook, and retains it after `_safeMint`. This is the
+   authoritative coordinator for that token's entropy reads. An incident abort
+   clears any defensive nonzero value along with the unminted identity, while
+   never rewinding or reusing the token ID or collection serial.
 2. The metadata router reads `tokenSeed(tokenId)` and
    `tokenEntropy(tokenId)` from `coordinatorAtMint[tokenId]`, not blindly from
    the current live Core pointer.
-3. The live Core `entropyCoordinator` pointer is used for new token
-   registration and for request/fulfillment routing only for tokens whose
-   `coordinatorAtMint` equals that live pointer.
+3. The live Core `ENTROPY_COORDINATOR` pointer is used for new token
+   registration and new request routing. The retained `coordinatorAtMint` is
+   the fulfillment and single-token Core refresh authority for that token even
+   after the live pointer changes, unless an accepted recovery policy has
+   terminally disabled that prior route.
 4. Coordinator replacement is blocked while any collection has active
    `REQUESTED` entropy — token-keyed or scope-keyed [EC-SCOPE] — against
    the current coordinator unless an already-frozen fresh-recovery policy
@@ -2376,11 +2364,18 @@ event MetadataUpdate(uint256 tokenId);
 
 Metadata refresh events are Core-originated (ADR 0009 decision 5): Core
 exposes restricted ERC-4906 refresh emitters callable by authorized
-satellites, and the coordinator calls that restricted Core method after
-finalization. The metadata router does not expose a refresh hook for this
-path. Marketplaces watch the ERC-721 contract, so a refresh event emitted
-from a satellite contract that marketplaces will not watch would never
-reach them.
+satellites, and the coordinator calls
+`emitMetadataUpdate(tokenId, requestKey)` (`0xb826aa0c`) after finalization;
+the nonzero `requestKey` is the refresh `reasonHash`. The metadata router does
+not expose a refresh hook for this path. Marketplaces watch the ERC-721
+contract, so a refresh event emitted from a satellite contract that
+marketplaces will not watch would never reach them.
+Core authorizes this call against the token's retained nonzero
+`coordinatorAtMint(tokenId)`, not merely the current coordinator pointer, and
+accepts both `MINTED` and `BURNED` lifecycle states. This preserves late
+fulfillment and archival refresh after pointer replacement or burn; an
+unrelated old coordinator, prepared token, incident-aborted ID, or unknown ID
+is rejected.
 
 ## Retry And Failure Policy
 
@@ -3088,8 +3083,9 @@ Core hook and interfaces, but this refactor should still buy about `0.8 KB` to
 ### Phase 3: Core Integration
 
 1. Remove Core randomizer storage and token hash storage.
-2. Add `entropyCoordinator`.
-3. Add `EntropyCoordinatorUpdated`.
+2. Add the private unified `ENTROPY_COORDINATOR` satellite-pointer record.
+3. Emit the canonical `CoreSatellitePointerUpdated` event for coordinator
+   changes; do not add an entropy-specific Core event or public getter.
 4. Register token entropy during mint.
 5. Remove `addRandomizer`, `setTokenHash`, and `retrieveTokenHash`.
 
@@ -3116,28 +3112,36 @@ Core hook and interfaces, but this refactor should still buy about `0.8 KB` to
 Core integration tests:
 
 1. Mint registers token entropy.
-2. Only Core can call `onTokenMinted`.
-3. Core emits `EntropyCoordinatorUpdated`.
-4. Updating coordinator requires admin authority.
-5. Core no longer stores token hash or randomizer address.
-6. Core carries no `ERC721Enumerable` surface:
+2. A prepared-incomplete identity keeps `coordinatorAtMint == address(0)`.
+   Completion stores the live coordinator immediately before `onTokenMinted`;
+   coordinator reentry at that boundary still observes
+   `PREPARED_INCOMPLETE` and cannot emit a Core metadata refresh. Incident
+   abort returns the coordinator read to zero, while successful completion
+   retains the pinned address.
+3. Only Core can call `onTokenMinted`.
+4. A coordinator update emits `CoreSatellitePointerUpdated` with pointer type
+   `ENTROPY_COORDINATOR`, and Core emits no entropy-specific alias event.
+5. Updating the coordinator succeeds only through the unified governed pointer
+   updater; the per-family getter and setter selectors are absent.
+6. Core no longer stores token hash or randomizer address.
+7. Core carries no `ERC721Enumerable` surface:
    `supportsInterface(0x780e9d63)` is false and the index selectors are
    absent (ADR 0012 decision T10; [LTA-ENUMERATION]).
-7. If `onTokenMinted` reverts, the whole mint reverts and no token is minted.
-8. Emergency switch to a pre-approved safe-mode coordinator preserves
+8. If `onTokenMinted` reverts, the whole mint reverts and no token is minted.
+9. Emergency switch to a pre-approved safe-mode coordinator preserves
    registration semantics.
-9. `ENTROPY_REGISTRATION_GAS_LIMIT` behaves per [EC-REGGAS] and
+10. `ENTROPY_REGISTRATION_GAS_LIMIT` behaves per [EC-REGGAS] and
    [LTA-GGP] requirements 1–2 (ADR 0011 decision R5): staged raises on
    the normal delay class bounded to 2x per action, the raise-only
    probe-gated emergency path, lower only with a recorded passing probe
    run at the proposed value, floor rejection below
    `ENTROPY_REGISTRATION_GAS_FLOOR`, and change events with old and new
    values.
-10. The EIP-150 parent precheck is exercised at, below, and above the
+11. The EIP-150 parent precheck is exercised at, below, and above the
     threshold and reads the live parameter value after a raise.
-11. Gas parameter values appear in no finality manifest, frozen-route
+12. Gas parameter values appear in no finality manifest, frozen-route
     identity, entropy policy manifest, or seed derivation input.
-12. The registration-gas probe satisfies its golden equivalence test,
+13. The registration-gas probe satisfies its golden equivalence test,
     records failing and passing runs on itself, and the parameter's
     `FAIL_CLOSED_PRECHECK` class excludes it from permissionless
     conditional-raise registration (ADR 0012 decision T1).
@@ -3180,12 +3184,13 @@ Coordinator config tests:
     recorded unavailability finding) proceeds; Operational retunes —
     GGP/GTP values and the reveal fee — need no consent [EC-CONFIG]
     rule 14 (ADR 0013 decision U4).
-14. Staged-action host events — `EntropyCoordinatorUpdated`,
-    `EntropyProviderStateUpdated`, `EntropyRegistrationGasLimitUpdated`,
-    and `EntropyTimeParameterUpdated` — carry an `actionId` equal to
-    the canonical governance action that executed the change, matching
-    the ADR 0004 governance events [EC-EVENTS] rule 4 (ADR 0014
-    decision V6).
+14. Staged-action host events — Core's canonical
+    `CoreSatellitePointerUpdated`, `EntropyProviderStateUpdated`, Core's
+    canonical `GasParameterUpdated`
+    for `ENTROPY_REGISTRATION_GAS_LIMIT`, and
+    `EntropyTimeParameterUpdated` — carry an `actionId` equal to the
+    canonical governance action that executed the change, matching the
+    ADR 0004 governance events [EC-EVENTS] rule 4 (ADR 0014 decision V6).
 
 Request tests:
 

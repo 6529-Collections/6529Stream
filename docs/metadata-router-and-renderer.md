@@ -41,9 +41,9 @@ posture is recorded with its rationale. It is further amended by
 per-collection contract-metadata read path is promoted to the Permanent,
 normative marketplace collection-identity signal, the collection-display
 evidence gate hardens to named signed integration commitments, OQ-X8 is
-resolved and its Review-entry blocker on this document is removed, and
-the router's facade-mode serving and refresh-authority posture is
-recorded.
+resolved and its Review-entry blocker on this document is removed. ADR 0016
+later removes the launch facade mode while preserving the collection-identity
+signal and commitment gate.
 
 This document specifies how Stream metadata rendering and script assembly move
 out of `StreamCore` into dedicated metadata contracts. 6529Stream is permanent
@@ -340,8 +340,10 @@ home,
    deepest cold read path plus margin; floor, raise/lower classes,
    Operational-layer exclusion, change events, EIP-150 live-value
    prechecks, repricing-checklist membership, and release-manifest
-   recording follow [LTA-GGP] unchanged, and this document adds no
-   pattern rules of its own.
+   recording follow [LTA-GGP] unchanged. Its Core mutation and
+   introspection entries use the seven-function production ABI pinned at
+   [LTA-GGP-CORE], and this document adds no convenience getter, public
+   constant getter, alias event, or pattern rule of its own.
 2. The health probe for lowering is a recorded `tokenURI()` +
    `contractURI()` read sweep over the deepest known routes at the
    proposed value.
@@ -479,70 +481,40 @@ Collection discovery contract [MRR-COLLECTION-DISCOVERY]:
    signal under sequential token IDs, together with its reserved-scope
    satellites — is resolved (ADR 0015 decision W6): the
    reads-plus-token-JSON path of rule 1 is the adopted Permanent signal
-   (ADR 0015 decision W1), and the per-collection ERC-721 facade line is
-   a dormant extension profile with a pre-public-sale tripwire, specified
-   in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
-   (ADR 0015 decisions W3 and W5). OQ-X8 no longer blocks Review entry
+   (ADR 0015 decision W1). ADR 0016 supersedes the facade tripwire and makes
+   launch Core the sole ERC-721 address. OQ-X8 no longer blocks Review entry
    for this document or for
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
    Review entry follows the ordinary conditions of
    [`docs/spec-policy.md`](spec-policy.md).
 
-Facade-mode serving [MRR-FACADE-SERVING]:
+Core-native serving [MRR-FACADE-SERVING]:
 
-1. The router serves `EXTERNAL_FACADE` collections identically to
-   `CORE_NATIVE` collections: `tokenURI()` routing, renderer resolution,
-   metadata-mode resolution, freeze policy, and the full-view reads are
-   keyed by the global token ID in both identity modes, and no router or
-   renderer read path branches on identity mode (ADR 0015 decision W4).
-   A facade maps its collection-local ERC-721 token ID to the global
-   token ID and delegates `tokenURI`/`contractURI` to Core and the
-   router per the facade profile ([FCP-READS] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
-2. Metadata-refresh authority is mode-independent: the Core-originated
-   restricted refresh emitters of [MRR-REFRESH-EMITTERS] remain the
-   canonical ERC-4906 authority for every collection, and a
-   facade-relayed refresh event for the facade's local id-space is
-   authorized only against the exact per-caller derivations the facade
-   profile pins for each relay entry, never from a separately mutable
-   allowlist. The genesis satellite implementations carry no relay
-   duty: the relay's producer obligation lands with the facade-aware
-   satellite versions whose acceptance is a named precondition of the
-   deployment-decision procedure ([FCP-DEPLOYMENT]; ADR 0015 decision
-   W3). The relay mechanics are owned by the facade profile
-   ([`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md));
-   this document does not restate them.
-
-Core should emit an event when the router changes:
-
-```solidity
-event MetadataRouterUpdated(
-    uint16 schemaVersion,
-    address indexed oldRouter,
-    address indexed newRouter
-);
-```
+1. ADR 0016 makes Core the sole ERC-721 address and global token ID the sole
+   token ID for launch. Router resolution, metadata mode, freeze policy, and
+   full-view reads are keyed by that ID and contain no identity-mode branch.
+2. Core-originated restricted refresh emitters remain the canonical ERC-4906
+   authority for every collection. No facade relay or local-ID translation is
+   part of the launch metadata stack.
 
 Router pointer event rules [MRR-ROUTER-EVENTS]:
 
 1. `CoreSatellitePointerUpdated(METADATA_ROUTER, ...)` is the canonical
    governance event for router pointer history.
-2. `MetadataRouterUpdated` is a required marketplace/indexer-compatibility
-   mirror — optional event mirrors are banned at genesis (ADR 0011
-   decision R12). Its production signature is schemaVersioned with the
-   leading `uint16 schemaVersion` field, as pinned above (ADR 0013
-   decision U7). It must be emitted in the same execution as the
-   canonical pointer update, is tagged as a mirror of
-   `CoreSatellitePointerUpdated` in the machine-readable event catalog,
-   and must never be a separate update path or carry different authority
-   semantics. A conformant deployment's event surface is deterministic: a
-   missing mirror emission is a defect, never an implementation choice.
+2. The pre-genesis target emits no `MetadataRouterUpdated` compatibility
+   mirror. Indexers filter the canonical event's indexed `pointerType` for
+   `METADATA_ROUTER` and join its indexed action ID. A router-specific mirror
+   would duplicate the same fact without a distinct consumer requirement and
+   would spend permanent Core bytecode; a separate router update path or mirror
+   event is nonconformant.
 
 Core should only allow router changes through ADR 0004 governance/action roles.
 Legacy selector-map `StreamAdmins` authorization is nonconformant for
 production deployment. The router should be set at genesis. Router changes
-must follow the shared Core Satellite Pointer Policy in
+call Core's single
+`updateSatellitePointer(METADATA_ROUTER, newRouter)` entry
+(`0xac1e5708`); there is no `setMetadataRouter` or `metadataRouter()` selector.
+They must follow the shared Core Satellite Pointer Policy in
 `docs/stream-long-term-architecture.md`: staged
 operation ID, registry eligibility, expected code hash, expected manifest hash,
 reason URI/hash, cancellation path, execution recheck, and optional one-way
@@ -575,7 +547,6 @@ interface IStreamCoreMetadataView {
     function collectionHasMaxSupply(uint256 collectionId) external view returns (bool);
     function collectionMaxSupply(uint256 collectionId) external view returns (uint256);
     function collectionMintedEver(uint256 collectionId) external view returns (uint256);
-    function viewCirSupply(uint256 collectionId) external view returns (uint256);
     function totalSupplyOfCollection(uint256 collectionId) external view returns (uint256);
     function collectionFreezeStatus(uint256 collectionId) external view returns (bool);
     function coordinatorAtMint(uint256 tokenId) external view returns (address);
@@ -860,7 +831,8 @@ Storage shape ownership [MRR-STORAGE-HOMES]:
    Core mint ABI in
    [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
    [MPA-CORE-ABI], where `tokenData` is opaque `bytes` end to end — V1
-   Core stores the renderer-visible `tokenData` bytes and their hash — and the
+   Core stores the renderer-visible `tokenData` bytes, verifies their supplied
+   hash commitment, and stores no second hash slot — and the
    renderer reads the mint-time bytes from Core, not from the metadata
    contract (ADR 0010 decision D3; typing drift repaired by ADR 0012
    decision T7). `StreamCollectionMetadata` stores only token-level
@@ -1336,12 +1308,9 @@ Attribution disclosure requirements [MRR-ATTRIBUTION]:
    disclosure, never address identity: it does not by itself make an
    artist the verified creator in marketplace creator-verification
    pipelines or explorer attribution heuristics that key on deployer
-   addresses. The per-collection facade line — and the marketplace
-   creator-verification and explorer-attribution gap that rides on it —
-   is resolved as a dormant extension profile with a pre-public-sale
-   tripwire (ADR 0015 decisions W3 and W5); its mechanics are owned by
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
-   ([MRR-COLLECTION-DISCOVERY]).
+   addresses. ADR 0016 rejects a dormant facade workaround in launch Core;
+   this residual attribution limitation remains disclosure/evidence work and
+   cannot be hidden behind a nonconformant second ERC-721 surface.
 8. Registry-read failure posture (ADR 0013 decision U4): the
    attribution object derives from bounded fail-safe reads of the
    artist registry and the attestation surfaces, under the read-set and
@@ -2273,6 +2242,12 @@ The metadata system should also support ERC-4906-style events:
 ```solidity
 event MetadataUpdate(uint256 _tokenId);
 event BatchMetadataUpdate(uint256 _fromTokenId, uint256 _toTokenId);
+event StreamMetadataRefresh(
+    uint16 schemaVersion,
+    bytes32 indexed reasonHash,
+    uint256 indexed fromTokenId,
+    uint256 indexed toTokenId
+);
 
 interface IStreamCoreMetadataRefresh {
     function emitMetadataUpdate(uint256 tokenId, bytes32 reasonHash) external;
@@ -2282,8 +2257,15 @@ interface IStreamCoreMetadataRefresh {
         uint256 toTokenId,
         bytes32 reasonHash
     ) external;
+
+    function emitContractURIUpdated() external;
 }
 ```
+
+The helper selectors are production-exact:
+`emitMetadataUpdate(uint256,bytes32) = 0xb826aa0c`,
+`emitBatchMetadataUpdate(uint256,uint256,bytes32) = 0x908c18bd`, and
+`emitContractURIUpdated() = 0x7f377036`. None returns a value.
 
 Because marketplaces call `tokenURI()` on `StreamCore`, there are two viable
 event strategies:
@@ -2303,30 +2285,48 @@ Refresh emitter authorization [MRR-REFRESH-EMITTERS]:
    `emitMetadataUpdate`/`emitBatchMetadataUpdate` helpers is owned by the
    Core Hook Budget table in
    [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
-   (ADR 0009 decision 5; ADR 0010 decision D10): the current metadata router,
-   the artwork finality registry, and the entropy coordinator, each resolved
-   from Core's own cached satellite pointers at call time. This document
-   cites that home and must not narrow or extend the set. The restricted
-   `ContractURIUpdated()` helper is pinned in the same hook-table home
+   (ADR 0009 decision 5; ADR 0010 decision D10): both helpers accept the
+   current metadata router and current artwork finality registry resolved from
+   Core's cached pointers; the single-token helper additionally accepts the
+   token's nonzero retained `coordinatorAtMint(tokenId)`, while the batch helper
+   does not admit an entropy coordinator. This document cites that home and
+   must not narrow or extend the set. The restricted
+   `emitContractURIUpdated()` helper is pinned in the same hook-table home
    with its own caller set — the current metadata router, resolved from
    the cached pointer — and its own golden caller-set test; "same
    posture" prose never substitutes for the pinned set (ADR 0012
    decision T9).
-2. The caller check derives from Core's satellite pointer storage, never
+2. The caller check derives from Core's private satellite pointer storage,
+   never
    from a separately mutable allowlist: a caller is authorized exactly when
-   it equals the current `metadataRouter`, the current finality registry
-   pointer, or the entropy coordinator authorized under the cached pointer
-   policy for the affected tokens. A stale router, replacement candidate,
-   generic metadata admin, or collection admin must not be able to call the
-   helpers directly.
+   it equals the current `METADATA_ROUTER` or current finality-registry pointer.
+   For `emitMetadataUpdate(tokenId,reasonHash)` only, Core also authorizes
+   `msg.sender == coordinatorAtMint(tokenId)` after requiring that retained
+   address to be nonzero; this is intentionally token-pinned rather than
+   current-pointer-pinned so fulfillment remains refreshable after coordinator
+   replacement. A stale router, replacement candidate, unrelated current or
+   prior entropy coordinator, generic metadata admin, or collection admin must
+   not be able to call the helpers directly. Core exposes no per-family pointer
+   getter; external discovery uses `getSatellitePointer(bytes32)` under
+   [LTA-POINTERS].
 3. A golden conformance test must enumerate the exact authorized caller set
-   and prove both acceptance for each authorized satellite and rejection for
-   every other caller class.
-4. The helper must verify that token IDs or collection ranges are valid for
-   the requested refresh, enforce the batch/range limit, and emit an
-   internal reason or manifest hash so indexers can distinguish normal
-   metadata refresh from entropy finalization, governance, or recovery. The
-   helper is not an arbitrary log-spam bridge.
+   and prove acceptance for each route, rejection of the current coordinator
+   for a token pinned to a prior coordinator and vice versa, rejection of every
+   entropy caller on the batch helper, and rejection of every other caller
+   class.
+4. `emitMetadataUpdate` requires a nonzero `reasonHash` and an authoritative
+   Core lifecycle of `MINTED` or `BURNED`; prepared-incomplete, incident-aborted,
+   and unknown IDs revert. Burned tokens remain eligible because archival
+   metadata and late entropy fulfillment remain observable after ownership is
+   destroyed. The helper emits `MetadataUpdate(tokenId)` and
+   `StreamMetadataRefresh(1, reasonHash, tokenId, tokenId)`.
+   `emitBatchMetadataUpdate` requires nonzero `reasonHash`,
+   `1 <= fromTokenId <= toTokenId <= lastAllocatedTokenId()`, and
+   `toTokenId - fromTokenId < MAX_REFRESH_RANGE`; it performs no per-token
+   loop and emits the standard batch event plus the same native reason event.
+   A global-ID range may contain burned tokens or tokens from other collections
+   because ERC-4906 ranges are invalidation supersets. These O(1) checks make
+   the helpers bounded and prevent an arbitrary log-spam bridge.
 Protocol v1 pins `MAX_REFRESH_RANGE = 5_000` token IDs per
 `BatchMetadataUpdate` helper call (ADR 0009 decision 15), confirmed by
 marketplace/indexer review evidence before deployment.
@@ -2349,7 +2349,8 @@ For ERC-7572-style contract metadata, Core exposes `contractURI()` in
 protocol v1 (ADR 0009 decision 4), and the same Core-origination rationale
 applies as for ERC-4906 refresh: marketplaces watch the ERC-721 contract.
 Global contract metadata updates therefore cause Core to emit
-`ContractURIUpdated()` through a restricted helper whose authorized
+`ContractURIUpdated()` through the exact `emitContractURIUpdated()` restricted
+helper whose authorized
 caller set is pinned — not analogized — at the Core Hook Budget table
 home, [PV1-HOOKS] in
 [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
@@ -2814,8 +2815,8 @@ Core tests:
    documented fallback data URI when the router is unset, has no code, reverts,
    returns malformed ABI, or exceeds the returndata cap.
 3. Router updates require admin authority.
-4. Router update emits canonical `CoreSatellitePointerUpdated` and the
-   required `MetadataRouterUpdated` mirror in the same execution
+4. Router update emits exactly the canonical `CoreSatellitePointerUpdated`
+   event with a verified nonzero `actionId`; no router-specific mirror exists
    [MRR-ROUTER-EVENTS].
 5. Core exposes `totalSupply()`, and `tokenOfOwnerByIndex`/`tokenByIndex`
    are absent from the Core interface (ADR 0012 decision T10).
@@ -2833,10 +2834,12 @@ Core tests:
     path, lower path with health probe, floor rejection, change event, and
     exclusion from finality identity [MRR-ROUTER-GGP].
 11. The restricted ERC-4906 helper golden test enumerates the exact
-    authorized caller set — metadata router, finality registry, entropy
-    coordinator — and proves rejection for every other caller class
+    authorized routes — current metadata router and finality registry on both
+    helpers, plus the token's retained `coordinatorAtMint` on the single-token
+    helper only — and proves the replacement, burned-token, wrong-coordinator,
+    batch-entropy, prepared, aborted, unknown-token, and unrelated-caller cases
     [MRR-REFRESH-EMITTERS].
-12. The restricted `ContractURIUpdated()` helper golden test enumerates
+12. The restricted `emitContractURIUpdated()` (`0x7f377036`) helper golden test enumerates
     its pinned caller set — the current metadata router, per [PV1-HOOKS]
     — proving acceptance for the router and rejection for every other
     caller class (ADR 0012 decision T9).
@@ -3038,9 +3041,8 @@ marketplace collection-identity signal (decision W1)
 [MRR-COLLECTION-DISCOVERY]; the collection-display evidence gate hardens
 to named, signed marketplace/indexer integration commitments before the
 first public sale, with the gate row owned by the conformance matrix
-(decision W2); and the router serves `EXTERNAL_FACADE` collections
-identically to `CORE_NATIVE` collections, with Core-originated
-metadata-refresh authority mode-independent (decision W4)
+(decision W2). ADR 0016 later supersedes the W3-W5 launch facade path; Core-
+originated metadata refresh and single-address serving are pinned at
 [MRR-FACADE-SERVING].
 OQ-X8 is resolved (ADR 0015 decision W6): no open decision touches this
 document, and its Review entry follows the ordinary conditions of

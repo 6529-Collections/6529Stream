@@ -76,6 +76,48 @@ FIXED_CONTRACT_KEYS = (
     "ARTWORK_FINALITY_REGISTRY",
     "ENTROPY_COORDINATOR_FALLBACK",
     "MINT_MANAGER_FALLBACK",
+    "STREAM_SYSTEM_MANIFEST",
+    "STREAM_CORE_FINALITY_ADAPTER",
+)
+
+SYSTEM_MANIFEST_MODULE_TYPE = (
+    "0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6"
+)
+SYSTEM_MANIFEST_INTERFACE_ID = "0x37660ede"
+SYSTEM_MANIFEST_REQUIRED_INTERFACES = ("IERC165", "IStreamSystemManifest")
+SYSTEM_MANIFEST_REQUIRED_MARKERS = (
+    "PERMANENT_CLASS",
+    f"MODULE_TYPE_{SYSTEM_MANIFEST_MODULE_TYPE}",
+    f"INTERFACE_ID_{SYSTEM_MANIFEST_INTERFACE_ID}",
+    "IMMUTABLE_STREAM_CORE_BINDING",
+    "IMMUTABLE_GOVERNANCE_EXECUTOR_BINDING",
+    "CORE_SYSTEM_MANIFEST_POINTER_TERMINAL_FROZEN",
+    "SYSTEM_MANIFEST_TAIL_PUBLISHER",
+    "APPEND_ONLY_SSTORE2_PAYLOAD_HISTORY",
+    "SUPPORTED_MANIFEST_TAIL_ACTION_CLASS_MASK_0x0f",
+)
+
+CORE_FINALITY_ADAPTER_MODULE_TYPE = (
+    "0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4"
+)
+CORE_FINALITY_ADAPTER_INTERFACE_ID = "0xebf35615"
+CORE_FINALITY_ADAPTER_REQUIRED_INTERFACES = (
+    "IERC165",
+    "IStreamCoreFinalityAdapter",
+)
+CORE_FINALITY_ADAPTER_REQUIRED_MARKERS = (
+    "PERMANENT_CLASS",
+    f"MODULE_TYPE_{CORE_FINALITY_ADAPTER_MODULE_TYPE}",
+    f"INTERFACE_ID_{CORE_FINALITY_ADAPTER_INTERFACE_ID}",
+    "IMMUTABLE_STREAM_CORE_BINDING",
+    "IMMUTABLE_COLLECTION_METADATA_BINDING",
+    "READ_ONLY_CORE_FINALITY_AGGREGATE",
+    "CORE_NATIVE_ONLY_NO_FACADE_STATE",
+)
+
+SYSTEM_MANIFEST_ENTRY_ID = FIXED_CONTRACT_KEYS.index("STREAM_SYSTEM_MANIFEST") + 1
+CORE_FINALITY_ADAPTER_ENTRY_ID = (
+    FIXED_CONTRACT_KEYS.index("STREAM_CORE_FINALITY_ADAPTER") + 1
 )
 
 GGP_PARAMETERS = (
@@ -499,15 +541,52 @@ def validate_profile_document(data: Any) -> list[dict[str, Any]]:
             + ", ".join(repr(alias) for alias in overlapping_aliases)
         )
     if tuple(keys[: len(FIXED_CONTRACT_KEYS)]) != FIXED_CONTRACT_KEYS:
-        raise GenesisProfileError("profile.entries 1-35 do not match the canonical contract inventory")
+        raise GenesisProfileError("profile.entries 1-37 do not match the canonical contract inventory")
     if any(entry["kind"] != "contract" for entry in entries[: len(FIXED_CONTRACT_KEYS)]):
-        raise GenesisProfileError("profile.entries 1-35 must be contract requirements")
+        raise GenesisProfileError("profile.entries 1-37 must be contract requirements")
+
+    system_manifest = entries[SYSTEM_MANIFEST_ENTRY_ID - 1]
+    if (
+        system_manifest["requirement"] != "StreamSystemManifest"
+        or system_manifest["deployment_scope"] != "singleton"
+        or system_manifest["implementation"]
+        != {"mode": "exact", "names": ["StreamSystemManifest"]}
+        or tuple(system_manifest["required_interfaces"])
+        != SYSTEM_MANIFEST_REQUIRED_INTERFACES
+        or tuple(system_manifest["required_markers"])
+        != SYSTEM_MANIFEST_REQUIRED_MARKERS
+        or system_manifest["approved_aliases"]
+        or system_manifest["parameters"]
+        or system_manifest["distinct_from"]
+    ):
+        raise GenesisProfileError(
+            "profile entry 36 must preserve the canonical Permanent StreamSystemManifest requirement"
+        )
+
+    core_finality_adapter = entries[CORE_FINALITY_ADAPTER_ENTRY_ID - 1]
+    if (
+        core_finality_adapter["requirement"] != "StreamCoreFinalityAdapter"
+        or core_finality_adapter["deployment_scope"] != "singleton"
+        or core_finality_adapter["implementation"]
+        != {"mode": "exact", "names": ["StreamCoreFinalityAdapter"]}
+        or tuple(core_finality_adapter["required_interfaces"])
+        != CORE_FINALITY_ADAPTER_REQUIRED_INTERFACES
+        or tuple(core_finality_adapter["required_markers"])
+        != CORE_FINALITY_ADAPTER_REQUIRED_MARKERS
+        or core_finality_adapter["approved_aliases"]
+        or core_finality_adapter["parameters"]
+        or core_finality_adapter["distinct_from"]
+    ):
+        raise GenesisProfileError(
+            "profile entry 37 must preserve the canonical Permanent "
+            "StreamCoreFinalityAdapter requirement"
+        )
 
     probe_entries = entries[len(FIXED_CONTRACT_KEYS) : -1]
     if any(entry["kind"] != "ggp_probe" for entry in probe_entries):
-        raise GenesisProfileError("profile.entries 36-57 must be per-parameter GGP probes")
+        raise GenesisProfileError("profile.entries 38-59 must be per-parameter GGP probes")
     if tuple(entry["parameters"][0] for entry in probe_entries) != GGP_PARAMETERS:
-        raise GenesisProfileError("profile.entries 36-57 do not match the canonical GGP inventory")
+        raise GenesisProfileError("profile.entries 38-59 do not match the canonical GGP inventory")
     if not entries or entries[-1]["kind"] != "gtp_probe":
         raise GenesisProfileError("the final profile entry must be the shared GTP cadence probe")
 

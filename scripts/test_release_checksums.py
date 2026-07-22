@@ -26,6 +26,14 @@ def write_text(path: Path, value: str) -> None:
 
 class ReleaseChecksumTests(unittest.TestCase):
     def test_default_covered_paths_include_evidence_artifacts(self) -> None:
+        self.assertIn(
+            Path("release-artifacts/stream-core-permanent-interface.json"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+        self.assertIn(
+            Path("release-artifacts/system-manifest-payload-vector.json"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
         self.assertIn(Path("release-artifacts/schema"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/evidence"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(
@@ -117,10 +125,15 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("release-artifacts/genesis-deployment-profile.json"),
             Path("scripts/check_genesis_deployment_profile.py"),
             Path("scripts/test_genesis_deployment_profile.py"),
+            Path("release-artifacts/system-manifest-payload-vector.json"),
+            Path("scripts/generate_system_manifest_payload_vector.py"),
+            Path("scripts/check_system_manifest_payload_vector.py"),
+            Path("scripts/test_system_manifest_payload_vector.py"),
             Path("scripts/check_release_mode.py"),
             Path("scripts/test_release_mode.py"),
             Path("docs/launch-conformance-matrix.md"),
             Path("docs/stream-long-term-architecture.md"),
+            Path("docs/adr/0004-admin-governance.md"),
         }
         self.assertTrue(genesis_profile_paths <= set(generator.DEFAULT_COVERED_PATHS))
         slither_baseline_paths = {

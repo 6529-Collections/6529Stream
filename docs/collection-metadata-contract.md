@@ -64,10 +64,10 @@ total coverage vocabulary, recovery lineage, platform-sustainability
 evidence). It is further amended by
 [ADR 0015](adr/0015-collection-identity-and-facade-readiness.md): the
 collection-identity token-JSON member set is pinned as a normative
-schema with this document as home ([CMC-COLLECTION-IDENTITY-JSON]),
-the facade identity binding record family joins the finality inputs
-for `EXTERNAL_FACADE` collections ([CMC-FACADE-BINDING]), and the
-acquisition packet gains the identity-mode item. OQ-X8 is resolved
+schema with this document as home ([CMC-COLLECTION-IDENTITY-JSON]). ADR 0016
+supersedes ADR 0015's launch facade machinery; the historical facade binding
+family [CMC-FACADE-BINDING] is not a launch input and the acquisition packet
+uses Core's sole ERC-721 identity. OQ-X8 is resolved
 (ADR 0015 decision W6) and no longer blocks this document's entry into
 Review, which follows the ordinary conditions of
 [`docs/spec-policy.md`](spec-policy.md).
@@ -372,7 +372,7 @@ The release checker for the deployment candidate must fail if the aggregate
 function count, selector catalog, bytecode report, or code-hash manifest for
 these metadata surfaces is missing or exceeds the accepted ceiling.
 
-## Core Boundary
+## Core Boundary [CMC-CORE]
 
 Core should keep the collection facts required to preserve token behavior:
 
@@ -401,6 +401,13 @@ struct CoreCollection {
     bool frozen;
 }
 ```
+
+The cross-contract numeric values are Permanent and exact:
+`CollectionSupplyMode.FIXED = 0`, `CAPPED_OPEN = 1`,
+`UNCAPPED_OPEN = 2`; `CollectionStatus.ACTIVE = 0`, `PAUSED = 1`, and
+`CLOSED = 2`. ABI decoders, events, governance state hashes, and the Numeric ID
+Catalog use those `uint8` values; every other value is rejected before state
+mutation.
 
 This is illustrative, not a required storage layout. The point is the boundary:
 
@@ -443,15 +450,26 @@ interface IStreamCoreCollectionView {
             uint256 collectionSerial,
             bool burned
         );
-    function viewCirSupply(uint256 collectionId) external view returns (uint256);
     function totalSupplyOfCollection(uint256 collectionId) external view returns (uint256);
     function collectionFreezeStatus(uint256 collectionId) external view returns (bool);
 }
 ```
 
+`collectionMintedEver(uint256)` is the production replacement for the legacy
+`viewCirSupply(uint256)` getter. `totalSupplyOfCollection(uint256)` is the live
+supply (minted-ever minus burned); retaining both old and new names for the same
+minted-ever fact would spend Core bytecode without adding information.
+`collectionMintedEver` increments only when an ERC-721 mint completes.
+`collectionNextSerial` returns the next monotonically allocated collection
+serial, starting at `1`; prepare consumes that serial before settlement, and an
+incident abort never rewinds it. An aborted prepared identity therefore creates
+a permanent serial gap without consuming max supply, minted-ever supply, or
+live supply. This separation prevents a replacement manager from reusing an
+identifier that durable satellite or event evidence may already reference.
+
 The metadata contract should not depend on private Core mappings.
 
-### Core Collection Management Interface
+### Core Collection Management Interface [CMC-MANAGEMENT]
 
 Collection creation belongs in Core only for authoritative supply/status facts.
 Display metadata belongs in `StreamCollectionMetadata`.
@@ -480,44 +498,233 @@ Rules:
 1. `createCollection` allocates a collection ID, initializes supply facts,
    emits `StreamCollectionCreated`, and does not write display strings, scripts,
    randomizer config, royalty config, or sale config.
-2. `hasMaxSupply = false` is allowed only for `UNCAPPED_OPEN`.
-3. `maxSupply` cannot be lowered below `mintedEver - burned`.
-4. Fixed collections cannot increase max supply after activation unless the
-   collection was explicitly configured as capped-open.
+2. `FIXED` and `CAPPED_OPEN` require `hasMaxSupply == true` and a nonzero
+   `maxSupply`; `UNCAPPED_OPEN` requires `hasMaxSupply == false` and
+   `maxSupply == 0`. No other tuple is valid.
+3. `maxSupply` can never be set below `collectionMintedEver`. Burns do not
+   restore issuance capacity: the cap is a historical issuance promise, not a
+   concurrent-live-token ceiling.
+4. A `FIXED` collection's max supply is immutable after creation.
+   `setCollectionMaxSupply` accepts only `CAPPED_OPEN`, only before `CLOSED`,
+   and may raise or lower its cap subject to rule 3. `UNCAPPED_OPEN` has no
+   max-supply setter path.
 5. V1 status transitions are `ACTIVE <-> PAUSED`, `ACTIVE -> CLOSED`, and
    `PAUSED -> CLOSED`. `CLOSED` is terminal and cannot be reopened. Ongoing
    collections should use `PAUSED` for temporary pauses; a reopenable state
    such as `SUSPENDED` is excluded from protocol v1 and, because Core owns
    collection status, would require a successor Core line.
-6. Metadata, revenue, mint, and entropy satellites listen to collection events
+6. `initialStatus` is `ACTIVE` or `PAUSED`; creation directly into `CLOSED` is
+   rejected so the terminal transition always receives its dedicated vetoable
+   action and event.
+7. Metadata, revenue, mint, and entropy satellites listen to collection events
    but do not create collection identity.
 
-Recommended events:
+Production-exact events:
 
 ```solidity
 event StreamCollectionCreated(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
+    bytes32 indexed actionId,
     uint8 supplyMode,
     bool hasMaxSupply,
     uint256 maxSupply,
-    uint8 initialStatus,
-    uint16 schemaVersion
+    uint8 initialStatus
 );
 
 event StreamCollectionStatusUpdated(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
+    bytes32 indexed actionId,
     uint8 oldStatus,
-    uint8 newStatus,
-    uint16 schemaVersion
+    uint8 newStatus
 );
 
 event StreamCollectionMaxSupplyUpdated(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
+    bytes32 indexed actionId,
     uint256 oldMaxSupply,
-    uint256 newMaxSupply,
-    uint16 schemaVersion
+    uint256 newMaxSupply
 );
 ```
+
+The production selectors are `0xd960e9e5` for
+`createCollection(uint8,bool,uint256,uint8)`, `0x68abd161` for
+`setCollectionStatus(uint256,uint8)`, and `0x9700e1db` for
+`setCollectionMaxSupply(uint256,uint256)`. The production event topics are:
+
+| Event signature | `topic0` |
+| --- | --- |
+| `StreamCollectionCreated(uint16,uint256,bytes32,uint8,bool,uint256,uint8)` | `0x7663fca5307dcd0534d394725f87820d7ca646288b4e2708308434c760c9da75` |
+| `StreamCollectionStatusUpdated(uint16,uint256,bytes32,uint8,uint8)` | `0xf1dffa5a477dbda4f3d61e1cafcca82cdfd00d5f287353249a9cf308767bf934` |
+| `StreamCollectionMaxSupplyUpdated(uint16,uint256,bytes32,uint256,uint256)` | `0xa49f2365effe8afdc532a2b061f0cadf514e33c5b47022cfb2fd4d47b14583df` |
+
+Each event uses schema version `1`; `collectionId` and `actionId` are indexed.
+These are mandatory Core events, not suggestions. The three writes accept only
+Core's immutable governance executor during a nonzero executing action and join
+the host event to that action by `actionId`. Creation and supply expansion use
+the normal delayed class; `ACTIVE -> PAUSED` and a nonterminal supply reduction
+are tightening actions; `PAUSED -> ACTIVE` and a permitted supply increase are
+delayed loosening actions; and any transition to terminal `CLOSED` uses
+`TERMINAL_FREEZE`, including the independent-veto floor. Core verifies the
+direction-appropriate class and the action's exact collection/config old/new
+state hashes before writing. Direct admin, owner, manager, artist, and sale-
+adapter calls are not part of the target ABI.
+
+The target-specific governance commitments are production-exact. All three
+writers use the same collection scope and complete configuration state, so a
+scheduled action cannot execute against a different next ID or intervening
+configuration:
+
+```solidity
+bytes32 constant STREAM_COLLECTION_CONFIG_STATE_V1 =
+    0x854c83f82b7677e58c61a2482a7a430a8318d765d99a95d3fbce5c84be6cc2b5;
+    // keccak256("6529STREAM_COLLECTION_CONFIG_STATE_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_SUBJECT_COLLECTION_V1,
+    uint256(block.chainid),
+    address(core),
+    uint256(collectionId)
+));
+
+bytes32 configStateHash = keccak256(abi.encode(
+    STREAM_COLLECTION_CONFIG_STATE_V1,
+    scopeHash,
+    bool(exists),
+    uint8(supplyMode),
+    uint8(status),
+    bool(hasMaxSupply),
+    uint256(maxSupply)
+));
+```
+
+For `createCollection`, `collectionId` is exactly
+`lastAllocatedCollectionId() + 1`, `oldValueHash` is the absent state
+`configStateHash(scopeHash,false,0,0,false,0)`, and `newValueHash` is the exact
+requested tuple after normalization checks; any intervening creation changes
+the expected scope and causes execution to revert. For either setter,
+`oldValueHash` is the full current configuration and `newValueHash` changes
+only the named field. Core requires this call's V2 `GovernanceCall` scope and
+old/new hashes to match, along with a nonzero executing action ID. Creation uses
+`DELAYED_LOOSENING` (`1`); a cap reduction or `ACTIVE -> PAUSED` uses
+`IMMEDIATE_TIGHTENING` (`0`); a cap increase or `PAUSED -> ACTIVE` uses
+`DELAYED_LOOSENING` (`1`); and either allowed transition to `CLOSED` uses
+`TERMINAL_FREEZE` (`2`) with its 72-hour veto floor. Because
+`setCollectionStatus` is intentionally polymorphic across three action classes,
+its selector is not registered in the executor's selector-wide freeze table:
+doing so would incorrectly force pause and resume through class `2`. Core's
+target-side exact old/new status and class check is the close backstop; golden
+tests prove a close scheduled under class `0` or `1` cannot execute, while a
+class-`2` close receives the executor's ordinary terminal veto mechanics. A no-op,
+unknown collection, invalid enum/tuple, wrong class, wrong caller, zero action
+ID, or any scope/state mismatch reverts before mutation or event emission.
+
+### Core Collection Freeze Interface [CMC-FREEZE]
+
+Core exposes one terminal collection-state bit so satellites and the artwork
+finality registry can enforce the same irreversible boundary without moving a
+metadata manifest or collection configuration back into Core:
+
+```solidity
+function freezeCollection(uint256 collectionId) external;
+function collectionFreezeStatus(uint256 collectionId)
+    external
+    view
+    returns (bool);
+
+event CollectionFrozen(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed actionId
+);
+```
+
+The ABI is production-exact: `freezeCollection(uint256)` is `0xbcc405d0` and
+`collectionFreezeStatus(uint256)` is `0x2ed330f7`. The event topic is
+`0x7b4b56479ec391ac57aaba4d2db17a75f598510fdc0e9472d03e0481d8e64328`
+for `CollectionFrozen(uint16,uint256,bytes32)`. Its schema version is `1`.
+The event joins the terminal Core write to its canonical governance record by
+`actionId`; it does not duplicate that record's `reasonHash` or any finality
+manifest hash.
+
+The freeze call commits its collection scope and terminal state exactly. ADR
+0004 exposes these target-specific hashes from the current
+`GovernanceCall` entry while that call executes:
+
+```solidity
+bytes32 constant STREAM_COLLECTION_FROZEN_STATE_V1 =
+    0xa54d2564d797e7eec4b1cd68d067d7c297bfae640f401ff3b8fde47441079692;
+    // keccak256("6529STREAM_COLLECTION_FROZEN_STATE_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_SUBJECT_COLLECTION_V1,
+    uint256(block.chainid),
+    address(core),
+    uint256(collectionId)
+));
+
+bytes32 oldValueHash = keccak256(abi.encode(
+    STREAM_COLLECTION_FROZEN_STATE_V1,
+    scopeHash,
+    false
+));
+
+bytes32 newValueHash = keccak256(abi.encode(
+    STREAM_COLLECTION_FROZEN_STATE_V1,
+    scopeHash,
+    true
+));
+```
+
+Freeze rules:
+
+1. `freezeCollection` is one-way. Core requires an existing collection, status
+   exactly `CLOSED`, `collectionBurnsBlocked(collectionId) == true`, and an
+   unset collection-freeze activation height.
+2. Only Core's immutable ADR 0004 governance executor may call the writer.
+   Core reads `currentAction()` from that executor and requires `executing`, a
+   nonzero `actionId`, action class `TERMINAL_FREEZE` (numeric ID `2`), and
+   exact equality with the `scopeHash`, `oldValueHash`, and `newValueHash`
+   above. It does not trust caller identity alone.
+3. Deployment registers `(core, freezeCollection.selector)` through
+   `registerFreezeSelector`, so the executor applies the 72-hour terminal veto
+   floor; Core independently enforces the terminal action class at execution.
+4. Core stores one private `uint64` activation-height slot per collection and
+   writes `uint64(block.number)` exactly once. `collectionFreezeStatus`
+   derives its result as `activationHeight != 0`; Core stores no duplicate
+   boolean and exposes no activation-height getter. The event's block number
+   is the public activation-height record.
+5. On success Core emits `CollectionFrozen(1, collectionId, actionId)`. An
+   unknown collection, non-`CLOSED` status, missing burn block, repeated call,
+   wrong caller, wrong action class, zero action ID, or any hash mismatch
+   reverts without changing state or emitting the event.
+6. Core hashes no finality manifest and accepts no manifest calldata in this
+   entrypoint. The richer component and manifest commitments remain in
+   `StreamArtworkFinalityRegistry`; this Core bit is only the terminal fact
+   consumed by that registry and by collection-scoped mutation guards.
+7. Collection-scope finality executes one atomic ordered governance batch.
+   Normally all promised satellite snapshots and locks execute first,
+   `blockCollectionBurns(collectionId)` next, `freezeCollection(collectionId)`
+   after it, and `finalizeCollectionArtwork(...)` last. Each writer verifies
+   its own `GovernanceCall` transition hashes; the governance `callsHash` binds
+   all entries, their exact order, and the finality record. If burns were
+   validly blocked earlier, the later finality batch omits the redundant burn
+   call but still performs the freeze before finality. The finality registry
+   requires both Core booleans to be true, and any later call reverting rolls
+   the entire batch back.
+8. Once true, every render-affecting collection mutation in protocol v1 must
+   reject the collection, with no token-level bypass. Core rejects its own
+   remaining mutable collection configuration paths; metadata, renderer,
+   entropy, revenue, royalty, sale, and transfer satellites independently read
+   this canonical Core fact where their collection-scoped freeze rules apply.
+   Append-only preservation exceptions remain exactly those permitted by the
+   metadata lock model and cannot alter artwork, economics, ownership, or Core
+   state.
+9. `CollectionFrozen` is not itself the cross-module finality record. Finality
+   exists only after the final ordered call succeeds and the registry records
+   the exact component set and manifest commitments.
 
 ### Core Burn Interface
 
@@ -545,11 +752,56 @@ function collectionBurnsBlockedAtBlock(uint256 collectionId)
     returns (uint64);
 
 event CollectionBurnsBlocked(
+    uint16 schemaVersion,
     uint256 indexed collectionId,
-    bytes32 indexed reasonHash,
-    uint16 schemaVersion
+    bytes32 indexed actionId
 );
 ```
+
+The three selectors are production-exact: `blockCollectionBurns(uint256)` is
+`0xfcfc7b26`, `collectionBurnsBlocked(uint256)` is `0x5923b379`, and
+`collectionBurnsBlockedAtBlock(uint256)` is `0x74a5ded9`. The event topic is
+`0x697a1b030ec8eb99502e034c7de5a260637923f3f9357d9e34f626e0cdb0745d`
+for `CollectionBurnsBlocked(uint16,uint256,bytes32)`. Its schema version is
+`1`. `actionId`, not a second copy of `reasonHash`, binds the governed host
+event to the canonical governance record per [LCM-EVENTS]; the governance
+record already stores and emits `reasonHash`, and the event log's block number
+is the same activation height Core stores.
+
+The staged action commits the collection scope and state transition exactly:
+
+```solidity
+bytes32 constant STREAM_COLLECTION_BURNS_BLOCKED_STATE_V1 =
+    0x0a834b49bdbe94b7d08a85a25431e3405b397e5f84bf90a90107edb2a58013ec;
+    // keccak256("6529STREAM_COLLECTION_BURNS_BLOCKED_STATE_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_SUBJECT_COLLECTION_V1,
+    uint256(block.chainid),
+    address(core),
+    uint256(collectionId)
+));
+
+bytes32 oldValueHash = keccak256(abi.encode(
+    STREAM_COLLECTION_BURNS_BLOCKED_STATE_V1,
+    scopeHash,
+    false
+));
+
+bytes32 newValueHash = keccak256(abi.encode(
+    STREAM_COLLECTION_BURNS_BLOCKED_STATE_V1,
+    scopeHash,
+    true
+));
+```
+
+`STREAM_SUBJECT_COLLECTION_V1` is the collection-subject domain owned by
+[CMC-SUBJECT-ID]. The execution block is deliberately absent from
+`newValueHash`: it cannot be known when the action is scheduled. The governance
+action's `callsHash` binds the complete ordered call set, including an atomic
+freeze and finality call when the action is a batch. During execution,
+`currentAction()` exposes this burn call's own three hashes from its
+`GovernanceCall` entry; later calls expose their own target-specific hashes.
 
 Burn rules [CMC-BURN]:
 
@@ -568,12 +820,18 @@ Burn rules [CMC-BURN]:
    state-export leaf. The token-data ownership and retention home is
    [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
    [MPA-CORE-ABI]; this rule is its burn-boundary application.
-5. A frozen collection is non-burnable unless the collection's pre-freeze
-   policy explicitly preserves a burn path and states the archival
-   consequences.
+5. A Core-frozen collection is non-burnable: [CMC-FREEZE] requires the
+   one-way burn block before the Core freeze can execute. Collections that
+   intentionally preserve post-finality burns use a narrower finality scope
+   and never enter this Core collection-freeze state.
 6. `blockCollectionBurns` is one-way and irreversible, requires Core status
-   `CLOSED`, and executes only through ADR 0004 staged governance. After it
-   executes, `burn` reverts for every token of the collection, so
+   `CLOSED`, and executes only through the immutable ADR 0004 governance
+   executor under action class `TERMINAL_FREEZE` (numeric ID `2`). The
+   deployment must register `(core, blockCollectionBurns.selector)` through
+   `registerFreezeSelector`, so the executor applies its 72-hour veto floor;
+   Core must independently enforce the same class at the target. After it
+   executes, every Core `burn` ownership-to-zero path reverts for every token of the
+   collection, so
    `mintedEver`, `burned`, and `nextSerial` are immutable thereafter.
    Core stores the executing block height and exposes it through the
    Permanent read `collectionBurnsBlockedAtBlock(collectionId)`:
@@ -592,19 +850,51 @@ Burn rules [CMC-BURN]:
    `CLOSED`, no mint can postdate the recorded height). The height
    read joins the Core hook table and planning budget in
    [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
-   alongside the boolean read.
-7. Collection-scope artwork finality requires `CLOSED` and
-   `collectionBurnsBlocked(collectionId) == true`, verified by the finality
-   registry in the same staged action that records finality. Burns between
-   `CLOSED` and the burn block are allowed; the Core supply facts captured
-   in the finality facts hash are read at finality execution time, after
-   the burn block, so late burns are bound, not raced. A collection that
-   needs post-finality burns must never set the burn block and must use
-   token, release, season, or view scoped finality instead of
-   collection-scope finality. This is the Core-side invariant behind
-   finality requirement 7 in
+   alongside the boolean read. The boolean getter derives its answer as
+   `collectionBurnsBlockedAtBlock(collectionId) != 0`; Core stores no duplicate
+   boolean mapping.
+7. Collection-scope artwork finality requires `CLOSED`,
+   `collectionBurnsBlocked(collectionId) == true`, and
+   `collectionFreezeStatus(collectionId) == true`, verified by the finality
+   registry in the same staged action that records finality. In the ordinary
+   path the burn-block call executes before the Core freeze, and the Core
+   freeze executes before finality; when a standalone burn block already
+   exists the later batch omits the already-complete call. Burns between
+   `CLOSED` and the burn block are allowed; the
+   Core supply facts captured in the finality facts hash are read at finality
+   execution time, after the burn block, so late burns are bound, not raced. A
+   collection that needs post-finality burns must never set the burn block or
+   Core collection freeze and must use token, release, season, or view scoped
+   finality instead of collection-scope finality. This is the Core-side
+   invariant behind finality requirement 7 in
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md).
-8. Burn emits `StreamTokenBurned` with collection ID and serial.
+8. At execution Core requires `msg.sender` to be its immutable governance
+   executor and reads that executor's in-flight context. `currentAction()` keeps
+   its existing selector and first three returns, then appends the three hashes
+   needed by governed targets:
+
+   ```solidity
+   function currentAction()
+       external
+       view
+       returns (
+           bool executing,
+           bytes32 actionId,
+           uint8 actionClass,
+           bytes32 scopeHash,
+           bytes32 oldValueHash,
+           bytes32 newValueHash
+       );
+   ```
+
+   Core requires `executing`, a nonzero `actionId`, action class `2`, and exact
+   equality with the three target-specific hashes above. Appending fixed-width returns lets
+   older three-word decoders ignore trailing returndata and avoids making Core
+   decode the governance action's dynamic record. Core also requires the
+   collection to exist, its status to be exactly `CLOSED`, and the stored
+   activation height to be zero; it then writes `uint64(block.number)` exactly
+   once and emits `CollectionBurnsBlocked(1, collectionId, actionId)`.
+9. Burn emits `StreamTokenBurned` with collection ID and serial.
 
 ```solidity
 event StreamTokenBurned(
@@ -614,6 +904,11 @@ event StreamTokenBurned(
     uint16 schemaVersion
 );
 ```
+
+This is the production-exact signature
+`StreamTokenBurned(uint256,uint256,uint256,uint16)` with topic
+`0x134ea0c85775a433c3b06f6e426d6da62c5397a6932ad57006e98e96c72a21f0`;
+`tokenId` and `collectionId` are indexed and `schemaVersion` is `1`.
 
 ## Open-Ended Collections
 
@@ -973,8 +1268,9 @@ or renderer overrides. Token-level display metadata lives in
 
 Mint-time token data is the one exception, and its home is the mint
 spec [CMC-MINT-ABI]: `tokenData` is opaque `bytes` end to end — V1 Core
-stores the renderer-visible `tokenData` bytes and their `tokenDataHash`
-commitment, written by the Core mint path
+stores the renderer-visible `tokenData` bytes and verifies the supplied
+`tokenDataHash` commitment in the Core mint path, but stores no second
+per-token hash slot
 ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
 [MPA-CORE-ABI], ADR 0010 decision D3; typing drift repaired by ADR 0012
 decision T7). If a collection treats token data as UTF-8, JSON,
@@ -3049,18 +3345,9 @@ schema-identified, hash-committed packet a registrar verifies at closing:
    ADR 0013 decision U8);
 9. the legal instrument hash recorded (or to be recorded) in
    `ACCESSION`;
-10. the ownership-provenance chain, identity-mode-aware (ADR 0015
-    decision W4): the token's complete ownership history from mint to
-    present — `from`, `to`, block number, and transaction hash per
-    hop — built from the mode's authoritative carrier: the ERC-721
-    `Transfer` history for `CORE_NATIVE` tokens, and the Core
-    `ControlledOwnershipChanged` history for `EXTERNAL_FACADE` tokens
-    ([PV1-RECON] item 13 in
-    [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)),
-    whose facade ERC-721 `Transfer` stream is reported beside the
-    chain as a convenience-mirror cross-check — never the carrier —
-    with any divergence between the two streams flagged in a typed
-    packet field; the chain is cross-referenced to the covering
+10. the ownership-provenance chain: the token's complete Core ERC-721
+    `Transfer` history from mint to present — `from`, `to`, block number, and
+    transaction hash per hop — cross-referenced to the covering
     event-history snapshot hash ([LTA-EVENT-HISTORY] in
     [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md))
     and to any `ACCESSION`/`DEACCESSION` `TITLE_BINDING` records bound
@@ -3111,16 +3398,10 @@ schema-identified, hash-committed packet a registrar verifies at closing:
     zero-signer museum-mode drill report hash — the
     platform-dependence facts a committee must underwrite, in the
     packet instead of scattered release artifacts; and
-19. the collection identity mode (ADR 0015 decisions W1 and W4): the
-    declared or defaulted (`CORE_NATIVE`) identity mode from the Core
-    read, and, for `EXTERNAL_FACADE` collections, the facade (transfer
-    controller) address with the recorded `IDENTITY_FACADE_BINDING`
-    record reference [CMC-FACADE-BINDING] — or an explicit
-    not-yet-recorded status where the binding record does not yet
-    exist, a state possible only before the finality hook of
-    [CMC-FINALITY-INPUTS] rule 14 enforces it — so the address and
-    token numbering under which the work is listed, traded, and cited
-    is a typed packet field rather than marketplace inference.
+19. the collection's sole ERC-721 identity under ADR 0016: Core address,
+    collection ID, global token ID/catalog number, and collection serial, so
+    the address and numbering under which the work is listed, traded, and
+    cited are typed packet fields rather than marketplace inference.
 
 Dossier tooling [CMC-OBJECT-DOSSIER] emits the packet, a registrar can
 regenerate and verify it against chain state with no operator involvement,
@@ -3539,7 +3820,6 @@ and identity alike — therefore ships pinned (ADR 0011 decision R11):
    | `STREAM_LIDO_PROFILE_V1` | the tombstone-to-LIDO crosswalk of [CMC-TOMBSTONE] rule 4 (ADR 0013 decision U8) |
    | `STREAM_BAGIT_PROFILE_V1` | the packaging profile of [CMC-PACKAGING] (ADR 0012 decision T8) |
    | `STREAM_COLLECTION_IDENTITY_V1` | the collection-identity token-JSON member set of [CMC-COLLECTION-IDENTITY-JSON]: `id`, `name`, `artist`, `serial`, `catalog_number` (ADR 0015 decision W1) |
-   | `STREAM_FACADE_IDENTITY_BINDING_V1` | the facade identity binding payload of [CMC-FACADE-BINDING]: chain ID, Core address, collection ID, facade address, local-ID rule identifier (ADR 0015 decision W4) |
 
 3. `STREAM_CONDITION_REPORT_V1` anchors every condition report to
    reproducible protocol state, so outbound and return condition records
@@ -4954,10 +5234,8 @@ The pinned member set, carried in every default token JSON under
 Member rules:
 
 1. All five members — `id`, `name`, `artist`, `serial`, and
-   `catalog_number` — are required in every default token JSON, for
-   every collection, in both identity modes (`CORE_NATIVE` and
-   `EXTERNAL_FACADE`); no member's presence, name, or value depends on
-   identity mode (ADR 0015 decision W4). Numeric values are decimal
+   `catalog_number` — are required in every default token JSON for every
+   collection. Numeric values are decimal
    strings per the encoding rules of [MRR-STREAM-PROPS] in
    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md).
 2. `id` is the Core collection ID and `serial` is the collection-local
@@ -4967,12 +5245,8 @@ Member rules:
    [MPA-CORE-ABI]); a rendered value that does not recompute from that
    read is nonconformant.
 3. `catalog_number` is the global catalog number: the global sequential
-   token ID (ADR 0009 decision 1), equal to the ERC-721 token ID at
-   Core. For `EXTERNAL_FACADE` collections the facade-local ERC-721
-   token ID is the collection-local serial and the catalog number
-   remains readable through the facade ([FCP-IDENTITY] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md));
-   the member set itself is identical in both modes.
+   token ID (ADR 0009 decision 1), equal to the launch line's sole ERC-721
+   token ID at Core (ADR 0016).
 4. `name` is the collection name from this contract's typed
    `CollectionIdentity` metadata for the collection.
 5. `artist` is the human-readable artist attribution line, derived from
@@ -5410,10 +5684,8 @@ address, interface ID, code hash, module version, manifest hash, and one
 8. the token content root, leaf count, and content-root schema for the
    finality scope [CMC-CONTENT-ROOT];
 9. post-finality exception policy, if any;
-10. for `EXTERNAL_FACADE` collections, the facade identity binding
-    record hash and its record-chain lane head [CMC-FACADE-BINDING]
-    (ADR 0015 decision W4); for `CORE_NATIVE` collections this
-    component is absent by construction.
+10. no facade identity component; ADR 0016 makes Core's address and stored
+    identity the sole launch ERC-721 identity.
 
 The `dataHash` must be reproducible from onchain reads and hash-committed
 manifests. It is the value the finality registry compares against the submitted
@@ -5547,9 +5819,12 @@ Finality rules [CMC-FINALITY-INPUTS]:
    record's interview entry or recorded alongside an intent waiver.
    Mere absence blocks finality; only the artist's stated waiver
    stands in for the interview.
-7. Collection-scope finality additionally requires Core status `CLOSED`
-   plus the one-way burn block, verified through
-   `collectionBurnsBlocked(collectionId)` [CMC-BURN].
+7. Collection-scope finality additionally requires Core status `CLOSED`, the
+   one-way burn block verified through
+   `collectionBurnsBlocked(collectionId)` [CMC-BURN], and the one-way Core
+   collection freeze verified through `collectionFreezeStatus(collectionId)`
+   [CMC-FREEZE]. The ordinary atomic action orders the burn block before the
+   Core freeze and the Core freeze before the finality-registry call.
 8. Every attestation and signature bundle referenced by the finality
    manifest must satisfy the bundle-preservation rule of
    [CMC-ATTESTATIONS] rule 10 before finality executes.
@@ -5617,16 +5892,15 @@ Finality rules [CMC-FINALITY-INPUTS]:
     operator can ignore for fifty years is not a record, so absence
     blocks finality and only an explicit, dated, attributed absence
     statement stands in for the description.
-14. Facade identity binding (ADR 0015 decision W4): finality at any
-    scope over an `EXTERNAL_FACADE` collection requires the recorded
-    `IDENTITY_FACADE_BINDING` record of [CMC-FACADE-BINDING], and
-    finality execution verifies that the record's facade address equals
-    the collection's Core-registered transfer controller and that the
-    record hash is committed by the metadata `dataHash` (component
-    item 10 above). A `CORE_NATIVE` collection carries no such record
-    and this rule does not apply to it.
+14. Launch finality carries no facade identity binding. Core's address and
+    stored collection/token identity are the sole ERC-721 identity (ADR 0016).
 
-### Facade Identity Binding [CMC-FACADE-BINDING]
+### Superseded Facade Identity Binding [CMC-FACADE-BINDING]
+
+ADR 0016 removes this record family from every launch schema, writer,
+finality input, manifest, and gate. The remainder of this section is retained
+only as historical successor-line research and must not be implemented by the
+launch metadata stack.
 
 For an `EXTERNAL_FACADE` collection the two-address identity — the
 facade address and its local-ID rule — is part of the work's permanent
@@ -5900,14 +6174,42 @@ Core integration tests:
 3. Collection existence and token collection IDs remain Core-owned.
 4. `totalSupply()` remains correct across mint and burn; Core exposes no
    `tokenOfOwnerByIndex`/`tokenByIndex` (ADR 0012 decision T10).
-5. `blockCollectionBurns` requires `CLOSED` and staged governance, is
-   one-way, and makes `burn` revert for the collection [CMC-BURN].
-6. Collection-scope finality is rejected without the burn block; burns
-   between `CLOSED` and the burn block are captured in finality facts.
-7. `collectionBurnsBlockedAtBlock` returns zero before the burn block,
-   equals the executing block height afterward, is set exactly once,
-   and satisfies the boolean-equivalence invariant of [CMC-BURN]
-   rule 6.
+5. Golden ABI coverage pins the three burn-block selectors, the exact
+   `CollectionBurnsBlocked(uint16,uint256,bytes32)` topic and indexed fields,
+   schema version `1`, and its `actionId` join to the executing governance
+   record; Core emits no duplicate `reasonHash` or block-height field.
+6. `blockCollectionBurns` rejects a direct caller, a governance executor with
+   no executing action, zero action ID, every non-`TERMINAL_FREEZE` class, and
+   mismatched collection scope, old-value, or new-value hashes. Deployment
+   registers the selector as an irreversible freeze; guardian absence, veto,
+   cancellation, expiry, and replay cases exercise the 72-hour veto floor.
+7. Unknown, non-`CLOSED`, and already-blocked collections reject without state
+   or event changes. A successful action writes the exact execution block once,
+   leaves another collection untouched, and satisfies
+   `collectionBurnsBlocked(id) ==
+   (collectionBurnsBlockedAtBlock(id) != 0)`.
+8. Before activation an otherwise-valid burn succeeds; afterward every Core
+   burn ownership-to-zero path for that collection rejects. An atomic
+   collection-finality action orders the
+   burn-block call before the Core freeze and the Core freeze before the
+   registry call; the registry observes both new Core states in the same
+   transaction.
+9. Golden ABI coverage pins `freezeCollection(uint256)` and
+   `collectionFreezeStatus(uint256)`, the exact
+   `CollectionFrozen(uint16,uint256,bytes32)` topic/indexed fields, schema
+   version `1`, and the event's verified `actionId` join. The activation height
+   is stored once, the boolean is derived from it, and no height getter or
+   duplicate boolean storage exists.
+10. `freezeCollection` rejects every direct, wrong-class, zero-action-ID, and
+    scope/value-hash-mismatched call, plus unknown, non-`CLOSED`, burn-enabled,
+    and already-frozen collections, without a state or event change. The
+    selector is registered for the 72-hour terminal-freeze veto floor.
+11. A successful finality batch exposes the burn writer's own per-call hashes,
+    then the freeze writer's distinct per-call hashes, and commits their order
+    through `callsHash`; reverting finality rolls both Core writes back. If a
+    valid standalone burn block predates finality, the later batch omits that
+    already-complete call and still freezes Core immediately before registry
+    finality.
 
 Metadata write tests:
 

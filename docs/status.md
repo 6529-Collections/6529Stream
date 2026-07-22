@@ -37,7 +37,14 @@ The current Gate A smoke baseline proves:
   threshold and fails the normative 2,000-byte production deployment minimum.
   The accepted CON-012 development exception cannot survive the deployment
   gate; [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
-  blocks production release until real headroom is recovered.
+  blocks production release until real headroom is recovered. Historical
+  artifacts show the extraction work did reduce Core to 21,792 bytes; the later
+  manager/prepared-mint slice added roughly 2,330 bytes before the legacy mint
+  path was retired. The current 24,152-byte runtime is therefore a duplicated,
+  incomplete transition rather than the promised post-extraction target. The
+  cutover now requires a single permanent target ABI and zero-Core-delta or
+  measured net-negative slices until the complete hook build is at or below
+  22,576 bytes.
   The stricter bytecode-spend ceiling remains the reviewed 22,184-byte approved
   baseline with 2,392 bytes of baseline margin.
   The architecture policy in

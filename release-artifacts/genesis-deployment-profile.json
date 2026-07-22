@@ -533,6 +533,62 @@
     },
     {
       "id": 36,
+      "key": "STREAM_SYSTEM_MANIFEST",
+      "kind": "contract",
+      "requirement": "StreamSystemManifest",
+      "deployment_scope": "singleton",
+      "multiplicity": { "minimum": 1, "maximum": 1 },
+      "implementation": { "mode": "exact", "names": ["StreamSystemManifest"] },
+      "required_interfaces": ["IERC165", "IStreamSystemManifest"],
+      "required_markers": [
+        "PERMANENT_CLASS",
+        "MODULE_TYPE_0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6",
+        "INTERFACE_ID_0x37660ede",
+        "IMMUTABLE_STREAM_CORE_BINDING",
+        "IMMUTABLE_GOVERNANCE_EXECUTOR_BINDING",
+        "CORE_SYSTEM_MANIFEST_POINTER_TERMINAL_FROZEN",
+        "SYSTEM_MANIFEST_TAIL_PUBLISHER",
+        "APPEND_ONLY_SSTORE2_PAYLOAD_HISTORY",
+        "SUPPORTED_MANIFEST_TAIL_ACTION_CLASS_MASK_0x0f"
+      ],
+      "approved_aliases": [],
+      "normative_anchors": [
+        "docs/launch-conformance-matrix.md#LCM-GENESIS",
+        "docs/stream-long-term-architecture.md#LTA-MANIFEST",
+        "docs/adr/0004-admin-governance.md#GOV-MANIFEST-TAIL"
+      ],
+      "parameters": [],
+      "distinct_from": []
+    },
+    {
+      "id": 37,
+      "key": "STREAM_CORE_FINALITY_ADAPTER",
+      "kind": "contract",
+      "requirement": "StreamCoreFinalityAdapter",
+      "deployment_scope": "singleton",
+      "multiplicity": { "minimum": 1, "maximum": 1 },
+      "implementation": { "mode": "exact", "names": ["StreamCoreFinalityAdapter"] },
+      "required_interfaces": ["IERC165", "IStreamCoreFinalityAdapter"],
+      "required_markers": [
+        "PERMANENT_CLASS",
+        "MODULE_TYPE_0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4",
+        "INTERFACE_ID_0xebf35615",
+        "IMMUTABLE_STREAM_CORE_BINDING",
+        "IMMUTABLE_COLLECTION_METADATA_BINDING",
+        "READ_ONLY_CORE_FINALITY_AGGREGATE",
+        "CORE_NATIVE_ONLY_NO_FACADE_STATE"
+      ],
+      "approved_aliases": [],
+      "normative_anchors": [
+        "docs/launch-conformance-matrix.md#LCM-GENESIS",
+        "docs/stream-long-term-architecture.md#Artwork-Finality-Freeze",
+        "docs/adr/0016-core-native-only-erc721.md"
+      ],
+      "parameters": [],
+      "distinct_from": []
+    },
+    {
+      "id": 38,
       "key": "GGP_PROBE_ROYALTY_RESOLVER_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ROYALTY_RESOLVER_GAS_LIMIT",
@@ -547,7 +603,7 @@
       "distinct_from": []
     },
     {
-      "id": 37,
+      "id": 39,
       "key": "GGP_PROBE_ROYALTY_RETURN_GAS_BUFFER",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ROYALTY_RETURN_GAS_BUFFER",
@@ -562,7 +618,7 @@
       "distinct_from": []
     },
     {
-      "id": 38,
+      "id": 40,
       "key": "GGP_PROBE_ERC_1271_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ERC_1271_GAS_LIMIT",
@@ -577,7 +633,7 @@
       "distinct_from": []
     },
     {
-      "id": 39,
+      "id": 41,
       "key": "GGP_PROBE_ASSET_POLICY_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ASSET_POLICY_GAS_LIMIT",
@@ -592,7 +648,7 @@
       "distinct_from": []
     },
     {
-      "id": 40,
+      "id": 42,
       "key": "GGP_PROBE_WALLET_DEPOSIT_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for WALLET_DEPOSIT_GAS_LIMIT",
@@ -607,7 +663,7 @@
       "distinct_from": []
     },
     {
-      "id": 41,
+      "id": 43,
       "key": "GGP_PROBE_FLUSH_GAS_FLOOR",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for FLUSH_GAS_FLOOR",
@@ -622,7 +678,7 @@
       "distinct_from": []
     },
     {
-      "id": 42,
+      "id": 44,
       "key": "GGP_PROBE_MINT_GATE_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for MINT_GATE_GAS_LIMIT",
@@ -637,7 +693,7 @@
       "distinct_from": []
     },
     {
-      "id": 43,
+      "id": 45,
       "key": "GGP_PROBE_TICKET_ERC1271_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for TICKET_ERC1271_GAS_LIMIT",
@@ -652,7 +708,7 @@
       "distinct_from": []
     },
     {
-      "id": 44,
+      "id": 46,
       "key": "GGP_PROBE_ARTIST_AUTHORITY_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ARTIST_AUTHORITY_GAS_LIMIT",
@@ -667,7 +723,7 @@
       "distinct_from": []
     },
     {
-      "id": 45,
+      "id": 47,
       "key": "GGP_PROBE_SALE_ERC1271_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for SALE_ERC1271_GAS_LIMIT",
@@ -682,7 +738,7 @@
       "distinct_from": []
     },
     {
-      "id": 46,
+      "id": 48,
       "key": "GGP_PROBE_DELEGATE_REGISTRY_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for DELEGATE_REGISTRY_GAS_LIMIT",
@@ -697,7 +753,7 @@
       "distinct_from": []
     },
     {
-      "id": 47,
+      "id": 49,
       "key": "GGP_PROBE_SALE_ARTIST_AUTHORITY_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for SALE_ARTIST_AUTHORITY_GAS_LIMIT",
@@ -712,7 +768,7 @@
       "distinct_from": []
     },
     {
-      "id": 48,
+      "id": 50,
       "key": "GGP_PROBE_REVEAL_ATTEMPT_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for REVEAL_ATTEMPT_GAS_LIMIT",
@@ -727,7 +783,7 @@
       "distinct_from": []
     },
     {
-      "id": 49,
+      "id": 51,
       "key": "GGP_PROBE_SALE_NFT_DELIVERY_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for SALE_NFT_DELIVERY_GAS_LIMIT",
@@ -742,7 +798,7 @@
       "distinct_from": []
     },
     {
-      "id": 50,
+      "id": 52,
       "key": "GGP_PROBE_METADATA_ROUTER_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for METADATA_ROUTER_GAS_LIMIT",
@@ -757,7 +813,7 @@
       "distinct_from": []
     },
     {
-      "id": 51,
+      "id": 53,
       "key": "GGP_PROBE_ENTROPY_VIEW_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ENTROPY_VIEW_GAS_LIMIT",
@@ -772,7 +828,7 @@
       "distinct_from": []
     },
     {
-      "id": 52,
+      "id": 54,
       "key": "GGP_PROBE_ENTROPY_REGISTRATION_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ENTROPY_REGISTRATION_GAS_LIMIT",
@@ -787,7 +843,7 @@
       "distinct_from": []
     },
     {
-      "id": 53,
+      "id": 55,
       "key": "GGP_PROBE_ENTROPY_RESULT_PROBE_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ENTROPY_RESULT_PROBE_GAS_LIMIT",
@@ -802,7 +858,7 @@
       "distinct_from": []
     },
     {
-      "id": 54,
+      "id": 56,
       "key": "GGP_PROBE_VRF_CALLBACK_GAS_LIMIT",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for VRF_CALLBACK_GAS_LIMIT",
@@ -817,7 +873,7 @@
       "distinct_from": []
     },
     {
-      "id": 55,
+      "id": 57,
       "key": "GGP_PROBE_ARTIST_ERC1271_VERIFY_GAS",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for ARTIST_ERC1271_VERIFY_GAS",
@@ -832,7 +888,7 @@
       "distinct_from": []
     },
     {
-      "id": 56,
+      "id": 58,
       "key": "GGP_PROBE_METADATA_ERC1271_VERIFY_GAS",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for METADATA_ERC1271_VERIFY_GAS",
@@ -847,7 +903,7 @@
       "distinct_from": []
     },
     {
-      "id": 57,
+      "id": 59,
       "key": "GGP_PROBE_FINALITY_COMPONENT_READ_GAS",
       "kind": "ggp_probe",
       "requirement": "Permanent probe for FINALITY_COMPONENT_READ_GAS",
@@ -862,7 +918,7 @@
       "distinct_from": []
     },
     {
-      "id": 58,
+      "id": 60,
       "key": "SHARED_ENTROPY_CADENCE_PROBE",
       "kind": "gtp_probe",
       "requirement": "Shared entropy cadence probe",
