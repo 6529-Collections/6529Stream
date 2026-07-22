@@ -16,6 +16,12 @@ CHECKSUM_SCHEMA = "6529stream.release-checksums.v1"
 GENERATOR_VERSION = "1"
 
 DEFAULT_COVERED_PATHS = [
+    Path("requirements-tools.txt"),
+    Path("requirements-tools.lock"),
+    Path(".github/workflows/ci.yml"),
+    Path(".github/workflows/release-mode.yml"),
+    Path("scripts/check_python_toolchain.py"),
+    Path("scripts/test_python_toolchain.py"),
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/stream-core-permanent-interface.json"),
@@ -120,7 +126,6 @@ DEFAULT_COVERED_PATHS = [
     Path("test/fixtures/warning-dispositions"),
     Path("CHANGELOG.md"),
     Path("README.md"),
-    Path("requirements-tools.txt"),
     Path("slither.config.json"),
     Path("foundry.toml"),
     Path("ops/SLITHER_BASELINE.json"),

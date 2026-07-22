@@ -4,6 +4,12 @@
   "algorithm": "sha256",
   "source": {
     "covered_paths": [
+      "requirements-tools.txt",
+      "requirements-tools.lock",
+      ".github/workflows/ci.yml",
+      ".github/workflows/release-mode.yml",
+      "scripts/check_python_toolchain.py",
+      "scripts/test_python_toolchain.py",
       "release-artifacts/contracts.json",
       "release-artifacts/genesis-deployment-profile.json",
       "release-artifacts/dependencies",
@@ -103,7 +109,6 @@
       "test/fixtures/warning-dispositions",
       "CHANGELOG.md",
       "README.md",
-      "requirements-tools.txt",
       "slither.config.json",
       "foundry.toml",
       "ops/SLITHER_BASELINE.json",
@@ -161,7 +166,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:a2db7627444b28bd4dc3cb88078ea2e47c5eba411acfacb25cfc520cc4d5081e"
+    "sha256": "sha256:5d3ba37223bbbc5e68e76687e52e4c8adbb4e67211acb04634aa330ae7ddeecb"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -204,9 +209,19 @@
       "size_bytes": 2402
     },
     {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "sha256:20887d2ed5870ef1b46def9b743fa0e59661ea40effd16345a1c7c2acf6a8bcc",
+      "size_bytes": 50764
+    },
+    {
+      "path": ".github/workflows/release-mode.yml",
+      "sha256": "sha256:7d999710c97ceac3de3e004fcd3cec7eebf2d990df169120c11287a504853d98",
+      "size_bytes": 3491
+    },
+    {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:31261a397505bd13964e867f9d5315fc36aaf0fc6af651a2b7fc0ac3eeb1569f",
-      "size_bytes": 102185
+      "sha256": "sha256:9b7f79297a4281bcb8e4ea4ead7033660d06eec9c61e8fd8b5abe21cad1ab870",
+      "size_bytes": 102566
     },
     {
       "path": "README.md",
@@ -515,8 +530,8 @@
     },
     {
       "path": "docs/production-readiness-execution.md",
-      "sha256": "sha256:9b07db9e8618668c5d7957c1c82a428cfdc8bed384ff6f053dd7f6100b3073a3",
-      "size_bytes": 7176
+      "sha256": "sha256:d4a1bd5fdb95e1a0122addb6d197778229d88f78833912369e802eaf495eff8c",
+      "size_bytes": 7247
     },
     {
       "path": "docs/protocol-surface.md",
@@ -565,8 +580,8 @@
     },
     {
       "path": "docs/slither.md",
-      "sha256": "sha256:ca4feb6b0b26380e97c6484cd5a418b0e3b2a16efa22e3637587357540829e2e",
-      "size_bytes": 5219
+      "sha256": "sha256:b226247a1436c24864cfc0c69bc89e779c15b081fb941176305355e51910b9af",
+      "size_bytes": 5629
     },
     {
       "path": "docs/status.md",
@@ -585,8 +600,8 @@
     },
     {
       "path": "docs/tooling.md",
-      "sha256": "sha256:967bb9e5d51f4f57ab4ce06d04c8391636ebb6e643d01180ac2b401b36b70433",
-      "size_bytes": 76681
+      "sha256": "sha256:e5f1013b0f87132e7be93ed8e48e8e3dc17aa0071c5b21c1064b23101a69d6dc",
+      "size_bytes": 81127
     },
     {
       "path": "docs/warning-dispositions.md",
@@ -1125,7 +1140,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:461d3242126cc4c0c7db11bde8466de2daa246ae3958ffba190199ddd1fd6fc1",
+      "sha256": "sha256:2f2b6cb7b9ca0888e329ef409a2f2d001e9d872792f5e63872f38a3fadf3656b",
       "size_bytes": 150235
     },
     {
@@ -1190,7 +1205,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:9b0a371d7b55508f8eb2d141d6e3895f79373a5c379d90cfe713279c09a5da12",
+      "sha256": "sha256:73845796f4c449570bb266b9f71dc20a904753b5254b20c2a0c441d87f8c80ad",
       "size_bytes": 8998
     },
     {
@@ -1240,22 +1255,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:3ddd6225f64dab611e311fb17cb408929af5584763b13d98d070166b41cf1713",
+      "sha256": "sha256:e772ce57c9da76f06cd4fa96e1a06d170d2b54c54fc9268af6dc54a6b97aa488",
       "size_bytes": 134630
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:f0409f9e9a9c93caf9e07b7b16b3ba33c821f57f6573a1c9aa22b8f0bfc3966f",
-      "size_bytes": 103890
+      "sha256": "sha256:18193f3de6146335091810fa531c2f8163cf83cf1f5ea488e2ebbf3d276320b5",
+      "size_bytes": 104270
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:aa09eddbbb7f1ec277349fd8f91a0a8fd001cb6aa6657257b4d821ab6d2bb049",
-      "size_bytes": 100660
+      "sha256": "sha256:1cf23d26d10fdc9141c8d5a0d7bf001dabc07268a7ee659a879d9f0e0577ee8c",
+      "size_bytes": 101033
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:043620d8062f217179f0afe284fc77eadede982d09cf997f5b77b477f71acaf9",
+      "sha256": "sha256:995c604f7c737634b8bb82c66e16447dd073b0760e30b7f088725347b588c2cb",
       "size_bytes": 25459
     },
     {
@@ -1347,6 +1362,11 @@
       "path": "release-artifacts/signer-custody-readiness/signer-custody-readiness-template.json",
       "sha256": "sha256:f7e52cacf645530e30c0d456d78d2e709c6b393ce01c297d8d7e7be7d13f30e3",
       "size_bytes": 3470
+    },
+    {
+      "path": "requirements-tools.lock",
+      "sha256": "sha256:db70a2dc42f6f929d3df6a309716234d0aa9f8b7b390251f477d89a468b5f43e",
+      "size_bytes": 138391
     },
     {
       "path": "requirements-tools.txt",
@@ -1452,6 +1472,11 @@
       "path": "scripts/check_public_beta_verified_addresses.py",
       "sha256": "sha256:2c257a4922374e67d1e42d37d95fbe62fa784c0ea6f7316891eec7fa64f532bd",
       "size_bytes": 4785
+    },
+    {
+      "path": "scripts/check_python_toolchain.py",
+      "sha256": "sha256:880cef79da6e2a258fec023762b6b5370dd0eb79b413b09ed86a850804c852dc",
+      "size_bytes": 27533
     },
     {
       "path": "scripts/check_react_next_reference.py",
@@ -1607,6 +1632,11 @@
       "path": "scripts/test_public_beta_verified_addresses.py",
       "sha256": "sha256:e43c3cd989d241751b620f08577cf0f8c7be9a955362b4de2ff13bb700731b4d",
       "size_bytes": 12720
+    },
+    {
+      "path": "scripts/test_python_toolchain.py",
+      "sha256": "sha256:0486ac38971e7d9d377fd2507e626205000893398c2140097da1bfeb9ad65c21",
+      "size_bytes": 21662
     },
     {
       "path": "scripts/test_react_next_reference.py",

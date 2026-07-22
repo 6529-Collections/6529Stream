@@ -495,7 +495,7 @@
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:ca4feb6b0b26380e97c6484cd5a418b0e3b2a16efa22e3637587357540829e2e"
+          "sha256": "sha256:b226247a1436c24864cfc0c69bc89e779c15b081fb941176305355e51910b9af"
         },
         {
           "path": "scripts/check_slither_baseline.py",
@@ -536,7 +536,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:967bb9e5d51f4f57ab4ce06d04c8391636ebb6e643d01180ac2b401b36b70433"
+          "sha256": "sha256:e5f1013b0f87132e7be93ed8e48e8e3dc17aa0071c5b21c1064b23101a69d6dc"
         },
         {
           "path": "docs/warning-dispositions.md",

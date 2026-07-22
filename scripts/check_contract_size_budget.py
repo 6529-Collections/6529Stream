@@ -71,7 +71,9 @@ def keccak256_hex(data: bytes) -> str:
     except ImportError as exc:
         raise SizeBudgetError(
             "Ethereum Keccak support is required to validate artifact source hashes; "
-            "install requirements-tools.txt before running the size budget checker"
+            "install the project's required tool environment before running the size "
+            "budget checker; release and audit jobs must use the hashed "
+            "requirements-tools.lock"
         ) from exc
 
 
