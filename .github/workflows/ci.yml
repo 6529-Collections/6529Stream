@@ -272,6 +272,8 @@ jobs:
             scripts/run_forge_size_log.py \
             scripts/check_release_readiness.py \
             scripts/test_release_readiness.py \
+            scripts/check_genesis_deployment_profile.py \
+            scripts/test_genesis_deployment_profile.py \
             scripts/check_release_mode.py \
             scripts/test_release_mode.py \
             scripts/generate_dependency_provenance_attestation.py \
@@ -740,6 +742,8 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_release_readiness.py 2>&1 | tee ci-logs/release-readiness-tests.log
           python3 scripts/check_release_readiness.py 2>&1 | tee ci-logs/release-readiness-check.log
+          python3 scripts/test_genesis_deployment_profile.py 2>&1 | tee ci-logs/genesis-deployment-profile-tests.log
+          python3 scripts/check_genesis_deployment_profile.py 2>&1 | tee ci-logs/genesis-deployment-profile-check.log
           python3 scripts/test_release_mode.py 2>&1 | tee ci-logs/release-mode-tests.log
 
       - name: Release manifest

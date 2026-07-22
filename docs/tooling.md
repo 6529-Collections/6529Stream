@@ -145,6 +145,8 @@ python scripts/test_withdrawals_credits_flow.py
 python scripts/check_withdrawals_credits_flow.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -493,7 +495,16 @@ mapping, and no-secret telemetry boundaries. It is not a maintained dashboard,
 hosted monitoring service, alert-provider integration, RPC provider, production
 indexer, public beta implementation, or production readiness claim.
 The strict release-mode decision remains opt-in rather than part of the default
-`make check` baseline, which runs `python scripts/test_release_mode.py`. The
+`make check` baseline, which runs the structural
+`genesis-deployment-profile-check` and `python scripts/test_release_mode.py`.
+The canonical
+`release-artifacts/genesis-deployment-profile.json` derives the exhaustive
+`[LCM-GENESIS]` entry count from its contiguous entries, keeps unreviewed
+legacy names non-satisfying, and reports class-level mapping gaps against the
+v1 `release-artifacts/contracts.json` catalog without making ordinary
+development unusable. That catalog is diagnostic only: it has no deployment
+addresses, instance identity, probe-parameter bindings, or on-chain manifest
+reconciliation and therefore can never clear production mode. The
 local `make release-mode-public-beta-check` and
 `make release-mode-production-release-check` targets run the aggregate `check`
 gate before the strict evidence decision. The manual GitHub `workflow_dispatch`
@@ -506,7 +517,17 @@ release readiness. Production mode then reads the checksum-covered
 `release-artifacts/latest/abi-checksums.json` measurement, rejects missing,
 malformed, boolean-as-integer, or arithmetically inconsistent `StreamCore` size
 fields, and requires at least 2,000 bytes of EIP-170 runtime headroom. That
-non-waivable threshold comes from the
+mode also invokes the genesis checker in strict completeness mode: missing,
+extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
+unapproved-alias, fallback, and probe gaps are production blockers. Even a v1
+catalog with no mapping gaps remains categorically insufficient. Production
+stays fail-closed until a checked schema for an instance-aware genesis
+deployment candidate reconciles deployment manifests, address books,
+source-verification inputs, the on-chain system-manifest payload, retained
+rehearsal/live evidence, and the release candidate lockfile. That remaining
+work is tracked by
+[issue #656](https://github.com/6529-Collections/6529Stream/issues/656). The
+non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
 is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
@@ -1111,6 +1132,8 @@ python scripts/check_monitoring_spec.py
 python scripts/test_operator_dashboard_query_model.py
 python scripts/check_operator_dashboard_query_model.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
@@ -1186,6 +1209,8 @@ python scripts/check_admin_ceremony_evidence.py
 python scripts/test_monitoring_spec.py
 python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
@@ -1223,7 +1248,9 @@ deployment manifests change; the `--check` mode fails on stale output, invalid
 or duplicate contract addresses, missing contract metadata, or mismatch against
 the release artifact contract set.
 
-The release-checksum generator covers `release-artifacts/contracts.json`,
+The release-checksum generator covers `release-artifacts/contracts.json`, the
+canonical `release-artifacts/genesis-deployment-profile.json` and its checker,
+tests, release-mode integration, and normative inventory mirrors,
 `release-artifacts/evidence/`,
 `release-artifacts/drop-authorization-signing/`,
 `release-artifacts/signer-custody-readiness/`,

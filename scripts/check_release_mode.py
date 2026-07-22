@@ -10,10 +10,13 @@ from pathlib import Path
 from typing import Any
 
 import check_public_beta_evidence as evidence_checker
+import check_genesis_deployment_profile as genesis_profile_checker
 
 
 DEFAULT_EVIDENCE = evidence_checker.DEFAULT_EVIDENCE
 DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
+DEFAULT_GENESIS_PROFILE = genesis_profile_checker.DEFAULT_PROFILE
+DEFAULT_CONTRACT_CONFIG = genesis_profile_checker.DEFAULT_CONTRACTS
 PUBLIC_BETA_PHASE = evidence_checker.PUBLIC_BETA_PHASE
 PRODUCTION_PHASE = evidence_checker.PRODUCTION_PHASE
 
@@ -219,6 +222,8 @@ def validate_release_mode(
     *,
     as_of: date | None = None,
     abi_checksums: Path = DEFAULT_ABI_CHECKSUMS,
+    genesis_profile: Path = DEFAULT_GENESIS_PROFILE,
+    contract_config: Path = DEFAULT_CONTRACT_CONFIG,
 ) -> None:
     """Require retained evidence to satisfy the selected release mode."""
     normalized_phase = normalize_phase(phase)
@@ -230,6 +235,12 @@ def validate_release_mode(
         )
         if headroom_blocker is not None:
             blockers.append(headroom_blocker)
+        blockers.extend(
+            "genesis deployment profile: " + blocker
+            for blocker in genesis_profile_checker.production_completeness_blockers(
+                genesis_profile, contract_config, repo_root
+            )
+        )
     if blockers:
         label = PHASE_LABELS[normalized_phase]
         details = "\n".join(f"- {blocker}" for blocker in blockers)
@@ -253,6 +264,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default="public-beta",
         help="Release gate to enforce. Production release also requires public-beta readiness.",
     )
+    parser.add_argument(
+        "--genesis-profile",
+        type=Path,
+        default=DEFAULT_GENESIS_PROFILE,
+        help="Canonical closed-world production deployment requirements.",
+    )
+    parser.add_argument(
+        "--contract-config",
+        type=Path,
+        default=DEFAULT_CONTRACT_CONFIG,
+        help="Current implementation catalog compared to the genesis profile.",
+    )
     return parser.parse_args(argv)
 
 
@@ -266,8 +289,14 @@ def main(argv: list[str] | None = None) -> int:
             repo_root,
             args.phase,
             abi_checksums=args.abi_checksums,
+            genesis_profile=args.genesis_profile,
+            contract_config=args.contract_config,
         )
-    except (evidence_checker.PublicBetaEvidenceError, ReleaseModeError) as exc:
+    except (
+        evidence_checker.PublicBetaEvidenceError,
+        genesis_profile_checker.GenesisProfileError,
+        ReleaseModeError,
+    ) as exc:
         print(f"release mode check failed: {exc}", file=sys.stderr)
         return 1
     print(f"release mode check passed for {args.phase}: {args.evidence}")

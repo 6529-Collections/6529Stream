@@ -23,9 +23,9 @@ the release policy in `docs/release-policy.md`.
   and confirmed that the measured build already uses plain non-enumerable
   ERC-721, so recovery must come from real compression, extraction, or
   authorized relocation rather than assumed enumerable-removal savings. The
-  readiness surfaces now also state the separate issue #656 limitation: strict
-  release mode cannot yet prove the normative exhaustive 58-contract genesis
-  candidate against the current 20-contract release inventory.
+  readiness surfaces now expose the canonical profile while keeping the
+  separate issue #656 genesis inventory limitation fail-closed because
+  instance-aware deployment reconciliation remains incomplete.
 - Rebuilt `StreamCore` token identity onto the specification's sequential
   model: one monotone global token ID counter starting at 1 replaces the
   reserved-range allocator, per-token `(collectionId, collectionSerial)`
@@ -44,6 +44,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the canonical machine-readable Genesis Deployment Profile and a
+  structural checker plus catalog-level diagnostics. The profile derives its
+  exhaustive count from contiguous entries, pins every contract role and
+  GGP/GTP probe, keeps legacy aliases unapproved by default, distinguishes the
+  SplitWallet implementation from on-demand clones, and records the required
+  fallback roles. The v1 `contracts.json` catalog can report missing, extra,
+  duplicate, ambiguous, wrong-scope, wrong-interface, and wrong-marker mapping
+  gaps, but it can never clear production mode because it cannot prove
+  deployment-instance identity, fallback-address distinctness, or probe
+  parameter bindings. Production remains fail-closed until a checked,
+  instance-aware candidate reconciles deployment manifests, address books,
+  source-verification inputs, the on-chain system-manifest payload, retained
+  rehearsal/live evidence, and the release candidate lockfile. This is a
+  permanently production-blocking foundation for issue #656, not completion of
+  that issue.
 - Added the Governed Gas Parameter and Governed Time Parameter machinery per
   `[LTA-GGP]`/`[LTA-GGP-PROBES]`/`[LTA-GTP]`: reusable
   `StreamGasParameterHost`/`StreamTimeParameterHost` bases with concrete

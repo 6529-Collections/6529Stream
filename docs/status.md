@@ -46,12 +46,13 @@ The current Gate A smoke baseline proves:
   satellite contracts, read adapters, linked libraries, release artifacts, or
   documentation-only evidence unless Core ownership/security invariants require
   otherwise.
-- The strict release-mode profile still has a known completeness limitation:
-  the normative genesis deployment profile requires an exhaustive 58-contract
-  candidate, while `release-artifacts/contracts.json` tracks 20 and no
-  fail-closed checker compares the two. This keeps production blocked under
-  [issue #656](https://github.com/6529-Collections/6529Stream/issues/656), even
-  if the currently implemented release-mode checks become green.
+- The strict release-mode profile now compares the current implementation
+  catalog with the canonical exhaustive genesis profile and fails closed on
+  missing, extra, ambiguous, wrong-scope, interface, marker, fallback, and
+  probe entries. The catalog remains incomplete, and its singleton-oriented
+  manifest model cannot yet prove every required distinct deployment instance.
+  This keeps production blocked under
+  [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass

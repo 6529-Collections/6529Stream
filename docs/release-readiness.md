@@ -5,6 +5,15 @@ It is a pre-audit local baseline, not production-ready, and not a security claim
 Local evidence does not replace fork/testnet/live evidence for public beta or
 production release.
 
+The canonical requirement inventory is
+[`release-artifacts/genesis-deployment-profile.json`](../release-artifacts/genesis-deployment-profile.json).
+Its default checker keeps the numbered `[LCM-GENESIS]` roles and exact probe
+rows structurally synchronized; production release mode additionally requires
+the current candidate to satisfy every entry exactly once. The committed
+implementation catalog remains incomplete and does not yet constitute a
+concrete deployment-instance manifest, so this gate is red without changing
+the public-beta decision.
+
 Use this file to answer one question before any release claim: what is already
 proved by committed local evidence, and what still blocks a public beta or
 production release?
@@ -208,14 +217,15 @@ The current 24,152-byte runtime has only 424 bytes of headroom, so
 [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
 production release even after evidence rows become complete.
 
-Known limitation: strict release mode does not yet prove that the release
-candidate implements the exhaustive genesis contract inventory. The normative
+Strict release mode now proves whether the implementation catalog satisfies the
+canonical
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
-currently requires 58 production contracts, while
-`release-artifacts/contracts.json` tracks 20 and no fail-closed profile
-completeness checker exists. This remains an independent production blocker
-tracked by [issue #656](https://github.com/6529-Collections/6529Stream/issues/656);
-a green result from the hardened checks in this change cannot satisfy it.
+as a closed world. The committed catalog fails that check, and the current
+manifest model still cannot prove distinct deployment instances for fallbacks
+and parameter-bound probes. That reconciliation remains an independent
+production blocker tracked by
+[issue #656](https://github.com/6529-Collections/6529Stream/issues/656); the
+structural profile gate is not concrete deployment evidence.
 
 ## Readiness Summary
 
@@ -223,7 +233,7 @@ a green result from the hardened checks in this change cannot satisfy it.
 | --- | --- | --- | --- |
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
 | StreamCore deployment headroom | The ordinary development size floor passes at 24,152 runtime bytes and 424 bytes of EIP-170 margin, but the normative production deployment gate requires at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
-| Genesis inventory completeness | The launch matrix requires an exhaustive 58-contract candidate, but the current release inventory tracks 20 contracts and has no fail-closed completeness checker; issue #656 tracks the missing gate | No | Yes |
+| Genesis inventory completeness | The canonical launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every distinct fallback and probe deployment instance; issue #656 tracks reconciliation | No | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |

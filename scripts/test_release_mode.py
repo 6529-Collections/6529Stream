@@ -12,11 +12,14 @@ from contextlib import redirect_stderr, redirect_stdout
 from datetime import date
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+
+import test_genesis_deployment_profile as genesis_profile_test_support
 
 SCRIPT_PATH = SCRIPT_DIR / "check_release_mode.py"
 SPEC = importlib.util.spec_from_file_location("check_release_mode", SCRIPT_PATH)
@@ -68,6 +71,22 @@ def write_core_size_artifact(
         },
     )
     return path
+
+
+def write_complete_genesis_candidate(root: Path) -> tuple[Path, Path]:
+    """Write an exact synthetic genesis profile candidate for release-mode tests."""
+    repo_root = Path(__file__).resolve().parents[1]
+    profile, contracts = genesis_profile_test_support.complete_fixture(
+        json.loads(
+            (repo_root / checker.DEFAULT_GENESIS_PROFILE).read_text(encoding="utf-8")
+        )
+    )
+    profile_path = root / checker.DEFAULT_GENESIS_PROFILE
+    contracts_path = root / checker.DEFAULT_CONTRACT_CONFIG
+    write_json(profile_path, profile)
+    write_json(contracts_path, contracts)
+    genesis_profile_test_support.copy_normative_documents(root)
+    return profile_path, contracts_path
 
 
 def file_ref(root: Path, relative_path: str, content: str) -> dict[str, str]:
@@ -141,6 +160,7 @@ def evidence_document(
 ) -> dict[str, object]:
     """Build a public-beta evidence document for release-mode tests."""
     write_core_size_artifact(root)
+    write_complete_genesis_candidate(root)
     schema_ref = {
         **file_ref(root, "release-artifacts/schema/public-beta-evidence.schema.json", "{}\n"),
         "category": "public_beta_evidence_schema",
@@ -256,8 +276,8 @@ class ReleaseModeTests(unittest.TestCase):
             with self.assertRaisesRegex(checker.ReleaseModeError, "status.public_beta"):
                 checker.validate_release_mode(path, root, "production-release")
 
-    def test_complete_production_fixture_passes(self) -> None:
-        """Production release mode passes only when both phases are ready."""
+    def test_complete_production_fixture_requires_concrete_candidate_model(self) -> None:
+        """Ready evidence cannot replace concrete instance-aware deployment proof."""
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             path = root / checker.DEFAULT_EVIDENCE
@@ -270,7 +290,60 @@ class ReleaseModeTests(unittest.TestCase):
                 ),
             )
 
-            checker.validate_release_mode(path, root, "production-release")
+            with self.assertRaises(checker.ReleaseModeError) as raised:
+                checker.validate_release_mode(path, root, "production-release")
+
+            self.assertIn(
+                checker.genesis_profile_checker.CONCRETE_CANDIDATE_MODEL_BLOCKER,
+                str(raised.exception),
+            )
+
+    def test_production_rejects_committed_incomplete_genesis_candidate(self) -> None:
+        """Production mode consumes the checked profile and fails on current gaps."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="ready",
+                ),
+            )
+            repo_root = Path(__file__).resolve().parents[1]
+            with self.assertRaisesRegex(
+                checker.ReleaseModeError, "genesis deployment profile"
+            ):
+                checker.validate_release_mode(
+                    path,
+                    root,
+                    "production-release",
+                    genesis_profile=repo_root / checker.DEFAULT_GENESIS_PROFILE,
+                    contract_config=repo_root / checker.DEFAULT_CONTRACT_CONFIG,
+                )
+
+    def test_public_beta_does_not_require_genesis_candidate_completeness(self) -> None:
+        """The closed-world deployment profile remains a production-only gate."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="blocked",
+                    production_requirement_status="missing",
+                ),
+            )
+            checker.validate_release_mode(
+                path,
+                root,
+                "public-beta",
+                genesis_profile=Path("missing-profile.json"),
+                contract_config=Path("missing-contracts.json"),
+            )
 
     def test_production_core_headroom_at_deployment_target_passes(self) -> None:
         """The exact normative 2,000-byte production margin is sufficient."""
@@ -290,7 +363,12 @@ class ReleaseModeTests(unittest.TestCase):
                 runtime_margin=checker.PRODUCTION_CORE_MIN_RUNTIME_MARGIN_BYTES,
             )
 
-            checker.validate_release_mode(path, root, "production-release")
+            with mock.patch.object(
+                checker.genesis_profile_checker,
+                "production_completeness_blockers",
+                return_value=[],
+            ):
+                checker.validate_release_mode(path, root, "production-release")
 
     def test_production_core_headroom_below_deployment_target_blocks(self) -> None:
         """A 1,999-byte Core margin fails the governing deployment rule."""

@@ -22,7 +22,7 @@
     },
     {
       "path": "docs/release-readiness.md",
-      "sha256": "sha256:8f49cf37d47fe9cabcdd0ea88890d4d407affc5e25f499879e849027f52d2884"
+      "sha256": "sha256:9e819595c3d6f5530e6083c555ce5bd9f85cf51138225307007544c6a5213a4c"
     },
     {
       "path": "docs/permanence-packages.md",
@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:6992c811c991c82d498898604148c41bd5f51d96e2cec5a990f531ba957c2825"
+      "sha256": "sha256:d74549032215097a6e0387ee5b876d2a1e828cc93ea05365bbb4a5a5ca3da2ab"
     },
     {
       "path": "ops/SLITHER_BASELINE.md",
@@ -167,7 +167,7 @@
       "evidence": [
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:8f49cf37d47fe9cabcdd0ea88890d4d407affc5e25f499879e849027f52d2884"
+          "sha256": "sha256:9e819595c3d6f5530e6083c555ce5bd9f85cf51138225307007544c6a5213a4c"
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
@@ -287,7 +287,7 @@
         },
         {
           "path": "docs/release-readiness.md",
-          "sha256": "sha256:8f49cf37d47fe9cabcdd0ea88890d4d407affc5e25f499879e849027f52d2884"
+          "sha256": "sha256:9e819595c3d6f5530e6083c555ce5bd9f85cf51138225307007544c6a5213a4c"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -445,7 +445,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:6992c811c991c82d498898604148c41bd5f51d96e2cec5a990f531ba957c2825"
+          "sha256": "sha256:d74549032215097a6e0387ee5b876d2a1e828cc93ea05365bbb4a5a5ca3da2ab"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -453,7 +453,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:257a7fe551250aa9010c0f07d36a3a6bd87a050d38e40806572693cbf99f66bf"
+          "sha256": "sha256:d3407b460aaf1d641e1d8169157c927b4935b4a9e754eebc9ccdec95a8f33ac0"
         }
       ],
       "risk_acceptance": null
@@ -524,7 +524,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:3509df9739bea07c706f9c1466bf535ed0e8d0e7aeb4b6238a338ee6b85ca91d"
+          "sha256": "sha256:0ce11044358a3391b821b35a77e6d649ec89396d5bd6a683b60007e8ab9bc48b"
         },
         {
           "path": "docs/warning-dispositions.md",
