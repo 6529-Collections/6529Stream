@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/core-cutover-abi-lock` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/660` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/654` |
-| Active PR | TBD |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/663` |
 | Next issue | Implement the first satellite-only or measured net-negative Core cutover slice after the permanent ABI target is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 14:56 UTC` |
+| Last updated | `2026-07-22 15:25 UTC` |
 
 ## Current Run Notes
 
@@ -70,6 +70,9 @@ evidence, and audit/readiness gates.
   hooks while the legacy Drops/Minter path remained live, producing the current
   24,152-byte transitional Core. The current build is already non-enumerable and
   is not a complete mandatory-hook proof.
+- PR #663 is the active target-lock review. Its authoritative merged-tree local
+  gate passed in 1,013 seconds before publication; CI and CodeRabbit review
+  remain required before merge.
 - This slice pins the intentional pre-genesis target ABI, one canonical
   satellite-pointer model, minimal governed-gas/emitter surfaces, terminal burn
   blocking, and an explicit cutover order. Until the complete target measures at

@@ -1785,8 +1785,7 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: PR not opened; active issue #654 on branch
-`codex/core-cutover-abi-lock`.
+Status: Active PR #663 / issue #654 on branch `codex/core-cutover-abi-lock`.
 
 Gate: C/E/G.
 
@@ -3973,7 +3972,7 @@ unless an external dependency changes.
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
 | `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
-| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Active issue #654 on branch `codex/core-cutover-abi-lock`; PR TBD; target lock first, then caller migration and measured implementation slices |
+| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Active PR #663 / issue #654 on branch `codex/core-cutover-abi-lock`; target lock first, then caller migration and measured implementation slices |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
