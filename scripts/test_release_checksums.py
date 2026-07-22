@@ -25,6 +25,49 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
+    def test_default_covered_paths_include_python_toolchain_provenance(self) -> None:
+        """Policy and committed bundles bind every reviewed Python toolchain input."""
+
+        expected_paths = {
+            Path("requirements-tools.txt"),
+            Path("requirements-tools.lock"),
+            Path(".github/workflows/ci.yml"),
+            Path(".github/workflows/release-mode.yml"),
+            Path("scripts/check_python_toolchain.py"),
+            Path("scripts/test_python_toolchain.py"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
+        repo_root = SCRIPT_PATH.parent.parent
+        checksum_text = (
+            repo_root / generator.DEFAULT_OUTPUT_DIR / generator.CHECKSUM_FILE_NAME
+        ).read_text(encoding="utf-8")
+        checksum_entries = {
+            relative_path: digest
+            for digest, relative_path in generator.parse_checksum_file(checksum_text)
+        }
+        manifest = json.loads(
+            (
+                repo_root
+                / generator.DEFAULT_OUTPUT_DIR
+                / generator.CHECKSUM_MANIFEST_NAME
+            ).read_text(encoding="utf-8")
+        )
+        manifest_entries = {entry["path"]: entry for entry in manifest["files"]}
+
+        for path in expected_paths:
+            relative_path = path.as_posix()
+            expected_hash = generator.file_sha256(repo_root / path)
+            self.assertEqual(
+                checksum_entries[relative_path],
+                expected_hash.removeprefix("sha256:"),
+            )
+            self.assertEqual(manifest_entries[relative_path]["sha256"], expected_hash)
+            self.assertEqual(
+                manifest_entries[relative_path]["size_bytes"],
+                (repo_root / path).stat().st_size,
+            )
+
     def test_default_covered_paths_include_evidence_artifacts(self) -> None:
         self.assertIn(Path("release-artifacts/schema"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/evidence"), generator.DEFAULT_COVERED_PATHS)

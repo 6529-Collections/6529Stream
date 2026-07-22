@@ -41,6 +41,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/test_solidity_formatting.py
 "$python_bin" scripts/check_solidity_formatting.py
 "$python_bin" scripts/test_windows_check_wrapper.py
+"$python_bin" scripts/test_python_toolchain.py
+"$python_bin" scripts/check_python_toolchain.py
 "$python_bin" scripts/test_metadata_fixtures.py
 "$python_bin" scripts/check_metadata_fixtures.py
 "$python_bin" scripts/test_metadata_browser_sandbox.py

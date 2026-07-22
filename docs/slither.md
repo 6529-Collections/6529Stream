@@ -6,6 +6,10 @@ and 34 Medium. Those rows are a review and burn-down queue; they are not proof
 of exploitability, an audit completion claim, or evidence that the protocol is
 ready for public beta or production.
 
+Slither is a direct pin in `requirements-tools.txt` and is transitively
+hash-locked for the Linux CI/release boundary through
+`requirements-tools.lock`.
+
 ## Versions
 
 | Tool | Version |
@@ -16,16 +20,19 @@ ready for public beta or production.
 | Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
 
-Install the pinned Python tools with:
+The reproducible Linux CI/release path installs the hashed lock before selecting
+the compiler:
 
 ```bash
-python3 -m pip install -r requirements-tools.txt
+python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+python -m pip check
 solc-select install 0.8.19
 solc-select use 0.8.19
 ```
 
 The EC2 and Windows bootstrap scripts perform the equivalent setup for their
-supported environments.
+supported contributor environments from the readable direct requirements;
+those heterogeneous convenience paths are not release evidence.
 
 The baseline records the analyzed source commit and raw capture identity
 separately from the current live-gate configuration. The

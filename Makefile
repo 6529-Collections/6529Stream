@@ -30,9 +30,11 @@ PATH := $(FOUNDRY_BIN)$(PATH_SEPARATOR)$(REPO_ROOT)/$(VENV_BIN)$(PATH_SEPARATOR)
 
 check: build test gas-snapshot-check gas-envelopes-check size contract-size-budget-check core-bytecode-spend-policy-check genesis-deployment-profile-check slither-baseline-metadata-check solidity-formatting-check windows-check-wrapper-policy metadata-fixtures-check drop-authorization-fixtures-check drop-authorization-signing-evidence-check signer-custody-readiness-check one-of-one-provenance-manifest-check one-of-one-permanence-manifest-check admin-ceremony-evidence-check release-artifacts-check protocol-surface-report-check custom-error-catalog-check natspec-coverage-check source-verification-inputs-check abi-compatibility-check dependency-provenance-attestation-check signed-release-tag-check non-local-release-evidence-check external-audit-report-evidence-check post-audit-remediation-evidence-check live-ceremony-evidence-check live-randomizer-operations-evidence-check fork-deployment-rehearsal-evidence-check testnet-deployment-rehearsal-evidence-check sepolia-evidence-preflight-check public-beta-verified-addresses-check production-broadcast-retention-check live-deployment-manifest-evidence-check production-verified-addresses-check production-release-signing-evidence-check fork-metadata-browser-evidence-check live-metadata-browser-evidence-check marketplace-indexer-evidence-check incident-drill-evidence-check signer-compromise-drill-evidence-check stuck-auction-drill-evidence-check failed-randomness-drill-evidence-check bad-metadata-dependency-drill-evidence-check public-beta-evidence-check public-beta-blocker-report-check production-release-blocker-report-check release-evidence-packet-index-check release-evidence-issue-backlog-check release-evidence-issue-links-check release-evidence-issue-labels-check release-evidence-issue-body-sync-check release-evidence-issue-bodies-check release-evidence-issue-closure-check release-evidence-live-audit-archive-check architecture-threat-model-check audit-package-check audit-finding-workflow-check incident-response-check readme-check first-30-minutes-check issue-templates-check pr-template-check autonomous-state-check markdown-links-check integrations-readme-check contract-flows-check auction-flows-check curator-rewards-check withdrawals-credits-check wallet-signature-flows-check events-and-indexing-check metadata-rendering-check react-next-reference-check typescript-artifact-chain-config-check typescript-eip712-drop-authorization-check typescript-event-decoding-indexer-check integration-conformance-fixtures-check mobile-walletconnect-check electron-security-wallets-check operator-admin-ui-check operator-dashboard-query-model-check monitoring-spec-check royalty-policy-check warning-dispositions-check release-readiness-check release-notes-check release-artifacts-verify changelog-check deployment-rehearsal-gate-check deploy-rehearsal
 check: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
+check: python-toolchain-check
 release-manifest: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 .PHONY: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
+.PHONY: python-toolchain-check
 
 build:
 	forge build
@@ -87,6 +89,10 @@ windows-check-wrapper-policy:
 
 windows-check-wrapper-runtime:
 	$(POWERSHELL) $(POWERSHELL_FLAGS) -File scripts/test_windows_check_helpers.ps1
+
+python-toolchain-check:
+	$(PYTHON) scripts/test_python_toolchain.py
+	$(PYTHON) scripts/check_python_toolchain.py
 
 drop-authorization-fixtures-check:
 	$(PYTHON) scripts/test_drop_authorization_payload_generator.py

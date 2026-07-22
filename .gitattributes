@@ -9,6 +9,7 @@ release-artifacts/** text eol=lf
 *.sol text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+*.lock text eol=lf
 *.js text eol=lf
 *.toml text eol=lf
 *.txt text eol=lf

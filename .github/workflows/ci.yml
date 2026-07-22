@@ -62,6 +62,11 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12.13"
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
         with:
@@ -70,7 +75,8 @@ jobs:
       - name: Install pinned Slither toolchain
         shell: bash
         run: |
-          python3 -m pip install --disable-pip-version-check -r requirements-tools.txt
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
           solc-select install 0.8.19
           solc-select use 0.8.19
 
@@ -92,6 +98,11 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12.13"
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
@@ -329,6 +340,8 @@ jobs:
             scripts/test_windows_ci_wrapper.py \
             scripts/check_deployment_rehearsal_gate.py \
             scripts/test_deployment_rehearsal_gate.py \
+            scripts/check_python_toolchain.py \
+            scripts/test_python_toolchain.py \
             scripts/check_changelog.py \
             scripts/test_changelog_check.py
 
@@ -338,9 +351,9 @@ jobs:
       - name: Install browser test tooling
         shell: bash
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements-tools.txt
-          python3 -m playwright install --with-deps chromium
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
+          python -m playwright install --with-deps chromium
 
       - name: PowerShell syntax and wrapper runtime
         shell: pwsh
