@@ -319,6 +319,8 @@ jobs:
             scripts/generate_system_manifest_payload_vector.py \
             scripts/check_system_manifest_payload_vector.py \
             scripts/test_system_manifest_payload_vector.py \
+            scripts/check_system_manifest_payload_vector_reference.py \
+            scripts/test_system_manifest_payload_vector_reference.py \
             scripts/check_slither_baseline.py \
             scripts/test_slither_baseline.py \
             scripts/check_release_mode.py \
@@ -803,6 +805,8 @@ jobs:
           python3 scripts/check_genesis_deployment_profile.py 2>&1 | tee ci-logs/genesis-deployment-profile-check.log
           python3 scripts/test_system_manifest_payload_vector.py 2>&1 | tee ci-logs/system-manifest-payload-vector-tests.log
           python3 scripts/check_system_manifest_payload_vector.py 2>&1 | tee ci-logs/system-manifest-payload-vector-check.log
+          python3 scripts/test_system_manifest_payload_vector_reference.py 2>&1 | tee ci-logs/system-manifest-payload-vector-reference-tests.log
+          python3 scripts/check_system_manifest_payload_vector_reference.py 2>&1 | tee ci-logs/system-manifest-payload-vector-reference-check.log
           python3 scripts/test_release_mode.py 2>&1 | tee ci-logs/release-mode-tests.log
 
       - name: Release manifest

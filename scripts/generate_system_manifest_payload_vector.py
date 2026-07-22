@@ -60,6 +60,64 @@ DEPLOYMENT_IDENTITY_DOMAIN = (
 GGP_PROBE_BINDING_DOMAIN = (
     "0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4"
 )
+STATE_EXPORT_PUBLISHER_INTERFACE = "IStreamStateExportPublisher"
+STATE_EXPORT_PUBLISHER_ABI_SCHEMA = "6529stream.state-export-publisher-abi.v1"
+STATE_EXPORT_PUBLISHER_INTERFACE_ID = "0x77faad4f"
+STATE_EXPORT_LATEST_SELECTOR = STATE_EXPORT_PUBLISHER_INTERFACE_ID
+STREAM_CORE_FINALITY_ADAPTER_INTERFACE_ID = "0xebf35615"
+STATE_EXPORT_PUBLISHER_ABI_SHA256 = (
+    "sha256:535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7"
+)
+STATE_EXPORT_LATEST_RETURNS = (
+    "uint256",
+    "bytes32",
+    "bytes32",
+    "bytes32",
+    "string",
+)
+STATE_EXPORT_EVENT_TOPICS = {
+    "StateExportPublished(uint16,uint256,bytes32,bytes32,bytes32,string)": (
+        "0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045"
+    ),
+    "StateExportChallenged(uint16,bytes32,bytes32,address,string)": (
+        "0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c"
+    ),
+    "StateExportSuperseded(uint16,bytes32,bytes32,bytes32,string)": (
+        "0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a"
+    ),
+}
+STATE_EXPORT_EVENT_INDEXED_MASKS = {
+    "StateExportPublished(uint16,uint256,bytes32,bytes32,bytes32,string)": (
+        False,
+        True,
+        True,
+        True,
+        False,
+        False,
+    ),
+    "StateExportChallenged(uint16,bytes32,bytes32,address,string)": (
+        False,
+        True,
+        True,
+        True,
+        False,
+    ),
+    "StateExportSuperseded(uint16,bytes32,bytes32,bytes32,string)": (
+        False,
+        True,
+        True,
+        True,
+        False,
+    ),
+}
+STATE_EXPORT_PUBLISHER_MARKERS = (
+    "STATE_EXPORT_PUBLISHER_EVENTS_V1",
+    f"LATEST_STATE_EXPORT_SELECTOR_{STATE_EXPORT_LATEST_SELECTOR}",
+    f"STATE_EXPORT_PUBLISHED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportPublished(uint16,uint256,bytes32,bytes32,bytes32,string)']}",
+    f"STATE_EXPORT_CHALLENGED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportChallenged(uint16,bytes32,bytes32,address,string)']}",
+    f"STATE_EXPORT_SUPERSEDED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportSuperseded(uint16,bytes32,bytes32,bytes32,string)']}",
+    f"STATE_EXPORT_PUBLISHER_ABI_SHA256_{STATE_EXPORT_PUBLISHER_ABI_SHA256.removeprefix('sha256:')}",
+)
 
 VECTOR_DERIVATION_DOMAIN = "6529STREAM_SYSTEM_MANIFEST_TARGET_VECTOR_V1"
 MODULE_VERSION_LITERAL = "6529STREAM_MODULE_VERSION_V1"
@@ -129,8 +187,8 @@ POINTER_TARGETS = {
     "ARTIST_REGISTRY": "ARTIST_REGISTRY",
     "ARTWORK_FINALITY_REGISTRY": "ARTWORK_FINALITY_REGISTRY",
     "MODULE_REGISTRY": "MODULE_REGISTRY",
-    # [LTA-EXPORT] permits governance to host the publisher surface.  The
-    # planning profile has no dedicated state-export-publisher entry.
+    # Genesis binds the publisher to governance only because the profile
+    # independently requires its exact publisher interface and event marker.
     "STATE_EXPORT_PUBLISHER": "GOVERNANCE_LAYER",
     "SYSTEM_MANIFEST": "STREAM_SYSTEM_MANIFEST",
 }
@@ -236,6 +294,44 @@ def hex_keccak(value: bytes) -> str:
 
 def sha256_prefixed(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
+
+
+def state_export_publisher_surface() -> dict[str, Any]:
+    """Return the transparent, digest-locked active publisher ABI surface."""
+    surface = {
+        "schema": STATE_EXPORT_PUBLISHER_ABI_SCHEMA,
+        "required_interface": STATE_EXPORT_PUBLISHER_INTERFACE,
+        "interface_id": STATE_EXPORT_PUBLISHER_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": "latestStateExport()",
+                "selector": STATE_EXPORT_LATEST_SELECTOR,
+                "state_mutability": "view",
+                "returns": list(STATE_EXPORT_LATEST_RETURNS),
+            }
+        ],
+        "events": [
+            {
+                "signature": signature,
+                "topic0": topic0,
+                "anonymous": False,
+                "indexed": list(STATE_EXPORT_EVENT_INDEXED_MASKS[signature]),
+            }
+            for signature, topic0 in STATE_EXPORT_EVENT_TOPICS.items()
+        ],
+    }
+    canonical = json.dumps(
+        surface,
+        ensure_ascii=True,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("ascii")
+    digest = sha256_prefixed(canonical)
+    if digest != STATE_EXPORT_PUBLISHER_ABI_SHA256:
+        raise ManifestVectorError(
+            "reviewed state-export publisher ABI constants disagree with their fixed digest"
+        )
+    return {**surface, "surface_sha256": digest}
 
 
 def require_exact_keys(value: dict[str, Any], expected: Iterable[str], path: str) -> None:
@@ -602,6 +698,19 @@ def _require_profile(profile: Any) -> list[dict[str, Any]]:
     missing = sorted(required - set(keys))
     if missing:
         raise ManifestVectorError(f"profile is missing target-vector entries: {missing}")
+    governance = entries[keys.index("GOVERNANCE_LAYER")]
+    governance_interfaces = governance.get("required_interfaces")
+    governance_markers = governance.get("required_markers")
+    if (
+        not isinstance(governance_interfaces, list)
+        or STATE_EXPORT_PUBLISHER_INTERFACE not in governance_interfaces
+        or not isinstance(governance_markers, list)
+        or not set(STATE_EXPORT_PUBLISHER_MARKERS).issubset(governance_markers)
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER must prove the state-export publisher interface "
+            "and event marker before serving STATE_EXPORT_PUBLISHER"
+        )
     return entries
 
 
@@ -618,6 +727,12 @@ def _module_type(entry: dict[str, Any]) -> str:
 def _interface_id(entry: dict[str, Any]) -> str:
     if entry["key"] == "STREAM_SYSTEM_MANIFEST":
         return "0x37660ede"
+    if entry["key"] == "STREAM_CORE_FINALITY_ADAPTER":
+        return STREAM_CORE_FINALITY_ADAPTER_INTERFACE_ID
+    if entry["key"] == "GOVERNANCE_LAYER":
+        # Events do not contribute to ERC-165; the one-function publisher
+        # interface ID is therefore latestStateExport()'s selector.
+        return STATE_EXPORT_PUBLISHER_INTERFACE_ID
     if entry.get("kind") == "ggp_probe":
         return "0x0f8c6b0f"
     if entry.get("kind") == "gtp_probe":
@@ -1031,6 +1146,7 @@ def build_vector(profile: dict[str, Any], profile_raw: bytes) -> dict[str, Any]:
                 "to avoid a self-address fixed point"
             ),
             "state_export_publisher_binding": "GOVERNANCE_LAYER",
+            "state_export_publisher_surface": state_export_publisher_surface(),
         },
         "constants": {
             "schema_version": SCHEMA_VERSION,

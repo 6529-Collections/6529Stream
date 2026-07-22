@@ -2267,17 +2267,11 @@ The helper selectors are production-exact:
 `emitBatchMetadataUpdate(uint256,uint256,bytes32) = 0x908c18bd`, and
 `emitContractURIUpdated() = 0x7f377036`. None returns a value.
 
-Because marketplaces call `tokenURI()` on `StreamCore`, there are two viable
-event strategies:
-
-1. Emit ERC-4906-style events from `StreamCore` through metadata-admin helper
-   functions.
-2. Emit equivalent events from `StreamMetadataRouter` and document that indexers
-   should observe the router as the metadata authority.
-
-Preferred v1 approach: Core should expose restricted helper functions that
-allow authorized satellites to cause Core to emit ERC-4906 events. This makes
-the events originate from the NFT contract that marketplaces already index.
+Because marketplaces call `tokenURI()` on `StreamCore`, protocol v1 has one
+viable event strategy: Core exposes restricted helper functions that allow
+authorized satellites to cause Core to emit ERC-4906 events. Router- or
+satellite-emitted mirrors are forbidden; the events must originate from the
+NFT contract that marketplaces already index (ADR 0016).
 
 Refresh emitter authorization [MRR-REFRESH-EMITTERS]:
 
@@ -2330,13 +2324,55 @@ Refresh emitter authorization [MRR-REFRESH-EMITTERS]:
 Protocol v1 pins `MAX_REFRESH_RANGE = 5_000` token IDs per
 `BatchMetadataUpdate` helper call (ADR 0009 decision 15), confirmed by
 marketplace/indexer review evidence before deployment.
-If an accepted recovery for a finalized scope legitimately affects more than
-`MAX_REFRESH_RANGE` minted tokens, the router must request chunked refreshes.
-Each chunk emits a standard `BatchMetadataUpdate(from, to)` plus the
-Stream-native reason/manifest event or helper input that carries the same
-`reasonHash` and recovery manifest hash for that chunk. A recovery must never
-emit one oversized batch range or silently skip refresh for affected minted
-tokens because the collection is larger than the batch cap.
+The artwork finality registry makes accepted collection and scoped recovery
+refresh executable without any new Core surface. Every schedule requires a
+nonzero `recoveryManifest.contentHash`. If artwork bytes change, or a newer
+route must carry forward an incomplete predecessor invalidation, recovery
+execution snapshots Core's monotonic `lastAllocatedTokenId()` and atomically
+stores the bounded refresh plan defined by [LTA-FINALITY]: collection and
+`RELEASE`/`SEASON`/`VIEW` plans cover the safe global-ID superset
+`[1, lastAllocatedTokenIdAtExecution]`, while a `TOKEN` plan covers only its
+token ID. Post-snapshot mints resolve through the recovered route immediately
+and have no old-route cache to invalidate.
+
+The exact permissionless continuation selectors are
+`continueFinalityRecoveryRefresh(uint256,bytes32) = 0x617c9142` and
+`continueScopedFinalityRecoveryRefresh((uint8,uint256,uint256,bytes32),bytes32)
+= 0x12ffdb0d`. Each successful call rechecks the stored executed record, active
+route, incomplete monotonic plan, and record/plan hash agreement, advances its
+stored cursor exactly once, and makes exactly one Core
+`emitBatchMetadataUpdate` call for at most `MAX_REFRESH_RANGE` IDs. This also
+uses the batch helper for the one-ID token case. A Core revert rolls the cursor
+and chunk count back with the transaction; a missing, complete, superseded, or
+mismatched plan reverts before the Core call. No loop or arbitrary caller-
+supplied range/hash exists.
+
+A newer recovery never strands an incomplete predecessor plan. Execution marks
+the old plan superseded, decrements the registry-wide active-incomplete count,
+and creates a fresh full-snapshot plan under the new stored manifest hash even
+when the newer record says `artworkBytesChanged = false`; a nonempty new plan
+increments the count. The exact getter and fail-closed transition assertion are
+`incompleteFinalityRecoveryRefreshPlanCount() = 0xa76ed63d` and
+`assertNoIncompleteFinalityRecoveryRefreshPlans() = 0x955d14fb`. Core stops
+authorizing the old registry immediately after a finality-registry pointer
+replacement, so the governance/module transition validator requires that exact
+assertion immediately before the Core pointer update in the same atomic batch.
+Protocol v1 drains to zero; it never abandons an old-registry cursor. Monitoring
+and permissionless keepers drive every nonzero-count plan to completion before
+cutover.
+
+For every successful recovery-driven chunk, the registry passes exactly the
+plan's nonzero `recoveryManifest.contentHash` through the Core helper's existing
+`reasonHash` parameter. Core therefore emits `BatchMetadataUpdate(from, to)`
+and `StreamMetadataRefresh(1, recoveryManifest.contentHash, from, to)` without
+adding a Permanent Core selector or event field. In this path the Core field is
+the refresh-correlation hash. The distinct governance `reasonHash` remains in
+`FinalityRecoveryExecuted` or `ScopedFinalityRecoveryExecuted`, whose
+`recoveryId` also commits both values; Core does not duplicate it. Indexers join
+the chunk to the accepted recovery by the manifest content hash and reconstruct
+completion from the registry's plan/progress events and exact plan reads. A
+recovery must never emit one oversized batch range or silently skip affected
+pre-snapshot IDs.
 
 After Core collection freeze, render-affecting metadata mutations are rejected,
 so the metadata router must not ask Core to emit ERC-4906 refresh events for

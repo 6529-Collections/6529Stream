@@ -172,6 +172,8 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("scripts/generate_system_manifest_payload_vector.py"),
             Path("scripts/check_system_manifest_payload_vector.py"),
             Path("scripts/test_system_manifest_payload_vector.py"),
+            Path("scripts/check_system_manifest_payload_vector_reference.py"),
+            Path("scripts/test_system_manifest_payload_vector_reference.py"),
             Path("scripts/check_release_mode.py"),
             Path("scripts/test_release_mode.py"),
             Path("docs/launch-conformance-matrix.md"),

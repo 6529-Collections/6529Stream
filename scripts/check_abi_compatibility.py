@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import re
 import sys
 from pathlib import Path
@@ -24,6 +26,199 @@ TARGET_REQUIRED_REVISION_RETURN_SIGNATURES = {
     "gasParameterInfo(bytes32)",
     "getSatellitePointer(bytes32)",
 }
+
+# Independent, reviewer-owned lock for the complete ordered active target.  The
+# normative manifest remains the rich source of ownership/authorization data;
+# these deliberately duplicated ABI shapes stop a status substitution or an
+# internally valid dummy entry from silently changing the Permanent surface.
+TARGET_ACTIVE_SURFACE_LOCK_SCHEMA = (
+    "6529stream.stream-core-active-surface-lock.v1"
+)
+TARGET_ACTIVE_SURFACE_LOCK_SHA256 = (
+    "sha256:2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4"
+)
+TARGET_FULL_MANIFEST_LOCK_SCHEMA = (
+    "6529stream.stream-core-permanent-interface-semantic-lock.v1"
+)
+TARGET_FULL_MANIFEST_LOCK_SHA256 = (
+    "sha256:18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55"
+)
+TARGET_ACTIVE_FUNCTION_SURFACES = (
+    ("abortPreparedMintFromManager(uint256,bytes32)", "nonpayable", ()),
+    ("approve(address,uint256)", "nonpayable", ()),
+    ("balanceOf(address)", "view", ("uint256",)),
+    ("blockCollectionBurns(uint256)", "nonpayable", ()),
+    ("burn(uint256)", "nonpayable", ()),
+    ("collectionBurnsBlocked(uint256)", "view", ("bool",)),
+    ("collectionBurnsBlockedAtBlock(uint256)", "view", ("uint64",)),
+    ("collectionExists(uint256)", "view", ("bool",)),
+    ("collectionFreezeStatus(uint256)", "view", ("bool",)),
+    ("collectionHasMaxSupply(uint256)", "view", ("bool",)),
+    ("collectionMaxSupply(uint256)", "view", ("uint256",)),
+    ("collectionMintedEver(uint256)", "view", ("uint256",)),
+    ("collectionNextSerial(uint256)", "view", ("uint256",)),
+    ("collectionStatus(uint256)", "view", ("uint8",)),
+    ("collectionSupplyMode(uint256)", "view", ("uint8",)),
+    (
+        "completePreparedMintFromManager(uint256,address,bytes32,bytes32)",
+        "nonpayable",
+        (),
+    ),
+    ("conditionalRaiseGasParameter(bytes32,uint256)", "nonpayable", ()),
+    ("conditionalRelowerGasParameter(bytes32,uint256)", "nonpayable", ()),
+    ("contractURI()", "view", ("string",)),
+    ("coordinatorAtMint(uint256)", "view", ("address",)),
+    ("createCollection(uint8,bool,uint256,uint8)", "nonpayable", ("uint256",)),
+    ("emergencyRaiseGasParameter(bytes32,uint256)", "nonpayable", ()),
+    ("emitBatchMetadataUpdate(uint256,uint256,bytes32)", "nonpayable", ()),
+    ("emitContractURIUpdated()", "nonpayable", ()),
+    ("emitMetadataUpdate(uint256,bytes32)", "nonpayable", ()),
+    ("freezeCollection(uint256)", "nonpayable", ()),
+    ("freezeSatellitePointer(bytes32)", "nonpayable", ()),
+    (
+        "gasParameterInfo(bytes32)",
+        "view",
+        ("uint256", "uint256", "address", "uint8", "uint64", "uint64"),
+    ),
+    ("getApproved(uint256)", "view", ("address",)),
+    (
+        "getSatellitePointer(bytes32)",
+        "view",
+        (
+            "address",
+            "bytes32",
+            "bool",
+            "bytes32",
+            "bytes4",
+            "address",
+            "uint8",
+            "bytes32",
+            "bytes32",
+            "uint64",
+        ),
+    ),
+    ("isApprovedForAll(address,address)", "view", ("bool",)),
+    ("lastAllocatedCollectionId()", "view", ("uint256",)),
+    ("lastAllocatedTokenId()", "view", ("uint256",)),
+    ("lowerGasParameter(bytes32,uint256)", "nonpayable", ()),
+    (
+        "mintFromManager(uint256,address,bytes,bytes32,bytes32)",
+        "nonpayable",
+        ("uint256", "uint256"),
+    ),
+    ("name()", "view", ("string",)),
+    ("ownerOf(uint256)", "view", ("address",)),
+    ("pendingPreparedMintTokenId()", "view", ("uint256",)),
+    ("preparedMint(uint256)", "view", ("(bool,bytes32,uint256)",)),
+    (
+        "prepareMintFromManager(uint256,bytes,bytes32,bytes32)",
+        "nonpayable",
+        ("uint256", "uint256"),
+    ),
+    ("raiseGasParameter(bytes32,uint256)", "nonpayable", ()),
+    ("rebindGasParameterProbe(bytes32,address)", "nonpayable", ()),
+    ("royaltyInfo(uint256,uint256)", "view", ("address", "uint256")),
+    ("safeTransferFrom(address,address,uint256,bytes)", "nonpayable", ()),
+    ("safeTransferFrom(address,address,uint256)", "nonpayable", ()),
+    ("setApprovalForAll(address,bool)", "nonpayable", ()),
+    ("setCollectionMaxSupply(uint256,uint256)", "nonpayable", ()),
+    ("setCollectionStatus(uint256,uint8)", "nonpayable", ()),
+    ("supportsInterface(bytes4)", "view", ("bool",)),
+    ("symbol()", "view", ("string",)),
+    (
+        "tokenCollectionIdentity(uint256)",
+        "view",
+        ("bool", "uint256", "uint256", "bool"),
+    ),
+    ("tokenData(uint256)", "view", ("bytes",)),
+    ("tokenLifecycle(uint256)", "view", ("uint8",)),
+    ("tokenURI(uint256)", "view", ("string",)),
+    ("totalSupply()", "view", ("uint256",)),
+    ("totalSupplyOfCollection(uint256)", "view", ("uint256",)),
+    ("transferFrom(address,address,uint256)", "nonpayable", ()),
+    ("updateSatellitePointer(bytes32,address)", "nonpayable", ()),
+)
+TARGET_ACTIVE_EVENT_SURFACES = (
+    ("Approval(address,address,uint256)", (True, True, True), False, None),
+    ("ApprovalForAll(address,address,bool)", (True, True, False), False, None),
+    ("BatchMetadataUpdate(uint256,uint256)", (False, False), False, None),
+    (
+        "CollectionBurnsBlocked(uint16,uint256,bytes32)",
+        (False, True, True),
+        False,
+        1,
+    ),
+    ("CollectionFrozen(uint16,uint256,bytes32)", (False, True, True), False, 1),
+    ("ContractURIUpdated()", (), False, None),
+    (
+        "CoreSatellitePointerFrozen(uint16,bytes32,bytes32,address,bytes32)",
+        (False, True, True, False, False),
+        False,
+        1,
+    ),
+    (
+        "CoreSatellitePointerUpdated(uint16,bytes32,bytes32,address,address)",
+        (False, True, True, True, False),
+        False,
+        1,
+    ),
+    (
+        "GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)",
+        (False, True, True, True, False, False),
+        False,
+        1,
+    ),
+    (
+        "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+        (False, True, True, True, False, False, False),
+        False,
+        1,
+    ),
+    ("MetadataUpdate(uint256)", (False,), False, None),
+    (
+        "StreamCollectionCreated(uint16,uint256,bytes32,uint8,bool,uint256,uint8)",
+        (False, True, True, False, False, False, False),
+        False,
+        1,
+    ),
+    (
+        "StreamCollectionMaxSupplyUpdated(uint16,uint256,bytes32,uint256,uint256)",
+        (False, True, True, False, False),
+        False,
+        1,
+    ),
+    (
+        "StreamCollectionStatusUpdated(uint16,uint256,bytes32,uint8,uint8)",
+        (False, True, True, False, False),
+        False,
+        1,
+    ),
+    (
+        "StreamMetadataRefresh(uint16,bytes32,uint256,uint256)",
+        (False, True, True, True),
+        False,
+        1,
+    ),
+    (
+        "StreamTokenBurned(uint256,uint256,uint256,uint16)",
+        (True, True, False, False),
+        False,
+        1,
+    ),
+    (
+        "TokenCollectionRegistered(uint16,uint256,uint256,uint256)",
+        (False, True, True, False),
+        False,
+        1,
+    ),
+    (
+        "TokenCollectionRegistrationReverted(uint16,uint256,uint256)",
+        (False, True, True),
+        False,
+        1,
+    ),
+    ("Transfer(address,address,uint256)", (True, True, True), False, None),
+)
 
 TARGET_ABI_SCHEMA = "6529stream.stream-core-permanent-interface.v1"
 TARGET_TOP_LEVEL_KEYS = {
@@ -108,6 +303,7 @@ TARGET_FUNCTION_KEYS = TARGET_COMMON_ENTRY_KEYS | {
 }
 TARGET_EVENT_KEYS = TARGET_COMMON_ENTRY_KEYS | {
     "topic0",
+    "anonymous",
     "indexed",
     "schema_version",
     "standard_interface",
@@ -150,6 +346,60 @@ ENTRY_CATEGORIES = (
 
 class AbiCompatibilityError(RuntimeError):
     pass
+
+
+IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
+
+
+def reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate object members instead of accepting last-key-wins JSON."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise AbiCompatibilityError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def parse_ijson_integer(token: str) -> int:
+    value = int(token)
+    if abs(value) > IJSON_SAFE_INTEGER_MAX:
+        raise AbiCompatibilityError(
+            f"JSON integer is outside the I-JSON interoperable range: {token}"
+        )
+    return value
+
+
+def reject_json_float(token: str) -> float:
+    raise AbiCompatibilityError(
+        f"floating-point JSON is forbidden in normative ABI checker inputs: {token}"
+    )
+
+
+def reject_json_constant(token: str) -> None:
+    raise AbiCompatibilityError(f"non-I-JSON token is forbidden: {token}")
+
+
+def load_strict_json(path: Path) -> Any:
+    """Load strict UTF-8, duplicate-free JSON for normative checker inputs."""
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError as exc:
+        raise AbiCompatibilityError(f"missing required file: {path}") from exc
+    try:
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise AbiCompatibilityError(f"{path} is not strict UTF-8 JSON: {exc}") from exc
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=reject_duplicate_json_pairs,
+            parse_int=parse_ijson_integer,
+            parse_float=reject_json_float,
+            parse_constant=reject_json_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise AbiCompatibilityError(f"invalid JSON in {path}: {exc}") from exc
 
 
 def require_exact_keys(
@@ -389,6 +639,138 @@ def validate_target_normative_revision_returns(
             )
 
 
+def target_active_surface_lock_payload(
+    function_surfaces: tuple[tuple[str, str, tuple[str, ...]], ...],
+    event_surfaces: tuple[
+        tuple[str, tuple[bool, ...], bool, int | None], ...
+    ],
+) -> dict[str, Any]:
+    """Build the canonical, intentionally narrow active-surface lock view."""
+    return {
+        "schema": TARGET_ACTIVE_SURFACE_LOCK_SCHEMA,
+        "functions": [
+            {
+                "signature": signature,
+                "state_mutability": state_mutability,
+                "returns": list(returns),
+            }
+            for signature, state_mutability, returns in function_surfaces
+        ],
+        "events": [
+            {
+                "signature": signature,
+                "indexed": list(indexed),
+                "anonymous": anonymous,
+                "schema_version": schema_version,
+            }
+            for signature, indexed, anonymous, schema_version in event_surfaces
+        ],
+    }
+
+
+def target_active_surface_lock_digest(
+    function_surfaces: tuple[tuple[str, str, tuple[str, ...]], ...],
+    event_surfaces: tuple[
+        tuple[str, tuple[bool, ...], bool, int | None], ...
+    ],
+) -> str:
+    payload = target_active_surface_lock_payload(function_surfaces, event_surfaces)
+    canonical = json.dumps(
+        payload,
+        ensure_ascii=True,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(canonical).hexdigest()
+
+
+def target_full_manifest_lock_payload(manifest: dict[str, Any]) -> dict[str, Any]:
+    """Build the reviewer-pinned view of every normative target semantic."""
+    return {
+        "schema": TARGET_FULL_MANIFEST_LOCK_SCHEMA,
+        "manifest": manifest,
+    }
+
+
+def target_full_manifest_lock_digest(manifest: dict[str, Any]) -> str:
+    """Hash the complete manifest while preserving all ordered arrays."""
+    try:
+        canonical = json.dumps(
+            target_full_manifest_lock_payload(manifest),
+            ensure_ascii=True,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("ascii")
+    except (TypeError, ValueError) as exc:
+        raise AbiCompatibilityError(
+            "StreamCore target manifest contains a non-canonical semantic value"
+        ) from exc
+    return "sha256:" + hashlib.sha256(canonical).hexdigest()
+
+
+def validate_target_full_manifest_lock(
+    manifest: dict[str, Any],
+    location: str,
+) -> None:
+    """Require every target field and ordered active/retired row to stay reviewed."""
+    actual_digest = target_full_manifest_lock_digest(manifest)
+    if actual_digest != TARGET_FULL_MANIFEST_LOCK_SHA256:
+        raise AbiCompatibilityError(
+            f"{location} does not match the complete reviewer-pinned target semantic lock: "
+            f"expected {TARGET_FULL_MANIFEST_LOCK_SHA256}, got {actual_digest}"
+        )
+
+
+def validate_target_active_surface_lock(
+    functions: list[dict[str, Any]],
+    events: list[dict[str, Any]],
+    location: str,
+) -> None:
+    """Require the complete ordered active ABI to match the reviewed fixed lock."""
+    expected_digest = target_active_surface_lock_digest(
+        TARGET_ACTIVE_FUNCTION_SURFACES,
+        TARGET_ACTIVE_EVENT_SURFACES,
+    )
+    if expected_digest != TARGET_ACTIVE_SURFACE_LOCK_SHA256:
+        raise AbiCompatibilityError(
+            "checker-owned active target surface constants disagree with their reviewed "
+            f"fixed digest: expected {TARGET_ACTIVE_SURFACE_LOCK_SHA256}, "
+            f"recomputed {expected_digest}"
+        )
+
+    actual_functions = tuple(
+        (
+            entry["signature"],
+            entry["state_mutability"],
+            tuple(entry["returns"]),
+        )
+        for entry in functions
+        if entry["status"] == "active_target"
+    )
+    actual_events = tuple(
+        (
+            entry["signature"],
+            tuple(entry["indexed"]),
+            entry["anonymous"],
+            entry["schema_version"],
+        )
+        for entry in events
+        if entry["status"] == "active_target"
+    )
+    actual_digest = target_active_surface_lock_digest(actual_functions, actual_events)
+    if (
+        actual_functions != TARGET_ACTIVE_FUNCTION_SURFACES
+        or actual_events != TARGET_ACTIVE_EVENT_SURFACES
+        or actual_digest != TARGET_ACTIVE_SURFACE_LOCK_SHA256
+    ):
+        raise AbiCompatibilityError(
+            f"{location} active functions/events do not match the independent active "
+            "target surface lock: "
+            f"expected {TARGET_ACTIVE_SURFACE_LOCK_SHA256}, got {actual_digest}"
+        )
+
+
 def validate_string_list(value: Any, location: str) -> list[str]:
     if not isinstance(value, list):
         raise AbiCompatibilityError(f"{location} must be a list")
@@ -503,7 +885,7 @@ def validate_target_manifest(
     manifest_path: Path,
     cast_bin: str = "cast",
 ) -> dict[str, Any]:
-    manifest = release_artifacts.load_json(manifest_path)
+    manifest = load_strict_json(manifest_path)
     if not isinstance(manifest, dict):
         raise AbiCompatibilityError(f"{manifest_path} must contain a JSON object")
     require_exact_keys(manifest, TARGET_TOP_LEVEL_KEYS, str(manifest_path))
@@ -682,6 +1064,11 @@ def validate_target_manifest(
             raise AbiCompatibilityError(
                 f"{location}.indexed must contain one boolean per event input"
             )
+        anonymous = entry["anonymous"]
+        if type(anonymous) is not bool or anonymous:
+            raise AbiCompatibilityError(
+                f"{location}.anonymous must be the boolean false for every Core target event"
+            )
         if sum(indexed) > 3:
             raise AbiCompatibilityError(f"{location} has more than three indexed event inputs")
         standard_interface = entry["standard_interface"]
@@ -717,7 +1104,7 @@ def validate_target_manifest(
             active_topics[topic0] = entry_id
         all_entries[entry_id] = ("event", status, entry)
 
-    for entry_id, (kind, status, entry) in all_entries.items():
+    for entry_id, (kind, _status, entry) in all_entries.items():
         for relation, expected_status, inverse in (
             ("supersedes", "retired_pre_genesis", "replaced_by"),
             ("replaced_by", "active_target", "supersedes"),
@@ -771,6 +1158,8 @@ def validate_target_manifest(
         functions,
         str(manifest_path),
     )
+    validate_target_active_surface_lock(functions, events, str(manifest_path))
+    validate_target_full_manifest_lock(manifest, str(manifest_path))
 
     return manifest
 
@@ -801,6 +1190,126 @@ def validate_target_required_absence(
         if category_entries:
             raise AbiCompatibilityError(
                 f"StreamCore target requires ABI category {category!r} to be absent"
+            )
+
+
+def target_function_shape(entry: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        entry.get("signature"),
+        entry.get("state_mutability"),
+        tuple(entry.get("returns", [])),
+    )
+
+
+def baseline_function_shape(entry: dict[str, Any]) -> tuple[Any, ...]:
+    outputs = entry.get("outputs", [])
+    if not isinstance(outputs, list):
+        raise AbiCompatibilityError("StreamCore baseline function outputs must be a list")
+    return (
+        entry.get("signature"),
+        entry.get("state_mutability"),
+        tuple(output.get("type") if isinstance(output, dict) else None for output in outputs),
+    )
+
+
+def target_event_shape(entry: dict[str, Any]) -> tuple[Any, ...]:
+    return (
+        entry.get("signature"),
+        tuple(entry.get("indexed", [])),
+        entry.get("anonymous"),
+    )
+
+
+def baseline_event_shape(entry: dict[str, Any]) -> tuple[Any, ...]:
+    inputs = entry.get("inputs", [])
+    if not isinstance(inputs, list):
+        raise AbiCompatibilityError("StreamCore baseline event inputs must be a list")
+    return (
+        entry.get("signature"),
+        tuple(
+            input_value.get("indexed") if isinstance(input_value, dict) else None
+            for input_value in inputs
+        ),
+        entry.get("anonymous"),
+    )
+
+
+def validate_target_retirement_baseline_closure(
+    manifest: dict[str, Any],
+    baseline: dict[str, Any],
+) -> None:
+    """Prove every current Core row survives exactly or has one reviewed retirement."""
+    contracts = baseline.get("contracts")
+    core = contracts.get("StreamCore") if isinstance(contracts, dict) else None
+    entries = core.get("entries") if isinstance(core, dict) else None
+    if not isinstance(entries, dict):
+        raise AbiCompatibilityError(
+            "implementation ABI baseline must include StreamCore entry categories"
+        )
+
+    categories = (
+        (
+            "function",
+            manifest["functions"],
+            entries.get("functions"),
+            target_function_shape,
+            baseline_function_shape,
+        ),
+        (
+            "event",
+            manifest["events"],
+            entries.get("events"),
+            target_event_shape,
+            baseline_event_shape,
+        ),
+    )
+    for label, target_rows, baseline_rows, target_shape, baseline_shape in categories:
+        if not isinstance(baseline_rows, list):
+            raise AbiCompatibilityError(
+                f"implementation ABI baseline StreamCore {label}s must be a list"
+            )
+        baseline_shapes = [baseline_shape(entry) for entry in baseline_rows]
+        active_shapes = [
+            target_shape(entry)
+            for entry in target_rows
+            if entry["status"] == "active_target"
+        ]
+        retired_shapes = [
+            target_shape(entry)
+            for entry in target_rows
+            if entry["status"] == "retired_pre_genesis"
+        ]
+        if len(baseline_shapes) != len(set(baseline_shapes)):
+            raise AbiCompatibilityError(
+                f"implementation ABI baseline has duplicate StreamCore {label} shapes"
+            )
+        if len(retired_shapes) != len(set(retired_shapes)):
+            raise AbiCompatibilityError(
+                f"target has duplicate retired StreamCore {label} shapes"
+            )
+
+        baseline_set = set(baseline_shapes)
+        accounted = set(active_shapes) | set(retired_shapes)
+        missing = sorted(baseline_set - accounted, key=repr)
+        phantom = sorted(set(retired_shapes) - baseline_set, key=repr)
+        double_counted = sorted(
+            set(active_shapes) & set(retired_shapes),
+            key=repr,
+        )
+        if missing:
+            raise AbiCompatibilityError(
+                f"target is missing retirement dispositions for current StreamCore {label} "
+                f"shapes: {missing!r}"
+            )
+        if phantom:
+            raise AbiCompatibilityError(
+                f"target contains retired StreamCore {label} shapes absent from the "
+                f"implementation baseline: {phantom!r}"
+            )
+        if double_counted:
+            raise AbiCompatibilityError(
+                f"target double-counts StreamCore {label} shapes as active and retired: "
+                f"{double_counted!r}"
             )
 
 
@@ -985,7 +1494,7 @@ def build_abi_surface(
     config_path: Path,
     foundry_out: Path,
 ) -> dict[str, Any]:
-    config = release_artifacts.load_json(config_path)
+    config = load_strict_json(config_path)
     configured_contracts = configured_artifact_entries(
         config,
         "production_contracts",
@@ -1027,7 +1536,7 @@ def build_abi_surface(
 
 
 def load_baseline(path: Path) -> dict[str, Any]:
-    baseline = release_artifacts.load_json(path)
+    baseline = load_strict_json(path)
     if baseline.get("schema_version") != ABI_SURFACE_SCHEMA:
         raise AbiCompatibilityError(
             f"{path} has schema {baseline.get('schema_version')!r}, "
@@ -1236,6 +1745,7 @@ def check_compatibility(
     current = build_abi_surface(repo_root, config_path, foundry_out)
     if target_manifest is not None:
         validate_target_required_absence(target_manifest, current)
+        validate_target_retirement_baseline_closure(target_manifest, baseline)
     report = compare_abi_surfaces(baseline, current)
     print_report(report)
     return 0 if report["compatible"] else 1

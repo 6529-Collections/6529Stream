@@ -2396,6 +2396,19 @@ struct RecoveryManifestRef {
     bytes32 schemaId;
     bytes32 canonicalizationHash;
 }
+
+struct FinalityRecoveryRefreshPlan {
+    bool exists;
+    bool complete;
+    bool superseded;
+    bytes32 manifestContentHash;
+    bytes32 supersededByRecoveryId;
+    uint256 lastAllocatedTokenIdAtExecution;
+    uint256 rangeStart;
+    uint256 rangeEnd;
+    uint256 processedThrough;
+    uint256 chunksEmitted;
+}
 ```
 
 `uriHash = keccak256(bytes(uri))`. `contentHash` is the hash of the canonical
@@ -2405,6 +2418,11 @@ canonicalized through the schema named by `schemaId` and
 PREMIS, C2PA, IIIF, preservation, recovery, and human-readable reconstruction
 records are bound through `contentHash` when they are part of the finality
 manifest.
+Every collection or scoped recovery schedule requires
+`recoveryManifest.contentHash != bytes32(0)`, whether or not the recovery says
+that artwork bytes change. This stored content hash is also the sole
+correlation value for any recovery refresh plan; a continuation caller never
+supplies a replacement hash.
 
 Every participating satellite must expose a finality read surface:
 
@@ -3251,6 +3269,21 @@ function scopedFinalityRecoveryRecord(
     FinalityScope calldata scope,
     bytes32 recoveryId
 ) external view returns (ScopedFinalityRecoveryRecord memory);
+
+function activeScopedFinalityRecoveryRoute(FinalityScope calldata scope)
+    external
+    view
+    returns (bytes32 recoveryRouteHash, bytes32 recoveryId);
+
+function scopedFinalityRecoveryRefreshPlan(
+    FinalityScope calldata scope,
+    bytes32 recoveryId
+) external view returns (FinalityRecoveryRefreshPlan memory);
+
+function continueScopedFinalityRecoveryRefresh(
+    FinalityScope calldata scope,
+    bytes32 recoveryId
+) external;
 ```
 
 `recoveryId` is `keccak256(abi.encode(STREAM_SCOPED_FINALITY_RECOVERY_V1,
@@ -3259,7 +3292,7 @@ scope.collectionId, scope.tokenId, scope.scopeId,
 expectedOldFinalityRecordHash, recoveryManifest.contentHash, recoveryRouteHash,
 executeAfter, artworkBytesChanged, reasonHash))`.
 
-Recommended scoped event:
+Production scoped events:
 
 ```solidity
 event ArtworkScopeFinalized(
@@ -3313,6 +3346,48 @@ event ScopedFinalityRecoveryExecuted(
     bool artworkBytesChanged,
     bytes32 reasonHash,
     string reasonURI
+);
+
+event ScopedFinalityRecoveryRefreshPlanCreated(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 manifestContentHash,
+    uint256 lastAllocatedTokenIdAtExecution,
+    uint256 rangeStart,
+    uint256 rangeEnd,
+    bool complete
+);
+
+event ScopedFinalityRecoveryRefreshProgress(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 manifestContentHash,
+    uint256 fromTokenId,
+    uint256 toTokenId,
+    uint256 processedThrough,
+    uint256 chunksEmitted,
+    bool complete
+);
+
+event ScopedFinalityRecoveryRefreshPlanSuperseded(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 supersededByRecoveryId,
+    bytes32 manifestContentHash,
+    uint256 processedThrough,
+    uint256 rangeEnd
 );
 ```
 
@@ -3492,6 +3567,39 @@ event FinalityRecoveryExecuted(
     string reasonURI
 );
 
+event FinalityRecoveryRefreshPlanCreated(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    bytes32 indexed manifestContentHash,
+    uint256 lastAllocatedTokenIdAtExecution,
+    uint256 rangeStart,
+    uint256 rangeEnd,
+    bool complete
+);
+
+event FinalityRecoveryRefreshProgress(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    bytes32 indexed manifestContentHash,
+    uint256 fromTokenId,
+    uint256 toTokenId,
+    uint256 processedThrough,
+    uint256 chunksEmitted,
+    bool complete
+);
+
+event FinalityRecoveryRefreshPlanSuperseded(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    bytes32 indexed supersededByRecoveryId,
+    bytes32 manifestContentHash,
+    uint256 processedThrough,
+    uint256 rangeEnd
+);
+
 function scheduleFinalityRecovery(
     uint256 collectionId,
     bytes32 recoveryId,
@@ -3525,7 +3633,61 @@ function activeFinalityRecoveryRoute(uint256 collectionId)
     external
     view
     returns (bytes32 recoveryRouteHash, bytes32 recoveryId);
+
+function finalityRecoveryRefreshPlan(
+    uint256 collectionId,
+    bytes32 recoveryId
+) external view returns (FinalityRecoveryRefreshPlan memory);
+
+function continueFinalityRecoveryRefresh(
+    uint256 collectionId,
+    bytes32 recoveryId
+) external;
+
+function incompleteFinalityRecoveryRefreshPlanCount()
+    external
+    view
+    returns (uint256);
+
+function assertNoIncompleteFinalityRecoveryRefreshPlans() external view;
+
+error RecoveryManifestContentHashZero();
+error FinalityRecoveryRefreshPlanMissing(bytes32 recoveryId);
+error FinalityRecoveryRefreshPlanComplete(bytes32 recoveryId);
+error FinalityRecoveryRefreshPlanInactive(
+    bytes32 recoveryId,
+    bytes32 activeRecoveryId
+);
+error FinalityRecoveryRefreshPlanMismatch(bytes32 recoveryId);
+error IncompleteFinalityRecoveryRefreshPlans(uint256 count);
 ```
+
+The production-exact continuation/read selectors are
+`continueFinalityRecoveryRefresh(uint256,bytes32) = 0x617c9142`,
+`continueScopedFinalityRecoveryRefresh((uint8,uint256,uint256,bytes32),bytes32)
+= 0x12ffdb0d`,
+`finalityRecoveryRefreshPlan(uint256,bytes32) = 0x2f72acb6`,
+`scopedFinalityRecoveryRefreshPlan((uint8,uint256,uint256,bytes32),bytes32)
+= 0x3d075555`, and
+`activeScopedFinalityRecoveryRoute((uint8,uint256,uint256,bytes32))
+= 0x066e33a4`. The global active-incomplete count getter is
+`incompleteFinalityRecoveryRefreshPlanCount() = 0xa76ed63d`, and its
+same-batch pointer-transition assertion is
+`assertNoIncompleteFinalityRecoveryRefreshPlans() = 0x955d14fb`. The six
+errors above have selectors `0x0d5f7f65`, `0x7352a53e`, `0x1abf597e`,
+`0x01bb61f5`, `0x2dc681ca`, and `0x0b37b37c`, respectively.
+
+The collection plan-created, progress, and superseded event topic-zero values
+are
+`0x5590436c7dbb2ed0938facf5ae98e65e85124a2e13e00beb6ec8074977862d84`,
+`0x8f59fcbfe19db77744f74c21e2ba799373890d37c0188d5647dc4d839c738e71`,
+and `0x46cf3a686b05af5842dbce8ee594d7d79150f32709b696f3e2ac8fabb3b90b1b`.
+The corresponding scoped values are
+`0x3dbc37ab6a915fb474ed929e21cc48c06e610215c7a1b8d8e4b78a4504b4228c`,
+`0x1f06d8cfd3bd35dbf2bd5e6b034faeab82e1a42696ee769c4112c2004158ab04`,
+and `0xf01128046f729a9423b6f9ebc2799e09a7608d6df6d35d5383a2e077c7d2a386`.
+These are finality-registry surfaces and add no selector, event, storage, or
+runtime byte to Core.
 
 Rules:
 
@@ -3602,6 +3764,95 @@ Rules:
     the acquisition-packet and condition-report fields owned by
     [CMC-ACQUISITION-PACKET], and owner-notification routing joins
     the monitoring list (State Export And Archival Operations).
+11. Scheduling either recovery form rejects a zero
+    `recoveryManifest.contentHash` with
+    `RecoveryManifestContentHashZero()`. Execution rechecks the scheduled
+    record's nonzero hash, and a refresh plan stores that exact value; neither
+    execution nor continuation accepts a caller-supplied refresh reason.
+12. When `artworkBytesChanged = true`, or when the new route supersedes an
+    active incomplete refresh plan, execution atomically marks the record
+    `EXECUTED`, activates its recovery route, reads Core's monotonic
+    `lastAllocatedTokenId()`, and creates exactly one fresh stored
+    `FinalityRecoveryRefreshPlan` under the new record's manifest hash.
+    Collection, `RELEASE`, `SEASON`, and `VIEW`
+    recovery use the global-ID invalidation superset
+    `[1, lastAllocatedTokenIdAtExecution]`, because collection/scope membership
+    is deliberately not enumerable in Core. `TOKEN` recovery uses exactly
+    `[scope.tokenId, scope.tokenId]`. For a zero high-water mark the wider plan
+    is created already complete with `rangeStart = rangeEnd =
+    processedThrough = 0`; otherwise wider plans start with
+    `processedThrough = 0`. A token plan starts with
+    `processedThrough = scope.tokenId - 1` using checked arithmetic only after
+    canonical scope validation has proved `scope.tokenId > 0`; this precondition
+    makes the subtraction safe. Execution emits the matching
+    `*RefreshPlanCreated` event but makes no Core refresh call, so notification
+    failure cannot prevent route recovery. When `artworkBytesChanged = false`
+    and there is no active incomplete predecessor plan, execution creates no
+    plan and continuation rejects it as missing. Creating an ordinary nonempty
+    plan increments the global active-incomplete count once; creating an empty
+    already-complete plan does not.
+13. Both `continue*FinalityRecoveryRefresh` entrypoints are permissionless and
+    process exactly one chunk per successful transaction. They validate the
+    canonical collection/scope key, an `EXECUTED` record carrying this stored
+    refresh obligation, an
+    existing incomplete plan, equality between the record and plan manifest
+    hashes, and that `active*FinalityRecoveryRoute` still names this
+    `recoveryId`. A plan with `superseded = true` is inactive and cannot emit a
+    stale-hash invalidation.
+14. Continuation derives `fromTokenId = processedThrough + 1` from storage and
+    `toTokenId = min(rangeEnd, fromTokenId + 4_999)` using subtraction before
+    addition so the arithmetic cannot overflow. It advances
+    `processedThrough` exactly once, increments `chunksEmitted` exactly once,
+    and sets `complete` iff `toTokenId == rangeEnd`; it then calls Core exactly
+    once with
+    `emitBatchMetadataUpdate(fromTokenId, toTokenId,
+    plan.manifestContentHash)`, including for a one-ID token plan. No loop and no
+    second Core call are permitted. Solidity transaction atomicity rolls all
+    three stored progress changes back if the Core call fails. Completing a
+    nonempty plan also decrements the global active-incomplete count exactly
+    once in that same transaction. The progress
+    event is emitted only in the successful transaction. Missing, complete,
+    inactive, or record/plan-mismatched states use the exact errors above.
+15. Every chunk contains at most Core's pinned `MAX_REFRESH_RANGE = 5_000` IDs
+    and ends no later than the execution snapshot. Burned, unrelated-
+    collection, and unrelated-scope token IDs may occur in wider ranges because
+    ERC-4906 batch ranges are safe invalidation supersets. Token IDs allocated
+    after the snapshot resolve through the already-active recovered route on
+    their first `tokenURI` read, so they have no stale pre-recovery cache and
+    require no recovery invalidation. Indexers reconstruct completion from the
+    plan and progress events and may verify it through the exact plan reads.
+16. Supersession never strands an earlier cache invalidation. If the active
+    route has an incomplete plan, executing any newer recovery for that same
+    collection or exact scope first sets the old plan's `superseded = true` and
+    `supersededByRecoveryId` to the new ID, emits the exact supersession event,
+    and decrements the global active-incomplete count once. It then creates a
+    fresh full-snapshot plan under the new stored manifest content hash even
+    when the new record says `artworkBytesChanged = false`. A nonempty fresh
+    plan increments the count once; an empty already-complete plan does not.
+    Thus superseding a nonempty plan with another nonempty plan has zero net
+    count change, while progress under the obsolete manifest cannot resume.
+17. The registry maintains
+    `incompleteFinalityRecoveryRefreshPlanCount()` as the global count of plans
+    that exist, are not complete, and are not superseded. Replacing Core's
+    current finality-registry pointer while this value is nonzero would strand
+    every old-registry continuation because Core authorizes only the current
+    registry. Therefore the governance executor/module-transition validator
+    requires the old current registry's exact
+    `assertNoIncompleteFinalityRecoveryRefreshPlans()` call immediately before
+    `updateSatellitePointer(ARTWORK_FINALITY_REGISTRY, successor)` in the same
+    atomic governance batch; the assertion reverts with
+    `IncompleteFinalityRecoveryRefreshPlans(count)` when nonzero. No intervening
+    call is permitted, and a finality-registry candidate cannot bypass this
+    batch-shape rule through the generic module path. Protocol v1 requires
+    drain-to-zero. Any later handoff/import extension must be explicitly
+    versioned, hash-commit and import every exact remaining plan into the
+    successor, and reduce the predecessor count to zero before this assertion;
+    a declared hash or operational promise alone is insufficient.
+18. Monitoring treats a nonzero global count, a plan whose cursor has stopped
+    advancing, a Core-call failure, and a pending finality-registry replacement
+    as actionable conditions. Permissionless keepers and operators must drive
+    every active plan to completion before pointer cutover; release and incident
+    runbooks may not treat notification as best-effort or silently abandon it.
 
 ## Governance Staging [LTA-GOV]
 
@@ -4727,6 +4978,36 @@ function latestStateExport()
     );
 ```
 
+The read above and the three `StateExportPublished`,
+`StateExportChallenged`, and `StateExportSuperseded` events are collectively
+the `IStreamStateExportPublisher` surface. The genesis profile binds
+`STATE_EXPORT_PUBLISHER` to `GOVERNANCE_LAYER`, so that entry must prove both
+the interface and the `STATE_EXPORT_PUBLISHER_EVENTS_V1` event marker; a bare
+governance executor/role-registry implementation is not a publisher. The
+profile pins selector `0x77faad4f` and event topics
+`0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045`,
+`0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c`,
+and `0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a`
+for that surface. The complete ABI lock also pins the read's five ordered return
+types to `(uint256,bytes32,bytes32,bytes32,string)`, pins all three events as
+non-anonymous, and pins their indexed masks, in the signature order above and below, to
+`[false,true,true,true,false,false]`, `[false,true,true,true,false]`, and
+`[false,true,true,true,false]`. The canonical surface digest is
+`sha256:535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`.
+
+Because this ERC-165 surface has exactly one function, its interface ID is the
+same `0x77faad4f` selector; events do not participate in ERC-165. Both the
+`STATE_EXPORT_PUBLISHER` pointer and the `GOVERNANCE_LAYER` registry record must
+carry that exact interface ID. A synthetic composite such as `0xa5971448` is
+not publisher-interface evidence. Candidate completeness likewise requires a
+separate exact `state_export_publisher_abi_proof` object containing the full
+surface and digest: `verified_interfaces` and `verified_markers` strings cannot
+prove return types, indexed masks, or non-anonymous emission. The proof digest
+is recomputed from type-strict canonical JSON, so numeric `0`/`1` cannot stand
+in for JSON booleans. The current implementation-class catalog
+remains non-instance evidence, so issue #656 must still supply and reconcile a
+concrete deployment candidate before this assertion can support production.
+
 The event may be emitted by governance, a dedicated archive publisher, or a
 successor/export satellite named in `streamSystemManifest()`. It does not make
 an offchain export magically correct; it makes the claimed export discoverable,
@@ -5474,7 +5755,12 @@ Monitoring operations should define alert routing and escalation for:
     requirement 9);
 14. recovery-notice routing to token owners of record and registered
     owner-records stewards, and the objection-window records of
-    Finality Recovery rule 10 ([LTA-FINALITY]).
+    Finality Recovery rule 10 ([LTA-FINALITY]);
+15. a nonzero `incompleteFinalityRecoveryRefreshPlanCount()`, stalled cursor,
+    failed Core refresh attempt, supersession, and any scheduled finality-
+    registry pointer replacement while the count is nonzero. Keeper/operator
+    escalation drives the count to zero and verifies the exact same-batch
+    assertion before cutover (Finality Recovery rules 16-18).
 
 If immutable Core is found to have a critical bug, the default incident posture
 is communication, pause/tightening where available, state export, and successor

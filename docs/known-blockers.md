@@ -145,8 +145,9 @@ contributors who start from the README.
   while the legacy Drops/Minter route remained live. The remediation is a
   pre-genesis ABI cutover and caller migration, not another additive parallel
   API: satellite-only slices must keep zero Core delta and Core-changing slices
-  must measure net-negative until the complete target passes at or below 22,576
-  bytes.
+  must measure net-negative until the complete linked production-profile
+  `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
+  not a bytecode measurement.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,

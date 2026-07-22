@@ -475,6 +475,39 @@ def validate_payload_schema(
                 "pointer cached facts disagree with contracts/registry state"
             )
 
+    publisher_pointer_type = generator.hex_keccak(b"STATE_EXPORT_PUBLISHER")
+    publisher_pointer = next(
+        pointer
+        for pointer in pointers
+        if pointer["pointerType"] == publisher_pointer_type
+    )
+    governance_address = contract_by_key["GOVERNANCE_LAYER"]["address"]
+    governance_registry_record = registry_by_module[governance_address]
+    if (
+        publisher_pointer["target"] != governance_address
+        or publisher_pointer["interfaceId"]
+        != generator.STATE_EXPORT_PUBLISHER_INTERFACE_ID
+        or governance_registry_record["interfaceId"]
+        != generator.STATE_EXPORT_PUBLISHER_INTERFACE_ID
+    ):
+        raise generator.ManifestVectorError(
+            "STATE_EXPORT_PUBLISHER pointer and GOVERNANCE_LAYER registry record "
+            "must use the exact IStreamStateExportPublisher interface ID 0x77faad4f"
+        )
+
+    finality_adapter_address = contract_by_key["STREAM_CORE_FINALITY_ADAPTER"][
+        "address"
+    ]
+    finality_adapter_registry_record = registry_by_module[finality_adapter_address]
+    if (
+        finality_adapter_registry_record["interfaceId"]
+        != generator.STREAM_CORE_FINALITY_ADAPTER_INTERFACE_ID
+    ):
+        raise generator.ManifestVectorError(
+            "STREAM_CORE_FINALITY_ADAPTER registry record must use the exact "
+            "IStreamCoreFinalityAdapter interface ID 0xebf35615"
+        )
+
     probes = _array(payload["gasParameterProbes"], "payload.gasParameterProbes")
     previous_probe_sort: tuple[str, str] | None = None
     seen_probe_pairs: set[tuple[str, str]] = set()
@@ -643,7 +676,9 @@ def _first_difference(expected: Any, actual: Any, path: str = "$") -> str | None
     if isinstance(expected, list):
         if len(expected) != len(actual):
             return f"{path}: expected {len(expected)} elements, got {len(actual)}"
-        for index, (expected_item, actual_item) in enumerate(zip(expected, actual)):
+        for index, (expected_item, actual_item) in enumerate(
+            zip(expected, actual, strict=True)
+        ):
             difference = _first_difference(
                 expected_item, actual_item, f"{path}[{index}]"
             )
@@ -733,6 +768,26 @@ def validate_vector_mechanics(
     if derivation.get("state_export_publisher_binding") != "GOVERNANCE_LAYER":
         raise generator.ManifestVectorError(
             "fixture state-export publisher binding must remain explicit"
+        )
+    publisher_surface = _object(
+        derivation.get("state_export_publisher_surface"),
+        "vector.fixture_derivation.state_export_publisher_surface",
+    )
+    expected_publisher_surface = generator.state_export_publisher_surface()
+    _exact_keys(
+        publisher_surface,
+        expected_publisher_surface,
+        "vector.fixture_derivation.state_export_publisher_surface",
+    )
+    publisher_difference = _first_difference(
+        expected_publisher_surface,
+        publisher_surface,
+        "vector.fixture_derivation.state_export_publisher_surface",
+    )
+    if publisher_difference:
+        raise generator.ManifestVectorError(
+            "fixture state-export publisher ABI surface or fixed digest drifted: "
+            + publisher_difference
         )
     if derivation.get("sstore2_carrier_policy") != (
         "root and chunk carriers are excluded from payload.contracts "

@@ -550,6 +550,8 @@ system-manifest-payload-vector:
 system-manifest-payload-vector-check:
 	$(PYTHON) scripts/test_system_manifest_payload_vector.py
 	$(PYTHON) scripts/check_system_manifest_payload_vector.py
+	$(PYTHON) scripts/test_system_manifest_payload_vector_reference.py
+	$(PYTHON) scripts/check_system_manifest_payload_vector_reference.py
 
 slither-baseline-metadata-check:
 	$(PYTHON) scripts/test_slither_baseline.py

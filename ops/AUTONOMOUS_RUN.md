@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 15:25 UTC` |
+| Last updated | `2026-07-22 17:13 UTC` |
 
 ## Current Run Notes
 
@@ -70,16 +70,69 @@ evidence, and audit/readiness gates.
   hooks while the legacy Drops/Minter path remained live, producing the current
   24,152-byte transitional Core. The current build is already non-enumerable and
   is not a complete mandatory-hook proof.
-- PR #663 is the active target-lock review. Its authoritative merged-tree local
-  gate passed in 1,013 seconds before publication; CI and CodeRabbit review
-  remain required before merge.
+- PR #663 is the active target-lock review. Its authoritative final-follow-up
+  local gate passed in 1,021.7 seconds; fresh CI and CodeRabbit review remain
+  required on that follow-up head before merge. The first published head passed
+  Windows, Slither, and Foundry CI. Independent review then found
+  that count-only target checks did not lock every active ABI shape and that
+  the vector's governance-hosted state-export publisher lacked an exact
+  publisher-surface proof. The follow-up now pins all 58 function and 19 event
+  shapes to reviewed digest
+  `2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`,
+  while a second full-target canonical-JSON digest
+  `18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`
+  pins every top-level semantic and ordered active/retired row. Baseline
+  reconciliation now requires an exact disposition for every current Core
+  function/event and rejects retired rows absent from that baseline. Target,
+  ABI config/baseline, genesis-profile, and candidate inputs reject invalid
+  UTF-8, duplicate members, non-finite/floating values, and unsafe integers.
+  The follow-up also pins the export read selector and three event topics in the
+  governance profile/vector. Every locked event is explicitly non-anonymous and
+  its schema version is fixed; the complete canonical Core, governance,
+  system-manifest, and finality-adapter profile rows are closed over all reviewed
+  fields. The Core profile and candidate check now pin the exact
+  IERC165/ERC-721/ERC-4906/ERC-2981/ERC-7572 interface tuple and reject an
+  extra enumerable advertisement; the system-manifest and finality-adapter
+  candidates likewise reject extra interfaces or markers and require their
+  exact implementation names. The governance entry remains composite and pins
+  its exact normative homes. Its publisher proof now fixes five return values,
+  all event indexed masks, non-anonymous emission, full ABI digest
+  `535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`,
+  and the real `0x77faad4f` interface ID at both pointer and registry records;
+  the synthetic registry ID is rejected. The vector also carries the finality
+  adapter's canonical `0xebf35615` interface ID rather than a synthetic
+  composite. Every non-governance candidate rejects a publisher proof.
+  Candidate proof comparison and the independent oracle are
+  type-strict, so integer `0`/`1` values cannot masquerade as booleans. The
+  independently implemented fixed-golden vector oracle is wired into CI and
+  release-checksum provenance. Focused mutation tests, independent
+  selector/topic/hash recomputation, and the full final-follow-up local gate
+  pass. The manual refresh/check recipes now preserve the same canonical
+  risk-register, release-notes, manifest, bytecode-proof, candidate-lockfile,
+  and checksum order enforced by Make, CI, and both check wrappers.
 - This slice pins the intentional pre-genesis target ABI, one canonical
   satellite-pointer model, minimal governed-gas/emitter surfaces, terminal burn
-  blocking, and an explicit cutover order. Until the complete target measures at
-  or below 22,576 bytes, a Core-changing PR must be measured net-negative and a
-  satellite slice must have zero Core delta.
+  blocking, and an explicit cutover order. Until the complete linked
+  production-profile `StreamCore` runtime measures at or below 22,576 bytes, a
+  Core-changing PR must be measured net-negative and a satellite slice must
+  have zero Core delta.
 - After this ABI lock merges, continue immediately with the satellite/caller
-  migration sequence. Do not route StreamDrops directly through the manager
+  migration sequence. Recovery-driven refresh chunks preserve the zero-Core-
+  delta ABI: artwork-changing execution snapshots the token high-water mark and
+  stores a monotonic collection/scoped plan; either exact permissionless
+  continuation advances one at-most-5,000-ID chunk and passes the stored
+  accepted recovery-manifest content hash in the existing batch-helper
+  `reasonHash` slot, with cursor rollback on Core failure. Wider scopes use a
+  global-ID invalidation superset because Core intentionally has no enumerable
+  membership index, token scope uses one ID, and a newer recovery carries any
+  incomplete predecessor invalidation into a fresh plan even when its own
+  artwork-change flag is false. The registry-wide active-incomplete count must
+  be zero through the exact same-batch assertion immediately before a Core
+  finality-registry pointer update; operators and permissionless keepers drain
+  plans so old-registry authorization cannot be stranded. Post-snapshot mints
+  already resolve through the recovered route. The finality execution event retains
+  the distinct governance reason. Do not route StreamDrops directly through
+  the manager
   until an authenticated, operation-bound settlement seam preserves revenue
   accounting before receiver callbacks, and do not delete the legacy mint path
   until all production callers and auction timing ownership have migrated.

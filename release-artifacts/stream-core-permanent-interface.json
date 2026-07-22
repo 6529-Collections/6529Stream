@@ -2742,6 +2742,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -2767,6 +2768,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -2792,6 +2794,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x6bd5c950a8d8df17f772f5af37cb3655737899cbf903264b9795592da439661c",
+      "anonymous": false,
       "indexed": [
         false,
         false
@@ -2816,6 +2819,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x697a1b030ec8eb99502e034c7de5a260637923f3f9357d9e34f626e0cdb0745d",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -2843,6 +2847,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x7b4b56479ec391ac57aaba4d2db17a75f598510fdc0e9472d03e0481d8e64328",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -2868,6 +2873,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0xa5d4097edda6d87cb9329af83fb3712ef77eeb13738ffe43cc35a4ce305ad962",
+      "anonymous": false,
       "indexed": [],
       "schema_version": null,
       "standard_interface": "IERC7572"
@@ -2889,6 +2895,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x08bb92ce6e33a2853c33ee2b8c70eb45f99aacc4c3baa3794494ce1e5984d380",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -2916,6 +2923,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0xa723bbdea55cffd0c5c0459a83524fb91e5620f4a9367ae98c76ca81ccf0128c",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -2943,6 +2951,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -2971,6 +2980,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x587835584450495af0ebae742cc2f7c3927ade7498ab91baaebb9525d68e14dc",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3000,6 +3010,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0xf8e1a15aba9398e019f0b49df1a4fde98ee17ae345cb5f6b5e2c27f5033e8ce7",
+      "anonymous": false,
       "indexed": [
         false
       ],
@@ -3025,6 +3036,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x7663fca5307dcd0534d394725f87820d7ca646288b4e2708308434c760c9da75",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3054,6 +3066,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0xa49f2365effe8afdc532a2b061f0cadf514e33c5b47022cfb2fd4d47b14583df",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3081,6 +3094,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0xf1dffa5a477dbda4f3d61e1cafcca82cdfd00d5f287353249a9cf308767bf934",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3108,6 +3122,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x167c8dd2305074833e7698077c46d5d3f848b5f53506dc2a72101a217c55bb04",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3136,6 +3151,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x134ea0c85775a433c3b06f6e426d6da62c5397a6932ad57006e98e96c72a21f0",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -3162,6 +3178,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x317801bca186064bc3c786ae0ab9d99863f1a9b56589bd5bd7eabecee366fe23",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3188,6 +3205,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0x07f05274cbe2dc6ec5d7f13cc31ed27bbaa2350da4d7fc3e254e220a1109dd81",
+      "anonymous": false,
       "indexed": [
         false,
         true,
@@ -3213,6 +3231,7 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -3240,6 +3259,7 @@
       "replacement_signature": null,
       "retirement_rationale": "The pre-genesis surface is superseded by the production-exact Permanent Core entry or entries named in replaced_by.",
       "topic0": "0x5baee347cce9899b119eb4f42984958a6e25dc5b505f4f1ab8f3837120cf241f",
+      "anonymous": false,
       "indexed": [
         true
       ],
@@ -3265,6 +3285,7 @@
       "replacement_signature": null,
       "retirement_rationale": "The pre-genesis surface is superseded by the production-exact Permanent Core entry or entries named in replaced_by.",
       "topic0": "0x7965a79edbbe8f2445202cb9d12fb0d9c7049a41ea1def1c77e96577610dfc4b",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -3291,6 +3312,7 @@
       "replacement_signature": null,
       "retirement_rationale": "This responsibility leaves byte-constrained Core before genesis and is owned by the named external subsystem or release surface.",
       "topic0": "0x95aac5389bb9506e202e041d95e1b1096a1925d0f8595b83ea609b1d372f22bf",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -3317,6 +3339,7 @@
       "replacement_signature": null,
       "retirement_rationale": "This responsibility leaves byte-constrained Core before genesis and is owned by the named external subsystem or release surface.",
       "topic0": "0x25cd81c3ce872bde5f7e7ddd309cd91c6091c1f6a2719c7c25c01b9f55fa1aec",
+      "anonymous": false,
       "indexed": [
         true,
         true,
@@ -3344,6 +3367,7 @@
       "replacement_signature": null,
       "retirement_rationale": "This legacy convenience, ownership, duplicate, or derived surface is intentionally absent from the production Core interface.",
       "topic0": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+      "anonymous": false,
       "indexed": [
         true,
         true
@@ -3370,6 +3394,7 @@
       "replacement_signature": null,
       "retirement_rationale": "The pre-genesis surface is superseded by the production-exact Permanent Core entry or entries named in replaced_by.",
       "topic0": "0x88e4cc622e8085aee6ea05a4954b24e3bc91085a6b1cc3d037904a1259a43708",
+      "anonymous": false,
       "indexed": [
         true,
         true,

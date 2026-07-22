@@ -44,6 +44,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/generate_system_manifest_payload_vector.py"),
     Path("scripts/check_system_manifest_payload_vector.py"),
     Path("scripts/test_system_manifest_payload_vector.py"),
+    Path("scripts/check_system_manifest_payload_vector_reference.py"),
+    Path("scripts/test_system_manifest_payload_vector_reference.py"),
     Path("scripts/check_slither_baseline.py"),
     Path("scripts/test_slither_baseline.py"),
     Path("scripts/release_evidence_paths.py"),

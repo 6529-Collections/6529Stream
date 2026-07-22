@@ -315,7 +315,7 @@ paths:
 | minimal `tokenURI()` delegation to router | Core | ERC-721 metadata callers |
 | minimal `contractURI()` delegation to the contract-metadata satellite (ADR 0009 decision 4) | Core | Marketplaces and indexers (ERC-7572) |
 | entropy registration call during mint | Core to coordinator | Mint path |
-| Core-originated `emitMetadataUpdate(uint256,bytes32)` (`0xb826aa0c`) and `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) restricted ERC-4906 helpers, emitting the standard event plus `StreamMetadataRefresh(uint16,bytes32,uint256,uint256)`, with O(1) lifecycle/range checks and `MAX_REFRESH_RANGE = 5_000` (ADR 0009 decision 5; [MRR-REFRESH-EMITTERS]) | Core | Current metadata router and finality registry; the exact nonzero `coordinatorAtMint(tokenId)` additionally for the single-token helper only, never for batch |
+| Core-originated `emitMetadataUpdate(uint256,bytes32)` (`0xb826aa0c`) and `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) restricted ERC-4906 helpers, emitting the standard event plus `StreamMetadataRefresh(uint16,bytes32,uint256,uint256)`, with O(1) lifecycle/range checks and `MAX_REFRESH_RANGE = 5_000` (ADR 0009 decision 5; [MRR-REFRESH-EMITTERS]) | Core | Current metadata router and finality registry; the registry's permissionless stored-plan continuation uses exactly one batch call per transaction; the exact nonzero `coordinatorAtMint(tokenId)` additionally for the single-token helper only, never for batch |
 | Core-originated `emitContractURIUpdated()` (`0x7f377036`) restricted ERC-7572 helper; no calldata or return value (ADR 0012 decision T9) | Core | Metadata router only |
 | `totalSupplyOfCollection(uint256)` per-collection live-supply storage read — minted-ever minus burned and non-reverting — per [PV1-IDENTITY] item 5 | Core | Marketplaces and indexers |
 | Complete linked via-IR runtime measurement through the checked production build | Release tooling | Sole authority for EIP-170 headroom; row or group estimates never substitute for the linked measurement |
@@ -393,6 +393,32 @@ stores actual Core separately, verifies both adapter bindings, and hashes the
 actual Core address. This adapter adds zero selectors and zero bytecode to
 Core; the obsolete Core aggregate/facade seam is not a launch compatibility
 surface ([LTA-CORE-FINALITY-ADAPTER]).
+
+Artwork-recovery invalidation is also satellite-first and adds zero Core
+delta. The finality registry requires a nonzero recovery-manifest content hash,
+snapshots Core's existing global token high-water mark when an artwork-changing
+route executes, and stores an enumerable-free monotonic refresh plan. A newer
+route also replaces any incomplete predecessor plan with a fresh snapshot plan
+under its own stored manifest hash, even when the newer recovery says bytes are
+unchanged, so invalidation is never stranded. The exact
+permissionless continuations are
+`continueFinalityRecoveryRefresh(uint256,bytes32)` (`0x617c9142`) and
+`continueScopedFinalityRecoveryRefresh((uint8,uint256,uint256,bytes32),bytes32)`
+(`0x12ffdb0d`); each advances one stored chunk and calls the existing Core batch
+helper exactly once for at most 5,000 global IDs. Collection and
+release/season/view changes use `[1, executionSnapshot]` as a safe invalidation
+superset, token changes use their one token ID, Core failure rolls progress
+back, and post-snapshot mints already use the recovered route. The exact plan
+reads, progress events, errors, supersession rule, and golden tests are owned by
+[LTA-FINALITY] and conformance golden 17.
+The registry exposes the exact active-incomplete count
+`incompleteFinalityRecoveryRefreshPlanCount()` (`0xa76ed63d`) and assertion
+`assertNoIncompleteFinalityRecoveryRefreshPlans()` (`0x955d14fb`). Because Core
+authorizes only the current finality registry, the governance/module transition
+validator requires the old registry's zero-count assertion immediately before
+the Core finality-pointer update in the same atomic batch. Operators and
+permissionless keepers drain active plans before cutover; omission, intervening
+calls, generic-path bypass, or a nonzero count fail without changing Core.
 
 Governance V2 removes the legacy caller-supplied `actionId` argument from every
 GGP/GTP host, not only Core. All GGP hosts use the six-return info read and

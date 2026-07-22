@@ -1810,6 +1810,31 @@ Acceptance criteria:
    gate, and keep audit/external-evidence readiness claims blocked until their
    independent acceptance criteria are satisfied.
 
+Current target-lock evidence additionally requires an independently reviewed
+exact active-surface digest rather than count-only ABI checks plus a separate
+full-target canonical-JSON digest over every top-level semantic and ordered
+active/retired row. Bidirectional baseline closure requires exactly one active
+or retired disposition for every current Core function/event and rejects
+retirements absent from that baseline. Normative target, config, baseline,
+profile, and candidate JSON rejects invalid UTF-8, duplicate members,
+non-finite/floating values, and unsafe integers. Complete canonical profile rows
+are locked for Core, governance, the system manifest, and the finality adapter; exact
+implementation/interface/marker sets are required for the three non-governance
+safety-critical candidates, and the structured state-export publisher ABI proof
+is governance-exclusive. Evidence also requires an explicit
+`IStreamStateExportPublisher` selector/event proof for that governance-hosted
+genesis publisher and a fixed-golden system-manifest vector oracle that shares
+no generator/checker codec implementation. The target architecture also closes
+recovery-refresh executability with a zero-Core-delta finality-registry plan:
+execution snapshots the monotonic token high-water mark and permissionless
+collection/scoped continuations advance exactly one bounded existing-Core batch
+call per transaction using only the stored recovery-manifest content hash. A
+new route atomically carries forward an incomplete predecessor invalidation,
+and a global active-incomplete count plus exact same-batch zero-count assertion
+blocks finality-registry pointer cutover from stranding old-registry plans.
+These close review gaps without claiming the target implementation or issue
+#654 is complete.
+
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
 Status: Completed in issue #436 / PR #437.

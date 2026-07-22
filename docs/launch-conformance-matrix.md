@@ -421,7 +421,17 @@ Mandatory genesis contracts:
 
 ```text
  1 StreamCore
- 2 StreamGovernance or equivalent ADR 0004 timelock/role layer
+ 2 StreamGovernance or equivalent ADR 0004 timelock/role layer, also
+   satisfying `IStreamStateExportPublisher` and the
+   `STATE_EXPORT_PUBLISHER_EVENTS_V1` marker because genesis binds the
+   `STATE_EXPORT_PUBLISHER` pointer to this entry; the profile also pins the
+   `latestStateExport()` selector and all three publication/challenge/
+   supersession event topics, the read's five ordered return types, all three
+   event indexed masks, and non-anonymous emission under ABI digest
+   `sha256:535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`;
+   the pointer and this entry's registry record both use the one-function
+   publisher interface ID `0x77faad4f`, and candidate marker strings alone do
+   not replace the separate type-strict, digest-recomputed structured ABI proof
  3 StreamModuleRegistry (canonical IStreamModuleRegistry)
  4 StreamRevenueResolver (IStreamRevenueResolver)
  5 StreamSplitFactory (IStreamSplitFactory)
@@ -898,9 +908,47 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
     ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
     [MPA-SINGLE-STEP]); sale adapters may pre-screen but their checks are
     not the conformance locus.
-17. A finalized collection-scope artwork recovery that affects more than
-    `MAX_REFRESH_RANGE` tokens emits chunked `BatchMetadataUpdate` events with
-    the same recovery reason hash and never emits one oversized range.
+17. Finality-recovery refresh is executable, bounded, and zero-Core-delta.
+    Golden tests prove both scheduling entrypoints reject a zero
+    `recoveryManifest.contentHash`; an artwork-changing execution atomically
+    activates the route, snapshots `lastAllocatedTokenId()`, and creates a
+    monotonic stored plan without calling Core. Collection and
+    `RELEASE`/`SEASON`/`VIEW` plans cover `[1, snapshot]` as a global-ID
+    invalidation superset; `TOKEN` first proves canonical `tokenId > 0`, then
+    safely initializes its checked cursor at `tokenId - 1` for exactly
+    `[tokenId, tokenId]`; and post-snapshot mints use the recovered route without
+    invalidation. A non-artwork-changing execution normally creates no plan,
+    but if it supersedes an incomplete predecessor it atomically marks that plan
+    superseded and creates a fresh full-snapshot plan under the new manifest
+    hash so the old cache invalidation is not stranded. The exact permissionless
+    `continueFinalityRecoveryRefresh(uint256,bytes32)` (`0x617c9142`) and
+    `continueScopedFinalityRecoveryRefresh((uint8,uint256,uint256,bytes32),bytes32)`
+    (`0x12ffdb0d`) entrypoints recheck the executed record, current active route,
+    incomplete plan, and manifest-hash agreement, derive the next range solely
+    from storage, advance the cursor/chunk count exactly once, and call Core's
+    existing `emitBatchMetadataUpdate` exactly once for no more than
+    `MAX_REFRESH_RANGE = 5_000` IDs. Every matching `StreamMetadataRefresh`
+    carries exactly the plan's nonzero `recoveryManifest.contentHash` through
+    the Core-helper `reasonHash` slot; no caller-supplied range or hash and no
+    oversized or second batch call exist. Tests prove missing, already-complete,
+    superseded, and record/plan-mismatched rejection; one-ID token completion;
+    exact boundary and multi-chunk progress; final short chunk; rollback of all
+    cursor changes on Core failure; progress-event/read reconstruction; safe
+    unrelated/burned IDs in wider supersets; and no change to the Core ABI. The
+    distinct governance `reasonHash` remains in `FinalityRecoveryExecuted` or
+    `ScopedFinalityRecoveryExecuted`.
+    The registry-wide active-incomplete count increments for each nonempty fresh
+    plan and decrements exactly once on completion or supersession. Tests pin
+    `incompleteFinalityRecoveryRefreshPlanCount()` (`0xa76ed63d`), the
+    `assertNoIncompleteFinalityRecoveryRefreshPlans()` (`0x955d14fb`) revert and
+    zero cases, and ordinary/artwork-unchanged supersession count transitions.
+    A finality-registry pointer replacement is nonconformant unless the
+    governance/module transition validator requires that assertion against the
+    old current registry immediately before Core's pointer update in the same
+    batch; nonzero-count cutover, an intervening call, omission, and generic-
+    module bypass all fail. Monitoring/keeper tests prove every active plan is
+    driven to completion before replacement, so loss of old-registry Core
+    authorization cannot silently strand a plan.
 18. A minted token whose pinned entropy coordinator has no code, reverts, is
     incident-revoked, or returns malformed data renders pending/unknown
     metadata rather than reverting `tokenURI()`.

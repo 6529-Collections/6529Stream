@@ -51,6 +51,169 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
         self.assertEqual(len(validated["payload"]["gasParameterProbes"]), 40)
         self.assertGreater(len(validated["chunks"]), 1)
 
+    def test_governance_binding_proves_state_export_publisher_surface(self) -> None:
+        governance = next(
+            entry
+            for entry in self.profile["entries"]
+            if entry["key"] == "GOVERNANCE_LAYER"
+        )
+        self.assertIn(
+            generator.STATE_EXPORT_PUBLISHER_INTERFACE,
+            governance["required_interfaces"],
+        )
+        self.assertTrue(
+            set(generator.STATE_EXPORT_PUBLISHER_MARKERS).issubset(
+                governance["required_markers"]
+            )
+        )
+        self.assertEqual(
+            self.vector["fixture_derivation"]["state_export_publisher_binding"],
+            "GOVERNANCE_LAYER",
+        )
+        self.assertEqual(
+            self.vector["fixture_derivation"]["state_export_publisher_surface"],
+            generator.state_export_publisher_surface(),
+        )
+        surface = self.vector["fixture_derivation"]["state_export_publisher_surface"]
+        self.assertEqual(surface["interface_id"], "0x77faad4f")
+        self.assertEqual(
+            surface["functions"][0]["returns"],
+            ["uint256", "bytes32", "bytes32", "bytes32", "string"],
+        )
+        self.assertEqual(
+            [event["indexed"] for event in surface["events"]],
+            [
+                [False, True, True, True, False, False],
+                [False, True, True, True, False],
+                [False, True, True, True, False],
+            ],
+        )
+        self.assertTrue(all(event["anonymous"] is False for event in surface["events"]))
+        self.assertEqual(
+            surface["surface_sha256"],
+            generator.STATE_EXPORT_PUBLISHER_ABI_SHA256,
+        )
+
+        governance_address = self.vector["semantic_round_trip"][
+            "contract_address_by_key"
+        ]["GOVERNANCE_LAYER"]
+        publisher_pointer_type = generator.hex_keccak(b"STATE_EXPORT_PUBLISHER")
+        publisher_pointer = next(
+            pointer
+            for pointer in self.vector["payload"]["pointers"]
+            if pointer["pointerType"] == publisher_pointer_type
+        )
+        governance_registry_record = next(
+            record
+            for record in self.vector["payload"]["registryEntries"]
+            if record["module"] == governance_address
+        )
+        self.assertEqual(publisher_pointer["target"], governance_address)
+        self.assertEqual(publisher_pointer["interfaceId"], "0x77faad4f")
+        self.assertEqual(governance_registry_record["interfaceId"], "0x77faad4f")
+
+        for field, expected_error in (
+            ("required_interfaces", "state-export publisher interface"),
+            ("required_markers", "state-export publisher interface"),
+        ):
+            with self.subTest(field=field):
+                mutated = copy.deepcopy(self.profile)
+                mutated_governance = next(
+                    entry
+                    for entry in mutated["entries"]
+                    if entry["key"] == "GOVERNANCE_LAYER"
+                )
+                mutated_governance[field].pop()
+                with self.assertRaisesRegex(
+                    generator.ManifestVectorError,
+                    expected_error,
+                ):
+                    generator._require_profile(mutated)
+
+    def test_checker_rejects_full_publisher_abi_and_synthetic_interface_id_drift(self) -> None:
+        surface_mutations = (
+            (
+                "return types",
+                lambda surface: surface["functions"][0]["returns"].pop(),
+            ),
+            (
+                "indexed mask",
+                lambda surface: surface["events"][0]["indexed"].reverse(),
+            ),
+            (
+                "anonymous event",
+                lambda surface: surface["events"][0].__setitem__("anonymous", True),
+            ),
+            (
+                "integer boolean masquerade",
+                lambda surface: surface["events"][0].__setitem__("anonymous", 0),
+            ),
+            (
+                "digest",
+                lambda surface: surface.__setitem__(
+                    "surface_sha256", "sha256:" + "00" * 32
+                ),
+            ),
+        )
+        for label, mutate in surface_mutations:
+            with self.subTest(label=label):
+                candidate = copy.deepcopy(self.vector)
+                mutate(
+                    candidate["fixture_derivation"][
+                        "state_export_publisher_surface"
+                    ]
+                )
+                with self.assertRaisesRegex(
+                    generator.ManifestVectorError,
+                    "publisher ABI surface",
+                ):
+                    checker.validate_vector_mechanics(candidate, self.profile)
+
+        candidate = copy.deepcopy(self.vector)
+        governance_address = candidate["semantic_round_trip"][
+            "contract_address_by_key"
+        ]["GOVERNANCE_LAYER"]
+        publisher_pointer_type = generator.hex_keccak(b"STATE_EXPORT_PUBLISHER")
+        publisher_pointer = next(
+            pointer
+            for pointer in candidate["payload"]["pointers"]
+            if pointer["pointerType"] == publisher_pointer_type
+        )
+        governance_registry_record = next(
+            record
+            for record in candidate["payload"]["registryEntries"]
+            if record["module"] == governance_address
+        )
+        publisher_pointer["interfaceId"] = "0xa5971448"
+        governance_registry_record["interfaceId"] = "0xa5971448"
+        with self.assertRaisesRegex(
+            generator.ManifestVectorError,
+            "exact IStreamStateExportPublisher interface ID",
+        ):
+            checker.validate_vector_mechanics(candidate, self.profile)
+
+    def test_finality_adapter_uses_canonical_interface_id(self) -> None:
+        candidate = copy.deepcopy(self.vector)
+        adapter_address = candidate["semantic_round_trip"][
+            "contract_address_by_key"
+        ]["STREAM_CORE_FINALITY_ADAPTER"]
+        adapter_record = next(
+            record
+            for record in candidate["payload"]["registryEntries"]
+            if record["module"] == adapter_address
+        )
+        self.assertEqual(
+            adapter_record["interfaceId"],
+            generator.STREAM_CORE_FINALITY_ADAPTER_INTERFACE_ID,
+        )
+
+        adapter_record["interfaceId"] = "0xc7c3f294"
+        with self.assertRaisesRegex(
+            generator.ManifestVectorError,
+            "exact IStreamCoreFinalityAdapter interface ID",
+        ):
+            checker.validate_vector_mechanics(candidate, self.profile)
+
     def test_normative_domain_preimages_and_root_magic_recompute(self) -> None:
         expected = {
             generator.PAYLOAD_SCHEMA_ID: b"STREAM_SYSTEM_MANIFEST_PAYLOAD_V1",

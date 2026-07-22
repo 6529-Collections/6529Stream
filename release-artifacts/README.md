@@ -17,10 +17,22 @@ the implementation-derived `baselines/v0.1.0/abi-surface.json`: the target is
 not generated from today's oversized transitional Core. Custom errors,
 constructor, and Medium/Replaceable surfaces remain separately cataloged;
 fallback and receive are fail-closed `required_absent` categories checked
-against the implementation. Its closed `bytecode_budget_groups` catalog assigns every active
-entry to one implementation-requirement group and rejects phantom groups;
-retired entries carry no group. The groups do not allocate or sum estimated
-bytes. Only a complete linked via-IR runtime measurement proves Core size.
+against the implementation. Its closed `bytecode_budget_groups` catalog assigns
+every active entry to one implementation-requirement group and rejects phantom
+groups; retired entries carry no group. The groups do not allocate or sum
+estimated bytes. Only a complete linked via-IR runtime measurement proves Core
+size. The
+ordered active surface is pinned to SHA-256
+`2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`, while a
+second reviewer-pinned canonical-JSON digest over every target semantic,
+including metadata, coverage, groups, required absence, bootstrap policy, and
+all ordered active/retired rows, is
+`18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`.
+The implementation check also requires every current-baseline Core
+function/event shape to have exactly one active or retired disposition and every
+retired row to match that baseline. Target, contract-config, and baseline JSON
+inputs reject invalid UTF-8, duplicate members, non-finite/floating-point
+values, and integers outside the I-JSON safe range.
 
 Run after the production build profile:
 
@@ -81,6 +93,7 @@ python scripts/test_release_mode.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
+python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 ```
 
@@ -191,6 +204,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/test_release_mode.py
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
@@ -204,6 +219,8 @@ python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_bytecode_release_proof.py
 python scripts/generate_bytecode_release_proof.py --check
+python scripts/test_release_candidate_lockfile.py
+python scripts/generate_release_candidate_lockfile.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/test_verify_release_artifacts.py
@@ -266,7 +283,16 @@ probes, and entry 60 is the one shared entropy cadence probe. The
 system-manifest entry
 pins its module type, full interface ID, immutable Core/executor bindings,
 terminal-frozen Core pointer, append-only payload history, and manifest-tail
-markers. The ordinary checker
+markers. The complete canonical Core, governance, system-manifest, and
+finality-adapter rows are byte-for-byte semantic locks over their reviewed
+identity, requirement, implementation, scope, multiplicity, interfaces,
+markers, aliases, anchors, parameters, and distinctness policy. Candidate
+matching requires exact implementation/interface/marker sets for Core, the
+system manifest, and the finality adapter; governance remains intentionally
+composite but must provide the exact structured state-export publisher ABI
+proof, which every non-governance candidate is forbidden from claiming. The
+profile and candidate inputs use strict UTF-8, duplicate-free,
+schema-restricted I-JSON. The ordinary checker
 validates this requirement artifact and reports class-level mapping diagnostics
 against the v1 `contracts.json` catalog. That catalog has no deployment
 addresses, instance identity, probe-parameter bindings, or on-chain manifest
@@ -290,10 +316,14 @@ keeps both `production_candidate`
 and `readiness_evidence` false. Regenerate it with
 `python scripts/generate_system_manifest_payload_vector.py`; the drift command
 is `python scripts/check_system_manifest_payload_vector.py` (plus
-`python scripts/test_system_manifest_payload_vector.py`), not a generator
-`--check` mode. Production semantic reconciliation remains blocked by issue
-#656 until an instance-aware candidate and live onchain state replace the
-synthetic fixture facts.
+`python scripts/test_system_manifest_payload_vector.py`), followed by the
+independent fixed-golden
+`python scripts/test_system_manifest_payload_vector_reference.py` and
+`python scripts/check_system_manifest_payload_vector_reference.py` pair, not a
+generator `--check` mode. The reference scripts are required CI and
+checksum-covered release inputs. Production semantic reconciliation remains
+blocked by issue `#656` until an instance-aware candidate and live on-chain state
+replace the synthetic fixture facts.
 
 The release-mode gate is not part of the default artifact refresh path because
 the committed baseline is intentionally blocked. Use
@@ -799,8 +829,11 @@ python scripts/check_audit_package.py
 python scripts/check_react_next_reference.py
 python scripts/check_mobile_walletconnect.py
 python scripts/check_release_readiness.py
+python scripts/generate_risk_register.py
+python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
+python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 ```
 
