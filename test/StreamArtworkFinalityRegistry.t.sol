@@ -1158,8 +1158,7 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
     // Discovery seam
     // ------------------------------------------------------------------
 
-    function testDiscoveryGateWhenBound() public {
-        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
+    function _bindDiscovery(MockFinalityDiscovery discovery) private {
         registry = new StreamArtworkFinalityRegistry(
             address(coreMock),
             address(metadataMock),
@@ -1168,6 +1167,11 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
             address(discovery)
         );
         previewer = new StreamArtworkFinalityPreview(registry);
+    }
+
+    function testDiscoveryGateWhenBound() public {
+        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
+        _bindDiscovery(discovery);
 
         Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
         uint256 total = fixture.components.length;
@@ -1204,6 +1208,115 @@ contract StreamArtworkFinalityRegistryTest is FinalityTestBase {
         discovery.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
         _finalizeFixtureCall(fixture);
         registry.collectionFinalityRecord(COLLECTION_ID).finalized.assertTrue("finalized");
+    }
+
+    function testVerifyFinalityDetectsPostFinalizationDiscoveryDrift() public {
+        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
+        _bindDiscovery(discovery);
+
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        uint256 total = fixture.components.length;
+        discovery.setCollectionDiscovery(COLLECTION_ID, total, fixture.componentsHash);
+        _executeFixture(fixture);
+
+        (bool healthy,,) = registry.verifyFinality(COLLECTION_ID);
+        healthy.assertTrue("healthy discovered route");
+
+        discovery.setCollectionDiscovery(COLLECTION_ID, total + 1, fixture.componentsHash);
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "post-finality count drift");
+
+        discovery.setCollectionDiscovery(
+            COLLECTION_ID, total, keccak256("post-finality discovery drift")
+        );
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "post-finality hash drift");
+    }
+
+    function testVerifyScopedFinalityDetectsPostFinalizationDiscoveryDrift() public {
+        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
+        _bindDiscovery(discovery);
+
+        StreamFinalityScope memory scope =
+            _idScope(StreamFinalityScopeType.SEASON, COLLECTION_ID, keccak256("season-1"));
+        Fixture memory fixture = _buildFixture(scope, true);
+        uint256 total = fixture.components.length;
+        discovery.setScopedDiscovery(scope, total, fixture.componentsHash);
+        _executeFixture(fixture);
+
+        (bool healthy,,) = registry.verifyArtworkScopeFinality(scope);
+        healthy.assertTrue("healthy scoped discovered route");
+
+        discovery.setScopedDiscovery(
+            scope, total, keccak256("post-finality scoped discovery drift")
+        );
+        (bool matches, bytes32 recordHash, bytes32 componentsHash) =
+            registry.verifyArtworkScopeFinality(scope);
+        matches.assertFalse("post-finality scoped discovery drift");
+        recordHash.assertEq(fixture.expectedFinalityRecordHash, "scoped record hash preserved");
+        componentsHash.assertEq(fixture.componentsHash, "scoped components hash preserved");
+    }
+
+    function testVerifyFinalityDiscoveryFailuresDegradeWithoutReverting() public {
+        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
+        _bindDiscovery(discovery);
+
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        discovery.setCollectionDiscovery(
+            COLLECTION_ID, fixture.components.length, fixture.componentsHash
+        );
+        _executeFixture(fixture);
+
+        discovery.setReadMode(1);
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "reverting discovery");
+
+        discovery.setReadMode(2);
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "malformed discovery");
+
+        discovery.setReadMode(3);
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "oversized discovery");
+
+        discovery.setReadMode(4);
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "gas-burning discovery");
+
+        vm.etch(address(discovery), bytes(""));
+        _assertCollectionDiscoveryDiagnosticFalse(fixture, "codeless discovery");
+    }
+
+    function testVerifyFinalityGasBurningDiscoveryPreservesParentGas() public {
+        MockFinalityDiscovery discovery = new MockFinalityDiscovery();
+        _bindDiscovery(discovery);
+
+        Fixture memory fixture = _buildFixture(_collectionScope(COLLECTION_ID), true);
+        discovery.setCollectionDiscovery(
+            COLLECTION_ID, fixture.components.length, fixture.componentsHash
+        );
+        _executeFixture(fixture);
+        discovery.setReadMode(4);
+
+        bytes memory payload = abi.encodeWithSelector(
+            StreamArtworkFinalityRegistry.verifyFinality.selector, COLLECTION_ID
+        );
+        (bool success, bytes memory returndata) =
+            address(registry).staticcall{ gas: 75_000 }(payload);
+        success.assertTrue("gas-burning discovery preserves parent frame");
+        returndata.length.assertEq(96, "complete diagnostic return");
+
+        (bool matches, bytes32 recordHash, bytes32 componentsHash) =
+            abi.decode(returndata, (bool, bytes32, bytes32));
+        matches.assertFalse("gas-burning discovery degrades false");
+        recordHash.assertEq(fixture.expectedFinalityRecordHash, "record hash preserved");
+        componentsHash.assertEq(fixture.componentsHash, "components hash preserved");
+    }
+
+    function _assertCollectionDiscoveryDiagnosticFalse(Fixture memory fixture, string memory reason)
+        private
+        view
+    {
+        (bool matches, bytes32 recordHash, bytes32 componentsHash) =
+            registry.verifyFinality(COLLECTION_ID);
+        matches.assertFalse(reason);
+        recordHash.assertEq(fixture.expectedFinalityRecordHash, "record hash preserved");
+        componentsHash.assertEq(fixture.componentsHash, "components hash preserved");
+        registry.finalityStillMatches(COLLECTION_ID).assertFalse(reason);
     }
 
     // ------------------------------------------------------------------
