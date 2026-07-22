@@ -18,6 +18,8 @@ LOCK_INSTALL_COMMAND = (
 )
 PIP_CHECK_COMMAND = "python -m pip check"
 PLAYWRIGHT_INSTALL_COMMAND = "python -m playwright install --with-deps chromium"
+SOLC_SELECT_INSTALL_COMMAND = "solc-select install 0.8.19"
+SOLC_SELECT_USE_COMMAND = "solc-select use 0.8.19"
 
 DIRECT_REQUIREMENTS_PATH = Path("requirements-tools.txt")
 LOCK_PATH = Path("requirements-tools.lock")
@@ -37,6 +39,7 @@ PROVENANCE_PATHS = (
     Path("scripts/test_python_toolchain.py"),
 )
 EXPECTED_DIRECT_NAMES = {
+    "crytic-compile",
     "eth-hash",
     "playwright",
     "slither-analyzer",
@@ -128,11 +131,34 @@ COMMON_APPROVED_INSTALL_LINES = {
     "- name: Install Foundry",
     LOCK_INSTALL_COMMAND,
     PLAYWRIGHT_INSTALL_COMMAND,
+    SOLC_SELECT_INSTALL_COMMAND,
 }
 WORKFLOW_APPROVED_INSTALL_LINES = {
     CI_WORKFLOW_PATH: {"- name: Install browser test tooling"},
     RELEASE_WORKFLOW_PATH: {"- name: Install release tooling"},
 }
+WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS = {
+    CI_WORKFLOW_PATH: 2,
+    RELEASE_WORKFLOW_PATH: 1,
+}
+WORKFLOW_SOLC_SELECT_COUNTS = {
+    CI_WORKFLOW_PATH: 1,
+    RELEASE_WORKFLOW_PATH: 1,
+}
+WORKFLOW_EXPECTED_JOB_NAMES = {
+    CI_WORKFLOW_PATH: {"windows-wrapper", "slither-baseline", "foundry"},
+    RELEASE_WORKFLOW_PATH: {"release-mode"},
+}
+WORKFLOW_TOOLCHAIN_JOB_PROFILES = {
+    CI_WORKFLOW_PATH: {
+        "slither-baseline": {"playwright": 0, "solc_select": 1},
+        "foundry": {"playwright": 1, "solc_select": 0},
+    },
+    RELEASE_WORKFLOW_PATH: {
+        "release-mode": {"playwright": 1, "solc_select": 1},
+    },
+}
+JOB_KEY_RE = re.compile(r"^  ([A-Za-z0-9_-]+):\s*$")
 
 
 class ToolchainError(RuntimeError):
@@ -321,6 +347,30 @@ def check_workflow_inventory(repo_root: Path) -> list[str]:
     return errors
 
 
+def workflow_job_blocks(text: str) -> dict[str, str]:
+    """Return canonical two-space-indented job blocks from a workflow."""
+
+    lines = text.splitlines(keepends=True)
+    try:
+        jobs_index = next(
+            index for index, line in enumerate(lines) if line.rstrip("\r\n") == "jobs:"
+        )
+    except StopIteration:
+        return {}
+
+    starts: list[tuple[str, int]] = []
+    for index in range(jobs_index + 1, len(lines)):
+        match = JOB_KEY_RE.fullmatch(lines[index].rstrip("\r\n"))
+        if match is not None:
+            starts.append((match.group(1), index))
+
+    blocks: dict[str, str] = {}
+    for position, (name, start) in enumerate(starts):
+        end = starts[position + 1][1] if position + 1 < len(starts) else len(lines)
+        blocks[name] = "".join(lines[start:end])
+    return blocks
+
+
 def check_workflow(path: Path, text: str) -> list[str]:
     """Return CI/release workflow policy violations."""
 
@@ -328,6 +378,8 @@ def check_workflow(path: Path, text: str) -> list[str]:
     setup_ref = f"uses: actions/setup-python@{SETUP_PYTHON_SHA}"
     python_pin = f'python-version: "{PYTHON_VERSION}"'
     foundry_ref = f"uses: foundry-rs/foundry-toolchain@{FOUNDRY_TOOLCHAIN_SHA}"
+    expected_instances = WORKFLOW_TOOLCHAIN_INSTANCE_COUNTS.get(path, 1)
+    expected_solc_select = WORKFLOW_SOLC_SELECT_COUNTS.get(path, 1)
     approved_install_lines = set(COMMON_APPROVED_INSTALL_LINES)
     approved_install_lines.update(WORKFLOW_APPROVED_INSTALL_LINES.get(path, set()))
     stripped_lines: list[str] = []
@@ -451,17 +503,19 @@ def check_workflow(path: Path, text: str) -> list[str]:
             )
 
     setup_refs = [ref for action, ref in action_refs if action == "actions/setup-python"]
-    if setup_refs != [SETUP_PYTHON_SHA]:
+    if setup_refs != [SETUP_PYTHON_SHA] * expected_instances:
         errors.append(
-            f"{path} setup-python refs must be exactly [{SETUP_PYTHON_SHA!r}], "
+            f"{path} setup-python refs must be exactly "
+            f"{[SETUP_PYTHON_SHA] * expected_instances!r}, "
             f"got {setup_refs!r}"
         )
     foundry_refs = [
         ref for action, ref in action_refs if action == "foundry-rs/foundry-toolchain"
     ]
-    if foundry_refs != [FOUNDRY_TOOLCHAIN_SHA]:
+    if foundry_refs != [FOUNDRY_TOOLCHAIN_SHA] * expected_instances:
         errors.append(
-            f"{path} Foundry action refs must be exactly [{FOUNDRY_TOOLCHAIN_SHA!r}], "
+            f"{path} Foundry action refs must be exactly "
+            f"{[FOUNDRY_TOOLCHAIN_SHA] * expected_instances!r}, "
             f"got {foundry_refs!r}"
         )
 
@@ -470,9 +524,10 @@ def check_workflow(path: Path, text: str) -> list[str]:
         for line in text.splitlines()
         if re.match(r"^\s*python-version\s*:", line)
     ]
-    if python_pins != [python_pin]:
+    if python_pins != [python_pin] * expected_instances:
         errors.append(
-            f"{path} Python runtime pins must be exactly [{python_pin!r}], got {python_pins!r}"
+            f"{path} Python runtime pins must be exactly "
+            f"{[python_pin] * expected_instances!r}, got {python_pins!r}"
         )
 
     foundry_pins = [
@@ -483,21 +538,22 @@ def check_workflow(path: Path, text: str) -> list[str]:
             line,
         )
     ]
-    if foundry_pins != [f"version: {FOUNDRY_VERSION}"]:
+    if foundry_pins != [f"version: {FOUNDRY_VERSION}"] * expected_instances:
         errors.append(
-            f"{path} must contain exactly one Foundry version pin "
-            f"version: {FOUNDRY_VERSION}"
+            f"{path} must contain exactly {expected_instances} Foundry version pin(s) "
+            f"with version: {FOUNDRY_VERSION}"
         )
 
-    if stripped_lines.count(LOCK_INSTALL_COMMAND) != 1:
+    if stripped_lines.count(LOCK_INSTALL_COMMAND) != expected_instances:
         errors.append(
-            f"{path} must contain exactly one canonical locked pip install command"
+            f"{path} must contain exactly {expected_instances} canonical locked pip "
+            "install command(s)"
         )
 
-    if stripped_lines.count(PIP_CHECK_COMMAND) != 1:
+    if stripped_lines.count(PIP_CHECK_COMMAND) != expected_instances:
         errors.append(
             f"{path} must run the locked environment integrity check "
-            f"{PIP_CHECK_COMMAND!r} exactly once"
+            f"{PIP_CHECK_COMMAND!r} exactly {expected_instances} time(s)"
         )
 
     if stripped_lines.count(PLAYWRIGHT_INSTALL_COMMAND) != 1:
@@ -505,20 +561,49 @@ def check_workflow(path: Path, text: str) -> list[str]:
             f"{path} must contain exactly one canonical Playwright install command"
         )
 
-    setup_position = logical_text.find(setup_ref)
-    install_position = logical_text.find(LOCK_INSTALL_COMMAND)
-    pip_check_position = logical_text.find(PIP_CHECK_COMMAND)
-    browser_position = logical_text.find(PLAYWRIGHT_INSTALL_COMMAND)
-    if not (
-        0
-        <= setup_position
-        < install_position
-        < pip_check_position
-        < browser_position
-    ):
+    if stripped_lines.count(SOLC_SELECT_INSTALL_COMMAND) != expected_solc_select:
         errors.append(
-            f"{path} must order setup-python, locked install, pip check, and "
-            "Playwright install"
+            f"{path} must contain exactly {expected_solc_select} canonical solc-select "
+            "install command(s)"
+        )
+
+    if stripped_lines.count(SOLC_SELECT_USE_COMMAND) != expected_solc_select:
+        errors.append(
+            f"{path} must contain exactly {expected_solc_select} canonical solc-select "
+            "use command(s)"
+        )
+
+    def positions(needle: str) -> list[int]:
+        return [match.start() for match in re.finditer(re.escape(needle), logical_text)]
+
+    setup_positions = positions(setup_ref)
+    foundry_positions = positions(foundry_ref)
+    install_positions = positions(LOCK_INSTALL_COMMAND)
+    pip_check_positions = positions(PIP_CHECK_COMMAND)
+    browser_position = logical_text.find(PLAYWRIGHT_INSTALL_COMMAND)
+    ordered_instances = (
+        len(setup_positions) == expected_instances
+        and len(foundry_positions) == expected_instances
+        and len(install_positions) == expected_instances
+        and len(pip_check_positions) == expected_instances
+        and all(
+            setup_positions[index]
+            < foundry_positions[index]
+            < install_positions[index]
+            < pip_check_positions[index]
+            for index in range(expected_instances)
+        )
+        and all(
+            pip_check_positions[index] < setup_positions[index + 1]
+            for index in range(expected_instances - 1)
+        )
+        and bool(pip_check_positions)
+        and pip_check_positions[-1] < browser_position
+    )
+    if not ordered_instances:
+        errors.append(
+            f"{path} must order each setup-python, Foundry setup, locked install, "
+            "and pip check group without overlap, then install Playwright last"
         )
 
     if path.as_posix() == RELEASE_WORKFLOW_PATH.as_posix():
@@ -546,6 +631,71 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 f"{path} must run the protected-default-branch guard immediately "
                 "after checkout and before Python or Foundry setup"
             )
+
+    expected_job_names = WORKFLOW_EXPECTED_JOB_NAMES.get(path)
+    job_profiles = WORKFLOW_TOOLCHAIN_JOB_PROFILES.get(path)
+    if expected_job_names is not None and job_profiles is not None:
+        job_blocks = workflow_job_blocks(text)
+        if set(job_blocks) != expected_job_names:
+            errors.append(
+                f"{path} job names must be exactly {sorted(expected_job_names)!r}, "
+                f"got {sorted(job_blocks)!r}"
+            )
+        toolchain_needles = (
+            setup_ref,
+            python_pin,
+            foundry_ref,
+            f"version: {FOUNDRY_VERSION}",
+            LOCK_INSTALL_COMMAND,
+            PIP_CHECK_COMMAND,
+            PLAYWRIGHT_INSTALL_COMMAND,
+            SOLC_SELECT_INSTALL_COMMAND,
+            SOLC_SELECT_USE_COMMAND,
+        )
+        for job_name, block in job_blocks.items():
+            profile = job_profiles.get(job_name)
+            if profile is None:
+                unexpected = [needle for needle in toolchain_needles if needle in block]
+                if unexpected:
+                    errors.append(
+                        f"{path} non-toolchain job {job_name!r} contains reviewed "
+                        f"toolchain declarations: {unexpected!r}"
+                    )
+                continue
+
+            expected_counts = {
+                setup_ref: 1,
+                python_pin: 1,
+                foundry_ref: 1,
+                f"version: {FOUNDRY_VERSION}": 1,
+                LOCK_INSTALL_COMMAND: 1,
+                PIP_CHECK_COMMAND: 1,
+                PLAYWRIGHT_INSTALL_COMMAND: profile["playwright"],
+                SOLC_SELECT_INSTALL_COMMAND: profile["solc_select"],
+                SOLC_SELECT_USE_COMMAND: profile["solc_select"],
+            }
+            for needle, expected_count in expected_counts.items():
+                actual_count = block.count(needle)
+                if actual_count != expected_count:
+                    errors.append(
+                        f"{path} job {job_name!r} must contain {needle!r} exactly "
+                        f"{expected_count} time(s), got {actual_count}"
+                    )
+            setup_at = block.find(setup_ref)
+            foundry_at = block.find(foundry_ref)
+            install_at = block.find(LOCK_INSTALL_COMMAND)
+            check_at = block.find(PIP_CHECK_COMMAND)
+            if not (0 <= setup_at < foundry_at < install_at < check_at):
+                errors.append(
+                    f"{path} job {job_name!r} must order setup-python, Foundry, "
+                    "locked install, and pip check"
+                )
+            if profile["playwright"] and not (
+                check_at < block.find(PLAYWRIGHT_INSTALL_COMMAND)
+            ):
+                errors.append(
+                    f"{path} job {job_name!r} must install Playwright after pip check"
+                )
 
     return errors
 

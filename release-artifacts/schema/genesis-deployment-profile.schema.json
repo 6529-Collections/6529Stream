@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/genesis-deployment-profile.schema.json",
+  "title": "6529Stream Genesis Deployment Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "normative_source",
+    "chain_id",
+    "entries",
+    "factory_spawned_exclusions",
+    "out_of_inventory"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.genesis-deployment-profile.v1"
+    },
+    "normative_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "anchor"],
+      "properties": {
+        "path": {
+          "const": "docs/launch-conformance-matrix.md"
+        },
+        "anchor": {
+          "const": "LCM-GENESIS"
+        }
+      }
+    },
+    "chain_id": {
+      "const": 1
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/entry"
+      }
+    },
+    "factory_spawned_exclusions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/factory_spawned_exclusion"
+      }
+    },
+    "out_of_inventory": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/out_of_inventory"
+      }
+    }
+  },
+  "$defs": {
+    "non_empty_string": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unique_strings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/non_empty_string"
+      }
+    },
+    "multiplicity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": {
+          "const": 1
+        },
+        "maximum": {
+          "const": 1
+        }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "names"],
+      "properties": {
+        "mode": {
+          "enum": [
+            "exact",
+            "one_of",
+            "manifest_equivalent",
+            "distinct_instance",
+            "role_bound",
+            "parameter_bound",
+            "shared_parameter_bound"
+          ]
+        },
+        "names": {
+          "$ref": "#/$defs/unique_strings"
+        }
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "key",
+        "kind",
+        "requirement",
+        "deployment_scope",
+        "multiplicity",
+        "implementation",
+        "required_interfaces",
+        "required_markers",
+        "approved_aliases",
+        "normative_anchors",
+        "parameters",
+        "distinct_from"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "key": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "kind": {
+          "enum": ["contract", "ggp_probe", "gtp_probe"]
+        },
+        "requirement": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "deployment_scope": {
+          "enum": [
+            "singleton",
+            "implementation",
+            "fallback_instance",
+            "per_parameter_probe",
+            "shared_probe"
+          ]
+        },
+        "multiplicity": {
+          "$ref": "#/$defs/multiplicity"
+        },
+        "implementation": {
+          "$ref": "#/$defs/implementation"
+        },
+        "required_interfaces": {
+          "$ref": "#/$defs/unique_strings"
+        },
+        "required_markers": {
+          "$ref": "#/$defs/unique_strings"
+        },
+        "approved_aliases": {
+          "$ref": "#/$defs/unique_strings"
+        },
+        "normative_anchors": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/unique_strings"
+            },
+            {
+              "minItems": 1
+            }
+          ]
+        },
+        "parameters": {
+          "$ref": "#/$defs/unique_strings"
+        },
+        "distinct_from": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "contract"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "deployment_scope": {
+                "enum": ["singleton", "implementation", "fallback_instance"]
+              },
+              "implementation": {
+                "properties": {
+                  "mode": {
+                    "enum": [
+                      "exact",
+                      "one_of",
+                      "manifest_equivalent",
+                      "distinct_instance",
+                      "role_bound"
+                    ]
+                  }
+                }
+              },
+              "parameters": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "ggp_probe"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "deployment_scope": {
+                "const": "per_parameter_probe"
+              },
+              "implementation": {
+                "properties": {
+                  "mode": {
+                    "const": "parameter_bound"
+                  },
+                  "names": {
+                    "maxItems": 0
+                  }
+                }
+              },
+              "parameters": {
+                "minItems": 1,
+                "maxItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "gtp_probe"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "properties": {
+              "deployment_scope": {
+                "const": "shared_probe"
+              },
+              "implementation": {
+                "properties": {
+                  "mode": {
+                    "const": "shared_parameter_bound"
+                  }
+                }
+              },
+              "parameters": {
+                "minItems": 3,
+                "maxItems": 3
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "implementation": {
+                "properties": {
+                  "mode": {
+                    "enum": ["exact", "one_of", "distinct_instance", "shared_parameter_bound"]
+                  }
+                },
+                "required": ["mode"]
+              }
+            },
+            "required": ["implementation"]
+          },
+          "then": {
+            "properties": {
+              "implementation": {
+                "properties": {
+                  "names": {
+                    "minItems": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "implementation": {
+                "properties": {
+                  "mode": {
+                    "enum": ["manifest_equivalent", "role_bound", "parameter_bound"]
+                  }
+                },
+                "required": ["mode"]
+              }
+            },
+            "required": ["implementation"]
+          },
+          "then": {
+            "properties": {
+              "implementation": {
+                "properties": {
+                  "names": {
+                    "maxItems": 0
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "factory_spawned_exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "factory_entry_id", "implementation_entry_id"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "factory_entry_id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "implementation_entry_id": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "out_of_inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "reason"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/non_empty_string"
+        },
+        "reason": {
+          "$ref": "#/$defs/non_empty_string"
+        }
+      }
+    }
+  }
+}

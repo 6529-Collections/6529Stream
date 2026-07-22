@@ -47,6 +47,9 @@ REQUIRED_COMMANDS = [
     "python scripts/test_warning_dispositions.py",
     "python scripts/run_forge_size_log.py --log cache/forge-size.log",
     "python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log",
+    "python scripts/test_slither_baseline.py",
+    "python scripts/check_slither_baseline.py --baseline-only",
+    "python scripts/check_slither_baseline.py --run-slither",
     "python scripts/test_natspec_coverage.py",
     "python scripts/check_natspec_coverage.py",
     "python scripts/test_incident_response.py",
@@ -94,6 +97,7 @@ REQUIRED_LINK_TARGETS = [
     "SECURITY.md",
     "ops/ROADMAP.md",
     "ops/AUTONOMOUS_RUN.md",
+    "ops/SLITHER_BASELINE.json",
     "ops/SLITHER_BASELINE.md",
     "docs/architecture.md",
     "docs/threat-model.md",
@@ -160,6 +164,8 @@ REQUIRED_LINK_TARGETS = [
     "scripts/check_risk_register.py",
     "scripts/generate_risk_register.py",
     "scripts/test_risk_register.py",
+    "scripts/check_slither_baseline.py",
+    "scripts/test_slither_baseline.py",
 ]
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)

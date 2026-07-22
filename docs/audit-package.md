@@ -14,7 +14,7 @@ Current maturity:
 - Evidence status: local baseline only.
 - Release status: no production deployment, no public release signature, and no
   completed third-party audit.
-- Security status: current tests, Slither disposition, and release artifacts
+- Security status: current tests, open Slither inventory, and release artifacts
   are review inputs, not protocol correctness proofs.
 
 In-scope review surfaces for this package:
@@ -139,19 +139,27 @@ direct regression test, invariant, or documented non-code acceptance decision.
 
 Static-analysis review inputs:
 
-- [`docs/slither.md`](slither.md) documents the pinned Slither toolchain and
-  local command.
-- [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) tracks high and
-  medium findings, resolutions, false-positive dispositions, and test links.
+- [`docs/slither.md`](slither.md) documents the pinned Slither toolchain,
+  normalization boundary, and local commands.
+- [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) is the canonical
+  normalized first-party production high/medium finding set;
+  [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) is its reviewer-facing
+  mirror. All 38 rows (4 High and 34 Medium) are Open: one confirmed gap, six
+  design-review rows, and 31 pending dispositions. No row is accepted or marked
+  false positive.
+- [`scripts/check_slither_baseline.py`](../scripts/check_slither_baseline.py)
+  validates metadata without running Slither and can run the pinned analyzer to
+  fail on any exact normalized drift; focused behavior is covered by
+  [`scripts/test_slither_baseline.py`](../scripts/test_slither_baseline.py).
 - [`docs/warning-dispositions.md`](warning-dispositions.md) tracks fixed
   NatSpec warning noise and accepted solc, documentation, linter, vendored,
   test-only, ABI-compatibility, and Core size-tradeoff warning dispositions.
 - [`docs/vendored-libraries.md`](vendored-libraries.md) documents retained
   vendored OpenZeppelin utility provenance and accepted Slither dispositions.
 
-Slither is currently a diagnostic input. Low, informational, and optimization
-findings remain outside the current CI gate unless a future roadmap item
-promotes them.
+The exact first-party production high/medium set is a CI gate and an unresolved
+Gate F blocker, not an accepted baseline. Low, informational, and optimization
+findings remain outside this gate unless a future roadmap item promotes them.
 
 ## Deployment And Release Evidence
 
@@ -261,21 +269,24 @@ Known unresolved blockers are tracked in
 [`docs/known-blockers.md`](known-blockers.md) and
 [`ops/ROADMAP.md`](../ops/ROADMAP.md), then summarized in the generated
 [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json).
-Current major unresolved categories
-include fork/testnet/live deployment ceremonies, production broadcast retention,
+Current major unresolved categories include the 38 open first-party production
+Slither high/medium findings and external evidence gaps for fork/testnet/live
+deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
 signatures, reviewed signer custody readiness evidence, non-local randomizer
 operations evidence, non-local metadata browser evidence, live bytecode proof,
-post-audit remediation, and external audit completion. The machine-readable
-status for these categories lives in
+post-audit remediation, and external audit completion. The canonical
+machine-readable Slither inventory lives in
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json); external-evidence
+status lives in
 [`release-artifacts/latest/public-beta-evidence.json`](../release-artifacts/latest/public-beta-evidence.json).
 
-Accepted local-baseline dispositions are separate from unresolved production
-blockers:
+Local evidence and accepted non-Slither dispositions are separate from
+unresolved production blockers:
 
-- Some Slither rows are accepted as test-only helper findings or documented
-  vendored-library false positives in
-  [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md).
+- The normalized first-party production Slither rows are all Open. Test,
+  vendored, and script findings are reported outside that release-blocking set;
+  they are not used to accept or suppress any of the 38 rows.
 - Local Anvil ceremony, randomizer operations, and release signature evidence
   use no-secret placeholders and do not claim production status.
 - The bytecode-to-release proof is local/fork release-artifact proof; it does
@@ -315,6 +326,9 @@ python scripts/check_architecture_threat_model.py
 python scripts/test_warning_dispositions.py
 python scripts/run_forge_size_log.py --log cache/forge-size.log
 python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
+python scripts/test_slither_baseline.py
+python scripts/check_slither_baseline.py --baseline-only
+python scripts/check_slither_baseline.py --run-slither
 python scripts/test_natspec_coverage.py
 python scripts/check_natspec_coverage.py
 python scripts/test_incident_response.py
@@ -376,10 +390,15 @@ notes:
 - The package still says pre-audit, not production-ready, and local baseline.
 - `docs/architecture.md`, `docs/threat-model.md`, ADRs, and this package point
   at the same protocol boundaries.
-- `ops/SLITHER_BASELINE.md` has no unexplained high/medium production finding.
-- `docs/known-blockers.md`, `docs/release-readiness.md`, public-beta blocker
-  report, production-release blocker report, and risk register agree on
-  external evidence gaps and accepted local-baseline risks.
+- `ops/SLITHER_BASELINE.json` and `ops/SLITHER_BASELINE.md` agree exactly, and
+  every high/medium production finding is remediated or carries an issue-linked
+  reviewed disposition with its required proof. Any retained Open row keeps Gate
+  F incomplete and must be labeled as a blocker, not audit-ready acceptance.
+- `docs/known-blockers.md`, `docs/release-readiness.md`, this package, and the
+  risk register agree on open Slither findings and accepted local-baseline
+  risks. The generated public-beta and production-release blocker reports cover
+  external-evidence requirements; they are not the inventory for technical
+  blockers such as Slither or Core headroom.
 - Release manifest, bytecode-to-release proof, source verification inputs,
   checksum bundle, and signed release tag gate are current.
 - Test evidence covers the state-machine, adversarial ordering, signer

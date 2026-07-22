@@ -62,6 +62,8 @@ python scripts/check_mobile_walletconnect.py
 python scripts/check_electron_security_wallets.py
 python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/test_release_mode.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
@@ -171,6 +173,8 @@ python scripts/test_operator_admin_ui.py
 python scripts/check_operator_admin_ui.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/test_release_mode.py
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
@@ -235,6 +239,24 @@ collection pin transactions, public-beta readiness, production readiness, or
 external audit acceptance. Validate it with
 `python scripts/test_dependency_provenance_attestation.py` and
 `python scripts/generate_dependency_provenance_attestation.py --check`.
+
+`genesis-deployment-profile.json` is the canonical machine-readable mirror of
+the normative `[LCM-GENESIS]` closed world. Its entry count is derived from the
+contiguous numbered entries rather than stored independently. Entries 1-35 are
+deployment roles, entries 36-57 are the exact per-parameter GGP probes, and the
+last entry is the one shared entropy cadence probe. The ordinary checker
+validates this requirement artifact and reports class-level mapping diagnostics
+against the v1 `contracts.json` catalog. That catalog has no deployment
+addresses, instance identity, probe-parameter bindings, or on-chain manifest
+reconciliation, so it is categorically insufficient for production and can
+never clear `--require-complete` or production release mode. Those gates require
+a future checked schema for an instance-aware genesis deployment candidate,
+tied to deployment manifests, address books, source-verification inputs, the
+on-chain system-manifest payload, retained rehearsal/live evidence, and the
+release candidate lockfile. Until that evidence exists and reconciles every role,
+production remains blocked under issue #656. On-demand split-wallet instances
+and the no-authority deployer factory are explicitly outside the numbered
+production inventory.
 
 The release-mode gate is not part of the default artifact refresh path because
 the committed baseline is intentionally blocked. Use

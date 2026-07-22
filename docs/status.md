@@ -46,12 +46,13 @@ The current Gate A smoke baseline proves:
   satellite contracts, read adapters, linked libraries, release artifacts, or
   documentation-only evidence unless Core ownership/security invariants require
   otherwise.
-- The strict release-mode profile still has a known completeness limitation:
-  the normative genesis deployment profile requires an exhaustive 58-contract
-  candidate, while `release-artifacts/contracts.json` tracks 20 and no
-  fail-closed checker compares the two. This keeps production blocked under
-  [issue #656](https://github.com/6529-Collections/6529Stream/issues/656), even
-  if the currently implemented release-mode checks become green.
+- The strict release-mode profile now compares the current implementation
+  catalog with the canonical exhaustive genesis profile and fails closed on
+  missing, extra, ambiguous, wrong-scope, interface, marker, fallback, and
+  probe entries. The catalog remains incomplete, and its singleton-oriented
+  manifest model cannot yet prove every required distinct deployment instance.
+  This keeps production blocked under
+  [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass
@@ -434,11 +435,17 @@ The current Gate A smoke baseline proves:
   maturity language before the audit package and release manifest are checked.
 - `scripts/test_audit_package.py` and `scripts/check_audit_package.py` prove
   `docs/audit-package.md` remains a complete auditor-facing index over current
-  maturity, scope, ADRs, invariants, Slither disposition, local deployment and
-  release evidence, known blockers, accepted local-baseline dispositions, and
+  maturity, scope, ADRs, invariants, the open Slither blocker, local deployment and
+  release evidence, known blockers, accepted non-Slither local-baseline dispositions, and
   security reporting. The generated release manifest records the architecture,
   threat model, and audit package hashes as governance documents before the
   checksum bundle is refreshed.
+- `scripts/check_slither_baseline.py` keeps a canonical normalized first-party
+  production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
+  provenance without invoking Slither during the fast default gate, and runs a
+  dedicated pinned exact-drift analysis in CI. The current set is 38 Open rows
+  (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending
+  dispositions. This is a release blocker and not a risk acceptance.
 - `scripts/test_release_readiness.py` and
   `scripts/check_release_readiness.py` prove
   `docs/release-readiness.md` remains a Gate G dashboard that separates
@@ -459,8 +466,8 @@ The current Gate A smoke baseline proves:
 The current tests are regression tripwires, not a correctness proof. Known
 blockers remain tracked in `ops/ROADMAP.md`, including any future unified
 pull-payment ledger abstraction or protocol-wide aggregation layer,
-canonical randomizer lifecycle ownership, lower-impact static-analysis cleanup
-beyond the now-triaged high/medium baseline, fork/testnet deployment
+canonical randomizer lifecycle ownership, remediation or reviewed disposition
+of every open high/medium first-party production Slither row, fork/testnet deployment
 rehearsals, production manifest generation from live broadcast outputs,
 production detached checksum signatures, signed release tags, production address books,
 verified live deployment hashes and explorer submissions, remaining generated

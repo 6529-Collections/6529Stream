@@ -27,7 +27,8 @@ conversation context.
 | `ops/ROADMAP.md` | Strategic gates, maturity status, launch criteria, and long-form issue context |
 | `ops/EXECUTION_BACKLOG.md` | PR-sized implementation map and dependency ordering |
 | `ops/AUTONOMOUS_RUN.md` | Current branch, active PR, merge/review state, and running worklog |
-| `ops/SLITHER_BASELINE.md` | Static-analysis finding inventory and accepted/fixed status |
+| `ops/SLITHER_BASELINE.json` | Canonical normalized first-party production High/Medium static-analysis finding set and open classifications |
+| `ops/SLITHER_BASELINE.md` | Checked reviewer-facing mirror of the normalized static-analysis baseline |
 | `release-artifacts/latest/` | Generated release state that must stay deterministic |
 
 ### Anti-Drift Rules
@@ -210,7 +211,7 @@ follow-up order unless bot feedback or CI forces a safer detour.
 | 0.4 | `CON-013` | C/G | V1 static mint ledger accounting foundation | Merged in PR #635; issue #634 closed completed |
 | 0.5 | `CON-014` | C/G | V1 `StreamMintManager` phase policy and execution integration | Merged in PR #637; issue #636 closed completed |
 | 0.6 | `CON-015` | C/G | V1 collection metadata and preservation record satellites | Merged in PR #639; issue #638 closed completed |
-| 0.7 | `CON-016` | C/G | V1 mint gate interface and module registry foundation | Active PR #641 / issue #640 on branch `codex/mint-gate-registry-foundation` |
+| 0.7 | `CON-016` | C/G | V1 mint gate interface and module registry foundation | Merged in PR #641; issue #640 closed completed |
 | 1 | `EXT-001` | E/G | Public beta evidence | Finish testnet deployment rehearsal retained artifact checker |
 | 2 | `MAP-001` | A/G | Execution clarity | Add this implementation backlog and link it from roadmap/run-state |
 | 3 | `EXT-002` | E | Public beta evidence | Add Sepolia deployment config and no-secret rehearsal runbook |
@@ -1745,8 +1746,7 @@ Acceptance criteria:
 
 ### CON-016: Add Mint Gate Interface And Module Registry Foundation
 
-Status: Active PR #641 / issue #640 on branch
-`codex/mint-gate-registry-foundation`.
+Status: Merged in PR #641; issue #640 closed completed.
 
 Gate: C/G.
 
@@ -3940,7 +3940,7 @@ unless an external dependency changes.
 | `CON-013` | Add StreamMintLedger static counter accounting foundation | C/G | Merged in PR #635; issue #634 closed completed |
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
-| `CON-016` | Add mint gate interface and module registry foundation | C/G | Active PR #641 / issue #640 on branch `codex/mint-gate-registry-foundation` |
+| `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
@@ -4007,6 +4007,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for all 38 open first-party production Slither High/Medium findings while preserving exact normalized drift CI | C/F/G | Active PR #662 / issue #658 on branch `codex/slither-baseline-gate` establishes the inventory and gate; all 38 rows remain Open: one confirmed gap, six design-review rows, and 31 pending dispositions |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |
@@ -4064,17 +4065,23 @@ flowchart TD
 
 - CI green on build, tests, size, formatting, release artifacts, release
   readiness, public-beta evidence, and evidence packet checks.
+- The live exact Slither gate is green and no first-party production
+  High/Medium row remains Open; baseline equality alone is not acceptance.
 - Testnet deployment rehearsal evidence is reviewed and retained.
 - Testnet explorer verification status is reviewed and retained.
 - Testnet fixed-price, auction, randomizer, and metadata smoke evidence exists
-  or is explicitly waived with owner/risk/expiry.
-- No P0/P1 public-beta blocker remains open without an accepted waiver.
+  or uses checker-authorized active risk acceptance with owner/risk/expiry.
+- External-audit evidence is complete and no P0/P1 technical public-beta
+  blocker remains Open. Risk acceptance is limited to checker-authorized
+  public-beta external-evidence rows.
 - README and docs clearly state pre-production or beta status.
 
 ### Audit Submission Ready
 
 - Audit package is current.
-- Slither high/medium baseline is fixed, accepted, or waived with evidence.
+- Every first-party production Slither High/Medium finding is remediated or has
+  an issue-linked reviewed disposition, with the exact normalized drift gate
+  green; baseline equality alone is not acceptance.
 - Risk register is current.
 - Adversarial state-machine tests exist for the highest-risk protocol paths.
 - External execution evidence exists for fork and testnet.
@@ -4083,7 +4090,13 @@ flowchart TD
 ### Production Ready
 
 - Public beta requirements are complete.
-- External audit report is retained or audit waiver is public and signed off.
+- External-audit evidence is complete and retained; it is non-waivable.
+- The checksum-covered current `StreamCore` build retains at least 2,000 bytes
+  of EIP-170 runtime headroom and issue #654's confirmed state gap is resolved.
+- The instance-aware genesis manifest, address-book, and verification inventory
+  is reconciled under issue #656.
+- Strict production release mode passes, including the canonical Slither,
+  Core-headroom, genesis, and non-waivable production-evidence gates.
 - Production signed tag and checksum bundle exist.
 - Production bytecode-to-release proof exists.
 - Live deployment manifest/address book/explorer verification evidence exists.
@@ -4093,7 +4106,7 @@ flowchart TD
   operator surfaces.
 - Contract-level metadata, royalty policy, 1/1 provenance, collector
   permanence, marketplace/indexer evidence, and release-grade warning
-  dispositions are complete or explicitly waived with owner/risk/expiry.
+  dispositions are complete.
 
 ### Integrator Ready
 

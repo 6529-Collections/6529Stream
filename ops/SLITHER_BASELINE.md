@@ -1,220 +1,131 @@
 # Slither Baseline
 
-This is the tracked high/medium Slither baseline for 6529Stream. High and
-medium rows are fixed, accepted with rationale, or documented as false
-positive; this is still not a full security baseline for public launch.
+This is the current first-party production High/Medium Slither inventory.
+Passing the drift gate means the inventory matches the analyzed source; it does
+not accept any finding, complete a security audit, or make the protocol ready for
+public beta or production. All 38 current rows remain `Open` under issue #658.
 
-## Capture Metadata
+## Capture Provenance
 
 | Field | Value |
 | --- | --- |
-| Status | High/medium rows triaged; not accepted as a CI gate |
-| Last generated | `2026-06-21 06:54 UTC` |
+| Analyzed commit | `712b43f6070af8903cdd33f0c2d05d36cb2d358f` |
+| Captured at | `2026-07-22T10:02:33Z` |
 | Slither | `0.11.5` |
+| crytic-compile | `0.3.11` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
-| Command | `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` |
-| Raw JSON | Not committed; latest local capture was `cache/slither-latest.json` |
+| Foundry | `1.7.1` |
+| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:270060616ed8498ac859c097702ae091a7fb6c9dba96fff14f429a1863f27a29` |
+| Slither config | `sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1` |
+| Foundry config | `sha256:155408a77117fe90f39469f1ad0b8f4d817da2fa030a6d850cd9a6c4276cbc02` |
+| Current gate tool requirements | `sha256:4af191d57f4305247c9fc3f97f853e3afb39d07ddd3b7ebde3a89da83384fa3e` |
+| Capture command | `slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` |
+| Gate command | `python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none` |
+| Capture process | Native exit `-1`; JSON `success=true`; `128086353` bytes |
+| Raw JSON SHA-256 | `sha256:718a2b7c8b18f658032221a71164dda987b9e0b1a83f41547d539625a62cc43a` |
 
-Slither returned detector results successfully, but the process exited non-zero
-because findings exist. That is expected until the roadmap accepts a gated
-baseline and lower-impact findings are handled.
+The default Slither process exit is non-zero while findings exist. The checked
+gate uses `--fail-none`, then independently requires native success, JSON
+`success=true`, `error=null`, and an exact normalized first-party row match.
 
-## Impact Counts
+## Full Capture Impact Counts
 
 | Impact | Count |
 | --- | ---: |
-| High | 22 |
-| Medium | 99 |
-| Low | 243 |
-| Informational | 713 |
-| Optimization | 17 |
-| Total | 1094 |
+| High | 38 |
+| Medium | 573 |
+| Low | 502 |
+| Informational | 831 |
+| Optimization | 30 |
+| Total | 1974 |
 
-## Detector Counts
+## High/Medium Scope Separation
 
-| Detector | Impact | Count |
-| --- | --- | ---: |
-| `arbitrary-send-eth` | High | 0 |
-| `encode-packed-collision` | High | 0 |
-| `incorrect-exp` | High | 2 |
-| `reentrancy-eth` | High | 16 |
-| `suicidal` | High | 4 |
-| `uninitialized-state` | High | 0 |
-| `weak-prng` | High | 0 |
-| `divide-before-multiply` | Medium | 11 |
-| `incorrect-equality` | Medium | 20 |
-| `locked-ether` | Medium | 16 |
-| `reentrancy-no-eth` | Medium | 22 |
-| `uninitialized-local` | Medium | 5 |
-| `unused-return` | Medium | 25 |
-| Low-impact findings | Low | 243 |
-| Informational findings | Informational | 713 |
-| Optimization findings | Optimization | 17 |
+Only first-party production rows are release-blocking inventory. Vendored,
+test, and script rows stay visible as separately classified diagnostic input.
 
-Dependency-script encoding delta from the previous tracked capture:
+| Scope | High | Medium | Total |
+| --- | ---: | ---: | ---: |
+| first party production | 4 | 34 | 38 |
+| vendored | 1 | 9 | 10 |
+| test | 33 | 523 | 556 |
+| script | 0 | 7 | 7 |
+| other | 0 | 0 | 0 |
 
-- High findings decreased from 9 to 8 because the final
-  `encode-packed-collision` row is fixed.
-- Medium findings decreased from 29 to 28 because
-  `StreamCore.retrieveDependencyScript(uint256).scripttext` is now initialized.
-- `encode-packed-collision` is now zero current findings; the remaining fixed
-  rows are kept below as audit traceability.
-- `uninitialized-local` is now one current accepted test-only finding; the
-  first-party production rows are fixed by `P0-INIT-001`, `P0-AUTH-002`, and
-  `P0-META-001`.
-- Mint-accounting state delta from the previous tracked capture:
-  - High findings decreased from 8 to 6 because the two dead
-    `uninitialized-state` mint-accounting mappings were removed.
-  - Informational findings decreased from 580 to 577 because the removed
-    storage and retrieval surface no longer appears in lower-impact detectors.
-  - `uninitialized-state` is now zero current findings; the fixed rows are
-    kept below as audit traceability.
-- Weak-helper randomness delta from the previous tracked capture:
-  - High findings decreased from 6 to 4 because the concrete production-source
-    `XRandoms` helper contract was removed.
-  - Informational findings decreased from 577 to 575 because the removed helper
-    source no longer appears in lower-impact detectors.
-  - `weak-prng` is now zero current findings; the fixed rows are kept below as
-    audit traceability.
-- Explicit-local-initialization delta from the previous tracked capture:
-  - Medium findings decreased from 28 to 19 because the remaining first-party
-    production `uninitialized-local` rows now initialize their default locals
-    explicitly.
-  - Informational findings decreased from 575 to 574 after the same source
-    cleanup.
-  - `uninitialized-local` now has one current finding, and it is the accepted
-    test-only `MockStreamMinter.mint(...).mintedCount` row.
-- Vendored-library provenance delta from the previous tracked capture:
-  - High and Medium counts remain unchanged at 4 and 19.
-  - Informational findings increased from 574 to 575 and Optimization findings
-    increased from 6 to 7 after adding the provenance test harness and
-    correcting the `Strings.sol` upstream header.
-  - The current vendored `incorrect-exp` and `divide-before-multiply` rows are
-    documented false positives, not open remediation items.
-- Payment invariant harness delta from the previous tracked capture:
-  - High and Medium counts remain unchanged at 4 and 19.
-  - Low findings increased from 63 to 82, Informational findings increased from
-    575 to 577, Optimization findings increased from 7 to 11, and total
-    findings increased from 668 to 693 after adding
-    `test/StreamPaymentsInvariant.t.sol`.
-  - New test-harness high/medium detector noise is scoped by source-level
-    suppressions for deliberate payable calls, generated-sequence bookkeeping,
-    and the payable mock randomness provider.
-- Signer lifecycle manager delta from the previous tracked capture:
-  - High and Medium counts remain unchanged at 4 and 19.
-  - Low findings increased from 82 to 90, Informational findings increased from
-    577 to 592, Optimization findings remain 11, and total findings increased
-    from 693 to 716 after adding `StreamAdmins` signer-manager entrypoints,
-    focused signer-lifecycle tests, and explicit selector grants in legacy test
-    harness setup.
-  - `arbitrary-send-eth`, `reentrancy-eth`, `encode-packed-collision`,
-    `weak-prng`, and `uninitialized-state` remain at zero findings.
-- Signer lifecycle target allowlist delta from the previous tracked capture:
-  - High and Medium counts remain unchanged at 4 and 19.
-  - Low findings increased from 90 to 92, Informational findings increased from
-    592 to 595, Optimization findings remain 11, and total findings increased
-    from 716 to 721 after adding owner-approved signer-lifecycle targets and
-    their event/test coverage.
-- `arbitrary-send-eth` and `reentrancy-eth` remain at zero findings.
-- StreamCore size-reduction delta from the previous tracked capture:
-  - High and Medium counts remain unchanged at 4 and 19.
-  - Low findings increased from 92 to 93, Informational findings decreased from
-    595 to 590, Optimization findings remain 11, and total findings decreased
-    from 721 to 717 after removing optional ERC-721 Enumerable inheritance and
-    moving pure metadata rendering into `StreamMetadataRenderer`.
-  - `arbitrary-send-eth`, `reentrancy-eth`, `encode-packed-collision`,
-    `weak-prng`, and `uninitialized-state` remain at zero findings.
-- Slither still exits non-zero because accepted test-only and vendored
-  false-positive rows remain visible, plus lower-impact findings are not yet a
-  CI gate.
-- Configurable proceeds split and Slither-remediation delta from the previous
-  tracked capture:
-  - `StreamDrops.releaseFixedPriceCuratorReserveCredit()` and
-    `StreamAuctions.releaseAuctionCuratorCredit()` release only to the
-    configured curator pool, avoiding an admin-selected arbitrary ETH
-    destination while preserving the stranded-pool recovery path.
-  - Current `reentrancy-eth` and `reentrancy-no-eth` rows do not include the
-    curator-reserve or auction-curator release helpers; those release paths
-    zero the owed pool credit before performing the constrained pool transfer.
-  - `StreamMetadataRenderer.offchainTokenURI(...)` now uses `string.concat`
-    instead of packed dynamic-string concatenation.
-  - `arbitrary-send-eth`, `encode-packed-collision`, `weak-prng`, and
-    `uninitialized-state` are all zero current findings.
-  - No non-vendored first-party production high/medium rows remain. Current
-    high/medium rows are 10 accepted vendored OpenZeppelin false positives and
-    111 accepted test/invariant-harness findings.
+## Current First-Party Production Findings
 
-## Status Semantics
+The JSON companion is canonical. This table is a deterministic mirror checked
+by `scripts/check_slither_baseline.py --baseline-only`.
 
-| Status | Meaning |
-| --- | --- |
-| `Open` | Production-impacting finding that still needs a fix, accepted-risk rationale, or false-positive proof |
-| `Accepted` | Non-production or explicitly accepted finding with documented rationale |
-| `False Positive` | Tool finding proven not to apply |
-| `Fixed` | Finding removed by code change and covered by regression test |
-| `Needs Issue` | Finding needs a dedicated issue before Gate F |
+| Fingerprint | Impact | Detector | Confidence | Source | Status | Triage | Owner | Issues | Rationale | Required proof | Gate |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `sha256:c1b7db0f62e7ff01758e147d41188f1d33ea9a448efb0162d98b14e3ef11cbe8` | High | `arbitrary-send-eth` | Medium | smart-contracts/StreamGovernanceExecutor.sol:810-832 `_executeCall(bytes32,uint256,GovernanceCall,bytes)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive governed call executor can forward proposal-selected native value. The finding needs a threat-model decision; it is not treated as a false positive. | Document and review the governance authority, balance source, destination/value constraints, and failure semantics.<br>Add adversarial tests for hostile targets, reentrancy, value exhaustion, replay, and failed-call rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:77bce4c4046ae81daf80a4d234e0494830405ae8b8546a9f6afa3d2def340dc6` | High | `arbitrary-send-eth` | Medium | smart-contracts/StreamPrimarySaleSettlement.sol:97-122 `settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive primary-sale settlement forwards native value to a resolver-derived recipient. Resolver trust and payment invariants require review; the row is not accepted. | Trace recipient and amount provenance through the revenue resolver and document every trust boundary.<br>Add adversarial recipient, value, rollback, and double-settlement tests.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:0d21ebacfe96da1e46e24cc1fd53abce15ea345781846317a3f78f4a507002dd` | High | `uninitialized-state` | High | smart-contracts/StreamArtworkFinalityRegistry.sol:66-66 `_scopedComponents` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports state variable _scopedComponents as uninitialized at smart-contracts/StreamArtworkFinalityRegistry.sol:66 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open. | Trace every read and possible write, including inheritance and assembly paths.<br>Either add the intended authorized writer with focused tests or prove the state is deliberately immutable/default-only and remove or document it.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:1728b8f1d12b639b534009b5dd9fe2d30e641675ef26974d4fc426e94dbe7a0b` | High | `uninitialized-state` | High | smart-contracts/StreamCore.sol:185-185 `collectionBurnsBlockedAtBlockHeights` | `Open` | `confirmed_gap` | Protocol maintainers and independent security reviewers | [#654](https://github.com/6529-Collections/6529Stream/issues/654), [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Confirmed read-never-written StreamCore burn-block state. Issue #654 tracks the missing writer and compatibility-safe remediation; this row is not accepted or suppressed. | Implement or remove the state surface under issue #654 with an explicit compatibility decision.<br>Add writer authorization, transition, read-path, and negative tests, plus golden ABI and behavior evidence.<br>Obtain independent review of the remediation before changing this row to Fixed or accepted risk. | Gate C / Gate F |
+| `sha256:46e1d540ec31275e1787b8f97822fec61d2b9ebb0086ec2c8ee2e789fa3896c3` | Medium | `incorrect-equality` | High | smart-contracts/StreamCadenceProbe.sol:158-181 `finalizeCadenceSample()` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:158 finalizeCadenceSample. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
+| `sha256:b1eb28be0867e75683c9885fc2c000a9ed6527d1392f4035258ca9b0a79b5d33` | Medium | `incorrect-equality` | High | smart-contracts/StreamCadenceProbe.sol:158-181 `finalizeCadenceSample()` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:158 finalizeCadenceSample. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
+| `sha256:ef8dfdb6c26f9a7527ec5f2afe01c466131563e70420db14eaaa9341e697d703` | Medium | `incorrect-equality` | High | smart-contracts/StreamCadenceProbe.sol:201-262 `recordCadenceRun(bytes32,uint256)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:201 recordCadenceRun. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
+| `sha256:90ef539fab80ace49c0a8dca086cfa95aac8f85bf426d8cedec385d83eb963f7` | Medium | `incorrect-equality` | High | smart-contracts/StreamSplitWallet.sol:200-251 `release(address,address,address)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamSplitWallet.sol:200 release. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
+| `sha256:ead8503a828dfb6d9804aef0e48de4ac7f475a1cb08b0e1f2706fc2bf98ead38` | Medium | `incorrect-equality` | High | smart-contracts/StreamSplitWallet.sol:253-270 `_recordObservation(address,uint256)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamSplitWallet.sol:253 _recordObservation. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
+| `sha256:9b9ad9788b8d83f271b0d0150b0c021d388aa4526b30856b229984ce54d3578c` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/StreamCore.sol:521-543 `completePreparedMintFromManager(uint256,address,bytes32,uint256)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in prepared-mint completion and its receiver/randomizer callbacks requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for duplicate completion, callback reentry, rollback, and state-ordering.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:0b3edb3481ac751e4cc796bb3f5c71f0c7757f5e38d28b6661294cc469f26bd8` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/StreamPrimarySaleSettlement.sol:97-122 `settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in native primary-sale resolver/payment interaction ordering requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for hostile resolver/recipient reentry, double settlement, and rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:efed4f345f401c104a046975dc440f9aff430bb4e267467a9978cba77eff04d8` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/StreamPrimarySaleSettlement.sol:125-145 `settleERC20PrimarySale(IStreamPrimarySaleSettlement.PrimarySale,address)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in ERC-20 primary-sale resolver/token interaction ordering requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for hostile resolver/token reentry, non-standard token behavior, double settlement, and rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:c8488d708079e4133b931bf4d5531f3f3ed38af63a2f126313943293b7b7892a` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/StreamSplitFactory.sol:213-252 `_deployWallet(bytes32)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in split-wallet deployment and initialization ordering requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for partial initialization, callback reentry, duplicate deployment, and rollback.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:98d4221ae9004ea09f17422c7557965037dee9f40cd8242ee9b23e20651db441` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamArtworkFinalityPreview.sol:161-161 `expectedLeafCount` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local expectedLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:161 expectedLeafCount. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:6904ac9b3fbb05430469cb724ae80bd70fa1e2f9b9947d1a5a34dad61fd01519` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamArtworkFinalityPreview.sol:162-162 `exactLeafCount` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local exactLeafCount as relying on a Solidity default in smart-contracts/StreamArtworkFinalityPreview.sol:162 exactLeafCount. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:a20f41500ce98193729dc371320674b88ecb096016a9f6b6ee9addccb40c7a30` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:364-364 `ctx` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamArtworkFinalityRegistry.sol:364 ctx. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:d38f88764899b33de6a0846639f9a956f5d0d7af3d3e7f3a62723e4bfa608001` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamGovernanceExecutor.sol:230-230 `ctx` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamGovernanceExecutor.sol:230 ctx. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:cfa495f1bf85105fb33931146244108f2d878c9d23f53b36bd997aa0d15bae0c` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamGovernanceExecutor.sol:261-261 `ctx` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local ctx as relying on a Solidity default in smart-contracts/StreamGovernanceExecutor.sol:261 ctx. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:47d97f7e573230383f349da175be01394ec54ca2e78b711a76e1236036ba4785` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamGovernanceExecutor.sol:760-760 `totalValue` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local totalValue as relying on a Solidity default in smart-contracts/StreamGovernanceExecutor.sol:760 totalValue. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:5ec694ad1fbfccbbab1010327f9cbe023523928afa3b78df766684a5f1494b0f` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamMintManager.sol:501-501 `cursor` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local cursor as relying on a Solidity default in smart-contracts/StreamMintManager.sol:501 cursor. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:9d08be8f4d7eb2f6d1918efc8d9f8bcdc92bd360575aa1aac850f70e04e1c94a` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamMintManager.sol:617-617 `gateCall` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local gateCall as relying on a Solidity default in smart-contracts/StreamMintManager.sol:617 gateCall. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:40a4d88b08f046effa32b687f28adb5e0c87a44db96384306959c362942c4f2b` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamRevenueResolver.sol:87-87 `registry` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local registry as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:87 registry. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:d7c336114270c20134b15f498f7cf47c8665b56bb372231d4582b0cff3976882` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamRevenueResolver.sol:96-96 `runtimeCodeHash` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local runtimeCodeHash as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:96 runtimeCodeHash. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:ae4dde072ed8a2d9e7cad7aa36f6803e8de60405d91676f7d2924af054ae6811` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamRevenueResolver.sol:469-469 `input` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local input as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:469 input. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:95a19f179acce854e637d2ecd1fd825c04b2decff5c381e76d6b017c088bcd2d` | Medium | `uninitialized-local` | Medium | smart-contracts/StreamRevenueResolver.sol:655-655 `dynamicSources` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports local dynamicSources as relying on a Solidity default in smart-contracts/StreamRevenueResolver.sol:655 dynamicSources. All control-flow paths and downstream consumers still need review. | Trace assignment and use on every branch, including early return and revert paths.<br>Add focused tests for the default-valued path and every explicitly assigned path.<br>Record independent reviewer disposition or make initialization explicit under issue #658. | Gate C / Gate F |
+| `sha256:0fb00223d58ba592ef6af6fe2dff03705ea1d462001144779597d12a22bde9aa` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityPreview.sol:119-143 `_stagedFreezeReady(StreamFinalityScope,bytes32)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:119 _stagedFreezeReady. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:861ad65c4c72f5686850adfbdb3a9a20c8cb3eb5b3e7edeb7a6880f3f5834206` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityPreview.sol:192-204 `_contentRootSatisfied(StreamFinalityScope,uint64,bool)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:192 _contentRootSatisfied. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:1da20e8b9fe4421e6586fc3e19394a6447aca9d053be565cbb49976aa4c007cf` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityPreview.sol:275-287 `_sanctionVerification(StreamFinalityScope,bytes32)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:275 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:5735aee73c891184c03b78f473107dece0a38df3deace4cfe5f6c1167a7057a9` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityPreview.sol:334-342 `_componentsMatchLive(StreamFinalityScope,StreamFinalityComponentExpectation[])` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityPreview.sol:334 _componentsMatchLive. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:35d3e94ddad1d1ee5b27c61f182ca146f0624e05600d7ce4b25c68f1839ec7c8` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:116-178 `scheduleArtworkTerminalFreeze(StreamFinalityScope,bytes32,uint64,uint64)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:116 scheduleArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:fcfc29f1d2495fc672fa2969c1e26df5a2be77eb3e952dd92b961bed527d75a3` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:183-207 `vetoArtworkTerminalFreeze(StreamFinalityScope,bytes32)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:183 vetoArtworkTerminalFreeze. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:add60124f1bdc8a9f84ed99486f35eb8de70ca8324772fffc8200cd95e611477` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:654-677 `_requireExecutableFreeze(StreamTerminalFreezeAction,bytes32,bytes32)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:654 _requireExecutableFreeze. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:bfc37fd970aab873c3db03cfe1273cd6fa176e1acaf4b3fb668890bfed41e4b5` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:884-902 `_verifyContentRoot(StreamFinalityScope,uint64,bool)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:884 _verifyContentRoot. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:9fbc40429570cfd209da228870723c5ec534d0a09387f28b7db27ee7339e964c` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:1039-1051 `_sanctionVerification(StreamFinalityScope,bytes32)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1039 _sanctionVerification. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:9357ec6811cb61dcce5bb761c0ee00d13d6f8008bd06676eb9ee2a019b6ec45a` | Medium | `unused-return` | Medium | smart-contracts/StreamArtworkFinalityRegistry.sol:1557-1567 `_diagnoseSlice(StreamFinalityComponentExpectation[],StreamFinalityScope)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamArtworkFinalityRegistry.sol:1557 _diagnoseSlice. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:1fd2fe29656df6147000214112ad9e22b1abc567c8c21e722e1efaf0da09da65` | Medium | `unused-return` | Medium | smart-contracts/StreamMinter.sol:177-180 `_collectionTotalSupply(uint256)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamMinter.sol:177 _collectionTotalSupply. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:4bfe37a9d1b2b6ad4d61083d05c5c6c4bbbb9f3dac33493c0af2832cf08e96c0` | Medium | `unused-return` | Medium | smart-contracts/StreamModuleRegistry.sol:305-325 `_checkGovernedClass(bool)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamModuleRegistry.sol:305 _checkGovernedClass. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
+| `sha256:d4a04b60480543f4134e3c4fb4415f0d20fecfb3a44d1579208bdb7ecca7304d` | Medium | `unused-return` | Medium | smart-contracts/StreamPrimarySaleSettlement.sol:209-259 `_resolveSale(IStreamPrimarySaleSettlement.PrimarySale)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports an ignored return component in smart-contracts/StreamPrimarySaleSettlement.sol:209 _resolveSale. Its authority and error-signaling role have not yet been proven non-essential. | Identify each ignored return component and trace whether it carries status, bounds, or authorization-relevant data.<br>Add focused tests showing ignored components cannot change the caller decision, or consume and validate them.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 
-## High And Medium Findings
+## Triage Counts
 
-Every `Open` or `Needs Issue` row is blocking triage until it is fixed,
-accepted with rationale, or proved false positive. Issue cells link the grouped
-GitHub work item that owns that resolution.
+| Classification | Open rows |
+| --- | ---: |
+| `confirmed_gap` | 1 |
+| `design_review` | 6 |
+| `pending_disposition` | 31 |
+| Total | 38 |
 
-| Detector | Occurrences | Contract | Function | Source kind | Source location | Severity | Confidence | Status | Resolution | Required test | Issue | Gate | Owner |
-| --- | ---: | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| `arbitrary-send-eth` | 1 | `StreamAuctions` | `emergencyWithdraw()` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Bounded auction emergency withdrawal to auction-local surplus after bidder credits and active highest-bid escrow | `test/StreamAuctionPayments.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `NextGenRandomizerRNG` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Treats all adapter ETH as randomness reserve, exposes zero emergency-withdrawable balance, and transfers no emergency-withdrawable ETH | `test/StreamEmergencyWithdraw.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `StreamCuratorsPool` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-005` | High | Medium | Fixed | Bounded curator pool emergency withdrawal to surplus after local curator credits owed | `test/StreamCuratorsPool.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8), [`P0-PAY-005`](https://github.com/6529-Collections/6529Stream/issues/29) | Gate C | TBD |
-| `arbitrary-send-eth` | 1 | `StreamMinter` | `emergencyWithdraw()` | first-party | Fixed in `P0-PAY-007`/`P0-PAY-008` | High | Medium | Fixed | Exposes `totalOwed() == 0` and withdraws only `emergencyWithdrawable()` surplus, covering forced ETH without an ordinary payable path | `test/StreamEmergencyWithdraw.t.sol`; `test/StreamPaymentsInvariant.t.sol` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | Gate C | TBD |
-| `encode-packed-collision` | 1 | `StreamCore` | `retrieveDependencyScript(uint256)` | first-party | Fixed in `P0-META-001` | High | High | Fixed | Replaced packed dynamic dependency-script composition with initialized `string.concat` rendering and typed dependency chunk/content hash views that use `abi.encode`, dependency key, chunk count, chunk index, chunk byte length, and per-chunk content hash | Ambiguous chunk-boundary and typed hash regressions in `test/StreamMetadataEncoding.t.sol` | [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
-| `encode-packed-collision` | 1 | `StreamDrops` | `retrieveMessageAndDropID(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Removed legacy packed helper; `hashDropAuthorization` now uses EIP-712 domain-separated typed data | Explicit digest, replay, wrong-domain, wrong-chain, wrong-contract, and field-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
-| `encode-packed-collision` | 1 | `StreamDrops` | `mintDrop(address,address,string,uint256,uint256,uint256,uint256)` | first-party | Removed in `P0-AUTH-002` | High | High | Fixed | Replaced legacy packed-hash `mintDrop` ABI with `mintDrop(DropAuthorization,string,bytes)` and storage-backed consumed/cancelled drop IDs | EOA, EIP-2098, replay, expiry, cancellation, stale-epoch, wrong-domain, wrong-chain, wrong-contract, wrong-signer, malleability, zero signer, bad quantity, and token-substitution tests in `test/StreamDropsEIP712.t.sol` | [`P0-AUTH-002`](https://github.com/6529-Collections/6529Stream/issues/10) | Gate C | TBD |
-| `incorrect-exp` | 1 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | High | Medium | False Positive | `Math.sol` is tracked to OpenZeppelin Contracts v4.8.0 in `docs/vendored-libraries.md`; `(3 * denominator) ^ 2` is the intended bitwise-XOR seed for modular inverse calculation, not exponentiation | `test/StreamVendoredLibraries.t.sol::testMathMulDivHandlesFullPrecisionBoundaries`; `testMathMulDivRevertsForOverflowAndZeroDenominator` | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
-| `suicidal` | 3 | Forced-ETH test helpers | `force(address)` | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamFixedPricePayments.t.sol` | High | Medium | Accepted | Accepted as intentional Solidity 0.8.19 `selfdestruct` helpers used only to test forced-ETH surplus accounting | Forced-ETH tests in the owning files | Accepted test-only | Gate A | TBD |
-| `reentrancy-eth` | 1 | `StreamAuctions` | `participateToAuction(uint256)` | first-party | Fixed in `P0-AUCT-002` | High | Medium | Fixed | Replaced synchronous outbid refund `call` with bidder credit accounting; highest-bid state and auction escrow accounting update before any external withdrawal path | `test/StreamAuctionPayments.t.sol` | [`P0-AUCT-002`](https://github.com/6529-Collections/6529Stream/issues/12) | Gate C | TBD |
-| `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedPerAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written public-sale mint-count mapping and retrieval API instead of exposing an always-zero counter with no accepted quota semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
-| `uninitialized-state` | 1 | `StreamCore` | `state variable tokensMintedAllowlistAddress` | first-party | Removed in `P0-CORE-001` | High | High | Fixed | Removed the never-written allowlist mint-count mapping and retrieval API because the current drop path has no allowlist phase semantics | Retained airdrop-counter regression in `test/StreamMintAccounting.t.sol` | [`P0-CORE-001`](https://github.com/6529-Collections/6529Stream/issues/13) | Gate C | TBD |
-| `weak-prng` | 1 | `randomPool` | `randomNumber()` | first-party | Removed in `P0-RAND-008` | High | Medium | Fixed | Removed the concrete production-source `XRandoms` helper contract instead of shipping block-derived helper randomness alongside production randomizer adapters | `test/StreamRandomizerLifecycle.t.sol::testNxtRandomizerCannotBeConfiguredForProductionCollections` plus Slither `weak-prng=0` confirmation | [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C | TBD |
-| `weak-prng` | 1 | `randomPool` | `randomWord()` | first-party | Removed in `P0-RAND-008` | High | Medium | Fixed | Removed the concrete production-source `XRandoms` helper contract instead of shipping block-derived helper randomness alongside production randomizer adapters | `test/StreamRandomizerLifecycle.t.sol::testNxtRandomizerCannotBeConfiguredForProductionCollections` plus Slither `weak-prng=0` confirmation | [`P0-RAND-008`](https://github.com/6529-Collections/6529Stream/issues/73) | Gate C | TBD |
-| `divide-before-multiply` | 1 | `Base64` | `encode(bytes)` | vendored | `smart-contracts/Base64.sol#L20-L91` | Medium | Medium | False Positive | `Base64.sol` is tracked to OpenZeppelin Contracts v4.7.0 in `docs/vendored-libraries.md`; the flagged expression intentionally computes Base64 output length as `4 * ceil(data.length / 3)` | `test/StreamVendoredLibraries.t.sol::testBase64EncodingMatchesOpenZeppelinGoldenVectors`; `testBase64EncodingPreservesBinaryInputsAndPadding` | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
-| `divide-before-multiply` | 8 | `Math` | `mulDiv(uint256,uint256,uint256)` | vendored | `smart-contracts/Math.sol#L55-L134` | Medium | Medium | False Positive | `Math.sol` is tracked to OpenZeppelin Contracts v4.8.0 in `docs/vendored-libraries.md`; the flagged operations are part of the full-precision 512-bit `mulDiv` algorithm and are not lossy protocol accounting arithmetic | `test/StreamVendoredLibraries.t.sol::testMathMulDivHandlesFullPrecisionBoundaries`; `testMathMulDivRoundingUpOnlyIncrementsOnRemainder` | [`P0-LIB-001`](https://github.com/6529-Collections/6529Stream/issues/11) | Gate F | TBD |
-| `incorrect-equality` | 1 | `DropAuthTestHelper` | `signMalleableAuthorization(...)` | test-only | `test/helpers/DropAuthTestHelper.sol#L113-L123` | Medium | Medium | Accepted | Accepted as a test-only helper branch used to manufacture malleable signatures for negative authorization tests | `test/StreamDropsEIP712.t.sol` malleability tests | Accepted test-only | Gate A | TBD |
-| `locked-ether` | 7 | Rejection/reentrancy/mock receivers | payable test helpers | test-only | `test/StreamAuctionPayments.t.sol`, `test/StreamCuratorsPool.t.sol`, `test/StreamEmergencyWithdraw.t.sol`, `test/StreamFixedPricePayments.t.sol`, `test/mocks/MockRandomizer.sol` | Medium | High | Accepted | Accepted as test-only receivers and mocks used to characterize failed transfers, reentrancy attempts, and randomizer provider payments | Payment and emergency-withdrawal tests in the owning files | Accepted test-only | Gate A | TBD |
-| `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...)._occurrences` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the occurrence counter to zero before scanning the bytes32 source | `test/StreamInitialization.t.sol::testBytes32CharacterCountingUsesExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `Bytes32Strings` | `containsExactCharacterQty(...).i` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the loop index in the `for` statement instead of relying on Solidity's default local value | `test/StreamInitialization.t.sol::testBytes32CharacterCountingUsesExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `registerDelegationAddressUsingSubDelegation(...).subdelegationRightsCol` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the subdelegation-rights gate to false before collection/all-collection checks | `test/StreamInitialization.t.sol::testSubdelegationRightsGateRegisterAndRevokePaths` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `revokeDelegationAddressUsingSubdelegation(...).subdelegationRightsCol` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the revoke-path subdelegation-rights gate to false before collection/all-collection checks | `test/StreamInitialization.t.sol::testSubdelegationRightsGateRegisterAndRevokePaths` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveTokenStatus(...).status` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the token-status accumulator to false and covered missing, matching, and non-matching token records | `test/StreamInitialization.t.sol::testDelegationStatusLookupsDefaultFalseWhenNoRecordsExist`, `testDelegationStatusLookupsFindOnlyMatchingRecords` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveSubDelegationStatus(...).subdelegationRights` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the subdelegation-status accumulator to false and covered missing and granted subdelegation records | `test/StreamInitialization.t.sol::testDelegationStatusLookupsDefaultFalseWhenNoRecordsExist`, `testSubdelegationRightsGateRegisterAndRevokePaths` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `DelegationManagementContract` | `retrieveStatusOfActiveDelegator(...).status` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the active-delegator accumulator to false and covered missing, active, wrong-delegator, and expired lookups | `test/StreamInitialization.t.sol::testDelegationStatusLookupsDefaultFalseWhenNoRecordsExist`, `testDelegationStatusLookupsFindOnlyMatchingRecords` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamCore` | `retrieveGenerativeScript(...).scripttext` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the generative-script accumulator to an empty string before concatenating collection script chunks | `test/StreamInitialization.t.sol::testGenerativeScriptAccumulatorStartsEmptyForEmptyCollectionScript` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamCore` | `retrieveDependencyScript(...).scripttext` | first-party | Fixed in `P0-META-001` | Medium | Medium | Fixed | Initialized the dependency-script accumulator to an empty string before concatenation and covered the rendered output through the metadata encoding regression suite | `test/StreamMetadataEncoding.t.sol` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15), [`P0-META-001`](https://github.com/6529-Collections/6529Stream/issues/9) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamDrops` | `mintDrop(...).tokenid` | first-party | Removed in `P0-AUTH-002` | Medium | Medium | Fixed | Rewritten typed authorization path initializes branch locals explicitly; captured Slither run no longer reports `StreamDrops.mintDrop` uninitialized locals | `make slither` targeted log check plus EIP-712 and characterization tests | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `StreamMinter` | `mint(...).mintIndex` | first-party | Fixed in `P0-INIT-001` | Medium | Medium | Fixed | Initialized the returned mint index to zero before mint loops and covered the multi-recipient last-index return value | `test/StreamInitialization.t.sol::testMinterReturnsLastMintedIndexFromExplicitZeroStart` | [`P0-INIT-001`](https://github.com/6529-Collections/6529Stream/issues/15) | Gate C | TBD |
-| `uninitialized-local` | 1 | `MockStreamMinter` | `mint(...).mintedCount` | test-only | `test/mocks/MockStreamMinter.sol#L71` | Medium | Medium | Accepted | Accepted as a test-only helper baseline | None; test-only baseline row | Accepted test-only | Gate A | TBD |
-| `unused-return` | 1 | `StreamDropsERC1271Test` | `testValidContractSignatureMintsAndConsumesDropId()` | test-only | `test/StreamDropsERC1271.t.sol#L35-L61` | Medium | Medium | Accepted | Accepted as a test-only assertion helper pattern where tuple fields are intentionally ignored except the signer check | `test/StreamDropsERC1271.t.sol` | Accepted test-only | Gate A | TBD |
+## Triage Boundary
 
-## Source-Level Suppressions
+- `confirmed_gap` is the unwritten Core burn-block activation-height mapping;
+  it remains owned by #654 and cannot be accepted or marked fixed here.
+- `design_review` covers two governed/native-value transfer rows and four
+  callback/order rows. Existing guards do not replace threat-model and
+  adversarial-test evidence.
+- `pending_disposition` covers default/sentinel/ignored-field candidates. Each
+  row needs its own executable proof before `Accepted` or `False Positive`.
+- No broad detector suppression is part of this baseline.
+- A removed row also fails drift until this inventory and its disposition
+  history are deliberately refreshed.
 
-Source suppressions must stay narrow, include an adjacent code comment, and be
-backed by a regression test or accepted-risk rationale.
+## Commands
 
-| Detector | Scope | Status | Rationale | Required test | Issue | Owner |
-| --- | --- | --- | --- | --- | --- | --- |
-| `reentrancy-eth`, `write-after-write` | `NextGenRandomizerRNG.requestRandomWords(uint256,uint256)` | Accepted scoped suppression | arRNG returns the provider request ID from an external payable call, so the adapter must record request state after that call. The function uses a local request-in-progress guard, fulfillment rejects during the guarded window, and the suppression is limited to this function. | `test/StreamRandomizerLifecycle.t.sol::testArrngControllerCannotReenterFulfillmentDuringRequest`; `test/StreamRandomizerLifecycle.t.sol::testArrngZeroRequestIdFailsBeforeRecordingLifecycle` | [`P0-RAND-001`](https://github.com/6529-Collections/6529Stream/issues/37) | TBD |
-| `arbitrary-send-eth`, `reentrancy-no-eth`, `locked-ether` | `test/StreamPaymentsInvariant.t.sol` payment-sequence handler and `InvariantArrngController` mock | Accepted scoped suppression | The invariant harness deliberately pays contracts under test, records generated-sequence bookkeeping around those calls, and retains ETH in a payable mock randomness provider to simulate reserve accounting. Production payment safety is asserted by the invariant after each generated action, and the suppressions are limited to test-only harness code. | `test/StreamPaymentsInvariant.t.sol::testPaymentInvariantsHoldAcrossBoundedOperationSequences` | [`P0-PAY-008`](https://github.com/6529-Collections/6529Stream/issues/8) | TBD |
-
-## Triage Rules
-
-- Fix first-party high findings before any public beta claim.
-- Convert each fixed finding into a regression test in the test matrix.
-- Replace retained upstream libraries with pinned upstream packages or document
-  provenance before accepting vendored library rows. The current retained
-  OpenZeppelin utility files are documented in `docs/vendored-libraries.md`.
-- Keep every `Needs Issue` row linked to a GitHub issue before accepting or
-  suppressing it.
-- Do not suppress a detector until the finding or scoped suppression is
-  documented as `Fixed`, `Accepted`, or `False Positive`.
-- Do not convert Slither into a CI gate until high and medium findings have a
-  stable accepted baseline.
+```text
+python scripts/test_slither_baseline.py
+python scripts/check_slither_baseline.py --render-markdown
+python scripts/check_slither_baseline.py --baseline-only
+python scripts/check_slither_baseline.py --run-slither
+```

@@ -156,6 +156,27 @@ class ReleaseChecksumTests(unittest.TestCase):
         self.assertIn(Path("deployments/admin-ceremony"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/signatures"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("test/fixtures/drop-authorization"), generator.DEFAULT_COVERED_PATHS)
+        genesis_profile_paths = {
+            Path("release-artifacts/genesis-deployment-profile.json"),
+            Path("scripts/check_genesis_deployment_profile.py"),
+            Path("scripts/test_genesis_deployment_profile.py"),
+            Path("scripts/check_release_mode.py"),
+            Path("scripts/test_release_mode.py"),
+            Path("docs/launch-conformance-matrix.md"),
+            Path("docs/stream-long-term-architecture.md"),
+        }
+        self.assertTrue(genesis_profile_paths <= set(generator.DEFAULT_COVERED_PATHS))
+        slither_baseline_paths = {
+            Path("ops/SLITHER_BASELINE.json"),
+            Path("ops/SLITHER_BASELINE.md"),
+            Path("scripts/check_slither_baseline.py"),
+            Path("scripts/test_slither_baseline.py"),
+            Path("docs/slither.md"),
+            Path("requirements-tools.txt"),
+            Path("slither.config.json"),
+            Path("foundry.toml"),
+        }
+        self.assertTrue(slither_baseline_paths <= set(generator.DEFAULT_COVERED_PATHS))
 
     def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
         expected_paths = {

@@ -174,7 +174,9 @@ Before a public release tag:
 
 - CI is green on the release commit.
 - `make check` or the documented platform equivalent passes locally.
-- Slither baseline is reviewed and accepted.
+- Every first-party production Slither High/Medium row is remediated or has an
+  issue-linked reviewed disposition, and the exact normalized drift gate is
+  green. Matching a tracked baseline is not acceptance.
 - Gas and size snapshots are accepted. The current local gas baseline is
   `release-artifacts/baselines/v0.1.0/gas-snapshot.snap` and must pass
   `forge snapshot --match-path test/StreamGasSnapshot.t.sol --check
@@ -230,12 +232,16 @@ Before a public release tag:
   `python scripts/check_release_mode.py --phase production-release` only for
   release-candidate evidence review. The default baseline runs
   `python scripts/test_release_mode.py`; local release-mode Make targets run the
-  aggregate `check` gate first, and the manual workflow requires the protected
-  default branch and runs `bash scripts/check.sh`. Release mode rejects expired,
+  aggregate `check` gate and live exact Slither comparison first, and the manual
+  workflow requires the protected default branch and runs both before the strict
+  decision. Release mode rejects expired,
   future, or inverted risk-acceptance windows. External-audit evidence and every
   production requirement are non-waivable and must be complete; only the other
-  public-beta rows may use active explicit risk acceptance. Production mode
-  additionally requires the checksum-covered current `StreamCore` build to
+  public-beta rows may use active explicit risk acceptance. Both release phases
+  validate the canonical normalized Slither JSON/Markdown pair and reject any
+  first-party production High/Medium row that remains Open; matching the
+  baseline is not acceptance. Production mode additionally requires the
+  checksum-covered current `StreamCore` build to
   retain at least 2,000 bytes of EIP-170 runtime headroom; missing, malformed,
   inconsistent, or sub-threshold size fields fail closed under issue #654.
 - Royalty policy follows `docs/royalty-policy.md` and passes

@@ -10,10 +10,16 @@ from pathlib import Path
 from typing import Any
 
 import check_public_beta_evidence as evidence_checker
+import check_genesis_deployment_profile as genesis_profile_checker
+import check_slither_baseline as slither_baseline_checker
 
 
 DEFAULT_EVIDENCE = evidence_checker.DEFAULT_EVIDENCE
 DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
+DEFAULT_GENESIS_PROFILE = genesis_profile_checker.DEFAULT_PROFILE
+DEFAULT_CONTRACT_CONFIG = genesis_profile_checker.DEFAULT_CONTRACTS
+DEFAULT_SLITHER_BASELINE = slither_baseline_checker.DEFAULT_BASELINE
+DEFAULT_SLITHER_MARKDOWN = slither_baseline_checker.DEFAULT_MARKDOWN
 PUBLIC_BETA_PHASE = evidence_checker.PUBLIC_BETA_PHASE
 PRODUCTION_PHASE = evidence_checker.PRODUCTION_PHASE
 
@@ -145,6 +151,38 @@ def production_core_headroom_blocker(path: Path, repo_root: Path) -> str | None:
     return None
 
 
+def slither_baseline_blockers(
+    baseline_path: Path,
+    markdown_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    """Validate the canonical baseline and return unresolved release blockers."""
+    resolved_baseline = (
+        baseline_path if baseline_path.is_absolute() else repo_root / baseline_path
+    )
+    resolved_markdown = (
+        markdown_path if markdown_path.is_absolute() else repo_root / markdown_path
+    )
+    baseline = slither_baseline_checker.validate_baseline(
+        repo_root,
+        resolved_baseline,
+        resolved_markdown,
+    )
+    open_rows = [row for row in baseline["findings"] if row["status"] == "Open"]
+    if not open_rows:
+        return []
+
+    counts = {impact: 0 for impact in slither_baseline_checker.IMPACTS}
+    for row in open_rows:
+        counts[row["impact"]] += 1
+    return [
+        "first-party production Slither baseline contains "
+        f"{len(open_rows)} Open High/Medium finding(s) "
+        f"(High={counts['High']}, Medium={counts['Medium']}); "
+        "matching the normalized baseline is not acceptance; see issue #658"
+    ]
+
+
 def accepted_risk_blocker(
     requirement: dict[str, Any], as_of: date
 ) -> str | None:
@@ -219,17 +257,30 @@ def validate_release_mode(
     *,
     as_of: date | None = None,
     abi_checksums: Path = DEFAULT_ABI_CHECKSUMS,
+    genesis_profile: Path = DEFAULT_GENESIS_PROFILE,
+    contract_config: Path = DEFAULT_CONTRACT_CONFIG,
+    slither_baseline: Path = DEFAULT_SLITHER_BASELINE,
+    slither_markdown: Path = DEFAULT_SLITHER_MARKDOWN,
 ) -> None:
     """Require retained evidence to satisfy the selected release mode."""
     normalized_phase = normalize_phase(phase)
     data = load_validated_evidence(path, repo_root)
     blockers = release_mode_blockers(data, normalized_phase, as_of=as_of)
+    blockers.extend(
+        slither_baseline_blockers(slither_baseline, slither_markdown, repo_root)
+    )
     if normalized_phase == PRODUCTION_PHASE:
         headroom_blocker = production_core_headroom_blocker(
             abi_checksums, repo_root
         )
         if headroom_blocker is not None:
             blockers.append(headroom_blocker)
+        blockers.extend(
+            "genesis deployment profile: " + blocker
+            for blocker in genesis_profile_checker.production_completeness_blockers(
+                genesis_profile, contract_config, repo_root
+            )
+        )
     if blockers:
         label = PHASE_LABELS[normalized_phase]
         details = "\n".join(f"- {blocker}" for blocker in blockers)
@@ -253,6 +304,30 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         default="public-beta",
         help="Release gate to enforce. Production release also requires public-beta readiness.",
     )
+    parser.add_argument(
+        "--genesis-profile",
+        type=Path,
+        default=DEFAULT_GENESIS_PROFILE,
+        help="Canonical closed-world production deployment requirements.",
+    )
+    parser.add_argument(
+        "--contract-config",
+        type=Path,
+        default=DEFAULT_CONTRACT_CONFIG,
+        help="Current implementation catalog compared to the genesis profile.",
+    )
+    parser.add_argument(
+        "--slither-baseline",
+        type=Path,
+        default=DEFAULT_SLITHER_BASELINE,
+        help="Canonical normalized first-party production High/Medium baseline.",
+    )
+    parser.add_argument(
+        "--slither-markdown",
+        type=Path,
+        default=DEFAULT_SLITHER_MARKDOWN,
+        help="Checked reviewer-facing mirror of the normalized Slither baseline.",
+    )
     return parser.parse_args(argv)
 
 
@@ -266,8 +341,17 @@ def main(argv: list[str] | None = None) -> int:
             repo_root,
             args.phase,
             abi_checksums=args.abi_checksums,
+            genesis_profile=args.genesis_profile,
+            contract_config=args.contract_config,
+            slither_baseline=args.slither_baseline,
+            slither_markdown=args.slither_markdown,
         )
-    except (evidence_checker.PublicBetaEvidenceError, ReleaseModeError) as exc:
+    except (
+        evidence_checker.PublicBetaEvidenceError,
+        genesis_profile_checker.GenesisProfileError,
+        slither_baseline_checker.SlitherBaselineError,
+        ReleaseModeError,
+    ) as exc:
         print(f"release mode check failed: {exc}", file=sys.stderr)
         return 1
     print(f"release mode check passed for {args.phase}: {args.evidence}")

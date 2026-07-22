@@ -1,6 +1,6 @@
 # Tooling
 
-6529Stream currently uses a pinned Foundry smoke baseline.
+6529Stream uses pinned Foundry and Slither toolchains for its checked baseline.
 
 ## Versions
 
@@ -10,6 +10,7 @@
 | Solidity compiler | `0.8.19` |
 | Python (Linux CI/release) | `3.12.13` |
 | Slither | `0.11.5` |
+| Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
 | eth-hash | `0.8.0` |
 | Playwright | `1.60.0` |
@@ -59,7 +60,7 @@ python scripts/check_python_toolchain.py
 ```
 
 Review the full package/version change and every added or removed hash, not
-only the four direct pins. The generated lock must not contain index URLs,
+only the five direct pins. The generated lock must not contain index URLs,
 trusted-host settings, credentials, or private package references. Record or
 remediate vulnerability findings before acceptance. Update the deliberately
 maintained `EXPECTED_LOCKED_NAMES` closure in
@@ -224,6 +225,10 @@ python scripts/test_withdrawals_credits_flow.py
 python scripts/check_withdrawals_credits_flow.py
 python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
+python scripts/test_slither_baseline.py
+python scripts/check_slither_baseline.py --baseline-only
 python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_release_checksums.py
@@ -572,20 +577,44 @@ mapping, and no-secret telemetry boundaries. It is not a maintained dashboard,
 hosted monitoring service, alert-provider integration, RPC provider, production
 indexer, public beta implementation, or production readiness claim.
 The strict release-mode decision remains opt-in rather than part of the default
-`make check` baseline, which runs `python scripts/test_release_mode.py`. The
+`make check` baseline, which runs the structural
+`genesis-deployment-profile-check` and `python scripts/test_release_mode.py`.
+The canonical
+`release-artifacts/genesis-deployment-profile.json` derives the exhaustive
+`[LCM-GENESIS]` entry count from its contiguous entries, keeps unreviewed
+legacy names non-satisfying, and reports class-level mapping gaps against the
+v1 `release-artifacts/contracts.json` catalog without making ordinary
+development unusable. That catalog is diagnostic only: it has no deployment
+addresses, instance identity, probe-parameter bindings, or on-chain manifest
+reconciliation and therefore can never clear production mode. The
 local `make release-mode-public-beta-check` and
 `make release-mode-production-release-check` targets run the aggregate `check`
-gate before the strict evidence decision. The manual GitHub `workflow_dispatch`
-profile likewise requires the protected default branch and runs
-`bash scripts/check.sh` before the selected release phase. Release mode accepts
+gate and `slither-baseline-check` before the strict evidence decision. The
+manual GitHub `workflow_dispatch` profile likewise requires the protected
+default branch and runs the aggregate plus live Slither gates before the selected
+release phase. Release mode accepts
 only active, correctly ordered risk-acceptance windows, permits them only for
 waivable public-beta rows, requires completed external-audit evidence and every
 production evidence row, and requires public-beta readiness before production
-release readiness. Production mode then reads the checksum-covered
+release readiness. Both phases validate the canonical normalized
+`ops/SLITHER_BASELINE.json` plus its checked Markdown mirror and reject any
+first-party production High/Medium row that remains Open. The current 38-row
+set is a non-waivable technical blocker under issue #658; exact analyzer drift
+parity is not acceptance. Production mode then reads the checksum-covered
 `release-artifacts/latest/abi-checksums.json` measurement, rejects missing,
 malformed, boolean-as-integer, or arithmetically inconsistent `StreamCore` size
 fields, and requires at least 2,000 bytes of EIP-170 runtime headroom. That
-non-waivable threshold comes from the
+mode also invokes the genesis checker in strict completeness mode: missing,
+extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
+unapproved-alias, fallback, and probe gaps are production blockers. Even a v1
+catalog with no mapping gaps remains categorically insufficient. Production
+stays fail-closed until a checked schema for an instance-aware genesis
+deployment candidate reconciles deployment manifests, address books,
+source-verification inputs, the on-chain system-manifest payload, retained
+rehearsal/live evidence, and the release candidate lockfile. That remaining
+work is tracked by
+[issue #656](https://github.com/6529-Collections/6529Stream/issues/656). The
+non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
 is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
@@ -1190,6 +1219,8 @@ python scripts/check_monitoring_spec.py
 python scripts/test_operator_dashboard_query_model.py
 python scripts/check_operator_dashboard_query_model.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/generate_release_manifest.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
@@ -1265,6 +1296,8 @@ python scripts/check_admin_ceremony_evidence.py
 python scripts/test_monitoring_spec.py
 python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
 python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
@@ -1304,7 +1337,9 @@ the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
 `requirements-tools.txt`, `requirements-tools.lock`, the ordinary CI and
-release-mode workflows, the Python toolchain checker and its tests,
+release-mode workflows, the Python toolchain checker and its tests, the
+canonical `release-artifacts/genesis-deployment-profile.json` and its checker,
+tests, release-mode integration, and normative inventory mirrors,
 `release-artifacts/evidence/`,
 `release-artifacts/drop-authorization-signing/`,
 `release-artifacts/signer-custody-readiness/`,
@@ -1319,29 +1354,43 @@ own generated checksum files to avoid self-referential hashes. Refresh the
 release manifest before refreshing the checksum bundle after changing any
 covered artifact.
 
-## Non-Gating Diagnostics
+## Slither Gates And Raw Diagnostics
 
-These commands are intentionally not part of `make check` yet:
+The default `make check` path includes the fast
+`slither-baseline-metadata-check`. It runs the checker tests plus
+`scripts/check_slither_baseline.py --baseline-only`, validating the normalized
+baseline and dispositions without launching Slither. The dedicated Ubuntu CI
+job runs `make slither-baseline-check` with the pinned Foundry and Python
+toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
+and fails when the live normalized first-party High/Medium set adds a new row or
+leaves a tracked row stale.
 
-```bash
-make slither
-forge fmt --check smart-contracts
-```
+The current checked baseline has 38 open findings: 4 High and 34 Medium. The
+compact normalized JSON lives at
+[`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
+classifications, rationales, and open proof requirements in
+[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The approximately
+128 MB raw Slither JSON is temporary analyzer output and is never committed.
+After a production-source edit intentionally stales the strict provenance hash,
+use the diagnostic `--candidate-slither-json` plus `--candidate-output` mode to
+materialize semantic identities and scope counts in an OS temporary directory
+or ignored `cache/`. Candidate output has no triage or
+proof fields, cannot overwrite the canonical JSON/Markdown pair, is never
+release evidence, and must not be committed. After reviewed JSON/provenance
+updates, regenerate the mirror with `--render-markdown` before rerunning both
+gates.
 
-`make slither` runs:
+`make slither` remains the raw diagnostic:
 
 ```bash
 slither . --config-file slither.config.json --foundry-compile-all
 ```
 
-The current Slither high/medium baseline is tracked in
-[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). Slither exits non-zero
-while findings exist; that is expected until the baseline is accepted as a CI
-gate.
-
-`forge fmt --check smart-contracts` is intentionally listed as a raw diagnostic
-because it still prints the vendored/provenance exemption diff. The scoped
-`make fmt-check` gate is part of `make check` and CI. Slither still has a known
-baseline and should become a fail-on-new-finding gate only after Slither
-baseline acceptance lands. See [`docs/slither.md`](slither.md) for the full
-Slither workflow.
+It can exit non-zero while baseline findings remain open. Likewise,
+`forge fmt --check smart-contracts` is a raw formatting diagnostic because it
+still prints the vendored/provenance exemption diff; the scoped
+`make fmt-check` gate is part of `make check` and CI. Passing either Slither
+baseline gate proves consistency with the committed checked inventory only. It
+does not prove the findings harmless, complete an external audit, or promote
+public-beta or production readiness. See [`docs/slither.md`](slither.md) for the
+full workflow.
