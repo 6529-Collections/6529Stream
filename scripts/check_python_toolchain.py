@@ -111,8 +111,9 @@ NAME_KEY_RE = re.compile(r"^\s*(?:-\s*)?name\s*:", re.IGNORECASE)
 STRICT_RUN_KEY_RE = re.compile(r"^\s*(?:-\s*)?run: \|\s*$")
 FOLDED_RUN_RE = re.compile(r"^\s*(?:-\s*)?run\s*:\s*>", re.IGNORECASE)
 EXPLICIT_MAPPING_KEY_RE = re.compile(r"^\s*(?:-\s*)?\?(?:\s|$)")
-STEP_FLOW_MAPPING_RE = re.compile(r"^\s*-\s*\{")
+STEP_FLOW_MAPPING_RE = re.compile(r"^\s*(?:-\s*)?\{")
 YAML_ANCHOR_ALIAS_RE = re.compile(r"[&*]")
+YAML_TAG_RE = re.compile(r"!")
 YAML_ESCAPE_RE = re.compile(
     r"\\(?:x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 )
@@ -340,7 +341,7 @@ def check_workflow(path: Path, text: str) -> list[str]:
         name_key = NAME_KEY_RE.match(raw_line)
         action_match = STRICT_ACTION_RE.fullmatch(raw_line)
 
-        if FOLDED_RUN_RE.match(raw_line):
+        if not in_literal_run_block and FOLDED_RUN_RE.match(raw_line):
             errors.append(
                 f"{path}:{line_number} folded run scalars are not allowed; use run: |"
             )
@@ -360,12 +361,21 @@ def check_workflow(path: Path, text: str) -> list[str]:
                 f"{path}:{line_number} YAML anchors and aliases are not allowed"
             )
 
-        if YAML_ESCAPE_RE.search(raw_line):
+        if not in_literal_run_block and YAML_TAG_RE.search(raw_line):
+            errors.append(
+                f"{path}:{line_number} YAML tags are not allowed"
+            )
+
+        if not in_literal_run_block and YAML_ESCAPE_RE.search(raw_line):
             errors.append(
                 f"{path}:{line_number} YAML hex and Unicode escapes are not allowed"
             )
 
-        if USES_TOKEN_RE.search(stripped) and name_key is None:
+        if (
+            not in_literal_run_block
+            and USES_TOKEN_RE.search(stripped)
+            and name_key is None
+        ):
             if action_match is None:
                 errors.append(
                     f"{path}:{line_number} every uses line must be a strict external "
@@ -387,13 +397,18 @@ def check_workflow(path: Path, text: str) -> list[str]:
         if canonical_run_key is not None:
             literal_run_indent = indentation
 
-        if "install" in stripped.casefold() and stripped not in approved_install_lines:
+        if (
+            name_key is None
+            and "install" in stripped.casefold()
+            and stripped not in approved_install_lines
+        ):
             errors.append(
                 f"{path}:{line_number} unapproved install line: {stripped!r}"
             )
 
         if (
-            SENSITIVE_PACKAGE_TOOL_RE.search(stripped)
+            name_key is None
+            and SENSITIVE_PACKAGE_TOOL_RE.search(stripped)
             and stripped not in {LOCK_INSTALL_COMMAND, PIP_CHECK_COMMAND}
         ):
             errors.append(
@@ -405,13 +420,19 @@ def check_workflow(path: Path, text: str) -> list[str]:
         stripped = raw_line.strip()
         if not stripped or stripped.startswith("#"):
             continue
-        if "install" in stripped.casefold() and stripped not in approved_install_lines:
+        logical_name_key = NAME_KEY_RE.match(raw_line)
+        if (
+            logical_name_key is None
+            and "install" in stripped.casefold()
+            and stripped not in approved_install_lines
+        ):
             errors.append(
                 f"{path}:logical-line-{logical_line_number} unapproved install line "
                 f"after shell continuation normalization: {stripped!r}"
             )
         if (
-            SENSITIVE_PACKAGE_TOOL_RE.search(stripped)
+            logical_name_key is None
+            and SENSITIVE_PACKAGE_TOOL_RE.search(stripped)
             and stripped not in {LOCK_INSTALL_COMMAND, PIP_CHECK_COMMAND}
         ):
             errors.append(

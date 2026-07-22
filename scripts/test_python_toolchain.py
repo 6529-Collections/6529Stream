@@ -117,15 +117,17 @@ class PythonToolchainTests(unittest.TestCase):
 
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), valid_workflow()), [])
 
-    def test_descriptive_uses_text_is_not_an_action_key(self) -> None:
-        """A step name containing the word uses is ordinary descriptive text."""
+    def test_descriptive_name_and_literal_content_pass(self) -> None:
+        """Names and literal shell content are not parsed as YAML policy keys."""
 
         workflow = valid_workflow().replace(
             "steps:",
             "steps:\n"
-            "  - name: Cache step that uses actions/cache\n"
+            "  - name: Install pip docs that use actions/cache\n"
             "    run: |\n"
-            "      echo cache",
+            "      echo cache uses actions/cache\n"
+            '      echo "run: > is shell text"\n'
+            "      printf '\\u0041'",
         )
         self.assertEqual(checker.check_workflow(Path("workflow.yml"), workflow), [])
 
@@ -247,6 +249,24 @@ class PythonToolchainTests(unittest.TestCase):
             '    ses"\n'
             "steps:"
         )
+        standalone_flow_uses = (
+            "  -\n"
+            f'    {{ ? "u{continuation}'
+            '        ses"\n'
+            "      : example/action@v1 }"
+        )
+        standalone_flow_run = (
+            "  -\n"
+            f'    {{ ? "r{continuation}'
+            '        un"\n'
+            '      : "pip install extra-package" }'
+        )
+        tagged_flow_uses = (
+            "  -\n"
+            f'    !!map {{ ? "u{continuation}'
+            '        ses"\n'
+            "      : example/action@v1 }"
+        )
         self.assertIn(
             "pip install extra-package",
             checker.normalize_shell_continuations(quoted_continuation),
@@ -338,6 +358,14 @@ class PythonToolchainTests(unittest.TestCase):
                 f"  - uses: {checkout}",
                 "  - *!k: example/action@v1",
             ),
+            "uses-standalone-flow-map": base.replace(
+                f"  - uses: {checkout}",
+                standalone_flow_uses,
+            ),
+            "uses-tagged-flow-map": base.replace(
+                f"  - uses: {checkout}",
+                tagged_flow_uses,
+            ),
             "uses-docker": base.replace(checkout, "docker://python:3.12.13"),
             "run-spaced-colon": base.replace("  - run: |", "  - run : echo bypass\n  - run: |"),
             "run-quoted-key": base.replace(
@@ -347,6 +375,10 @@ class PythonToolchainTests(unittest.TestCase):
             "run-flow-map": base.replace(
                 "  - run: |",
                 "  - { run: echo bypass }\n  - run: |",
+            ),
+            "run-standalone-flow-map": base.replace(
+                "  - run: |",
+                f"{standalone_flow_run}\n  - run: |",
             ),
             "run-explicit-key": base.replace(
                 "  - run: |",
