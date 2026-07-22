@@ -131,7 +131,7 @@ research pass in `docs/metadata-renderer-research.md`:
    payload.
 7. Design storage as plural from day one: genesis uses chunked strings for
    small scripts and SSTORE2 write-once blobs for large ones (ADR 0010
-   decision 4), while the manifest interfaces can later point to EthFS,
+   decision D4), while the manifest interfaces can later point to EthFS,
    Arweave, IPFS, dependency registries, or other durable stores without
    touching Core.
 8. Keep frontier ideas as optional modules outside protocol v1 Core: post-mint
@@ -855,7 +855,7 @@ Storage shape ownership [MRR-STORAGE-HOMES]:
    chunk, dependency manifest, and media manifest storage shapes are owned
    by [`docs/collection-metadata-contract.md`](collection-metadata-contract.md);
    this document cites them and must not restate the structs (ADR 0010
-   decision 3).
+   decision D3).
 2. Mint-time `tokenData` and its `tokenDataHash` commitment are owned by the
    Core mint ABI in
    [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
@@ -2583,7 +2583,7 @@ freezeTokenMetadata            token/global metadata admin
 
 Artist identity, acceptance, attestation, consent-mode, and sanction
 authority are owned by [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010
-decision 2); metadata admin roles never substitute for artist authority.
+decision D2); metadata admin roles never substitute for artist authority.
 Mutable metadata updates after an artist attestation must be deliberately
 constrained by policy, and any render-affecting update invalidates
 attestation currency per the staleness rules in

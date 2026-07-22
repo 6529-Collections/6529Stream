@@ -238,7 +238,7 @@
       "evidence": [
         {
           "path": "docs/collection-metadata-contract.md",
-          "sha256": "sha256:74e4a1007f1b12889ed4c517881f53b468c7238ee9a567783ad85bcddb3ed7f3"
+          "sha256": "sha256:c4c11fe56a8e03c3c29ff700cd7b201c617feefd58ebfd2319f08b278e4551c7"
         },
         {
           "path": "docs/deployment.md",
