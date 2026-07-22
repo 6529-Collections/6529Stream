@@ -2,7 +2,12 @@
 
 ## Status
 
-Accepted.
+Superseded in part by
+[`ADR 0016`](0016-core-native-only-erc721.md) for the pre-genesis launch line.
+Decisions W1 and W2 remain accepted. Decisions W3, W4, and W5 are historical
+and must not be implemented in the launch Core: the contract-wide ERC-721
+review proved that selective per-token shutdown of Core approval/transfer/event
+semantics is nonconformant. W6 remains historical register context.
 
 Accepted 2026-07-05 by the protocol owner. This ADR resolves OQ-X8 — the
 single question the owner reserved through five review rounds (ADR 0010

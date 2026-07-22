@@ -41,7 +41,7 @@ year contract life through the frozen extension mechanisms only:
 
 | Area | Protocol v1 requirement | Extension surface (Permanent from v1) |
 | --- | --- | --- |
-| Core | ERC-721 ownership, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, Core-native ERC-2981, and the dormant facade-readiness surfaces — per-collection identity mode, transfer-controller registry, and controlled mutation path ([PV1-FACADE-READINESS]; ADR 0015 decision W4) | None. Core gains no new semantics after deployment; no mutable policy or rendering logic in Core. Changing Core surfaces means a successor Core line |
+| Core | ERC-721 ownership and approvals, token identity, collection identity, supply invariants, minimal router/resolver/coordinator hooks, and Core-native ERC-2981; every token is `CORE_NATIVE` under ADR 0016 | None. Core gains no new semantics after deployment; no mutable policy or rendering logic in Core. Changing Core surfaces means a successor Core line |
 | Revenue | Immutable split profiles, deterministic split wallets, resolver assignments, native ETH primary settlement, approved-standard ERC-20 primary settlement through outside-Core adapters, passive royalty receipt, and native/approved-asset revenue escrow | New settlement or recovery adapters are new Replaceable modules with their own accepted specs; non-standard ERC-20 behavior stays excluded until a spec accepts it |
 | Royalties | Core-native ERC-2981 that calls a resolver for receiver and bps, then computes amount in Core | Resolver implementations rotate behind the frozen resolver interface; marketplace registry overrides remain outside protocol semantics, but launch royalty-resolution coverage is deployment-gated release evidence ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md) [LCM-MARKETPLACE]; ADR 0011 decision R12) |
 | Minting | `StreamMintManager` policy plus `StreamMintLedger` accounting with many counters, aggregate-only consumption, signed tickets, and module-checked gates/resolvers | New counter resolvers and gates register through the frozen module registry and gate/resolver interfaces |
@@ -233,480 +233,43 @@ Point-in-time implementation caveats do not belong in this section;
 as-built deviations are recorded as labeled non-normative evidence in the
 documents that own the affected path.
 
-## Facade-Readiness Genesis Surfaces
+## Core-Native-Only Launch Rule
 
-Requirements [PV1-FACADE-READINESS]:
+Requirements [PV1-FACADE-READINESS], [PV1-IDENTITY-MODE], and
+[PV1-TRANSFER-CONTROLLER]:
 
-Core ships the facade-readiness surfaces at genesis, dormant, so the
-facade tripwire (ADR 0015 decision W3) can never require a Core
-redeployment (ADR 0015 decision W4): a per-collection identity mode, a
-transfer-controller registry, a controlled ownership-mutation path, a
-controlled-ownership-change event family, and a per-collection supply
-read. The per-collection ERC-721
-facade line itself is a dormant extension profile, never a launch
-dependency; its contract requirements, local-serial identity rules,
-emission-exclusivity rules, and deployment-decision procedure are owned
-by
-[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
-(ADR 0015 decision W5). The umbrella owns the facade-readiness doctrine
-([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
-[LTA-IDENTITY-MODE]); this section owns the Core surface shapes,
-constants, and events, with every new keccak ID pinned in the
-[Domain-Constants Mirror](#domain-constants-mirror) under the
-unpinned-placeholder rule ([PV1-MIRROR] rule 2). This is Permanent
-semantics. Cross-cutting requirements:
+ADR 0016
+([core-native-only ERC-721](adr/0016-core-native-only-erc721.md))
+supersedes the launch meanings previously carried by these three legacy
+aliases. The aliases remain only so older cross-references resolve; they do
+not define a launch ABI or dormant extension surface.
 
-1. `CORE_NATIVE` equivalence is scoped to observable outcomes: no
-   state outcome, return value, event, or revert of any pre-ADR-0015
-   entry differs for a `CORE_NATIVE` collection from pre-ADR-0015
-   behavior, and the mode resolution on native entries adds no
-   observable behavior change for `CORE_NATIVE` collections — the
-   equivalence is behavioral, never a bytecode or gas identity claim.
-   On a `CORE_NATIVE`-only deployment the facade-readiness reads
-   answer their dormant defaults — `collectionIdentityMode` returns
-   `IDENTITY_MODE_CORE_NATIVE` and `collectionTransferController`
-   returns `address(0)` ([PV1-IDENTITY-MODE] requirement 2;
-   [PV1-TRANSFER-CONTROLLER] requirement 1) —
-   `controlledOwnershipChange` reverts for every caller
-   ([PV1-TRANSFER-CONTROLLER] requirement 6), and the only other
-   reachable facade-readiness entries are the governed declaration
-   and registration surfaces themselves ([PV1-IDENTITY-MODE]
-   requirement 3; [PV1-TRANSFER-CONTROLLER] requirement 2), inert
-   without governance per requirement 5. This requirement is the
-   single scoping home of the facades-dormant equivalence claim,
-   cited by the umbrella doctrine and drill roster
-   ([LTA-IDENTITY-MODE] rule 7), the facade profile, and the matrix
-   gate row. ERC-721 conformance statements across this spec set —
-   interface advertisement, `Transfer` emission, approval semantics,
-   and safe-transfer recipient checks — are scoped to `CORE_NATIVE`
-   collections' tokens; for an `EXTERNAL_FACADE` collection the
-   registered facade is the ERC-721 surface for its tokens
-   ([FCP-SCOPE] in the facade profile).
-2. State reads are mode-independent: `ownerOf`, `balanceOf`,
-   `totalSupply`, lifecycle, and token/collection identity reads
-   answer identically in both modes, and record chains and state
-   exports are mode-independent ([LTA-EXPORT]; [LTA-EVENT-HISTORY]).
-   Metadata serving is mode-independent
-   ([`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
-   [MRR-FACADE-SERVING]). The surfaces that differ by mode are the
-   live ownership-mutation entry set, the per-mutation event family,
-   and the mint-time recipient callback: mint delivery performs the
-   ERC-721 safe-transfer recipient check for `CORE_NATIVE`
-   collections and no recipient callback for `EXTERNAL_FACADE`
-   collections, whose terminal notification goes to the controller
-   instead ([PV1-TRANSFER-CONTROLLER] requirement 12).
-3. Event exclusivity. Per ownership mutation Core emits exactly one of
-   ERC-721 `Transfer` (`CORE_NATIVE`) or `ControlledOwnershipChanged`
-   (`EXTERNAL_FACADE`; [PV1-TRANSFER-CONTROLLER] requirement 11), and
-   the registered facade is the exclusive ERC-721 `Transfer` emitter
-   for its collection's tokens (emission-exclusivity rules owned by
-   the facade profile). Core-address log replay therefore remains a
-   complete ownership record in both modes ([PV1-RECON] item 13;
-   [LTA-EVENT-HISTORY]).
-4. No policy surface. The identity mode relocates which contract
-   serves the ERC-721 surface for a collection; it conditions nothing.
-   [PV1-EXCL] items 1-3 bind in both modes — disclosure-only
-   royalties, no soulbound or lockable tokens, no rental or
-   transfer-conditioned behavior. A controller that conditions
-   ownership mutation on payment, lock state, or user roles is
-   nonconformant with the facade profile ([FCP-PERMANENCE]), and the
-   controlled path enforces exactly the native open-transfer
-   invariant set — owner match and a nonzero recipient for a
-   transfer, the native burn-precondition suite only for the burn
-   case — and nothing more: locks, finality components, and pause
-   never gate ownership transfer on this Core line, in either mode
-   ([LTA-STANDARDS]; [PV1-TRANSFER-CONTROLLER] requirement 6).
-5. Zero-governance inertness. Mode declaration and controller
-   registration execute only as canonical staged governance actions of
-   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
-   ([GOV-ACTION-ID]); with governance lost neither is possible, no
-   other code path writes facade-readiness state, and the dormant
-   surfaces have no effect on a `CORE_NATIVE`-only deployment —
-   equivalence scoped by requirement 1 (ADR 0015 decision W4). The zero-signer museum-mode drill extension
-   that proves this inertness is owned by the conformance matrix
-   (Collection identity mode gate,
-   [`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md))
-   and the umbrella drill roster ([LTA-IDENTITY-MODE];
-   [LTA-GGP-PROBES] rule 9); this section cites it and restates
-   nothing.
-6. Mint ordering is unchanged. The [PV1-MINT-ORDER] invariants and the
-   two blessed paid-path realizations ([RSR-ORCHESTRATION]) hold
-   verbatim in both modes; the sole mode-dependent step is the
-   terminal delivery notification of [PV1-TRANSFER-CONTROLLER]
-   requirement 12, and `CORE_NATIVE` mint execution follows the
-   pre-ADR-0015 ordering unchanged.
-7. Retrofit is excluded (ADR 0015 decision W3). The identity mode is
-   one-way and pre-first-mint, so a collection that reached its first
-   mint under `CORE_NATIVE` identity can never migrate to a facade; if
-   facades ever deploy, they apply only to collections declared
-   `EXTERNAL_FACADE` before their first mint.
-8. Per-collection supply read. Core exposes
-   `totalSupplyOfCollection(uint256 collectionId) returns (uint256)`
-   at genesis: a Permanent, non-reverting storage read returning the
-   collection's live token count — minted-ever minus burned, the
-   counts Core owns per [PV1-IDENTITY] item 5 — zero for a collection
-   with no minted tokens, created or not, and mode-independent per
-   requirement 2. A registered facade serves its ERC-721
-   `totalSupply()` by delegating to this read with no facade-local
-   supply storage ([FCP-IDENTITY] in the facade profile), so no
-   facade deployment ever requires a Core redeployment for a supply
-   surface (ADR 0015 decision W4). The read enters the Core hook
-   budget ([PV1-HOOKS]) and its golden coverage rides the
-   conformance-matrix identity-mode golden test (golden test 29).
-
-### Collection Identity Mode
-
-Requirements [PV1-IDENTITY-MODE]:
-
-Every collection carries an identity mode from the closed two-member
-vocabulary `CORE_NATIVE` and `EXTERNAL_FACADE` (ADR 0015 decision W4).
-Mode IDs are `bytes32` values, the `keccak256` of the ASCII mode name,
-following the conservation-tier vocabulary style
-([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-[CMC-MUSEUM-GRADE]); the vocabulary is pinned in the
-[mirror](#collection-identity-and-facade-readiness-mirror-rows) under
-the CI recomputation discipline ([PV1-MIRROR]). No Solidity enum and no
-Numeric ID Catalog entry exists for the modes, exactly as for the
-conservation tiers, so no parallel numeric ID space is ever created;
-the mode and controller reads keep their golden coverage
-([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
-[LCM-GOLDEN]).
-
-```solidity
-bytes32 constant IDENTITY_MODE_CORE_NATIVE =
-    0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1;
-// keccak256("CORE_NATIVE")
-
-bytes32 constant IDENTITY_MODE_EXTERNAL_FACADE =
-    0xc7dd233bcf9b505ac7e2ab434d9e6af7bc663d64e2d983f1dd6d77668b578656;
-// keccak256("EXTERNAL_FACADE")
-
-function collectionIdentityMode(uint256 collectionId)
-    external
-    view
-    returns (bytes32 mode);
-
-function declareCollectionIdentityMode(
-    uint256 collectionId,
-    bytes32 mode
-) external;
-```
-
-1. Closed vocabulary. The only mode IDs are
-   `IDENTITY_MODE_CORE_NATIVE` and `IDENTITY_MODE_EXTERNAL_FACADE`,
-   pinned in the
-   [mirror](#collection-identity-and-facade-readiness-mirror-rows);
-   `declareCollectionIdentityMode` reverts with the typed error
-   `UnknownCollectionIdentityMode` for every other `mode` value.
-2. `CORE_NATIVE` is the default by construction.
-   `collectionIdentityMode` is a non-reverting Core storage read: it
-   returns `IDENTITY_MODE_CORE_NATIVE` for every collection with no
-   recorded declaration — created or not — and the mode is never
-   derived from token-ID shape, facade state, or offchain convention.
-3. Declaration is governed, one-way, and pre-first-mint.
-   `declareCollectionIdentityMode` executes only through the canonical
-   staged governance action ([GOV-ACTION-ID]) on the normal delay
-   class ([GOV-WINDOWS]), and reverts with the typed error
-   `CollectionUnknown` when `collectionId` is outside
-   `[1, lastAllocatedCollectionId()]` ([PV1-IDENTITY] item 7); with
-   `IdentityModeAlreadyDeclared` when a declaration is already
-   recorded for the collection — one declaration per collection, ever,
-   in either mode; and with `IdentityModeDeclarationClosed` at or
-   after the collection's first mint. The first-mint boundary is the
-   collection's first Core token-identity allocation — the
-   [PV1-MINT-ORDER] invariant 3 write, single-step and prepared alike
-   — so a collection with any allocated identity, including a
-   prepared, uncompleted mint, can never change mode.
-4. Artist consent gates the declaration for artist-bound collections
-   (ADR 0015 decision W4). The identity mode decides the marketplace
-   identity of the work, so for a collection with an accepted artist
-   binding
-   ([`docs/stream-artist-authority.md`](stream-artist-authority.md)
-   [AA-BINDING]) the declaration is consent-gated at the
-   content-affecting authority level. Binding status is read, never
-   assumed: Core consults the registry's
-   `attributionState(collectionId)` read ([AA-STATE] requirement 6;
-   mirrored at [AA-INTERFACES]) before the gated write — when the
-   read reports `ATTR_NONE`, `CLAIMED`, or `REVOKED`, no accepted
-   artist binding exists, Core does not call the consent read, and
-   the declaration proceeds on governance authority alone
-   (`requireContentConsent` reverts on absent consent, so an
-   unconditional call would wrongly block unbound collections). For
-   every other reported state Core must verify the registry's
-   `requireContentConsent(collectionId, familyId, newStateHash)` read
-   ([AA-CONTENT]) with `familyId` equal to
-   `COLLECTION_IDENTITY_MODE_FAMILY_ID` — the content-consent family
-   identifier owned by this section, the `keccak256` of the ASCII
-   name `COLLECTION_IDENTITY_MODE`, pinned in the mirror. The
-   family's canonical state hash is per-mode (ADR 0015 decision W4):
-   for a `CORE_NATIVE` declaration `newStateHash` is the bare mode ID
-   `IDENTITY_MODE_CORE_NATIVE`, verified before recording the
-   declaration; for an `EXTERNAL_FACADE` declaration it is
-   `keccak256(abi.encode(IDENTITY_MODE_EXTERNAL_FACADE, controller))`
-   — the facade address is the thing that actually fixes the
-   marketplace identity, so the artist consents to the concrete
-   two-address identity, never to a facade chosen later. An
-   artist-bound `EXTERNAL_FACADE` declaration therefore executes only
-   as one atomic canonical governed batch ([GOV-BATCH] in
-   [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
-   staging exactly the declaration followed by the controller
-   registration under one action identity: Core verifies the pair
-   consent at the registration entry — the first point the controller
-   address is call input ([PV1-TRANSFER-CONTROLLER] requirement 2) —
-   and batch atomicity extends a consent revert to the whole batch,
-   so the mode record and the controller binding land together,
-   consented, or not at all. A declaration-only staging of an
-   artist-bound `EXTERNAL_FACADE` declaration is nonconformant. The
-   consent read reverts on refusal, dispute, or absent consent and
-   the gated action reverts with it; authority, record mechanics, and
-   the `DISPUTED` block are owned by [AA-CONTENT] (requirements 2
-   and 5) and its identity-mode join paragraph, which cites this
-   section for the mechanics. An undeclared collection is
-   `CORE_NATIVE` by construction, so where no artist authority is
-   live the declaration waits and the collection loses nothing.
-5. Declaration is evented:
-
-   ```solidity
-   event CollectionIdentityModeDeclared(
-       uint16 schemaVersion,
-       uint256 indexed collectionId,
-       bytes32 indexed mode,
-       bytes32 indexed actionId
-   );
-   ```
-
-   `schemaVersion` is `1`, and `actionId` binds the authorizing
-   ADR 0004 action identity ([GOV-ACTION-ID]) per the uniform
-   governance-evidence rule. The signature enters the machine-readable
-   event catalog and its golden tests
-   ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
-   [LCM-EVENTS]), which are authoritative over this prose snippet.
-6. `EXTERNAL_FACADE` allocation precondition. Core token-identity
-   allocation for an `EXTERNAL_FACADE` collection reverts with the
-   typed error `TransferControllerUnregistered` until the collection's
-   transfer controller is registered ([PV1-TRANSFER-CONTROLLER]
-   requirement 2), so no facade-mode token ever exists without a live
-   mutation path and a live ERC-721 `Transfer` emitter.
-7. Verification. The mode read, the declaration path, and the three
-   negative gates — post-first-mint declaration, redeclaration, and
-   unknown-mode rejection — are deployment-gated by the conformance
-   matrix (Collection identity mode gate), and the artist-consent join
-   — including the requirement 4 per-mode state hashes and the atomic
-   declaration-and-registration batch shape — is exercised per its
-   artist-authority home.
-
-### Transfer Controller Registry And Controlled Mutation
-
-Requirements [PV1-TRANSFER-CONTROLLER]:
-
-An `EXTERNAL_FACADE` collection binds exactly one transfer controller —
-its facade — before its first mint; the binding is one-way and
-immutable, and the controller-called path is the collection's sole
-ownership-mutation entry (ADR 0015 decision W4).
-
-```solidity
-interface IStreamTransferController {
-    function onStreamOwnershipChange(
-        uint256 collectionId,
-        uint256 tokenId,
-        uint256 collectionSerial,
-        address from,
-        address to,
-        bytes calldata data
-    ) external returns (bytes4);
-}
-
-bytes4 constant ON_STREAM_OWNERSHIP_CHANGE_SELECTOR = 0xdaee0572;
-// bytes4 of keccak256("onStreamOwnershipChange(uint256,uint256,uint256,address,address,bytes)")
-
-function collectionTransferController(uint256 collectionId)
-    external
-    view
-    returns (address controller);
-
-function registerCollectionTransferController(
-    uint256 collectionId,
-    address controller
-) external;
-
-function controlledOwnershipChange(
-    uint256 collectionId,
-    uint256 tokenId,
-    address from,
-    address to,
-    bytes calldata data
-) external;
-```
-
-1. Registry read. `collectionTransferController` is a non-reverting
-   Core storage read: it returns the one registered controller for an
-   `EXTERNAL_FACADE` collection and `address(0)` otherwise —
-   `CORE_NATIVE`, undeclared, and not-yet-registered collections
-   alike.
-2. Registration is governed, one-way, and pre-first-mint.
-   `registerCollectionTransferController` executes only through the
-   canonical staged governance action ([GOV-ACTION-ID]) on the normal
-   delay class ([GOV-WINDOWS]), and reverts with the typed error
-   `IdentityModeNotExternalFacade` unless
-   `collectionIdentityMode(collectionId)` is
-   `IDENTITY_MODE_EXTERNAL_FACADE` — permanent for `CORE_NATIVE`
-   collections, where no code path ever admits a controller; with
-   `TransferControllerAlreadyRegistered` when a controller is already
-   registered — the binding is immutable once set; with
-   `TransferControllerRegistrationClosed` at or after the collection's
-   first token-identity allocation (the [PV1-IDENTITY-MODE]
-   requirement 3 boundary); and with `InvalidTransferController` for
-   `address(0)`, an address with no deployed code, or an address not
-   registered in the module registry at binding time ([LTA-REGISTRY];
-   ADR 0015 decision W4). For an
-   artist-bound collection this entry is additionally where the
-   identity-mode consent verifies over the `(mode, controller)` state
-   hash, inside the atomic declaration-and-registration batch — the
-   mechanics are owned by [PV1-IDENTITY-MODE] requirement 4; this
-   requirement cites them and restates nothing.
-3. Controller conformance. The registered controller must be a
-   Permanent-class contract conforming to the facade profile
-   ([FCP-PERMANENCE] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
-   Core cannot prove profile conformance from an address; deployment
-   conformance must enforce it through controller code-hash approval,
-   static analysis, tests, and the matrix gates, mirroring the
-   resolver-binding posture of [PV1-2981].
-4. Registration is evented:
-
-   ```solidity
-   event CollectionTransferControllerRegistered(
-       uint16 schemaVersion,
-       uint256 indexed collectionId,
-       address indexed controller,
-       bytes32 indexed actionId
-   );
-   ```
-
-   `schemaVersion` is `1`, `actionId` binds the authorizing action
-   identity ([GOV-ACTION-ID]), and the signature enters the event
-   catalog and its golden tests ([LCM-EVENTS]).
-5. Finality identity binding. For `EXTERNAL_FACADE` collections the
-   registered controller address and its facade-local ID rule are
-   bound into the collection's finality components through the pinned
-   record family owned by [CMC-FACADE-BINDING] in
-   [`docs/collection-metadata-contract.md`](collection-metadata-contract.md),
-   a finality component per [LTA-FINALITY] requirement 16
-   ([LTA-IDENTITY-MODE]; ADR 0015 decision W4), so the two-address
-   identity is part of the work's permanent identity; this section
-   cites that binding and restates nothing.
-6. Controlled mutation path with invariant parity.
-   `controlledOwnershipChange` is the sole ownership-mutation entry
-   for `EXTERNAL_FACADE` collections. It is callable only by the
-   collection's registered controller — every other caller reverts
-   with the typed error `CallerNotTransferController`, and every call
-   for a `CORE_NATIVE` collection reverts with
-   `IdentityModeNotExternalFacade` — and for a transfer it enforces
-   exactly the native open-transfer invariant set: owner match
-   (`from` must equal `ownerOf(tokenId)`) and a nonzero recipient,
-   nothing else. Native transfers on this Core line are unconditioned
-   ([LTA-STANDARDS]; [PV1-EXCL] items 1-3): locks, finality
-   components, and pause never gate ownership transfer, in either
-   mode — finality freezes artwork bytes, never ownership — so the
-   controlled path checks none of them for transfers, and the native
-   burn-precondition suite applies only to the `to == address(0)`
-   burn case (requirement 7). No additional checks and no omitted
-   checks, verified by running the native-transfer invariant suite —
-   the open-transfer set above, positive and negative cases alike,
-   including transfers that must succeed under live locks, finality
-   components, and pause — against the controlled path (conformance
-   matrix, Transfer controller and controlled mutation gate). Core's
-   native approval state is not consulted: controller authorization
-   replaces the owner/approved check, and facade-local approval
-   semantics are owned by the facade profile.
-7. Path semantics. `collectionId` must match the token's stored
-   collection identity or the call reverts with the typed error
-   `TokenCollectionMismatch` ([PV1-IDENTITY]). `to == address(0)` is a
-   burn and enforces the identical preconditions as the native burn
-   path, including the one-way collection burn block
-   ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-   [CMC-BURN]). `from == address(0)` reverts with the typed error
-   `ControlledMintForbidden`: minting remains manager-only through the
-   [MPA-CORE-ABI] entries in both modes.
-8. Native-entry closure. For an `EXTERNAL_FACADE` collection's tokens,
-   `approve`, `transferFrom`, both `safeTransferFrom` overloads, and
-   the native burn entry revert with the typed error
-   `NativeTransferPathClosed`, and `getApproved` returns `address(0)`
-   because no per-token approval can ever be recorded.
-   `setApprovalForAll` and `isApprovedForAll` are owner-scoped,
-   contract-wide ERC-721 surfaces and remain callable for
-   `CORE_NATIVE` use; an operator grant conveys no authority over
-   `EXTERNAL_FACADE` tokens because every native entry that would
-   consume it reverts per-token. Exactly one live ownership-mutation
-   path exists per collection in either mode.
-9. Checks-effects-interactions ordering. In every controlled mutation,
-   and in the facade-mode delivery of requirement 12, all Core state
-   writes and record-chain writes of the operation — ownership,
-   supply and burn accounting, burn audit, and the requirement 11
-   emission — settle before the ownership-change callback to the
-   controller; the callback is the operation's only external call to
-   the controller and its terminal step; a reentrant call from the
-   callback observes fully settled state, and reentry into any
-   ownership-mutation entry within the callback reverts. A callback
-   revert reverts the whole operation ([PV1-MINT-ORDER] invariant 1
-   atomicity).
-10. Terminal callback. The callback is
-    `IStreamTransferController.onStreamOwnershipChange`, covering mint
-    (`from == address(0)`), transfer, and burn (`to == address(0)`);
-    `collectionSerial` carries the facade-local ERC-721 token ID
-    ([FCP-IDENTITY] in the facade profile), and `data` is opaque
-    controller context, empty bytes for manager-path mints. The
-    callback must return `ON_STREAM_OWNERSHIP_CHANGE_SELECTOR` — the
-    `bytes4` selector of `onStreamOwnershipChange`, pinned in the
-    mirror — and any other returndata reverts the operation with the
-    typed error `InvalidTransferControllerAck`. The interface is
-    golden-tested by selector alongside the [PV1-MODULE-ID] surface.
-11. Controlled-ownership-change event family:
-
-    ```solidity
-    event ControlledOwnershipChanged(
-        uint16 schemaVersion,
-        address indexed from,
-        address indexed to,
-        uint256 indexed tokenId,
-        uint256 collectionId,
-        uint256 collectionSerial
-    );
-    ```
-
-    Core emits `ControlledOwnershipChanged` in place of ERC-721
-    `Transfer` for every `EXTERNAL_FACADE` ownership mutation — mint,
-    transfer, and burn, with the zero-address conventions of ERC-721
-    `Transfer` — carrying the same indexed triple as `Transfer` so
-    indexers retarget by topic shape, plus the collection grouping key
-    and the collection-local serial. `schemaVersion` is `1`; the
-    signature enters the event catalog and its golden tests
-    ([LCM-EVENTS]). `CORE_NATIVE` mutations emit ERC-721 `Transfer`
-    unchanged, and identity events (`TokenCollectionRegistered`,
-    [MPA-CORE-ABI]) are mode-independent.
-12. Mint and burn delivery. For `EXTERNAL_FACADE` collections every
-    mint execution routes the same terminal callback — at single-step
-    mint and at prepared-mint completion alike, the point where
-    ERC-721 ownership materializes ([MPA-CORE-ABI]) — and every burn
-    routes it, with the requirement 10 zero-address semantics. The
-    callback executes after every [PV1-MINT-ORDER] invariant is
-    satisfied and every write of requirement 9 has settled.
-    `StreamMintManager`'s canonical mint ordering [PV1-MINT-ORDER] is
-    otherwise unchanged: the invariants, the two blessed realizations,
-    and every `CORE_NATIVE` behavior are untouched — the delivery
-    notification is an appended terminal step for facade-mode
-    collections only. Core performs no ERC-721 safe-transfer recipient
-    callback for `EXTERNAL_FACADE` operations; recipient-safety
-    semantics for facade tokens are owned by the facade profile, and
-    [PV1-MINT-ORDER] invariant 6 holds by construction because the
-    controller is called only after full settlement.
-13. Verification. The registry read, registration path, negative
-    gates, invariant parity, adversarial CEI reentrancy test, and
-    per-mode event-exclusivity assertions are deployment-gated by the
-    conformance matrix (Transfer controller and controlled mutation
-    gate), with the controller-registration and
-    controlled-ownership-change families asserted against the event
-    catalog ([LCM-EVENTS]).
+1. The launch Core is `CORE_NATIVE` only. Every allocated token uses the
+   same Core ERC-721 ownership, approval, transfer, safe-transfer, mint-event,
+   and burn-event semantics for the life of this deployment line.
+2. The target Core ABI excludes `collectionIdentityMode(uint256)`,
+   `collectionTransferController(uint256)`,
+   `declareCollectionIdentityMode(uint256,bytes32)`,
+   `registerCollectionTransferController(uint256,address)`, and
+   `controlledOwnershipChange(uint256,uint256,address,address,bytes)`.
+   No launch storage or mutation path may depend on those selectors.
+3. The target Core event surface excludes
+   `CollectionIdentityModeDeclared(uint16,uint256,bytes32,bytes32)`,
+   `CollectionTransferControllerRegistered(uint16,uint256,address,bytes32)`,
+   and
+   `ControlledOwnershipChanged(uint16,address,address,uint256,uint256,uint256)`.
+   Core emits the standard ERC-721 `Transfer` event for every mint, transfer,
+   and burn.
+4. A facade or address-per-collection design is successor-line research. It
+   requires a new accepted ADR and threat model with an explicitly
+   standards-conformant asset model; it cannot reactivate dormant launch-Core
+   branches.
+5. ADR 0015 decisions W1 and W2 remain in force. W1's Permanent
+   collection-identity reads and JSON signal remain launch requirements, and
+   W2's marketplace/indexer commitment evidence remains a release go/no-go
+   gate. Failure of that gate never activates an alternate ownership path.
+6. `totalSupplyOfCollection(uint256)` remains a Permanent Core supply-fact
+   read under [PV1-IDENTITY] item 5. It is not facade readiness.
 
 ## Core Hook Budget
 
@@ -714,6 +277,15 @@ Requirements [PV1-HOOKS]:
 
 Core-native ERC-2981 is mandatory. Core may stay small only by moving other
 logic out.
+
+The checksum-covered
+[`stream-core-permanent-interface.json`](../release-artifacts/stream-core-permanent-interface.json)
+is the normative complete list of Core Permanent functions and events. Its
+closed `bytecode_budget_groups` catalog assigns every active entry to exactly
+one implementation-requirement group and rejects phantom groups. This hook
+table groups those requirements for implementation review; it cannot add an
+ABI entry omitted from the manifest or make a manifest entry optional. Budget
+groups carry no additive byte estimates.
 
 The implementation must provide one measured Core hook proof before the
 implementation PR is accepted. The proof must be produced by:
@@ -729,31 +301,144 @@ paths:
 
 | Hook | Selector owner | Required caller/user |
 | --- | --- | --- |
+| Complete Permanent Core function/event lock and closed bytecode-budget-group coverage | Release tooling | Implementers, reviewers, and auditors use the machine-readable manifest as the exhaustive surface |
 | `royaltyInfo(uint256,uint256)` | Core | Marketplaces and indexers |
-| `supportsInterface(bytes4)` with ERC-721 (including ERC-721 Metadata), ERC-4906, and ERC-2981; the ERC-721 Enumerable interface (`0x780e9d63`) is not advertised and its per-transfer index storage does not exist in Core (ADR 0012 decision T10) | Core | Marketplaces and indexers |
+| `supportsInterface(bytes4)` with ERC-721, ERC-721 Metadata, ERC-4906, ERC-2981, and mandatory ERC-7572 (`0xe8a3d485`); the ERC-721 Enumerable interface (`0x780e9d63`) is not advertised and its per-transfer index storage does not exist in Core (ADR 0012 decision T10) | Core | Marketplaces and indexers |
 | `totalSupply()` and `lastAllocatedTokenId()` storage reads with no enumerable index storage, per the enumeration posture home ([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md) [LTA-ENUMERATION]); `tokenOfOwnerByIndex`/`tokenByIndex` do not exist on Core, and live reads are served by the periphery enumeration lens (ADR 0012 decision T10) | Core | Marketplaces, indexers, and museum-mode iteration |
-| `mintFromManager(...)` and the prepared-mint pair, per the manager-only mint ABI home ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CORE-ABI]) | Core | `StreamMintManager` only |
+| Complete manager-only mint surface: `mintFromManager(uint256,address,bytes,bytes32,bytes32)` (`0xc4e32ca9`), `prepareMintFromManager(uint256,bytes,bytes32,bytes32)` (`0x67c6528b`), `completePreparedMintFromManager(uint256,address,bytes32,bytes32)` (`0xabf5d45f`), incident-only `abortPreparedMintFromManager(uint256,bytes32)` (`0xd9251657`), `preparedMint(uint256)` (`0x06d25065`), `pendingPreparedMintTokenId()` (`0xa767d50e`), and retained opaque-byte read `tokenData(uint256)` (`0xb4b5b48f`), per the exact ABI and same-transaction prepared-mint semantics at [MPA-CORE-ABI]; Core verifies the supplied `tokenDataHash` against the bytes but stores no second per-token hash slot | Core | `StreamMintManager`, renderers, finality, archival tools, and incident monitoring |
 | `TokenCollectionRegistered` emission at identity write, carrying `uint16 schemaVersion` (ADR 0010 decision D10.1; ADR 0011 decision R12); the production signature is pinned once at the event home ([`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CORE-ABI]) | Core | Indexers and archive reconstruction |
 | token identity reads: collection ID, collection serial, authoritative identity read, burn audit as needed | Core | Resolver, router, indexers |
-| `collectionBurnsBlockedAtBlock(uint256)` one-way burn-block activation-height read, zero until set, per the burn-block home ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-BURN]; ADR 0013 decision U4) | Core | Artist registry steward minted-before checks, indexers |
-| metadata router pointer read and update | Core | Admin and `tokenURI()` path |
+| `blockCollectionBurns(uint256)` (`0xfcfc7b26`), `collectionBurnsBlocked(uint256)` (`0x5923b379`), and `collectionBurnsBlockedAtBlock(uint256)` (`0x74a5ded9`) with one activation-height storage slot, terminal-freeze governance binding, and no duplicate boolean state, per the production-exact burn-block home ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-BURN]; ADR 0013 decision U4) | Core | Finality registry, artist registry steward minted-before checks, governance, indexers |
+| One-way `freezeCollection(uint256)` (`0xbcc405d0`) and derived `collectionFreezeStatus(uint256)` (`0x2ed330f7`), backed by one private activation-height slot with no height getter; terminal-governance class and exact per-call scope/state checks plus schema-v1 `CollectionFrozen(uint16,uint256,bytes32)` action-ID event; executes after the burn block and before registry finality, per [CMC-FREEZE] | Core | Finality registry, satellites, governance, monitoring, indexers |
+| Unified Core satellite-pointer ABI: `getSatellitePointer(bytes32)` (`0x3528d53c`), `updateSatellitePointer(bytes32,address)` (`0xac1e5708`), and one-way `freezeSatellitePointer(bytes32)` (`0xcdcdb71e`), with the exact ten-word return including monotonic per-family revision, private cached storage, live-`MODULE_REGISTRY`/executor-context/hash rechecks, old-registry bootstrap for a registry successor, same-target registry revalidation, exact-state no-op rejection, and no individual pointer getters or second staging state machine, per [LTA-POINTERS] | Core | Satellites, governance, `tokenURI()`/`contractURI()`, finality, monitoring, indexers |
+| Core-minimal GGP ABI: six-return `gasParameterInfo(bytes32)` (`0xec2ef90a`) including monotonic per-parameter revision; governed `raiseGasParameter(bytes32,uint256)` (`0x5c0df7da`), `emergencyRaiseGasParameter(bytes32,uint256)` (`0x4fa1b5ad`), `lowerGasParameter(bytes32,uint256)` (`0x908dc981`), and `rebindGasParameterProbe(bytes32,address)` (`0xb98f30e0`); and `FORWARDING_CAP`-only conditional raise (`0x0671a369`) and re-lower (`0x59bf6beb`), with authenticated Permanent probe bindings, full per-call state hashes, action classes `1`/`3`/`6`, schema-v1 `GasParameterProbeRebound` topic `0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c`, and class-3 rebind-plus-manifest-tail atomicity pinned at [LTA-GGP-CORE]; no action-ID calldata, generic convenience reads, public constant getters, or subsystem alias events | Core | Governance, permissionless museum-mode repair, monitoring, bounded Core call paths |
 | minimal `tokenURI()` delegation to router | Core | ERC-721 metadata callers |
 | minimal `contractURI()` delegation to the contract-metadata satellite (ADR 0009 decision 4) | Core | Marketplaces and indexers (ERC-7572) |
-| collection metadata pointer read and update | Core | Router and admin tooling |
-| entropy coordinator pointer read and update | Core | Mint and entropy lifecycle |
 | entropy registration call during mint | Core to coordinator | Mint path |
-| Core-originated ERC-4906 refresh emitters callable by authorized satellites (ADR 0009 decision 5) | Core | Metadata router, finality registry, entropy coordinator |
-| Core-originated ERC-7572 `ContractURIUpdated()` emitter callable by one authorized satellite (ADR 0012 decision T9) | Core | Metadata router only |
-| `collectionIdentityMode(uint256)` and `collectionTransferController(uint256)` storage reads plus the governed one-way `declareCollectionIdentityMode` and `registerCollectionTransferController` entries ([PV1-FACADE-READINESS]; ADR 0015 decision W4) | Core | Marketplaces, indexers, and governance tooling |
-| `controlledOwnershipChange(...)` controller-only mutation entry with the terminal `IStreamTransferController` delivery callback and `ControlledOwnershipChanged` emission for `EXTERNAL_FACADE` collections ([PV1-TRANSFER-CONTROLLER]; ADR 0015 decision W4) | Core | Registered transfer controllers only |
-| `totalSupplyOfCollection(uint256)` per-collection live-supply storage read — minted-ever minus burned, non-reverting, mode-independent — the pinned Core read a registered facade's `totalSupply()` delegates to ([PV1-FACADE-READINESS] requirement 8; ADR 0015 decision W4) | Core | Marketplaces, indexers, and registered facades |
+| Core-originated `emitMetadataUpdate(uint256,bytes32)` (`0xb826aa0c`) and `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) restricted ERC-4906 helpers, emitting the standard event plus `StreamMetadataRefresh(uint16,bytes32,uint256,uint256)`, with O(1) lifecycle/range checks and `MAX_REFRESH_RANGE = 5_000` (ADR 0009 decision 5; [MRR-REFRESH-EMITTERS]) | Core | Current metadata router and finality registry; the registry's permissionless stored-plan continuation uses exactly one batch call per transaction; the exact nonzero `coordinatorAtMint(tokenId)` additionally for the single-token helper only, never for batch |
+| Core-originated `emitContractURIUpdated()` (`0x7f377036`) restricted ERC-7572 helper; no calldata or return value (ADR 0012 decision T9) | Core | Metadata router only |
+| `totalSupplyOfCollection(uint256)` per-collection live-supply storage read — minted-ever minus burned and non-reverting — per [PV1-IDENTITY] item 5 | Core | Marketplaces and indexers |
+| Complete linked via-IR runtime measurement through the checked production build | Release tooling | Sole authority for EIP-170 headroom; row or group estimates never substitute for the linked measurement |
+
+The system-manifest aggregate is deliberately absent from this Core table.
+Protocol v1 deploys the governance executor first with no downstream-derived
+constructor inputs, then deploys immutable Permanent `StreamSystemManifest`
+bound to this Core and executor. ADR 0004's authority-only one-way bootstrap
+bind proves Core's executor through the locked writer's exact staticcall revert
+order, verifies the satellite's two immutable binding getters and interface,
+records live Core/satellite code hashes and stable content/inventory/trigger
+commitments, and enables governance; no action is available before that bind.
+The deployment registers module type
+`0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6`
+(`keccak256("STREAM_SYSTEM_MANIFEST")`) with full interface ID `0x37660ede`,
+sets Core's `SYSTEM_MANIFEST` pointer to it, and terminal-freezes that family at
+genesis. The satellite owns `streamSystemManifest()` (`0x97c93f10`),
+the binding reads `core()` (`0xf2f4eb26`) and `governanceExecutor()`
+(`0x8fc98386`),
+`streamSystemManifestPointer()` (`0x7b3a36b1`),
+`streamSystemManifestPointerCount()` (`0x5b1e1cba`),
+`streamSystemManifestPointerAt(uint256)` (`0x893aae03`), and
+`publishStreamSystemManifest(address,(bytes32,string,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32))`
+(`0x09b1b5c6`), plus the schema-v1 publication event, bounded
+SSTORE2 root-descriptor history over RFC8785-JCS canonical payload chunks,
+exact leaf/list/root commitments, at most `32` canonical `24_575`-byte chunks
+(`786_400` total bytes), a nonempty `manifestURI` of at most `2_048` UTF-8
+bytes, and [GOV-MANIFEST-TAIL] enforcement at [LTA-MANIFEST-PUBLISH]. The
+returned `payloadPointer` is the descriptor root. The five-function
+`IStreamSystemManifest` interface ID remains `0x37660ede`; the two binding reads
+are mandatory outside it, for seven protocol-specific selectors plus
+`supportsInterface(bytes4)`—eight external functions total—and no function
+assumes a single data blob. Its cached aggregate read is storage-only;
+its governed writer derives the post-batch address set from Core's generic
+pointer reads. Root/chunk data carriers are excluded from their own payload and
+deploy only after every inventoried address and canonical byte is fixed; the
+actual root is recorded at atomic seal/publication, never pinned in executor
+initcode or the bootstrap bind. ABI lock requires a deterministic non-production
+60-profile fixture proving canonical bytes, chunk/root mechanics, profile-drift
+detection, and decoded/RPC wire-size arithmetic. Measured maximum-size writer
+gas/RPC fixtures remain mandatory implementation and deployment gates once the
+writer exists; the target fixture is not that evidence. Live semantic equality to the
+cached addresses/discovery hashes remains a separate production blocker until
+the instance-aware deployment candidate is reconciled under issue #656.
+
+Every `deploymentManifestHash` in that payload and in module/registry/pointer
+identity is the same release-wide pre-publication deployment-identity digest
+defined at [LTA-DEPLOYMENT-IDENTITY]. It is
+`keccak256(abi.encode(STREAM_DEPLOYMENT_IDENTITY_V1,
+keccak256(rfc8785JcsUtf8(identityView))))` over the exact address-free symbolic
+inventory and zeroed deployment-template view. Actual protocol addresses,
+init/runtime hashes, system payload/root/publication facts, and later release,
+checksum, signature, address-book, or evidence artifacts are excluded. After
+the digest is fixed, deployment resolves constructor/library bindings and
+CREATE2 addresses; the system payload then commits those actual facts plus the
+stable digest, and later release evidence may reference both only in that
+one-way direction. The full deployment/release file's normalized SHA-256 is a
+different downstream checksum.
+
+Artwork-finality aggregates are likewise absent from the Permanent Core target.
+Genesis instead deploys singleton immutable Permanent
+`StreamCoreFinalityAdapter`, module type
+`0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4`.
+Its four-function interface ID is `0xebf35615`: `core()` (`0xf2f4eb26`),
+`collectionMetadata()` (`0x89ed2edf`),
+`coreCollectionFinalityFacts(uint256)` (`0x4eb4b6dc`), and
+`scopedCoreFinalityFacts((uint8,uint256,uint256,bytes32))` (`0xde5e2530`).
+It supports ERC-165, binds Core and collection metadata immutably, and has no
+owner, writer, upgrade, selfdestruct, funds, facade, or controller surface. It
+composes facts from the granular target-Core ABI, uses `uint256` supply fields
+with no `createdAt`, derives burned supply as checked `minted - live`, and reads
+`scopeManifest(uint256,bytes32)` (`0x862fdecd`) only for release/season/view
+scope manifests; token-scope manifest hash is zero in V1. The finality registry
+stores actual Core separately, verifies both adapter bindings, and hashes the
+actual Core address. This adapter adds zero selectors and zero bytecode to
+Core; the obsolete Core aggregate/facade seam is not a launch compatibility
+surface ([LTA-CORE-FINALITY-ADAPTER]).
+
+Artwork-recovery invalidation is also satellite-first and adds zero Core
+delta. The finality registry requires a nonzero recovery-manifest content hash,
+snapshots Core's existing global token high-water mark when an artwork-changing
+route executes, and stores an enumerable-free monotonic refresh plan. A newer
+route also replaces any incomplete predecessor plan with a fresh snapshot plan
+under its own stored manifest hash, even when the newer recovery says bytes are
+unchanged, so invalidation is never stranded. The exact
+permissionless continuations are
+`continueFinalityRecoveryRefresh(uint256,bytes32)` (`0x617c9142`) and
+`continueScopedFinalityRecoveryRefresh((uint8,uint256,uint256,bytes32),bytes32)`
+(`0x12ffdb0d`); each advances one stored chunk and calls the existing Core batch
+helper exactly once for at most 5,000 global IDs. Collection and
+release/season/view changes use `[1, executionSnapshot]` as a safe invalidation
+superset, token changes use their one token ID, Core failure rolls progress
+back, and post-snapshot mints already use the recovered route. The exact plan
+reads, progress events, errors, supersession rule, and golden tests are owned by
+[LTA-FINALITY] and conformance golden 17.
+The registry exposes the exact active-incomplete count
+`incompleteFinalityRecoveryRefreshPlanCount()` (`0xa76ed63d`) and assertion
+`assertNoIncompleteFinalityRecoveryRefreshPlans()` (`0x955d14fb`). Because Core
+authorizes only the current finality registry, the governance/module transition
+validator requires the old registry's zero-count assertion immediately before
+the Core finality-pointer update in the same atomic batch. Operators and
+permissionless keepers drain active plans before cutover; omission, intervening
+calls, generic-path bypass, or a nonzero count fail without changing Core.
+
+Governance V2 removes the legacy caller-supplied `actionId` argument from every
+GGP/GTP host, not only Core. All GGP hosts use the six-return info read and
+exact two-argument mutation selectors in [LTA-GGP-CORE]. All GTP hosts use six-
+return `timeParameterInfo(bytes32)` (`0x5f2463b8`),
+`raiseTimeParameter(bytes32,uint256)` (`0x046e1fd5`),
+`lowerTimeParameter(bytes32,uint256)` (`0xa4e24c49`), and class-3 tail-triggered
+`rebindTimeParameterProbe(bytes32,address)` (`0xc07b3459`). Each host derives
+the emitted action ID and validates class/scope/old/new state from
+`currentAction()`; no alternate three-argument writer survives cutover.
 
 This hook table is the normative home of the Core refresh-emitter caller
-set (ADR 0010 decision D3.6): the restricted ERC-4906 helpers are callable
-by exactly three satellites — the metadata router, the artwork finality
-registry, and the entropy coordinator — each authorized by resolving
-Core's cached satellite pointers at call time, never through a separately
-mutable allowlist.
+set (ADR 0010 decision D3.6). Both restricted ERC-4906 helpers accept the
+current metadata router and current artwork finality registry resolved from
+Core's cached pointers. The single-token helper additionally accepts exactly
+the nonzero `coordinatorAtMint(tokenId)` retained in Core, including a prior
+coordinator after pointer replacement; the batch helper does not accept an
+entropy coordinator. This token-pinned exception is required so delayed
+fulfillment can refresh a token after coordinator replacement. No helper uses a
+separately mutable allowlist.
 [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
 ([MRR-REFRESH-EMITTERS]) and the entropy coordinator spec cite this set,
 and a conformance-matrix golden test pins the exact caller list.
@@ -767,9 +452,24 @@ cites this set instead of restating it, and conformance-matrix golden
 test 24 enumerates acceptance and rejection for this helper alongside
 the ERC-4906 helpers. Token
 data ownership is likewise single-sourced: V1 Core stores the
-renderer-visible `tokenData` bytes and their `tokenDataHash` per the mint
-ABI home ([MPA-CORE-ABI]); no other document may redefine that storage
-split.
+renderer-visible `tokenData` bytes per the mint ABI home
+([MPA-CORE-ABI]). Core verifies the supplied `tokenDataHash` commitment at
+mint or prepare time but stores no second per-token hash slot; no other
+document may redefine that storage split.
+
+The unified pointer row is likewise production-exact. The three pointer
+selectors cover every Core pointer family; protocol v1 adds no
+`metadataRouter()`, `collectionMetadata()`, `entropyCoordinator()`, or other
+per-family public getter. `streamSystemManifest()` remains the required
+aggregate discovery read on the terminal-frozen `SYSTEM_MANIFEST` satellite,
+which caches the addresses derived from these generic records; Core does not
+implement or proxy that selector. Pointer staging, cancellation, and
+role-gated expiring class-3 incident replacement live in the governance layer,
+with authorized scheduling required within four hours of
+`INCIDENT_REVOKED` and permissionless execution available only after the
+normal class-3 delay. Core exposes only the execution update and one-way freeze
+entries and independently rechecks the in-flight action, registry, and pointer-
+state commitments ([LTA-POINTERS]).
 
 The implementation PR must report:
 
@@ -811,6 +511,69 @@ CON-012-lineage Core hook proof:
    [issue #654](https://github.com/6529-Collections/6529Stream/issues/654), must
    recover real bytes through compression, actual extraction, or authorized
    relocation while retaining every mandatory hook.
+
+Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
+
+1. This repository has no production Stream deployment whose ABI must be
+   preserved in place. The target-Core implementation is therefore an
+   intentional pre-genesis MAJOR ABI cutover under ADR 0007 and the release
+   policy: callers, deployment inputs, interface artifacts, golden selector
+   tests, and the ABI baseline move atomically before a release candidate is
+   named. Transitional source compatibility is not a reason to keep legacy
+   selectors in the permanent Core.
+2. While measured Core is above the 22,576-byte deployment ceiling, no PR may
+   land an additive Core-only mandatory hook. A Core-changing PR must be
+   satellite-first with zero Core delta, or pair the hook with actual removal
+   and produce a net-negative measured Core delta. The final implementation PR
+   must compile every mandatory hook in [PV1-HOOKS] together; a partial build
+   below the ceiling is not the passing proof.
+3. From the current 24,152-byte evidence, the minimum full-stack recovery is
+   `1,576 + A` bytes, where `A` is the measured net runtime cost of all
+   mandatory Core hooks absent from that evidence after any same-PR removals.
+   Scratch deletions and individually measured experiments are non-additive
+   under via-IR and never satisfy this equation. Only the final linked runtime
+   from the pinned production build does.
+4. The implementation order is binding because it prevents a dead caller,
+   unsafe receiver-callback ordering, or a temporary Core-size regression:
+
+   | Order | Cutover slice | Required result before the next slice |
+   | --- | --- | --- |
+   | 1 | Complete ADR 0004 [GOV-V2-CUTOVER] before any new Core writer | Executor and interfaces use the seven-word `GovernanceCall` and six-return per-call context; published calldata is SSTORE2-backed and decoded at schedule/execute; action classes `0..6`, append-only exact class-6 eligibility [GOV-EMERGENCY-RESTORATION], every existing GGP/GTP host's independent class/context checks, and [GOV-MANIFEST-TAIL] are enforced; executor-first deployment plus the irreversible downstream bind has no CREATE2 fixed point and rejects every action before bind; V1 is rejected/retired; Safe/governor tooling, monitoring, golden/adversarial tests, rehearsal evidence, ABI/event/numeric-ID/domain catalogs, deployment inputs, manifest, and checksums agree |
+   | 2 | Deploy and test Permanent `StreamSystemManifest` plus the collection-metadata/router/renderer and entropy-coordinator/provider satellites without changing Core | Satellite ABIs, including system-manifest module type/interface, bounded calls, failure posture, governance, SSTORE2/history/tail behavior, and focused tests are complete; Core delta is zero |
+   | 3 | Move `StreamDrops`, auction-start timing/state, and every other live mint caller to the manager/ledger/sale-adapter path | No production caller reaches legacy `StreamMinter` or Core `mint(...)`; the operation-bound prepared settlement seam records all required economics before `_safeMint` |
+   | 4 | Replace Core's rich metadata state and rendering with packed collection facts, cached satellite pointers, bounded `tokenURI`, and bounded `contractURI` | Output/fallback golden tests pass and the measured Core delta is net-negative |
+   | 5 | Retire the legacy minter pointer, legacy mint selector, Core airdrop/max-purchase accounting, and old collection tuples after step 3 | Manager/ledger/adapters are the only mint-policy and product-accounting owners |
+   | 6 | Replace direct randomizer/hash state with the entropy-coordinator pointer, `coordinatorAtMint`, and bounded registration using the final `bytes32 mintCommitment` ABI | Identity and entropy registration settle before `_safeMint`; no provider call can brick mint |
+   | 7 | Land the governed collection burn-block writer and guards in a net-negative Core slice | [CMC-BURN] selector, event, terminal-freeze, scope/value hash, veto, replay, height, boolean-equivalence, and controlled-burn tests pass |
+   | 8 | Land any remaining Permanent hooks, remove superseded ABI, and refresh release artifacts once against the complete target | Full production size proof is at or below 22,576 bytes and all interface/event/manifest gates agree |
+
+   In particular, Core's
+   `emergencyRaiseGasParameter(bytes32,uint256)` selector is unreachable until
+   the executor accepts append-only action class ID `6`, reports zero minimum
+   delay for that class, terminal-registers the exact target/selector/code hash,
+   rejects value/native/unregistered calls, publishes/decodes the V2 calldata,
+   migrates every existing GGP/GTP host away from authority-only checks, and the target
+   harness proves stale, missing, passing, wrong-value, over-2x, wrong-class,
+   and forged-context rejection. Existing executor code and tests that stop at
+   ID `5` are transitional evidence, not an implementation of this gate.
+
+5. Rich legacy Core responsibilities are expressly retirement candidates after
+   their prerequisite cutovers: display strings, script/dependency chunks,
+   token image/attribute overrides, artist signature/approval state, direct
+   randomizer and token-hash state, legacy minter and airdrop accounting,
+   `changeTokenData`, metadata-heavy tuple reads, and the option-coded
+   `updateContracts` surface. Their replacement owners are respectively the
+   metadata/router satellites, artist registry, entropy coordinator/providers,
+   manager/ledger/sale adapters, and typed governed pointer interfaces.
+6. Permanent Core responsibilities cannot be removed to make the number pass:
+   ERC-721 ownership and approvals, global and collection supply facts,
+   sequential token/collection high-water marks, retained token identity and
+   opaque `tokenData` bytes, prepared-mint replay/sentinel state, collection
+   status/freeze/burn-block facts, ERC-2981, thin metadata reads, generic
+   satellite-pointer discovery and restricted
+   refresh emitters remain in the complete measurement. Medium aggregate
+   successor/export/finality views may use only the pre-authorized relocation
+   order in the conformance matrix; granular facts remain Core-owned.
 
 Implementation evidence (non-normative). CON-013 slice:
 
@@ -1318,6 +1081,35 @@ with ERC-5267.
 | `STREAM_SUBJECT_MEDIA_V1` | `6529STREAM_SUBJECT_MEDIA_V1` | `0x030f2701e9035fcb711b3acc44ec0bf14b4f4e344e231cdaadce7d14e590994b` | metadata satellites | `1` | CM spec `[CMC-SUBJECT-ID]` |
 | `STREAM_SUBJECT_SCOPE_V1` | `6529STREAM_SUBJECT_SCOPE_V1` | `0x748002ff892f4748f1544a8191da460ca6d167aa2e13eeced354e4f66f636394` | metadata satellites | `1` | CM spec `[CMC-SUBJECT-ID]` |
 | `STREAM_SUBJECT_COLLECTION_V1` | `6529STREAM_SUBJECT_COLLECTION_V1` | `0x3a882a22dad9915c9193738f63216234155080ed4c4fc9bfae446e90f1df6e16` | metadata satellites | `1` | CM spec `[CMC-SUBJECT-ID]` |
+| `STREAM_COLLECTION_CONFIG_STATE_V1` | `6529STREAM_COLLECTION_CONFIG_STATE_V1` | `0x854c83f82b7677e58c61a2482a7a430a8318d765d99a95d3fbce5c84be6cc2b5` | `StreamCore` | `1` | CM spec `[CMC-MANAGEMENT]`; complete collection configuration old/new state hash |
+| `STREAM_COLLECTION_BURNS_BLOCKED_STATE_V1` | `6529STREAM_COLLECTION_BURNS_BLOCKED_STATE_V1` | `0x0a834b49bdbe94b7d08a85a25431e3405b397e5f84bf90a90107edb2a58013ec` | `StreamCore` | `1` | CM spec `[CMC-BURN]`; old/new burn-block state hash |
+| `STREAM_COLLECTION_FROZEN_STATE_V1` | `6529STREAM_COLLECTION_FROZEN_STATE_V1` | `0xa54d2564d797e7eec4b1cd68d067d7c297bfae640f401ff3b8fde47441079692` | `StreamCore` | `1` | CM spec `[CMC-FREEZE]`; old/new collection-freeze state hash |
+| `STREAM_CORE_SATELLITE_POINTER_SCOPE_V1` | `6529STREAM_CORE_SATELLITE_POINTER_SCOPE_V1` | `0xf4a381d3d4c51db07c19830799ea01c544326118ea1db1fb59d54af5f637bdbb` | `StreamCore` | `1` | Umbrella `[LTA-POINTERS]`; pointer action scope hash |
+| `STREAM_CORE_SATELLITE_POINTER_STATE_V1` | `6529STREAM_CORE_SATELLITE_POINTER_STATE_V1` | `0x1fdde0a7122d0fc7c237e721e372e43082581dcc6bd2babca4e09bb1e6b3d043` | `StreamCore` | `1` | Umbrella `[LTA-POINTERS]`; old/new cached pointer state plus monotonic revision |
+| `STREAM_MODULE_REGISTRATION_SCOPE_V1` | `6529STREAM_MODULE_REGISTRATION_SCOPE_V1` | `0x5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a274` | module registry | `1` | Umbrella `[LTA-REGISTRY-GOVERNANCE]`; chainid, registry, module |
+| `STREAM_MODULE_REGISTRATION_STATE_V1` | `6529STREAM_MODULE_REGISTRATION_STATE_V1` | `0x93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a` | module registry | `1` | Umbrella `[LTA-REGISTRY-GOVERNANCE]`; absent/full record/revision plus enumeration/chain state |
+| `STREAM_MODULE_STATUS_SCOPE_V1` | `6529STREAM_MODULE_STATUS_SCOPE_V1` | `0x104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e31924` | module registry | `1` | Umbrella `[LTA-REGISTRY-GOVERNANCE]`; chainid, registry, module |
+| `STREAM_MODULE_STATUS_STATE_V1` | `6529STREAM_MODULE_STATUS_STATE_V1` | `0x6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e23139` | module registry | `1` | Umbrella `[LTA-REGISTRY-GOVERNANCE]`; complete record/status/revision and invariant chain state |
+| `STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1` | `6529STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1` | `0x5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b` | module registry | `1` | Umbrella `[LTA-REGISTRY-GOVERNANCE]`; chainid and registry |
+| `STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1` | `6529STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1` | `0x2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c62` | module registry | `1` | Umbrella `[LTA-REGISTRY-GOVERNANCE]`; manifest hash, URI hash, revision |
+| `STREAM_SYSTEM_MANIFEST_SCOPE_V1` | `6529STREAM_SYSTEM_MANIFEST_SCOPE_V1` | `0xf73b4d7b4d260fce0823707f836fdf29a1767a2a2a9cfbce14ec8c5e49e47841` | `StreamSystemManifest` | `1` | Umbrella `[LTA-MANIFEST-PUBLISH]`; domain, chainid, system-manifest satellite |
+| `STREAM_SYSTEM_MANIFEST_STATE_V1` | `6529STREAM_SYSTEM_MANIFEST_STATE_V1` | `0x3764ccb415d0aac07f1bddb8d4841ad6d4c2f9b2fe7ce7d221c586bc056aaf60` | `StreamSystemManifest` | `1` | Umbrella `[LTA-MANIFEST-PUBLISH]`; old/new cached aggregate state plus append-only revision |
+| `STREAM_DEPLOYMENT_IDENTITY_V1` | `6529STREAM_DEPLOYMENT_IDENTITY_V1` | `0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a` | release tooling / module identity | `1` | Umbrella `[LTA-DEPLOYMENT-IDENTITY]`; domain plus Keccak-256 of the RFC8785-JCS address-free identity view |
+| `STREAM_SYSTEM_MANIFEST` module type | `STREAM_SYSTEM_MANIFEST` | `0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6` | module registry / `StreamSystemManifest` | `1` | `keccak256` of the ASCII module-type name; no `abi.encode` inputs; Umbrella `[LTA-POINTERS]`, `[LTA-MANIFEST]` |
+| `STREAM_CORE_FINALITY_ADAPTER` module type | `STREAM_CORE_FINALITY_ADAPTER` | `0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4` | module registry / `StreamCoreFinalityAdapter` | `1` | immutable Core/collection-metadata bindings, interface `0xebf35615`; Umbrella `[LTA-CORE-FINALITY-ADAPTER]` |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` schema ID | `STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` | `0x8844b744a67cdcdb84ea3c6e3d686883da175820b9ff07a19cffa14bf62e6e81` | schema catalog / `StreamSystemManifest` | `1` | exact JSON payload schema; Umbrella `[LTA-MANIFEST]` |
+| `RFC8785_JCS` canonicalization ID | `RFC8785_JCS` | `0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044` | canonicalization catalog / `StreamSystemManifest` | `1` | RFC 8785 JCS plus pinned I-JSON/NFC restrictions; Umbrella `[LTA-MANIFEST]` |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | `0x852f4811a2eb32694863d94ba41b545a65ef4c76086a32c35881f0c4e250a7b5` | `StreamSystemManifest` | `1` | chunk index, length, payload hash; Umbrella `[LTA-MANIFEST]` |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | `0xa93750a5551ac5668c8f24cca85acaf1d5f8334fac9406f845fce1ce35548839` | `StreamSystemManifest` | `1` | total bytes and ordered leaf hashes; Umbrella `[LTA-MANIFEST]` |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | `0xd6ab89b077c61a288c7168cf8f1c9a7a19464b10475735dae37cb46a0c94c40b` | `StreamSystemManifest` | `1` | schema/canonicalization IDs, total/count, list hash; Umbrella `[LTA-MANIFEST]` |
+| `STREAM_GAS_PARAMETER_SCOPE_V1` | `6529STREAM_GAS_PARAMETER_SCOPE_V1` | `0x8d8b74997070792410ba6f4dd511d967fec29b82366868401baa2bfb3681da69` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId |
+| `STREAM_GAS_PARAMETER_STATE_V1` | `6529STREAM_GAS_PARAMETER_STATE_V1` | `0xa16fd6b2f079cdf0a8f1a952c35496a693958895d1782fecc8b6440e06594977` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; value/floor, authenticated probe binding, class/recency, standing IDs, monotonic revision |
+| `STREAM_GGP_PROBE_BINDING_V1` | `6529STREAM_GGP_PROBE_BINDING_V1` | `0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; registry/type/interface/version/code/module/deployment facts |
+| `STREAM_GGP_PROBE` module type | `STREAM_GGP_PROBE` | `0xe358a47f0dcbc7a22cc88ea7cd9ff433ec85ce6d9c7d0dc3f329e98b621cd6c8` | module registry / GGP probes | `1` | base interface `0x0f8c6b0f`; Umbrella `[LTA-GGP-PROBES]` |
+| `STREAM_GGP_CONDITIONAL_RAISE_V1` | `6529STREAM_GGP_CONDITIONAL_RAISE_V1` | `0x88d201cde2efee286ecd558414d10dd0599848f47e6dcdfa51a2e0287e4fb2eb` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId standing raise action ID |
+| `STREAM_GGP_CONDITIONAL_RELOWER_V1` | `6529STREAM_GGP_CONDITIONAL_RELOWER_V1` | `0xb30115be75ee59eeed3fa156242dc7c0eda20b383f4f251c8adcfa616b2276a1` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId standing re-lower action ID |
+| `STREAM_TIME_PARAMETER_SCOPE_V1` | `6529STREAM_TIME_PARAMETER_SCOPE_V1` | `0xcb90eddcfa663732d90ca0d1892636ba1216e3900df55acc72d58187eee359a8` | GTP hosts | `1` | Umbrella `[LTA-GTP]`; domain, chainid, host, parameterId |
+| `STREAM_TIME_PARAMETER_STATE_V1` | `6529STREAM_TIME_PARAMETER_STATE_V1` | `0x2cdcb8724d05b4fa9d1ad4f857f9c5fa49ca997d15870fe7f9df6fbae1402583` | GTP hosts | `1` | Umbrella `[LTA-GTP]`; value/floors, authenticated cadence-probe binding, recency, monotonic revision |
 | `STREAM_TOKEN_CONTENT_LEAF_V1` | `6529STREAM_TOKEN_CONTENT_LEAF_V1` | `0x61d75cd1a57d24657b860f99f77c15e5f8556fb725b56a96dd770205f9352b0d` | `StreamCollectionMetadata` | `1` | CM spec `[CMC-CONTENT-ROOT]` |
 | `STREAM_TOKEN_CONTENT_NODE_V1` | `6529STREAM_TOKEN_CONTENT_NODE_V1` | `0x7239fc0713b7ccc92b7eef3087150a1f32037aff6ab05f5bf78db4f8ab71a6ea` | `StreamCollectionMetadata` | `1` | CM spec `[CMC-CONTENT-ROOT]` |
 | `STREAM_RECORD_CHAIN_V1` | `6529STREAM_RECORD_CHAIN_V1` | `0x0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa1609` | record-lane satellites | `1` | CM spec `[CMC-RECORD-CHAIN]` |
@@ -1359,12 +1151,12 @@ State Export And Archival Operations code blocks).
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
 | `STREAM_FINALITY_COMPONENTS_V1` | `6529STREAM_FINALITY_COMPONENTS_V1` | 0xf57efb77611ea13bd3a60968beee86ec330159736aa5d42707a9c0676dbc8898 | finality registry | `1` | domain; sorted `FinalityComponentExpectation[]` (Artwork Finality Freeze) |
-| `STREAM_CORE_COLLECTION_FACTS_V1` | `6529STREAM_CORE_COLLECTION_FACTS_V1` | 0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764 | finality registry | `1` | domain; chainid; core; collectionId; `CoreCollectionFinalityFacts` fields (Artwork Finality Freeze) |
-| `STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | `6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | 0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26 | `StreamCore` | `1` | domain; chainid; core; collectionId (Artwork Finality Freeze) |
+| `STREAM_CORE_COLLECTION_FACTS_V1` | `6529STREAM_CORE_COLLECTION_FACTS_V1` | 0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764 | `StreamCoreFinalityAdapter` / finality registry | `1` | domain; chainid; actual Core; collectionId; adapter-derived facts with no `createdAt` and `uint256` supply fields; Umbrella `[LTA-CORE-FINALITY-ADAPTER]` |
+| `STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | `6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | 0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26 | `StreamCoreFinalityAdapter` | `1` | domain; chainid; actual Core; collectionId; adapter-computed empty-config fact; Umbrella `[LTA-CORE-FINALITY-ADAPTER]` |
 | `STREAM_FINALITY_V1` | `6529STREAM_FINALITY_V1` | 0x569714204c899f0d33a0f98879ce85708169a5f1e11f763f2897f64e5d6c8493 | finality registry | `1` | domain; chainid; core; collectionId; coreCollectionFactsHash; componentsHash; manifest uriHash/contentHash/schemaId/canonicalizationHash |
 | `STREAM_FINALITY_RECOVERY_V1` | `6529STREAM_FINALITY_RECOVERY_V1` | 0x521e8df5a00a793a5b47409e1e7711b4b8857ba9e6c833fe59a48dfa865b19ac | finality registry | `1` | domain; chainid; finalityRegistry; collectionId; expectedOldFinalityRecordHash; recoveryManifest.contentHash; recoveryRouteHash; executeAfter; artworkBytesChanged; reasonHash |
 | `STREAM_SCOPED_FINALITY_V1` | `6529STREAM_SCOPED_FINALITY_V1` | 0x5b56313142e6381659f9d10163ccfa5ea22cb437617c8e69b37c31ecda6f3a50 | finality registry | `1` | domain; chainid; core; scopeType; collectionId; tokenId; scopeId; scopedCoreFactsHash; componentsHash; manifest uriHash/contentHash/schemaId/canonicalizationHash |
-| `STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | `6529STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | 0x5c6390c543248a4d63630061d67c3d2245df223d9ac586deccabf40620b43f6e | finality registry | `1` | domain; chainid; core; scope fields; `ScopedCoreFinalityFacts` fields (Scoped Finality For Open Series) |
+| `STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | `6529STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | 0x5c6390c543248a4d63630061d67c3d2245df223d9ac586deccabf40620b43f6e | `StreamCoreFinalityAdapter` / finality registry | `1` | domain; chainid; actual Core; raw scope tuple; adapter-derived Core/metadata facts; Umbrella `[LTA-CORE-FINALITY-ADAPTER]` |
 | `STREAM_SCOPED_FINALITY_RECOVERY_V1` | `6529STREAM_SCOPED_FINALITY_RECOVERY_V1` | 0x7111cd2afae740dbddcd349ab0b8b9269b6a81c331cef7ca8d542e87308bc54a | finality registry | `1` | domain; chainid; finalityRegistry; scope fields; expectedOldFinalityRecordHash; recoveryManifest.contentHash; recoveryRouteHash; executeAfter; artworkBytesChanged; reasonHash |
 | `STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1` | `6529STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1` | 0x584f047f88b167145486935a02a69e85bf86fdaa6200d84996b4b03124922beb | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1` | `6529STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1` | 0x8868a51be1bdbae4624466a9fa15a9c14b03dd877a0d62e9fca92a2651a8ee2d | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
@@ -1397,7 +1189,8 @@ below (ADR 0011 decision R12).
 ### Governance Mirror Rows
 
 Home: [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
-([GOV-ACTION-ID], [GOV-BATCH]). ADR 0004 is the owner-designated
+([GOV-ACTION-ID], [GOV-BATCH], [GOV-MANIFEST-TAIL],
+[GOV-EMERGENCY-RESTORATION]). ADR 0004 is the owner-designated
 normative home of the canonical governance action identity (ADR 0010
 decision D3.4); these rows complete the mirror for the most-executed
 preimages in the system — every staged governance action, batch, and GGP
@@ -1406,41 +1199,45 @@ settled (ADR 0014 decision V6): the ADR 0004 home stands, visibly
 partitioned so its owner-designated normative sections are
 unmistakable against its baseline-era evidence (ADR 0014 decision V9),
 and these mirror rows close the outside-the-reviewed-set gap by
-placing both governance preimages inside the spec inventory's
+placing the governance action and manifest-tail preimages inside the spec inventory's
 checker-verified mirror surface and the CI recomputation test — the
 inventory reviews them here, and the home's anchors own the ordered
 inputs, replay semantics, and window floors.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
-| `STREAM_GOVERNANCE_ACTION_V1` | `6529STREAM_GOVERNANCE_ACTION_V1` | 0xda01e91bb5de11674cef69c6774002280d75bcb43cd9c78413c4b94d5d14249b | ADR 0004 governance timelock layer | `1` | ADR 0004 `[GOV-ACTION-ID]` |
-| `STREAM_GOVERNANCE_CALLS_V1` | `6529STREAM_GOVERNANCE_CALLS_V1` | 0x51c60c7ea5577cbf0c5157f544a7de1a186ae82b6fc4df6a626b9c8d1d3a0b61 | ADR 0004 governance timelock layer | `1` | ADR 0004 `[GOV-ACTION-ID]`, `[GOV-BATCH]` |
+| `STREAM_GOVERNANCE_ACTION_V2` | `6529STREAM_GOVERNANCE_ACTION_V2` | 0x214cd728538bb3775a7106caff5c761bace11866a984d4a4d97a98f51971ac4b | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; per-call transition commitments |
+| `STREAM_GOVERNANCE_CALLS_V2` | `6529STREAM_GOVERNANCE_CALLS_V2` | 0x10f09566fb70f7947b61639c2a53b3aec872069a8b46edd08ba14eb2b5942b70 | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`, `[GOV-BATCH]`; per-call transition commitments |
+| `STREAM_GOVERNANCE_BATCH_SCOPE_V2` | `6529STREAM_GOVERNANCE_BATCH_SCOPE_V2` | 0x6cfd5dfd67f064adac45602c05057edddda810734779c0ebe11b447e6985e31c | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; callsHash and ordered per-call scope hashes |
+| `STREAM_GOVERNANCE_BATCH_OLD_STATE_V2` | `6529STREAM_GOVERNANCE_BATCH_OLD_STATE_V2` | 0xc5029f937b44065c2ad92d9253e07f06117567480206189fcc1409d5509222b7 | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; callsHash and ordered per-call old-state hashes |
+| `STREAM_GOVERNANCE_BATCH_NEW_STATE_V2` | `6529STREAM_GOVERNANCE_BATCH_NEW_STATE_V2` | 0xce958009248d20d9574439fa374bc00c142940af2b496896b5bdbc00b882e98b | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; callsHash and ordered per-call new-state hashes |
+| `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1` | 0x2c9b0dbea692b77bd1679258ca569c13c24eb261671f5a6b78b9fa59cd29c7f1 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; domain, chainid, executor, trigger target, trigger selector |
+| `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1` | 0xd41313fe7ee9b51221beebf9c314d67aebec3677907eb1365fff4caa4248f493 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; scope, registered bit, trigger code hash, allowed-class mask, append-only count/chain, immutable tail facts |
+| `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1` | 0xe52b2b6e65acb1eae2c217c4b26e893c7d0e7f32afc148867b79c133b3a134fa | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; index, exact pair, code hash, mask |
+| `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_CHAIN_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_CHAIN_V1` | 0xdf8c3b0d7ebdd491123b988924db55f8fd11251d7e88e5d76722331928dd4951 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; chainid, executor, prior chain, record, index |
+| `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1` | 0xace275f08856e822491961304b01cdc9423d7d16c05518327353df5cd02e33f8 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; chainid and executor bootstrap scope |
+| `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1` | 0x96decef116f307400b4d1826658d33976ec923ce136ead67b736b8becbe781ef | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; bound/sealed bits, recorded Core/satellite/code hashes, observed/expected trigger set, content/inventory commitments, actual sealed root |
+| `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1` | 0x9927dc0a368efe3d99880bb180d83938664a29ad399291c4544e4cab70c84548 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; ordered rolling genesis trigger commitment |
+| `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1` | 0x389d432187327bb28628b23403c9b3c549d0cf950e480ad6d69b7d9fa7b48b9d | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; typed Core-pointer, registry-header, or registry-module live-state leaf |
+| `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1` | 0x9efe6891a30e5198982f60b2d916e3275b866addbee37b7d4b875e52d5251e89 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; prior chain, global leaf index, inventory leaf hash |
+| `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1` | 0xb524bfb9f69adc6c2d0e07003dd39a76b1d6a728dd95dbd495f709428d21b4ec | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; chainid, executor, bound Core, leaf count, final inventory chain |
+| `STREAM_EMERGENCY_RESTORATION_SCOPE_V1` | `6529STREAM_EMERGENCY_RESTORATION_SCOPE_V1` | 0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; domain, chainid, executor, target, selector |
+| `STREAM_EMERGENCY_RESTORATION_STATE_V1` | `6529STREAM_EMERGENCY_RESTORATION_STATE_V1` | 0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; scope, eligible bit, code hash, append-only count/chain |
+| `STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1` | `6529STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1` | 0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; index, target, selector, code hash |
+| `STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1` | `6529STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1` | 0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; chainid, executor, prior chain, record, index |
 
-### Collection Identity And Facade-Readiness Mirror Rows
+Governance action-class numeric IDs are catalog values, not enum ordinals that
+may be reordered. The protocol-v1 mirror is append-only:
 
-Homes: this document ([PV1-IDENTITY-MODE], [PV1-TRANSFER-CONTROLLER]),
-the facade profile ([FCP-PERMANENCE] rule 4 in
-[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)),
-and the collection metadata contract ([CMC-FACADE-BINDING] in
-[`docs/collection-metadata-contract.md`](collection-metadata-contract.md))
-(ADR 0015 decisions W4 and W5). The identity-mode vocabulary IDs and the
-content-consent family identifier are each the `keccak256` of the ASCII
-name with no `abi.encode` inputs, following the conservation-tier
-vocabulary style
-([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-[CMC-MUSEUM-GRADE]); the interface selector is the first four bytes of
-the `keccak256` of the canonical signature string. The hash values are
-computed from the adjacent preimages; the CI recomputation checker
-re-derives each one under [PV1-MIRROR] rule 2, failing on drift.
-
-| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
-| --- | --- | --- | --- | --- | --- |
-| `IDENTITY_MODE_CORE_NATIVE` | `CORE_NATIVE` | 0x54ea3b5903aef88b4d2ec4097ea15a9ba68b09b27cc9423d519cb1d7486e61d1 | `StreamCore` | `1` | identity-mode vocabulary ID; this document `[PV1-IDENTITY-MODE]` requirement 1 (ADR 0015 decision W4) |
-| `IDENTITY_MODE_EXTERNAL_FACADE` | `EXTERNAL_FACADE` | 0xc7dd233bcf9b505ac7e2ab434d9e6af7bc663d64e2d983f1dd6d77668b578656 | `StreamCore` | `1` | identity-mode vocabulary ID; this document `[PV1-IDENTITY-MODE]` requirement 1 (ADR 0015 decision W4) |
-| `COLLECTION_IDENTITY_MODE_FAMILY_ID` | `COLLECTION_IDENTITY_MODE` | 0x2066df294ae5c31dd9fb618d99b6691f986f542e81b225382082dfca99030ce1 | `StreamCore` | `1` | content-consent family identifier consumed by `requireContentConsent`; this document `[PV1-IDENTITY-MODE]` requirement 4; artist spec `[AA-CONTENT]` (ADR 0015 decision W4) |
-| `ON_STREAM_OWNERSHIP_CHANGE_SELECTOR` | `onStreamOwnershipChange(uint256,uint256,uint256,address,address,bytes)` | 0xdaee0572 | registered transfer controllers | `1` | `bytes4` interface selector — the first four bytes of the `keccak256` of the signature string; this document `[PV1-TRANSFER-CONTROLLER]` requirement 10 (ADR 0015 decision W4) |
-| `STREAM_COLLECTION_FACADE` | `STREAM_COLLECTION_FACADE` | 0x10f31f822ddc93e9cc5b5b8696166e94f953b83c514ca790ae0bbc83acf8ded8 | collection facades | `1` | facade module type; home `[FCP-PERMANENCE]` rule 4 in [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md) (ADR 0015 decision W5) |
-| `RECORD_IDENTITY_FACADE_BINDING` | `IDENTITY_FACADE_BINDING` | 0xb3454197cb151b3305cae7757ccaa671e791eb40902d3aefe6cbaa64d6695087 | `StreamCollectionMetadata` | `1` | facade identity binding record type; home `[CMC-FACADE-BINDING]` in [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) (ADR 0015 decision W4) |
+| Numeric ID | Name | Status |
+| --- | --- | --- |
+| `0` | `IMMEDIATE_TIGHTENING` | retained |
+| `1` | `DELAYED_LOOSENING` | retained |
+| `2` | `TERMINAL_FREEZE` | retained |
+| `3` | `POINTER_REPLACEMENT` | retained |
+| `4` | `FUNDS_RECOVERY` | retained |
+| `5` | `SUCCESSOR_DECLARATION` | retained |
+| `6` | `EMERGENCY_RESTORATION` | appended target ID; zero delay only for an exact terminal-registered target/selector/code hash under ADR 0004 `[GOV-EMERGENCY-RESTORATION]`, plus the target-side fresh-failing-probe and bounded-restoration checks in `[GOV-WINDOWS]` and `[LTA-GGP-CORE]` |
 
 ### Governed Gas Parameter Identifier Mirror Rows
 
@@ -1512,12 +1309,13 @@ Permanent surface (ADR 0014 decision V9):
    [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md),
    Domain Constants And Typehashes); integration code must copy it
    byte-exactly, and no CamelCase alias exists or ever will.
-3. The `STREAM_ADMINS_OR_GOVERNANCE` pointer family ([LTA-POINTERS])
-   is one family whose name records that its holder may be the admin
-   Safe layer early in the line's life or the ADR 0004 governance
-   layer later; the `OR` is part of the pinned vocabulary word, not an
-   unresolved design choice. The genesis inventory's governance-layer
-   entry carries the matching deployment-side note
+3. The `STREAM_ADMINS_OR_GOVERNANCE` deployment-inventory label records that
+   its holder may be the admin Safe layer early in the line's life or the ADR
+   0004 governance layer later; the `OR` is part of the pinned vocabulary word,
+   not an unresolved design choice. It is not a Core pointer family: Core and
+   `StreamSystemManifest` bind the executor immutably, and the satellite derives
+   the aggregate field from that binding. The genesis inventory's
+   governance-layer entry carries the matching deployment-side note
    ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md)
    [LCM-GENESIS]).
 
@@ -1557,14 +1355,6 @@ the following from emitted events and compares against direct reads:
     proving record-stream completeness for any replica
     ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
     [CMC-OWNER-RECORDS], [CMC-RECORD-CHAIN]).
-13. For `EXTERNAL_FACADE` collections, complete per-token ownership
-    from `ControlledOwnershipChanged` replay alone — Core-address logs
-    only, no facade logs — compared against `ownerOf`, proving the
-    Core-side controlled-ownership-change family is a complete
-    ownership record and facade emission is a convenience mirror,
-    never the carrier ([PV1-FACADE-READINESS] requirement 3; ADR 0015
-    decision W4).
-
 State reads remain useful for live tooling, but event replay must be
 sufficient for long-lived indexers and archive reconstruction.
 
@@ -1605,6 +1395,11 @@ function streamModuleManifest() external view returns (string memory uri, bytes3
 This mirrors the existing contract metadata release-hash posture and gives
 future indexers a way to discover module families without frontend-specific
 knowledge.
+`streamModuleDeploymentManifestHash()` returns the release-wide digest above,
+not a per-contract file hash. It is identical across the deployment and may be
+injected only after the address-free view has been hashed; its constructor word
+is zero in the committed template, so neither its own value nor resolved
+protocol addresses feed back into its preimage.
 `streamModuleSupersedes()` returns the immediate predecessor in the same
 module family, not the latest known descendant. Indexers reconstruct longer
 successor chains by following the predecessor links and matching module
@@ -1650,13 +1445,9 @@ mechanisms.
    records — the documented pattern is
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
    [CMC-MEMENTO] (ADR 0011 decision R9) — never as Core token properties.
-3. Rental and user-role mechanics (ERC-4907-class) and any other
-   transfer-conditioned or transfer-hooked token behavior — successor
-   line only, same invariant. The facade-readiness controlled mutation
-   path is not such a hook: it relocates which contract serves the
-   ERC-721 surface for `EXTERNAL_FACADE` collections and conditions
-   nothing ([PV1-FACADE-READINESS] requirement 4; ADR 0015 decision
-   W4).
+3. Rental and user-role mechanics (ERC-4907-class), facade-controlled
+   mutation, and any other transfer-conditioned or transfer-hooked token
+   behavior — successor line only, under the same invariant and ADR 0016.
 4. General onchain policy VM behavior.
 5. Transfer of arbitrary museum, rights, legal, VC/DID, EAS, or
    institution-specific graph logic into `StreamCore`.

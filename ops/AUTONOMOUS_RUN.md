@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/slither-baseline-gate` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/661` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/658` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/662` |
-| Next issue | Begin the safe Core extraction sequence with canonical executor eligibility and a prepared settlement seam, without routing live Drops traffic. |
+| Active PR branch | `codex/core-cutover-abi-lock` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/660` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/654` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/663` |
+| Next issue | Implement the first satellite-only or measured net-negative Core cutover slice after the permanent ABI target is merged. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 11:40 UTC` |
+| Last updated | `2026-07-22 17:44 UTC` |
 
 ## Current Run Notes
 
@@ -56,18 +56,90 @@ evidence, and audit/readiness gates.
   current v1 contract catalog cannot prove deployment-instance identity,
   fallback distinctness, or parameterized probe bindings, so issue #656 remains
   a production blocker.
-- The current topic is issue #658 in PR #662 on branch
-  `codex/slither-baseline-gate`. A clean pinned run found 38 first-party
-  production High/Medium Slither rows (4 High, 34 Medium), contradicting the
-  historical accepted-baseline narrative.
-- This topic adds a canonical normalized JSON baseline, checked Markdown mirror,
-  fast metadata/parity validation, dedicated live exact-drift CI, and truthful
-  open-blocker risk/readiness language. All 38 rows remain Open: one confirmed
-  gap, six design-review rows, and 31 pending dispositions.
-- After this gate merges, continue issue-linked contract/test remediation and
-  the safe Core extraction sequence. Do not route StreamDrops directly through
-  the manager until an authenticated, operation-bound settlement seam preserves
-  revenue accounting before receiver callbacks.
+- PR #662 merged the canonical normalized Slither gate. All 38 first-party
+  production High/Medium rows remain Open under issue #658: one confirmed gap,
+  six design-review rows, and 31 pending dispositions. That remains an
+  independent public-beta and production blocker.
+- PR #660 subsequently merged the locked CPython audit/release toolchain and
+  checksum provenance. Its temporary worktree and local/remote topic branch
+  were removed after the reviewed, CI-clean merge; this run now uses one
+  worktree.
+- The current topic is issue #654 on branch `codex/core-cutover-abi-lock`.
+  Historical artifacts prove the earlier headroom work reduced Core to 21,792
+  runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
+  hooks while the legacy Drops/Minter path remained live, producing the current
+  24,152-byte transitional Core. The current build is already non-enumerable and
+  is not a complete mandatory-hook proof.
+- PR #663 is the active target-lock review. Its authoritative final-follow-up
+  local gate passed in 1,021.7 seconds; fresh CI and CodeRabbit review remain
+  required on that follow-up head before merge. The first published head passed
+  Windows, Slither, and Foundry CI. Independent review then found
+  that count-only target checks did not lock every active ABI shape and that
+  the vector's governance-hosted state-export publisher lacked an exact
+  publisher-surface proof. The follow-up now pins all 58 function and 19 event
+  shapes to reviewed digest
+  `2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`,
+  while a second full-target canonical-JSON digest
+  `18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`
+  pins every top-level semantic and ordered active/retired row. Baseline
+  reconciliation now requires an exact disposition for every current Core
+  function/event and rejects retired rows absent from that baseline. Target,
+  ABI config/baseline, genesis-profile, and candidate inputs reject invalid
+  UTF-8, duplicate members, non-finite/floating values, and unsafe integers.
+  The follow-up also pins the export read selector and three event topics in the
+  governance profile/vector. Every locked event is explicitly non-anonymous and
+  its schema version is fixed; the complete canonical Core, governance,
+  system-manifest, and finality-adapter profile rows are closed over all reviewed
+  fields. The Core profile and candidate check now pin the exact
+  IERC165/ERC-721/ERC-4906/ERC-2981/ERC-7572 interface tuple and reject an
+  extra enumerable advertisement; the system-manifest and finality-adapter
+  candidates likewise reject extra interfaces or markers and require their
+  exact implementation names. The governance entry remains composite and pins
+  its exact normative homes. Its publisher proof now fixes five return values,
+  all event indexed masks, non-anonymous emission, full ABI digest
+  `535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`,
+  and the real `0x77faad4f` interface ID at both pointer and registry records;
+  the synthetic registry ID is rejected. The vector also carries the finality
+  adapter's canonical `0xebf35615` interface ID rather than a synthetic
+  composite. Every non-governance candidate rejects a publisher proof.
+  Candidate proof comparison and the independent oracle are
+  type-strict, so integer `0`/`1` values cannot masquerade as booleans. The
+  independently implemented fixed-golden vector oracle is wired into CI and
+  release-checksum provenance. Focused mutation tests, independent
+  selector/topic/hash recomputation, and the full final-follow-up local gate
+  pass. Final implementation mapping also closed two V2 ambiguities before
+  merge: ordered call index/selector validation is executor-owned and does not
+  widen the exact six-return `currentAction()` target context, while module
+  registration has its own nonempty strict-UTF-8 2,048-byte manifest-URI bound.
+  The manual refresh/check recipes now preserve the same canonical
+  risk-register, release-notes, manifest, bytecode-proof, candidate-lockfile,
+  and checksum order enforced by Make, CI, and both check wrappers.
+- This slice pins the intentional pre-genesis target ABI, one canonical
+  satellite-pointer model, minimal governed-gas/emitter surfaces, terminal burn
+  blocking, and an explicit cutover order. Until the complete linked
+  production-profile `StreamCore` runtime measures at or below 22,576 bytes, a
+  Core-changing PR must be measured net-negative and a satellite slice must
+  have zero Core delta.
+- After this ABI lock merges, continue immediately with the satellite/caller
+  migration sequence. Recovery-driven refresh chunks preserve the zero-Core-
+  delta ABI: artwork-changing execution snapshots the token high-water mark and
+  stores a monotonic collection/scoped plan; either exact permissionless
+  continuation advances one at-most-5,000-ID chunk and passes the stored
+  accepted recovery-manifest content hash in the existing batch-helper
+  `reasonHash` slot, with cursor rollback on Core failure. Wider scopes use a
+  global-ID invalidation superset because Core intentionally has no enumerable
+  membership index, token scope uses one ID, and a newer recovery carries any
+  incomplete predecessor invalidation into a fresh plan even when its own
+  artwork-change flag is false. The registry-wide active-incomplete count must
+  be zero through the exact same-batch assertion immediately before a Core
+  finality-registry pointer update; operators and permissionless keepers drain
+  plans so old-registry authorization cannot be stranded. Post-snapshot mints
+  already resolve through the recovered route. The finality execution event retains
+  the distinct governance reason. Do not route StreamDrops directly through
+  the manager
+  until an authenticated, operation-bound settlement seam preserves revenue
+  accounting before receiver callbacks, and do not delete the legacy mint path
+  until all production callers and auction timing ownership have migrated.
 
 ## Packaging Notes
 

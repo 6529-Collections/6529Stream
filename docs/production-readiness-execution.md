@@ -11,8 +11,8 @@ not replace the generated release evidence status manifest in
 | Field | Value |
 | --- | --- |
 | Candidate source | `https://github.com/6529-Collections/6529Stream` |
-| Candidate commit | `8109f8a771315960def875d06ada253737ffa952` |
-| Candidate summary | PR #661 merge: canonical fail-closed genesis deployment profile; the current implementation catalog remains insufficient for production reconciliation |
+| Candidate commit | `b77e2338df10f223a0b892a58af4497d156d8576` |
+| Candidate summary | Current remote `main` after PR #660: locked Python audit/release toolchain, canonical genesis-profile and Slither drift gates, and unchanged blocked production posture |
 | Execution date | 2026-07-22 |
 | Readiness posture | Public beta blocked; production release blocked |
 | No-secret posture | No private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads were used or retained in this packet |
@@ -26,12 +26,12 @@ artifact generators in canonical order.
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Full ordinary repository gate | Passed on PR #661 before merge | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; Foundry and Windows CI also passed on the reviewed final head |
+| Full ordinary repository gate | Passed on PR #660 before merge | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; Foundry, Slither, and Windows CI passed on the reviewed final head |
 | Production size build | Measured, release-blocking | `forge build --sizes --via-ir --skip test --skip script --force` records `StreamCore` at 24,152 runtime bytes |
 | `StreamCore` production headroom | Blocked | 424 bytes of EIP-170 margin, 1,576 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
-| Genesis deployment profile | Blocked | The canonical 58-entry profile is checked, but the current v1 implementation catalog cannot prove deployment-instance identity, fallback distinctness, or parameterized probe bindings; issue #656 owns reconciliation |
+| Genesis deployment profile | Blocked | The active target specification expands the checked profile to 60 entries, including Permanent `StreamSystemManifest` entry 36 and immutable Permanent `StreamCoreFinalityAdapter` entry 37, but the current v1 implementation catalog cannot prove deployment-instance identity, fallback distinctness, or parameterized probe bindings; issue #656 owns reconciliation |
 | Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 38 Open production rows (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending dispositions; issue #658 owns remediation and reviewed disposition |
-| Slither exact drift automation | Implemented on the active remediation branch | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
+| Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
 | Production release mode | Blocked | External evidence, Core headroom, genesis completeness, and open Slither findings must all fail closed before production release |
 
 The successful local gates are regression evidence only. They do not replace

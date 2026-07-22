@@ -92,6 +92,14 @@ Accepted headroom-recovery records use `measured_delta_bytes` as
 `runtime_size_bytes - baseline_runtime_size_bytes`, so bytecode reductions are
 negative deltas and bytecode spend remains positive.
 
+Until issue #654's complete-hook build is at or below 22,576 bytes, Core work
+follows the pre-genesis cutover rule [PV1-CORE-CUTOVER]: a PR is satellite-only
+with zero Core delta, or pairs a mandatory Core addition with real removal and
+reports a net-negative production-profile runtime delta. An additive-only Core
+PR cannot consume the remaining development-exception margin. The final proof
+includes every mandatory hook at its production call shape; isolated scratch
+deltas and a partial Core below the ceiling are not release evidence.
+
 ## Breaking Changes
 
 The following changes are breaking unless maintainers explicitly document a
@@ -131,11 +139,34 @@ Breaking changes require:
   changes;
 - explicit maintainer approval before a public release tag.
 
+Before genesis, the #654 target-Core replacement is an intentional MAJOR ABI
+cutover, not an in-place migration of a live deployment. Its specification may
+land before code, but the implementation PR that removes or changes selectors
+must atomically migrate production callers and interfaces, refresh the ABI
+baseline and all covered artifacts, and publish the complete selector/event
+diff. Transitional development selectors do not become Permanent merely
+because they appear in the current `v0.1.0` baseline.
+
 ## ABI And Artifact Approval
 
 The ABI compatibility gate compares the current production contract and
 published interface ABI surfaces against
 `release-artifacts/baselines/v0.1.0/abi-surface.json`.
+
+The pre-genesis Core cutover is separately locked by
+`release-artifacts/stream-core-permanent-interface.json`. That normative target
+is complete for Permanent functions and events, records selector/topic and ABI
+shape plus retired-current lineage, and maps each active entry to exactly one
+closed bytecode-budget group while requiring retired entries to map to none.
+Phantom groups fail validation, groups carry no additive size estimates, and
+only the complete linked via-IR runtime measurement is authoritative. The
+target explicitly excludes custom errors, constructor, and Medium/Replaceable
+surfaces. Those exclusions remain governed by separately cataloged release
+evidence. Fallback and receive are not exclusions: they are
+`required_absent`, and implementation `--check` fails if either appears.
+`--target-only` validates the policy declaration without reading or rewriting
+implementation artifacts, while `--check` enforces it before running the
+independent current-versus-baseline comparison.
 
 - Removed or changed entries are blocking until the change is approved and the
   baseline is intentionally refreshed.

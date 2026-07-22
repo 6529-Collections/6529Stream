@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import tempfile
 import unittest
@@ -59,20 +60,44 @@ def complete_fixture(profile: dict[str, object]) -> tuple[dict[str, object], dic
     for entry in entries:
         assert isinstance(entry, dict)
         entry_id = entry["id"]
-        name = f"FixtureGenesisEntry{entry_id:02d}"
-        aliases = entry["approved_aliases"]
-        assert isinstance(aliases, list)
-        aliases.append(name)
-        candidates.append(
-            {
-                "name": name,
-                "source": f"smart-contracts/fixtures/Entry{entry_id}.sol",
-                "deployment_scope": entry["deployment_scope"],
-                "verified_interfaces": list(entry["required_interfaces"]),
-                "verified_markers": list(entry["required_markers"]),
-            }
-        )
+        exact_names = {
+            "STREAM_CORE": "StreamCore",
+            "STREAM_SYSTEM_MANIFEST": "StreamSystemManifest",
+            "STREAM_CORE_FINALITY_ADAPTER": "StreamCoreFinalityAdapter",
+        }
+        name = exact_names.get(entry["key"], f"FixtureGenesisEntry{entry_id:02d}")
+        exact_profile_rows = {
+            "STREAM_CORE",
+            "GOVERNANCE_LAYER",
+            "STREAM_SYSTEM_MANIFEST",
+            "STREAM_CORE_FINALITY_ADAPTER",
+        }
+        if entry["key"] not in exact_profile_rows:
+            entry["approved_aliases"].append(name)
+        candidate: dict[str, object] = {
+            "name": name,
+            "source": f"smart-contracts/fixtures/Entry{entry_id}.sol",
+            "deployment_scope": entry["deployment_scope"],
+            "verified_interfaces": list(entry["required_interfaces"]),
+            "verified_markers": list(entry["required_markers"]),
+        }
+        if entry["key"] == "GOVERNANCE_LAYER":
+            candidate["state_export_publisher_abi_proof"] = (
+                checker.state_export_publisher_abi_proof()
+            )
+        candidates.append(candidate)
     return completed, candidate_config(candidates)
+
+
+def validate_complete_fixture(
+    profile: dict[str, object],
+    contracts: dict[str, object],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    """Validate exact rows, then bind the synthetic manifest-equivalent governance name."""
+    entries = checker.validate_profile_document(profile)
+    candidates = checker.validate_contract_config(contracts)
+    entries[1]["approved_aliases"].append("FixtureGenesisEntry02")
+    return entries, candidates
 
 
 class GenesisDeploymentProfileTests(unittest.TestCase):
@@ -92,6 +117,33 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         self.assertEqual(len(entries), expected_count)
         self.assertEqual([entry["id"] for entry in entries], list(range(1, len(entries) + 1)))
         checker.validate_document_mirrors(entries, REPO_ROOT)
+
+    def test_profile_and_candidate_loader_rejects_ambiguous_or_non_ijson_input(self) -> None:
+        cases = (
+            (
+                "duplicate candidate member",
+                b'{"schema_version":"x","production_contracts":[{"name":"Bad","name":"Good"}]}',
+                "duplicate JSON member",
+            ),
+            ("nonfinite number", b'{"value":Infinity}', "non-I-JSON token"),
+            (
+                "floating number",
+                b'{"chain_id":1.5}',
+                "floating-point JSON is forbidden",
+            ),
+            (
+                "unsafe integer",
+                b'{"chain_id":9007199254740992}',
+                "outside the I-JSON interoperable range",
+            ),
+            ("invalid UTF-8", b'{"value":"\xff"}', "not strict UTF-8 JSON"),
+        )
+        for label, raw, diagnostic in cases:
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temp_dir:
+                path = Path(temp_dir) / "candidate.json"
+                path.write_bytes(raw)
+                with self.assertRaisesRegex(checker.GenesisProfileError, diagnostic):
+                    checker.load_json(path)
 
     def test_json_schema_matches_version_and_forbids_independent_total(self) -> None:
         schema = load_json(SCHEMA_PATH)
@@ -199,10 +251,164 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
 
     def test_exact_ggp_probe_inventory_includes_newest_rows(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
-        parameters = tuple(entry["parameters"][0] for entry in entries[35:57])
+        parameters = tuple(
+            entry["parameters"][0]
+            for entry in entries[len(checker.FIXED_CONTRACT_KEYS) : -1]
+        )
         self.assertEqual(parameters, checker.GGP_PARAMETERS)
         self.assertIn("REVEAL_ATTEMPT_GAS_LIMIT", parameters)
         self.assertIn("SALE_NFT_DELIVERY_GAS_LIMIT", parameters)
+
+    def test_stream_system_manifest_requirement_is_exact_and_complete(self) -> None:
+        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
+        system_manifest = entries[checker.SYSTEM_MANIFEST_ENTRY_ID - 1]
+        self.assertEqual(system_manifest["id"], 36)
+        self.assertEqual(system_manifest["key"], "STREAM_SYSTEM_MANIFEST")
+        self.assertEqual(system_manifest["requirement"], "StreamSystemManifest")
+        self.assertEqual(
+            system_manifest["implementation"],
+            {"mode": "exact", "names": ["StreamSystemManifest"]},
+        )
+        self.assertEqual(
+            tuple(system_manifest["required_interfaces"]),
+            checker.SYSTEM_MANIFEST_REQUIRED_INTERFACES,
+        )
+        self.assertEqual(
+            tuple(system_manifest["required_markers"]),
+            checker.SYSTEM_MANIFEST_REQUIRED_MARKERS,
+        )
+        self.assertIn(
+            f"MODULE_TYPE_{checker.SYSTEM_MANIFEST_MODULE_TYPE}",
+            system_manifest["required_markers"],
+        )
+        self.assertIn(
+            f"INTERFACE_ID_{checker.SYSTEM_MANIFEST_INTERFACE_ID}",
+            system_manifest["required_markers"],
+        )
+
+    def test_stream_system_manifest_requirement_rejects_marker_or_interface_drift(self) -> None:
+        entry_index = checker.SYSTEM_MANIFEST_ENTRY_ID - 1
+        for field in (
+            "required_interfaces",
+            "required_markers",
+            "normative_anchors",
+            "multiplicity",
+        ):
+            with self.subTest(field=field):
+                profile = copy.deepcopy(self.profile)
+                if field == "multiplicity":
+                    profile["entries"][entry_index][field]["maximum"] = 2
+                else:
+                    profile["entries"][entry_index][field].pop()
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "exactly one deployment|complete canonical Permanent StreamSystemManifest profile row",
+                ):
+                    checker.validate_profile_document(profile)
+
+    def test_stream_core_required_interface_set_is_exact_and_ordered(self) -> None:
+        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
+        self.assertEqual(
+            tuple(entries[0]["required_interfaces"]),
+            checker.STREAM_CORE_REQUIRED_INTERFACES,
+        )
+
+        for label, mutate in (
+            ("missing interface", lambda interfaces: interfaces.pop()),
+            ("reordered interfaces", lambda interfaces: interfaces.reverse()),
+        ):
+            with self.subTest(label=label):
+                profile = copy.deepcopy(self.profile)
+                mutate(profile["entries"][0]["required_interfaces"])
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "complete exact StreamCore profile row",
+                ):
+                    checker.validate_profile_document(profile)
+
+    def test_stream_core_profile_row_identity_is_fully_pinned(self) -> None:
+        mutations = (
+            ("requirement", lambda row: row.__setitem__("requirement", "Core")),
+            (
+                "implementation",
+                lambda row: row.__setitem__(
+                    "implementation",
+                    {"mode": "one_of", "names": ["StreamCore"]},
+                ),
+            ),
+            ("scope", lambda row: row.__setitem__("deployment_scope", "implementation")),
+            ("multiplicity", lambda row: row["multiplicity"].__setitem__("maximum", 2)),
+            ("marker", lambda row: row["required_markers"].append("FACADE_STATE_ALLOWED")),
+            ("alias", lambda row: row["approved_aliases"].append("LegacyCore")),
+            (
+                "anchor",
+                lambda row: row["normative_anchors"].__setitem__(
+                    1,
+                    "docs/launch-conformance-matrix.md#LCM-GENESIS",
+                ),
+            ),
+            ("parameters", lambda row: row["parameters"].append("unexpected")),
+            ("distinctness", lambda row: row["distinct_from"].append(2)),
+        )
+        for label, mutate in mutations:
+            with self.subTest(label=label):
+                profile = copy.deepcopy(self.profile)
+                mutate(profile["entries"][0])
+                with self.assertRaises(checker.GenesisProfileError):
+                    checker.validate_profile_document(profile)
+
+    def test_stream_core_finality_adapter_requirement_is_exact_and_complete(self) -> None:
+        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
+        adapter = entries[checker.CORE_FINALITY_ADAPTER_ENTRY_ID - 1]
+        self.assertEqual(adapter["id"], 37)
+        self.assertEqual(adapter["key"], "STREAM_CORE_FINALITY_ADAPTER")
+        self.assertEqual(adapter["requirement"], "StreamCoreFinalityAdapter")
+        self.assertEqual(
+            adapter["implementation"],
+            {"mode": "exact", "names": ["StreamCoreFinalityAdapter"]},
+        )
+        self.assertEqual(
+            tuple(adapter["required_interfaces"]),
+            checker.CORE_FINALITY_ADAPTER_REQUIRED_INTERFACES,
+        )
+        self.assertEqual(
+            tuple(adapter["required_markers"]),
+            checker.CORE_FINALITY_ADAPTER_REQUIRED_MARKERS,
+        )
+        self.assertIn(
+            f"MODULE_TYPE_{checker.CORE_FINALITY_ADAPTER_MODULE_TYPE}",
+            adapter["required_markers"],
+        )
+        self.assertIn(
+            f"INTERFACE_ID_{checker.CORE_FINALITY_ADAPTER_INTERFACE_ID}",
+            adapter["required_markers"],
+        )
+
+    def test_stream_core_finality_adapter_rejects_exact_requirement_drift(self) -> None:
+        entry_index = checker.CORE_FINALITY_ADAPTER_ENTRY_ID - 1
+        for field in (
+            "requirement",
+            "implementation",
+            "required_interfaces",
+            "required_markers",
+            "normative_anchors",
+            "multiplicity",
+        ):
+            with self.subTest(field=field):
+                profile = copy.deepcopy(self.profile)
+                if field == "requirement":
+                    profile["entries"][entry_index][field] = "DriftedFinalityAdapter"
+                elif field == "implementation":
+                    profile["entries"][entry_index][field]["names"] = ["DriftedAdapter"]
+                elif field == "multiplicity":
+                    profile["entries"][entry_index][field]["maximum"] = 2
+                else:
+                    profile["entries"][entry_index][field].pop()
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "exactly one deployment|complete canonical Permanent StreamCoreFinalityAdapter profile row",
+                ):
+                    checker.validate_profile_document(profile)
 
     def test_shared_cadence_probe_serves_exact_gtp_inventory(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
@@ -215,6 +421,18 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
         self.assertEqual(entries[1]["implementation"]["mode"], "manifest_equivalent")
         self.assertEqual(entries[1]["approved_aliases"], [])
+        self.assertEqual(
+            tuple(entries[1]["required_interfaces"]),
+            checker.GOVERNANCE_REQUIRED_INTERFACES,
+        )
+        self.assertEqual(
+            tuple(entries[1]["required_markers"]),
+            checker.GOVERNANCE_REQUIRED_MARKERS,
+        )
+        self.assertEqual(
+            tuple(entries[1]["normative_anchors"]),
+            checker.GOVERNANCE_NORMATIVE_ANCHORS,
+        )
         self.assertEqual(entries[31]["implementation"]["mode"], "one_of")
         self.assertEqual(
             entries[31]["implementation"]["names"],
@@ -227,6 +445,115 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         profile["entries"][1]["implementation"]["names"] = ["StreamAdmins"]
         with self.assertRaisesRegex(checker.GenesisProfileError, "must be empty"):
             checker.validate_profile_document(profile)
+
+    def test_governance_state_export_publisher_surface_rejects_drift(self) -> None:
+        for field in (
+            "required_interfaces",
+            "required_markers",
+            "normative_anchors",
+        ):
+            with self.subTest(field=field):
+                profile = copy.deepcopy(self.profile)
+                profile["entries"][1][field].pop()
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "complete governance disjunction",
+                ):
+                    checker.validate_profile_document(profile)
+
+        profile = copy.deepcopy(self.profile)
+        profile["entries"][1]["normative_anchors"] = [
+            "docs/unrelated.md#NOT-REAL"
+        ]
+        with self.assertRaisesRegex(
+            checker.GenesisProfileError,
+            "complete governance disjunction",
+        ):
+            checker.validate_profile_document(profile)
+
+    def test_governance_profile_row_scope_and_identity_are_fully_pinned(self) -> None:
+        mutations = (
+            ("requirement", lambda row: row.__setitem__("requirement", "timelock layer")),
+            ("scope", lambda row: row.__setitem__("deployment_scope", "implementation")),
+            ("multiplicity", lambda row: row["multiplicity"].__setitem__("maximum", 2)),
+            ("alias", lambda row: row["approved_aliases"].append("StreamAdmins")),
+            ("parameters", lambda row: row["parameters"].append("unexpected")),
+            ("distinctness", lambda row: row["distinct_from"].append(1)),
+        )
+        for label, mutate in mutations:
+            with self.subTest(label=label):
+                profile = copy.deepcopy(self.profile)
+                mutate(profile["entries"][1])
+                with self.assertRaises(checker.GenesisProfileError):
+                    checker.validate_profile_document(profile)
+
+    def test_state_export_publisher_abi_proof_locks_full_shape(self) -> None:
+        proof = checker.state_export_publisher_abi_proof()
+        self.assertEqual(
+            proof["surface_sha256"], checker.STATE_EXPORT_PUBLISHER_ABI_SHA256
+        )
+        self.assertEqual(proof["interface_id"], "0x77faad4f")
+        self.assertEqual(
+            proof["functions"][0]["returns"],
+            ["uint256", "bytes32", "bytes32", "bytes32", "string"],
+        )
+        self.assertEqual(
+            [event["indexed"] for event in proof["events"]],
+            [
+                [False, True, True, True, False, False],
+                [False, True, True, True, False],
+                [False, True, True, True, False],
+            ],
+        )
+        self.assertTrue(all(event["anonymous"] is False for event in proof["events"]))
+
+        mutations = (
+            ("return types", lambda value: value["functions"][0]["returns"].pop()),
+            ("indexed mask", lambda value: value["events"][0]["indexed"].reverse()),
+            ("interface ID", lambda value: value.__setitem__("interface_id", "0xa5971448")),
+            ("surface digest", lambda value: value.__setitem__("surface_sha256", "sha256:" + "00" * 32)),
+        )
+        for label, mutate in mutations:
+            with self.subTest(label=label):
+                candidate = copy.deepcopy(proof)
+                mutate(candidate)
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "must exactly match",
+                ):
+                    checker.validate_state_export_publisher_abi_proof(
+                        candidate,
+                        "candidate.proof",
+                    )
+
+    def test_state_export_publisher_proof_rejects_integer_boolean_masquerade(self) -> None:
+        proof = checker.state_export_publisher_abi_proof()
+        candidate = copy.deepcopy(proof)
+        for event in candidate["events"]:
+            event["indexed"] = [int(value) for value in event["indexed"]]
+
+        with self.assertRaisesRegex(
+            checker.GenesisProfileError,
+            "surface_sha256 does not match",
+        ):
+            checker.validate_state_export_publisher_abi_proof(candidate, "candidate.proof")
+
+        candidate_surface = {
+            key: value
+            for key, value in candidate.items()
+            if key != "surface_sha256"
+        }
+        candidate["surface_sha256"] = (
+            "sha256:"
+            + hashlib.sha256(
+                checker.canonical_json_bytes(candidate_surface, "candidate.proof")
+            ).hexdigest()
+        )
+        with self.assertRaisesRegex(
+            checker.GenesisProfileError,
+            "must exactly match",
+        ):
+            checker.validate_state_export_publisher_abi_proof(candidate, "candidate.proof")
 
     def test_document_mirror_rejects_requirement_drift(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
@@ -312,20 +639,124 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         joined = "\n".join(audit.blockers)
         self.assertIn("StreamMintManager", joined)
         self.assertIn("StreamSplitWallet", joined)
+        self.assertIn("STREAM_SYSTEM_MANIFEST", joined)
+        self.assertIn("STREAM_CORE_FINALITY_ADAPTER", joined)
         self.assertIn("expected 'implementation'", joined)
         self.assertIn("SHARED_ENTROPY_CADENCE_PROBE", joined)
 
     def test_synthesized_exact_candidate_passes(self) -> None:
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
-        entries = checker.validate_profile_document(profile)
-        candidates = checker.validate_contract_config(contracts)
+        entries, candidates = validate_complete_fixture(profile, contracts)
         self.assertEqual(checker.completeness_blockers(entries, candidates), [])
+
+    def test_stream_core_candidate_rejects_forbidden_extra_interface(self) -> None:
+        profile, contracts = complete_fixture(copy.deepcopy(self.profile))
+        core = next(
+            candidate
+            for candidate in contracts["production_contracts"]
+            if candidate["name"] == "StreamCore"
+        )
+        core["verified_interfaces"].append("IERC721Enumerable")
+
+        entries, candidates = validate_complete_fixture(profile, contracts)
+        blockers = "\n".join(checker.completeness_blockers(entries, candidates))
+        self.assertIn("forbidden extra interfaces", blockers)
+        self.assertIn("IERC721Enumerable", blockers)
+
+    def test_exact_safety_critical_candidates_reject_extra_capabilities_and_publisher_proof(self) -> None:
+        candidate_names = {
+            "STREAM_CORE": "StreamCore",
+            "STREAM_SYSTEM_MANIFEST": "StreamSystemManifest",
+            "STREAM_CORE_FINALITY_ADAPTER": "StreamCoreFinalityAdapter",
+        }
+        self.assertEqual(
+            set(candidate_names),
+            set(checker.EXACT_SAFETY_CRITICAL_CANDIDATE_KEYS),
+        )
+        for key, candidate_name in candidate_names.items():
+            with self.subTest(key=key):
+                profile, contracts = complete_fixture(copy.deepcopy(self.profile))
+                candidate = next(
+                    value
+                    for value in contracts["production_contracts"]
+                    if value["name"] == candidate_name
+                )
+                candidate["verified_interfaces"].append("IForbiddenCapability")
+                candidate["verified_markers"].append("FACADE_STATE_ALLOWED")
+                candidate["state_export_publisher_abi_proof"] = (
+                    checker.state_export_publisher_abi_proof()
+                )
+
+                entries, candidates = validate_complete_fixture(profile, contracts)
+                blockers = "\n".join(
+                    checker.completeness_blockers(entries, candidates)
+                )
+                self.assertIn("forbidden extra interfaces", blockers)
+                self.assertIn("IForbiddenCapability", blockers)
+                self.assertIn("forbidden extra markers", blockers)
+                self.assertIn("FACADE_STATE_ALLOWED", blockers)
+                self.assertIn("governance-only state-export publisher ABI proof", blockers)
+
+    def test_governance_candidate_remains_composite_but_requires_exact_publisher_proof(self) -> None:
+        profile, contracts = complete_fixture(copy.deepcopy(self.profile))
+        governance = next(
+            candidate
+            for candidate in contracts["production_contracts"]
+            if candidate["name"] == "FixtureGenesisEntry02"
+        )
+        governance["verified_interfaces"].append("IGovernanceExtension")
+        governance["verified_markers"].append("ADDITIONAL_REVIEWED_GOVERNANCE_CAPABILITY")
+
+        entries, candidates = validate_complete_fixture(profile, contracts)
+        self.assertEqual(checker.completeness_blockers(entries, candidates), [])
+
+    def test_every_non_governance_candidate_rejects_publisher_proof(self) -> None:
+        profile, contracts = complete_fixture(copy.deepcopy(self.profile))
+        module_registry = next(
+            candidate
+            for candidate in contracts["production_contracts"]
+            if candidate["name"] == "FixtureGenesisEntry03"
+        )
+        module_registry["state_export_publisher_abi_proof"] = (
+            checker.state_export_publisher_abi_proof()
+        )
+
+        entries, candidates = validate_complete_fixture(profile, contracts)
+        blockers = "\n".join(checker.completeness_blockers(entries, candidates))
+        self.assertIn("governance-only state-export publisher ABI proof", blockers)
+        self.assertIn("MODULE_REGISTRY", blockers)
+
+    def test_governance_marker_strings_cannot_replace_structured_abi_proof(self) -> None:
+        profile, contracts = complete_fixture(copy.deepcopy(self.profile))
+        governance = next(
+            candidate
+            for candidate in contracts["production_contracts"]
+            if candidate["name"] == "FixtureGenesisEntry02"
+        )
+        self.assertEqual(
+            governance["verified_interfaces"],
+            list(checker.GOVERNANCE_REQUIRED_INTERFACES),
+        )
+        self.assertEqual(
+            governance["verified_markers"],
+            list(checker.GOVERNANCE_REQUIRED_MARKERS),
+        )
+        governance.pop("state_export_publisher_abi_proof")
+
+        entries, candidates = validate_complete_fixture(profile, contracts)
+        blockers = "\n".join(checker.completeness_blockers(entries, candidates))
+        self.assertIn("lacks the exact structured state-export publisher ABI proof", blockers)
+        self.assertIn("marker strings do not prove", blockers)
 
     def test_missing_and_extra_candidates_fail(self) -> None:
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
-        entries = checker.validate_profile_document(profile)
-        candidates = checker.validate_contract_config(contracts)
-        missing = candidates[:-1]
+        entries, candidates = validate_complete_fixture(profile, contracts)
+        cadence_fixture_name = f"FixtureGenesisEntry{len(entries):02d}"
+        missing = [
+            candidate
+            for candidate in candidates
+            if candidate["name"] != cadence_fixture_name
+        ]
         self.assertTrue(
             any("SHARED_ENTROPY_CADENCE_PROBE" in blocker for blocker in checker.completeness_blockers(entries, missing))
         )
@@ -344,8 +775,7 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
 
     def test_duplicate_and_ambiguous_satisfaction_fail(self) -> None:
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
-        entries = checker.validate_profile_document(profile)
-        candidates = checker.validate_contract_config(contracts)
+        entries, candidates = validate_complete_fixture(profile, contracts)
         duplicate_name = "FixtureDuplicateEntry01"
         entries[0]["approved_aliases"].append(duplicate_name)
         duplicate = candidates + [
@@ -362,18 +792,19 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         )
 
         ambiguous_profile, ambiguous_contracts = complete_fixture(copy.deepcopy(self.profile))
-        ambiguous_entries = checker.validate_profile_document(ambiguous_profile)
-        shared_alias = "FixtureGenesisEntry01"
+        ambiguous_entries, ambiguous_candidates = validate_complete_fixture(
+            ambiguous_profile,
+            ambiguous_contracts,
+        )
+        shared_alias = "StreamCore"
         ambiguous_entries[1]["approved_aliases"].append(shared_alias)
-        ambiguous_candidates = checker.validate_contract_config(ambiguous_contracts)
         self.assertTrue(
             any("ambiguously matches" in blocker for blocker in checker.completeness_blockers(ambiguous_entries, ambiguous_candidates))
         )
 
     def test_wrong_scope_interface_and_marker_fail(self) -> None:
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
-        entries = checker.validate_profile_document(profile)
-        candidates = checker.validate_contract_config(contracts)
+        entries, candidates = validate_complete_fixture(profile, contracts)
         candidates[0]["deployment_scope"] = "fallback_instance"
         candidates[1]["verified_interfaces"] = []
         candidates[1]["verified_markers"] = []

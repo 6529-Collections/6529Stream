@@ -33,8 +33,8 @@ Companion specs:
 - `docs/launch-conformance-matrix.md` (deployment conformance gates)
 - `docs/metadata-router-and-renderer.md`
 - `docs/collection-metadata-contract.md`
-- `docs/stream-collection-facade-profile.md` (dormant facade extension
-  profile)
+- `docs/stream-collection-facade-profile.md` (superseded successor-line
+  research under ADR 0016)
 - `docs/stream-entropy-coordinator.md`
 - `docs/stream-entropy-providers.md`
 
@@ -84,17 +84,15 @@ version or manifest hashes.
 
 1. Keep Core permanent, small, and boring.
 2. Keep `totalSupply()` in Core; keep `ERC721Enumerable` index storage out
-   of Core. Enumeration is served by state exports, dense sequential IDs,
+   of Core. Enumeration is served by state exports, monotonic sequential IDs,
    and periphery lenses ([LTA-ENUMERATION]; ADR 0012 decision T10,
    superseding ADR 0010 decision D9.3).
 3. Keep Core-native ERC-2981 in Core, but put mutable royalty policy in a
    resolver.
 4. Keep marketplace-facing surfaces stable: `ownerOf`, `tokenURI`,
    `royaltyInfo`, `supportsInterface`, transfer, approval, and
-   `totalSupply` reads. For `EXTERNAL_FACADE` collections the stable
-   marketplace surface — ERC-721 `Transfer` emission and approvals
-   included — is the collection's facade, backed by the same Core
-   reads ([LTA-IDENTITY-MODE]).
+   `totalSupply` reads. The launch line has one contract-wide ERC-721 surface
+   for every token: Core ([LTA-IDENTITY-MODE]; ADR 0016).
 5. Keep mutable economic, rendering, and entropy policy out of Core.
 6. Prefer immutable profiles, immutable implementation versions, and mutable
    assignments over mutable internals.
@@ -196,6 +194,93 @@ deterministic IDs to init code hash, runtime code hash, schema version,
 interface ID, manifest hash, deployment manifest hash, chain ID, and factory
 address.
 
+### Pre-publication deployment identity [LTA-DEPLOYMENT-IDENTITY]
+
+The Permanent ABI name `deploymentManifestHash` denotes one release-wide
+**pre-publication deployment-identity digest**, not the checksum of a later
+release/deployment-manifest file. The identical digest appears in every module
+getter, registry record, pointer record, probe/fallback binding, and `contracts`
+entry for that deployment.
+
+Tooling first forms an address-free deployment-identity view. After the same
+RFC 8785 JCS, I-JSON, UTF-8, NFC, fixed-width lowercase-hex, safe-integer, and
+unknown/duplicate-member restrictions used by [LTA-MANIFEST], that view is one
+JSON object with exactly these top-level members and no others:
+
+| Member | Exact contents |
+| --- | --- |
+| `schema` / `schemaVersion` | literals `STREAM_DEPLOYMENT_IDENTITY_V1` and `1` |
+| `canonicalization` | literal `RFC8785_JCS` |
+| `chainId` | canonical unsigned decimal string; protocol v1 requires `"1"` |
+| `deploymentVersion` | nonempty NFC release-line identifier fixed before deployment |
+| `factory` | pre-existing deterministic deployment-factory address |
+| `sourceBundleHash` / `toolchainHash` / `schemaCatalogHash` | nonzero `bytes32` hashes of the address-free source bundle, exact compiler/toolchain lock, and schema catalog |
+| `contracts` | the complete genesis inventory in ascending `inventoryId` order |
+
+Each `contracts` element has exactly `inventoryId`, `key`, `moduleType`,
+`moduleVersion`, `interfaceId`, `moduleSchemaHash`, `create2Salt`,
+`creationCodeTemplateHash`, `constructorSignature`,
+`constructorTemplateHash`, `constructorBindings`, and `linkBindings`.
+`inventoryId` is a unique nonnegative safe integer; `key` is the exact unique
+nonempty uppercase-ASCII inventory key. Non-module identity fields use their
+fixed-width zero values. `creationCodeTemplateHash` is `keccak256` of compiler
+creation bytecode with every compiler-reported library link span zeroed.
+`linkBindings` enumerates those nonoverlapping spans as exact objects
+`{offset,length,inventoryKey}`, sorted by byte offset; the referenced inventory
+key replaces the zero span only after the digest is fixed.
+
+`constructorSignature` is the compiler ABI's exact canonical constructor type
+signature. `constructorTemplateHash` is `keccak256` of its ABI-encoded argument
+bytes after every deployment-derived 32-byte word is zeroed.
+`constructorBindings` enumerates those nonoverlapping, word-aligned locations
+as exact objects `{offset,abiType,bindingKey}`, sorted by byte offset.
+`abiType` is exactly `address` or `bytes32`; `bindingKey` is an inventory key for
+an address word or the literal `DEPLOYMENT_IDENTITY` for the one global digest.
+All unbound argument bytes remain their final literal configuration. Empty
+binding arrays are permitted; overlapping, out-of-range, nonzero-template,
+unknown-key, duplicate, or dependency-cyclic bindings are forbidden.
+
+The digest algorithm is production-exact:
+
+```solidity
+bytes32 constant STREAM_DEPLOYMENT_IDENTITY_V1 =
+    0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a;
+    // keccak256("6529STREAM_DEPLOYMENT_IDENTITY_V1")
+
+bytes32 identityViewHash = keccak256(rfc8785JcsUtf8(identityView));
+bytes32 deploymentManifestHash = keccak256(abi.encode(
+    STREAM_DEPLOYMENT_IDENTITY_V1,
+    identityViewHash
+));
+```
+
+Only after that value is fixed may tooling substitute it, linked-library
+addresses, and topologically resolved contract addresses into constructor and
+creation-code templates, derive actual init-code hashes/CREATE2 addresses, and
+deploy. Consequently the canonical view excludes every resolved protocol
+address other than the pre-existing factory, actual init-code and runtime-code
+hashes, constructor output, the system-manifest payload bytes/`manifestHash`,
+root descriptor and chunk addresses, bootstrap seal/action facts, publication
+transaction/block/timestamp/event evidence, module-manifest hash or URI,
+release/deployment-manifest file checksums, signatures, address books, checksum
+bundles, and every downstream provenance, attestation, or evidence artifact
+that contains or refers back to the digest.
+
+The later canonical system payload binds actual addresses, init/runtime hashes,
+salts, and this stable digest together. A later release/deployment manifest may
+one-way reference both that completed system manifest and the digest, and its
+normalized SHA-256 may protect that file, but no downstream fact feeds back
+into `deploymentManifestHash`. The dependency direction is therefore acyclic:
+
+```text
+symbolic inventory + source/toolchain/schema + zeroed deployment templates
+    -> deploymentManifestHash
+    -> resolved initcode + CREATE2 addresses + deployed runtime
+    -> registry/pointer/system-payload records
+    -> system manifest hash/root/publication
+    -> release, checksum, signature, and evidence artifacts
+```
+
 ## Registry Pattern [LTA-REGISTRY]
 
 Use registries for replaceable modules, but keep registry authority narrow.
@@ -253,6 +338,7 @@ struct StreamModuleRecord {
     string moduleManifestURI;
     uint64 registeredAt;
     uint64 statusUpdatedAt;
+    uint64 revision;
 }
 
 interface IStreamModuleRegistry {
@@ -270,7 +356,11 @@ interface IStreamModuleRegistry {
     function moduleRegistryManifest()
         external
         view
-        returns (bytes32 manifestHash, string memory manifestURI);
+        returns (
+            bytes32 manifestHash,
+            string memory manifestURI,
+            uint64 revision
+        );
 
     // Append-only module enumeration index (requirement 6;
     // ADR 0013 decision U2).
@@ -286,6 +376,176 @@ interface IStreamModuleRegistry {
         returns (bytes32 chainHash, uint64 recordCount);
 }
 ```
+
+Governed writer ABI and transition commitments [LTA-REGISTRY-GOVERNANCE]. The
+three registry writers are part of the V2 cutover; an authority-only version is
+not a production implementation:
+
+```solidity
+function registerModule(StreamModuleRegistration calldata registration)
+    external; // 0x77bfa48d
+
+function setModuleStatus(
+    address module,
+    ModuleRegistryStatus newStatus,
+    bytes32 reasonHash,
+    string calldata reasonURI
+) external; // 0x96a6e18b
+
+function setModuleRegistryManifest(bytes32 manifestHash, string calldata manifestURI)
+    external; // 0x7ba46615
+```
+
+The registration tuple is
+`(address,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string)` in the
+declared `StreamModuleRegistration` field order. The target requires its
+immutable executor, a nonzero executing V2 action, the transition-specific
+class below, and exact per-call scope/old/new hashes. Production domains and
+formulas are:
+
+The six-return `currentAction()` is the complete target-readable execution
+context. It intentionally has no call-index or selector return: the executor
+binds order through the ordered `callsHash`, validates each descriptor's target,
+value, selector, and calldata hash before making any call, and rotates the three
+per-call hashes immediately before that call. The registry independently checks
+the immutable executor caller, the entrypoint's own `msg.sig`, the nonzero
+action ID, exact class, and exact three hashes. Call-index/order and descriptor-
+selector negative tests therefore live at the executor boundary; adding a
+target-readable index/selector return or companion authorization read is not a
+protocol-v1 requirement and must not replace the six-return context.
+
+Both module-level and registry-level manifest URIs have separately named exact
+bounds:
+
+```solidity
+uint256 constant MAX_MODULE_MANIFEST_URI_BYTES = 2_048;
+uint256 constant MAX_MODULE_REGISTRY_MANIFEST_URI_BYTES = 2_048;
+```
+
+```solidity
+bytes32 constant STREAM_MODULE_REGISTRATION_SCOPE_V1 =
+    0x5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a274;
+    // keccak256("6529STREAM_MODULE_REGISTRATION_SCOPE_V1")
+bytes32 constant STREAM_MODULE_REGISTRATION_STATE_V1 =
+    0x93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a;
+    // keccak256("6529STREAM_MODULE_REGISTRATION_STATE_V1")
+bytes32 constant STREAM_MODULE_STATUS_SCOPE_V1 =
+    0x104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e31924;
+    // keccak256("6529STREAM_MODULE_STATUS_SCOPE_V1")
+bytes32 constant STREAM_MODULE_STATUS_STATE_V1 =
+    0x6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e23139;
+    // keccak256("6529STREAM_MODULE_STATUS_STATE_V1")
+bytes32 constant STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1 =
+    0x5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b;
+    // keccak256("6529STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1")
+bytes32 constant STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1 =
+    0x2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c62;
+    // keccak256("6529STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1")
+
+bytes32 registrationScopeHash = keccak256(abi.encode(
+    STREAM_MODULE_REGISTRATION_SCOPE_V1,
+    uint256(block.chainid),
+    address(moduleRegistry),
+    registration.module
+));
+
+bytes32 moduleRecordFactsHash = keccak256(abi.encode(
+    uint8(status),
+    moduleType,
+    moduleVersion,
+    interfaceId,
+    moduleGasLimit,
+    runtimeCodeHash,
+    deploymentManifestHash,
+    moduleManifestHash,
+    keccak256(bytes(moduleManifestURI)),
+    uint64(revision)
+));
+
+bytes32 registrationStateHash = keccak256(abi.encode(
+    STREAM_MODULE_REGISTRATION_STATE_V1,
+    registrationScopeHash,
+    exists,
+    moduleRecordFactsHash,
+    moduleCount,
+    registrationChainHash,
+    registrationRecordCount,
+    indexedModuleAtNewIndex
+));
+
+bytes32 statusScopeHash = keccak256(abi.encode(
+    STREAM_MODULE_STATUS_SCOPE_V1,
+    uint256(block.chainid),
+    address(moduleRegistry),
+    module
+));
+bytes32 statusStateHash = keccak256(abi.encode(
+    STREAM_MODULE_STATUS_STATE_V1,
+    statusScopeHash,
+    moduleRecordFactsHash,
+    moduleCount,
+    registrationChainHash,
+    registrationRecordCount
+));
+
+bytes32 registryManifestScopeHash = keccak256(abi.encode(
+    STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1,
+    uint256(block.chainid),
+    address(moduleRegistry)
+));
+bytes32 registryManifestStateHash = keccak256(abi.encode(
+    STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1,
+    registryManifestScopeHash,
+    manifestHash,
+    keccak256(bytes(manifestURI)),
+    uint64(revision)
+));
+```
+
+For registration, the old state is the absent record, the current count/chain
+pair, and `indexedModuleAtNewIndex = address(0)`. The new state is the complete
+`ACTIVE` record at revision `1`, `moduleCount + 1`,
+`registrationRecordCount + 1`, the exact
+new record-chain hash from requirement 7, and
+`indexedModuleAtNewIndex = registration.module`; pre-state count and record
+count must be equal and overflow-safe. The registry verifies live code hash,
+interface, every nonzero manifest field, and URI bounds before writing. The
+execution-generated `registeredAt` and `statusUpdatedAt` timestamps both equal
+the current block timestamp and are excluded from a pre-scheduled hash because
+no proposer controls that timestamp; every authority-bearing and
+content-bearing record field is committed above. Registration requires
+`registration.moduleManifestURI` to be nonempty, strictly valid UTF-8, and at
+most `MAX_MODULE_MANIFEST_URI_BYTES`; its `moduleManifestHash` and other
+required manifest commitments remain nonzero. The URI bytes are committed
+through the registration state hash above, so a different representation is a
+different scheduled transition.
+
+Registration stores record revision `1`. `registerModule` is class
+`DELAYED_LOOSENING` (`1`). `setModuleStatus` is
+calldata-polymorphic: a move to a more restrictive non-`UNKNOWN` state requires
+`IMMEDIATE_TIGHTENING` (`0`), and a move toward `ACTIVE` requires
+`DELAYED_LOOSENING` (`1`); `UNKNOWN`, no-op, and class/status mismatches revert.
+Its old/new hashes use the complete record facts with `status` changed and
+`revision = oldRevision + 1`;
+the counts and chain remain identical. `reasonHash` and the UTF-8 `reasonURI`
+are not stored in the record and are bound exactly by the V2 `callDataHash`.
+`setModuleRegistryManifest` is class `1`, rejects a zero hash and no-op, and
+requires a nonempty valid UTF-8 URI of at most
+`MAX_MODULE_REGISTRY_MANIFEST_URI_BYTES = 2_048`; its old/new state hashes use
+the final formula above with manifest revision incremented exactly once. The
+constructor's nonzero genesis manifest starts at revision `1`; both revision
+counters revert on overflow. Thus module reactivation or manifest content that
+cycles `A -> B -> A` still has a different state hash and cannot revive a stale
+scheduled action.
+
+All three exact `(registry, selector)` pairs are [GOV-MANIFEST-TAIL] triggers:
+registration and manifest publication use allowed-class mask `0x02`, while the
+polymorphic status writer uses mask `0x03`. Target-side class decoding remains
+mandatory even though the executor also checks the mask. Goldens cover the
+absent-to-indexed registration/record-chain transition, status tightening and
+loosening, reason calldata binding, manifest hash/URI bounds, forged per-call
+context, wrong class, wrong mask, and exactly one same-class final system-
+manifest publication.
 
 Registry record requirements:
 
@@ -414,6 +674,12 @@ metadata router, collection metadata contract, or entropy coordinator can
 redirect royalties, alter metadata, reinterpret randomness state, or change the
 meaning of a freeze. Pointer changes therefore need their own shared policy.
 
+No writer in this section may be deployed against the transitional governance
+interface. ADR 0004 [GOV-V2-CUTOVER] — seven-word call descriptors, per-call
+context, call-data publication, action-class ID `6`, batch-tail enforcement,
+tooling/tests, and V1 retirement — is a completed precondition before any new
+Core pointer, GGP, or manifest writer becomes reachable.
+
 Core satellite pointer families:
 
 ```text
@@ -424,15 +690,37 @@ ENTROPY_COORDINATOR
 MINT_MANAGER
 MINT_LEDGER
 ARTIST_REGISTRY
-STREAM_ADMINS_OR_GOVERNANCE
 ARTWORK_FINALITY_REGISTRY
+MODULE_REGISTRY
+STATE_EXPORT_PUBLISHER
 SYSTEM_MANIFEST
 ```
 
+`MODULE_REGISTRY` and `STATE_EXPORT_PUBLISHER` are unified pointer families,
+not hidden fields with bespoke setters. `streamSystemManifest()` derives those
+two addresses, like the other mutable module addresses, from their private
+cached pointer records. The governance executor is deliberately not a pointer
+family: Core and `StreamSystemManifest` each bind the same executor immutably,
+and the aggregate's `streamAdminsOrGovernance` field returns that immutable
+satellite binding. Allocating and freezing a duplicate Core record would spend
+bytecode and storage without adding authority or discovery. `SYSTEM_MANIFEST`
+has one concrete role: it points to the
+immutable Permanent `StreamSystemManifest` aggregate/cache/history publisher
+defined at [LTA-MANIFEST]. Its expected module type is
+`keccak256("STREAM_SYSTEM_MANIFEST") =
+0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6`
+and its full five-function interface ID is `0x37660ede`. The family is
+initialized to the checked satellite and terminal-frozen during the genesis
+ceremony. The append-only SSTORE2 payload pointers that satellite publishes
+are manifest history, not module pointers, and never pass through
+`updateSatellitePointer`.
+
 Required pointer lifecycle:
 
-1. New pointer targets must be approved by the relevant registry before they
-   can be staged.
+1. New pointer targets must be approved by the live `MODULE_REGISTRY` pointer
+   target before they can be staged. A pointer record's cached historical
+   `registry` field is audit evidence, never the lookup authority for a later
+   update.
 2. Staging uses the canonical governance action of
    [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
    [GOV-ACTION-ID]. Pointer-specific fields are encoded into the batch
@@ -442,16 +730,30 @@ Required pointer lifecycle:
    pointer plus catalog update, finality plus pointer freeze — must execute
    as one atomic [GOV-BATCH] batch (ADR 0010 decision D7.1).
 
-3. Every staged operation emits old target, new target, code hash, manifest
-   hash, earliest execution time, actor, indexed action ID, and reason URI/hash.
+3. Pointer staging and cancellation live only in the canonical governance
+   executor. `GovernanceActionScheduled` plus the action's state-readable
+   calldata and manifest payload carry the old target, new target, code hash,
+   manifest hashes, earliest execution time, actor, indexed action ID, and
+   reason URI/hash; `GovernanceActionCancelled` is the cancellation record.
+   Core has no `stageSatellitePointer`, `cancelSatellitePointer`, staged-pointer
+   mapping, or pointer-specific staging event. Adding any of them would create
+   a second lifecycle whose state could disagree with [GOV-ACTION-ID].
 4. A staged operation can be cancelled before execution by the appropriate
-   governance role.
-5. Execution rechecks registry eligibility, code hash, manifest hash, and
-   operation ID.
-6. Emergency bypass is allowed only for incident response and must be limited to
-   moving from an incident-revoked target to a pre-approved compatible target
-   or to a safe read-only fallback. It must not redirect owed funds or final
-   artwork arbitrarily.
+   governance role through the governance executor. A cancelled, vetoed,
+   expired, or executed action cannot reach Core again.
+5. Execution rechecks registry eligibility against the live
+   `MODULE_REGISTRY` pointer target, live code hash, both module and deployment
+   manifest hashes, the cached old pointer state, and the executing action ID.
+   For a `MODULE_REGISTRY` update, "live registry" means the old current
+   registry, which must already carry an `ACTIVE` compatible record for its
+   successor. Core independently verifies the executor's in-flight action
+   class and exact `scopeHash`/`oldValueHash`/`newValueHash`; trusting the
+   executor's selector classifier alone is nonconformant.
+6. There is no permissionless or zero-delay pointer bypass. Incident response
+   may move only from an incident-revoked target to a pre-approved compatible
+   target or safe read-only fallback, but it still uses the ordinary class-3
+   pointer-replacement action, exact target hashes, manifest tail, and minimum
+   delay. It must not redirect owed funds or final artwork arbitrarily.
    For `ENTROPY_COORDINATOR`, the pre-approved compatible target must be
    write-capable because mint registration is required; there is no read-only
    entropy fallback for live minting.
@@ -477,13 +779,15 @@ Required pointer lifecycle:
     compatible fallback target (for example a safe-mode coordinator or
     replacement mint manager) deployed and named in the
     conformance-matrix genesis deployment profile. Without a standing
-    fallback, the rule 6 emergency bypass and the permissionless
-    emergency move of [LTA-GOV] rule 7 decay into a multi-day
-    `DELAYED_LOOSENING` registration cycle at the worst moment — a Safe
-    cannot conjure a reviewed fallback inside a 4-hour emergency window.
-    A rehearsed permissionless emergency move to each fallback is
-    release evidence, and the conformance matrix gates the fallback
-    inventory.
+    fallback, incident recovery first needs a separate delayed module-
+    registration cycle at the worst moment. Pre-approval removes that extra
+    cycle; it does not remove the class-3 pointer delay. The deployment runbook
+    requires the authorized role to schedule the exact fallback action within
+    four hours of an onchain `INCIDENT_REVOKED` observation, after which anyone
+    may execute at the earliest permitted block. Rehearsal evidence measures
+    detection-to-schedule and earliest-execution latency against the deployment
+    manifest's `minimumDelay(POINTER_REPLACEMENT) + 4 hours + execution margin`
+    SLA, and the conformance matrix gates the fallback inventory.
 
 Frozen-route compatibility is reported through a small read:
 
@@ -525,22 +829,9 @@ can serve or delegate every pinned frozen route reported by the frozen route
 registry, or if an executed recovery manifest supersedes that route. Core does
 not add arbitrary per-collection router pointers in v1.
 
-Required events:
+Core execution events:
 
 ```solidity
-event CoreSatellitePointerStaged(
-    uint16 schemaVersion,
-    bytes32 indexed pointerType,
-    bytes32 indexed actionId,
-    address indexed newTarget,
-    address oldTarget,
-    bytes32 newTargetCodeHash,
-    bytes32 newTargetManifestHash,
-    uint64 notBefore,
-    bytes32 reasonHash,
-    string reasonURI
-);
-
 event CoreSatellitePointerUpdated(
     uint16 schemaVersion,
     bytes32 indexed pointerType,
@@ -558,10 +849,16 @@ event CoreSatellitePointerFrozen(
 );
 ```
 
-Core must expose a required pointer read interface from genesis:
+`CoreSatellitePointerUpdated` and `CoreSatellitePointerFrozen` are emitted by
+Core only after the corresponding state write. Pointer staging is represented
+by the governance executor's canonical event and state-readable action payload,
+not by a Core mirror. In `CoreSatellitePointerFrozen`, `manifestHash` is the
+post-freeze pointer-state hash committed as the action's `newValueHash`.
+
+Core must expose this production-exact pointer interface from genesis:
 
 ```solidity
-interface IStreamCorePointerView {
+interface IStreamCorePointers {
     function getSatellitePointer(bytes32 pointerType)
         external
         view
@@ -574,17 +871,148 @@ interface IStreamCorePointerView {
             address registry,
             ModuleRegistryStatus registryStatus,
             bytes32 moduleManifestHash,
-            bytes32 deploymentManifestHash
+            bytes32 deploymentManifestHash,
+            uint64 revision
         );
+
+    function updateSatellitePointer(bytes32 pointerType, address newTarget)
+        external;
+
+    function freezeSatellitePointer(bytes32 pointerType) external;
 }
+
+error UnauthorizedGovernanceExecutor(address caller);
+error NoExecutingGovernanceAction();
 ```
 
+The selectors are production-exact:
+`getSatellitePointer(bytes32) = 0x3528d53c`,
+`updateSatellitePointer(bytes32,address) = 0xac1e5708`, and
+`freezeSatellitePointer(bytes32) = 0xcdcdb71e`. The getter's
+`ModuleRegistryStatus` return has ABI type `uint8`. An unknown `pointerType`
+returns the zeroed ten-word tuple; either mutation rejects an unknown type.
+There is no return value from either mutation. The two authority errors are
+production-exact: `UnauthorizedGovernanceExecutor(address) = 0xdd2aa8bd` and
+`NoExecutingGovernanceAction() = 0xb8456c92`. Both mutations check the immutable
+executor caller first, then require a nonzero executing `currentAction()`, and
+only then decode/validate pointer semantics. ADR 0004's direct one-way bind
+uses a `staticcall` from the executor to
+`updateSatellitePointer(bytes32(0),address(0))` and accepts only the second
+error, proving the immutable Core authority without a new getter or any
+possible state write.
+
+The action commitments are production-exact:
+
+```solidity
+bytes32 constant STREAM_CORE_SATELLITE_POINTER_SCOPE_V1 =
+    0xf4a381d3d4c51db07c19830799ea01c544326118ea1db1fb59d54af5f637bdbb;
+    // keccak256("6529STREAM_CORE_SATELLITE_POINTER_SCOPE_V1")
+
+bytes32 constant STREAM_CORE_SATELLITE_POINTER_STATE_V1 =
+    0x1fdde0a7122d0fc7c237e721e372e43082581dcc6bd2babca4e09bb1e6b3d043;
+    // keccak256("6529STREAM_CORE_SATELLITE_POINTER_STATE_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_CORE_SATELLITE_POINTER_SCOPE_V1,
+    uint256(block.chainid),
+    address(core),
+    pointerType
+));
+
+bytes32 pointerStateHash = keccak256(abi.encode(
+    STREAM_CORE_SATELLITE_POINTER_STATE_V1,
+    scopeHash,
+    target,
+    codeHash,
+    frozen,
+    moduleType,
+    interfaceId,
+    registry,
+    uint8(registryStatus),
+    moduleManifestHash,
+    deploymentManifestHash,
+    uint64(revision)
+));
+```
+
+For an update, `oldValueHash` is the current `pointerStateHash` and
+`newValueHash` is the candidate record with `frozen = false` and
+`revision = oldRevision + 1`. For a freeze,
+both records carry the same target and registry facts, the old record has
+`frozen = false`, and the new record has `frozen = true` and the same checked
+revision increment. An absent family has revision `0` and its first assignment
+stores revision `1`; overflow reverts. The complete ordered
+Core/system-manifest update calldata remains bound by the governance
+`callsHash`; neither value hash duplicates the batch preimage.
+
+`updateSatellitePointer` accepts only Core's immutable governance executor
+during an executing, nonzero action whose class is `POINTER_REPLACEMENT`
+(numeric ID `3`). The pointer must be unfrozen. Core derives the expected
+module type and interface ID from the known pointer family. It resolves the
+current target of the unified `MODULE_REGISTRY` pointer and reads the candidate
+there — never from this pointer record's cached historical `registry`. For a
+`MODULE_REGISTRY` update, that live target is the old registry, so the old
+registry must bootstrap the proposed successor with an `ACTIVE` compatible
+record before replacement. In every case Core requires registry `ACTIVE`, a
+nonzero target with code, exact live/runtime code-hash equality, exact module
+type and interface ID, and the registry-record module/deployment manifest
+hashes, then stores the live registry address used for that validation in the
+new pointer record.
+
+Target equality is not a no-op test. `newTarget == current.target` is permitted
+when revalidating an unchanged module after the `MODULE_REGISTRY` pointer moved,
+or when any cached registry fact legitimately changed; this writes a new record
+whose `registry`, status, and manifest facts came from the live registry. The
+function rejects only when the complete candidate `pointerStateHash` is
+byte-identical before applying the mandatory revision increment. It then requires the in-flight
+`scopeHash`, `oldValueHash`, and `newValueHash` to equal those complete old/new
+records before writing. The calldata deliberately carries only `pointerType`
+and `newTarget`: duplicating registry facts as caller-supplied arguments creates
+two values for the same reviewed fact without strengthening the recheck.
+The monotonic revision prevents an old scheduled action from reviving after an
+`A -> B -> A` target/fact cycle: the apparent value may return, but the full
+state hash never does.
+
+A successor-registry batch orders the `MODULE_REGISTRY` update first, any
+same-target revalidations of mutable pointer families second (so they consult
+the new live registry), and the system-manifest publication last. Frozen
+pointer records are not rewritten: their cached registry evidence remains part
+of the frozen record, and the successor registry/release payload preserves the
+historical registry discovery path. Golden tests cover old-registry bootstrap
+of its successor, rejection of a successor absent/inactive in the old registry,
+post-swap lookup only in the new live registry, same-target revalidation with a
+changed cached registry/state hash, exact-state no-op rejection, and a full
+registry-swap/revalidation/publication rollback when any record or hash fails.
+
+`freezeSatellitePointer` accepts only the immutable executor during an
+executing, nonzero `TERMINAL_FREEZE` action (numeric ID `2`), requires an
+existing unfrozen target, and verifies the same exact scope and old/new pointer
+state commitments before setting the cached freeze bit once. The executor must
+register `(core, freezeSatellitePointer.selector)` as an irreversible freeze,
+so its 72-hour veto floor applies. There is no unfreeze selector.
+
+An incident move uses the same role-gated, expiring class-3 action as every
+other pointer replacement; there is no standing action ID or guardian shortcut
+to specify or replay. The current target must be observably
+`INCIDENT_REVOKED`, the proposed target must be the genesis-pre-approved
+compatible fallback, and Core still rechecks the same in-flight context,
+registry, freeze, revision, and hash facts. Scheduling meets rule 11's four-
+hour operational SLA; after the delay, execution may be permissionless under
+[GOV-BATCH].
+
 Finality discovery, the system manifest, monitoring, and indexers depend on
-this interface rather than individual public variable getter names. Core must
-not call the registry from this read. `registryStatus` is the cached status
-observed and stored during the latest successful pointer scheduling/execution
-recheck. If tools need the live registry status, they should call the registry
-directly with their own gas policy and compare it with Core's cached value.
+this interface rather than individual public variable getter names. Core
+pointer storage is private: `metadataRouter()`, `collectionMetadata()`,
+`entropyCoordinator()`, `mintManager()`, and other per-family automatic getters
+must not be added. The required `streamSystemManifest()` aggregate is a
+storage-only cache on the immutable Permanent satellite reached through Core's
+generic terminal-frozen `SYSTEM_MANIFEST` pointer; Core does not implement or
+proxy that selector. Its governed writer derives and caches the post-batch
+pointer targets, while the collector read never calls Core. Core must not call
+the registry from `getSatellitePointer`. `registryStatus` is the cached status
+observed and stored during the latest successful execution recheck. If tools
+need live registry status, they call the registry directly under their own gas
+policy and compare it with Core's cached value.
 
 ## Governed Gas Parameters [LTA-GGP]
 
@@ -644,7 +1072,17 @@ function lastProbeRun(bytes32 parameterId, uint256 probedValue)
     external
     view
     returns (bytes32 probeRunId, bool passed, uint64 probedAtBlock);
+
+function probedParameterId() external view returns (bytes32 parameterId);
 ```
+
+These two reads form the required `IStreamGasParameterProbe` base interface:
+their selectors are `0xc04c14e3` and `0xcfc07fec`, and their ERC-165 interface
+ID is `0x0f8c6b0f`. Every probe reports that interface and module type
+`keccak256("STREAM_GGP_PROBE") =
+0xe358a47f0dcbc7a22cc88ea7cd9ff433ec85ce6d9c7d0dc3f329e98b621cd6c8`;
+parameter-specific execution functions may extend, but never replace, this
+base.
 
 A probe run must execute the guarded operation itself, or a faithful
 equivalent measured on the production path, at `probedValue`;
@@ -682,8 +1120,10 @@ protects (ADR 0012 decision T1):
    lives on the probe contract. The host verifies probe records at
    execution rechecks through the probe address bound at parameter
    registration. While governance functions, a parameter's probe
-   binding may move to a successor Permanent-class probe through the
-   normal delay class with staging events and cancellation; with
+   binding may move to a successor Permanent-class probe only through class-3
+   `rebindGasParameterProbe`, with a live-registry `ACTIVE` record, exact
+   interface/type/code/manifest checks, a manifest-tail publication, staging
+   events, and cancellation; with
    governance lost the binding is frozen, which is why every probe is
    Permanent-class.
 4. Probe inputs are pinned per parameter: each probe executes a fixed,
@@ -754,7 +1194,7 @@ Requirements:
    every Permanent preimage, so retuning gas never touches artwork or
    economic identity (ADR 0010 decision D1.3). Frozen collections keep
    working because the cap can always be raised.
-4. Every GGP change executes through the canonical governance action
+4. Every governed GGP change executes through the canonical governance action
    ([GOV-ACTION-ID] in
    [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
    and emits the canonical change event:
@@ -776,6 +1216,15 @@ Requirements:
    and host are implied by the emitter; the event catalog must tag every
    alias as a member of the GGP change family so indexers reconstruct
    every parameter's value history uniformly.
+   The two [LTA-GGP] requirement 11 functions are the explicit exception:
+   `conditionalRaiseGasParameter` and `conditionalRelowerGasParameter` are
+   direct permissionless calls under their pre-registered standing IDs, not
+   scheduled executor actions. Their `GasParameterUpdated.actionId` is exactly
+   the applicable `STREAM_GGP_CONDITIONAL_RAISE_V1` or
+   `STREAM_GGP_CONDITIONAL_RELOWER_V1` derivation; there is no governance action
+   record to look up. The domain catalog and release manifest enumerate both
+   standing IDs per eligible `(host, parameterId)`, and indexers classify the
+   event by selector/domain while reconstructing the same value history.
 5. Every EIP-150 63/64 parent-gas precheck reads the current GGP value at
    call time, never a compiled-in constant (ADR 0010 decision D1.4).
 6. Monitoring must alert when a measured guarded path exceeds two-thirds
@@ -820,9 +1269,11 @@ Requirements:
    ([LTA-GGP-PROBES] rules 4–5), the [LTA-GGP-PROBES] permanence checks
    (static permanence, golden interface, museum-mode drill), a
    host-introspection test proving `gasParameterInfo` (requirement 12)
-   returns the pinned floor, probe binding, failure class, and recency
-   bound for every deployed parameter, and change-event assertions for
-   every deployed GGP.
+   returns the live value, pinned floor, probe binding, failure class,
+   recency bound, and monotonic revision for every deployed parameter;
+   revision increments exactly once for every successful change or probe
+   rebind and prevents same-value ABA state-hash reuse; and change-event
+   assertions for every deployed GGP.
 10. Raise direction is not uniformly safe, and each parameter says so
     (ADR 0011 decision R5). Every release-manifest GGP entry records the
     parameter's failure-direction class: `FORWARDING_CAP` (bounds gas
@@ -931,7 +1382,8 @@ Requirements:
             uint256 floor,
             address probe,
             uint8 failureClass,
-            uint64 probeMaxAgeBlocks
+            uint64 probeMaxAgeBlocks,
+            uint64 revision
         );
     ```
 
@@ -941,7 +1393,8 @@ Requirements:
     pinned numeric IDs `NONE = 0` (unregistered `parameterId`),
     `FORWARDING_CAP = 1`, `FAIL_CLOSED_PRECHECK = 2`, and
     `MIN_GAS_GATE = 3`, mirrored in the Numeric ID Catalog;
-    `probeMaxAgeBlocks` is the recency bound the host enforces. An
+    `probeMaxAgeBlocks` is the recency bound the host enforces; `revision` is
+    the monotonic per-parameter mutation generation. An
     unregistered `parameterId` returns the zeroed tuple. Release
     manifests and mirror tables remain evidence and convenience — this
     read is the normative source on the lost-governance raise path, so
@@ -952,6 +1405,293 @@ Requirements:
     introspection read is additionally required of every host from
     genesis, golden-tested per host (requirement 9), and exercised by
     the zero-signer museum-mode drill ([LTA-GGP-PROBES] rule 9).
+
+Governance-V2 host floor. Before ADR 0004 action class `6` is enabled, every
+existing GGP and GTP host must replace authority-only acceptance with an
+independent `currentAction()` recheck. Ordinary governed raise/lower operations
+require their delayed class; only the exact emergency-raise selector may accept
+`EMERGENCY_RESTORATION`, and only after its `(host, selector, runtimeCodeHash)`
+is terminal-registered under [GOV-EMERGENCY-RESTORATION]. A caller-supplied or
+event-only action ID is never proof of class. Every manifest-inventoried probe
+rebind, including all genesis GGP probes, is a class-3 pointer replacement and
+an exact [GOV-MANIFEST-TAIL] trigger. Lower, rebind, time-parameter mutation,
+and unrelated selectors explicitly reject class `6` at the host even though
+the executor also rejects them. The V2 migration gate runs these negative
+goldens against every concrete host, not only the Core profile below.
+The migration does not preserve the legacy three-argument writer ABI. Every
+GGP host uses the same two-argument governed mutation signatures/selectors
+pinned at [LTA-GGP-CORE], and every GTP host uses the two-argument signatures
+pinned below. No host accepts, ignores, or equality-checks caller-supplied
+`actionId` calldata; the verified ID comes only from `currentAction()` and is
+the ID emitted. Rich standalone stores may retain only additional read/
+enumeration conveniences, not alternate authority-bearing writers. Therefore
+the bind-recorded [GOV-MANIFEST-TAIL] rebind pair is unambiguous for every host.
+
+### Core-Minimal GGP ABI [LTA-GGP-CORE]
+
+Core hosts exactly four protocol-v1 rows:
+`ROYALTY_RESOLVER_GAS_LIMIT`, `ROYALTY_RETURN_GAS_BUFFER`,
+`METADATA_ROUTER_GAS_LIMIT`, and `ENTROPY_REGISTRATION_GAS_LIMIT`. Its
+production ABI is the byte-minimal host profile below; richer standalone
+parameter stores may retain the convenience enumeration and narrow reads of
+`IStreamGasParameterHost`.
+
+```solidity
+interface IStreamCoreGasParameters {
+    function gasParameterInfo(bytes32 parameterId)
+        external
+        view
+        returns (
+            uint256 value,
+            uint256 floor,
+            address probe,
+            uint8 failureClass,
+            uint64 probeMaxAgeBlocks,
+            uint64 revision
+        );
+
+    function raiseGasParameter(
+        bytes32 parameterId,
+        uint256 newValue
+    ) external;
+
+    function emergencyRaiseGasParameter(
+        bytes32 parameterId,
+        uint256 newValue
+    ) external;
+
+    function lowerGasParameter(
+        bytes32 parameterId,
+        uint256 newValue
+    ) external;
+
+    function rebindGasParameterProbe(
+        bytes32 parameterId,
+        address newProbe
+    ) external;
+
+    function conditionalRaiseGasParameter(
+        bytes32 parameterId,
+        uint256 newValue
+    ) external;
+
+    function conditionalRelowerGasParameter(
+        bytes32 parameterId,
+        uint256 newValue
+    ) external;
+}
+
+event GasParameterProbeRebound(
+    uint16 schemaVersion,
+    bytes32 indexed parameterId,
+    address indexed host,
+    bytes32 indexed actionId,
+    address oldProbe,
+    address newProbe
+);
+```
+
+The rebound event topic is
+`0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c`
+for
+`GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)`.
+Its schema version is `1`; `parameterId`, `host`, and the executor-verified
+`actionId` are indexed, and it emits only after the complete binding state is
+stored.
+
+The selectors are production-exact:
+
+| Signature | Selector |
+| --- | --- |
+| `gasParameterInfo(bytes32)` | `0xec2ef90a` |
+| `raiseGasParameter(bytes32,uint256)` | `0x5c0df7da` |
+| `emergencyRaiseGasParameter(bytes32,uint256)` | `0x4fa1b5ad` |
+| `lowerGasParameter(bytes32,uint256)` | `0x908dc981` |
+| `rebindGasParameterProbe(bytes32,address)` | `0xb98f30e0` |
+| `conditionalRaiseGasParameter(bytes32,uint256)` | `0x0671a369` |
+| `conditionalRelowerGasParameter(bytes32,uint256)` | `0x59bf6beb` |
+
+Core does not expose the redundant `gasParameter(bytes32)`,
+`gasParameterIds()`, `conditionalGasParameterActions(bytes32)`, or
+`governanceAuthority()` convenience reads, and it does not inherit public
+failure-class/schema constant getters. The fixed four-row inventory and IDs
+are catalog-pinned; `gasParameterInfo` already returns the live value and all
+lost-governance execution facts; `streamSystemManifest()` exposes the
+immutable governance address after discovery through Core's
+`SYSTEM_MANIFEST` pointer;
+and the conditional action IDs are deterministically
+derived from their pinned domains, chain ID, Core address, and `parameterId`.
+An unregistered ID returns the zeroed `gasParameterInfo` tuple and every
+mutation rejects it.
+
+The four governed mutations accept only Core's immutable governance executor
+during an executing action. None accepts a redundant caller-supplied
+`actionId`: Core obtains the nonzero action ID and class from `currentAction()`
+and emits that verified ID. The executor's published calldata and `callsHash`
+bind the exact parameter, proposed value or probe, and selector; Core remains
+the execution-recheck locus for the exact transition commitments below, the
+immutable floor, 2x raise bound, exact-value fresh probe, failure-direction
+class, probe binding, and every subsystem coupling invariant. In particular,
+every change to either royalty row rechecks the resolver-limit/return-buffer
+coupling required by [RSR-2981-GAS].
+
+Core's per-call scope and complete parameter-state commitments are
+production-exact:
+
+```solidity
+bytes32 constant STREAM_GAS_PARAMETER_SCOPE_V1 =
+    0x8d8b74997070792410ba6f4dd511d967fec29b82366868401baa2bfb3681da69;
+    // keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V1")
+
+bytes32 constant STREAM_GAS_PARAMETER_STATE_V1 =
+    0xa16fd6b2f079cdf0a8f1a952c35496a693958895d1782fecc8b6440e06594977;
+    // keccak256("6529STREAM_GAS_PARAMETER_STATE_V1")
+
+bytes32 constant STREAM_GGP_CONDITIONAL_RAISE_V1 =
+    0x88d201cde2efee286ecd558414d10dd0599848f47e6dcdfa51a2e0287e4fb2eb;
+    // keccak256("6529STREAM_GGP_CONDITIONAL_RAISE_V1")
+
+bytes32 constant STREAM_GGP_CONDITIONAL_RELOWER_V1 =
+    0xb30115be75ee59eeed3fa156242dc7c0eda20b383f4f251c8adcfa616b2276a1;
+    // keccak256("6529STREAM_GGP_CONDITIONAL_RELOWER_V1")
+
+bytes32 constant STREAM_GGP_PROBE_BINDING_V1 =
+    0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4;
+    // keccak256("6529STREAM_GGP_PROBE_BINDING_V1")
+
+bytes32 conditionalRaiseActionId = failureClass == FORWARDING_CAP
+    ? keccak256(abi.encode(
+        STREAM_GGP_CONDITIONAL_RAISE_V1,
+        uint256(block.chainid),
+        address(core),
+        parameterId
+    ))
+    : bytes32(0);
+
+bytes32 conditionalRelowerActionId = failureClass == FORWARDING_CAP
+    ? keccak256(abi.encode(
+        STREAM_GGP_CONDITIONAL_RELOWER_V1,
+        uint256(block.chainid),
+        address(core),
+        parameterId
+    ))
+    : bytes32(0);
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_GAS_PARAMETER_SCOPE_V1,
+    uint256(block.chainid),
+    address(core),
+    parameterId
+));
+
+bytes32 probeBindingHash = keccak256(abi.encode(
+    STREAM_GGP_PROBE_BINDING_V1,
+    probeRegistry,
+    probe,
+    probeModuleType,
+    probeInterfaceId,
+    probeModuleVersion,
+    probeRuntimeCodeHash,
+    probeModuleManifestHash,
+    probeDeploymentManifestHash
+));
+
+bytes32 gasParameterStateHash = keccak256(abi.encode(
+    STREAM_GAS_PARAMETER_STATE_V1,
+    scopeHash,
+    value,
+    floor,
+    probe,
+    probeRuntimeCodeHash,
+    probeBindingHash,
+    uint8(failureClass),
+    uint64(probeMaxAgeBlocks),
+    conditionalRaiseActionId,
+    conditionalRelowerActionId,
+    uint64(revision)
+));
+```
+
+`oldValueHash` is the hash of the complete live tuple. The byte-constrained
+Core caches `probeRuntimeCodeHash` and `probeBindingHash`; the system-manifest
+payload expands the latter into the exact registry, type, interface, version,
+runtime code hash, and module/deployment manifest hashes above. For a raise or
+lower, `newValueHash` changes only `value`; for a probe rebind it changes the
+probe address and both compact immutability commitments. Every successful
+raise, lower, conditional step, or probe rebind increments `revision` exactly
+once (`0 -> 1` at genesis registration; overflow reverts), and governed
+`newValueHash` commits `oldRevision + 1`. Core derives both hashes from storage and calldata and requires this
+call's V2 `GovernanceCall` scope/old/new context to match before writing. The
+floor, class, recency bound, and conditional IDs therefore cannot drift outside
+the reviewed transition even though they have no separate Core getters.
+The revision prevents an `A -> B -> A` value or probe cycle from reviving an
+older scheduled action whose apparent tuple values match again.
+
+Target-side action-class and transition checks are exact:
+
+| Entry | Required class | Execution rechecks |
+| --- | --- | --- |
+| `raiseGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `newValue > value`; overflow-safe 2x bound `newValue - value <= value`; full scope/old/new hash match; row coupling invariants |
+| `emergencyRaiseGasParameter` | `EMERGENCY_RESTORATION` (`6`) | every normal raise check plus a recorded failing run from the bound probe at exactly the current `value`, no older than `probeMaxAgeBlocks` |
+| `lowerGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `floor <= newValue < value`; a recorded passing run at exactly `newValue`, no older than `probeMaxAgeBlocks`; full hash/coupling checks |
+| `rebindGasParameterProbe` | `POINTER_REPLACEMENT` (`3`) | nonzero deployed `newProbe`; resolve Core's live `MODULE_REGISTRY`, require an `ACTIVE` record with module type `STREAM_GGP_PROBE`, interface `0x0f8c6b0f`, exact live runtime code hash, nonzero module/deployment manifest hashes, and the reviewed version; require `probedParameterId() == parameterId`; cache the code/binding hashes and match the full state/coupling commitments; allow the same probe address only when its live registry/binding commitment changes, and reject an exact complete-state no-op; exact selector is a class-3 [GOV-MANIFEST-TAIL] trigger whose final satellite publication expands and commits the new probe binding |
+
+Every governed entry also requires `msg.sender` to be Core's immutable
+executor, `currentAction().executing == true`, and a nonzero current action ID.
+The emergency class is zero-delay but not unchecked: a stale, missing, passing,
+wrong-value, or wrong-probe record reverts at Core, and an emergency step can
+never exceed the overflow-safe 2x bound. Normal raise and lower require class
+`1`; rebind requires class `3`; all three reject class `6`. Emergency
+raise rejects classes `0` through `5`. Before trusting `lastProbeRun`, every
+lower, emergency raise, and permissionless conditional call resolves the
+host's live canonical module registry, requires the probe's record to remain
+`ACTIVE`, recomputes the full binding against that registry and requires it to
+equal cached `probeBindingHash`, rechecks `probe.codehash` against cached
+`probeRuntimeCodeHash`, and rechecks `probedParameterId()`. A status-revoked,
+record-drifted, wrong-registry, or mutable same-address probe cannot arm a
+repair merely because its address or code hash still matches.
+
+Core's `rebindGasParameterProbe(bytes32,address)` (`0xb98f30e0`) is registered
+in the executor's manifest-tail rule set as a class-3 trigger. Probe bindings
+are manifest-inventoried protocol facts, so a conforming batch executes the
+rebind first and exactly one final `StreamSystemManifest` publication second;
+either both state changes commit or both revert. Goldens reject class `1` or
+`6`, a missing/duplicate/non-final publisher, a manifest payload that retains
+the old probe, an inactive or wrong-registry record, zero/mismatched manifest
+hashes, wrong module type/interface/version/runtime hash, a mutable same-address
+impostor, and a probe whose parameter binding differs from the reviewed
+`newValueHash`. The successful golden proves the GGP event's
+verified action ID and the satellite publication event carry the same action
+ID.
+
+Replacing the live `MODULE_REGISTRY` invalidates the registry-address component
+of every cached probe binding. A conforming class-3 replacement batch therefore
+updates the Core registry pointer first, performs same-address
+`rebindGasParameterProbe` revalidations against the successor registry for
+every affected Core and satellite GGP/GTP host second, and publishes the system
+manifest last. The rebind entry permits these same-address binding changes but
+rejects an exact complete-state no-op. Atomicity prevents an observable state
+where the new registry is live while old bindings remain trusted. Goldens cover
+successful successor revalidation, omitted host revalidation, registry/status
+drift, `INCIDENT_REVOKED`, and a same-address no-op.
+
+The two conditional functions are permissionless only for the three
+`FORWARDING_CAP` rows. They use the deployment-derived standing action IDs and
+the exact domain formulas above, so no conditional-action getter is needed.
+They do not require or synthesize an executor `currentAction()` record; the
+standing ID is authorization evidence only after the target independently
+proves the fixed parameter scope, live Permanent probe binding, fresh outcome,
+direction, floor, 2x/half-step bound, and coupling invariants.
+Conditional raise requires a fresh failing run at the current value and a
+strictly higher value no greater than 2x. Conditional re-lower requires a fresh
+passing run at the proposed value, `floor <= newValue < value`, and
+`newValue >= (value / 2) + (value % 2)`; both repeat the full row-coupling
+checks. Both
+functions reject `ENTROPY_REGISTRATION_GAS_LIMIT`, whose
+`FAIL_CLOSED_PRECHECK` raise path remains governance-only. Core emits the
+canonical `GasParameterUpdated` event for every value change and
+`GasParameterProbeRebound` for a probe move; subsystem-specific duplicate GGP
+alias events are prohibited on bytecode-constrained Core.
 
 GGP inventory. The model is instantiated by the parameters below; each
 home owns host, genesis value, floor sizing, failure-direction class,
@@ -1095,15 +1835,39 @@ A Governed Time Parameter is:
            uint256 floorBlocks,
            uint64 wallClockFloorSeconds,
            address cadenceProbe,
-           uint64 probeMaxAgeBlocks
+           uint64 probeMaxAgeBlocks,
+           uint64 revision
        );
    ```
 
-   Live value, both floors, the cadence-probe binding, and the recency
+   Live value, both floors, the cadence-probe binding, the recency bound, and
+   the monotonic per-parameter mutation revision
    bound come from host state alone — never from a release manifest or
    mirror — with the same per-host golden-test and museum-mode drill
    obligations as the GGP read; an unregistered `parameterId` returns
-   the zeroed tuple.
+   the zeroed six-word tuple.
+
+   The exact Governance-V2 GTP ABI is:
+
+   ```solidity
+   function raiseTimeParameter(bytes32 parameterId, uint256 newValue) external;
+   function lowerTimeParameter(bytes32 parameterId, uint256 newValue) external;
+   function rebindTimeParameterProbe(bytes32 parameterId, address newCadenceProbe)
+       external;
+   ```
+
+   | Signature | Selector |
+   | --- | --- |
+   | `timeParameterInfo(bytes32)` | `0x5f2463b8` |
+   | `raiseTimeParameter(bytes32,uint256)` | `0x046e1fd5` |
+   | `lowerTimeParameter(bytes32,uint256)` | `0xa4e24c49` |
+   | `rebindTimeParameterProbe(bytes32,address)` | `0xc07b3459` |
+
+   Raise and lower require the normal delayed class. Probe rebind requires
+   class `3`, is an exact [GOV-MANIFEST-TAIL] trigger for every inventoried host,
+   and ends in the same-batch manifest publication. All three independently
+   verify the V2 action ID, class, scope hash, old-state hash, and new-state hash
+   through `currentAction()`.
 
 GTP change discipline:
 
@@ -1123,6 +1887,9 @@ GTP change discipline:
    must verify a recorded cadence-probe run no older than the
    parameter's `probeMaxAgeBlocks` proving the proposed count still
    covers the pinned wall-clock floor at the observed cadence.
+   Every probe-dependent use applies the same live-registry `ACTIVE`, complete
+   binding-hash, live code-hash, and `probedParameterId()` checks as GGP; a
+   revoked or registry-stale cadence probe is not evidence.
 4. Every GTP change emits the canonical change event:
 
    ```solidity
@@ -1147,9 +1914,11 @@ GTP change discipline:
    intent, not raw block counts.
 6. GTP behavior is conformance-gated alongside GGPs: floor rejection,
    per-action raise and lower bounds, cadence-probe-gated lower, the
-   host-introspection test (`timeParameterInfo`, definition item 7),
-   and change-event assertions for every deployed GTP (Release Gates,
-   governance gate 7).
+   host-introspection test (`timeParameterInfo`, definition item 7) proving the
+   live value, both floors, authenticated probe binding, recency bound, and
+   monotonic revision, exact-once revision increments for every successful
+   change or probe rebind, same-value ABA state-hash rejection, and change-event
+   assertions for every deployed GTP (Release Gates, governance gate 7).
 7. Wall-clock floors bind in both directions, and scheduled
    acceleration is handled at the activation boundary (ADR 0014
    decision V7). Cadence slowdown lengthens every frozen
@@ -1167,6 +1936,42 @@ GTP change discipline:
    monitoring plan. Instantiating homes state both residuals, never
    only the slowdown ([EC-TIME] in
    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)).
+8. Every host uses exact V2 per-call transition commitments:
+
+   ```solidity
+   bytes32 constant STREAM_TIME_PARAMETER_SCOPE_V1 =
+       0xcb90eddcfa663732d90ca0d1892636ba1216e3900df55acc72d58187eee359a8;
+       // keccak256("6529STREAM_TIME_PARAMETER_SCOPE_V1")
+   bytes32 constant STREAM_TIME_PARAMETER_STATE_V1 =
+       0x2cdcb8724d05b4fa9d1ad4f857f9c5fa49ca997d15870fe7f9df6fbae1402583;
+       // keccak256("6529STREAM_TIME_PARAMETER_STATE_V1")
+
+   bytes32 scopeHash = keccak256(abi.encode(
+       STREAM_TIME_PARAMETER_SCOPE_V1,
+       uint256(block.chainid),
+       address(host),
+       parameterId
+   ));
+   bytes32 timeParameterStateHash = keccak256(abi.encode(
+       STREAM_TIME_PARAMETER_STATE_V1,
+       scopeHash,
+       value,
+       floorBlocks,
+       wallClockFloorSeconds,
+       cadenceProbe,
+       probeRuntimeCodeHash,
+       probeBindingHash,
+       probeMaxAgeBlocks,
+       revision
+   ));
+   ```
+
+   A governed value change modifies only `value` and sets
+   `newRevision = oldRevision + 1`; a class-3 probe rebind modifies the probe
+   and authenticated binding facts and applies the same revision increment.
+   Genesis starts at revision `1`, overflow reverts, and the host independently
+   checks the executor/class/scope/old/new context. Thus an `A -> B -> A` value
+   or binding cycle cannot revive an older scheduled action.
 
 The GTP inventory is owned by the subsystem homes; the genesis rows are
 the coordinator-hosted entropy lifecycle windows —
@@ -1268,11 +2073,10 @@ signal is the collection-identity read path owned by
 (collection discovery), the `properties.stream.collection` token-JSON
 member set owned by
 [`docs/collection-metadata-contract.md`](collection-metadata-contract.md),
-and the Core identity reads above. The per-collection ERC-721 facade
-line is a dormant extension profile behind a pre-public-sale tripwire,
-never a launch dependency; its identity-mode doctrine is
-[LTA-IDENTITY-MODE] (ADR 0015 decision W3). The onchain identity model
-above is complete and identical in both identity modes.
+  and the Core identity reads above. The launch line is Core-native only;
+  any per-collection wrapper or successor asset model is successor-line
+  research under [LTA-IDENTITY-MODE] and ADR 0016. The onchain identity
+  model above is complete for every launch token.
 
 Canonical Core read surface:
 
@@ -1309,8 +2113,8 @@ interface IStreamCoreTokenIdentityView {
 
 `mappingExists` is the public authoritative identity read. The read semantics
 are Permanent; the v1 implementation may derive the result from live
-ownership, burned-token audit state, and prepared-mint state rather than
-storing a separate boolean. For a currently minted token, the
+ownership, burned-token audit state, prepared-mint state, and the active
+completion sentinel rather than storing a separate boolean. For a currently minted token, the
 function returns `(true, collectionId, collectionSerial, false)`. For a burned
 token that was once minted, it returns
 `(true, lastCollectionId, lastCollectionSerial, true)`. For a prepared-incomplete
@@ -1325,6 +2129,15 @@ operation but are not ordinary minted ERC-721 tokens. Satellites that can be
 called during `PREPARED_INCOMPLETE` must check `tokenLifecycle(tokenId)` and
 reject or render provisional state as their spec requires rather than falling
 through to the unmapped `(false, 0, 0, false)` branch.
+Completion clears the private prepared record before its first external call,
+but the active completion sentinel keeps the same identity read and
+`PREPARED_INCOMPLETE` lifecycle until `_mint` creates ERC-721 ownership. The
+minted owner state takes precedence after `_mint`, so the receiver callback
+observes `MINTED`. `coordinatorAtMint` is zero throughout prepare and is stored
+immediately before the bounded completion-time coordinator registration; a
+nonzero coordinator alone never advances lifecycle or authorizes a pre-mint
+metadata refresh. An incident abort returns identity and lifecycle reads to the
+unknown tuple while leaving the allocator high-water marks consumed.
 The cross-contract ABI returns `uint8`; the numeric values are pinned in the
 Numeric ID Catalog as `UNKNOWN = 0`, `PREPARED_INCOMPLETE = 1`, `MINTED = 2`,
 and `BURNED = 3`.
@@ -1338,7 +2151,7 @@ would have added roughly 45,000–50,000 gas to every all-cold mint and
 roughly 60,000–70,000 gas to every all-cold wallet-to-wallet transfer —
 a permanent per-collector tax on every ownership change for the life of
 the system — plus several kilobytes against the Core headroom rule, to
-serve needs that dense sequential IDs, state exports, and event replay
+serve needs that monotonic sequential IDs, state exports, and event replay
 already serve. The decision is taken before genesis precisely because it
 is irreversible after; it is recorded as an owner-flagged supersession
 in ADR 0012.
@@ -1350,30 +2163,30 @@ Core enumeration surface:
    sequential global allocator's high-water mark, zero before the first
    allocation — as Permanent reads from genesis, golden-tested and
    named in the release manifest.
-2. Allocation is dense: every `tokenId` in
-   `[1, lastAllocatedTokenId()]` has an authoritative
-   `tokenLifecycle(tokenId)` and `tokenCollectionIdentity(tokenId)`
-   result ([LTA-IDENTITY]), so a state-only walker enumerates every
-   token that ever existed without logs, indexes, or heuristics.
+2. Allocation is monotonic and never reuses an ID. A state-only walker scans
+   `[1, lastAllocatedTokenId()]` and uses the non-reverting
+   `tokenLifecycle(tokenId)` and `tokenCollectionIdentity(tokenId)` results
+   ([LTA-IDENTITY]) to enumerate every completed or burned token without logs,
+   indexes, or heuristics. The only permitted empty slot below the high-water
+   mark is an incident-aborted prepared mint: its identity is deleted, its
+   `TokenCollectionRegistrationReverted` event records the rollback, and its ID
+   remains permanently consumed so durable satellite evidence can never collide
+   with a later token.
 3. Core implements no `tokenOfOwnerByIndex`, no `tokenByIndex`, and no
    owner-index or global-index storage, and
    `supportsInterface(0x780e9d63)` returns false, permanently. Adding
    the enumerable standard back is a successor-line decision.
-4. The enumeration posture is identity-mode-independent
-   ([LTA-IDENTITY-MODE]; ADR 0015 decision W4): dense global
-   allocation, the rule 2 lifecycle walks, and the
-   `totalSupply()`/`lastAllocatedTokenId()` reads are identical for
-   `CORE_NATIVE` and `EXTERNAL_FACADE` collections. Facade-local
-   serial enumeration is a facade-layer concern owned by the facade
-   profile ([FCP-IDENTITY] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md));
-   it adds no Core enumeration surface.
+4. The enumeration posture is uniform because the launch line is Core-native
+   only ([LTA-IDENTITY-MODE]; ADR 0016): monotonic global allocation, the rule
+   2 lifecycle walks, and the `totalSupply()`/`lastAllocatedTokenId()` reads
+   cover every token.
 
 Museum-mode and archival enumeration is served by three independent
 lanes, each exercised by the museum-mode drill: state exports (ownership
 and token-to-collection roots, [LTA-EXPORT]); sequential-ID iteration
 over live state (rule 2 above — `ownerOf`/`tokenLifecycle` walks need
-no operator and no logs); and Transfer/mint/burn event replay through
+no operator and no logs and skip incident-aborted gaps); and
+Transfer/mint/burn event replay through
 the reconstruction client and mirrored event-history snapshots
 ([LTA-RECON]; [LTA-EVENT-HISTORY]).
 
@@ -1419,91 +2232,46 @@ Lens rules:
    deployment manifest. Anyone may deploy a replacement lens
    permissionlessly forever.
 
-## Collection Identity Modes [LTA-IDENTITY-MODE]
+## Core-Native Collection Identity [LTA-IDENTITY-MODE]
 
-Ethereum's only native marketplace grouping key is a contract address,
-and this Core line serves every collection from one address. Collection
-identity is therefore two-layer by doctrine (ADR 0015 decisions W3 and
-W4): the state layer — ownership, identity, lifecycle, records — is
-always Core, and the marketplace-identity layer is per-collection,
-carried as an identity mode. This section is the normative home of the
-identity-mode doctrine. The protocol v1 specification owns the concrete
-Core surface shapes, constants, and event signatures
-([PV1-IDENTITY-MODE] in
-[`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md));
-the facade contract line is specified as a dormant extension profile by
-[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
-(ADR 0015 decision W5).
+ADR 0016 supersedes ADR 0015 decisions W3-W5 for the launch line. ADR 0015
+decision W1's collection-identity reads and token-JSON signal remain Permanent,
+and decision W2's marketplace/indexer commitment evidence remains a release
+go/no-go gate. Neither decision creates or activates an alternate ownership
+mode.
 
 Doctrine requirements:
 
-1. Closed mode vocabulary. Every collection carries an identity mode
-   from the closed vocabulary `CORE_NATIVE` (the default; an undeclared
-   collection is `CORE_NATIVE` by construction) and `EXTERNAL_FACADE`
-   (dormant; no facade deploys at genesis). The facade line is a named
-   extension profile behind the pre-public-sale marketplace-commitment
-   tripwire, never a launch dependency (ADR 0015 decision W3).
-2. One-way pre-first-mint binding. Declaring the mode and, for an
-   `EXTERNAL_FACADE` collection, binding exactly one facade are
-   governed actions allowed only before the collection's first mint
-   and immutable from that mint onward. A collection that minted
-   `CORE_NATIVE` can never migrate to a facade; if facades ever
-   deploy, they apply only to collections created after the deployment
-   decision (ADR 0015 decisions W3 and W4).
-3. Authority split. For an `EXTERNAL_FACADE` collection the facade — a
-   Permanent-class contract conforming to the facade profile — is the
-   marketplace-authoritative ERC-721: the address venues key on, the
-   approval surface, and the exclusive ERC-721 `Transfer` emitter for
-   its tokens ([LTA-EVENT-HISTORY] rule 6; emission rules at
-   [FCP-EXCLUSIVITY] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
-   Core remains the state-authoritative record: every ownership fact
-   settles in Core state, and the facade holds no ownership state of
-   its own (ADR 0015 decision W4).
-4. Exactly one live mutation path. Per collection, in either mode,
-   exactly one ownership-mutation path is live — the native ERC-721
-   entries for `CORE_NATIVE`, the facade-called controlled path for
-   `EXTERNAL_FACADE` — and the controlled path enforces exactly the
-   native open-transfer invariant set: owner match and a nonzero
-   recipient for a transfer, the native burn-precondition suite only
-   for the burn case. Native transfers on this Core line are
-   unconditioned ([LTA-STANDARDS]): locks, finality components, and
-   pause never gate ownership transfer, in either mode — finality
-   freezes artwork bytes, never ownership — so the controlled path
-   checks none of them for transfers. The path settles all Core state
-   and record-chain writes before any callback into the facade
-   (ADR 0015 decision W4); the entry shapes, revert conditions, and
-   CEI ordering are owned by [PV1-TRANSFER-CONTROLLER] (requirements
-   6–9). Transfer openness ([LTA-STANDARDS]) is mode-independent:
-   neither mode adds a transfer-conditioning mechanic, and the
-   [LTA-STANDARDS] preclusions bind the facade profile equally.
-5. Mode independence. State reads, record chains, and state exports
-   are mode-independent: `ownerOf`, `totalSupply`, lifecycle, and
-   identity reads answer identically in both modes; enumeration is
-   unchanged ([LTA-ENUMERATION] rule 4); no [LTA-EXPORT] leaf and no
-   record-chain preimage keys on identity mode; and freeze, finality,
-   and recovery semantics are unchanged. A 2075 archivist reconstructs
-   ownership, identity, and provenance from state and exports without
-   ever needing to know a collection's mode (ADR 0015 decision W4).
-   The event layer is the single mode-visible surface, carved out at
-   [LTA-EVENT-HISTORY] rule 6.
-6. Token identity across the layers. The facade-local ERC-721 token ID
-   is the collection-local serial, and the global sequential token ID
-   remains the protocol catalog number in both modes, readable through
-   the facade and carried in token JSON and state exports; global
-   allocation order is untouched (ADR 0009 decision 1; ADR 0015
-   decision W4; facade-side reads at [FCP-IDENTITY]). For an
-   `EXTERNAL_FACADE` collection the facade identity binding joins the
-   collection's finality components ([LTA-FINALITY] requirement 16).
-7. Zero-governance inertness. Mode declaration and facade binding are
-   governed actions; with governance lost neither is possible and the
-   dormant surfaces are inert — a `CORE_NATIVE`-only deployment is
-   identical on every pre-ADR-0015 surface, with the facade-readiness
-   reads answering their dormant defaults (`CORE_NATIVE` mode, zero
-   controller) and the governed entries reverting for every caller.
-   The single scoping home of that claim is [PV1-FACADE-READINESS]
-   requirement 1; the zero-signer museum-mode drill proves it (State
-   Export And Archival Operations; ADR 0015 decision W4.7).
+1. Launch Core is the sole ERC-721 contract and ownership authority for every
+   token it allocates. ERC-721 conformance is contract-wide: every token uses
+   the same approval, transfer, safe-transfer, mint-event, burn-event, and
+   ownership semantics for the life of this deployment line.
+2. Core has no identity-mode mapping, transfer-controller registry,
+   controlled-mutation path, controller callback, or alternate ownership event.
+   The complete Permanent Core target excludes
+   `collectionIdentityMode`, `collectionTransferController`,
+   `declareCollectionIdentityMode`,
+   `registerCollectionTransferController`, and
+   `controlledOwnershipChange`, plus
+   `CollectionIdentityModeDeclared`,
+   `CollectionTransferControllerRegistered`, and
+   `ControlledOwnershipChanged`.
+3. Core emits the standard ERC-721 `Transfer` event for every mint, transfer,
+   and burn. State export and event-history reconstruction use that single
+   Core event stream; no launch proof depends on facade logs or a private
+   ownership-event family.
+4. W1 collection identity remains explicit Core state and canonical JSON, never
+   a token-range inference or offchain-only convention. W2 failure requires a
+   recorded protocol-owner go/no-go and, for an accepted launch, an owner-signed
+   risk-acceptance artifact; it never enables dormant Core bytecode.
+5. `totalSupplyOfCollection(uint256)` remains a Permanent collection supply
+   fact under [LTA-IDENTITY]. It carries no facade or mode semantics.
+6. Any address-per-collection wrapper, custody asset, or successor Core is
+   successor-line research requiring a fresh accepted ADR and threat model with
+   an explicitly standards-conformant asset model. The historical
+   [`stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
+   is superseded research, not a launch dependency or deployable extension of
+   this Core.
 
 ## Assignment Hierarchy
 
@@ -1652,6 +2420,19 @@ struct RecoveryManifestRef {
     bytes32 schemaId;
     bytes32 canonicalizationHash;
 }
+
+struct FinalityRecoveryRefreshPlan {
+    bool exists;
+    bool complete;
+    bool superseded;
+    bytes32 manifestContentHash;
+    bytes32 supersededByRecoveryId;
+    uint256 lastAllocatedTokenIdAtExecution;
+    uint256 rangeStart;
+    uint256 rangeEnd;
+    uint256 processedThrough;
+    uint256 chunksEmitted;
+}
 ```
 
 `uriHash = keccak256(bytes(uri))`. `contentHash` is the hash of the canonical
@@ -1661,6 +2442,11 @@ canonicalized through the schema named by `schemaId` and
 PREMIS, C2PA, IIIF, preservation, recovery, and human-readable reconstruction
 records are bound through `contentHash` when they are part of the finality
 manifest.
+Every collection or scoped recovery schedule requires
+`recoveryManifest.contentHash != bytes32(0)`, whether or not the recovery says
+that artwork bytes change. This stored content hash is also the sole
+correlation value for any recovery refresh plan; a continuation caller never
+supplies a replacement hash.
 
 Every participating satellite must expose a finality read surface:
 
@@ -1758,8 +2544,9 @@ ABI-encoded field value, with addresses compared as 20-byte values and
 `bytes4` compared as four-byte values. Any unsorted or duplicate list reverts
 before finality is recorded.
 
-`coreCollectionFactsHash` is computed onchain from Core through a small typed
-read, not supplied as an opaque offchain assertion:
+`coreCollectionFactsHash` is computed onchain through the mandatory Permanent
+`StreamCoreFinalityAdapter`, not supplied as an opaque offchain assertion and
+not paid for with aggregate Core bytecode [LTA-CORE-FINALITY-ADAPTER]:
 
 ```solidity
 struct CoreCollectionFinalityFacts {
@@ -1767,19 +2554,50 @@ struct CoreCollectionFinalityFacts {
     bool hasMaxSupply;
     uint8 status;
     uint8 supplyMode;
-    uint64 createdAt;
-    uint64 maxSupply;
-    uint64 mintedSupply;
-    uint64 burnedSupply;
-    uint64 nextCollectionSerial;
+    uint256 maxSupply;
+    uint256 mintedSupply;
+    uint256 burnedSupply;
+    uint256 nextCollectionSerial;
     bytes32 collectionConfigHash;
 }
 
-interface IStreamCoreFinalityFacts {
+struct CoreFinalityScopeQuery {
+    uint8 scopeType;
+    uint256 collectionId;
+    uint256 tokenId;
+    bytes32 scopeId;
+}
+
+struct ScopedCoreFinalityFacts {
+    bool scopeExists;
+    uint8 scopeType;
+    uint256 collectionId;
+    uint256 tokenId;
+    bytes32 scopeId;
+    bool tokenMappingExists;
+    uint256 collectionSerial;
+    uint8 tokenLifecycle;
+    bool burned;
+    uint8 collectionStatus;
+    uint8 collectionSupplyMode;
+    bytes32 collectionConfigHash;
+    bytes32 scopeManifestHash;
+}
+
+interface IStreamCoreFinalityAdapter {
+    function core() external view returns (address);
+
+    function collectionMetadata() external view returns (address);
+
     function coreCollectionFinalityFacts(uint256 collectionId)
         external
         view
         returns (CoreCollectionFinalityFacts memory);
+
+    function scopedCoreFinalityFacts(CoreFinalityScopeQuery calldata scope)
+        external
+        view
+        returns (ScopedCoreFinalityFacts memory);
 }
 
 bytes32 coreCollectionFactsHash = keccak256(abi.encode(
@@ -1791,7 +2609,6 @@ bytes32 coreCollectionFactsHash = keccak256(abi.encode(
     facts.hasMaxSupply,
     facts.status,
     facts.supplyMode,
-    facts.createdAt,
     facts.maxSupply,
     facts.mintedSupply,
     facts.burnedSupply,
@@ -1800,12 +2617,35 @@ bytes32 coreCollectionFactsHash = keccak256(abi.encode(
 ));
 ```
 
-`collectionConfigHash` is Core's hash of collection-level supply/status fields
-that are not otherwise included above. It must not include mutable display
-metadata, economic assignments, or event-only labels.
-For protocol v1, if no additional Core-owned collection config fields affect
-finality beyond the fields explicitly listed in `CoreCollectionFinalityFacts`,
-`collectionConfigHash` is:
+The four adapter selectors are `0xf2f4eb26` for `core()`, `0x89ed2edf` for
+`collectionMetadata()`, `0x4eb4b6dc` for
+`coreCollectionFinalityFacts(uint256)`, and `0xde5e2530` for
+`scopedCoreFinalityFacts((uint8,uint256,uint256,bytes32))`; their full interface
+ID is `0xebf35615`. The adapter supports that ID through ERC-165 and registers
+under module type
+`0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4`
+(`keccak256("STREAM_CORE_FINALITY_ADAPTER")`). It is immutable Permanent-class
+periphery: its constructor binds one nonzero code-bearing Core and one nonzero
+code-bearing collection-metadata contract, its two getters expose those exact
+bindings, and it has no owner, writer, upgrade, delegatecall, selfdestruct, or
+funds path.
+
+The adapter obtains `exists`, `hasMaxSupply`, `status`, `supplyMode`,
+`maxSupply`, `mintedSupply`, and `nextCollectionSerial` from Core's granular
+`collectionExists`, `collectionHasMaxSupply`, `collectionStatus`,
+`collectionSupplyMode`, `collectionMaxSupply`, `collectionMintedEver`, and
+`collectionNextSerial` reads. It obtains live supply from
+`totalSupplyOfCollection`; `liveSupply > mintedSupply` is an impossible
+invariant and reverts fail-closed, otherwise `burnedSupply = mintedSupply -
+liveSupply`. The four supply values are `uint256`: no undocumented narrowing to
+`uint64` is allowed. `createdAt` is absent because the target Core has no such
+read and finality does not require it.
+
+`collectionConfigHash` is the adapter-computed hash of any additional
+Core-owned collection-level supply/status fields that are not otherwise
+included above. It must not include mutable display metadata, economic
+assignments, or event-only labels. Protocol v1 has no additional fields, so the
+adapter always uses:
 
 ```solidity
 bytes32 collectionConfigHash = keccak256(abi.encode(
@@ -1820,6 +2660,16 @@ If implementation adds another Core-owned collection config field that affects
 minting, burning, supply, status, or finality, this spec must update the
 preimage before deployment. A generic "whatever Core stores" hash is not
 conformant.
+
+The finality registry stores the actual Core, collection-metadata contract, and
+adapter as three separate immutable bindings. Construction rejects unless
+`adapter.core() == core` and `adapter.collectionMetadata() ==
+collectionMetadata`; all must be nonzero and code-bearing. Finality record
+preimages continue to hash `address(core)`, never the adapter. Preview tooling
+reads these registry bindings instead of accepting an independent Core,
+metadata, or adapter address. Neither registry nor preview has a facade/
+controller component, error, condition, or `facadeBindingSatisfied` result:
+ADR 0016's Core-native-only decision retired that entire gate.
 
 Each component's `dataHash` preimage is component-owned but must be versioned,
 typed, and named in that component's manifest. Genesis components must publish
@@ -1852,7 +2702,9 @@ registry cannot and must not try to parse `manifest.uri` onchain.
 
 Component discovery path:
 
-1. The registry is bound to one Core.
+1. The registry is bound separately to one Core, one collection-metadata
+   contract, and one conforming `StreamCoreFinalityAdapter`; the adapter's two
+   immutable getters must match the first two bindings.
 2. Core exposes current pointers for `COLLECTION_METADATA`,
    `METADATA_ROUTER`, `ENTROPY_COORDINATOR`, and other Core-owned satellites.
 3. The metadata router implements `IStreamFinalityDiscovery` for the resolved
@@ -1979,19 +2831,24 @@ Finality requirements:
    those pinned semantics, never an implementation guess.
 7. Collection-level artwork finality that binds `mintedSupply`,
    `burnedSupply`, and `nextCollectionSerial` requires Core collection
-   status `CLOSED` plus the one-way Core burn block, verified through
+   status `CLOSED`, the one-way Core burn block, and the one-way Core
+   collection freeze. The finality registry verifies
    `collectionBurnsBlocked(collectionId) == true` — equivalently, the
    activation-height read `collectionBurnsBlockedAtBlock(collectionId)`
    returning nonzero, golden-tested equivalent at the home (ADR 0013
-   decision U4) — in the same staged
-   action that records finality. `CLOSED` alone only ends minting and can
+   decision U4) — plus `collectionFreezeStatus(collectionId) == true` in the
+   same staged action that records finality. The ordinary batch orders
+   `blockCollectionBurns` before `freezeCollection`, and `freezeCollection`
+   before the finality-registry call; each target verifies its own per-call
+   transition hashes from [GOV-BATCH]. `CLOSED` alone only ends minting and can
    never guarantee an immutable `burnedSupply`; the burn block is the
    Core-verifiable no-burn invariant, and its surface
    (`blockCollectionBurns`, `collectionBurnsBlocked`,
    `collectionBurnsBlockedAtBlock`,
    `CollectionBurnsBlocked`) is owned by
    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-   [CMC-BURN] (ADR 0010 decision D10.5). Burns between `CLOSED` and the
+   [CMC-BURN] (ADR 0010 decision D10.5); the exact Core collection-freeze
+   surface is owned by [CMC-FREEZE] in the same document. Burns between `CLOSED` and the
    burn block are allowed: Core supply facts are read at finality
    execution time, after the burn block, so late burns are bound into the
    facts hash, never raced. A collection that needs post-finality burns
@@ -2166,14 +3023,9 @@ Finality requirements:
     state export that includes the new finality record and content root
     leaves (State Export And Archival Operations); the export-at-finality
     cadence is a conformance gate (ADR 0010 decision D4.4).
-16. For an `EXTERNAL_FACADE` collection ([LTA-IDENTITY-MODE]) the
-    facade identity binding — the facade address and its local-ID
-    rule — is bound into the collection's finality components through
-    the pinned record family owned by
-    [`docs/collection-metadata-contract.md`](collection-metadata-contract.md)
-    [CMC-FACADE-BINDING] (ADR 0015 decision W4): the two-address
-    identity is part of the work's permanent identity, never an
-    offchain convention.
+16. The launch line has no facade identity binding or alternate ownership
+    address in finality. Core's address plus its stored token/collection
+    identity is the sole ERC-721 identity (ADR 0016).
 
 ### Scoped Finality For Open Series
 
@@ -2296,11 +3148,12 @@ Scope rules:
 
 1. `COLLECTION` scope uses `collectionId` and requires `tokenId == 0` and
    `scopeId == bytes32(0)`.
-2. `TOKEN` scope requires a minted or burned token whose retained Core identity
-   maps to `collectionId`; `scopeId` is zero unless a future token-view schema
-   explicitly defines it.
-3. `RELEASE`, `SEASON`, and `VIEW` scopes require a nonzero `scopeId` whose
-   schema and canonical manifest are published by collection metadata.
+2. `TOKEN` scope requires `tokenId != 0`, `scopeId == bytes32(0)` in protocol
+   v1, and a minted or burned token whose retained Core identity maps to
+   `collectionId`.
+3. `RELEASE`, `SEASON`, and `VIEW` scopes require `tokenId == 0` and a nonzero,
+   type-domain-separated `scopeId` whose schema and canonical manifest are
+   published by collection metadata.
 4. A scoped finality record binds the same component identity fields as
    collection finality, but component `dataHash` may be scoped to the token,
    release, season, or view.
@@ -2337,30 +3190,12 @@ bytes32 scopedFinalityRecordHash = keccak256(abi.encode(
 ));
 ```
 
-Scoped Core facts:
+Scoped adapter facts use the `CoreFinalityScopeQuery` and
+`ScopedCoreFinalityFacts` shapes from [LTA-CORE-FINALITY-ADAPTER]. The input's
+first field is raw `uint8`, not a Solidity enum, so unknown numeric values can
+return a negative fact result instead of reverting during ABI decoding:
 
 ```solidity
-struct ScopedCoreFinalityFacts {
-    bool scopeExists;
-    uint8 scopeType;
-    uint256 collectionId;
-    uint256 tokenId;
-    bytes32 scopeId;
-    bool tokenMappingExists;
-    uint256 collectionSerial;
-    uint8 tokenLifecycle;
-    bool burned;
-    uint8 collectionStatus;
-    uint8 collectionSupplyMode;
-    bytes32 collectionConfigHash;
-    bytes32 scopeManifestHash;
-}
-
-function scopedCoreFinalityFacts(FinalityScope calldata scope)
-    external
-    view
-    returns (ScopedCoreFinalityFacts memory);
-
 bytes32 scopedCoreFactsHash = keccak256(abi.encode(
     STREAM_SCOPED_CORE_FINALITY_FACTS_V1,
     block.chainid,
@@ -2381,13 +3216,39 @@ bytes32 scopedCoreFactsHash = keccak256(abi.encode(
 ));
 ```
 
-For `TOKEN`, `scopeExists` requires `tokenCollectionIdentity(tokenId)` to map
-to `collectionId`, and `scopeManifestHash` is zero unless token metadata names
-a token-finality manifest. For `RELEASE`, `SEASON`, and `VIEW`, `scopeExists`
-requires collection metadata to publish the `scopeId` and its manifest hash.
+The adapter always echoes the raw input tuple in the four corresponding output
+fields. The state-changing registry validates canonical shape first and uses
+`coreCollectionFinalityFacts` for `COLLECTION`. Passing `COLLECTION`, an unknown
+scope type, or a noncanonical tuple to the scoped adapter returns
+`scopeExists = false` with every non-echo field zero and makes no dependency
+call; semantic invalidity never reverts. `TOKEN` is canonical only with a
+nonzero `tokenId` and zero `scopeId`. The adapter reads
+`tokenCollectionIdentity(tokenId)` and `tokenLifecycle(tokenId)`;
+`scopeExists` is true only when the mapping exists, the mapped collection is
+the supplied collection, lifecycle is `MINTED` or `BURNED`, and the identity's
+burn bit agrees with lifecycle. It returns that identity's collection serial,
+lifecycle, and burn bit. Protocol v1 has no token-scope manifest read, so
+`scopeManifestHash` is explicitly zero for every `TOKEN`; a later schema may
+change that only by first adding an exact metadata read and versioning the
+preimage.
+
+`RELEASE`, `SEASON`, and `VIEW` are canonical only with `tokenId == 0` and a
+nonzero `scopeId`. For those types the adapter calls the bound metadata read
+`scopeManifest(uint256,bytes32)` (`0x862fdecd`), returning
+`(bool published, bytes32 manifestHash)`, and sets `scopeExists` only when the
+collection exists, `published` is true, and `manifestHash` is nonzero. For a
+canonical TOKEN/RELEASE/SEASON/VIEW query whose collection exists, the adapter
+derives status, supply mode, and the empty-domain `collectionConfigHash`
+exactly as in the collection aggregate; unavailable token- or manifest-specific
+facts remain zero. An unknown collection/token or unpublished/zero manifest
+returns a negative fact record with unavailable fields zero. Only dependency failure/malformed
+returndata or the impossible `liveSupply > mintedSupply` collection invariant
+reverts fail-closed.
+
 Scoped finality for an open parent collection does not bind `mintedSupply`,
-`burnedSupply`, or `nextCollectionSerial`; it binds only the scoped facts above
-and the component list for that scope.
+`burnedSupply`, or `nextCollectionSerial`; it binds only the scoped adapter
+facts above and the component list for that scope. The record preimage still
+binds the actual Core address stored by the registry, never the adapter address.
 
 Scoped recovery mirrors collection recovery:
 
@@ -2432,6 +3293,21 @@ function scopedFinalityRecoveryRecord(
     FinalityScope calldata scope,
     bytes32 recoveryId
 ) external view returns (ScopedFinalityRecoveryRecord memory);
+
+function activeScopedFinalityRecoveryRoute(FinalityScope calldata scope)
+    external
+    view
+    returns (bytes32 recoveryRouteHash, bytes32 recoveryId);
+
+function scopedFinalityRecoveryRefreshPlan(
+    FinalityScope calldata scope,
+    bytes32 recoveryId
+) external view returns (FinalityRecoveryRefreshPlan memory);
+
+function continueScopedFinalityRecoveryRefresh(
+    FinalityScope calldata scope,
+    bytes32 recoveryId
+) external;
 ```
 
 `recoveryId` is `keccak256(abi.encode(STREAM_SCOPED_FINALITY_RECOVERY_V1,
@@ -2440,7 +3316,7 @@ scope.collectionId, scope.tokenId, scope.scopeId,
 expectedOldFinalityRecordHash, recoveryManifest.contentHash, recoveryRouteHash,
 executeAfter, artworkBytesChanged, reasonHash))`.
 
-Recommended scoped event:
+Production scoped events:
 
 ```solidity
 event ArtworkScopeFinalized(
@@ -2494,6 +3370,48 @@ event ScopedFinalityRecoveryExecuted(
     bool artworkBytesChanged,
     bytes32 reasonHash,
     string reasonURI
+);
+
+event ScopedFinalityRecoveryRefreshPlanCreated(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 manifestContentHash,
+    uint256 lastAllocatedTokenIdAtExecution,
+    uint256 rangeStart,
+    uint256 rangeEnd,
+    bool complete
+);
+
+event ScopedFinalityRecoveryRefreshProgress(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 manifestContentHash,
+    uint256 fromTokenId,
+    uint256 toTokenId,
+    uint256 processedThrough,
+    uint256 chunksEmitted,
+    bool complete
+);
+
+event ScopedFinalityRecoveryRefreshPlanSuperseded(
+    uint16 schemaVersion,
+    uint8 indexed scopeType,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    uint256 tokenId,
+    bytes32 scopeId,
+    bytes32 supersededByRecoveryId,
+    bytes32 manifestContentHash,
+    uint256 processedThrough,
+    uint256 rangeEnd
 );
 ```
 
@@ -2673,6 +3591,39 @@ event FinalityRecoveryExecuted(
     string reasonURI
 );
 
+event FinalityRecoveryRefreshPlanCreated(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    bytes32 indexed manifestContentHash,
+    uint256 lastAllocatedTokenIdAtExecution,
+    uint256 rangeStart,
+    uint256 rangeEnd,
+    bool complete
+);
+
+event FinalityRecoveryRefreshProgress(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    bytes32 indexed manifestContentHash,
+    uint256 fromTokenId,
+    uint256 toTokenId,
+    uint256 processedThrough,
+    uint256 chunksEmitted,
+    bool complete
+);
+
+event FinalityRecoveryRefreshPlanSuperseded(
+    uint16 schemaVersion,
+    uint256 indexed collectionId,
+    bytes32 indexed recoveryId,
+    bytes32 indexed supersededByRecoveryId,
+    bytes32 manifestContentHash,
+    uint256 processedThrough,
+    uint256 rangeEnd
+);
+
 function scheduleFinalityRecovery(
     uint256 collectionId,
     bytes32 recoveryId,
@@ -2706,7 +3657,61 @@ function activeFinalityRecoveryRoute(uint256 collectionId)
     external
     view
     returns (bytes32 recoveryRouteHash, bytes32 recoveryId);
+
+function finalityRecoveryRefreshPlan(
+    uint256 collectionId,
+    bytes32 recoveryId
+) external view returns (FinalityRecoveryRefreshPlan memory);
+
+function continueFinalityRecoveryRefresh(
+    uint256 collectionId,
+    bytes32 recoveryId
+) external;
+
+function incompleteFinalityRecoveryRefreshPlanCount()
+    external
+    view
+    returns (uint256);
+
+function assertNoIncompleteFinalityRecoveryRefreshPlans() external view;
+
+error RecoveryManifestContentHashZero();
+error FinalityRecoveryRefreshPlanMissing(bytes32 recoveryId);
+error FinalityRecoveryRefreshPlanComplete(bytes32 recoveryId);
+error FinalityRecoveryRefreshPlanInactive(
+    bytes32 recoveryId,
+    bytes32 activeRecoveryId
+);
+error FinalityRecoveryRefreshPlanMismatch(bytes32 recoveryId);
+error IncompleteFinalityRecoveryRefreshPlans(uint256 count);
 ```
+
+The production-exact continuation/read selectors are
+`continueFinalityRecoveryRefresh(uint256,bytes32) = 0x617c9142`,
+`continueScopedFinalityRecoveryRefresh((uint8,uint256,uint256,bytes32),bytes32)
+= 0x12ffdb0d`,
+`finalityRecoveryRefreshPlan(uint256,bytes32) = 0x2f72acb6`,
+`scopedFinalityRecoveryRefreshPlan((uint8,uint256,uint256,bytes32),bytes32)
+= 0x3d075555`, and
+`activeScopedFinalityRecoveryRoute((uint8,uint256,uint256,bytes32))
+= 0x066e33a4`. The global active-incomplete count getter is
+`incompleteFinalityRecoveryRefreshPlanCount() = 0xa76ed63d`, and its
+same-batch pointer-transition assertion is
+`assertNoIncompleteFinalityRecoveryRefreshPlans() = 0x955d14fb`. The six
+errors above have selectors `0x0d5f7f65`, `0x7352a53e`, `0x1abf597e`,
+`0x01bb61f5`, `0x2dc681ca`, and `0x0b37b37c`, respectively.
+
+The collection plan-created, progress, and superseded event topic-zero values
+are
+`0x5590436c7dbb2ed0938facf5ae98e65e85124a2e13e00beb6ec8074977862d84`,
+`0x8f59fcbfe19db77744f74c21e2ba799373890d37c0188d5647dc4d839c738e71`,
+and `0x46cf3a686b05af5842dbce8ee594d7d79150f32709b696f3e2ac8fabb3b90b1b`.
+The corresponding scoped values are
+`0x3dbc37ab6a915fb474ed929e21cc48c06e610215c7a1b8d8e4b78a4504b4228c`,
+`0x1f06d8cfd3bd35dbf2bd5e6b034faeab82e1a42696ee769c4112c2004158ab04`,
+and `0xf01128046f729a9423b6f9ebc2799e09a7608d6df6d35d5383a2e077c7d2a386`.
+These are finality-registry surfaces and add no selector, event, storage, or
+runtime byte to Core.
 
 Rules:
 
@@ -2783,12 +3788,101 @@ Rules:
     the acquisition-packet and condition-report fields owned by
     [CMC-ACQUISITION-PACKET], and owner-notification routing joins
     the monitoring list (State Export And Archival Operations).
+11. Scheduling either recovery form rejects a zero
+    `recoveryManifest.contentHash` with
+    `RecoveryManifestContentHashZero()`. Execution rechecks the scheduled
+    record's nonzero hash, and a refresh plan stores that exact value; neither
+    execution nor continuation accepts a caller-supplied refresh reason.
+12. When `artworkBytesChanged = true`, or when the new route supersedes an
+    active incomplete refresh plan, execution atomically marks the record
+    `EXECUTED`, activates its recovery route, reads Core's monotonic
+    `lastAllocatedTokenId()`, and creates exactly one fresh stored
+    `FinalityRecoveryRefreshPlan` under the new record's manifest hash.
+    Collection, `RELEASE`, `SEASON`, and `VIEW`
+    recovery use the global-ID invalidation superset
+    `[1, lastAllocatedTokenIdAtExecution]`, because collection/scope membership
+    is deliberately not enumerable in Core. `TOKEN` recovery uses exactly
+    `[scope.tokenId, scope.tokenId]`. For a zero high-water mark the wider plan
+    is created already complete with `rangeStart = rangeEnd =
+    processedThrough = 0`; otherwise wider plans start with
+    `processedThrough = 0`. A token plan starts with
+    `processedThrough = scope.tokenId - 1` using checked arithmetic only after
+    canonical scope validation has proved `scope.tokenId > 0`; this precondition
+    makes the subtraction safe. Execution emits the matching
+    `*RefreshPlanCreated` event but makes no Core refresh call, so notification
+    failure cannot prevent route recovery. When `artworkBytesChanged = false`
+    and there is no active incomplete predecessor plan, execution creates no
+    plan and continuation rejects it as missing. Creating an ordinary nonempty
+    plan increments the global active-incomplete count once; creating an empty
+    already-complete plan does not.
+13. Both `continue*FinalityRecoveryRefresh` entrypoints are permissionless and
+    process exactly one chunk per successful transaction. They validate the
+    canonical collection/scope key, an `EXECUTED` record carrying this stored
+    refresh obligation, an
+    existing incomplete plan, equality between the record and plan manifest
+    hashes, and that `active*FinalityRecoveryRoute` still names this
+    `recoveryId`. A plan with `superseded = true` is inactive and cannot emit a
+    stale-hash invalidation.
+14. Continuation derives `fromTokenId = processedThrough + 1` from storage and
+    `toTokenId = min(rangeEnd, fromTokenId + 4_999)` using subtraction before
+    addition so the arithmetic cannot overflow. It advances
+    `processedThrough` exactly once, increments `chunksEmitted` exactly once,
+    and sets `complete` iff `toTokenId == rangeEnd`; it then calls Core exactly
+    once with
+    `emitBatchMetadataUpdate(fromTokenId, toTokenId,
+    plan.manifestContentHash)`, including for a one-ID token plan. No loop and no
+    second Core call are permitted. Solidity transaction atomicity rolls all
+    three stored progress changes back if the Core call fails. Completing a
+    nonempty plan also decrements the global active-incomplete count exactly
+    once in that same transaction. The progress
+    event is emitted only in the successful transaction. Missing, complete,
+    inactive, or record/plan-mismatched states use the exact errors above.
+15. Every chunk contains at most Core's pinned `MAX_REFRESH_RANGE = 5_000` IDs
+    and ends no later than the execution snapshot. Burned, unrelated-
+    collection, and unrelated-scope token IDs may occur in wider ranges because
+    ERC-4906 batch ranges are safe invalidation supersets. Token IDs allocated
+    after the snapshot resolve through the already-active recovered route on
+    their first `tokenURI` read, so they have no stale pre-recovery cache and
+    require no recovery invalidation. Indexers reconstruct completion from the
+    plan and progress events and may verify it through the exact plan reads.
+16. Supersession never strands an earlier cache invalidation. If the active
+    route has an incomplete plan, executing any newer recovery for that same
+    collection or exact scope first sets the old plan's `superseded = true` and
+    `supersededByRecoveryId` to the new ID, emits the exact supersession event,
+    and decrements the global active-incomplete count once. It then creates a
+    fresh full-snapshot plan under the new stored manifest content hash even
+    when the new record says `artworkBytesChanged = false`. A nonempty fresh
+    plan increments the count once; an empty already-complete plan does not.
+    Thus superseding a nonempty plan with another nonempty plan has zero net
+    count change, while progress under the obsolete manifest cannot resume.
+17. The registry maintains
+    `incompleteFinalityRecoveryRefreshPlanCount()` as the global count of plans
+    that exist, are not complete, and are not superseded. Replacing Core's
+    current finality-registry pointer while this value is nonzero would strand
+    every old-registry continuation because Core authorizes only the current
+    registry. Therefore the governance executor/module-transition validator
+    requires the old current registry's exact
+    `assertNoIncompleteFinalityRecoveryRefreshPlans()` call immediately before
+    `updateSatellitePointer(ARTWORK_FINALITY_REGISTRY, successor)` in the same
+    atomic governance batch; the assertion reverts with
+    `IncompleteFinalityRecoveryRefreshPlans(count)` when nonzero. No intervening
+    call is permitted, and a finality-registry candidate cannot bypass this
+    batch-shape rule through the generic module path. Protocol v1 requires
+    drain-to-zero. Any later handoff/import extension must be explicitly
+    versioned, hash-commit and import every exact remaining plan into the
+    successor, and reduce the predecessor count to zero before this assertion;
+    a declared hash or operational promise alone is insufficient.
+18. Monitoring treats a nonzero global count, a plan whose cursor has stopped
+    advancing, a Core-call failure, and a pending finality-registry replacement
+    as actionable conditions. Permissionless keepers and operators must drive
+    every active plan to completion before pointer cutover; release and incident
+    runbooks may not treat notification as best-effort or silently abandon it.
 
 ## Governance Staging [LTA-GOV]
 
 "Use timelock" is not enough. Staged governance actions share one
 implementable model, and this document does not restate it: the canonical
-action ID and preimage (`STREAM_GOVERNANCE_ACTION_V1`), the atomic batch
+action ID and preimage (`STREAM_GOVERNANCE_ACTION_V2`), the atomic batch
 execution rules, and the window floors and unpause classification are
 defined once in
 [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
@@ -2840,13 +3934,11 @@ Rules:
    pattern specified below ([LTA-GUARDIAN]; ADR 0012 decision T5): the
    governor pre-authorizes a narrow, bounded, auto-expiring executor for
    pause/veto/cancel/incident-revoke so defense does not require a full
-   proposal cycle.
-   Emergency moves to registry-pre-approved fallback targets must be
-   permissionlessly executable once the triggering incident condition is
-   onchain-observable (for example a target marked `INCIDENT_REVOKED`).
+   proposal cycle. Pointer replacement is deliberately outside that zero-delay
+   guardian capability and follows [LTA-POINTERS] rule 6's delayed class-3 SLA.
 8. Emergency operations must be narrower than normal governance. They can
-   pause, deprecate, incident-revoke, or move to a pre-approved safe
-   fallback, but they cannot sweep owed funds or change final
+   pause, deprecate, or incident-revoke, but they cannot replace a pointer,
+   sweep owed funds, or change final
    artwork/economics without the normal recovery process. Unpause is its
    own no-timelock operational class held by a dedicated role, distinct
    from pause guardians ([GOV-WINDOWS]).
@@ -3094,40 +4186,146 @@ function streamSystemManifest()
         bytes32 schemaCatalogHash,
         bytes32 canonicalizationCatalogHash,
         bytes32 specBundleHash,
-        bytes32 reconstructionClientHash
+        bytes32 reconstructionClientHash,
+        uint64 revision
     );
 ```
 
-The `streamSystemManifest()` read is hosted on Core and is a required Core
-surface from genesis, not an optional convenience (ADR 0010 decision
-D10.6). It is classified `permanent` in the Core bytecode planning budget:
-it is never a size-pressure relocation candidate, the conformance-matrix
-drop-order list must not contain it, and the Core Minimalism rule applies —
-under bytecode pressure, other logic moves out until this read fits with
-headroom. The release manifest records its selector,
-interface ID if one is assigned, return shape, and gas measurement. The
-manifest should include module addresses, versions, code hashes, registry
+The read is hosted by an immutable Permanent `StreamSystemManifest` satellite,
+discovered from Core's terminal-frozen `SYSTEM_MANIFEST` pointer family. Core
+does not implement, proxy, or emit any aggregate read, payload-history,
+publication, or publication-event surface in this section; its only discovery
+responsibility is the generic `getSatellitePointer(SYSTEM_MANIFEST)` record.
+This is the mandatory pre-genesis extraction that preserves Core headroom
+without weakening state-only discovery. The satellite is classified
+`permanent` in the deployment inventory:
+it is a genesis contract, never an optional offchain mirror or Replaceable
+module. Its module type is `keccak256("STREAM_SYSTEM_MANIFEST") =
+0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6`.
+The five production selectors below XOR to the exact
+`IStreamSystemManifest` interface ID `0x37660ede`, which the satellite reports
+through ERC-165. The release manifest records its selector set, interface ID,
+runtime code hash, immutable Core and executor bindings, return shape, and gas
+measurements. The
+manifest must include module addresses, versions, code hashes, registry
 states, pointer freeze states, event catalog hash, compatibility matrix hash,
 numeric ID catalog hash, schema catalog hash, canonicalization catalog hash,
 spec bundle hash, reconstruction client hash, and deployment chain IDs.
-`streamSystemManifest()` is a storage-only read. Core stores the manifest hash,
-manifest URI, current Core pointer addresses, the state/export publisher
-address, cached catalog hashes, and cached discovery hashes needed for the
-return tuple. It must not call satellites,
-registries, or offchain resolvers. Pointer updates and catalog updates that
-change any returned field must update the cached system manifest fields in the
-same governed execution and emit the corresponding pointer/catalog event. If a
+`streamSystemManifest()` is a storage-only satellite read. The satellite stores
+the manifest hash and URI, cached Core pointer addresses, cached catalog and
+discovery hashes, and append-only payload history needed by the tuple. This read
+does not call Core, registries, other satellites, or offchain resolvers. The
+governed publication writer, which is not a collector read path, derives the
+current address set through Core's bounded, storage-only
+`getSatellitePointer(bytes32)` reads immediately before it caches the new
+aggregate. Pointer and catalog updates that change any returned field share
+that atomic governed batch and emit their own pointer/catalog event. If a
 catalog publisher needs richer data, it lives in the content-addressed manifest
 named by `manifestURI` and committed by `manifestHash`, not in an external call
-from Core.
+from the aggregate read.
 
-The system-manifest payload — the canonical deployment-inventory
-document committed by `manifestHash` — is itself an onchain-bytes
-payload of the [LTA-CATALOGS] rule 2 class (ADR 0013 decision U2): its
-canonical bytes are stored in contract storage or an SSTORE2 blob at
-every publication, and Core exposes the storage-backed pointer reads
+The system-manifest payload — the canonical deployment-inventory document
+committed by `manifestHash` — is itself an onchain-bytes payload of the
+[LTA-CATALOGS] rule 2 class (ADR 0013 decision U2). A single SSTORE2 blob is
+not a durable format: the current pretty genesis profile is already larger
+than one runtime-code payload and append-only module registrations grow the
+live inventory. Protocol v1 therefore keeps the five-function
+`IStreamSystemManifest` ABI (within the seven protocol-specific selectors plus
+ERC-165) but defines
+`payloadPointer` as an SSTORE2 **root descriptor**, never as an assumed single
+data blob.
+
+The root pointer's runtime is exactly `0x00 || rootDescriptor`, where the
+canonical ABI encoding is
 
 ```solidity
+struct StreamSystemManifestChunk {
+    address pointer;
+    uint32 payloadLength;
+    bytes32 payloadHash;
+}
+
+rootDescriptor = abi.encode(
+    bytes4(0x6c9d2530), // first four bytes of keccak256("STREAM_SYSTEM_MANIFEST_ROOT")
+    uint16(1),
+    STREAM_SYSTEM_MANIFEST_PAYLOAD_V1,
+    RFC8785_JCS,
+    uint32(totalBytes),
+    uint16(chunkCount),
+    StreamSystemManifestChunk[] chunks
+);
+
+bytes32 constant STREAM_SYSTEM_MANIFEST_PAYLOAD_V1 =
+    0x8844b744a67cdcdb84ea3c6e3d686883da175820b9ff07a19cffa14bf62e6e81;
+    // keccak256("STREAM_SYSTEM_MANIFEST_PAYLOAD_V1")
+bytes32 constant RFC8785_JCS =
+    0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044;
+    // keccak256("RFC8785_JCS")
+bytes32 constant STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1 =
+    0xd6ab89b077c61a288c7168cf8f1c9a7a19464b10475735dae37cb46a0c94c40b;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1 =
+    0x852f4811a2eb32694863d94ba41b545a65ef4c76086a32c35881f0c4e250a7b5;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1 =
+    0xa93750a5551ac5668c8f24cca85acaf1d5f8334fac9406f845fce1ce35548839;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1")
+```
+
+Each chunk pointer's runtime is exactly `0x00 || segment`. Canonical splitting
+uses exactly `24_575` bytes for every non-final segment and `1..24_575` bytes
+for the final segment. `chunkCount == chunks.length` is in
+`1..MAX_MANIFEST_CHUNKS`, where `MAX_MANIFEST_CHUNKS = 32`; every
+pointer is nonzero and code-bearing, and repeated pointers are permitted when
+canonical segments are byte-identical. `totalBytes` is in
+`1..MAX_MANIFEST_PAYLOAD_BYTES`, where
+`MAX_MANIFEST_PAYLOAD_BYTES = 786_400`; it equals the declared-length sum,
+and `chunkCount == ceil(totalBytes / 24_575)`. For every ordered element, the
+writer strips the leading `STOP`, requires live payload length to equal the
+declared `payloadLength`, recomputes `payloadHash = keccak256(segment)`, and
+derives
+
+```solidity
+bytes32 chunkLeafHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1,
+    uint256(index),
+    uint32(payloadLength),
+    payloadHash
+));
+
+bytes32 chunkListHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1,
+    uint32(totalBytes),
+    chunkLeafHashes
+));
+
+manifestHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1,
+    uint16(1),
+    STREAM_SYSTEM_MANIFEST_PAYLOAD_V1,
+    RFC8785_JCS,
+    uint32(totalBytes),
+    uint16(chunkCount),
+    chunkListHash
+));
+```
+
+The fixed split makes the root independently reproducible from canonical bytes
+and prevents an alternate chunk layout from representing the same payload.
+The descriptor ABI payload length is exactly `256 + 96 * chunkCount` and at
+most `MAX_MANIFEST_ROOT_DESCRIPTOR_BYTES = 3_328`; there are no trailing
+bytes. The writer reads the fixed head and declared count first, rejects an
+offset other than `224`, a count over `32`, or a mismatched root code length
+before allocating a dynamic array, then decodes and requires byte-for-byte
+equality with a canonical ABI re-encoding. It hashes one bounded chunk at a
+time and never concatenates the full payload in EVM memory.
+`StreamSystemManifest` exposes the storage-backed root-pointer reads
+
+```solidity
+function core() external view returns (address coreAddress);
+
+function governanceExecutor() external view returns (address executor);
+
 function streamSystemManifestPointer()
     external
     view
@@ -3145,13 +4343,406 @@ function streamSystemManifestPointerAt(uint256 index)
     );
 ```
 
-sharing `streamSystemManifest()`'s Permanent classification in the Core
-bytecode planning budget. The pointer history is append-only, matching
+State-only clients read and ABI-decode the root descriptor at offset `1`,
+validate its exact schema/canonicalization IDs, traverse `chunks` in order,
+strip each leading `STOP`, concatenate the segments, and then apply the payload
+schema below. No offchain resolver, event, or mirrored document is needed to
+recover a current or historical payload.
+
+Production publication uses one satellite writer and one terminal satellite
+event; Core has neither:
+
+```solidity
+struct StreamSystemManifestUpdate {
+    bytes32 manifestHash;
+    string manifestURI;
+    bytes32 eventCatalogHash;
+    bytes32 compatibilityMatrixHash;
+    bytes32 numericIdCatalogHash;
+    bytes32 schemaCatalogHash;
+    bytes32 canonicalizationCatalogHash;
+    bytes32 specBundleHash;
+    bytes32 reconstructionClientHash;
+}
+
+function publishStreamSystemManifest(
+    address payloadPointer,
+    StreamSystemManifestUpdate calldata update
+) external;
+
+event StreamSystemManifestPublished(
+    uint16 schemaVersion,
+    bytes32 indexed manifestHash,
+    address indexed payloadPointer,
+    bytes32 indexed actionId
+);
+```
+
+The seven protocol selectors are `0xf2f4eb26` for `core()`, `0x8fc98386` for
+`governanceExecutor()`, `0x97c93f10` for `streamSystemManifest()`,
+`0x7b3a36b1` for `streamSystemManifestPointer()`, `0x5b1e1cba` for
+`streamSystemManifestPointerCount()`, `0x893aae03` for
+`streamSystemManifestPointerAt(uint256)`, and `0x09b1b5c6` for
+`publishStreamSystemManifest(address,(bytes32,string,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32,bytes32))`.
+The event topic is
+`0x46b4507137a35524e302b6794c5e4fb40783c10d6be0a72c1aa58d7386203793`
+for `StreamSystemManifestPublished(uint16,bytes32,address,bytes32)`. Its schema
+version is `1`; `manifestHash`, `payloadPointer`, and `actionId` are indexed.
+The two immutable-binding getters are outside the five-function
+`IStreamSystemManifest` publication/history interface, whose interface ID
+remains `0x37660ede`; they are nevertheless mandatory production ABI and are
+used by ADR 0004's one-way bootstrap bind. ERC-165's own selector is standard
+surface and is not counted among these seven protocol selectors.
+
+Canonical payload schema. After RFC 8785 JSON Canonicalization Scheme (JCS),
+the UTF-8 bytes committed by the chunk root represent one JSON object with
+exactly these required top-level members and no others:
+
+| Member | JSON type | Exact contents |
+| --- | --- | --- |
+| `schema` | string | literal `STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` |
+| `schemaVersion` | integer | literal `1` |
+| `chainId` | decimal string | canonical unsigned chain ID; protocol v1 requires `"1"` |
+| `core` / `systemManifest` | string | exact deployed addresses |
+| `publicationRevision` | decimal string | exact new append-only aggregate/history revision represented by this payload |
+| `aggregate` | object | exactly the eleven address fields returned by `streamSystemManifest()` |
+| `catalogs` | object | exactly the seven returned discovery-hash fields |
+| `moduleRegistryManifest` | object | exactly `hash`, `uri`, and monotonic `revision` from the live registry |
+| `contracts` | array | complete protocol-contract inventory records; excludes this payload's SSTORE2 root/chunk data carriers |
+| `pointers` | array | every actual Core pointer record; no governance pseudo-pointer |
+| `registryEntries` | array | every `moduleAt` entry from every live/historical registry instance |
+| `gasParameterProbes` | array | every GGP/GTP host/parameter's stable Permanent probe-binding inventory facts |
+| `criticalFallbacks` | array | every pre-approved critical-family fallback record |
+| `securityContact` | object | exactly `policyHash` and `uri` from [LTA-DISCLOSURE] |
+
+`aggregate` uses exactly `revenueResolver`, `metadataRouter`,
+`collectionMetadata`, `entropyCoordinator`, `mintManager`, `mintLedger`,
+`artistRegistry`, `streamAdminsOrGovernance`, `artworkFinalityRegistry`,
+`moduleRegistry`, and `stateExportPublisher`. `catalogs` uses exactly
+`eventCatalogHash`, `compatibilityMatrixHash`, `numericIdCatalogHash`,
+`schemaCatalogHash`, `canonicalizationCatalogHash`, `specBundleHash`, and
+`reconstructionClientHash`. A `contracts` element has exactly
+`inventoryId`, `key`, `address`, `runtimeCodeHash`, `create2Salt`,
+`initCodeHash`, and `deploymentManifestHash`. A `pointers` element has exactly
+`pointerType` plus the ten fields returned by `getSatellitePointer`:
+`target`, `codeHash`, `frozen`, `moduleType`, `interfaceId`, `registry`,
+`registryStatus`, `moduleManifestHash`, `deploymentManifestHash`, and
+`revision`.
+
+A `registryEntries` element has exactly `registry`, `enumerationIndex`,
+`module`, `status`, `moduleType`, `moduleVersion`, `interfaceId`,
+`moduleGasLimit`, `runtimeCodeHash`, `deploymentManifestHash`,
+`moduleManifestHash`, `moduleManifestURI`, and `revision`. Execution-generated
+`registeredAt` and `statusUpdatedAt` remain authoritative in `moduleAt` but are
+forbidden here: a delayed action cannot precompute its execution timestamp for
+the same-batch manifest tail. A `gasParameterProbes` element has exactly `host`,
+`parameterId`, `probe`, `probeRegistry`, `probeModuleType`,
+`probeInterfaceId`, `probeModuleVersion`, `probeRuntimeCodeHash`,
+`probeModuleManifestHash`, `probeDeploymentManifestHash`,
+`probeBindingHash`, and `probeMaxAgeBlocks`. It deliberately excludes live
+parameter value, floor, failure class, standing IDs, and parameter revision:
+those operational facts come from `gasParameterInfo`/`timeParameterInfo`, and a
+permissionless conditional GGP step must not require a manifest publication.
+A `criticalFallbacks` element has
+exactly `pointerType`, `target`, `runtimeCodeHash`, `moduleType`, `interfaceId`,
+`registry`, `moduleManifestHash`, and `deploymentManifestHash`.
+Every field named `deploymentManifestHash` is the one release-wide digest
+defined at [LTA-DEPLOYMENT-IDENTITY], never a checksum of the full
+deployment/release artifact. Every occurrence in one payload must therefore be
+byte-identical.
+
+The live executor registries are intentionally outside this payload.
+`manifestTailTriggers`, `emergencyRestorationEligibilities`, and
+`governanceRegistryRoots` are forbidden top-level members, not optional
+snapshots. State-only clients recover the authoritative trigger and class-6
+eligibility inventories from their respective `count`/`At`/`ChainHash` reads
+under [GOV-MANIFEST-TAIL] and [GOV-EMERGENCY-RESTORATION], recomputing both
+chains at a single block tag. Registration can therefore remain isolated and
+append-only without making an otherwise-current system-manifest payload stale
+or requiring a non-atomic follow-up publication.
+
+The current root descriptor and its chunk contracts are also deliberately
+outside `contracts`: their addresses are derived only after these bytes exist,
+so including them in their own payload would require a CREATE2 fixed point.
+They remain completely state-discoverable through the root descriptor and the
+append-only `streamSystemManifestPointer*` history. Historical payload data
+carriers follow the same rule and are not protocol-module inventory entries.
+
+All address/`bytes4`/`bytes32` strings are lowercase `0x`-prefixed fixed-width
+hex. `key` is nonempty uppercase ASCII with underscores. `inventoryId`,
+`schemaVersion`, `status`, `registryStatus`, and `enumerationIndex` are
+nonnegative JSON integers with no fraction or exponent and at most
+`2^53 - 1`; every other protocol integer is a minimal unsigned decimal string
+(`"0"` or no leading zero). Booleans are JSON booleans. `null`, duplicate
+object names, unknown members, malformed UTF-8, lone UTF-16 surrogates,
+non-Unicode scalar values, non-I-JSON numbers, and non-NFC free text are
+forbidden. JCS supplies object-key ordering and string/escape encoding; no BOM,
+whitespace, or trailing newline survives canonicalization.
+
+Arrays are uniquely and deterministically ordered: `contracts` by ascending
+`inventoryId`; `pointers` by ascending raw `pointerType`; `registryEntries` by
+ascending registry address then `enumerationIndex`; `gasParameterProbes` by
+host address then `parameterId`; and `criticalFallbacks` by `pointerType` then
+target address. Every referenced address appears exactly once in `contracts`,
+every registry array is a complete `0..moduleCount-1` walk whose records match
+state, the aggregate/catalog objects equal the cached tuple, and every probe
+binding recomputes the [LTA-GGP-CORE] binding hash. The schema-catalog and
+canonicalization-catalog payloads must include the exact
+`STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` and `RFC8785_JCS` IDs above; their returned
+catalog hashes therefore commit the format used to decode this payload.
+
+Before ABI lock, the checked release golden
+`release-artifacts/system-manifest-payload-vector.json` must be a deterministic
+non-production target fixture containing the complete generated fixture
+object, exact canonical UTF-8 hex, ordered segment hex and hashes, encoded
+root-descriptor bytes, `totalBytes`, and the resulting `manifestHash`. Its
+generator and CI checker consume all 60 canonical genesis-profile entries,
+detect profile drift, recompute every byte, and prove the JCS, chunk, list,
+root, hash, and `1..32`-chunk mechanics. Because the current profile does not
+contain live addresses, code hashes, registry/pointer state, or parameterized
+probe bindings, this fixture does not prove equality to a deployed cached
+aggregate/discovery tuple and is not deployment-readiness evidence. Production
+semantic reconciliation remains fail-closed until the instance-aware genesis
+deployment candidate, onchain payload, address book, verification inputs, and
+release-candidate lockfile agree under
+[issue #656](https://github.com/6529-Collections/6529Stream/issues/656). A
+hand-authored, partial, pretty-JSON-only, or single-blob feasibility claim does
+not satisfy the ABI-lock mechanics gate.
+
+The target-specific governance transition commits the complete old and new
+cached aggregate state:
+
+```solidity
+bytes32 constant STREAM_SYSTEM_MANIFEST_SCOPE_V1 =
+    0xf73b4d7b4d260fce0823707f836fdf29a1767a2a2a9cfbce14ec8c5e49e47841;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_SCOPE_V1")
+
+bytes32 constant STREAM_SYSTEM_MANIFEST_STATE_V1 =
+    0x3764ccb415d0aac07f1bddb8d4841ad6d4c2f9b2fe7ce7d221c586bc056aaf60;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_STATE_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_SCOPE_V1,
+    uint256(block.chainid),
+    address(systemManifest)
+));
+
+bytes32 moduleAddressesHash = keccak256(abi.encode(
+    revenueResolver,
+    metadataRouter,
+    collectionMetadata,
+    entropyCoordinator,
+    mintManager,
+    mintLedger,
+    artistRegistry,
+    streamAdminsOrGovernance,
+    artworkFinalityRegistry,
+    moduleRegistry,
+    stateExportPublisher
+));
+
+bytes32 discoveryHashesHash = keccak256(abi.encode(
+    eventCatalogHash,
+    compatibilityMatrixHash,
+    numericIdCatalogHash,
+    schemaCatalogHash,
+    canonicalizationCatalogHash,
+    specBundleHash,
+    reconstructionClientHash
+));
+
+bytes32 stateHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_STATE_V1,
+    scopeHash,
+    manifestHash,
+    keccak256(bytes(manifestURI)),
+    payloadPointer,
+    moduleAddressesHash,
+    discoveryHashesHash,
+    uint64(revision)
+));
+```
+
+For `oldValueHash`, `StreamSystemManifest` applies `stateHash` to its currently
+cached aggregate and current history pointer. For `newValueHash`, it uses
+`update`, the proposed payload pointer, and the records it derives at execution
+from Core's generic pointer read for every returned mutable address, including
+`MODULE_REGISTRY` and `STATE_EXPORT_PUBLISHER`. It sources
+`streamAdminsOrGovernance` directly from its immutable executor binding and
+requires that binding to equal Core's immutable executor; no governance pointer
+record exists. It requires every actual pointer family to exist. There is no
+caller-supplied module-address array and no hidden individual setter on either
+contract.
+`revision` equals the append-only pointer-history count. The empty pre-
+publication state is revision `0`; every successful publication appends one
+entry and commits `newRevision = oldRevision + 1` (overflow reverts). The
+separate `streamSystemManifestPointerCount()` read exposes the same value, so a
+cached aggregate cannot cycle back to an earlier full state hash even if its
+addresses, discovery hashes, URI, and content root later repeat.
+
+Publication rules [LTA-MANIFEST-PUBLISH]:
+
+1. Only the satellite's immutable governance executor may call the writer. The
+   satellite requires
+   a nonzero executing `currentAction().actionId`, the exact scope and old/new
+   state hashes above from this call's `GovernanceCall` entry, and an action
+   class in the closed writer set `0..3`. The immutable executor has already
+   enforced [GOV-MANIFEST-TAIL]'s exact trigger code hash and allowed-class
+   mask: registry tightening uses class `0`, registration/status loosening/
+   registry-manifest publication uses class `1`, pointer freeze uses class `2`,
+   pointer/catalog/probe replacement uses class `3`, and standalone catalog/
+   payload publication is class `3` only.
+   The satellite still verifies the executor caller, nonzero action, class membership,
+   and this tail call's own exact hashes rather than accepting a bare class
+   label. For classes `0`, `1`, and `2`, every cached aggregate module address
+   and all seven cached discovery hashes must be byte-identical to old state;
+   only the canonical payload root/hash/URI/history may change to record the
+   registry or freeze fact. Class `3` is the sole class allowed to change an
+   aggregate pointer or discovery hash, subject to its triggering target's own
+   transition checks. There is no class-6 path for rewriting the canonical
+   deployment inventory.
+2. `payloadPointer` must be nonzero and its runtime must be the exact bounded
+   `0x00 || rootDescriptor` form above. The satellite validates magic, version,
+   schema ID, canonicalization ID, offset, canonical ABI length/re-encoding,
+   `totalBytes`, and `chunkCount` before following any chunk. It then validates
+   every declared `(pointer, payloadLength, payloadHash)` against exact
+   `0x00 || segment` runtime code, the canonical non-final/final lengths,
+   count/ceiling/sum equations, and the three leaf/list/root formulas, streaming
+   one chunk at a time. Repeated pointers are valid only when each occurrence's
+   declared length and recomputed payload hash match that immutable code. The
+   recomputed root must equal nonzero `update.manifestHash`; a caller-supplied
+   descriptor hash or unverified chunk hash is never accepted.
+   The canonical `manifestURI` is nonempty UTF-8 and its encoded byte length is
+   at most `MAX_MANIFEST_URI_BYTES = 2_048`; the contract enforces
+   `bytes(update.manifestURI).length` in `[1, 2_048]`, while release tooling
+   rejects malformed UTF-8. The URI and all seven discovery hashes must be
+   nonempty/nonzero. The satellite never accepts caller-supplied module
+   addresses: it derives them from Core's generic pointer records after
+   rechecking that every required pointer exists, is bound to the expected
+   module family, and matches the satellite's immutable Core/executor bindings.
+3. The concatenated chunk bytes are the RFC8785-JCS canonical encoding of the
+   complete deployment inventory under the exact schema above, including the
+   aggregate addresses and discovery hashes being cached. The satellite proves
+   the bounded content root but deliberately does not parse multi-megabyte JSON;
+   governed calldata, exact per-call state hashes, canonical chunks, and the
+   root commitment bind the publication. Release tooling must parse, validate,
+   and reject any schema, ordering, completeness, or semantic mismatch before
+   scheduling and again in conformance tests. The required checked golden
+   supplies canonical bytes and root/chunk vectors; no single-blob assumption
+   or partial inventory is permitted.
+   Adversarial vectors reject wrong magic/version/schema/canonicalization,
+   noncanonical ABI or trailing bytes, offset/count/length/sum/ceiling drift,
+   zero or code-less pointers, bad leading bytes, empty/oversized/fractional
+   chunks, non-final short chunks, extra/reordered/omitted chunks, and declared
+   hashes or `manifestHash` that differ from recomputation. A repeated pointer
+   carrying an identical canonical segment is an explicit positive vector.
+   Before deployment, the implemented build must generate a maximum-size
+   fixture at `MAX_MANIFEST_CHUNKS = 32` and
+   `MAX_MANIFEST_PAYLOAD_BYTES`, then measure both writer gas and the
+   state-only client's RPC/read budget. The writer must reuse one bounded
+   `24_575`-byte scratch buffer rather than allocating the total payload, and
+   worst-case publication validation must stay at or below `12_000_000` gas.
+   At the maximum, chunk runtimes total `32 * 24_576 = 786_432` decoded bytes
+   and the root runtime is `3_329`, for `789_761` decoded code bytes; the
+   reference state-only traversal therefore has an `800_000` decoded-byte
+   ceiling and a separate `2_097_152`-byte JSON-RPC wire ceiling for hex plus
+   framing. The 32-chunk cap supplies roughly 24x the current minified profile
+   size while bounding one publication well below the block limit; the actual
+   canonical live-schema vector remains the authority. The current
+   non-production ABI-lock fixture proves canonicalization, chunk/root
+   mechanics, and decoded/RPC arithmetic only; it does not measure the
+   `12_000_000`-gas path or a full 32-chunk RPC traversal. Those measurements
+   are mandatory implementation/conformance gates once the writer and
+   state-only client exist. If either implemented path misses its ceiling, the
+   cap must be lowered before lock, never silently accepted as executable.
+4. A successful call replaces the current manifest hash, URI, and cached
+   discovery hashes, increments the publication revision exactly once, appends
+   `(payloadPointer, update.manifestHash, uint64(block.timestamp))` to history,
+   and only then emits
+   `StreamSystemManifestPublished(1, update.manifestHash, payloadPointer,
+   actionId)`. It never edits or deletes a prior entry and rejects an exact
+   no-op publication.
+5. Any unified pointer or catalog mutation that changes an aggregate return
+   field must share one atomic [GOV-BATCH] action with exactly one publication
+   call. External catalog writes execute first, Core pointer writes next, and
+   `publishStreamSystemManifest` last, so it derives the post-update address
+   set. The executor-enforced, append-only trigger registry and exact batch scan
+   at ADR 0004 [GOV-MANIFEST-TAIL] — not an offchain policy — reject a
+   protected pointer/catalog call set with a missing, duplicate, value-bearing,
+   or non-final writer, rechecking the registered trigger and irreversibly bound
+   satellite code hashes and the trigger-derived action class at scheduling and
+   execution. `callsHash` commits every call-level
+   transition and the order. A publication failure reverts the whole batch;
+   there is no interval in which the aggregate read names a new pointer with an
+   old manifest payload or vice versa.
+   Golden batches cover class-0 module revocation; class-1 module registration,
+   status loosening, and registry-manifest publication; class-2
+   `freezeSatellitePointer`; and class-3 `updateSatellitePointer`, Core GGP
+   probe rebind, and every genesis catalog trigger, each with one final
+   publication. They also cover standalone class-3 publication and every
+   wrong-mask/mixed-class/missing-tail permutation. A class-0/1/2 tail that
+   changes any cached address or discovery hash, including one mixed into an
+   otherwise valid registry action, must revert.
+6. This is the only mutable `StreamSystemManifest` cache entrypoint. Core has no
+   manifest cache or writer. The satellite has no per-catalog setter,
+   per-address setter, direct payload-pointer setter, or second staging state
+   machine. Genesis initialization must use a governed publication to produce
+   the first state/history entry and schema-v1 event; the Core
+   `SYSTEM_MANIFEST` pointer update and terminal freeze are separately evented
+   through the generic pointer surface and complete before the genesis gate.
+
+The genesis sequence is fail-closed under ADR 0004's one-way bootstrap bind and
+seal. The executor deploys first with only its bootstrap authority and pure
+schema/domain/governance configuration; its constructor accepts no Core,
+satellite, registry/host, trigger/code-hash, payload, manifest, or inventory
+fact derived from an executor-bound downstream deployment. Core, registries,
+hosts, and `StreamSystemManifest` then deploy with the now-known executor
+address. No governance action can be scheduled, executed, cancelled, or
+registered yet. After all inventoried addresses exist, tooling generates the
+planned canonical first payload bytes and stable content hash, excluding the
+root/chunk carrier addresses and execution-generated registry timestamps. The
+bootstrap authority makes ADR 0004's sole direct one-way bind, which verifies
+the satellite's immutable Core/executor getters and interface support, records live
+Core/satellite code hashes, atomically validates and materializes the complete
+bounded supplied trigger table into its normal mapping/enumeration/chain, and
+stores the pointer/registry lists, manifest content hash, and final live-
+inventory root/count. Release tooling proves supplied-list completeness against
+the 60-entry profile; the executor proves order, code hashes, masks, and equality
+to the irreversibly bound state.
+
+Only after that bind does the constrained pre-seal governance lane activate.
+The sole authority completes the governed registry registrations and Core
+pointer writes through the bounded
+pre-seal no-tail branch while no manifest has yet been published. It verifies
+the final registry, probe, fallback, catalog, and pointer inventory, sets Core's
+`SYSTEM_MANIFEST` pointer to the bound satellite, and executes its class-2
+terminal freeze with the full veto evidence. Canonical chunks and the root
+descriptor deploy after the bytes and all inventoried addresses are fixed; the
+root address was not a constructor or bind input. The final class-3 two-call
+batch seals bootstrap first and publishes that actual complete root last. Seal
+independently recomputes its descriptor/chunk commitment to the bind-recorded
+`manifestHash`, stores the actual root pointer, and relies on the satellite's
+normal per-call state hash—computed from that actual pointer—rather than any
+pre-pinned state hash. Seal and first publication are atomic, and the bootstrap
+identity has no authority afterward. This executor-first, downstream-second,
+bind-third, data-carriers-last order has no CREATE2 address/code-hash fixed
+point.
+
+Deployment conformance rejects any action before bind; a second or partial
+bind; a prior or second publication/seal; an incomplete or out-of-order trigger
+set; a pending bootstrap action; a missing/mutable pointer; wrong module
+type/interface/live code hash or Core/executor immutable; a live-inventory,
+root/payload/cache semantic mismatch; absent freeze-veto evidence; any post-
+seal untailled writer; or any aggregate/history function or publication event
+remaining in Core bytecode/ABI.
+
+The three pointer-history reads share `streamSystemManifest()`'s Permanent
+satellite classification. The pointer history is append-only, matching
 the successor-declaration history shape, so superseded manifest
 payloads stay locatable from state ([LTA-PAYLOAD-DISCOVERY] rule 2);
 `streamSystemManifestPointer()` returns the current entry, and the
-current `manifestHash` commits to exactly its stored
-bytes. The payload must name every genesis-profile contract — Core,
+current `manifestHash` is the exact leaf/list/root commitment to the canonical
+bytes traversed from that stored root descriptor. The payload must name every genesis-profile contract — Core,
 satellites, probe contracts, pre-approved fallback targets, sale
 adapters, settlement contracts, the ticket gate, the claim router, the
 schema registry, the record satellites, and every registry instance —
@@ -3410,6 +5001,36 @@ function latestStateExport()
         string memory manifestURI
     );
 ```
+
+The read above and the three `StateExportPublished`,
+`StateExportChallenged`, and `StateExportSuperseded` events are collectively
+the `IStreamStateExportPublisher` surface. The genesis profile binds
+`STATE_EXPORT_PUBLISHER` to `GOVERNANCE_LAYER`, so that entry must prove both
+the interface and the `STATE_EXPORT_PUBLISHER_EVENTS_V1` event marker; a bare
+governance executor/role-registry implementation is not a publisher. The
+profile pins selector `0x77faad4f` and event topics
+`0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045`,
+`0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c`,
+and `0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a`
+for that surface. The complete ABI lock also pins the read's five ordered return
+types to `(uint256,bytes32,bytes32,bytes32,string)`, pins all three events as
+non-anonymous, and pins their indexed masks, in the signature order above and below, to
+`[false,true,true,true,false,false]`, `[false,true,true,true,false]`, and
+`[false,true,true,true,false]`. The canonical surface digest is
+`sha256:535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`.
+
+Because this ERC-165 surface has exactly one function, its interface ID is the
+same `0x77faad4f` selector; events do not participate in ERC-165. Both the
+`STATE_EXPORT_PUBLISHER` pointer and the `GOVERNANCE_LAYER` registry record must
+carry that exact interface ID. A synthetic composite such as `0xa5971448` is
+not publisher-interface evidence. Candidate completeness likewise requires a
+separate exact `state_export_publisher_abi_proof` object containing the full
+surface and digest: `verified_interfaces` and `verified_markers` strings cannot
+prove return types, indexed masks, or non-anonymous emission. The proof digest
+is recomputed from type-strict canonical JSON, so numeric `0`/`1` cannot stand
+in for JSON booleans. The current implementation-class catalog
+remains non-instance evidence, so issue #656 must still supply and reconcile a
+concrete deployment candidate before this assertion can support production.
 
 The event may be emitted by governance, a dedicated archive publisher, or a
 successor/export satellite named in `streamSystemManifest()`. It does not make
@@ -3787,23 +5408,11 @@ history expiry cannot be cross-verified.
    `StateExportSuperseded`, never corrected in place. An export or
    successor manifest whose event-history snapshot hash is computed
    over any other serialization is nonconformant.
-6. Identity-mode carve-out (ADR 0015 decision W4). For an
-   `EXTERNAL_FACADE` collection ([LTA-IDENTITY-MODE]), Core emits the
-   controlled-ownership-change event family in place of ERC-721
-   `Transfer` — the family's signature is owned by the protocol v1
-   specification ([PV1-TRANSFER-CONTROLLER] requirement 11 in
-   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md))
-   — and the collection's facade is the exclusive ERC-721 `Transfer`
-   emitter for its tokens ([FCP-EXCLUSIVITY] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)).
-   Event-history reproduction for such a collection derives from both
-   streams: Core's controlled family plus the facade's `Transfer`
-   stream. No new address-set mechanism exists for this: every facade
-   is registered through a genesis-profile module registry at
-   deployment, appending to the registration record-chain lane
-   ([LTA-REGISTRY] requirements 6–7), so the rule 1 address-set
-   derivation already covers every facade's log stream from state
-   alone. `CORE_NATIVE` collections are unchanged.
+6. Core-native ownership history (ADR 0016). Every launch mint, transfer,
+   and burn emits the standard ERC-721 `Transfer` event from Core. Export and
+   reconstruction gates derive the complete ownership history from that one
+   Core stream and compare it with Core state; no alternate event family or
+   facade address belongs to the launch address set.
 
 Dual-family archival rule [LTA-ARCHIVE] (ADR 0010 decision D4.6;
 ADR 0011 decision R4; ADR 0014 decision V2):
@@ -4170,7 +5779,12 @@ Monitoring operations should define alert routing and escalation for:
     requirement 9);
 14. recovery-notice routing to token owners of record and registered
     owner-records stewards, and the objection-window records of
-    Finality Recovery rule 10 ([LTA-FINALITY]).
+    Finality Recovery rule 10 ([LTA-FINALITY]);
+15. a nonzero `incompleteFinalityRecoveryRefreshPlanCount()`, stalled cursor,
+    failed Core refresh attempt, supersession, and any scheduled finality-
+    registry pointer replacement while the count is nonzero. Keeper/operator
+    escalation drives the count to zero and verifies the exact same-batch
+    assertion before cutover (Finality Recovery rules 16-18).
 
 If immutable Core is found to have a critical bug, the default incident posture
 is communication, pause/tightening where available, state export, and successor
@@ -4182,21 +5796,11 @@ Zero-admin and lost-quorum drills must cover the complete satellite set, not
 only Core. The runbook should periodically prove degraded-mode reads and
 operations for metadata router failure, finality verification, pending entropy,
 split-wallet release, escrow flush, state export publication, event-catalog
-reconstruction, the zero-signer inertness of the dormant identity-mode
-surfaces — scoped by [PV1-FACADE-READINESS] requirement 1: the drill
-proves a `CORE_NATIVE`-only deployment is identical on every
-pre-ADR-0015 surface by asserting each of (a)
-`declareCollectionIdentityMode` and
-`registerCollectionTransferController` attempted from a non-governance
-sender revert, so with governance lost no identity mode can be declared
-and no facade can ever be registered, (b) the governance role reads
-show zero signers and no signer-replacement path, (c) sampled
-`CORE_NATIVE` reads, writes, and events match pre-ADR-0015 golden
-vectors, and (d) `collectionIdentityMode` and
-`collectionTransferController` answer their dormant defaults,
-`IDENTITY_MODE_CORE_NATIVE` and `address(0)`
-([LTA-IDENTITY-MODE] rule 7; ADR 0015 decision W4.7) — and
-the permissionless probe-gated conditional-raise
+reconstruction, the ADR 0016 Core-native interface invariant — the five
+identity-mode/controller functions and three alternate events remain absent,
+every sampled token follows the contract-wide ERC-721 approval, transfer,
+safe-transfer, mint-event, and burn-event behavior, governance role reads show
+zero signers and no signer-replacement path — and the permissionless probe-gated conditional-raise
 and conditional-re-lower paths for
 `FORWARDING_CAP` Governed Gas Parameters, executed end to end against the
 deployed Permanent-class probe contracts with zero governance signers,
@@ -4319,8 +5923,8 @@ Rosetta stone to social mirroring. Onchain catalog requirements
    and the system-manifest payload ([LTA-MANIFEST]; ADR 0013 decision
    U2) — must be stored as onchain bytes (contract storage or SSTORE2
    blobs — state-trie carriers; rule 6) referenced from the registry
-   and from `streamSystemManifest()` — the system-manifest payload
-   through Core's `streamSystemManifestPointer()` read; hash-plus-URI
+   and from the `StreamSystemManifest` satellite — the system-manifest payload
+   through that satellite's `streamSystemManifestPointer()` read; hash-plus-URI
    alone is nonconformant for
    these catalogs. Catalog updates replace the referenced bytes through
    staged governance and never reinterpret old IDs.
@@ -4919,8 +6523,10 @@ Recovery principles:
 
 ## Umbrella Domain Constants [LTA-DOMAINS]
 
-This document is the normative home of the finality, state-export,
-module-registry, and governance-guardian hash domains. Every constant
+This document is the normative home of the Core pointer, system-manifest,
+Governed Gas Parameter transition and standing-action, finality, state-export,
+module-registry, and governance-guardian hash domains.
+Every constant
 is Permanent: recorded
 here with its string preimage and ordered inputs, mirrored as
 checker-verified rows in the protocol v1 domain-constants table, and
@@ -4934,13 +6540,39 @@ same CI recomputation before any gate consumes them.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
+| `STREAM_CORE_SATELLITE_POINTER_SCOPE_V1` | `6529STREAM_CORE_SATELLITE_POINTER_SCOPE_V1` | 0xf4a381d3d4c51db07c19830799ea01c544326118ea1db1fb59d54af5f637bdbb | `StreamCore` | `1` | domain; chainid; core; pointerType ([LTA-POINTERS]) |
+| `STREAM_CORE_SATELLITE_POINTER_STATE_V1` | `6529STREAM_CORE_SATELLITE_POINTER_STATE_V1` | 0x1fdde0a7122d0fc7c237e721e372e43082581dcc6bd2babca4e09bb1e6b3d043 | `StreamCore` | `1` | domain; scopeHash; target; runtimeCodeHash; frozen; moduleType; interfaceId; registry; registryStatus; moduleManifestHash; deploymentManifestHash; monotonic revision ([LTA-POINTERS]) |
+| `STREAM_MODULE_REGISTRATION_SCOPE_V1` | `6529STREAM_MODULE_REGISTRATION_SCOPE_V1` | 0x5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a274 | module registry | `1` | domain; chainid; registry; module ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_MODULE_REGISTRATION_STATE_V1` | `6529STREAM_MODULE_REGISTRATION_STATE_V1` | 0x93088f9512a50b047b7d8d85dff50b75c0477b2100b7faa95e140bdfdeb20b0a | module registry | `1` | scope; existence; complete record facts/revision; count; chain hash/count; indexed module ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_MODULE_STATUS_SCOPE_V1` | `6529STREAM_MODULE_STATUS_SCOPE_V1` | 0x104af01db40b16330febbabdcb5564c94185b428a7c45b9ebfedbc16b0e31924 | module registry | `1` | domain; chainid; registry; module ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_MODULE_STATUS_STATE_V1` | `6529STREAM_MODULE_STATUS_STATE_V1` | 0x6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e23139 | module registry | `1` | scope; complete record facts/status/revision; invariant count and chain ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1` | `6529STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1` | 0x5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b | module registry | `1` | domain; chainid; registry ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1` | `6529STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1` | 0x2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c62 | module registry | `1` | scope; manifest hash; manifest URI hash; monotonic revision ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_SYSTEM_MANIFEST_SCOPE_V1` | `6529STREAM_SYSTEM_MANIFEST_SCOPE_V1` | 0xf73b4d7b4d260fce0823707f836fdf29a1767a2a2a9cfbce14ec8c5e49e47841 | `StreamSystemManifest` | `1` | domain; chainid; systemManifest satellite ([LTA-MANIFEST-PUBLISH]) |
+| `STREAM_SYSTEM_MANIFEST_STATE_V1` | `6529STREAM_SYSTEM_MANIFEST_STATE_V1` | 0x3764ccb415d0aac07f1bddb8d4841ad6d4c2f9b2fe7ce7d221c586bc056aaf60 | `StreamSystemManifest` | `1` | domain; scopeHash; manifestHash; manifestURI hash; payloadPointer; moduleAddressesHash; discoveryHashesHash; append-only revision ([LTA-MANIFEST-PUBLISH]) |
+| `STREAM_DEPLOYMENT_IDENTITY_V1` | `6529STREAM_DEPLOYMENT_IDENTITY_V1` | 0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a | release tooling / module identity | `1` | domain; Keccak-256 of the RFC8785-JCS address-free deployment-identity view ([LTA-DEPLOYMENT-IDENTITY]) |
+| `STREAM_SYSTEM_MANIFEST` module type | `STREAM_SYSTEM_MANIFEST` | 0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6 | module registry / `StreamSystemManifest` | `1` | `keccak256` of the ASCII module-type name; no `abi.encode` inputs ([LTA-POINTERS], [LTA-MANIFEST]) |
+| `STREAM_CORE_FINALITY_ADAPTER` module type | `STREAM_CORE_FINALITY_ADAPTER` | 0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4 | module registry / `StreamCoreFinalityAdapter` | `1` | `keccak256` of the ASCII module-type name; immutable Core/collection-metadata bindings; interface `0xebf35615` ([LTA-CORE-FINALITY-ADAPTER]) |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` schema ID | `STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` | 0x8844b744a67cdcdb84ea3c6e3d686883da175820b9ff07a19cffa14bf62e6e81 | schema catalog / `StreamSystemManifest` | `1` | exact system-manifest JSON member/type/order rules ([LTA-MANIFEST]) |
+| `RFC8785_JCS` canonicalization ID | `RFC8785_JCS` | 0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044 | canonicalization catalog / `StreamSystemManifest` | `1` | RFC 8785 JCS plus pinned I-JSON/NFC restrictions ([LTA-MANIFEST]) |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | 0x852f4811a2eb32694863d94ba41b545a65ef4c76086a32c35881f0c4e250a7b5 | `StreamSystemManifest` | `1` | chunk index; payload length; recomputed segment hash ([LTA-MANIFEST]) |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | 0xa93750a5551ac5668c8f24cca85acaf1d5f8334fac9406f845fce1ce35548839 | `StreamSystemManifest` | `1` | total bytes; ordered chunk leaf hashes ([LTA-MANIFEST]) |
+| `STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | 0xd6ab89b077c61a288c7168cf8f1c9a7a19464b10475735dae37cb46a0c94c40b | `StreamSystemManifest` | `1` | schema version/ID; canonicalization ID; total bytes; chunk count; list hash ([LTA-MANIFEST]) |
+| `STREAM_GAS_PARAMETER_SCOPE_V1` | `6529STREAM_GAS_PARAMETER_SCOPE_V1` | 0x8d8b74997070792410ba6f4dd511d967fec29b82366868401baa2bfb3681da69 | GGP hosts | `1` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
+| `STREAM_GAS_PARAMETER_STATE_V1` | `6529STREAM_GAS_PARAMETER_STATE_V1` | 0xa16fd6b2f079cdf0a8f1a952c35496a693958895d1782fecc8b6440e06594977 | GGP hosts | `1` | domain; scopeHash; value; floor; probe; probe runtime/binding hashes; failureClass; probeMaxAgeBlocks; conditional action IDs; monotonic revision ([LTA-GGP-CORE]) |
+| `STREAM_GGP_PROBE_BINDING_V1` | `6529STREAM_GGP_PROBE_BINDING_V1` | 0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4 | GGP hosts | `1` | registry; probe; module type/interface/version; runtime code hash; module/deployment manifest hashes ([LTA-GGP-CORE]) |
+| `STREAM_GGP_PROBE` module type | `STREAM_GGP_PROBE` | 0xe358a47f0dcbc7a22cc88ea7cd9ff433ec85ce6d9c7d0dc3f329e98b621cd6c8 | module registry / GGP probes | `1` | base probe module type; interface ID `0x0f8c6b0f` ([LTA-GGP-PROBES]) |
+| `STREAM_GGP_CONDITIONAL_RAISE_V1` | `6529STREAM_GGP_CONDITIONAL_RAISE_V1` | 0x88d201cde2efee286ecd558414d10dd0599848f47e6dcdfa51a2e0287e4fb2eb | GGP hosts | `1` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
+| `STREAM_GGP_CONDITIONAL_RELOWER_V1` | `6529STREAM_GGP_CONDITIONAL_RELOWER_V1` | 0xb30115be75ee59eeed3fa156242dc7c0eda20b383f4f251c8adcfa616b2276a1 | GGP hosts | `1` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
+| `STREAM_TIME_PARAMETER_SCOPE_V1` | `6529STREAM_TIME_PARAMETER_SCOPE_V1` | 0xcb90eddcfa663732d90ca0d1892636ba1216e3900df55acc72d58187eee359a8 | GTP hosts | `1` | domain; chainid; host; parameterId ([LTA-GTP]) |
+| `STREAM_TIME_PARAMETER_STATE_V1` | `6529STREAM_TIME_PARAMETER_STATE_V1` | 0x2cdcb8724d05b4fa9d1ad4f857f9c5fa49ca997d15870fe7f9df6fbae1402583 | GTP hosts | `1` | scope; value/floors; authenticated cadence-probe binding; recency; monotonic revision ([LTA-GTP]) |
 | `STREAM_FINALITY_COMPONENTS_V1` | `6529STREAM_FINALITY_COMPONENTS_V1` | 0xf57efb77611ea13bd3a60968beee86ec330159736aa5d42707a9c0676dbc8898 | finality registry | `1` | domain; sorted `FinalityComponentExpectation[]` (Artwork Finality Freeze) |
-| `STREAM_CORE_COLLECTION_FACTS_V1` | `6529STREAM_CORE_COLLECTION_FACTS_V1` | 0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764 | finality registry | `1` | domain; chainid; core; collectionId; `CoreCollectionFinalityFacts` fields (Artwork Finality Freeze) |
-| `STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | `6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | 0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26 | `StreamCore` | `1` | domain; chainid; core; collectionId (Artwork Finality Freeze) |
+| `STREAM_CORE_COLLECTION_FACTS_V1` | `6529STREAM_CORE_COLLECTION_FACTS_V1` | 0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764 | `StreamCoreFinalityAdapter` / finality registry | `1` | domain; chainid; actual Core; collectionId; adapter-derived facts with no `createdAt` and `uint256` supply fields ([LTA-CORE-FINALITY-ADAPTER]) |
+| `STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | `6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | 0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26 | `StreamCoreFinalityAdapter` | `1` | domain; chainid; actual Core; collectionId; adapter-computed empty-config fact, not a Core read ([LTA-CORE-FINALITY-ADAPTER]) |
 | `STREAM_FINALITY_V1` | `6529STREAM_FINALITY_V1` | 0x569714204c899f0d33a0f98879ce85708169a5f1e11f763f2897f64e5d6c8493 | finality registry | `1` | domain; chainid; core; collectionId; coreCollectionFactsHash; componentsHash; manifest uriHash/contentHash/schemaId/canonicalizationHash |
 | `STREAM_FINALITY_RECOVERY_V1` | `6529STREAM_FINALITY_RECOVERY_V1` | 0x521e8df5a00a793a5b47409e1e7711b4b8857ba9e6c833fe59a48dfa865b19ac | finality registry | `1` | domain; chainid; finalityRegistry; collectionId; expectedOldFinalityRecordHash; recoveryManifest.contentHash; recoveryRouteHash; executeAfter; artworkBytesChanged; reasonHash |
 | `STREAM_SCOPED_FINALITY_V1` | `6529STREAM_SCOPED_FINALITY_V1` | 0x5b56313142e6381659f9d10163ccfa5ea22cb437617c8e69b37c31ecda6f3a50 | finality registry | `1` | domain; chainid; core; scopeType; collectionId; tokenId; scopeId; scopedCoreFactsHash; componentsHash; manifest uriHash/contentHash/schemaId/canonicalizationHash |
-| `STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | `6529STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | 0x5c6390c543248a4d63630061d67c3d2245df223d9ac586deccabf40620b43f6e | finality registry | `1` | domain; chainid; core; scope fields; `ScopedCoreFinalityFacts` fields (Scoped Finality For Open Series) |
+| `STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | `6529STREAM_SCOPED_CORE_FINALITY_FACTS_V1` | 0x5c6390c543248a4d63630061d67c3d2245df223d9ac586deccabf40620b43f6e | `StreamCoreFinalityAdapter` / finality registry | `1` | domain; chainid; actual Core; raw scope tuple; adapter-derived Core/metadata facts (Scoped Finality For Open Series) |
 | `STREAM_SCOPED_FINALITY_RECOVERY_V1` | `6529STREAM_SCOPED_FINALITY_RECOVERY_V1` | 0x7111cd2afae740dbddcd349ab0b8b9269b6a81c331cef7ca8d542e87308bc54a | finality registry | `1` | domain; chainid; finalityRegistry; scope fields; expectedOldFinalityRecordHash; recoveryManifest.contentHash; recoveryRouteHash; executeAfter; artworkBytesChanged; reasonHash |
 | `STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1` | `6529STREAM_EXPORT_TOKEN_COLLECTION_LEAF_V1` | 0x584f047f88b167145486935a02a69e85bf86fdaa6200d84996b4b03124922beb | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
 | `STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1` | `6529STREAM_EXPORT_COLLECTION_SERIAL_LEAF_V1` | 0x8868a51be1bdbae4624466a9fa15a9c14b03dd877a0d62e9fca92a2651a8ee2d | `STATE_EXPORT_V1` profile | `1` | leaf schema in [LTA-EXPORT] |
@@ -4990,9 +6622,11 @@ Core gates:
    remain the pre-deployment development control; interim exceptions cannot
    survive to the deployment gate.
 3. interface IDs verified.
-4. `totalSupply()`, `lastAllocatedTokenId()`, and dense sequential
-   allocation verified; the `ERC721Enumerable` index surface is absent —
-   no per-index selectors, no index storage, and
+4. `totalSupply()`, `lastAllocatedTokenId()`, monotonic sequential allocation,
+   and permanent no-reuse verified; a state-only walker golden skips an
+   incident-aborted prepared-mint gap below the high-water mark without losing
+   the completed token after it. The `ERC721Enumerable` index surface is
+   absent — no per-index selectors, no index storage, and
    `supportsInterface(0x780e9d63) == false` ([LTA-ENUMERATION]).
 5. Core-native ERC-2981 tested under resolver failure.
 
@@ -5063,8 +6697,10 @@ Governance gates:
 9. batch-action atomicity tests for every cross-contract "same governed
    execution" obligation ([LTA-GOV] rule 5);
 10. registry-`ACTIVE` pre-approved fallback targets verified for every
-    critical pointer family, with a rehearsed permissionless emergency
-    move as release evidence ([LTA-POINTERS] rule 11);
+    critical pointer family, with a rehearsed lifecycle proving authorized
+    class-3 scheduling within four hours of `INCIDENT_REVOKED` and
+    permissionless execution only after the normal class-3 delay
+    ([LTA-POINTERS] rule 11);
 11. every governor-held defensive role proves either a registered
     guardian module with a live authorization exercised in rehearsal —
     its agents passing the holder-class, redundancy, and sunset checks
@@ -5103,7 +6739,7 @@ Operations gates:
    transfer — several cold `SSTORE`s on every ownership change, paid by
    collectors on every marketplace sale for the life of the system —
    plus several kilobytes against the Core headroom rule, to serve an
-   archival need that state exports, dense sequential IDs with the
+   archival need that state exports, monotonic sequential IDs with the
    iteration surface, Transfer replay, and the conformance-gated
    reconstruction client already serve ([LTA-ENUMERATION]).
    `totalSupply()` stays. The costs of removal are accepted with open

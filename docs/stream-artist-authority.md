@@ -169,7 +169,7 @@ the documents below own their storage and flows and cite this document:
    and collection metadata specs cite that schema and never restate or
    fork it (ADR 0011 decision R7.6).
 6. [ADR 0004](adr/0004-admin-governance.md) owns roles, the canonical
-   governance action ID (`STREAM_GOVERNANCE_ACTION_V1`), delay classes, and
+   governance action ID (`STREAM_GOVERNANCE_ACTION_V2`), delay classes, and
    batch execution. Every governed action in this document stages through
    that one preimage; this document defines no second staged-operation
    preimage (ADR 0010 decision D3.4).
@@ -2199,13 +2199,9 @@ deployer field, but external surfaces cannot read intent from an
 address. The artist-signed deployment attestation is the address-level
 provenance record (ADR 0012 decision T9): the artist's own signature
 asserting that this collection at this Core address is their authorized
-deployment. The per-collection facade profile — an address-per-series
-front for Core identity — is resolved as a dormant extension profile
-with a pre-public-sale tripwire (ADR 0015 decisions W3 and W5): its
-home is
-[`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md),
-and any deployment decision advances only through that document's
-tripwire procedure ([FCP-DEPLOYMENT]).
+deployment. ADR 0016 rejects a dormant address-per-series facade inside launch
+Core because ERC-721 conformance is contract-wide. Core is the sole launch
+ERC-721 address; any future wrapper or successor line requires a new ADR.
 
 Requirements:
 
@@ -2259,9 +2255,8 @@ bytes32 deploymentFactsHash = keccak256(abi.encode(
    registry and this attestation rather than by a deployer field — as
    an explicit disclosed term alongside the royalty term
    (`AA-TOOLING` requirement 2).
-5. Creator-verification posture (ADR 0013 decision U4). Independent of
-   whether the dormant facade extension profile ever deploys
-   (ADR 0015 decision W3), the registry attests three
+5. Creator-verification posture (ADR 0013 decision U4; ADR 0016). The registry
+   attests three
    creator-verification facts an external marketplace or explorer can
    consume with no bespoke integration: the two-sided binding — an
    artist-accepted attribution, address-verifiable and evented
@@ -2270,12 +2265,9 @@ bytes32 deploymentFactsHash = keccak256(abi.encode(
    collection; and sanction records (`AA-SANCTION`) — each typed and
    reachable from token JSON and `contractURI`. What the registry
    cannot supply on a shared Core is a per-series deployer address for
-   pipelines that verify creators by deployer key alone; that gap is
-   exactly the one the dormant per-collection facade line closes if it
-   ever deploys, and the deployment decision advances only through the
-   tripwire procedure of [FCP-DEPLOYMENT] in
-   [`docs/stream-collection-facade-profile.md`](stream-collection-facade-profile.md)
-   (ADR 0015 decision W3). Launch-evidence
+   pipelines that verify creators by deployer key alone. ADR 0016 leaves that
+   limitation explicit rather than adding a nonconformant second ERC-721
+   surface. Launch-evidence
    enforcement — per pinned marketplace target, proof that the launch
    artist displays as the verified creator or a recorded target
    limitation — is owned by the conformance matrix
@@ -2652,43 +2644,11 @@ when no artist authority is live, and the unilateral content freeze
 consent reads are `bytes32`-generic by construction, so no new registry
 surface is needed.
 
-The collection identity mode joins the same boundary (ADR 0015 decision
-W4): the identity mode — `CORE_NATIVE` or `EXTERNAL_FACADE` — decides
-the marketplace identity of the work, the address and token numbering
-under which the work is listed, traded, and cited, so for artist-bound
-collections the identity-mode declaration is consent-gated at the same
-authority level as a content-affecting write. The identity-mode
-vocabulary, declaration surface, family identifier, canonical mode
-state hash, and Core-side enforcement are owned by the protocol v1
-specification
-([`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
-[PV1-IDENTITY-MODE]), which mirrors this section: Core must verify
-`requireContentConsent` over the exact declared mode state before
-recording an identity-mode declaration for an artist-bound collection.
-Because the facade address is the thing that actually fixes that
-marketplace identity, an `EXTERNAL_FACADE` declaration on an
-artist-bound collection binds the mode and the controller together in
-the consented state — the canonical mode state hash for an
-`EXTERNAL_FACADE` declaration commits to the mode and the controller
-address, while a `CORE_NATIVE` declaration commits to the bare mode,
-per the state-hash definitions of [PV1-IDENTITY-MODE] — and the
-declaration and the controller registration execute in one atomic
-governed batch
-([`adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
-[GOV-BATCH]; ADR 0015 decision W4), so the artist's consent covers the
-concrete two-address identity, never a facade address chosen later.
-Authority, record mechanics, and the `DISPUTED` block follow
-requirements 2 and 5 unchanged. Because the declaration is one-way,
-allowed only before the collection's first mint, and immutable from
-that mint onward (ADR 0015 decision W4), the requirement 1 window
-structurally cannot cover it: the consent obligation attaches to the
-declaration act itself, from binding acceptance until the first mint,
-and the artist-unavailability fallback of `AA-RECOVERY` requirement 2
-does not apply — an undeclared collection is `CORE_NATIVE` by
-construction, so where no artist authority is live the declaration
-waits and the collection loses nothing. The consent reads are
-`bytes32`-generic by construction, so no new registry surface is
-needed.
+The launch line has no collection identity-mode declaration or facade binding
+to consent to (ADR 0016). Core address, collection ID, global token ID, and
+collection serial are the fixed launch identity facts. Any future successor
+asset model that changes those facts must define a fresh artist-consent family
+in its own accepted ADR; the generic registry does not pre-authorize it.
 
 Pinned typed payloads:
 
@@ -3514,7 +3474,7 @@ STEWARD_CAPABILITIES = CAP_ATTEST | CAP_ROYALTY_FREEZE | CAP_DISPUTE
    are Permanent semantics
    of `AUTH_STEWARD`.
 7. All dormancy governance actions use the canonical
-   `STREAM_GOVERNANCE_ACTION_V1` action ID with dormancy fields folded
+   `STREAM_GOVERNANCE_ACTION_V2` action ID with dormancy fields folded
    into `scopeHash`/`newValueHash` per ADR 0004 (Canonical Action ID And
    Batch Execution); this document defines no second staging preimage.
 8. Completion never voids recorded consents (requirement 5): phases the
@@ -5267,13 +5227,8 @@ Requirements:
    `ARTIST_REGISTRY` pointer freeze state and the registry-immutability
    election (`AA-MODULE` requirement 2, `AA-BINDING` requirement 10),
    of the sale-parameter consent election and its boundary
-   (`AA-ECON` requirement 7), of the operative collection identity mode
-   for every bound collection — declared, or `CORE_NATIVE` by
-   construction ([PV1-IDENTITY-MODE] in
-   [`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md);
-   ADR 0015 decision W4) — so a declaration that predates the binding
-   is disclosed at the one moment the artist's acceptance is the
-   protection, and of the guardian holder-latency check
+   (`AA-ECON` requirement 7), of Core as the sole ERC-721 identity for every
+   launch collection (ADR 0016), and of the guardian holder-latency check
    against the effective contest window (`AA-GUARD` requirement 10);
    every acknowledgment record enters the
    same rehearsal artifact.

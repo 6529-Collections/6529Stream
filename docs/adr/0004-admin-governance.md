@@ -529,26 +529,27 @@ Governance principles:
 9. Immutable contracts are replaced through new deployment lines and explicit
    pointer governance, not hidden implementation replacement.
 
-Long-term action classes:
+The production action-class IDs are append-only. Existing IDs `0` through `5`
+never change meaning; protocol v1 appends the narrowly checked emergency
+restoration class as ID `6`:
 
-```text
-IMMEDIATE_TIGHTENING
-DELAYED_LOOSENING
-TERMINAL_FREEZE
-POINTER_REPLACEMENT
-FUNDS_RECOVERY
-SUCCESSOR_DECLARATION
-```
+| Numeric ID | Action class | Minimum scheduling delay |
+| --- | --- | --- |
+| `0` | `IMMEDIATE_TIGHTENING` | `0` |
+| `1` | `DELAYED_LOOSENING` | at least 48 hours |
+| `2` | `TERMINAL_FREEZE` | at least 48 hours plus the independent veto floor below |
+| `3` | `POINTER_REPLACEMENT` | at least 48 hours |
+| `4` | `FUNDS_RECOVERY` | the 14-day floor below |
+| `5` | `SUCCESSOR_DECLARATION` | the 30-day floor below |
+| `6` | `EMERGENCY_RESTORATION` | `0`; target-side fresh-failure and bounded-transition checks are mandatory |
 
-The deployed enforcement model is definitively the two-tier delay model
-below plus the named exception floors (ADR 0012 decision T9); the richer
-action-class taxonomy above is catalog and manifest vocabulary until a
-separately accepted ADR implements it onchain:
-
-```text
-IMMEDIATE tightening actions only, 0 delay
-DELAYED all other material actions, at least 48 hours
-```
+The implementation keeps the two ordinary delay tiers — zero delay for
+proved tightening and at least 48 hours for every other ordinary material
+action — plus the named exception floors. `EMERGENCY_RESTORATION` is not a
+generic third tier and is never inferred from a proposer label: it is admitted
+only by a target entrypoint that explicitly requires numeric ID `6` and proves
+the incident fact and bounded restoration at execution. Registering any other
+selector as ID `6`-eligible is nonconformant.
 
 Three action families keep explicit longer launch floors even under the
 two-tier model:
@@ -691,23 +692,63 @@ struct GovernanceCall {
     uint256 value;
     bytes4 selector;
     bytes32 callDataHash; // keccak256(callData)
+    bytes32 scopeHash;    // target-specific transition scope
+    bytes32 oldValueHash; // target-specific pre-state commitment
+    bytes32 newValueHash; // target-specific post-state commitment
 }
 
-bytes32 constant STREAM_GOVERNANCE_CALLS_V1 =
-    0x51c60c7ea5577cbf0c5157f544a7de1a186ae82b6fc4df6a626b9c8d1d3a0b61;
-    // keccak256("6529STREAM_GOVERNANCE_CALLS_V1")
+bytes32 constant STREAM_GOVERNANCE_CALLS_V2 =
+    0x10f09566fb70f7947b61639c2a53b3aec872069a8b46edd08ba14eb2b5942b70;
+    // keccak256("6529STREAM_GOVERNANCE_CALLS_V2")
 
 bytes32 callsHash = keccak256(abi.encode(
-    STREAM_GOVERNANCE_CALLS_V1,
+    STREAM_GOVERNANCE_CALLS_V2,
     calls
 ));
 
-bytes32 constant STREAM_GOVERNANCE_ACTION_V1 =
-    0xda01e91bb5de11674cef69c6774002280d75bcb43cd9c78413c4b94d5d14249b;
-    // keccak256("6529STREAM_GOVERNANCE_ACTION_V1")
+bytes32 constant STREAM_GOVERNANCE_BATCH_SCOPE_V2 =
+    0x6cfd5dfd67f064adac45602c05057edddda810734779c0ebe11b447e6985e31c;
+    // keccak256("6529STREAM_GOVERNANCE_BATCH_SCOPE_V2")
+
+bytes32 constant STREAM_GOVERNANCE_BATCH_OLD_STATE_V2 =
+    0xc5029f937b44065c2ad92d9253e07f06117567480206189fcc1409d5509222b7;
+    // keccak256("6529STREAM_GOVERNANCE_BATCH_OLD_STATE_V2")
+
+bytes32 constant STREAM_GOVERNANCE_BATCH_NEW_STATE_V2 =
+    0xce958009248d20d9574439fa374bc00c142940af2b496896b5bdbc00b882e98b;
+    // keccak256("6529STREAM_GOVERNANCE_BATCH_NEW_STATE_V2")
+
+bytes32[] memory callScopeHashes = new bytes32[](calls.length);
+bytes32[] memory callOldValueHashes = new bytes32[](calls.length);
+bytes32[] memory callNewValueHashes = new bytes32[](calls.length);
+for (uint256 i; i < calls.length; ++i) {
+    callScopeHashes[i] = calls[i].scopeHash;
+    callOldValueHashes[i] = calls[i].oldValueHash;
+    callNewValueHashes[i] = calls[i].newValueHash;
+}
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_BATCH_SCOPE_V2,
+    callsHash,
+    callScopeHashes
+));
+bytes32 oldValueHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_BATCH_OLD_STATE_V2,
+    callsHash,
+    callOldValueHashes
+));
+bytes32 newValueHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_BATCH_NEW_STATE_V2,
+    callsHash,
+    callNewValueHashes
+));
+
+bytes32 constant STREAM_GOVERNANCE_ACTION_V2 =
+    0x214cd728538bb3775a7106caff5c761bace11866a984d4a4d97a98f51971ac4b;
+    // keccak256("6529STREAM_GOVERNANCE_ACTION_V2")
 
 bytes32 actionId = keccak256(abi.encode(
-    STREAM_GOVERNANCE_ACTION_V1,
+    STREAM_GOVERNANCE_ACTION_V2,
     uint256(block.chainid),
     address(this),            // the governance contract
     uint8(actionClass),
@@ -723,9 +764,73 @@ bytes32 actionId = keccak256(abi.encode(
 ));
 ```
 
+The pre-genesis V2 domains replace the transitional V1 action/calls domains.
+V2 is required because each `GovernanceCall` now commits its target-specific
+scope and state transition; retaining the V1 domain after changing that typed
+preimage would make signed/scheduled evidence schema-ambiguous. V1 actions are
+not accepted by the target executor and cannot be replayed into V2.
+The three action-level transition hashes are not caller-authored summaries:
+the executor derives them from the ordered call descriptors with the exact
+formulas above and rejects any scheduling arguments that differ. Including
+`callsHash` in each aggregate binds target, value, selector, calldata, and all
+three per-call commitments. A one-call wrapper constructs the same one-element
+arrays and therefore stores the same aggregate fields and produces the same
+`actionId` as the equivalent batch.
+
+V2 cutover gate [GOV-V2-CUTOVER]. This migration is the first implementation
+slice and a hard precondition to every new Core writer. Before a pointer,
+collection-freeze, burn-block, manifest-publication, facade-governance, or
+Core-hosted GGP writer can merge, one atomic governance cutover must:
+
+1. replace the executor and `IStreamGovernanceExecutor` call descriptor with
+   the seven-word `GovernanceCall`, the six-return `currentAction()`, and the V2
+   action/calls domains and selectors below; append action class
+   `EMERGENCY_RESTORATION = 6` without changing IDs `0..5`, teach
+   `minimumDelay(6)` and the class validator the zero-delay target-checked
+   exception, implement [GOV-EMERGENCY-RESTORATION]'s exact eligibility
+   registry, and keep every class-6 writer unreachable until this lands;
+2. update the governance call-data publisher, action-ID builder, Safe/governor
+   transaction builder, monitoring decoder, and release checker to derive V2
+   descriptors and per-call contexts from the same published bytes; migrate
+   every existing GGP/GTP host from authority-only acceptance to independent
+   action-class/context enforcement before registering any emergency selector;
+3. add golden tests for every selector, domain, and numeric action-class ID,
+   including unknown-class rejection above `6`, per-call context rotation and
+   clearing, one-call-wrapper equivalence, SSTORE2 publication and decoding,
+   batch atomicity/value conservation, V1 rejection, and target-side forged-
+   context rejection;
+4. rehearse one class-6 schedule/execute path from every supported material
+   holder class and retain the target-side failing-probe/bounded-raise evidence;
+   regenerate the governance ABI/interface artifact, selector and event
+   catalogs, numeric-ID/domain catalogs (including the row for ID `6`),
+   deployment inputs, release manifest, and checksum bundle; and
+5. retire the V1 structs, V1 action/calls domains, V1 executor entrypoints, and
+   every pending V1 action. There is no compatibility wrapper that schedules or
+   executes V1, and a development action that was scheduled under V1 must be
+   cancelled or abandoned and rescheduled under V2.
+
+The cutover gate tests the executor against target-interface harnesses before
+any target writer exists on Core. A PR that adds a Core writer while any item
+above is incomplete is out of order even if its target-side checks are correct.
+
+With the seven-word V2 `GovernanceCall` tuple, the production batch selectors
+are `0x9c954144` for
+`scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)`
+and `0x2eccc33e` for
+`executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])`.
+
 Explicit batch ABI (ADR 0011 decision R10):
 
 ```solidity
+function publishGovernanceCallData(bytes[] calldata callDatas)
+    external
+    returns (address pointer);
+
+function publishedCallData(bytes32 callDataKey)
+    external
+    view
+    returns (address pointer);
+
 function scheduleGovernanceBatch(
     uint8 actionClass,
     GovernanceCall[] calldata calls,
@@ -744,6 +849,28 @@ function executeGovernanceBatch(
     GovernanceCall[] calldata calls,
     bytes[] calldata callDatas
 ) external payable;
+
+function currentAction()
+    external
+    view
+    returns (
+        bool executing,
+        bytes32 actionId,
+        uint8 actionClass,
+        bytes32 scopeHash,
+        bytes32 oldValueHash,
+        bytes32 newValueHash
+    );
+
+function scheduledCallDataPointer(bytes32 actionId)
+    external
+    view
+    returns (address pointer);
+
+function scheduledCallData(bytes32 actionId)
+    external
+    view
+    returns (bytes[] memory callDatas);
 ```
 
 The batch entrypoints are the canonical scheduling and execution ABI
@@ -751,12 +878,79 @@ The batch entrypoints are the canonical scheduling and execution ABI
 `scheduleGovernanceAction`/`executeGovernanceAction` are thin wrappers that
 must produce byte-identical action IDs to the equivalent one-call batch.
 Tooling and specs cite the batch ABI.
+`currentAction()` has selector `0x546ea281`. During each batch call it exposes
+the fixed-width action ID/class plus that `GovernanceCall` entry's three
+target-specific hashes. The executor sets the per-call context immediately
+before the call and clears it immediately afterward; outside execution all six
+returns are zero. The first three returns preserve the shipped development
+interface and the three hashes are trailing compatibility outputs, so an older
+decoder may ignore them. A target must not trust the executor's selector
+classifier alone when the target can irreversibly freeze or redirect state; it
+checks this in-flight per-call context against the subsystem-owned hash
+formulas. The action-level `scopeHash`/`oldValueHash`/`newValueHash` retained in
+`GovernanceAction` describe the batch's composite transition for scheduling and
+review; they are not substituted for a target's call-level commitments. The
+dynamic reason URI and other display evidence remain available through
+`governanceAction(actionId)` and are intentionally absent from this bytecode-
+constrained target path.
+
+The call-data publication ABI is also production-exact. Selectors are
+`0x5447021f` for `publishGovernanceCallData(bytes[])`, `0x95a2b189` for
+`publishedCallData(bytes32)`, `0x38f8ce24` for
+`scheduledCallDataPointer(bytes32)`, and `0x72a3c7b8` for
+`scheduledCallData(bytes32)`. Publication is permissionless and
+content-addressed:
+
+```solidity
+bytes32[] memory callDataHashes = new bytes32[](callDatas.length);
+for (uint256 i; i < callDatas.length; ++i) {
+    callDataHashes[i] = keccak256(callDatas[i]);
+}
+bytes32 callDataKey = keccak256(abi.encodePacked(callDataHashes));
+bytes memory payload = abi.encode(callDatas);
+```
+
+The SSTORE2 runtime code is exactly `0x00 || payload`: byte zero is `STOP`, and
+the read is `extcodecopy(pointer, ..., 1, extcodesize(pointer) - 1)`. The
+publisher rejects an empty outer array, an invalid or non-canonical decoded
+payload, runtime code whose first byte is not `0x00`, and
+`payload.length > 24_575`, so the runtime never exceeds the EIP-170
+24,576-byte limit. An empty `bytes` element remains valid for the canonical
+approved-native-receiver case; it is not an empty publication. It stores one immutable
+pointer at `publishedCallData[callDataKey]`; republishing byte-identical content
+is idempotent and returns the existing pointer. A new publication emits
+`GovernanceCallDataPublished(bytes32 indexed callDataKey, address pointer,
+address publisher)`, topic
+`0x4ac1b161ad3fa578344338460c39347b0ca6f7690548acc6d22d3b4ea81c059f`.
+
+`scheduleGovernanceBatch` does not accept a second copy of `callDatas`. It
+derives `callDataKey` from the ordered descriptors, requires the pointer to
+exist, reads and ABI-decodes the blob, requires equal array lengths, and for
+each position rechecks the decoded byte hash and leading selector against the
+corresponding `GovernanceCall` before storing that pointer for the action. An
+element is valid in exactly one of two shapes: empty bytes require
+`selector == bytes4(0)`, `value > 0`, and an exact approved native receiver;
+otherwise its length is at least four and its leading four bytes equal
+`selector`. Class `6` rejects the empty/native shape regardless of receiver.
+`scheduleGovernanceAction` carries its sole call-data preimage, publishes
+`abi.encode(oneElementBytesArray)` internally, and then schedules the same
+one-call descriptor, producing the byte-identical V2 action ID. Execution
+repeats pointer format, decode, hash, selector, and descriptor checks before
+the first target call; the supplied execution bytes must equal the scheduled
+content, not merely collide at an action-level composite.
 
 Batch rules [GOV-BATCH]:
 
 1. Execution supplies the full ordered `GovernanceCall[]` plus each call's
    `callData`; every `callDataHash` must match, and the recomputed
-   `callsHash` and `actionId` must match the stored action.
+   `callsHash` and `actionId` must match the stored action. Immediately before
+   each low-level call the executor exposes that entry's `scopeHash`,
+   `oldValueHash`, and `newValueHash` through `currentAction()`; it clears the
+   per-call context after the call. The single-call wrapper places its request's
+   three transition hashes in the sole call descriptor, then derives the three
+   action-level aggregates with the one-element-array formulas in
+   [GOV-ACTION-ID], so it remains byte-identical to the equivalent one-call
+   batch.
 2. Batch execution is atomic: every call succeeds or the whole action
    reverts. Partial application is never observable. Payable semantics are
    pinned (ADR 0013 decision U5): each `GovernanceCall.value` is the exact
@@ -771,10 +965,795 @@ Batch rules [GOV-BATCH]:
    `scopeHash`/`newValueHash` and this one preimage; defining a second
    staged-operation preimage is nonconformant (ADR 0010 decision D3.4).
 5. Scheduled calldata is published onchain for the full open-to-execute
-   window (ADR 0013 decision U5): scheduling stores an SSTORE2 pointer to
-   the exact `callDatas` bytes in the action record, so executors and
-   verifiers never depend on an offchain preimage to exercise or audit a
-   scheduled action.
+   window (ADR 0013 decision U5) through the exact publication ABI and
+   `callDataKey` formula above. Batch publication precedes scheduling; the
+   single-call wrapper publishes internally. Scheduling stores the resolved
+   SSTORE2 pointer in the action record, and the pointer and decoded bytes are
+   exposed by the two scheduled-call-data reads, so executors and verifiers
+   never depend on an offchain preimage to exercise or audit an action.
+
+### System-Manifest Batch Tail [GOV-MANIFEST-TAIL]
+
+"Batch-composition policy" is not an offchain convention. The executor has one
+minimal, append-only rule set that forces every registered pointer or catalog
+mutation to end in the Permanent `StreamSystemManifest` publication call.
+
+The executor constructor pins only
+`SYSTEM_MANIFEST_PUBLISH_SELECTOR = 0x09b1b5c6` and bootstrap-independent
+governance configuration. It accepts no Core, satellite, registry, trigger,
+code-hash, payload-address, manifest-hash, or inventory-root input derived from
+an executor-bound downstream deployment. The tail target and its observed
+runtime code hash begin zero and are recorded by the single irreversible
+bootstrap bind specified below, after the executor-bound contracts exist.
+There is no clear, replace, or second-bind path. Exact trigger ABI and storage
+are:
+
+```solidity
+struct ManifestTailTriggerRule {
+    bytes32 triggerCodeHash; // zero means unregistered
+    uint8 allowedActionClassMask; // bits 0..3 only; zero means invalid
+}
+
+// Exact target plus selector prevents selector aliasing.
+mapping(address => mapping(bytes4 => ManifestTailTriggerRule))
+    private _manifestTailTriggerRules;
+
+struct ManifestTailTriggerEntry {
+    address triggerTarget;
+    bytes4 triggerSelector;
+}
+ManifestTailTriggerEntry[] private _manifestTailTriggerEntries;
+bytes32 private _manifestTailTriggerChainHash;
+
+function systemManifestBatchTailRule(
+    address triggerTarget,
+    bytes4 triggerSelector
+)
+    external
+    view
+    returns (
+        bool registered,
+        bytes32 triggerCodeHash,
+        uint8 allowedActionClassMask,
+        address tailTarget,
+        bytes4 tailSelector,
+        bytes32 tailCodeHash
+    );
+
+function registerSystemManifestTailTrigger(
+    address triggerTarget,
+    bytes4 triggerSelector,
+    uint8 allowedActionClassMask
+) external;
+
+function systemManifestTailTriggerCount() external view returns (uint256);
+
+function systemManifestTailTriggerAt(uint256 index)
+    external
+    view
+    returns (
+        address triggerTarget,
+        bytes4 triggerSelector,
+        bytes32 triggerCodeHash,
+        uint8 allowedActionClassMask
+    );
+
+function systemManifestTailTriggerChainHash()
+    external
+    view
+    returns (bytes32 chainHash, uint64 recordCount);
+
+event SystemManifestTailTriggerRegistered(
+    uint16 schemaVersion,
+    address indexed triggerTarget,
+    bytes4 indexed triggerSelector,
+    bytes32 triggerCodeHash,
+    uint8 allowedActionClassMask,
+    address tailTarget,
+    bytes4 tailSelector,
+    bytes32 indexed actionId
+);
+```
+
+Selectors are `0xffd6babe` for
+`systemManifestBatchTailRule(address,bytes4)` and `0xc64f0807` for
+`registerSystemManifestTailTrigger(address,bytes4,uint8)`, plus `0xeee99df8`,
+`0xd83d70b6`, and `0xa05cac72` for the count, indexed-at, and chain-hash reads.
+The schema-v1 event topic
+is `0x522584aa9f3d195f3d5f3001a5a3a2365f9f61c3982d9ae9aa1c6d0518b31f7f`
+for
+`SystemManifestTailTriggerRegistered(uint16,address,bytes4,bytes32,uint8,address,bytes4,bytes32)`;
+`triggerTarget`, `triggerSelector`, and `actionId` are indexed.
+
+Registration is itself an exact target-side transition:
+
+```solidity
+bytes32 constant STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1 =
+    0x2c9b0dbea692b77bd1679258ca569c13c24eb261671f5a6b78b9fa59cd29c7f1;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1")
+
+bytes32 constant STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1 =
+    0xd41313fe7ee9b51221beebf9c314d67aebec3677907eb1365fff4caa4248f493;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1")
+
+bytes32 constant STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1 =
+    0xe52b2b6e65acb1eae2c217c4b26e893c7d0e7f32afc148867b79c133b3a134fa;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1")
+
+bytes32 constant STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_CHAIN_V1 =
+    0xdf8c3b0d7ebdd491123b988924db55f8fd11251d7e88e5d76722331928dd4951;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_CHAIN_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    triggerTarget,
+    triggerSelector
+));
+
+bytes32 triggerStateHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1,
+    scopeHash,
+    registered,
+    triggerCodeHash,
+    uint8(allowedActionClassMask),
+    uint64(triggerCount),
+    triggerChainHash,
+    systemManifestSatellite,
+    bytes4(0x09b1b5c6),
+    systemManifestSatelliteCodeHash
+));
+
+bytes32 triggerRecordHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1,
+    uint64(triggerIndex),
+    triggerTarget,
+    triggerSelector,
+    triggerCodeHash,
+    uint8(allowedActionClassMask)
+));
+bytes32 nextTriggerChainHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_CHAIN_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    triggerChainHash,
+    triggerRecordHash,
+    uint64(triggerIndex)
+));
+```
+
+The ordinary registration function accepts only an executor self-call while a
+nonzero `TERMINAL_FREEZE` action (numeric ID `2`) is executing and additionally
+requires the bootstrap seal already set. Genesis uses atomic materialization in
+the direct one-way bind below, never ordinary registration. Post-seal registration requires exact
+per-call scope/old/new hashes above, an unregistered nonzero target and
+selector, `allowedActionClassMask != 0`, no set bit outside numeric classes
+`0..3` (`allowedActionClassMask & 0xf0 == 0`),
+`triggerTarget.code.length > 0`, the stored observed code hash to equal
+`triggerTarget.codehash`, a live satellite code hash equal to the immutable
+one-way-bound tail code hash, and a trigger pair different from the tail pair. The old state
+uses `registered = false`, zero trigger code hash, and mask `0`; the new state
+uses `registered = true`, the observed hash, and the proposed mask. A mask bit
+is `uint8(1 << actionClass)`: `0x01`, `0x02`, `0x04`, and `0x08` permit classes
+`0`, `1`, `2`, and `3`, respectively. Field-name changes do not alter the
+getter/registration selectors or the event topic because their ABI types are
+unchanged.
+Registration emits the event only
+after mapping storage, the append-only entry, count, and chain hash are written.
+`triggerIndex` is the pre-state count; the new state commits count plus one and
+`nextTriggerChainHash`, with uint64 overflow rejected. The three enumeration
+reads must agree (`recordCount == systemManifestTailTriggerCount()`), and `At`
+resolves its fields from the append-only key plus mapping. The mapping has no delete, clear, replace, wildcard,
+or target-only registration path.
+
+Except for the bounded, one-way genesis branch specified below, scheduling and
+execution both run the same deterministic scan after validating the decoded
+call-data selectors:
+
+1. A batch containing the exact executor self-call
+   `registerSystemManifestTailTrigger` must contain that one call only. This
+   prevents a new rule from becoming visible partway through the same batch.
+2. For every call whose exact `(target, selector)` is registered, the executor
+   rechecks the target's current runtime code hash against the stored trigger
+   code hash. The action class must be in `0..3`, and every matched rule must
+   contain that class's bit. Different masks may coexist in one batch only when
+   their intersection contains the current class bit; one permissive trigger
+   never overrides a second trigger that omits it. One or more registered
+   triggers require exactly one call to the immutable
+   `(systemManifestSatellite, 0x09b1b5c6)` tail pair.
+3. A tail call, whether trigger-required or standalone, may occur exactly once,
+   must have `value == 0`, and must be the final array element. The executor
+   rechecks the satellite runtime code hash against the one-way-bound observed hash. A
+   standalone tail with no registered trigger is permitted only under
+   `POINTER_REPLACEMENT` (`3`), the catalog/payload publication class.
+4. A missing, duplicated, non-final, value-bearing, or code-hash-mismatched tail
+   rejects scheduling and execution. Rules registered after an older action was
+   scheduled are enforced at execution too; the now-incomplete action becomes
+   safely unexecutable and must be cancelled or allowed to expire, then
+   rescheduled with the required tail.
+
+Before any protected writer is enabled, the genesis bind—or, after seal, a
+separate completed registration action—must cover Core's
+`updateSatellitePointer(bytes32,address)` (`0xac1e5708`) as
+mask `0x08`, `freezeSatellitePointer(bytes32)` (`0xcdcdb71e`) as mask `0x04`,
+Core's `rebindGasParameterProbe(bytes32,address)` (`0xb98f30e0`) as mask
+`0x08`, every other manifest-inventoried GGP/GTP host's exact probe-rebind pair
+as mask `0x08`, and every exact deployed catalog-publisher `(target, selector)`
+that can change one of the seven cached discovery hashes as mask `0x08`.
+Current module-registry inventory is equally protected: each exact deployed
+`registerModule((address,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string))`
+pair (`0x77bfa48d`) is registered with mask `0x02`; each exact polymorphic
+`setModuleStatus(address,uint8,bytes32,string)` pair (`0x96a6e18b`) uses mask
+`0x03`; and each exact
+`setModuleRegistryManifest(bytes32,string)` pair (`0x7ba46615`) uses mask
+`0x02`. The executor's calldata-aware classifier and the registry target both
+independently require class `0` for status tightening and class `1` for
+registration, status loosening, or registry-manifest publication; the mask is
+not permission to misclassify a transition. Their target-owned scope/state
+formulas and hash/URI bounds are pinned at [LTA-REGISTRY-GOVERNANCE]. If a
+future registry separates loosening and revocation selectors, their exact
+rules use the corresponding one-bit masks instead. A future
+registry/catalog/pointer trigger address is deployed and
+code-hash checked, registered in its own terminal-freeze action, and only then
+made usable. This exact-address model covers future modules without a selector
+wildcard or an unsafe mutable policy administrator.
+
+Tail/class goldens cover at least: class-2 pointer freeze followed by one final
+publication; class-3 pointer update followed by one final publication; every
+Core probe rebind, other inventoried GGP/GTP probe rebind, and genesis catalog
+trigger followed by one final publication; module registration and status
+loosening under class `1` followed by one final publication; incident status
+revocation under class `0` followed by one final publication; registry-
+manifest publication under class `1` followed by one final publication; and
+standalone class-3 payload publication. Negative goldens reject a zero or high-bit mask,
+class-2/update, class-3/freeze, registration/revocation under the wrong class,
+mixed triggers when any mask omits the current class bit, missing/duplicate/
+non-final tails, and standalone class-0/1/2 publication; a mixed-mask batch
+whose every rule contains the current class bit succeeds. Enumeration goldens
+walk `0..count-1`, recompute the record chain, compare every mapping rule, and
+reject out-of-range access or any count/chain/state-hash drift.
+
+Genesis bootstrap is an exact one-way exception, not an ungoverned gap. The
+executor constructor pins only a single `genesisBootstrapAuthority` plus pure
+schema/domain/governance configuration; no constructor input may be derived
+from Core, the satellite, a registry/host, an expected trigger, downstream
+runtime code, or a payload/inventory commitment. The executor deploys first.
+`genesisBootstrapAuthority == address(0)` rejects deployment; the zero-
+authority negative is a constructor golden.
+Core, registries, hosts, and `StreamSystemManifest` then deploy with that known
+executor address. One direct, authority-only, irreversible bind atomically
+records the downstream facts and stable first-publication commitments. A pre-
+seal action is always *bootstrap-scoped*; there is no ordinary pre-seal action
+lane. Scheduling is allowed only when `bound && !sealed`,
+`pendingScheduledActionCount() == 0`, the stored proposer is exactly
+`genesisBootstrapAuthority`, and the batch is one of two forms: one or more
+calls all drawn from the already-bound trigger table with a compatible single
+class and no tail; or the exact seal/publication batch below. The same
+form and proposer checks run again at execution. Native transfers, role/admin
+changes, class-6 eligibility registration, and every unrelated target/selector
+are forbidden until after seal; they cannot be queued to survive the bootstrap
+authority's sunset. Checking only the caller that submits or executes the
+transaction is insufficient. The bind materializes its entire supplied trigger
+table from index zero through the final record atomically, so no later proposer
+can add an extra, skipped, substituted, or out-of-order pre-seal record. Any
+executor-mediated registry, catalog, GGP/GTP
+probe-binding, or Core-pointer mutation that contributes to the first payload
+but is absent from the bound expected table rejects while unsealed. Every
+schedule increments the executor-wide pending scheduled count from zero to
+one; execution, cancellation, veto, or explicit expiry materialization returns
+it to zero. A virtually expired but unmaterialized action still counts. All
+ordinary target-side classes, scope/state hashes, delays, vetoes, code-hash
+checks, and transition rules still apply. The executor exposes:
+
+```solidity
+struct SystemManifestBootstrapTriggerExpectation {
+    address triggerTarget;
+    bytes4 triggerSelector;
+    bytes32 triggerCodeHash;
+    uint8 allowedActionClassMask;
+}
+
+struct SystemManifestBootstrapBinding {
+    address core;
+    address systemManifestSatellite;
+    bytes32 expectedManifestHash;
+    bytes32 expectedInventoryStateRoot;
+    uint64 expectedInventoryLeafCount;
+    SystemManifestBootstrapTriggerExpectation[] expectedTriggers;
+    bytes32[] pointerTypes;
+    address[] registries;
+}
+
+function bindSystemManifestBootstrap(
+    SystemManifestBootstrapBinding calldata binding
+) external;
+
+function pendingScheduledActionCount() external view returns (uint256);
+
+function systemManifestBootstrapState()
+    external
+    view
+    returns (
+        bool bound,
+        bool sealed,
+        address core,
+        bytes32 coreCodeHash,
+        address systemManifestSatellite,
+        bytes32 systemManifestSatelliteCodeHash,
+        bytes32 triggerSetHash,
+        uint256 triggerCount,
+        bytes32 expectedTriggerSetHash,
+        uint256 expectedTriggerCount,
+        bytes32 expectedManifestHash,
+        bytes32 expectedInventoryStateRoot,
+        uint256 expectedInventoryLeafCount,
+        bytes32 inventoryStateRoot,
+        uint256 inventoryLeafCount,
+        address genesisBootstrapAuthority,
+        address sealedPayloadPointer
+    );
+
+function sealSystemManifestBootstrap() external;
+
+event SystemManifestBootstrapSealed(
+    uint16 schemaVersion,
+    bytes32 indexed triggerSetHash,
+    uint256 triggerCount,
+    address indexed payloadPointer,
+    bytes32 manifestHash,
+    bytes32 indexed actionId
+);
+
+event SystemManifestBootstrapBound(
+    uint16 schemaVersion,
+    address indexed core,
+    address indexed systemManifestSatellite,
+    bytes32 coreCodeHash,
+    bytes32 systemManifestSatelliteCodeHash,
+    bytes32 indexed expectedManifestHash,
+    bytes32 expectedInventoryStateRoot,
+    bytes32 expectedTriggerSetHash,
+    uint256 triggerCount,
+    address genesisBootstrapAuthority
+);
+```
+
+The bind, pending-count, state, and seal selectors are `0x6528ac7f`,
+`0x20662991`, `0x8a2d979b`, and `0xbd1f39cd`, respectively.
+The bind event topic is
+`0xa8c56f141d0cb94dcbf4cff03abdcda92d641351e75e365a198ac13ab6855ce0`
+for
+`SystemManifestBootstrapBound(uint16,address,address,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,address)`;
+schema version is `1`, and Core, satellite, and expected manifest hash are
+indexed. The seal event topic is
+`0xf8424a276e804e284aa6e3c67ceb87c4c23caff3164e0666e558d34893b13cf9`
+for
+`SystemManifestBootstrapSealed(uint16,bytes32,uint256,address,bytes32,bytes32)`;
+schema version is `1`, and trigger-set hash, root pointer, and action ID are
+indexed. Bootstrap transition hashes are:
+
+Before `bound == true`, every scheduling, execution, cancellation,
+registration, eligibility, and seal path reverts; read-only inspection and the
+exact direct bind call are the only available surfaces. The bind requires
+`msg.sender == genesisBootstrapAuthority`, `bound == sealed == false`, no
+action nonce or record ever created, nonzero distinct code-bearing Core and
+satellite addresses, and nonzero content/inventory commitments and counts. It
+proves Core's immutable executor without adding a Core getter by making a
+write-impossible `staticcall` to
+`updateSatellitePointer(bytes32(0),address(0))`: Core must first accept this
+executor as caller and then revert with exact
+`NoExecutingGovernanceAction()` (`0xb8456c92`) before argument validation;
+`UnauthorizedGovernanceExecutor(address)` (`0xdd2aa8bd`), success, empty data,
+or any other revert rejects the bind. It requires the satellite's explicit
+binding getters `core()` (`0xf2f4eb26`) and `governanceExecutor()`
+(`0x8fc98386`) to equal the bound Core and this executor, and requires
+`supportsInterface(0x37660ede)` to match [LTA-MANIFEST]. Those two getters are
+part of the satellite's seven protocol-specific selectors but are excluded
+from the five-function `IStreamSystemManifest` interface ID;
+`supportsInterface(bytes4)` is the eighth external function. The bind records
+the observed Core and satellite `extcodehash` values and never accepts caller-
+supplied expected code hashes for either contract.
+
+The trigger array is bounded by
+`MAX_GENESIS_MANIFEST_TAIL_TRIGGERS = 128`; it and the pointer/registry arrays
+must be nonempty, strictly ascending in their canonical orders, and duplicate-
+free. Every supplied trigger has a nonzero target/selector, an
+observed live code hash equal to its supplied trigger code hash, and a valid
+nonzero class mask within `0x0f`. In the same transaction the bind appends every
+record to the normal trigger array/mapping, computes every record/chain step,
+and stores actual and expected trigger hash/count as the same final values. It
+does not emit `SystemManifestTailTriggerRegistered` per row because no governed
+`actionId` exists; the single bind event commits the final hash/count and the
+state enumeration exposes every row. All registry addresses are code-bearing
+and expose the exact registry interface. All checks and storage writes are one
+transaction; a failure leaves the executor unbound with zero trigger count.
+Success emits the bind event, permanently disables the bind entrypoint, and
+enables only the constrained pre-seal governance lane. From
+then until seal the bootstrap identity has no direct writer privilege: it is
+only the exact stored proposer required for bootstrap-scoped governed actions.
+The executor rechecks the recorded Core/satellite code hashes on every
+bootstrap-scoped schedule and execution and on seal.
+
+The executor can enforce order, bounds, live code hashes, masks, and equality
+to the irreversibly bound set; it cannot know the external 60-entry release
+profile from constructor state. Checksum-covered release tooling and deployment
+conformance—not the bind—prove that the supplied trigger and pointer/registry
+lists are complete against the normative profile/spec. The implementation gate
+measures the full-profile bind, including all trigger SSTOREs and hashing, under
+the deployment block-gas envelope and retains margin; the 128-row bound is also
+gas-tested. A prose estimate or target JSON fixture is not measured bind-gas
+evidence.
+
+This ordering has no CREATE2 fixed point. Executor initcode contains no value
+derived from an executor-bound deployment; downstream addresses and runtime
+code are created only after the executor address exists; the one-way bind then
+records them; canonical manifest bytes are built only after every inventoried
+address is known; and payload chunks/root deploy last. The root address is
+never a bind or constructor input.
+
+```solidity
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1 =
+    0xace275f08856e822491961304b01cdc9423d7d16c05518327353df5cd02e33f8;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1 =
+    0x96decef116f307400b4d1826658d33976ec923ce136ead67b736b8becbe781ef;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1 =
+    0x9927dc0a368efe3d99880bb180d83938664a29ad399291c4544e4cab70c84548;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1 =
+    0x389d432187327bb28628b23403c9b3c549d0cf950e480ad6d69b7d9fa7b48b9d;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1 =
+    0x9efe6891a30e5198982f60b2d916e3275b866addbee37b7d4b875e52d5251e89;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1")
+bytes32 constant STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1 =
+    0xb524bfb9f69adc6c2d0e07003dd39a76b1d6a728dd95dbd495f709428d21b4ec;
+    // keccak256("6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1")
+
+bytes32 bootstrapScopeHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_SCOPE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor)
+));
+bytes32 bootstrapStateHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_STATE_V1,
+    bootstrapScopeHash,
+    bound,
+    sealed,
+    core,
+    coreCodeHash,
+    systemManifestSatellite,
+    systemManifestSatelliteCodeHash,
+    triggerSetHash,
+    triggerCount,
+    expectedTriggerSetHash,
+    expectedTriggerCount,
+    expectedManifestHash,
+    expectedInventoryStateRoot,
+    expectedInventoryLeafCount,
+    inventoryStateRoot,
+    inventoryLeafCount,
+    genesisBootstrapAuthority,
+    sealedPayloadPointer
+));
+```
+
+The one-way bind stores the complete nonempty ascending list of actual Core
+pointer types and the complete nonempty ascending list of registry instances
+represented by the first payload, plus `expectedInventoryStateRoot` and
+`expectedInventoryLeafCount`. Duplicate or unsorted list entries reject the
+bind. The executor recomputes the live inventory at scheduling and
+execution in this one canonical order: every Core pointer in raw
+`pointerType` order; then, for each registry in address order, one registry
+header followed by every `moduleAt(0..moduleCount-1)` record. Leaf kinds are
+`0 = CORE_POINTER`, `1 = REGISTRY_HEADER`, and `2 = REGISTRY_MODULE`; a pointer
+leaf uses `leafHost = core` and `leafKey = pointerType`, a registry header uses
+`leafHost = registry` and `leafKey = bytes32(0)`, and a registry-module leaf
+uses `leafHost = registry` and `leafKey = bytes32(moduleIndex)`. Facts and the
+rolling root are exact:
+
+```solidity
+bytes32 pointerFactsHash = keccak256(abi.encode(
+    pointerTarget,
+    pointerCodeHash,
+    pointerFrozen,
+    pointerModuleType,
+    pointerInterfaceId,
+    pointerRegistry,
+    uint8(pointerRegistryStatus),
+    pointerModuleManifestHash,
+    pointerDeploymentManifestHash,
+    uint64(pointerRevision)
+));
+
+bytes32 registryHeaderFactsHash = keccak256(abi.encode(
+    moduleCount,
+    registrationChainHash,
+    uint64(registrationRecordCount),
+    registryManifestHash,
+    keccak256(bytes(registryManifestURI)),
+    uint64(registryManifestRevision)
+));
+
+bytes32 registryModuleFactsHash = keccak256(abi.encode(
+    moduleAtIndex,
+    uint8(moduleStatus),
+    moduleType,
+    moduleVersion,
+    moduleInterfaceId,
+    moduleGasLimit,
+    moduleRuntimeCodeHash,
+    moduleDeploymentManifestHash,
+    moduleManifestHash,
+    keccak256(bytes(moduleManifestURI)),
+    uint64(moduleRevision)
+));
+
+bytes32 inventoryLeafHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1,
+    uint8(leafKind),
+    leafHost,
+    leafKey,
+    leafFactsHash
+));
+bytes32 nextInventoryChainHash = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1,
+    inventoryChainHash,
+    uint64(leafIndex),
+    inventoryLeafHash
+));
+bytes32 inventoryStateRoot = keccak256(abi.encode(
+    STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    address(core),
+    uint64(inventoryLeafCount),
+    inventoryChainHash
+));
+```
+
+`pointerFactsHash` is formed from the exact ten trailing fields returned by
+`getSatellitePointer(pointerType)`. The registry header requires
+`registrationRecordCount == moduleCount`; each module leaf resolves the address
+from `moduleAt` and the remaining fields from `moduleRecord`. The execution-
+generated `registeredAt` and `statusUpdatedAt` fields are deliberately excluded
+for the same reason they are excluded from scheduled registry transition hashes
+and the system-manifest payload. Every read must decode canonically and every
+count/index/revision conversion must fit `uint64`. The trailing returns of
+`systemManifestBootstrapState()` expose both expected and current roots/counts,
+the bound Core/satellite/code hashes, the exact genesis authority, and the
+actual root pointer accepted at seal; adding return values does not change its
+`0x8a2d979b` selector.
+
+During bind, genesis trigger records are materialized in strict ascending
+`(uint160(triggerTarget), uint32(triggerSelector))` order and update
+`triggerSetHash = keccak256(abi.encode(STREAM_SYSTEM_MANIFEST_BOOTSTRAP_TRIGGER_V1,
+priorHash, triggerTarget, triggerSelector, triggerCodeHash,
+allowedActionClassMask))`. Post-seal registrations remain possible only by the
+normal isolated terminal-freeze path and do not alter the sealed genesis root.
+
+The only pre-seal tail-scan exception is the following exact bootstrap branch.
+A bootstrap-scoped action containing one or more expected protected-writer
+pairs may omit the final manifest publication only when every such pair has
+already been registered with its exact expected code hash and class mask, the
+action proposer is `genesisBootstrapAuthority`, and all normal mask/class/code-
+hash checks pass at both scheduling and execution. The exception suppresses
+only the otherwise-required tail call; it does not relax call isolation,
+classification, transition, delay, veto, or target-side authorization. A
+manifest tail is forbidden while unsealed except in the exact seal batch
+below, and post-seal trigger registration remains a one-call-only class-2
+action. Thus
+the authority can populate the registry and Core-pointer state from which the
+first payload is generated without publishing a knowingly partial payload.
+The branch predicate begins with `!sealed`, is rechecked at execution, and no
+function can clear `sealed`; after the seal flips it can never be reached
+again.
+
+The seal is an exact class-3 two-call batch: executor self-call
+`sealSystemManifestBootstrap()` first and the first
+`publishStreamSystemManifest` call last, both zero value. The executor requires
+the current action's proposer to equal `genesisBootstrapAuthority`; no prior
+manifest publication; `pendingScheduledActionCount() == 1` with that sole entry
+equal to the currently executing seal action; exact expected
+trigger hash/count and a full enumeration/mapping walk equal to the bound set;
+the final
+registry and every Core pointer (including the already terminal-frozen
+`SYSTEM_MANIFEST` family) produce the exact bind-recorded inventory root and
+leaf count under the formula above. It decodes the final publication call,
+requires a nonzero actual root pointer and its update's `manifestHash` to equal
+the bind-recorded content commitment, parses the live root descriptor and
+chunks under [LTA-MANIFEST], and independently recomputes that same
+`manifestHash`. The tail's normal per-call scope/old/new hashes commit the
+actual pointer and derived satellite state; no constructor or bind commitment
+contains the root address or a state hash that embeds it. The seal stores that
+actual pointer as `sealedPayloadPointer`, flips `sealed` before the tail call, and emits
+only after the satellite publication succeeds; atomic reversion restores the
+unsealed bit and zero sealed pointer if publication fails. From that
+transaction onward the bootstrap
+authority is ignored forever and every registered writer is subject to the
+normal tail scan. There is no transaction boundary between sealing and the
+first manifest publication.
+
+Bootstrap goldens cover the complete ordered ceremony and reject a second
+seal; a pre-seal action proposed by any identity other than the exact
+genesis authority at scheduling or execution; missing, extra, skipped,
+substituted, or out-of-order triggers; a wrong trigger code hash or mask; an
+unregistered or non-expected protected writer; any pre-seal tail outside the
+seal batch; any pre-seal class-6 eligibility, role/admin, native-value, or other
+non-ceremony action; an attempt to queue a second action; any cancelled,
+vetoed, or virtually expired action whose pending-count accounting is not
+materialized back to zero; a seal whose sole pending/current-action invariant
+fails; prior publication; incomplete or pending registry/pointer work; a
+mutable or wrong `SYSTEM_MANIFEST` pointer; a mismatched actual root/content
+hash/satellite per-call state;
+a malformed descriptor, chunk/hash mismatch, or any attempt to bind the root
+address before the seal action; a mismatched live-inventory root/count or
+registry record-chain count; a seal
+batch with any third call; failed-tail rollback; and every protected
+mutation after sealing that omits its required final tail. A positive golden
+also proves that the bounded no-tail population branch succeeds before seal
+and that the identical call shape fails without a tail immediately after
+seal.
+
+### Emergency-Restoration Eligibility [GOV-EMERGENCY-RESTORATION]
+
+Numeric class `6` is fail-closed to an exact append-only eligibility registry;
+the zero delay is never available merely because a proposer labels an action
+`EMERGENCY_RESTORATION`.
+
+```solidity
+// Zero means ineligible; exact target plus selector prevents aliasing.
+mapping(address => mapping(bytes4 => bytes32))
+    private _emergencyRestorationCodeHash;
+
+struct EmergencyRestorationEligibilityEntry {
+    address target;
+    bytes4 selector;
+}
+EmergencyRestorationEligibilityEntry[]
+    private _emergencyRestorationEligibilityEntries;
+bytes32 private _emergencyRestorationEligibilityChainHash;
+
+function emergencyRestorationEligibility(address target, bytes4 selector)
+    external
+    view
+    returns (bool eligible, bytes32 targetCodeHash);
+
+function registerEmergencyRestorationEligibility(
+    address target,
+    bytes4 selector
+) external;
+
+function emergencyRestorationEligibilityCount()
+    external
+    view
+    returns (uint256);
+
+function emergencyRestorationEligibilityAt(uint256 index)
+    external
+    view
+    returns (address target, bytes4 selector, bytes32 targetCodeHash);
+
+function emergencyRestorationEligibilityChainHash()
+    external
+    view
+    returns (bytes32 chainHash, uint64 recordCount);
+
+event EmergencyRestorationEligibilityRegistered(
+    uint16 schemaVersion,
+    address indexed target,
+    bytes4 indexed selector,
+    bytes32 targetCodeHash,
+    bytes32 indexed actionId
+);
+```
+
+Selectors are `0xf23a1e43` for
+`emergencyRestorationEligibility(address,bytes4)` and `0x9e842aea` for
+`registerEmergencyRestorationEligibility(address,bytes4)`, plus `0xffd0e631`,
+`0xe249cded`, and `0x927836c4` for the count, indexed-at, and chain-hash reads.
+The schema-v1 event
+topic is
+`0x58f0981cb5de22437b5c66dda67857f5ec829b10c47f4e75ac208966fd9c7088`
+for
+`EmergencyRestorationEligibilityRegistered(uint16,address,bytes4,bytes32,bytes32)`;
+`target`, `selector`, and `actionId` are indexed.
+
+Registration hashes are exact:
+
+```solidity
+bytes32 constant STREAM_EMERGENCY_RESTORATION_SCOPE_V1 =
+    0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b;
+    // keccak256("6529STREAM_EMERGENCY_RESTORATION_SCOPE_V1")
+
+bytes32 constant STREAM_EMERGENCY_RESTORATION_STATE_V1 =
+    0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae;
+    // keccak256("6529STREAM_EMERGENCY_RESTORATION_STATE_V1")
+
+bytes32 constant STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1 =
+    0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004;
+    // keccak256("6529STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1")
+
+bytes32 constant STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1 =
+    0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340;
+    // keccak256("6529STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1")
+
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_EMERGENCY_RESTORATION_SCOPE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    target,
+    selector
+));
+
+bytes32 eligibilityStateHash = keccak256(abi.encode(
+    STREAM_EMERGENCY_RESTORATION_STATE_V1,
+    scopeHash,
+    eligible,
+    targetCodeHash,
+    uint64(eligibilityCount),
+    eligibilityChainHash
+));
+
+bytes32 eligibilityRecordHash = keccak256(abi.encode(
+    STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1,
+    uint64(eligibilityIndex),
+    target,
+    selector,
+    targetCodeHash
+));
+bytes32 nextEligibilityChainHash = keccak256(abi.encode(
+    STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    eligibilityChainHash,
+    eligibilityRecordHash,
+    uint64(eligibilityIndex)
+));
+```
+
+The registration entry accepts only an isolated executor self-call under
+`TERMINAL_FREEZE` (`2`) with exact per-call old/new hashes, a nonzero deployed
+target and selector, an absent rule, and the observed nonzero runtime code
+hash. The old state is ineligible with zero code hash and the new state is
+eligible with the observed hash. `eligibilityIndex` is the pre-state count; the
+new state also commits count plus one and `nextEligibilityChainHash`, rejecting
+uint64 overflow. It writes the mapping, append-only key, count, and chain before
+emitting. The enumeration count/at/chain reads agree and reconstruct every
+eligible exact pair from state. It has no remove,
+replace, wildcard, target-only, owner-direct, or class-6 registration path.
+The entry additionally requires `sealed == true`; class-6 eligibility is never
+part of the pre-seal ceremony and cannot be queued across the bootstrap sunset.
+
+At both scheduling and execution, every class-6 call must have nonempty
+selector-bearing calldata, `value == 0`, deployed target code, an exact eligible
+`(target, selector)` pair, and a live runtime code hash equal to the registered
+hash. Class `6` never admits empty-calldata/native transfers or the approved-
+native-receiver exception. Conversely, a registered emergency selector must be
+scheduled only as class `6`. A batch may contain several calls only when every
+call independently passes these rules; any rule registered after scheduling is
+rechecked at execution.
+
+Eligibility is only the executor backstop. Every eligible target independently
+requires `currentAction().actionClass == 6`, a nonzero action ID, exact per-call
+scope/old/new commitments, and its own fresh incident proof and bounded
+restoration predicate. Before class `6` is enabled, every existing GGP and GTP
+host — not only Core — must migrate from authority-only checks to these
+target-side class/context checks. In particular, lower, ordinary raise,
+probe-rebind, and unrelated admin selectors remain ineligible and reject class
+`6` at the target even if reached from the executor.
+
+Goldens cover registration isolation/terminal veto, exact selector and code-
+hash matching, missing/stale eligibility, zero/nonzero value, empty/native
+calls, mixed eligible/ineligible batches, emergency selector under a non-6
+class, lower/rebind under class `6`, all pre-existing GGP/GTP hosts, and a
+registered emergency raise whose target rejects stale/passing/wrong-value or
+over-bound probe evidence. They reject registration before seal and any
+pre-seal action that attempts to queue one past seal. They also enumerate `0..count-1`, recompute the
+eligibility record chain, compare every mapping entry, and reject out-of-range
+or count/chain/state-hash drift.
 
 ### Material Actions And Holder Classes [GOV-MATERIAL]
 
@@ -845,23 +1824,38 @@ governor-contract latency, not for fast single signers:
    timelock and an evented reason. Pause guardians cannot unpause; unpause
    holders cannot pause. The two-tier delay model does not apply to
    unpause.
+4. `EMERGENCY_RESTORATION` (numeric ID `6`) has zero scheduling delay only
+   for exact target/selector pairs terminal-registered under
+   [GOV-EMERGENCY-RESTORATION] whose target implementation explicitly requires that ID and
+   rechecks a fresh, target-owned failing probe plus a bounded restorative
+   transition. For the Core GGP host this is solely
+   `emergencyRaiseGasParameter(bytes32,uint256)` and means a failing run at the
+   exact current value within `probeMaxAgeBlocks`, `newValue > currentValue`,
+   and the overflow-safe 2x bound
+   `newValue - currentValue <= currentValue`. The ordinary proposer/canceller roles,
+   event, action-ID, call-data publication, and execution checks still apply.
 
 Execution rules:
 
-1. `scheduleGovernanceAction` allocates the next nonce, computes the canonical
-   action ID, stores the action, and emits `GovernanceActionScheduled`.
+1. `scheduleGovernanceBatch` allocates the next nonce, derives and checks the
+   three action-level aggregate hashes, computes the canonical V2 action ID,
+   stores the batch `callsHash` in `GovernanceAction.callHash` plus the
+   validated calldata pointer, and emits `GovernanceActionScheduled`.
+   `scheduleGovernanceAction` is the equivalent one-call wrapper.
 2. `notBefore` must be at least `block.timestamp + minimumDelay(actionClass)`
    unless the action is `IMMEDIATE_TIGHTENING` and the implementation's
-   tightening classifier proves it cannot loosen policy.
+   calldata-aware tightening classifier proves it cannot loosen policy, or is
+   exact eligible class `6` under [GOV-EMERGENCY-RESTORATION].
 3. `expiresAfter` must be greater than `notBefore` and within a launch-pinned
    maximum action lifetime.
-4. The stored `callHash` is `keccak256(callData)`. Execution must require the
-   supplied `callData` hash to equal the stored hash, `msg.value` to equal
-   `value`, `target` to have code unless the action explicitly targets native
-   ETH transfer to an approved governance receiver, and `block.timestamp` to be
-   within `[notBefore, expiresAfter]`.
-   For non-empty calldata, `bytes4(callData[0:4])` must equal the stored
-   `selector`.
+4. The stored `callHash` is the V2 `callsHash`, never
+   `keccak256(singleCallData)`. Execution recomputes every descriptor and the
+   three action-level aggregates, requires the ordered supplied calldata to be
+   byte-identical to the decoded scheduled SSTORE2 publication, and requires
+   `msg.value == sum(calls[].value)`. Each nonempty calldata element has length
+   at least four, its leading selector matches, and its target has code. The
+   sole empty-calldata exception has selector zero, positive value, and an
+   approved native receiver; class `6` admits no such exception.
 5. Anyone may execute a scheduled action after `notBefore` unless the action
    class requires a named executor in the manifest. Permission to schedule and
    cancel remains role-gated.
@@ -869,8 +1863,11 @@ Execution rules:
    manifest, including old value hash, new value hash, pointer code hash,
    registry eligibility, interface ID, freeze state, owed-funds boundary, and
    terminal-freeze veto status where applicable.
-7. Execution uses the stored `target`, `value`, `selector`, and `callHash`; it
-   must not execute arbitrary calldata supplied by the caller.
+7. Execution uses the stored `callsHash`, scheduled calldata pointer, and full
+   caller-supplied descriptor array only after all V2 hashes, selectors, bytes,
+   tail/eligibility rules, and action ID match. The first-call target/selector
+   fields retained for indexing are never execution authority, and arbitrary
+   caller-selected bytes cannot execute.
 8. A successful execution stores `EXECUTED`, records `executor`, emits
    `GovernanceActionExecuted`, and cannot be replayed.
 9. Cancellation is allowed only while `SCHEDULED` and before execution; it
@@ -899,6 +1896,18 @@ tightening/loosening classifier, old/new value predicate, emergency eligibility,
 and whether permissionless execution after delay is allowed. Governance code
 and CI use this catalog as the conformance target; prose examples are not
 authority.
+
+Selector-wide irreversible-freeze registration is valid only when every
+successful invocation of that selector is terminal. A polymorphic selector is
+never put in that boolean registry. In particular,
+`setCollectionStatus(uint256,uint8)` (`0x68abd161`) is explicitly excluded:
+the executor's calldata-aware policy requires `IMMEDIATE_TIGHTENING` (`0`) for
+`PAUSED`, `DELAYED_LOOSENING` (`1`) for `ACTIVE`, and `TERMINAL_FREEZE` (`2`)
+for `CLOSED`; a class-2 schedule enters the ordinary veto live set and guardian
+checks. Core independently decodes `newStatus` and requires the same class and
+exact old/new state hashes at execution. Golden tests prove that a `CLOSED`
+call cannot schedule or execute as class `0` or `1`, while pause and resume are
+not accidentally forced through the terminal class.
 
 Terminal freeze actions require an explicit guardian/veto surface:
 

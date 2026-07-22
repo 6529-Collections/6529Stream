@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Closed two governance-v2 target ambiguities before implementation: the
+  six-return `currentAction()` is now explicitly the complete target-readable
+  context while ordered call index/selector validation remains at the
+  executor's descriptor/`callsHash` boundary, and module registration now pins
+  a separately named 2,048-byte, nonempty, strict-UTF-8 module-manifest URI
+  policy alongside the existing registry-manifest URI bound.
 - Pinned Linux CI and release mode to CPython `3.12.13`, replaced floating pip
   upgrades and live transitive resolution with one binary-only SHA-256 lock,
   added fail-closed workflow/lock policy tests, documented lock refresh and the
@@ -49,6 +55,84 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Closed the finality-recovery refresh executability gap without spending Core
+  bytecode: recovery schedules require a nonzero manifest content hash;
+  artwork-changing execution snapshots the global token high-water mark and
+  creates a stored monotonic plan; exact permissionless collection/scoped
+  continuations emit one existing Core batch refresh of at most 5,000 IDs per
+  transaction with rollback on failure; collection/release/season/view plans
+  use a safe global-ID superset, token plans use one ID, superseded and complete
+  plans reject, and progress is reconstructible through exact reads/events.
+  New recoveries carry an incomplete predecessor invalidation into a fresh
+  snapshot plan even when their own artwork-change flag is false. A global
+  active-incomplete count and exact same-batch zero-count assertion prevent a
+  finality-registry pointer replacement from stranding old-registry plans;
+  monitoring/keepers drain them before cutover. Post-snapshot mints already
+  resolve through the recovered route. The Core ABI is unchanged.
+- Added the checksum-covered, normative
+  `stream-core-permanent-interface.json` target for issue #654. It locks the
+  complete Permanent `StreamCore` function/event surface (58 active functions
+  and 19 active events), excludes the five facade-readiness functions and three
+  events deferred by ADR 0016, omits the redundant `MetadataRouterUpdated`
+  alias in favor of `CoreSatellitePointerUpdated`, includes the native
+  `StreamMetadataRefresh` event, moves the system-manifest five-function/event
+  surface to its Permanent satellite, and maps every active entry into a closed
+  bytecode-budget group whose only sizing authority is the complete linked
+  via-IR runtime measurement. It records explicit pre-genesis dispositions for
+  all 60 current functions and 6 current events that do not survive unchanged,
+  and is validated independently of Foundry output with
+  `check_abi_compatibility.py --target-only`. Custom errors, constructor, and
+  Medium/Replaceable surfaces remain separately cataloged; fallback and receive
+  are fail-closed `required_absent` categories enforced against implementation
+  ABI output. The canonical genesis target now contains 60 derived entries:
+  `StreamSystemManifest` is Permanent deployment entry 36,
+  `StreamCoreFinalityAdapter` is immutable Permanent entry 37, the 22
+  per-parameter GGP probes occupy entries 38-59, and the shared cadence probe is
+  entry 60. Checker goldens pin both satellites' module/interface identities
+  and immutable bindings, including the manifest's frozen Core pointer and
+  append-only history and the adapter's Core-native-only finality boundary,
+  without claiming a deployed candidate exists. A separate reviewed lock now
+  pins the exact ordered `(signature, mutability, returns)` shape of all 58
+  active functions and `(signature, indexed, anonymous, schema_version)` shape
+  of all 19 active events, with every event explicitly non-anonymous and every
+  protocol event fixed to schema version `1`, to
+  fixed SHA-256 digest
+  `2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`,
+  so count-preserving status substitution, dummy replacement, shape drift, or
+  reordering fails. A second reviewer-pinned canonical-JSON digest,
+  `18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`,
+  covers every top-level target semantic plus all ordered active and retired
+  rows. Baseline reconciliation is bidirectional: every current Core
+  function/event has exactly one active or retired disposition, and every
+  retirement matches a current-baseline shape. Target, config, baseline,
+  genesis-profile, and candidate JSON now reject invalid UTF-8, duplicate keys,
+  non-finite/floating values, and unsafe integers. The complete canonical
+  profile rows for Core, governance, `StreamSystemManifest`, and
+  `StreamCoreFinalityAdapter` pin all reviewed fields. Candidate reconciliation
+  requires the exact implementation/interface/marker sets for the three
+  safety-critical non-governance entries, including rejecting an extra
+  `IERC721Enumerable` Core advertisement, while governance remains composite
+  and pins its exact three normative homes. The governance profile entry now
+  proves its genesis `STATE_EXPORT_PUBLISHER` role through
+  `IStreamStateExportPublisher`, the exact `latestStateExport()` selector, and
+  all three publication/challenge/supersession event topics. Its complete
+  machine lock also pins the read's
+  five ordered return types, all three event indexed masks, and non-anonymous
+  emission to fixed digest
+  `535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7`;
+  candidate proof validation recomputes that digest over type-strict canonical
+  JSON, so integer `0`/`1` values cannot masquerade as booleans, and matching
+  interface/marker strings cannot replace the separate structured proof. The
+  proof is governance-exclusive: every matched non-governance candidate rejects
+  a non-null publisher proof. The StreamCore genesis entry also pins the exact
+  advertised `IERC165`, `IERC721`, `IERC721Metadata`, `IERC4906`, `IERC2981`,
+  and `IERC7572` interface tuple. The
+  system-manifest vector records the publisher surface
+  explicitly, and its `STATE_EXPORT_PUBLISHER` pointer plus the governance
+  registry record now carry the real one-function publisher interface ID
+  `0x77faad4f`, rather than the synthetic composite `0xa5971448`. A separately
+  implemented fixed-golden JCS/Keccak/ABI oracle prevents the generator and
+  primary checker from self-confirming the same codec or formula defect.
 - Added a canonical normalized Slither baseline and fail-closed drift gate for
   first-party production High/Medium findings. The current 38 rows (4 High and
   34 Medium) are all explicitly Open: one confirmed gap, six design-review

@@ -10,6 +10,30 @@ event topics, interface IDs, release manifest, source verification inputs, risk
 register, protocol surface report, and readiness artifacts into a single
 source-of-truth view without claiming public beta or production readiness.
 
+[`stream-core-permanent-interface.json`](stream-core-permanent-interface.json)
+is the normative pre-genesis target for the complete Permanent `StreamCore`
+function/event interface. It is intentionally separate from `latest/` and from
+the implementation-derived `baselines/v0.1.0/abi-surface.json`: the target is
+not generated from today's oversized transitional Core. Custom errors,
+constructor, and Medium/Replaceable surfaces remain separately cataloged;
+fallback and receive are fail-closed `required_absent` categories checked
+against the implementation. Its closed `bytecode_budget_groups` catalog assigns
+every active entry to one implementation-requirement group and rejects phantom
+groups; retired entries carry no group. The groups do not allocate or sum
+estimated bytes. Only a complete linked via-IR runtime measurement proves Core
+size. The
+ordered active surface is pinned to SHA-256
+`2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`, while a
+second reviewer-pinned canonical-JSON digest over every target semantic,
+including metadata, coverage, groups, required absence, bootstrap policy, and
+all ordered active/retired rows, is
+`18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`.
+The implementation check also requires every current-baseline Core
+function/event shape to have exactly one active or retired disposition and every
+retired row to match that baseline. Target, contract-config, and baseline JSON
+inputs reject invalid UTF-8, duplicate members, non-finite/floating-point
+values, and integers outside the I-JSON safe range.
+
 Run after the production build profile:
 
 ```sh
@@ -64,10 +88,12 @@ python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/generate_system_manifest_payload_vector.py
 python scripts/test_release_mode.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
+python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 ```
 
@@ -90,6 +116,7 @@ python scripts/generate_dependency_artifact_manifest.py --check
 python scripts/test_dependency_provenance_attestation.py
 python scripts/generate_dependency_provenance_attestation.py --check
 python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --target-only
 python scripts/check_abi_compatibility.py --check
 python scripts/test_deployment_manifest.py
 python scripts/generate_deployment_manifest.py --check
@@ -175,6 +202,10 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/test_release_mode.py
 python scripts/test_production_broadcast_retention.py
 python scripts/check_production_broadcast_retention.py
@@ -188,6 +219,8 @@ python scripts/test_release_manifest.py
 python scripts/generate_release_manifest.py --check
 python scripts/test_bytecode_release_proof.py
 python scripts/generate_bytecode_release_proof.py --check
+python scripts/test_release_candidate_lockfile.py
+python scripts/generate_release_candidate_lockfile.py --check
 python scripts/test_release_checksums.py
 python scripts/generate_release_checksums.py --check
 python scripts/test_verify_release_artifacts.py
@@ -242,9 +275,24 @@ external audit acceptance. Validate it with
 
 `genesis-deployment-profile.json` is the canonical machine-readable mirror of
 the normative `[LCM-GENESIS]` closed world. Its entry count is derived from the
-contiguous numbered entries rather than stored independently. Entries 1-35 are
-deployment roles, entries 36-57 are the exact per-parameter GGP probes, and the
-last entry is the one shared entropy cadence probe. The ordinary checker
+contiguous numbered entries rather than stored independently. Entries 1-37 are
+deployment roles, with entry 36 the immutable Permanent
+`StreamSystemManifest` and entry 37 the immutable
+`StreamCoreFinalityAdapter`; entries 38-59 are the exact per-parameter GGP
+probes, and entry 60 is the one shared entropy cadence probe. The
+system-manifest entry
+pins its module type, full interface ID, immutable Core/executor bindings,
+terminal-frozen Core pointer, append-only payload history, and manifest-tail
+markers. The complete canonical Core, governance, system-manifest, and
+finality-adapter rows are byte-for-byte semantic locks over their reviewed
+identity, requirement, implementation, scope, multiplicity, interfaces,
+markers, aliases, anchors, parameters, and distinctness policy. Candidate
+matching requires exact implementation/interface/marker sets for Core, the
+system manifest, and the finality adapter; governance remains intentionally
+composite but must provide the exact structured state-export publisher ABI
+proof, which every non-governance candidate is forbidden from claiming. The
+profile and candidate inputs use strict UTF-8, duplicate-free,
+schema-restricted I-JSON. The ordinary checker
 validates this requirement artifact and reports class-level mapping diagnostics
 against the v1 `contracts.json` catalog. That catalog has no deployment
 addresses, instance identity, probe-parameter bindings, or on-chain manifest
@@ -257,6 +305,25 @@ release candidate lockfile. Until that evidence exists and reconciles every role
 production remains blocked under issue #656. On-demand split-wallet instances
 and the no-authority deployer factory are explicitly outside the numbered
 production inventory.
+
+`system-manifest-payload-vector.json` is the deterministic, non-production
+`target_abi_lock_fixture` derived from all 60 profile entries. It locks the
+RFC8785/I-JSON bytes, fixed 24,575-byte split, chunk/leaf/list/root commitments,
+and canonical ABI root descriptor. Every deployment-manifest field reuses one
+synthetic release-wide, profile-bound target digest under the production outer
+deployment-identity domain instead of inventing a per-entry identity. The file
+keeps both `production_candidate`
+and `readiness_evidence` false. Regenerate it with
+`python scripts/generate_system_manifest_payload_vector.py`; the drift command
+is `python scripts/check_system_manifest_payload_vector.py` (plus
+`python scripts/test_system_manifest_payload_vector.py`), followed by the
+independent fixed-golden
+`python scripts/test_system_manifest_payload_vector_reference.py` and
+`python scripts/check_system_manifest_payload_vector_reference.py` pair, not a
+generator `--check` mode. The reference scripts are required CI and
+checksum-covered release inputs. Production semantic reconciliation remains
+blocked by issue `#656` until an instance-aware candidate and live on-chain state
+replace the synthetic fixture facts.
 
 The release-mode gate is not part of the default artifact refresh path because
 the committed baseline is intentionally blocked. Use
@@ -762,8 +829,11 @@ python scripts/check_audit_package.py
 python scripts/check_react_next_reference.py
 python scripts/check_mobile_walletconnect.py
 python scripts/check_release_readiness.py
+python scripts/generate_risk_register.py
+python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
 python scripts/generate_bytecode_release_proof.py
+python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 ```
 

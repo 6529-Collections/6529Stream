@@ -227,6 +227,10 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/test_slither_baseline.py
 python scripts/check_slither_baseline.py --baseline-only
 python scripts/test_release_manifest.py
@@ -364,6 +368,42 @@ published interface ABI surfaces against
 changed functions, events, custom errors, constructors, fallback, or receive
 entries. Additive entries are reported as compatible for this first baseline so
 maintainers can pair them with release notes and version policy.
+
+Before that implementation comparison, the same checker validates
+`release-artifacts/stream-core-permanent-interface.json`. This normative target
+locks every Permanent `StreamCore` function selector, return shape, mutability,
+event topic, and indexed-field shape, plus the explicit disposition of each
+pre-genesis Core function or event that does not survive the cutover. Every
+active entry maps to exactly one member of the closed
+`bytecode_budget_groups` catalog; retired entries map to none, and a catalog
+group with no active entry fails validation. Groups organize implementation
+requirements only: they contain no additive byte estimate, and the complete
+linked via-IR runtime measurement is the sole bytecode-size authority. Its
+checked scope is deliberately functions and events: custom errors and the
+constructor remain in the generated ABI baseline rather than being mislabeled
+Permanent. Fallback and receive are instead locked as `required_absent`; target
+validation checks that policy declaration, and implementation `--check` fails
+if either ABI category appears even though ordinary additive ABI changes remain
+compatible. A transparent active-surface lock pins the ordered function/event
+shapes to SHA-256
+`2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`.
+A separate reviewer-pinned canonical-JSON lock covers every target semantic,
+including all top-level metadata, authorization and ownership policy, normative
+homes, coverage counts, bytecode-budget groups, required-absence and bootstrap
+policy, and every ordered active or retired function/event row, at SHA-256
+`18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`.
+Implementation `--check` also closes the retirement catalog in both directions:
+every current baseline Core function/event shape must have exactly one active or
+retired disposition, and every retired row must match a current-baseline shape.
+The target, contract config, and ABI baseline are loaded as strict UTF-8,
+duplicate-free, schema-restricted I-JSON; invalid UTF-8, duplicate members,
+non-finite or floating-point values, and integers outside the I-JSON safe range
+fail closed. Validate the target without reading `out/` or the implementation
+baseline with:
+
+```bash
+python scripts/check_abi_compatibility.py --target-only
+```
 
 ABI diagnostic records use `subject` as the canonical contract or interface
 identifier and retain `contract` as a deprecated compatibility alias with the
@@ -584,9 +624,20 @@ The canonical
 `[LCM-GENESIS]` entry count from its contiguous entries, keeps unreviewed
 legacy names non-satisfying, and reports class-level mapping gaps against the
 v1 `release-artifacts/contracts.json` catalog without making ordinary
-development unusable. That catalog is diagnostic only: it has no deployment
-addresses, instance identity, probe-parameter bindings, or on-chain manifest
-reconciliation and therefore can never clear production mode. The
+development unusable. Both the profile and candidate catalog use the same
+strict UTF-8, duplicate-free, schema-restricted I-JSON input rules. The complete
+canonical rows for `StreamCore`, the governance layer,
+`StreamSystemManifest`, and `StreamCoreFinalityAdapter` pin their reviewed
+identity, requirement, implementation, scope, multiplicity, interfaces,
+markers, aliases, normative anchors, parameters, and distinctness policy.
+Candidate matching requires exact implementation/interface/marker sets for the
+three safety-critical Core, system-manifest, and finality-adapter entries. The
+governance entry remains intentionally composite but requires its exact
+structured state-export publisher ABI proof; every non-governance candidate is
+forbidden from presenting that proof. That catalog is diagnostic only: it has
+no deployment addresses, instance identity, probe-parameter bindings, or
+on-chain manifest reconciliation and therefore can never clear production
+mode. The
 local `make release-mode-public-beta-check` and
 `make release-mode-production-release-check` targets run the aggregate `check`
 gate and `slither-baseline-check` before the strict evidence decision. The
@@ -614,7 +665,25 @@ source-verification inputs, the on-chain system-manifest payload, retained
 rehearsal/live evidence, and the release candidate lockfile. That remaining
 work is tracked by
 [issue #656](https://github.com/6529-Collections/6529Stream/issues/656). The
-non-waivable Core headroom threshold comes from the
+checked `release-artifacts/system-manifest-payload-vector.json` is deliberately
+only a `target_abi_lock_fixture`: it consumes all 60 planning entries and proves
+RFC8785/I-JSON, fixed-chunk, commitment, and canonical root-descriptor mechanics,
+including one synthetic release-wide deployment-identity digest reused by every
+payload occurrence under the production outer domain. Its deterministic
+synthetic addresses and hashes are not deployment or readiness evidence.
+Regenerate it with
+`python scripts/generate_system_manifest_payload_vector.py`; validate drift with
+`python scripts/test_system_manifest_payload_vector.py` followed by
+`python scripts/check_system_manifest_payload_vector.py`, then run
+`python scripts/test_system_manifest_payload_vector_reference.py` and
+`python scripts/check_system_manifest_payload_vector_reference.py`. The reference
+oracle deliberately imports neither the generator nor the primary checker: it
+independently encodes the audited JCS/ABI preimages and hard-pins the reviewed
+profile, payload, deployment-identity, chunk, commitment, and root-descriptor
+goldens. Update those goldens only after an independent recomputation and review.
+The generator has no `--check` mode; both checkers are fail-closed check commands.
+
+The non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget), and
 is tracked by [issue #654](https://github.com/6529-Collections/6529Stream/issues/654).
@@ -1221,7 +1290,14 @@ python scripts/check_operator_dashboard_query_model.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/generate_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
+python scripts/generate_risk_register.py
+python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
+python scripts/generate_bytecode_release_proof.py
+python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 python scripts/check_changelog.py
 ```
@@ -1298,7 +1374,15 @@ python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
+python scripts/generate_risk_register.py --check
+python scripts/generate_release_notes.py --check
 python scripts/generate_release_manifest.py --check
+python scripts/generate_bytecode_release_proof.py --check
+python scripts/generate_release_candidate_lockfile.py --check
 python scripts/generate_release_checksums.py --check
 python scripts/check_changelog.py
 ```

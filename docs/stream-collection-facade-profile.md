@@ -1,45 +1,36 @@
 # Stream Collection Facade Profile
 
-Specification status: Draft. This document follows
-[`docs/spec-policy.md`](spec-policy.md) and implements
-[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md)
-decisions W3, W4, and W5. It is a dormant extension profile, not a
-launch component: no facade exists in the genesis deployment, the
-genesis system is physically free of facade bytecode, and a facade
-becomes deployable only through the ADR 0015 decision W3 tripwire
-procedure ([Deployment Decision Procedure](#deployment-decision-procedure)).
-The profile is specified in full now so that a tripwire deployment is a
-review-and-deploy exercise, never a design sprint (ADR 0015 decision
-W5).
+Specification status: Superseded successor-line research. ADR 0016 supersedes
+ADR 0015 decisions W3, W4, and W5 for the pre-genesis launch line after the
+contract-wide ERC-721 conformance review. Nothing in this document is a
+deployable launch extension, a Permanent launch interface, or authority to add
+facade-readiness storage, selectors, events, branches, or callbacks to the
+launch Core. The historical design is retained only to inform a future fresh
+ADR; such an ADR must choose an explicitly standards-conformant two-asset or
+successor-Core model and redo the threat model, rather than reviving this
+selective per-token ERC-721 mode.
 
-This document is the normative home for the per-collection ERC-721
+Every occurrence below of “normative,” “must,” “shall,” a requirement label,
+or a launch gate is preserved historical text only and has no force for the
+launch line. No launch specification may cite this file as authority.
+
+The remainder records the superseded design for the per-collection ERC-721
 facade: the facade interface and identity reads, the local-serial token
 identity rule and the catalog-number read, the facade side of the
 routed ownership-mutation path, the facade-local approval model,
 exclusive ERC-721 `Transfer` emission, delegation of `tokenURI`,
 `royaltyInfo`, and `contractURI` to Core and the metadata router, the
 metadata-refresh relay, per-facade Permanent-class requirements, the
-facade threat model, and the deployment decision procedure. Other
-documents cite these definitions and must not restate them (ADR 0010
-decision D3.1).
+facade threat model, and the deployment decision procedure. Those definitions
+were once intended to be normative under ADR 0015 but are superseded by ADR
+0016.
 
-Boundaries with the neighboring homes:
+Historical boundaries with the neighboring homes:
 
-1. Core-side facade readiness is not defined here. The identity-mode
-   vocabulary (`CORE_NATIVE`, `EXTERNAL_FACADE`), the one-way
-   pre-first-mint mode declaration, the transfer-controller registry,
-   the controlled mutation path and its invariant set, the
-   controlled-ownership-change event family, the native-entry revert
-   rules, and the finality identity binding record family are dormant
-   Core genesis surfaces (ADR 0015 decision W4): the umbrella
-   architecture owns the identity-mode doctrine
-   ([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-IDENTITY-MODE]) and the protocol v1 specification owns the
-   surface shapes, event schemas, and domain constants
-   ([`docs/launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
-   [PV1-IDENTITY-MODE] and [PV1-TRANSFER-CONTROLLER]). This document
-   consumes those surfaces and defines only the facade side of each
-   boundary.
+1. ADR 0015 proposed Core-side identity-mode, transfer-controller,
+   controlled-mutation, alternate-event, native-entry, and finality-binding
+   surfaces. ADR 0016 removes every one from the launch line; no dormant Core
+   genesis surface remains for this historical design to consume.
 2. The normative collection-identity signal (ADR 0015 decision W1) is
    owned by
    [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md)
@@ -50,21 +41,15 @@ Boundaries with the neighboring homes:
    the address-keyed grouping key on top of that signal; it never
    replaces it. Router and renderer serving is identity-mode
    independent ([MRR-FACADE-SERVING]).
-3. For artist-bound collections the `EXTERNAL_FACADE` mode declaration
-   joins the artist consent/veto surface of
-   [`docs/stream-artist-authority.md`](stream-artist-authority.md)
-   ([AA-CONTENT]) — the mode changes the marketplace identity of the
-   work, so the declaration is consent-gated at the same authority
-   level as a content-affecting write (ADR 0015 decision W4.1). This
-   document adds no consent rule of its own.
+3. The proposed artist-consent rule for an `EXTERNAL_FACADE` declaration was
+   superseded with the declaration itself. The launch artist-authority surface
+   has no facade-mode branch.
 4. The Governed Gas Parameter model is owned by
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
    [LTA-GGP]. The facade introduces no new Governed Gas Parameter
    ([FCP-READS] rule 6).
-5. The conformance matrix
-   ([`docs/launch-conformance-matrix.md`](launch-conformance-matrix.md))
-   owns every gate this profile names, including the ADR 0015 decision
-   W2 marketplace-commitment gate whose failure arms the tripwire.
+5. The ADR 0015 W2 marketplace-commitment gate remains a launch go/no-go gate,
+   but failure does not arm or authorize this superseded profile (ADR 0016).
 
 ## Design Summary
 
@@ -640,10 +625,12 @@ Requirements [FCP-READS]:
    `address(0)`, and must satisfy the conservation invariant of
    [FCP-THREATS] item (e). Facade-local serial enumeration needs no
    enumerable index and adds no Core surface ([LTA-ENUMERATION]
-   rule 4): local IDs are dense in `[1, mintedEver]` in mint order
-   ([FCP-IDENTITY] rule 1), so a state walk over `ownerOf` and
-   `streamCatalogTokenId` enumerates the collection from the facade
-   exactly as dense global IDs do at Core.
+   rule 4): local IDs are monotonic collection serials in mint order
+   ([FCP-IDENTITY] rule 1). A state walk spans
+   `[1, Core.collectionNextSerial(collectionId))`, skips the only permitted
+   empty entries (incident-aborted prepared mints), and uses `ownerOf` plus
+   `streamCatalogTokenId` to enumerate the collection exactly as Core's global
+   high-water walk does.
 2. `tokenURI(tokenId)` returns Core
    `tokenURI(streamCatalogTokenId(tokenId))` byte-for-byte. The facade
    adds no rendering, no rewriting, and no gas bound of its own: Core's
@@ -1082,9 +1069,10 @@ Core-side rows owned by the matrix against [PV1-IDENTITY-MODE] and
    correspondence with the Core controlled-ownership-change stream in
    the same transaction.
 4. Identity suite: local-serial equality with Core serials over mint
-   order, catalog-read totality over `[1, mintedEver]`, burned-serial
-   retention, stateless reverse-read agreement, and mapping
-   immutability.
+   order, catalog-read totality over
+   `[1, Core.collectionNextSerial(collectionId))` with incident-aborted gaps
+   skipped and never reused, burned-serial retention, stateless reverse-read
+   agreement, and mapping immutability.
 5. Delegated-read equivalence suite: `tokenURI` and `royaltyInfo`
    byte-equality with Core for live and burned tokens, `contractURI`
    equality with the router collection read, fail-safe fallback

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
@@ -76,6 +77,133 @@ FIXED_CONTRACT_KEYS = (
     "ARTWORK_FINALITY_REGISTRY",
     "ENTROPY_COORDINATOR_FALLBACK",
     "MINT_MANAGER_FALLBACK",
+    "STREAM_SYSTEM_MANIFEST",
+    "STREAM_CORE_FINALITY_ADAPTER",
+)
+
+STREAM_CORE_REQUIRED_INTERFACES = (
+    "IERC165",
+    "IERC721",
+    "IERC721Metadata",
+    "IERC4906",
+    "IERC2981",
+    "IERC7572",
+)
+STREAM_CORE_REQUIRED_MARKERS = ("ERC721_ENUMERABLE_NOT_ADVERTISED",)
+STREAM_CORE_NORMATIVE_ANCHORS = (
+    "docs/launch-conformance-matrix.md#LCM-GENESIS",
+    "docs/launch-v1-target-architecture.md#Core-Hook-Budget",
+)
+STREAM_CORE_EXACT_IMPLEMENTATION = {"mode": "exact", "names": ["StreamCore"]}
+
+GOVERNANCE_REQUIRED_INTERFACES = (
+    "IStreamGovernanceExecutor",
+    "IStreamRoleRegistry",
+    "IStreamStateExportPublisher",
+)
+GOVERNANCE_NORMATIVE_ANCHORS = (
+    "docs/launch-conformance-matrix.md#LCM-GENESIS",
+    "docs/adr/0004-admin-governance.md",
+    "docs/stream-long-term-architecture.md#LTA-EXPORT",
+)
+GOVERNANCE_REQUIREMENT = "StreamGovernance or equivalent ADR 0004 timelock/role layer"
+GOVERNANCE_EXACT_IMPLEMENTATION = {"mode": "manifest_equivalent", "names": []}
+STATE_EXPORT_PUBLISHER_ABI_SCHEMA = "6529stream.state-export-publisher-abi.v1"
+STATE_EXPORT_PUBLISHER_INTERFACE = "IStreamStateExportPublisher"
+STATE_EXPORT_PUBLISHER_INTERFACE_ID = "0x77faad4f"
+STATE_EXPORT_PUBLISHER_ABI_SHA256 = (
+    "sha256:535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7"
+)
+STATE_EXPORT_PUBLISHER_FUNCTIONS = (
+    (
+        "latestStateExport()",
+        STATE_EXPORT_PUBLISHER_INTERFACE_ID,
+        "view",
+        ("uint256", "bytes32", "bytes32", "bytes32", "string"),
+    ),
+)
+STATE_EXPORT_PUBLISHER_EVENTS = (
+    (
+        "StateExportPublished(uint16,uint256,bytes32,bytes32,bytes32,string)",
+        "0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045",
+        (False, True, True, True, False, False),
+    ),
+    (
+        "StateExportChallenged(uint16,bytes32,bytes32,address,string)",
+        "0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c",
+        (False, True, True, True, False),
+    ),
+    (
+        "StateExportSuperseded(uint16,bytes32,bytes32,bytes32,string)",
+        "0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a",
+        (False, True, True, True, False),
+    ),
+)
+GOVERNANCE_REQUIRED_MARKERS = (
+    "ADR0004_TIMELOCK_ROLE_LAYER",
+    "STATE_EXPORT_PUBLISHER_EVENTS_V1",
+    "LATEST_STATE_EXPORT_SELECTOR_0x77faad4f",
+    "STATE_EXPORT_PUBLISHED_TOPIC_0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045",
+    "STATE_EXPORT_CHALLENGED_TOPIC_0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c",
+    "STATE_EXPORT_SUPERSEDED_TOPIC_0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a",
+    "STATE_EXPORT_PUBLISHER_ABI_SHA256_535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7",
+)
+
+SYSTEM_MANIFEST_MODULE_TYPE = (
+    "0x47fd79d5a6e9b1d75dcedf141a46e2e8f6d95d5a5be2b88f197fa98a1436fec6"
+)
+SYSTEM_MANIFEST_INTERFACE_ID = "0x37660ede"
+SYSTEM_MANIFEST_REQUIRED_INTERFACES = ("IERC165", "IStreamSystemManifest")
+SYSTEM_MANIFEST_REQUIRED_MARKERS = (
+    "PERMANENT_CLASS",
+    f"MODULE_TYPE_{SYSTEM_MANIFEST_MODULE_TYPE}",
+    f"INTERFACE_ID_{SYSTEM_MANIFEST_INTERFACE_ID}",
+    "IMMUTABLE_STREAM_CORE_BINDING",
+    "IMMUTABLE_GOVERNANCE_EXECUTOR_BINDING",
+    "CORE_SYSTEM_MANIFEST_POINTER_TERMINAL_FROZEN",
+    "SYSTEM_MANIFEST_TAIL_PUBLISHER",
+    "APPEND_ONLY_SSTORE2_PAYLOAD_HISTORY",
+    "SUPPORTED_MANIFEST_TAIL_ACTION_CLASS_MASK_0x0f",
+)
+SYSTEM_MANIFEST_NORMATIVE_ANCHORS = (
+    "docs/launch-conformance-matrix.md#LCM-GENESIS",
+    "docs/stream-long-term-architecture.md#LTA-MANIFEST",
+    "docs/adr/0004-admin-governance.md#GOV-MANIFEST-TAIL",
+)
+
+CORE_FINALITY_ADAPTER_MODULE_TYPE = (
+    "0xc61967911fb81a81bc2ac526bef1f8ca6b1acc696ffc230763d9d36e6e5ccfb4"
+)
+CORE_FINALITY_ADAPTER_INTERFACE_ID = "0xebf35615"
+CORE_FINALITY_ADAPTER_REQUIRED_INTERFACES = (
+    "IERC165",
+    "IStreamCoreFinalityAdapter",
+)
+CORE_FINALITY_ADAPTER_REQUIRED_MARKERS = (
+    "PERMANENT_CLASS",
+    f"MODULE_TYPE_{CORE_FINALITY_ADAPTER_MODULE_TYPE}",
+    f"INTERFACE_ID_{CORE_FINALITY_ADAPTER_INTERFACE_ID}",
+    "IMMUTABLE_STREAM_CORE_BINDING",
+    "IMMUTABLE_COLLECTION_METADATA_BINDING",
+    "READ_ONLY_CORE_FINALITY_AGGREGATE",
+    "CORE_NATIVE_ONLY_NO_FACADE_STATE",
+)
+CORE_FINALITY_ADAPTER_NORMATIVE_ANCHORS = (
+    "docs/launch-conformance-matrix.md#LCM-GENESIS",
+    "docs/stream-long-term-architecture.md#Artwork-Finality-Freeze",
+    "docs/adr/0016-core-native-only-erc721.md",
+)
+EXACT_SAFETY_CRITICAL_CANDIDATE_KEYS = frozenset(
+    {
+        "STREAM_CORE",
+        "STREAM_SYSTEM_MANIFEST",
+        "STREAM_CORE_FINALITY_ADAPTER",
+    }
+)
+
+SYSTEM_MANIFEST_ENTRY_ID = FIXED_CONTRACT_KEYS.index("STREAM_SYSTEM_MANIFEST") + 1
+CORE_FINALITY_ADAPTER_ENTRY_ID = (
+    FIXED_CONTRACT_KEYS.index("STREAM_CORE_FINALITY_ADAPTER") + 1
 )
 
 GGP_PARAMETERS = (
@@ -114,6 +242,38 @@ class GenesisProfileError(RuntimeError):
     """Raised when the profile or candidate inventory is malformed."""
 
 
+IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
+
+
+def reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate members instead of accepting last-key-wins JSON."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise GenesisProfileError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def parse_ijson_integer(token: str) -> int:
+    value = int(token)
+    if abs(value) > IJSON_SAFE_INTEGER_MAX:
+        raise GenesisProfileError(
+            f"JSON integer is outside the I-JSON interoperable range: {token}"
+        )
+    return value
+
+
+def reject_json_float(token: str) -> float:
+    raise GenesisProfileError(
+        f"floating-point JSON is forbidden in genesis checker inputs: {token}"
+    )
+
+
+def reject_json_constant(token: str) -> None:
+    raise GenesisProfileError(f"non-I-JSON token is forbidden: {token}")
+
+
 @dataclass(frozen=True)
 class ProfileAudit:
     """Validated profile summary and production-completeness blockers."""
@@ -124,12 +284,23 @@ class ProfileAudit:
 
 
 def load_json(path: Path) -> Any:
-    """Load one UTF-8 JSON file with stable diagnostics."""
+    """Load strict UTF-8, duplicate-free I-JSON with stable diagnostics."""
     try:
-        with path.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
+        raw = path.read_bytes()
     except FileNotFoundError as exc:
         raise GenesisProfileError(f"missing required file: {path}") from exc
+    try:
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise GenesisProfileError(f"{path} is not strict UTF-8 JSON: {exc}") from exc
+    try:
+        return json.loads(
+            text,
+            object_pairs_hook=reject_duplicate_json_pairs,
+            parse_int=parse_ijson_integer,
+            parse_float=reject_json_float,
+            parse_constant=reject_json_constant,
+        )
     except json.JSONDecodeError as exc:
         raise GenesisProfileError(f"invalid JSON in {path}: {exc}") from exc
 
@@ -173,6 +344,90 @@ def require_exact_keys(value: dict[str, Any], required: set[str], path: str) -> 
         raise GenesisProfileError(f"{path} is missing fields: {', '.join(missing)}")
     if extra:
         raise GenesisProfileError(f"{path} has unsupported fields: {', '.join(extra)}")
+
+
+def canonical_json_bytes(value: Any, path: str) -> bytes:
+    """Encode a strict canonical comparison view without Python's bool/int equality."""
+    try:
+        return json.dumps(
+            value,
+            ensure_ascii=True,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("ascii")
+    except (TypeError, ValueError) as exc:
+        raise GenesisProfileError(f"{path} must contain canonical JSON values") from exc
+
+
+def state_export_publisher_abi_surface() -> dict[str, Any]:
+    """Return the reviewed publisher surface whose digest is machine-locked."""
+    return {
+        "schema": STATE_EXPORT_PUBLISHER_ABI_SCHEMA,
+        "required_interface": STATE_EXPORT_PUBLISHER_INTERFACE,
+        "interface_id": STATE_EXPORT_PUBLISHER_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": signature,
+                "selector": selector,
+                "state_mutability": state_mutability,
+                "returns": list(returns),
+            }
+            for signature, selector, state_mutability, returns in STATE_EXPORT_PUBLISHER_FUNCTIONS
+        ],
+        "events": [
+            {
+                "signature": signature,
+                "topic0": topic0,
+                "anonymous": False,
+                "indexed": list(indexed),
+            }
+            for signature, topic0, indexed in STATE_EXPORT_PUBLISHER_EVENTS
+        ],
+    }
+
+
+def state_export_publisher_abi_proof() -> dict[str, Any]:
+    """Return the exact structured assertion required of a governance candidate."""
+    surface = state_export_publisher_abi_surface()
+    canonical = canonical_json_bytes(surface, "reviewed state-export publisher ABI")
+    digest = "sha256:" + hashlib.sha256(canonical).hexdigest()
+    if digest != STATE_EXPORT_PUBLISHER_ABI_SHA256:
+        raise GenesisProfileError(
+            "reviewed state-export publisher ABI constants disagree with their fixed digest"
+        )
+    return {**surface, "surface_sha256": digest}
+
+
+def validate_state_export_publisher_abi_proof(value: Any, path: str) -> dict[str, Any]:
+    """Reject partial or marker-only claims about the publisher ABI."""
+    proof = require_dict(value, path)
+    expected = state_export_publisher_abi_proof()
+    require_exact_keys(proof, set(expected), path)
+    candidate_surface = {
+        key: candidate_value
+        for key, candidate_value in proof.items()
+        if key != "surface_sha256"
+    }
+    candidate_canonical = canonical_json_bytes(candidate_surface, path)
+    candidate_digest = "sha256:" + hashlib.sha256(candidate_canonical).hexdigest()
+    if type(proof["surface_sha256"]) is not str or proof["surface_sha256"] != candidate_digest:
+        raise GenesisProfileError(
+            f"{path} must exactly match the reviewed state-export publisher ABI surface; "
+            "surface_sha256 does not match the candidate surface's canonical JSON bytes"
+        )
+    expected_canonical = canonical_json_bytes(
+        state_export_publisher_abi_surface(),
+        "reviewed state-export publisher ABI",
+    )
+    if (
+        candidate_canonical != expected_canonical
+        or candidate_digest != STATE_EXPORT_PUBLISHER_ABI_SHA256
+    ):
+        raise GenesisProfileError(
+            f"{path} must exactly match the reviewed state-export publisher ABI surface"
+        )
+    return proof
 
 
 def resolve_path(repo_root: Path, path: Path) -> Path:
@@ -499,21 +754,125 @@ def validate_profile_document(data: Any) -> list[dict[str, Any]]:
             + ", ".join(repr(alias) for alias in overlapping_aliases)
         )
     if tuple(keys[: len(FIXED_CONTRACT_KEYS)]) != FIXED_CONTRACT_KEYS:
-        raise GenesisProfileError("profile.entries 1-35 do not match the canonical contract inventory")
+        raise GenesisProfileError("profile.entries 1-37 do not match the canonical contract inventory")
     if any(entry["kind"] != "contract" for entry in entries[: len(FIXED_CONTRACT_KEYS)]):
-        raise GenesisProfileError("profile.entries 1-35 must be contract requirements")
+        raise GenesisProfileError("profile.entries 1-37 must be contract requirements")
+
+    stream_core = entries[0]
+    expected_stream_core = {
+        "id": 1,
+        "key": "STREAM_CORE",
+        "kind": "contract",
+        "requirement": "StreamCore",
+        "deployment_scope": "singleton",
+        "multiplicity": {"minimum": 1, "maximum": 1},
+        "implementation": STREAM_CORE_EXACT_IMPLEMENTATION,
+        "required_interfaces": list(STREAM_CORE_REQUIRED_INTERFACES),
+        "required_markers": list(STREAM_CORE_REQUIRED_MARKERS),
+        "approved_aliases": [],
+        "normative_anchors": list(STREAM_CORE_NORMATIVE_ANCHORS),
+        "parameters": [],
+        "distinct_from": [],
+    }
+    if canonical_json_bytes(stream_core, "profile entry 1") != canonical_json_bytes(
+        expected_stream_core,
+        "reviewed StreamCore profile row",
+    ):
+        raise GenesisProfileError(
+            "profile entry 1 must preserve the complete exact StreamCore profile row"
+        )
+
+    system_manifest = entries[SYSTEM_MANIFEST_ENTRY_ID - 1]
+    expected_system_manifest = {
+        "id": SYSTEM_MANIFEST_ENTRY_ID,
+        "key": "STREAM_SYSTEM_MANIFEST",
+        "kind": "contract",
+        "requirement": "StreamSystemManifest",
+        "deployment_scope": "singleton",
+        "multiplicity": {"minimum": 1, "maximum": 1},
+        "implementation": {"mode": "exact", "names": ["StreamSystemManifest"]},
+        "required_interfaces": list(SYSTEM_MANIFEST_REQUIRED_INTERFACES),
+        "required_markers": list(SYSTEM_MANIFEST_REQUIRED_MARKERS),
+        "approved_aliases": [],
+        "normative_anchors": list(SYSTEM_MANIFEST_NORMATIVE_ANCHORS),
+        "parameters": [],
+        "distinct_from": [],
+    }
+    if canonical_json_bytes(
+        system_manifest,
+        "profile entry 36",
+    ) != canonical_json_bytes(
+        expected_system_manifest,
+        "reviewed StreamSystemManifest profile row",
+    ):
+        raise GenesisProfileError(
+            "profile entry 36 must preserve the complete canonical Permanent "
+            "StreamSystemManifest profile row"
+        )
+
+    core_finality_adapter = entries[CORE_FINALITY_ADAPTER_ENTRY_ID - 1]
+    expected_core_finality_adapter = {
+        "id": CORE_FINALITY_ADAPTER_ENTRY_ID,
+        "key": "STREAM_CORE_FINALITY_ADAPTER",
+        "kind": "contract",
+        "requirement": "StreamCoreFinalityAdapter",
+        "deployment_scope": "singleton",
+        "multiplicity": {"minimum": 1, "maximum": 1},
+        "implementation": {
+            "mode": "exact",
+            "names": ["StreamCoreFinalityAdapter"],
+        },
+        "required_interfaces": list(CORE_FINALITY_ADAPTER_REQUIRED_INTERFACES),
+        "required_markers": list(CORE_FINALITY_ADAPTER_REQUIRED_MARKERS),
+        "approved_aliases": [],
+        "normative_anchors": list(CORE_FINALITY_ADAPTER_NORMATIVE_ANCHORS),
+        "parameters": [],
+        "distinct_from": [],
+    }
+    if canonical_json_bytes(
+        core_finality_adapter,
+        "profile entry 37",
+    ) != canonical_json_bytes(
+        expected_core_finality_adapter,
+        "reviewed StreamCoreFinalityAdapter profile row",
+    ):
+        raise GenesisProfileError(
+            "profile entry 37 must preserve the complete canonical Permanent "
+            "StreamCoreFinalityAdapter profile row"
+        )
 
     probe_entries = entries[len(FIXED_CONTRACT_KEYS) : -1]
     if any(entry["kind"] != "ggp_probe" for entry in probe_entries):
-        raise GenesisProfileError("profile.entries 36-57 must be per-parameter GGP probes")
+        raise GenesisProfileError("profile.entries 38-59 must be per-parameter GGP probes")
     if tuple(entry["parameters"][0] for entry in probe_entries) != GGP_PARAMETERS:
-        raise GenesisProfileError("profile.entries 36-57 do not match the canonical GGP inventory")
+        raise GenesisProfileError("profile.entries 38-59 do not match the canonical GGP inventory")
     if not entries or entries[-1]["kind"] != "gtp_probe":
         raise GenesisProfileError("the final profile entry must be the shared GTP cadence probe")
 
     governance = entries[1]
-    if governance["implementation"]["mode"] != "manifest_equivalent":
-        raise GenesisProfileError("profile entry 2 must preserve the governance disjunction")
+    expected_governance = {
+        "id": 2,
+        "key": "GOVERNANCE_LAYER",
+        "kind": "contract",
+        "requirement": GOVERNANCE_REQUIREMENT,
+        "deployment_scope": "singleton",
+        "multiplicity": {"minimum": 1, "maximum": 1},
+        "implementation": GOVERNANCE_EXACT_IMPLEMENTATION,
+        "required_interfaces": list(GOVERNANCE_REQUIRED_INTERFACES),
+        "required_markers": list(GOVERNANCE_REQUIRED_MARKERS),
+        "approved_aliases": [],
+        "normative_anchors": list(GOVERNANCE_NORMATIVE_ANCHORS),
+        "parameters": [],
+        "distinct_from": [],
+    }
+    if canonical_json_bytes(governance, "profile entry 2") != canonical_json_bytes(
+        expected_governance,
+        "reviewed governance profile row",
+    ):
+        raise GenesisProfileError(
+            "profile entry 2 must preserve the complete governance disjunction, "
+            "state-export publisher surface, scope, and normative homes"
+        )
     provider_fallback = entries[31]
     if provider_fallback["implementation"]["mode"] != "one_of":
         raise GenesisProfileError("profile entry 32 must preserve the fallback-provider disjunction")
@@ -574,6 +933,15 @@ def validate_contract_config(data: Any) -> list[dict[str, Any]]:
         verified_markers = require_string_list(
             candidate.get("verified_markers", []), f"{path}.verified_markers"
         )
+        proof_value = candidate.get("state_export_publisher_abi_proof")
+        publisher_proof = (
+            None
+            if proof_value is None
+            else validate_state_export_publisher_abi_proof(
+                proof_value,
+                f"{path}.state_export_publisher_abi_proof",
+            )
+        )
         names.append(name)
         result.append(
             {
@@ -581,6 +949,7 @@ def validate_contract_config(data: Any) -> list[dict[str, Any]]:
                 "deployment_scope": scope,
                 "verified_interfaces": verified_interfaces,
                 "verified_markers": verified_markers,
+                "state_export_publisher_abi_proof": publisher_proof,
             }
         )
     if len(names) != len(set(names)):
@@ -617,6 +986,14 @@ def completeness_blockers(
         entry = matches[0]
         target_id = entry["id"]
         matched_by_entry.setdefault(target_id, []).append(candidate)
+        if (
+            entry["key"] in EXACT_SAFETY_CRITICAL_CANDIDATE_KEYS
+            and name not in entry["implementation"]["names"]
+        ):
+            blockers.append(
+                f"candidate contract {name!r} must use the exact implementation name "
+                f"for safety-critical profile entry {target_id} ({entry['key']})"
+            )
         if candidate["deployment_scope"] != entry["deployment_scope"]:
             blockers.append(
                 f"candidate contract {name!r} has deployment_scope "
@@ -631,6 +1008,17 @@ def completeness_blockers(
                 f"candidate contract {name!r} lacks verified interfaces for profile entry "
                 f"{target_id}: {', '.join(missing_interfaces)}"
             )
+        if entry["key"] in EXACT_SAFETY_CRITICAL_CANDIDATE_KEYS:
+            extra_interfaces = sorted(
+                set(candidate["verified_interfaces"])
+                - set(entry["required_interfaces"])
+            )
+            if extra_interfaces:
+                blockers.append(
+                    f"candidate contract {name!r} advertises forbidden extra interfaces "
+                    f"for exact safety-critical profile entry {target_id} "
+                    f"({entry['key']}): {', '.join(extra_interfaces)}"
+                )
         missing_markers = sorted(
             set(entry["required_markers"]) - set(candidate["verified_markers"])
         )
@@ -638,6 +1026,37 @@ def completeness_blockers(
             blockers.append(
                 f"candidate contract {name!r} lacks verified markers for profile entry "
                 f"{target_id}: {', '.join(missing_markers)}"
+            )
+        if entry["key"] in EXACT_SAFETY_CRITICAL_CANDIDATE_KEYS:
+            extra_markers = sorted(
+                set(candidate["verified_markers"])
+                - set(entry["required_markers"])
+            )
+            if extra_markers:
+                blockers.append(
+                    f"candidate contract {name!r} advertises forbidden extra markers "
+                    f"for exact safety-critical profile entry {target_id} "
+                    f"({entry['key']}): {', '.join(extra_markers)}"
+                )
+        if (
+            entry["key"] != "GOVERNANCE_LAYER"
+            and candidate.get("state_export_publisher_abi_proof") is not None
+        ):
+            blockers.append(
+                f"candidate contract {name!r} must not claim the governance-only "
+                "state-export publisher ABI proof for non-governance profile entry "
+                f"{target_id} ({entry['key']})"
+            )
+        if (
+            entry["key"] == "GOVERNANCE_LAYER"
+            and candidate.get("state_export_publisher_abi_proof")
+            != state_export_publisher_abi_proof()
+        ):
+            blockers.append(
+                f"candidate contract {name!r} lacks the exact structured "
+                "state-export publisher ABI proof for profile entry 2; verified "
+                "interface or marker strings do not prove the five return types "
+                "and three event indexed masks or non-anonymous emission"
             )
 
     for entry in entries:

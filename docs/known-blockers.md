@@ -140,7 +140,14 @@ contributors who start from the README.
   cannot survive the deployment gate;
   [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
   production release until real headroom is recovered while every mandatory
-  Core hook is retained.
+  Core hook is retained. Historical measurements show the prior refactor reached
+  21,792 bytes, then the manager/prepared-mint boundary added roughly 2,330 bytes
+  while the legacy Drops/Minter route remained live. The remediation is a
+  pre-genesis ABI cutover and caller migration, not another additive parallel
+  API: satellite-only slices must keep zero Core delta and Core-changing slices
+  must measure net-negative until the complete linked production-profile
+  `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
+  not a bytecode measurement.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
