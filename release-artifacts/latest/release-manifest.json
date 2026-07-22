@@ -71,14 +71,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:90a5dae12d17f1705e0f8210c55c7dce225a79d243af3544a6fbed9b0aea038e",
-        "size_bytes": 109731,
+        "sha256": "sha256:dd996d206f2d8c55eb95e703ae8ed3b7afee879f086370d6ae1a03c4a8bfdead",
+        "size_bytes": 110165,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:90425775575711591447fe1059488216d6fd2ed98aa0c5baa91d328296bf1cdd",
-        "size_bytes": 106480
+        "sha256": "sha256:63866a4cb8d8b0eb866159992a5273c70a1756ec5816b0d3d732c1e29b4897f9",
+        "size_bytes": 106907
       }
     },
     "release_candidate_lockfile": {
@@ -2323,8 +2323,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:8cdfae4a9c1175fd724aa7eac934627914ff18ec764ed506dbae0c77b3e54b6c",
-      "size_bytes": 108165
+      "sha256": "sha256:a784cb5f1a58360450b875355359a6644642ab528b5052f8632ed2749892424b",
+      "size_bytes": 108602
     },
     "governance_docs": [
       {

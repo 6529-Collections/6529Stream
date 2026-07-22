@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-22 17:13 UTC` |
+| Last updated | `2026-07-22 17:44 UTC` |
 
 ## Current Run Notes
 
@@ -107,7 +107,11 @@ evidence, and audit/readiness gates.
   independently implemented fixed-golden vector oracle is wired into CI and
   release-checksum provenance. Focused mutation tests, independent
   selector/topic/hash recomputation, and the full final-follow-up local gate
-  pass. The manual refresh/check recipes now preserve the same canonical
+  pass. Final implementation mapping also closed two V2 ambiguities before
+  merge: ordered call index/selector validation is executor-owned and does not
+  widen the exact six-return `currentAction()` target context, while module
+  registration has its own nonempty strict-UTF-8 2,048-byte manifest-URI bound.
+  The manual refresh/check recipes now preserve the same canonical
   risk-register, release-notes, manifest, bytecode-proof, candidate-lockfile,
   and checksum order enforced by Make, CI, and both check wrappers.
 - This slice pins the intentional pre-genesis target ABI, one canonical

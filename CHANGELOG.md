@@ -7,6 +7,12 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Closed two governance-v2 target ambiguities before implementation: the
+  six-return `currentAction()` is now explicitly the complete target-readable
+  context while ordered call index/selector validation remains at the
+  executor's descriptor/`callsHash` boundary, and module registration now pins
+  a separately named 2,048-byte, nonempty, strict-UTF-8 module-manifest URI
+  policy alongside the existing registry-manifest URI bound.
 - Pinned Linux CI and release mode to CPython `3.12.13`, replaced floating pip
   upgrades and live transitive resolution with one binary-only SHA-256 lock,
   added fail-closed workflow/lock policy tests, documented lock refresh and the

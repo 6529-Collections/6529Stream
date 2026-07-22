@@ -403,6 +403,25 @@ immutable executor, a nonzero executing V2 action, the transition-specific
 class below, and exact per-call scope/old/new hashes. Production domains and
 formulas are:
 
+The six-return `currentAction()` is the complete target-readable execution
+context. It intentionally has no call-index or selector return: the executor
+binds order through the ordered `callsHash`, validates each descriptor's target,
+value, selector, and calldata hash before making any call, and rotates the three
+per-call hashes immediately before that call. The registry independently checks
+the immutable executor caller, the entrypoint's own `msg.sig`, the nonzero
+action ID, exact class, and exact three hashes. Call-index/order and descriptor-
+selector negative tests therefore live at the executor boundary; adding a
+target-readable index/selector return or companion authorization read is not a
+protocol-v1 requirement and must not replace the six-return context.
+
+Both module-level and registry-level manifest URIs have separately named exact
+bounds:
+
+```solidity
+uint256 constant MAX_MODULE_MANIFEST_URI_BYTES = 2_048;
+uint256 constant MAX_MODULE_REGISTRY_MANIFEST_URI_BYTES = 2_048;
+```
+
 ```solidity
 bytes32 constant STREAM_MODULE_REGISTRATION_SCOPE_V1 =
     0x5277bfb240fc6ff036a86dc964a11dd9db1c1fa99403fc75261e01e39314a274;
@@ -494,7 +513,12 @@ interface, every nonzero manifest field, and URI bounds before writing. The
 execution-generated `registeredAt` and `statusUpdatedAt` timestamps both equal
 the current block timestamp and are excluded from a pre-scheduled hash because
 no proposer controls that timestamp; every authority-bearing and
-content-bearing record field is committed above.
+content-bearing record field is committed above. Registration requires
+`registration.moduleManifestURI` to be nonempty, strictly valid UTF-8, and at
+most `MAX_MODULE_MANIFEST_URI_BYTES`; its `moduleManifestHash` and other
+required manifest commitments remain nonzero. The URI bytes are committed
+through the registration state hash above, so a different representation is a
+different scheduled transition.
 
 Registration stores record revision `1`. `registerModule` is class
 `DELAYED_LOOSENING` (`1`). `setModuleStatus` is
