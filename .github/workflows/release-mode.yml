@@ -50,6 +50,11 @@ jobs:
             exit 1
           fi
 
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.12.13"
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d
         with:
@@ -59,9 +64,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements-tools.txt
-          python3 -m playwright install --with-deps chromium
+          python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+          python -m pip check
+          python -m playwright install --with-deps chromium
 
       - name: Run aggregate release checks
         shell: bash

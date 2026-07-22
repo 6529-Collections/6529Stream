@@ -25,6 +25,17 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
+    def test_default_covered_paths_include_python_toolchain_provenance(self) -> None:
+        expected_paths = {
+            Path("requirements-tools.txt"),
+            Path("requirements-tools.lock"),
+            Path(".github/workflows/ci.yml"),
+            Path(".github/workflows/release-mode.yml"),
+            Path("scripts/check_python_toolchain.py"),
+            Path("scripts/test_python_toolchain.py"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
     def test_default_covered_paths_include_evidence_artifacts(self) -> None:
         self.assertIn(Path("release-artifacts/schema"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("release-artifacts/evidence"), generator.DEFAULT_COVERED_PATHS)

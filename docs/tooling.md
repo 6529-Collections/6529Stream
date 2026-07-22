@@ -8,9 +8,77 @@
 | --- | --- |
 | Foundry | `v1.7.1` |
 | Solidity compiler | `0.8.19` |
+| Python (Linux CI/release) | `3.12.13` |
 | Slither | `0.11.5` |
 | solc-select | `1.2.0` |
 | eth-hash | `0.8.0` |
+| Playwright | `1.60.0` |
+
+## Reproducible Python Audit And Release Toolchain
+
+[`requirements-tools.txt`](../requirements-tools.txt) is the short,
+human-maintained list of direct tool intent. The generated
+[`requirements-tools.lock`](../requirements-tools.lock) is the complete Linux
+CI/release dependency graph. Every direct and transitive package is pinned to
+one version and has one or more reviewed SHA-256 artifact hashes. Ordinary CI
+and manual release mode both select CPython `3.12.13` through the full-SHA
+pinned `actions/setup-python` action and install exactly the same lock with:
+
+```bash
+python -m pip install --disable-pip-version-check --require-hashes --only-binary=:all: -r requirements-tools.lock
+python -m pip check
+```
+
+There is no live `pip --upgrade` step. The exact Python tool-cache artifact
+provides pip, and `--require-hashes` fails if an artifact differs or dependency
+resolution needs a package absent from the lock. `--only-binary=:all:` also
+keeps unreviewed source builds out of the Linux evidence path.
+
+`scripts/bootstrap-ec2.sh` and `scripts/bootstrap-windows.ps1` remain
+contributor conveniences for heterogeneous local Python installations. They
+consume the readable direct requirements and do not upgrade pip, but they are
+not release-evidence install paths. A release or audit run must use the exact
+Linux runtime and hashed lock above.
+
+### Refresh And Review
+
+Refresh the lock only in a clean Linux x86-64 environment running CPython
+`3.12.13`. Use the reviewed generator and vulnerability-scanner versions, then
+run the policy checks:
+
+```bash
+python -m venv .venv-lock-refresh
+source .venv-lock-refresh/bin/activate
+python -m pip install "pip-tools==7.6.0" "pip-audit==2.10.1"
+CUSTOM_COMPILE_COMMAND='python -m piptools compile --generate-hashes --strip-extras --no-emit-index-url requirements-tools.txt' \
+  python -m piptools compile --generate-hashes --strip-extras --no-emit-index-url \
+  --output-file=requirements-tools.lock requirements-tools.txt
+python -m pip_audit --require-hashes -r requirements-tools.lock
+python scripts/test_python_toolchain.py
+python scripts/check_python_toolchain.py
+```
+
+Review the full package/version change and every added or removed hash, not
+only the four direct pins. The generated lock must not contain index URLs,
+trusted-host settings, credentials, or private package references. Record or
+remediate vulnerability findings before acceptance. The expected generated
+diff is the lock plus the downstream release manifest/checksum bundle after
+the normal generator sequence; changes to direct intent also update
+`requirements-tools.txt`. Update the pinned Python, setup action, compiler, or
+scanner deliberately in the same focused PR when one of those inputs changes.
+
+The Playwright Python package is inside the hashed lock. Chromium itself is a
+separate runtime download: `python -m playwright install --with-deps chromium`
+uses the browser revision encoded by locked Playwright `1.60.0`, while the
+runner's operating-system packages installed by `--with-deps` are outside the
+Python package lock. Both workflows invoke that same locked module and command;
+the Python lock does not claim to checksum Chromium or Ubuntu packages.
+
+Python toolchain provenance is part of release evidence: the checksum bundle
+covers the direct requirements, hashed lock, both consuming workflows, and the
+checker plus its tests. This binds the reviewed install policy without storing
+credentials or private-index configuration. It improves reproducibility only
+and does not promote release maturity.
 
 ## Local Checks
 
@@ -37,6 +105,8 @@ python scripts/test_contract_size_budget.py
 python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
 python scripts/check_solidity_formatting.py
+python scripts/test_python_toolchain.py
+python scripts/check_python_toolchain.py
 python scripts/test_warning_dispositions.py
 python scripts/run_forge_size_log.py --log cache/forge-size.log
 python scripts/check_warning_dispositions.py --solc-warnings-log cache/forge-size.log
@@ -921,7 +991,7 @@ artifact, public-beta evidence, release evidence issue backlog, release
 evidence issue-link map, release evidence issue body sync, deployment manifest,
 address-book, schema, ceremony evidence, release-manifest, bytecode proof, and
 release-candidate lockfile outputs, plus the checked mint-manager domain
-constant spec and checker. This
+constant spec and Python toolchain provenance. This
 gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
@@ -1224,6 +1294,8 @@ or duplicate contract addresses, missing contract metadata, or mismatch against
 the release artifact contract set.
 
 The release-checksum generator covers `release-artifacts/contracts.json`,
+`requirements-tools.txt`, `requirements-tools.lock`, the ordinary CI and
+release-mode workflows, the Python toolchain checker and its tests,
 `release-artifacts/evidence/`,
 `release-artifacts/drop-authorization-signing/`,
 `release-artifacts/signer-custody-readiness/`,

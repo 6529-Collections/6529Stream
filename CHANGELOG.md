@@ -7,6 +7,11 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Pinned Linux CI and release mode to CPython `3.12.13`, replaced floating pip
+  upgrades and live transitive resolution with one binary-only SHA-256 lock,
+  added fail-closed workflow/lock policy tests, documented lock refresh and the
+  separate Playwright browser-runtime boundary, and checksum-bound the complete
+  Python toolchain provenance without changing release maturity.
 - Aligned seven ADR 0010 citations in the collection-metadata and
   metadata-router specifications with the D-prefixed decision-id format and
   refreshed the hash-bound release evidence; this is documentation-only and

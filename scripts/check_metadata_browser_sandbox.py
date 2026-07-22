@@ -146,8 +146,9 @@ def run_browser_sandbox(fixture: AnimationFixture, *, timeout_ms: int, headed: b
         from playwright.sync_api import sync_playwright
     except ModuleNotFoundError as exc:
         raise BrowserSandboxError(
-            "playwright is not installed. Run `python -m pip install -r "
-            "requirements-tools.txt` and `python -m playwright install chromium`, "
+            "playwright is not installed. On the release Linux runtime, install "
+            "`requirements-tools.lock` with `--require-hashes --only-binary=:all:` "
+            "and run `python -m playwright install chromium`, "
             "then retry this check."
         ) from exc
 

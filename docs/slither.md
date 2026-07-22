@@ -1,8 +1,9 @@
 # Slither Baseline
 
-Slither is pinned through `requirements-tools.txt` and is currently a
-non-gating diagnostic. It is expected to report high and medium findings until
-the roadmap triage work fixes, accepts, or scopes each row.
+Slither is a direct pin in `requirements-tools.txt` and is transitively
+hash-locked for Linux CI/release through `requirements-tools.lock`. It is
+currently a non-gating diagnostic. It is expected to report high and medium
+findings until the roadmap triage work fixes, accepts, or scopes each row.
 
 ## Versions
 

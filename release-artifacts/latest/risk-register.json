@@ -483,7 +483,7 @@
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:85f0724352de3789935202f0404136bb0d37e701b67378e98b25cf4150305d02"
+          "sha256": "sha256:de93986b87ed93ff0acbb65aabb4b55021ca7c27e3beb0520517abeda133d488"
         },
         {
           "path": "docs/vendored-libraries.md",
@@ -524,7 +524,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:3509df9739bea07c706f9c1466bf535ed0e8d0e7aeb4b6238a338ee6b85ca91d"
+          "sha256": "sha256:84dcdeff2a0aa77cb06bb0ca73b66e8c01a0c7c630a1febb285e477452739f27"
         },
         {
           "path": "docs/warning-dispositions.md",

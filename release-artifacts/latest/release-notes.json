@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c9490d4ca8011d3f789d87185b03d7ccad63f7ce0ba55c08945321e43aec63b8",
-      "size_bytes": 100236
+      "sha256": "sha256:cb4c764c75f8b69139f4bdc508ea39d3e8d71949cc3b86bb44359f5b6ae7835a",
+      "size_bytes": 100617
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:10e256fb751501cd7c675748f2526dbf89690360a04f2ece00f62d00e09b15e4",
+      "sha256": "sha256:d26907b50b3cc7fff0e1ee8a1e9f1c623f11cfd647bc4a9ec07e432a5f8b1682",
       "size_bytes": 24790
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Pinned Linux CI and release mode to CPython `3.12.13`, replaced floating pip upgrades and live transitive resolution with one binary-only SHA-256 lock, added fail-closed workflow/lock policy tests, documented lock refresh and the separate Playwright browser-runtime boundary, and checksum-bound the complete Python toolchain provenance without changing release maturity.",
       "Aligned seven ADR 0010 citations in the collection-metadata and metadata-router specifications with the D-prefixed decision-id format and refreshed the hash-bound release evidence; this is documentation-only and does not change deployed protocol behavior.",
       "Hardened release mode so expired, future, or inverted risk-acceptance windows fail; external-audit evidence and all production evidence are non-waivable; local release targets run the aggregate check; and the manual workflow fails unless invoked from the protected default branch before running the full repository gate. Production release mode also validates the checksum-covered `StreamCore` build measurement against the normative 2,000-byte EIP-170 deployment headroom requirement, keeping issue #654 fail-closed while the current 424-byte margin is recovered. Reconciled current roadmap and non-normative architecture notes to the artifact-backed 24,152-byte runtime and confirmed that the measured build already uses plain non-enumerable ERC-721, so recovery must come from real compression, extraction, or authorized relocation rather than assumed enumerable-removal savings. The readiness surfaces now also state the separate issue #656 limitation: strict release mode cannot yet prove the normative exhaustive 58-contract genesis candidate against the current 20-contract release inventory.",
       "Rebuilt `StreamCore` token identity onto the specification's sequential model: one monotone global token ID counter starting at 1 replaces the reserved-range allocator, per-token `(collectionId, collectionSerial)` identity records are written at allocation and retained across burns, `TokenCollectionRegistered` (leading `uint16 schemaVersion`) is emitted at every authoritative identity write before dependent effects, burn is reshaped to `burn(uint256)` with the `StreamTokenBurned` event and the `collectionBurnsBlockedAtBlock` height read, the Permanent identity and enumeration reads land (`tokenLifecycle`, `lastAllocatedTokenId`, `lastAllocatedCollectionId`, storage-backed `tokenCollectionIdentity`), transfer/approval conditioning overrides are removed so ERC-721 transfers stay unconditioned, the vendored `ERC721Enumerable` pair is deleted, and every `10^10` range derivation is purged from Core, the minter read path, and the metadata renderer (`TokenOutsideCollectionRange` is renamed to `TokenIdentityUnknown`).",

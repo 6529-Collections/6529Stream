@@ -74,8 +74,7 @@ install_python_tools() {
   python3 -m venv .venv-tools
   # shellcheck source=/dev/null
   source .venv-tools/bin/activate
-  python -m pip install --upgrade pip
-  python -m pip install -r requirements-tools.txt
+  python -m pip install --disable-pip-version-check -r requirements-tools.txt
   python -m playwright install --with-deps chromium
   solc-select install 0.8.19
   solc-select use 0.8.19

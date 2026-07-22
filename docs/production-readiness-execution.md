@@ -83,7 +83,8 @@ authenticated `gh` access.
 
 Before any public beta or production-release claim:
 
-1. Install the pinned tools environment from `requirements-tools.txt` without
+1. On Linux CPython `3.12.13`, install the hashed tools environment from
+   `requirements-tools.lock` with the command in `docs/tooling.md`, without
    changing readiness claims.
 2. Run `make check` and `powershell -ExecutionPolicy Bypass -File scripts\check.ps1`
    on the frozen candidate commit.
