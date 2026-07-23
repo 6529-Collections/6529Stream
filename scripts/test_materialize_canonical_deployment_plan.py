@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
+from unittest import mock
 
 import materialize_canonical_deployment_plan as materializer
 
@@ -248,6 +250,34 @@ class MaterializerFixture:
         )
         self.write_candidate()
 
+    def set_full_initcode_length(self, length: int) -> None:
+        """Configure exact full initcode length without invoking a compiler."""
+        encoded_args = materializer.encode_abi(["address"], [ADMIN_ADDRESS])
+        creation_length = length - len(encoded_args)
+        if creation_length < 1:
+            raise AssertionError("fixture initcode must retain creation bytecode")
+        creation = bytes.fromhex("60" * creation_length)
+        runtime = bytes.fromhex("6100")
+        self.artifact["bytecode"] = {
+            "object": "0x" + creation.hex(),
+            "linkReferences": {},
+        }
+        self.artifact["deployedBytecode"] = {
+            "object": "0x" + runtime.hex(),
+            "linkReferences": {},
+            "immutableReferences": {},
+        }
+        instance = self.candidate["instances"][0]
+        instance["libraries"] = []
+        instance["runtime"] = {
+            "immutable_values": {},
+            "expected_keccak256": materializer.keccak256_hex(runtime),
+        }
+        instance["expected_initcode_keccak256"] = materializer.keccak256_hex(
+            creation + encoded_args
+        )
+        self.rebind_artifact_and_receipt()
+
 
 class CanonicalDeploymentPlanTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -270,6 +300,10 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         self.assertEqual(
             first["schema_version"],
             "6529stream.canonical-deployment-plan.v1",
+        )
+        self.assertEqual(
+            first["generated_by"],
+            "scripts/materialize_canonical_deployment_plan.py:2",
         )
         self.assertFalse(first["release_posture"]["production_candidate"])
         self.assertFalse(first["release_posture"]["readiness_evidence"])
@@ -391,6 +425,93 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
                 "01",
                 "argument",
             )
+
+    def test_abi_normalization_handles_nested_tuple_arrays(self) -> None:
+        parameter = {
+            "name": "_nested",
+            "type": "tuple[][2]",
+            "internalType": "struct Nested[2]",
+            "components": [
+                {"name": "count", "type": "uint8", "internalType": "uint8"},
+                {
+                    "name": "flags",
+                    "type": "tuple[]",
+                    "internalType": "struct Flag[]",
+                    "components": [
+                        {
+                            "name": "account",
+                            "type": "address",
+                            "internalType": "address",
+                        },
+                        {
+                            "name": "enabled",
+                            "type": "bool",
+                            "internalType": "bool",
+                        },
+                    ],
+                },
+            ],
+        }
+        value = [
+            [["255", [[ADMIN_ADDRESS, True]]]],
+            [[0, []], [1, [[OTHER_LIBRARY_ADDRESS, False]]]],
+        ]
+        canonical = materializer.canonical_abi_type(parameter, "input")
+        self.assertEqual(canonical, "(uint8,(address,bool)[])[][2]")
+        normalized = materializer.normalize_abi_value(
+            parameter,
+            value,
+            "argument",
+        )
+        expected = materializer.encode_abi([canonical], [normalized])
+        constructor = {
+            "types": [canonical],
+            "arguments": [value],
+            "encoded_args_keccak256": materializer.keccak256_hex(expected),
+        }
+        canonical_types, encoded = materializer.encode_constructor(
+            [parameter],
+            constructor,
+            "nested",
+        )
+        self.assertEqual(canonical_types, [canonical])
+        self.assertEqual(encoded, expected)
+
+    def test_abi_integer_width_bounds_fail_closed(self) -> None:
+        cases = (
+            ("uint8", 0, 0),
+            ("uint8", "255", 255),
+            ("int8", "-128", -128),
+            ("int8", 127, 127),
+        )
+        for abi_type, value, expected in cases:
+            with self.subTest(abi_type=abi_type, value=value):
+                self.assertEqual(
+                    materializer.normalize_abi_value(
+                        {"type": abi_type},
+                        value,
+                        "argument",
+                    ),
+                    expected,
+                )
+        for abi_type, value in (
+            ("uint8", -1),
+            ("uint8", 256),
+            ("int8", -129),
+            ("int8", 128),
+            ("uint7", 1),
+            ("int264", 1),
+        ):
+            with self.subTest(abi_type=abi_type, value=value):
+                with self.assertRaisesRegex(
+                    materializer.DeploymentPlanError,
+                    "outside|invalid ABI type",
+                ):
+                    materializer.normalize_abi_value(
+                        {"type": abi_type},
+                        value,
+                        "argument",
+                    )
 
     def test_rejects_missing_unresolved_and_wrong_library_bindings(self) -> None:
         instance = self.fixture.candidate["instances"][0]
@@ -555,6 +676,55 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             "immutable bindings do not match artifact references"
         )
 
+    def test_rejects_wrong_immutable_width_and_positions(self) -> None:
+        runtime = self.fixture.artifact["deployedBytecode"]
+        runtime["object"] = "0x61" + PLACEHOLDER + ("00" * 32) + "00"
+        runtime["immutableReferences"] = {
+            "123": [{"start": 21, "length": 32}]
+        }
+        instance = self.fixture.candidate["instances"][0]
+        instance["runtime"]["immutable_values"] = {
+            "123": "0x" + ("ab" * 31)
+        }
+        self.fixture.rebind_artifact_and_receipt()
+        self.assert_materialization_fails("must contain exactly 32 bytes")
+
+        runtime["immutableReferences"] = {
+            "123": [{"start": 54, "length": 1}]
+        }
+        instance["runtime"]["immutable_values"] = {"123": "0xab"}
+        self.fixture.rebind_artifact_and_receipt()
+        self.assert_materialization_fails("in-bounds immutable reference")
+
+    def test_rejects_overlapping_immutable_positions(self) -> None:
+        runtime = self.fixture.artifact["deployedBytecode"]
+        runtime["object"] = "0x61" + PLACEHOLDER + ("00" * 40)
+        runtime["immutableReferences"] = {
+            "123": [{"start": 21, "length": 20}],
+            "124": [{"start": 40, "length": 10}],
+        }
+        instance = self.fixture.candidate["instances"][0]
+        instance["runtime"]["immutable_values"] = {
+            "123": "0x" + ("ab" * 20),
+            "124": "0x" + ("cd" * 10),
+        }
+        self.fixture.rebind_artifact_and_receipt()
+        self.assert_materialization_fails("contains overlapping ranges")
+
+    def test_rejects_wrong_library_positions_and_runtime_hash(self) -> None:
+        self.fixture.artifact["bytecode"]["linkReferences"][
+            "smart-contracts/FixtureLibrary.sol"
+        ]["FixtureLibrary"][0]["length"] = 19
+        self.fixture.rebind_artifact_and_receipt()
+        self.assert_materialization_fails("20-byte in-bounds library link")
+
+        self.fixture = MaterializerFixture(self.root / "runtime-hash")
+        self.fixture.candidate["instances"][0]["runtime"][
+            "expected_keccak256"
+        ] = "0x" + ("0" * 64)
+        self.fixture.write_candidate()
+        self.assert_materialization_fails("expected runtime hash mismatch")
+
     def test_rejects_overlapping_runtime_link_and_immutable(self) -> None:
         runtime = self.fixture.artifact["deployedBytecode"]
         runtime["immutableReferences"] = {
@@ -601,6 +771,184 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         ):
             materializer.check_output(output, plan)
 
+    def test_output_is_reparsed_before_atomic_replacement(self) -> None:
+        output = materializer.resolve_output_path(
+            self.root,
+            self.root / "tmp" / "plan.json",
+        )
+        with mock.patch.object(
+            materializer,
+            "json_text",
+            return_value='{"wrong":true}\n',
+        ):
+            with self.assertRaisesRegex(
+                materializer.DeploymentPlanError,
+                "did not reparse",
+            ):
+                materializer.write_output(
+                    self.root,
+                    output,
+                    {"expected": True},
+                )
+        self.assertFalse(output.exists())
+
+    def test_strict_json_rejects_ambiguous_or_non_ijson_inputs(self) -> None:
+        invalid_inputs = (
+            (b'{"value":1,"value":2}', "duplicate JSON member"),
+            (b'{"value":1.5}', "floating-point JSON is forbidden"),
+            (
+                b'{"value":9007199254740992}',
+                "outside the I-JSON interoperable range",
+            ),
+            (b'{"value":"\\ud800"}', "non-Unicode-scalar surrogate"),
+            (b'{"value":"\xff"}', "strict UTF-8 JSON"),
+        )
+        for raw, pattern in invalid_inputs:
+            with self.subTest(pattern=pattern):
+                with self.assertRaisesRegex(
+                    materializer.DeploymentPlanError,
+                    pattern,
+                ):
+                    materializer.decode_json_bytes(
+                        raw,
+                        self.root / "candidate.json",
+                    )
+
+    def test_repository_relative_paths_are_cross_platform_canonical(self) -> None:
+        self.assertEqual(
+            materializer.require_safe_relative_path(
+                "smart-contracts/Fixture.sol",
+                "path",
+            ),
+            "smart-contracts/Fixture.sol",
+        )
+        for value in (
+            "/absolute",
+            "C:/windows-drive",
+            "nested/file:stream",
+            "../escape",
+            "nested/../escape",
+            "./prefixed",
+            "nested/./file",
+            "nested//file",
+            "nested\\file",
+            "nested/",
+            ".",
+            "..",
+        ):
+            with self.subTest(value=value):
+                with self.assertRaisesRegex(
+                    materializer.DeploymentPlanError,
+                    "normalized forward-slash repository-relative path",
+                ):
+                    materializer.require_safe_relative_path(value, "path")
+
+    def test_eip3860_full_initcode_boundary(self) -> None:
+        self.fixture.set_full_initcode_length(
+            materializer.EIP3860_MAX_INITCODE_SIZE
+        )
+        deployment = self.fixture.materialize()["deployments"][0]
+        self.assertEqual(
+            deployment["initcode_length_bytes"],
+            materializer.EIP3860_MAX_INITCODE_SIZE,
+        )
+
+        self.fixture.set_full_initcode_length(
+            materializer.EIP3860_MAX_INITCODE_SIZE + 1
+        )
+        self.assert_materialization_fails("exceeding the EIP-3860 limit")
+
+    def test_repository_gates_run_real_candidate_after_canonical_build(
+        self,
+    ) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        makefile = (repo_root / "Makefile").read_text(encoding="utf-8")
+        self.assertIn(
+            "canonical-deployment-plan-check: release-build-check",
+            makefile,
+        )
+        self.assertIn(
+            "check: canonical-deployment-plan-check",
+            makefile,
+        )
+        self.assertIn(
+            "tmp/canonical-deployment-plan.json",
+            (repo_root / ".gitignore").read_text(encoding="utf-8"),
+        )
+        for token in (
+            "scripts/test_materialize_canonical_deployment_plan.py",
+            "scripts/materialize_canonical_deployment_plan.py --candidate "
+            "deployments/config/canonical-deployment-candidate-non-production.json "
+            "--output tmp/canonical-deployment-plan.json",
+            "--output tmp/canonical-deployment-plan.json --check",
+        ):
+            self.assertIn(token, makefile)
+
+        shell = (repo_root / "scripts" / "check.sh").read_text(
+            encoding="utf-8"
+        )
+        release_at = shell.index(
+            '"$python_bin" scripts/build_release_artifacts.py --check'
+        )
+        unit_at = shell.index(
+            '"$python_bin" scripts/test_materialize_canonical_deployment_plan.py'
+        )
+        write_at = shell.index(
+            '"$python_bin" scripts/materialize_canonical_deployment_plan.py '
+            "--candidate",
+            unit_at,
+        )
+        check_at = shell.index(
+            "--output tmp/canonical-deployment-plan.json --check",
+            write_at,
+        )
+        self.assertLess(release_at, unit_at)
+        self.assertLess(unit_at, write_at)
+        self.assertLess(write_at, check_at)
+
+        powershell = (repo_root / "scripts" / "check.ps1").read_text(
+            encoding="utf-8"
+        )
+        release_at = powershell.index(
+            '"scripts\\build_release_artifacts.py" "--check"'
+        )
+        unit_at = powershell.index(
+            '"scripts\\test_materialize_canonical_deployment_plan.py"'
+        )
+        write_at = powershell.index(
+            '"scripts\\materialize_canonical_deployment_plan.py" "--candidate"',
+            unit_at,
+        )
+        check_at = powershell.index(
+            '"tmp\\canonical-deployment-plan.json" "--check"',
+            write_at,
+        )
+        self.assertLess(release_at, unit_at)
+        self.assertLess(unit_at, write_at)
+        self.assertLess(write_at, check_at)
+
+        workflow = (
+            repo_root / ".github" / "workflows" / "ci.yml"
+        ).read_text(encoding="utf-8")
+        release_at = workflow.index("- name: Canonical release build")
+        gate_at = workflow.index(
+            "- name: Canonical deployment plan (non-production fixture)"
+        )
+        size_at = workflow.index("- name: Contract size budget", gate_at)
+        self.assertLess(release_at, gate_at)
+        self.assertLess(gate_at, size_at)
+        block = workflow[gate_at:size_at]
+        self.assertLess(
+            block.index("test_materialize_canonical_deployment_plan.py"),
+            block.index(
+                "materialize_canonical_deployment_plan.py --candidate"
+            ),
+        )
+        self.assertIn(
+            "--output tmp/canonical-deployment-plan.json --check",
+            block,
+        )
+
     def test_committed_candidate_and_schemas_are_strict_nonproduction(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
         candidate_path = (
@@ -634,6 +982,54 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
                 value["$schema"],
                 "https://json-schema.org/draft/2020-12/schema",
             )
+
+        candidate_schema = materializer.load_json(
+            repo_root
+            / "deployments"
+            / "schema"
+            / "canonical-deployment-candidate.schema.json"
+        )
+        plan_schema = materializer.load_json(
+            repo_root
+            / "deployments"
+            / "schema"
+            / "canonical-deployment-plan.schema.json"
+        )
+        candidate_defs = candidate_schema["$defs"]
+        plan_defs = plan_schema["$defs"]
+        candidate_network = candidate_schema["properties"]["network"][
+            "properties"
+        ]
+        self.assertEqual(
+            candidate_network["chain_id"]["maximum"],
+            materializer.IJSON_SAFE_INTEGER_MAX,
+        )
+        self.assertEqual(
+            plan_schema["properties"]["deployments"]["items"]["$ref"],
+            "#/$defs/deployment",
+        )
+        self.assertEqual(
+            plan_defs["deployment"]["properties"]["initcode_length_bytes"][
+                "maximum"
+            ],
+            materializer.EIP3860_MAX_INITCODE_SIZE,
+        )
+        self.assertEqual(
+            plan_defs["library_position"]["properties"]["length"]["const"],
+            20,
+        )
+        for repo_path in (candidate_defs["repo_path"], plan_defs["repo_path"]):
+            pattern = re.compile(repo_path["pattern"])
+            self.assertIsNotNone(pattern.fullmatch("contracts/Fixture.sol"))
+            for rejected in (
+                "../x",
+                "x//y",
+                "x/./y",
+                "C:/x",
+                "x/file:stream",
+                "x\\y",
+            ):
+                self.assertIsNone(pattern.fullmatch(rejected))
 
 
 if __name__ == "__main__":

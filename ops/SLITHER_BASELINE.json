@@ -17,7 +17,7 @@
     "solidity_tree_sha256": "sha256:df095dfb797c46828c966f5cb4eaadb1e4ce9c510a8df821ac0e0091a18f2be4",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:155408a77117fe90f39469f1ad0b8f4d817da2fa030a6d850cd9a6c4276cbc02",
-    "requirements_tools_sha256": "sha256:4af191d57f4305247c9fc3f97f853e3afb39d07ddd3b7ebde3a89da83384fa3e"
+    "requirements_tools_sha256": "sha256:41f8387cd7e7cf98ec659962ef96643de0fe2e58e1b9304d1cccf4113c1c29b3"
   },
   "scope": {
     "included_impacts": [

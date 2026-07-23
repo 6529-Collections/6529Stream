@@ -24,6 +24,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_python_toolchain.py"),
     Path("scripts/build_release_artifacts.py"),
     Path("scripts/test_release_build_artifacts.py"),
+    Path("scripts/materialize_canonical_deployment_plan.py"),
+    Path("scripts/test_materialize_canonical_deployment_plan.py"),
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/stream-core-permanent-interface.json"),

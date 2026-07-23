@@ -160,14 +160,30 @@ addresses, has no genesis-profile entry, and sets both production/readiness
 flags to false. The materializer revalidates the complete canonical build and
 checks exact receipt, catalog, config, artifact, constructor, link, immutable,
 initcode, and runtime hashes before emitting the ordered plan below `tmp/`.
-Treat any mismatch as a stop condition; do not weaken or bypass a binding to
-make a stale candidate pass.
+Full creation bytecode plus ABI-encoded constructor arguments must fit the
+49,152-byte EIP-3860 initcode limit. Treat any mismatch or limit breach as a
+stop condition; do not weaken or bypass a binding to make a stale candidate
+pass.
+
+Supplied immutable values are candidate assertions. The materializer checks
+their artifact-declared byte widths and positions and the resulting expected
+runtime hash; it does not derive the intended values from constructor
+semantics, execute creation code, or prove that constructor execution returns
+that runtime. Those semantic and deployed-runtime proofs remain required for a
+production candidate.
+
+The ordinary `make check`, `scripts/check.sh`, `scripts/check.ps1`, and Linux
+CI paths run the focused unit suite, materialize this exact committed fixture,
+and reparse/check the ephemeral output immediately after the canonical release
+build. This is regression coverage for the tooling foundation, not deployment
+or readiness evidence.
 
 The output is ephemeral operator input, not a deployment manifest or release
 artifact. Version 1 refuses production candidates, does not derive deployment
-addresses or salts, and has no broadcaster or on-chain parity check. The strict
-instance-aware issue #656 candidate, the reusable broadcaster, retained
-receipts, and deployed runtime comparison remain outstanding. Nothing in this
+addresses or salts, prove constructor semantics, execute creation code, or
+compare deployed runtime, and it has no broadcaster. The strict instance-aware
+issue #656 candidate, the reusable broadcaster, retained receipts, and
+constructor/deployed-runtime comparison remain outstanding. Nothing in this
 workflow closes issue #656 or #677, authorizes a testnet or mainnet broadcast,
 or establishes public-beta or production readiness.
 

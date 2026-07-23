@@ -28,7 +28,7 @@ except ModuleNotFoundError:  # pragma: no cover - exercised only on broken toolc
 
 CANDIDATE_SCHEMA = "6529stream.canonical-deployment-candidate.v1"
 PLAN_SCHEMA = "6529stream.canonical-deployment-plan.v1"
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "2"
 DEFAULT_CANDIDATE = Path(
     "deployments/config/canonical-deployment-candidate-non-production.json"
 )
@@ -39,6 +39,7 @@ CANONICAL_FOUNDRY_CONFIG = Path("foundry.toml")
 NON_PRODUCTION_ENVIRONMENTS = frozenset({"anvil", "local", "fork", "testnet"})
 EPHEMERAL_OUTPUT_ROOT = "tmp"
 IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
+EIP3860_MAX_INITCODE_SIZE = 49_152
 
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 KECCAK_RE = re.compile(r"^0x[0-9a-f]{64}$")
@@ -101,7 +102,7 @@ def decode_json_bytes(raw: bytes, path: Path) -> Any:
     except UnicodeDecodeError as exc:
         raise DeploymentPlanError(f"{path} is not strict UTF-8 JSON: {exc}") from exc
     try:
-        return json.loads(
+        value = json.loads(
             text,
             object_pairs_hook=reject_duplicate_json_pairs,
             parse_int=parse_ijson_integer,
@@ -110,6 +111,26 @@ def decode_json_bytes(raw: bytes, path: Path) -> Any:
         )
     except json.JSONDecodeError as exc:
         raise DeploymentPlanError(f"invalid JSON in {path}: {exc}") from exc
+    reject_non_unicode_scalars(value, str(path))
+    return value
+
+
+def reject_non_unicode_scalars(value: Any, path: str) -> None:
+    """Reject escaped surrogate code points that strict UTF-8 decoding cannot see."""
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            raise DeploymentPlanError(
+                f"{path} contains a non-Unicode-scalar surrogate code point"
+            )
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            reject_non_unicode_scalars(item, f"{path}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            reject_non_unicode_scalars(key, f"{path}.<member>")
+            reject_non_unicode_scalars(item, f"{path}.{key}")
 
 
 def load_json_with_sha256(path: Path) -> tuple[Any, str]:
@@ -269,12 +290,13 @@ def require_solidity_name(value: Any, path: str) -> str:
 
 def require_safe_relative_path(value: Any, path: str) -> str:
     text = require_string(value, path)
-    candidate = Path(text)
     if (
-        candidate.is_absolute()
+        text.startswith("/")
         or "\\" in text
-        or ".." in candidate.parts
-        or candidate.as_posix() != text
+        or ":" in text
+        or text.endswith("/")
+        or "//" in text
+        or any(part in {"", ".", ".."} for part in text.split("/"))
     ):
         raise DeploymentPlanError(
             f"{path} must be a normalized forward-slash repository-relative path"
@@ -304,6 +326,7 @@ def resolve_output_path(repo_root: Path, value: Path) -> Path:
 
 def write_output(repo_root: Path, path: Path, value: Any) -> None:
     """Replace an output file atomically after validating its parent path."""
+    path = resolve_output_path(repo_root, path)
     path.parent.mkdir(parents=True, exist_ok=True)
     normalize_repo_path(repo_root, path.parent, "deployment plan output parent")
     handle, temporary_name = tempfile.mkstemp(
@@ -315,6 +338,11 @@ def write_output(repo_root: Path, path: Path, value: Any) -> None:
     try:
         with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as output:
             output.write(json_text(value))
+        reparsed = decode_json_bytes(temporary.read_bytes(), temporary)
+        if reparsed != value:
+            raise DeploymentPlanError(
+                "deployment plan output did not reparse to the materialized value"
+            )
         os.replace(temporary, path)
     finally:
         if temporary.exists():
@@ -989,7 +1017,7 @@ def encode_constructor(
     ]
     if encode_abi is None:
         raise DeploymentPlanError(
-            "constructor encoding requires eth-abi from requirements-tools.lock"
+            "constructor encoding requires the pinned eth-abi toolchain dependency"
         )
     try:
         encoded = encode_abi(canonical_types, normalized)
@@ -1334,6 +1362,11 @@ def materialize_instance(
         path=f"{label}.runtime",
     )
     initcode = linked_creation + encoded_arguments
+    if len(initcode) > EIP3860_MAX_INITCODE_SIZE:
+        raise DeploymentPlanError(
+            f"{label} full initcode is {len(initcode)} bytes, exceeding the "
+            f"EIP-3860 limit of {EIP3860_MAX_INITCODE_SIZE} bytes"
+        )
     actual_initcode_hash = keccak256_hex(initcode)
     if actual_initcode_hash != instance["expected_initcode_keccak256"]:
         raise DeploymentPlanError(

@@ -13,6 +13,7 @@ out-release/
 cache/
 broadcast/
 .release-build-*/
+tmp/canonical-deployment-plan.json
 __pycache__/
 *.pyc
 

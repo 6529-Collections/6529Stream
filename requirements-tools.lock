@@ -639,6 +639,7 @@ eth-abi==5.2.0 \
     --hash=sha256:178703fa98c07d8eecd5ae569e7e8d159e493ebb6eeb534a8fe973fbc4e40ef0 \
     --hash=sha256:17abe47560ad753f18054f5b3089fcb588f3e3a092136a416b6c1502cb7e8877
     # via
+    #   -r requirements-tools.txt
     #   eth-account
     #   slither-analyzer
     #   web3

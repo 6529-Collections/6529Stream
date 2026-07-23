@@ -40,6 +40,7 @@ PROVENANCE_PATHS = (
 )
 EXPECTED_DIRECT_NAMES = {
     "crytic-compile",
+    "eth-abi",
     "eth-hash",
     "playwright",
     "slither-analyzer",

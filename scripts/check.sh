@@ -35,6 +35,9 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/test_release_build_artifacts.py
 "$python_bin" scripts/build_release_artifacts.py
 "$python_bin" scripts/build_release_artifacts.py --check
+"$python_bin" scripts/test_materialize_canonical_deployment_plan.py
+"$python_bin" scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json
+"$python_bin" scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json --check
 "$python_bin" scripts/test_contract_size_budget.py
 "$python_bin" scripts/check_contract_size_budget.py
 "$python_bin" scripts/test_core_bytecode_spend_policy.py

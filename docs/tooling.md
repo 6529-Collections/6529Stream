@@ -12,6 +12,7 @@
 | Slither | `0.11.5` |
 | Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
+| eth-abi | `5.2.0` |
 | eth-hash | `0.8.0` |
 | Playwright | `1.60.0` |
 
@@ -60,7 +61,7 @@ python scripts/check_python_toolchain.py
 ```
 
 Review the full package/version change and every added or removed hash, not
-only the five direct pins. The generated lock must not contain index URLs,
+only the six direct pins. The generated lock must not contain index URLs,
 trusted-host settings, credentials, or private package references. Record or
 remediate vulnerability findings before acceptance. Update the deliberately
 maintained `EXPECTED_LOCKED_NAMES` closure in
@@ -446,9 +447,12 @@ catalog, release-config, Foundry-config, and artifact hashes. It derives the
 constructor ABI from each receipt-bound artifact, ABI-encodes the declared
 arguments, resolves the artifact's exact creation/runtime library positions
 and runtime immutable positions, and emits ordered full initcode plus expected
-runtime bytecode and Keccak-256 hashes.
+runtime bytecode and Keccak-256 hashes. `eth-abi==5.2.0` is a reviewed direct
+toolchain pin because this encoder is part of the materialization boundary.
+The complete creation bytecode plus encoded constructor arguments fails closed
+above the 49,152-byte EIP-3860 initcode limit.
 
-Version 1 accepts only `candidate_kind: non_production_fixture` with both
+The v1 candidate schema accepts only `candidate_kind: non_production_fixture` with both
 `production_candidate` and `readiness_evidence` set to `false`. The committed
 fixture at
 `deployments/config/canonical-deployment-candidate-non-production.json`
@@ -472,21 +476,36 @@ python scripts/materialize_canonical_deployment_plan.py \
   --check
 ```
 
+The ordinary Make, Bash, PowerShell, and Linux CI aggregate gates run this
+unit/materialize/reparse-check sequence immediately after they create and
+validate `out-release/`. The checked candidate remains the same narrow
+non-production fixture; gate inclusion does not turn the ephemeral plan into a
+release artifact or deployment authorization.
+
+Candidate-supplied immutable values are assertions, not values derived from
+constructor semantics. The materializer enforces the artifact-declared widths
+and positions and checks the resulting expected-runtime hash, but it does not
+execute creation code or prove that constructor execution returns that runtime.
+That semantic/runtime equivalence remains outside this non-production
+foundation.
+
 Materialized plans are ephemeral operator inputs and may only be written below
 the repository `tmp/` directory. They are not generated release evidence.
 Candidate, receipt, artifact, and output paths reject repository escapes and
 symlink, junction, or reparse components. Duplicate JSON members, floats,
-non-I-JSON integers, stale or mutated receipts/artifacts, constructor ABI or
-argument-hash drift, missing/extra/unresolved/wrong/overlapping links, missing
-or overlapping immutables, target mismatches, forward dependencies, and
-non-ephemeral output paths fail closed.
+non-I-JSON integers or Unicode surrogate values, stale or mutated
+receipts/artifacts, constructor ABI or argument-hash drift,
+missing/extra/unresolved/wrong/overlapping links, missing, wrong-width, or
+overlapping immutables, EIP-3860 overflow, runtime-hash drift, target
+mismatches, forward dependencies, and non-ephemeral output paths fail closed.
 
-This materializer does not derive salts or deployment addresses, broadcast
-transactions, inspect deployed code, retain ceremony evidence, or modify the
-existing Forge scripts. A broadcaster and the issue #656 strict instance-aware
-production candidate are still required before issue #677 can supply
-production broadcast-bytecode parity. This slice therefore does not close
-issue #656 or #677 and does not change release maturity.
+This materializer does not derive salts or deployment addresses, prove
+constructor semantics, execute creation code, broadcast transactions, inspect
+deployed code, retain ceremony evidence, or modify the existing Forge scripts.
+A broadcaster and the issue #656 strict instance-aware production candidate
+are still required before issue #677 can supply production broadcast-bytecode
+parity. This slice therefore does not close issue #656 or #677 and does not
+change release maturity.
 
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface

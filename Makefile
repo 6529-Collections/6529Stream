@@ -31,11 +31,13 @@ check: build test gas-snapshot-check gas-envelopes-check size release-build-chec
 check: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 check: python-toolchain-check
 check: external-call-gas-inventory-check
+check: canonical-deployment-plan-check
 release-manifest: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 .PHONY: fork-ceremony-evidence-check fork-randomizer-operations-evidence-check
 .PHONY: python-toolchain-check
 .PHONY: external-call-gas-inventory-check
+.PHONY: canonical-deployment-plan-check
 
 build:
 	forge build
@@ -67,6 +69,11 @@ release-build:
 
 release-build-check: release-build
 	$(PYTHON) scripts/build_release_artifacts.py --check
+
+canonical-deployment-plan-check: release-build-check
+	$(PYTHON) scripts/test_materialize_canonical_deployment_plan.py
+	$(PYTHON) scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json
+	$(PYTHON) scripts/materialize_canonical_deployment_plan.py --candidate deployments/config/canonical-deployment-candidate-non-production.json --output tmp/canonical-deployment-plan.json --check
 
 contract-size-budget-check: size release-build-check
 	$(PYTHON) scripts/test_contract_size_budget.py
