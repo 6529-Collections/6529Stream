@@ -377,9 +377,13 @@ version. It reads each configured artifact once, validates and hashes that
 captured byte snapshot, writes those exact bytes into a staged aggregate, and
 derives retained compiler-input bytes and hashes from one in-memory encoding.
 The config and Foundry-config target/policy validation and receipt hashes are
-likewise derived from the same captured bytes. The builder stages only
-configured named artifacts alongside retained compiler inputs and the build
-receipt, then replaces
+likewise derived from the same captured bytes. At the canonical validator
+boundary, config, receipt, every configured artifact, retained compiler input,
+and string-form embedded metadata JSON are decoded from those captured bytes
+under a strict UTF-8, duplicate-free, non-floating-point I-JSON policy with
+safe integers and Unicode scalar values. The builder stages only configured
+named artifacts alongside retained compiler inputs and the build receipt, then
+replaces
 dedicated ignored `out-release/` with rollback on caught replacement failures.
 The output option is restricted to the literal repo-root `out-release/`, while
 ordinary Forge builds and scripts continue to use `out/`. Config, receipt,
@@ -449,8 +453,9 @@ That validator carries the exact validated receipt, config, Foundry config, and
 artifact bytes plus their paths and SHA-256 digests into the materializer.
 The materializer recomputes every carried digest, requires an exact
 receipt-to-artifact snapshot set, strictly decodes the carried receipt and
-artifact JSON bytes, and does not reopen those files. One artifact snapshot is
-reused when multiple candidate instances target it. A filesystem replacement
+release-config JSON plus every carried artifact before candidate target
+selection, and does not reopen those files. Parsed artifact snapshots are
+reused when multiple candidate instances target them. A filesystem replacement
 after validation therefore cannot change the plan being constructed from the
 validated snapshot. It derives the constructor ABI from each receipt-bound
 artifact, ABI-encodes the declared arguments, resolves the artifact's exact

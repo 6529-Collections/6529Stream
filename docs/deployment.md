@@ -164,12 +164,15 @@ constructor, link, immutable, initcode, and runtime hashes before emitting the
 ordered plan below `tmp/`. The build validator carries the exact receipt,
 release-config, Foundry-config, and artifact byte snapshots into the
 materializer. Paths and SHA-256 digests are rechecked, carried JSON is strictly
-decoded for the receipt and artifacts, and those files are not reopened while
-the plan is assembled. A shared target artifact is read once and reused across
-instances, and a post-validation filesystem replacement cannot change the
-validated snapshot used for the plan. Generator version 3 retains the
-canonical build's restricted-source-root and portable compiler-path policies
-in the validated plan.
+decoded for the receipt, release config, and every artifact before target
+selection, and those files are not reopened while the plan is assembled. The
+underlying build validator applies the same strict UTF-8, duplicate-free,
+non-floating-point I-JSON policy to its config, receipt, every artifact,
+retained compiler input, and string-form embedded metadata snapshots. A shared
+target artifact is read once and reused across instances, and a post-validation
+filesystem replacement cannot change the validated snapshot used for the plan.
+Generator version 3 retains the canonical build's restricted-source-root and
+portable compiler-path policies in the validated plan.
 Full creation bytecode plus ABI-encoded constructor arguments must fit the
 49,152-byte EIP-3860 initcode limit. Treat any mismatch or limit breach as a
 stop condition; do not weaken or bypass a binding to make a stale candidate

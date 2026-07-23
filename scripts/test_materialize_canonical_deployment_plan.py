@@ -563,6 +563,73 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         self.fixture.write_candidate()
         self.assert_materialization_fails("duplicate JSON member")
 
+    def test_strictly_decodes_carried_config_snapshot(self) -> None:
+        config_path = self.root / "release-artifacts" / "contracts.json"
+        duplicate_config = b'{"targets":[],"targets":[]}'
+        config_path.write_bytes(duplicate_config)
+        config_sha256 = materializer.sha256_bytes(duplicate_config)
+        self.fixture.receipt["source"]["config_sha256"] = config_sha256
+        write_json(self.fixture.receipt_path, self.fixture.receipt)
+        binding = self.fixture.candidate["release_build"]
+        binding["config_sha256"] = config_sha256
+        binding["receipt_sha256"] = materializer.file_sha256(
+            self.fixture.receipt_path
+        )
+        self.fixture.write_candidate()
+
+        self.assert_materialization_fails("duplicate JSON member")
+
+    def test_strictly_decodes_unselected_artifact_snapshot(self) -> None:
+        unselected_path = (
+            self.root / "out-release" / "Unused.sol" / "Unused.json"
+        )
+        duplicate_artifact = b'{"abi":[],"abi":[]}'
+        unselected_path.parent.mkdir(parents=True)
+        unselected_path.write_bytes(duplicate_artifact)
+        self.fixture.receipt["targets"].append(
+            {
+                "kind": "interface",
+                "name": "Unused",
+                "source": "smart-contracts/Unused.sol",
+                "artifact_relative_path": "Unused.sol/Unused.json",
+                "artifact_sha256": materializer.sha256_bytes(
+                    duplicate_artifact
+                ),
+            }
+        )
+        write_json(self.fixture.receipt_path, self.fixture.receipt)
+        binding = self.fixture.candidate["release_build"]
+        binding["receipt_sha256"] = materializer.file_sha256(
+            self.fixture.receipt_path
+        )
+        binding["target_catalog_sha256"] = (
+            materializer.target_catalog_sha256(self.fixture.receipt)
+        )
+        self.fixture.write_candidate()
+        validated = self.fixture.validator(
+            self.root,
+            self.root / "release-artifacts" / "contracts.json",
+            self.root / "foundry.toml",
+            self.root / "out-release",
+        )
+        validated = replace(
+            validated,
+            artifact_snapshots=(
+                *validated.artifact_snapshots,
+                self.fixture.file_snapshot(unselected_path),
+            ),
+        )
+
+        with self.assertRaisesRegex(
+            materializer.DeploymentPlanError,
+            "duplicate JSON member",
+        ):
+            materializer.materialize_deployment_plan(
+                self.root,
+                self.fixture.candidate_path,
+                receipt_validator=lambda *_args: validated,
+            )
+
     def test_refuses_production_and_readiness_claims(self) -> None:
         self.fixture.candidate["production_candidate"] = True
         self.fixture.write_candidate()

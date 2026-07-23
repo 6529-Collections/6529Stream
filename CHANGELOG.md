@@ -142,11 +142,15 @@ the release policy in `docs/release-policy.md`.
   runtime hashes from a pinned Anvil-only `DependencyRegistry` fixture. It
   carries the exact validated receipt, release-config, Foundry-config, and
   artifact byte snapshots through plan construction without reopening those
-  files, strictly decodes the carried receipt and artifact JSON, and reuses a
-  single validated artifact snapshot across repeated instances so
-  post-validation filesystem replacement cannot alter the resulting plan.
-  Focused regressions cover exact read counts, post-validation mutation, forged
-  snapshot sets, and ambiguous carried JSON. It enforces the full 49,152-byte
+  files, strictly decodes the carried receipt, config, and every artifact JSON
+  before target selection, and reuses parsed artifact snapshots across repeated
+  instances. The underlying canonical validator now applies the same
+  duplicate-free, non-floating-point I-JSON policy to config, receipt, all
+  artifacts, retained compiler inputs, and string-form metadata without
+  rereading them, so post-validation filesystem replacement cannot alter the
+  resulting plan. Focused regressions cover exact read counts, post-validation
+  mutation, forged snapshot sets, and ambiguous selected or unselected inputs.
+  It enforces the full 49,152-byte
   EIP-3860 initcode limit,
   directly pins its `eth-abi` encoder, uses a directly pinned `jsonschema`
   engine for actual Draft 2020-12 candidate/plan validation, and applies one

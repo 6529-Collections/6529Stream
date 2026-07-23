@@ -71,14 +71,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:03bec48f7b0820e3d84b37521c8dde39796cad602b09bbb07f6551382dcb3f99",
-        "size_bytes": 117957,
+        "sha256": "sha256:73e55fc512130e43beea4384ece85310d1c6b9a2ed16afd58e55d2244af500b4",
+        "size_bytes": 118218,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:62bdc5a088ed3b84ee0c96c92f3402047e58fb028eeb850d504aab1f0cea004a",
-        "size_bytes": 114650
+        "sha256": "sha256:b39de57550b8aa459f24d8b7937860367d2be813b72db486d7abe5619c6698f2",
+        "size_bytes": 114911
       }
     },
     "release_candidate_lockfile": {
@@ -155,7 +155,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:184116f4b146ca8d863a619c07d00e14f4bd26664b8baa18012c3f937bdacf1e",
+      "sha256": "sha256:b76b754626557cae803a44f0f74ccf5d0ff201b94ef149ae57523f8987c63877",
       "size_bytes": 25494,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2341,8 +2341,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:2f9a024aa1f6fac35491de2329c7ceb498fec6118c5b9487289037e134206266",
-      "size_bytes": 116553
+      "sha256": "sha256:e1341be31a2a00877bec744dc67b0438e89dc4f2a7ea563990d5f367308460aa",
+      "size_bytes": 116822
     },
     "governance_docs": [
       {
@@ -2397,8 +2397,8 @@
       },
       {
         "path": "docs/deployment.md",
-        "sha256": "sha256:b4ef53ca4da7fb4d1a67e20552e7a42ebba3e6c8cfb8b3e6a85ca63dd94931f2",
-        "size_bytes": 34654
+        "sha256": "sha256:0b310d91b2db8f2239d8c9134d00d2a3bf38f5aa9e22eee6e3e1019622c23bf5",
+        "size_bytes": 34921
       },
       {
         "path": "docs/dependency-operations.md",
@@ -2623,8 +2623,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:239d73e2871c264c4c7b8ed4c7a660317119c0ed23a3fcb7253ea30e3f40634c",
-        "size_bytes": 101645
+        "sha256": "sha256:9ea1473e20c2d367b16f96b8c62431dd08221fe68f6df3b95e07115fd2e76011",
+        "size_bytes": 102014
       },
       {
         "path": "docs/status.md",

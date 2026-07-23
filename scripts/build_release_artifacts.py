@@ -48,10 +48,77 @@ PORTABLE_COMPILER_PATHS = {
     "includePaths": ["."],
 }
 TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
 
 
 class ReleaseBuildError(RuntimeError):
     """Raised when canonical release artifacts cannot be built or validated."""
+
+
+def reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate JSON members instead of accepting last-key-wins input."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ReleaseBuildError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def parse_ijson_integer(token: str) -> int:
+    """Accept only integers interoperable across I-JSON consumers."""
+    value = int(token)
+    if abs(value) > IJSON_SAFE_INTEGER_MAX:
+        raise ReleaseBuildError(
+            f"JSON integer is outside the I-JSON interoperable range: {token}"
+        )
+    return value
+
+
+def reject_json_float(token: str) -> float:
+    """Canonical release inputs do not permit floating-point JSON values."""
+    raise ReleaseBuildError(
+        f"floating-point JSON is forbidden in canonical release inputs: {token}"
+    )
+
+
+def reject_json_constant(token: str) -> None:
+    """Reject NaN and infinities."""
+    raise ReleaseBuildError(f"non-I-JSON token is forbidden: {token}")
+
+
+def reject_non_unicode_scalars(value: Any, path: str) -> None:
+    """Reject escaped surrogate code points that strict UTF-8 cannot detect."""
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            raise ReleaseBuildError(
+                f"{path} contains a non-Unicode-scalar surrogate code point"
+            )
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            reject_non_unicode_scalars(item, f"{path}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            reject_non_unicode_scalars(key, f"{path}.<member>")
+            reject_non_unicode_scalars(item, f"{path}.{key}")
+
+
+def load_json_text(text: str, label: str) -> Any:
+    """Decode duplicate-free JSON under the canonical I-JSON input policy."""
+    try:
+        value = json.loads(
+            text,
+            object_pairs_hook=reject_duplicate_json_pairs,
+            parse_int=parse_ijson_integer,
+            parse_float=reject_json_float,
+            parse_constant=reject_json_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise ReleaseBuildError(f"invalid JSON in {label}: {exc}") from exc
+    reject_non_unicode_scalars(value, label)
+    return value
 
 
 @dataclass(frozen=True)
@@ -88,9 +155,10 @@ def read_required_bytes(path: Path) -> bytes:
 
 def load_json_bytes(raw: bytes, path: Path) -> Any:
     try:
-        return json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ReleaseBuildError(f"invalid JSON in {path}: {exc}") from exc
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise ReleaseBuildError(f"{path} is not strict UTF-8 JSON: {exc}") from exc
+    return load_json_text(text, str(path))
 
 
 def load_json_snapshot(path: Path) -> tuple[Any, bytes, str]:
@@ -403,8 +471,11 @@ def artifact_metadata(artifact: dict[str, Any], label: str) -> dict[str, Any]:
         return metadata
     if isinstance(metadata, str):
         try:
-            return require_dict(json.loads(metadata), f"{label}.metadata")
-        except json.JSONDecodeError as exc:
+            return require_dict(
+                load_json_text(metadata, f"{label}.metadata"),
+                f"{label}.metadata",
+            )
+        except ReleaseBuildError as exc:
             raise ReleaseBuildError(f"invalid metadata JSON in {label}: {exc}") from exc
     raise ReleaseBuildError(f"{label} does not contain compiler metadata")
 
@@ -604,9 +675,11 @@ def load_retained_compiler_input_with_sha256(
             f"unable to read retained compiler input {path}: {exc}"
         ) from exc
     try:
-        value = require_dict(json.loads(raw.decode("utf-8")), label)
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ReleaseBuildError(f"invalid retained compiler input JSON in {path}: {exc}") from exc
+        value = require_dict(load_json_bytes(raw, path), label)
+    except ReleaseBuildError as exc:
+        raise ReleaseBuildError(
+            f"invalid retained compiler input JSON in {path}: {exc}"
+        ) from exc
     if ordered_json_bytes(value) != raw:
         raise ReleaseBuildError(f"{path} is not the exact ordered compiler-input encoding")
     return value, sha256_bytes(raw)
