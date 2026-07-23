@@ -166,7 +166,7 @@ library StreamGovernanceEvidence {
                     ) != 0 || terminalRoleChain != bytes32(0) || terminalRoleRevision != 0
                 || globalRoleChain != bytes32(0) || globalRoleRevision != 0
         ) revert IStreamGovernanceExecutor.InvalidSystemManifestBootstrap();
-        address priorGuardian;
+        address priorGuardian = address(0);
         for (uint256 i = 0; i < binding.initialTerminalFreezeVetoGuardians.length; i++) {
             address guardian = binding.initialTerminalFreezeVetoGuardians[i];
             if (
@@ -219,8 +219,8 @@ library StreamGovernanceEvidence {
                 || !_supportsInterface(binding.systemManifestSatellite, MANIFEST_INTERFACE_ID)
                 || _supportsInterface(binding.systemManifestSatellite, 0xffffffff)
         ) revert IStreamGovernanceExecutor.InvalidSystemManifestBootstrap();
-        address priorTarget;
-        bytes4 priorSelector;
+        address priorTarget = address(0);
+        bytes4 priorSelector = bytes4(0);
         for (uint256 i = 0; i < binding.expectedTriggers.length; i++) {
             SystemManifestBootstrapTriggerExpectation calldata expected =
                 binding.expectedTriggers[i];
@@ -246,7 +246,7 @@ library StreamGovernanceEvidence {
             priorTarget = expected.triggerTarget;
             priorSelector = expected.triggerSelector;
         }
-        bool sawSystemManifestPointerType;
+        bool sawSystemManifestPointerType = false;
         for (uint256 i = 0; i < binding.pointerTypes.length; i++) {
             if (
                 binding.pointerTypes[i] == bytes32(0)
@@ -324,9 +324,9 @@ library StreamGovernanceEvidence {
         uint256 expectedInventoryLeafCount,
         bool requireLive
     ) private view returns (bytes32 inventoryStateRoot, uint256 inventoryLeafCount) {
-        bytes32 inventoryChainHash;
-        uint256 leafIndex;
-        bool sawSystemManifestPointer;
+        bytes32 inventoryChainHash = bytes32(0);
+        uint256 leafIndex = 0;
+        bool sawSystemManifestPointer = false;
         StrictInventoryContext memory strict;
         if (requireLive) {
             strict.pointerTargets = new address[](pointerTypes.length);

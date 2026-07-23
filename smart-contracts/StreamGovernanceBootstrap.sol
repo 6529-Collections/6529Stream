@@ -717,7 +717,7 @@ library StreamGovernanceBootstrap {
         // swap-and-pop index used by terminal transitions.
         // forge-lint: disable-next-line(block-timestamp)
         uint256 currentTimestamp = block.timestamp;
-        uint256 liveIndex;
+        uint256 liveIndex = 0;
         for (uint256 i = 0; i < live.length; i++) {
             bytes32 candidate = live[i];
             uint64 candidateDeadline = state.terminalActionDeadline[candidate];

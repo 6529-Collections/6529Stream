@@ -240,7 +240,7 @@ contract StreamGovernanceExecutor is
         override
         returns (bool enabled, uint64 revision, bytes32 stateHash)
     {
-        return StreamGovernancePolicy.proposerConfig(_admin, account);
+        (enabled, revision, stateHash) = StreamGovernancePolicy.proposerConfig(_admin, account);
     }
 
     function cancellerConfig(address account)
@@ -249,7 +249,7 @@ contract StreamGovernanceExecutor is
         override
         returns (bool enabled, uint64 revision, bytes32 stateHash)
     {
-        return StreamGovernancePolicy.cancellerConfig(_admin, account);
+        (enabled, revision, stateHash) = StreamGovernancePolicy.cancellerConfig(_admin, account);
     }
 
     function approvedNativeReceiverConfig(address receiver)
@@ -258,7 +258,8 @@ contract StreamGovernanceExecutor is
         override
         returns (bool approved, uint64 revision, bytes32 stateHash)
     {
-        return StreamGovernancePolicy.nativeReceiverConfig(_policy, _admin, receiver);
+        (approved, revision, stateHash) =
+            StreamGovernancePolicy.nativeReceiverConfig(_policy, _admin, receiver);
     }
 
     function tighteningCallConfig(address target, bytes4 selector)
@@ -267,7 +268,8 @@ contract StreamGovernanceExecutor is
         override
         returns (bool tightening, bytes32 targetCodeHash, uint64 revision, bytes32 stateHash)
     {
-        return StreamGovernancePolicy.tighteningConfig(_policy, _admin, target, selector);
+        (tightening, targetCodeHash, revision, stateHash) =
+            StreamGovernancePolicy.tighteningConfig(_policy, _admin, target, selector);
     }
 
     function freezeSelectorConfig(address target, bytes4 selector)
@@ -276,7 +278,8 @@ contract StreamGovernanceExecutor is
         override
         returns (bool freeze, bytes32 targetCodeHash, uint64 revision, bytes32 stateHash)
     {
-        return StreamGovernancePolicy.freezeConfig(_policy, _admin, target, selector);
+        (freeze, targetCodeHash, revision, stateHash) =
+            StreamGovernancePolicy.freezeConfig(_policy, _admin, target, selector);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -571,7 +574,8 @@ contract StreamGovernanceExecutor is
         override
         returns (bytes32 actionId, uint64 vetoDeadline)
     {
-        return StreamGovernanceBootstrap.liveTerminalFreezeActionAt(_policy, scopeHash, index);
+        (actionId, vetoDeadline) =
+            StreamGovernanceBootstrap.liveTerminalFreezeActionAt(_policy, scopeHash, index);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -1342,7 +1346,8 @@ contract StreamGovernanceExecutor is
         pure
         returns (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
     {
-        return StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, callsHash);
+        (scopeHash, oldValueHash, newValueHash) =
+            StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, callsHash);
     }
 
     function _bytesEqual(bytes memory left, bytes memory right) private pure returns (bool equal) {

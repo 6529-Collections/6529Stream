@@ -404,7 +404,7 @@ library StreamGovernancePolicy {
         commitment = _appendGuardianHolderCodeHashes(
             registry, StreamRoles.ROLE_TERMINAL_FREEZE_VETO, commitment
         );
-        uint256 distinctScopeCount;
+        uint256 distinctScopeCount = 0;
         for (uint256 i = 0; i < calls.length; i++) {
             if (_scopeSeenBefore(calls, i, calls[i].scopeHash)) continue;
             bytes32 derivedRole =

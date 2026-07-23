@@ -185,7 +185,7 @@ library StreamGovernanceManifest {
         state.expectedInventoryStateRoot = binding.expectedInventoryStateRoot;
         state.expectedInventoryLeafCount = binding.expectedInventoryLeafCount;
 
-        bytes32 triggerSetHash;
+        bytes32 triggerSetHash = bytes32(0);
         for (uint256 i = 0; i < binding.expectedTriggers.length; i++) {
             SystemManifestBootstrapTriggerExpectation calldata expected =
                 binding.expectedTriggers[i];
@@ -462,7 +462,8 @@ library StreamGovernanceManifest {
     {
         bytes32[] memory pointerTypes = state.pointerTypes;
         address[] memory registries = state.registries;
-        return StreamGovernanceEvidence.computeInventoryState(state.core, pointerTypes, registries);
+        (inventoryStateRoot, inventoryLeafCount) =
+            StreamGovernanceEvidence.computeInventoryState(state.core, pointerTypes, registries);
     }
 
     function requireBootstrapCodeHashes(LifecycleState storage state) public view {
