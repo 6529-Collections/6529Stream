@@ -12,6 +12,11 @@ import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 import "./helpers/StreamGovernanceBootstrapHarness.sol";
 
+interface VmStorageCheats {
+    function load(address target, bytes32 slot) external view returns (bytes32 value);
+    function store(address target, bytes32 slot, bytes32 value) external;
+}
+
 /// @notice Minimal governance-executor stand-in exposing the executing-action
 ///         context the registry gates on, so registry unit tests can drive
 ///         lifecycle calls under an arbitrary action class.
@@ -287,6 +292,8 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
     uint8 private constant IMMEDIATE = StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING;
     uint8 private constant LOOSENING = StreamGovernanceActionClasses.DELAYED_LOOSENING;
     uint8 private constant TERMINAL = StreamGovernanceActionClasses.TERMINAL_FREEZE;
+    VmStorageCheats private constant STORAGE_VM =
+        VmStorageCheats(address(uint160(uint256(keccak256("hevm cheat code")))));
 
     GovernanceExecutorContextMock private executorMock;
     StreamModuleRegistry private registry;
@@ -376,6 +383,31 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
             address(registry),
             data
         );
+    }
+
+    function _forceModuleRevision(address moduleAddress, uint64 revision) private {
+        // StreamModuleRegistry has no inherited mutable storage. `_records` is
+        // slot 0 and the record's three uint64 timestamp/revision fields share
+        // struct slot 8, with revision at bit offset 128.
+        bytes32 recordBase = keccak256(abi.encode(moduleAddress, uint256(0)));
+        bytes32 packedRevisionSlot = bytes32(uint256(recordBase) + 8);
+        uint256 packed = uint256(STORAGE_VM.load(address(registry), packedRevisionSlot));
+        uint256 revisionMask = uint256(type(uint64).max) << 128;
+        packed = (packed & ~revisionMask) | (uint256(revision) << 128);
+        STORAGE_VM.store(address(registry), packedRevisionSlot, bytes32(packed));
+        uint256(registry.moduleRecord(moduleAddress).revision)
+            .assertEq(revision, "record storage-layout revision setup");
+    }
+
+    function _forceRegistryManifestRevision(uint64 revision) private {
+        // `_manifestRevision` is slot 6. The public getter assertion keeps this
+        // ceiling regression fail-closed if the storage layout ever changes.
+        bytes32 revisionSlot = bytes32(uint256(6));
+        uint256 packed = uint256(STORAGE_VM.load(address(registry), revisionSlot));
+        packed = (packed & ~uint256(type(uint64).max)) | uint256(revision);
+        STORAGE_VM.store(address(registry), revisionSlot, bytes32(packed));
+        (,, uint64 storedRevision) = registry.moduleRegistryManifest();
+        uint256(storedRevision).assertEq(revision, "manifest storage-layout revision setup");
     }
 
     function _expectedChainHash(
@@ -1305,6 +1337,32 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
             .assertEq(3, "stale action changed no state");
     }
 
+    function testStatusRevisionOverflowRevertsBeforeMutation() public {
+        _register(_registration(address(module)));
+        _forceModuleRevision(address(module), type(uint64).max);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamModuleRegistry.RegistryRevisionOverflow.selector)
+        );
+        _callRegistry(
+            IMMEDIATE,
+            abi.encodeCall(
+                StreamModuleRegistry.setModuleStatus,
+                (
+                    address(module),
+                    ModuleRegistryStatus.DEPRECATED,
+                    keccak256("revision-overflow"),
+                    "ipfs://revision-overflow"
+                )
+            )
+        );
+
+        StreamModuleRecord memory record = registry.moduleRecord(address(module));
+        uint256(uint8(record.status))
+            .assertEq(uint256(uint8(ModuleRegistryStatus.ACTIVE)), "overflow changed status");
+        uint256(record.revision).assertEq(type(uint64).max, "overflow changed revision");
+    }
+
     function testStatusMachineRejectsInvalidTransitions() public {
         // Unregistered module.
         _expectStatusRevert(
@@ -1557,6 +1615,26 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
         uint256(revision).assertEq(3, "stale manifest action changed no state");
     }
 
+    function testRegistryManifestRevisionOverflowRevertsBeforeMutation() public {
+        _forceRegistryManifestRevision(type(uint64).max);
+        bytes32 newHash = keccak256("registry-overflow");
+        string memory newURI = "ipfs://registry-overflow";
+
+        vm.expectRevert(
+            abi.encodeWithSelector(StreamModuleRegistry.RegistryRevisionOverflow.selector)
+        );
+        _callRegistry(
+            LOOSENING,
+            abi.encodeCall(StreamModuleRegistry.setModuleRegistryManifest, (newHash, newURI))
+        );
+
+        (bytes32 manifestHash, string memory manifestURI, uint64 revision) =
+            registry.moduleRegistryManifest();
+        manifestHash.assertEq(REGISTRY_MANIFEST_HASH, "overflow changed manifest hash");
+        manifestURI.assertEq(REGISTRY_MANIFEST_URI, "overflow changed manifest URI");
+        uint256(revision).assertEq(type(uint64).max, "overflow changed manifest revision");
+    }
+
     function testConstructorRejectsInvalidExecutorAndManifest() public {
         vm.expectRevert(
             abi.encodeWithSelector(StreamModuleRegistry.ZeroGovernanceExecutor.selector)
@@ -1671,47 +1749,7 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
             executor, keccak256("registry-manifest"), "ipfs://registry-manifest"
         );
         module = new RegistryModuleMock(MODULE_INTERFACE_ID);
-        _registerStatusTailRule();
-    }
-
-    function _scheduleRegistryCall(
-        uint8 actionClass,
-        bytes memory data,
-        bytes32 callScopeHash,
-        bytes32 callOldValueHash,
-        bytes32 callNewValueHash,
-        uint64 notBefore
-    ) private returns (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) {
-        calls = new GovernanceCall[](1);
-        bytes4 selector;
-        assembly {
-            selector := mload(add(data, 0x20))
-        }
-        calls[0] = GovernanceCall({
-            target: address(registry),
-            value: 0,
-            selector: selector,
-            callDataHash: keccak256(data),
-            scopeHash: callScopeHash,
-            oldValueHash: callOldValueHash,
-            newValueHash: callNewValueHash
-        });
-        bytes32 callsHash = keccak256(abi.encode(GOVERNANCE_CALLS_V2, calls));
-        callDatas = new bytes[](1);
-        callDatas[0] = data;
-        executor.publishGovernanceCallData(callDatas);
-        actionId = executor.scheduleGovernanceBatch(
-            actionClass,
-            calls,
-            _aggregateHash(BATCH_SCOPE_V2, callsHash, callScopeHash),
-            _aggregateHash(BATCH_OLD_STATE_V2, callsHash, callOldValueHash),
-            _aggregateHash(BATCH_NEW_STATE_V2, callsHash, callNewValueHash),
-            notBefore,
-            notBefore + 7 days,
-            keccak256("reason"),
-            "ipfs://reason",
-            keccak256("manifest")
-        );
+        _registerRegistryTailRules();
     }
 
     function _scheduleExecutorCall(
@@ -1754,13 +1792,18 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         );
     }
 
-    function _registerStatusTailRule() private {
-        bytes4 selector = StreamModuleRegistry.setModuleStatus.selector;
+    function _registerRegistryTailRules() private {
+        _registerRegistryTailRule(StreamModuleRegistry.registerModule.selector, 0x02);
+        _registerRegistryTailRule(StreamModuleRegistry.setModuleStatus.selector, 0x03);
+        _registerRegistryTailRule(StreamModuleRegistry.setModuleRegistryManifest.selector, 0x02);
+    }
+
+    function _registerRegistryTailRule(bytes4 selector, uint8 expectedMask) private {
         (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
-            _tailTriggerTransition(address(registry), selector, 0x03);
+            _tailTriggerTransition(address(registry), selector, expectedMask);
         bytes memory data = abi.encodeCall(
             StreamGovernanceExecutor.registerSystemManifestTailTrigger,
-            (address(registry), selector, uint8(0x03))
+            (address(registry), selector, expectedMask)
         );
         uint64 notBefore = uint64(block.timestamp)
             + executor.minimumDelay(StreamGovernanceActionClasses.TERMINAL_FREEZE);
@@ -1777,10 +1820,10 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
 
         (bool registered,, uint8 mask, address tailTarget, bytes4 tailSelector,) =
             executor.systemManifestBatchTailRule(address(registry), selector);
-        registered.assertTrue("status tail rule registered");
-        uint256(mask).assertEq(3, "status tail rule mask");
-        tailTarget.assertEq(address(systemManifest), "status tail target");
-        bytes32(tailSelector).assertEq(bytes32(bytes4(0x09b1b5c6)), "status tail selector");
+        registered.assertTrue("registry tail rule registered");
+        uint256(mask).assertEq(expectedMask, "registry tail rule mask");
+        tailTarget.assertEq(address(systemManifest), "registry tail target");
+        bytes32(tailSelector).assertEq(bytes32(bytes4(0x09b1b5c6)), "registry tail selector");
     }
 
     function _tailTriggerTransition(address target, bytes4 selector, uint8 mask)
@@ -1865,17 +1908,32 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         return keccak256(abi.encode(domain, callsHash, values));
     }
 
-    function _scheduleRegistryStatusWithTail(
-        bytes memory statusData,
-        bytes32 statusScopeHash,
-        bytes32 statusOldValueHash,
-        bytes32 statusNewValueHash,
-        uint64 notBefore
-    ) private returns (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) {
+    function _buildRegistryBatchWithTail(
+        bytes memory registryData,
+        bytes32 registryScopeHash,
+        bytes32 registryOldValueHash,
+        bytes32 registryNewValueHash
+    )
+        private
+        view
+        returns (GovernanceCall[] memory calls, bytes[] memory callDatas, bytes32 manifestHash)
+    {
+        bytes4 registrySelector;
+        assembly ("memory-safe") {
+            registrySelector := mload(add(registryData, 0x20))
+        }
+        manifestHash = keccak256(
+            abi.encode(
+                "registry-writer-manifest",
+                registrySelector,
+                registryNewValueHash,
+                systemManifest.streamSystemManifestPointerCount()
+            )
+        );
         StreamGovernanceBootstrapManifestMock.StreamSystemManifestUpdate memory update =
             StreamGovernanceBootstrapManifestMock.StreamSystemManifestUpdate({
-                manifestHash: keccak256(abi.encode("registry-status-manifest", statusNewValueHash)),
-                manifestURI: "ipfs://registry-status-manifest",
+                manifestHash: manifestHash,
+                manifestURI: "ipfs://registry-writer-manifest",
                 eventCatalogHash: keccak256("event-catalog"),
                 compatibilityMatrixHash: keccak256("compatibility-matrix"),
                 numericIdCatalogHash: keccak256("numeric-id-catalog"),
@@ -1885,43 +1943,82 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
                 reconstructionClientHash: keccak256("reconstruction-client")
             });
         callDatas = new bytes[](2);
-        callDatas[0] = statusData;
+        callDatas[0] = registryData;
         callDatas[1] = abi.encodeWithSelector(bytes4(0x09b1b5c6), systemManifestPayload, update);
 
         calls = new GovernanceCall[](2);
         calls[0] = GovernanceCall({
             target: address(registry),
             value: 0,
-            selector: StreamModuleRegistry.setModuleStatus.selector,
+            selector: registrySelector,
             callDataHash: keccak256(callDatas[0]),
-            scopeHash: statusScopeHash,
-            oldValueHash: statusOldValueHash,
-            newValueHash: statusNewValueHash
+            scopeHash: registryScopeHash,
+            oldValueHash: registryOldValueHash,
+            newValueHash: registryNewValueHash
         });
         calls[1] = GovernanceCall({
             target: address(systemManifest),
             value: 0,
             selector: bytes4(0x09b1b5c6),
             callDataHash: keccak256(callDatas[1]),
-            scopeHash: keccak256(abi.encode("registry-status-tail-scope", statusNewValueHash)),
-            oldValueHash: keccak256(abi.encode("registry-status-tail-old", statusOldValueHash)),
-            newValueHash: keccak256(abi.encode("registry-status-tail-new", statusNewValueHash))
+            scopeHash: keccak256(
+                abi.encode("registry-writer-tail-scope", registrySelector, registryNewValueHash)
+            ),
+            oldValueHash: keccak256(
+                abi.encode("registry-writer-tail-old", registrySelector, registryOldValueHash)
+            ),
+            newValueHash: keccak256(
+                abi.encode("registry-writer-tail-new", registrySelector, registryNewValueHash)
+            )
         });
+    }
+
+    function _scheduleRegistryBatch(
+        uint8 actionClass,
+        GovernanceCall[] memory calls,
+        bytes[] memory callDatas,
+        uint64 notBefore,
+        bytes32 manifestHash
+    ) private returns (bytes32 actionId) {
+        executor.publishGovernanceCallData(callDatas);
+        return _schedulePublishedRegistryBatch(actionClass, calls, notBefore, manifestHash);
+    }
+
+    function _schedulePublishedRegistryBatch(
+        uint8 actionClass,
+        GovernanceCall[] memory calls,
+        uint64 notBefore,
+        bytes32 manifestHash
+    ) private returns (bytes32 actionId) {
         (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
             _registryBatchTransitionHashes(calls);
-        executor.publishGovernanceCallData(callDatas);
         actionId = executor.scheduleGovernanceBatch(
-            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING,
+            actionClass,
             calls,
             scopeHash,
             oldValueHash,
             newValueHash,
             notBefore,
             notBefore + 7 days,
-            keccak256("incident"),
-            "ipfs://incident",
-            update.manifestHash
+            keccak256(abi.encode("registry-writer", calls[0].callDataHash)),
+            "ipfs://registry-writer",
+            manifestHash
         );
+    }
+
+    function _scheduleRegistryCallWithTail(
+        uint8 actionClass,
+        bytes memory registryData,
+        bytes32 registryScopeHash,
+        bytes32 registryOldValueHash,
+        bytes32 registryNewValueHash,
+        uint64 notBefore
+    ) private returns (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) {
+        bytes32 manifestHash;
+        (calls, callDatas, manifestHash) = _buildRegistryBatchWithTail(
+            registryData, registryScopeHash, registryOldValueHash, registryNewValueHash
+        );
+        actionId = _scheduleRegistryBatch(actionClass, calls, callDatas, notBefore, manifestHash);
     }
 
     function _registryBatchTransitionHashes(GovernanceCall[] memory calls)
@@ -1941,6 +2038,22 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         scopeHash = keccak256(abi.encode(BATCH_SCOPE_V2, callsHash, scopes));
         oldValueHash = keccak256(abi.encode(BATCH_OLD_STATE_V2, callsHash, oldValues));
         newValueHash = keccak256(abi.encode(BATCH_NEW_STATE_V2, callsHash, newValues));
+    }
+
+    function _registrationFor(address moduleAddress)
+        private
+        view
+        returns (StreamModuleRegistration memory registration)
+    {
+        registration.module = moduleAddress;
+        registration.moduleType = keccak256("STREAM_RENDERER");
+        registration.moduleVersion = bytes32(uint256(1));
+        registration.interfaceId = MODULE_INTERFACE_ID;
+        registration.moduleGasLimit = 0;
+        registration.expectedRuntimeCodeHash = moduleAddress.codehash;
+        registration.deploymentManifestHash = keccak256("deployment-manifest");
+        registration.moduleManifestHash = keccak256("module-manifest");
+        registration.moduleManifestURI = "ipfs://module-manifest";
     }
 
     function _registrationTransition(StreamModuleRegistration memory registration)
@@ -2075,6 +2188,40 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         );
     }
 
+    function _manifestTransition(bytes32 newManifestHash, string memory newManifestURI)
+        private
+        view
+        returns (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
+    {
+        (bytes32 oldManifestHash, string memory oldManifestURI, uint64 oldRevision) =
+            registry.moduleRegistryManifest();
+        scopeHash = keccak256(
+            abi.encode(
+                registry.STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1(),
+                uint256(block.chainid),
+                address(registry)
+            )
+        );
+        oldValueHash = keccak256(
+            abi.encode(
+                registry.STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1(),
+                scopeHash,
+                oldManifestHash,
+                keccak256(bytes(oldManifestURI)),
+                oldRevision
+            )
+        );
+        newValueHash = keccak256(
+            abi.encode(
+                registry.STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1(),
+                scopeHash,
+                newManifestHash,
+                keccak256(bytes(newManifestURI)),
+                oldRevision + 1
+            )
+        );
+    }
+
     function _recordFactsHash(
         StreamModuleRecord memory record,
         ModuleRegistryStatus status,
@@ -2096,22 +2243,183 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         );
     }
 
+    function _assertRegistryTailRule(bytes4 selector, uint8 expectedMask) private view {
+        (
+            bool registered,
+            bytes32 triggerCodeHash,
+            uint8 mask,
+            address tailTarget,
+            bytes4 tailSelector,
+            bytes32 tailCodeHash
+        ) = executor.systemManifestBatchTailRule(address(registry), selector);
+        registered.assertTrue("registry writer tail rule registered");
+        triggerCodeHash.assertEq(address(registry).codehash, "registry writer codehash pin");
+        uint256(mask).assertEq(expectedMask, "registry writer class mask");
+        tailTarget.assertEq(address(systemManifest), "registry writer tail target");
+        bytes32(tailSelector).assertEq(bytes32(bytes4(0x09b1b5c6)), "registry writer tail selector");
+        tailCodeHash.assertEq(address(systemManifest).codehash, "registry writer tail codehash");
+    }
+
+    function _expectMissingManifestTail(
+        uint8 actionClass,
+        bytes memory registryData,
+        bytes32 registryScopeHash,
+        bytes32 registryOldValueHash,
+        bytes32 registryNewValueHash,
+        uint64 notBefore
+    ) private {
+        (
+            GovernanceCall[] memory canonicalCalls,
+            bytes[] memory canonicalCallDatas,
+            bytes32 manifestHash
+        ) = _buildRegistryBatchWithTail(
+            registryData, registryScopeHash, registryOldValueHash, registryNewValueHash
+        );
+        GovernanceCall[] memory triggerOnly = new GovernanceCall[](1);
+        triggerOnly[0] = canonicalCalls[0];
+        bytes[] memory triggerOnlyData = new bytes[](1);
+        triggerOnlyData[0] = canonicalCallDatas[0];
+        executor.publishGovernanceCallData(triggerOnlyData);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.ManifestTailRequired.selector)
+        );
+        _schedulePublishedRegistryBatch(actionClass, triggerOnly, notBefore, manifestHash);
+    }
+
+    function testRegistryTailRulesPinAllWriterPairsAndMasks() public view {
+        _assertRegistryTailRule(StreamModuleRegistry.registerModule.selector, 0x02);
+        _assertRegistryTailRule(StreamModuleRegistry.setModuleStatus.selector, 0x03);
+        _assertRegistryTailRule(StreamModuleRegistry.setModuleRegistryManifest.selector, 0x02);
+    }
+
+    function testAllRegistryWritersRejectMissingManifestTail() public {
+        StreamModuleRegistration memory registration = _registrationFor(address(module));
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+            _registrationTransition(registration);
+        bytes memory registrationData =
+            abi.encodeCall(StreamModuleRegistry.registerModule, (registration));
+        uint64 registrationNotBefore = uint64(block.timestamp) + 48 hours;
+        _expectMissingManifestTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            registrationData,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            registrationNotBefore
+        );
+        (
+            bytes32 registrationActionId,
+            GovernanceCall[] memory registrationCalls,
+            bytes[] memory registrationCallDatas
+        ) = _scheduleRegistryCallWithTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            registrationData,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            registrationNotBefore
+        );
+        vm.warp(registrationNotBefore);
+        executor.executeGovernanceBatch(
+            registrationActionId, registrationCalls, registrationCallDatas
+        );
+
+        bytes memory statusData = abi.encodeCall(
+            StreamModuleRegistry.setModuleStatus,
+            (
+                address(module),
+                ModuleRegistryStatus.INCIDENT_REVOKED,
+                keccak256("missing-tail-status"),
+                "ipfs://missing-tail-status"
+            )
+        );
+        _expectMissingManifestTail(
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING,
+            statusData,
+            keccak256("missing-tail-status-scope"),
+            keccak256("missing-tail-status-old"),
+            keccak256("missing-tail-status-new"),
+            uint64(block.timestamp)
+        );
+
+        bytes memory manifestData = abi.encodeCall(
+            StreamModuleRegistry.setModuleRegistryManifest,
+            (keccak256("missing-tail-manifest"), "ipfs://missing-tail-manifest")
+        );
+        _expectMissingManifestTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            manifestData,
+            keccak256("missing-tail-manifest-scope"),
+            keccak256("missing-tail-manifest-old"),
+            keccak256("missing-tail-manifest-new"),
+            uint64(block.timestamp) + 48 hours
+        );
+    }
+
+    function testRegistryWriterRejectsDuplicateAndNonFinalManifestTails() public {
+        StreamModuleRegistration memory registration = _registrationFor(address(module));
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+            _registrationTransition(registration);
+        (
+            GovernanceCall[] memory canonicalCalls,
+            bytes[] memory canonicalCallDatas,
+            bytes32 manifestHash
+        ) = _buildRegistryBatchWithTail(
+            abi.encodeCall(StreamModuleRegistry.registerModule, (registration)),
+            scopeHash,
+            oldValueHash,
+            newValueHash
+        );
+        uint64 notBefore = uint64(block.timestamp) + 48 hours;
+
+        GovernanceCall[] memory duplicateTailCalls = new GovernanceCall[](3);
+        duplicateTailCalls[0] = canonicalCalls[0];
+        duplicateTailCalls[1] = canonicalCalls[1];
+        duplicateTailCalls[2] = canonicalCalls[1];
+        bytes[] memory duplicateTailDatas = new bytes[](3);
+        duplicateTailDatas[0] = canonicalCallDatas[0];
+        duplicateTailDatas[1] = canonicalCallDatas[1];
+        duplicateTailDatas[2] = canonicalCallDatas[1];
+        executor.publishGovernanceCallData(duplicateTailDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.InvalidManifestTail.selector)
+        );
+        _schedulePublishedRegistryBatch(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            duplicateTailCalls,
+            notBefore,
+            manifestHash
+        );
+
+        GovernanceCall[] memory nonFinalTailCalls = new GovernanceCall[](2);
+        nonFinalTailCalls[0] = canonicalCalls[1];
+        nonFinalTailCalls[1] = canonicalCalls[0];
+        bytes[] memory nonFinalTailDatas = new bytes[](2);
+        nonFinalTailDatas[0] = canonicalCallDatas[1];
+        nonFinalTailDatas[1] = canonicalCallDatas[0];
+        executor.publishGovernanceCallData(nonFinalTailDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.InvalidManifestTail.selector)
+        );
+        _schedulePublishedRegistryBatch(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            nonFinalTailCalls,
+            notBefore,
+            manifestHash
+        );
+
+        registry.moduleCount().assertEq(0, "invalid tails mutated registry");
+        systemManifest.streamSystemManifestPointerCount()
+            .assertEq(1, "invalid tails published manifest");
+    }
+
     function testRegistrationThroughDelayedLooseningAction() public {
-        StreamModuleRegistration memory registration;
-        registration.module = address(module);
-        registration.moduleType = keccak256("STREAM_RENDERER");
-        registration.moduleVersion = bytes32(uint256(1));
-        registration.interfaceId = MODULE_INTERFACE_ID;
-        registration.moduleGasLimit = 0;
-        registration.expectedRuntimeCodeHash = address(module).codehash;
-        registration.deploymentManifestHash = keccak256("deployment-manifest");
-        registration.moduleManifestHash = keccak256("module-manifest");
-        registration.moduleManifestURI = "ipfs://module-manifest";
+        StreamModuleRegistration memory registration = _registrationFor(address(module));
 
         (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
             _registrationTransition(registration);
         uint64 notBefore = uint64(block.timestamp) + 48 hours;
-        (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) = _scheduleRegistryCall(
+        (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) = _scheduleRegistryCallWithTail(
             StreamGovernanceActionClasses.DELAYED_LOOSENING,
             abi.encodeCall(StreamModuleRegistry.registerModule, (registration)),
             scopeHash,
@@ -2128,6 +2436,103 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         registry.isModuleEligible(
                 address(module), keccak256("STREAM_RENDERER"), MODULE_INTERFACE_ID
             ).assertTrue("eligible after governed registration");
+        systemManifest.streamSystemManifestPointerCount()
+            .assertEq(2, "registration batch published final manifest");
+    }
+
+    function testScheduledRegistrationRejectsInterveningCountAndChainDrift() public {
+        RegistryModuleMock interveningModule = new RegistryModuleMock(MODULE_INTERFACE_ID);
+        StreamModuleRegistration memory staleRegistration = _registrationFor(address(module));
+        StreamModuleRegistration memory interveningRegistration =
+            _registrationFor(address(interveningModule));
+        uint64 notBefore = uint64(block.timestamp) + 48 hours;
+
+        (bytes32 staleScope, bytes32 staleOld, bytes32 staleNew) =
+            _registrationTransition(staleRegistration);
+        (
+            bytes32 staleActionId,
+            GovernanceCall[] memory staleCalls,
+            bytes[] memory staleCallDatas
+        ) = _scheduleRegistryCallWithTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            abi.encodeCall(StreamModuleRegistry.registerModule, (staleRegistration)),
+            staleScope,
+            staleOld,
+            staleNew,
+            notBefore
+        );
+
+        (bytes32 currentScope, bytes32 currentOld, bytes32 currentNew) =
+            _registrationTransition(interveningRegistration);
+        (
+            bytes32 currentActionId,
+            GovernanceCall[] memory currentCalls,
+            bytes[] memory currentCallDatas
+        ) = _scheduleRegistryCallWithTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            abi.encodeCall(StreamModuleRegistry.registerModule, (interveningRegistration)),
+            currentScope,
+            currentOld,
+            currentNew,
+            notBefore
+        );
+
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(currentActionId, currentCalls, currentCallDatas);
+        (bytes32 chainAfterIntervening, uint64 countAfterIntervening) =
+            registry.registrationChainHash();
+        registry.moduleCount().assertEq(1, "intervening registration count");
+        uint256(countAfterIntervening).assertEq(1, "intervening record count");
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamModuleRegistry.GovernanceTransitionContextMismatch.selector
+            )
+        );
+        executor.executeGovernanceBatch(staleActionId, staleCalls, staleCallDatas);
+
+        registry.moduleCount().assertEq(1, "stale registration changed module count");
+        (bytes32 finalChain, uint64 finalRecordCount) = registry.registrationChainHash();
+        finalChain.assertEq(chainAfterIntervening, "stale registration changed chain");
+        uint256(finalRecordCount).assertEq(1, "stale registration changed record count");
+        uint256(uint8(registry.moduleRecord(address(module)).status))
+            .assertEq(uint256(uint8(ModuleRegistryStatus.UNKNOWN)), "stale module registered");
+        uint256(uint8(registry.moduleRecord(address(interveningModule)).status))
+            .assertEq(uint256(uint8(ModuleRegistryStatus.ACTIVE)), "intervening module not active");
+        systemManifest.streamSystemManifestPointerCount()
+            .assertEq(2, "stale registration published its tail");
+    }
+
+    function testRegistryManifestUpdateThroughDelayedLooseningWithTail() public {
+        bytes32 newManifestHash = keccak256("registry-manifest-v2");
+        string memory newManifestURI = "ipfs://registry-manifest-v2";
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+            _manifestTransition(newManifestHash, newManifestURI);
+        uint64 notBefore = uint64(block.timestamp) + 48 hours;
+        (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) = _scheduleRegistryCallWithTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            abi.encodeCall(
+                StreamModuleRegistry.setModuleRegistryManifest, (newManifestHash, newManifestURI)
+            ),
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            notBefore
+        );
+
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+
+        (bytes32 manifestHash, string memory manifestURI, uint64 revision) =
+            registry.moduleRegistryManifest();
+        manifestHash.assertEq(newManifestHash, "governed manifest hash");
+        require(
+            keccak256(bytes(manifestURI)) == keccak256(bytes(newManifestURI)),
+            "governed manifest URI"
+        );
+        uint256(revision).assertEq(2, "governed manifest revision");
+        systemManifest.streamSystemManifestPointerCount()
+            .assertEq(2, "manifest writer published final system manifest");
     }
 
     function testIncidentRevocationThroughImmediateTightening() public {
@@ -2146,10 +2551,16 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
         (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
             _statusTransition(address(module), ModuleRegistryStatus.INCIDENT_REVOKED);
         uint64 notBefore = uint64(block.timestamp);
-        (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) = _scheduleRegistryStatusWithTail(
-            data, scopeHash, oldValueHash, newValueHash, notBefore
+        (bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas) = _scheduleRegistryCallWithTail(
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING,
+            data,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            notBefore
         );
-        systemManifest.streamSystemManifestPointerCount().assertEq(1, "bootstrap publication count");
+        systemManifest.streamSystemManifestPointerCount()
+            .assertEq(2, "registration publication retained");
         executor.executeGovernanceBatch(actionId, calls, callDatas);
 
         uint256(uint8(registry.moduleRecord(address(module)).status))
@@ -2162,6 +2573,37 @@ contract StreamModuleRegistryGovernanceIntegrationTest is StreamGovernanceBootst
             ).assertFalse("revoked module ineligible");
         registry.moduleCount().assertEq(1, "record retained after revocation");
         systemManifest.streamSystemManifestPointerCount()
-            .assertEq(2, "status batch published final manifest");
+            .assertEq(3, "status batch published final manifest");
+
+        bytes memory reactivateData = abi.encodeCall(
+            StreamModuleRegistry.setModuleStatus,
+            (
+                address(module),
+                ModuleRegistryStatus.ACTIVE,
+                keccak256("reactivate"),
+                "ipfs://reactivate"
+            )
+        );
+        (scopeHash, oldValueHash, newValueHash) =
+            _statusTransition(address(module), ModuleRegistryStatus.ACTIVE);
+        notBefore = uint64(block.timestamp) + 48 hours;
+        (actionId, calls, callDatas) = _scheduleRegistryCallWithTail(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            reactivateData,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            notBefore
+        );
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+
+        uint256(uint8(registry.moduleRecord(address(module)).status))
+            .assertEq(
+                uint256(uint8(ModuleRegistryStatus.ACTIVE)),
+                "delayed status loosening reactivated module"
+            );
+        systemManifest.streamSystemManifestPointerCount()
+            .assertEq(4, "status loosening published final manifest");
     }
 }

@@ -237,6 +237,33 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         }
     }
 
+    function _cloneCalls(GovernanceCall[] memory source)
+        private
+        pure
+        returns (GovernanceCall[] memory copy)
+    {
+        copy = new GovernanceCall[](source.length);
+        for (uint256 i = 0; i < source.length; i++) {
+            GovernanceCall memory call_ = source[i];
+            copy[i] = GovernanceCall({
+                target: call_.target,
+                value: call_.value,
+                selector: call_.selector,
+                callDataHash: call_.callDataHash,
+                scopeHash: call_.scopeHash,
+                oldValueHash: call_.oldValueHash,
+                newValueHash: call_.newValueHash
+            });
+        }
+    }
+
+    function _cloneCallDatas(bytes[] memory source) private pure returns (bytes[] memory copy) {
+        copy = new bytes[](source.length);
+        for (uint256 i = 0; i < source.length; i++) {
+            copy[i] = source[i];
+        }
+    }
+
     function _defaultWindow() private view returns (uint64 notBefore, uint64 expiresAfter) {
         notBefore = uint64(block.timestamp) + 48 hours;
         expiresAfter = notBefore + 7 days;
@@ -1937,6 +1964,104 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             abi.encodeWithSelector(IStreamGovernanceExecutor.CallDataCountMismatch.selector, 1, 2)
         );
         executor.executeGovernanceBatch(actionId, calls, wrongCount);
+    }
+
+    function testExecuteRejectsReorderedAndMutatedDescriptorsBeforeAnyTargetCall() public {
+        GovernedTargetMock second = new GovernedTargetMock();
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (11));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (22));
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        calls[0] = GovernanceCall({
+            target: address(target),
+            value: 0,
+            selector: GovernedTargetMock.setValue.selector,
+            callDataHash: keccak256(callDatas[0]),
+            scopeHash: keccak256("integrity-scope-0"),
+            oldValueHash: keccak256("integrity-old-0"),
+            newValueHash: keccak256("integrity-new-0")
+        });
+        calls[1] = GovernanceCall({
+            target: address(second),
+            value: 0,
+            selector: GovernedTargetMock.setValue.selector,
+            callDataHash: keccak256(callDatas[1]),
+            scopeHash: keccak256("integrity-scope-1"),
+            oldValueHash: keccak256("integrity-old-1"),
+            newValueHash: keccak256("integrity-new-1")
+        });
+
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+
+        // If validation moved behind the external-call loop, these armed
+        // targets would revert with Error(string), not the exact executor
+        // integrity error asserted for every malformed execution below.
+        target.setShouldRevert(true);
+        second.setShouldRevert(true);
+
+        GovernanceCall[] memory mutatedCalls = new GovernanceCall[](2);
+        mutatedCalls[0] = calls[1];
+        mutatedCalls[1] = calls[0];
+        bytes[] memory mutatedCallDatas = new bytes[](2);
+        mutatedCallDatas[0] = callDatas[1];
+        mutatedCallDatas[1] = callDatas[0];
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.CallsHashMismatch.selector, actionId)
+        );
+        executor.executeGovernanceBatch(actionId, mutatedCalls, mutatedCallDatas);
+
+        GovernedTargetMock third = new GovernedTargetMock();
+        mutatedCalls = _cloneCalls(calls);
+        mutatedCalls[1].target = address(third);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.CallsHashMismatch.selector, actionId)
+        );
+        executor.executeGovernanceBatch(actionId, mutatedCalls, callDatas);
+
+        mutatedCalls = _cloneCalls(calls);
+        mutatedCalls[1].value = 1;
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.CallsHashMismatch.selector, actionId)
+        );
+        executor.executeGovernanceBatch(actionId, mutatedCalls, callDatas);
+
+        mutatedCalls = _cloneCalls(calls);
+        mutatedCalls[1].selector = GovernedTargetMock.setShouldRevert.selector;
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.CallsHashMismatch.selector, actionId)
+        );
+        executor.executeGovernanceBatch(actionId, mutatedCalls, callDatas);
+
+        mutatedCalls = _cloneCalls(calls);
+        mutatedCalls[1].callDataHash = keccak256("forged-call-data-hash");
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.CallsHashMismatch.selector, actionId)
+        );
+        executor.executeGovernanceBatch(actionId, mutatedCalls, callDatas);
+
+        mutatedCallDatas = _cloneCallDatas(callDatas);
+        mutatedCallDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (23));
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.ScheduledCallDataMismatch.selector, 1)
+        );
+        executor.executeGovernanceBatch(actionId, calls, mutatedCallDatas);
+
+        target.value().assertEq(0, "first target untouched by rejected executions");
+        second.value().assertEq(0, "second target untouched by rejected executions");
+
+        target.setShouldRevert(false);
+        second.setShouldRevert(false);
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+        target.value().assertEq(11, "canonical first call executed");
+        second.value().assertEq(22, "canonical second call executed");
     }
 
     function testBatchValueSemantics() public {

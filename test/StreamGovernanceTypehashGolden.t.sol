@@ -10,6 +10,13 @@ import "../smart-contracts/StreamRoles.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
 
+struct LegacyGovernanceCallV1 {
+    address target;
+    uint256 value;
+    bytes4 selector;
+    bytes32 callDataHash;
+}
+
 /// @notice Golden equality tests for every doc-pinned governance and registry
 ///         hash domain, the [GOV-ROLES] keccak-of-own-name rule, the pinned
 ///         enum numeric IDs, and the [LTA-MODULE-ID] selector surface.
@@ -45,6 +52,8 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         0x00ef486fa9550ecdc9851c2df1073c1c991e7d56e6a0d388357ba5f5a89c4263;
     bytes32 private constant PINNED_ROLE_MANAGER_CONFIG_MUTATION_V1 =
         0xbd1ca24b4e56b656dee2d7ca30433716550c54ab67aab3e6b9eba46ac0ff79d6;
+    bytes4 private constant LEGACY_SCHEDULE_BATCH_SELECTOR = 0xd983ef8e;
+    bytes4 private constant LEGACY_EXECUTE_BATCH_SELECTOR = 0x5e9014e4;
 
     StreamGovernanceExecutor private executor;
     StreamModuleRegistry private registry;
@@ -132,6 +141,60 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         (bool actionV1,) = address(executor).staticcall(hex"5cf9f49e");
         callsV1.assertFalse("calls V1 getter retired");
         actionV1.assertFalse("action V1 getter retired");
+    }
+
+    function testV1BatchEntryPointSelectorsAreRetired() public {
+        bytes32(
+                bytes4(
+                    keccak256(
+                        "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)"
+                    )
+                )
+            ).assertEq(bytes32(LEGACY_SCHEDULE_BATCH_SELECTOR), "legacy schedule selector pin");
+        bytes32(
+                bytes4(
+                    keccak256(
+                        "executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32)[],bytes[])"
+                    )
+                )
+            ).assertEq(bytes32(LEGACY_EXECUTE_BATCH_SELECTOR), "legacy execute selector pin");
+
+        bytes memory targetCall = abi.encodeCall(StreamModuleRegistry.moduleCount, ());
+        LegacyGovernanceCallV1[] memory legacyCalls = new LegacyGovernanceCallV1[](1);
+        legacyCalls[0] = LegacyGovernanceCallV1({
+            target: address(registry),
+            value: 0,
+            selector: StreamModuleRegistry.moduleCount.selector,
+            callDataHash: keccak256(targetCall)
+        });
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = targetCall;
+
+        bytes memory legacyScheduleCall = abi.encodeWithSelector(
+            LEGACY_SCHEDULE_BATCH_SELECTOR,
+            uint8(StreamGovernanceActionClasses.DELAYED_LOOSENING),
+            legacyCalls,
+            keccak256("legacy-scope"),
+            keccak256("legacy-old"),
+            keccak256("legacy-new"),
+            uint64(block.timestamp + 48 hours),
+            uint64(block.timestamp + 48 hours + 7 days),
+            keccak256("legacy-reason"),
+            "ipfs://legacy-governance-v1",
+            keccak256("legacy-manifest")
+        );
+        (bool scheduleSuccess, bytes memory scheduleReturnData) =
+            address(executor).call(legacyScheduleCall);
+        scheduleSuccess.assertFalse("legacy schedule ABI retired");
+        uint256(scheduleReturnData.length).assertEq(0, "legacy schedule has no dispatcher");
+
+        bytes memory legacyExecuteCall = abi.encodeWithSelector(
+            LEGACY_EXECUTE_BATCH_SELECTOR, keccak256("legacy-action"), legacyCalls, callDatas
+        );
+        (bool executeSuccess, bytes memory executeReturnData) =
+            address(executor).call(legacyExecuteCall);
+        executeSuccess.assertFalse("legacy execute ABI retired");
+        uint256(executeReturnData.length).assertEq(0, "legacy execute has no dispatcher");
     }
 
     function testModuleRegistrationRecordTypehashGolden() public {
