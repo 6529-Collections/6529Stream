@@ -17,10 +17,16 @@ contract StreamTimeParameterStore is StreamTimeParameterHost {
     /// @param authority The governance action executor seam
     ///        (`IStreamGovernedParameterAuthority`), or address(0) for a store
     ///        with no governance.
+    /// @param core_ The immutable Core source of the live module-registry pointer.
+    /// @param genesisModuleRegistry_ The expected genesis registry committed into
+    ///        every constructor-time cadence-probe binding.
     /// @param configs The full parameter inventory hosted by this store.
-    constructor(address authority, TimeParameterConfig[] memory configs)
-        StreamTimeParameterHost(authority)
-    {
+    constructor(
+        address authority,
+        address core_,
+        address genesisModuleRegistry_,
+        TimeParameterConfig[] memory configs
+    ) StreamTimeParameterHost(authority, core_, genesisModuleRegistry_) {
         uint256 count = configs.length;
         for (uint256 i = 0; i < count;) {
             _registerTimeParameter(configs[i]);

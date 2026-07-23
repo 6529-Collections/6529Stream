@@ -70,6 +70,23 @@ the release policy in `docs/release-policy.md`.
   transporting shell-sensitive text through native argv, and the checker
   rejects missing, ambiguous, malformed, or quote-drifted replay commands
   without changing release readiness.
+- Replaced the transitional Governance V1 executor boundary with the atomic
+  Governance V2 schema: seven-field per-call transition commitments, derived
+  batch scope/old/new hashes, six-return target context, exact SSTORE2 calldata
+  publication, action classes `0..6`, target-scoped terminal-freeze veto
+  indexing, manifest-tail composition, append-only class-6 eligibility, and an
+  executor-first one-way system-manifest bootstrap bind/seal ceremony.
+  ModuleRegistry, RoleRegistry, and governed gas/time hosts now recheck the
+  executing action ID, class, scope, old state, new state, revision, and probe
+  evidence; V1 action-ID calldata and domains are rejected. Bootstrap and
+  live-registry reads forward EIP-150-clamped available gas with bounded
+  returndata and canonical decoding instead of compiled-in call caps. Added
+  focused malformed-return, high-gas, sequential-probe, role-history,
+  bootstrap-envelope, and holder-rehearsal coverage. Deployment-input
+  generators and candidate artifacts remain a separate follow-up release
+  evidence slice. This partial source/test slice does not complete
+  [GOV-V2-CUTOVER] or close #665. This is pre-audit work and not a
+  production-readiness claim.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
   from the retired aggregate/facade Core-read seam to separately bound actual
   Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The

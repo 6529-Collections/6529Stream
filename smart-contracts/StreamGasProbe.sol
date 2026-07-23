@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamGasParameterProbe.sol";
+import "./ERC165.sol";
 
 /// @notice Abstract base for Permanent-class Governed Gas Parameter probes per
 ///         `docs/stream-long-term-architecture.md` [LTA-GGP-PROBES] rules 1-9.
@@ -24,7 +25,7 @@ import "./IStreamGasParameterProbe.sol";
 ///         gas-shaped, or otherwise starved run reverts there — before any record
 ///         is written — so a recordable failing run exists only when the guarded
 ///         operation was genuinely given the probed value and still failed.
-abstract contract StreamGasProbe is IStreamGasParameterProbe {
+abstract contract StreamGasProbe is IStreamGasParameterProbe, ERC165 {
     /// @notice Schema version carried by every canonical probe-record event.
     uint16 public constant GAS_PARAMETER_PROBE_SCHEMA_VERSION = 1;
 
@@ -67,6 +68,13 @@ abstract contract StreamGasProbe is IStreamGasParameterProbe {
             revert StreamGasProbeInvalidScenario();
         }
         probedParameterId = keccak256(abi.encodePacked("6529STREAM_GGP_", parameterName));
+    }
+
+    /// @notice Advertises the canonical gas-probe read surface required by the
+    ///         module registry before a probe can be bound to a host.
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return interfaceId == type(IStreamGasParameterProbe).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /// @notice Executes the pinned guarded scenario at `probedValue` and records

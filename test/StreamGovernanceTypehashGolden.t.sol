@@ -6,7 +6,6 @@ import "../smart-contracts/IStreamModule.sol";
 import "../smart-contracts/IStreamModuleRegistry.sol";
 import "../smart-contracts/StreamGovernanceExecutor.sol";
 import "../smart-contracts/StreamModuleRegistry.sol";
-import "../smart-contracts/StreamRoleRegistry.sol";
 import "../smart-contracts/StreamRoles.sol";
 import "./helpers/Assertions.sol";
 import "./helpers/CharacterizationTestBase.sol";
@@ -17,44 +16,122 @@ import "./helpers/CharacterizationTestBase.sol";
 /// @dev Pinned 0x literals are copied from `docs/adr/0004-admin-governance.md`
 ///     [GOV-ACTION-ID], `docs/stream-long-term-architecture.md` [LTA-DOMAINS],
 ///     and `docs/collection-metadata-contract.md` [CMC-RECORD-CHAIN]; each is
-///     asserted against both the deployed Solidity constant and a live keccak
-///     recomputation of the exact string preimage.
+///     asserted against a live keccak recomputation of the exact string
+///     preimage. These domains are catalog-pinned rather than contract ABI.
 contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
     using Assertions for bool;
     using Assertions for bytes32;
     using Assertions for uint256;
 
-    bytes32 private constant PINNED_GOVERNANCE_ACTION_V1 =
-        0xda01e91bb5de11674cef69c6774002280d75bcb43cd9c78413c4b94d5d14249b;
-    bytes32 private constant PINNED_GOVERNANCE_CALLS_V1 =
-        0x51c60c7ea5577cbf0c5157f544a7de1a186ae82b6fc4df6a626b9c8d1d3a0b61;
+    bytes32 private constant PINNED_GOVERNANCE_ACTION_V2 =
+        0x214cd728538bb3775a7106caff5c761bace11866a984d4a4d97a98f51971ac4b;
+    bytes32 private constant PINNED_GOVERNANCE_CALLS_V2 =
+        0x10f09566fb70f7947b61639c2a53b3aec872069a8b46edd08ba14eb2b5942b70;
     bytes32 private constant PINNED_MODULE_REGISTRATION_RECORD_V1 =
         0x4b5b157069f454a5c1b78a95a28e2016af2d428d4eb4037917b271a668490869;
     bytes32 private constant PINNED_RECORD_CHAIN_V1 =
         0x0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa1609;
+    bytes32 private constant PINNED_ROLE_MUTATION_V1 =
+        0xa8dba5d6fcfd6e5b3cd0487118fc42e1d598c9ba0fb59aefad69b419212bc91e;
+    bytes32 private constant PINNED_GLOBAL_ROLE_MUTATION_V1 =
+        0x2da8f94be4b1e85c976aae097d48589ff562492679ebc2842c866ba5b986d39c;
+    bytes32 private constant PINNED_ROLE_MUTATION_SCOPE_V1 =
+        0x51943e9f337cf7f50fc89b1f37701a670f4477d8d6e3efbd34d986b27f35d271;
+    bytes32 private constant PINNED_ROLE_MUTATION_STATE_V1 =
+        0xf80e0ae6730f5e4e48b5a6c1b46bfb06af297aefb0eaa569f87f095a7f99153d;
+    bytes32 private constant PINNED_ROLE_MANAGER_CONFIG_V1 =
+        0x6b7160b8472382fb5a6b7cad94720fd10007c4124b0b0d405aa6523763ad0fe7;
+    bytes32 private constant PINNED_ROLE_MANAGER_CONFIG_STATE_V1 =
+        0x00ef486fa9550ecdc9851c2df1073c1c991e7d56e6a0d388357ba5f5a89c4263;
+    bytes32 private constant PINNED_ROLE_MANAGER_CONFIG_MUTATION_V1 =
+        0xbd1ca24b4e56b656dee2d7ca30433716550c54ab67aab3e6b9eba46ac0ff79d6;
 
     StreamGovernanceExecutor private executor;
     StreamModuleRegistry private registry;
 
     function setUp() public {
-        StreamRoleRegistry roleRegistry = new StreamRoleRegistry();
-        executor = new StreamGovernanceExecutor(roleRegistry);
+        executor = new StreamGovernanceExecutor(address(this));
         registry =
             new StreamModuleRegistry(executor, keccak256("registry-manifest"), "ipfs://registry");
     }
 
     function testGovernanceActionTypehashGolden() public {
-        executor.STREAM_GOVERNANCE_ACTION_V1()
-            .assertEq(PINNED_GOVERNANCE_ACTION_V1, "action typehash vs doc pin");
-        keccak256("6529STREAM_GOVERNANCE_ACTION_V1")
-            .assertEq(PINNED_GOVERNANCE_ACTION_V1, "action preimage recompute");
+        keccak256("6529STREAM_GOVERNANCE_ACTION_V2")
+            .assertEq(PINNED_GOVERNANCE_ACTION_V2, "action preimage recompute");
     }
 
     function testGovernanceCallsTypehashGolden() public {
-        executor.STREAM_GOVERNANCE_CALLS_V1()
-            .assertEq(PINNED_GOVERNANCE_CALLS_V1, "calls typehash vs doc pin");
-        keccak256("6529STREAM_GOVERNANCE_CALLS_V1")
-            .assertEq(PINNED_GOVERNANCE_CALLS_V1, "calls preimage recompute");
+        keccak256("6529STREAM_GOVERNANCE_CALLS_V2")
+            .assertEq(PINNED_GOVERNANCE_CALLS_V2, "calls preimage recompute");
+    }
+
+    function testGovernanceV2DomainsAreNotContractGetters() public {
+        bytes4[5] memory retiredGetters = [
+            bytes4(0x5a7922a5),
+            bytes4(0xe27ffa02),
+            bytes4(0x4f87c81c),
+            bytes4(0xe5427dd5),
+            bytes4(0x0b1a9825)
+        ];
+        for (uint256 i = 0; i < retiredGetters.length; i++) {
+            (bool success,) = address(executor).staticcall(abi.encodePacked(retiredGetters[i]));
+            success.assertFalse("catalog domain must not spend executor ABI");
+        }
+    }
+
+    function testGovernanceV2SelectorGoldens() public {
+        bytes32(IStreamGovernanceExecutor.scheduleGovernanceBatch.selector)
+            .assertEq(bytes32(bytes4(0x9c954144)), "schedule batch selector");
+        bytes32(IStreamGovernanceExecutor.executeGovernanceBatch.selector)
+            .assertEq(bytes32(bytes4(0x2eccc33e)), "execute batch selector");
+        bytes32(IStreamGovernanceExecutor.currentAction.selector)
+            .assertEq(bytes32(bytes4(0x546ea281)), "current action selector");
+        bytes32(IStreamGovernanceExecutor.publishGovernanceCallData.selector)
+            .assertEq(bytes32(bytes4(0x5447021f)), "publish calldata selector");
+        bytes32(IStreamGovernanceExecutor.publishedCallData.selector)
+            .assertEq(bytes32(bytes4(0x95a2b189)), "published calldata selector");
+        bytes32(IStreamGovernanceExecutor.scheduledCallDataPointer.selector)
+            .assertEq(bytes32(bytes4(0x38f8ce24)), "scheduled pointer selector");
+        bytes32(IStreamGovernanceExecutor.scheduledCallData.selector)
+            .assertEq(bytes32(bytes4(0x72a3c7b8)), "scheduled data selector");
+    }
+
+    function testManifestAndEmergencySelectorGoldens() public {
+        bytes32(IStreamGovernanceExecutor.systemManifestBatchTailRule.selector)
+            .assertEq(bytes32(bytes4(0xffd6babe)), "tail rule selector");
+        bytes32(IStreamGovernanceExecutor.registerSystemManifestTailTrigger.selector)
+            .assertEq(bytes32(bytes4(0xc64f0807)), "register tail selector");
+        bytes32(IStreamGovernanceExecutor.systemManifestTailTriggerCount.selector)
+            .assertEq(bytes32(bytes4(0xeee99df8)), "tail count selector");
+        bytes32(IStreamGovernanceExecutor.systemManifestTailTriggerAt.selector)
+            .assertEq(bytes32(bytes4(0xd83d70b6)), "tail at selector");
+        bytes32(IStreamGovernanceExecutor.systemManifestTailTriggerChainHash.selector)
+            .assertEq(bytes32(bytes4(0xa05cac72)), "tail chain selector");
+        bytes32(IStreamGovernanceExecutor.bindSystemManifestBootstrap.selector)
+            .assertEq(bytes32(bytes4(0x32212927)), "bootstrap bind selector");
+        bytes32(IStreamGovernanceExecutor.pendingScheduledActionCount.selector)
+            .assertEq(bytes32(bytes4(0x20662991)), "pending count selector");
+        bytes32(IStreamGovernanceExecutor.systemManifestBootstrapState.selector)
+            .assertEq(bytes32(bytes4(0x8a2d979b)), "bootstrap state selector");
+        bytes32(IStreamGovernanceExecutor.sealSystemManifestBootstrap.selector)
+            .assertEq(bytes32(bytes4(0xbd1f39cd)), "bootstrap seal selector");
+        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibility.selector)
+            .assertEq(bytes32(bytes4(0xf23a1e43)), "emergency eligibility selector");
+        bytes32(IStreamGovernanceExecutor.registerEmergencyRestorationEligibility.selector)
+            .assertEq(bytes32(bytes4(0x9e842aea)), "register emergency selector");
+        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibilityCount.selector)
+            .assertEq(bytes32(bytes4(0xffd0e631)), "emergency count selector");
+        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibilityAt.selector)
+            .assertEq(bytes32(bytes4(0xe249cded)), "emergency at selector");
+        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibilityChainHash.selector)
+            .assertEq(bytes32(bytes4(0x927836c4)), "emergency chain selector");
+    }
+
+    function testV1DomainGettersAreRetired() public {
+        (bool callsV1,) = address(executor).staticcall(hex"48634e0d");
+        (bool actionV1,) = address(executor).staticcall(hex"5cf9f49e");
+        callsV1.assertFalse("calls V1 getter retired");
+        actionV1.assertFalse("action V1 getter retired");
     }
 
     function testModuleRegistrationRecordTypehashGolden() public {
@@ -75,6 +152,25 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(PINNED_RECORD_CHAIN_V1, "record chain preimage recompute");
     }
 
+    function testRoleRegistryDomainGoldens() public {
+        keccak256("6529STREAM_ROLE_MUTATION_V1")
+            .assertEq(PINNED_ROLE_MUTATION_V1, "role mutation preimage recompute");
+        keccak256("6529STREAM_GLOBAL_ROLE_MUTATION_V1")
+            .assertEq(PINNED_GLOBAL_ROLE_MUTATION_V1, "global role mutation preimage recompute");
+        keccak256("6529STREAM_ROLE_MUTATION_SCOPE_V1")
+            .assertEq(PINNED_ROLE_MUTATION_SCOPE_V1, "role scope preimage recompute");
+        keccak256("6529STREAM_ROLE_MUTATION_STATE_V1")
+            .assertEq(PINNED_ROLE_MUTATION_STATE_V1, "role state preimage recompute");
+        keccak256("6529STREAM_ROLE_MANAGER_CONFIG_V1")
+            .assertEq(PINNED_ROLE_MANAGER_CONFIG_V1, "role manager key preimage recompute");
+        keccak256("6529STREAM_ROLE_MANAGER_CONFIG_STATE_V1")
+            .assertEq(PINNED_ROLE_MANAGER_CONFIG_STATE_V1, "role manager state preimage recompute");
+        keccak256("6529STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1")
+            .assertEq(
+                PINNED_ROLE_MANAGER_CONFIG_MUTATION_V1, "role manager mutation preimage recompute"
+            );
+    }
+
     function testModuleRegistrationLaneConstants() public {
         registry.MODULE_REGISTRATION_RECORD_TYPE()
             .assertEq(keccak256("MODULE_REGISTRATION"), "registration lane record type");
@@ -82,17 +178,17 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
     }
 
     function testGovernanceActionScheduledTopicGolden() public {
-        executor.GOVERNANCE_ACTION_SCHEDULED_TOPIC()
-            .assertEq(
-                keccak256(
-                    bytes(
-                        string.concat(
-                            "GovernanceActionScheduled(uint16,bytes32,uint8,address,uint256,",
-                            "bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint256,",
-                            "address,bytes32,string,bytes32)"
-                        )
+        keccak256(
+                bytes(
+                    string.concat(
+                        "GovernanceActionScheduled(uint16,bytes32,uint8,address,uint256,",
+                        "bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint256,",
+                        "address,bytes32,string,bytes32)"
                     )
-                ),
+                )
+            )
+            .assertEq(
+                0x31024a726b55cea4cbdba5c85421828889c7015fdc195fafed46fed8020f760c,
                 "scheduled event topic"
             );
     }
@@ -158,6 +254,8 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         uint256(StreamGovernanceActionClasses.FUNDS_RECOVERY).assertEq(4, "FUNDS_RECOVERY = 4");
         uint256(StreamGovernanceActionClasses.SUCCESSOR_DECLARATION)
             .assertEq(5, "SUCCESSOR_DECLARATION = 5");
+        uint256(StreamGovernanceActionClasses.EMERGENCY_RESTORATION)
+            .assertEq(6, "EMERGENCY_RESTORATION = 6");
     }
 
     function testGovernanceWindowFloorConstants() public {
@@ -173,13 +271,14 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(14 days, "funds recovery floor");
         uint256(executor.minimumDelay(StreamGovernanceActionClasses.SUCCESSOR_DECLARATION))
             .assertEq(30 days, "successor declaration floor");
-        uint256(executor.OPEN_TO_EXECUTE_WINDOW_FLOOR()).assertEq(7 days, "open-to-execute floor");
-        uint256(executor.EMERGENCY_ASSUMPTION_LATENCY())
-            .assertEq(4 hours, "emergency assumption latency");
+        uint256(7 days).assertEq(604_800, "open-to-execute floor catalog pin");
+        uint256(4 hours).assertEq(14_400, "emergency assumption latency catalog pin");
+        uint256(executor.minimumDelay(StreamGovernanceActionClasses.EMERGENCY_RESTORATION))
+            .assertEq(0, "emergency restoration delay");
         vm.expectRevert(
-            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, 6)
+            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, 7)
         );
-        executor.minimumDelay(6);
+        executor.minimumDelay(7);
     }
 
     function testStreamModuleSelectorGolden() public {

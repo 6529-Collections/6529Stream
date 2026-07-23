@@ -11,16 +11,23 @@ pragma solidity ^0.8.19;
 library SSTORE2 {
     /// @notice Offset that skips the `STOP` guard byte at the head of the data contract.
     uint256 internal constant DATA_OFFSET = 1;
+    /// @notice Maximum payload whose STOP-prefixed runtime fits EIP-170.
+    uint256 internal constant MAX_DATA_LENGTH = 24_575;
 
     /// @notice Reverts when the data-contract deployment fails.
     error SSTORE2WriteFailed();
     /// @notice Reverts when a pointer does not hold a readable payload.
     error SSTORE2InvalidPointer(address pointer);
+    /// @notice Reverts when STOP plus payload would exceed EIP-170.
+    error SSTORE2DataTooLarge(uint256 length);
 
     /// @notice Deploys `data` as the runtime code of a new data contract.
     /// @param data Payload bytes to persist.
     /// @return pointer Address of the deployed data contract.
     function write(bytes memory data) internal returns (address pointer) {
+        if (data.length > MAX_DATA_LENGTH) {
+            revert SSTORE2DataTooLarge(data.length);
+        }
         // Creation preamble: copies everything after the 11-byte preamble to
         // memory and returns it as runtime code.
         //   0x600B  PUSH1 0x0B   (preamble length)
@@ -34,7 +41,7 @@ library SSTORE2 {
         //   0x39    CODECOPY
         //   0xF3    RETURN
         bytes memory creationCode = abi.encodePacked(hex"600B5981380380925939F3", hex"00", data);
-        assembly {
+        assembly ("memory-safe") {
             pointer := create(0, add(creationCode, 0x20), mload(creationCode))
         }
         if (pointer == address(0)) {
@@ -50,12 +57,20 @@ library SSTORE2 {
         if (codeSize < DATA_OFFSET) {
             revert SSTORE2InvalidPointer(pointer);
         }
+        bytes1 prefix;
+        assembly ("memory-safe") {
+            extcodecopy(pointer, 0x00, 0x00, 0x01)
+            prefix := mload(0x00)
+        }
+        if (prefix != bytes1(0)) {
+            revert SSTORE2InvalidPointer(pointer);
+        }
         uint256 size;
         unchecked {
             size = codeSize - DATA_OFFSET;
         }
         data = new bytes(size);
-        assembly {
+        assembly ("memory-safe") {
             extcodecopy(pointer, add(data, 0x20), DATA_OFFSET, size)
         }
     }

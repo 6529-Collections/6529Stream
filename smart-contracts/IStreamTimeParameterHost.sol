@@ -20,6 +20,10 @@ interface IStreamTimeParameterHost {
         uint64 wallClockFloorSeconds;
         address cadenceProbe;
         uint64 probeMaxAgeBlocks;
+        bytes32 expectedProbeModuleVersion;
+        bytes32 expectedProbeRuntimeCodeHash;
+        bytes32 expectedProbeModuleManifestHash;
+        bytes32 expectedProbeDeploymentManifestHash;
     }
 
     /// @notice Canonical GTP change event ([LTA-GTP] change discipline 4).
@@ -64,9 +68,23 @@ interface IStreamTimeParameterHost {
     error TimeParameterAlreadyRegistered(bytes32 parameterId);
     /// @notice Reverts when a registration config violates [LTA-GTP] invariants.
     error TimeParameterInvalidConfig(bytes32 parameterId);
+    /// @notice Reverts when the expected genesis registry is absent, has no code,
+    ///         or does not return the exact canonical ERC-165 module-registry marker.
+    error TimeParameterInvalidModuleRegistry(address moduleRegistry);
+    /// @notice Reverts when the immutable Core pointer source is absent or invalid.
+    error TimeParameterInvalidCore(address core);
+    /// @notice Reverts when Core does not expose one exact live canonical
+    ///         `MODULE_REGISTRY` pointer record.
+    error TimeParameterLiveModuleRegistryInvalid(address core);
     /// @notice Reverts when a bound cadence probe does not pin the parameter's
     ///         wall-clock floor.
     error TimeParameterProbeMismatch(bytes32 parameterId, address cadenceProbe);
+    /// @notice Reverts when a cadence probe lacks the exact live ACTIVE registry
+    ///         binding required by [LTA-GTP]/[LTA-GGP-PROBES], or when a cached
+    ///         binding has drifted before a probe-dependent operation.
+    error TimeParameterProbeBindingInvalid(bytes32 parameterId, address cadenceProbe);
+    /// @notice Reverts when a rebind would preserve the exact cached probe state.
+    error TimeParameterProbeRebindNoOp(bytes32 parameterId, address cadenceProbe);
     /// @notice Reverts when a governed entry point is called by anyone but the
     ///         governance authority.
     error TimeParameterNotAuthority(address caller);
@@ -99,9 +117,26 @@ interface IStreamTimeParameterHost {
     /// @notice Reverts when the recorded cadence run at the proposed value failed
     ///         the wall-clock-floor coverage check ([LTA-GTP] change discipline 3).
     error TimeParameterProbeNotPassing(bytes32 parameterId, uint256 probedValue);
+    /// @notice Reverts when the governance executor is the caller but is not
+    ///         currently executing an action.
+    error TimeParameterActionNotExecuting();
+    /// @notice Reverts when an executing governance context exposes a zero id.
+    error TimeParameterActionIdZero();
+    /// @notice Reverts when the executing action class is not the exact class
+    ///         required by the target entry point.
+    error TimeParameterActionClassMismatch(uint8 expectedClass, uint8 actualClass);
+    /// @notice Reverts when the current call's parameter scope commitment differs.
+    error TimeParameterScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when the current call's complete old-state commitment differs.
+    error TimeParameterOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when the current call's complete new-state commitment differs.
+    error TimeParameterNewStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts instead of wrapping the monotonic per-parameter revision.
+    error TimeParameterRevisionOverflow(bytes32 parameterId);
 
-    /// @notice Canonical pinned host introspection ([LTA-GTP] definition item 7).
-    ///         Returns the zeroed tuple for an unregistered parameterId.
+    /// @notice Canonical pinned host introspection ([LTA-GTP] definition item 7),
+    ///         including the monotonic mutation revision. Returns the zeroed
+    ///         tuple for an unregistered parameterId.
     function timeParameterInfo(bytes32 parameterId)
         external
         view
@@ -110,7 +145,8 @@ interface IStreamTimeParameterHost {
             uint256 floorBlocks,
             uint64 wallClockFloorSeconds,
             address cadenceProbe,
-            uint64 probeMaxAgeBlocks
+            uint64 probeMaxAgeBlocks,
+            uint64 revision
         );
 
     /// @notice Live storage-backed window read for guarded paths
@@ -121,12 +157,17 @@ interface IStreamTimeParameterHost {
     function timeParameterIds() external view returns (bytes32[] memory);
 
     /// @notice The governance action executor wired at deployment; address(0)
-    ///         means no governance (both change paths permanently revert).
+    ///         means no governance (all governed change paths permanently revert).
     function governanceAuthority() external view returns (address);
+
+    /// @notice Core's current canonical module-registry pointer target, validated
+    ///         against the exact ten-word pointer record. Reverts before the
+    ///         pointer is initialized or while it is malformed.
+    function moduleRegistry() external view returns (address);
 
     /// @notice Staged raise on the normal delay class ([LTA-GTP] change
     ///         discipline 1-2). Authority-only; at most 2x current per action.
-    function raiseTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
+    function raiseTimeParameter(bytes32 parameterId, uint256 newValue) external;
 
     /// @notice Staged lower on the normal delay class ([LTA-GTP] change
     ///         discipline 1-3). Authority-only; no less than half current per
@@ -134,18 +175,15 @@ interface IStreamTimeParameterHost {
     ///         requires a recorded passing cadence run at exactly `newValue`
     ///         within `probeMaxAgeBlocks` proving the proposed count still covers
     ///         the pinned wall-clock floor at the observed cadence.
-    function lowerTimeParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
+    function lowerTimeParameter(bytes32 parameterId, uint256 newValue) external;
 
     /// @notice Moves the parameter's cadence-probe binding to a successor
-    ///         Permanent-class probe on the normal delay class
+    ///         Permanent-class probe on pointer-replacement class `3`; its exact
+    ///         target/selector pair is a [GOV-MANIFEST-TAIL] trigger
     ///         ([LTA-GGP-PROBES] rule 3). Authority-only — with governance lost
     ///         the binding is frozen. The successor must pin the identical
     ///         wall-clock floor for this row (`pinnedWallClockFloorSeconds`
     ///         recheck), so a rebind can never change the width a candidate must
     ///         prove.
-    function rebindTimeParameterProbe(
-        bytes32 parameterId,
-        address newCadenceProbe,
-        bytes32 actionId
-    ) external;
+    function rebindTimeParameterProbe(bytes32 parameterId, address newCadenceProbe) external;
 }

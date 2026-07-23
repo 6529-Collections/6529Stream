@@ -2,6 +2,8 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IStreamGasParameterHost.sol";
+import "../smart-contracts/IStreamGasParameterProbe.sol";
+import "../smart-contracts/IERC165.sol";
 import "../smart-contracts/StreamForwardingCapProbe.sol";
 import "../smart-contracts/StreamGasParameterStore.sol";
 import "./helpers/Assertions.sol";
@@ -27,15 +29,19 @@ contract StreamGasProbeTest is CharacterizationTestBase {
 
     GasBurningConsumer private _consumer;
     StreamForwardingCapProbe private _probe;
+    MockParameterCorePointer private _core;
+    MockParameterModuleRegistry private _moduleRegistry;
 
     function setUp() public {
         vm.roll(START_BLOCK);
         _consumer = new GasBurningConsumer();
         _probe = new StreamForwardingCapProbe(
-            "ROYALTY_RESOLVER_GAS_LIMIT",
-            address(_consumer),
-            abi.encodeWithSignature("read()")
+            "ROYALTY_RESOLVER_GAS_LIMIT", address(_consumer), abi.encodeWithSignature("read()")
         );
+        _core = new MockParameterCorePointer();
+        _moduleRegistry = new MockParameterModuleRegistry();
+        _moduleRegistry.registerGasProbe(address(_probe));
+        _core.setLiveModuleRegistry(address(_moduleRegistry), address(_moduleRegistry));
     }
 
     // ------------------------------------------------------------------
@@ -57,6 +63,20 @@ contract StreamGasProbeTest is CharacterizationTestBase {
         );
     }
 
+    function testProbeCanonicalErc165Surface() public view {
+        bytes4 probeInterfaceId = type(IStreamGasParameterProbe).interfaceId;
+        Assertions.assertEq(
+            uint256(uint32(probeInterfaceId)),
+            uint256(uint32(bytes4(0x0f8c6b0f))),
+            "canonical gas-probe interface id"
+        );
+        Assertions.assertTrue(_probe.supportsInterface(probeInterfaceId), "gas probe interface");
+        Assertions.assertTrue(
+            _probe.supportsInterface(type(IERC165).interfaceId), "ERC165 interface"
+        );
+        Assertions.assertFalse(_probe.supportsInterface(0xffffffff), "invalid interface rejected");
+    }
+
     function testProbeConstructionGuards() public {
         // Empty parameter name.
         try new StreamForwardingCapProbe("", address(_consumer), bytes("")) returns (
@@ -75,7 +95,9 @@ contract StreamGasProbeTest is CharacterizationTestBase {
         // Target without code.
         try new StreamForwardingCapProbe(
             "ROYALTY_RESOLVER_GAS_LIMIT", vm.addr(0xEE), bytes("")
-        ) returns (StreamForwardingCapProbe) {
+        ) returns (
+            StreamForwardingCapProbe
+        ) {
             Assertions.assertTrue(false, "code-less target should revert");
         } catch (bytes memory err) {
             Assertions.assertEq(
@@ -84,6 +106,25 @@ contract StreamGasProbeTest is CharacterizationTestBase {
                     abi.encodeWithSelector(StreamGasProbe.StreamGasProbeInvalidScenario.selector)
                 ),
                 "code-less target error"
+            );
+        }
+        // An EIP-7702 designation is code-bearing but remains controlled by an
+        // EOA that can replace or clear the pinned behavior later.
+        address delegatedTarget = vm.addr(0x770220);
+        vm.etch(delegatedTarget, abi.encodePacked(hex"ef0100", bytes20(address(_consumer))));
+        try new StreamForwardingCapProbe(
+            "ROYALTY_RESOLVER_GAS_LIMIT", delegatedTarget, abi.encodeWithSignature("read()")
+        ) returns (
+            StreamForwardingCapProbe
+        ) {
+            Assertions.assertTrue(false, "delegated target should revert");
+        } catch (bytes memory err) {
+            Assertions.assertEq(
+                keccak256(err),
+                keccak256(
+                    abi.encodeWithSelector(StreamGasProbe.StreamGasProbeInvalidScenario.selector)
+                ),
+                "delegated target error"
             );
         }
     }
@@ -126,8 +167,7 @@ contract StreamGasProbeTest is CharacterizationTestBase {
         _consumer.setBurnGas(300_000);
         (bytes32 probeRunId, bool passed) = _probe.recordProbeRun(60_000);
         Assertions.assertFalse(passed, "genuine failure recorded");
-        (bytes32 storedRunId, bool storedPassed,) =
-            _probe.lastProbeRun(ROYALTY_RESOLVER_ID, 60_000);
+        (bytes32 storedRunId, bool storedPassed,) = _probe.lastProbeRun(ROYALTY_RESOLVER_ID, 60_000);
         Assertions.assertEq(storedRunId, probeRunId, "failing record stored");
         Assertions.assertFalse(storedPassed, "failing record flag");
 
@@ -152,9 +192,7 @@ contract StreamGasProbeTest is CharacterizationTestBase {
         // re-lowers on false evidence and making failing runs unrecordable. The
         // run must instead revert with nothing recorded.
         vm.etch(address(_consumer), "");
-        Assertions.assertEq(
-            uint256(address(_consumer).code.length), 0, "target code cleared"
-        );
+        Assertions.assertEq(uint256(address(_consumer).code.length), 0, "target code cleared");
         vm.expectRevert(
             abi.encodeWithSelector(
                 StreamGasProbe.StreamGasProbeCodelessTarget.selector, address(_consumer)
@@ -163,7 +201,7 @@ contract StreamGasProbeTest is CharacterizationTestBase {
         _probe.recordProbeRun(60_000);
 
         // The earlier genuine failing record is untouched.
-        (bytes32 runId, bool storedPassed, ) = _probe.lastProbeRun(ROYALTY_RESOLVER_ID, 60_000);
+        (bytes32 runId, bool storedPassed,) = _probe.lastProbeRun(ROYALTY_RESOLVER_ID, 60_000);
         Assertions.assertEq(runId, failingRunId, "record unchanged");
         Assertions.assertFalse(storedPassed, "still a failing record");
 
@@ -244,9 +282,17 @@ contract StreamGasProbeTest is CharacterizationTestBase {
             floor: 20_000,
             probe: address(_probe),
             failureClass: 1, // FORWARDING_CAP
-            probeMaxAgeBlocks: 50_400
+            probeMaxAgeBlocks: 50_400,
+            expectedProbeModuleVersion: bytes32(uint256(1)),
+            expectedProbeRuntimeCodeHash: address(_probe).codehash,
+            expectedProbeModuleManifestHash: keccak256(abi.encode("module", address(_probe))),
+            expectedProbeDeploymentManifestHash: keccak256(
+                abi.encode("deployment", address(_probe))
+            )
         });
-        StreamGasParameterStore store = new StreamGasParameterStore(address(0), configs);
+        StreamGasParameterStore store = new StreamGasParameterStore(
+            address(0), address(_core), address(_moduleRegistry), configs
+        );
         Assertions.assertEq(store.governanceAuthority(), address(0), "no signer");
 
         // While healthy, a stranger cannot ratchet the cap: the fresh passing

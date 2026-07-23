@@ -2,11 +2,14 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamGovernanceExecutor.sol";
+import "./IStreamGovernedParameterAuthority.sol";
 import "./IStreamRoleRegistry.sol";
 import "./Ownable.sol";
 import "./ReentrancyGuard.sol";
-import "./SSTORE2.sol";
 import "./StreamRoles.sol";
+import "./StreamGovernanceBootstrap.sol";
+import "./StreamGovernanceManifest.sol";
+import "./StreamGovernancePolicy.sol";
 
 /// @notice Staged governance executor for 6529Stream implementing ADR 0004
 ///         [GOV-ACTION-ID] canonical action identity, [GOV-BATCH] atomic
@@ -16,153 +19,179 @@ import "./StreamRoles.sol";
 /// @dev The owner is `GovernanceRoot`. Scheduling and cancellation are
 ///     role-gated (owner, registered proposers/cancellers, and the action's
 ///     proposer for cancellation); execution is permissionless inside the
-///     open-to-execute window. Executor configuration is mutable by the owner
-///     or by a governed self-call so post-bootstrap operation can run fully
-///     through the staged model.
-contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, ReentrancyGuard {
+///     open-to-execute window. Executor configuration changes require an exact,
+///     isolated governed self-call with a direction-sensitive action class.
+contract StreamGovernanceExecutor is
+    IStreamGovernanceExecutor,
+    IStreamGovernedParameterAuthority,
+    Ownable,
+    ReentrancyGuard
+{
     /// @notice Batch calls-hash domain pinned by ADR 0004 [GOV-ACTION-ID].
-    bytes32 public constant STREAM_GOVERNANCE_CALLS_V1 =
-        keccak256("6529STREAM_GOVERNANCE_CALLS_V1");
+    bytes32 private constant STREAM_GOVERNANCE_CALLS_V2 =
+        0x10f09566fb70f7947b61639c2a53b3aec872069a8b46edd08ba14eb2b5942b70;
     /// @notice Action identity domain pinned by ADR 0004 [GOV-ACTION-ID].
-    bytes32 public constant STREAM_GOVERNANCE_ACTION_V1 =
-        keccak256("6529STREAM_GOVERNANCE_ACTION_V1");
-    /// @notice Base role for per-scope terminal-freeze veto derivation.
-    bytes32 public constant ROLE_TERMINAL_FREEZE_VETO = StreamRoles.ROLE_TERMINAL_FREEZE_VETO;
+    bytes32 private constant STREAM_GOVERNANCE_ACTION_V2 =
+        0x214cd728538bb3775a7106caff5c761bace11866a984d4a4d97a98f51971ac4b;
+    bytes32 private constant STREAM_GOVERNANCE_BATCH_SCOPE_V2 =
+        0x6cfd5dfd67f064adac45602c05057edddda810734779c0ebe11b447e6985e31c;
+    bytes32 private constant STREAM_GOVERNANCE_BATCH_OLD_STATE_V2 =
+        0xc5029f937b44065c2ad92d9253e07f06117567480206189fcc1409d5509222b7;
+    bytes32 private constant STREAM_GOVERNANCE_BATCH_NEW_STATE_V2 =
+        0xce958009248d20d9574439fa374bc00c142940af2b496896b5bdbc00b882e98b;
+
+    bytes4 private constant SYSTEM_MANIFEST_PUBLISH_SELECTOR = 0x09b1b5c6;
+    bytes4 private constant SYSTEM_MANIFEST_INTERFACE_ID = 0x37660ede;
+    bytes4 private constant NO_EXECUTING_GOVERNANCE_ACTION = 0xb8456c92;
+    uint8 private constant SUPPORTED_MANIFEST_TAIL_ACTION_CLASS_MASK = 0x0f;
 
     /// @notice Schema version carried by governance events.
-    uint16 public constant SCHEMA_VERSION = 1;
-    /// @notice Minimum delay for delayed loosening and pointer replacement
-    ///         (two-tier model DELAYED floor, ADR 0004).
-    uint64 public constant MINIMUM_DELAY_DELAYED = 48 hours;
-    /// @notice Terminal-freeze guardian/veto window floor ([GOV-WINDOWS] rule 2).
-    uint64 public constant TERMINAL_FREEZE_VETO_FLOOR = 72 hours;
-    /// @notice Funds recovery launch floor (ADR 0004 exception floors).
-    uint64 public constant MINIMUM_DELAY_FUNDS_RECOVERY = 14 days;
-    /// @notice Successor declaration launch floor (ADR 0004 exception floors).
-    uint64 public constant MINIMUM_DELAY_SUCCESSOR_DECLARATION = 30 days;
-    /// @notice Open-to-execute window floor for delayed classes ([GOV-WINDOWS] rule 1).
-    uint64 public constant OPEN_TO_EXECUTE_WINDOW_FLOOR = 7 days;
-    /// @notice Emergency coordination latency assumption ([GOV-WINDOWS] rule 2);
-    ///         consumed by conformance-matrix gates with the role registry's
-    ///         redundancy views, not enforced as an onchain delay.
-    uint64 public constant EMERGENCY_ASSUMPTION_LATENCY = 4 hours;
-    /// @notice Launch-pinned maximum action lifetime bound on `expiresAfter`.
-    uint64 public constant MAX_ACTION_LIFETIME = 365 days;
-
+    uint16 private constant SCHEMA_VERSION = 1;
     /// @notice `keccak256` of the `GovernanceActionScheduled` signature.
     /// @dev The scheduling event carries 17 pinned fields, beyond what legacy
     ///     codegen can stack for a Solidity `emit`, so `_emitActionScheduled`
     ///     emits it via `log4` with hand-laid ABI data; golden tests assert
     ///     topic and data byte layout against this constant.
-    bytes32 public constant GOVERNANCE_ACTION_SCHEDULED_TOPIC = keccak256(
+    bytes32 private constant GOVERNANCE_ACTION_SCHEDULED_TOPIC = keccak256(
         "GovernanceActionScheduled(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint256,address,bytes32,string,bytes32)"
     );
-
-    /// @notice Role registry resolving [GOV-ROLES] constants, including
-    ///         ROLE_TERMINAL_FREEZE_VETO for the veto surface.
-    IStreamRoleRegistry public immutable roleRegistry;
 
     mapping(bytes32 => GovernanceAction) private _actions;
     mapping(bytes32 => uint256) private _actionNonces;
     mapping(bytes32 => address) private _callDataPointers;
-    // content-addressed published calldata preimage blobs ([GOV-BATCH] rule 5)
-    mapping(bytes32 => address) private _publishedCallData;
-    mapping(address => bool) private _proposers;
-    mapping(address => bool) private _cancellers;
-    mapping(address => mapping(bytes4 => bool)) private _tighteningCalls;
-    mapping(address => bool) private _approvedNativeReceivers;
-    // known-irreversible freeze (target => selector => registered) for the
-    // executor-side veto-floor backstop (FIX A).
-    mapping(address => mapping(bytes4 => bool)) private _freezeSelectors;
-    // scopeHash => set of live (scheduled, pre-notBefore) terminal-freeze
-    // action IDs; pruned on veto/cancel/execute/expire (FIX B).
-    mapping(bytes32 => bytes32[]) private _liveTerminalFreezeActions;
-    // actionId => (index + 1) into its scope's live set; zero means not live.
-    mapping(bytes32 => uint256) private _liveTerminalFreezeIndex;
+    StreamGovernancePolicy.AdminState private _admin;
+    mapping(bytes32 => bytes32[3]) private _firstCallTransitionHashes;
+    mapping(bytes32 => bytes32) private _terminalFreezeGuardianConfigCommitments;
+
+    StreamGovernanceBootstrap.PolicyState private _policy;
+    StreamGovernanceManifest.LifecycleState private _manifest;
+    address private immutable genesisBootstrapAuthority;
+    uint256 private _pendingScheduledActionCount;
 
     uint256 private _nonce;
     bool private _executing;
     bytes32 private _currentActionId;
     uint8 private _currentActionClass;
+    bytes32 private _currentScopeHash;
+    bytes32 private _currentOldValueHash;
+    bytes32 private _currentNewValueHash;
+    uint256 private _currentBatchLength;
+    uint256 private _currentCallIndex;
 
-    /// @dev Internal scheduling context; not part of any pinned surface.
-    struct ScheduleContext {
-        uint8 actionClass;
-        bytes32 scopeHash;
-        bytes32 oldValueHash;
-        bytes32 newValueHash;
-        uint64 notBefore;
-        uint64 expiresAfter;
-        bytes32 reasonHash;
-        string reasonURI;
-        bytes32 manifestHash;
+    function _checkOwner() internal view override {
+        if (!_manifest.isSealed) revert SystemManifestBootstrapNotSealed();
+        super._checkOwner();
+        _requireGovernanceRootCodeHash();
     }
 
-    /// @notice Reverts when constructed with a zero role registry.
-    error ZeroRoleRegistry();
-    /// @notice Reverts when registering a zero-address proposer.
-    error ZeroProposer();
-    /// @notice Reverts when registering a zero-address canceller.
-    error ZeroCanceller();
-    /// @notice Reverts when a tightening-classifier target is the zero address.
-    error ZeroTighteningTarget();
-    /// @notice Reverts when a freeze-selector target is the zero address.
-    error ZeroFreezeTarget();
-    /// @notice Reverts when a freeze-selector selector is the zero selector.
-    error ZeroFreezeSelector();
-    /// @notice Reverts when an approved native receiver is the zero address.
-    error ZeroNativeReceiver();
-
-    modifier onlyOwnerOrSelf() {
-        if (msg.sender != owner() && msg.sender != address(this)) {
-            revert GovernanceActorNotAuthorized(msg.sender);
+    constructor(address genesisBootstrapAuthority_) {
+        if (genesisBootstrapAuthority_ == address(0)) {
+            revert InvalidGenesisBootstrapAuthority(genesisBootstrapAuthority_);
         }
-        _;
+        genesisBootstrapAuthority = genesisBootstrapAuthority_;
     }
 
-    constructor(IStreamRoleRegistry roleRegistry_) {
-        if (address(roleRegistry_) == address(0)) {
-            revert ZeroRoleRegistry();
-        }
-        roleRegistry = roleRegistry_;
+    /// @dev Ownership is part of the versioned governance state machine. The
+    ///      inherited unversioned escape hatches are permanently disabled.
+    function transferOwnership(address) public pure override {
+        revert DirectOwnershipMutationDisabled();
     }
 
-    /// @notice Registers or removes a scheduling proposer.
-    function registerProposer(address account, bool enabled) external onlyOwnerOrSelf {
-        if (account == address(0)) {
-            revert ZeroProposer();
-        }
-        _proposers[account] = enabled;
-        emit GovernanceProposerUpdated(account, enabled, msg.sender);
+    function renounceOwnership() public pure override {
+        revert DirectOwnershipMutationDisabled();
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function governanceRootState()
+        external
+        view
+        override
+        returns (address governanceRoot_, bytes32 codeHash, uint64 revision)
+    {
+        return (
+            _manifest.governanceRoot,
+            _manifest.governanceRootCodeHash,
+            _manifest.governanceRootRevision
+        );
+    }
+
+    /// @notice Role registry resolving [GOV-ROLES], including the terminal veto role.
+    function roleRegistry() external view returns (IStreamRoleRegistry) {
+        return _manifest.roleRegistry;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function rotateGovernanceRoot(address newRoot, bytes32 expectedCodeHash) external override {
+        _requireIsolatedSelfCall(StreamGovernanceActionClasses.POINTER_REPLACEMENT);
+        address oldRoot = StreamGovernanceManifest.validateGovernanceRootRotation(
+            _manifest, genesisBootstrapAuthority, newRoot, expectedCodeHash
+        );
+        (bytes32 scopeHash, bytes32 oldStateHash, bytes32 newStateHash, uint64 newRevision) = StreamGovernancePolicy.governanceRootTransitionHashes(
+            oldRoot,
+            _manifest.governanceRootCodeHash,
+            _manifest.governanceRootRevision,
+            newRoot,
+            expectedCodeHash
+        );
+        _requireCurrentTransition(scopeHash, oldStateHash, newStateHash);
+        _manifest.governanceRoot = newRoot;
+        _manifest.governanceRootCodeHash = expectedCodeHash;
+        _manifest.governanceRootRevision = newRevision;
+        _transferOwnership(newRoot);
+        emit GovernanceRootRotated(
+            oldRoot, newRoot, expectedCodeHash, newRevision, _currentActionId
+        );
+    }
+
+    /// @notice Registers or removes a scheduling proposer through an isolated
+    ///         versioned governance self-call.
+    function registerProposer(address account, bool enabled) external override {
+        _requireIsolatedSelfCall(
+            enabled
+                ? StreamGovernanceActionClasses.DELAYED_LOOSENING
+                : StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING
+        );
+        _requireBoundRoleRegistry();
+        StreamGovernancePolicy.updateProposer(
+            _admin, _manifest.roleRegistry, account, enabled, _policyExecutionContext()
+        );
     }
 
     /// @notice Registers or removes a canceller (for example a guardian module).
-    function registerCanceller(address account, bool enabled) external onlyOwnerOrSelf {
-        if (account == address(0)) {
-            revert ZeroCanceller();
-        }
-        _cancellers[account] = enabled;
-        emit GovernanceCancellerUpdated(account, enabled, msg.sender);
+    function registerCanceller(address account, bool enabled) external override {
+        StreamGovernancePolicy.updateCanceller(_admin, account, enabled, _policyExecutionContext());
+    }
+
+    function isProposer(address account) external view override returns (bool) {
+        return _admin.proposers[account];
+    }
+
+    function isCanceller(address account) external view override returns (bool) {
+        return _admin.cancellers[account];
     }
 
     /// @notice Tightening classifier: registers `(target, selector)` pairs
     ///         proven unable to loosen policy, eligible for zero-delay
     ///         IMMEDIATE_TIGHTENING scheduling (ADR 0004 execution rule 2).
-    /// @dev Owner-only, never governed-self-call (FIX C): the fast-path
-    ///     classifier must not be widenable through a staged self-call, and it
-    ///     is advisory only — the durable guard is target-side class
-    ///     enforcement (each governed target asserting
-    ///     `currentAction().actionClass`), which lands as a protocol invariant
-    ///     in the finality/Core waves.
-    function setTighteningCall(address target, bytes4 selector, bool tightening)
-        external
-        onlyOwner
-    {
-        if (target == address(0)) {
-            revert ZeroTighteningTarget();
+    /// @dev An exact isolated self-call is required. Enabling the fast path
+    ///      requires DELAYED_LOOSENING; disabling it is IMMEDIATE_TIGHTENING.
+    ///      The classifier is advisory; target-side class enforcement remains primary.
+    function setTighteningCall(address target, bytes4 selector, bool tightening) external override {
+        if (tightening && target == address(_manifest.roleRegistry)) {
+            revert NotClassifiedTightening(target, selector);
         }
-        _tighteningCalls[target][selector] = tightening;
-        emit TighteningCallUpdated(target, selector, tightening, msg.sender);
+        StreamGovernancePolicy.updateTighteningCall(
+            _policy, _admin, target, selector, tightening, _policyExecutionContext()
+        );
+    }
+
+    function isTighteningCall(address target, bytes4 selector)
+        external
+        view
+        override
+        returns (bool)
+    {
+        return StreamGovernancePolicy.isTighteningCall(_policy, target, selector);
     }
 
     /// @notice Registers or clears a known-irreversible freeze
@@ -171,33 +200,83 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     ///         `(target, selector)` must be scheduled as `TERMINAL_FREEZE`,
     ///         forcing the [GOV-WINDOWS] rule 2 72h veto floor regardless of
     ///         the proposer-declared class.
-    /// @dev Owner-only, never governed-self-call: a proposer-declared action
-    ///     class is not trustworthy for veto-critical decisions, so the
-    ///     backstop must not be self-widenable. This covers the
-    ///     registered-selector subset at the executor; the primary guard is
-    ///     target-side class enforcement in the finality/Core waves.
+    /// @dev An exact isolated self-call is required. Registering this protective
+    ///      backstop is IMMEDIATE_TIGHTENING; clearing it requires
+    ///      DELAYED_LOOSENING. Target-side class enforcement remains primary.
     function registerFreezeSelector(address target, bytes4 selector, bool freeze)
         external
-        onlyOwner
+        override
     {
-        if (target == address(0)) {
-            revert ZeroFreezeTarget();
+        if (freeze && target == address(_manifest.roleRegistry)) {
+            revert InvalidManifestTailTrigger(target, selector);
         }
-        if (selector == bytes4(0)) {
-            revert ZeroFreezeSelector();
-        }
-        _freezeSelectors[target][selector] = freeze;
-        emit FreezeSelectorUpdated(target, selector, freeze, msg.sender);
+        StreamGovernancePolicy.updateFreezeSelector(
+            _policy,
+            _admin,
+            target,
+            selector,
+            freeze,
+            _manifest.systemManifestSatellite,
+            SYSTEM_MANIFEST_PUBLISH_SELECTOR,
+            _policyExecutionContext()
+        );
     }
 
     /// @notice Approves a receiver for empty-calldata native ETH transfer calls
     ///         (ADR 0004 execution rule 4).
-    function setApprovedNativeReceiver(address receiver, bool approved) external onlyOwnerOrSelf {
-        if (receiver == address(0)) {
-            revert ZeroNativeReceiver();
-        }
-        _approvedNativeReceivers[receiver] = approved;
-        emit ApprovedNativeReceiverUpdated(receiver, approved, msg.sender);
+    function setApprovedNativeReceiver(address receiver, bool approved) external override {
+        StreamGovernancePolicy.updateNativeReceiver(
+            _policy, _admin, receiver, approved, _policyExecutionContext()
+        );
+    }
+
+    function isApprovedNativeReceiver(address receiver) external view override returns (bool) {
+        return _policy.approvedNativeReceivers[receiver];
+    }
+
+    function proposerConfig(address account)
+        external
+        view
+        override
+        returns (bool enabled, uint64 revision, bytes32 stateHash)
+    {
+        return StreamGovernancePolicy.proposerConfig(_admin, account);
+    }
+
+    function cancellerConfig(address account)
+        external
+        view
+        override
+        returns (bool enabled, uint64 revision, bytes32 stateHash)
+    {
+        return StreamGovernancePolicy.cancellerConfig(_admin, account);
+    }
+
+    function approvedNativeReceiverConfig(address receiver)
+        external
+        view
+        override
+        returns (bool approved, uint64 revision, bytes32 stateHash)
+    {
+        return StreamGovernancePolicy.nativeReceiverConfig(_policy, _admin, receiver);
+    }
+
+    function tighteningCallConfig(address target, bytes4 selector)
+        external
+        view
+        override
+        returns (bool tightening, bytes32 targetCodeHash, uint64 revision, bytes32 stateHash)
+    {
+        return StreamGovernancePolicy.tighteningConfig(_policy, _admin, target, selector);
+    }
+
+    function freezeSelectorConfig(address target, bytes4 selector)
+        external
+        view
+        override
+        returns (bool freeze, bytes32 targetCodeHash, uint64 revision, bytes32 stateHash)
+    {
+        return StreamGovernancePolicy.freezeConfig(_policy, _admin, target, selector);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -206,12 +285,13 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         override
         returns (address pointer)
     {
+        if (!_manifest.bound) revert SystemManifestBootstrapNotBound();
         return _publishCallData(callDatas);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
     function publishedCallData(bytes32 callDataKey) external view override returns (address) {
-        return _publishedCallData[callDataKey];
+        return _policy.publishedCallData[callDataKey];
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -227,16 +307,18 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         string calldata reasonURI,
         bytes32 manifestHash
     ) external override returns (bytes32 actionId) {
-        ScheduleContext memory ctx;
-        ctx.actionClass = actionClass;
-        ctx.scopeHash = scopeHash;
-        ctx.oldValueHash = oldValueHash;
-        ctx.newValueHash = newValueHash;
-        ctx.notBefore = notBefore;
-        ctx.expiresAfter = expiresAfter;
-        ctx.reasonHash = reasonHash;
-        ctx.reasonURI = reasonURI;
-        ctx.manifestHash = manifestHash;
+        StreamGovernanceBootstrap.ScheduleContext memory ctx =
+            StreamGovernanceBootstrap.ScheduleContext({
+                actionClass: actionClass,
+                scopeHash: scopeHash,
+                oldValueHash: oldValueHash,
+                newValueHash: newValueHash,
+                notBefore: notBefore,
+                expiresAfter: expiresAfter,
+                reasonHash: reasonHash,
+                reasonURI: reasonURI,
+                manifestHash: manifestHash
+            });
         return _schedule(ctx, calls);
     }
 
@@ -251,23 +333,31 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
             target: request.target,
             value: request.value,
             selector: request.selector,
-            callDataHash: keccak256(request.callData)
+            callDataHash: keccak256(request.callData),
+            scopeHash: request.scopeHash,
+            oldValueHash: request.oldValueHash,
+            newValueHash: request.newValueHash
         });
         bytes[] memory callDatas = new bytes[](1);
         callDatas[0] = request.callData;
         // The single-call wrapper carries the preimage, so it publishes
         // directly before scheduling the equivalent batch of one.
         _publishCallData(callDatas);
-        ScheduleContext memory ctx;
-        ctx.actionClass = request.actionClass;
-        ctx.scopeHash = request.scopeHash;
-        ctx.oldValueHash = request.oldValueHash;
-        ctx.newValueHash = request.newValueHash;
-        ctx.notBefore = request.notBefore;
-        ctx.expiresAfter = request.expiresAfter;
-        ctx.reasonHash = request.reasonHash;
-        ctx.reasonURI = request.reasonURI;
-        ctx.manifestHash = request.manifestHash;
+        bytes32 callsHash = _callsHash(calls);
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+            _deriveBatchTransitionHashes(calls, callsHash);
+        StreamGovernanceBootstrap.ScheduleContext memory ctx =
+            StreamGovernanceBootstrap.ScheduleContext({
+                actionClass: request.actionClass,
+                scopeHash: scopeHash,
+                oldValueHash: oldValueHash,
+                newValueHash: newValueHash,
+                notBefore: request.notBefore,
+                expiresAfter: request.expiresAfter,
+                reasonHash: request.reasonHash,
+                reasonURI: request.reasonURI,
+                manifestHash: request.manifestHash
+            });
         return _schedule(ctx, calls);
     }
 
@@ -296,7 +386,10 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
             target: action.target,
             value: action.value,
             selector: action.selector,
-            callDataHash: keccak256(callData)
+            callDataHash: keccak256(callData),
+            scopeHash: _firstCallTransitionHashes[actionId][0],
+            oldValueHash: _firstCallTransitionHashes[actionId][1],
+            newValueHash: _firstCallTransitionHashes[actionId][2]
         });
         bytes[] memory callDatas = new bytes[](1);
         callDatas[0] = callData;
@@ -312,12 +405,22 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         if (action.status != GovernanceActionStatus.SCHEDULED) {
             revert GovernanceActionNotScheduled(actionId);
         }
-        if (msg.sender != owner() && !_cancellers[msg.sender] && msg.sender != action.proposer) {
-            revert GovernanceActorNotAuthorized(msg.sender);
+        if (!_manifest.isSealed) {
+            if (msg.sender != genesisBootstrapAuthority && msg.sender != action.proposer) {
+                revert GovernanceActorNotAuthorized(msg.sender);
+            }
+        } else {
+            bool rootAuthorized = msg.sender == owner();
+            if (rootAuthorized) _requireGovernanceRootCodeHash();
+            if (!rootAuthorized && !_admin.cancellers[msg.sender] && msg.sender != action.proposer)
+            {
+                revert GovernanceActorNotAuthorized(msg.sender);
+            }
         }
         action.status = GovernanceActionStatus.CANCELLED;
         action.canceller = msg.sender;
-        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
+        _pendingScheduledActionCount -= 1;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass);
         emit GovernanceActionCancelled(
             SCHEMA_VERSION,
             actionId,
@@ -347,18 +450,19 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         if (block.timestamp >= action.notBefore) {
             revert VetoDeadlinePassed(actionId, action.notBefore);
         }
+        _requireBoundRoleRegistry();
         // FIX B: per-scope veto authority with fallback to the global holders;
         // global holders may veto any scope (vetoing is protective), per-scope
         // designation is additive.
-        if (
-            !roleRegistry.hasRole(terminalFreezeVetoRole(action.scopeHash), msg.sender)
-                && !roleRegistry.hasRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, msg.sender)
-        ) {
+        if (!StreamGovernanceBootstrap.isTerminalFreezeVetoGuardian(
+                _policy, _manifest.roleRegistry, actionId, msg.sender
+            )) {
             revert NotTerminalFreezeVetoGuardian(msg.sender);
         }
         action.status = GovernanceActionStatus.VETOED;
         action.vetoer = msg.sender;
-        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
+        _pendingScheduledActionCount -= 1;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass);
         emit GovernanceActionVetoed(
             SCHEMA_VERSION, actionId, action.actionClass, msg.sender, action.scopeHash, reasonHash
         );
@@ -377,7 +481,8 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
             revert GovernanceActionNotExpired(actionId, action.expiresAfter);
         }
         action.status = GovernanceActionStatus.EXPIRED;
-        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
+        _pendingScheduledActionCount -= 1;
+        _pruneLiveTerminalFreeze(actionId, action.actionClass);
         emit GovernanceActionExpired(SCHEMA_VERSION, actionId, action.actionClass, msg.sender);
     }
 
@@ -405,30 +510,22 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
 
     /// @inheritdoc IStreamGovernanceExecutor
     function minimumDelay(uint8 actionClass) public pure override returns (uint64) {
-        if (actionClass == StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING) {
-            return 0;
-        }
-        if (
-            actionClass == StreamGovernanceActionClasses.DELAYED_LOOSENING
-                || actionClass == StreamGovernanceActionClasses.POINTER_REPLACEMENT
-        ) {
-            return MINIMUM_DELAY_DELAYED;
-        }
-        if (actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            return TERMINAL_FREEZE_VETO_FLOOR;
-        }
-        if (actionClass == StreamGovernanceActionClasses.FUNDS_RECOVERY) {
-            return MINIMUM_DELAY_FUNDS_RECOVERY;
-        }
-        if (actionClass == StreamGovernanceActionClasses.SUCCESSOR_DECLARATION) {
-            return MINIMUM_DELAY_SUCCESSOR_DECLARATION;
-        }
-        revert UnknownActionClass(actionClass);
+        return StreamGovernanceBootstrap.minimumDelay(actionClass);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
     function terminalFreezeVetoRole(bytes32 scopeHash) public pure override returns (bytes32) {
         return keccak256(abi.encode(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeHash));
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function terminalFreezeGuardianConfigCommitment(bytes32 actionId)
+        external
+        view
+        override
+        returns (bytes32 commitment)
+    {
+        return _terminalFreezeGuardianConfigCommitments[actionId];
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -438,20 +535,23 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         override
         returns (address guardian, uint64 vetoDeadline)
     {
+        _requireBoundRoleRegistry();
         // Per-scope holder resolves first; fall back to a single global holder.
         // Anything other than exactly one candidate returns the zero-address
         // sentinel (never holder[0] paired with a live deadline).
         bytes32 scopeRole = terminalFreezeVetoRole(scopeHash);
-        uint256 scopeHolders = roleRegistry.roleHolderCount(scopeRole);
+        uint256 scopeHolders = _manifest.roleRegistry.roleHolderCount(scopeRole);
         if (scopeHolders == 1) {
-            guardian = roleRegistry.roleHolderAt(scopeRole, 0);
+            guardian = _manifest.roleRegistry.roleHolderAt(scopeRole, 0);
         } else if (scopeHolders == 0) {
-            if (roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 1) {
-                guardian = roleRegistry.roleHolderAt(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, 0);
+            if (_manifest.roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 1)
+            {
+                guardian =
+                    _manifest.roleRegistry.roleHolderAt(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, 0);
             }
         }
         // Earliest-deadline live action so a later decoy never shadows it.
-        vetoDeadline = _earliestLiveTerminalFreezeDeadline(scopeHash);
+        vetoDeadline = StreamGovernanceBootstrap.earliestTerminalFreezeDeadline(_policy, scopeHash);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -461,7 +561,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         override
         returns (uint256)
     {
-        return _liveTerminalFreezeActions[scopeHash].length;
+        return StreamGovernanceBootstrap.liveTerminalFreezeActionCount(_policy, scopeHash);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -471,12 +571,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         override
         returns (bytes32 actionId, uint64 vetoDeadline)
     {
-        bytes32[] storage live = _liveTerminalFreezeActions[scopeHash];
-        if (index >= live.length) {
-            revert LiveTerminalFreezeIndexOutOfBounds(scopeHash, index);
-        }
-        actionId = live[index];
-        vetoDeadline = _actions[actionId].notBefore;
+        return StreamGovernanceBootstrap.liveTerminalFreezeActionAt(_policy, scopeHash, index);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -486,17 +581,36 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         override
         returns (bool)
     {
-        return _freezeSelectors[target][selector];
+        return StreamGovernancePolicy.isFreezeSelector(_policy, target, selector);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
     function currentAction()
         external
         view
-        override
-        returns (bool executing, bytes32 actionId, uint8 actionClass)
+        override(IStreamGovernanceExecutor, IStreamGovernedParameterAuthority)
+        returns (
+            bool executing,
+            bytes32 actionId,
+            uint8 actionClass,
+            bytes32 scopeHash,
+            bytes32 oldValueHash,
+            bytes32 newValueHash
+        )
     {
-        return (_executing, _currentActionId, _currentActionClass);
+        return (
+            _executing,
+            _currentActionId,
+            _currentActionClass,
+            _currentScopeHash,
+            _currentOldValueHash,
+            _currentNewValueHash
+        );
+    }
+
+    /// @inheritdoc IStreamGovernedParameterAuthority
+    function isStreamGovernedParameterAuthority() external pure override returns (bool) {
+        return true;
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -510,57 +624,315 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         if (pointer == address(0)) {
             revert GovernanceActionUnknown(actionId);
         }
-        return abi.decode(SSTORE2.read(pointer), (bytes[]));
+        return _readCanonicalCallDatas(pointer);
     }
 
-    /// @notice Returns true when `(target, selector)` is classified tightening.
-    function isTighteningCall(address target, bytes4 selector) external view returns (bool) {
-        return _tighteningCalls[target][selector];
-    }
-
-    /// @notice Returns true when `account` is a registered proposer.
-    function isProposer(address account) external view returns (bool) {
-        return _proposers[account];
-    }
-
-    /// @notice Returns true when `account` is a registered canceller.
-    function isCanceller(address account) external view returns (bool) {
-        return _cancellers[account];
-    }
-
-    /// @notice Returns true when `receiver` may receive empty-calldata native transfers.
-    function isApprovedNativeReceiver(address receiver) external view returns (bool) {
-        return _approvedNativeReceivers[receiver];
-    }
-
-    function _schedule(ScheduleContext memory ctx, GovernanceCall[] memory calls)
-        private
-        returns (bytes32 actionId)
+    /// @inheritdoc IStreamGovernanceExecutor
+    function emergencyRestorationEligibility(address target, bytes4 selector)
+        external
+        view
+        override
+        returns (bool eligible, bytes32 targetCodeHash)
     {
-        if (msg.sender != owner() && !_proposers[msg.sender]) {
+        targetCodeHash = _policy.emergencyCodeHash[target][selector];
+        eligible = targetCodeHash != bytes32(0);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function registerEmergencyRestorationEligibility(address target, bytes4 selector)
+        external
+        override
+    {
+        _requireIsolatedSelfCall(StreamGovernanceActionClasses.TERMINAL_FREEZE);
+        bytes32 codeHash = StreamGovernanceBootstrap.registerEmergencyEligibility(
+            _policy,
+            target,
+            selector,
+            address(_manifest.roleRegistry),
+            _manifest.systemManifestSatellite,
+            _currentScopeHash,
+            _currentOldValueHash,
+            _currentNewValueHash,
+            _manifest.isSealed
+        );
+        emit EmergencyRestorationEligibilityRegistered(
+            SCHEMA_VERSION, target, selector, codeHash, _currentActionId
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function emergencyRestorationEligibilityCount() external view override returns (uint256) {
+        return _policy.emergencyEntries.length;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function emergencyRestorationEligibilityAt(uint256 index)
+        external
+        view
+        override
+        returns (address target, bytes4 selector, bytes32 targetCodeHash)
+    {
+        if (index >= _policy.emergencyEntries.length) {
+            revert EmergencyRestorationEligibilityIndexOutOfBounds(index);
+        }
+        EmergencyRestorationEligibilityEntry storage entry = _policy.emergencyEntries[index];
+        target = entry.target;
+        selector = entry.selector;
+        targetCodeHash = _policy.emergencyCodeHash[target][selector];
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function emergencyRestorationEligibilityChainHash()
+        external
+        view
+        override
+        returns (bytes32 chainHash, uint64 recordCount)
+    {
+        chainHash = _policy.emergencyChainHash;
+        recordCount = uint64(_policy.emergencyEntries.length);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function systemManifestBatchTailRule(address triggerTarget, bytes4 triggerSelector)
+        external
+        view
+        override
+        returns (
+            bool registered,
+            bytes32 triggerCodeHash,
+            uint8 allowedActionClassMask,
+            address tailTarget,
+            bytes4 tailSelector,
+            bytes32 tailCodeHash
+        )
+    {
+        ManifestTailTriggerRule storage rule = _policy.tailRules[triggerTarget][triggerSelector];
+        triggerCodeHash = rule.triggerCodeHash;
+        registered = triggerCodeHash != bytes32(0);
+        allowedActionClassMask = rule.allowedActionClassMask;
+        tailTarget = _manifest.systemManifestSatellite;
+        tailSelector = SYSTEM_MANIFEST_PUBLISH_SELECTOR;
+        tailCodeHash = _manifest.systemManifestSatelliteCodeHash;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function registerSystemManifestTailTrigger(
+        address triggerTarget,
+        bytes4 triggerSelector,
+        uint8 allowedActionClassMask
+    ) external override {
+        _requireIsolatedSelfCall(StreamGovernanceActionClasses.TERMINAL_FREEZE);
+        if (!_manifest.isSealed) {
+            revert SystemManifestBootstrapNotSealed();
+        }
+        if (_manifest.systemManifestSatellite.codehash != _manifest.systemManifestSatelliteCodeHash)
+        {
+            revert ManifestTailCodeHashMismatch(
+                _manifest.systemManifestSatelliteCodeHash,
+                _manifest.systemManifestSatellite.codehash
+            );
+        }
+        if (
+            triggerTarget == address(0) || triggerSelector == bytes4(0)
+                || triggerTarget.code.length == 0 || allowedActionClassMask == 0
+                || (allowedActionClassMask & ~SUPPORTED_MANIFEST_TAIL_ACTION_CLASS_MASK) != 0
+                || triggerTarget == address(_manifest.roleRegistry)
+                || (triggerTarget == _manifest.systemManifestSatellite
+                    && triggerSelector == SYSTEM_MANIFEST_PUBLISH_SELECTOR)
+        ) {
+            revert InvalidManifestTailTrigger(triggerTarget, triggerSelector);
+        }
+        if (_policy.tailRules[triggerTarget][triggerSelector].triggerCodeHash != bytes32(0)) {
+            revert ManifestTailTriggerAlreadyRegistered(triggerTarget, triggerSelector);
+        }
+        _appendManifestTailTrigger(
+            triggerTarget, triggerSelector, triggerTarget.codehash, allowedActionClassMask, true
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function systemManifestTailTriggerCount() external view override returns (uint256) {
+        return _policy.tailEntries.length;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function systemManifestTailTriggerAt(uint256 index)
+        external
+        view
+        override
+        returns (
+            address triggerTarget,
+            bytes4 triggerSelector,
+            bytes32 triggerCodeHash,
+            uint8 allowedActionClassMask
+        )
+    {
+        if (index >= _policy.tailEntries.length) {
+            revert ManifestTailTriggerIndexOutOfBounds(index);
+        }
+        ManifestTailTriggerEntry storage entry = _policy.tailEntries[index];
+        triggerTarget = entry.triggerTarget;
+        triggerSelector = entry.triggerSelector;
+        ManifestTailTriggerRule storage rule = _policy.tailRules[triggerTarget][triggerSelector];
+        triggerCodeHash = rule.triggerCodeHash;
+        allowedActionClassMask = rule.allowedActionClassMask;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function systemManifestTailTriggerChainHash()
+        external
+        view
+        override
+        returns (bytes32 chainHash, uint64 recordCount)
+    {
+        chainHash = _policy.tailChainHash;
+        recordCount = uint64(_policy.tailEntries.length);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function bindSystemManifestBootstrap(SystemManifestBootstrapBinding calldata binding)
+        external
+        override
+        nonReentrant
+    {
+        StreamGovernanceManifest.bind(
+            _manifest,
+            _policy,
+            _admin,
+            binding,
+            StreamGovernanceManifest.BindContext({
+                genesisBootstrapAuthority: genesisBootstrapAuthority,
+                governanceNonce: _nonce,
+                pendingScheduledActionCount: _pendingScheduledActionCount,
+                proposerSelector: this.registerProposer.selector,
+                cancellerSelector: this.registerCanceller.selector,
+                nativeReceiverSelector: this.setApprovedNativeReceiver.selector,
+                tighteningSelector: this.setTighteningCall.selector,
+                freezeSelector: this.registerFreezeSelector.selector
+            })
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function pendingScheduledActionCount() external view override returns (uint256) {
+        return _pendingScheduledActionCount;
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function systemManifestBootstrapState()
+        external
+        view
+        override
+        returns (
+            bool,
+            bool,
+            address,
+            bytes32,
+            address,
+            bytes32,
+            uint64,
+            bytes32,
+            uint256,
+            bytes32,
+            uint64,
+            address,
+            bytes32,
+            address,
+            bytes32,
+            bytes32,
+            uint256,
+            bytes32,
+            uint256,
+            bytes32,
+            bytes32,
+            uint256,
+            bytes32,
+            uint256,
+            address,
+            address
+        )
+    {
+        bytes memory encoded = StreamGovernanceManifest.encodeBootstrapState(
+            _manifest, genesisBootstrapAuthority
+        );
+        assembly ("memory-safe") {
+            return(add(encoded, 0x20), mload(encoded))
+        }
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function sealSystemManifestBootstrap() external override {
+        GovernanceAction storage action = _actions[_currentActionId];
+        address governanceRoot = StreamGovernanceManifest.prepareSeal(
+            _manifest,
+            _policy,
+            StreamGovernanceManifest.SealContext({
+                executing: _executing,
+                actionId: _currentActionId,
+                actionClass: _currentActionClass,
+                batchLength: _currentBatchLength,
+                callIndex: _currentCallIndex,
+                pendingScheduledActionCount: _pendingScheduledActionCount,
+                actionProposer: action.proposer,
+                callDataPointer: _callDataPointers[_currentActionId],
+                scopeHash: _currentScopeHash,
+                oldValueHash: _currentOldValueHash,
+                newValueHash: _currentNewValueHash,
+                genesisBootstrapAuthority: genesisBootstrapAuthority
+            })
+        );
+        _transferOwnership(governanceRoot);
+    }
+
+    function _schedule(
+        StreamGovernanceBootstrap.ScheduleContext memory ctx,
+        GovernanceCall[] memory calls
+    ) private returns (bytes32 actionId) {
+        if (_executing) revert GovernanceSchedulingDuringExecution();
+        bool bootstrapAuthority =
+            _manifest.bound && !_manifest.isSealed && msg.sender == genesisBootstrapAuthority;
+        if (_manifest.isSealed) _requireGovernanceRootCodeHash();
+        if (!bootstrapAuthority && msg.sender != owner() && !_admin.proposers[msg.sender]) {
             revert GovernanceActorNotAuthorized(msg.sender);
+        }
+        if (!_manifest.bound) {
+            revert SystemManifestBootstrapNotBound();
+        }
+        if (!_manifest.isSealed) {
+            if (msg.sender != genesisBootstrapAuthority) {
+                revert GenesisBootstrapActorRequired(msg.sender);
+            }
+            if (_pendingScheduledActionCount != 0) {
+                revert PendingGovernanceActionExists(_pendingScheduledActionCount);
+            }
+            _requireBootstrapCodeHashes();
         }
         // [GOV-BATCH] rule 5: the exact calldata preimages must already be
         // published onchain; the action record stores the pointer for the
         // full open-to-execute window.
         address callDataPointer = _requirePublishedCallData(calls);
-        uint256 totalValue = _validateCalls(
-            ctx.actionClass, calls, abi.decode(SSTORE2.read(callDataPointer), (bytes[]))
-        );
+        uint256 totalValue =
+            _validateCalls(ctx.actionClass, calls, _readCanonicalCallDatas(callDataPointer));
+        bytes32 callsHash = _callsHash(calls);
+        (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
+            _deriveBatchTransitionHashes(calls, callsHash);
+        if (ctx.scopeHash != derivedScopeHash) {
+            revert BatchScopeHashMismatch(derivedScopeHash, ctx.scopeHash);
+        }
+        if (ctx.oldValueHash != derivedOldValueHash) {
+            revert BatchOldValueHashMismatch(derivedOldValueHash, ctx.oldValueHash);
+        }
+        if (ctx.newValueHash != derivedNewValueHash) {
+            revert BatchNewValueHashMismatch(derivedNewValueHash, ctx.newValueHash);
+        }
         _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
+        _validateManifestTailComposition(msg.sender, ctx.actionClass, calls, !_manifest.isSealed);
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            // FIX B: never schedule an irreversible op with no holder able to
-            // exercise the 72h veto. Per-scope holders or global holders count.
-            if (
-                roleRegistry.roleHolderCount(terminalFreezeVetoRole(ctx.scopeHash)) == 0
-                    && roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 0
-            ) {
-                revert NoTerminalFreezeVetoGuardianConfigured(ctx.scopeHash);
-            }
+            _requireBoundRoleRegistry();
+            StreamGovernanceBootstrap.validateTerminalFreezeGuardians(_manifest.roleRegistry, calls);
         }
 
-        bytes32 callsHash = keccak256(abi.encode(STREAM_GOVERNANCE_CALLS_V1, calls));
         uint256 nonceUsed = _nonce;
         _nonce = nonceUsed + 1;
         actionId = _computeActionId(ctx, callsHash, nonceUsed);
@@ -587,35 +959,27 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
 
         _actionNonces[actionId] = nonceUsed;
         _callDataPointers[actionId] = callDataPointer;
+        _firstCallTransitionHashes[actionId] =
+            [calls[0].scopeHash, calls[0].oldValueHash, calls[0].newValueHash];
+        _pendingScheduledActionCount += 1;
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            // FIX B: append to the scope's live set so no live action is ever
-            // shadowed by a later-scheduled decoy.
-            _liveTerminalFreezeActions[ctx.scopeHash].push(actionId);
-            _liveTerminalFreezeIndex[actionId] = _liveTerminalFreezeActions[ctx.scopeHash].length;
+            StreamGovernanceBootstrap.appendTerminalFreeze(_policy, actionId, ctx.notBefore, calls);
+            bytes32 guardianConfigCommitment =
+                StreamGovernancePolicy.terminalFreezeGuardianConfigCommitment(
+                    _manifest.roleRegistry, calls
+                );
+            _terminalFreezeGuardianConfigCommitments[actionId] = guardianConfigCommitment;
+            emit TerminalFreezeGuardianConfigCommitted(actionId, guardianConfigCommitment);
         }
 
-        _emitActionScheduled(
+        StreamGovernanceBootstrap.emitActionScheduled(
             actionId, ctx, calls[0].target, calls[0].selector, totalValue, callsHash, nonceUsed
         );
     }
 
     function _publishCallData(bytes[] memory callDatas) private returns (address pointer) {
-        if (callDatas.length == 0) {
-            revert EmptyGovernanceBatch();
-        }
-        bytes32[] memory hashes = new bytes32[](callDatas.length);
-        for (uint256 i = 0; i < callDatas.length; i++) {
-            hashes[i] = keccak256(callDatas[i]);
-        }
-        bytes32 callDataKey = keccak256(abi.encodePacked(hashes));
-        pointer = _publishedCallData[callDataKey];
-        if (pointer != address(0)) {
-            return pointer;
-        }
-        pointer = SSTORE2.write(abi.encode(callDatas));
-        _publishedCallData[callDataKey] = pointer;
-        emit GovernanceCallDataPublished(callDataKey, pointer, msg.sender);
+        return StreamGovernanceBootstrap.publishCallData(_policy, callDatas);
     }
 
     function _requirePublishedCallData(GovernanceCall[] memory calls)
@@ -623,61 +987,130 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         view
         returns (address pointer)
     {
-        if (calls.length == 0) {
-            revert EmptyGovernanceBatch();
-        }
-        bytes32[] memory hashes = new bytes32[](calls.length);
-        for (uint256 i = 0; i < calls.length; i++) {
-            hashes[i] = calls[i].callDataHash;
-        }
-        bytes32 callDataKey = keccak256(abi.encodePacked(hashes));
-        pointer = _publishedCallData[callDataKey];
-        if (pointer == address(0)) {
-            revert CallDataNotPublished(callDataKey);
-        }
+        return StreamGovernanceBootstrap.requirePublishedCallData(_policy, calls);
     }
 
-    /// @dev Removes a terminal-freeze action from its scope's live set on any
-    ///     terminal transition (veto/cancel/execute/expire), swap-removing to
-    ///     keep the enumeration dense (FIX B). No-op for non-terminal-freeze
-    ///     actions and for actions already pruned.
-    function _pruneLiveTerminalFreeze(bytes32 actionId, uint8 actionClass, bytes32 scopeHash)
-        private
-    {
-        if (actionClass != StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            return;
-        }
-        uint256 indexPlusOne = _liveTerminalFreezeIndex[actionId];
-        if (indexPlusOne == 0) {
-            return;
-        }
-        bytes32[] storage live = _liveTerminalFreezeActions[scopeHash];
-        uint256 index = indexPlusOne - 1;
-        uint256 lastIndex = live.length - 1;
-        if (index != lastIndex) {
-            bytes32 moved = live[lastIndex];
-            live[index] = moved;
-            _liveTerminalFreezeIndex[moved] = indexPlusOne;
-        }
-        live.pop();
-        delete _liveTerminalFreezeIndex[actionId];
-    }
-
-    /// @dev Returns the soonest `notBefore` among the scope's still-vetoable
-    ///     (scheduled, pre-`notBefore`) live terminal-freeze actions, or zero
-    ///     when none is vetoable. The live set only ever holds SCHEDULED
-    ///     actions, so this filters purely on the deadline.
-    function _earliestLiveTerminalFreezeDeadline(bytes32 scopeHash)
+    function _readCanonicalCallDatas(address pointer)
         private
         view
-        returns (uint64 deadline)
+        returns (bytes[] memory callDatas)
     {
-        bytes32[] storage live = _liveTerminalFreezeActions[scopeHash];
-        for (uint256 i = 0; i < live.length; i++) {
-            uint64 notBefore = _actions[live[i]].notBefore;
-            if (block.timestamp < notBefore && (deadline == 0 || notBefore < deadline)) {
-                deadline = notBefore;
-            }
+        return StreamGovernanceBootstrap.readCanonicalCallDatas(pointer);
+    }
+
+    function _requireSelfCall(uint8 requiredClass) private view {
+        if (
+            msg.sender != address(this) || !_executing || _currentActionId == bytes32(0)
+                || _currentActionClass != requiredClass
+        ) {
+            revert GovernanceSelfCallContextRequired();
+        }
+    }
+
+    function _requireIsolatedSelfCall(uint8 requiredClass) private view {
+        _requireSelfCall(requiredClass);
+        if (_currentBatchLength != 1 || _currentCallIndex != 0) {
+            revert GovernanceSelfCallContextRequired();
+        }
+    }
+
+    function _requireCurrentTransition(
+        bytes32 scopeHash,
+        bytes32 oldValueHash,
+        bytes32 newValueHash
+    ) private view {
+        if (
+            _currentScopeHash != scopeHash || _currentOldValueHash != oldValueHash
+                || _currentNewValueHash != newValueHash
+        ) {
+            revert GovernanceTransitionContextMismatch();
+        }
+    }
+
+    function _policyExecutionContext()
+        private
+        view
+        returns (StreamGovernancePolicy.ExecutionContext memory)
+    {
+        return StreamGovernancePolicy.ExecutionContext({
+            executing: _executing,
+            actionId: _currentActionId,
+            actionClass: _currentActionClass,
+            scopeHash: _currentScopeHash,
+            oldValueHash: _currentOldValueHash,
+            newValueHash: _currentNewValueHash,
+            batchLength: _currentBatchLength,
+            callIndex: _currentCallIndex
+        });
+    }
+
+    function _appendManifestTailTrigger(
+        address triggerTarget,
+        bytes4 triggerSelector,
+        bytes32 triggerCodeHash,
+        uint8 allowedActionClassMask,
+        bool governed
+    ) private {
+        StreamGovernanceManifest.appendManifestTailTrigger(
+            _policy,
+            _manifest,
+            triggerTarget,
+            triggerSelector,
+            triggerCodeHash,
+            allowedActionClassMask,
+            governed,
+            _currentScopeHash,
+            _currentOldValueHash,
+            _currentNewValueHash
+        );
+        if (governed) {
+            emit SystemManifestTailTriggerRegistered(
+                SCHEMA_VERSION,
+                triggerTarget,
+                triggerSelector,
+                triggerCodeHash,
+                allowedActionClassMask,
+                _manifest.systemManifestSatellite,
+                SYSTEM_MANIFEST_PUBLISH_SELECTOR,
+                _currentActionId
+            );
+        }
+    }
+
+    function _validateManifestTailComposition(
+        address proposer,
+        uint8 actionClass,
+        GovernanceCall[] memory calls,
+        bool bootstrapScoped
+    ) private view {
+        StreamGovernanceManifest.validateManifestTailComposition(
+            _policy,
+            _manifest,
+            proposer,
+            actionClass,
+            calls,
+            bootstrapScoped,
+            this.sealSystemManifestBootstrap.selector,
+            this.registerSystemManifestTailTrigger.selector,
+            this.registerEmergencyRestorationEligibility.selector
+        );
+    }
+
+    function _requireBootstrapCodeHashes() private view {
+        StreamGovernanceManifest.requireBootstrapCodeHashes(_manifest);
+    }
+
+    function _requireGovernanceRootCodeHash() private view {
+        StreamGovernanceManifest.requireGovernanceRootCodeHash(_manifest);
+    }
+
+    function _requireBoundRoleRegistry() private view {
+        StreamGovernanceManifest.requireBoundRoleRegistry(_manifest);
+    }
+
+    function _pruneLiveTerminalFreeze(bytes32 actionId, uint8 actionClass) private {
+        if (actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
+            StreamGovernanceBootstrap.pruneTerminalFreeze(_policy, actionId);
         }
     }
 
@@ -685,47 +1118,6 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
     ///     ABI-encoded in word chunks: 14 head words (the string head slot at
     ///     index 13 points to offset 0x1C0), then the string length, raw
     ///     bytes, and canonical zero padding.
-    function _emitActionScheduled(
-        bytes32 actionId,
-        ScheduleContext memory ctx,
-        address target,
-        bytes4 selector,
-        uint256 totalValue,
-        bytes32 callsHash,
-        uint256 nonceUsed
-    ) private {
-        bytes memory raw = bytes(ctx.reasonURI);
-        bytes memory data = bytes.concat(
-            abi.encode(
-                uint256(SCHEMA_VERSION),
-                totalValue,
-                bytes32(selector),
-                callsHash,
-                ctx.scopeHash,
-                ctx.oldValueHash,
-                ctx.newValueHash
-            ),
-            abi.encode(
-                uint256(ctx.notBefore),
-                uint256(ctx.expiresAfter),
-                nonceUsed,
-                uint256(uint160(msg.sender)),
-                ctx.reasonHash,
-                uint256(0x1C0),
-                ctx.manifestHash
-            ),
-            abi.encode(raw.length),
-            raw,
-            new bytes((32 - (raw.length % 32)) % 32)
-        );
-        bytes32 topic0 = GOVERNANCE_ACTION_SCHEDULED_TOPIC;
-        uint256 topic2 = uint256(ctx.actionClass);
-        uint256 topic3 = uint256(uint160(target));
-        assembly {
-            log4(add(data, 0x20), mload(data), topic0, actionId, topic2, topic3)
-        }
-    }
-
     function _execute(bytes32 actionId, GovernanceCall[] memory calls, bytes[] memory callDatas)
         private
     {
@@ -746,23 +1138,61 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
 
         // [GOV-BATCH] rule 1: recompute callsHash and actionId from the
         // supplied batch and require both to match the stored action.
-        bytes32 callsHash = keccak256(abi.encode(STREAM_GOVERNANCE_CALLS_V1, calls));
+        bytes32 callsHash = _callsHash(calls);
         if (callsHash != action.callHash) {
             revert CallsHashMismatch(actionId);
         }
-        if (_recomputeActionId(action, callsHash, _actionNonces[actionId]) != actionId) {
+        (bytes32 derivedScopeHash, bytes32 derivedOldValueHash, bytes32 derivedNewValueHash) =
+            _deriveBatchTransitionHashes(calls, callsHash);
+        if (
+            derivedScopeHash != action.scopeHash || derivedOldValueHash != action.oldValueHash
+                || derivedNewValueHash != action.newValueHash
+        ) {
             revert ActionIdMismatch(actionId);
         }
-        if (callDatas.length != calls.length) {
+        if (
+            StreamGovernanceBootstrap.governanceActionIdFromStored(
+                    action, callsHash, _actionNonces[actionId]
+                ) != actionId
+        ) {
+            revert ActionIdMismatch(actionId);
+        }
+        bytes[] memory scheduledCallDatas = _readCanonicalCallDatas(_callDataPointers[actionId]);
+        if (callDatas.length != calls.length || scheduledCallDatas.length != calls.length) {
             revert CallDataCountMismatch(calls.length, callDatas.length);
         }
-
-        uint256 totalValue;
+        uint256 totalValue = _validateCalls(action.actionClass, calls, scheduledCallDatas);
         for (uint256 i = 0; i < calls.length; i++) {
-            if (keccak256(callDatas[i]) != calls[i].callDataHash) {
-                revert CallDataHashMismatch(i);
+            if (!_bytesEqual(callDatas[i], scheduledCallDatas[i])) {
+                revert ScheduledCallDataMismatch(i);
             }
-            totalValue += calls[i].value;
+        }
+        bool bootstrapSeal = !_manifest.isSealed && calls.length == 2
+            && calls[0].target == address(this)
+            && calls[0].selector == this.sealSystemManifestBootstrap.selector;
+        _validateManifestTailComposition(
+            action.proposer, action.actionClass, calls, !_manifest.isSealed
+        );
+        if (!_manifest.isSealed && action.proposer != genesisBootstrapAuthority) {
+            revert GenesisBootstrapActorRequired(action.proposer);
+        }
+        if (!_manifest.isSealed) {
+            _requireBootstrapCodeHashes();
+        } else {
+            _requireGovernanceRootCodeHash();
+        }
+        if (action.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
+            _requireBoundRoleRegistry();
+            StreamGovernanceBootstrap.validateTerminalFreezeGuardians(_manifest.roleRegistry, calls);
+            bytes32 expectedCommitment = _terminalFreezeGuardianConfigCommitments[actionId];
+            bytes32 actualCommitment = StreamGovernancePolicy.terminalFreezeGuardianConfigCommitment(
+                _manifest.roleRegistry, calls
+            );
+            if (actualCommitment != expectedCommitment) {
+                revert TerminalFreezeGuardianConfigDrift(
+                    actionId, expectedCommitment, actualCommitment
+                );
+            }
         }
         // [GOV-BATCH] rule 2: msg.value equals the exact batch value sum.
         if (msg.value != totalValue) {
@@ -771,18 +1201,40 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
 
         action.status = GovernanceActionStatus.EXECUTED;
         action.executor = msg.sender;
-        _pruneLiveTerminalFreeze(actionId, action.actionClass, action.scopeHash);
+        _pruneLiveTerminalFreeze(actionId, action.actionClass);
         _executing = true;
         _currentActionId = actionId;
         _currentActionClass = action.actionClass;
+        _currentBatchLength = calls.length;
 
         for (uint256 i = 0; i < calls.length; i++) {
+            _currentCallIndex = i;
+            _currentScopeHash = calls[i].scopeHash;
+            _currentOldValueHash = calls[i].oldValueHash;
+            _currentNewValueHash = calls[i].newValueHash;
             _executeCall(actionId, i, calls[i], callDatas[i]);
+            _currentScopeHash = bytes32(0);
+            _currentOldValueHash = bytes32(0);
+            _currentNewValueHash = bytes32(0);
+        }
+
+        if (bootstrapSeal) {
+            emit SystemManifestBootstrapSealed(
+                SCHEMA_VERSION,
+                _manifest.bootstrapTriggerSetHash,
+                _manifest.expectedTriggerCount,
+                _manifest.sealedPayloadPointer,
+                _manifest.expectedManifestHash,
+                actionId
+            );
         }
 
         _executing = false;
         _currentActionId = bytes32(0);
         _currentActionClass = 0;
+        _currentBatchLength = 0;
+        _currentCallIndex = 0;
+        _pendingScheduledActionCount -= 1;
 
         // [GOV-BATCH] rule 2: refunded surplus reverts the batch rather than
         // stranding value in the governance contract.
@@ -814,7 +1266,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         bytes memory callData
     ) private {
         if (callData.length == 0) {
-            if (call_.target.code.length == 0 && !_approvedNativeReceivers[call_.target]) {
+            if (call_.target.code.length == 0 && !_policy.approvedNativeReceivers[call_.target]) {
                 revert NativeReceiverNotApproved(call_.target);
             }
         } else if (call_.target.code.length == 0) {
@@ -823,7 +1275,7 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         (bool success, bytes memory returnData) = call_.target.call{ value: call_.value }(callData);
         if (!success) {
             if (returnData.length > 0) {
-                assembly {
+                assembly ("memory-safe") {
                     revert(add(returnData, 0x20), mload(returnData))
                 }
             }
@@ -835,118 +1287,65 @@ contract StreamGovernanceExecutor is IStreamGovernanceExecutor, Ownable, Reentra
         uint8 actionClass,
         GovernanceCall[] memory calls,
         bytes[] memory callDatas
-    ) private view returns (uint256 totalValue) {
-        if (calls.length == 0) {
-            revert EmptyGovernanceBatch();
-        }
-        if (callDatas.length != calls.length) {
-            revert CallDataCountMismatch(calls.length, callDatas.length);
-        }
-        bool immediate = actionClass == StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING;
-        bool terminalFreeze = actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE;
-        for (uint256 i = 0; i < calls.length; i++) {
-            GovernanceCall memory call_ = calls[i];
-            bytes memory callData = callDatas[i];
-            if (call_.target == address(0)) {
-                revert ZeroGovernanceTarget(i);
-            }
-            if (keccak256(callData) != call_.callDataHash) {
-                revert CallDataHashMismatch(i);
-            }
-            if (callData.length == 0) {
-                if (call_.selector != bytes4(0)) {
-                    revert CallSelectorMismatch(i);
-                }
-            } else if (callData.length < 4) {
-                revert CallDataTooShort(i);
-            } else if (_firstSelector(callData) != call_.selector) {
-                revert CallSelectorMismatch(i);
-            }
-            if (immediate && !_tighteningCalls[call_.target][call_.selector]) {
-                revert NotClassifiedTightening(call_.target, call_.selector);
-            }
-            // FIX A: a batch touching a registered known-irreversible freeze
-            // must ride the TERMINAL_FREEZE class so the 72h veto floor applies
-            // regardless of the proposer-declared label.
-            if (!terminalFreeze && _freezeSelectors[call_.target][call_.selector]) {
-                revert TerminalFreezeClassRequired(call_.target, call_.selector);
-            }
-            totalValue += call_.value;
-        }
+    ) private view returns (uint256) {
+        return StreamGovernanceBootstrap.validateCalls(
+            _policy,
+            address(_manifest.roleRegistry),
+            _manifest.systemManifestSatellite,
+            actionClass,
+            calls,
+            callDatas,
+            this.sealSystemManifestBootstrap.selector
+        );
     }
 
     function _validateWindow(uint8 actionClass, uint64 notBefore, uint64 expiresAfter)
         private
         view
     {
-        uint64 delayFloor = minimumDelay(actionClass);
-        uint64 earliest = uint64(block.timestamp) + delayFloor;
-        if (notBefore < earliest) {
-            revert DelayBelowClassMinimum(actionClass, notBefore, earliest);
-        }
-        if (expiresAfter <= notBefore) {
-            revert InvalidActionWindow(notBefore, expiresAfter);
-        }
-        // [GOV-WINDOWS] rule 1: delayed classes keep a 7-day open-to-execute window.
-        if (delayFloor > 0 && expiresAfter - notBefore < OPEN_TO_EXECUTE_WINDOW_FLOOR) {
-            revert OpenWindowBelowFloor(notBefore, expiresAfter);
-        }
-        if (expiresAfter > uint64(block.timestamp) + MAX_ACTION_LIFETIME) {
-            revert InvalidActionWindow(notBefore, expiresAfter);
-        }
+        StreamGovernanceBootstrap.validateActionWindow(actionClass, notBefore, expiresAfter);
     }
 
-    function _computeActionId(ScheduleContext memory ctx, bytes32 callsHash, uint256 nonceUsed)
-        private
-        view
-        returns (bytes32)
-    {
-        return keccak256(
-            abi.encode(
-                STREAM_GOVERNANCE_ACTION_V1,
-                uint256(block.chainid),
-                address(this),
-                uint8(ctx.actionClass),
-                callsHash,
-                bytes32(ctx.scopeHash),
-                bytes32(ctx.oldValueHash),
-                bytes32(ctx.newValueHash),
-                uint256(nonceUsed),
-                uint64(ctx.notBefore),
-                uint64(ctx.expiresAfter),
-                bytes32(ctx.reasonHash),
-                bytes32(ctx.manifestHash)
-            )
-        );
-    }
-
-    function _recomputeActionId(
-        GovernanceAction storage action,
+    function _computeActionId(
+        StreamGovernanceBootstrap.ScheduleContext memory ctx,
         bytes32 callsHash,
         uint256 nonceUsed
     ) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                STREAM_GOVERNANCE_ACTION_V1,
-                uint256(block.chainid),
-                address(this),
-                uint8(action.actionClass),
-                callsHash,
-                bytes32(action.scopeHash),
-                bytes32(action.oldValueHash),
-                bytes32(action.newValueHash),
-                uint256(nonceUsed),
-                uint64(action.notBefore),
-                uint64(action.expiresAfter),
-                bytes32(action.reasonHash),
-                bytes32(action.manifestHash)
-            )
-        );
+        StreamGovernanceBootstrap.ActionIdentity memory identity =
+            StreamGovernanceBootstrap.ActionIdentity({
+                actionClass: ctx.actionClass,
+                callsHash: callsHash,
+                scopeHash: ctx.scopeHash,
+                oldValueHash: ctx.oldValueHash,
+                newValueHash: ctx.newValueHash,
+                nonce: nonceUsed,
+                notBefore: ctx.notBefore,
+                expiresAfter: ctx.expiresAfter,
+                reasonHash: ctx.reasonHash,
+                manifestHash: ctx.manifestHash
+            });
+        return StreamGovernanceBootstrap.governanceActionId(identity);
     }
 
     function _firstSelector(bytes memory callData) private pure returns (bytes4 selector) {
-        assembly {
+        assembly ("memory-safe") {
             selector := mload(add(callData, 0x20))
         }
+    }
+
+    function _callsHash(GovernanceCall[] memory calls) private pure returns (bytes32) {
+        return StreamGovernanceBootstrap.governanceCallsHash(calls);
+    }
+
+    function _deriveBatchTransitionHashes(GovernanceCall[] memory calls, bytes32 callsHash)
+        private
+        pure
+        returns (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash)
+    {
+        return StreamGovernanceBootstrap.deriveBatchTransitionHashes(calls, callsHash);
+    }
+
+    function _bytesEqual(bytes memory left, bytes memory right) private pure returns (bool equal) {
+        return StreamGovernanceBootstrap.bytesEqual(left, right);
     }
 }
