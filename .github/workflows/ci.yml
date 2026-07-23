@@ -140,6 +140,8 @@ jobs:
             scripts/test_contract_size_budget.py \
             scripts/check_core_bytecode_spend_policy.py \
             scripts/test_core_bytecode_spend_policy.py \
+            scripts/check_external_call_gas_inventory.py \
+            scripts/test_external_call_gas_inventory.py \
             scripts/check_metadata_fixtures.py \
             scripts/test_metadata_fixtures.py \
             scripts/check_metadata_browser_sandbox.py \
@@ -414,6 +416,14 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_gas_envelopes.py 2>&1 | tee ci-logs/gas-envelope-tests.log
           python3 scripts/check_gas_envelopes.py 2>&1 | tee ci-logs/gas-envelope-check.log
+
+      - name: External-call gas inventory
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_external_call_gas_inventory.py 2>&1 | tee ci-logs/external-call-gas-inventory-tests.log
+          python3 scripts/check_external_call_gas_inventory.py 2>&1 | tee ci-logs/external-call-gas-inventory-check.log
 
       - name: Aggregate size and warning diagnostic
         shell: bash

@@ -74,6 +74,8 @@ forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 & $pythonPath @pythonArgs "scripts\test_gas_envelopes.py"
 & $pythonPath @pythonArgs "scripts\check_gas_envelopes.py"
+& $pythonPath @pythonArgs "scripts\test_external_call_gas_inventory.py"
+& $pythonPath @pythonArgs "scripts\check_external_call_gas_inventory.py"
 & $pythonPath @pythonArgs "scripts\run_forge_size_log.py" "--log" "cache\forge-size.log"
 & $pythonPath @pythonArgs "scripts\test_release_build_artifacts.py"
 & $pythonPath @pythonArgs "scripts\build_release_artifacts.py"

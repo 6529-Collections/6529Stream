@@ -14,7 +14,7 @@
     "capture_json_success": true,
     "raw_json_size_bytes": 143333855,
     "raw_json_sha256": "sha256:d98273df2d70954fd4442b11ca1b628b575788bf93cfc18f8918a91a9323c14c",
-    "solidity_tree_sha256": "sha256:9522faed660b5cfd6c850304bbaef2351f58691b3c748af66cfdd889cd9bdab2",
+    "solidity_tree_sha256": "sha256:df095dfb797c46828c966f5cb4eaadb1e4ce9c510a8df821ac0e0091a18f2be4",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:155408a77117fe90f39469f1ad0b8f4d817da2fa030a6d850cd9a6c4276cbc02",
     "requirements_tools_sha256": "sha256:4af191d57f4305247c9fc3f97f853e3afb39d07ddd3b7ebde3a89da83384fa3e"
@@ -1731,8 +1731,8 @@
       "confidence": "Medium",
       "source": {
         "path": "smart-contracts/StreamModuleRegistry.sol",
-        "start_line": 305,
-        "end_line": 325,
+        "start_line": 302,
+        "end_line": 322,
         "element_type": "function",
         "name": "_checkGovernedClass",
         "signature": "_checkGovernedClass(bool)"
@@ -1740,26 +1740,26 @@
       "semantic_elements": [
         {
           "path": "smart-contracts/StreamModuleRegistry.sol",
-          "start_line": 305,
-          "end_line": 325,
+          "start_line": 302,
+          "end_line": 322,
           "element_type": "function",
           "name": "_checkGovernedClass",
           "signature": "_checkGovernedClass(bool)"
         },
         {
           "path": "smart-contracts/StreamModuleRegistry.sol",
-          "start_line": 309,
-          "end_line": 309,
+          "start_line": 306,
+          "end_line": 306,
           "element_type": "node",
           "name": "(executing,None,actionClass) = governanceExecutor.currentAction()",
           "signature": ""
         }
       ],
-      "fingerprint": "sha256:4bfe37a9d1b2b6ad4d61083d05c5c6c4bbbb9f3dac33493c0af2832cf08e96c0",
+      "fingerprint": "sha256:56eedf7bc7933f4c21779a38ebbe1fa67aad61b52733c113421f8c4fdb99bc8a",
       "source_kind": "first_party_production",
       "status": "Open",
       "triage_class": "pending_disposition",
-      "rationale": "Slither reports an ignored return component in smart-contracts/StreamModuleRegistry.sol:305 _checkGovernedClass. Its authority and error-signaling role have not yet been proven non-essential.",
+      "rationale": "Slither reports an ignored return component in smart-contracts/StreamModuleRegistry.sol:302 _checkGovernedClass. Its authority and error-signaling role have not yet been proven non-essential.",
       "issues": [
         "https://github.com/6529-Collections/6529Stream/issues/658"
       ],

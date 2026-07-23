@@ -110,6 +110,8 @@ This runs:
 forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_build_artifacts.py
 python scripts/build_release_artifacts.py
@@ -1205,6 +1207,41 @@ branch changes contract surfaces, release artifacts, deployment artifacts, or
 release workflow files, `CHANGELOG.md` must be part of the change and its
 `Unreleased` section must contain a non-placeholder bullet. The release-impact
 rules are documented in [`release-policy.md`](release-policy.md).
+
+## External-Call Gas Inventory
+
+Run the deterministic external-call gas policy gate with:
+
+```bash
+make external-call-gas-inventory-check
+```
+
+The gate runs `scripts/test_external_call_gas_inventory.py` and
+`scripts/check_external_call_gas_inventory.py` across every Solidity source
+under `smart-contracts/`. It masks comments and strings, inventories every
+non-`gas()`/non-`gasleft()` Solidity call-option gas expression and Yul call
+gas argument, and exact-matches literal integer `constant` or `immutable`
+gas-cap/reserve declarations, including constructor-assigned immutables. It
+also rejects direct numeric assignments and numeric struct-literal fields that
+feed an inventoried identifier or member-valued call-gas argument. Parentheses
+and integer casts around one literal are normalized; arithmetic literal
+initializers fail closed because their effective value cannot be represented
+by the exact lexical inventory. Solidity `.transfer(...)` and `.send(...)`
+calls are rejected because their implicit native-value stipend is another
+fixed external-call gas policy. New sites, added uses, removed sites whose
+inventory row was not retired, literal-value drift, and missing inventory all
+fail.
+
+The canonical inventory is
+[`ops/EXTERNAL_CALL_GAS_INVENTORY.json`](../ops/EXTERNAL_CALL_GAS_INVENTORY.json).
+Its finality, minting, and revenue rows are temporary open remediation work
+tied to issue #669. They are not accepted-risk exceptions and must be removed
+or connected to the Global Gas Parameter system in later focused slices. The
+separate `StreamGasProbe` row records deliberate probe-under-test semantics,
+not a production-path immutable gas policy. Because this is a lexical policy
+gate rather than a Solidity data-flow engine, normal review and focused
+behavioral tests remain required when gas is computed through helper functions
+or structured state.
 
 ## Solidity Formatting
 

@@ -1,0 +1,265 @@
+{
+  "schema_version": "6529stream.external-call-gas-inventory.v1",
+  "tracking_issue": "https://github.com/6529-Collections/6529Stream/issues/669",
+  "status": "open-remediation-inventory",
+  "note": "Open rows are exact temporary inventory, not accepted risk or permanent exceptions. Remove or govern them through #669 follow-up slices.",
+  "open_call_gas_expressions": [
+    {
+      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "site": "_readExactStatic",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "deployment-constructor",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "site": "_readDiscoveryWord",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "mixed-user-and-observability",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "site": "_readDiscoveryComponent",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "mixed-user-and-observability",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "site": "observeComponent",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "mixed-user-and-observability",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "site": "observeDiscoveryWord",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "mixed-user-and-observability",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "site": "observeDiscoveryComponent",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "forwardedGas",
+      "expected_count": 1,
+      "path_class": "mixed-user-and-observability",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamMintManager.sol",
+      "site": "_gateAdvertisesInterface",
+      "kind": "call-option",
+      "operation": "external-call",
+      "expression": "GATE_ERC165_PROBE_GAS",
+      "expected_count": 1,
+      "path_class": "mixed-control-plane-and-user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamMintManager.sol",
+      "site": "_executeGateCall",
+      "kind": "call-option",
+      "operation": "external-call",
+      "expression": "gateCall.gasLimit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamMintModuleRegistry.sol",
+      "site": "_supportsInterface",
+      "kind": "call-option",
+      "operation": "external-call",
+      "expression": "MODULE_ERC165_PROBE_GAS",
+      "expected_count": 1,
+      "path_class": "mixed-control-plane-and-user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "site": "_readAssetStatusWord",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "gasLimit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamSplitWallet.sol",
+      "site": "_readAssetStatusWord",
+      "kind": "yul-call",
+      "operation": "staticcall",
+      "expression": "gasLimit",
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    }
+  ],
+  "explicit_probe_call_gas_expressions": [
+    {
+      "path": "smart-contracts/StreamGasProbe.sol",
+      "site": "_provedStaticcall",
+      "kind": "call-option",
+      "operation": "external-call",
+      "expression": "probedValue",
+      "expected_count": 1,
+      "path_class": "observability-probe",
+      "authority": "docs/stream-long-term-architecture.md [LTA-GGP-PROBES]",
+      "rationale": "The call cap is the probe input under measurement, not a production-path immutable gas policy."
+    }
+  ],
+  "open_literal_gas_declarations": [
+    {
+      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "identifier": "FINALITY_COMPONENT_READ_GAS",
+      "value": 30000,
+      "expected_count": 1,
+      "path_class": "observability-diagnostic",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "identifier": "FINALITY_DIAGNOSTIC_PARENT_GAS_RESERVE",
+      "value": 10000,
+      "expected_count": 1,
+      "path_class": "observability-diagnostic",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",
+      "identifier": "FINALITY_STRICT_PARENT_GAS_RESERVE",
+      "value": 100000,
+      "expected_count": 1,
+      "path_class": "mixed-deployment-and-user-path",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "identifier": "DIAGNOSTIC_READ_PARENT_GAS_RESERVE",
+      "value": 10000,
+      "expected_count": 1,
+      "path_class": "observability-diagnostic",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamArtworkFinalityTypes.sol",
+      "identifier": "STRICT_READ_PARENT_GAS_RESERVE",
+      "value": 100000,
+      "expected_count": 1,
+      "path_class": "mixed-user-and-observability",
+      "lane": "finality",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamMintManager.sol",
+      "identifier": "GATE_ERC165_PROBE_GAS",
+      "value": 30000,
+      "expected_count": 1,
+      "path_class": "mixed-control-plane-and-user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamMintModuleRegistry.sol",
+      "identifier": "MODULE_ERC165_PROBE_GAS",
+      "value": 30000,
+      "expected_count": 1,
+      "path_class": "mixed-control-plane-and-user-path",
+      "lane": "minting",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "identifier": "_ASSET_POLICY_GAS_LIMIT",
+      "value": 30000,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamPrimarySaleSettlement.sol",
+      "identifier": "_ASSET_POLICY_PARENT_GAS_MIN",
+      "value": 31000,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamSplitWallet.sol",
+      "identifier": "_ASSET_POLICY_GAS_LIMIT",
+      "value": 30000,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    },
+    {
+      "path": "smart-contracts/StreamSplitWallet.sol",
+      "identifier": "_ASSET_POLICY_PARENT_GAS_MIN",
+      "value": 31000,
+      "expected_count": 1,
+      "path_class": "user-path",
+      "lane": "revenue",
+      "issue": "#669",
+      "disposition": "open-remediation-required"
+    }
+  ]
+}

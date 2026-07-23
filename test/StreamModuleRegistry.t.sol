@@ -67,6 +67,63 @@ contract RegistryModuleMock is ERC165 {
     }
 }
 
+/// @notice Simulates an ERC-165 read whose cost rose beyond the historical
+///         30,000-gas convention.
+contract RepricedRegistryModuleMock is ERC165 {
+    bytes4 private immutable _extraInterfaceId;
+    uint256 private immutable _minimumProbeGas;
+
+    constructor(bytes4 extraInterfaceId, uint256 minimumProbeGas) {
+        _extraInterfaceId = extraInterfaceId;
+        _minimumProbeGas = minimumProbeGas;
+    }
+
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        if (gasleft() < _minimumProbeGas) revert();
+        return interfaceId == _extraInterfaceId || super.supportsInterface(interfaceId);
+    }
+}
+
+/// @notice Returns deliberately adversarial ERC-165 returndata without asking
+///         Solidity's ABI encoder to canonicalize it.
+contract MalformedRegistryModuleMock {
+    uint8 private immutable _mode;
+
+    constructor(uint8 mode) {
+        _mode = mode;
+    }
+
+    fallback() external {
+        uint256 mode = _mode;
+        assembly ("memory-safe") {
+            switch mode
+            case 0 { revert(0, 0) }
+            case 1 {
+                mstore(0, 1)
+                return(0x1f, 1)
+            }
+            case 2 {
+                mstore(0, 1)
+                mstore(0x20, 0)
+                return(0, 0x40)
+            }
+            default {
+                mstore(0, 2)
+                return(0, 0x20)
+            }
+        }
+    }
+}
+
+/// @notice Consumes every unit of gas forwarded to the ERC-165 probe.
+contract GasExhaustingRegistryModuleMock {
+    fallback() external {
+        assembly ("memory-safe") {
+            for { } 1 { } { }
+        }
+    }
+}
+
 contract StreamModuleRegistryTest is CharacterizationTestBase {
     using Assertions for address;
     using Assertions for bool;
@@ -431,6 +488,68 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
         registration.expectedRuntimeCodeHash = address(module).codehash;
         _register(registration);
         registry.moduleCount().assertEq(1, "pinned registration landed");
+    }
+
+    function testRegistrationForwardsAvailableGasForRepricedERC165Read() public {
+        RepricedRegistryModuleMock repriced =
+            new RepricedRegistryModuleMock(MODULE_INTERFACE_ID, 60_000);
+        (bool legacyCapSucceeded,) = address(repriced).staticcall{ gas: 30_000 }(
+            abi.encodeWithSelector(
+                bytes4(keccak256("supportsInterface(bytes4)")), MODULE_INTERFACE_ID
+            )
+        );
+        legacyCapSucceeded.assertFalse("historical 30k probe cannot complete");
+
+        _register(_registration(address(repriced)));
+
+        registry.moduleCount().assertEq(1, "repriced module registered");
+        registry.isModuleEligible(address(repriced), MODULE_TYPE, MODULE_INTERFACE_ID)
+            .assertTrue("repriced module eligible");
+    }
+
+    function testRegistrationRejectsRevertingERC165Read() public {
+        _expectMalformedERC165Rejected(0);
+    }
+
+    function testRegistrationRejectsShortERC165Returndata() public {
+        _expectMalformedERC165Rejected(1);
+    }
+
+    function testRegistrationRejectsOversizedERC165Returndata() public {
+        _expectMalformedERC165Rejected(2);
+    }
+
+    function testRegistrationRejectsNoncanonicalERC165Bool() public {
+        _expectMalformedERC165Rejected(3);
+    }
+
+    function testRegistrationFailsClosedWhenERC165ProbeExhaustsGas() public {
+        GasExhaustingRegistryModuleMock exhausting = new GasExhaustingRegistryModuleMock();
+        StreamModuleRegistration memory registration = _registration(address(exhausting));
+        bytes memory registryCall =
+            abi.encodeCall(StreamModuleRegistry.registerModule, (registration));
+        bytes memory executorCall = abi.encodeCall(
+            GovernanceExecutorContextMock.callAs,
+            (LOOSENING, keccak256("gas-exhaustion"), address(registry), registryCall)
+        );
+
+        (bool success,) = address(executorMock).call{ gas: 500_000 }(executorCall);
+
+        success.assertFalse("gas-exhausting probe fails registration");
+        registry.moduleCount().assertEq(0, "gas-exhausting module not registered");
+    }
+
+    function _expectMalformedERC165Rejected(uint8 mode) private {
+        MalformedRegistryModuleMock malformed = new MalformedRegistryModuleMock(mode);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                StreamModuleRegistry.ModuleInterfaceUnsupported.selector,
+                address(malformed),
+                MODULE_INTERFACE_ID
+            )
+        );
+        _register(_registration(address(malformed)));
+        registry.moduleCount().assertEq(0, "malformed module not registered");
     }
 
     function testZeroGasLimitMeansUnbounded() public {
