@@ -10,8 +10,10 @@ the release policy in `docs/release-policy.md`.
 - Hardened canonical release builds so configured targets, retained build-info
   compiler inputs, and artifact metadata fail closed if any resolved source is
   under `test/` or `script/`; added focused regressions for both restricted
-  roots; and consistently labeled the aggregate all-source size/warning build
-  as diagnostic rather than production evidence. This addresses
+  roots; made the runtime-size and Core bytecode-spend checker CLIs validate the
+  canonical receipt before reading artifacts; and consistently labeled the
+  aggregate all-source size/warning build as diagnostic rather than production
+  evidence. This addresses
   [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
   without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test
   compilation, or release maturity.

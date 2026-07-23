@@ -10,14 +10,17 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+import build_release_artifacts as release_build
+
 
 BUDGET_SCHEMA = "6529stream.contract-runtime-size-budget.v1"
-DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out-release")
+DEFAULT_CONFIG = release_build.DEFAULT_CONFIG
+DEFAULT_FOUNDRY_CONFIG = release_build.DEFAULT_FOUNDRY_CONFIG
+DEFAULT_FOUNDRY_OUT = release_build.DEFAULT_OUTPUT_DIR
 EXPECTED_SOLC_VERSION = "0.8.19+commit.7dd6d404"
 EXPECTED_EVM_VERSION = "paris"
 EXPECTED_OPTIMIZER_RUNS = 200
-CANONICAL_RELEASE_BUILD_COMMAND = "python scripts/build_release_artifacts.py"
+CANONICAL_RELEASE_BUILD_COMMAND = release_build.CANONICAL_BUILD_COMMAND
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
 
@@ -329,6 +332,25 @@ def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[
     return report
 
 
+def validate_canonical_release_output(
+    repo_root: Path,
+    config_path: Path,
+    foundry_config_path: Path,
+    foundry_out: Path,
+) -> dict[str, Any]:
+    try:
+        return release_build.validate_release_output(
+            repo_root,
+            config_path,
+            foundry_config_path,
+            foundry_out,
+        )
+    except (OSError, release_build.ReleaseBuildError) as exc:
+        raise SizeBudgetError(
+            f"canonical release output validation failed: {exc}"
+        ) from exc
+
+
 def print_report(report: list[dict[str, Any]]) -> None:
     for row in report:
         print(
@@ -367,6 +389,11 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument(
+        "--foundry-config",
+        type=Path,
+        default=DEFAULT_FOUNDRY_CONFIG,
+    )
     parser.add_argument("--foundry-out", type=Path, default=DEFAULT_FOUNDRY_OUT)
     return parser.parse_args(argv)
 
@@ -375,6 +402,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     repo_root = args.repo_root.resolve()
     try:
+        validate_canonical_release_output(
+            repo_root,
+            args.config,
+            args.foundry_config,
+            args.foundry_out,
+        )
         report = build_report(repo_root, args.config, args.foundry_out)
     except SizeBudgetError as exc:
         print(f"error: {exc}", file=sys.stderr)

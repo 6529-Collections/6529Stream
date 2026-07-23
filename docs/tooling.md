@@ -285,16 +285,17 @@ not a deployability or release-evidence gate. It uses `via_ir` because the
 current deployable `StreamCore` profile needs the IR optimizer, but Foundry
 compilation restrictions can still admit `test/` helpers despite the command's
 `--skip test --skip script` flags. The artifact-backed budget checker therefore
-reads only canonical target-isolated `out-release/` artifacts. It reads
+validates the canonical build receipt and retained compiler inputs before
+reading target-isolated `out-release/` artifacts. It reads
 `release-artifacts/contracts.json`, treats unlinked Solidity library
 placeholders as their 20-byte deployed addresses for size counting, fails below
 the 384-byte `StreamCore` minimum margin, and reports a warning below the
 512-byte future-work threshold. The checker also validates artifact compiler
 metadata, optimizer settings, EVM version, compilation target, and
 current-source Keccak hashes before trusting any reported runtime size, so
-stale artifacts from earlier local commands fail before they can become release
-evidence. Its 384-byte floor is an interim development control, not the
-governing production deployment threshold.
+aggregate, missing-receipt, or stale artifacts from earlier local commands fail
+before they can become release evidence. Its 384-byte floor is an interim
+development control, not the governing production deployment threshold.
 
 The Core bytecode-spend policy is stricter than the EIP-170 floor. It reads the
 same canonical target-isolated artifacts and pins the currently approved

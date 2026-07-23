@@ -102,7 +102,9 @@ python scripts/generate_release_checksums.py
 The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
 command remains useful for warnings and whole-tree size diagnostics, but
 Foundry compilation restrictions can admit `test/` helpers despite those skip
-flags. It is not an input to release, verification, or deployment evidence.
+flags. Its retained log remains warning evidence, but it is not an input to
+canonical release bytecode, explorer-verification inputs, or
+deployment-bytecode evidence.
 
 Check the committed artifacts without rewriting them:
 

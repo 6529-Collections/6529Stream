@@ -126,9 +126,12 @@ make check
 
 The aggregate size/warning step is diagnostic only. Foundry compilation
 restrictions can still admit test helpers despite the command's
-`--skip test --skip script` flags, so release bytecode and EIP-170/EIP-3860
-evidence come from the target-isolated
-`python scripts/build_release_artifacts.py` output instead.
+`--skip test --skip script` flags, so canonical release bytecode and EIP-170
+runtime-size evidence come from the target-isolated
+`python scripts/build_release_artifacts.py` output and size-budget checker
+instead. This boundary does not establish deployment-specific EIP-3860
+initcode proof; constructor arguments and broadcast initcode remain under
+[issue #677](https://github.com/6529-Collections/6529Stream/issues/677).
 The local deployment rehearsal uses placeholder addresses; it proves the
 deploy-and-wire ceremony can execute without production secrets, not that a
 live deployment is ready.

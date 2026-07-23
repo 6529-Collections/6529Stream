@@ -14,6 +14,9 @@ from pathlib import Path
 from typing import Any, Iterator
 from unittest.mock import patch
 
+import check_contract_size_budget as size_checker
+import check_core_bytecode_spend_policy as core_checker
+
 
 SCRIPT_PATH = Path(__file__).with_name("build_release_artifacts.py")
 REPO_ROOT = SCRIPT_PATH.parent.parent
@@ -24,6 +27,8 @@ CI_PATH = REPO_ROOT / ".github" / "workflows" / "ci.yml"
 README_PATH = REPO_ROOT / "README.md"
 TEST_README_PATH = REPO_ROOT / "test" / "README.md"
 TOOLING_PATH = REPO_ROOT / "docs" / "tooling.md"
+DEPLOYMENT_DOC_PATH = REPO_ROOT / "docs" / "deployment.md"
+WARNING_DISPOSITIONS_PATH = REPO_ROOT / "docs" / "warning-dispositions.md"
 DEPLOYMENT_README_PATH = REPO_ROOT / "deployments" / "README.md"
 RELEASE_ARTIFACTS_README_PATH = REPO_ROOT / "release-artifacts" / "README.md"
 SIZE_LOG_PATH = REPO_ROOT / "scripts" / "run_forge_size_log.py"
@@ -125,6 +130,18 @@ def seed_tree(root: Path) -> dict[str, Path]:
             "interfaces": [
                 {"name": "IExample", "source": "smart-contracts/IExample.sol"}
             ],
+            "runtime_size_budget": {
+                "schema_version": size_checker.BUDGET_SCHEMA,
+                "eip_170_runtime_limit_bytes": 24_576,
+                "contracts": {
+                    "Example": {
+                        "source": "smart-contracts/Example.sol",
+                        "minimum_runtime_margin_bytes": 0,
+                        "warning_runtime_margin_bytes": 0,
+                        "tracking": "https://example.test/release-size-budget",
+                    }
+                },
+            },
         },
     )
     return {
@@ -438,6 +455,109 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
 
             self.assertEqual(fake.commands, [])
 
+    def test_rejects_restricted_source_aliases_after_resolution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            cases = [
+                (
+                    "dot segment",
+                    Path("smart-contracts") / ".." / "test" / "DotAlias.t.sol",
+                    root / "test" / "DotAlias.t.sol",
+                ),
+                (
+                    "absolute path",
+                    root / "script" / "AbsoluteAlias.s.sol",
+                    root / "script" / "AbsoluteAlias.s.sol",
+                ),
+                (
+                    "mixed-case root",
+                    Path("TeSt") / "MixedCaseAlias.t.sol",
+                    root / "test" / "MixedCaseAlias.t.sol",
+                ),
+            ]
+            if os.name == "nt":
+                cases.extend(
+                    [
+                        (
+                            "Windows separator",
+                            Path(r"test\WindowsAlias.t.sol"),
+                            root / "test" / "WindowsAlias.t.sol",
+                        ),
+                        (
+                            "Windows trailing-dot root",
+                            Path("test.") / "TrailingDotAlias.t.sol",
+                            root / "test" / "TrailingDotAlias.t.sol",
+                        ),
+                    ]
+                )
+
+            for label, alias, source_path in cases:
+                with self.subTest(alias=label):
+                    write_text(
+                        source_path,
+                        (
+                            "// SPDX-License-Identifier: MIT\n"
+                            "pragma solidity 0.8.19;\n"
+                            "contract RestrictedAlias {}\n"
+                        ),
+                    )
+                    resolved = builder.resolve_repo_path(
+                        root,
+                        alias,
+                        f"{label} source",
+                    )
+                    with self.assertRaisesRegex(
+                        builder.ReleaseBuildError,
+                        "restricted canonical release source root",
+                    ):
+                        builder.reject_restricted_release_source(
+                            root,
+                            resolved,
+                            f"{label} source",
+                        )
+
+    @unittest.skipUnless(os.name == "nt", "Windows 8.3 aliases are Windows-only")
+    def test_rejects_restricted_windows_short_path_alias(self) -> None:
+        import ctypes
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir).resolve()
+            source_path = root / "test" / "ShortPathAlias.t.sol"
+            write_text(
+                source_path,
+                (
+                    "// SPDX-License-Identifier: MIT\n"
+                    "pragma solidity 0.8.19;\n"
+                    "contract RestrictedShortPathAlias {}\n"
+                ),
+            )
+            buffer = ctypes.create_unicode_buffer(32_768)
+            length = ctypes.windll.kernel32.GetShortPathNameW(  # type: ignore[attr-defined]
+                str(source_path),
+                buffer,
+                len(buffer),
+            )
+            if length == 0 or length >= len(buffer):
+                self.skipTest("Windows did not return an 8.3 alias")
+            short_path = Path(buffer.value)
+            if str(short_path).casefold() == str(source_path).casefold():
+                self.skipTest("8.3 aliases are unavailable for the temporary directory")
+
+            resolved = builder.resolve_repo_path(
+                root,
+                short_path,
+                "Windows 8.3 source",
+            )
+            with self.assertRaisesRegex(
+                builder.ReleaseBuildError,
+                "restricted canonical release source root",
+            ):
+                builder.reject_restricted_release_source(
+                    root,
+                    resolved,
+                    "Windows 8.3 source",
+                )
+
     def test_rejects_test_and_script_sources_from_artifact_metadata(self) -> None:
         for restricted_source in (
             "test/MetadataLeak.t.sol",
@@ -481,10 +601,17 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
             README_PATH: "aggregate size/warning step is diagnostic only",
             TEST_README_PATH: "warning and whole-tree size diagnostic only",
             TOOLING_PATH: "warning-collection and whole-tree size diagnostic",
+            DEPLOYMENT_DOC_PATH: "warning and whole-tree size diagnostic;",
+            WARNING_DISPOSITIONS_PATH: (
+                "log is therefore warning evidence, not production bytecode"
+            ),
             DEPLOYMENT_README_PATH: "command is diagnostic only",
             RELEASE_ARTIFACTS_README_PATH: "warnings and whole-tree size diagnostics",
             SIZE_LOG_PATH: "aggregate size/warning diagnostic",
             CI_PATH: "name: Aggregate size and warning diagnostic",
+            MAKEFILE_PATH: (
+                "Aggregate diagnostic only; canonical release bytecode is built"
+            ),
         }
         for path, phrase in expected_phrases.items():
             with self.subTest(path=path.relative_to(REPO_ROOT).as_posix()):
@@ -495,15 +622,32 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
 
         canonical_commands = [
             "python scripts/test_release_build_artifacts.py",
-            "python scripts/build_release_artifacts.py",
-            "python scripts/build_release_artifacts.py --check",
+            builder.CANONICAL_BUILD_COMMAND,
+            f"{builder.CANONICAL_BUILD_COMMAND} --check",
             "python scripts/generate_release_artifacts.py",
         ]
-        for path in (DEPLOYMENT_README_PATH, RELEASE_ARTIFACTS_README_PATH):
+        for path in (
+            DEPLOYMENT_DOC_PATH,
+            DEPLOYMENT_README_PATH,
+            RELEASE_ARTIFACTS_README_PATH,
+        ):
             with self.subTest(path=path.relative_to(REPO_ROOT).as_posix()):
                 text = path.read_text(encoding="utf-8")
                 positions = [text.index(command) for command in canonical_commands]
                 self.assertEqual(positions, sorted(positions))
+
+        banned_phrases = {
+            README_PATH: "release bytecode and EIP-170/EIP-3860 evidence",
+            RELEASE_ARTIFACTS_README_PATH: (
+                "not an input to release, verification, or deployment evidence"
+            ),
+            WARNING_DISPOSITIONS_PATH: (
+                "helpers can appear only in aggregate diagnostic warnings"
+            ),
+        }
+        for path, phrase in banned_phrases.items():
+            with self.subTest(path=path.relative_to(REPO_ROOT).as_posix()):
+                self.assertNotIn(phrase, path.read_text(encoding="utf-8"))
 
     def test_successful_replacement_is_exact_and_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -618,6 +762,213 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                     paths["foundry_config"],
                     paths["output"],
                 )
+
+    def test_size_checker_rejects_aggregate_output_and_missing_receipt(self) -> None:
+        cases = (
+            ("aggregate output", "out", "canonical repository out-release"),
+            ("missing receipt", "out-release", "missing required file"),
+        )
+        for label, foundry_out, expected_error in cases:
+            with self.subTest(case=label):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_tree(root)
+                    stderr = StringIO()
+                    with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                        result = size_checker.main(
+                            [
+                                "--repo-root",
+                                str(root),
+                                "--config",
+                                str(paths["config"].relative_to(root)),
+                                "--foundry-config",
+                                str(paths["foundry_config"].relative_to(root)),
+                                "--foundry-out",
+                                foundry_out,
+                            ]
+                        )
+
+                    self.assertEqual(result, 1)
+                    self.assertIn(
+                        "canonical release output validation failed",
+                        stderr.getvalue(),
+                    )
+                    self.assertIn(expected_error, stderr.getvalue())
+
+    def test_size_and_core_checkers_accept_valid_canonical_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            custom_foundry_config = root / "config" / "release-foundry.toml"
+            write_text(
+                custom_foundry_config,
+                paths["foundry_config"].read_text(encoding="utf-8"),
+            )
+            paths["foundry_config"] = custom_foundry_config
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            common_args = [
+                "--repo-root",
+                str(root),
+                "--config",
+                str(paths["config"].relative_to(root)),
+                "--foundry-config",
+                str(paths["foundry_config"].relative_to(root)),
+                "--foundry-out",
+                builder.DEFAULT_OUTPUT_DIR.as_posix(),
+            ]
+            with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
+                self.assertEqual(size_checker.main(common_args), 0)
+
+            with (
+                patch.object(core_checker, "check_policy", return_value=0) as policy,
+                redirect_stdout(StringIO()),
+                redirect_stderr(StringIO()),
+            ):
+                self.assertEqual(core_checker.main(common_args), 0)
+            policy.assert_called_once_with(
+                root.resolve(),
+                Path(paths["config"].relative_to(root)),
+                builder.DEFAULT_OUTPUT_DIR,
+            )
+
+            noncanonical_args = [
+                *common_args[:-1],
+                "out",
+            ]
+            stderr = StringIO()
+            with (
+                patch.object(core_checker, "check_policy", return_value=0) as policy,
+                redirect_stdout(StringIO()),
+                redirect_stderr(stderr),
+            ):
+                self.assertEqual(core_checker.main(noncanonical_args), 1)
+            policy.assert_not_called()
+            self.assertIn("canonical repository out-release", stderr.getvalue())
+
+    def test_size_checker_rejects_restricted_source_in_retained_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            restricted_source = "test/ReceiptLeak.t.sol"
+            restricted_content = (
+                "// SPDX-License-Identifier: MIT\n"
+                "pragma solidity 0.8.19;\n"
+                "contract ReceiptLeak {}\n"
+            )
+            write_text(root / restricted_source, restricted_content)
+            compiler_input_path = (
+                paths["output"] / "compiler-inputs" / "000-Example.json"
+            )
+            compiler_input = json.loads(
+                compiler_input_path.read_text(encoding="utf-8")
+            )
+            compiler_input["sources"][restricted_source] = {
+                "content": restricted_content
+            }
+            compiler_input_path.write_bytes(
+                builder.ordered_json_bytes(compiler_input)
+            )
+
+            manifest_path = paths["output"] / builder.MANIFEST_FILENAME
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            compiler_input_hash = builder.file_sha256(compiler_input_path)
+            for record in manifest["targets"]:
+                if (
+                    record["compiler_input_relative_path"]
+                    == "compiler-inputs/000-Example.json"
+                ):
+                    record["compiler_input_sha256"] = compiler_input_hash
+            write_json(manifest_path, manifest)
+
+            stderr = StringIO()
+            with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                result = size_checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--config",
+                        str(paths["config"].relative_to(root)),
+                        "--foundry-config",
+                        str(paths["foundry_config"].relative_to(root)),
+                        "--foundry-out",
+                        builder.DEFAULT_OUTPUT_DIR.as_posix(),
+                    ]
+                )
+
+            self.assertEqual(result, 1)
+            self.assertIn(
+                "restricted canonical release source root",
+                stderr.getvalue(),
+            )
+
+    def test_size_checker_rejects_stale_receipt_version_and_root_policy(self) -> None:
+        cases = (
+            ("generator version", "generator identity is invalid"),
+            ("restricted-root policy", "compiler policy is stale"),
+        )
+        for mutation, expected_error in cases:
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_tree(root)
+                    with redirect_stdout(StringIO()):
+                        builder.build_release_output(
+                            root,
+                            paths["config"],
+                            paths["foundry_config"],
+                            paths["output"],
+                            runner=FakeForge(),
+                            forge_version_output=FAKE_FORGE_VERSION,
+                        )
+
+                    manifest_path = paths["output"] / builder.MANIFEST_FILENAME
+                    manifest = json.loads(
+                        manifest_path.read_text(encoding="utf-8")
+                    )
+                    if mutation == "generator version":
+                        manifest["generated_by"] = (
+                            "scripts/build_release_artifacts.py:1"
+                        )
+                    else:
+                        del manifest["policy"]["restricted_source_roots"]
+                    write_json(manifest_path, manifest)
+
+                    stderr = StringIO()
+                    with redirect_stdout(StringIO()), redirect_stderr(stderr):
+                        result = size_checker.main(
+                            [
+                                "--repo-root",
+                                str(root),
+                                "--config",
+                                str(paths["config"].relative_to(root)),
+                                "--foundry-config",
+                                str(paths["foundry_config"].relative_to(root)),
+                                "--foundry-out",
+                                builder.DEFAULT_OUTPUT_DIR.as_posix(),
+                            ]
+                        )
+
+                    self.assertEqual(result, 1)
+                    self.assertIn(expected_error, stderr.getvalue())
 
     def test_rejects_post_build_compiler_input_mutation(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
