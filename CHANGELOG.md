@@ -14,8 +14,10 @@ the release policy in `docs/release-policy.md`.
   noncanonical results. Added repricing and malformed-returndata Solidity
   regressions plus a deterministic all-`smart-contracts/` call-gas inventory
   gate that also rejects implicit fixed-gas `.transfer(...)` and `.send(...)`
-  calls. This slice does not change `StreamCore`. It is only the first
-  control-plane remediation for
+  calls, parses a strict duplicate-free inventory, and pins the sole
+  probe-under-test exception to its normative architecture authority. This
+  slice does not change `StreamCore`. It is only the first control-plane
+  remediation for
   [issue #669](https://github.com/6529-Collections/6529Stream/issues/669):
   eleven finality, minting, and revenue call sites and eleven literal
   declarations remain explicitly open in the checked inventory rather than

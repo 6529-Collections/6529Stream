@@ -1219,25 +1219,33 @@ make external-call-gas-inventory-check
 The gate runs `scripts/test_external_call_gas_inventory.py` and
 `scripts/check_external_call_gas_inventory.py` across every Solidity source
 under `smart-contracts/`. It masks comments and strings, inventories every
-non-`gas()`/non-`gasleft()` Solidity call-option gas expression and Yul call
-gas argument, and exact-matches literal integer `constant` or `immutable`
-gas-cap/reserve declarations, including constructor-assigned immutables. It
-also rejects direct numeric assignments and numeric struct-literal fields that
-feed an inventoried identifier or member-valued call-gas argument. Parentheses
-and integer casts around one literal are normalized; arithmetic literal
-initializers fail closed because their effective value cannot be represented
-by the exact lexical inventory. Solidity `.transfer(...)` and `.send(...)`
-calls are rejected because their implicit native-value stipend is another
-fixed external-call gas policy. New sites, added uses, removed sites whose
-inventory row was not retired, literal-value drift, and missing inventory all
-fail.
+high-level Solidity call-option gas expression, and inventories every Yul call
+gas argument except the exact Yul `gas()` builtin. A high-level function named
+`gas` or `gasleft`, and a Yul helper named `gasleft`, therefore cannot imitate
+the builtin exception. The checker exact-matches literal integer `constant` or
+`immutable` gas-cap/reserve declarations, including constructor-assigned
+immutables. It also rejects direct numeric assignments and numeric
+struct-literal fields that feed an inventoried identifier or member-valued
+call-gas argument. Parentheses and integer casts around one literal are
+normalized; arithmetic literal initializers fail closed because their
+effective value cannot be represented by the exact lexical inventory.
+Solidity `.transfer(...)` and `.send(...)` calls, including whitespace- or
+comment-separated spellings, are rejected because their implicit native-value
+stipend is another fixed external-call gas policy. New sites, added uses,
+removed sites whose inventory row was not retired, literal-value drift, and
+missing inventory all fail.
 
 The canonical inventory is
 [`ops/EXTERNAL_CALL_GAS_INVENTORY.json`](../ops/EXTERNAL_CALL_GAS_INVENTORY.json).
 Its finality, minting, and revenue rows are temporary open remediation work
 tied to issue #669. They are not accepted-risk exceptions and must be removed
 or connected to the Global Gas Parameter system in later focused slices. The
-separate `StreamGasProbe` row records deliberate probe-under-test semantics,
+inventory is strict duplicate-free I-JSON: object keys are exact, floats,
+non-finite values, unsafe integers, and Unicode surrogates fail closed. The
+separate exception is pinned to the sole exact
+`StreamGasProbe._provedStaticcall` use and the normative
+`[LTA-GGP-PROBES]` authority; local, moved, or additional probe rationales
+cannot create waivers. That row records deliberate probe-under-test semantics,
 not a production-path immutable gas policy. Because this is a lexical policy
 gate rather than a Solidity data-flow engine, normal review and focused
 behavioral tests remain required when gas is computed through helper functions

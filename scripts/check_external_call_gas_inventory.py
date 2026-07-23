@@ -17,6 +17,10 @@ SCHEMA_VERSION = "6529stream.external-call-gas-inventory.v1"
 TRACKING_ISSUE = "https://github.com/6529-Collections/6529Stream/issues/669"
 DEFAULT_INVENTORY = Path("ops/EXTERNAL_CALL_GAS_INVENTORY.json")
 SOLIDITY_ROOT = Path("smart-contracts")
+INVENTORY_NOTE = (
+    "Open rows are exact temporary inventory, not accepted risk or permanent "
+    "exceptions. Remove or govern them through #669 follow-up slices."
+)
 OPEN_LANES = {"finality", "minting", "revenue"}
 PATH_CLASSES = {
     "deployment-constructor",
@@ -28,7 +32,72 @@ PATH_CLASSES = {
     "mixed-control-plane-and-user-path",
     "mixed-user-and-observability",
 }
-AVAILABLE_GAS_EXPRESSIONS = {"gas()", "gasleft()"}
+YUL_AVAILABLE_GAS_EXPRESSION = "gas()"
+IJSON_MAX_SAFE_INTEGER = (1 << 53) - 1
+TOP_LEVEL_FIELDS = frozenset(
+    {
+        "schema_version",
+        "tracking_issue",
+        "status",
+        "note",
+        "open_call_gas_expressions",
+        "explicit_probe_call_gas_expressions",
+        "open_literal_gas_declarations",
+    }
+)
+OPEN_CALL_FIELDS = frozenset(
+    {
+        "path",
+        "site",
+        "kind",
+        "operation",
+        "expression",
+        "expected_count",
+        "path_class",
+        "lane",
+        "issue",
+        "disposition",
+    }
+)
+EXPLICIT_PROBE_FIELDS = frozenset(
+    {
+        "path",
+        "site",
+        "kind",
+        "operation",
+        "expression",
+        "expected_count",
+        "path_class",
+        "authority",
+        "rationale",
+    }
+)
+LITERAL_DECLARATION_FIELDS = frozenset(
+    {
+        "path",
+        "identifier",
+        "value",
+        "expected_count",
+        "path_class",
+        "lane",
+        "issue",
+        "disposition",
+    }
+)
+APPROVED_PROBE_ROW: dict[str, object] = {
+    "path": "smart-contracts/StreamGasProbe.sol",
+    "site": "_provedStaticcall",
+    "kind": "call-option",
+    "operation": "external-call",
+    "expression": "probedValue",
+    "expected_count": 1,
+    "path_class": "observability-probe",
+    "authority": "docs/stream-long-term-architecture.md [LTA-GGP-PROBES]",
+    "rationale": (
+        "The call cap is the probe input under measurement, not a "
+        "production-path immutable gas policy."
+    ),
+}
 
 NUMERIC_LITERAL_BODY = (
     r"(?:0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*|"
@@ -46,11 +115,12 @@ CALL_OPTION_GAS_RE = re.compile(r"\bgas\s*:")
 YUL_CALL_RE = re.compile(
     r"(?<![\w.])(?P<operation>staticcall|delegatecall|callcode|call)\s*\("
 )
-IMPLICIT_STIPEND_RE = re.compile(r"\.(?P<operation>transfer|send)\s*\(")
+IMPLICIT_STIPEND_RE = re.compile(r"\.\s*(?P<operation>transfer|send)\s*\(")
 CALLABLE_RE = re.compile(
     r"\b(?:function\s+(?P<function>[_A-Za-z][_A-Za-z0-9]*)|"
     r"(?P<special>constructor|fallback|receive))\s*\("
 )
+ASSEMBLY_BLOCK_RE = re.compile(r"\bassembly(?:\s*\([^)]*\))?\s*\{")
 INITIALIZED_INTEGER_DECL_RE = re.compile(
     rf"""
     \b(?:uint|int)(?:8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|
@@ -151,6 +221,65 @@ def require_positive_int(value: Any, location: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
         raise GasInventoryError(f"{location} must be a positive integer")
     return value
+
+
+def require_exact_keys(
+    value: dict[str, Any], expected: frozenset[str], location: str
+) -> None:
+    actual = set(value)
+    if actual == expected:
+        return
+    missing = sorted(expected - actual)
+    unexpected = sorted(actual - expected)
+    details: list[str] = []
+    if missing:
+        details.append(f"missing {', '.join(missing)}")
+    if unexpected:
+        details.append(f"unexpected {', '.join(unexpected)}")
+    raise GasInventoryError(f"{location} fields drifted: {'; '.join(details)}")
+
+
+def ijson_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise GasInventoryError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def ijson_integer(raw: str) -> int:
+    value = int(raw)
+    if abs(value) > IJSON_MAX_SAFE_INTEGER:
+        raise GasInventoryError(
+            f"JSON integer is outside the I-JSON interoperable range: {raw}"
+        )
+    return value
+
+
+def reject_ijson_float(raw: str) -> Any:
+    raise GasInventoryError(f"floating-point JSON numbers are prohibited: {raw}")
+
+
+def reject_ijson_constant(raw: str) -> Any:
+    raise GasInventoryError(f"non-finite JSON number is prohibited: {raw}")
+
+
+def validate_ijson_unicode(value: Any, location: str = "$") -> None:
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            raise GasInventoryError(
+                f"{location} contains a Unicode surrogate and is not valid I-JSON"
+            )
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            validate_ijson_unicode(item, f"{location}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            validate_ijson_unicode(key, f"{location}.<member>")
+            validate_ijson_unicode(item, f"{location}.{key}")
 
 
 def mask_comments_and_strings(source: str) -> str:
@@ -262,9 +391,32 @@ def source_line(source: str, offset: int) -> int:
     return source.count("\n", 0, offset) + 1
 
 
+def matching_closing_brace(source: str, opening: int) -> int | None:
+    depth = 0
+    for index in range(opening, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    return None
+
+
+def inside_assembly_block(source: str, offset: int) -> bool:
+    for match in ASSEMBLY_BLOCK_RE.finditer(source, 0, offset):
+        opening = source.rfind("{", match.start(), match.end())
+        closing = matching_closing_brace(source, opening)
+        if closing is None or offset < closing:
+            return True
+    return False
+
+
 def enclosing_callable(source: str, offset: int) -> str:
     callable_name = "<contract-scope>"
     for match in CALLABLE_RE.finditer(source, 0, offset):
+        if inside_assembly_block(source, match.start()):
+            continue
         callable_name = match.group("function") or match.group("special")
     return callable_name
 
@@ -453,8 +605,6 @@ def scan_source(path: str, source: str) -> ScanResult:
         start = match.end()
         end = expression_end(masked, start)
         expression = normalize_expression(masked[start:end])
-        if expression in AVAILABLE_GAS_EXPRESSIONS:
-            continue
         use = CallUse(
             path,
             enclosing_callable(masked, match.start()),
@@ -469,7 +619,7 @@ def scan_source(path: str, source: str) -> ScanResult:
         start = match.end()
         end = expression_end(masked, start)
         expression = normalize_expression(masked[start:end])
-        if expression in AVAILABLE_GAS_EXPRESSIONS:
+        if expression == YUL_AVAILABLE_GAS_EXPRESSION:
             continue
         use = CallUse(
             path,
@@ -634,68 +784,127 @@ def scan_tree(repo_root: Path) -> ScanResult:
 def load_inventory(path: Path) -> dict[str, Any]:
     try:
         with path.open("r", encoding="utf-8") as handle:
-            inventory = require_dict(json.load(handle), str(path))
+            inventory = require_dict(
+                json.load(
+                    handle,
+                    object_pairs_hook=ijson_object,
+                    parse_int=ijson_integer,
+                    parse_float=reject_ijson_float,
+                    parse_constant=reject_ijson_constant,
+                ),
+                str(path),
+            )
     except FileNotFoundError as exc:
         raise GasInventoryError(f"missing inventory: {path}") from exc
     except json.JSONDecodeError as exc:
         raise GasInventoryError(f"invalid JSON in {path}: {exc}") from exc
+    except UnicodeDecodeError as exc:
+        raise GasInventoryError(f"inventory is not valid UTF-8: {path}") from exc
 
+    validate_ijson_unicode(inventory)
+    require_exact_keys(inventory, TOP_LEVEL_FIELDS, "inventory")
     if inventory.get("schema_version") != SCHEMA_VERSION:
         raise GasInventoryError(f"schema_version must be {SCHEMA_VERSION}")
     if inventory.get("tracking_issue") != TRACKING_ISSUE:
         raise GasInventoryError(f"tracking_issue must be {TRACKING_ISSUE}")
     if inventory.get("status") != "open-remediation-inventory":
         raise GasInventoryError("status must be open-remediation-inventory")
-    require_string(inventory.get("note"), "note")
+    note = require_string(inventory.get("note"), "note")
+    if note != INVENTORY_NOTE:
+        raise GasInventoryError(
+            "note must retain the canonical no-accepted-risk inventory boundary"
+        )
     return inventory
 
 
 def expected_calls(inventory: dict[str, Any]) -> Counter[CallUse]:
     expected: Counter[CallUse] = Counter()
-    groups = (
-        ("open_call_gas_expressions", True),
-        ("explicit_probe_call_gas_expressions", False),
-    )
-    for group, is_open in groups:
-        for index, raw in enumerate(require_list(inventory.get(group), group)):
-            location = f"{group}[{index}]"
-            row = require_dict(raw, location)
-            use = CallUse(
-                require_string(row.get("path"), f"{location}.path"),
-                require_string(row.get("site"), f"{location}.site"),
-                require_string(row.get("kind"), f"{location}.kind"),
-                require_string(row.get("operation"), f"{location}.operation"),
-                require_string(row.get("expression"), f"{location}.expression"),
+    group = "open_call_gas_expressions"
+    for index, raw in enumerate(require_list(inventory.get(group), group)):
+        location = f"{group}[{index}]"
+        row = require_dict(raw, location)
+        require_exact_keys(row, OPEN_CALL_FIELDS, location)
+        use = CallUse(
+            require_string(row.get("path"), f"{location}.path"),
+            require_string(row.get("site"), f"{location}.site"),
+            require_string(row.get("kind"), f"{location}.kind"),
+            require_string(row.get("operation"), f"{location}.operation"),
+            require_string(row.get("expression"), f"{location}.expression"),
+        )
+        count = require_positive_int(
+            row.get("expected_count"), f"{location}.expected_count"
+        )
+        if use in expected:
+            raise GasInventoryError(f"duplicate call inventory row: {use}")
+        expected[use] = count
+        path_class = require_string(
+            row.get("path_class"), f"{location}.path_class"
+        )
+        if path_class not in PATH_CLASSES:
+            raise GasInventoryError(
+                f"{location}.path_class must be one of "
+                f"{', '.join(sorted(PATH_CLASSES))}"
             )
-            count = require_positive_int(
+        lane = require_string(row.get("lane"), f"{location}.lane")
+        if lane not in OPEN_LANES:
+            raise GasInventoryError(
+                f"{location}.lane must be one of {', '.join(sorted(OPEN_LANES))}"
+            )
+        if row.get("issue") != "#669":
+            raise GasInventoryError(f"{location}.issue must be #669")
+        if row.get("disposition") != "open-remediation-required":
+            raise GasInventoryError(
+                f"{location}.disposition must be open-remediation-required"
+            )
+
+    probe_group = "explicit_probe_call_gas_expressions"
+    probe_rows = require_list(inventory.get(probe_group), probe_group)
+    if len(probe_rows) > 1:
+        raise GasInventoryError(
+            f"{probe_group} may contain only the sole approved StreamGasProbe use"
+        )
+    if probe_rows:
+        location = f"{probe_group}[0]"
+        row = require_dict(probe_rows[0], location)
+        require_exact_keys(row, EXPLICIT_PROBE_FIELDS, location)
+        normalized_probe: dict[str, object] = {
+            "path": require_string(row.get("path"), f"{location}.path"),
+            "site": require_string(row.get("site"), f"{location}.site"),
+            "kind": require_string(row.get("kind"), f"{location}.kind"),
+            "operation": require_string(
+                row.get("operation"), f"{location}.operation"
+            ),
+            "expression": require_string(
+                row.get("expression"), f"{location}.expression"
+            ),
+            "expected_count": require_positive_int(
                 row.get("expected_count"), f"{location}.expected_count"
-            )
-            if use in expected:
-                raise GasInventoryError(f"duplicate call inventory row: {use}")
-            expected[use] = count
-            path_class = require_string(
+            ),
+            "path_class": require_string(
                 row.get("path_class"), f"{location}.path_class"
+            ),
+            "authority": require_string(
+                row.get("authority"), f"{location}.authority"
+            ),
+            "rationale": require_string(
+                row.get("rationale"), f"{location}.rationale"
+            ),
+        }
+        if normalized_probe != APPROVED_PROBE_ROW:
+            raise GasInventoryError(
+                f"{location} must exactly match the sole approved "
+                "StreamGasProbe._provedStaticcall exception and normative authority"
             )
-            if path_class not in PATH_CLASSES:
-                raise GasInventoryError(
-                    f"{location}.path_class must be one of "
-                    f"{', '.join(sorted(PATH_CLASSES))}"
-                )
-            if is_open:
-                lane = require_string(row.get("lane"), f"{location}.lane")
-                if lane not in OPEN_LANES:
-                    raise GasInventoryError(
-                        f"{location}.lane must be one of {', '.join(sorted(OPEN_LANES))}"
-                    )
-                if row.get("issue") != "#669":
-                    raise GasInventoryError(f"{location}.issue must be #669")
-                if row.get("disposition") != "open-remediation-required":
-                    raise GasInventoryError(
-                        f"{location}.disposition must be open-remediation-required"
-                    )
-            else:
-                require_string(row.get("authority"), f"{location}.authority")
-                require_string(row.get("rationale"), f"{location}.rationale")
+        use = CallUse(
+            str(normalized_probe["path"]),
+            str(normalized_probe["site"]),
+            str(normalized_probe["kind"]),
+            str(normalized_probe["operation"]),
+            str(normalized_probe["expression"]),
+        )
+        if use in expected:
+            raise GasInventoryError(f"duplicate call inventory row: {use}")
+        expected[use] = int(normalized_probe["expected_count"])
     return expected
 
 
@@ -707,6 +916,7 @@ def expected_declarations(
     for index, raw in enumerate(require_list(inventory.get(group), group)):
         location = f"{group}[{index}]"
         row = require_dict(raw, location)
+        require_exact_keys(row, LITERAL_DECLARATION_FIELDS, location)
         declaration = LiteralDeclaration(
             require_string(row.get("path"), f"{location}.path"),
             require_string(row.get("identifier"), f"{location}.identifier"),
