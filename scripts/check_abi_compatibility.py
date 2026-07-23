@@ -18,7 +18,7 @@ ABI_SURFACE_SCHEMA = "6529stream.abi-surface-baseline.v2"
 GENERATOR_VERSION = "2"
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out")
+DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_BASELINE = Path("release-artifacts/baselines/v0.1.0/abi-surface.json")
 DEFAULT_TARGET_MANIFEST = Path("release-artifacts/stream-core-permanent-interface.json")
 TARGET_NORMATIVE_RETURN_SOURCE = Path("docs/stream-long-term-architecture.md")

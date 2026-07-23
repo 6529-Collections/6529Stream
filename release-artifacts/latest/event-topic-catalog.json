@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_release_artifacts.py:1",
   "source": {
     "config": "release-artifacts/contracts.json",
-    "foundry_out": "out"
+    "foundry_out": "out-release"
   },
   "topics": [
     {
@@ -4787,7 +4787,7 @@
   "contracts": {
     "DependencyRegistry": {
       "source": "smart-contracts/DependencyRegistry.sol",
-      "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
+      "artifact_path": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
       "events": [
         {
           "name": "DependencyVersionCreated",
@@ -4858,7 +4858,7 @@
     },
     "NextGenRandomizerRNG": {
       "source": "smart-contracts/RandomizerRNG.sol",
-      "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+      "artifact_path": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
       "events": [
         {
           "name": "BurnedTokenRandomnessRecorded",
@@ -5314,7 +5314,7 @@
     },
     "NextGenRandomizerVRF": {
       "source": "smart-contracts/RandomizerVRF.sol",
-      "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+      "artifact_path": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
       "events": [
         {
           "name": "BurnedTokenRandomnessRecorded",
@@ -5741,7 +5741,7 @@
     },
     "StreamAdmins": {
       "source": "smart-contracts/StreamAdmins.sol",
-      "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json",
+      "artifact_path": "out-release/StreamAdmins.sol/StreamAdmins.json",
       "events": [
         {
           "name": "EmergencyRecipientUpdated",
@@ -6022,7 +6022,7 @@
     },
     "StreamAssetPolicyRegistry": {
       "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
-      "artifact_path": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+      "artifact_path": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
       "events": [
         {
           "name": "AssetPolicyUpdated",
@@ -6100,7 +6100,7 @@
     },
     "StreamAuctions": {
       "source": "smart-contracts/AuctionContract.sol",
-      "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
+      "artifact_path": "out-release/AuctionContract.sol/StreamAuctions.json",
       "events": [
         {
           "name": "AuctionCancelled",
@@ -6634,7 +6634,7 @@
     },
     "StreamCollectionMetadata": {
       "source": "smart-contracts/StreamCollectionMetadata.sol",
-      "artifact_path": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+      "artifact_path": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
       "events": [
         {
           "name": "CollectionMetadataAdminContractUpdated",
@@ -6805,7 +6805,7 @@
     },
     "StreamContractMetadata": {
       "source": "smart-contracts/StreamContractMetadata.sol",
-      "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+      "artifact_path": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
       "events": [
         {
           "name": "ContractURIUpdated",
@@ -6818,7 +6818,7 @@
     },
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
-      "artifact_path": "out/StreamCore.sol/StreamCore.json",
+      "artifact_path": "out-release/StreamCore.sol/StreamCore.json",
       "events": [
         {
           "name": "Approval",
@@ -7237,7 +7237,7 @@
     },
     "StreamCuratorsPool": {
       "source": "smart-contracts/StreamCuratorsPool.sol",
-      "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
+      "artifact_path": "out-release/StreamCuratorsPool.sol/StreamCuratorsPool.json",
       "events": [
         {
           "name": "CuratorCreditCreated",
@@ -7431,7 +7431,7 @@
     },
     "StreamDrops": {
       "source": "smart-contracts/StreamDrops.sol",
-      "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
+      "artifact_path": "out-release/StreamDrops.sol/StreamDrops.json",
       "events": [
         {
           "name": "AuctionContractChanged",
@@ -7783,7 +7783,7 @@
     },
     "StreamMintLedger": {
       "source": "smart-contracts/StreamMintLedger.sol",
-      "artifact_path": "out/StreamMintLedger.sol/StreamMintLedger.json",
+      "artifact_path": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
       "events": [
         {
           "name": "MintLedgerAuthorizationConsumed",
@@ -8154,7 +8154,7 @@
     },
     "StreamMintManager": {
       "source": "smart-contracts/StreamMintManager.sol",
-      "artifact_path": "out/StreamMintManager.sol/StreamMintManager.json",
+      "artifact_path": "out-release/StreamMintManager.sol/StreamMintManager.json",
       "events": [
         {
           "name": "MintCounterConfigured",
@@ -8701,7 +8701,7 @@
     },
     "StreamMintModuleRegistry": {
       "source": "smart-contracts/StreamMintModuleRegistry.sol",
-      "artifact_path": "out/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
+      "artifact_path": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
       "events": [
         {
           "name": "MintModuleMetadata",
@@ -8822,7 +8822,7 @@
     },
     "StreamMinter": {
       "source": "smart-contracts/StreamMinter.sol",
-      "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
+      "artifact_path": "out-release/StreamMinter.sol/StreamMinter.json",
       "events": [
         {
           "name": "CollectionPhasesUpdated",
@@ -9101,7 +9101,7 @@
     },
     "StreamPreservationRecords": {
       "source": "smart-contracts/StreamPreservationRecords.sol",
-      "artifact_path": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+      "artifact_path": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
       "events": [
         {
           "name": "CollectionRecordRecorded",
@@ -9186,7 +9186,7 @@
     },
     "StreamPrimarySaleSettlement": {
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
-      "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+      "artifact_path": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
       "events": [
         {
           "name": "OwnershipTransferred",
@@ -9470,7 +9470,7 @@
     },
     "StreamRevenueResolver": {
       "source": "smart-contracts/StreamRevenueResolver.sol",
-      "artifact_path": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+      "artifact_path": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
       "events": [
         {
           "name": "OwnershipTransferred",
@@ -9805,7 +9805,7 @@
     },
     "StreamSplitFactory": {
       "source": "smart-contracts/StreamSplitFactory.sol",
-      "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+      "artifact_path": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
       "events": [
         {
           "name": "AssetPolicyRegistryPinned",
@@ -10005,7 +10005,7 @@
     },
     "StreamSplitWallet": {
       "source": "smart-contracts/StreamSplitWallet.sol",
-      "artifact_path": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+      "artifact_path": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
       "events": [
         {
           "name": "AssetObservationInitialized",

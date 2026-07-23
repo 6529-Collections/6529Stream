@@ -80,6 +80,18 @@ class WindowsCheckWrapperTests(unittest.TestCase):
         self.assertIn('& $pythonPath @pythonArgs "scripts\\check_metadata_browser_sandbox.py"', self.check_content)
         self.assertIn('& $pythonPath @pythonArgs "scripts\\test_contract_size_budget.py"', self.check_content)
         self.assertIn('& $pythonPath @pythonArgs "scripts\\check_contract_size_budget.py"', self.check_content)
+        self.assertIn(
+            '& $pythonPath @pythonArgs "scripts\\test_release_build_artifacts.py"',
+            self.check_content,
+        )
+        self.assertIn(
+            '& $pythonPath @pythonArgs "scripts\\build_release_artifacts.py"',
+            self.check_content,
+        )
+        self.assertIn(
+            '& $pythonPath @pythonArgs "scripts\\build_release_artifacts.py" "--check"',
+            self.check_content,
+        )
         self.assertIn('& $pythonPath @pythonArgs "scripts\\test_deployment_rehearsal_gate.py"', self.check_content)
         self.assertIn('& $pythonPath @pythonArgs "scripts\\check_deployment_rehearsal_gate.py"', self.check_content)
 

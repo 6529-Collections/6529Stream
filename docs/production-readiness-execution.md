@@ -27,7 +27,7 @@ artifact generators in canonical order.
 | Gate | Result | Evidence |
 | --- | --- | --- |
 | Full ordinary repository gate | Passed on PR #660 before merge | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; Foundry, Slither, and Windows CI passed on the reviewed final head |
-| Production size build | Measured, release-blocking | `forge build --sizes --via-ir --skip test --skip script --force` records `StreamCore` at 24,152 runtime bytes |
+| Production size build | Measured, release-blocking | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py` records canonical `StreamCore` at 24,152 runtime bytes; the aggregate all-source size build is diagnostic only |
 | `StreamCore` production headroom | Blocked | 424 bytes of EIP-170 margin, 1,576 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
 | Genesis deployment profile | Blocked | The active target specification expands the checked profile to 60 entries, including Permanent `StreamSystemManifest` entry 36 and immutable Permanent `StreamCoreFinalityAdapter` entry 37, but the current v1 implementation catalog cannot prove deployment-instance identity, fallback distinctness, or parameterized probe bindings; issue #656 owns reconciliation |
 | Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 38 Open production rows (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending dispositions; issue #658 owns remediation and reviewed disposition |

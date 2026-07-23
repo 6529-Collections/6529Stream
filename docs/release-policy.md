@@ -64,7 +64,10 @@ include:
 - a linked issue or ADR explaining why a satellite contract, read adapter,
   linked library, release artifact, or docs-only path is insufficient;
 - the before/after `StreamCore` runtime size from
-  `forge build --sizes --via-ir --skip test --skip script --force`;
+  `python scripts/build_release_artifacts.py` followed by
+  `python scripts/check_contract_size_budget.py`; the aggregate
+  `forge build --sizes --via-ir --skip test --skip script --force` output is
+  diagnostic only;
 - the resulting EIP-170 margin and whether it remains above the interim
   384-byte development floor and 512-byte warning threshold from
   [`release-artifacts/contracts.json`](../release-artifacts/contracts.json);

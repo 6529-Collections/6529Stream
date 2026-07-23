@@ -103,6 +103,8 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         self.assertIn(Path("scripts/generate_release_notes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/verify_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/build_release_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
+        self.assertIn(Path("scripts/test_release_build_artifacts.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("docs/first-30-minutes.md"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/check_first_30_minutes.py"), generator.DEFAULT_COVERED_PATHS)
         self.assertIn(Path("scripts/test_first_30_minutes.py"), generator.DEFAULT_COVERED_PATHS)

@@ -111,6 +111,9 @@ forge build
 forge test -vvv
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 python scripts/test_contract_size_budget.py
 python scripts/check_contract_size_budget.py
 python scripts/test_solidity_formatting.py
@@ -350,10 +353,53 @@ secret-shaped values, path escapes, stale retained hashes, or incomplete
 approval state.
 
 The release artifact step is the first Gate G machine-readable artifact gate.
-It verifies that `release-artifacts/latest/` matches the production `via-ir`
-Foundry build output, including ABI checksums, bytecode checksums, interface
-IDs, and the event topic catalog. The generator automatically finds Foundry's
-`cast` in `~/.foundry/bin` when the shell has not added it to `PATH`.
+Its bytecode authority is `python scripts/build_release_artifacts.py`, not the
+aggregate all-source size build. The helper compiles each unique configured
+production or interface source exactly once with only that source and its
+import closure, an isolated temporary output/cache pair, pinned Foundry
+`v1.7.1` with the explicit `default` profile, Solidity `0.8.19`, Paris EVM,
+optimizer runs `200`, via-IR, and metadata bytecode disabled. Real Forge
+subprocesses discard inherited `FOUNDRY_*` and `DAPP_*` settings, then set only
+the controlled `FOUNDRY_PROFILE=default` override supported by the pinned Forge
+version. It copies only configured named artifacts into a staged aggregate
+alongside retained compiler inputs and the build receipt, then replaces
+dedicated ignored `out-release/` with rollback on caught replacement failures.
+The output option is restricted to the literal repo-root `out-release/`, while
+ordinary Forge builds and scripts continue to use `out/`. Config, receipt,
+artifact, and compiler-input paths reject symlink, junction, and reparse
+components before resolution. Tests and scripts are excluded from those source
+closures. The deterministic ignored build receipt binds the
+config, Foundry config, exact Forge version output, explicit normalized Forge
+argv, compiler policy, target, complete metadata source universe and hashes,
+compiler-settings hash, canonical build-input hash, and artifact hash. Both the
+release-artifact and source-verification generators validate that receipt
+before consuming `out-release/`, so stale source inputs or post-build artifact
+mutation fail closed.
+
+The official Make target and repository check wrappers order the canonical
+builder before its size, Core-policy, release-artifact, source-verification, and
+ABI consumers within one invocation. Direct concurrent build, check, consumer,
+or clean invocations in the same worktree are unsupported and may fail
+transiently while `out-release/` is replaced.
+
+The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
+run remains useful for compiler warning collection and whole-tree diagnostic
+size output, but it is not release bytecode or explorer-verification evidence.
+This separation addresses
+[issue #674](https://github.com/6529-Collections/6529Stream/issues/674);
+the broader noncausal test-source leakage investigation remains tracked under
+[issue #675](https://github.com/6529-Collections/6529Stream/issues/675) without
+expanding this release-integrity change into a compiler redesign.
+This helper canonicalizes release and verification evidence only. The current
+Forge deployment scripts can still recompile a larger script import universe
+and do not yet prove that broadcasts consume this canonical initcode;
+[issue #677](https://github.com/6529-Collections/6529Stream/issues/677) remains
+a production blocker for that deployment binding.
+
+The artifact generator verifies that `release-artifacts/latest/` matches the
+canonical isolated build, including ABI checksums, bytecode checksums, interface
+IDs, and the event topic catalog. It automatically finds Foundry's `cast` in
+`~/.foundry/bin` when the shell has not added it to `PATH`.
 
 The source-verification step generates and checks
 `release-artifacts/latest/source-verification-inputs.json` from the production
@@ -1232,6 +1278,9 @@ build and regenerate the tracked release baseline with:
 
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/test_core_bytecode_spend_policy.py
 python scripts/check_core_bytecode_spend_policy.py
@@ -1305,6 +1354,7 @@ python scripts/check_changelog.py
 The check mode is:
 
 ```bash
+python scripts/build_release_artifacts.py --check
 python scripts/generate_release_artifacts.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_source_verification_inputs.py --check

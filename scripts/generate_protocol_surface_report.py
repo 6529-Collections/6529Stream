@@ -17,7 +17,7 @@ import generate_release_artifacts as release_artifacts
 PROTOCOL_SURFACE_SCHEMA = "6529stream.protocol-surface-report.v1"
 GENERATOR_VERSION = "1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out")
+DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_OUTPUT = Path("release-artifacts/latest/protocol-surface-report.json")
 
 

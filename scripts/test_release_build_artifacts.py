@@ -1,0 +1,895 @@
+#!/usr/bin/env python3
+"""Focused tests for isolated canonical release builds."""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import os
+import tempfile
+import unittest
+from contextlib import contextmanager, redirect_stderr, redirect_stdout
+from io import StringIO
+from pathlib import Path
+from typing import Any, Iterator
+from unittest.mock import patch
+
+
+SCRIPT_PATH = Path(__file__).with_name("build_release_artifacts.py")
+REPO_ROOT = SCRIPT_PATH.parent.parent
+MAKEFILE_PATH = REPO_ROOT / "Makefile"
+CHECK_PS1_PATH = REPO_ROOT / "scripts" / "check.ps1"
+CHECK_SH_PATH = REPO_ROOT / "scripts" / "check.sh"
+SPEC = importlib.util.spec_from_file_location("build_release_artifacts", SCRIPT_PATH)
+assert SPEC is not None and SPEC.loader is not None
+builder = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(builder)
+
+GENERATOR_PATH = Path(__file__).with_name("generate_release_artifacts.py")
+GENERATOR_SPEC = importlib.util.spec_from_file_location(
+    "generate_release_artifacts_for_build_test",
+    GENERATOR_PATH,
+)
+assert GENERATOR_SPEC is not None and GENERATOR_SPEC.loader is not None
+release_generator = importlib.util.module_from_spec(GENERATOR_SPEC)
+GENERATOR_SPEC.loader.exec_module(release_generator)
+
+FAKE_FORGE_VERSION = (
+    "forge Version: 1.7.1\n"
+    "Commit SHA: fixture\n"
+    "Build Timestamp: fixture\n"
+    "Build Profile: fixture"
+)
+
+
+@contextmanager
+def working_directory(path: Path) -> Iterator[None]:
+    previous = Path.cwd()
+    os.chdir(path)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
+
+
+def write_json(path: Path, value: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        json.dump(value, handle, indent=2)
+        handle.write("\n")
+
+
+def write_text(path: Path, value: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def seed_tree(root: Path) -> dict[str, Path]:
+    config = root / "release-artifacts" / "contracts.json"
+    foundry_config = root / "foundry.toml"
+    output = root / builder.DEFAULT_OUTPUT_DIR
+    write_text(
+        foundry_config,
+        "\n".join(
+            [
+                "[profile.default]",
+                'src = "smart-contracts"',
+                'out = "out"',
+                'cache_path = "cache"',
+                'solc_version = "0.8.19"',
+                "auto_detect_solc = false",
+                'evm_version = "paris"',
+                "optimizer = true",
+                "optimizer_runs = 200",
+                'bytecode_hash = "none"',
+                "cbor_metadata = false",
+                "",
+            ]
+        ),
+    )
+    write_text(
+        root / "smart-contracts" / "Example.sol",
+        (
+            "// SPDX-License-Identifier: MIT\n"
+            "pragma solidity 0.8.19;\n"
+            'import "./Shared.sol";\n'
+            "contract Example {}\n"
+            "contract ExampleTwo {}\n"
+        ),
+    )
+    write_text(
+        root / "smart-contracts" / "Shared.sol",
+        "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\nlibrary Shared {}\n",
+    )
+    write_text(
+        root / "smart-contracts" / "IExample.sol",
+        "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\ninterface IExample {}\n",
+    )
+    write_json(
+        config,
+        {
+            "schema_version": "6529stream.release-artifact-contracts.v1",
+            "production_contracts": [
+                {"name": "Example", "source": "smart-contracts/Example.sol"},
+                {"name": "ExampleTwo", "source": "smart-contracts/Example.sol"},
+            ],
+            "interfaces": [
+                {"name": "IExample", "source": "smart-contracts/IExample.sol"}
+            ],
+        },
+    )
+    return {
+        "config": config,
+        "foundry_config": foundry_config,
+        "output": output,
+        "shared": root / "smart-contracts" / "Shared.sol",
+    }
+
+
+def artifact(
+    source: str,
+    name: str,
+    metadata_sources: dict[str, str],
+    *,
+    compilation_target: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    return {
+        "abi": [],
+        "bytecode": {"object": "0x6000"},
+        "deployedBytecode": {"object": "0x6001"},
+        "methodIdentifiers": {},
+        "metadata": {
+            "compiler": {"version": builder.SOLC_LONG_VERSION},
+            "language": "Solidity",
+            "settings": {
+                "compilationTarget": compilation_target or {source: name},
+                "evmVersion": builder.EVM_VERSION,
+                "metadata": {"bytecodeHash": "none", "appendCBOR": False},
+                "optimizer": {"enabled": True, "runs": builder.OPTIMIZER_RUNS},
+                "viaIR": True,
+            },
+            "sources": {
+                path: {"keccak256": source_hash}
+                for path, source_hash in metadata_sources.items()
+            },
+            "version": 1,
+        },
+    }
+
+
+class FakeForge:
+    def __init__(self, *, wrong_target: bool = False) -> None:
+        self.commands: list[list[str]] = []
+        self.cwd_values: list[Path] = []
+        self.wrong_target = wrong_target
+
+    def __call__(self, command: list[str], cwd: Path) -> None:
+        self.commands.append(command)
+        self.cwd_values.append(cwd)
+        source = command[2]
+        out_dir = Path(command[command.index("--out") + 1])
+        names = (
+            ["Example", "ExampleTwo"]
+            if Path(source).name == "Example.sol"
+            else ["IExample"]
+        )
+        source_paths = [source]
+        if Path(source).name == "Example.sol":
+            source_paths.append("smart-contracts/Shared.sol")
+        source_contents = {
+            path: (cwd / path).read_bytes().decode("utf-8")
+            for path in source_paths
+        }
+        source_hashes = {
+            path: builder.keccak256_hex(content.encode("utf-8"))
+            for path, content in source_contents.items()
+        }
+        for name in names:
+            target = {"smart-contracts/Wrong.sol": name} if self.wrong_target else None
+            write_json(
+                out_dir / Path(source).name / f"{name}.json",
+                artifact(
+                    source,
+                    name,
+                    source_hashes,
+                    compilation_target=target,
+                ),
+            )
+        build_info_dir = Path(command[command.index("--build-info-path") + 1])
+        write_json(
+            build_info_dir / "build-info.json",
+            {
+                "id": "fixture",
+                "input": {
+                    "language": "Solidity",
+                    "sources": {
+                        path: {"content": content}
+                        for path, content in source_contents.items()
+                    },
+                    "settings": {
+                        "evmVersion": builder.EVM_VERSION,
+                        "metadata": {"bytecodeHash": "none", "appendCBOR": False},
+                        "optimizer": {
+                            "enabled": True,
+                            "runs": builder.OPTIMIZER_RUNS,
+                        },
+                        "outputSelection": {"*": {"*": ["abi"]}},
+                        "viaIR": True,
+                    },
+                },
+            },
+        )
+        write_json(
+            out_dir / "Imported.sol" / "Imported.json",
+            artifact(
+                "smart-contracts/Shared.sol",
+                "Imported",
+                {
+                    "smart-contracts/Shared.sol": source_hashes.get(
+                        "smart-contracts/Shared.sol",
+                        builder.keccak256_hex(
+                            (cwd / "smart-contracts/Shared.sol").read_bytes()
+                        ),
+                    )
+                },
+            ),
+        )
+
+
+class ReleaseBuildArtifactTests(unittest.TestCase):
+    def test_builds_each_target_in_an_isolated_import_closure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            fake = FakeForge()
+
+            with redirect_stdout(StringIO()):
+                manifest = builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    "fake-forge",
+                    fake,
+                    FAKE_FORGE_VERSION,
+                )
+
+            self.assertEqual(len(fake.commands), 2)
+            self.assertEqual(fake.cwd_values, [root.resolve(), root.resolve()])
+            self.assertEqual({command[2] for command in fake.commands}, {
+                "smart-contracts/Example.sol",
+                "smart-contracts/IExample.sol",
+            })
+            self.assertTrue(all(command[3] == "--root" for command in fake.commands))
+            out_dirs = [Path(command[command.index("--out") + 1]) for command in fake.commands]
+            cache_dirs = [
+                Path(command[command.index("--cache-path") + 1])
+                for command in fake.commands
+            ]
+            self.assertEqual(len(set(out_dirs)), 2)
+            self.assertEqual(len(set(cache_dirs)), 2)
+            for command in fake.commands:
+                self.assertIn("--via-ir", command)
+                self.assertIn("--no-metadata", command)
+                self.assertIn("--build-info", command)
+                self.assertIn("--use-literal-content", command)
+                self.assertNotIn("--profile", command)
+                self.assertEqual(command[command.index("--use") + 1], "0.8.19")
+                self.assertEqual(command[command.index("--optimizer-runs") + 1], "200")
+
+            actual_files = {
+                path.relative_to(paths["output"]).as_posix()
+                for path in paths["output"].rglob("*")
+                if path.is_file()
+            }
+            self.assertEqual(
+                actual_files,
+                {
+                    "Example.sol/Example.json",
+                    "Example.sol/ExampleTwo.json",
+                    "IExample.sol/IExample.json",
+                    "compiler-inputs/000-Example.json",
+                    "compiler-inputs/001-IExample.json",
+                    builder.MANIFEST_FILENAME,
+                },
+            )
+            self.assertEqual(manifest["output_dir"], "out-release")
+            self.assertEqual(manifest["policy"]["forge_version"], FAKE_FORGE_VERSION)
+            self.assertEqual(
+                manifest["policy"]["foundry_version"],
+                builder.FOUNDRY_VERSION,
+            )
+            self.assertEqual(manifest["policy"]["forge_profile"], "default")
+            self.assertEqual(
+                manifest["policy"]["controlled_forge_environment"],
+                {"FOUNDRY_PROFILE": "default"},
+            )
+            self.assertEqual(
+                manifest["policy"]["sanitized_environment_prefixes"],
+                ["DAPP_", "FOUNDRY_"],
+            )
+            records = {record["name"]: record for record in manifest["targets"]}
+            self.assertEqual(
+                records["Example"]["artifact_path"],
+                "out-release/Example.sol/Example.json",
+            )
+            self.assertEqual(
+                records["Example"]["forge_environment"],
+                {"FOUNDRY_PROFILE": "default"},
+            )
+            self.assertEqual(
+                [item["path"] for item in records["Example"]["metadata_sources"]],
+                ["smart-contracts/Example.sol", "smart-contracts/Shared.sol"],
+            )
+            self.assertEqual(
+                [item["path"] for item in records["IExample"]["metadata_sources"]],
+                ["smart-contracts/IExample.sol"],
+            )
+            self.assertEqual(
+                records["Example"]["canonical_source_universe_sha256"],
+                records["ExampleTwo"]["canonical_source_universe_sha256"],
+            )
+            self.assertEqual(records["Example"]["forge_argv"][2], "smart-contracts/Example.sol")
+            self.assertNotEqual(
+                records["Example"]["canonical_build_input_sha256"],
+                records["ExampleTwo"]["canonical_build_input_sha256"],
+            )
+            self.assertEqual(
+                records["Example"]["compiler_input_ordered_sha256"],
+                records["ExampleTwo"]["compiler_input_ordered_sha256"],
+            )
+            self.assertEqual(
+                records["Example"]["compiler_input_path"],
+                "out-release/compiler-inputs/000-Example.json",
+            )
+
+    def test_successful_replacement_is_exact_and_deterministic(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            write_text(paths["output"] / "stale.txt", "stale output\n")
+            write_json(
+                paths["output"] / "Old.sol" / "Old.json",
+                {"artifact": "must be removed"},
+            )
+            write_text(root / "out" / "ordinary-forge.txt", "ordinary output\n")
+
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            first = {
+                path.relative_to(paths["output"]).as_posix(): path.read_bytes()
+                for path in paths["output"].rglob("*")
+                if path.is_file()
+            }
+            self.assertNotIn("stale.txt", first)
+            self.assertNotIn("Old.sol/Old.json", first)
+            self.assertNotIn("Imported.sol/Imported.json", first)
+            self.assertEqual(
+                (root / "out" / "ordinary-forge.txt").read_text(encoding="utf-8"),
+                "ordinary output\n",
+            )
+
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            second = {
+                path.relative_to(paths["output"]).as_posix(): path.read_bytes()
+                for path in paths["output"].rglob("*")
+                if path.is_file()
+            }
+
+            self.assertEqual(second, first)
+
+    def test_check_mode_accepts_current_output_and_rejects_import_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            with (
+                patch.object(
+                    builder,
+                    "read_forge_version",
+                    return_value=FAKE_FORGE_VERSION,
+                ),
+                redirect_stdout(StringIO()),
+                redirect_stderr(StringIO()),
+            ):
+                self.assertEqual(
+                    builder.main(
+                        [
+                            "--repo-root",
+                            str(root),
+                            "--config",
+                            str(paths["config"].relative_to(root)),
+                            "--foundry-config",
+                            str(paths["foundry_config"].relative_to(root)),
+                            "--output-dir",
+                            "out-release",
+                            "--check",
+                        ]
+                    ),
+                    0,
+                )
+
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "different Forge version"):
+                builder.validate_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    expected_forge_version=FAKE_FORGE_VERSION.replace(
+                        "Commit SHA: fixture",
+                        "Commit SHA: different",
+                    ),
+                )
+
+            write_text(
+                paths["shared"],
+                "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\nlibrary Changed {}\n",
+            )
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "metadata keccak256"):
+                builder.validate_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                )
+
+    def test_rejects_post_build_compiler_input_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            compiler_input_path = (
+                paths["output"] / "compiler-inputs" / "000-Example.json"
+            )
+            compiler_input_path.write_bytes(
+                compiler_input_path.read_bytes().replace(
+                    b"contract Example",
+                    b"contract Changed",
+                )
+            )
+
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "compiler input hash is stale"):
+                builder.validate_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                )
+
+    def test_rejects_foundry_profile_drift_before_compiling(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            content = paths["foundry_config"].read_text(encoding="utf-8")
+            write_text(paths["foundry_config"], content.replace("optimizer_runs = 200", "optimizer_runs = 1"))
+            fake = FakeForge()
+
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "optimizer_runs"):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=fake,
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            self.assertEqual(fake.commands, [])
+
+    def test_rejects_unpinned_forge_and_sanitizes_forge_environment(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            fake = FakeForge()
+
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "expected pinned 1.7.1"):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=fake,
+                    forge_version_output=FAKE_FORGE_VERSION.replace("1.7.1", "1.7.2"),
+                )
+            self.assertEqual(fake.commands, [])
+
+            completed = builder.subprocess.CompletedProcess(
+                ["forge", "build", "smart-contracts/Example.sol"],
+                0,
+                stdout="",
+                stderr="",
+            )
+            with (
+                patch.dict(
+                    os.environ,
+                    {
+                        "DAPP_OUT": "attacker-out",
+                        "FOUNDRY_PROFILE": "attacker-profile",
+                        "RELEASE_BUILD_KEEP": "retained",
+                    },
+                ),
+                patch.object(
+                    builder.subprocess,
+                    "run",
+                    return_value=completed,
+                ) as run,
+            ):
+                builder.run_forge(
+                    ["forge", "build", "smart-contracts/Example.sol"],
+                    root,
+                )
+            child_environment = run.call_args.kwargs["env"]
+            self.assertEqual(child_environment["RELEASE_BUILD_KEEP"], "retained")
+            self.assertEqual(child_environment["FOUNDRY_PROFILE"], "default")
+            self.assertFalse(
+                any(
+                    name.upper().startswith("DAPP_")
+                    or (
+                        name.upper().startswith("FOUNDRY_")
+                        and name.upper() != "FOUNDRY_PROFILE"
+                    )
+                    for name in child_environment
+                )
+            )
+
+            version_result = builder.subprocess.CompletedProcess(
+                ["forge", "--version"],
+                0,
+                stdout=FAKE_FORGE_VERSION,
+                stderr="",
+            )
+            with (
+                patch.dict(
+                    os.environ,
+                    {
+                        "DAPP_TEST": "remove",
+                        "FOUNDRY_TEST": "remove",
+                        "RELEASE_BUILD_KEEP": "retained",
+                    },
+                ),
+                patch.object(
+                    builder.subprocess,
+                    "run",
+                    return_value=version_result,
+                ) as version_run,
+            ):
+                self.assertEqual(
+                    builder.read_forge_version("forge", root),
+                    FAKE_FORGE_VERSION,
+                )
+            version_environment = version_run.call_args.kwargs["env"]
+            self.assertEqual(version_environment["RELEASE_BUILD_KEEP"], "retained")
+            self.assertEqual(version_environment["FOUNDRY_PROFILE"], "default")
+            self.assertFalse(
+                any(
+                    name.upper().startswith("DAPP_")
+                    or (
+                        name.upper().startswith("FOUNDRY_")
+                        and name.upper() != "FOUNDRY_PROFILE"
+                    )
+                    for name in version_environment
+                )
+            )
+
+    def test_rejects_broad_output_and_linked_inputs_before_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            fake = FakeForge()
+            source = root / "smart-contracts" / "Example.sol"
+            original_source = source.read_bytes()
+
+            write_text(root / "out" / "ordinary-forge.txt", "ordinary output\n")
+            for unsafe_output in (root / "out", root / "smart-contracts"):
+                with self.subTest(unsafe_output=unsafe_output.name):
+                    with self.assertRaisesRegex(
+                        builder.ReleaseBuildError,
+                        "canonical repository out-release",
+                    ):
+                        builder.build_release_output(
+                            root,
+                            paths["config"],
+                            paths["foundry_config"],
+                            unsafe_output,
+                            runner=fake,
+                            forge_version_output=FAKE_FORGE_VERSION,
+                        )
+            self.assertEqual(source.read_bytes(), original_source)
+            self.assertEqual(
+                (root / "out" / "ordinary-forge.txt").read_text(encoding="utf-8"),
+                "ordinary output\n",
+            )
+            self.assertEqual(fake.commands, [])
+
+            linked_config = root / "release-artifacts" / "contracts-link.json"
+            try:
+                linked_config.symlink_to(paths["config"])
+            except OSError as exc:
+                self.skipTest(f"file symlinks unavailable: {exc}")
+            with self.assertRaisesRegex(
+                builder.ReleaseBuildError,
+                "symlink, junction, or reparse",
+            ):
+                builder.build_release_output(
+                    root,
+                    linked_config,
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=fake,
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            self.assertEqual(fake.commands, [])
+
+            paths["output"].symlink_to(
+                root / "smart-contracts",
+                target_is_directory=True,
+            )
+            with self.assertRaisesRegex(
+                builder.ReleaseBuildError,
+                "symlink, junction, or reparse",
+            ):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=fake,
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            self.assertEqual(source.read_bytes(), original_source)
+            self.assertEqual(fake.commands, [])
+
+    def test_validator_rejects_linked_receipt_artifact_and_compiler_input(self) -> None:
+        cases = (
+            Path(builder.MANIFEST_FILENAME),
+            Path("Example.sol") / "Example.json",
+            Path("compiler-inputs") / "000-Example.json",
+        )
+        for index, relative in enumerate(cases):
+            with self.subTest(relative=relative.as_posix()):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_tree(root)
+                    with redirect_stdout(StringIO()):
+                        builder.build_release_output(
+                            root,
+                            paths["config"],
+                            paths["foundry_config"],
+                            paths["output"],
+                            runner=FakeForge(),
+                            forge_version_output=FAKE_FORGE_VERSION,
+                        )
+                    linked_path = paths["output"] / relative
+                    moved_path = root / f"linked-target-{index}.json"
+                    linked_path.replace(moved_path)
+                    try:
+                        linked_path.symlink_to(moved_path)
+                    except OSError as exc:
+                        self.skipTest(f"file symlinks unavailable: {exc}")
+
+                    with self.assertRaisesRegex(
+                        builder.ReleaseBuildError,
+                        "symlink, junction, or reparse",
+                    ):
+                        builder.validate_release_output(
+                            root,
+                            paths["config"],
+                            paths["foundry_config"],
+                            paths["output"],
+                        )
+
+    def test_replacement_rolls_back_on_base_exception(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            output = root / builder.DEFAULT_OUTPUT_DIR
+            staged_root = root / ".release-build-test"
+            staged = staged_root / "aggregate"
+            write_text(output / "sentinel.txt", "previous canonical output\n")
+            write_text(staged / "new.txt", "new canonical output\n")
+
+            real_replace = builder.os.replace
+            replace_calls = 0
+
+            def interrupt_second_replace(source: Path, destination: Path) -> None:
+                nonlocal replace_calls
+                replace_calls += 1
+                if replace_calls == 2:
+                    raise KeyboardInterrupt("simulated interruption")
+                real_replace(source, destination)
+
+            with (
+                patch.object(
+                    builder.os,
+                    "replace",
+                    side_effect=interrupt_second_replace,
+                ),
+                self.assertRaises(KeyboardInterrupt),
+            ):
+                builder.replace_output_directory(staged, output, staged_root)
+
+            self.assertEqual(replace_calls, 3)
+            self.assertEqual(
+                (output / "sentinel.txt").read_text(encoding="utf-8"),
+                "previous canonical output\n",
+            )
+            self.assertTrue((staged / "new.txt").is_file())
+
+    def test_makefile_orders_release_output_writer_before_consumers(self) -> None:
+        makefile = MAKEFILE_PATH.read_text(encoding="utf-8")
+        expected_dependencies = [
+            "release-build-check: release-build",
+            "contract-size-budget-check: size release-build-check",
+            "core-bytecode-spend-policy-check: size release-build-check",
+            "release-artifacts: release-build-check",
+            "release-artifacts-check: release-build-check",
+            "source-verification-inputs: release-artifacts",
+            "source-verification-inputs-check: release-artifacts-check",
+            "abi-compatibility: release-build-check",
+            "abi-compatibility-check: release-build-check",
+        ]
+        for dependency in expected_dependencies:
+            with self.subTest(dependency=dependency):
+                self.assertIn(dependency, makefile)
+        self.assertNotIn(".NOTPARALLEL", makefile)
+
+    def test_check_wrappers_order_release_builder_before_all_consumers(self) -> None:
+        wrapper_commands = {
+            "PowerShell": (
+                CHECK_PS1_PATH,
+                [
+                    '& $pythonPath @pythonArgs "scripts\\test_release_build_artifacts.py"',
+                    '& $pythonPath @pythonArgs "scripts\\build_release_artifacts.py"',
+                    '& $pythonPath @pythonArgs "scripts\\build_release_artifacts.py" "--check"',
+                    '& $pythonPath @pythonArgs "scripts\\test_contract_size_budget.py"',
+                    '& $pythonPath @pythonArgs "scripts\\check_contract_size_budget.py"',
+                    '& $pythonPath @pythonArgs "scripts\\test_core_bytecode_spend_policy.py"',
+                    '& $pythonPath @pythonArgs "scripts\\check_core_bytecode_spend_policy.py"',
+                    '& $pythonPath @pythonArgs "scripts\\test_release_artifacts.py"',
+                    '& $pythonPath @pythonArgs "scripts\\generate_release_artifacts.py" "--check"',
+                    '& $pythonPath @pythonArgs "scripts\\test_source_verification_inputs.py"',
+                    '& $pythonPath @pythonArgs "scripts\\generate_source_verification_inputs.py" "--check"',
+                    '& $pythonPath @pythonArgs "scripts\\test_abi_compatibility.py"',
+                    '& $pythonPath @pythonArgs "scripts\\check_abi_compatibility.py" "--check"',
+                ],
+            ),
+            "POSIX shell": (
+                CHECK_SH_PATH,
+                [
+                    '"$python_bin" scripts/test_release_build_artifacts.py',
+                    '"$python_bin" scripts/build_release_artifacts.py',
+                    '"$python_bin" scripts/build_release_artifacts.py --check',
+                    '"$python_bin" scripts/test_contract_size_budget.py',
+                    '"$python_bin" scripts/check_contract_size_budget.py',
+                    '"$python_bin" scripts/test_core_bytecode_spend_policy.py',
+                    '"$python_bin" scripts/check_core_bytecode_spend_policy.py',
+                    '"$python_bin" scripts/test_release_artifacts.py',
+                    '"$python_bin" scripts/generate_release_artifacts.py --check',
+                    '"$python_bin" scripts/test_source_verification_inputs.py',
+                    '"$python_bin" scripts/generate_source_verification_inputs.py --check',
+                    '"$python_bin" scripts/test_abi_compatibility.py',
+                    '"$python_bin" scripts/check_abi_compatibility.py --check',
+                ],
+            ),
+        }
+
+        for wrapper_name, (path, expected_commands) in wrapper_commands.items():
+            with self.subTest(wrapper=wrapper_name):
+                lines = [
+                    line.strip()
+                    for line in path.read_text(encoding="utf-8").splitlines()
+                ]
+                positions: list[int] = []
+                for command in expected_commands:
+                    self.assertEqual(lines.count(command), 1, command)
+                    positions.append(lines.index(command))
+                self.assertEqual(positions, sorted(positions))
+
+    def test_release_generator_rejects_post_build_artifact_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            artifact_path = paths["output"] / "Example.sol" / "Example.json"
+            value = json.loads(artifact_path.read_text(encoding="utf-8"))
+            value["deployedBytecode"]["object"] = "0x6002"
+            write_json(artifact_path, value)
+
+            stderr = StringIO()
+            with working_directory(root), redirect_stdout(StringIO()), redirect_stderr(stderr):
+                result = release_generator.main(
+                    [
+                        "--config",
+                        "release-artifacts/contracts.json",
+                        "--foundry-config",
+                        "foundry.toml",
+                        "--foundry-out",
+                        "out-release",
+                        "--output-dir",
+                        "release-artifacts/latest",
+                    ]
+                )
+
+            self.assertEqual(result, 1)
+            self.assertIn("artifact hash is stale", stderr.getvalue())
+            self.assertFalse((root / "release-artifacts" / "latest").exists())
+
+    def test_rejects_artifact_with_wrong_compilation_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "compilation target"):
+                with redirect_stdout(StringIO()):
+                    builder.build_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                        runner=FakeForge(wrong_target=True),
+                        forge_version_output=FAKE_FORGE_VERSION,
+                    )
+
+    def test_failed_build_preserves_previous_output(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            sentinel = paths["output"] / "sentinel.txt"
+            write_text(sentinel, "previous canonical output\n")
+
+            def fail(_command: list[str], _cwd: Path) -> None:
+                raise builder.ReleaseBuildError("simulated compiler failure")
+
+            with self.assertRaisesRegex(builder.ReleaseBuildError, "simulated compiler failure"):
+                with redirect_stdout(StringIO()):
+                    builder.build_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                        runner=fail,
+                        forge_version_output=FAKE_FORGE_VERSION,
+                    )
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "previous canonical output\n")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)

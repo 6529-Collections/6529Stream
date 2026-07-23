@@ -24,11 +24,24 @@ The current Gate A smoke baseline proves:
   breaking-change approval references before review.
 - Foundry is configured to compile `smart-contracts`.
 - `forge build` runs against Solidity `0.8.19`.
-- `forge build --sizes --via-ir --skip test --skip script --force` runs as the
-  aggregate development deployability gate. `python
-  scripts/check_contract_size_budget.py` checks every production contract
+- `forge build --sizes --via-ir --skip test --skip script --force` remains an
+  aggregate diagnostic and warning-collection build. Canonical release
+  bytecode instead comes from `python scripts/build_release_artifacts.py`,
+  which compiles each configured source and import closure in isolation,
+  excludes test/script source units, validates a deterministic input/artifact
+  receipt, and uses staged replacement with rollback on caught failures to
+  restore configured artifacts plus retained compiler inputs and the receipt to
+  dedicated ignored `out-release/`. Ordinary Forge builds and scripts continue
+  to use `out/`. `python
+  scripts/check_contract_size_budget.py` checks those canonical artifacts
   against EIP-170 and enforces the interim `StreamCore` development floor from
-  `release-artifacts/contracts.json`. The committed
+  `release-artifacts/contracts.json`. This closes the local release and
+  verification evidence gap tracked by
+  [issue #674](https://github.com/6529-Collections/6529Stream/issues/674)
+  without making Forge deployment scripts or broadcasts consume the canonical
+  initcode. That deployment binding remains a production blocker under
+  [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
+  the pre-audit, not-production-ready posture is unchanged. The committed
   `release-artifacts/latest/bytecode-release-proof.json` records the current
   measured `StreamCore` production runtime size as 24,152 bytes, leaving
   424 bytes of EIP-170

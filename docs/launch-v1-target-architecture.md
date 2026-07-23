@@ -291,9 +291,13 @@ The implementation must provide one measured Core hook proof before the
 implementation PR is accepted. The proof must be produced by:
 
 ```bash
-forge build --sizes --via-ir --skip test --skip script --force
+python scripts/build_release_artifacts.py
 python scripts/check_contract_size_budget.py
 ```
+
+The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
+output is diagnostic only and cannot replace this isolated canonical
+measurement.
 
 The measured Core must include every mandatory hook with final call shapes,
 not placeholders that omit calldata, returndata, storage, or external call

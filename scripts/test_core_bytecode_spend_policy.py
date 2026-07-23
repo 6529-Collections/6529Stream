@@ -97,6 +97,7 @@ def write_tree(
             "contract": "StreamCore",
             "approved_runtime_size_bytes": approved_size,
             "approved_runtime_margin_bytes": 24_576 - approved_size,
+            "baseline_command": checker.EXPECTED_BASELINE_COMMAND,
             "tracking": "https://example.test/core-bytecode-policy",
             "exceptions": exceptions or [],
             "rejected_experiments": [],
@@ -112,7 +113,7 @@ def write_tree(
             newline="\n",
         )
     write_json(
-        root / "out/StreamCore.sol/StreamCore.json",
+        root / "out-release/StreamCore.sol/StreamCore.json",
         {
             "deployedBytecode": {"object": runtime_hex(runtime_size)},
             "metadata": artifact_metadata(root, source),
@@ -354,6 +355,27 @@ class CoreBytecodeSpendPolicyTests(unittest.TestCase):
                 "core_bytecode_spend_policy",
             ):
                 checker.check_policy(root, checker.DEFAULT_CONFIG, checker.DEFAULT_FOUNDRY_OUT)
+
+    def test_noncanonical_baseline_command_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_tree(root)
+            config_path = root / checker.DEFAULT_CONFIG
+            config = checker.load_json(config_path)
+            config["core_bytecode_spend_policy"]["baseline_command"] = (
+                "forge build --sizes --via-ir"
+            )
+            write_json(config_path, config)
+
+            with self.assertRaisesRegex(
+                checker.CoreBytecodePolicyError,
+                "baseline_command",
+            ):
+                checker.check_policy(
+                    root,
+                    checker.DEFAULT_CONFIG,
+                    checker.DEFAULT_FOUNDRY_OUT,
+                )
 
 
 if __name__ == "__main__":

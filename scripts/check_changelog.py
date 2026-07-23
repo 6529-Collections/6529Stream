@@ -31,6 +31,8 @@ RELEASE_IMPACTING_PATHS = {
         "Makefile",
         "scripts/check.sh",
         "scripts/check.ps1",
+        "scripts/build_release_artifacts.py",
+        "scripts/test_release_build_artifacts.py",
         "scripts/generate_release_artifacts.py",
         "scripts/check_abi_compatibility.py",
         "scripts/generate_deployment_manifest.py",

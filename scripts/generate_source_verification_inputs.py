@@ -12,6 +12,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import build_release_artifacts as release_build
+
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback.
@@ -23,10 +25,10 @@ GENERATOR_VERSION = "1"
 
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
-DEFAULT_FOUNDRY_OUT = Path("out")
+DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
 DEFAULT_OUTPUT = Path("release-artifacts/latest/source-verification-inputs.json")
-PRODUCTION_BUILD_COMMAND = "forge build --sizes --via-ir --skip test --skip script --force"
+PRODUCTION_BUILD_COMMAND = release_build.CANONICAL_BUILD_COMMAND
 
 
 class SourceVerificationError(RuntimeError):
@@ -658,6 +660,12 @@ def main(argv: list[str]) -> int:
     repo_root = Path.cwd()
 
     try:
+        release_build.validate_release_output(
+            repo_root,
+            args.contract_config,
+            args.foundry_config,
+            args.foundry_out,
+        )
         if args.check:
             return check_output(
                 repo_root,
@@ -675,7 +683,7 @@ def main(argv: list[str]) -> int:
             args.foundry_out,
             args.abi_checksums,
         )
-    except SourceVerificationError as exc:
+    except (SourceVerificationError, release_build.ReleaseBuildError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

@@ -22,6 +22,8 @@ DEFAULT_COVERED_PATHS = [
     Path(".github/workflows/release-mode.yml"),
     Path("scripts/check_python_toolchain.py"),
     Path("scripts/test_python_toolchain.py"),
+    Path("scripts/build_release_artifacts.py"),
+    Path("scripts/test_release_build_artifacts.py"),
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/stream-core-permanent-interface.json"),

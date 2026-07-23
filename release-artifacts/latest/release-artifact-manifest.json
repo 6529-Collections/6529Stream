@@ -3,20 +3,20 @@
   "generated_by": "scripts/generate_release_artifacts.py:1",
   "source": {
     "config": "release-artifacts/contracts.json",
-    "foundry_out": "out"
+    "foundry_out": "out-release"
   },
   "artifacts": {
     "abi-checksums.json": {
       "path": "abi-checksums.json",
-      "sha256": "sha256:02065c2b723f818519d802c74f7f7fad9c50ca7de0de1943282fe6e766d941d8"
+      "sha256": "sha256:ebb86315565bdf3d7d2de54c17531311ab72bede23002b103bccedbe83647d77"
     },
     "event-topic-catalog.json": {
       "path": "event-topic-catalog.json",
-      "sha256": "sha256:28e1e602f2e8b03eb1a96b5ba70a7598ca9cda6d14e46e169ab2e9ef897f0806"
+      "sha256": "sha256:3c2ebad0ad784974db7457569a8e8142f77a7aef5f634e32eca50ece7e8cbc04"
     },
     "interface-ids.json": {
       "path": "interface-ids.json",
-      "sha256": "sha256:1c4f965c0142c8d6798117790779f38ab2579eb2fa6c29ae360f8d270382af0c"
+      "sha256": "sha256:7af61436645675061212e1dec56ab5622a7f2f00924afcbbdcf30fd1f77c4f67"
     }
   }
 }

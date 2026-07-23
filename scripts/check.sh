@@ -30,6 +30,9 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/test_gas_envelopes.py
 "$python_bin" scripts/check_gas_envelopes.py
 "$python_bin" scripts/run_forge_size_log.py --log cache/forge-size.log
+"$python_bin" scripts/test_release_build_artifacts.py
+"$python_bin" scripts/build_release_artifacts.py
+"$python_bin" scripts/build_release_artifacts.py --check
 "$python_bin" scripts/test_contract_size_budget.py
 "$python_bin" scripts/check_contract_size_budget.py
 "$python_bin" scripts/test_core_bytecode_spend_policy.py
@@ -67,7 +70,6 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/generate_one_of_one_provenance_manifest.py --check
 "$python_bin" scripts/test_admin_ceremony_evidence.py
 "$python_bin" scripts/check_admin_ceremony_evidence.py
-forge build --force --via-ir --skip test script
 "$python_bin" scripts/test_release_artifacts.py
 "$python_bin" scripts/generate_release_artifacts.py --check
 "$python_bin" scripts/test_protocol_surface_report.py

@@ -38,7 +38,7 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:9bca921a51f87ca736f9ef6f53fe456424551c19fc6bbd9f8647d8c386d35e0d"
+      "sha256": "sha256:78e752a8ab40aa6fe048f006a2538fd89e4f5db2dbfe818acadb3c878874ef0a"
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
@@ -50,7 +50,7 @@
     },
     {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:95bab07111d332e2c26f9c0208d63d90a417528e73fb68e38a90dc8e9f2c404e"
+      "sha256": "sha256:0c3b9cf41f5a042749994cf3a1287d328124b2b4f6eaabf896d6e24524dbea19"
     },
     {
       "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -175,7 +175,7 @@
         },
         {
           "path": "release-artifacts/latest/public-beta-evidence.json",
-          "sha256": "sha256:95bab07111d332e2c26f9c0208d63d90a417528e73fb68e38a90dc8e9f2c404e"
+          "sha256": "sha256:0c3b9cf41f5a042749994cf3a1287d328124b2b4f6eaabf896d6e24524dbea19"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -246,7 +246,7 @@
         },
         {
           "path": "docs/deployment.md",
-          "sha256": "sha256:2848cf24054b9b37060c08a4a9443629e57ab7e5552e567aff119b5bf5bda369"
+          "sha256": "sha256:8cc08f555ef12b23823735ab20a84a1cb691129de426410dcca4c60af7e7fb7a"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -381,7 +381,7 @@
         },
         {
           "path": "deployments/randomizer-operations/anvil-6529stream-v0.1.0-001-local.json",
-          "sha256": "sha256:bdd02b23e835c301ba64ac086a0753ce6bb3079ab4044cceab4defbe3967a01d"
+          "sha256": "sha256:b55fc81b62725102bb5f8f63126125f7fa7b9162b1ab738b84889099a4ecb74f"
         },
         {
           "path": "release-artifacts/latest/public-beta-blockers.md",
@@ -417,7 +417,7 @@
         },
         {
           "path": "release-artifacts/latest/source-verification-inputs.json",
-          "sha256": "sha256:d01f18ef38a91e39afdf74f9b55577b0d54ca4778fa0b8594e6ef73e465bca50"
+          "sha256": "sha256:99ffc1e1912d3be38b55cdefd8ba098b72e6ffeb0108a5b68be48efe55bbd1b2"
         },
         {
           "path": "release-artifacts/latest/production-release-blockers.md",
@@ -438,7 +438,8 @@
       "mitigation": "Recover real Core headroom through measured compression, extraction, or authorized relocation while retaining every mandatory hook; keep non-critical product surfaces satellite-first.",
       "residual_risk": "The current 24,152-byte runtime leaves 424 bytes of EIP-170 headroom, 1,576 bytes below the non-waivable 2,000-byte production deployment minimum.",
       "checks": [
-        "forge build --sizes --via-ir --skip test --skip script --force",
+        "python scripts/build_release_artifacts.py",
+        "python scripts/check_contract_size_budget.py",
         "python scripts/check_release_mode.py --phase production-release",
         "python scripts/generate_release_manifest.py --check"
       ],
@@ -449,7 +450,7 @@
       "evidence": [
         {
           "path": "docs/known-blockers.md",
-          "sha256": "sha256:9bca921a51f87ca736f9ef6f53fe456424551c19fc6bbd9f8647d8c386d35e0d"
+          "sha256": "sha256:78e752a8ab40aa6fe048f006a2538fd89e4f5db2dbfe818acadb3c878874ef0a"
         },
         {
           "path": "ops/ROADMAP.md",
@@ -457,7 +458,7 @@
         },
         {
           "path": "docs/status.md",
-          "sha256": "sha256:072d7007536d42f06567770b94cd71e2db4f14d81fdabbe113c9b036f59832e6"
+          "sha256": "sha256:3cfddb4ccdd17c93fe6bcb4cf249e7c7ea25745e257b1421ee7906fbdc676aa0"
         }
       ],
       "risk_acceptance": null
@@ -536,7 +537,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:609a697e38754a9dc07cd4316225d5675eb47842945aa75a686d561acc67a9a4"
+          "sha256": "sha256:e67671fa4c8b19303020f2b9827671b31de869cff05eafdf0465d72b968908de"
         },
         {
           "path": "docs/warning-dispositions.md",

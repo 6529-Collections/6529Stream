@@ -128,10 +128,20 @@ contributors who start from the README.
   Python checks for JSON/data-URI decoding, current URI scheme policy, and final
   animation HTML wrapper/script boundaries, plus a Playwright-backed Chromium
   sandbox check for the committed final animation fixture.
+- Canonical isolated release and verification artifacts now close the local
+  evidence-generation gap under
+  [issue #674](https://github.com/6529-Collections/6529Stream/issues/674), but
+  the Forge deployment scripts can still recompile their monolithic import
+  universe rather than consume the retained canonical initcode.
+  [Issue #677](https://github.com/6529-Collections/6529Stream/issues/677)
+  remains a production blocker until broadcast initcode is bound to the
+  reviewed canonical build.
 - `StreamCore` now uses a linked metadata renderer library, inherits plain
   non-enumerable ERC-721 with no enumerable index storage, preserves a live
   `totalSupply()` view, and has an IR-optimized development size gate:
-  `forge build --sizes --via-ir --skip test --skip script --force`. The
+  canonical isolated `python scripts/build_release_artifacts.py` output. The
+  aggregate `forge build --sizes --via-ir --skip test --skip script --force`
+  output remains diagnostic only. The
   committed `release-artifacts/latest/bytecode-release-proof.json` currently
   records `StreamCore` runtime size at 24,152 bytes with 424 bytes of EIP-170 headroom,
   which passes deployability and the interim 384-byte development floor but

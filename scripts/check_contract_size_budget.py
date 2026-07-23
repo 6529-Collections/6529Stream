@@ -13,11 +13,11 @@ from typing import Any, Sequence
 
 BUDGET_SCHEMA = "6529stream.contract-runtime-size-budget.v1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out")
+DEFAULT_FOUNDRY_OUT = Path("out-release")
 EXPECTED_SOLC_VERSION = "0.8.19+commit.7dd6d404"
 EXPECTED_EVM_VERSION = "paris"
 EXPECTED_OPTIMIZER_RUNS = 200
-PRODUCTION_BUILD_COMMAND = "forge build --sizes --via-ir --skip test --skip script --force"
+PRODUCTION_BUILD_COMMAND = "python scripts/build_release_artifacts.py"
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
 

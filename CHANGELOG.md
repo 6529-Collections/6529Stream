@@ -7,6 +7,19 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Made release bytecode generation reproducible under Solidity 0.8.19 by
+  compiling each configured production source and its import closure in an
+  isolated via-IR Forge invocation, retaining a deterministic build receipt,
+  and using staged replacement with rollback on caught failures to restore the
+  configured named artifacts plus retained compiler inputs and receipt to
+  dedicated ignored `out-release/` before release, ABI, size, and
+  explorer-verification generators run. The aggregate all-source size build
+  remains a diagnostic warning input, not the release-bytecode authority. This
+  closes the local release/verification evidence gap tracked by
+  [issue #674](https://github.com/6529-Collections/6529Stream/issues/674), but
+  does not make Forge deployment scripts or broadcasts consume that canonical
+  initcode; [issue #677](https://github.com/6529-Collections/6529Stream/issues/677)
+  remains a production blocker. Protocol maturity is unchanged.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
   from the retired aggregate/facade Core-read seam to separately bound actual
   Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The
