@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_release_artifacts.py:1",
   "source": {
     "config": "release-artifacts/contracts.json",
-    "foundry_out": "out"
+    "foundry_out": "out-release"
   },
   "abi_hashes": {
     "DependencyRegistry": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
@@ -313,7 +313,7 @@
     "DependencyRegistry": {
       "source": "smart-contracts/DependencyRegistry.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/DependencyRegistry.sol/DependencyRegistry.json",
+      "artifact_path": "out-release/DependencyRegistry.sol/DependencyRegistry.json",
       "abi_sha256": "sha256:08a9f71db1ab3e57d52b820d757fcf20b97c58997c0f03f726a63bf1eb949582",
       "bytecode_sha256": "sha256:d9137961326627de597c1227ebf6c46da7d117d7e311cc144a6519f0a08f5263",
       "bytecode_linked": false,
@@ -333,7 +333,7 @@
     "NextGenRandomizerRNG": {
       "source": "smart-contracts/RandomizerRNG.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/RandomizerRNG.sol/NextGenRandomizerRNG.json",
+      "artifact_path": "out-release/RandomizerRNG.sol/NextGenRandomizerRNG.json",
       "abi_sha256": "sha256:e2114b8d9c13179d4683d2590c54c44705dc74afbc41d090e82b45159e742ebf",
       "bytecode_sha256": "sha256:aba7152235c82e6d9dda8d066e5f2686325ccc2dadb31cba7ea9d9b62bd95653",
       "bytecode_linked": true,
@@ -353,7 +353,7 @@
     "NextGenRandomizerVRF": {
       "source": "smart-contracts/RandomizerVRF.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/RandomizerVRF.sol/NextGenRandomizerVRF.json",
+      "artifact_path": "out-release/RandomizerVRF.sol/NextGenRandomizerVRF.json",
       "abi_sha256": "sha256:d913a668add41a0e37da1913191d4e35b3428fb62c5e55be96f1e9ba239b58c6",
       "bytecode_sha256": "sha256:bbecbc11fa0e1b1306c7aaea7a1c19ec966d8d5486ba2db78aca529cd0f15bd5",
       "bytecode_linked": true,
@@ -373,7 +373,7 @@
     "StreamAdmins": {
       "source": "smart-contracts/StreamAdmins.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamAdmins.sol/StreamAdmins.json",
+      "artifact_path": "out-release/StreamAdmins.sol/StreamAdmins.json",
       "abi_sha256": "sha256:0dec302776ef6fe8038a96a716c7300d697c52c9b8d79559ab86c2b5c6599dd5",
       "bytecode_sha256": "sha256:cb8a838957bf250f82794e723e777d479226b838d0e4e1b6ff31718740fe3a1f",
       "bytecode_linked": true,
@@ -393,7 +393,7 @@
     "StreamAssetPolicyRegistry": {
       "source": "smart-contracts/StreamAssetPolicyRegistry.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
+      "artifact_path": "out-release/StreamAssetPolicyRegistry.sol/StreamAssetPolicyRegistry.json",
       "abi_sha256": "sha256:082fd9e9f3e061b4740f5e82b6f338fa2f6c8821bd5d7fd1dcf503beec7c597d",
       "bytecode_sha256": "sha256:84f272972214fad13c1bccea90a1782b1276ff0f1f29cc723286b654a6051abf",
       "bytecode_linked": true,
@@ -413,7 +413,7 @@
     "StreamAuctions": {
       "source": "smart-contracts/AuctionContract.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/AuctionContract.sol/StreamAuctions.json",
+      "artifact_path": "out-release/AuctionContract.sol/StreamAuctions.json",
       "abi_sha256": "sha256:338513cbd4ad6774097ac1661628d96e256726aa4827b62f1bcab3dd61486a17",
       "bytecode_sha256": "sha256:f196db13588f3b75f378868ed7c7feb6550c9b579289b6d9e09b6cc0dd4f84a6",
       "bytecode_linked": true,
@@ -433,7 +433,7 @@
     "StreamCollectionMetadata": {
       "source": "smart-contracts/StreamCollectionMetadata.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
+      "artifact_path": "out-release/StreamCollectionMetadata.sol/StreamCollectionMetadata.json",
       "abi_sha256": "sha256:0ce856dd9d298ad115754dc7e78eb3d3eca9b5d2d173f682069ff41bd3a25c44",
       "bytecode_sha256": "sha256:5d8b1318038a44fc2aab77e2db02f73fdaa34e32666fedd5ee23dbb60adf7981",
       "bytecode_linked": false,
@@ -453,7 +453,7 @@
     "StreamContractMetadata": {
       "source": "smart-contracts/StreamContractMetadata.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamContractMetadata.sol/StreamContractMetadata.json",
+      "artifact_path": "out-release/StreamContractMetadata.sol/StreamContractMetadata.json",
       "abi_sha256": "sha256:5ce71b32d32dcc70ad0e6ac470417feb8a8f4b6d73691771dace5ad892e9dbd7",
       "bytecode_sha256": "sha256:0a42017e1111fec726ca72a9ee4bb7a1790286228076b7e44f804b4878676e1a",
       "bytecode_linked": false,
@@ -473,7 +473,7 @@
     "StreamCore": {
       "source": "smart-contracts/StreamCore.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamCore.sol/StreamCore.json",
+      "artifact_path": "out-release/StreamCore.sol/StreamCore.json",
       "abi_sha256": "sha256:3fac75f1ecce40be43b8dc5ae7a91f77d3566213634c6242eb1ce93332edf1bc",
       "bytecode_sha256": "sha256:0b06066bbb57e9bea53f9ee9bedbfab18b11aaf79b7f152a6769a55cf72096d7",
       "bytecode_linked": false,
@@ -493,7 +493,7 @@
     "StreamCuratorsPool": {
       "source": "smart-contracts/StreamCuratorsPool.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamCuratorsPool.sol/StreamCuratorsPool.json",
+      "artifact_path": "out-release/StreamCuratorsPool.sol/StreamCuratorsPool.json",
       "abi_sha256": "sha256:da16abd29bac8a461340d3fdd5ac9b1db4d483db90a1c7d1352c02bd1b20ac2b",
       "bytecode_sha256": "sha256:d3acb7c52ffb7c0eef402327580923728e67456ffddc7399766bec9629911d83",
       "bytecode_linked": true,
@@ -513,7 +513,7 @@
     "StreamDrops": {
       "source": "smart-contracts/StreamDrops.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamDrops.sol/StreamDrops.json",
+      "artifact_path": "out-release/StreamDrops.sol/StreamDrops.json",
       "abi_sha256": "sha256:0ed8a97db06fc7348527abc34e3d76cbf1f41a2d06030062e0ee3afef64508bd",
       "bytecode_sha256": "sha256:8f1697f0f2ee7a06e2f7519bf08265ccd82d95ef4c56cccd6721ef2cce680b4a",
       "bytecode_linked": true,
@@ -533,7 +533,7 @@
     "StreamMintLedger": {
       "source": "smart-contracts/StreamMintLedger.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamMintLedger.sol/StreamMintLedger.json",
+      "artifact_path": "out-release/StreamMintLedger.sol/StreamMintLedger.json",
       "abi_sha256": "sha256:e267423ed819a9e3c79030b6f80321e438255a6ae61f107aa3306849e21f33ed",
       "bytecode_sha256": "sha256:8ea238270a5869d13a251a8230d03776a10b3b109e96ad858e8ebfab17654509",
       "bytecode_linked": true,
@@ -553,7 +553,7 @@
     "StreamMintManager": {
       "source": "smart-contracts/StreamMintManager.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamMintManager.sol/StreamMintManager.json",
+      "artifact_path": "out-release/StreamMintManager.sol/StreamMintManager.json",
       "abi_sha256": "sha256:acc87d87f469b726c4df8e7b50517a2489a034376cdec964fbfa8256c41cc74f",
       "bytecode_sha256": "sha256:08d7b0b3d984a22445d576717921e667457c6ff7e621f970d6d32fce32ea041a",
       "bytecode_linked": true,
@@ -573,7 +573,7 @@
     "StreamMintModuleRegistry": {
       "source": "smart-contracts/StreamMintModuleRegistry.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
+      "artifact_path": "out-release/StreamMintModuleRegistry.sol/StreamMintModuleRegistry.json",
       "abi_sha256": "sha256:8dd5f09ca75e80f0df6ebd3637f63a46245b8cccdba1e2cfc8852de3afb37a9f",
       "bytecode_sha256": "sha256:eaaec369a63a49003c8dad2e21864f0a4839b2e499555a75238a995027ea6686",
       "bytecode_linked": true,
@@ -593,7 +593,7 @@
     "StreamMinter": {
       "source": "smart-contracts/StreamMinter.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamMinter.sol/StreamMinter.json",
+      "artifact_path": "out-release/StreamMinter.sol/StreamMinter.json",
       "abi_sha256": "sha256:6faf0764cab1a6a740700d7cba57c59cde39dd5b9b8eab098172f1bfaf76aa7a",
       "bytecode_sha256": "sha256:c6a6fa3f3ed8df13c1acc9485fc99e14d44c85ef8f99285ef0b3a7c20bce3333",
       "bytecode_linked": true,
@@ -613,7 +613,7 @@
     "StreamPreservationRecords": {
       "source": "smart-contracts/StreamPreservationRecords.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamPreservationRecords.sol/StreamPreservationRecords.json",
+      "artifact_path": "out-release/StreamPreservationRecords.sol/StreamPreservationRecords.json",
       "abi_sha256": "sha256:f89faa370ddd0e771063a3213ff758029cc94843b13b1b402b26d4450f03afae",
       "bytecode_sha256": "sha256:2a5f0b83a975aea7fa08496c42dac34aa147fb07ffc645adb41d9c24b4ac3ef7",
       "bytecode_linked": false,
@@ -633,7 +633,7 @@
     "StreamPrimarySaleSettlement": {
       "source": "smart-contracts/StreamPrimarySaleSettlement.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
+      "artifact_path": "out-release/StreamPrimarySaleSettlement.sol/StreamPrimarySaleSettlement.json",
       "abi_sha256": "sha256:48fc686d6b7e094b3d93322cf5713c2252068bf3db6d387e1ff7ec92f2afaff8",
       "bytecode_sha256": "sha256:ab63cac7ba99e96a065aad3d015a0e871b870e6a4bd00cd6f6e4433c007e7e79",
       "bytecode_linked": true,
@@ -653,7 +653,7 @@
     "StreamRevenueResolver": {
       "source": "smart-contracts/StreamRevenueResolver.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamRevenueResolver.sol/StreamRevenueResolver.json",
+      "artifact_path": "out-release/StreamRevenueResolver.sol/StreamRevenueResolver.json",
       "abi_sha256": "sha256:10dff0ff266e3fc2e56fb926b5b414c1aff7ee9ccea43d68f47dd27cc92b7c00",
       "bytecode_sha256": "sha256:9872a73d5f2b155ddae8e9da15d336dc359f4b271f0c9a361b2d467f5b8dc390",
       "bytecode_linked": true,
@@ -673,7 +673,7 @@
     "StreamSplitFactory": {
       "source": "smart-contracts/StreamSplitFactory.sol",
       "deployment_scope": "singleton",
-      "artifact_path": "out/StreamSplitFactory.sol/StreamSplitFactory.json",
+      "artifact_path": "out-release/StreamSplitFactory.sol/StreamSplitFactory.json",
       "abi_sha256": "sha256:63ca06f8b11b4ee66f0b56fe50e6cdac12fdb3bb72179d629cdd7ca6a49f85bf",
       "bytecode_sha256": "sha256:008b8fd57513d26c30a8cf027daa052e9d75f696bc5c31b5b2e10faefc82db21",
       "bytecode_linked": true,
@@ -693,7 +693,7 @@
     "StreamSplitWallet": {
       "source": "smart-contracts/StreamSplitWallet.sol",
       "deployment_scope": "factory_spawned",
-      "artifact_path": "out/StreamSplitWallet.sol/StreamSplitWallet.json",
+      "artifact_path": "out-release/StreamSplitWallet.sol/StreamSplitWallet.json",
       "abi_sha256": "sha256:fd1b403e564ffff1b74b72cc5ab65a040f0d85be6d2a591543bc1c8a8869d96b",
       "bytecode_sha256": "sha256:941e3fa9869bada72e57043e844ddcbb4497d97441935a92376dcab79fea599b",
       "bytecode_linked": true,

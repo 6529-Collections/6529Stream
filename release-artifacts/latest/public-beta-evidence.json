@@ -29,7 +29,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json",
-          "sha256": "sha256:bf776e70a782fbed9a1b2dca0b672e81246b9377eed46f465b8f1d6181057f68"
+          "sha256": "sha256:ca9bfdaf500784c410f02ae381e15f9d7bfe46b8c82d63117ac0a032ecfb99e2"
         }
       ],
       "risk_acceptance": null,
@@ -94,7 +94,7 @@
       "evidence": [
         {
           "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json",
-          "sha256": "sha256:f646b272ec90ec61db8b505bad71d11bb55cd47e80984ba5b313d021b14c525e"
+          "sha256": "sha256:014ef636af1548e57c4aa0fba81a21440664a409a9015d0684a739f8cc3c55cb"
         }
       ],
       "risk_acceptance": null,

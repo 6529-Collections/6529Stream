@@ -357,7 +357,8 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "docs/status.md",
         ],
         "checks": [
-            "forge build --sizes --via-ir --skip test --skip script --force",
+            "python scripts/build_release_artifacts.py",
+            "python scripts/check_contract_size_budget.py",
             "python scripts/check_release_mode.py --phase production-release",
             "python scripts/generate_release_manifest.py --check",
         ],

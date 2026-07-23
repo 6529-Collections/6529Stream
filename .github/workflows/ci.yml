@@ -126,6 +126,8 @@ jobs:
 
           python3 -m py_compile \
             scripts/argparse_helpers.py \
+            scripts/build_release_artifacts.py \
+            scripts/test_release_build_artifacts.py \
             scripts/generate_release_artifacts.py \
             scripts/generate_protocol_surface_report.py \
             scripts/test_release_artifacts.py \
@@ -420,6 +422,15 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/run_forge_size_log.py --log ci-logs/forge-size.log
 
+      - name: Canonical release build
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p ci-logs
+          python3 scripts/test_release_build_artifacts.py 2>&1 | tee ci-logs/release-build-tests.log
+          python3 scripts/build_release_artifacts.py 2>&1 | tee ci-logs/release-build.log
+          python3 scripts/build_release_artifacts.py --check 2>&1 | tee ci-logs/release-build-check.log
+
       - name: Contract size budget
         shell: bash
         run: |
@@ -510,13 +521,6 @@ jobs:
           mkdir -p ci-logs
           python3 scripts/test_admin_ceremony_evidence.py 2>&1 | tee ci-logs/admin-ceremony-evidence-tests.log
           python3 scripts/check_admin_ceremony_evidence.py 2>&1 | tee ci-logs/admin-ceremony-evidence-check.log
-
-      - name: Restore production via-IR build artifacts
-        shell: bash
-        run: |
-          set -o pipefail
-          mkdir -p ci-logs
-          forge build --force --via-ir --skip test script 2>&1 | tee ci-logs/forge-build-production-via-ir-artifacts.log
 
       - name: Release artifact catalog
         shell: bash

@@ -101,7 +101,7 @@
     "contract": "StreamCore",
     "approved_runtime_size_bytes": 22184,
     "approved_runtime_margin_bytes": 2392,
-    "baseline_command": "forge build --sizes --via-ir --skip test --skip script --force",
+    "baseline_command": "python scripts/build_release_artifacts.py",
     "tracking": "https://github.com/6529-Collections/6529Stream/issues/478",
     "policy": "Core runtime bytecode may decrease freely. Any increase above the approved runtime baseline requires an accepted exception record before merge, even when the EIP-170 release floor still passes.",
     "exceptions": [

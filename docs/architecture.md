@@ -98,8 +98,12 @@ bytecode release proof
 [`release-artifacts/latest/bytecode-release-proof.json`](../release-artifacts/latest/bytecode-release-proof.json)
 plus the artifact-backed checker
 [`scripts/check_contract_size_budget.py`](../scripts/check_contract_size_budget.py).
-Run `python scripts/check_contract_size_budget.py` after the production size
-build before relying on any size-budget claim.
+Run `python scripts/build_release_artifacts.py` and then
+`python scripts/check_contract_size_budget.py` before relying on any
+size-budget claim. The aggregate
+`forge build --sizes --via-ir --skip test --skip script --force` command is
+retained for whole-tree diagnostics and warning collection, not as the
+release-bytecode authority.
 The stricter bytecode-spend policy is checked by
 [`scripts/check_core_bytecode_spend_policy.py`](../scripts/check_core_bytecode_spend_policy.py):
 the current approved `StreamCore` runtime may decrease without review, but any
@@ -107,7 +111,8 @@ increase above the approved baseline requires an accepted exception record in
 [`release-artifacts/contracts.json`](../release-artifacts/contracts.json).
 The current production profile is:
 
-- command: `forge build --sizes --via-ir --skip test --skip script --force`;
+- canonical command: `python scripts/build_release_artifacts.py`;
+- aggregate diagnostic: `forge build --sizes --via-ir --skip test --skip script --force`;
 - current `StreamCore` runtime: 24,152 bytes;
 - current EIP-170 margin: 424 bytes;
 - approved `StreamCore` bytecode-spend baseline: 22,184 bytes;

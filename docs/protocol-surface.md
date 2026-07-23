@@ -11,10 +11,12 @@ The generated report is tracked at
 [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json).
 It is derived from the production contract set in
 [`release-artifacts/contracts.json`](../release-artifacts/contracts.json) and
-the Foundry production build artifacts under ignored `out/` after:
+the canonical isolated Foundry artifacts under ignored `out-release/` after:
 
 ```sh
-forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 python scripts/generate_release_artifacts.py
 python scripts/generate_protocol_surface_report.py
 python scripts/generate_custom_error_catalog.py

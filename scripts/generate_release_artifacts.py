@@ -15,6 +15,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import build_release_artifacts as release_build
+
 
 ABI_CHECKSUM_SCHEMA = "6529stream.abi-checksums.v1"
 EVENT_CATALOG_SCHEMA = "6529stream.event-topic-catalog.v1"
@@ -53,7 +55,8 @@ DOWNSTREAM_RELEASE_FILES = {
 }
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out")
+DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
+DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_OUTPUT_DIR = Path("release-artifacts/latest")
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
@@ -581,8 +584,9 @@ def check_artifacts(
             for mismatch in mismatches:
                 print(f"  - {mismatch}", file=sys.stderr)
             print(
-                "run `python scripts/generate_release_artifacts.py` after `forge build` "
-                "and commit the regenerated JSON",
+                "run `python scripts/build_release_artifacts.py`, then "
+                "`python scripts/generate_release_artifacts.py`, and commit the "
+                "regenerated JSON",
                 file=sys.stderr,
             )
             return 1
@@ -593,6 +597,7 @@ def check_artifacts(
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--foundry-config", type=Path, default=DEFAULT_FOUNDRY_CONFIG)
     parser.add_argument("--foundry-out", type=Path, default=DEFAULT_FOUNDRY_OUT)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--cast-bin", default="cast")
@@ -608,10 +613,16 @@ def main(argv: list[str]) -> int:
     output_dir = args.output_dir
 
     try:
+        release_build.validate_release_output(
+            repo_root,
+            config_path,
+            args.foundry_config,
+            foundry_out,
+        )
         if args.check:
             return check_artifacts(repo_root, config_path, foundry_out, output_dir, args.cast_bin)
         written = generate_artifacts(repo_root, config_path, foundry_out, output_dir, args.cast_bin)
-    except ArtifactError as exc:
+    except (ArtifactError, release_build.ReleaseBuildError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

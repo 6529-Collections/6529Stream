@@ -9,8 +9,10 @@ logs/
 dist/
 build/
 out/
+out-release/
 cache/
 broadcast/
+.release-build-*/
 __pycache__/
 *.pyc
 

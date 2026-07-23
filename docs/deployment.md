@@ -180,6 +180,9 @@ Preflight from a clean checkout:
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
 forge test -vvv
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 python scripts/generate_release_artifacts.py --check
 python scripts/generate_source_verification_inputs.py --check
 python scripts/test_deployment_manifest.py
@@ -187,6 +190,13 @@ python scripts/check_testnet_deployment_rehearsal_evidence.py
 python scripts/test_sepolia_evidence_preflight.py
 python scripts/check_sepolia_evidence_preflight.py
 ```
+
+This canonical build validates release and explorer-verification evidence; it
+does not yet make the Forge deployment scripts or broadcasts consume the same
+isolated initcode. Do not treat this preflight as production broadcast-bytecode
+proof until
+[issue #677](https://github.com/6529-Collections/6529Stream/issues/677) is
+resolved.
 
 Before the operator shell spends Sepolia gas, run the same preflight in
 environment-required mode and retain only the redacted report. The checker
@@ -360,6 +370,9 @@ Foundry artifacts:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 python scripts/check_contract_size_budget.py
 python scripts/generate_release_artifacts.py
 python scripts/generate_release_artifacts.py --check
@@ -386,6 +399,11 @@ python scripts/generate_release_manifest.py --check
 python scripts/generate_release_checksums.py
 python scripts/generate_release_checksums.py --check
 ```
+
+These generated artifacts do not prove that Forge broadcasts consume the same
+canonical isolated initcode; that production deployment binding remains
+blocked by
+[issue #677](https://github.com/6529-Collections/6529Stream/issues/677).
 
 The committed baseline is under `release-artifacts/latest/`. `StreamCore`
 currently links `StreamMetadataRenderer`, so its bytecode hash entries are

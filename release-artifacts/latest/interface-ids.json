@@ -3,7 +3,7 @@
   "generated_by": "scripts/generate_release_artifacts.py:1",
   "source": {
     "config": "release-artifacts/contracts.json",
-    "foundry_out": "out"
+    "foundry_out": "out-release"
   },
   "interface_ids": {
     "IDependencyRegistry": "0x9dbd52e1",
@@ -39,7 +39,7 @@
   "interfaces": {
     "IDependencyRegistry": {
       "source": "smart-contracts/IDependencyRegistry.sol",
-      "artifact_path": "out/IDependencyRegistry.sol/IDependencyRegistry.json",
+      "artifact_path": "out-release/IDependencyRegistry.sol/IDependencyRegistry.json",
       "abi_sha256": "sha256:0a37dc008896b8c45bd91ec3d6475c13312bd94f1f260f2845eeb8c78d9e418f",
       "interface_id": "0x9dbd52e1",
       "interface_id_source": "selector_xor",
@@ -109,7 +109,7 @@
     },
     "IERC165": {
       "source": "smart-contracts/IERC165.sol",
-      "artifact_path": "out/IERC165.sol/IERC165.json",
+      "artifact_path": "out-release/IERC165.sol/IERC165.json",
       "abi_sha256": "sha256:fc839607f64e5467d99b3595b1238161897b3d186fa7ddc7d190df4b4e73ca46",
       "interface_id": "0x01ffc9a7",
       "interface_id_source": "configured",
@@ -123,7 +123,7 @@
     },
     "IERC2981": {
       "source": "smart-contracts/IERC2981.sol",
-      "artifact_path": "out/IERC2981.sol/IERC2981.json",
+      "artifact_path": "out-release/IERC2981.sol/IERC2981.json",
       "abi_sha256": "sha256:aacd60a298b69f44e9d96171c56834a694c547138a5eb0c6a45ac5c905db20ca",
       "interface_id": "0x2a55205a",
       "interface_id_source": "configured",
@@ -141,7 +141,7 @@
     },
     "IERC4906": {
       "source": "smart-contracts/IERC4906.sol",
-      "artifact_path": "out/IERC4906.sol/IERC4906.json",
+      "artifact_path": "out-release/IERC4906.sol/IERC4906.json",
       "abi_sha256": "sha256:1a0ec850075a0dda86b33880a319e649251d516cbfcd35d60675a909eeb10006",
       "interface_id": "0x49064906",
       "interface_id_source": "configured",
@@ -150,7 +150,7 @@
     },
     "IERC721": {
       "source": "smart-contracts/IERC721.sol",
-      "artifact_path": "out/IERC721.sol/IERC721.json",
+      "artifact_path": "out-release/IERC721.sol/IERC721.json",
       "abi_sha256": "sha256:c6cb2310d6dc4368f45ae89b64a55369785d8196967a6146d663964661a97662",
       "interface_id": "0x80ac58cd",
       "interface_id_source": "configured",
@@ -200,7 +200,7 @@
     },
     "IERC721Metadata": {
       "source": "smart-contracts/IERC721Metadata.sol",
-      "artifact_path": "out/IERC721Metadata.sol/IERC721Metadata.json",
+      "artifact_path": "out-release/IERC721Metadata.sol/IERC721Metadata.json",
       "abi_sha256": "sha256:5ed9f3277e136284e3f9e8701131fd0fe76312b0dfa33cdb2664f571498b3f3e",
       "interface_id": "0x5b5e139f",
       "interface_id_source": "configured",
@@ -262,7 +262,7 @@
     },
     "IERC7572": {
       "source": "smart-contracts/IERC7572.sol",
-      "artifact_path": "out/IERC7572.sol/IERC7572.json",
+      "artifact_path": "out-release/IERC7572.sol/IERC7572.json",
       "abi_sha256": "sha256:fdc27ee0b903d51effbc5868dfe10f7cf9bf0233900772ced428ce4ac5d27ab6",
       "interface_id": "0xe8a3d485",
       "interface_id_source": "selector_xor",
@@ -276,7 +276,7 @@
     },
     "IRandomizer": {
       "source": "smart-contracts/IRandomizer.sol",
-      "artifact_path": "out/IRandomizer.sol/IRandomizer.json",
+      "artifact_path": "out-release/IRandomizer.sol/IRandomizer.json",
       "abi_sha256": "sha256:69476ee0c7139c273afae875e9349fbeb34e9ae9fd314d45c888450b762ab7a4",
       "interface_id": "0xf3eb4f44",
       "interface_id_source": "selector_xor",
@@ -294,7 +294,7 @@
     },
     "IRandomizerLifecycle": {
       "source": "smart-contracts/IRandomizerLifecycle.sol",
-      "artifact_path": "out/IRandomizerLifecycle.sol/IRandomizerLifecycle.json",
+      "artifact_path": "out-release/IRandomizerLifecycle.sol/IRandomizerLifecycle.json",
       "abi_sha256": "sha256:b061cd96b3d60300538484f68c97409c99b953440495001f8d5f142e38e1710a",
       "interface_id": "0xaabe1a0d",
       "interface_id_source": "selector_xor",
@@ -344,7 +344,7 @@
     },
     "IStreamAdmins": {
       "source": "smart-contracts/IStreamAdmins.sol",
-      "artifact_path": "out/IStreamAdmins.sol/IStreamAdmins.json",
+      "artifact_path": "out-release/IStreamAdmins.sol/IStreamAdmins.json",
       "abi_sha256": "sha256:b94c95898b38bda7deaf60046c0261a53659aee577e5bae4046088feeeb873c6",
       "interface_id": "0x00ddd221",
       "interface_id_source": "selector_xor",
@@ -382,7 +382,7 @@
     },
     "IStreamArtworkFinalityRegistry": {
       "source": "smart-contracts/IStreamArtworkFinalityRegistry.sol",
-      "artifact_path": "out/IStreamArtworkFinalityRegistry.sol/IStreamArtworkFinalityRegistry.json",
+      "artifact_path": "out-release/IStreamArtworkFinalityRegistry.sol/IStreamArtworkFinalityRegistry.json",
       "abi_sha256": "sha256:92a1df8b5622d7985c54d4bf7f6cb590dc34d8148056d3aa908f1d9f8366313a",
       "interface_id": "0x47291ea1",
       "interface_id_source": "selector_xor",
@@ -508,7 +508,7 @@
     },
     "IStreamAssetPolicyRegistry": {
       "source": "smart-contracts/IStreamAssetPolicyRegistry.sol",
-      "artifact_path": "out/IStreamAssetPolicyRegistry.sol/IStreamAssetPolicyRegistry.json",
+      "artifact_path": "out-release/IStreamAssetPolicyRegistry.sol/IStreamAssetPolicyRegistry.json",
       "abi_sha256": "sha256:cabf2146b13d8746cb2452a20f347b35ffb6e7215d8e29268de72496328f7679",
       "interface_id": "0x5a37a79e",
       "interface_id_source": "selector_xor",
@@ -566,7 +566,7 @@
     },
     "IStreamAuctions": {
       "source": "smart-contracts/IStreamAuctions.sol",
-      "artifact_path": "out/IStreamAuctions.sol/IStreamAuctions.json",
+      "artifact_path": "out-release/IStreamAuctions.sol/IStreamAuctions.json",
       "abi_sha256": "sha256:449284cbe3ae9f0744769204c9157e74bf0d9f89868dae34073586a51cf8f400",
       "interface_id": "0xb109bb30",
       "interface_id_source": "selector_xor",
@@ -584,7 +584,7 @@
     },
     "IStreamCollectionMetadata": {
       "source": "smart-contracts/IStreamCollectionMetadata.sol",
-      "artifact_path": "out/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
+      "artifact_path": "out-release/IStreamCollectionMetadata.sol/IStreamCollectionMetadata.json",
       "abi_sha256": "sha256:a62f6c3524655d3421d1c465dea83c4300ebb93116817d8da6d96da37fe90f8f",
       "interface_id": "0x6e0fb84e",
       "interface_id_source": "selector_xor",
@@ -686,7 +686,7 @@
     },
     "IStreamCompatibility": {
       "source": "smart-contracts/IStreamCompatibility.sol",
-      "artifact_path": "out/IStreamCompatibility.sol/IStreamCompatibility.json",
+      "artifact_path": "out-release/IStreamCompatibility.sol/IStreamCompatibility.json",
       "abi_sha256": "sha256:6bd73e252a944619732c85628400e6718bf263c6e98effffa45900a6279c636d",
       "interface_id": "0x205fac5d",
       "interface_id_source": "selector_xor",
@@ -724,7 +724,7 @@
     },
     "IStreamContractMetadata": {
       "source": "smart-contracts/IStreamContractMetadata.sol",
-      "artifact_path": "out/IStreamContractMetadata.sol/IStreamContractMetadata.json",
+      "artifact_path": "out-release/IStreamContractMetadata.sol/IStreamContractMetadata.json",
       "abi_sha256": "sha256:ce8a86739d4d47eb40058bd5df61667adf2a97fe77179e6424a552d8264bc797",
       "interface_id": "0x88369d44",
       "interface_id_source": "selector_xor",
@@ -762,7 +762,7 @@
     },
     "IStreamCore": {
       "source": "smart-contracts/IStreamCore.sol",
-      "artifact_path": "out/IStreamCore.sol/IStreamCore.json",
+      "artifact_path": "out-release/IStreamCore.sol/IStreamCore.json",
       "abi_sha256": "sha256:4d66ce46e274843c05cbdf32acf8ccbac22629f7af612e1a98fd59f426777c7f",
       "interface_id": "0xba77d620",
       "interface_id_source": "selector_xor",
@@ -892,7 +892,7 @@
     },
     "IStreamCoreFinalityAdapter": {
       "source": "smart-contracts/IStreamCoreFinalityAdapter.sol",
-      "artifact_path": "out/IStreamCoreFinalityAdapter.sol/IStreamCoreFinalityAdapter.json",
+      "artifact_path": "out-release/IStreamCoreFinalityAdapter.sol/IStreamCoreFinalityAdapter.json",
       "abi_sha256": "sha256:1b9e23a6f40bf0e378eac5d10f6bf910416de2df14284803717333a8a0fad562",
       "interface_id": "0xebf35615",
       "interface_id_source": "configured",
@@ -922,7 +922,7 @@
     },
     "IStreamDrops": {
       "source": "smart-contracts/IStreamDrops.sol",
-      "artifact_path": "out/IStreamDrops.sol/IStreamDrops.json",
+      "artifact_path": "out-release/IStreamDrops.sol/IStreamDrops.json",
       "abi_sha256": "sha256:481ef1bd67f9a47da7c6e71f095991dd74a3b09664bca7dc6e52df5ba988400e",
       "interface_id": "0xd7c2abe3",
       "interface_id_source": "selector_xor",
@@ -956,7 +956,7 @@
     },
     "IStreamMintGate": {
       "source": "smart-contracts/IStreamMintGate.sol",
-      "artifact_path": "out/IStreamMintGate.sol/IStreamMintGate.json",
+      "artifact_path": "out-release/IStreamMintGate.sol/IStreamMintGate.json",
       "abi_sha256": "sha256:0725dcb8f0e9e9a9de912a5c75ef775f9ae0fc2f717cbe4e4a93ac8074214be9",
       "interface_id": "0xa5d7921d",
       "interface_id_source": "selector_xor",
@@ -974,7 +974,7 @@
     },
     "IStreamMintLedger": {
       "source": "smart-contracts/IStreamMintLedger.sol",
-      "artifact_path": "out/IStreamMintLedger.sol/IStreamMintLedger.json",
+      "artifact_path": "out-release/IStreamMintLedger.sol/IStreamMintLedger.json",
       "abi_sha256": "sha256:0ad44fc08e116d4b741d39b07f335eb34a3048bf0be71a468e217f9a63ed5149",
       "interface_id": "0x79bc7192",
       "interface_id_source": "selector_xor",
@@ -1032,7 +1032,7 @@
     },
     "IStreamMintManager": {
       "source": "smart-contracts/IStreamMintManager.sol",
-      "artifact_path": "out/IStreamMintManager.sol/IStreamMintManager.json",
+      "artifact_path": "out-release/IStreamMintManager.sol/IStreamMintManager.json",
       "abi_sha256": "sha256:35697e221de52b5d3974a4e08ca17528a668754cef5ec999a618d710c267f755",
       "interface_id": "0xfc2559eb",
       "interface_id_source": "selector_xor",
@@ -1094,7 +1094,7 @@
     },
     "IStreamMintModuleRegistry": {
       "source": "smart-contracts/IStreamMintModuleRegistry.sol",
-      "artifact_path": "out/IStreamMintModuleRegistry.sol/IStreamMintModuleRegistry.json",
+      "artifact_path": "out-release/IStreamMintModuleRegistry.sol/IStreamMintModuleRegistry.json",
       "abi_sha256": "sha256:582538c63865086c0bf211787e97e1d9ec37a472167ff331d3b79f50f9064af4",
       "interface_id": "0x4eb81941",
       "interface_id_source": "selector_xor",
@@ -1124,7 +1124,7 @@
     },
     "IStreamMinter": {
       "source": "smart-contracts/IStreamMinter.sol",
-      "artifact_path": "out/IStreamMinter.sol/IStreamMinter.json",
+      "artifact_path": "out-release/IStreamMinter.sol/IStreamMinter.json",
       "abi_sha256": "sha256:649d9216a2db37e90086197519c338afd3344a311d86336726fce30694ad851c",
       "interface_id": "0x0f48ec25",
       "interface_id_source": "selector_xor",
@@ -1162,7 +1162,7 @@
     },
     "IStreamPreservationRecords": {
       "source": "smart-contracts/IStreamPreservationRecords.sol",
-      "artifact_path": "out/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
+      "artifact_path": "out-release/IStreamPreservationRecords.sol/IStreamPreservationRecords.json",
       "abi_sha256": "sha256:cb7d4208b6eec8dc934c494c46837e55a7719c2ac260b83a7458fc1ada6227ab",
       "interface_id": "0xad590280",
       "interface_id_source": "selector_xor",
@@ -1228,7 +1228,7 @@
     },
     "IStreamPrimarySaleSettlement": {
       "source": "smart-contracts/IStreamPrimarySaleSettlement.sol",
-      "artifact_path": "out/IStreamPrimarySaleSettlement.sol/IStreamPrimarySaleSettlement.json",
+      "artifact_path": "out-release/IStreamPrimarySaleSettlement.sol/IStreamPrimarySaleSettlement.json",
       "abi_sha256": "sha256:91cf0d5dc22763347e5d7a6f8c1bab8bb75b17971866ae38a84fff44e831ad1f",
       "interface_id": "0x53f97e17",
       "interface_id_source": "selector_xor",
@@ -1294,7 +1294,7 @@
     },
     "IStreamRevenueResolver": {
       "source": "smart-contracts/IStreamRevenueResolver.sol",
-      "artifact_path": "out/IStreamRevenueResolver.sol/IStreamRevenueResolver.json",
+      "artifact_path": "out-release/IStreamRevenueResolver.sol/IStreamRevenueResolver.json",
       "abi_sha256": "sha256:bac7233f0764d26ab7bd20e5a0c49941b90823658016ebcd434fcb7119b30032",
       "interface_id": "0x3503c22e",
       "interface_id_source": "selector_xor",
@@ -1380,7 +1380,7 @@
     },
     "IStreamSplitFactory": {
       "source": "smart-contracts/IStreamSplitFactory.sol",
-      "artifact_path": "out/IStreamSplitFactory.sol/IStreamSplitFactory.json",
+      "artifact_path": "out-release/IStreamSplitFactory.sol/IStreamSplitFactory.json",
       "abi_sha256": "sha256:fe3777a5946ead624d24e0cbb88c6da13833f7d987cece7e4889384fb22894c3",
       "interface_id": "0x1748deee",
       "interface_id_source": "selector_xor",
@@ -1474,7 +1474,7 @@
     },
     "IStreamSplitWallet": {
       "source": "smart-contracts/IStreamSplitWallet.sol",
-      "artifact_path": "out/IStreamSplitWallet.sol/IStreamSplitWallet.json",
+      "artifact_path": "out-release/IStreamSplitWallet.sol/IStreamSplitWallet.json",
       "abi_sha256": "sha256:b2882c0159e40effbaeb6cadcb3b343b801bc0adde39ce57402bc7673ff3cb4e",
       "interface_id": "0x0ea5f02c",
       "interface_id_source": "selector_xor",

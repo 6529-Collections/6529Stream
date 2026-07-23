@@ -119,7 +119,7 @@ def write_tree(
         },
     )
     write_json(
-        root / "out/Example.sol/Example.json",
+        root / "out-release/Example.sol/Example.json",
         artifact_json(
             root,
             name="Example",
@@ -136,7 +136,7 @@ def add_production_contract(root: Path, name: str, source: str, runtime_size: in
     write_json(config_path, config)
     write_source(root, source, f"// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\ncontract {name} {{}}\n")
     write_json(
-        root / "out" / Path(source).name / f"{name}.json",
+        root / "out-release" / Path(source).name / f"{name}.json",
         artifact_json(
             root,
             name=name,
@@ -191,7 +191,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
             root = Path(temp_dir)
             write_tree(root, runtime_size=24_000, limit=100, minimum_margin=1, warning_margin=1)
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",
@@ -213,7 +213,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
             root = Path(temp_dir)
             write_tree(root, runtime_size=24_000, limit=100, minimum_margin=1, warning_margin=1)
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",
@@ -258,7 +258,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
             root = Path(temp_dir)
             write_tree(root, runtime_size=24_000)
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",
@@ -289,7 +289,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
             root = Path(temp_dir)
             write_tree(root, runtime_size=24_000)
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",
@@ -307,7 +307,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
             root = Path(temp_dir)
             write_tree(root, runtime_size=24_000)
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",
@@ -330,7 +330,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
             root = Path(temp_dir)
             write_tree(root, runtime_size=24_000)
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",
@@ -372,7 +372,7 @@ class ContractSizeBudgetTests(unittest.TestCase):
                 "// SPDX-License-Identifier: MIT\npragma solidity 0.8.19;\nlibrary Dependency {}\n",
             )
             write_json(
-                root / "out/Example.sol/Example.json",
+                root / "out-release/Example.sol/Example.json",
                 artifact_json(
                     root,
                     name="Example",

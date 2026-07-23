@@ -14,8 +14,9 @@ import check_contract_size_budget
 
 POLICY_SCHEMA = "6529stream.core-bytecode-spend-policy.v1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out")
+DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_CONTRACT = "StreamCore"
+EXPECTED_BASELINE_COMMAND = "python scripts/build_release_artifacts.py"
 DOC_BASELINE_PATHS = (Path("docs/architecture.md"), Path("docs/tooling.md"))
 EXCEPTION_STATUSES = {"accepted", "rejected", "superseded"}
 
@@ -73,6 +74,15 @@ def core_policy(config: dict[str, Any]) -> dict[str, Any]:
     if baseline <= 0:
         raise CoreBytecodePolicyError(
             "core_bytecode_spend_policy.approved_runtime_size_bytes must be positive"
+        )
+    baseline_command = require_string(
+        policy.get("baseline_command"),
+        "core_bytecode_spend_policy.baseline_command",
+    )
+    if baseline_command != EXPECTED_BASELINE_COMMAND:
+        raise CoreBytecodePolicyError(
+            "core_bytecode_spend_policy.baseline_command must be "
+            f"{EXPECTED_BASELINE_COMMAND!r}"
         )
     require_string(policy.get("tracking"), "core_bytecode_spend_policy.tracking")
     exceptions = policy.get("exceptions", [])
