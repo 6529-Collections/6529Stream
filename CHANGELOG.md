@@ -17,7 +17,13 @@ the release policy in `docs/release-policy.md`.
   producer derive config, Foundry-config, artifact, and retained compiler-input
   receipt hashes from the exact snapshots it validates and writes; bound
   source-verification checkout reads to the receipt's compiler/metadata source
-  hashes and carried each source snapshot forward without reopening it; and
+  hashes and carried each source snapshot forward without reopening it;
+  required one canonical-path, Windows-alias-safe manifest-wide source identity
+  across production and interface metadata/compiler records; bound every
+  size/Core artifact import read to that
+  identity with missing and non-file replacements rejected; made release JSON
+  generation hash one serialization, atomically install those exact bytes, and
+  verify installed bytes before success; and
   consistently labeled the aggregate all-source size/warning build as
   diagnostic rather than production evidence. Canonical retention now validates
   the exact Forge worktree path

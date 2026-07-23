@@ -148,13 +148,11 @@ def load_release_config(
     )
 
 
-def receipt_artifact(
+def receipt_target_record(
     release_manifest: dict[str, Any],
-    foundry_out: Path,
-    repo_root: Path,
     name: str,
     source: str,
-) -> tuple[Path, dict[str, Any]]:
+) -> dict[str, Any]:
     records = release_manifest.get("targets")
     if not isinstance(records, list):
         raise SizeBudgetError("release build manifest.targets must be an array")
@@ -171,6 +169,76 @@ def receipt_artifact(
     record = matches[0]
     if record.get("source") != source:
         raise SizeBudgetError(f"validated release receipt source is stale for {name}")
+    return record
+
+
+def receipt_source_bindings(
+    target_record: dict[str, Any],
+    name: str,
+) -> dict[str, dict[str, str]]:
+    indexed: dict[str, dict[str, str]] | None = None
+    for field in ("metadata_sources", "compiler_input_sources"):
+        values = target_record.get(field)
+        if not isinstance(values, list) or not values:
+            raise SizeBudgetError(
+                f"validated release receipt {field} is missing for {name}"
+            )
+        current: dict[str, dict[str, str]] = {}
+        for index, value in enumerate(values):
+            record = require_dict(
+                value,
+                f"release build manifest target {name}.{field}[{index}]",
+            )
+            path = require_string(
+                record.get("path"),
+                f"release build manifest target {name}.{field}[{index}].path",
+            )
+            if path in current:
+                raise SizeBudgetError(
+                    f"validated release receipt {field} has duplicate source {path} "
+                    f"for {name}"
+                )
+            current[path] = {
+                "sha256": require_string(
+                    record.get("sha256"),
+                    f"release build manifest target {name}.{field}[{index}].sha256",
+                ),
+                "keccak256": require_string(
+                    record.get("keccak256"),
+                    f"release build manifest target {name}.{field}[{index}].keccak256",
+                ),
+            }
+        if indexed is None:
+            indexed = current
+        elif indexed != current:
+            raise SizeBudgetError(
+                "validated release receipt metadata/compiler source bindings "
+                f"disagree for {name}"
+            )
+    if indexed is None:  # pragma: no cover - both required fields are iterated.
+        raise SizeBudgetError(
+            f"validated release receipt source bindings are missing for {name}"
+        )
+    return indexed
+
+
+def receipt_artifact(
+    release_manifest: dict[str, Any],
+    foundry_out: Path,
+    repo_root: Path,
+    name: str,
+    source: str,
+    target_record: dict[str, Any] | None = None,
+) -> tuple[Path, dict[str, Any]]:
+    record = (
+        target_record
+        if target_record is not None
+        else receipt_target_record(
+            release_manifest,
+            name,
+            source,
+        )
+    )
     relative = Path(
         require_string(
             record.get("artifact_relative_path"),
@@ -236,12 +304,15 @@ def artifact_profile_error(artifact_path: Path, reason: str) -> SizeBudgetError:
 
 
 def metadata_source_path(repo_root: Path, source_key: str) -> Path | None:
-    source_path = (repo_root / Path(source_key)).resolve()
+    resolved_root = repo_root.resolve()
     try:
-        source_path.relative_to(repo_root.resolve())
-    except ValueError:
+        return release_build.resolve_repo_path(
+            resolved_root,
+            Path(source_key),
+            "artifact metadata source",
+        )
+    except release_build.ReleaseBuildError:
         return None
-    return source_path
 
 
 def artifact_metadata(artifact: dict[str, Any], artifact_path: Path) -> dict[str, Any]:
@@ -264,6 +335,7 @@ def validate_current_production_artifact(
     artifact_path: Path,
     contract_name: str,
     source: str,
+    receipt_sources: dict[str, dict[str, str]] | None = None,
 ) -> None:
     metadata = artifact_metadata(artifact, artifact_path)
     compiler = require_dict(metadata.get("compiler"), f"{artifact_path}.metadata.compiler")
@@ -320,6 +392,11 @@ def validate_current_production_artifact(
         sources.get(normalized_source),
         f"{artifact_path}.metadata.sources.{normalized_source}",
     )
+    if receipt_sources is not None and set(sources) != set(receipt_sources):
+        raise artifact_profile_error(
+            artifact_path,
+            "metadata source closure does not match the validated release receipt",
+        )
 
     for source_key in sorted(sources):
         source_metadata = require_dict(
@@ -330,15 +407,52 @@ def validate_current_production_artifact(
             source_metadata.get("keccak256"),
             f"{artifact_path}.metadata.sources.{source_key}.keccak256",
         )
-        source_path = metadata_source_path(repo_root, source_key)
-        if source_path is None or not source_path.is_file():
-            if source_key == normalized_source:
+        receipt_source = (
+            receipt_sources.get(source_key)
+            if receipt_sources is not None
+            else None
+        )
+        if receipt_sources is not None and receipt_source is None:
+            raise artifact_profile_error(
+                artifact_path,
+                f"source {source_key} is absent from the validated release receipt",
+            )
+        if receipt_source is not None:
+            expected_keccak = receipt_source["keccak256"]
+            if recorded_hash.lower() != expected_keccak.lower():
                 raise artifact_profile_error(
                     artifact_path,
-                    f"source file is missing: {repo_root / normalized_source}",
+                    f"metadata source hash for {source_key} does not match the "
+                    "validated release receipt",
                 )
-            continue
-        actual_hash = keccak256_hex(source_path.read_bytes())
+        source_path = metadata_source_path(repo_root, source_key)
+        if source_path is None or not source_path.is_file():
+            raise artifact_profile_error(
+                artifact_path,
+                f"source file is missing or not a regular file: {repo_root / source_key}",
+            )
+        try:
+            source_bytes = source_path.read_bytes()
+        except OSError as exc:
+            raise artifact_profile_error(
+                artifact_path,
+                f"cannot read source file {source_key}: {exc}",
+            ) from exc
+        actual_hash = keccak256_hex(source_bytes)
+        if receipt_source is not None:
+            actual_sha256 = release_build.sha256_bytes(source_bytes)
+            if actual_sha256 != receipt_source["sha256"]:
+                raise artifact_profile_error(
+                    artifact_path,
+                    f"source hash for {source_key} does not match the validated "
+                    "release receipt",
+                )
+            if actual_hash.lower() != receipt_source["keccak256"].lower():
+                raise artifact_profile_error(
+                    artifact_path,
+                    f"source keccak for {source_key} does not match the validated "
+                    "release receipt",
+                )
         if recorded_hash.lower() != actual_hash.lower():
             raise artifact_profile_error(
                 artifact_path,
@@ -390,15 +504,30 @@ def build_report(
         if release_manifest is None:
             artifact_path = find_artifact(foundry_out_abs, name, source)
             artifact = require_dict(load_json(artifact_path), str(artifact_path))
+            receipt_sources = None
         else:
+            target_record = receipt_target_record(
+                release_manifest,
+                name,
+                source,
+            )
             artifact_path, artifact = receipt_artifact(
                 release_manifest,
                 foundry_out_abs,
                 repo_root,
                 name,
                 source,
+                target_record,
             )
-        validate_current_production_artifact(repo_root, artifact, artifact_path, name, source)
+            receipt_sources = receipt_source_bindings(target_record, name)
+        validate_current_production_artifact(
+            repo_root,
+            artifact,
+            artifact_path,
+            name,
+            source,
+            receipt_sources,
+        )
         runtime_size = deployed_runtime_size_bytes(artifact, artifact_path)
         runtime_limit = require_int(
             budget.get("runtime_limit_bytes", default_limit),

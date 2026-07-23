@@ -7,6 +7,7 @@ import argparse
 import filecmp
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -95,9 +96,43 @@ def load_json(path: Path) -> Any:
 
 def write_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="\n") as handle:
-        json.dump(value, handle, indent=2, ensure_ascii=False)
-        handle.write("\n")
+    path.write_bytes(serialized_json_bytes(value))
+
+
+def serialized_json_bytes(value: Any) -> bytes:
+    return (
+        json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+
+
+def install_exact_bytes(path: Path, value: bytes) -> None:
+    """Stage and atomically install one already serialized output."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    staged_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb",
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            dir=path.parent,
+            delete=False,
+        ) as handle:
+            staged_path = Path(handle.name)
+            handle.write(value)
+            handle.flush()
+            os.fsync(handle.fileno())
+        if read_required_bytes(staged_path) != value:
+            raise ArtifactError(f"staged generated output differs from memory: {path}")
+        os.replace(staged_path, path)
+        staged_path = None
+    except OSError as exc:
+        raise ArtifactError(f"unable to install generated output {path}: {exc}") from exc
+    finally:
+        if staged_path is not None:
+            try:
+                staged_path.unlink(missing_ok=True)
+            except OSError:
+                pass
 
 
 def canonical_json_bytes(value: Any) -> bytes:
@@ -571,8 +606,7 @@ def build_interface_ids(
 
 
 def artifact_file_hash(path: Path) -> str:
-    with path.open("rb") as handle:
-        return sha256_bytes(handle.read())
+    return sha256_bytes(read_required_bytes(path))
 
 
 def generate_artifacts(
@@ -636,12 +670,10 @@ def generate_artifacts(
         ),
     }
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    written = []
-    for file_name, data in sorted(files.items()):
-        path = output_dir / file_name
-        write_json(path, data)
-        written.append(path)
+    serialized_files = {
+        file_name: serialized_json_bytes(data)
+        for file_name, data in sorted(files.items())
+    }
 
     manifest = {
         "schema_version": MANIFEST_SCHEMA,
@@ -651,16 +683,30 @@ def generate_artifacts(
             "foundry_out": normalize_artifact_path(foundry_out, repo_root),
         },
         "artifacts": {
-            path.name: {
-                "path": path.name,
-                "sha256": artifact_file_hash(path),
+            file_name: {
+                "path": file_name,
+                "sha256": sha256_bytes(content),
             }
-            for path in written
+            for file_name, content in serialized_files.items()
         },
     }
-    manifest_path = output_dir / "release-artifact-manifest.json"
-    write_json(manifest_path, manifest)
-    written.append(manifest_path)
+    serialized_files["release-artifact-manifest.json"] = serialized_json_bytes(
+        manifest
+    )
+
+    written = []
+    for file_name, content in sorted(serialized_files.items()):
+        path = output_dir / file_name
+        install_exact_bytes(path, content)
+        written.append(path)
+
+    for file_name, expected in sorted(serialized_files.items()):
+        installed = read_required_bytes(output_dir / file_name)
+        if installed != expected:
+            raise ArtifactError(
+                "installed generated output changed before generation completed: "
+                f"{output_dir / file_name}"
+            )
     return written
 
 

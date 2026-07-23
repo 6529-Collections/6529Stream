@@ -1034,6 +1034,69 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         stderr.getvalue(),
                     )
 
+    def test_size_checker_rejects_import_loss_after_receipt_validation(
+        self,
+    ) -> None:
+        for mutation in ("deleted", "directory"):
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_tree(root)
+                    with redirect_stdout(StringIO()):
+                        builder.build_release_output(
+                            root,
+                            paths["config"],
+                            paths["foundry_config"],
+                            paths["output"],
+                            runner=FakeForge(),
+                            forge_version_output=FAKE_FORGE_VERSION,
+                        )
+
+                    original_validate = size_checker.validate_canonical_release_output
+
+                    def validate_then_remove_import(
+                        *args: Any,
+                        **kwargs: Any,
+                    ) -> dict[str, Any]:
+                        manifest = original_validate(*args, **kwargs)
+                        paths["shared"].unlink()
+                        if mutation == "directory":
+                            paths["shared"].mkdir()
+                        return manifest
+
+                    stderr = StringIO()
+                    with (
+                        patch.object(
+                            size_checker,
+                            "validate_canonical_release_output",
+                            side_effect=validate_then_remove_import,
+                        ),
+                        redirect_stdout(StringIO()),
+                        redirect_stderr(stderr),
+                    ):
+                        result = size_checker.main(
+                            [
+                                "--repo-root",
+                                str(root),
+                                "--config",
+                                str(paths["config"].relative_to(root)),
+                                "--foundry-config",
+                                str(paths["foundry_config"].relative_to(root)),
+                                "--foundry-out",
+                                builder.DEFAULT_OUTPUT_DIR.as_posix(),
+                            ]
+                        )
+
+                    self.assertEqual(result, 1)
+                    self.assertIn(
+                        "source file is missing or not a regular file",
+                        stderr.getvalue(),
+                    )
+                    self.assertIn(
+                        "Shared.sol",
+                        stderr.getvalue(),
+                    )
+
     def test_size_checker_rejects_restricted_source_in_retained_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -1238,6 +1301,123 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 read_counts,
                 {path: 1 for path in tracked_paths},
             )
+
+    def test_validator_rejects_cross_kind_source_binding_conflict_before_reads(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            manifest_path = paths["output"] / builder.MANIFEST_FILENAME
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            interface_record = next(
+                record
+                for record in manifest["targets"]
+                if record["kind"] == "interface"
+            )
+            alternate_source = (
+                b"// SPDX-License-Identifier: MIT\n"
+                b"pragma solidity 0.8.19;\n"
+                b"library AlternatingShared {}\n"
+            )
+            conflicting_binding = {
+                "path": "smart-contracts/Shared.sol",
+                "sha256": builder.sha256_bytes(alternate_source),
+                "keccak256": builder.keccak256_hex(alternate_source),
+            }
+            interface_record["metadata_sources"] = [conflicting_binding]
+            interface_record["compiler_input_sources"] = [conflicting_binding]
+            write_json(manifest_path, manifest)
+
+            shared_path = paths["shared"].resolve()
+            shared_reads = 0
+            original_read_bytes = Path.read_bytes
+
+            def alternating_read_bytes(path: Path) -> bytes:
+                nonlocal shared_reads
+                if path.resolve() == shared_path:
+                    shared_reads += 1
+                    return (
+                        alternate_source
+                        if shared_reads % 2 == 0
+                        else original_read_bytes(path)
+                    )
+                return original_read_bytes(path)
+
+            with (
+                patch.object(Path, "read_bytes", new=alternating_read_bytes),
+                self.assertRaisesRegex(
+                    builder.ReleaseBuildError,
+                    "conflicting source bindings for smart-contracts/Shared.sol",
+                ),
+            ):
+                builder.validate_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                )
+
+            self.assertEqual(shared_reads, 0)
+
+    def test_validator_rejects_noncanonical_source_path_aliases(self) -> None:
+        aliases = ["smart-contracts/../smart-contracts/Shared.sol"]
+        if os.name == "nt":
+            aliases.append("SMART-CONTRACTS/SHARED.SOL")
+
+        for alias in aliases:
+            with self.subTest(alias=alias), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                paths = seed_tree(root)
+                with redirect_stdout(StringIO()):
+                    builder.build_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                        runner=FakeForge(),
+                        forge_version_output=FAKE_FORGE_VERSION,
+                    )
+
+                manifest_path = paths["output"] / builder.MANIFEST_FILENAME
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                shared_binding = next(
+                    source_record
+                    for record in manifest["targets"]
+                    if record["kind"] == "production_contract"
+                    for source_record in record["metadata_sources"]
+                    if source_record["path"] == "smart-contracts/Shared.sol"
+                )
+                aliased_binding = {**shared_binding, "path": alias}
+                interface_record = next(
+                    record
+                    for record in manifest["targets"]
+                    if record["kind"] == "interface"
+                )
+                interface_record["metadata_sources"] = [aliased_binding]
+                interface_record["compiler_input_sources"] = [aliased_binding]
+                write_json(manifest_path, manifest)
+
+                with self.assertRaisesRegex(
+                    builder.ReleaseBuildError,
+                    "must use canonical repository spelling",
+                ):
+                    builder.validate_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                    )
 
     def test_builder_carries_single_input_snapshots_into_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

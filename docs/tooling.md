@@ -287,7 +287,11 @@ compilation restrictions can still admit `test/` helpers despite the command's
 `--skip test --skip script` flags. The artifact-backed budget checker therefore
 validates the canonical build receipt and retained compiler inputs, then hashes
 the exact target-isolated `out-release/` artifact bytes it reads against that
-in-memory receipt before decoding them. It reads
+in-memory receipt before decoding them. For every artifact metadata source,
+including imports, the size and Core-spend consumers require a regular
+non-reparse checkout file and compare one read against both the receipt
+SHA-256/Keccak record and artifact metadata Keccak; deletion or non-file
+replacement after receipt validation fails closed. The checker reads
 `release-artifacts/contracts.json`, treats unlinked Solidity library
 placeholders as their 20-byte deployed addresses for size counting, fails below
 the 384-byte `StreamCore` minimum margin, and reports a warning below the
@@ -395,6 +399,14 @@ then hashes and decodes one artifact byte snapshot; source-verification also
 carries that parsed snapshot into metadata collection, binds every checkout
 source read to the receipt's matching metadata/compiler-input SHA-256 and
 Keccak records, and reuses one snapshot per source instead of reopening files.
+Receipt validation first requires every occurrence of a source path to carry
+one identical SHA-256/Keccak identity across metadata and compiler-input
+records for all production and interface targets, so alternating a shared
+checkout source between target validations cannot yield a valid receipt.
+Source records must use their resolved canonical repository-relative spelling;
+Windows identity keys are case-folded after resolution to reject case and
+short/long aliases, while Linux receipt paths retain case-sensitive filesystem
+semantics.
 Stale source inputs or mutation after initial receipt validation therefore fail
 closed.
 
@@ -424,8 +436,12 @@ a production blocker for that deployment binding.
 
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface
-IDs, and the event topic catalog. It automatically finds Foundry's `cast` in
-`~/.foundry/bin` when the shell has not added it to `PATH`.
+IDs, and the event topic catalog. Each generated JSON output is serialized once;
+its manifest hash is derived from those exact in-memory bytes, which are staged
+and atomically installed. Before reporting success, the generator rereads every
+installed output and requires byte-for-byte equality with its in-memory
+snapshot. It automatically finds Foundry's `cast` in `~/.foundry/bin` when the
+shell has not added it to `PATH`.
 
 The source-verification step generates and checks
 `release-artifacts/latest/source-verification-inputs.json` from the production

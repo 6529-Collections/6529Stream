@@ -964,6 +964,91 @@ def expected_target_identity(targets: list[dict[str, str]]) -> list[tuple[str, s
     return [(target["kind"], target["name"], target["source"]) for target in targets]
 
 
+def validate_manifest_source_binding_consistency(
+    repo_root: Path,
+    records: list[Any],
+    manifest_path: Path,
+) -> None:
+    """Require one immutable source identity across every receipt target."""
+    bindings: dict[str, tuple[str, str]] = {}
+    binding_locations: dict[str, str] = {}
+    binding_paths: dict[str, str] = {}
+    for target_index, value in enumerate(records):
+        record = require_dict(value, f"{manifest_path}.targets[{target_index}]")
+        target_label = (
+            f"targets[{target_index}] "
+            f"{record.get('kind')}:{record.get('source')}:{record.get('name')}"
+        )
+        for field in ("metadata_sources", "compiler_input_sources"):
+            source_records = require_list(
+                record.get(field),
+                f"{target_label}.{field}",
+            )
+            local_paths: set[str] = set()
+            for source_index, source_value in enumerate(source_records):
+                location = f"{target_label}.{field}[{source_index}]"
+                source_record = require_dict(source_value, location)
+                source_path = require_string(
+                    source_record.get("path"),
+                    f"{location}.path",
+                )
+                if source_path in local_paths:
+                    raise ReleaseBuildError(
+                        f"{target_label}.{field} contains duplicate source path "
+                        f"{source_path}"
+                    )
+                local_paths.add(source_path)
+                resolved_source = resolve_repo_path(
+                    repo_root,
+                    Path(source_path),
+                    f"{location}.path",
+                )
+                canonical_source_path = normalize_path(
+                    resolved_source,
+                    repo_root,
+                )
+                if source_path != canonical_source_path:
+                    raise ReleaseBuildError(
+                        f"{location}.path must use canonical repository spelling "
+                        f"{canonical_source_path!r}, got {source_path!r}"
+                    )
+                binding_key = (
+                    canonical_source_path.casefold()
+                    if os.name == "nt"
+                    else canonical_source_path
+                )
+                existing_path = binding_paths.get(binding_key)
+                if (
+                    existing_path is not None
+                    and existing_path != canonical_source_path
+                ):
+                    raise ReleaseBuildError(
+                        "release build receipt has case-aliased source paths "
+                        f"{existing_path!r} and {canonical_source_path!r}"
+                    )
+                identity = (
+                    require_string(
+                        source_record.get("sha256"),
+                        f"{location}.sha256",
+                    ),
+                    require_string(
+                        source_record.get("keccak256"),
+                        f"{location}.keccak256",
+                    ).lower(),
+                )
+                existing = bindings.get(binding_key)
+                if existing is not None and existing != identity:
+                    raise ReleaseBuildError(
+                        "release build receipt has conflicting source bindings for "
+                        f"{canonical_source_path}: "
+                        f"{binding_locations[binding_key]} records "
+                        f"{existing!r}, while {location} records {identity!r}"
+                    )
+                bindings[binding_key] = identity
+                binding_paths.setdefault(binding_key, canonical_source_path)
+                binding_locations.setdefault(binding_key, location)
+
+
 def validate_release_output(
     repo_root: Path,
     config_path: Path,
@@ -1061,6 +1146,7 @@ def validate_release_output(
         raise ReleaseBuildError(f"{manifest_path} compiler policy is stale")
 
     records = require_list(manifest.get("targets"), f"{manifest_path}.targets")
+    validate_manifest_source_binding_consistency(repo_root, records, manifest_path)
     record_identity = []
     expected_files = {Path(MANIFEST_FILENAME)}
     compiler_input_snapshots: dict[Path, tuple[dict[str, Any], str]] = {}
