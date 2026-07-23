@@ -191,10 +191,11 @@ python scripts/test_sepolia_evidence_preflight.py
 python scripts/check_sepolia_evidence_preflight.py
 ```
 
-This canonical build validates release and explorer-verification evidence; it
-does not yet make the Forge deployment scripts or broadcasts consume the same
-isolated initcode. Do not treat this preflight as production broadcast-bytecode
-proof until
+This canonical build validates release artifacts and explorer-verification
+inputs; it does not prove live explorer verification or deployed-address
+parity, and it does not yet make the Forge deployment scripts or broadcasts
+consume the same isolated initcode. Do not treat this preflight as production
+broadcast-bytecode proof until
 [issue #677](https://github.com/6529-Collections/6529Stream/issues/677) is
 resolved.
 

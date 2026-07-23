@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 from typing import Any, Sequence
 
+import build_release_artifacts as release_build
 import check_contract_size_budget
 
 
@@ -16,7 +17,7 @@ POLICY_SCHEMA = "6529stream.core-bytecode-spend-policy.v1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_CONTRACT = "StreamCore"
-EXPECTED_BASELINE_COMMAND = "python scripts/build_release_artifacts.py"
+EXPECTED_BASELINE_COMMAND = release_build.CANONICAL_BUILD_COMMAND
 DOC_BASELINE_PATHS = (Path("docs/architecture.md"), Path("docs/tooling.md"))
 EXCEPTION_STATUSES = {"accepted", "rejected", "superseded"}
 

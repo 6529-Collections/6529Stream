@@ -28,6 +28,7 @@ DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_OUTPUT_DIR = Path("out-release")
 MANIFEST_FILENAME = "release-build-manifest.json"
+CANONICAL_BUILD_COMMAND = "python scripts/build_release_artifacts.py"
 FOUNDRY_VERSION = "1.7.1"
 SOLC_VERSION = "0.8.19"
 SOLC_LONG_VERSION = "0.8.19+commit.7dd6d404"
@@ -168,7 +169,7 @@ def lexical_repo_path(repo_root: Path, value: Path, label: str) -> Path:
                 raise ReleaseBuildError(
                     f"{label} must not use symlink, junction, or reparse "
                     f"components: {cursor}"
-                )
+                ) from None
         resolved = lexical.resolve()
         try:
             resolved.relative_to(repo_root)

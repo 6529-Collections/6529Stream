@@ -28,7 +28,7 @@ DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
 DEFAULT_OUTPUT = Path("release-artifacts/latest/source-verification-inputs.json")
-PRODUCTION_BUILD_COMMAND = "python scripts/build_release_artifacts.py"
+PRODUCTION_BUILD_COMMAND = release_build.CANONICAL_BUILD_COMMAND
 
 
 class SourceVerificationError(RuntimeError):
