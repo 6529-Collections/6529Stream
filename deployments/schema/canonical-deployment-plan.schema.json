@@ -1,0 +1,536 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/canonical-deployment-plan.schema.json",
+  "title": "6529Stream Materialized Canonical Deployment Plan",
+  "description": "Deterministic, non-production initcode materialized from a validated isolated release build.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_by",
+    "release_posture",
+    "candidate",
+    "network",
+    "release_build",
+    "deployments"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.canonical-deployment-plan.v1"
+    },
+    "generated_by": {
+      "const": "scripts/materialize_canonical_deployment_plan.py:3"
+    },
+    "release_posture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "production_candidate",
+        "readiness_evidence",
+        "status",
+        "note"
+      ],
+      "properties": {
+        "production_candidate": {
+          "const": false
+        },
+        "readiness_evidence": {
+          "const": false
+        },
+        "status": {
+          "const": "non_production_tooling_only"
+        },
+        "note": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "candidate_id", "candidate_kind"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "candidate_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "candidate_kind": {
+          "const": "non_production_fixture"
+        }
+      }
+    },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "chain_id"],
+      "properties": {
+        "environment": {
+          "enum": ["anvil", "local", "fork", "testnet"]
+        },
+        "chain_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "release_build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "receipt_path",
+        "receipt_sha256",
+        "target_catalog_sha256",
+        "config_path",
+        "config_sha256",
+        "foundry_config_path",
+        "foundry_config_sha256",
+        "compiler_policy"
+      ],
+      "properties": {
+        "receipt_path": {
+          "const": "out-release/release-build-manifest.json"
+        },
+        "receipt_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "target_catalog_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "config_path": {
+          "const": "release-artifacts/contracts.json"
+        },
+        "config_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "foundry_config_path": {
+          "const": "foundry.toml"
+        },
+        "foundry_config_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "compiler_policy": {
+          "$ref": "#/$defs/compiler_policy"
+        }
+      }
+    },
+    "deployments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/deployment"
+      }
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*[\\u0000-\\u001F\\u007F<>:\"\\\\|?*])(?!.*//)(?!.*\\/$)(?!\\.\\.?(?:/|$))(?!.*\\/\\.\\.?(?:/|$))(?![^/]*[. ](?:/|$))(?!.*\\/[^/]*[. ](?:/|$))(?!(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\\.|/|$))(?!.*\\/(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\\.|/|$)).+$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "keccak256": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{64}$"
+    },
+    "address": {
+      "type": "string",
+      "pattern": "^0x[0-9a-f]{40}$"
+    },
+    "hex_bytes": {
+      "type": "string",
+      "pattern": "^0x(?:[0-9a-f]{2})*$"
+    },
+    "nonempty_hex_bytes": {
+      "type": "string",
+      "pattern": "^0x(?:[0-9a-f]{2})+$"
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "length"],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        }
+      }
+    },
+    "library_position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "length"],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "length": {
+          "const": 20
+        }
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name",
+        "source",
+        "artifact_relative_path",
+        "artifact_sha256"
+      ],
+      "properties": {
+        "kind": {
+          "const": "production_contract"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "source": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "artifact_relative_path": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "artifact_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "library": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "name",
+        "address",
+        "creation_positions",
+        "runtime_positions"
+      ],
+      "properties": {
+        "source": {
+          "$ref": "#/$defs/repo_path"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "address": {
+          "$ref": "#/$defs/address"
+        },
+        "creation_positions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/library_position"
+          }
+        },
+        "runtime_positions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/library_position"
+          }
+        }
+      }
+    },
+    "immutable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ast_id", "value", "runtime_positions"],
+      "properties": {
+        "ast_id": {
+          "type": "string",
+          "pattern": "^(?:0|[1-9][0-9]*)$"
+        },
+        "value": {
+          "type": "string",
+          "pattern": "^0x(?:[0-9a-f]{2})+$"
+        },
+        "runtime_positions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/position"
+          }
+        }
+      }
+    },
+    "constructor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "abi_inputs",
+        "canonical_types",
+        "arguments",
+        "encoded_args",
+        "encoded_args_keccak256"
+      ],
+      "properties": {
+        "abi_inputs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "canonical_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "arguments": {
+          "type": "array",
+          "items": {}
+        },
+        "encoded_args": {
+          "$ref": "#/$defs/hex_bytes"
+        },
+        "encoded_args_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        }
+      }
+    },
+    "compiler_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compilation_unit",
+        "solc_version",
+        "solc_long_version",
+        "evm_version",
+        "optimizer_enabled",
+        "optimizer_runs",
+        "via_ir",
+        "bytecode_hash",
+        "cbor_metadata",
+        "controlled_forge_environment",
+        "forge_profile",
+        "foundry_version",
+        "forge_version",
+        "forge_version_sha256",
+        "sanitized_environment_prefixes",
+        "restricted_source_roots",
+        "portable_compiler_paths"
+      ],
+      "properties": {
+        "compilation_unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "solc_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "solc_long_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evm_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "optimizer_enabled": {
+          "type": "boolean"
+        },
+        "optimizer_runs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "via_ir": {
+          "type": "boolean"
+        },
+        "bytecode_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cbor_metadata": {
+          "type": "boolean"
+        },
+        "controlled_forge_environment": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "forge_profile": {
+          "type": "string",
+          "minLength": 1
+        },
+        "foundry_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forge_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forge_version_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "sanitized_environment_prefixes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "restricted_source_roots": {
+          "const": ["script", "test"]
+        },
+        "portable_compiler_paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "basePath",
+            "includePaths",
+            "allowPaths"
+          ],
+          "properties": {
+            "basePath": {
+              "const": "."
+            },
+            "includePaths": {
+              "const": ["."]
+            },
+            "allowPaths": {
+              "const": [".", "lib"]
+            }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "instance_id",
+        "profile_entry_id",
+        "target",
+        "depends_on",
+        "artifact",
+        "constructor",
+        "libraries",
+        "immutables",
+        "linked_creation_bytecode",
+        "linked_creation_bytecode_keccak256",
+        "initcode",
+        "initcode_length_bytes",
+        "initcode_keccak256",
+        "expected_runtime_bytecode",
+        "expected_runtime_length_bytes",
+        "expected_runtime_keccak256"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "instance_id": {
+          "$ref": "#/$defs/identifier"
+        },
+        "profile_entry_id": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "target": {
+          "$ref": "#/$defs/target"
+        },
+        "depends_on": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          }
+        },
+        "artifact": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {
+              "$ref": "#/$defs/repo_path"
+            },
+            "sha256": {
+              "$ref": "#/$defs/sha256"
+            }
+          }
+        },
+        "constructor": {
+          "$ref": "#/$defs/constructor"
+        },
+        "libraries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/library"
+          }
+        },
+        "immutables": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/immutable"
+          }
+        },
+        "linked_creation_bytecode": {
+          "$ref": "#/$defs/nonempty_hex_bytes"
+        },
+        "linked_creation_bytecode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "initcode": {
+          "$ref": "#/$defs/nonempty_hex_bytes"
+        },
+        "initcode_length_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 49152
+        },
+        "initcode_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "expected_runtime_bytecode": {
+          "$ref": "#/$defs/nonempty_hex_bytes"
+        },
+        "expected_runtime_length_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "expected_runtime_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        }
+      }
+    }
+  }
+}

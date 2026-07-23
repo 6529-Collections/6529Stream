@@ -43,9 +43,11 @@ the release policy in `docs/release-policy.md`.
   diagnostic rather than production evidence. Canonical retention now validates
   the exact Forge worktree path
   carriers and projects only those fields to stable `.` / `lib` values before
-  hashing, so otherwise identical checkouts produce byte-identical compiler
-  inputs and receipt hashes without weakening source or artifact binding. This
-  addresses
+  hashing. It also normalizes only Forge's platform packaging timestamp while
+  retaining the exact semantic version, commit, build profile, and identity
+  self-hash, so otherwise identical Windows and POSIX builds produce
+  byte-identical compiler inputs and receipt hashes without weakening source,
+  compiler, toolchain, or artifact binding. This addresses
   [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
   without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test
   compilation, or release maturity.
@@ -135,6 +137,33 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the first non-production issue #677 canonical deployment-plan
+  materializer. It validates the issue #674 isolated build receipt and exact
+  artifact hashes, derives constructor ABI encoding plus creation/runtime
+  library and immutable ranges, and emits ordered full initcode and expected
+  runtime hashes from a pinned Anvil-only `DependencyRegistry` fixture. It
+  carries the exact validated receipt, release-config, Foundry-config, and
+  artifact byte snapshots through plan construction without reopening those
+  files, strictly decodes the carried receipt, config, and every artifact JSON
+  before target selection, and reuses parsed artifact snapshots across repeated
+  instances. The underlying canonical validator now applies the same
+  duplicate-free, non-floating-point I-JSON policy to config, receipt, all
+  artifacts, retained compiler inputs, and string-form metadata without
+  rereading them, so post-validation filesystem replacement cannot alter the
+  resulting plan. Focused regressions cover exact read counts, post-validation
+  mutation, forged snapshot sets, and ambiguous selected or unselected inputs.
+  It enforces the full 49,152-byte
+  EIP-3860 initcode limit,
+  directly pins its `eth-abi` encoder, uses a directly pinned `jsonschema`
+  engine for actual Draft 2020-12 candidate/plan validation, and applies one
+  runtime/schema portable path policy that rejects Windows-invalid controls,
+  characters, device names, dot aliases, and trailing dot/space aliases. It
+  checksum-binds the implementation/tests and runs the unit plus real-fixture
+  materialize/reparse-check sequence after canonical builds in the Make, Bash,
+  PowerShell, and Linux CI gates. The tool refuses production/readiness flags,
+  writes only ephemeral `tmp/` output, and does not add a broadcaster, a strict
+  issue #656 instance-aware candidate, or any release-readiness evidence;
+  issues #656 and #677 remain open and protocol maturity is unchanged.
 - Added the immutable, read-only `StreamCoreFinalityAdapter` with its exact
   four-function ERC-165 ABI and fixed Core/collection-metadata bindings. It
   composes collection facts from granular target-Core reads, derives checked

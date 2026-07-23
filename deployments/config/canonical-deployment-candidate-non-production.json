@@ -1,0 +1,56 @@
+{
+  "schema_version": "6529stream.canonical-deployment-candidate.v1",
+  "candidate_id": "anvil-dependency-registry-fixture-v1",
+  "candidate_kind": "non_production_fixture",
+  "production_candidate": false,
+  "readiness_evidence": false,
+  "network": {
+    "environment": "anvil",
+    "chain_id": 31337
+  },
+  "release_build": {
+    "receipt_path": "out-release/release-build-manifest.json",
+    "receipt_sha256": "sha256:d0eaab22ffdde38b97a13c9e2393622099edc37c688026418111c534d79272f5",
+    "target_catalog_sha256": "sha256:1fb823f17f1ded48ed349c30aec8ff95f7446610c4008d1c2f8d6aa4cb02c8b9",
+    "config_path": "release-artifacts/contracts.json",
+    "config_sha256": "sha256:a9717b7984538f5c2ebe7cc1383b84add5289b100e0c5a3618e000561d3c8b9e",
+    "foundry_config_path": "foundry.toml",
+    "foundry_config_sha256": "sha256:155408a77117fe90f39469f1ad0b8f4d817da2fa030a6d850cd9a6c4276cbc02"
+  },
+  "instances": [
+    {
+      "order": 1,
+      "instance_id": "dependency-registry-fixture",
+      "profile_entry_id": null,
+      "target": {
+        "kind": "production_contract",
+        "name": "DependencyRegistry",
+        "source": "smart-contracts/DependencyRegistry.sol",
+        "artifact_relative_path": "DependencyRegistry.sol/DependencyRegistry.json",
+        "artifact_sha256": "sha256:bf74a1c36ea1c29de7a37f4343bc91894e71d37855ad7907e2e71820450b37e0"
+      },
+      "depends_on": [],
+      "constructor": {
+        "types": [
+          "address"
+        ],
+        "arguments": [
+          "0x0000000000000000000000000000000000001001"
+        ],
+        "encoded_args_keccak256": "0x7ae754b5dd90fd26ba5a69866c5082dc9f5d5f3ec0076d8c1bd946f0d37ff961"
+      },
+      "libraries": [
+        {
+          "source": "smart-contracts/StreamMetadataRenderer.sol",
+          "name": "StreamMetadataRenderer",
+          "address": "0x0000000000000000000000000000000000002001"
+        }
+      ],
+      "runtime": {
+        "immutable_values": {},
+        "expected_keccak256": "0xebe01dccd7837774fda779b3cdca2f55b50bb284b81c3c3b6694ec6eb6437c80"
+      },
+      "expected_initcode_keccak256": "0x6e780dccffa4d8b86cd356cdd0b33ce1468007b7721ee4abdb06755f7c59af98"
+    }
+  ]
+}

@@ -133,6 +133,80 @@ secrets. This is a local Anvil release gate; fork, testnet, and production
 broadcasts should still retain their own manifest and browser evidence during
 the release ceremony.
 
+## Canonical Initcode Materialization (Non-Production Only)
+
+The current issue #677 tooling foundation can deterministically materialize
+constructor arguments, linked creation bytecode, full initcode, and expected
+linked/immutable runtime bytecode from the issue #674 canonical isolated
+release build. It does not broadcast.
+
+First produce `out-release/` with the canonical builder described in
+[`docs/tooling.md`](tooling.md). Then run:
+
+```sh
+python scripts/test_materialize_canonical_deployment_plan.py
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json \
+  --check
+```
+
+The committed candidate is a deliberately narrow Anvil fixture. It binds one
+canonical `DependencyRegistry` artifact to literal non-secret placeholder
+addresses, has no genesis-profile entry, and sets both production/readiness
+flags to false. The materializer performs actual Draft 2020-12 validation of
+the committed candidate and every generated plan, revalidates the complete
+canonical build, and checks exact receipt, catalog, config, artifact,
+constructor, link, immutable, initcode, and runtime hashes before emitting the
+ordered plan below `tmp/`. The build validator carries the exact receipt,
+release-config, Foundry-config, and artifact byte snapshots into the
+materializer. Paths and SHA-256 digests are rechecked, carried JSON is strictly
+decoded for the receipt, release config, and every artifact before target
+selection, and those files are not reopened while the plan is assembled. The
+underlying build validator applies the same strict UTF-8, duplicate-free,
+non-floating-point I-JSON policy to its config, receipt, every artifact,
+retained compiler input, and string-form embedded metadata snapshots. A shared
+target artifact is read once and reused across instances, and a post-validation
+filesystem replacement cannot change the validated snapshot used for the plan.
+Generator version 3 retains the canonical build's restricted-source-root and
+portable compiler-path policies in the validated plan.
+Full creation bytecode plus ABI-encoded constructor arguments must fit the
+49,152-byte EIP-3860 initcode limit. Treat any mismatch or limit breach as a
+stop condition; do not weaken or bypass a binding to make a stale candidate
+pass.
+
+Every repository-relative path in the candidate and plan uses the same
+runtime/schema portable policy. It rejects controls, Windows-invalid
+characters and device names (including device names with extensions),
+backslashes, drive or alternate-stream syntax, empty or dot-alias segments,
+and segments ending in a dot or space.
+
+Supplied immutable values are candidate assertions. The materializer checks
+their artifact-declared byte widths and positions and the resulting expected
+runtime hash; it does not derive the intended values from constructor
+semantics, execute creation code, or prove that constructor execution returns
+that runtime. Those semantic and deployed-runtime proofs remain required for a
+production candidate.
+
+The ordinary `make check`, `scripts/check.sh`, `scripts/check.ps1`, and Linux
+CI paths run the focused unit suite, materialize this exact committed fixture,
+and reparse/check the ephemeral output immediately after the canonical release
+build. This is regression coverage for the tooling foundation, not deployment
+or readiness evidence.
+
+The output is ephemeral operator input, not a deployment manifest or release
+artifact. The v1 candidate schema refuses production candidates. The
+materializer does not derive deployment addresses or salts, prove constructor
+semantics, execute creation code, or compare deployed runtime, and it has no
+broadcaster. The strict instance-aware issue #656 candidate, the reusable
+broadcaster, retained receipts, and constructor/deployed-runtime comparison
+remain outstanding. Nothing in this workflow closes issue #656 or #677,
+authorizes a testnet or mainnet broadcast, or establishes public-beta or
+production readiness.
+
 ## Sepolia Deployment Rehearsal Runbook
 
 The Sepolia rehearsal path is a no-secret public-beta evidence workflow. It does

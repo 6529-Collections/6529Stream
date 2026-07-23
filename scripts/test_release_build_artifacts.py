@@ -53,6 +53,14 @@ FAKE_FORGE_VERSION = (
     "Build Timestamp: fixture\n"
     "Build Profile: fixture"
 )
+OTHER_PLATFORM_FAKE_FORGE_VERSION = FAKE_FORGE_VERSION.replace(
+    "Build Timestamp: fixture",
+    "Build Timestamp: other-platform-fixture",
+)
+PORTABLE_FAKE_FORGE_VERSION = FAKE_FORGE_VERSION.replace(
+    "Build Timestamp: fixture",
+    builder.PORTABLE_FORGE_BUILD_TIMESTAMP,
+)
 
 
 @contextmanager
@@ -75,6 +83,16 @@ def write_json(path: Path, value: Any) -> None:
 def write_text(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def append_json_object_member(raw: bytes, member: bytes) -> bytes:
+    """Append one raw member without normalizing intentionally ambiguous JSON."""
+    closing = raw.rfind(b"}")
+    if closing < 0:
+        raise AssertionError("fixture JSON must end with an object")
+    prefix = raw[:closing].rstrip()
+    suffix = raw[closing:]
+    return prefix + b"," + member + suffix
 
 
 def seed_tree(root: Path) -> dict[str, Path]:
@@ -286,6 +304,26 @@ class FakeForge:
 
 
 class ReleaseBuildArtifactTests(unittest.TestCase):
+    def test_strict_json_decoder_preserves_ijson_policy(self) -> None:
+        cases = (
+            (b'{"value":1.5}', "floating-point JSON is forbidden"),
+            (
+                b'{"value":9007199254740992}',
+                "outside the I-JSON interoperable range",
+            ),
+            (
+                b'{"value":"\\ud800"}',
+                "non-Unicode-scalar surrogate",
+            ),
+            (b'{"value":"\xff"}', "not strict UTF-8 JSON"),
+        )
+        for raw, expected in cases:
+            with (
+                self.subTest(raw=raw),
+                self.assertRaisesRegex(builder.ReleaseBuildError, expected),
+            ):
+                builder.load_json_bytes(raw, Path("fixture.json"))
+
     def test_builds_each_target_in_an_isolated_import_closure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -343,7 +381,10 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 },
             )
             self.assertEqual(manifest["output_dir"], "out-release")
-            self.assertEqual(manifest["policy"]["forge_version"], FAKE_FORGE_VERSION)
+            self.assertEqual(
+                manifest["policy"]["forge_version"],
+                PORTABLE_FAKE_FORGE_VERSION,
+            )
             self.assertEqual(
                 manifest["policy"]["foundry_version"],
                 builder.FOUNDRY_VERSION,
@@ -414,14 +455,20 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 builder.PORTABLE_COMPILER_PATHS,
             )
 
-    def test_release_receipt_is_identical_across_worktree_roots(self) -> None:
+    def test_release_receipt_is_identical_across_roots_and_platform_builds(
+        self,
+    ) -> None:
         with (
             tempfile.TemporaryDirectory() as first_dir,
             tempfile.TemporaryDirectory() as second_dir,
         ):
             roots = (Path(first_dir), Path(second_dir))
-            outputs: list[tuple[dict[str, Any], list[bytes]]] = []
-            for root in roots:
+            forge_versions = (
+                FAKE_FORGE_VERSION,
+                OTHER_PLATFORM_FAKE_FORGE_VERSION,
+            )
+            outputs: list[tuple[dict[str, Any], list[bytes], bytes]] = []
+            for root, forge_version in zip(roots, forge_versions, strict=True):
                 paths = seed_tree(root)
                 with redirect_stdout(StringIO()):
                     manifest = builder.build_release_output(
@@ -431,7 +478,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         paths["output"],
                         "fake-forge",
                         FakeForge(),
-                        FAKE_FORGE_VERSION,
+                        forge_version,
                     )
                 retained = [
                     path.read_bytes()
@@ -439,9 +486,25 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         (paths["output"] / "compiler-inputs").glob("*.json")
                     )
                 ]
-                outputs.append((manifest, retained))
+                receipt = (
+                    paths["output"] / builder.MANIFEST_FILENAME
+                ).read_bytes()
+                outputs.append((manifest, retained, receipt))
 
             self.assertEqual(outputs[0], outputs[1])
+            self.assertEqual(
+                outputs[0][0]["policy"]["forge_version"],
+                PORTABLE_FAKE_FORGE_VERSION,
+            )
+            self.assertNotEqual(
+                builder.validate_forge_version(
+                    FAKE_FORGE_VERSION.replace(
+                        "Commit SHA: fixture",
+                        "Commit SHA: different",
+                    )
+                ),
+                PORTABLE_FAKE_FORGE_VERSION,
+            )
             self.assertEqual(
                 builder.file_sha256(
                     roots[0] / builder.DEFAULT_OUTPUT_DIR / builder.MANIFEST_FILENAME
@@ -1247,6 +1310,167 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                     paths["output"],
                 )
 
+    def test_validator_strictly_decodes_every_security_json_input(self) -> None:
+        cases = tuple(
+            (boundary, variant)
+            for boundary in (
+                "config",
+                "receipt",
+                "selected artifact",
+                "unselected artifact",
+                "retained compiler input",
+                "string metadata",
+            )
+            for variant in ("duplicate", "NaN")
+        )
+        duplicate_members = {
+            "config": (
+                b'"schema_version":'
+                b'"6529stream.release-artifact-contracts.v1"'
+            ),
+            "receipt": b'"schema_version":"6529stream.release-build.v1"',
+            "selected artifact": b'"abi":[]',
+            "unselected artifact": b'"abi":[]',
+            "retained compiler input": b'"language":"Solidity"',
+            "string metadata": b'"language":"Solidity"',
+        }
+
+        for boundary, variant in cases:
+            with (
+                self.subTest(boundary=boundary, variant=variant),
+                tempfile.TemporaryDirectory() as temp_dir,
+            ):
+                root = Path(temp_dir)
+                paths = seed_tree(root)
+                with redirect_stdout(StringIO()):
+                    builder.build_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                        runner=FakeForge(),
+                        forge_version_output=FAKE_FORGE_VERSION,
+                    )
+
+                manifest_path = paths["output"] / builder.MANIFEST_FILENAME
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                member = (
+                    duplicate_members[boundary]
+                    if variant == "duplicate"
+                    else b'"ambiguous":NaN'
+                )
+
+                if boundary == "config":
+                    config_raw = append_json_object_member(
+                        paths["config"].read_bytes(),
+                        member,
+                    )
+                    paths["config"].write_bytes(config_raw)
+                    manifest["source"]["config_sha256"] = builder.sha256_bytes(
+                        config_raw
+                    )
+                    write_json(manifest_path, manifest)
+                elif boundary == "receipt":
+                    manifest_path.write_bytes(
+                        append_json_object_member(
+                            manifest_path.read_bytes(),
+                            member,
+                        )
+                    )
+                elif boundary in {
+                    "selected artifact",
+                    "unselected artifact",
+                }:
+                    target_name = (
+                        "Example"
+                        if boundary == "selected artifact"
+                        else "IExample"
+                    )
+                    record = next(
+                        item
+                        for item in manifest["targets"]
+                        if item["name"] == target_name
+                    )
+                    artifact_path = (
+                        paths["output"] / record["artifact_relative_path"]
+                    )
+                    artifact_raw = append_json_object_member(
+                        artifact_path.read_bytes(),
+                        member,
+                    )
+                    artifact_path.write_bytes(artifact_raw)
+                    record["artifact_sha256"] = builder.sha256_bytes(
+                        artifact_raw
+                    )
+                    write_json(manifest_path, manifest)
+                elif boundary == "retained compiler input":
+                    record = next(
+                        item
+                        for item in manifest["targets"]
+                        if item["name"] == "Example"
+                    )
+                    relative_input = record["compiler_input_relative_path"]
+                    compiler_input_path = paths["output"] / relative_input
+                    compiler_input_raw = append_json_object_member(
+                        compiler_input_path.read_bytes(),
+                        member,
+                    )
+                    compiler_input_path.write_bytes(compiler_input_raw)
+                    compiler_input_sha256 = builder.sha256_bytes(
+                        compiler_input_raw
+                    )
+                    for item in manifest["targets"]:
+                        if (
+                            item["compiler_input_relative_path"]
+                            == relative_input
+                        ):
+                            item["compiler_input_sha256"] = (
+                                compiler_input_sha256
+                            )
+                    write_json(manifest_path, manifest)
+                else:
+                    record = next(
+                        item
+                        for item in manifest["targets"]
+                        if item["name"] == "Example"
+                    )
+                    artifact_path = (
+                        paths["output"] / record["artifact_relative_path"]
+                    )
+                    artifact_value = json.loads(
+                        artifact_path.read_text(encoding="utf-8")
+                    )
+                    metadata_raw = json.dumps(
+                        artifact_value["metadata"],
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    ).encode("utf-8")
+                    artifact_value["metadata"] = (
+                        append_json_object_member(metadata_raw, member)
+                        .decode("utf-8")
+                    )
+                    write_json(artifact_path, artifact_value)
+                    record["artifact_sha256"] = builder.file_sha256(
+                        artifact_path
+                    )
+                    write_json(manifest_path, manifest)
+
+                expected = (
+                    "duplicate JSON member"
+                    if variant == "duplicate"
+                    else "non-I-JSON token is forbidden: NaN"
+                )
+                with self.assertRaisesRegex(
+                    builder.ReleaseBuildError,
+                    expected,
+                ):
+                    builder.validate_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                    )
+
     def test_validator_reads_each_receipt_bound_input_once(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -1266,9 +1490,13 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                     encoding="utf-8"
                 )
             )
+            manifest_path = (
+                paths["output"] / builder.MANIFEST_FILENAME
+            ).resolve()
             tracked_paths = {
                 paths["config"].resolve(),
                 paths["foundry_config"].resolve(),
+                manifest_path,
             }
             for record in manifest["targets"]:
                 tracked_paths.add(
@@ -1280,6 +1508,10 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         / record["compiler_input_relative_path"]
                     ).resolve()
                 )
+            expected_raw = {
+                path: path.read_bytes()
+                for path in tracked_paths
+            }
             read_counts = {path: 0 for path in tracked_paths}
             original_read_bytes = Path.read_bytes
 
@@ -1290,7 +1522,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 return original_read_bytes(path)
 
             with patch.object(Path, "read_bytes", new=counted_read_bytes):
-                builder.validate_release_output(
+                validated = builder.validate_release_output_with_snapshots(
                     root,
                     paths["config"],
                     paths["foundry_config"],
@@ -1301,6 +1533,36 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 read_counts,
                 {path: 1 for path in tracked_paths},
             )
+            carried = (
+                validated.receipt_snapshot,
+                validated.config_snapshot,
+                validated.foundry_config_snapshot,
+                *validated.artifact_snapshots,
+            )
+            carried_by_path = {
+                snapshot.path: snapshot
+                for snapshot in carried
+            }
+            expected_carried_paths = {
+                manifest_path,
+                paths["config"].resolve(),
+                paths["foundry_config"].resolve(),
+                *(
+                    (
+                        paths["output"]
+                        / record["artifact_relative_path"]
+                    ).resolve()
+                    for record in manifest["targets"]
+                ),
+            }
+            self.assertEqual(len(carried), len(expected_carried_paths))
+            self.assertEqual(set(carried_by_path), expected_carried_paths)
+            for path, snapshot in carried_by_path.items():
+                self.assertEqual(snapshot.raw, expected_raw[path])
+                self.assertEqual(
+                    snapshot.sha256,
+                    builder.sha256_bytes(expected_raw[path]),
+                )
 
     def test_validator_rejects_cross_kind_source_binding_conflict_before_reads(
         self,
@@ -1610,7 +1872,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
             ):
                 self.assertEqual(
                     builder.read_forge_version("forge", root),
-                    FAKE_FORGE_VERSION,
+                    PORTABLE_FAKE_FORGE_VERSION,
                 )
             version_environment = version_run.call_args.kwargs["env"]
             self.assertEqual(version_environment["RELEASE_BUILD_KEEP"], "retained")

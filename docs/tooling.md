@@ -12,7 +12,9 @@
 | Slither | `0.11.5` |
 | Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
+| eth-abi | `5.2.0` |
 | eth-hash | `0.8.0` |
+| jsonschema | `4.25.1` |
 | Playwright | `1.60.0` |
 
 ## Reproducible Python Audit And Release Toolchain
@@ -60,7 +62,7 @@ python scripts/check_python_toolchain.py
 ```
 
 Review the full package/version change and every added or removed hash, not
-only the five direct pins. The generated lock must not contain index URLs,
+only the seven direct pins. The generated lock must not contain index URLs,
 trusted-host settings, credentials, or private package references. Record or
 remediate vulnerability findings before acceptance. Update the deliberately
 maintained `EXPECTED_LOCKED_NAMES` closure in
@@ -375,9 +377,13 @@ version. It reads each configured artifact once, validates and hashes that
 captured byte snapshot, writes those exact bytes into a staged aggregate, and
 derives retained compiler-input bytes and hashes from one in-memory encoding.
 The config and Foundry-config target/policy validation and receipt hashes are
-likewise derived from the same captured bytes. The builder stages only
-configured named artifacts alongside retained compiler inputs and the build
-receipt, then replaces
+likewise derived from the same captured bytes. At the canonical validator
+boundary, config, receipt, every configured artifact, retained compiler input,
+and string-form embedded metadata JSON are decoded from those captured bytes
+under a strict UTF-8, duplicate-free, non-floating-point I-JSON policy with
+safe integers and Unicode scalar values. The builder stages only configured
+named artifacts alongside retained compiler inputs and the build receipt, then
+replaces
 dedicated ignored `out-release/` with rollback on caught replacement failures.
 The output option is restricted to the literal repo-root `out-release/`, while
 ordinary Forge builds and scripts continue to use `out/`. Config, receipt,
@@ -389,11 +395,15 @@ the stable relative policy `basePath="."`, `includePaths=["."]`, and
 `allowPaths=[".", "lib"]`. Any missing, reordered, duplicate, aliased, or extra
 path fails before retention. This makes compiler-input bytes and the complete
 receipt hash portable across checkouts while preserving the exact source,
-settings, toolchain, and artifact bindings. Tests and scripts are excluded from
-those source closures. The deterministic ignored build receipt binds the
-config, Foundry config, exact Forge version output, explicit normalized Forge
-argv, compiler policy, target, complete metadata source universe and hashes,
-compiler-settings hash, canonical build-input hash, and artifact hash. The
+settings, toolchain, and artifact bindings. Forge's platform packaging
+timestamp is the sole normalized version-output field; the receipt retains the
+exact semantic version, commit, build profile, and canonical identity self-hash,
+so official Windows and POSIX binaries for the same pinned Forge release produce
+the same receipt. Tests and scripts are excluded from those source closures. The
+deterministic ignored build receipt binds the config, Foundry config, canonical
+Forge identity, explicit normalized Forge argv, compiler policy, target,
+complete metadata source universe and hashes, compiler-settings hash, canonical
+build-input hash, and artifact hash. The
 release-artifact, source-verification, protocol-surface, and ABI-compatibility
 CLIs retain the validated receipt while consuming `out-release/`. Each matches
 the exact target kind, name, source, relative path, normalized path, and hash,
@@ -435,6 +445,100 @@ Forge deployment scripts can still recompile a larger script import universe
 and do not yet prove that broadcasts consume this canonical initcode;
 [issue #677](https://github.com/6529-Collections/6529Stream/issues/677) remains
 a production blocker for that deployment binding.
+
+The first issue #677 tooling slice is
+`scripts/materialize_canonical_deployment_plan.py`. It consumes, but never
+rebuilds, the validated `out-release/release-build-manifest.json` receipt and
+the exact configured artifacts produced by the canonical builder. Before
+materializing any bytecode, it runs the builder's complete
+`validate_release_output_with_snapshots(...)` path, then checks the candidate's
+pinned receipt, catalog, release-config, Foundry-config, and artifact hashes.
+That validator carries the exact validated receipt, config, Foundry config, and
+artifact bytes plus their paths and SHA-256 digests into the materializer.
+The materializer recomputes every carried digest, requires an exact
+receipt-to-artifact snapshot set, strictly decodes the carried receipt and
+release-config JSON plus every carried artifact before candidate target
+selection, and does not reopen those files. Parsed artifact snapshots are
+reused when multiple candidate instances target them. A filesystem replacement
+after validation therefore cannot change the plan being constructed from the
+validated snapshot. It derives the constructor ABI from each receipt-bound
+artifact, ABI-encodes the declared arguments, resolves the artifact's exact
+creation/runtime library positions and runtime immutable positions, and emits
+ordered full initcode plus expected runtime bytecode and Keccak-256 hashes.
+`eth-abi==5.2.0` is a reviewed direct toolchain pin because this encoder is part
+of the materialization boundary.
+`jsonschema==4.25.1` is a reviewed direct pin because the checked path performs
+actual Draft 2020-12 validation rather than treating the schema documents as
+descriptive references.
+The complete creation bytecode plus encoded constructor arguments fails closed
+above the 49,152-byte EIP-3860 initcode limit.
+
+The v1 candidate schema accepts only
+`candidate_kind: non_production_fixture` with both `production_candidate` and
+`readiness_evidence` set to `false`. The committed fixture at
+`deployments/config/canonical-deployment-candidate-non-production.json`
+materializes one `DependencyRegistry` instance with literal Anvil-only admin
+and library addresses. Its `profile_entry_id` is deliberately `null`; it is not
+the strict instance-aware genesis candidate required by issue #656. Candidate
+and output shapes are documented by
+`deployments/schema/canonical-deployment-candidate.schema.json` and
+`deployments/schema/canonical-deployment-plan.schema.json`. The materializer
+checks that both schema documents are valid Draft 2020-12, validates the
+strictly decoded committed candidate, and validates every in-memory generated
+plan before it can be written or compared in `--check` mode. Generator version
+3 also requires the issue #680 restricted-source-root and portable compiler
+path policies in the materialized plan.
+
+After producing the canonical isolated build, run the focused tool as follows:
+
+```bash
+python scripts/test_materialize_canonical_deployment_plan.py
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json \
+  --check
+```
+
+The ordinary Make, Bash, PowerShell, and Linux CI aggregate gates run this
+unit/materialize/reparse-check sequence immediately after they create and
+validate `out-release/`. The checked candidate remains the same narrow
+non-production fixture; gate inclusion does not turn the ephemeral plan into a
+release artifact or deployment authorization. Because Draft validation is
+inside the materializer, both the committed candidate and the real generated
+plan are schema-checked in every one of those gate paths.
+
+Candidate-supplied immutable values are assertions, not values derived from
+constructor semantics. The materializer enforces the artifact-declared widths
+and positions and checks the resulting expected-runtime hash, but it does not
+execute creation code or prove that constructor execution returns that runtime.
+That semantic/runtime equivalence remains outside this non-production
+foundation.
+
+Materialized plans are ephemeral operator inputs and may only be written below
+the repository `tmp/` directory. They are not generated release evidence.
+Candidate, receipt, artifact, and output paths reject repository escapes and
+symlink, junction, or reparse components. Repository-relative JSON paths use
+one runtime/schema-identical portable policy: no C0/DEL controls, Windows
+invalid characters, drive or alternate-stream colons, backslashes, empty or
+dot-alias segments, trailing dot/space segments, or case-insensitive
+`CON`/`PRN`/`AUX`/`NUL`/`COM1`-`COM9`/`LPT1`-`LPT9` device segments (including
+extensions). Duplicate JSON members, floats, non-I-JSON integers or Unicode
+surrogate values, invalid Draft 2020-12 candidate/plan shapes, stale or mutated
+receipts/artifacts, constructor ABI or argument-hash drift,
+missing/extra/unresolved/wrong/overlapping links, missing, wrong-width, or
+overlapping immutables, EIP-3860 overflow, runtime-hash drift, target
+mismatches, forward dependencies, and non-ephemeral output paths fail closed.
+
+This materializer does not derive salts or deployment addresses, prove
+constructor semantics, execute creation code, broadcast transactions, inspect
+deployed code, retain ceremony evidence, or modify the existing Forge scripts.
+A broadcaster and the issue #656 strict instance-aware production candidate
+are still required before issue #677 can supply production broadcast-bytecode
+parity. This slice therefore does not close issue #656 or #677 and does not
+change release maturity.
 
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface

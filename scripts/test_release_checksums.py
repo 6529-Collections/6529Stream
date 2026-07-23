@@ -25,6 +25,27 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
+    def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
+        expected_paths = {
+            Path("scripts/materialize_canonical_deployment_plan.py"),
+            Path("scripts/test_materialize_canonical_deployment_plan.py"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
+        repo_root = SCRIPT_PATH.parent.parent
+        checksum_text = (
+            repo_root / generator.DEFAULT_OUTPUT_DIR / generator.CHECKSUM_FILE_NAME
+        ).read_text(encoding="utf-8")
+        checksum_entries = {
+            relative_path: digest
+            for digest, relative_path in generator.parse_checksum_file(checksum_text)
+        }
+        for path in expected_paths:
+            self.assertEqual(
+                checksum_entries[path.as_posix()],
+                generator.file_sha256(repo_root / path).removeprefix("sha256:"),
+            )
+
     def test_default_covered_paths_include_python_toolchain_provenance(self) -> None:
         """Policy and committed bundles bind every reviewed Python toolchain input."""
 

@@ -13,6 +13,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -23,7 +24,7 @@ except ModuleNotFoundError:  # pragma: no cover - the checked toolchain is Pytho
 
 
 RELEASE_BUILD_SCHEMA = "6529stream.release-build.v1"
-GENERATOR_VERSION = "3"
+GENERATOR_VERSION = "4"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_OUTPUT_DIR = Path("out-release")
@@ -47,10 +48,102 @@ PORTABLE_COMPILER_PATHS = {
     "includePaths": ["."],
 }
 TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+FORGE_BUILD_TIMESTAMP_RE = re.compile(
+    r"^Build Timestamp:\s+.+$",
+    flags=re.MULTILINE,
+)
+PORTABLE_FORGE_BUILD_TIMESTAMP = "Build Timestamp: <platform-packaging-timestamp>"
+IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
 
 
 class ReleaseBuildError(RuntimeError):
     """Raised when canonical release artifacts cannot be built or validated."""
+
+
+def reject_duplicate_json_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Reject duplicate JSON members instead of accepting last-key-wins input."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ReleaseBuildError(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def parse_ijson_integer(token: str) -> int:
+    """Accept only integers interoperable across I-JSON consumers."""
+    value = int(token)
+    if abs(value) > IJSON_SAFE_INTEGER_MAX:
+        raise ReleaseBuildError(
+            f"JSON integer is outside the I-JSON interoperable range: {token}"
+        )
+    return value
+
+
+def reject_json_float(token: str) -> float:
+    """Canonical release inputs do not permit floating-point JSON values."""
+    raise ReleaseBuildError(
+        f"floating-point JSON is forbidden in canonical release inputs: {token}"
+    )
+
+
+def reject_json_constant(token: str) -> None:
+    """Reject NaN and infinities."""
+    raise ReleaseBuildError(f"non-I-JSON token is forbidden: {token}")
+
+
+def reject_non_unicode_scalars(value: Any, path: str) -> None:
+    """Reject escaped surrogate code points that strict UTF-8 cannot detect."""
+    if isinstance(value, str):
+        if any(0xD800 <= ord(character) <= 0xDFFF for character in value):
+            raise ReleaseBuildError(
+                f"{path} contains a non-Unicode-scalar surrogate code point"
+            )
+        return
+    if isinstance(value, list):
+        for index, item in enumerate(value):
+            reject_non_unicode_scalars(item, f"{path}[{index}]")
+        return
+    if isinstance(value, dict):
+        for key, item in value.items():
+            reject_non_unicode_scalars(key, f"{path}.<member>")
+            reject_non_unicode_scalars(item, f"{path}.{key}")
+
+
+def load_json_text(text: str, label: str) -> Any:
+    """Decode duplicate-free JSON under the canonical I-JSON input policy."""
+    try:
+        value = json.loads(
+            text,
+            object_pairs_hook=reject_duplicate_json_pairs,
+            parse_int=parse_ijson_integer,
+            parse_float=reject_json_float,
+            parse_constant=reject_json_constant,
+        )
+    except json.JSONDecodeError as exc:
+        raise ReleaseBuildError(f"invalid JSON in {label}: {exc}") from exc
+    reject_non_unicode_scalars(value, label)
+    return value
+
+
+@dataclass(frozen=True)
+class ReleaseFileSnapshot:
+    """One exact file version consumed by canonical release validation."""
+
+    path: Path
+    raw: bytes
+    sha256: str
+
+
+@dataclass(frozen=True)
+class ValidatedReleaseOutput:
+    """Validated receipt plus exact receipt/config/artifact file versions."""
+
+    receipt: dict[str, Any]
+    receipt_snapshot: ReleaseFileSnapshot
+    config_snapshot: ReleaseFileSnapshot
+    foundry_config_snapshot: ReleaseFileSnapshot
+    artifact_snapshots: tuple[ReleaseFileSnapshot, ...]
 
 
 CommandRunner = Callable[[list[str], Path], None]
@@ -67,9 +160,10 @@ def read_required_bytes(path: Path) -> bytes:
 
 def load_json_bytes(raw: bytes, path: Path) -> Any:
     try:
-        return json.loads(raw.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ReleaseBuildError(f"invalid JSON in {path}: {exc}") from exc
+        text = raw.decode("utf-8", "strict")
+    except UnicodeDecodeError as exc:
+        raise ReleaseBuildError(f"{path} is not strict UTF-8 JSON: {exc}") from exc
+    return load_json_text(text, str(path))
 
 
 def load_json_snapshot(path: Path) -> tuple[Any, bytes, str]:
@@ -382,8 +476,11 @@ def artifact_metadata(artifact: dict[str, Any], label: str) -> dict[str, Any]:
         return metadata
     if isinstance(metadata, str):
         try:
-            return require_dict(json.loads(metadata), f"{label}.metadata")
-        except json.JSONDecodeError as exc:
+            return require_dict(
+                load_json_text(metadata, f"{label}.metadata"),
+                f"{label}.metadata",
+            )
+        except ReleaseBuildError as exc:
             raise ReleaseBuildError(f"invalid metadata JSON in {label}: {exc}") from exc
     raise ReleaseBuildError(f"{label} does not contain compiler metadata")
 
@@ -583,9 +680,11 @@ def load_retained_compiler_input_with_sha256(
             f"unable to read retained compiler input {path}: {exc}"
         ) from exc
     try:
-        value = require_dict(json.loads(raw.decode("utf-8")), label)
-    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise ReleaseBuildError(f"invalid retained compiler input JSON in {path}: {exc}") from exc
+        value = require_dict(load_json_bytes(raw, path), label)
+    except ReleaseBuildError as exc:
+        raise ReleaseBuildError(
+            f"invalid retained compiler input JSON in {path}: {exc}"
+        ) from exc
     if ordered_json_bytes(value) != raw:
         raise ReleaseBuildError(f"{path} is not the exact ordered compiler-input encoding")
     return value, sha256_bytes(raw)
@@ -877,7 +976,15 @@ def validate_forge_version(value: str) -> str:
         raise ReleaseBuildError(
             f"Foundry version is {actual}, expected pinned {FOUNDRY_VERSION}"
         )
-    return normalized
+    portable, timestamp_count = FORGE_BUILD_TIMESTAMP_RE.subn(
+        PORTABLE_FORGE_BUILD_TIMESTAMP,
+        normalized,
+    )
+    if timestamp_count != 1:
+        raise ReleaseBuildError(
+            "forge --version output must contain exactly one Build Timestamp line"
+        )
+    return portable
 
 
 def read_forge_version(forge_bin: str, repo_root: Path) -> str:
@@ -905,6 +1012,7 @@ def read_forge_version(forge_bin: str, repo_root: Path) -> str:
 
 
 def build_policy(forge_version: str) -> dict[str, Any]:
+    forge_version = validate_forge_version(forge_version)
     return {
         "compilation_unit": "one_configured_target_source_and_its_import_closure",
         "restricted_source_roots": sorted(RESTRICTED_RELEASE_SOURCE_ROOTS),
@@ -1049,7 +1157,7 @@ def validate_manifest_source_binding_consistency(
                 binding_locations.setdefault(binding_key, location)
 
 
-def validate_release_output(
+def validate_release_output_with_snapshots(
     repo_root: Path,
     config_path: Path,
     foundry_config_path: Path,
@@ -1057,7 +1165,7 @@ def validate_release_output(
     *,
     declared_output_dir: Path | None = None,
     expected_forge_version: str | None = None,
-) -> dict[str, Any]:
+) -> ValidatedReleaseOutput:
     repo_root = repo_root.resolve()
     config_path = resolve_repo_path(repo_root, config_path, "contract config")
     foundry_config_path = resolve_repo_path(
@@ -1102,7 +1210,10 @@ def validate_release_output(
         output_dir / MANIFEST_FILENAME,
         "release build receipt",
     )
-    manifest = require_dict(load_json(manifest_path), str(manifest_path))
+    manifest_value, manifest_raw, manifest_sha256 = load_json_snapshot(
+        manifest_path
+    )
+    manifest = require_dict(manifest_value, str(manifest_path))
     if manifest.get("schema_version") != RELEASE_BUILD_SCHEMA:
         raise ReleaseBuildError(
             f"{manifest_path} schema must be {RELEASE_BUILD_SCHEMA!r}"
@@ -1129,7 +1240,10 @@ def validate_release_output(
         policy.get("forge_version"),
         f"{manifest_path}.policy.forge_version",
     )
-    validate_forge_version(recorded_forge_version)
+    if recorded_forge_version != validate_forge_version(recorded_forge_version):
+        raise ReleaseBuildError(
+            f"{manifest_path} Forge version identity is not portable"
+        )
     if policy.get("forge_version_sha256") != sha256_bytes(
         recorded_forge_version.encode("utf-8")
     ):
@@ -1150,6 +1264,7 @@ def validate_release_output(
     record_identity = []
     expected_files = {Path(MANIFEST_FILENAME)}
     compiler_input_snapshots: dict[Path, tuple[dict[str, Any], str]] = {}
+    artifact_snapshots: list[ReleaseFileSnapshot] = []
     for index, value in enumerate(records):
         record = require_dict(value, f"{manifest_path}.targets[{index}]")
         target = {
@@ -1209,7 +1324,16 @@ def validate_release_output(
         if record.get("compiler_input_sha256") != compiler_input_sha256:
             raise ReleaseBuildError(f"targets[{index}] compiler input hash is stale")
 
-        artifact_value, artifact_sha256 = load_json_with_sha256(actual_artifact_path)
+        artifact_value, artifact_raw, artifact_sha256 = load_json_snapshot(
+            actual_artifact_path
+        )
+        artifact_snapshots.append(
+            ReleaseFileSnapshot(
+                path=actual_artifact_path,
+                raw=artifact_raw,
+                sha256=artifact_sha256,
+            )
+        )
         artifact = require_dict(artifact_value, str(actual_artifact_path))
         _, bindings = validate_target_artifact_data(
             repo_root,
@@ -1250,7 +1374,45 @@ def validate_release_output(
             f"{output_dir} does not contain the exact configured artifact set: "
             + ", ".join(details)
         )
-    return manifest
+    return ValidatedReleaseOutput(
+        receipt=manifest,
+        receipt_snapshot=ReleaseFileSnapshot(
+            path=manifest_path,
+            raw=manifest_raw,
+            sha256=manifest_sha256,
+        ),
+        config_snapshot=ReleaseFileSnapshot(
+            path=config_path,
+            raw=config_raw,
+            sha256=config_sha256,
+        ),
+        foundry_config_snapshot=ReleaseFileSnapshot(
+            path=foundry_config_path,
+            raw=foundry_config_raw,
+            sha256=foundry_config_sha256,
+        ),
+        artifact_snapshots=tuple(artifact_snapshots),
+    )
+
+
+def validate_release_output(
+    repo_root: Path,
+    config_path: Path,
+    foundry_config_path: Path,
+    output_dir: Path,
+    *,
+    declared_output_dir: Path | None = None,
+    expected_forge_version: str | None = None,
+) -> dict[str, Any]:
+    """Validate canonical output while preserving the legacy receipt API."""
+    return validate_release_output_with_snapshots(
+        repo_root,
+        config_path,
+        foundry_config_path,
+        output_dir,
+        declared_output_dir=declared_output_dir,
+        expected_forge_version=expected_forge_version,
+    ).receipt
 
 
 def replace_output_directory(staged: Path, output_dir: Path, temp_root: Path) -> None:
