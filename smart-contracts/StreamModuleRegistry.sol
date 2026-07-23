@@ -33,9 +33,6 @@ contract StreamModuleRegistry is ERC165, IStreamModuleRegistry {
 
     /// @notice Schema version carried by registry lifecycle events.
     uint16 public constant SCHEMA_VERSION = 1;
-    /// @notice Gas ceiling for ERC-165 probes of candidate modules per EIP-165 guidance.
-    uint256 private constant MODULE_ERC165_PROBE_GAS = 30_000;
-
     /// @notice Reverts when a module address is invalid for registry policy.
     error InvalidModule(address module);
     /// @notice Reverts when registration facts are incomplete or unsupported.
@@ -334,13 +331,23 @@ contract StreamModuleRegistry is ERC165, IStreamModuleRegistry {
         return 2; // INCIDENT_REVOKED
     }
 
+    /// @dev Forwards available gas so opcode repricing cannot strand governed
+    ///      registration. Returndata is never allocated dynamically: only an
+    ///      exact 32-byte canonical `true` is accepted, so every failure mode
+    ///      leaves the registry unchanged.
     function _supportsInterface(address module, bytes4 interfaceId) private view returns (bool) {
-        try IERC165(module).supportsInterface{ gas: MODULE_ERC165_PROBE_GAS }(interfaceId) returns (
-            bool supported
-        ) {
-            return supported;
-        } catch {
-            return false;
+        bytes memory payload = abi.encodeCall(IERC165.supportsInterface, (interfaceId));
+        bool success;
+        uint256 returnSize;
+        uint256 raw;
+        assembly ("memory-safe") {
+            success := staticcall(gas(), module, add(payload, 0x20), mload(payload), 0, 0)
+            returnSize := returndatasize()
+            if and(success, eq(returnSize, 0x20)) {
+                returndatacopy(0, 0, 0x20)
+                raw := mload(0)
+            }
         }
+        return success && returnSize == 32 && raw == 1;
     }
 }

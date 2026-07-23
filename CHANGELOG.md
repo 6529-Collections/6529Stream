@@ -7,6 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Removed the immutable 30,000-gas ERC-165 probe ceiling from governed
+  `StreamModuleRegistry` registration. The registry now forwards available gas
+  into a bounded read, accepts only successful exact 32-byte canonical `true`
+  returndata, and fails closed on revert, short, oversized, false, or
+  noncanonical results. Added repricing and malformed-returndata Solidity
+  regressions plus a deterministic all-`smart-contracts/` call-gas inventory
+  gate that also rejects implicit fixed-gas `.transfer(...)` and `.send(...)`
+  calls, parses a strict duplicate-free inventory, and pins the sole
+  probe-under-test exception to its normative architecture authority. This
+  slice does not change `StreamCore`. It is only the first control-plane
+  remediation for
+  [issue #669](https://github.com/6529-Collections/6529Stream/issues/669):
+  eleven finality, minting, and revenue call sites and eleven literal
+  declarations remain explicitly open in the checked inventory rather than
+  accepted as risk. Protocol maturity and production readiness are unchanged.
 - Hardened canonical release builds so configured targets, retained build-info
   compiler inputs, and artifact metadata fail closed if any resolved source is
   under `test/` or `script/`; added focused regressions for both restricted
