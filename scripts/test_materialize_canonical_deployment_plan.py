@@ -1300,9 +1300,21 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             "canonical-deployment-plan-check: release-build-check",
             makefile,
         )
+        check_targets = [
+            line.split()[1:]
+            for line in makefile.splitlines()
+            if line.startswith("check:")
+        ]
         self.assertIn(
-            "check: canonical-deployment-plan-check",
-            makefile,
+            "canonical-deployment-plan-check",
+            check_targets[0],
+        )
+        self.assertEqual(
+            sum(
+                targets.count("canonical-deployment-plan-check")
+                for targets in check_targets
+            ),
+            1,
         )
         self.assertIn(
             "tmp/canonical-deployment-plan.json",

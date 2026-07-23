@@ -53,6 +53,14 @@ FAKE_FORGE_VERSION = (
     "Build Timestamp: fixture\n"
     "Build Profile: fixture"
 )
+OTHER_PLATFORM_FAKE_FORGE_VERSION = FAKE_FORGE_VERSION.replace(
+    "Build Timestamp: fixture",
+    "Build Timestamp: other-platform-fixture",
+)
+PORTABLE_FAKE_FORGE_VERSION = FAKE_FORGE_VERSION.replace(
+    "Build Timestamp: fixture",
+    builder.PORTABLE_FORGE_BUILD_TIMESTAMP,
+)
 
 
 @contextmanager
@@ -373,7 +381,10 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 },
             )
             self.assertEqual(manifest["output_dir"], "out-release")
-            self.assertEqual(manifest["policy"]["forge_version"], FAKE_FORGE_VERSION)
+            self.assertEqual(
+                manifest["policy"]["forge_version"],
+                PORTABLE_FAKE_FORGE_VERSION,
+            )
             self.assertEqual(
                 manifest["policy"]["foundry_version"],
                 builder.FOUNDRY_VERSION,
@@ -444,14 +455,20 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 builder.PORTABLE_COMPILER_PATHS,
             )
 
-    def test_release_receipt_is_identical_across_worktree_roots(self) -> None:
+    def test_release_receipt_is_identical_across_roots_and_platform_builds(
+        self,
+    ) -> None:
         with (
             tempfile.TemporaryDirectory() as first_dir,
             tempfile.TemporaryDirectory() as second_dir,
         ):
             roots = (Path(first_dir), Path(second_dir))
-            outputs: list[tuple[dict[str, Any], list[bytes]]] = []
-            for root in roots:
+            forge_versions = (
+                FAKE_FORGE_VERSION,
+                OTHER_PLATFORM_FAKE_FORGE_VERSION,
+            )
+            outputs: list[tuple[dict[str, Any], list[bytes], bytes]] = []
+            for root, forge_version in zip(roots, forge_versions, strict=True):
                 paths = seed_tree(root)
                 with redirect_stdout(StringIO()):
                     manifest = builder.build_release_output(
@@ -461,7 +478,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         paths["output"],
                         "fake-forge",
                         FakeForge(),
-                        FAKE_FORGE_VERSION,
+                        forge_version,
                     )
                 retained = [
                     path.read_bytes()
@@ -469,9 +486,25 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         (paths["output"] / "compiler-inputs").glob("*.json")
                     )
                 ]
-                outputs.append((manifest, retained))
+                receipt = (
+                    paths["output"] / builder.MANIFEST_FILENAME
+                ).read_bytes()
+                outputs.append((manifest, retained, receipt))
 
             self.assertEqual(outputs[0], outputs[1])
+            self.assertEqual(
+                outputs[0][0]["policy"]["forge_version"],
+                PORTABLE_FAKE_FORGE_VERSION,
+            )
+            self.assertNotEqual(
+                builder.validate_forge_version(
+                    FAKE_FORGE_VERSION.replace(
+                        "Commit SHA: fixture",
+                        "Commit SHA: different",
+                    )
+                ),
+                PORTABLE_FAKE_FORGE_VERSION,
+            )
             self.assertEqual(
                 builder.file_sha256(
                     roots[0] / builder.DEFAULT_OUTPUT_DIR / builder.MANIFEST_FILENAME
@@ -1839,7 +1872,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
             ):
                 self.assertEqual(
                     builder.read_forge_version("forge", root),
-                    FAKE_FORGE_VERSION,
+                    PORTABLE_FAKE_FORGE_VERSION,
                 )
             version_environment = version_run.call_args.kwargs["env"]
             self.assertEqual(version_environment["RELEASE_BUILD_KEEP"], "retained")

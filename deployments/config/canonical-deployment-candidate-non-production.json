@@ -10,7 +10,7 @@
   },
   "release_build": {
     "receipt_path": "out-release/release-build-manifest.json",
-    "receipt_sha256": "sha256:bb4f56edf752daea57320864ce200033132532f67f16b9176d8f3a168198edf0",
+    "receipt_sha256": "sha256:d0eaab22ffdde38b97a13c9e2393622099edc37c688026418111c534d79272f5",
     "target_catalog_sha256": "sha256:1fb823f17f1ded48ed349c30aec8ff95f7446610c4008d1c2f8d6aa4cb02c8b9",
     "config_path": "release-artifacts/contracts.json",
     "config_sha256": "sha256:a9717b7984538f5c2ebe7cc1383b84add5289b100e0c5a3618e000561d3c8b9e",

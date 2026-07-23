@@ -395,11 +395,15 @@ the stable relative policy `basePath="."`, `includePaths=["."]`, and
 `allowPaths=[".", "lib"]`. Any missing, reordered, duplicate, aliased, or extra
 path fails before retention. This makes compiler-input bytes and the complete
 receipt hash portable across checkouts while preserving the exact source,
-settings, toolchain, and artifact bindings. Tests and scripts are excluded from
-those source closures. The deterministic ignored build receipt binds the
-config, Foundry config, exact Forge version output, explicit normalized Forge
-argv, compiler policy, target, complete metadata source universe and hashes,
-compiler-settings hash, canonical build-input hash, and artifact hash. The
+settings, toolchain, and artifact bindings. Forge's platform packaging
+timestamp is the sole normalized version-output field; the receipt retains the
+exact semantic version, commit, build profile, and canonical identity self-hash,
+so official Windows and POSIX binaries for the same pinned Forge release produce
+the same receipt. Tests and scripts are excluded from those source closures. The
+deterministic ignored build receipt binds the config, Foundry config, canonical
+Forge identity, explicit normalized Forge argv, compiler policy, target,
+complete metadata source universe and hashes, compiler-settings hash, canonical
+build-input hash, and artifact hash. The
 release-artifact, source-verification, protocol-surface, and ABI-compatibility
 CLIs retain the validated receipt while consuming `out-release/`. Each matches
 the exact target kind, name, source, relative path, normalized path, and hash,

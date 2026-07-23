@@ -24,7 +24,7 @@ except ModuleNotFoundError:  # pragma: no cover - the checked toolchain is Pytho
 
 
 RELEASE_BUILD_SCHEMA = "6529stream.release-build.v1"
-GENERATOR_VERSION = "3"
+GENERATOR_VERSION = "4"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_OUTPUT_DIR = Path("out-release")
@@ -48,6 +48,11 @@ PORTABLE_COMPILER_PATHS = {
     "includePaths": ["."],
 }
 TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+FORGE_BUILD_TIMESTAMP_RE = re.compile(
+    r"^Build Timestamp:\s+.+$",
+    flags=re.MULTILINE,
+)
+PORTABLE_FORGE_BUILD_TIMESTAMP = "Build Timestamp: <platform-packaging-timestamp>"
 IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
 
 
@@ -971,7 +976,15 @@ def validate_forge_version(value: str) -> str:
         raise ReleaseBuildError(
             f"Foundry version is {actual}, expected pinned {FOUNDRY_VERSION}"
         )
-    return normalized
+    portable, timestamp_count = FORGE_BUILD_TIMESTAMP_RE.subn(
+        PORTABLE_FORGE_BUILD_TIMESTAMP,
+        normalized,
+    )
+    if timestamp_count != 1:
+        raise ReleaseBuildError(
+            "forge --version output must contain exactly one Build Timestamp line"
+        )
+    return portable
 
 
 def read_forge_version(forge_bin: str, repo_root: Path) -> str:
@@ -999,6 +1012,7 @@ def read_forge_version(forge_bin: str, repo_root: Path) -> str:
 
 
 def build_policy(forge_version: str) -> dict[str, Any]:
+    forge_version = validate_forge_version(forge_version)
     return {
         "compilation_unit": "one_configured_target_source_and_its_import_closure",
         "restricted_source_roots": sorted(RESTRICTED_RELEASE_SOURCE_ROOTS),
@@ -1226,7 +1240,10 @@ def validate_release_output_with_snapshots(
         policy.get("forge_version"),
         f"{manifest_path}.policy.forge_version",
     )
-    validate_forge_version(recorded_forge_version)
+    if recorded_forge_version != validate_forge_version(recorded_forge_version):
+        raise ReleaseBuildError(
+            f"{manifest_path} Forge version identity is not portable"
+        )
     if policy.get("forge_version_sha256") != sha256_bytes(
         recorded_forge_version.encode("utf-8")
     ):
