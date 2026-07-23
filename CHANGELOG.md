@@ -12,7 +12,13 @@ the release policy in `docs/release-policy.md`.
   under `test/` or `script/`; added focused regressions for both restricted
   roots; made the runtime-size and Core bytecode-spend checker CLIs retain the
   validated canonical receipt and hash the exact artifact bytes they consume;
-  and consistently labeled the aggregate all-source size/warning build as
+  extended that receipt-bound single-read/hash/decode model through the release,
+  source-verification, protocol-surface, and ABI consumers; made the canonical
+  producer derive config, Foundry-config, artifact, and retained compiler-input
+  receipt hashes from the exact snapshots it validates and writes; bound
+  source-verification checkout reads to the receipt's compiler/metadata source
+  hashes and carried each source snapshot forward without reopening it; and
+  consistently labeled the aggregate all-source size/warning build as
   diagnostic rather than production evidence. Canonical retention now validates
   the exact Forge worktree path
   carriers and projects only those fields to stable `.` / `lib` values before

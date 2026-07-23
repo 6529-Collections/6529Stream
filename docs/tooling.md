@@ -365,8 +365,13 @@ import closure, an isolated temporary output/cache pair, pinned Foundry
 optimizer runs `200`, via-IR, and metadata bytecode disabled. Real Forge
 subprocesses discard inherited `FOUNDRY_*` and `DAPP_*` settings, then set only
 the controlled `FOUNDRY_PROFILE=default` override supported by the pinned Forge
-version. It copies only configured named artifacts into a staged aggregate
-alongside retained compiler inputs and the build receipt, then replaces
+version. It reads each configured artifact once, validates and hashes that
+captured byte snapshot, writes those exact bytes into a staged aggregate, and
+derives retained compiler-input bytes and hashes from one in-memory encoding.
+The config and Foundry-config target/policy validation and receipt hashes are
+likewise derived from the same captured bytes. The builder stages only
+configured named artifacts alongside retained compiler inputs and the build
+receipt, then replaces
 dedicated ignored `out-release/` with rollback on caught replacement failures.
 The output option is restricted to the literal repo-root `out-release/`, while
 ordinary Forge builds and scripts continue to use `out/`. Config, receipt,
@@ -382,10 +387,16 @@ settings, toolchain, and artifact bindings. Tests and scripts are excluded from
 those source closures. The deterministic ignored build receipt binds the
 config, Foundry config, exact Forge version output, explicit normalized Forge
 argv, compiler policy, target, complete metadata source universe and hashes,
-compiler-settings hash, canonical build-input hash, and artifact hash. Both the
-release-artifact and source-verification generators validate that receipt
-before consuming `out-release/`, so stale source inputs or post-build artifact
-mutation fail closed.
+compiler-settings hash, canonical build-input hash, and artifact hash. The
+release-artifact, source-verification, protocol-surface, and ABI-compatibility
+CLIs retain the validated receipt while consuming `out-release/`. Each matches
+the exact target kind, name, source, relative path, normalized path, and hash,
+then hashes and decodes one artifact byte snapshot; source-verification also
+carries that parsed snapshot into metadata collection, binds every checkout
+source read to the receipt's matching metadata/compiler-input SHA-256 and
+Keccak records, and reuses one snapshot per source instead of reopening files.
+Stale source inputs or mutation after initial receipt validation therefore fail
+closed.
 
 The official Make target and repository check wrappers order the canonical
 builder before its size, Core-policy, release-artifact, source-verification, and

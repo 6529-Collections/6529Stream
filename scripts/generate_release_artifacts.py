@@ -67,14 +67,30 @@ class ArtifactError(RuntimeError):
     pass
 
 
-def load_json(path: Path) -> Any:
+def read_required_bytes(path: Path) -> bytes:
     try:
-        with path.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
+        return path.read_bytes()
     except FileNotFoundError as exc:
         raise ArtifactError(f"missing required file: {path}") from exc
-    except json.JSONDecodeError as exc:
+    except OSError as exc:
+        raise ArtifactError(f"unable to read required file {path}: {exc}") from exc
+
+
+def load_json_bytes(raw: bytes, path: Path) -> Any:
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ArtifactError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def load_json_with_sha256(path: Path) -> tuple[Any, str]:
+    raw = read_required_bytes(path)
+    return load_json_bytes(raw, path), sha256_bytes(raw)
+
+
+def load_json(path: Path) -> Any:
+    value, _ = load_json_with_sha256(path)
+    return value
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -151,6 +167,54 @@ def normalize_artifact_path(path: Path, repo_root: Path) -> str:
         return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def load_release_config(
+    repo_root: Path,
+    config_path: Path,
+    release_manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    value, digest = load_json_with_sha256(config_path)
+    if not isinstance(value, dict):
+        raise ArtifactError(f"{config_path} must contain a JSON object")
+    if release_manifest is not None:
+        source = release_manifest.get("source")
+        if not isinstance(source, dict):
+            raise ArtifactError("validated release receipt source must be an object")
+        expected_path = normalize_artifact_path(config_path, repo_root)
+        if source.get("config") != expected_path:
+            raise ArtifactError(
+                f"validated release receipt config path does not match {expected_path}"
+            )
+        if source.get("config_sha256") != digest:
+            raise ArtifactError(f"validated release receipt config hash is stale: {config_path}")
+    return value
+
+
+def receipt_target(
+    release_manifest: dict[str, Any],
+    *,
+    kind: str,
+    name: str,
+    source: str,
+) -> dict[str, Any]:
+    records = release_manifest.get("targets")
+    if not isinstance(records, list):
+        raise ArtifactError("validated release receipt targets must be an array")
+    matches = [
+        record
+        for record in records
+        if isinstance(record, dict)
+        and record.get("kind") == kind
+        and record.get("name") == name
+        and record.get("source") == source
+    ]
+    if len(matches) != 1:
+        raise ArtifactError(
+            "validated release receipt must contain exactly one "
+            f"{kind} target for {source}:{name}"
+        )
+    return matches[0]
 
 
 def canonical_type(parameter: dict[str, Any]) -> str:
@@ -266,6 +330,9 @@ def artifact_summary(
     entry: dict[str, Any],
     foundry_out: Path,
     repo_root: Path,
+    *,
+    release_manifest: dict[str, Any] | None = None,
+    release_kind: str | None = None,
 ) -> dict[str, Any]:
     name = entry["name"]
     source = entry.get("source")
@@ -273,8 +340,44 @@ def artifact_summary(
     if deployment_scope not in DEPLOYMENT_SCOPES:
         expected = ", ".join(sorted(DEPLOYMENT_SCOPES))
         raise ArtifactError(f"{name} deployment_scope must be one of: {expected}")
-    artifact_path = find_artifact(foundry_out, name, source)
-    artifact = load_json(artifact_path)
+    if release_manifest is None:
+        artifact_path = find_artifact(foundry_out, name, source)
+        artifact_value, artifact_sha256 = load_json_with_sha256(artifact_path)
+    else:
+        if not release_kind:
+            raise ArtifactError("release_kind is required with a validated release receipt")
+        if not isinstance(source, str) or not source:
+            raise ArtifactError(f"{name} source is required with a validated release receipt")
+        record = receipt_target(
+            release_manifest,
+            kind=release_kind,
+            name=name,
+            source=source,
+        )
+        relative_value = record.get("artifact_relative_path")
+        if not isinstance(relative_value, str) or not relative_value:
+            raise ArtifactError(
+                f"validated release receipt artifact path is missing for {source}:{name}"
+            )
+        relative_artifact = Path(relative_value)
+        if relative_artifact.is_absolute() or ".." in relative_artifact.parts:
+            raise ArtifactError(
+                f"validated release receipt artifact path is unsafe for {source}:{name}"
+            )
+        artifact_path = foundry_out / relative_artifact
+        expected_path = normalize_artifact_path(artifact_path, repo_root)
+        if record.get("artifact_path") != expected_path:
+            raise ArtifactError(
+                f"validated release receipt artifact path is stale for {source}:{name}"
+            )
+        artifact_value, artifact_sha256 = load_json_with_sha256(artifact_path)
+        if record.get("artifact_sha256") != artifact_sha256:
+            raise ArtifactError(
+                f"validated release receipt artifact hash is stale for {source}:{name}"
+            )
+    if not isinstance(artifact_value, dict):
+        raise ArtifactError(f"artifact for {name} must contain a JSON object")
+    artifact = artifact_value
     abi = artifact.get("abi")
     if not isinstance(abi, list):
         raise ArtifactError(f"artifact for {name} does not contain an ABI array")
@@ -288,6 +391,8 @@ def artifact_summary(
         "deployment_scope": deployment_scope,
         "config": entry,
         "artifact_path": normalize_artifact_path(artifact_path, repo_root),
+        "artifact_sha256": artifact_sha256,
+        "_artifact_file": artifact_path,
         "artifact": artifact,
         "abi": abi,
         "abi_sha256": sha256_json(abi),
@@ -476,8 +581,9 @@ def generate_artifacts(
     foundry_out: Path,
     output_dir: Path,
     cast_bin: str,
+    release_manifest: dict[str, Any] | None = None,
 ) -> list[Path]:
-    config = load_json(config_path)
+    config = load_release_config(repo_root, config_path, release_manifest)
     contracts = config.get("production_contracts", [])
     interfaces = config.get("interfaces", [])
     runtime_size_budget = config.get("runtime_size_budget", {})
@@ -494,10 +600,24 @@ def generate_artifacts(
         raise ArtifactError("config production_contracts list is empty")
 
     contract_summaries = [
-        artifact_summary(entry, foundry_out, repo_root) for entry in sorted(contracts, key=lambda x: x["name"])
+        artifact_summary(
+            entry,
+            foundry_out,
+            repo_root,
+            release_manifest=release_manifest,
+            release_kind="production_contract",
+        )
+        for entry in sorted(contracts, key=lambda x: x["name"])
     ]
     interface_summaries = [
-        artifact_summary(entry, foundry_out, repo_root) for entry in sorted(interfaces, key=lambda x: x["name"])
+        artifact_summary(
+            entry,
+            foundry_out,
+            repo_root,
+            release_manifest=release_manifest,
+            release_kind="interface",
+        )
+        for entry in sorted(interfaces, key=lambda x: x["name"])
     ]
 
     files = {
@@ -574,10 +694,18 @@ def check_artifacts(
     foundry_out: Path,
     output_dir: Path,
     cast_bin: str,
+    release_manifest: dict[str, Any] | None = None,
 ) -> int:
     with tempfile.TemporaryDirectory() as temp_dir:
         generated_dir = Path(temp_dir) / "release-artifacts"
-        generate_artifacts(repo_root, config_path, foundry_out, generated_dir, cast_bin)
+        generate_artifacts(
+            repo_root,
+            config_path,
+            foundry_out,
+            generated_dir,
+            cast_bin,
+            release_manifest,
+        )
         mismatches = compare_directories(generated_dir, output_dir)
         if mismatches:
             print("release artifacts are out of date:", file=sys.stderr)
@@ -613,15 +741,29 @@ def main(argv: list[str]) -> int:
     output_dir = args.output_dir
 
     try:
-        release_build.validate_release_output(
+        release_manifest = release_build.validate_release_output(
             repo_root,
             config_path,
             args.foundry_config,
             foundry_out,
         )
         if args.check:
-            return check_artifacts(repo_root, config_path, foundry_out, output_dir, args.cast_bin)
-        written = generate_artifacts(repo_root, config_path, foundry_out, output_dir, args.cast_bin)
+            return check_artifacts(
+                repo_root,
+                config_path,
+                foundry_out,
+                output_dir,
+                args.cast_bin,
+                release_manifest,
+            )
+        written = generate_artifacts(
+            repo_root,
+            config_path,
+            foundry_out,
+            output_dir,
+            args.cast_bin,
+            release_manifest,
+        )
     except (ArtifactError, release_build.ReleaseBuildError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

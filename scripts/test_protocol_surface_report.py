@@ -100,7 +100,41 @@ def seed_fixture(root: Path, *, include_all_selectors: bool = True) -> dict[str,
             ],
         },
     )
-    return {"config": config_path, "out": out_dir, "output": output_path}
+    return {
+        "config": config_path,
+        "out": out_dir,
+        "output": output_path,
+        "artifact": out_dir / "Example.sol" / "Example.json",
+    }
+
+
+def release_receipt(root: Path, paths: dict[str, Path]) -> dict[str, object]:
+    return {
+        "source": {
+            "config": generator.release_artifacts.normalize_artifact_path(
+                paths["config"],
+                root,
+            ),
+            "config_sha256": generator.release_artifacts.sha256_bytes(
+                paths["config"].read_bytes()
+            ),
+        },
+        "targets": [
+            {
+                "kind": "production_contract",
+                "name": "Example",
+                "source": "smart-contracts/Example.sol",
+                "artifact_relative_path": "Example.sol/Example.json",
+                "artifact_path": generator.release_artifacts.normalize_artifact_path(
+                    paths["artifact"],
+                    root,
+                ),
+                "artifact_sha256": generator.release_artifacts.sha256_bytes(
+                    paths["artifact"].read_bytes()
+                ),
+            }
+        ],
+    }
 
 
 @contextmanager
@@ -250,6 +284,27 @@ class ProtocolSurfaceReportTests(unittest.TestCase):
             custom_error = contract["custom_errors"][0]
             self.assertEqual(custom_error["signature"], "BadValue(uint256)")
             self.assertEqual(custom_error["selector"], "0xdeadbeef")
+
+    def test_receipt_bound_report_rejects_post_validation_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir, patched_cast():
+            root = Path(temp_dir)
+            paths = seed_fixture(root)
+            receipt = release_receipt(root, paths)
+            value = json.loads(paths["artifact"].read_text(encoding="utf-8"))
+            value["deployedBytecode"]["object"] = "0x6002"
+            write_json(paths["artifact"], value)
+
+            with self.assertRaisesRegex(
+                generator.release_artifacts.ArtifactError,
+                "validated release receipt artifact hash is stale",
+            ):
+                generator.build_report(
+                    root,
+                    paths["config"],
+                    paths["out"],
+                    "cast",
+                    receipt,
+                )
 
     def test_check_report_detects_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir, patched_cast():

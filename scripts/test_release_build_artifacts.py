@@ -1184,6 +1184,111 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                     paths["output"],
                 )
 
+    def test_validator_reads_each_receipt_bound_input_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            manifest = json.loads(
+                (paths["output"] / builder.MANIFEST_FILENAME).read_text(
+                    encoding="utf-8"
+                )
+            )
+            tracked_paths = {
+                paths["config"].resolve(),
+                paths["foundry_config"].resolve(),
+            }
+            for record in manifest["targets"]:
+                tracked_paths.add(
+                    (paths["output"] / record["artifact_relative_path"]).resolve()
+                )
+                tracked_paths.add(
+                    (
+                        paths["output"]
+                        / record["compiler_input_relative_path"]
+                    ).resolve()
+                )
+            read_counts = {path: 0 for path in tracked_paths}
+            original_read_bytes = Path.read_bytes
+
+            def counted_read_bytes(path: Path) -> bytes:
+                resolved = path.resolve()
+                if resolved in read_counts:
+                    read_counts[resolved] += 1
+                return original_read_bytes(path)
+
+            with patch.object(Path, "read_bytes", new=counted_read_bytes):
+                builder.validate_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                )
+
+            self.assertEqual(
+                read_counts,
+                {path: 1 for path in tracked_paths},
+            )
+
+    def test_builder_carries_single_input_snapshots_into_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            config_path = paths["config"].resolve()
+            foundry_config_path = paths["foundry_config"].resolve()
+            source_artifact_reads = {
+                "Example.json": 0,
+                "ExampleTwo.json": 0,
+                "IExample.json": 0,
+            }
+            input_reads = {
+                config_path: 0,
+                foundry_config_path: 0,
+            }
+            original_read_bytes = Path.read_bytes
+
+            def counted_read_bytes(path: Path) -> bytes:
+                resolved = path.resolve()
+                if resolved in input_reads:
+                    input_reads[resolved] += 1
+                if (
+                    path.name in source_artifact_reads
+                    and path.parent.name.endswith(".sol")
+                    and "targets" in path.parts
+                ):
+                    source_artifact_reads[path.name] += 1
+                return original_read_bytes(path)
+
+            with (
+                patch.object(Path, "read_bytes", new=counted_read_bytes),
+                redirect_stdout(StringIO()),
+            ):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            # One initial producer snapshot plus staged and installed validation.
+            self.assertEqual(input_reads[config_path], 3)
+            self.assertEqual(input_reads[foundry_config_path], 3)
+            self.assertEqual(
+                source_artifact_reads,
+                {name: 1 for name in source_artifact_reads},
+            )
+
     def test_validator_rejects_absolute_path_reintroduced_into_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -1589,6 +1694,60 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
 
             self.assertEqual(result, 1)
             self.assertIn("artifact hash is stale", stderr.getvalue())
+            self.assertFalse((root / "release-artifacts" / "latest").exists())
+
+    def test_release_generator_rejects_mutation_after_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+            artifact_path = paths["output"] / "Example.sol" / "Example.json"
+            original_validate = release_generator.release_build.validate_release_output
+
+            def validate_then_mutate(*args: Any, **kwargs: Any) -> dict[str, Any]:
+                receipt = original_validate(*args, **kwargs)
+                value = json.loads(artifact_path.read_text(encoding="utf-8"))
+                value["deployedBytecode"]["object"] = "0x6002"
+                write_json(artifact_path, value)
+                return receipt
+
+            stderr = StringIO()
+            with (
+                patch.object(
+                    release_generator.release_build,
+                    "validate_release_output",
+                    side_effect=validate_then_mutate,
+                ),
+                working_directory(root),
+                redirect_stdout(StringIO()),
+                redirect_stderr(stderr),
+            ):
+                result = release_generator.main(
+                    [
+                        "--config",
+                        "release-artifacts/contracts.json",
+                        "--foundry-config",
+                        "foundry.toml",
+                        "--foundry-out",
+                        "out-release",
+                        "--output-dir",
+                        "release-artifacts/latest",
+                    ]
+                )
+
+            self.assertEqual(result, 1)
+            self.assertIn(
+                "validated release receipt artifact hash is stale",
+                stderr.getvalue(),
+            )
             self.assertFalse((root / "release-artifacts" / "latest").exists())
 
     def test_rejects_artifact_with_wrong_compilation_target(self) -> None:

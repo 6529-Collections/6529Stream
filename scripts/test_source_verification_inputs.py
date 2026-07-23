@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_source_verification_inputs.py")
@@ -163,6 +164,13 @@ def seed_tree(
         link_references=link_references,
         runtime_link_references=runtime_link_references,
     )
+    metadata_sources = value["metadata"]["sources"]
+    metadata_sources["smart-contracts/Example.sol"]["keccak256"] = (
+        generator.release_build.keccak256_hex(source.read_bytes())
+    )
+    metadata_sources["smart-contracts/Library.sol"]["keccak256"] = (
+        generator.release_build.keccak256_hex(library.read_bytes())
+    )
     write_json(artifact_path, value)
     write_json(
         config,
@@ -198,6 +206,43 @@ def seed_tree(
         "output": output,
         "source": source,
         "artifact": artifact_path,
+    }
+
+
+def release_receipt(root: Path, paths: dict[str, Path]) -> dict[str, object]:
+    source_records = []
+    for source_path in ("smart-contracts/Example.sol", "smart-contracts/Library.sol"):
+        raw = (root / source_path).read_bytes()
+        source_records.append(
+            {
+                "path": source_path,
+                "sha256": generator.sha256_bytes(raw),
+                "keccak256": generator.release_build.keccak256_hex(raw),
+            }
+        )
+    return {
+        "source": {
+            "config": generator.normalize_path(paths["config"], root),
+            "config_sha256": generator.sha256_bytes(paths["config"].read_bytes()),
+            "foundry_config": generator.normalize_path(paths["foundry_config"], root),
+            "foundry_config_sha256": generator.sha256_bytes(
+                paths["foundry_config"].read_bytes()
+            ),
+        },
+        "targets": [
+            {
+                "kind": "production_contract",
+                "name": "Example",
+                "source": "smart-contracts/Example.sol",
+                "artifact_relative_path": "Example.sol/Example.json",
+                "artifact_path": generator.normalize_path(paths["artifact"], root),
+                "artifact_sha256": generator.sha256_bytes(
+                    paths["artifact"].read_bytes()
+                ),
+                "metadata_sources": source_records,
+                "compiler_input_sources": source_records,
+            }
+        ],
     }
 
 
@@ -243,6 +288,90 @@ class SourceVerificationInputTests(unittest.TestCase):
                 "--libraries smart-contracts/Library.sol:Library:<library-address>",
                 contract["verification"]["template"],
             )
+
+    def test_receipt_bound_generator_reads_artifact_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            receipt = release_receipt(root, paths)
+            artifact_path = paths["artifact"].resolve()
+            source_paths = {
+                paths["source"].resolve(),
+                (root / "smart-contracts" / "Library.sol").resolve(),
+            }
+            artifact_reads = 0
+            source_reads = {path: 0 for path in source_paths}
+            original_read_bytes = Path.read_bytes
+
+            def counted_read_bytes(path: Path) -> bytes:
+                nonlocal artifact_reads
+                resolved = path.resolve()
+                if resolved == artifact_path:
+                    artifact_reads += 1
+                if resolved in source_reads:
+                    source_reads[resolved] += 1
+                return original_read_bytes(path)
+
+            with patch.object(Path, "read_bytes", new=counted_read_bytes):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["out"],
+                    paths["checksums"],
+                    receipt,
+                )
+
+            self.assertEqual(artifact_reads, 1)
+            self.assertEqual(source_reads, {path: 1 for path in source_paths})
+
+    def test_receipt_bound_generator_rejects_post_validation_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            receipt = release_receipt(root, paths)
+            value = json.loads(paths["artifact"].read_text(encoding="utf-8"))
+            value["deployedBytecode"]["object"] = "0x6002"
+            write_json(paths["artifact"], value)
+
+            with self.assertRaisesRegex(
+                generator.SourceVerificationError,
+                "validated release receipt artifact hash is stale",
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["out"],
+                    paths["checksums"],
+                    receipt,
+                )
+
+    def test_receipt_bound_generator_rejects_source_mutation_after_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            receipt = release_receipt(root, paths)
+            write_text(
+                paths["source"],
+                "contract Example { address public changedOwner; }\n",
+            )
+
+            with self.assertRaisesRegex(
+                generator.SourceVerificationError,
+                "validated release receipt source hash is stale",
+            ):
+                generator.build_manifest(
+                    root,
+                    paths["output"],
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["out"],
+                    paths["checksums"],
+                    receipt,
+                )
 
     def test_library_verification_template_deduplicates_creation_and_runtime_links(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

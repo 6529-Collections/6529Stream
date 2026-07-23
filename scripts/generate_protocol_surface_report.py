@@ -11,12 +11,14 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+import build_release_artifacts as release_build
 import generate_release_artifacts as release_artifacts
 
 
 PROTOCOL_SURFACE_SCHEMA = "6529stream.protocol-surface-report.v1"
 GENERATOR_VERSION = "1"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
+DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_OUTPUT = Path("release-artifacts/latest/protocol-surface-report.json")
 
@@ -168,14 +170,25 @@ def build_report(
     config_path: Path,
     foundry_out: Path,
     cast_bin: str,
+    release_manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    config = release_artifacts.load_json(config_path)
+    config = release_artifacts.load_release_config(
+        repo_root,
+        config_path,
+        release_manifest,
+    )
     contracts = config.get("production_contracts", [])
     if not contracts:
         raise ProtocolSurfaceError("config production_contracts list is empty")
 
     summaries = [
-        release_artifacts.artifact_summary(entry, foundry_out, repo_root)
+        release_artifacts.artifact_summary(
+            entry,
+            foundry_out,
+            repo_root,
+            release_manifest=release_manifest,
+            release_kind="production_contract",
+        )
         for entry in sorted(contracts, key=lambda item: item["name"])
     ]
 
@@ -232,8 +245,15 @@ def generate_report(
     foundry_out: Path,
     output_path: Path,
     cast_bin: str,
+    release_manifest: dict[str, Any] | None = None,
 ) -> Path:
-    report = build_report(repo_root, config_path, foundry_out, cast_bin)
+    report = build_report(
+        repo_root,
+        config_path,
+        foundry_out,
+        cast_bin,
+        release_manifest,
+    )
     write_json(output_path, report)
     return output_path
 
@@ -244,6 +264,7 @@ def check_report(
     foundry_out: Path,
     output_path: Path,
     cast_bin: str,
+    release_manifest: dict[str, Any] | None = None,
 ) -> int:
     if not output_path.exists():
         print(
@@ -255,7 +276,14 @@ def check_report(
 
     with tempfile.TemporaryDirectory() as temp_dir:
         generated = Path(temp_dir) / output_path.name
-        generate_report(repo_root, config_path, foundry_out, generated, cast_bin)
+        generate_report(
+            repo_root,
+            config_path,
+            foundry_out,
+            generated,
+            cast_bin,
+            release_manifest,
+        )
         if not filecmp.cmp(generated, output_path, shallow=False):
             print(
                 f"{output_path} is out of date; run "
@@ -268,23 +296,29 @@ def check_report(
     return 0
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate or check the deterministic protocol surface report."
     )
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--foundry-config", type=Path, default=DEFAULT_FOUNDRY_CONFIG)
     parser.add_argument("--foundry-out", type=Path, default=DEFAULT_FOUNDRY_OUT)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--cast-bin", default="cast")
     parser.add_argument("--check", action="store_true")
-    return parser.parse_args()
+    return parser.parse_args(argv)
 
 
-def main() -> int:
-    args = parse_args()
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
     repo_root = args.repo_root.resolve()
     config_path = args.config if args.config.is_absolute() else repo_root / args.config
+    foundry_config_path = (
+        args.foundry_config
+        if args.foundry_config.is_absolute()
+        else repo_root / args.foundry_config
+    )
     foundry_out = (
         args.foundry_out
         if args.foundry_out.is_absolute()
@@ -293,10 +327,34 @@ def main() -> int:
     output_path = args.output if args.output.is_absolute() else repo_root / args.output
 
     try:
+        release_manifest = release_build.validate_release_output(
+            repo_root,
+            config_path,
+            foundry_config_path,
+            foundry_out,
+        )
         if args.check:
-            return check_report(repo_root, config_path, foundry_out, output_path, args.cast_bin)
-        written = generate_report(repo_root, config_path, foundry_out, output_path, args.cast_bin)
-    except (ProtocolSurfaceError, release_artifacts.ArtifactError) as exc:
+            return check_report(
+                repo_root,
+                config_path,
+                foundry_out,
+                output_path,
+                args.cast_bin,
+                release_manifest,
+            )
+        written = generate_report(
+            repo_root,
+            config_path,
+            foundry_out,
+            output_path,
+            args.cast_bin,
+            release_manifest,
+        )
+    except (
+        ProtocolSurfaceError,
+        release_artifacts.ArtifactError,
+        release_build.ReleaseBuildError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

@@ -275,6 +275,50 @@ class AbiCompatibilityTests(unittest.TestCase):
         checker.write_baseline(root, config_path, root / "out", baseline_path)
         return baseline_path
 
+    def release_receipt(
+        self,
+        root: Path,
+        config_path: Path,
+        names: list[str] | None = None,
+        interface_names: list[str] | None = None,
+    ) -> dict[str, Any]:
+        targets = []
+        for kind, target_names in (
+            ("production_contract", names or ["Example"]),
+            ("interface", interface_names or []),
+        ):
+            for name in target_names:
+                artifact_path = root / "out" / f"{name}.sol" / f"{name}.json"
+                targets.append(
+                    {
+                        "kind": kind,
+                        "name": name,
+                        "source": f"smart-contracts/{name}.sol",
+                        "artifact_relative_path": f"{name}.sol/{name}.json",
+                        "artifact_path": (
+                            checker.release_artifacts.normalize_artifact_path(
+                                artifact_path,
+                                root,
+                            )
+                        ),
+                        "artifact_sha256": checker.release_build.sha256_bytes(
+                            artifact_path.read_bytes()
+                        ),
+                    }
+                )
+        return {
+            "source": {
+                "config": checker.release_artifacts.normalize_artifact_path(
+                    config_path,
+                    root,
+                ),
+                "config_sha256": checker.release_build.sha256_bytes(
+                    config_path.read_bytes()
+                ),
+            },
+            "targets": targets,
+        }
+
     def assert_subject_contract_alias(self, change: dict[str, Any], subject: str) -> None:
         self.assertEqual(change["subject"], subject)
         self.assertEqual(change["contract"], subject)
@@ -290,6 +334,28 @@ class AbiCompatibilityTests(unittest.TestCase):
                 self.assertEqual(
                     checker.check_compatibility(root, config_path, root / "out", baseline_path),
                     0,
+                )
+
+    def test_receipt_bound_surface_rejects_post_validation_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.write_contract(root)
+            config_path = self.write_config(root)
+            receipt = self.release_receipt(root, config_path)
+            artifact_path = root / "out" / "Example.sol" / "Example.json"
+            artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+            artifact["deployedBytecode"]["object"] = "0x6002"
+            write_json(artifact_path, artifact)
+
+            with self.assertRaisesRegex(
+                checker.release_artifacts.ArtifactError,
+                "validated release receipt artifact hash is stale",
+            ):
+                checker.build_abi_surface(
+                    root,
+                    config_path,
+                    root / "out",
+                    receipt,
                 )
 
     def test_additive_entries_are_reported_as_compatible(self) -> None:
