@@ -66,7 +66,7 @@ def valid_template() -> str:
 - CI run or operator transcript: `TBD`
 - Fork block number: `TBD`
 - Fork block hash: `TBD`
-- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --rpc-url <redacted> --via-ir`
+- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url <redacted> --via-ir`
 
 ## Required Retained Artifacts
 
@@ -104,7 +104,7 @@ def valid_template() -> str:
 ```sh
 python scripts/test_fork_deployment_rehearsal_evidence.py
 python scripts/check_fork_deployment_rehearsal_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork block>" --command-or-source-system "<operator transcript>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork block>" --command-or-source-system-from-retained --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -138,7 +138,7 @@ def reviewed_artifact() -> str:
 - CI run or operator transcript: `ci-run-123`
 - Fork block number: `19000000`
 - Fork block hash: `0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef`
-- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --via-ir`
+- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --via-ir`
 
 ## Required Retained Artifacts
 
@@ -176,7 +176,7 @@ def reviewed_artifact() -> str:
 ```sh
 python scripts/test_fork_deployment_rehearsal_evidence.py
 python scripts/check_fork_deployment_rehearsal_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 19000000" --command-or-source-system "operator transcript" --owner release-operator --reviewer release-reviewer --source-git-commit 1234567890abcdef1234567890abcdef12345678 --source-ci-run ci-run-123
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-deployment-rehearsal-template.json --retained-artifact release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md --output release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 19000000" --command-or-source-system-from-retained --owner release-operator --reviewer release-reviewer --source-git-commit 1234567890abcdef1234567890abcdef12345678 --source-ci-run ci-run-123
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check

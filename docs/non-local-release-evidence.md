@@ -121,6 +121,10 @@ The checker validates the public-beta requirement ID, environment, chain ID
 policy, retained artifact path, SHA-256 digest, review status, source metadata,
 public-beta and production-release template-set coverage, and no-secret
 boundary before release manifest and checksum generation.
+For fork deployment, ceremony, and randomizer evidence, it also compares
+`command_or_source_system` byte for byte with the retained Markdown artifact's
+single canonical `Command` field, whose value must be inline code. Quote changes
+are provenance drift, not formatting differences.
 
 ### Evidence Metadata Generator
 
@@ -143,12 +147,24 @@ python scripts/generate_non_local_release_evidence.py \
   --environment fork \
   --chain-id 1 \
   --block-or-reference "fork block 19000000" \
-  --command-or-source-system "forge script script/RehearseDeployment.s.sol:RehearseDeployment --rpc-url <redacted>" \
+  --command-or-source-system-from-retained \
   --owner release-operator \
   --reviewer TBD \
   --source-git-commit <release commit sha> \
   --source-ci-run <ci run or TBD>
 ```
+
+For `--command-or-source-system-from-retained`, the retained Markdown artifact
+must contain exactly one inline-code `Command` field such as:
+
+```md
+- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_FORK_RPC --via-ir`
+```
+
+This file-backed mode keeps shell-significant quote characters out of the
+native process argument vector, so the same generator recipe is safe from
+PowerShell and POSIX shells. Use direct `--command-or-source-system` only when
+the provenance string does not depend on shell-sensitive quoting.
 
 Use `--review-status reviewed --reviewer <reviewer>` only after independent
 review is complete. Use `--check` in follow-up PRs to prove the retained

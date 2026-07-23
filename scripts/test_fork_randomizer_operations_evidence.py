@@ -86,6 +86,7 @@ def template_text() -> str:
 - CI run or operator transcript: `TBD`
 - Fork/testnet block or reference: `TBD`
 - Network and deployment version: `TBD`
+- Command: `TBD`
 
 ## Provider Configuration
 
@@ -154,7 +155,7 @@ def template_text() -> str:
 python scripts/test_fork_randomizer_operations_evidence.py
 python scripts/check_fork_randomizer_operations_evidence.py
 python scripts/check_randomizer_operations.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork/testnet block, provider epoch, request-health reference, or operations transcript>" --command-or-source-system "<provider export, explorer source, operations JSON, or reviewer source>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-randomizer-operations-evidence-template.json --retained-artifact release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md --output release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork/testnet block, provider epoch, request-health reference, or operations transcript>" --command-or-source-system-from-retained --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -177,6 +178,7 @@ def reviewed_artifact() -> str:
         "CI run or operator transcript: `TBD`": "CI run or operator transcript: `ci-run-123`",
         "Fork/testnet block or reference: `TBD`": "Fork/testnet block or reference: `fork block 25316366`",
         "Network and deployment version: `TBD`": "Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001`",
+        "Command: `TBD`": 'Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests`',
         "VRF adapter: `TBD`": "VRF adapter: `0x0000000000000000000000000000000000000008`",
         "VRF coordinator: `TBD`": "VRF coordinator: `0x0000000000000000000000000000000000006535`",
         "VRF provider epoch: `TBD`": "VRF provider epoch: `1`",
@@ -218,7 +220,6 @@ def reviewed_artifact() -> str:
         "Signer-service secrets removed: `TBD`": "Signer-service secrets removed: `yes`",
         "Unreleased drop payloads removed: `TBD`": "Unreleased drop payloads removed: `yes`",
         '--block-or-reference "<fork/testnet block, provider epoch, request-health reference, or operations transcript>"': '--block-or-reference "fork block 25316366"',
-        '--command-or-source-system "<provider export, explorer source, operations JSON, or reviewer source>"': '--command-or-source-system "fork randomizer operations transcript"',
         '--owner "<operator>"': "--owner release-operator",
         '--reviewer "<reviewer>"': "--reviewer release-reviewer",
         '--source-git-commit "<release commit>"': "--source-git-commit 1234567890abcdef1234567890abcdef12345678",

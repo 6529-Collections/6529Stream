@@ -938,6 +938,12 @@ artifact path. The helper computes the artifact digest, validates the output
 with the canonical checker, and supports `--check` for drift detection. It does
 not unblock a release row until the generated evidence is independently
 reviewed and linked from `release-artifacts/latest/public-beta-evidence.json`.
+When exact provenance contains shell-significant quotes, put it in the retained
+Markdown artifact as exactly one inline-code `Command` field and pass
+`--command-or-source-system-from-retained`. This file-backed transport keeps
+the quote bytes out of native argv on Windows and POSIX systems. The checker
+requires exact retained-command fidelity for fork deployment, fork ceremony,
+and fork randomizer evidence, including the quotes around replay signatures.
 External audit report evidence for issue #215 has a Markdown retained artifact
 path at
 `release-artifacts/evidence/external-audit-report/external-audit-report-retained-artifact-template.md`.

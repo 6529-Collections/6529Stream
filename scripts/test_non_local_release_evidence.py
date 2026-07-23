@@ -452,6 +452,141 @@ class NonLocalReleaseEvidenceTests(unittest.TestCase):
             ):
                 checker.validate_evidence(path, root)
 
+    def test_accepts_exact_quoted_command_from_retained_artifact(self) -> None:
+        """Selected fork evidence preserves the retained command byte for byte."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            command = (
+                "forge script script/RehearseDeployment.s.sol:RehearseDeployment "
+                '--sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --via-ir'
+            )
+            retained_path = root / "evidence/fork-rehearsal.md"
+            write_text(retained_path, f"- Command: `{command}`\n")
+            evidence = valid_evidence(root)
+            evidence.update(
+                {
+                    "public_beta_requirement_id": "fork_deployment_rehearsal",
+                    "command_or_source_system": command,
+                    "retained_path": "evidence/fork-rehearsal.md",
+                    "sha256": checker.file_sha256(retained_path),
+                }
+            )
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            checker.validate_evidence(path, root)
+
+    def test_rejects_command_quote_drift_from_retained_artifact(self) -> None:
+        """Dropping replay-signature quotes fails exact provenance validation."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            retained_command = (
+                "forge script script/RehearseDeployment.s.sol:RehearseDeployment "
+                '--sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --via-ir'
+            )
+            retained_path = root / "evidence/fork-ceremony.md"
+            write_text(retained_path, f"- Command: `{retained_command}`\n")
+            evidence = valid_evidence(root)
+            evidence.update(
+                {
+                    "public_beta_requirement_id": "fork_testnet_ceremony_evidence",
+                    "command_or_source_system": retained_command.replace(
+                        '--sig "run()"',
+                        "--sig run()",
+                    ),
+                    "retained_path": "evidence/fork-ceremony.md",
+                    "sha256": checker.file_sha256(retained_path),
+                }
+            )
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "exactly match the retained Command",
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_missing_retained_command_for_fidelity_requirement(self) -> None:
+        """Selected fork evidence must retain one canonical command field."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            retained_path = root / "evidence/fork-randomizer.md"
+            write_text(retained_path, "sanitized fork randomizer evidence\n")
+            evidence = valid_evidence(root)
+            evidence.update(
+                {
+                    "public_beta_requirement_id": (
+                        "fork_testnet_randomizer_operations_evidence"
+                    ),
+                    "retained_path": "evidence/fork-randomizer.md",
+                    "sha256": checker.file_sha256(retained_path),
+                }
+            )
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "exactly one canonical",
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_multiple_retained_commands_for_fidelity_requirement(self) -> None:
+        """Selected fork evidence cannot choose ambiguously between commands."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            command = 'forge script Rehearse --sig "run()" --via-ir'
+            retained_path = root / "evidence/fork-randomizer.md"
+            write_text(
+                retained_path,
+                f"- Command: `{command}`\n- Command: `{command} --check`\n",
+            )
+            evidence = valid_evidence(root)
+            evidence.update(
+                {
+                    "public_beta_requirement_id": (
+                        "fork_testnet_randomizer_operations_evidence"
+                    ),
+                    "command_or_source_system": command,
+                    "retained_path": "evidence/fork-randomizer.md",
+                    "sha256": checker.file_sha256(retained_path),
+                }
+            )
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "exactly one canonical",
+            ):
+                checker.validate_evidence(path, root)
+
+    def test_rejects_malformed_retained_command_field(self) -> None:
+        """Canonical command fields require one inline-code value."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            command = 'forge script Rehearse --sig "run()" --via-ir'
+            retained_path = root / "evidence/fork-deployment.md"
+            write_text(retained_path, f"- Command: {command}\n")
+            evidence = valid_evidence(root)
+            evidence.update(
+                {
+                    "public_beta_requirement_id": "fork_deployment_rehearsal",
+                    "command_or_source_system": command,
+                    "retained_path": "evidence/fork-deployment.md",
+                    "sha256": checker.file_sha256(retained_path),
+                }
+            )
+            path = root / "release-artifacts/evidence/example.json"
+            write_json(path, evidence)
+
+            with self.assertRaisesRegex(
+                checker.NonLocalReleaseEvidenceError,
+                "exactly one canonical",
+            ):
+                checker.validate_evidence(path, root)
+
     def test_rejects_secret_like_value(self) -> None:
         """Secret-shaped values cannot be committed."""
         with tempfile.TemporaryDirectory() as temp_dir:

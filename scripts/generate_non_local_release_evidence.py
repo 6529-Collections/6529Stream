@@ -147,6 +147,13 @@ def default_operator_notes(template_path: str, requirement_id: str) -> str:
     )
 
 
+def command_or_source_system(args: argparse.Namespace, retained_path: Path) -> str:
+    """Return direct CLI provenance or read it losslessly from retained Markdown."""
+    if args.command_or_source_system_from_retained:
+        return evidence_checker.retained_command_or_source_system(retained_path)
+    return args.command_or_source_system
+
+
 def build_evidence_document(args: argparse.Namespace, repo_root: Path) -> dict[str, Any]:
     """Build checker-compatible evidence metadata from CLI arguments."""
     template_path = args.template if args.template.is_absolute() else repo_root / args.template
@@ -170,7 +177,13 @@ def build_evidence_document(args: argparse.Namespace, repo_root: Path) -> dict[s
     source_git_commit = args.source_git_commit or default_git_commit(repo_root)
     template_relative = repo_relative_path(repo_root, template_path, "template")
     retained_relative = repo_relative_path(repo_root, retained_path, "retained artifact")
+    retained_path = evidence_checker.resolve_repo_file(
+        repo_root,
+        retained_relative,
+        "retained_path",
+    )
     redacted_fields = args.redacted_field or template_redacted_fields(template)
+    command_source = command_or_source_system(args, retained_path)
 
     document = {
         "schema_version": evidence_checker.EVIDENCE_SCHEMA,
@@ -181,7 +194,7 @@ def build_evidence_document(args: argparse.Namespace, repo_root: Path) -> dict[s
         "environment": args.environment,
         "chain_id": args.chain_id,
         "block_or_reference": args.block_or_reference,
-        "command_or_source_system": args.command_or_source_system,
+        "command_or_source_system": command_source,
         "retained_path": retained_relative,
         "sha256": evidence_checker.file_sha256(retained_path),
         "redaction_statement": args.redaction_statement,
@@ -241,7 +254,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--chain-id", type=parse_chain_id, required=True)
     parser.add_argument("--block-or-reference", required=True)
-    parser.add_argument("--command-or-source-system", required=True)
+    command_source = parser.add_mutually_exclusive_group(required=True)
+    command_source.add_argument("--command-or-source-system")
+    command_source.add_argument(
+        "--command-or-source-system-from-retained",
+        action="store_true",
+        help=(
+            "Read command_or_source_system from the retained Markdown artifact's "
+            "single '- Command: `...`' field. This avoids shell argument quote "
+            "rewriting."
+        ),
+    )
     parser.add_argument("--owner", required=True)
     parser.add_argument("--reviewer", default="TBD")
     parser.add_argument(
