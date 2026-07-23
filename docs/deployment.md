@@ -191,7 +191,9 @@ python scripts/test_sepolia_evidence_preflight.py
 python scripts/check_sepolia_evidence_preflight.py
 ```
 
-This canonical build validates release artifacts and explorer-verification
+The first aggregate Forge command is a warning and whole-tree size diagnostic;
+its skip flags do not make it canonical production evidence. The subsequent
+target-isolated build validates release artifacts and explorer-verification
 inputs; it does not prove live explorer verification or deployed-address
 parity, and it does not yet make the Forge deployment scripts or broadcasts
 consume the same isolated initcode. Do not treat this preflight as production
@@ -366,8 +368,9 @@ constructor arguments or admin ceremony details. They follow
 lowercase, and should be regenerated from manifests rather than edited by hand.
 
 ABI checksum, bytecode checksum, interface ID, event topic catalog, and
-protocol surface report inputs are generated from the production `via-ir`
-Foundry artifacts:
+protocol surface report inputs are generated from the canonical target-isolated
+`via-ir` Foundry artifacts. The aggregate command shown first is diagnostic
+only:
 
 ```sh
 forge build --sizes --via-ir --skip test --skip script --force

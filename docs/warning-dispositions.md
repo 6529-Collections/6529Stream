@@ -35,13 +35,16 @@ risk row for this work is retained in
 
 ## Current Warning Baseline
 
-The current committed release gate still runs `forge build`,
+The current committed release gate still runs `forge build`, the diagnostic
 `forge build --sizes --via-ir --skip test --skip script --force`,
-`forge doc --build`, the scoped Solidity formatting checker, the release
-manifest/checksum checks, and the warning disposition checker. The
-warning-disposition checker also compares the retained `forge-size.log` output
-against the accepted solc warning rows so new compiler warnings cannot silently
-enter CI. The parser is tested against a captured
+`forge doc --build`, the scoped Solidity formatting checker, the canonical
+target-isolated release builder, release manifest/checksum checks, and the
+warning disposition checker. The warning-disposition checker compares the
+retained aggregate `forge-size.log` output against the accepted solc warning
+rows so new compiler warnings cannot silently enter CI. Foundry compilation
+restrictions can admit test helpers to that diagnostic despite its skip flags;
+the log is therefore warning evidence, not production bytecode or source-input
+evidence. The parser is tested against a captured
 `forge build --sizes --via-ir --skip test --skip script --force` fixture from
 Foundry v1.7.1 and Solidity 0.8.19, and it keys the accepted solc rows by
 warning code, source file, and source excerpt instead of raw line number. As of
@@ -112,7 +115,7 @@ prior via-IR release artifact baseline to the current compiled output.
 | `SOLC-PURE-RANDOMIZER-VRF` | `pure-suggestion` | [`smart-contracts/RandomizerVRF.sol`](../smart-contracts/RandomizerVRF.sol) `isRandomizerContract()` | Marker function could be `pure` | `accepted-abi-compatibility` because changing `view` to `pure` changes ABI `stateMutability` for no security gain | Revisit only in a coordinated interface version bump |
 | `SOLC-PURE-MINTER-MARKER` | `pure-suggestion` | [`smart-contracts/StreamMinter.sol`](../smart-contracts/StreamMinter.sol) `isMinterContract()` | Marker function could be `pure` | `accepted-abi-compatibility` because changing `view` to `pure` changes ABI `stateMutability` for no security gain | Revisit only in a coordinated interface version bump |
 | `SOLC-PURE-ROYALTY` | `pure-suggestion` | [`smart-contracts/StreamCore.sol`](../smart-contracts/StreamCore.sol) `royaltyInfo(uint256 tokenId, uint256 salePrice)` | Fixed royalty math could be `pure` | `accepted-abi-compatibility` and `accepted-size-tradeoff`; the current ERC-2981 surface is stable and Core changes require measured bytecode review | Revisit only if the royalty policy or ABI baseline changes |
-| `SOLC-TEST-SELFDESTRUCT-HELPERS` | `selfdestruct-deprecation` | [`test/StreamAuctionPayments.t.sol`](../test/StreamAuctionPayments.t.sol), [`test/StreamCuratorsPool.t.sol`](../test/StreamCuratorsPool.t.sol), [`test/StreamEmergencyWithdraw.t.sol`](../test/StreamEmergencyWithdraw.t.sol), [`test/StreamFixedPricePayments.t.sol`](../test/StreamFixedPricePayments.t.sol), [`test/StreamRandomizerPayments.t.sol`](../test/StreamRandomizerPayments.t.sol) | Forced-ETH helper contracts intentionally use `selfdestruct` under Solidity 0.8.19 | `accepted-test-only` because the helpers are excluded from the production size build and prove forced-balance accounting behavior | Replace only when the test suite adopts an equivalent deterministic forced-ETH primitive |
+| `SOLC-TEST-SELFDESTRUCT-HELPERS` | `selfdestruct-deprecation` | [`test/StreamAuctionPayments.t.sol`](../test/StreamAuctionPayments.t.sol), [`test/StreamCuratorsPool.t.sol`](../test/StreamCuratorsPool.t.sol), [`test/StreamEmergencyWithdraw.t.sol`](../test/StreamEmergencyWithdraw.t.sol), [`test/StreamFixedPricePayments.t.sol`](../test/StreamFixedPricePayments.t.sol), [`test/StreamRandomizerPayments.t.sol`](../test/StreamRandomizerPayments.t.sol) | Forced-ETH helper contracts intentionally use `selfdestruct` under Solidity 0.8.19 | `accepted-test-only` because these helpers can appear only in aggregate diagnostic warnings and are rejected from canonical release inputs | Replace only when the test suite adopts an equivalent deterministic forced-ETH primitive |
 
 ## Accepted Documentation And Linter Dispositions
 
@@ -126,7 +129,7 @@ prior via-IR release artifact baseline to the current compiled output.
 | `LINT-BLOCK-TIMESTAMP-DROPS` | `block-timestamp` | [`smart-contracts/StreamDrops.sol`](../smart-contracts/StreamDrops.sol) | Drop execution uses block time | `accepted-protocol-time-window` because drop deadlines are part of EIP-712 authorization and replay safety | Keep expired and deadline-bound drop authorization tests |
 | `LINT-BLOCK-TIMESTAMP-MINTER` | `block-timestamp` | [`smart-contracts/StreamMinter.sol`](../smart-contracts/StreamMinter.sol) | Minting path checks collection and drop time windows | `accepted-protocol-time-window` because time gates are required external behavior | Keep mint-window and drop-window regression tests |
 | `LINT-BLOCK-TIMESTAMP-MINT-MANAGER` | `block-timestamp` | [`smart-contracts/StreamMintManager.sol`](../smart-contracts/StreamMintManager.sol) | Manager phase execution checks configured start and end windows | `accepted-protocol-time-window` because phase windows are explicit launch policy state outside Core | Keep phase not-started, ended, pause, and executor regression tests |
-| `LINT-BLOCK-TIMESTAMP-TEST-HELPER` | `block-timestamp` | [`test/helpers/ProtocolStateMachine.sol`](../test/helpers/ProtocolStateMachine.sol) | Stateful test helper compares block time | `accepted-test-only` because this code is not a production artifact | Keep production build skipping `test` and `script` paths |
+| `LINT-BLOCK-TIMESTAMP-TEST-HELPER` | `block-timestamp` | [`test/helpers/ProtocolStateMachine.sol`](../test/helpers/ProtocolStateMachine.sol) | Stateful test helper compares block time | `accepted-test-only` because this code is not a production artifact | Keep canonical release validation rejecting `test` and `script` paths |
 | `LINT-BLOCK-TIMESTAMP-FINALITY-REGISTRY` | `block-timestamp` | [`smart-contracts/StreamArtworkFinalityRegistry.sol`](../smart-contracts/StreamArtworkFinalityRegistry.sol) | Terminal-freeze staging compares block time against the veto floor and open-to-execute window | `accepted-protocol-time-window` because the 72-hour veto floor and 7-day execution window are explicit [GOV-WINDOWS] wall-clock policy | Keep the freeze-machine window regression tests in `test/StreamArtworkFinalityFreeze.t.sol` |
 | `LINT-BLOCK-TIMESTAMP-FINALITY-PREVIEW` | `block-timestamp` | [`smart-contracts/StreamArtworkFinalityPreview.sol`](../smart-contracts/StreamArtworkFinalityPreview.sol) | View-only preview mirrors the registry's staged-window comparison | `accepted-protocol-time-window` because the preview must report exactly the execution-time window state | Keep preview-parity tests in `test/StreamArtworkFinalityRegistry.t.sol` |
 

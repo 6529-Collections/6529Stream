@@ -23,7 +23,7 @@ except ModuleNotFoundError:  # pragma: no cover - the checked toolchain is Pytho
 
 
 RELEASE_BUILD_SCHEMA = "6529stream.release-build.v1"
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "2"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_OUTPUT_DIR = Path("out-release")
@@ -40,6 +40,7 @@ TARGET_GROUPS = (
     ("production_contract", "production_contracts"),
     ("interface", "interfaces"),
 )
+RESTRICTED_RELEASE_SOURCE_ROOTS = frozenset({"script", "test"})
 TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -224,6 +225,20 @@ def resolve_repo_path(repo_root: Path, value: Path, label: str) -> Path:
     return resolved
 
 
+def reject_restricted_release_source(
+    repo_root: Path,
+    source_path: Path,
+    label: str,
+) -> None:
+    relative = normalize_path(source_path, repo_root)
+    parts = Path(relative).parts
+    if parts and parts[0].casefold() in RESTRICTED_RELEASE_SOURCE_ROOTS:
+        raise ReleaseBuildError(
+            f"{label} is under restricted canonical release source root "
+            f"{parts[0]!r}: {relative}"
+        )
+
+
 def resolve_canonical_output_path(repo_root: Path, value: Path) -> Path:
     lexical = lexical_repo_path(repo_root, value, "release output directory")
     canonical = repo_root / DEFAULT_OUTPUT_DIR
@@ -257,6 +272,8 @@ def load_foundry_profile(path: Path) -> dict[str, Any]:
 def validate_foundry_profile(path: Path) -> None:
     profile = load_foundry_profile(path)
     expected = {
+        "test": "test",
+        "script": "script",
         "solc_version": SOLC_VERSION,
         "auto_detect_solc": False,
         "evm_version": EVM_VERSION,
@@ -300,6 +317,11 @@ def configured_targets(repo_root: Path, config_path: Path) -> list[dict[str, str
                 Path(source),
                 f"{config_key}[{index}].source",
             )
+            reject_restricted_release_source(
+                repo_root,
+                source_path,
+                f"{config_key}[{index}].source",
+            )
             if source_path.suffix != ".sol" or not source_path.is_file():
                 raise ReleaseBuildError(f"configured Solidity source is missing: {source}")
             targets.append({"kind": kind, "name": name, "source": source})
@@ -336,6 +358,11 @@ def metadata_source_records(
             f"{label}.metadata.sources.{source}.keccak256",
         )
         source_path = resolve_repo_path(repo_root, Path(source), f"{label} metadata source")
+        reject_restricted_release_source(
+            repo_root,
+            source_path,
+            f"{label} metadata source",
+        )
         if not source_path.is_file():
             raise ReleaseBuildError(f"{label} metadata source is missing: {source}")
         source_bytes = source_path.read_bytes()
@@ -377,6 +404,11 @@ def validate_compiler_input(
         source_path = resolve_repo_path(
             repo_root,
             Path(source),
+            f"{label} compiler input source",
+        )
+        reject_restricted_release_source(
+            repo_root,
+            source_path,
             f"{label} compiler input source",
         )
         try:
@@ -772,6 +804,7 @@ def build_manifest(
         },
         "policy": {
             "compilation_unit": "one_configured_target_source_and_its_import_closure",
+            "restricted_source_roots": sorted(RESTRICTED_RELEASE_SOURCE_ROOTS),
             "solc_version": SOLC_VERSION,
             "solc_long_version": SOLC_LONG_VERSION,
             "evm_version": EVM_VERSION,

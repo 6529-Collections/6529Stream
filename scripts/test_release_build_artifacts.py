@@ -20,6 +20,13 @@ REPO_ROOT = SCRIPT_PATH.parent.parent
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 CHECK_PS1_PATH = REPO_ROOT / "scripts" / "check.ps1"
 CHECK_SH_PATH = REPO_ROOT / "scripts" / "check.sh"
+CI_PATH = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+README_PATH = REPO_ROOT / "README.md"
+TEST_README_PATH = REPO_ROOT / "test" / "README.md"
+TOOLING_PATH = REPO_ROOT / "docs" / "tooling.md"
+DEPLOYMENT_README_PATH = REPO_ROOT / "deployments" / "README.md"
+RELEASE_ARTIFACTS_README_PATH = REPO_ROOT / "release-artifacts" / "README.md"
+SIZE_LOG_PATH = REPO_ROOT / "scripts" / "run_forge_size_log.py"
 SPEC = importlib.util.spec_from_file_location("build_release_artifacts", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 builder = importlib.util.module_from_spec(SPEC)
@@ -74,6 +81,8 @@ def seed_tree(root: Path) -> dict[str, Path]:
             [
                 "[profile.default]",
                 'src = "smart-contracts"',
+                'test = "test"',
+                'script = "script"',
                 'out = "out"',
                 'cache_path = "cache"',
                 'solc_version = "0.8.19"',
@@ -158,10 +167,16 @@ def artifact(
 
 
 class FakeForge:
-    def __init__(self, *, wrong_target: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        wrong_target: bool = False,
+        compiler_input_extra_source: str | None = None,
+    ) -> None:
         self.commands: list[list[str]] = []
         self.cwd_values: list[Path] = []
         self.wrong_target = wrong_target
+        self.compiler_input_extra_source = compiler_input_extra_source
 
     def __call__(self, command: list[str], cwd: Path) -> None:
         self.commands.append(command)
@@ -176,6 +191,8 @@ class FakeForge:
         source_paths = [source]
         if Path(source).name == "Example.sol":
             source_paths.append("smart-contracts/Shared.sol")
+            if self.compiler_input_extra_source is not None:
+                source_paths.append(self.compiler_input_extra_source)
         source_contents = {
             path: (cwd / path).read_bytes().decode("utf-8")
             for path in source_paths
@@ -305,6 +322,10 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 {"FOUNDRY_PROFILE": "default"},
             )
             self.assertEqual(
+                manifest["policy"]["restricted_source_roots"],
+                ["script", "test"],
+            )
+            self.assertEqual(
                 manifest["policy"]["sanitized_environment_prefixes"],
                 ["DAPP_", "FOUNDRY_"],
             )
@@ -342,6 +363,147 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 records["Example"]["compiler_input_path"],
                 "out-release/compiler-inputs/000-Example.json",
             )
+
+    def test_rejects_test_and_script_sources_from_build_info_compiler_input(self) -> None:
+        for restricted_source in (
+            "test/ReleaseLeak.t.sol",
+            "script/ReleaseLeak.s.sol",
+        ):
+            with self.subTest(source=restricted_source):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_tree(root)
+                    write_text(
+                        root / restricted_source,
+                        (
+                            "// SPDX-License-Identifier: MIT\n"
+                            "pragma solidity 0.8.19;\n"
+                            "contract ReleaseLeak {}\n"
+                        ),
+                    )
+                    fake = FakeForge(
+                        compiler_input_extra_source=restricted_source,
+                    )
+
+                    with self.assertRaisesRegex(
+                        builder.ReleaseBuildError,
+                        "restricted canonical release source root",
+                    ):
+                        with redirect_stdout(StringIO()):
+                            builder.build_release_output(
+                                root,
+                                paths["config"],
+                                paths["foundry_config"],
+                                paths["output"],
+                                runner=fake,
+                                forge_version_output=FAKE_FORGE_VERSION,
+                            )
+
+                    self.assertEqual(len(fake.commands), 1)
+                    self.assertFalse(paths["output"].exists())
+
+    def test_rejects_restricted_configured_target_before_compiling(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            restricted_source = "test/ConfiguredReleaseTarget.t.sol"
+            write_text(
+                root / restricted_source,
+                (
+                    "// SPDX-License-Identifier: MIT\n"
+                    "pragma solidity 0.8.19;\n"
+                    "contract ConfiguredReleaseTarget {}\n"
+                ),
+            )
+            config = json.loads(paths["config"].read_text(encoding="utf-8"))
+            config["production_contracts"][0] = {
+                "name": "ConfiguredReleaseTarget",
+                "source": restricted_source,
+            }
+            write_json(paths["config"], config)
+            fake = FakeForge()
+
+            with self.assertRaisesRegex(
+                builder.ReleaseBuildError,
+                "restricted canonical release source root",
+            ):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=fake,
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            self.assertEqual(fake.commands, [])
+
+    def test_rejects_test_and_script_sources_from_artifact_metadata(self) -> None:
+        for restricted_source in (
+            "test/MetadataLeak.t.sol",
+            "script/MetadataLeak.s.sol",
+        ):
+            with self.subTest(source=restricted_source):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_tree(root)
+                    source_path = root / restricted_source
+                    write_text(
+                        source_path,
+                        (
+                            "// SPDX-License-Identifier: MIT\n"
+                            "pragma solidity 0.8.19;\n"
+                            "contract MetadataLeak {}\n"
+                        ),
+                    )
+                    metadata = {
+                        "sources": {
+                            restricted_source: {
+                                "keccak256": builder.keccak256_hex(
+                                    source_path.read_bytes()
+                                )
+                            }
+                        }
+                    }
+
+                    with self.assertRaisesRegex(
+                        builder.ReleaseBuildError,
+                        "restricted canonical release source root",
+                    ):
+                        builder.metadata_source_records(
+                            root.resolve(),
+                            metadata,
+                            "metadata fixture",
+                        )
+
+    def test_aggregate_size_build_is_labeled_diagnostic(self) -> None:
+        expected_phrases = {
+            README_PATH: "aggregate size/warning step is diagnostic only",
+            TEST_README_PATH: "warning and whole-tree size diagnostic only",
+            TOOLING_PATH: "warning-collection and whole-tree size diagnostic",
+            DEPLOYMENT_README_PATH: "command is diagnostic only",
+            RELEASE_ARTIFACTS_README_PATH: "warnings and whole-tree size diagnostics",
+            SIZE_LOG_PATH: "aggregate size/warning diagnostic",
+            CI_PATH: "name: Aggregate size and warning diagnostic",
+        }
+        for path, phrase in expected_phrases.items():
+            with self.subTest(path=path.relative_to(REPO_ROOT).as_posix()):
+                self.assertIn(
+                    phrase,
+                    path.read_text(encoding="utf-8"),
+                )
+
+        canonical_commands = [
+            "python scripts/test_release_build_artifacts.py",
+            "python scripts/build_release_artifacts.py",
+            "python scripts/build_release_artifacts.py --check",
+            "python scripts/generate_release_artifacts.py",
+        ]
+        for path in (DEPLOYMENT_README_PATH, RELEASE_ARTIFACTS_README_PATH):
+            with self.subTest(path=path.relative_to(REPO_ROOT).as_posix()):
+                text = path.read_text(encoding="utf-8")
+                positions = [text.index(command) for command in canonical_commands]
+                self.assertEqual(positions, sorted(positions))
 
     def test_successful_replacement_is_exact_and_deterministic(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

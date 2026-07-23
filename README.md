@@ -124,9 +124,12 @@ Install Foundry `v1.7.1`, then run:
 make check
 ```
 
-The production-size step skips Foundry test and script contracts, compiles via
-IR, and fails if deployable contracts exceed EIP-170 or EIP-3860 limits. The
-local deployment rehearsal uses placeholder addresses; it proves the
+The aggregate size/warning step is diagnostic only. Foundry compilation
+restrictions can still admit test helpers despite the command's
+`--skip test --skip script` flags, so release bytecode and EIP-170/EIP-3860
+evidence come from the target-isolated
+`python scripts/build_release_artifacts.py` output instead.
+The local deployment rehearsal uses placeholder addresses; it proves the
 deploy-and-wire ceremony can execute without production secrets, not that a
 live deployment is ready.
 

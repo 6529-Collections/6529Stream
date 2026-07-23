@@ -7,6 +7,14 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Hardened canonical release builds so configured targets, retained build-info
+  compiler inputs, and artifact metadata fail closed if any resolved source is
+  under `test/` or `script/`; added focused regressions for both restricted
+  roots; and consistently labeled the aggregate all-source size/warning build
+  as diagnostic rather than production evidence. This addresses
+  [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
+  without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test
+  compilation, or release maturity.
 - Made release bytecode generation reproducible under Solidity 0.8.19 by
   compiling each configured production source and its import closure in an
   isolated via-IR Forge invocation, retaining a deterministic build receipt,

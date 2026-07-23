@@ -280,26 +280,27 @@ reason. The current baseline has 648 explicit exclusions, so it is a checked
 burn-down queue rather than proof that API documentation is complete. See
 [`natspec-coverage.md`](natspec-coverage.md).
 
-The aggregate size step is the ordinary development deployability gate. It
-skips test and script contracts so non-production artifacts do not pollute
-EIP-170/EIP-3860 evidence, and it uses `via_ir` because the current deployable
-`StreamCore` release profile needs the IR optimizer to fit under the runtime
-limit. The artifact-backed
-budget checker reads `release-artifacts/contracts.json`, treats unlinked
-Solidity library placeholders as their 20-byte deployed addresses for size
-counting, fails below the 384-byte `StreamCore` minimum margin, and reports a
-warning below the 512-byte future-work threshold. The checker also validates
-artifact compiler metadata, optimizer settings, EVM version, compilation target,
-and current-source Keccak hashes before trusting any reported runtime size, so
+The aggregate size step is a warning-collection and whole-tree size diagnostic,
+not a deployability or release-evidence gate. It uses `via_ir` because the
+current deployable `StreamCore` profile needs the IR optimizer, but Foundry
+compilation restrictions can still admit `test/` helpers despite the command's
+`--skip test --skip script` flags. The artifact-backed budget checker therefore
+reads only canonical target-isolated `out-release/` artifacts. It reads
+`release-artifacts/contracts.json`, treats unlinked Solidity library
+placeholders as their 20-byte deployed addresses for size counting, fails below
+the 384-byte `StreamCore` minimum margin, and reports a warning below the
+512-byte future-work threshold. The checker also validates artifact compiler
+metadata, optimizer settings, EVM version, compilation target, and
+current-source Keccak hashes before trusting any reported runtime size, so
 stale artifacts from earlier local commands fail before they can become release
 evidence. Its 384-byte floor is an interim development control, not the
 governing production deployment threshold.
 
 The Core bytecode-spend policy is stricter than the EIP-170 floor. It reads the
-same production-size artifacts and pins the currently approved `StreamCore`
-runtime baseline from `release-artifacts/contracts.json`. A future PR may reduce
-Core runtime size without an exception, but any increase above the approved
-baseline must add an accepted exception record with an issue, rationale,
+same canonical target-isolated artifacts and pins the currently approved
+`StreamCore` runtime baseline from `release-artifacts/contracts.json`. A future
+PR may reduce Core runtime size without an exception, but any increase above
+the approved baseline must add an accepted exception record with an issue, rationale,
 measured delta, maximum approved runtime size, and mitigation before
 `python scripts/check_core_bytecode_spend_policy.py` will pass.
 Accepted headroom-recovery records use `measured_delta_bytes` as
@@ -386,10 +387,13 @@ The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
 run remains useful for compiler warning collection and whole-tree diagnostic
 size output, but it is not release bytecode or explorer-verification evidence.
 This separation addresses
-[issue #674](https://github.com/6529-Collections/6529Stream/issues/674);
-the broader noncausal test-source leakage investigation remains tracked under
+[issue #674](https://github.com/6529-Collections/6529Stream/issues/674).
+The canonical builder additionally rejects any configured target, retained
+build-info compiler-input source, or artifact-metadata source whose resolved
+repository path starts under `test/` or `script/`. This fail-closed guard
+addresses the noncausal aggregate leakage tracked by
 [issue #675](https://github.com/6529-Collections/6529Stream/issues/675) without
-expanding this release-integrity change into a compiler redesign.
+changing `foundry.toml` or the via-IR test compilation behavior.
 This helper canonicalizes release and verification evidence only. The current
 Forge deployment scripts can still recompile a larger script import universe
 and do not yet prove that broadcasts consume this canonical initcode;
@@ -1279,8 +1283,9 @@ the pinned release asset and verified with SHA256 before extraction.
 
 ## Release Artifacts
 
-After changing any production contract ABI or event surface, run the production
-build and regenerate the tracked release baseline with:
+After changing any production contract ABI or event surface, optionally run the
+aggregate diagnostic, then build the canonical target-isolated artifacts and
+regenerate the tracked release baseline with:
 
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force

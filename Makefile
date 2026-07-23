@@ -51,6 +51,7 @@ gas-envelopes-check:
 	$(PYTHON) scripts/test_gas_envelopes.py
 	$(PYTHON) scripts/check_gas_envelopes.py
 
+# Aggregate diagnostic only; canonical release bytecode is built by release-build.
 size:
 	$(PYTHON) scripts/run_forge_size_log.py --log cache/forge-size.log
 

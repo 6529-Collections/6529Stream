@@ -382,16 +382,15 @@ collection-level metadata writes emit `BatchMetadataUpdate` for the minted-ever
 token range, empty collections do not emit empty batch events, and mint-only
 plus burn paths do not emit misleading ERC-4906 events.
 
-Production bytecode size is checked through the local/CI gate
-`forge build --sizes --via-ir --skip test --skip script --force`, rather than a unit test,
-because the deployable contracts use the IR-optimized release profile while
-test-only invariant handlers can exceed initcode limits. The current Core UTF-8
-slice plus lifecycle-aware stale/failed metadata state display now keeps
-`StreamCore` deployable at 23,661 runtime bytes with 915 bytes of EIP-170
-headroom, above the documented 384-byte release floor and 512-byte warning
-threshold for larger Core feature work. The latest size recovery also keeps
-randomizer migration regressions for unsupported lifecycle providers and for
-lifecycle-aware providers whose pending-request probe fails.
+Production bytecode size is checked from the target-isolated
+`python scripts/build_release_artifacts.py` output because the deployable
+contracts use the IR-optimized release profile while test-only invariant
+handlers can exceed initcode limits. The aggregate
+`forge build --sizes --via-ir --skip test --skip script --force` run is a
+warning and whole-tree size diagnostic only: Foundry compilation restrictions
+can still admit `test/` helpers into that compiler universe. Canonical release
+build validation rejects any `test/` or `script/` source found in retained
+compiler inputs or artifact metadata.
 
 Burn metadata semantics now have P1-META-005 target-state coverage in
 `StreamCoreBurn.t.sol`: burn emits the standard ERC-721 transfer-to-zero event

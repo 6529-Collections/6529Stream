@@ -17,7 +17,7 @@ DEFAULT_FOUNDRY_OUT = Path("out-release")
 EXPECTED_SOLC_VERSION = "0.8.19+commit.7dd6d404"
 EXPECTED_EVM_VERSION = "paris"
 EXPECTED_OPTIMIZER_RUNS = 200
-PRODUCTION_BUILD_COMMAND = "python scripts/build_release_artifacts.py"
+CANONICAL_RELEASE_BUILD_COMMAND = "python scripts/build_release_artifacts.py"
 HEX_RE = re.compile(r"^[0-9a-fA-F]*$")
 SOLIDITY_LINK_PLACEHOLDER_RE = re.compile(r"__\$[0-9a-fA-F]{34}\$__")
 
@@ -128,8 +128,8 @@ def deployed_runtime_size_bytes(artifact: dict[str, Any], artifact_path: Path) -
 
 def artifact_profile_error(artifact_path: Path, reason: str) -> SizeBudgetError:
     return SizeBudgetError(
-        f"{artifact_path} is not a current production-size artifact: {reason}. "
-        f"Run `{PRODUCTION_BUILD_COMMAND}` before checking runtime budgets."
+        f"{artifact_path} is not a current canonical release artifact: {reason}. "
+        f"Run `{CANONICAL_RELEASE_BUILD_COMMAND}` before checking runtime budgets."
     )
 
 
@@ -345,7 +345,8 @@ def check_report(report: list[dict[str, Any]]) -> int:
             print(
                 "error: {contract} runtime margin {runtime_margin_bytes} is below "
                 "minimum {minimum_runtime_margin_bytes}; see {tracking}. If this "
-                f"uses stale or non-production artifacts, rerun `{PRODUCTION_BUILD_COMMAND}`".format(
+                f"uses stale or non-canonical artifacts, rerun "
+                f"`{CANONICAL_RELEASE_BUILD_COMMAND}`".format(
                     **row
                 ),
                 file=sys.stderr,
