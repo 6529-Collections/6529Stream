@@ -246,7 +246,7 @@
         },
         {
           "path": "docs/deployment.md",
-          "sha256": "sha256:2d6fe4e0142611b1055b043dc5b0bb7773e091f4538927b3abf50d93bb2519bb"
+          "sha256": "sha256:8cc08f555ef12b23823735ab20a84a1cb691129de426410dcca4c60af7e7fb7a"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
