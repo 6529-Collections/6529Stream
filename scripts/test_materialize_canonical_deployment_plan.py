@@ -36,6 +36,15 @@ class MaterializerFixture:
 
     def __init__(self, root: Path) -> None:
         self.root = root
+        source_root = Path(__file__).resolve().parents[1]
+        for schema_path in (
+            materializer.CANDIDATE_SCHEMA_PATH,
+            materializer.PLAN_SCHEMA_PATH,
+        ):
+            write_json(
+                root / schema_path,
+                materializer.load_json(source_root / schema_path),
+            )
         self.artifact_path = (
             root / "out-release" / "Fixture.sol" / "Fixture.json"
         )
@@ -619,7 +628,7 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         target["artifact_relative_path"] = "../Fixture.json"
         self.fixture.write_candidate()
         self.assert_materialization_fails(
-            "normalized forward-slash repository-relative path"
+            "normalized portable forward-slash repository-relative path"
         )
 
         with self.assertRaisesRegex(
@@ -815,17 +824,28 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
                     )
 
     def test_repository_relative_paths_are_cross_platform_canonical(self) -> None:
-        self.assertEqual(
-            materializer.require_safe_relative_path(
-                "smart-contracts/Fixture.sol",
-                "path",
-            ),
+        accepted = (
             "smart-contracts/Fixture.sol",
+            ".hidden/Fixture.sol",
+            "unicode/\N{SNOWMAN}.sol",
+            "COM0.sol",
+            "com10.sol",
+            "LPT0",
+            "lpt10.json",
+            "CONSOLE.sol",
+            "nulled/file",
+            "directory/name .sol",
         )
-        for value in (
+        for value in accepted:
+            with self.subTest(accepted=value):
+                self.assertEqual(
+                    materializer.require_safe_relative_path(value, "path"),
+                    value,
+                )
+
+        rejected = [
             "/absolute",
             "C:/windows-drive",
-            "nested/file:stream",
             "../escape",
             "nested/../escape",
             "./prefixed",
@@ -835,13 +855,140 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             "nested/",
             ".",
             "..",
-        ):
+            "trailing.",
+            "trailing ",
+            "nested/trailing.",
+            "nested/trailing ",
+            "nested/alias. /file",
+            "nested/alias /file",
+        ]
+        rejected.extend(f"nested/file{character}name" for character in '<>:"|?*')
+        rejected.extend(
+            f"nested/control{chr(codepoint)}name"
+            for codepoint in (*range(0x20), 0x7F)
+        )
+        reserved_names = (
+            "CON",
+            "PRN",
+            "AUX",
+            "NUL",
+            *(f"COM{index}" for index in range(1, 10)),
+            *(f"LPT{index}" for index in range(1, 10)),
+        )
+        for name in reserved_names:
+            rejected.extend(
+                (
+                    name,
+                    name.lower() + ".json",
+                    f"nested/{name.swapcase()}",
+                    f"nested/{name} .json",
+                    f"nested/{name}..json",
+                )
+            )
+
+        for value in rejected:
             with self.subTest(value=value):
                 with self.assertRaisesRegex(
                     materializer.DeploymentPlanError,
-                    "normalized forward-slash repository-relative path",
+                    "normalized portable forward-slash "
+                    "repository-relative path",
                 ):
                     materializer.require_safe_relative_path(value, "path")
+
+        repo_root = Path(__file__).resolve().parents[1]
+        for schema_path in (
+            materializer.CANDIDATE_SCHEMA_PATH,
+            materializer.PLAN_SCHEMA_PATH,
+        ):
+            path_schema = materializer.load_json(repo_root / schema_path)[
+                "$defs"
+            ]["repo_path"]
+            self.assertEqual(
+                path_schema["pattern"],
+                materializer.REPO_PATH_PATTERN,
+            )
+            materializer.Draft202012Validator.check_schema(path_schema)
+            validator = materializer.Draft202012Validator(path_schema)
+            for value in accepted:
+                with self.subTest(schema=schema_path, accepted=value):
+                    self.assertTrue(validator.is_valid(value))
+            for value in rejected:
+                with self.subTest(schema=schema_path, rejected=value):
+                    self.assertFalse(validator.is_valid(value))
+
+    def test_materialization_runs_real_draft_2020_12_validation(self) -> None:
+        with mock.patch.object(
+            materializer,
+            "validate_draft_2020_12_schema",
+            wraps=materializer.validate_draft_2020_12_schema,
+        ) as validate_schema:
+            plan = self.fixture.materialize()
+        self.assertEqual(
+            [call.args[3] for call in validate_schema.call_args_list],
+            ["deployment candidate", "canonical deployment plan"],
+        )
+
+        invalid_candidate = copy.deepcopy(self.fixture.candidate)
+        invalid_candidate["unexpected"] = True
+        with self.assertRaisesRegex(
+            materializer.DeploymentPlanError,
+            "deployment candidate does not satisfy its Draft 2020-12 schema",
+        ):
+            materializer.validate_draft_2020_12_schema(
+                self.root,
+                materializer.CANDIDATE_SCHEMA_PATH,
+                invalid_candidate,
+                "deployment candidate",
+            )
+
+        invalid_plan = copy.deepcopy(plan)
+        invalid_plan["generated_by"] = "unreviewed-generator"
+        with self.assertRaisesRegex(
+            materializer.DeploymentPlanError,
+            "canonical deployment plan does not satisfy its "
+            "Draft 2020-12 schema",
+        ):
+            materializer.validate_draft_2020_12_schema(
+                self.root,
+                materializer.PLAN_SCHEMA_PATH,
+                invalid_plan,
+                "canonical deployment plan",
+            )
+
+    def test_draft_2020_12_validation_fails_closed_without_dependency(
+        self,
+    ) -> None:
+        with mock.patch.object(
+            materializer,
+            "Draft202012Validator",
+            None,
+        ):
+            with self.assertRaisesRegex(
+                materializer.DeploymentPlanError,
+                "pinned jsonschema toolchain dependency",
+            ):
+                materializer.validate_draft_2020_12_schema(
+                    self.root,
+                    materializer.CANDIDATE_SCHEMA_PATH,
+                    self.fixture.candidate,
+                    "deployment candidate",
+                )
+
+    def test_draft_2020_12_validation_rejects_invalid_schema(self) -> None:
+        schema_path = self.root / materializer.CANDIDATE_SCHEMA_PATH
+        schema = materializer.load_json(schema_path)
+        schema["type"] = 42
+        write_json(schema_path, schema)
+        with self.assertRaisesRegex(
+            materializer.DeploymentPlanError,
+            "schema is not valid Draft 2020-12",
+        ):
+            materializer.validate_draft_2020_12_schema(
+                self.root,
+                materializer.CANDIDATE_SCHEMA_PATH,
+                self.fixture.candidate,
+                "deployment candidate",
+            )
 
     def test_eip3860_full_initcode_boundary(self) -> None:
         self.fixture.set_full_initcode_length(
@@ -957,9 +1104,14 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             / "config"
             / "canonical-deployment-candidate-non-production.json"
         )
-        candidate = materializer.validate_candidate(
-            materializer.load_json(candidate_path)
+        candidate_value = materializer.load_json(candidate_path)
+        materializer.validate_draft_2020_12_schema(
+            repo_root,
+            materializer.CANDIDATE_SCHEMA_PATH,
+            candidate_value,
+            "committed deployment candidate",
         )
+        candidate = materializer.validate_candidate(candidate_value)
         self.assertEqual(
             candidate["candidate_kind"],
             "non_production_fixture",
@@ -1019,6 +1171,10 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             20,
         )
         for repo_path in (candidate_defs["repo_path"], plan_defs["repo_path"]):
+            self.assertEqual(
+                repo_path["pattern"],
+                materializer.REPO_PATH_PATTERN,
+            )
             pattern = re.compile(repo_path["pattern"])
             self.assertIsNotNone(pattern.fullmatch("contracts/Fixture.sol"))
             for rejected in (
@@ -1028,6 +1184,11 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
                 "C:/x",
                 "x/file:stream",
                 "x\\y",
+                "x/CON.json",
+                "x/Lpt9",
+                "x/name.",
+                "x/name ",
+                "x/control\u007fname",
             ):
                 self.assertIsNone(pattern.fullmatch(rejected))
 

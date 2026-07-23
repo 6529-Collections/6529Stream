@@ -157,13 +157,21 @@ python scripts/materialize_canonical_deployment_plan.py \
 The committed candidate is a deliberately narrow Anvil fixture. It binds one
 canonical `DependencyRegistry` artifact to literal non-secret placeholder
 addresses, has no genesis-profile entry, and sets both production/readiness
-flags to false. The materializer revalidates the complete canonical build and
-checks exact receipt, catalog, config, artifact, constructor, link, immutable,
-initcode, and runtime hashes before emitting the ordered plan below `tmp/`.
+flags to false. The materializer performs actual Draft 2020-12 validation of
+the committed candidate and every generated plan, revalidates the complete
+canonical build, and checks exact receipt, catalog, config, artifact,
+constructor, link, immutable, initcode, and runtime hashes before emitting the
+ordered plan below `tmp/`.
 Full creation bytecode plus ABI-encoded constructor arguments must fit the
 49,152-byte EIP-3860 initcode limit. Treat any mismatch or limit breach as a
 stop condition; do not weaken or bypass a binding to make a stale candidate
 pass.
+
+Every repository-relative path in the candidate and plan uses the same
+runtime/schema portable policy. It rejects controls, Windows-invalid
+characters and device names (including device names with extensions),
+backslashes, drive or alternate-stream syntax, empty or dot-alias segments,
+and segments ending in a dot or space.
 
 Supplied immutable values are candidate assertions. The materializer checks
 their artifact-declared byte widths and positions and the resulting expected
@@ -179,13 +187,14 @@ build. This is regression coverage for the tooling foundation, not deployment
 or readiness evidence.
 
 The output is ephemeral operator input, not a deployment manifest or release
-artifact. Version 1 refuses production candidates, does not derive deployment
-addresses or salts, prove constructor semantics, execute creation code, or
-compare deployed runtime, and it has no broadcaster. The strict instance-aware
-issue #656 candidate, the reusable broadcaster, retained receipts, and
-constructor/deployed-runtime comparison remain outstanding. Nothing in this
-workflow closes issue #656 or #677, authorizes a testnet or mainnet broadcast,
-or establishes public-beta or production readiness.
+artifact. The v1 candidate schema refuses production candidates. The
+materializer does not derive deployment addresses or salts, prove constructor
+semantics, execute creation code, or compare deployed runtime, and it has no
+broadcaster. The strict instance-aware issue #656 candidate, the reusable
+broadcaster, retained receipts, and constructor/deployed-runtime comparison
+remain outstanding. Nothing in this workflow closes issue #656 or #677,
+authorizes a testnet or mainnet broadcast, or establishes public-beta or
+production readiness.
 
 ## Sepolia Deployment Rehearsal Runbook
 

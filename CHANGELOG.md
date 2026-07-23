@@ -141,13 +141,16 @@ the release policy in `docs/release-policy.md`.
   library and immutable ranges, and emits ordered full initcode and expected
   runtime hashes from a pinned Anvil-only `DependencyRegistry` fixture. It
   enforces the full 49,152-byte EIP-3860 initcode limit, directly pins its
-  `eth-abi` encoder, checksum-binds the implementation/tests, and runs the unit
-  plus real-fixture materialize/reparse-check sequence after canonical builds
-  in the Make, Bash, PowerShell, and Linux CI gates. The tool refuses
-  production/readiness flags, writes only ephemeral `tmp/` output, and does not
-  add a broadcaster, a strict issue #656 instance-aware candidate, or any
-  release-readiness evidence; issues #656 and #677 remain open and protocol
-  maturity is unchanged.
+  `eth-abi` encoder, uses a directly pinned `jsonschema` engine for actual
+  Draft 2020-12 candidate/plan validation, and applies one runtime/schema
+  portable path policy that rejects Windows-invalid controls, characters,
+  device names, dot aliases, and trailing dot/space aliases. It checksum-binds
+  the implementation/tests and runs the unit plus real-fixture
+  materialize/reparse-check sequence after canonical builds in the Make, Bash,
+  PowerShell, and Linux CI gates. The tool refuses production/readiness flags,
+  writes only ephemeral `tmp/` output, and does not add a broadcaster, a strict
+  issue #656 instance-aware candidate, or any release-readiness evidence;
+  issues #656 and #677 remain open and protocol maturity is unchanged.
 - Added the immutable, read-only `StreamCoreFinalityAdapter` with its exact
   four-function ERC-165 ABI and fixed Core/collection-metadata bindings. It
   composes collection facts from granular target-Core reads, derives checked

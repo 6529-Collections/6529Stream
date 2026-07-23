@@ -96,6 +96,7 @@ class PythonToolchainTests(unittest.TestCase):
             )
         )
         self.assertEqual(direct["eth-abi"], "5.2.0")
+        self.assertEqual(direct["jsonschema"], "4.25.1")
 
     def test_direct_requirements_require_exact_expected_pins(self) -> None:
         """Range-based direct requirements fail closed."""
@@ -103,7 +104,8 @@ class PythonToolchainTests(unittest.TestCase):
         with self.assertRaisesRegex(checker.ToolchainError, "exact name==version pin"):
             checker.parse_direct_requirements(
                 "crytic-compile==0.3.11\neth-abi==5.2.0\n"
-                "eth-hash>=0.8.0\nplaywright==1.60.0\n"
+                "eth-hash>=0.8.0\njsonschema==4.25.1\n"
+                "playwright==1.60.0\n"
                 "slither-analyzer==0.11.5\nsolc-select==1.2.0\n"
             )
 
@@ -114,7 +116,8 @@ class PythonToolchainTests(unittest.TestCase):
             checker.parse_direct_requirements(
                 "# --index-url https://user:secret@example.invalid/simple\n"
                 "crytic-compile==0.3.11\neth-abi==5.2.0\n"
-                "eth-hash==0.8.0\nplaywright==1.60.0\n"
+                "eth-hash==0.8.0\njsonschema==4.25.1\n"
+                "playwright==1.60.0\n"
                 "slither-analyzer==0.11.5\nsolc-select==1.2.0\n"
             )
 

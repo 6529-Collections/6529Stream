@@ -14,6 +14,7 @@
 | solc-select | `1.2.0` |
 | eth-abi | `5.2.0` |
 | eth-hash | `0.8.0` |
+| jsonschema | `4.25.1` |
 | Playwright | `1.60.0` |
 
 ## Reproducible Python Audit And Release Toolchain
@@ -61,7 +62,7 @@ python scripts/check_python_toolchain.py
 ```
 
 Review the full package/version change and every added or removed hash, not
-only the six direct pins. The generated lock must not contain index URLs,
+only the seven direct pins. The generated lock must not contain index URLs,
 trusted-host settings, credentials, or private package references. Record or
 remediate vulnerability findings before acceptance. Update the deliberately
 maintained `EXPECTED_LOCKED_NAMES` closure in
@@ -449,19 +450,25 @@ arguments, resolves the artifact's exact creation/runtime library positions
 and runtime immutable positions, and emits ordered full initcode plus expected
 runtime bytecode and Keccak-256 hashes. `eth-abi==5.2.0` is a reviewed direct
 toolchain pin because this encoder is part of the materialization boundary.
+`jsonschema==4.25.1` is a reviewed direct pin because the checked path performs
+actual Draft 2020-12 validation rather than treating the schema documents as
+descriptive references.
 The complete creation bytecode plus encoded constructor arguments fails closed
 above the 49,152-byte EIP-3860 initcode limit.
 
-The v1 candidate schema accepts only `candidate_kind: non_production_fixture` with both
-`production_candidate` and `readiness_evidence` set to `false`. The committed
-fixture at
+The v1 candidate schema accepts only
+`candidate_kind: non_production_fixture` with both `production_candidate` and
+`readiness_evidence` set to `false`. The committed fixture at
 `deployments/config/canonical-deployment-candidate-non-production.json`
 materializes one `DependencyRegistry` instance with literal Anvil-only admin
 and library addresses. Its `profile_entry_id` is deliberately `null`; it is not
 the strict instance-aware genesis candidate required by issue #656. Candidate
 and output shapes are documented by
 `deployments/schema/canonical-deployment-candidate.schema.json` and
-`deployments/schema/canonical-deployment-plan.schema.json`.
+`deployments/schema/canonical-deployment-plan.schema.json`. The materializer
+checks that both schema documents are valid Draft 2020-12, validates the
+strictly decoded committed candidate, and validates every in-memory generated
+plan before it can be written or compared in `--check` mode.
 
 After producing the canonical isolated build, run the focused tool as follows:
 
@@ -480,7 +487,9 @@ The ordinary Make, Bash, PowerShell, and Linux CI aggregate gates run this
 unit/materialize/reparse-check sequence immediately after they create and
 validate `out-release/`. The checked candidate remains the same narrow
 non-production fixture; gate inclusion does not turn the ephemeral plan into a
-release artifact or deployment authorization.
+release artifact or deployment authorization. Because Draft validation is
+inside the materializer, both the committed candidate and the real generated
+plan are schema-checked in every one of those gate paths.
 
 Candidate-supplied immutable values are assertions, not values derived from
 constructor semantics. The materializer enforces the artifact-declared widths
@@ -492,8 +501,13 @@ foundation.
 Materialized plans are ephemeral operator inputs and may only be written below
 the repository `tmp/` directory. They are not generated release evidence.
 Candidate, receipt, artifact, and output paths reject repository escapes and
-symlink, junction, or reparse components. Duplicate JSON members, floats,
-non-I-JSON integers or Unicode surrogate values, stale or mutated
+symlink, junction, or reparse components. Repository-relative JSON paths use
+one runtime/schema-identical portable policy: no C0/DEL controls, Windows
+invalid characters, drive or alternate-stream colons, backslashes, empty or
+dot-alias segments, trailing dot/space segments, or case-insensitive
+`CON`/`PRN`/`AUX`/`NUL`/`COM1`-`COM9`/`LPT1`-`LPT9` device segments (including
+extensions). Duplicate JSON members, floats, non-I-JSON integers or Unicode
+surrogate values, invalid Draft 2020-12 candidate/plan shapes, stale or mutated
 receipts/artifacts, constructor ABI or argument-hash drift,
 missing/extra/unresolved/wrong/overlapping links, missing, wrong-width, or
 overlapping immutables, EIP-3860 overflow, runtime-hash drift, target

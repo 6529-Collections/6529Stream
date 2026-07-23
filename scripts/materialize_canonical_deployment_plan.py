@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Materialize deterministic initcode from the canonical isolated release build.
 
-This is a reusable tooling foundation for issues #656 and #677.  Version 1
-deliberately accepts only explicitly non-production candidates.  It does not
-broadcast, derive deployment addresses, prove constructor semantics, or make
-release-readiness claims.
+This is a reusable tooling foundation for issues #656 and #677.  The v1
+candidate schema deliberately accepts only explicitly non-production
+candidates.  It does not broadcast, derive deployment addresses, prove
+constructor semantics, or make release-readiness claims.
 """
 
 from __future__ import annotations
@@ -25,6 +25,13 @@ try:
 except ModuleNotFoundError:  # pragma: no cover - exercised only on broken toolchains.
     encode_abi = None
 
+try:
+    from jsonschema import Draft202012Validator
+    from jsonschema.exceptions import SchemaError
+except ModuleNotFoundError:  # pragma: no cover - exercised only on broken toolchains.
+    Draft202012Validator = None
+    SchemaError = Exception
+
 
 CANDIDATE_SCHEMA = "6529stream.canonical-deployment-candidate.v1"
 PLAN_SCHEMA = "6529stream.canonical-deployment-plan.v1"
@@ -36,10 +43,32 @@ DEFAULT_OUTPUT = Path("tmp/canonical-deployment-plan.json")
 CANONICAL_RECEIPT = Path("out-release/release-build-manifest.json")
 CANONICAL_CONFIG = Path("release-artifacts/contracts.json")
 CANONICAL_FOUNDRY_CONFIG = Path("foundry.toml")
+CANDIDATE_SCHEMA_PATH = Path(
+    "deployments/schema/canonical-deployment-candidate.schema.json"
+)
+PLAN_SCHEMA_PATH = Path(
+    "deployments/schema/canonical-deployment-plan.schema.json"
+)
 NON_PRODUCTION_ENVIRONMENTS = frozenset({"anvil", "local", "fork", "testnet"})
 EPHEMERAL_OUTPUT_ROOT = "tmp"
 IJSON_SAFE_INTEGER_MAX = (1 << 53) - 1
 EIP3860_MAX_INITCODE_SIZE = 49_152
+JSON_SCHEMA_DRAFT_2020_12 = "https://json-schema.org/draft/2020-12/schema"
+REPO_PATH_PATTERN = (
+    r"^(?!/)"
+    r'(?!.*[\u0000-\u001F\u007F<>:"\\|?*])'
+    r"(?!.*//)"
+    r"(?!.*\/$)"
+    r"(?!\.\.?(?:/|$))"
+    r"(?!.*\/\.\.?(?:/|$))"
+    r"(?![^/]*[. ](?:/|$))"
+    r"(?!.*\/[^/]*[. ](?:/|$))"
+    r"(?!(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|"
+    r"[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\.|/|$))"
+    r"(?!.*\/(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|"
+    r"[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])[ ]*(?:\.|/|$))"
+    r".+$"
+)
 
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 KECCAK_RE = re.compile(r"^0x[0-9a-f]{64}$")
@@ -51,6 +80,7 @@ ARRAY_SUFFIX_RE = re.compile(r"^(?P<inner>.+)\[(?P<size>[0-9]*)\]$")
 UNSIGNED_DECIMAL_RE = re.compile(r"^(?:0|[1-9][0-9]*)$")
 SIGNED_DECIMAL_RE = re.compile(r"^(?:0|-?[1-9][0-9]*)$")
 AST_ID_RE = UNSIGNED_DECIMAL_RE
+REPO_PATH_RE = re.compile(REPO_PATH_PATTERN)
 
 
 class DeploymentPlanError(RuntimeError):
@@ -290,16 +320,10 @@ def require_solidity_name(value: Any, path: str) -> str:
 
 def require_safe_relative_path(value: Any, path: str) -> str:
     text = require_string(value, path)
-    if (
-        text.startswith("/")
-        or "\\" in text
-        or ":" in text
-        or text.endswith("/")
-        or "//" in text
-        or any(part in {"", ".", ".."} for part in text.split("/"))
-    ):
+    if REPO_PATH_RE.fullmatch(text) is None:
         raise DeploymentPlanError(
-            f"{path} must be a normalized forward-slash repository-relative path"
+            f"{path} must be a normalized portable forward-slash "
+            "repository-relative path"
         )
     return text
 
@@ -309,6 +333,65 @@ def normalize_repo_path(repo_root: Path, value: Path, label: str) -> Path:
         return release_build.resolve_repo_path(repo_root, value, label)
     except release_build.ReleaseBuildError as exc:
         raise DeploymentPlanError(str(exc)) from exc
+
+
+def format_json_schema_path(parts: Sequence[Any]) -> str:
+    """Format a validator path without introducing ambiguous dot notation."""
+    result = "$"
+    for part in parts:
+        if isinstance(part, int):
+            result += f"[{part}]"
+        else:
+            result += f"[{json.dumps(part, ensure_ascii=True)}]"
+    return result
+
+
+def validate_draft_2020_12_schema(
+    repo_root: Path,
+    schema_path: Path,
+    value: Any,
+    label: str,
+) -> None:
+    """Validate one value against a checked-in Draft 2020-12 schema."""
+    if Draft202012Validator is None:
+        raise DeploymentPlanError(
+            "Draft 2020-12 validation requires the pinned jsonschema "
+            "toolchain dependency"
+        )
+    resolved_schema_path = normalize_repo_path(
+        repo_root,
+        repo_root / schema_path,
+        f"{label} schema",
+    )
+    schema = require_dict(
+        load_json(resolved_schema_path),
+        f"{label} schema",
+    )
+    if schema.get("$schema") != JSON_SCHEMA_DRAFT_2020_12:
+        raise DeploymentPlanError(
+            f"{label} schema must declare {JSON_SCHEMA_DRAFT_2020_12}"
+        )
+    try:
+        Draft202012Validator.check_schema(schema)
+    except SchemaError as exc:
+        raise DeploymentPlanError(
+            f"{label} schema is not valid Draft 2020-12: {exc.message}"
+        ) from exc
+    validator = Draft202012Validator(schema)
+    errors = sorted(
+        validator.iter_errors(value),
+        key=lambda error: (
+            format_json_schema_path(tuple(error.absolute_path)),
+            error.message,
+        ),
+    )
+    if errors:
+        error = errors[0]
+        location = format_json_schema_path(tuple(error.absolute_path))
+        raise DeploymentPlanError(
+            f"{label} does not satisfy its Draft 2020-12 schema at "
+            f"{location}: {error.message}"
+        )
 
 
 def resolve_output_path(repo_root: Path, value: Path) -> Path:
@@ -1445,6 +1528,12 @@ def materialize_deployment_plan(
     )
     candidate_value, candidate_sha = load_json_with_sha256(candidate_path)
     candidate = validate_candidate(candidate_value)
+    validate_draft_2020_12_schema(
+        repo_root,
+        CANDIDATE_SCHEMA_PATH,
+        candidate_value,
+        "deployment candidate",
+    )
     receipt, receipt_path, receipt_sha, catalog = validate_receipt_binding(
         repo_root,
         candidate,
@@ -1455,7 +1544,7 @@ def materialize_deployment_plan(
         materialize_instance(repo_root, instance, targets)
         for instance in candidate["instances"]
     ]
-    return {
+    plan = {
         "schema_version": PLAN_SCHEMA,
         "generated_by": (
             f"scripts/materialize_canonical_deployment_plan.py:{GENERATOR_VERSION}"
@@ -1495,6 +1584,13 @@ def materialize_deployment_plan(
         },
         "deployments": deployments,
     }
+    validate_draft_2020_12_schema(
+        repo_root,
+        PLAN_SCHEMA_PATH,
+        plan,
+        "canonical deployment plan",
+    )
+    return plan
 
 
 def check_output(path: Path, plan: dict[str, Any]) -> None:
