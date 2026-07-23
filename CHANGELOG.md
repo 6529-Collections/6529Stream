@@ -10,10 +10,11 @@ the release policy in `docs/release-policy.md`.
 - Hardened canonical release builds so configured targets, retained build-info
   compiler inputs, and artifact metadata fail closed if any resolved source is
   under `test/` or `script/`; added focused regressions for both restricted
-  roots; made the runtime-size and Core bytecode-spend checker CLIs validate the
-  canonical receipt before reading artifacts; and consistently labeled the
-  aggregate all-source size/warning build as diagnostic rather than production
-  evidence. Canonical retention now validates the exact Forge worktree path
+  roots; made the runtime-size and Core bytecode-spend checker CLIs retain the
+  validated canonical receipt and hash the exact artifact bytes they consume;
+  and consistently labeled the aggregate all-source size/warning build as
+  diagnostic rather than production evidence. Canonical retention now validates
+  the exact Forge worktree path
   carriers and projects only those fields to stable `.` / `lib` values before
   hashing, so otherwise identical checkouts produce byte-identical compiler
   inputs and receipt hashes without weakening source or artifact binding. This
@@ -704,10 +705,10 @@ the release policy in `docs/release-policy.md`.
   paths, local/Windows validation commands, release-readiness blockers, and
   release-manifest/checksum coverage.
 - Added live solc warning baseline enforcement for the warning-disposition gate:
-  production-size forge output is retained in local/CI logs and checked against
-  the reviewed warning rows so new or resolved compiler warnings require an
-  explicit code or disposition update, and removed or relocated accepted
-  warnings require a reviewed baseline refresh.
+  aggregate size/warning diagnostic output is retained in local/CI logs and
+  checked against the reviewed warning rows so new or resolved compiler
+  warnings require an explicit code or disposition update, and removed or
+  relocated accepted warnings require a reviewed baseline refresh.
 - Added a checked incident drill retained-artifact template and validation gate
   for mint pause, bid pause, settlement pause, withdrawal policy, failed
   randomness, stuck auction, bad metadata/dependency, bad Merkle root, and

@@ -246,7 +246,7 @@
         },
         {
           "path": "docs/deployment.md",
-          "sha256": "sha256:177ae939fe2a76629cab731c1a96c4aa785e58b3500529dec743cdcb99f16536"
+          "sha256": "sha256:3266b87090d84996cb69e9e08871ceeaecdec8e651d0b4943f312033676656bc"
         },
         {
           "path": "ops/EXECUTION_BACKLOG.md",
@@ -537,7 +537,7 @@
         },
         {
           "path": "docs/tooling.md",
-          "sha256": "sha256:f30c6dc8df4298aa0365fccb56e5ff4be9ea0eb5b763d339b385e8b2ed42a4c1"
+          "sha256": "sha256:c5c54de347372ab096dce0a91827aad0e3a23b03ec1cc663010db270173d72d6"
         },
         {
           "path": "docs/warning-dispositions.md",

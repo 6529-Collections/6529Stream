@@ -193,11 +193,12 @@ python scripts/check_sepolia_evidence_preflight.py
 
 The first aggregate Forge command is a warning and whole-tree size diagnostic;
 its skip flags do not make it canonical production evidence. The subsequent
-target-isolated build validates release artifacts and explorer-verification
-inputs; it does not prove live explorer verification or deployed-address
-parity, and it does not yet make the Forge deployment scripts or broadcasts
-consume the same isolated initcode. Do not treat this preflight as production
-broadcast-bytecode proof until
+target-isolated builder validates the canonical receipt, artifacts, and retained
+compiler inputs. The separate source-verification generator check validates the
+explorer-verification inputs; neither command proves live explorer verification
+or deployed-address parity, and they do not yet make the Forge deployment
+scripts or broadcasts consume the same isolated initcode. Do not treat this
+preflight as production broadcast-bytecode proof until
 [issue #677](https://github.com/6529-Collections/6529Stream/issues/677) is
 resolved.
 

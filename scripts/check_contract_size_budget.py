@@ -33,8 +33,28 @@ def load_json(path: Path) -> Any:
     try:
         with path.open("r", encoding="utf-8") as handle:
             return json.load(handle)
-    except FileNotFoundError as exc:
-        raise SizeBudgetError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise SizeBudgetError(f"cannot read required file {path}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise SizeBudgetError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def load_receipt_bound_json(path: Path, expected_sha256: str, label: str) -> Any:
+    """Read, hash, and parse one exact file version from a validated receipt."""
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise SizeBudgetError(f"cannot read {label} {path}: {exc}") from exc
+    actual_sha256 = release_build.sha256_bytes(raw)
+    if actual_sha256 != expected_sha256:
+        raise SizeBudgetError(
+            f"{label} no longer matches the validated canonical release receipt: "
+            f"expected {expected_sha256}, got {actual_sha256}"
+        )
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except UnicodeDecodeError as exc:
+        raise SizeBudgetError(f"{label} is not UTF-8: {path}") from exc
     except json.JSONDecodeError as exc:
         raise SizeBudgetError(f"invalid JSON in {path}: {exc}") from exc
 
@@ -100,6 +120,85 @@ def production_contracts(config: dict[str, Any]) -> dict[str, dict[str, Any]]:
             raise SizeBudgetError(f"duplicate production contract: {name}")
         by_name[name] = record
     return by_name
+
+
+def load_release_config(
+    repo_root: Path,
+    config_path: Path,
+    release_manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    config_abs = config_path if config_path.is_absolute() else repo_root / config_path
+    if release_manifest is None:
+        return require_dict(load_json(config_abs), str(config_abs))
+
+    source = require_dict(release_manifest.get("source"), "release build manifest.source")
+    recorded_path = require_string(
+        source.get("config"),
+        "release build manifest.source.config",
+    )
+    if normalize_path(config_abs, repo_root) != recorded_path:
+        raise SizeBudgetError("contract config path does not match the validated release receipt")
+    expected_sha256 = require_string(
+        source.get("config_sha256"),
+        "release build manifest.source.config_sha256",
+    )
+    return require_dict(
+        load_receipt_bound_json(config_abs, expected_sha256, "contract config"),
+        str(config_abs),
+    )
+
+
+def receipt_artifact(
+    release_manifest: dict[str, Any],
+    foundry_out: Path,
+    repo_root: Path,
+    name: str,
+    source: str,
+) -> tuple[Path, dict[str, Any]]:
+    records = release_manifest.get("targets")
+    if not isinstance(records, list):
+        raise SizeBudgetError("release build manifest.targets must be an array")
+    matches = []
+    for index, value in enumerate(records):
+        record = require_dict(value, f"release build manifest.targets[{index}]")
+        if record.get("kind") == "production_contract" and record.get("name") == name:
+            matches.append(record)
+    if len(matches) != 1:
+        raise SizeBudgetError(
+            f"validated release receipt must contain exactly one production artifact for {name}"
+        )
+
+    record = matches[0]
+    if record.get("source") != source:
+        raise SizeBudgetError(f"validated release receipt source is stale for {name}")
+    relative = Path(
+        require_string(
+            record.get("artifact_relative_path"),
+            f"release build manifest target {name}.artifact_relative_path",
+        )
+    )
+    if relative.is_absolute() or ".." in relative.parts:
+        raise SizeBudgetError(f"validated release receipt artifact path is unsafe for {name}")
+    artifact_path = foundry_out / relative
+    recorded_artifact_path = require_string(
+        record.get("artifact_path"),
+        f"release build manifest target {name}.artifact_path",
+    )
+    if normalize_path(artifact_path, repo_root) != recorded_artifact_path:
+        raise SizeBudgetError(f"validated release receipt artifact path is stale for {name}")
+    expected_sha256 = require_string(
+        record.get("artifact_sha256"),
+        f"release build manifest target {name}.artifact_sha256",
+    )
+    artifact = require_dict(
+        load_receipt_bound_json(
+            artifact_path,
+            expected_sha256,
+            f"canonical artifact for {name}",
+        ),
+        str(artifact_path),
+    )
+    return artifact_path, artifact
 
 
 def find_artifact(foundry_out: Path, name: str, source: str | None) -> Path:
@@ -264,10 +363,14 @@ def budget_contracts(config: dict[str, Any]) -> tuple[int, dict[str, dict[str, A
     return eip_170_limit, {str(name): require_dict(value, f"runtime_size_budget.contracts.{name}") for name, value in contracts.items()}
 
 
-def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[dict[str, Any]]:
-    config_abs = config_path if config_path.is_absolute() else repo_root / config_path
+def build_report(
+    repo_root: Path,
+    config_path: Path,
+    foundry_out: Path,
+    release_manifest: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     foundry_out_abs = foundry_out if foundry_out.is_absolute() else repo_root / foundry_out
-    config = require_dict(load_json(config_abs), str(config_abs))
+    config = load_release_config(repo_root, config_path, release_manifest)
     production = production_contracts(config)
     default_limit, budgets = budget_contracts(config)
 
@@ -284,8 +387,17 @@ def build_report(repo_root: Path, config_path: Path, foundry_out: Path) -> list[
         if configured_source is not None and configured_source != source:
             raise SizeBudgetError(f"{name} budget source does not match production source")
 
-        artifact_path = find_artifact(foundry_out_abs, name, source)
-        artifact = require_dict(load_json(artifact_path), str(artifact_path))
+        if release_manifest is None:
+            artifact_path = find_artifact(foundry_out_abs, name, source)
+            artifact = require_dict(load_json(artifact_path), str(artifact_path))
+        else:
+            artifact_path, artifact = receipt_artifact(
+                release_manifest,
+                foundry_out_abs,
+                repo_root,
+                name,
+                source,
+            )
         validate_current_production_artifact(repo_root, artifact, artifact_path, name, source)
         runtime_size = deployed_runtime_size_bytes(artifact, artifact_path)
         runtime_limit = require_int(
@@ -402,13 +514,18 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     repo_root = args.repo_root.resolve()
     try:
-        validate_canonical_release_output(
+        release_manifest = validate_canonical_release_output(
             repo_root,
             args.config,
             args.foundry_config,
             args.foundry_out,
         )
-        report = build_report(repo_root, args.config, args.foundry_out)
+        report = build_report(
+            repo_root,
+            args.config,
+            args.foundry_out,
+            release_manifest,
+        )
     except SizeBudgetError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

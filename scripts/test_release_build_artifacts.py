@@ -20,6 +20,7 @@ import check_core_bytecode_spend_policy as core_checker
 
 SCRIPT_PATH = Path(__file__).with_name("build_release_artifacts.py")
 REPO_ROOT = SCRIPT_PATH.parent.parent
+CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 MAKEFILE_PATH = REPO_ROOT / "Makefile"
 CHECK_PS1_PATH = REPO_ROOT / "scripts" / "check.ps1"
 CHECK_SH_PATH = REPO_ROOT / "scripts" / "check.sh"
@@ -727,6 +728,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
             MAKEFILE_PATH: (
                 "Aggregate diagnostic only; canonical release bytecode is built"
             ),
+            CHANGELOG_PATH: "aggregate size/warning diagnostic output is retained",
         }
         for path, phrase in expected_phrases.items():
             with self.subTest(path=path.relative_to(REPO_ROOT).as_posix()):
@@ -752,6 +754,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 self.assertEqual(positions, sorted(positions))
 
         banned_phrases = {
+            CHANGELOG_PATH: "production-size forge output",
             README_PATH: "release bytecode and EIP-170/EIP-3860 evidence",
             RELEASE_ARTIFACTS_README_PATH: (
                 "not an input to release, verification, or deployment evidence"
@@ -949,10 +952,13 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 redirect_stderr(StringIO()),
             ):
                 self.assertEqual(core_checker.main(common_args), 0)
+            validated_manifest = policy.call_args.args[3]
+            self.assertIsInstance(validated_manifest, dict)
             policy.assert_called_once_with(
                 root.resolve(),
                 Path(paths["config"].relative_to(root)),
                 builder.DEFAULT_OUTPUT_DIR,
+                validated_manifest,
             )
 
             noncanonical_args = [
@@ -968,6 +974,65 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 self.assertEqual(core_checker.main(noncanonical_args), 1)
             policy.assert_not_called()
             self.assertIn("canonical repository out-release", stderr.getvalue())
+
+    def test_size_checker_rejects_consumed_file_mutation_after_receipt_validation(
+        self,
+    ) -> None:
+        for mutated_file in ("artifact", "config"):
+            with self.subTest(mutated_file=mutated_file):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_tree(root)
+                    with redirect_stdout(StringIO()):
+                        builder.build_release_output(
+                            root,
+                            paths["config"],
+                            paths["foundry_config"],
+                            paths["output"],
+                            runner=FakeForge(),
+                            forge_version_output=FAKE_FORGE_VERSION,
+                        )
+
+                    mutation_path = (
+                        paths["output"] / "Example.sol" / "Example.json"
+                        if mutated_file == "artifact"
+                        else paths["config"]
+                    )
+                    original_validate = size_checker.validate_canonical_release_output
+
+                    def validate_then_mutate(*args: Any, **kwargs: Any) -> dict[str, Any]:
+                        manifest = original_validate(*args, **kwargs)
+                        mutation_path.write_bytes(mutation_path.read_bytes() + b"\n")
+                        return manifest
+
+                    stderr = StringIO()
+                    with (
+                        patch.object(
+                            size_checker,
+                            "validate_canonical_release_output",
+                            side_effect=validate_then_mutate,
+                        ),
+                        redirect_stdout(StringIO()),
+                        redirect_stderr(stderr),
+                    ):
+                        result = size_checker.main(
+                            [
+                                "--repo-root",
+                                str(root),
+                                "--config",
+                                str(paths["config"].relative_to(root)),
+                                "--foundry-config",
+                                str(paths["foundry_config"].relative_to(root)),
+                                "--foundry-out",
+                                builder.DEFAULT_OUTPUT_DIR.as_posix(),
+                            ]
+                        )
+
+                    self.assertEqual(result, 1)
+                    self.assertIn(
+                        "no longer matches the validated canonical release receipt",
+                        stderr.getvalue(),
+                    )
 
     def test_size_checker_rejects_restricted_source_in_retained_receipt(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
