@@ -135,6 +135,15 @@ the release policy in `docs/release-policy.md`.
 
 ### Added
 
+- Added the first non-production issue #677 canonical deployment-plan
+  materializer. It validates the issue #674 isolated build receipt and exact
+  artifact hashes, derives constructor ABI encoding plus creation/runtime
+  library and immutable ranges, and emits ordered full initcode and expected
+  runtime hashes from a pinned Anvil-only `DependencyRegistry` fixture. The
+  tool refuses production/readiness flags, writes only ephemeral `tmp/` output,
+  and does not add a broadcaster, a strict issue #656 instance-aware candidate,
+  or any release-readiness evidence; issues #656 and #677 remain open and
+  protocol maturity is unchanged.
 - Added the immutable, read-only `StreamCoreFinalityAdapter` with its exact
   four-function ERC-165 ABI and fixed Core/collection-metadata bindings. It
   composes collection facts from granular target-Core reads, derives checked

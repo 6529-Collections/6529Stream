@@ -436,6 +436,58 @@ and do not yet prove that broadcasts consume this canonical initcode;
 [issue #677](https://github.com/6529-Collections/6529Stream/issues/677) remains
 a production blocker for that deployment binding.
 
+The first issue #677 tooling slice is
+`scripts/materialize_canonical_deployment_plan.py`. It consumes, but never
+rebuilds, the validated `out-release/release-build-manifest.json` receipt and
+the exact configured artifacts produced by the canonical builder. Before
+materializing any bytecode, it runs the builder's complete
+`validate_release_output(...)` path, then checks the candidate's pinned receipt,
+catalog, release-config, Foundry-config, and artifact hashes. It derives the
+constructor ABI from each receipt-bound artifact, ABI-encodes the declared
+arguments, resolves the artifact's exact creation/runtime library positions
+and runtime immutable positions, and emits ordered full initcode plus expected
+runtime bytecode and Keccak-256 hashes.
+
+Version 1 accepts only `candidate_kind: non_production_fixture` with both
+`production_candidate` and `readiness_evidence` set to `false`. The committed
+fixture at
+`deployments/config/canonical-deployment-candidate-non-production.json`
+materializes one `DependencyRegistry` instance with literal Anvil-only admin
+and library addresses. Its `profile_entry_id` is deliberately `null`; it is not
+the strict instance-aware genesis candidate required by issue #656. Candidate
+and output shapes are documented by
+`deployments/schema/canonical-deployment-candidate.schema.json` and
+`deployments/schema/canonical-deployment-plan.schema.json`.
+
+After producing the canonical isolated build, run the focused tool as follows:
+
+```bash
+python scripts/test_materialize_canonical_deployment_plan.py
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json \
+  --check
+```
+
+Materialized plans are ephemeral operator inputs and may only be written below
+the repository `tmp/` directory. They are not generated release evidence.
+Candidate, receipt, artifact, and output paths reject repository escapes and
+symlink, junction, or reparse components. Duplicate JSON members, floats,
+non-I-JSON integers, stale or mutated receipts/artifacts, constructor ABI or
+argument-hash drift, missing/extra/unresolved/wrong/overlapping links, missing
+or overlapping immutables, target mismatches, forward dependencies, and
+non-ephemeral output paths fail closed.
+
+This materializer does not derive salts or deployment addresses, broadcast
+transactions, inspect deployed code, retain ceremony evidence, or modify the
+existing Forge scripts. A broadcaster and the issue #656 strict instance-aware
+production candidate are still required before issue #677 can supply
+production broadcast-bytecode parity. This slice therefore does not close
+issue #656 or #677 and does not change release maturity.
+
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface
 IDs, and the event topic catalog. Each generated JSON output is serialized once;

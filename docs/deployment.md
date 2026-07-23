@@ -133,6 +133,44 @@ secrets. This is a local Anvil release gate; fork, testnet, and production
 broadcasts should still retain their own manifest and browser evidence during
 the release ceremony.
 
+## Canonical Initcode Materialization (Non-Production Only)
+
+The current issue #677 tooling foundation can deterministically materialize
+constructor arguments, linked creation bytecode, full initcode, and expected
+linked/immutable runtime bytecode from the issue #674 canonical isolated
+release build. It does not broadcast.
+
+First produce `out-release/` with the canonical builder described in
+[`docs/tooling.md`](tooling.md). Then run:
+
+```sh
+python scripts/test_materialize_canonical_deployment_plan.py
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json
+python scripts/materialize_canonical_deployment_plan.py \
+  --candidate deployments/config/canonical-deployment-candidate-non-production.json \
+  --output tmp/canonical-deployment-plan.json \
+  --check
+```
+
+The committed candidate is a deliberately narrow Anvil fixture. It binds one
+canonical `DependencyRegistry` artifact to literal non-secret placeholder
+addresses, has no genesis-profile entry, and sets both production/readiness
+flags to false. The materializer revalidates the complete canonical build and
+checks exact receipt, catalog, config, artifact, constructor, link, immutable,
+initcode, and runtime hashes before emitting the ordered plan below `tmp/`.
+Treat any mismatch as a stop condition; do not weaken or bypass a binding to
+make a stale candidate pass.
+
+The output is ephemeral operator input, not a deployment manifest or release
+artifact. Version 1 refuses production candidates, does not derive deployment
+addresses or salts, and has no broadcaster or on-chain parity check. The strict
+instance-aware issue #656 candidate, the reusable broadcaster, retained
+receipts, and deployed runtime comparison remain outstanding. Nothing in this
+workflow closes issue #656 or #677, authorizes a testnet or mainnet broadcast,
+or establishes public-beta or production readiness.
+
 ## Sepolia Deployment Rehearsal Runbook
 
 The Sepolia rehearsal path is a no-secret public-beta evidence workflow. It does
