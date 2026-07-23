@@ -62,6 +62,23 @@ contract GovernedRefundingMock {
     }
 }
 
+contract GovernedReturndataMock {
+    bool public called;
+
+    function succeedWithReturndata(uint256 returnDataBytes) external {
+        called = true;
+        assembly ("memory-safe") {
+            return(0x00, returnDataBytes)
+        }
+    }
+
+    function revertWithReturndata(uint256 returnDataBytes) external pure {
+        assembly ("memory-safe") {
+            revert(0x00, returnDataBytes)
+        }
+    }
+}
+
 contract GovernedReentrantTargetMock {
     IStreamGovernanceExecutor public immutable executor;
     bytes private nestedExecution;
@@ -143,6 +160,19 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         address materializer
     );
 
+    event TerminalFreezeActionMembershipUpdated(
+        uint16 schemaVersion,
+        bytes32 indexed scopeHash,
+        bytes32 indexed actionId,
+        address indexed proposer,
+        bool present,
+        uint8 mutationCause,
+        bool usesRootCapacity,
+        uint64 vetoDeadline,
+        uint256 rawIndex,
+        uint256 remainingCount
+    );
+
     bytes32 private constant SCOPE = keccak256("test-scope");
     bytes32 private constant OLD_VALUE = keccak256("old-value");
     bytes32 private constant NEW_VALUE = keccak256("new-value");
@@ -151,6 +181,28 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
     bytes32 private constant GOVERNANCE_ACTION_SCHEDULED_TOPIC = keccak256(
         "GovernanceActionScheduled(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint256,address,bytes32,string,bytes32)"
     );
+    bytes32 private constant GOVERNANCE_CALL_DATA_PUBLISHED_TOPIC =
+        keccak256("GovernanceCallDataPublished(uint16,bytes32,address,address)");
+    bytes32 private constant GOVERNANCE_ROOT_ROTATED_TOPIC =
+        keccak256("GovernanceRootRotated(uint16,address,address,bytes32,uint64,bytes32)");
+    bytes32 private constant GOVERNANCE_PROPOSER_UPDATED_TOPIC =
+        keccak256("GovernanceProposerUpdated(uint16,address,bool,uint64,bytes32)");
+    bytes32 private constant GOVERNANCE_CANCELLER_UPDATED_TOPIC =
+        keccak256("GovernanceCancellerUpdated(uint16,address,bool,uint64,bytes32)");
+    bytes32 private constant TIGHTENING_CALL_UPDATED_TOPIC =
+        keccak256("TighteningCallUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)");
+    bytes32 private constant APPROVED_NATIVE_RECEIVER_UPDATED_TOPIC =
+        keccak256("ApprovedNativeReceiverUpdated(uint16,address,bool,uint64,bytes32)");
+    bytes32 private constant FREEZE_SELECTOR_UPDATED_TOPIC =
+        keccak256("FreezeSelectorUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)");
+    bytes32 private constant GOVERNANCE_ACTION_CANCELLED_TOPIC = keccak256(
+        "GovernanceActionCancelled(uint16,bytes32,uint8,address,bytes4,bytes32,bytes32,address,bytes32,string)"
+    );
+    bytes32 private constant TERMINAL_FREEZE_ACTION_MEMBERSHIP_UPDATED_TOPIC = keccak256(
+        "TerminalFreezeActionMembershipUpdated(uint16,bytes32,bytes32,address,bool,uint8,bool,uint64,uint256,uint256)"
+    );
+    bytes32 private constant TERMINAL_FREEZE_GUARDIAN_CONFIG_COMMITTED_TOPIC =
+        keccak256("TerminalFreezeGuardianConfigCommitted(uint16,bytes32,bytes32)");
     bytes32 private constant GOVERNANCE_ACTION_V2 =
         0x214cd728538bb3775a7106caff5c761bace11866a984d4a4d97a98f51971ac4b;
     bytes32 private constant GOVERNANCE_CONFIG_SCOPE_V1 =
@@ -171,6 +223,12 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         keccak256("6529STREAM_GOVERNANCE_ROOT_SCOPE_V1");
     bytes32 private constant GOVERNANCE_ROOT_STATE_V1 =
         keccak256("6529STREAM_GOVERNANCE_ROOT_STATE_V1");
+    bytes32 private constant TERMINAL_GUARDIAN_CONFIG_V1 =
+        keccak256("6529STREAM_TERMINAL_GUARDIAN_CONFIG_V1");
+    bytes32 private constant TERMINAL_GUARDIAN_SCOPE_V1 =
+        keccak256("6529STREAM_TERMINAL_GUARDIAN_SCOPE_V1");
+    bytes32 private constant TERMINAL_GUARDIAN_HOLDER_V1 =
+        keccak256("6529STREAM_TERMINAL_GUARDIAN_HOLDER_V1");
     bytes32 private constant ROLE_MUTATION_SCOPE_V1 =
         keccak256("6529STREAM_ROLE_MUTATION_SCOPE_V1");
     bytes32 private constant ROLE_MUTATION_STATE_V1 =
@@ -402,6 +460,84 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         });
     }
 
+    function _roleRevokeGovernanceCall(bytes32 role, address account, bytes memory callData)
+        private
+        view
+        returns (GovernanceCall memory call_)
+    {
+        (bytes32 roleChainHash, uint64 roleRevision) = roleRegistry.roleMutationState(role);
+        (bytes32 globalChainHash, uint64 globalRevision) = roleRegistry.globalRoleMutationState();
+        bytes32 scopeHash = keccak256(
+            abi.encode(
+                ROLE_MUTATION_SCOPE_V1, uint256(block.chainid), address(roleRegistry), role, account
+            )
+        );
+        bytes32 oldStateHash = _roleMutationStateHash(
+            scopeHash, true, roleChainHash, roleRevision, globalChainHash, globalRevision
+        );
+        uint64 nextRoleRevision = roleRevision + 1;
+        uint64 nextGlobalRevision = globalRevision + 1;
+        bytes32 nextRoleChainHash = keccak256(
+            abi.encode(
+                ROLE_MUTATION_RECORD_V1,
+                roleChainHash,
+                uint256(block.chainid),
+                address(roleRegistry),
+                role,
+                account,
+                false,
+                nextRoleRevision
+            )
+        );
+        bytes32 nextGlobalChainHash = keccak256(
+            abi.encode(
+                GLOBAL_ROLE_MUTATION_RECORD_V1,
+                globalChainHash,
+                uint256(block.chainid),
+                address(roleRegistry),
+                role,
+                account,
+                false,
+                nextGlobalRevision
+            )
+        );
+        call_ = GovernanceCall({
+            target: address(roleRegistry),
+            value: 0,
+            selector: _selectorOf(callData),
+            callDataHash: keccak256(callData),
+            scopeHash: scopeHash,
+            oldValueHash: oldStateHash,
+            newValueHash: _roleMutationStateHash(
+                scopeHash,
+                false,
+                nextRoleChainHash,
+                nextRoleRevision,
+                nextGlobalChainHash,
+                nextGlobalRevision
+            )
+        });
+    }
+
+    function _grantRoleViaGovernance(bytes32 role, address account) private {
+        bytes memory callData =
+            abi.encodeWithSelector(IStreamRoleRegistry.grantRole.selector, role, account);
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = _roleGrantGovernanceCall(role, account, callData);
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+    }
+
     function _grantScopedRoleViaGovernance(bytes32 baseRole, bytes32 scopeHash, address account)
         private
     {
@@ -409,6 +545,29 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             abi.encodeCall(IStreamRoleRegistry.grantScopedRole, (baseRole, scopeHash, account));
         GovernanceCall[] memory calls = new GovernanceCall[](1);
         calls[0] = _roleGrantGovernanceCall(
+            roleRegistry.scopedRole(baseRole, scopeHash), account, callData
+        );
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+    }
+
+    function _revokeScopedRoleViaGovernance(bytes32 baseRole, bytes32 scopeHash, address account)
+        private
+    {
+        bytes memory callData =
+            abi.encodeCall(IStreamRoleRegistry.revokeScopedRole, (baseRole, scopeHash, account));
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = _roleRevokeGovernanceCall(
             roleRegistry.scopedRole(baseRole, scopeHash), account, callData
         );
         bytes[] memory callDatas = new bytes[](1);
@@ -486,6 +645,98 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         );
     }
 
+    function _terminalGuardianCommitment(GovernanceCall[] memory calls)
+        private
+        view
+        returns (bytes32 commitment)
+    {
+        (bytes32 baseChain, uint64 baseRevision) =
+            roleRegistry.roleMutationState(StreamRoles.ROLE_TERMINAL_FREEZE_VETO);
+        commitment = keccak256(
+            abi.encode(
+                TERMINAL_GUARDIAN_CONFIG_V1,
+                uint256(block.chainid),
+                address(executor),
+                address(roleRegistry),
+                address(roleRegistry).codehash,
+                baseChain,
+                baseRevision
+            )
+        );
+        commitment =
+            _appendGuardianHolderCommitment(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, commitment);
+        uint256 distinctScopeCount = 0;
+        for (uint256 i = 0; i < calls.length; i++) {
+            bytes32 scopeHash = calls[i].scopeHash;
+            if (_scopeSeenBeforeForCommitment(calls, i, scopeHash)) continue;
+            bytes32 scopedRole =
+                roleRegistry.scopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeHash);
+            (bytes32 scopedChain, uint64 scopedRevision) =
+                roleRegistry.roleMutationState(scopedRole);
+            commitment = keccak256(
+                abi.encode(
+                    TERMINAL_GUARDIAN_SCOPE_V1,
+                    commitment,
+                    scopeHash,
+                    scopedRole,
+                    scopedChain,
+                    scopedRevision
+                )
+            );
+            commitment = _appendGuardianHolderCommitment(scopedRole, commitment);
+            distinctScopeCount++;
+        }
+        return keccak256(abi.encode(TERMINAL_GUARDIAN_CONFIG_V1, commitment, distinctScopeCount));
+    }
+
+    function _appendGuardianHolderCommitment(bytes32 role, bytes32 chainHash)
+        private
+        view
+        returns (bytes32)
+    {
+        uint256 holderCount = roleRegistry.roleHolderCount(role);
+        chainHash = keccak256(abi.encode(TERMINAL_GUARDIAN_HOLDER_V1, chainHash, role, holderCount));
+        for (uint256 i = 0; i < holderCount; i++) {
+            address holder = roleRegistry.roleHolderAt(role, i);
+            chainHash = keccak256(
+                abi.encode(TERMINAL_GUARDIAN_HOLDER_V1, chainHash, role, i, holder, holder.codehash)
+            );
+        }
+        return chainHash;
+    }
+
+    function _scopeSeenBeforeForCommitment(
+        GovernanceCall[] memory calls,
+        uint256 endExclusive,
+        bytes32 scopeHash
+    ) private pure returns (bool) {
+        for (uint256 i = 0; i < endExclusive; i++) {
+            if (calls[i].scopeHash == scopeHash) return true;
+        }
+        return false;
+    }
+
+    function _assertTerminalGuardianCommitmentDrift(
+        bytes32 actionId,
+        GovernanceCall[] memory calls,
+        bytes[] memory callDatas
+    ) private {
+        bytes32 expectedCommitment = executor.terminalFreezeGuardianConfigCommitment(actionId);
+        bytes32 actualCommitment = _terminalGuardianCommitment(calls);
+        (expectedCommitment != actualCommitment).assertTrue("guardian commitment must drift");
+        GovernanceAction memory action = executor.governanceAction(actionId);
+        if (block.timestamp < action.notBefore) vm.warp(action.notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeGuardianConfigDrift.selector,
+                actionId,
+                expectedCommitment,
+                actualCommitment
+            )
+        );
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+    }
+
     function _roleMutationStateHash(
         bytes32 scopeHash,
         bool granted,
@@ -553,6 +804,68 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         actionId = _schedule(actionClass, calls, callDatas, notBefore, expiresAfter);
     }
 
+    function _scheduleRootRotationAs(address actor, address newRoot)
+        private
+        returns (
+            bytes32 actionId,
+            GovernanceCall[] memory calls,
+            bytes[] memory callDatas,
+            uint64 notBefore,
+            uint64 priorRevision
+        )
+    {
+        (address oldRoot, bytes32 oldCodeHash, uint64 oldRevision) = executor.governanceRootState();
+        bytes32 scopeHash = keccak256(
+            abi.encode(GOVERNANCE_ROOT_SCOPE_V1, uint256(block.chainid), address(executor))
+        );
+        bytes32 oldStateHash = keccak256(
+            abi.encode(
+                GOVERNANCE_ROOT_STATE_V1,
+                uint256(block.chainid),
+                address(executor),
+                oldRoot,
+                oldCodeHash,
+                oldRevision
+            )
+        );
+        bytes32 newStateHash = keccak256(
+            abi.encode(
+                GOVERNANCE_ROOT_STATE_V1,
+                uint256(block.chainid),
+                address(executor),
+                newRoot,
+                newRoot.codehash,
+                oldRevision + 1
+            )
+        );
+        bytes memory callData = abi.encodeCall(
+            StreamGovernanceExecutor.rotateGovernanceRoot, (newRoot, newRoot.codehash)
+        );
+        calls = new GovernanceCall[](1);
+        calls[0] = GovernanceCall({
+            target: address(executor),
+            value: 0,
+            selector: StreamGovernanceExecutor.rotateGovernanceRoot.selector,
+            callDataHash: keccak256(callData),
+            scopeHash: scopeHash,
+            oldValueHash: oldStateHash,
+            newValueHash: newStateHash
+        });
+        callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        executor.publishGovernanceCallData(callDatas);
+        notBefore = uint64(block.timestamp)
+            + executor.minimumDelay(StreamGovernanceActionClasses.POINTER_REPLACEMENT);
+        actionId = _schedulePublishedAs(
+            actor,
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            calls,
+            notBefore,
+            notBefore + 7 days
+        );
+        priorRevision = oldRevision;
+    }
+
     function _executeConfigCall(
         uint8 actionClass,
         bytes memory callData,
@@ -567,6 +880,100 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             _scheduleConfigCall(actionClass, callData, scopeHash, oldValueHash, newValueHash);
         vm.warp(notBefore);
         executor.executeGovernanceBatch(actionId, calls, callDatas);
+    }
+
+    function _assertExecutorConfigDirectionRejected(
+        bytes memory callData,
+        bool enabled,
+        uint8 expectedClass,
+        uint8 actualClass
+    ) private {
+        bytes4 selector = _selectorOf(callData);
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = GovernanceCall({
+            target: address(executor),
+            value: 0,
+            selector: selector,
+            callDataHash: keccak256(callData),
+            scopeHash: SCOPE,
+            oldValueHash: OLD_VALUE,
+            newValueHash: NEW_VALUE
+        });
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        uint64 notBefore = uint64(block.timestamp) + executor.minimumDelay(actualClass);
+        uint64 expiresAfter = notBefore + 7 days;
+        executor.publishGovernanceCallData(callDatas);
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) = _derivedBatchHashes(calls);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.ExecutorConfigActionClassMismatch.selector,
+                address(executor),
+                selector,
+                enabled,
+                expectedClass,
+                actualClass
+            )
+        );
+        executor.scheduleGovernanceBatch(
+            actualClass,
+            calls,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            notBefore,
+            expiresAfter,
+            REASON,
+            REASON_URI,
+            MANIFEST
+        );
+    }
+
+    function _assertIsolatedExecutorControlRejected(bytes memory callData, uint8 actionClass)
+        private
+    {
+        GovernedTargetMock second = new GovernedTargetMock();
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = callData;
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (777));
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        calls[0] = _governanceCall(address(executor), callDatas[0], keccak256("isolated-control"));
+        calls[1] = _governanceCall(address(second), callDatas[1], keccak256("second-control"));
+        executor.publishGovernanceCallData(callDatas);
+        uint64 notBefore = uint64(block.timestamp) + executor.minimumDelay(actionClass);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceSelfCallContextRequired.selector
+            )
+        );
+        _schedulePublishedAs(address(this), actionClass, calls, notBefore, notBefore + 7 days);
+    }
+
+    function _assertSingleExecutorControlScheduleRevert(
+        bytes memory callData,
+        uint8 actionClass,
+        bytes memory expectedRevert
+    ) private {
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = _governanceCall(address(executor), callData, keccak256("executor-control"));
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        executor.publishGovernanceCallData(callDatas);
+        uint64 notBefore = uint64(block.timestamp) + executor.minimumDelay(actionClass);
+
+        vm.expectRevert(expectedRevert);
+        _schedulePublishedAs(address(this), actionClass, calls, notBefore, notBefore + 7 days);
+    }
+
+    function _assertExecutorTighteningClassifierUnseeded(bytes4 selector) private view {
+        (bool tightening, bytes32 targetCodeHash, uint64 revision,) =
+            executor.tighteningCallConfig(address(executor), selector);
+        tightening.assertFalse("executor selector is not selector-wide tightening state");
+        targetCodeHash.assertEq(bytes32(0), "executor selector has no pinned policy code hash");
+        uint256(revision).assertEq(0, "executor selector has no mutable-policy revision");
+        executor.isTighteningCall(address(executor), selector)
+            .assertFalse("executor selector classifier is calldata-aware only");
     }
 
     function _executeBooleanConfigCall(
@@ -902,17 +1309,509 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         newValueHash = keccak256(abi.encode(BATCH_NEW_STATE_V2, callsHash, newValues));
     }
 
+    function _onlyExecutorEventLog(Vm.Log[] memory logs, bytes32 topic0)
+        private
+        view
+        returns (Vm.Log memory matched)
+    {
+        uint256 matchCount;
+        for (uint256 i = 0; i < logs.length; i++) {
+            if (
+                logs[i].emitter == address(executor) && logs[i].topics.length != 0
+                    && logs[i].topics[0] == topic0
+            ) {
+                matched = logs[i];
+                matchCount++;
+            }
+        }
+        matchCount.assertEq(1, "exactly one matching executor event");
+    }
+
+    function _assertBooleanConfigEventLog(
+        Vm.Log[] memory logs,
+        bytes32 topic0,
+        address account,
+        bool enabled,
+        uint64 revision,
+        bytes32 actionId
+    ) private view {
+        Vm.Log memory log = _onlyExecutorEventLog(logs, topic0);
+        log.topics.length.assertEq(3, "boolean config topic count");
+        log.topics[1].assertEq(bytes32(uint256(uint160(account))), "boolean config account topic");
+        log.topics[2].assertEq(actionId, "boolean config action topic");
+        bytes memory expectedData = abi.encode(uint16(1), enabled, revision);
+        log.data.length.assertEq(expectedData.length, "boolean config data length");
+        keccak256(log.data).assertEq(keccak256(expectedData), "boolean config raw data");
+        (uint16 schemaVersion, bool eventEnabled, uint64 eventRevision) =
+            abi.decode(log.data, (uint16, bool, uint64));
+        uint256(schemaVersion).assertEq(1, "boolean config schema");
+        require(eventEnabled == enabled, "boolean config enabled");
+        uint256(eventRevision).assertEq(uint256(revision), "boolean config revision");
+    }
+
+    function _assertSelectorConfigEventLog(
+        Vm.Log[] memory logs,
+        bytes32 topic0,
+        address configTarget,
+        bytes4 selector,
+        bool enabled,
+        bytes32 targetCodeHash,
+        uint64 revision,
+        bytes32 actionId
+    ) private view {
+        Vm.Log memory log = _onlyExecutorEventLog(logs, topic0);
+        log.topics.length.assertEq(4, "selector config topic count");
+        log.topics[1].assertEq(
+            bytes32(uint256(uint160(configTarget))), "selector config target topic"
+        );
+        log.topics[2].assertEq(bytes32(selector), "selector config selector topic");
+        log.topics[3].assertEq(actionId, "selector config action topic");
+        bytes memory expectedData = abi.encode(uint16(1), enabled, targetCodeHash, revision);
+        log.data.length.assertEq(expectedData.length, "selector config data length");
+        keccak256(log.data).assertEq(keccak256(expectedData), "selector config raw data");
+        (
+            uint16 schemaVersion,
+            bool eventEnabled,
+            bytes32 eventTargetCodeHash,
+            uint64 eventRevision
+        ) = abi.decode(log.data, (uint16, bool, bytes32, uint64));
+        uint256(schemaVersion).assertEq(1, "selector config schema");
+        require(eventEnabled == enabled, "selector config enabled");
+        eventTargetCodeHash.assertEq(targetCodeHash, "selector config code hash");
+        uint256(eventRevision).assertEq(uint256(revision), "selector config revision");
+    }
+
     // ------------------------------------------------------------- scheduling
+
+    function testGovernanceCallDataPublishedEventHasExactLogLayout() public {
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (uint256(0xCA11DA7A)));
+        callDatas[1] = abi.encodePacked(bytes4(0x12345678), bytes32(uint256(0xBEEF)));
+        bytes32 callDataKey =
+            keccak256(abi.encodePacked(keccak256(callDatas[0]), keccak256(callDatas[1])));
+
+        vm.recordLogs();
+        vm.prank(stranger);
+        address pointer = executor.publishGovernanceCallData(callDatas);
+        Vm.Log memory log =
+            _onlyExecutorEventLog(vm.getRecordedLogs(), GOVERNANCE_CALL_DATA_PUBLISHED_TOPIC);
+
+        log.topics.length.assertEq(2, "calldata publication topic count");
+        log.topics[1].assertEq(callDataKey, "calldata publication key topic");
+        bytes memory expectedData = abi.encode(uint16(1), pointer, stranger);
+        log.data.length.assertEq(expectedData.length, "calldata publication data length");
+        keccak256(log.data).assertEq(keccak256(expectedData), "calldata publication raw data");
+        (uint16 schemaVersion, address eventPointer, address eventPublisher) =
+            abi.decode(log.data, (uint16, address, address));
+        uint256(schemaVersion).assertEq(1, "calldata publication schema");
+        eventPointer.assertEq(pointer, "calldata publication pointer");
+        eventPublisher.assertEq(stranger, "calldata publication publisher");
+        executor.publishedCallData(callDataKey)
+            .assertEq(pointer, "calldata publication state pointer");
+    }
+
+    function testGovernanceRootRotatedEventHasExactLogLayout() public {
+        StreamGovernanceRootMock newRoot = new StreamGovernanceRootMock();
+        (address oldRoot,,) = executor.governanceRootState();
+        bytes32 actionId;
+        GovernanceCall[] memory calls;
+        bytes[] memory callDatas;
+        uint64 notBefore;
+        uint64 priorRevision;
+        (actionId, calls, callDatas, notBefore, priorRevision) =
+            _scheduleRootRotationAs(address(this), address(newRoot));
+        uint64 expectedRevision = priorRevision + 1;
+
+        vm.warp(notBefore);
+        vm.recordLogs();
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+        Vm.Log memory log =
+            _onlyExecutorEventLog(vm.getRecordedLogs(), GOVERNANCE_ROOT_ROTATED_TOPIC);
+
+        log.topics.length.assertEq(4, "root rotation topic count");
+        log.topics[1].assertEq(bytes32(uint256(uint160(oldRoot))), "root rotation old root topic");
+        log.topics[2].assertEq(
+            bytes32(uint256(uint160(address(newRoot)))), "root rotation new root topic"
+        );
+        log.topics[3].assertEq(actionId, "root rotation action topic");
+        bytes memory expectedData =
+            abi.encode(uint16(1), address(newRoot).codehash, expectedRevision);
+        log.data.length.assertEq(expectedData.length, "root rotation data length");
+        keccak256(log.data).assertEq(keccak256(expectedData), "root rotation raw data");
+        (uint16 schemaVersion, bytes32 eventCodeHash, uint64 eventRevision) =
+            abi.decode(log.data, (uint16, bytes32, uint64));
+        uint256(schemaVersion).assertEq(1, "root rotation schema");
+        eventCodeHash.assertEq(address(newRoot).codehash, "root rotation code hash");
+        uint256(eventRevision).assertEq(uint256(expectedRevision), "root rotation revision");
+        (address storedRoot, bytes32 storedCodeHash, uint64 storedRevision) =
+            executor.governanceRootState();
+        storedRoot.assertEq(address(newRoot), "stored governance root");
+        storedCodeHash.assertEq(address(newRoot).codehash, "stored governance root code hash");
+        uint256(storedRevision)
+            .assertEq(uint256(expectedRevision), "stored governance root revision");
+    }
+
+    function testBooleanGovernanceConfigEventsHaveExactLogLayouts() public {
+        vm.recordLogs();
+        bytes32 proposerActionId = _setProposer(proposer, true);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        (bool proposerEnabled, uint64 proposerRevision,) = executor.proposerConfig(proposer);
+        proposerEnabled.assertTrue("proposer state enabled");
+        _assertBooleanConfigEventLog(
+            logs,
+            GOVERNANCE_PROPOSER_UPDATED_TOPIC,
+            proposer,
+            true,
+            proposerRevision,
+            proposerActionId
+        );
+
+        vm.recordLogs();
+        bytes32 cancellerActionId = _setCanceller(canceller, true);
+        logs = vm.getRecordedLogs();
+        (bool cancellerEnabled, uint64 cancellerRevision,) = executor.cancellerConfig(canceller);
+        cancellerEnabled.assertTrue("canceller state enabled");
+        _assertBooleanConfigEventLog(
+            logs,
+            GOVERNANCE_CANCELLER_UPDATED_TOPIC,
+            canceller,
+            true,
+            cancellerRevision,
+            cancellerActionId
+        );
+
+        vm.recordLogs();
+        bytes32 receiverActionId = _setNativeReceiver(stranger, true);
+        logs = vm.getRecordedLogs();
+        (bool receiverApproved, uint64 receiverRevision,) =
+            executor.approvedNativeReceiverConfig(stranger);
+        receiverApproved.assertTrue("native receiver state approved");
+        _assertBooleanConfigEventLog(
+            logs,
+            APPROVED_NATIVE_RECEIVER_UPDATED_TOPIC,
+            stranger,
+            true,
+            receiverRevision,
+            receiverActionId
+        );
+    }
+
+    function testSelectorGovernanceConfigEventsHaveExactLogLayouts() public {
+        bytes4 selector = GovernedTargetMock.setValue.selector;
+
+        vm.recordLogs();
+        bytes32 tighteningActionId = _setTighteningCall(address(target), selector, true);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        (bool tightening, bytes32 tighteningCodeHash, uint64 tighteningRevision,) =
+            executor.tighteningCallConfig(address(target), selector);
+        tightening.assertTrue("tightening state enabled");
+        _assertSelectorConfigEventLog(
+            logs,
+            TIGHTENING_CALL_UPDATED_TOPIC,
+            address(target),
+            selector,
+            true,
+            tighteningCodeHash,
+            tighteningRevision,
+            tighteningActionId
+        );
+
+        GovernedTargetMock freezeTarget = new GovernedTargetMock();
+        vm.recordLogs();
+        bytes32 freezeActionId = _setFreezeSelector(address(freezeTarget), selector, true);
+        logs = vm.getRecordedLogs();
+        (bool freeze, bytes32 freezeCodeHash, uint64 freezeRevision,) =
+            executor.freezeSelectorConfig(address(freezeTarget), selector);
+        freeze.assertTrue("freeze selector state enabled");
+        _assertSelectorConfigEventLog(
+            logs,
+            FREEZE_SELECTOR_UPDATED_TOPIC,
+            address(freezeTarget),
+            selector,
+            true,
+            freezeCodeHash,
+            freezeRevision,
+            freezeActionId
+        );
+    }
+
+    function testExecutorConfigDirectionIsProvenBeforeScheduling() public {
+        uint8 immediate = StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING;
+        uint8 delayed = StreamGovernanceActionClasses.DELAYED_LOOSENING;
+
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(StreamGovernanceExecutor.registerProposer, (stranger, true)),
+            true,
+            delayed,
+            immediate
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(StreamGovernanceExecutor.registerProposer, (stranger, false)),
+            false,
+            immediate,
+            delayed
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(StreamGovernanceExecutor.registerCanceller, (stranger, false)),
+            false,
+            delayed,
+            immediate
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(StreamGovernanceExecutor.registerCanceller, (stranger, true)),
+            true,
+            immediate,
+            delayed
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(StreamGovernanceExecutor.setApprovedNativeReceiver, (stranger, true)),
+            true,
+            delayed,
+            immediate
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(StreamGovernanceExecutor.setApprovedNativeReceiver, (stranger, false)),
+            false,
+            immediate,
+            delayed
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.setTighteningCall,
+                (address(target), GovernedTargetMock.setValue.selector, true)
+            ),
+            true,
+            delayed,
+            immediate
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.setTighteningCall,
+                (address(target), GovernedTargetMock.setValue.selector, false)
+            ),
+            false,
+            immediate,
+            delayed
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.registerFreezeSelector,
+                (address(target), GovernedTargetMock.setValue.selector, false)
+            ),
+            false,
+            delayed,
+            immediate
+        );
+        _assertExecutorConfigDirectionRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.registerFreezeSelector,
+                (address(target), GovernedTargetMock.setValue.selector, true)
+            ),
+            true,
+            immediate,
+            delayed
+        );
+    }
+
+    function testExecutorConfigIsolationIsProvenBeforeScheduling() public {
+        _assertIsolatedExecutorControlRejected(
+            abi.encodeCall(StreamGovernanceExecutor.registerProposer, (stranger, true)),
+            StreamGovernanceActionClasses.DELAYED_LOOSENING
+        );
+        _assertIsolatedExecutorControlRejected(
+            abi.encodeCall(StreamGovernanceExecutor.registerCanceller, (stranger, true)),
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING
+        );
+        _assertIsolatedExecutorControlRejected(
+            abi.encodeCall(StreamGovernanceExecutor.setApprovedNativeReceiver, (stranger, true)),
+            StreamGovernanceActionClasses.DELAYED_LOOSENING
+        );
+        _assertIsolatedExecutorControlRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.setTighteningCall,
+                (address(target), GovernedTargetMock.setValue.selector, true)
+            ),
+            StreamGovernanceActionClasses.DELAYED_LOOSENING
+        );
+        _assertIsolatedExecutorControlRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.registerFreezeSelector,
+                (address(target), GovernedTargetMock.setValue.selector, true)
+            ),
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING
+        );
+    }
+
+    function testGovernanceRootRotationClassCalldataAndIsolationAreProvenBeforeScheduling() public {
+        StreamGovernanceRootMock newRoot = new StreamGovernanceRootMock();
+        bytes memory validCallData = abi.encodeCall(
+            StreamGovernanceExecutor.rotateGovernanceRoot,
+            (address(newRoot), address(newRoot).codehash)
+        );
+        bytes4 selector = StreamGovernanceExecutor.rotateGovernanceRoot.selector;
+
+        _assertSingleExecutorControlScheduleRevert(
+            validCallData,
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.ExecutorControlActionClassMismatch.selector,
+                address(executor),
+                selector,
+                StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+                StreamGovernanceActionClasses.DELAYED_LOOSENING
+            )
+        );
+        _assertSingleExecutorControlScheduleRevert(
+            bytes.concat(validCallData, bytes32(uint256(1))),
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector,
+                address(executor),
+                selector
+            )
+        );
+        _assertSingleExecutorControlScheduleRevert(
+            abi.encodePacked(selector, bytes32(type(uint256).max), address(newRoot).codehash),
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector,
+                address(executor),
+                selector
+            )
+        );
+        _assertSingleExecutorControlScheduleRevert(
+            abi.encodeCall(
+                StreamGovernanceExecutor.rotateGovernanceRoot,
+                (address(0), address(newRoot).codehash)
+            ),
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector,
+                address(executor),
+                selector
+            )
+        );
+        _assertSingleExecutorControlScheduleRevert(
+            abi.encodeCall(
+                StreamGovernanceExecutor.rotateGovernanceRoot, (address(newRoot), bytes32(0))
+            ),
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector,
+                address(executor),
+                selector
+            )
+        );
+        _assertIsolatedExecutorControlRejected(
+            validCallData, StreamGovernanceActionClasses.POINTER_REPLACEMENT
+        );
+    }
+
+    function testExecutorConfigSelectorsAreNotSeededAsSelectorWideTighteningCalls() public view {
+        _assertExecutorTighteningClassifierUnseeded(
+            StreamGovernanceExecutor.registerProposer.selector
+        );
+        _assertExecutorTighteningClassifierUnseeded(
+            StreamGovernanceExecutor.registerCanceller.selector
+        );
+        _assertExecutorTighteningClassifierUnseeded(
+            StreamGovernanceExecutor.setApprovedNativeReceiver.selector
+        );
+        _assertExecutorTighteningClassifierUnseeded(
+            StreamGovernanceExecutor.setTighteningCall.selector
+        );
+        _assertExecutorTighteningClassifierUnseeded(
+            StreamGovernanceExecutor.registerFreezeSelector.selector
+        );
+    }
+
+    function testMutableTighteningClassifierCannotTargetExecutorSelfConfig() public {
+        bytes memory callData = abi.encodeCall(
+            StreamGovernanceExecutor.setTighteningCall,
+            (address(executor), StreamGovernanceExecutor.registerProposer.selector, true)
+        );
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = GovernanceCall({
+            target: address(executor),
+            value: 0,
+            selector: StreamGovernanceExecutor.setTighteningCall.selector,
+            callDataHash: keccak256(callData),
+            scopeHash: SCOPE,
+            oldValueHash: OLD_VALUE,
+            newValueHash: NEW_VALUE
+        });
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        executor.publishGovernanceCallData(callDatas);
+        uint8 actionClass = StreamGovernanceActionClasses.DELAYED_LOOSENING;
+        uint64 notBefore = uint64(block.timestamp) + executor.minimumDelay(actionClass);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector,
+                address(executor),
+                StreamGovernanceExecutor.setTighteningCall.selector
+            )
+        );
+        _schedulePublishedAs(address(this), actionClass, calls, notBefore, notBefore + 7 days);
+    }
+
+    function testFreezeSelectorClassifierCannotTargetExecutorSelfConfig() public {
+        _assertExecutorSelfTargetConfigRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.registerFreezeSelector,
+                (address(executor), StreamGovernanceExecutor.registerProposer.selector, true)
+            ),
+            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING
+        );
+        _assertExecutorSelfTargetConfigRejected(
+            abi.encodeCall(
+                StreamGovernanceExecutor.registerFreezeSelector,
+                (address(executor), StreamGovernanceExecutor.registerProposer.selector, false)
+            ),
+            StreamGovernanceActionClasses.DELAYED_LOOSENING
+        );
+    }
+
+    function _assertExecutorSelfTargetConfigRejected(bytes memory callData, uint8 actionClass)
+        private
+    {
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = GovernanceCall({
+            target: address(executor),
+            value: 0,
+            selector: StreamGovernanceExecutor.registerFreezeSelector.selector,
+            callDataHash: keccak256(callData),
+            scopeHash: SCOPE,
+            oldValueHash: OLD_VALUE,
+            newValueHash: NEW_VALUE
+        });
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        executor.publishGovernanceCallData(callDatas);
+        uint64 notBefore = uint64(block.timestamp) + executor.minimumDelay(actionClass);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector,
+                address(executor),
+                StreamGovernanceExecutor.registerFreezeSelector.selector
+            )
+        );
+        _schedulePublishedAs(address(this), actionClass, calls, notBefore, notBefore + 7 days);
+    }
 
     function testRegisteredProposerCannotScheduleExecutorControlPlaneMutation() public {
         _setProposer(proposer, true);
+        uint8 actionClass = StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING;
         bytes memory callData =
             abi.encodeCall(StreamGovernanceExecutor.registerCanceller, (stranger, true));
         GovernanceCall[] memory calls = new GovernanceCall[](1);
         calls[0] = _governanceCall(address(executor), callData, keccak256("executor-control"));
         bytes[] memory callDatas = new bytes[](1);
         callDatas[0] = callData;
-        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        uint64 notBefore = uint64(block.timestamp) + executor.minimumDelay(actionClass);
+        uint64 expiresAfter = notBefore + 7 days;
 
         executor.publishGovernanceCallData(callDatas);
         vm.expectRevert(
@@ -924,13 +1823,49 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
                 StreamGovernanceExecutor.registerCanceller.selector
             )
         );
-        _schedulePublishedAs(
-            proposer,
-            StreamGovernanceActionClasses.DELAYED_LOOSENING,
-            calls,
-            notBefore,
-            expiresAfter
+        _schedulePublishedAs(proposer, actionClass, calls, notBefore, expiresAfter);
+    }
+
+    function testProposerDisableAndAddressABAPermanentlyInvalidateQueuedActions() public {
+        _setProposer(proposer, true);
+        (, uint64 scheduledRevision,) = executor.proposerConfig(proposer);
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (9191));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        executor.publishGovernanceCallData(callDatas);
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        vm.prank(proposer);
+        bytes32 actionId = _scheduleClass(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, calls, notBefore, expiresAfter
         );
+
+        _setProposer(proposer, false);
+        vm.warp(notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceProposerAuthorizationDrift.selector,
+                actionId,
+                proposer,
+                scheduledRevision,
+                scheduledRevision + 1,
+                false
+            )
+        );
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+
+        _setProposer(proposer, true);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceProposerAuthorizationDrift.selector,
+                actionId,
+                proposer,
+                scheduledRevision,
+                scheduledRevision + 2,
+                true
+            )
+        );
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+        target.value().assertEq(0, "stale proposer action never executed");
+        executor.cancelGovernanceAction(actionId, keccak256("proposer ABA regression cleanup"));
     }
 
     function testBootstrapSealExemptionExpiresAfterSeal() public {
@@ -1332,6 +2267,69 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             .assertFalse("stale root action did not mutate roles");
     }
 
+    function testRootAddressABACannotReviveStaleControlPlaneAction() public {
+        (,, uint64 initialRootRevision) = executor.governanceRootState();
+        bytes memory roleCallData = abi.encodeWithSelector(
+            IStreamRoleRegistry.grantRole.selector, StreamRoles.ROLE_TREASURY, stranger
+        );
+        GovernanceCall[] memory staleCalls = new GovernanceCall[](1);
+        staleCalls[0] = _governanceCall(
+            address(roleRegistry), roleCallData, keccak256("root-aba-stale-action")
+        );
+        bytes[] memory staleCallDatas = new bytes[](1);
+        staleCallDatas[0] = roleCallData;
+        (uint64 staleNotBefore, uint64 staleExpiresAfter) = _defaultWindow();
+        bytes32 staleActionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            staleCalls,
+            staleCallDatas,
+            staleNotBefore,
+            staleExpiresAfter
+        );
+
+        StreamGovernanceRootMock intermediateRoot = new StreamGovernanceRootMock();
+        (
+            bytes32 toIntermediate,
+            GovernanceCall[] memory firstRotationCalls,
+            bytes[] memory firstRotationCallDatas,
+            uint64 firstRotationNotBefore,
+            uint64 firstRotationPriorRevision
+        ) = _scheduleRootRotationAs(address(this), address(intermediateRoot));
+        uint256(firstRotationPriorRevision)
+            .assertEq(uint256(initialRootRevision), "first rotation root revision");
+        vm.warp(firstRotationNotBefore);
+        executor.executeGovernanceBatch(toIntermediate, firstRotationCalls, firstRotationCallDatas);
+
+        (
+            bytes32 backToOriginal,
+            GovernanceCall[] memory secondRotationCalls,
+            bytes[] memory secondRotationCallDatas,
+            uint64 secondRotationNotBefore,
+            uint64 intermediateRevision
+        ) = _scheduleRootRotationAs(address(intermediateRoot), address(this));
+        uint256(intermediateRevision)
+            .assertEq(uint256(initialRootRevision) + 1, "intermediate root revision");
+        vm.warp(secondRotationNotBefore);
+        executor.executeGovernanceBatch(
+            backToOriginal, secondRotationCalls, secondRotationCallDatas
+        );
+
+        executor.owner().assertEq(address(this), "root address returned after ABA");
+        (,, uint64 actualRootRevision) = executor.governanceRootState();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceRootRevisionMismatch.selector,
+                staleActionId,
+                initialRootRevision,
+                actualRootRevision
+            )
+        );
+        executor.executeGovernanceBatch(staleActionId, staleCalls, staleCallDatas);
+        roleRegistry.hasRole(StreamRoles.ROLE_TREASURY, stranger)
+            .assertFalse("ABA did not revive stale root action");
+        executor.cancelGovernanceAction(staleActionId, keccak256("ABA regression cleanup"));
+    }
+
     function testRoleRegistryCannotEnterFastEmergencyFreezeOrTailPolicyLanes() public {
         bytes4 roleSelector = IStreamRoleRegistry.grantRole.selector;
         uint256 initialTailCount = executor.systemManifestTailTriggerCount();
@@ -1568,6 +2566,39 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         assembly ("memory-safe") {
             word := mload(add(add(data, 0x20), mul(index, 0x20)))
         }
+    }
+
+    function _assertTerminalMembershipLog(
+        Vm.Log memory log,
+        bytes32 scopeHash,
+        bytes32 actionId,
+        address actionProposer,
+        bool present,
+        uint8 mutationCause,
+        bool usesRootCapacity,
+        uint64 vetoDeadline,
+        uint256 rawIndex,
+        uint256 remainingCount
+    ) private view {
+        log.emitter.assertEq(address(executor), "membership event emitter");
+        log.topics.length.assertEq(4, "membership event topic count");
+        log.topics[0].assertEq(
+            TERMINAL_FREEZE_ACTION_MEMBERSHIP_UPDATED_TOPIC, "membership event topic0"
+        );
+        log.topics[1].assertEq(scopeHash, "membership event scope");
+        log.topics[2].assertEq(actionId, "membership event action");
+        log.topics[3].assertEq(
+            bytes32(uint256(uint160(actionProposer))), "membership event proposer"
+        );
+        log.data.length.assertEq(7 * 32, "membership event data length");
+        _word(log.data, 0).assertEq(bytes32(uint256(1)), "membership event schema");
+        _word(log.data, 1).assertEq(bytes32(uint256(present ? 1 : 0)), "membership event presence");
+        _word(log.data, 2).assertEq(bytes32(uint256(mutationCause)), "membership event cause");
+        _word(log.data, 3)
+            .assertEq(bytes32(uint256(usesRootCapacity ? 1 : 0)), "membership event root capacity");
+        _word(log.data, 4).assertEq(bytes32(uint256(vetoDeadline)), "membership event deadline");
+        _word(log.data, 5).assertEq(bytes32(rawIndex), "membership event raw index");
+        _word(log.data, 6).assertEq(bytes32(remainingCount), "membership event post-count");
     }
 
     function testScheduleRequiresPublishedCallData() public {
@@ -2198,6 +3229,65 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         second.value().assertEq(22, "second call applied");
     }
 
+    function testGovernedCallIgnoresOversizedSuccessReturndata() public {
+        GovernedReturndataMock returner = new GovernedReturndataMock();
+        bytes memory callData =
+            abi.encodeCall(GovernedReturndataMock.succeedWithReturndata, (uint256(128 * 1024)));
+        GovernanceCall[] memory calls = new GovernanceCall[](1);
+        calls[0] = _governanceCall(address(returner), callData, keccak256("large-success"));
+        bytes[] memory callDatas = new bytes[](1);
+        callDatas[0] = callData;
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+        returner.called().assertTrue("large success payload call executed");
+        uint256(uint8(executor.governanceAction(actionId).status))
+            .assertEq(uint256(uint8(GovernanceActionStatus.EXECUTED)), "action executed");
+    }
+
+    function testOversizedGovernedRevertIsBoundedAndBatchRemainsAtomic() public {
+        GovernedReturndataMock returner = new GovernedReturndataMock();
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (77));
+        callDatas[1] =
+            abi.encodeCall(GovernedReturndataMock.revertWithReturndata, (uint256(128 * 1024)));
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        calls[0] = _governanceCall(address(target), callDatas[0], keccak256("before-large-revert"));
+        calls[1] = _governanceCall(address(returner), callDatas[1], keccak256("large-revert"));
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
+        );
+        vm.warp(notBefore);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceCallReturndataTooLarge.selector,
+                actionId,
+                uint256(1),
+                uint256(128 * 1024),
+                uint256(4_096)
+            )
+        );
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+
+        target.value().assertEq(0, "earlier call rolled back after oversized revert");
+        uint256(uint8(executor.governanceAction(actionId).status))
+            .assertEq(uint256(uint8(GovernanceActionStatus.SCHEDULED)), "action remains scheduled");
+    }
+
     function testBatchExecutionRejectsTargetReentrancyAndRollsBack() public {
         bytes memory nestedTargetData = abi.encodeCall(GovernedTargetMock.setValue, (91));
         (GovernanceCall[] memory nestedCalls, bytes[] memory nestedCallDatas) =
@@ -2404,6 +3494,56 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
             .assertEq(canceller, "registered canceller cancelled");
     }
 
+    function testRegisteredCancellerCannotEntrenchItselfByCancellingRemoval() public {
+        _setCanceller(canceller, true);
+        (bool enabled, uint64 revision, bytes32 oldStateHash) = executor.cancellerConfig(canceller);
+        enabled.assertTrue("canceller enabled before removal");
+        bytes32 scopeHash = keccak256(
+            abi.encode(
+                GOVERNANCE_CONFIG_SCOPE_V1,
+                uint256(block.chainid),
+                address(executor),
+                GOVERNANCE_CONFIG_CANCELLER,
+                canceller
+            )
+        );
+        bytes32 newStateHash = keccak256(
+            abi.encode(
+                GOVERNANCE_CONFIG_STATE_V1,
+                uint256(block.chainid),
+                address(executor),
+                GOVERNANCE_CONFIG_CANCELLER,
+                canceller,
+                false,
+                revision + 1
+            )
+        );
+        (
+            bytes32 removalAction,
+            GovernanceCall[] memory calls,
+            bytes[] memory callDatas,
+            uint64 notBefore
+        ) = _scheduleConfigCall(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            abi.encodeCall(StreamGovernanceExecutor.registerCanceller, (canceller, false)),
+            scopeHash,
+            oldStateHash,
+            newStateHash
+        );
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActorNotAuthorized.selector, canceller
+            )
+        );
+        vm.prank(canceller);
+        executor.cancelGovernanceAction(removalAction, keccak256("self-entrenchment"));
+
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(removalAction, calls, callDatas);
+        executor.isCanceller(canceller).assertFalse("compromised canceller removed");
+    }
+
     // ------------------------------------------------------------------ veto
 
     function testTerminalFreezeVeto() public {
@@ -2560,13 +3700,28 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         executor.cancelGovernanceAction(actionId, keccak256("too late"));
     }
 
-    function testExpiredButUnmaterializedActionCanBeCancelled() public {
+    function testExpiredButUnmaterializedActionCannotBeCancelled() public {
         bytes32 actionId = _scheduleDefault(abi.encodeCall(GovernedTargetMock.setValue, (1)));
         GovernanceAction memory action = executor.governanceAction(actionId);
         vm.warp(uint256(action.expiresAfter) + 1);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.GovernanceActionExpiredWindow.selector,
+                actionId,
+                action.expiresAfter
+            )
+        );
         executor.cancelGovernanceAction(actionId, keccak256("cancel expired"));
+
         uint256(uint8(executor.governanceAction(actionId).status))
-            .assertEq(uint256(uint8(GovernanceActionStatus.CANCELLED)), "expired action cancelled");
+            .assertEq(
+                uint256(uint8(GovernanceActionStatus.EXPIRED)), "expired action stays expired"
+            );
+        executor.pendingScheduledActionCount().assertEq(1, "virtual expiry remains pending");
+
+        executor.materializeExpiredAction(actionId);
+        executor.pendingScheduledActionCount().assertEq(0, "materialized expiry leaves pending set");
     }
 
     // ------------------------------------------------- single-call wrappers
@@ -3006,6 +4161,249 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         );
     }
 
+    function _scheduleFreezeAs(address actor, bytes32 scope, uint64 notBefore)
+        private
+        returns (bytes32 actionId)
+    {
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(0xFEE1)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        calls[0].scopeHash = scope;
+        executor.publishGovernanceCallData(callDatas);
+        return _schedulePublishedAs(
+            actor,
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            notBefore,
+            notBefore + 7 days
+        );
+    }
+
+    function _twoScopeFreezeBatch(bytes32 scopeA, bytes32 scopeB)
+        private
+        returns (GovernanceCall[] memory calls, bytes[] memory callDatas)
+    {
+        GovernedTargetMock second = new GovernedTargetMock();
+        callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (101));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (202));
+        calls = new GovernanceCall[](2);
+        calls[0] = _governanceCall(address(target), callDatas[0], keccak256("guardian-scope-a"));
+        calls[0].scopeHash = scopeA;
+        calls[1] = _governanceCall(address(second), callDatas[1], keccak256("guardian-scope-b"));
+        calls[1].scopeHash = scopeB;
+    }
+
+    function testTerminalGuardianCommitmentFormulaEventGetterAndDistinctScopes() public {
+        _grantGlobalVetoGuardian();
+        bytes32 scopeA = keccak256("guardian-formula-a");
+        bytes32 scopeB = keccak256("guardian-formula-b");
+        GovernedTargetMock second = new GovernedTargetMock();
+        bytes[] memory callDatas = new bytes[](3);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (11));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (12));
+        callDatas[2] = abi.encodeCall(GovernedTargetMock.setValue, (13));
+        GovernanceCall[] memory calls = new GovernanceCall[](3);
+        calls[0] = _governanceCall(address(target), callDatas[0], keccak256("formula-a-1"));
+        calls[0].scopeHash = scopeA;
+        calls[1] = _governanceCall(address(second), callDatas[1], keccak256("formula-a-2"));
+        calls[1].scopeHash = scopeA;
+        calls[2] = _governanceCall(address(second), callDatas[2], keccak256("formula-b"));
+        calls[2].scopeHash = scopeB;
+        bytes32 expectedCommitment = _terminalGuardianCommitment(calls);
+
+        GovernanceCall[] memory deduplicated = new GovernanceCall[](2);
+        deduplicated[0] = calls[0];
+        deduplicated[1] = calls[2];
+        _terminalGuardianCommitment(deduplicated)
+            .assertEq(expectedCommitment, "duplicate scope included exactly once");
+
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        uint64 expiresAfter = notBefore + 7 days;
+        vm.recordLogs();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE, calls, callDatas, notBefore, expiresAfter
+        );
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        bool foundCommitment;
+        bool foundScheduled;
+        uint256 membershipCount;
+        uint256 lastMembershipIndex;
+        uint256 commitmentIndex;
+        uint256 scheduledIndex;
+        for (uint256 i = 0; i < logs.length; i++) {
+            bytes32 topic0 = logs[i].topics[0];
+            if (topic0 == TERMINAL_FREEZE_ACTION_MEMBERSHIP_UPDATED_TOPIC) {
+                bytes32 expectedScope = membershipCount == 0 ? scopeA : scopeB;
+                _assertTerminalMembershipLog(
+                    logs[i], expectedScope, actionId, address(this), true, 1, true, notBefore, 0, 1
+                );
+                membershipCount++;
+                lastMembershipIndex = i;
+                continue;
+            }
+            if (topic0 == TERMINAL_FREEZE_GUARDIAN_CONFIG_COMMITTED_TOPIC) {
+                logs[i].emitter.assertEq(address(executor), "commitment event emitter");
+                logs[i].topics.length.assertEq(3, "commitment event topics");
+                logs[i].topics[1].assertEq(actionId, "commitment event action");
+                logs[i].topics[2].assertEq(expectedCommitment, "commitment event value");
+                _word(logs[i].data, 0).assertEq(bytes32(uint256(1)), "commitment event schema");
+                foundCommitment = true;
+                commitmentIndex = i;
+                continue;
+            }
+            if (topic0 == GOVERNANCE_ACTION_SCHEDULED_TOPIC) {
+                foundScheduled = true;
+                scheduledIndex = i;
+            }
+        }
+        membershipCount.assertEq(2, "one append event per distinct scope");
+        foundCommitment.assertTrue("guardian commitment event found");
+        foundScheduled.assertTrue("scheduled event found");
+        (lastMembershipIndex < commitmentIndex).assertTrue("membership precedes commitment");
+        (commitmentIndex < scheduledIndex).assertTrue("commitment precedes lifecycle event");
+        executor.terminalFreezeGuardianConfigCommitment(actionId)
+            .assertEq(expectedCommitment, "stored guardian commitment exact formula");
+    }
+
+    function testTerminalGuardianCommitmentRejectsGlobalMutationDrift() public {
+        _grantGlobalVetoGuardian();
+        bytes32 scope = keccak256("guardian-global-drift");
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (301));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        calls[0].scopeHash = scope;
+        uint64 notBefore = uint64(block.timestamp) + 300 days;
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        _grantRoleViaGovernance(
+            StreamRoles.ROLE_TERMINAL_FREEZE_VETO, address(new StreamGovernanceRootMock())
+        );
+        _assertTerminalGuardianCommitmentDrift(actionId, calls, callDatas);
+    }
+
+    function testTerminalGuardianCommitmentRejectsEachDistinctScopedMutation() public {
+        _grantGlobalVetoGuardian();
+        bytes32 scopeA = keccak256("guardian-distinct-a");
+        bytes32 scopeB = keccak256("guardian-distinct-b");
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) =
+            _twoScopeFreezeBatch(scopeA, scopeB);
+        uint64 notBefore = uint64(block.timestamp) + 300 days;
+        bytes32 actionA = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        _grantScopedRoleViaGovernance(
+            StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeA, address(new StreamGovernanceRootMock())
+        );
+        _assertTerminalGuardianCommitmentDrift(actionA, calls, callDatas);
+        executor.cancelGovernanceAction(actionA, keccak256("scope A drift complete"));
+
+        (calls, callDatas) = _twoScopeFreezeBatch(scopeA, scopeB);
+        notBefore = uint64(block.timestamp) + 300 days;
+        bytes32 actionB = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        _grantScopedRoleViaGovernance(
+            StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeB, address(new StreamGovernanceRootMock())
+        );
+        _assertTerminalGuardianCommitmentDrift(actionB, calls, callDatas);
+    }
+
+    function testTerminalGuardianCommitmentRejectsScopedGuardianABA() public {
+        _grantGlobalVetoGuardian();
+        bytes32 scope = keccak256("guardian-aba");
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (401));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        calls[0].scopeHash = scope;
+        uint64 notBefore = uint64(block.timestamp) + 300 days;
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        address scopedGuardian = address(new StreamGovernanceRootMock());
+        _grantScopedRoleViaGovernance(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope, scopedGuardian);
+        _revokeScopedRoleViaGovernance(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope, scopedGuardian);
+        roleRegistry.roleHolderCount(executor.terminalFreezeVetoRole(scope))
+            .assertEq(0, "scoped holder set returned to original");
+        _assertTerminalGuardianCommitmentDrift(actionId, calls, callDatas);
+    }
+
+    function testTerminalGuardianCommitmentRejectsGuardianCodehashDrift() public {
+        _grantGlobalVetoGuardian();
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (501));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        bytes32 guardianAction = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        vm.etch(guardian, hex"60006000f3");
+        _assertTerminalGuardianCommitmentDrift(guardianAction, calls, callDatas);
+    }
+
+    function testTerminalGuardianCommitmentRejectsRegistryCodehashDrift() public {
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (502));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        uint64 notBefore = uint64(block.timestamp) + 72 hours;
+        bytes32 registryAction = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        bytes32 expectedCodeHash = address(roleRegistry).codehash;
+        vm.etch(address(roleRegistry), hex"60006000f3");
+        bytes32 actualCodeHash = address(roleRegistry).codehash;
+        vm.warp(notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.RoleRegistryCodeHashMismatch.selector,
+                expectedCodeHash,
+                actualCodeHash
+            )
+        );
+        executor.executeGovernanceBatch(registryAction, calls, callDatas);
+    }
+
+    function testUnrelatedRoleMutationDoesNotDriftTerminalGuardianCommitment() public {
+        _grantGlobalVetoGuardian();
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (601));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        uint64 notBefore = uint64(block.timestamp) + 300 days;
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            callDatas,
+            notBefore,
+            notBefore + 7 days
+        );
+        bytes32 expectedCommitment = executor.terminalFreezeGuardianConfigCommitment(actionId);
+        _grantRoleViaGovernance(StreamRoles.ROLE_TREASURY, address(new StreamGovernanceRootMock()));
+        _terminalGuardianCommitment(calls)
+            .assertEq(expectedCommitment, "unrelated role excluded from guardian commitment");
+        vm.warp(notBefore);
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+        target.value().assertEq(601, "terminal action executes after unrelated role mutation");
+    }
+
     function testDecoyFreezeDoesNotShadowEarlierLiveAction() public {
         _grantGlobalVetoGuardian();
         // First: a live freeze at the 72h floor.
@@ -3084,6 +4482,582 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         executor.liveTerminalFreezeActionAt(SCOPE, 0);
         (, uint64 vetoDeadline) = executor.terminalFreezeVetoGuardian(SCOPE);
         uint256(vetoDeadline).assertEq(0, "no currently vetoable deadline");
+    }
+
+    function testTerminalFreezeRawPaginationAndPermissionlessElapsedPruning() public {
+        _grantGlobalVetoGuardian();
+        uint64 firstDeadline = uint64(block.timestamp) + 72 hours;
+        uint64 secondDeadline = uint64(block.timestamp) + 80 hours;
+        uint64 thirdDeadline = uint64(block.timestamp) + 90 hours;
+        bytes32 firstAction = _scheduleFreeze(SCOPE, firstDeadline);
+        bytes32 secondAction = _scheduleFreeze(SCOPE, secondDeadline);
+        bytes32 thirdAction = _scheduleFreeze(SCOPE, thirdDeadline);
+
+        (bytes32[] memory ids, uint64[] memory deadlines, uint256 nextCursor) =
+            executor.terminalFreezeActionPage(SCOPE, 0, 2);
+        ids.length.assertEq(2, "first raw page length");
+        ids[0].assertEq(firstAction, "first raw membership");
+        ids[1].assertEq(secondAction, "second raw membership");
+        uint256(deadlines[0]).assertEq(uint256(firstDeadline), "first raw deadline");
+        uint256(deadlines[1]).assertEq(uint256(secondDeadline), "second raw deadline");
+        nextCursor.assertEq(2, "first raw next cursor");
+
+        (ids, deadlines, nextCursor) = executor.terminalFreezeActionPage(SCOPE, 2, 2);
+        ids.length.assertEq(1, "second raw page length");
+        ids[0].assertEq(thirdAction, "third raw membership");
+        uint256(deadlines[0]).assertEq(uint256(thirdDeadline), "third raw deadline");
+        nextCursor.assertEq(3, "second raw next cursor");
+
+        (ids, deadlines, nextCursor) = executor.terminalFreezeActionPage(SCOPE, 3, 0);
+        ids.length.assertEq(0, "zero-limit page ids");
+        deadlines.length.assertEq(0, "zero-limit page deadlines");
+        nextCursor.assertEq(3, "zero-limit cursor stable");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezePageCursorOutOfBounds.selector,
+                SCOPE,
+                uint256(4),
+                uint256(3)
+            )
+        );
+        executor.terminalFreezeActionPage(SCOPE, 4, 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezePageLimitExceeded.selector,
+                uint256(65),
+                uint256(64)
+            )
+        );
+        executor.terminalFreezeActionPage(SCOPE, 0, 65);
+
+        vm.warp(firstDeadline);
+        uint256 pendingBefore = executor.pendingScheduledActionCount();
+        vm.expectEmit(true, true, true, true);
+        emit TerminalFreezeActionMembershipUpdated(
+            1, SCOPE, firstAction, address(this), false, 2, true, firstDeadline, 0, 2
+        );
+        executor.pruneElapsedTerminalFreezeActions(SCOPE).assertEq(1, "one elapsed pruned");
+        executor.pendingScheduledActionCount()
+            .assertEq(pendingBefore, "index pruning does not change pending actions");
+        uint256(uint8(executor.governanceAction(firstAction).status))
+            .assertEq(uint256(uint8(GovernanceActionStatus.SCHEDULED)), "action state unchanged");
+
+        // Swap-and-pop moves the former last membership into slot zero and
+        // keeps both moved and untouched indices usable.
+        (ids, deadlines, nextCursor) = executor.terminalFreezeActionPage(SCOPE, 0, 64);
+        ids.length.assertEq(2, "two raw memberships remain");
+        ids[0].assertEq(thirdAction, "swap-in membership indexed");
+        ids[1].assertEq(secondAction, "untouched membership indexed");
+        nextCursor.assertEq(2, "compacted raw cursor");
+
+        executor.cancelGovernanceAction(firstAction, keccak256("already deindexed"));
+        executor.cancelGovernanceAction(thirdAction, keccak256("moved index cleanup"));
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(1, "moved index pruned correctly");
+        (bytes32 remaining,) = executor.liveTerminalFreezeActionAt(SCOPE, 0);
+        remaining.assertEq(secondAction, "untouched action remains discoverable");
+    }
+
+    function testTerminalFreezeTerminalCleanupEmitsReplayableSwapPopBeforeLifecycle() public {
+        _grantGlobalVetoGuardian();
+        uint64 deadline = uint64(block.timestamp) + 72 hours;
+        bytes32 firstAction = _scheduleFreeze(SCOPE, deadline);
+        bytes32 removedAction = _scheduleFreeze(SCOPE, deadline);
+        bytes32 movedAction = _scheduleFreeze(SCOPE, deadline);
+
+        vm.recordLogs();
+        executor.cancelGovernanceAction(removedAction, keccak256("membership replay cleanup"));
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        uint256 membershipCount;
+        uint256 lifecycleCount;
+        uint256 membershipIndex;
+        uint256 lifecycleIndex;
+        for (uint256 i = 0; i < logs.length; i++) {
+            bytes32 topic0 = logs[i].topics[0];
+            if (topic0 == TERMINAL_FREEZE_ACTION_MEMBERSHIP_UPDATED_TOPIC) {
+                _assertTerminalMembershipLog(
+                    logs[i], SCOPE, removedAction, address(this), false, 3, true, deadline, 1, 2
+                );
+                membershipCount++;
+                membershipIndex = i;
+            } else if (topic0 == GOVERNANCE_ACTION_CANCELLED_TOPIC) {
+                logs[i].topics[1].assertEq(removedAction, "cancelled lifecycle action");
+                lifecycleCount++;
+                lifecycleIndex = i;
+            }
+        }
+        membershipCount.assertEq(1, "one terminal cleanup membership event");
+        lifecycleCount.assertEq(1, "one cancellation lifecycle event");
+        (membershipIndex + 1 == lifecycleIndex)
+        .assertTrue("membership post-state event immediately precedes lifecycle event");
+
+        (bytes32[] memory ids,,) = executor.terminalFreezeActionPage(SCOPE, 0, 64);
+        ids.length.assertEq(2, "two memberships remain after middle removal");
+        ids[0].assertEq(firstAction, "first membership remains in place");
+        ids[1].assertEq(movedAction, "prior last membership swap-pops into removed index");
+    }
+
+    function testTerminalFreezePerScopeCapAndScheduleTimeElapsedCompaction() public {
+        _grantGlobalVetoGuardian();
+        (uint256 cap, uint256 nonRootCap, uint256 proposerCap) =
+            executor.terminalFreezeLiveActionCaps();
+        cap.assertEq(64, "pinned terminal live-set cap");
+        nonRootCap.assertEq(48, "pinned non-root reserve boundary");
+        proposerCap.assertEq(8, "pinned per-proposer cap");
+        uint64 deadline = uint64(block.timestamp) + 72 hours;
+        bytes32 firstAction;
+        for (uint256 i = 0; i < cap; i++) {
+            bytes32 actionId = _scheduleFreeze(SCOPE, deadline);
+            if (i == 0) firstAction = actionId;
+        }
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(cap, "scope filled to cap");
+
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(0xFEE1)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        calls[0].scopeHash = SCOPE;
+        executor.publishGovernanceCallData(callDatas);
+        (bytes32 actionScope, bytes32 actionOld, bytes32 actionNew) = _derivedBatchHashes(calls);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeLiveActionCapExceeded.selector, SCOPE, cap
+            )
+        );
+        executor.scheduleGovernanceBatch(
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            actionScope,
+            actionOld,
+            actionNew,
+            deadline,
+            deadline + 7 days,
+            REASON,
+            REASON_URI,
+            MANIFEST
+        );
+
+        vm.warp(deadline);
+        uint256 pendingBefore = executor.pendingScheduledActionCount();
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(0, "cap entries elapsed");
+        vm.expectEmit(true, true, true, true);
+        emit TerminalFreezeActionMembershipUpdated(
+            1, SCOPE, firstAction, address(this), false, 2, true, deadline, 0, cap - 1
+        );
+        bytes32 replacement = _schedulePublishedAs(
+            address(this),
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            deadline + 72 hours,
+            deadline + 72 hours + 7 days
+        );
+        executor.liveTerminalFreezeActionCount(SCOPE).assertEq(1, "schedule compacts then appends");
+        executor.pendingScheduledActionCount()
+            .assertEq(pendingBefore + 1, "elapsed actions remain pending after compaction");
+        uint256(uint8(executor.governanceAction(firstAction).status))
+            .assertEq(uint256(uint8(GovernanceActionStatus.SCHEDULED)), "elapsed index only pruned");
+        (bytes32 onlyAction,) = executor.liveTerminalFreezeActionAt(SCOPE, 0);
+        onlyAction.assertEq(replacement, "replacement is sole open membership");
+    }
+
+    function testScheduleTimeCompactionEmitsForEachAffectedScopeOnly() public {
+        _grantGlobalVetoGuardian();
+        bytes32 scopeA = keccak256("compaction-scope-a");
+        bytes32 scopeB = keccak256("compaction-scope-b");
+        uint64 earlyDeadline = uint64(block.timestamp) + 72 hours;
+        uint64 lateDeadline = uint64(block.timestamp) + 80 hours;
+        bytes32 earlyA = _scheduleFreeze(scopeA, earlyDeadline);
+        bytes32 lateB = _scheduleFreeze(scopeB, lateDeadline);
+        vm.warp(earlyDeadline);
+
+        GovernedTargetMock second = new GovernedTargetMock();
+        bytes[] memory callDatas = new bytes[](2);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (111));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (222));
+        GovernanceCall[] memory calls = new GovernanceCall[](2);
+        calls[0] = _governanceCall(address(target), callDatas[0], keccak256("compact-a"));
+        calls[0].scopeHash = scopeA;
+        calls[1] = _governanceCall(address(second), callDatas[1], keccak256("compact-b"));
+        calls[1].scopeHash = scopeB;
+        executor.publishGovernanceCallData(callDatas);
+        uint64 newDeadline = uint64(block.timestamp) + 72 hours;
+
+        vm.expectEmit(true, true, true, true);
+        emit TerminalFreezeActionMembershipUpdated(
+            1, scopeA, earlyA, address(this), false, 2, true, earlyDeadline, 0, 0
+        );
+        bytes32 replacement = _schedulePublishedAs(
+            address(this),
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            newDeadline,
+            newDeadline + 7 days
+        );
+
+        (bytes32[] memory ids,,) = executor.terminalFreezeActionPage(scopeA, 0, 64);
+        ids.length.assertEq(1, "scope A compacted then appended");
+        ids[0].assertEq(replacement, "scope A replacement membership");
+        (ids,,) = executor.terminalFreezeActionPage(scopeB, 0, 64);
+        ids.length.assertEq(2, "scope B retained then appended");
+        ids[0].assertEq(lateB, "scope B unelapsed membership retained");
+        ids[1].assertEq(replacement, "scope B replacement appended");
+        uint256(uint8(executor.governanceAction(earlyA).status))
+            .assertEq(
+                uint256(uint8(GovernanceActionStatus.SCHEDULED)), "compacted action unchanged"
+            );
+    }
+
+    function testNonRootTerminalFreezeProposerCannotConsumeRootReserve() public {
+        _grantGlobalVetoGuardian();
+        _setProposer(proposer, true);
+        (,, uint256 proposerCap) = executor.terminalFreezeLiveActionCaps();
+        uint64 deadline = uint64(block.timestamp) + 300 days;
+        for (uint256 i = 0; i < proposerCap; i++) {
+            _scheduleFreezeAs(proposer, SCOPE, deadline);
+        }
+
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(0xFEE1)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        calls[0].scopeHash = SCOPE;
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeProposerLiveActionCapExceeded.selector,
+                SCOPE,
+                proposer,
+                proposerCap
+            )
+        );
+        _schedulePublishedAs(
+            proposer,
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            deadline,
+            deadline + 7 days
+        );
+
+        bytes32 rootAction = _scheduleFreeze(SCOPE, deadline);
+        executor.liveTerminalFreezeActionCount(SCOPE)
+            .assertEq(proposerCap + 1, "root reserve remains schedulable");
+        vm.prank(guardian);
+        executor.vetoTerminalFreeze(rootAction, keccak256("root action veto"));
+        executor.liveTerminalFreezeActionCount(SCOPE)
+            .assertEq(proposerCap, "root membership prunes independently");
+    }
+
+    function testSharedNonRootCapPreservesExactlySixteenRootSlots() public {
+        _grantGlobalVetoGuardian();
+        (uint256 totalCap, uint256 nonRootCap, uint256 proposerCap) =
+            executor.terminalFreezeLiveActionCaps();
+        address[] memory proposers = new address[](7);
+        for (uint256 i = 0; i < proposers.length; i++) {
+            proposers[i] = address(uint160(0x9000 + i));
+            _setProposer(proposers[i], true);
+        }
+        uint64 deadline = uint64(block.timestamp) + 300 days;
+        for (uint256 i = 0; i < 6; i++) {
+            for (uint256 j = 0; j < proposerCap; j++) {
+                _scheduleFreezeAs(proposers[i], SCOPE, deadline);
+            }
+        }
+        (uint256 totalUsage, uint256 nonRootUsage,) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposers[6]);
+        totalUsage.assertEq(nonRootCap, "shared non-root capacity filled");
+        nonRootUsage.assertEq(nonRootCap, "non-root counter filled");
+
+        bytes memory callData = abi.encodeCall(GovernedTargetMock.setValue, (uint256(0xFEE1)));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        calls[0].scopeHash = SCOPE;
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeNonRootLiveActionCapExceeded.selector,
+                SCOPE,
+                nonRootCap
+            )
+        );
+        _schedulePublishedAs(
+            proposers[6],
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            deadline,
+            deadline + 7 days
+        );
+
+        uint256 rootReserve = totalCap - nonRootCap;
+        for (uint256 i = 0; i < rootReserve; i++) {
+            _scheduleFreeze(SCOPE, deadline);
+        }
+        (totalUsage, nonRootUsage,) = executor.terminalFreezeLiveActionUsage(SCOPE, proposers[6]);
+        totalUsage.assertEq(totalCap, "root consumes exactly reserved capacity");
+        nonRootUsage.assertEq(nonRootCap, "root does not consume non-root counter");
+
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeLiveActionCapExceeded.selector,
+                SCOPE,
+                totalCap
+            )
+        );
+        _schedulePublishedAs(
+            address(this),
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            deadline,
+            deadline + 7 days
+        );
+    }
+
+    function testNonRootTerminalFreezeQuotaCountersReopenOnEveryRemovalPath() public {
+        _grantGlobalVetoGuardian();
+        _setProposer(proposer, true);
+        (,, uint256 proposerCap) = executor.terminalFreezeLiveActionCaps();
+        uint64 deadline = uint64(block.timestamp) + 300 days;
+        bytes32[] memory actions = new bytes32[](proposerCap);
+        for (uint256 i = 0; i < proposerCap; i++) {
+            actions[i] = _scheduleFreezeAs(proposer, SCOPE, deadline);
+        }
+        (uint256 totalUsage, uint256 nonRootUsage, uint256 proposerUsage) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposer);
+        totalUsage.assertEq(proposerCap, "initial total quota usage");
+        nonRootUsage.assertEq(proposerCap, "initial non-root quota usage");
+        proposerUsage.assertEq(proposerCap, "initial proposer quota usage");
+
+        vm.prank(guardian);
+        executor.vetoTerminalFreeze(actions[0], keccak256("quota veto"));
+        (totalUsage, nonRootUsage, proposerUsage) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposer);
+        totalUsage.assertEq(proposerCap - 1, "veto reopens total slot");
+        nonRootUsage.assertEq(proposerCap - 1, "veto reopens shared slot");
+        proposerUsage.assertEq(proposerCap - 1, "veto reopens proposer slot");
+        _scheduleFreezeAs(proposer, SCOPE, deadline);
+
+        executor.cancelGovernanceAction(actions[1], keccak256("quota cancel"));
+        (totalUsage, nonRootUsage, proposerUsage) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposer);
+        totalUsage.assertEq(proposerCap - 1, "cancel reopens total slot");
+        nonRootUsage.assertEq(proposerCap - 1, "cancel reopens shared slot");
+        proposerUsage.assertEq(proposerCap - 1, "cancel reopens proposer slot");
+        _scheduleFreezeAs(proposer, SCOPE, deadline);
+
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) =
+            _singleCall(0, abi.encodeCall(GovernedTargetMock.setValue, (uint256(0xFEE1))));
+        calls[0].scopeHash = SCOPE;
+        vm.warp(deadline);
+        executor.executeGovernanceBatch(actions[2], calls, callDatas);
+        (totalUsage, nonRootUsage, proposerUsage) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposer);
+        totalUsage.assertEq(proposerCap - 1, "execute removes one raw membership");
+        nonRootUsage.assertEq(proposerCap - 1, "execute decrements shared quota");
+        proposerUsage.assertEq(proposerCap - 1, "execute decrements proposer quota");
+
+        executor.pruneElapsedTerminalFreezeActions(SCOPE)
+            .assertEq(proposerCap - 1, "permissionless prune removes remaining elapsed memberships");
+        (totalUsage, nonRootUsage, proposerUsage) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposer);
+        totalUsage.assertEq(0, "elapsed prune clears total usage");
+        nonRootUsage.assertEq(0, "elapsed prune clears shared usage");
+        proposerUsage.assertEq(0, "elapsed prune clears proposer usage");
+
+        uint64 expiryDeadline = uint64(block.timestamp) + 72 hours;
+        bytes32 expiringAction = _scheduleFreezeAs(proposer, SCOPE, expiryDeadline);
+        GovernanceAction memory expiring = executor.governanceAction(expiringAction);
+        vm.warp(uint256(expiring.expiresAfter) + 1);
+        executor.materializeExpiredAction(expiringAction);
+        (totalUsage, nonRootUsage, proposerUsage) =
+            executor.terminalFreezeLiveActionUsage(SCOPE, proposer);
+        totalUsage.assertEq(0, "expiry clears total usage");
+        nonRootUsage.assertEq(0, "expiry clears shared usage");
+        proposerUsage.assertEq(0, "expiry clears proposer usage");
+    }
+
+    function testTerminalFreezeBatchDeduplicatesRepeatedScopesAndCleansCounters() public {
+        _grantGlobalVetoGuardian();
+        _setProposer(proposer, true);
+        bytes32 scopeA = keccak256("terminal-dedup-a");
+        bytes32 scopeB = keccak256("terminal-dedup-b");
+        GovernedTargetMock second = new GovernedTargetMock();
+        bytes[] memory callDatas = new bytes[](3);
+        callDatas[0] = abi.encodeCall(GovernedTargetMock.setValue, (701));
+        callDatas[1] = abi.encodeCall(GovernedTargetMock.setValue, (702));
+        callDatas[2] = abi.encodeCall(GovernedTargetMock.setValue, (703));
+        GovernanceCall[] memory calls = new GovernanceCall[](3);
+        calls[0] = _governanceCall(address(target), callDatas[0], keccak256("terminal-dedup-a-1"));
+        calls[0].scopeHash = scopeA;
+        calls[1] = _governanceCall(address(second), callDatas[1], keccak256("terminal-dedup-a-2"));
+        calls[1].scopeHash = scopeA;
+        calls[2] = _governanceCall(address(second), callDatas[2], keccak256("terminal-dedup-b"));
+        calls[2].scopeHash = scopeB;
+        executor.publishGovernanceCallData(callDatas);
+        uint64 deadline = uint64(block.timestamp) + 300 days;
+        bytes32 actionId = _schedulePublishedAs(
+            proposer,
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            deadline,
+            deadline + 7 days
+        );
+
+        _assertTerminalUsage(scopeA, proposer, 1, 1, 1);
+        _assertTerminalUsage(scopeB, proposer, 1, 1, 1);
+        (bytes32[] memory ids,,) = executor.terminalFreezeActionPage(scopeA, 0, 64);
+        ids.length.assertEq(1, "duplicate scope indexed once");
+        ids[0].assertEq(actionId, "scope A action id");
+        (ids,,) = executor.terminalFreezeActionPage(scopeB, 0, 64);
+        ids.length.assertEq(1, "distinct scope indexed once");
+        ids[0].assertEq(actionId, "scope B action id");
+
+        executor.cancelGovernanceAction(actionId, keccak256("dedup cleanup"));
+        _assertTerminalUsage(scopeA, proposer, 0, 0, 0);
+        _assertTerminalUsage(scopeB, proposer, 0, 0, 0);
+    }
+
+    function testTerminalFreezeMixedRootAndProposerSwapPopPreservesCounters() public {
+        _grantGlobalVetoGuardian();
+        _setProposer(proposer, true);
+        bytes32 scope = keccak256("terminal-mixed-swap-pop");
+        uint64 deadline = uint64(block.timestamp) + 300 days;
+        bytes32 firstProposerAction = _scheduleFreezeAs(proposer, scope, deadline);
+        bytes32 rootAction = _scheduleFreeze(scope, deadline);
+        bytes32 secondProposerAction = _scheduleFreezeAs(proposer, scope, deadline);
+        _assertTerminalUsage(scope, proposer, 3, 2, 2);
+
+        executor.cancelGovernanceAction(rootAction, keccak256("remove middle root"));
+        _assertTerminalUsage(scope, proposer, 2, 2, 2);
+        (bytes32[] memory ids,,) = executor.terminalFreezeActionPage(scope, 0, 64);
+        ids.length.assertEq(2, "middle removal leaves two memberships");
+        ids[0].assertEq(firstProposerAction, "first proposer stays at zero");
+        ids[1].assertEq(secondProposerAction, "last proposer swaps into middle");
+
+        executor.cancelGovernanceAction(firstProposerAction, keccak256("remove first proposer"));
+        _assertTerminalUsage(scope, proposer, 1, 1, 1);
+        (ids,,) = executor.terminalFreezeActionPage(scope, 0, 64);
+        ids[0].assertEq(secondProposerAction, "moved proposer remains indexed");
+        executor.cancelGovernanceAction(secondProposerAction, keccak256("remove last proposer"));
+        _assertTerminalUsage(scope, proposer, 0, 0, 0);
+    }
+
+    function testLaterScopeQuotaFailureRollsBackEarlierScopeCompaction() public {
+        _grantGlobalVetoGuardian();
+        _setProposer(proposer, true);
+        bytes32 scopeA = keccak256("terminal-rollback-a");
+        bytes32 scopeB = keccak256("terminal-rollback-b");
+        uint64 elapsedDeadline = uint64(block.timestamp) + 72 hours;
+        bytes32 elapsedAction = _scheduleFreezeAs(proposer, scopeA, elapsedDeadline);
+        (,, uint256 proposerCap) = executor.terminalFreezeLiveActionCaps();
+        uint64 longDeadline = uint64(block.timestamp) + 300 days;
+        for (uint256 i = 0; i < proposerCap; i++) {
+            _scheduleFreezeAs(proposer, scopeB, longDeadline);
+        }
+        vm.warp(elapsedDeadline);
+        _assertTerminalUsage(scopeA, proposer, 1, 1, 1);
+        _assertTerminalUsage(scopeB, proposer, proposerCap, proposerCap, proposerCap);
+        uint256 pendingBefore = executor.pendingScheduledActionCount();
+        uint256 nonceBefore = executor.governanceNonce();
+
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) =
+            _twoScopeFreezeBatch(scopeA, scopeB);
+        executor.publishGovernanceCallData(callDatas);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGovernanceExecutor.TerminalFreezeProposerLiveActionCapExceeded.selector,
+                scopeB,
+                proposer,
+                proposerCap
+            )
+        );
+        _schedulePublishedAs(
+            proposer,
+            StreamGovernanceActionClasses.TERMINAL_FREEZE,
+            calls,
+            longDeadline,
+            longDeadline + 7 days
+        );
+
+        executor.pendingScheduledActionCount()
+            .assertEq(pendingBefore, "failed multi-scope schedule rolls back pending count");
+        executor.governanceNonce()
+            .assertEq(nonceBefore, "failed multi-scope schedule rolls back nonce");
+        _assertTerminalUsage(scopeA, proposer, 1, 1, 1);
+        _assertTerminalUsage(scopeB, proposer, proposerCap, proposerCap, proposerCap);
+        (bytes32[] memory ids,,) = executor.terminalFreezeActionPage(scopeA, 0, 64);
+        ids.length.assertEq(1, "earlier scope compaction rolled back");
+        ids[0].assertEq(elapsedAction, "elapsed membership remains raw-indexed after rollback");
+    }
+
+    function testTerminalFreezeRootCapacitySnapshotSurvivesRootRotation() public {
+        _grantGlobalVetoGuardian();
+        _setProposer(proposer, true);
+        bytes32 scope = keccak256("terminal-root-rotation-capacity");
+        uint64 deadline = uint64(block.timestamp) + 300 days;
+        bytes32 oldRootAction = _scheduleFreeze(scope, deadline);
+        bytes32 proposerAction = _scheduleFreezeAs(proposer, scope, deadline);
+        _assertTerminalUsage(scope, proposer, 2, 1, 1);
+
+        StreamGovernanceRootMock newRoot = new StreamGovernanceRootMock();
+        _rotateGovernanceRootForTest(newRoot);
+        bytes32 newRootAction = _scheduleFreezeAs(address(newRoot), scope, deadline);
+        _assertTerminalUsage(scope, proposer, 3, 1, 1);
+
+        vm.prank(address(newRoot));
+        executor.cancelGovernanceAction(oldRootAction, keccak256("old root queued action"));
+        _assertTerminalUsage(scope, proposer, 2, 1, 1);
+        vm.prank(address(newRoot));
+        executor.cancelGovernanceAction(newRootAction, keccak256("new root action"));
+        _assertTerminalUsage(scope, proposer, 1, 1, 1);
+        vm.prank(address(newRoot));
+        executor.cancelGovernanceAction(proposerAction, keccak256("proposer action"));
+        _assertTerminalUsage(scope, proposer, 0, 0, 0);
+    }
+
+    function _assertTerminalUsage(
+        bytes32 scope,
+        address actor,
+        uint256 expectedTotal,
+        uint256 expectedNonRoot,
+        uint256 expectedProposer
+    ) private view {
+        (uint256 total, uint256 nonRoot, uint256 proposerCount) =
+            executor.terminalFreezeLiveActionUsage(scope, actor);
+        total.assertEq(expectedTotal, "terminal total usage");
+        nonRoot.assertEq(expectedNonRoot, "terminal non-root usage");
+        proposerCount.assertEq(expectedProposer, "terminal proposer usage");
+    }
+
+    function _rotateGovernanceRootForTest(StreamGovernanceRootMock newRoot) private {
+        (address oldRoot, bytes32 oldCodeHash, uint64 oldRevision) = executor.governanceRootState();
+        bytes32 scopeHash = keccak256(
+            abi.encode(GOVERNANCE_ROOT_SCOPE_V1, uint256(block.chainid), address(executor))
+        );
+        bytes32 oldStateHash = keccak256(
+            abi.encode(
+                GOVERNANCE_ROOT_STATE_V1,
+                uint256(block.chainid),
+                address(executor),
+                oldRoot,
+                oldCodeHash,
+                oldRevision
+            )
+        );
+        bytes32 newStateHash = keccak256(
+            abi.encode(
+                GOVERNANCE_ROOT_STATE_V1,
+                uint256(block.chainid),
+                address(executor),
+                address(newRoot),
+                address(newRoot).codehash,
+                oldRevision + 1
+            )
+        );
+        _executeConfigCall(
+            StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+            abi.encodeCall(
+                StreamGovernanceExecutor.rotateGovernanceRoot,
+                (address(newRoot), address(newRoot).codehash)
+            ),
+            scopeHash,
+            oldStateHash,
+            newStateHash
+        );
     }
 
     function testLiveSetPrunedOnEveryTerminalTransition() public {
@@ -3167,14 +5141,30 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
 
     function testPerScopeVetoAuthorityAndGlobalFallback() public {
         address scopeGuardian = address(new StreamGovernanceRootMock());
-        // A unique per-scope holder takes precedence over the redundant global set.
+        // The scoped holder is additive to the redundant global set.
         _grantScopedRoleViaGovernance(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, SCOPE, scopeGuardian);
 
         uint64 notBefore = uint64(block.timestamp) + 72 hours;
         bytes32 actionId = _scheduleFreeze(SCOPE, notBefore);
 
         (address resolvedGuardian,) = executor.terminalFreezeVetoGuardian(SCOPE);
-        resolvedGuardian.assertEq(scopeGuardian, "per-scope guardian resolved");
+        resolvedGuardian.assertEq(
+            address(0), "additive scoped and global guardian set uses sentinel"
+        );
+        (
+            address guardianRegistry,
+            bytes32 scopedRole,
+            uint256 scopedHolderCount,
+            bytes32 globalRole,
+            uint256 globalHolderCount,
+            uint64 discoveredDeadline
+        ) = executor.terminalFreezeVetoGuardianSet(SCOPE);
+        guardianRegistry.assertEq(address(roleRegistry), "guardian registry discoverable");
+        scopedRole.assertEq(executor.terminalFreezeVetoRole(SCOPE), "scoped role discoverable");
+        scopedHolderCount.assertEq(1, "one scoped holder discoverable");
+        globalRole.assertEq(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, "global role discoverable");
+        globalHolderCount.assertEq(2, "redundant global holders discoverable");
+        uint256(discoveredDeadline).assertEq(uint256(notBefore), "set view includes deadline");
 
         // A stranger cannot veto.
         vm.expectRevert(

@@ -23,14 +23,34 @@ library StreamGovernanceBootstrap {
     uint256 private constant MODULE_RECORD_MIN_RETURN_BYTES = 448;
     uint256 private constant MODULE_RECORD_MAX_RETURN_BYTES = 2_496;
     uint256 private constant MAX_MODULE_MANIFEST_URI_BYTES = 2_048;
+    uint256 private constant MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 64;
+    uint256 private constant MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 48;
+    uint256 private constant MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER = 8;
     uint64 private constant EMERGENCY_OPEN_WINDOW_FLOOR = 4 hours;
+    uint16 private constant SCHEMA_VERSION = 1;
 
     error InvalidSystemManifestBootstrap();
     error InvalidManifestTail();
 
     event GovernanceCallDataPublished(
-        bytes32 indexed callDataKey, address pointer, address publisher
+        uint16 schemaVersion, bytes32 indexed callDataKey, address pointer, address publisher
     );
+    event TerminalFreezeActionMembershipUpdated(
+        uint16 schemaVersion,
+        bytes32 indexed scopeHash,
+        bytes32 indexed actionId,
+        address indexed proposer,
+        bool present,
+        uint8 mutationCause,
+        bool usesRootCapacity,
+        uint64 vetoDeadline,
+        uint256 rawIndex,
+        uint256 remainingCount
+    );
+
+    uint8 private constant TERMINAL_MEMBERSHIP_APPEND = 1;
+    uint8 private constant TERMINAL_MEMBERSHIP_ELAPSED_COMPACTION = 2;
+    uint8 private constant TERMINAL_MEMBERSHIP_ACTION_TERMINAL_CLEANUP = 3;
 
     struct PolicyState {
         mapping(bytes32 => address) publishedCallData;
@@ -49,6 +69,10 @@ library StreamGovernanceBootstrap {
         mapping(bytes32 => mapping(bytes32 => uint256)) terminalLiveIndex;
         mapping(bytes32 => bytes32[]) terminalActionScopes;
         mapping(bytes32 => uint64) terminalActionDeadline;
+        mapping(bytes32 => address) terminalActionProposer;
+        mapping(bytes32 => bool) terminalActionUsesRootCapacity;
+        mapping(bytes32 => uint256) terminalNonRootLiveCount;
+        mapping(bytes32 => mapping(address => uint256)) terminalProposerLiveCount;
     }
 
     struct ActionIdentity {
@@ -180,7 +204,7 @@ library StreamGovernanceBootstrap {
             revert IStreamGovernanceExecutor.NonCanonicalCallDataPublication();
         }
         state.publishedCallData[callDataKey] = pointer;
-        emit GovernanceCallDataPublished(callDataKey, pointer, msg.sender);
+        emit GovernanceCallDataPublished(SCHEMA_VERSION, callDataKey, pointer, msg.sender);
     }
 
     function requirePublishedCallData(PolicyState storage state, GovernanceCall[] memory calls)
@@ -348,7 +372,10 @@ library StreamGovernanceBootstrap {
                 _validateModuleStatusDirection(state, actionClass, call_, callData);
             bool roleManagerClassified =
                 _validateRoleManagerDirection(roleRegistry, actionClass, call_, callData);
-            bool directionClassified = moduleStatusClassified || roleManagerClassified;
+            bool executorConfigClassified =
+                _validateExecutorConfigDirection(actionClass, call_, callData, calls.length, i);
+            bool directionClassified =
+                moduleStatusClassified || roleManagerClassified || executorConfigClassified;
             bool deferredManifestTail =
                 call_.target == manifestTailTarget && call_.selector == MANIFEST_PUBLISH_SELECTOR;
             if (immediate) {
@@ -449,6 +476,114 @@ library StreamGovernanceBootstrap {
             );
         }
         return true;
+    }
+
+    function _validateExecutorConfigDirection(
+        uint8 actionClass,
+        GovernanceCall memory call_,
+        bytes memory callData,
+        uint256 batchLength,
+        uint256 callIndex
+    ) private view returns (bool classified) {
+        if (call_.target != address(this)) return false;
+
+        bytes4 selector = call_.selector;
+        if (selector == IStreamGovernanceExecutor.rotateGovernanceRoot.selector) {
+            uint256 newRootWord;
+            bytes32 expectedCodeHash;
+            if (call_.value != 0 || callData.length != 68) {
+                revert IStreamGovernanceExecutor.InvalidExecutorConfigCall(call_.target, selector);
+            }
+            assembly ("memory-safe") {
+                newRootWord := mload(add(callData, 0x24))
+                expectedCodeHash := mload(add(callData, 0x44))
+            }
+            if (
+                newRootWord == 0 || newRootWord > type(uint160).max
+                    || expectedCodeHash == bytes32(0)
+            ) {
+                revert IStreamGovernanceExecutor.InvalidExecutorConfigCall(call_.target, selector);
+            }
+            if (actionClass != StreamGovernanceActionClasses.POINTER_REPLACEMENT) {
+                revert IStreamGovernanceExecutor.ExecutorControlActionClassMismatch(
+                    call_.target,
+                    selector,
+                    StreamGovernanceActionClasses.POINTER_REPLACEMENT,
+                    actionClass
+                );
+            }
+            _requireIsolatedExecutorControl(batchLength, callIndex);
+            return true;
+        }
+
+        bool enabledMeansLoosening;
+        uint256 expectedLength;
+        uint256 enabledWord;
+        uint256 keyWord;
+        if (
+            selector == IStreamGovernanceExecutor.registerProposer.selector
+                || selector == IStreamGovernanceExecutor.setApprovedNativeReceiver.selector
+        ) {
+            enabledMeansLoosening = true;
+            expectedLength = 68;
+        } else if (selector == IStreamGovernanceExecutor.registerCanceller.selector) {
+            enabledMeansLoosening = false;
+            expectedLength = 68;
+        } else if (selector == IStreamGovernanceExecutor.setTighteningCall.selector) {
+            enabledMeansLoosening = true;
+            expectedLength = 100;
+        } else if (selector == IStreamGovernanceExecutor.registerFreezeSelector.selector) {
+            enabledMeansLoosening = false;
+            expectedLength = 100;
+        } else {
+            return false;
+        }
+
+        if (call_.value != 0 || callData.length != expectedLength) {
+            revert IStreamGovernanceExecutor.InvalidExecutorConfigCall(call_.target, selector);
+        }
+        assembly ("memory-safe") {
+            keyWord := mload(add(callData, 0x24))
+            enabledWord := mload(add(callData, expectedLength))
+        }
+        if (keyWord == 0 || keyWord > type(uint160).max || enabledWord > 1) {
+            revert IStreamGovernanceExecutor.InvalidExecutorConfigCall(call_.target, selector);
+        }
+        if (expectedLength == 100) {
+            uint256 selectorWord;
+            assembly ("memory-safe") {
+                selectorWord := mload(add(callData, 0x44))
+            }
+            if (selectorWord == 0 || selectorWord & type(uint224).max != 0) {
+                revert IStreamGovernanceExecutor.InvalidExecutorConfigCall(call_.target, selector);
+            }
+            if (
+                (selector == IStreamGovernanceExecutor.setTighteningCall.selector
+                        || selector == IStreamGovernanceExecutor.registerFreezeSelector.selector)
+                    && address(uint160(keyWord)) == address(this)
+            ) {
+                revert IStreamGovernanceExecutor.InvalidExecutorConfigCall(call_.target, selector);
+            }
+        }
+
+        bool enabled = enabledWord == 1;
+        bool loosening = enabled == enabledMeansLoosening;
+        uint8 expectedClass = loosening
+            ? StreamGovernanceActionClasses.DELAYED_LOOSENING
+            : StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING;
+        if (actionClass != expectedClass) {
+            revert IStreamGovernanceExecutor.ExecutorConfigActionClassMismatch(
+                call_.target, selector, enabled, expectedClass, actionClass
+            );
+        }
+        _requireIsolatedExecutorControl(batchLength, callIndex);
+        return true;
+    }
+
+    function _requireIsolatedExecutorControl(uint256 batchLength, uint256 callIndex) private pure {
+        if (batchLength != 1 || callIndex != 0) {
+            revert IStreamGovernanceExecutor.GovernanceSelfCallContextRequired();
+        }
     }
 
     function _validateModuleStatusDirection(
@@ -624,16 +759,60 @@ library StreamGovernanceBootstrap {
         PolicyState storage state,
         bytes32 actionId,
         uint64 vetoDeadline,
-        GovernanceCall[] memory calls
+        GovernanceCall[] memory calls,
+        address proposer,
+        bool usesRootCapacity
     ) public {
         state.terminalActionDeadline[actionId] = vetoDeadline;
+        state.terminalActionProposer[actionId] = proposer;
+        state.terminalActionUsesRootCapacity[actionId] = usesRootCapacity;
         for (uint256 i = 0; i < calls.length; i++) {
             bytes32 scopeHash = calls[i].scopeHash;
             if (_scopeSeenBefore(calls, i, scopeHash)) continue;
             state.terminalActionScopes[actionId].push(scopeHash);
             bytes32[] storage live = state.terminalLiveActions[scopeHash];
+            pruneElapsedTerminalFreezeActions(state, scopeHash);
+            if (live.length >= MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE) {
+                revert IStreamGovernanceExecutor.TerminalFreezeLiveActionCapExceeded(
+                    scopeHash, MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE
+                );
+            }
+            if (!usesRootCapacity) {
+                if (
+                    state.terminalNonRootLiveCount[scopeHash]
+                        >= MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE
+                ) {
+                    revert IStreamGovernanceExecutor.TerminalFreezeNonRootLiveActionCapExceeded(
+                        scopeHash, MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE
+                    );
+                }
+                if (
+                    state.terminalProposerLiveCount[scopeHash][proposer]
+                        >= MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER
+                ) {
+                    revert IStreamGovernanceExecutor.TerminalFreezeProposerLiveActionCapExceeded(
+                        scopeHash, proposer, MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER
+                    );
+                }
+            }
             live.push(actionId);
             state.terminalLiveIndex[scopeHash][actionId] = live.length;
+            if (!usesRootCapacity) {
+                state.terminalNonRootLiveCount[scopeHash] += 1;
+                state.terminalProposerLiveCount[scopeHash][proposer] += 1;
+            }
+            emit TerminalFreezeActionMembershipUpdated(
+                SCHEMA_VERSION,
+                scopeHash,
+                actionId,
+                proposer,
+                true,
+                TERMINAL_MEMBERSHIP_APPEND,
+                usesRootCapacity,
+                vetoDeadline,
+                live.length - 1,
+                live.length
+            );
         }
     }
 
@@ -659,19 +838,59 @@ library StreamGovernanceBootstrap {
             bytes32 scopeHash = scopes[i];
             uint256 indexPlusOne = state.terminalLiveIndex[scopeHash][actionId];
             if (indexPlusOne == 0) continue;
-            bytes32[] storage live = state.terminalLiveActions[scopeHash];
-            uint256 index = indexPlusOne - 1;
-            uint256 lastIndex = live.length - 1;
-            if (index != lastIndex) {
-                bytes32 moved = live[lastIndex];
-                live[index] = moved;
-                state.terminalLiveIndex[scopeHash][moved] = indexPlusOne;
-            }
-            live.pop();
-            delete state.terminalLiveIndex[scopeHash][actionId];
+            _removeTerminalFreezeMembership(
+                state,
+                scopeHash,
+                actionId,
+                indexPlusOne,
+                TERMINAL_MEMBERSHIP_ACTION_TERMINAL_CLEANUP
+            );
         }
         delete state.terminalActionScopes[actionId];
         delete state.terminalActionDeadline[actionId];
+        delete state.terminalActionProposer[actionId];
+        delete state.terminalActionUsesRootCapacity[actionId];
+    }
+
+    function pruneElapsedTerminalFreezeActions(PolicyState storage state, bytes32 scopeHash)
+        public
+        returns (uint256 prunedCount)
+    {
+        prunedCount = _pruneElapsedTerminalFreezeActions(state, scopeHash);
+    }
+
+    function terminalFreezeActionPage(
+        PolicyState storage state,
+        bytes32 scopeHash,
+        uint256 cursor,
+        uint256 limit
+    )
+        public
+        view
+        returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)
+    {
+        if (limit > MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE) {
+            revert IStreamGovernanceExecutor.TerminalFreezePageLimitExceeded(
+                limit, MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE
+            );
+        }
+        bytes32[] storage live = state.terminalLiveActions[scopeHash];
+        uint256 membershipCount = live.length;
+        if (cursor > membershipCount) {
+            revert IStreamGovernanceExecutor.TerminalFreezePageCursorOutOfBounds(
+                scopeHash, cursor, membershipCount
+            );
+        }
+        uint256 pageLength = membershipCount - cursor;
+        if (pageLength > limit) pageLength = limit;
+        actionIds = new bytes32[](pageLength);
+        vetoDeadlines = new uint64[](pageLength);
+        for (uint256 i = 0; i < pageLength; i++) {
+            bytes32 actionId = live[cursor + i];
+            actionIds[i] = actionId;
+            vetoDeadlines[i] = state.terminalActionDeadline[actionId];
+        }
+        nextCursor = cursor + pageLength;
     }
 
     function earliestTerminalFreezeDeadline(PolicyState storage state, bytes32 scopeHash)
@@ -737,6 +956,67 @@ library StreamGovernanceBootstrap {
             if (calls[i].scopeHash == scopeHash) return true;
         }
         return false;
+    }
+
+    function _pruneElapsedTerminalFreezeActions(PolicyState storage state, bytes32 scopeHash)
+        private
+        returns (uint256 prunedCount)
+    {
+        bytes32[] storage live = state.terminalLiveActions[scopeHash];
+        // The set is capped at 64, making this full compaction bounded. Inspect
+        // the swap-in element at the same index after every removal.
+        uint256 i = 0;
+        while (i < live.length) {
+            bytes32 actionId = live[i];
+            // The veto window is closed at the exact deadline.
+            // forge-lint: disable-next-line(block-timestamp)
+            if (block.timestamp < state.terminalActionDeadline[actionId]) {
+                i++;
+                continue;
+            }
+            _removeTerminalFreezeMembership(
+                state, scopeHash, actionId, i + 1, TERMINAL_MEMBERSHIP_ELAPSED_COMPACTION
+            );
+            prunedCount++;
+        }
+    }
+
+    function _removeTerminalFreezeMembership(
+        PolicyState storage state,
+        bytes32 scopeHash,
+        bytes32 actionId,
+        uint256 indexPlusOne,
+        uint8 mutationCause
+    ) private {
+        bytes32[] storage live = state.terminalLiveActions[scopeHash];
+        uint256 index = indexPlusOne - 1;
+        uint256 lastIndex = live.length - 1;
+        address proposer = state.terminalActionProposer[actionId];
+        bool usesRootCapacity = state.terminalActionUsesRootCapacity[actionId];
+        uint64 vetoDeadline = state.terminalActionDeadline[actionId];
+        if (index != lastIndex) {
+            bytes32 moved = live[lastIndex];
+            live[index] = moved;
+            state.terminalLiveIndex[scopeHash][moved] = indexPlusOne;
+        }
+        live.pop();
+        delete state.terminalLiveIndex[scopeHash][actionId];
+        if (!usesRootCapacity) {
+            state.terminalNonRootLiveCount[scopeHash] -= 1;
+            state.terminalProposerLiveCount[scopeHash][proposer] -= 1;
+        }
+        emit TerminalFreezeActionMembershipUpdated(
+            SCHEMA_VERSION,
+            scopeHash,
+            actionId,
+            proposer,
+            false,
+            mutationCause,
+            usesRootCapacity,
+            vetoDeadline,
+            index,
+            live.length
+        );
     }
 
     function registerEmergencyEligibility(

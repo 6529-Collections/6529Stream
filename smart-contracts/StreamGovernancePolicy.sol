@@ -12,6 +12,7 @@ import "./StreamRoles.sol";
 ///         those of the Executor while the validation bytecode stays outside
 ///         its EIP-170 envelope.
 library StreamGovernancePolicy {
+    uint16 private constant SCHEMA_VERSION = 1;
     bytes32 private constant TERMINAL_GUARDIAN_CONFIG_V1 =
         keccak256("6529STREAM_TERMINAL_GUARDIAN_CONFIG_V1");
     bytes32 private constant TERMINAL_GUARDIAN_SCOPE_V1 =
@@ -47,6 +48,7 @@ library StreamGovernancePolicy {
         mapping(address => uint64) nativeReceiverRevisions;
         mapping(bytes32 => uint64) tighteningCallRevisions;
         mapping(bytes32 => uint64) freezeSelectorRevisions;
+        mapping(bytes32 => uint64) actionProposerRevisions;
     }
 
     struct ExecutionContext {
@@ -61,15 +63,28 @@ library StreamGovernancePolicy {
     }
 
     event GovernanceProposerUpdated(
-        address indexed account, bool enabled, uint64 revision, bytes32 indexed actionId
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        uint64 revision,
+        bytes32 indexed actionId
     );
     event GovernanceCancellerUpdated(
-        address indexed account, bool enabled, uint64 revision, bytes32 indexed actionId
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        uint64 revision,
+        bytes32 indexed actionId
     );
     event ApprovedNativeReceiverUpdated(
-        address indexed receiver, bool approved, uint64 revision, bytes32 indexed actionId
+        uint16 schemaVersion,
+        address indexed receiver,
+        bool approved,
+        uint64 revision,
+        bytes32 indexed actionId
     );
     event TighteningCallUpdated(
+        uint16 schemaVersion,
         address indexed target,
         bytes4 indexed selector,
         bool tightening,
@@ -78,6 +93,7 @@ library StreamGovernancePolicy {
         bytes32 indexed actionId
     );
     event FreezeSelectorUpdated(
+        uint16 schemaVersion,
         address indexed target,
         bytes4 indexed selector,
         bool freeze,
@@ -86,32 +102,31 @@ library StreamGovernancePolicy {
         bytes32 indexed actionId
     );
 
-    function seedExecutorClassifiers(
-        StreamGovernanceBootstrap.PolicyState storage policy,
+    function snapshotActionProposerRevision(
         AdminState storage admin,
-        bytes4 proposerSelector,
-        bytes4 cancellerSelector,
-        bytes4 receiverSelector,
-        bytes4 tighteningSelector,
-        bytes4 freezeSelector
-    ) public {
-        bytes32 executorCodeHash = address(this).codehash;
-        _seedClassifier(policy, admin, proposerSelector, executorCodeHash);
-        _seedClassifier(policy, admin, cancellerSelector, executorCodeHash);
-        _seedClassifier(policy, admin, receiverSelector, executorCodeHash);
-        _seedClassifier(policy, admin, tighteningSelector, executorCodeHash);
-        _seedClassifier(policy, admin, freezeSelector, executorCodeHash);
+        bytes32 actionId,
+        address proposer,
+        bool privilegedProposer
+    ) internal {
+        if (!privilegedProposer) {
+            admin.actionProposerRevisions[actionId] = admin.proposerRevisions[proposer];
+        }
     }
 
-    function _seedClassifier(
-        StreamGovernanceBootstrap.PolicyState storage policy,
+    function requireActionProposerRevision(
         AdminState storage admin,
-        bytes4 selector,
-        bytes32 executorCodeHash
-    ) private {
-        policy.tighteningCalls[address(this)][selector] = true;
-        policy.tighteningCallCodeHashes[address(this)][selector] = executorCodeHash;
-        admin.tighteningCallRevisions[keccak256(abi.encode(address(this), selector))] = 1;
+        bytes32 actionId,
+        address proposer
+    ) internal view {
+        uint64 expected = admin.actionProposerRevisions[actionId];
+        if (expected == 0) return;
+        uint64 actual = admin.proposerRevisions[proposer];
+        bool enabled = admin.proposers[proposer];
+        if (!enabled || expected != actual) {
+            revert IStreamGovernanceExecutor.GovernanceProposerAuthorizationDrift(
+                actionId, proposer, expected, actual, enabled
+            );
+        }
     }
 
     function updateProposer(
@@ -149,7 +164,7 @@ library StreamGovernancePolicy {
         _requireTransition(ctx, scopeHash, oldHash, newHash);
         admin.proposers[account] = enabled;
         admin.proposerRevisions[account] = revision;
-        emit GovernanceProposerUpdated(account, enabled, revision, ctx.actionId);
+        emit GovernanceProposerUpdated(SCHEMA_VERSION, account, enabled, revision, ctx.actionId);
     }
 
     function updateCanceller(
@@ -181,7 +196,7 @@ library StreamGovernancePolicy {
         _requireTransition(ctx, scopeHash, oldHash, newHash);
         admin.cancellers[account] = enabled;
         admin.cancellerRevisions[account] = revision;
-        emit GovernanceCancellerUpdated(account, enabled, revision, ctx.actionId);
+        emit GovernanceCancellerUpdated(SCHEMA_VERSION, account, enabled, revision, ctx.actionId);
     }
 
     function updateNativeReceiver(
@@ -214,7 +229,9 @@ library StreamGovernancePolicy {
         _requireTransition(ctx, scopeHash, oldHash, newHash);
         policy.approvedNativeReceivers[receiver] = approved;
         admin.nativeReceiverRevisions[receiver] = revision;
-        emit ApprovedNativeReceiverUpdated(receiver, approved, revision, ctx.actionId);
+        emit ApprovedNativeReceiverUpdated(
+            SCHEMA_VERSION, receiver, approved, revision, ctx.actionId
+        );
     }
 
     function updateTighteningCall(
@@ -234,6 +251,9 @@ library StreamGovernancePolicy {
         if (target == address(0)) revert IStreamGovernanceExecutor.ZeroTighteningTarget();
         if (selector == bytes4(0)) {
             revert IStreamGovernanceExecutor.ZeroTighteningSelector();
+        }
+        if (target == address(this)) {
+            revert IStreamGovernanceExecutor.TighteningCallSelfTargetForbidden(selector);
         }
         bool oldEnabled = policy.tighteningCalls[target][selector];
         bytes32 oldCodeHash = policy.tighteningCallCodeHashes[target][selector];
@@ -260,7 +280,7 @@ library StreamGovernancePolicy {
         policy.tighteningCallCodeHashes[target][selector] = newCodeHash;
         admin.tighteningCallRevisions[key] = revision;
         emit TighteningCallUpdated(
-            target, selector, tightening, newCodeHash, revision, ctx.actionId
+            SCHEMA_VERSION, target, selector, tightening, newCodeHash, revision, ctx.actionId
         );
     }
 
@@ -323,7 +343,9 @@ library StreamGovernancePolicy {
         policy.freezeSelectors[target][selector] = freeze;
         policy.freezeSelectorCodeHashes[target][selector] = newCodeHash;
         admin.freezeSelectorRevisions[key] = revision;
-        emit FreezeSelectorUpdated(target, selector, freeze, newCodeHash, revision, ctx.actionId);
+        emit FreezeSelectorUpdated(
+            SCHEMA_VERSION, target, selector, freeze, newCodeHash, revision, ctx.actionId
+        );
     }
 
     function _enabledCodeHash(address target, bool enabled) private view returns (bytes32) {

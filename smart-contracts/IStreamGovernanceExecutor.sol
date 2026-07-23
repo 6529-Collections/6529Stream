@@ -183,6 +183,30 @@ interface IStreamGovernanceExecutor {
     error RoleManagerConfigActionClassMismatch(
         address target, address account, bool enabled, uint8 expectedClass, uint8 actualClass
     );
+    /// @notice Reverts when an Executor self-configuration call is not the
+    ///         exact canonical ABI shape required for schedule-time direction proof.
+    error InvalidExecutorConfigCall(address target, bytes4 selector);
+    /// @notice Reverts when a direction-sensitive Executor self-configuration
+    ///         call is scheduled under the wrong action class.
+    error ExecutorConfigActionClassMismatch(
+        address target, bytes4 selector, bool enabled, uint8 expectedClass, uint8 actualClass
+    );
+    /// @notice Reverts when a fixed-class Executor control-plane call is
+    ///         scheduled under a different action class.
+    error ExecutorControlActionClassMismatch(
+        address target, bytes4 selector, uint8 expectedClass, uint8 actualClass
+    );
+    /// @notice Reverts when a control-plane action was scheduled under an
+    ///         earlier governance-root revision, including an address ABA.
+    error GovernanceRootRevisionMismatch(bytes32 actionId, uint64 expected, uint64 actual);
+    /// @notice Reverts when a registered proposer's queued action survives a
+    ///         disable/re-enable or any other proposer-revision change.
+    error GovernanceProposerAuthorizationDrift(
+        bytes32 actionId, address proposer, uint64 expected, uint64 actual, bool enabled
+    );
+    /// @notice Reverts when the Executor's own hard-coded direction classifier
+    ///         is targeted by the mutable tightening-call registry.
+    error TighteningCallSelfTargetForbidden(bytes4 selector);
     /// @notice Reverts before narrowing or adding to a timestamp that cannot
     ///         fit the Governance V2 uint64 time domain.
     error GovernanceTimestampOverflow(uint256 timestamp);
@@ -215,6 +239,11 @@ interface IStreamGovernanceExecutor {
     error NativeReceiverNotApproved(address target);
     /// @notice Reverts when a batch call fails without revert data.
     error GovernanceCallFailed(bytes32 actionId, uint256 callIndex);
+    /// @notice Reverts without copying a governed target's unbounded failure
+    ///         payload when it exceeds the Executor's pinned bubbling cap.
+    error GovernanceCallReturndataTooLarge(
+        bytes32 actionId, uint256 callIndex, uint256 returnDataBytes, uint256 maxReturnDataBytes
+    );
     /// @notice Reverts when execution leaves surplus value in the executor.
     error BatchValueSurplus(uint256 surplus);
     /// @notice Reverts when the veto caller does not hold the per-scope or
@@ -235,6 +264,25 @@ interface IStreamGovernanceExecutor {
     error NoTerminalFreezeVetoGuardianConfigured(bytes32 scopeHash);
     /// @notice Reverts on a live-terminal-freeze enumeration index out of bounds.
     error LiveTerminalFreezeIndexOutOfBounds(bytes32 scopeHash, uint256 index);
+    /// @notice Reverts when one scope already has the maximum number of
+    ///         simultaneously open terminal-freeze veto memberships.
+    error TerminalFreezeLiveActionCapExceeded(bytes32 scopeHash, uint256 cap);
+    /// @notice Reverts when non-root proposers have consumed the shared
+    ///         per-scope capacity reserved below the total live-action cap.
+    error TerminalFreezeNonRootLiveActionCapExceeded(bytes32 scopeHash, uint256 cap);
+    /// @notice Reverts when one non-root proposer reaches its per-scope live
+    ///         terminal-freeze membership cap.
+    error TerminalFreezeProposerLiveActionCapExceeded(
+        bytes32 scopeHash, address proposer, uint256 cap
+    );
+    /// @notice Reverts when a raw terminal-freeze page cursor exceeds the
+    ///         current bounded membership length.
+    error TerminalFreezePageCursorOutOfBounds(
+        bytes32 scopeHash, uint256 cursor, uint256 membershipCount
+    );
+    /// @notice Reverts when a raw terminal-freeze page requests more than the
+    ///         protocol-pinned bounded page size.
+    error TerminalFreezePageLimitExceeded(uint256 limit, uint256 maxLimit);
     /// @notice Reverts when caller-supplied aggregate transition hashes are not derived from calls.
     error BatchScopeHashMismatch(bytes32 expected, bytes32 supplied);
     error BatchOldValueHashMismatch(bytes32 expected, bytes32 supplied);
@@ -347,6 +395,22 @@ interface IStreamGovernanceExecutor {
         bytes32 scopeHash,
         bytes32 reasonHash
     );
+    /// @notice Emitted after every raw terminal-freeze membership append or removal.
+    /// @dev `mutationCause` is 1 for append, 2 for elapsed compaction, and 3 for
+    ///      action-terminal cleanup. `rawIndex` is zero-based and `remainingCount`
+    ///      is the post-mutation raw membership count for `scopeHash`.
+    event TerminalFreezeActionMembershipUpdated(
+        uint16 schemaVersion,
+        bytes32 indexed scopeHash,
+        bytes32 indexed actionId,
+        address indexed proposer,
+        bool present,
+        uint8 mutationCause,
+        bool usesRootCapacity,
+        uint64 vetoDeadline,
+        uint256 rawIndex,
+        uint256 remainingCount
+    );
 
     /// @notice Emitted when a virtual expiry is materialized into storage.
     event GovernanceActionExpired(
@@ -358,7 +422,7 @@ interface IStreamGovernanceExecutor {
 
     /// @notice Emitted when a calldata preimage set is published onchain.
     event GovernanceCallDataPublished(
-        bytes32 indexed callDataKey, address pointer, address publisher
+        uint16 schemaVersion, bytes32 indexed callDataKey, address pointer, address publisher
     );
 
     event SystemManifestTailTriggerRegistered(
@@ -411,6 +475,7 @@ interface IStreamGovernanceExecutor {
     );
 
     event GovernanceRootRotated(
+        uint16 schemaVersion,
         address indexed oldRoot,
         address indexed newRoot,
         bytes32 newRootCodeHash,
@@ -418,15 +483,24 @@ interface IStreamGovernanceExecutor {
         bytes32 indexed actionId
     );
     event TerminalFreezeGuardianConfigCommitted(
-        bytes32 indexed actionId, bytes32 indexed commitment
+        uint16 schemaVersion, bytes32 indexed actionId, bytes32 indexed commitment
     );
     event GovernanceProposerUpdated(
-        address indexed account, bool enabled, uint64 revision, bytes32 indexed actionId
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        uint64 revision,
+        bytes32 indexed actionId
     );
     event GovernanceCancellerUpdated(
-        address indexed account, bool enabled, uint64 revision, bytes32 indexed actionId
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        uint64 revision,
+        bytes32 indexed actionId
     );
     event TighteningCallUpdated(
+        uint16 schemaVersion,
         address indexed target,
         bytes4 indexed selector,
         bool tightening,
@@ -435,11 +509,16 @@ interface IStreamGovernanceExecutor {
         bytes32 indexed actionId
     );
     event ApprovedNativeReceiverUpdated(
-        address indexed receiver, bool approved, uint64 revision, bytes32 indexed actionId
+        uint16 schemaVersion,
+        address indexed receiver,
+        bool approved,
+        uint64 revision,
+        bytes32 indexed actionId
     );
     /// @notice Emitted when a known-irreversible freeze `(target, selector)` is
     ///         registered or cleared for the executor-side veto-floor backstop.
     event FreezeSelectorUpdated(
+        uint16 schemaVersion,
         address indexed target,
         bytes4 indexed selector,
         bool freeze,
@@ -575,15 +654,15 @@ interface IStreamGovernanceExecutor {
     /// @notice Materializes `EXPIRED` for a scheduled action past `expiresAfter`.
     function materializeExpiredAction(bytes32 actionId) external;
 
-    /// @notice Returns a target-transition scope's veto guardian and the veto
-    ///         deadline of its EARLIEST live terminal-freeze action.
+    /// @notice Returns a target-transition scope's sole effective veto guardian
+    ///         and the deadline of its EARLIEST live terminal-freeze action.
     /// @dev Terminal-freeze batches are indexed once under every distinct
     ///     `GovernanceCall.scopeHash`, never under the V2 action aggregate.
-    ///     The guardian is resolved per target scope
-    ///     (`keccak256(ROLE_TERMINAL_FREEZE_VETO, scopeHash)`) with fallback to
-    ///     the global `ROLE_TERMINAL_FREEZE_VETO` holders; a single per-scope or
-    ///     global holder resolves to that address, otherwise `guardian` is the
-    ///     zero-address sentinel. `vetoDeadline` is zero when the scope has no
+    ///     Per-scope and global holders are additive veto authorities. The
+    ///     address is nonzero only when their deduplicated union has exactly one
+    ///     member; otherwise `guardian` is the zero-address sentinel. Use
+    ///     `terminalFreezeVetoGuardianSet` plus RoleRegistry enumeration for the
+    ///     complete set. `vetoDeadline` is zero when the scope has no
     ///     live (scheduled, pre-`notBefore`) terminal-freeze action. Because a
     ///     scope may have several live actions, use
     ///     `liveTerminalFreezeActionCount`/`liveTerminalFreezeActionAt` to
@@ -593,6 +672,48 @@ interface IStreamGovernanceExecutor {
         external
         view
         returns (address guardian, uint64 vetoDeadline);
+
+    /// @notice Returns the exact RoleRegistry enumeration recipe for every
+    ///         additive veto guardian effective for a scope.
+    function terminalFreezeVetoGuardianSet(bytes32 scopeHash)
+        external
+        view
+        returns (
+            address roleRegistryAddress,
+            bytes32 scopedRole,
+            uint256 scopedHolderCount,
+            bytes32 globalRole,
+            uint256 globalHolderCount,
+            uint64 vetoDeadline
+        );
+
+    /// @notice Returns the total, shared non-root, and per-non-root-proposer
+    ///         caps for open terminal-freeze memberships in one scope.
+    function terminalFreezeLiveActionCaps()
+        external
+        pure
+        returns (uint256 totalCap, uint256 nonRootCap, uint256 perNonRootProposerCap);
+
+    /// @notice Returns raw capacity usage for one scope and non-root proposer.
+    /// @dev Usage includes elapsed memberships until bounded pruning runs.
+    function terminalFreezeLiveActionUsage(bytes32 scopeHash, address proposer)
+        external
+        view
+        returns (uint256 totalMemberships, uint256 nonRootMemberships, uint256 proposerMemberships);
+
+    /// @notice Permissionlessly removes memberships whose veto deadline has
+    ///         elapsed. This does not mutate action status or pending counts.
+    function pruneElapsedTerminalFreezeActions(bytes32 scopeHash)
+        external
+        returns (uint256 prunedCount);
+
+    /// @notice Returns one bounded page of raw veto-discovery memberships.
+    /// @dev Entries may be elapsed until permissionless pruning runs; compare
+    ///      each deadline with the current block timestamp.
+    function terminalFreezeActionPage(bytes32 scopeHash, uint256 cursor, uint256 limit)
+        external
+        view
+        returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor);
 
     /// @notice Returns the number of live (scheduled, pre-`notBefore`)
     ///         terminal-freeze actions affecting target scope `scopeHash`.

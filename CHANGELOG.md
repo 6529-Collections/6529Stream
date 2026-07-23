@@ -82,9 +82,23 @@ the release policy in `docs/release-policy.md`.
   live-registry reads forward EIP-150-clamped available gas with bounded
   returndata and canonical decoding instead of compiled-in call caps. Added
   focused malformed-return, high-gas, sequential-probe, role-history,
-  bootstrap-envelope, and holder-rehearsal coverage. Deployment-input
-  generators and candidate artifacts remain a separate follow-up release
-  evidence slice. This partial source/test slice does not complete
+  bootstrap-envelope, and holder-rehearsal coverage. Additional hardening
+  rejects cancellation after expiry; classifies Executor configuration from
+  exact canonical calldata and direction; forbids self-targeted mutable
+  classifier configuration; bounds governed-call failure returndata while
+  ignoring successful returndata; caps and reserves terminal-freeze discovery
+  capacity with schedule-time root classification; commits the exact terminal
+  guardian registry, role histories, holder ordering, and holder code hashes;
+  emits replay-complete per-scope membership mutations; and attributes every
+  governed RoleRegistry mutation to its exact action ID. Executor and
+  RoleRegistry control-plane actions bind the scheduling root revision, and
+  non-root proposer actions bind the proposer's configuration revision, so
+  address ABA cannot revive stale queues; a registered canceller also cannot
+  cancel its own delayed removal unless it is the root or action proposer.
+  Deployment-input
+  generators, a closed-world action-policy catalog, target-side cutover hooks,
+  and candidate artifacts remain separate follow-up release-evidence slices.
+  This partial source/test slice does not complete
   [GOV-V2-CUTOVER] or close #665. This is pre-audit work and not a
   production-readiness claim.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over

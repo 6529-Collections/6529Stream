@@ -1503,6 +1503,39 @@ contract StreamTimeParameterStoreTest is CharacterizationTestBase {
     // floor binding in both directions per change discipline 7)
     // ------------------------------------------------------------------
 
+    function testCadenceProbeReadRejectsMalformedResponsesWithoutMutation() public {
+        (StreamTimeParameterStore store, MockAdversarialProbeRun probe) = _adversarialCadenceStore();
+        probe.setRun(300, true, uint64(block.number));
+        _armValueChange(store, TIMEOUT_ID, 300, ACTION_ID);
+
+        _assertMalformedCadenceReadRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.Oversized
+        );
+        _assertMalformedCadenceReadRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.Short
+        );
+        _assertMalformedCadenceReadRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.NonCanonicalBool
+        );
+        _assertMalformedCadenceReadRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.NonCanonicalUint64
+        );
+        _assertMalformedCadenceReadRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.Reverting
+        );
+    }
+
+    function testCadenceProbeReadForwardsAvailableGas() public {
+        (StreamTimeParameterStore store, MockAdversarialProbeRun probe) = _adversarialCadenceStore();
+        probe.setRun(300, true, uint64(block.number));
+        probe.setMinimumReadGas(250_000);
+        _armValueChange(store, TIMEOUT_ID, 300, ACTION_ID);
+
+        vm.prank(address(_authority));
+        store.lowerTimeParameter(TIMEOUT_ID, 300);
+        _assertAdversarialTimeState(store, 300, 2);
+    }
+
     function testLowerCadenceProbeGates() public {
         // No recorded run at the proposed value.
         vm.prank(address(_authority));
@@ -2064,6 +2097,62 @@ contract StreamTimeParameterStoreTest is CharacterizationTestBase {
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
+
+    function _adversarialCadenceStore()
+        private
+        returns (StreamTimeParameterStore store, MockAdversarialProbeRun probe)
+    {
+        probe = new MockAdversarialProbeRun(TIMEOUT_ID, 3_600);
+        _moduleRegistry.registerTimeProbe(address(probe));
+
+        IStreamTimeParameterHost.TimeParameterConfig[] memory configs =
+            new IStreamTimeParameterHost.TimeParameterConfig[](1);
+        configs[0] = IStreamTimeParameterHost.TimeParameterConfig({
+            name: "ENTROPY_REQUEST_TIMEOUT_BLOCKS",
+            genesisValue: 600,
+            floorBlocks: 300,
+            wallClockFloorSeconds: 3_600,
+            cadenceProbe: address(probe),
+            probeMaxAgeBlocks: MAX_AGE,
+            expectedProbeModuleVersion: bytes32(uint256(1)),
+            expectedProbeRuntimeCodeHash: address(probe).codehash,
+            expectedProbeModuleManifestHash: keccak256(abi.encode("module", address(probe))),
+            expectedProbeDeploymentManifestHash: keccak256(abi.encode("deployment", address(probe)))
+        });
+        store = new StreamTimeParameterStore(
+            address(_authority), address(_core), address(_moduleRegistry), configs
+        );
+    }
+
+    function _assertMalformedCadenceReadRejected(
+        StreamTimeParameterStore store,
+        MockAdversarialProbeRun probe,
+        MockAdversarialProbeRun.ResponseMode responseMode
+    ) private {
+        probe.setResponseMode(responseMode);
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterProbeRecordMissing.selector,
+                TIMEOUT_ID,
+                uint256(300)
+            )
+        );
+        store.lowerTimeParameter(TIMEOUT_ID, 300);
+        _assertAdversarialTimeState(store, 600, 1);
+    }
+
+    function _assertAdversarialTimeState(
+        StreamTimeParameterStore store,
+        uint256 expectedValue,
+        uint64 expectedRevision
+    ) private view {
+        (uint256 value,,,,, uint64 revision) = store.timeParameterInfo(TIMEOUT_ID);
+        Assertions.assertEq(value, expectedValue, "malformed probe changed time value");
+        Assertions.assertEq(
+            uint256(revision), uint256(expectedRevision), "malformed probe changed time revision"
+        );
+    }
 
     function _armValueChange(
         StreamTimeParameterStore store,

@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../../smart-contracts/IStreamGasParameterProbe.sol";
 import "../../smart-contracts/IStreamGovernedParameterAuthority.sol";
 import "../../smart-contracts/IStreamModuleRegistry.sol";
+import "../../smart-contracts/IStreamTimeParameterProbe.sol";
 
 /// @notice Minimal governance-executor stand-in for the wiring seam; the real
 ///         executor is built by the governance wave.
@@ -383,33 +384,125 @@ contract MockGasProbe is IStreamGasParameterProbe {
     }
 }
 
-    /// @notice Reference consumer whose read cost is tunable, standing in for a
-    ///         guarded fail-safe read (royalty resolver / metadata router class).
-    contract GasBurningConsumer {
-        uint256 public burnGas;
-
-        function setBurnGas(uint256 newBurnGas) external {
-            burnGas = newBurnGas;
+    /// @notice Probe-record responder that can emit raw ABI edge cases while
+    ///         retaining stable runtime code and registration bindings.
+    contract MockAdversarialProbeRun is IStreamGasParameterProbe, IStreamTimeParameterProbe {
+        enum ResponseMode {
+            Canonical,
+            Oversized,
+            Short,
+            NonCanonicalBool,
+            NonCanonicalUint64,
+            Reverting
         }
 
-        function read() external view returns (uint256 acc) {
-            uint256 target = burnGas;
-            uint256 start = gasleft();
-            while (start - gasleft() < target) {
-                acc = uint256(keccak256(abi.encode(acc)));
+        bytes32 public immutable override probedParameterId;
+        uint64 private immutable _wallClockFloorSeconds;
+
+        ResponseMode private _responseMode;
+        uint256 private _minimumReadGas;
+        uint256 private _probedValue;
+        bytes32 private _probeRunId;
+        bool private _passed;
+        uint64 private _probedAtBlock;
+
+        constructor(bytes32 parameterId, uint64 wallClockFloorSeconds) {
+            probedParameterId = parameterId;
+            _wallClockFloorSeconds = wallClockFloorSeconds;
+        }
+
+        function setRun(uint256 probedValue, bool passed, uint64 probedAtBlock) external {
+            _probedValue = probedValue;
+            _passed = passed;
+            _probedAtBlock = probedAtBlock;
+            _probeRunId = keccak256(
+                abi.encode(address(this), probedValue, passed, probedAtBlock, block.number)
+            );
+        }
+
+        function setResponseMode(ResponseMode responseMode) external {
+            _responseMode = responseMode;
+        }
+
+        function setMinimumReadGas(uint256 minimumReadGas) external {
+            _minimumReadGas = minimumReadGas;
+        }
+
+        function pinnedWallClockFloorSeconds(bytes32 parameterId)
+            external
+            view
+            override
+            returns (uint64)
+        {
+            return parameterId == probedParameterId ? _wallClockFloorSeconds : 0;
+        }
+
+        function lastProbeRun(bytes32 parameterId, uint256 probedValue)
+            external
+            view
+            override(IStreamGasParameterProbe, IStreamTimeParameterProbe)
+            returns (bytes32 probeRunId, bool passed, uint64 probedAtBlock)
+        {
+            if (gasleft() < _minimumReadGas) revert("probe read gas-starved");
+
+            bool servesRun = parameterId == probedParameterId && probedValue == _probedValue;
+            probeRunId = servesRun ? _probeRunId : bytes32(0);
+            passed = servesRun && _passed;
+            probedAtBlock = servesRun ? _probedAtBlock : 0;
+
+            ResponseMode responseMode = _responseMode;
+            if (responseMode == ResponseMode.Reverting) revert("probe read unavailable");
+            if (responseMode == ResponseMode.Canonical) {
+                return (probeRunId, passed, probedAtBlock);
+            }
+
+            uint256 responseLength = responseMode == ResponseMode.Oversized
+                ? 128
+                : responseMode == ResponseMode.Short ? 64 : 96;
+            uint256 encodedPassed = responseMode == ResponseMode.NonCanonicalBool
+                ? 2
+                : passed ? 1 : 0;
+            uint256 encodedBlock = responseMode == ResponseMode.NonCanonicalUint64
+                ? uint256(type(uint64).max) + 1
+                : uint256(probedAtBlock);
+            bytes memory response = new bytes(responseLength);
+            assembly ("memory-safe") {
+                mstore(add(response, 0x20), probeRunId)
+                mstore(add(response, 0x40), encodedPassed)
+                if gt(responseLength, 0x40) { mstore(add(response, 0x60), encodedBlock) }
+                if eq(responseLength, 0x80) { mstore(add(response, 0x80), 1) }
+                return(add(response, 0x20), responseLength)
             }
         }
     }
 
-    /// @notice Wrapper that invokes a probe run under a caller-chosen gas budget, so
-    ///         tests can prove an under-funded run reverts without recording.
-    contract UnderfundedProbeCaller {
-        function tryRecord(address probe, uint256 probedValue, uint256 gasBudget)
-            external
-            returns (bool ok)
-        {
-            (ok,) = probe.call{ gas: gasBudget }(
-                abi.encodeWithSignature("recordProbeRun(uint256)", probedValue)
-            );
+        /// @notice Reference consumer whose read cost is tunable, standing in for a
+        ///         guarded fail-safe read (royalty resolver / metadata router class).
+        contract GasBurningConsumer {
+            uint256 public burnGas;
+
+            function setBurnGas(uint256 newBurnGas) external {
+                burnGas = newBurnGas;
+            }
+
+            function read() external view returns (uint256 acc) {
+                uint256 target = burnGas;
+                uint256 start = gasleft();
+                while (start - gasleft() < target) {
+                    acc = uint256(keccak256(abi.encode(acc)));
+                }
+            }
         }
-    }
+
+        /// @notice Wrapper that invokes a probe run under a caller-chosen gas budget, so
+        ///         tests can prove an under-funded run reverts without recording.
+        contract UnderfundedProbeCaller {
+            function tryRecord(address probe, uint256 probedValue, uint256 gasBudget)
+                external
+                returns (bool ok)
+            {
+                (ok,) = probe.call{ gas: gasBudget }(
+                    abi.encodeWithSignature("recordProbeRun(uint256)", probedValue)
+                );
+            }
+        }

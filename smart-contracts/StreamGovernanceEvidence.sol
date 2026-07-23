@@ -327,6 +327,9 @@ library StreamGovernanceEvidence {
         bytes32 inventoryChainHash = bytes32(0);
         uint256 leafIndex = 0;
         bool sawSystemManifestPointer = false;
+        // The non-live path never dereferences this context. The live path
+        // initializes every array below before the first use.
+        // slither-disable-next-line uninitialized-local
         StrictInventoryContext memory strict;
         if (requireLive) {
             strict.pointerTargets = new address[](pointerTypes.length);
@@ -415,8 +418,7 @@ library StreamGovernanceEvidence {
         inventoryChainHash =
             _appendLeaf(inventoryChainHash, leafIndex, 1, registry, bytes32(0), headerFactsHash);
         leafIndex += 1;
-        address[] memory seenModules;
-        if (requireLive) seenModules = new address[](moduleCount);
+        address[] memory seenModules = new address[](requireLive ? moduleCount : 0);
         for (uint256 moduleIndex = 0; moduleIndex < moduleCount; moduleIndex++) {
             (address module, bytes32 moduleFactsHash, bytes32 moduleRecordHash) =
                 _registryModuleFactsHash(registry, moduleIndex, requireLive);

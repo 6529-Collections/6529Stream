@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "../smart-contracts/IStreamGovernanceExecutor.sol";
 import "../smart-contracts/IStreamModule.sol";
 import "../smart-contracts/IStreamModuleRegistry.sol";
+import "../smart-contracts/IStreamRoleRegistry.sol";
 import "../smart-contracts/StreamGovernanceExecutor.sol";
 import "../smart-contracts/StreamModuleRegistry.sol";
 import "../smart-contracts/StreamRoles.sol";
@@ -52,6 +53,14 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         0x00ef486fa9550ecdc9851c2df1073c1c991e7d56e6a0d388357ba5f5a89c4263;
     bytes32 private constant PINNED_ROLE_MANAGER_CONFIG_MUTATION_V1 =
         0xbd1ca24b4e56b656dee2d7ca30433716550c54ab67aab3e6b9eba46ac0ff79d6;
+    bytes32 private constant PINNED_TERMINAL_GUARDIAN_CONFIG_V1 =
+        0x08d0b0fbace471ddf2e5f522c3621b3fdd92b1a17fce4c1effb39e5ad1d9243e;
+    bytes32 private constant PINNED_TERMINAL_GUARDIAN_SCOPE_V1 =
+        0x077788610e4d141120fd85c2372b9673a8a4ac7633f4d79522bf19565809252a;
+    bytes32 private constant PINNED_INITIAL_TERMINAL_GUARDIAN_SET_V1 =
+        0x9ee586231c2f5d832b7ab74ebdf30550f7b6ac36ff7f5d4ceedebd713c364b99;
+    bytes32 private constant PINNED_TERMINAL_GUARDIAN_HOLDER_V1 =
+        0x6043687fb0254773308ed2f9a8d9a86c356d45779c952f0ffd71d8beaa5a57d8;
     bytes4 private constant LEGACY_SCHEDULE_BATCH_SELECTOR = 0xd983ef8e;
     bytes4 private constant LEGACY_EXECUTE_BATCH_SELECTOR = 0x5e9014e4;
 
@@ -103,6 +112,67 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(bytes32(bytes4(0x38f8ce24)), "scheduled pointer selector");
         bytes32(IStreamGovernanceExecutor.scheduledCallData.selector)
             .assertEq(bytes32(bytes4(0x72a3c7b8)), "scheduled data selector");
+        bytes32(IStreamGovernanceExecutor.registerProposer.selector)
+            .assertEq(bytes32(bytes4(0x0794ec84)), "register proposer selector");
+        bytes32(IStreamGovernanceExecutor.registerCanceller.selector)
+            .assertEq(bytes32(bytes4(0xcb585072)), "register canceller selector");
+        bytes32(IStreamGovernanceExecutor.setApprovedNativeReceiver.selector)
+            .assertEq(bytes32(bytes4(0x31ac9e82)), "native receiver selector");
+        bytes32(IStreamGovernanceExecutor.setTighteningCall.selector)
+            .assertEq(bytes32(bytes4(0x250885fb)), "tightening config selector");
+        bytes32(IStreamGovernanceExecutor.registerFreezeSelector.selector)
+            .assertEq(bytes32(bytes4(0xb1b73b69)), "freeze config selector");
+        bytes32(IStreamGovernanceExecutor.terminalFreezeGuardianConfigCommitment.selector)
+            .assertEq(bytes32(bytes4(0xd0477f1f)), "guardian commitment selector");
+        bytes32(IStreamGovernanceExecutor.terminalFreezeVetoGuardianSet.selector)
+            .assertEq(bytes32(bytes4(0x2b33c302)), "guardian set selector");
+        bytes32(IStreamGovernanceExecutor.terminalFreezeLiveActionCaps.selector)
+            .assertEq(bytes32(bytes4(0x1b630d16)), "terminal cap selector");
+        bytes32(IStreamGovernanceExecutor.terminalFreezeLiveActionUsage.selector)
+            .assertEq(bytes32(bytes4(0x481eae00)), "terminal usage selector");
+        bytes32(IStreamGovernanceExecutor.pruneElapsedTerminalFreezeActions.selector)
+            .assertEq(bytes32(bytes4(0xace3628e)), "terminal prune selector");
+        bytes32(IStreamGovernanceExecutor.terminalFreezeActionPage.selector)
+            .assertEq(bytes32(bytes4(0xc8b276ba)), "terminal page selector");
+    }
+
+    function testGovernanceV2ErrorSelectorGoldens() public pure {
+        bytes32(IStreamGovernanceExecutor.GovernanceRootProposerRequired.selector)
+            .assertEq(bytes32(bytes4(0x572c5e0b)), "governance root proposer error");
+        bytes32(IStreamGovernanceExecutor.RoleRegistryDelayedActionRequired.selector)
+            .assertEq(bytes32(bytes4(0x5e6cae4c)), "role registry delayed action error");
+        bytes32(IStreamGovernanceExecutor.InvalidExecutorConfigCall.selector)
+            .assertEq(bytes32(bytes4(0x988f5a6d)), "invalid executor config error");
+        bytes32(IStreamGovernanceExecutor.ExecutorConfigActionClassMismatch.selector)
+            .assertEq(bytes32(bytes4(0x53eb2651)), "executor config class error");
+        bytes32(IStreamGovernanceExecutor.ExecutorControlActionClassMismatch.selector)
+            .assertEq(bytes32(bytes4(0x25f6871f)), "executor control class error");
+        bytes32(IStreamGovernanceExecutor.GovernanceSelfCallContextRequired.selector)
+            .assertEq(bytes32(bytes4(0xd13ef67d)), "isolated self-call context error");
+        bytes32(IStreamGovernanceExecutor.GovernanceRootRevisionMismatch.selector)
+            .assertEq(bytes32(bytes4(0xfdd2ef9e)), "governance root revision error");
+        bytes32(IStreamGovernanceExecutor.GovernanceProposerAuthorizationDrift.selector)
+            .assertEq(bytes32(bytes4(0x18cd5aee)), "governance proposer revision error");
+        bytes32(IStreamGovernanceExecutor.TighteningCallSelfTargetForbidden.selector)
+            .assertEq(bytes32(bytes4(0x67bbddf4)), "self tightening error");
+        bytes32(IStreamGovernanceExecutor.FreezeSelectorSelfTargetForbidden.selector)
+            .assertEq(bytes32(bytes4(0x500fc8d8)), "self freeze-selector error");
+        bytes32(IStreamGovernanceExecutor.GovernanceCallReturndataTooLarge.selector)
+            .assertEq(bytes32(bytes4(0x29111b54)), "governance returndata error");
+        bytes32(IStreamGovernanceExecutor.GovernanceActionExpiredWindow.selector)
+            .assertEq(bytes32(bytes4(0xc797754c)), "expired action window error");
+        bytes32(IStreamGovernanceExecutor.TerminalFreezeGuardianConfigDrift.selector)
+            .assertEq(bytes32(bytes4(0x3ef646fd)), "terminal guardian drift error");
+        bytes32(IStreamGovernanceExecutor.TerminalFreezeLiveActionCapExceeded.selector)
+            .assertEq(bytes32(bytes4(0xed1b395d)), "terminal total cap error");
+        bytes32(IStreamGovernanceExecutor.TerminalFreezeNonRootLiveActionCapExceeded.selector)
+            .assertEq(bytes32(bytes4(0x441113a4)), "terminal non-root cap error");
+        bytes32(IStreamGovernanceExecutor.TerminalFreezeProposerLiveActionCapExceeded.selector)
+            .assertEq(bytes32(bytes4(0xea2c035f)), "terminal proposer cap error");
+        bytes32(IStreamGovernanceExecutor.TerminalFreezePageCursorOutOfBounds.selector)
+            .assertEq(bytes32(bytes4(0x204cb92b)), "terminal cursor error");
+        bytes32(IStreamGovernanceExecutor.TerminalFreezePageLimitExceeded.selector)
+            .assertEq(bytes32(bytes4(0x83beaacb)), "terminal page-limit error");
     }
 
     function testManifestAndEmergencySelectorGoldens() public {
@@ -232,6 +302,144 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(
                 PINNED_ROLE_MANAGER_CONFIG_MUTATION_V1, "role manager mutation preimage recompute"
             );
+    }
+
+    function testGovernanceConfigAndTerminalGuardianDomainGoldens() public {
+        keccak256("6529STREAM_TERMINAL_GUARDIAN_CONFIG_V1")
+            .assertEq(PINNED_TERMINAL_GUARDIAN_CONFIG_V1, "terminal guardian config domain");
+        keccak256("6529STREAM_TERMINAL_GUARDIAN_SCOPE_V1")
+            .assertEq(PINNED_TERMINAL_GUARDIAN_SCOPE_V1, "terminal guardian scope domain");
+        keccak256("6529STREAM_INITIAL_TERMINAL_GUARDIAN_SET_V1")
+            .assertEq(
+                PINNED_INITIAL_TERMINAL_GUARDIAN_SET_V1, "initial terminal guardian set domain"
+            );
+        keccak256("6529STREAM_TERMINAL_GUARDIAN_HOLDER_V1")
+            .assertEq(PINNED_TERMINAL_GUARDIAN_HOLDER_V1, "terminal guardian holder domain");
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_SCOPE_V1")
+            .assertEq(
+                0x3c84722ce639aca105835269de227cc0ffea495f13383068c46ec2e7aae88016,
+                "governance config scope domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_STATE_V1")
+            .assertEq(
+                0x05000ed56f03029aee74f99fd9d1a7319ad482fa3148ae863053ea955d1e9a4b,
+                "governance config state domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_ROOT_SCOPE_V1")
+            .assertEq(
+                0x6aadc831e79f225350483abeae2839b877650539b2bbb4a19c70ade78ea2e42c,
+                "governance root scope domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_ROOT_STATE_V1")
+            .assertEq(
+                0xd9975385cd3dcefe66cfc6e447a2c92f84d20f043e1198e1b6f5c65be5805d90,
+                "governance root state domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_PROPOSER")
+            .assertEq(
+                0x3159801de288c136cc45c5fbc40879c4e5a4c7bba9806400495d2120cd681905,
+                "proposer config domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_CANCELLER")
+            .assertEq(
+                0x334c6d45b3bad249a3f870b97f4a79b845676c102c028972e94f21b49628217b,
+                "canceller config domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_NATIVE_RECEIVER")
+            .assertEq(
+                0x19222bb517f28c7f9a05615c9b0fac13b5258c5b61fcaec4605f5b56aa239cf4,
+                "native receiver config domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_TIGHTENING_CALL")
+            .assertEq(
+                0xc3f9be103fb546fd998001a0d6447e98378926dd86bc995bb06019fd4eac50cf,
+                "tightening config domain"
+            );
+        keccak256("6529STREAM_GOVERNANCE_CONFIG_FREEZE_SELECTOR")
+            .assertEq(
+                0x034b6f0b02fadd47ce4775cbf1d72a3b570a62a973efcec85059bf135bf5da91,
+                "freeze config domain"
+            );
+    }
+
+    function testGovernanceV2EventTopicGoldens() public pure {
+        keccak256("GovernanceCallDataPublished(uint16,bytes32,address,address)")
+            .assertEq(
+                0x5922e6285b4b955740f916aa25accf8dcd9f75131e4bde259347d27adfaf1cce,
+                "calldata publication topic"
+            );
+        keccak256("GovernanceRootRotated(uint16,address,address,bytes32,uint64,bytes32)")
+            .assertEq(
+                0x08d370ac1a1f9fb20901f4973ecd503905441935a5b50d55949383fb2e577022,
+                "governance root topic"
+            );
+        keccak256("TerminalFreezeGuardianConfigCommitted(uint16,bytes32,bytes32)")
+            .assertEq(
+                0x53acfef70a58072f772f652e17d1aae14ab4389a12ad30c9423ed0a887f8ba65,
+                "guardian commitment topic"
+            );
+        keccak256("GovernanceProposerUpdated(uint16,address,bool,uint64,bytes32)")
+            .assertEq(
+                0x220035fc1066049066bc625ffc68a6dd5d26c64d3bcf552113a2b83726f5ccc3,
+                "proposer update topic"
+            );
+        keccak256("GovernanceCancellerUpdated(uint16,address,bool,uint64,bytes32)")
+            .assertEq(
+                0x25f1eb9ffcadbf70fdce20cb2089d1d75b4acc808a30caf8730a8cac77191a47,
+                "canceller update topic"
+            );
+        keccak256("TighteningCallUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)")
+            .assertEq(
+                0x036c8ff514a46d08a6d064b8303207c224554087f3a378bf88ca1d8f8d4ece58,
+                "tightening update topic"
+            );
+        keccak256("ApprovedNativeReceiverUpdated(uint16,address,bool,uint64,bytes32)")
+            .assertEq(
+                0xd02c58454df06c3acae4d99fd37a3031799db442605179362d1ee19588f9f3b4,
+                "native receiver update topic"
+            );
+        keccak256("FreezeSelectorUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)")
+            .assertEq(
+                0x99b0305b9daf0dfcf7c496155ec00fbc7f4c03a7d91f6436f7edc0a3cef91ac3,
+                "freeze selector update topic"
+            );
+        keccak256(
+                "TerminalFreezeActionMembershipUpdated(uint16,bytes32,bytes32,address,bool,uint8,bool,uint64,uint256,uint256)"
+            )
+            .assertEq(
+                0xfca432e480c87cddba2b629d363f2ad28733127441639c4f7a1d84edca17d676,
+                "terminal membership topic"
+            );
+        keccak256("StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)")
+            .assertEq(
+                0x9b9b410e01df674848a6af9c4677f982bcd5957194cd51eb34ed04532bc7a2aa,
+                "role grant topic"
+            );
+        keccak256("StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)")
+            .assertEq(
+                0x674124c7fd9b40a7e8da58914611e15b27e8f0645cae8abf147adb7eb68d841f,
+                "role revoke topic"
+            );
+        keccak256("RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)")
+            .assertEq(
+                0xb08dd46dd5caf79cdfd7060f42cebba12dc707c2d25f0646753c6c240ea5b627,
+                "role manager topic"
+            );
+        keccak256(
+                "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)"
+            )
+            .assertEq(
+                0xe7db8fc830e4a9ad4e109992e6cf9d48e383ea6b7b37cf64be502d2ad4143666,
+                "role mutation topic"
+            );
+    }
+
+    function testTerminalFreezeCapacityPins() public view {
+        (uint256 totalCap, uint256 nonRootCap, uint256 proposerCap) =
+            executor.terminalFreezeLiveActionCaps();
+        totalCap.assertEq(64, "terminal total cap");
+        nonRootCap.assertEq(48, "terminal non-root cap");
+        proposerCap.assertEq(8, "terminal proposer cap");
     }
 
     function testModuleRegistrationLaneConstants() public {

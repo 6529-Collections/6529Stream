@@ -134,14 +134,18 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
                 revert TerminalFreezeVetoGuardianCap(_roleHolders[role].length);
             }
             IStreamGovernanceExecutor executor = IStreamGovernanceExecutor(owner());
+            // Identity disjointness needs only the root address; the executor
+            // validates the code hash and revision at its control boundary.
+            // slither-disable-next-line unused-return
             (address governanceRoot,,) = executor.governanceRootState();
             if (executor.isProposer(holder) || holder == governanceRoot) {
                 revert GovernanceIdentityRoleOverlap(holder, StreamRoles.ROLE_TERMINAL_FREEZE_VETO);
             }
         }
         _checkDisjointness(role, holder);
+        bytes32 governanceActionId = bytes32(0);
         if (msg.sender == owner()) {
-            _requireGovernanceRoleTransition(role, holder, false, true);
+            governanceActionId = _requireGovernanceRoleTransition(role, holder, false, true);
         }
         _roleHolders[role].push(holder);
         _roleHolderIndex[role][holder] = _roleHolders[role].length;
@@ -149,8 +153,10 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         if (role == StreamRoles.ROLE_TERMINAL_FREEZE_VETO && _roleHolders[role].length >= 2) {
             _terminalGuardianFloorActivated = true;
         }
-        _appendRoleMutation(role, holder, true);
-        emit StreamRoleGranted(SCHEMA_VERSION, role, holder, grantClass, msg.sender);
+        _appendRoleMutation(role, holder, true, governanceActionId);
+        emit StreamRoleGranted(
+            SCHEMA_VERSION, role, holder, grantClass, msg.sender, governanceActionId
+        );
     }
 
     function _revoke(bytes32 role, address holder, uint8 grantClass, bool terminalVetoRole)
@@ -166,8 +172,9 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         ) {
             revert TerminalFreezeVetoGuardianFloor(_roleHolders[role].length);
         }
+        bytes32 governanceActionId = bytes32(0);
         if (msg.sender == owner()) {
-            _requireGovernanceRoleTransition(role, holder, true, false);
+            governanceActionId = _requireGovernanceRoleTransition(role, holder, true, false);
         }
         address[] storage holders = _roleHolders[role];
         uint256 index = indexPlusOne - 1;
@@ -180,8 +187,10 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         holders.pop();
         delete _roleHolderIndex[role][holder];
         if (terminalVetoRole) _terminalVetoMembershipCount[holder] -= 1;
-        _appendRoleMutation(role, holder, false);
-        emit StreamRoleRevoked(SCHEMA_VERSION, role, holder, grantClass, msg.sender);
+        _appendRoleMutation(role, holder, false, governanceActionId);
+        emit StreamRoleRevoked(
+            SCHEMA_VERSION, role, holder, grantClass, msg.sender, governanceActionId
+        );
     }
 
     /// @inheritdoc IStreamRoleRegistry
@@ -191,13 +200,22 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         }
         bool currentEnabled = _roleManagers[account];
         if (currentEnabled == enabled) revert RoleManagerConfigNoOp(account, enabled);
-        _requireGovernanceRoleTransition(
+        bytes32 governanceActionId = _requireGovernanceRoleTransition(
             STREAM_ROLE_MANAGER_CONFIG_V1, account, currentEnabled, enabled
         );
         _roleManagers[account] = enabled;
-        _appendRoleManagerConfigMutation(account, enabled);
-        _appendRoleMutation(STREAM_ROLE_MANAGER_CONFIG_V1, account, enabled);
-        emit RoleManagerUpdated(account, enabled, msg.sender);
+        (bytes32 configChainHash, uint64 configRevision) =
+            _appendRoleManagerConfigMutation(account, enabled);
+        _appendRoleMutation(STREAM_ROLE_MANAGER_CONFIG_V1, account, enabled, governanceActionId);
+        emit RoleManagerUpdated(
+            SCHEMA_VERSION,
+            account,
+            enabled,
+            msg.sender,
+            configChainHash,
+            configRevision,
+            governanceActionId
+        );
     }
 
     /// @inheritdoc IStreamRoleRegistry
@@ -371,7 +389,12 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         revert RoleActorNotAuthorized(role, msg.sender);
     }
 
-    function _appendRoleMutation(bytes32 role, address holder, bool granted) private {
+    function _appendRoleMutation(
+        bytes32 role,
+        address holder,
+        bool granted,
+        bytes32 governanceActionId
+    ) private {
         uint64 roleRevision = _roleMutationRevision[role];
         uint64 globalRevision = _globalRoleMutationRevision;
         if (roleRevision == type(uint64).max || globalRevision == type(uint64).max) {
@@ -410,19 +433,30 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         _globalRoleMutationChain = globalChainHash;
         _globalRoleMutationRevision = globalRevision;
         emit RoleMutationCommitted(
-            role, holder, granted, roleChainHash, roleRevision, globalChainHash, globalRevision
+            SCHEMA_VERSION,
+            role,
+            holder,
+            granted,
+            roleChainHash,
+            roleRevision,
+            globalChainHash,
+            globalRevision,
+            governanceActionId
         );
     }
 
-    function _appendRoleManagerConfigMutation(address account, bool enabled) private {
-        uint64 revision = _roleManagerConfigRevision[account];
+    function _appendRoleManagerConfigMutation(address account, bool enabled)
+        private
+        returns (bytes32 chainHash, uint64 revision)
+    {
+        revision = _roleManagerConfigRevision[account];
         if (revision == type(uint64).max) {
             revert RoleMutationRevisionOverflow(STREAM_ROLE_MANAGER_CONFIG_V1);
         }
         unchecked {
             revision += 1;
         }
-        bytes32 chainHash = keccak256(
+        chainHash = keccak256(
             abi.encode(
                 STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1,
                 _roleManagerConfigChain[account],
@@ -442,7 +476,7 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         address holder,
         bool oldGranted,
         bool newGranted
-    ) private view {
+    ) private view returns (bytes32 governanceActionId) {
         (
             bool executing,
             bytes32 actionId,
@@ -455,7 +489,7 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
             if (
                 role == StreamRoles.ROLE_TERMINAL_FREEZE_VETO && !oldGranted && newGranted
                     && _isBootstrapGuardianGrant()
-            ) return;
+            ) return bytes32(0);
             revert RoleGovernanceActionNotExecuting();
         }
         if (actionId == bytes32(0)) revert RoleGovernanceActionIdZero();
@@ -490,6 +524,7 @@ contract StreamRoleRegistry is Ownable, IStreamRoleRegistry {
         if (actualNewStateHash != expectedNewStateHash) {
             revert RoleGovernanceNewStateHashMismatch(expectedNewStateHash, actualNewStateHash);
         }
+        return actionId;
     }
 
     function _roleTransitionStateHashes(

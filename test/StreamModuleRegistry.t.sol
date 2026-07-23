@@ -92,7 +92,9 @@ contract GovernanceExecutorMalformedCurrentActionMock {
         view
         returns (bool, bytes32, uint8, bytes32, bytes32, bytes32)
     {
-        if (_returnMode == 0) revert("current action unavailable");
+        if (_returnMode == 0) {
+            revert("current action unavailable");
+        }
         uint256 returnSize = _returnMode == 1 ? 5 * 32 : 32_768;
         assembly ("memory-safe") {
             return(0, returnSize)
@@ -982,8 +984,7 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
             registration
         );
 
-        RegistryRevertingERC165ModuleMock revertingERC165 =
-            new RegistryRevertingERC165ModuleMock();
+        RegistryRevertingERC165ModuleMock revertingERC165 = new RegistryRevertingERC165ModuleMock();
         registration = _registration(address(revertingERC165));
         _expectRegisterRevert(
             abi.encodeWithSelector(
@@ -1103,9 +1104,7 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
             .assertTrue("high-gas live ERC-165 module rejected");
     }
 
-    function testSequentialUncappedERC165ProbesStayFailClosedWhenModuleStarvesParent()
-        public
-    {
+    function testSequentialUncappedERC165ProbesStayFailClosedWhenModuleStarvesParent() public {
         RegistryGasStarvingModuleMock starvingModule =
             new RegistryGasStarvingModuleMock(MODULE_INTERFACE_ID);
         _register(_registration(address(starvingModule)));
@@ -1121,16 +1120,15 @@ contract StreamModuleRegistryTest is CharacterizationTestBase {
             "first isolated probe is not canonical"
         );
 
-        (bool eligibilityOk, bytes memory eligibilityData) = address(registry).staticcall{
-            gas: 180_000
-        }(
+        (bool eligibilityOk, bytes memory eligibilityData) = address(registry)
+        .staticcall{ gas: 180_000 }(
             abi.encodeCall(
                 StreamModuleRegistry.isModuleEligible,
                 (address(starvingModule), MODULE_TYPE, MODULE_INTERFACE_ID)
             )
         );
-        bool eligible = eligibilityOk && eligibilityData.length == 32
-            && abi.decode(eligibilityData, (bool));
+        bool eligible =
+            eligibilityOk && eligibilityData.length == 32 && abi.decode(eligibilityData, (bool));
         eligible.assertFalse("gas-starving module became eligible");
     }
 

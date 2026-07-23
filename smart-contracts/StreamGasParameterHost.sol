@@ -79,6 +79,7 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
     uint256 private constant _CORE_POINTER_RETURN_BYTES = 320;
     uint256 private constant _MAX_MODULE_RECORD_RETURN_BYTES = 2_496;
     uint256 private constant _MAX_MODULE_MANIFEST_URI_BYTES = 2_048;
+    uint256 private constant _PROBE_RUN_RETURN_BYTES = 96;
     uint8 private constant _MODULE_STATUS_ACTIVE = 1;
 
     uint8 private constant _ACTION_CLASS_DELAYED_LOOSENING = 1;
@@ -784,6 +785,34 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         }
     }
 
+    function _readProbeRun(address probe, bytes32 parameterId, uint256 probedValue)
+        private
+        view
+        returns (bytes32 probeRunId, bool passed, uint64 probedAtBlock)
+    {
+        (bool ok, bytes memory data) = _boundedStaticRead(
+            probe,
+            abi.encodeWithSelector(
+                IStreamGasParameterProbe.lastProbeRun.selector, parameterId, probedValue
+            ),
+            _PROBE_RUN_RETURN_BYTES
+        );
+        if (!ok || !_isCanonicalProbeRunEncoding(data)) {
+            revert GasParameterProbeRecordMissing(parameterId, probedValue);
+        }
+        return abi.decode(data, (bytes32, bool, uint64));
+    }
+
+    function _isCanonicalProbeRunEncoding(bytes memory data) private pure returns (bool valid) {
+        if (data.length != _PROBE_RUN_RETURN_BYTES) return false;
+        assembly ("memory-safe") {
+            valid := and(
+                iszero(gt(mload(add(data, 0x40)), 1)),
+                iszero(shr(64, mload(add(data, 0x60))))
+            )
+        }
+    }
+
     function _supportsModuleRegistryInterface(address registry) private view returns (bool) {
         (bool requiredOk, bytes memory requiredData) = _boundedStaticRead(
             registry,
@@ -825,7 +854,7 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         _requireCurrentProbeBinding(parameterId, parameter);
         uint256 currentValue = parameter.value;
         (bytes32 probeRunId, bool passed, uint64 probedAtBlock) =
-            IStreamGasParameterProbe(parameter.probe).lastProbeRun(parameterId, currentValue);
+            _readProbeRun(parameter.probe, parameterId, currentValue);
         if (probeRunId == bytes32(0)) {
             revert GasParameterProbeRecordMissing(parameterId, currentValue);
         }
@@ -851,7 +880,7 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
     ) private view {
         _requireCurrentProbeBinding(parameterId, parameter);
         (bytes32 probeRunId, bool passed, uint64 probedAtBlock) =
-            IStreamGasParameterProbe(parameter.probe).lastProbeRun(parameterId, proposedValue);
+            _readProbeRun(parameter.probe, parameterId, proposedValue);
         if (probeRunId == bytes32(0)) {
             revert GasParameterProbeRecordMissing(parameterId, proposedValue);
         }

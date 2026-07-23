@@ -1324,6 +1324,53 @@ contract StreamGasParameterStoreTest is CharacterizationTestBase {
     // Permissionless conditional raise/re-lower ([LTA-GGP] requirement 11)
     // ------------------------------------------------------------------
 
+    function testProbeRunReadsRejectMalformedResponsesWithoutMutation() public {
+        (StreamGasParameterStore store, MockAdversarialProbeRun probe) = _adversarialProbeStore();
+        probe.setRun(50_000, false, uint64(block.number));
+
+        _assertMalformedRaiseRejected(store, probe, MockAdversarialProbeRun.ResponseMode.Oversized);
+        _assertMalformedRaiseRejected(store, probe, MockAdversarialProbeRun.ResponseMode.Short);
+        _assertMalformedRaiseRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.NonCanonicalBool
+        );
+        _assertMalformedRaiseRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.NonCanonicalUint64
+        );
+        _assertMalformedRaiseRejected(store, probe, MockAdversarialProbeRun.ResponseMode.Reverting);
+
+        probe.setResponseMode(MockAdversarialProbeRun.ResponseMode.Canonical);
+        store.conditionalRaiseGasParameter(ROYALTY_RESOLVER_ID, 100_000);
+        _assertAdversarialGasState(store, 100_000, 2);
+
+        probe.setRun(60_000, true, uint64(block.number));
+        _assertMalformedRelowerRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.Oversized
+        );
+        _assertMalformedRelowerRejected(store, probe, MockAdversarialProbeRun.ResponseMode.Short);
+        _assertMalformedRelowerRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.NonCanonicalBool
+        );
+        _assertMalformedRelowerRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.NonCanonicalUint64
+        );
+        _assertMalformedRelowerRejected(
+            store, probe, MockAdversarialProbeRun.ResponseMode.Reverting
+        );
+    }
+
+    function testProbeRunReadsForwardAvailableGasAcrossRaiseAndRelower() public {
+        (StreamGasParameterStore store, MockAdversarialProbeRun probe) = _adversarialProbeStore();
+        probe.setMinimumReadGas(250_000);
+
+        probe.setRun(50_000, false, uint64(block.number));
+        store.conditionalRaiseGasParameter(ROYALTY_RESOLVER_ID, 100_000);
+        _assertAdversarialGasState(store, 100_000, 2);
+
+        probe.setRun(60_000, true, uint64(block.number));
+        store.conditionalRelowerGasParameter(ROYALTY_RESOLVER_ID, 60_000);
+        _assertAdversarialGasState(store, 60_000, 3);
+    }
+
     function testConditionalRaisePermissionlessZeroSigner() public {
         address stranger = vm.addr(0xA11CE);
 
@@ -2327,6 +2374,66 @@ contract StreamGasParameterStoreTest is CharacterizationTestBase {
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
+
+    function _adversarialProbeStore()
+        private
+        returns (StreamGasParameterStore store, MockAdversarialProbeRun probe)
+    {
+        probe = new MockAdversarialProbeRun(ROYALTY_RESOLVER_ID, 0);
+        IStreamGasParameterHost.GasParameterConfig[] memory configs =
+            new IStreamGasParameterHost.GasParameterConfig[](1);
+        configs[0] = _config("ROYALTY_RESOLVER_GAS_LIMIT", 50_000, 10_000, address(probe), 1);
+        store = new StreamGasParameterStore(
+            address(0), address(_core), address(_moduleRegistry), configs
+        );
+        _moduleRegistry.registerGasProbe(address(probe));
+    }
+
+    function _assertMalformedRaiseRejected(
+        StreamGasParameterStore store,
+        MockAdversarialProbeRun probe,
+        MockAdversarialProbeRun.ResponseMode responseMode
+    ) private {
+        probe.setResponseMode(responseMode);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterProbeRecordMissing.selector,
+                ROYALTY_RESOLVER_ID,
+                uint256(50_000)
+            )
+        );
+        store.conditionalRaiseGasParameter(ROYALTY_RESOLVER_ID, 100_000);
+        _assertAdversarialGasState(store, 50_000, 1);
+    }
+
+    function _assertMalformedRelowerRejected(
+        StreamGasParameterStore store,
+        MockAdversarialProbeRun probe,
+        MockAdversarialProbeRun.ResponseMode responseMode
+    ) private {
+        probe.setResponseMode(responseMode);
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterProbeRecordMissing.selector,
+                ROYALTY_RESOLVER_ID,
+                uint256(60_000)
+            )
+        );
+        store.conditionalRelowerGasParameter(ROYALTY_RESOLVER_ID, 60_000);
+        _assertAdversarialGasState(store, 100_000, 2);
+    }
+
+    function _assertAdversarialGasState(
+        StreamGasParameterStore store,
+        uint256 expectedValue,
+        uint64 expectedRevision
+    ) private view {
+        (uint256 value,,,,, uint64 revision) = store.gasParameterInfo(ROYALTY_RESOLVER_ID);
+        Assertions.assertEq(value, expectedValue, "malformed probe changed gas value");
+        Assertions.assertEq(
+            uint256(revision), uint256(expectedRevision), "malformed probe changed gas revision"
+        );
+    }
 
     function _registerProbe(address probe) private {
         _moduleRegistry.registerGasProbe(probe);

@@ -25,7 +25,8 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
         bytes32 indexed role,
         address indexed holder,
         uint8 grantClass,
-        address indexed actor
+        address actor,
+        bytes32 indexed actionId
     );
 
     event StreamRoleRevoked(
@@ -33,7 +34,30 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
         bytes32 indexed role,
         address indexed holder,
         uint8 grantClass,
-        address indexed actor
+        address actor,
+        bytes32 indexed actionId
+    );
+
+    event RoleManagerUpdated(
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        address indexed admin,
+        bytes32 configChainHash,
+        uint64 configRevision,
+        bytes32 indexed actionId
+    );
+
+    event RoleMutationCommitted(
+        uint16 schemaVersion,
+        bytes32 indexed role,
+        address indexed holder,
+        bool granted,
+        bytes32 roleChainHash,
+        uint64 roleRevision,
+        bytes32 globalChainHash,
+        uint64 globalRevision,
+        bytes32 indexed actionId
     );
 
     StreamRoleRegistry private registry;
@@ -65,6 +89,15 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
         keccak256("6529STREAM_ROLE_MANAGER_CONFIG_STATE_V1");
     bytes32 private constant ROLE_MANAGER_CONFIG_MUTATION_V1 =
         keccak256("6529STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1");
+    bytes32 private constant STREAM_ROLE_GRANTED_TOPIC =
+        keccak256("StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)");
+    bytes32 private constant STREAM_ROLE_REVOKED_TOPIC =
+        keccak256("StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)");
+    bytes32 private constant ROLE_MANAGER_UPDATED_TOPIC =
+        keccak256("RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)");
+    bytes32 private constant ROLE_MUTATION_COMMITTED_TOPIC = keccak256(
+        "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)"
+    );
 
     function currentAction()
         external
@@ -167,11 +200,18 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
 
     function testRootRoleGrantAuthority() public {
         // Owner grants and the event carries the grant class.
+        _setRoleGovernanceContext(StreamRoles.ROLE_TREASURY, holder, false, true);
         vm.expectEmit(true, true, true, true);
         emit StreamRoleGranted(
-            1, StreamRoles.ROLE_TREASURY, holder, StreamRoles.GRANT_CLASS_ROOT, address(this)
+            1,
+            StreamRoles.ROLE_TREASURY,
+            holder,
+            StreamRoles.GRANT_CLASS_ROOT,
+            address(this),
+            mockActionId
         );
-        _rootGrant(StreamRoles.ROLE_TREASURY, holder);
+        registry.grantRole(StreamRoles.ROLE_TREASURY, holder);
+        _clearRoleGovernanceContext();
         registry.hasRole(StreamRoles.ROLE_TREASURY, holder).assertTrue("root role granted");
 
         // Role managers cannot grant root-class roles.
@@ -222,11 +262,142 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
             StreamRoles.ROLE_EXPORT_PUBLISHER,
             holder,
             StreamRoles.GRANT_CLASS_OPERATIONAL,
-            roleManager
+            roleManager,
+            bytes32(0)
         );
         vm.prank(roleManager);
         registry.revokeRole(StreamRoles.ROLE_EXPORT_PUBLISHER, holder);
         registry.hasRole(StreamRoles.ROLE_EXPORT_PUBLISHER, holder).assertFalse("revoked");
+    }
+
+    function testGovernedBaseAndScopedRoleEventsCarryExactActionId() public {
+        bytes32 baseRole = StreamRoles.ROLE_TREASURY;
+
+        _setRoleGovernanceContext(baseRole, holder, false, true);
+        bytes32 grantActionId = mockActionId;
+        require(grantActionId != bytes32(0), "governed base grant action");
+        vm.recordLogs();
+        registry.grantRole(baseRole, holder);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertRoleMutationLogs(
+            logs,
+            baseRole,
+            holder,
+            true,
+            StreamRoles.GRANT_CLASS_ROOT,
+            address(this),
+            grantActionId,
+            STREAM_ROLE_GRANTED_TOPIC
+        );
+        _clearRoleGovernanceContext();
+
+        _setRoleGovernanceContext(baseRole, holder, true, false);
+        bytes32 revokeActionId = mockActionId;
+        require(revokeActionId != bytes32(0), "governed base revoke action");
+        vm.recordLogs();
+        registry.revokeRole(baseRole, holder);
+        logs = vm.getRecordedLogs();
+        _assertRoleMutationLogs(
+            logs,
+            baseRole,
+            holder,
+            false,
+            StreamRoles.GRANT_CLASS_ROOT,
+            address(this),
+            revokeActionId,
+            STREAM_ROLE_REVOKED_TOPIC
+        );
+        _clearRoleGovernanceContext();
+
+        RoleHolderContractMock scopedGuardian = new RoleHolderContractMock();
+        address scopedHolder = address(scopedGuardian);
+        bytes32 scopeHash = keccak256("event-attribution-scope");
+        bytes32 scopedRole = registry.scopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeHash);
+
+        _setRoleGovernanceContext(scopedRole, scopedHolder, false, true);
+        grantActionId = mockActionId;
+        require(grantActionId != bytes32(0), "governed scoped grant action");
+        vm.recordLogs();
+        registry.grantScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeHash, scopedHolder);
+        logs = vm.getRecordedLogs();
+        _assertRoleMutationLogs(
+            logs,
+            scopedRole,
+            scopedHolder,
+            true,
+            StreamRoles.GRANT_CLASS_ROOT,
+            address(this),
+            grantActionId,
+            STREAM_ROLE_GRANTED_TOPIC
+        );
+        _clearRoleGovernanceContext();
+
+        _setRoleGovernanceContext(scopedRole, scopedHolder, true, false);
+        revokeActionId = mockActionId;
+        require(revokeActionId != bytes32(0), "governed scoped revoke action");
+        vm.recordLogs();
+        registry.revokeScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scopeHash, scopedHolder);
+        logs = vm.getRecordedLogs();
+        _assertRoleMutationLogs(
+            logs,
+            scopedRole,
+            scopedHolder,
+            false,
+            StreamRoles.GRANT_CLASS_ROOT,
+            address(this),
+            revokeActionId,
+            STREAM_ROLE_REVOKED_TOPIC
+        );
+        _clearRoleGovernanceContext();
+    }
+
+    function testOperationalManagerRoleEventsUseZeroActionIdSentinel() public {
+        bytes32 role = StreamRoles.ROLE_EXPORT_PUBLISHER;
+
+        vm.recordLogs();
+        vm.prank(roleManager);
+        registry.grantRole(role, holder);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        _assertRoleMutationLogs(
+            logs,
+            role,
+            holder,
+            true,
+            StreamRoles.GRANT_CLASS_OPERATIONAL,
+            roleManager,
+            bytes32(0),
+            STREAM_ROLE_GRANTED_TOPIC
+        );
+
+        vm.recordLogs();
+        vm.prank(roleManager);
+        registry.revokeRole(role, holder);
+        logs = vm.getRecordedLogs();
+        _assertRoleMutationLogs(
+            logs,
+            role,
+            holder,
+            false,
+            StreamRoles.GRANT_CLASS_OPERATIONAL,
+            roleManager,
+            bytes32(0),
+            STREAM_ROLE_REVOKED_TOPIC
+        );
+    }
+
+    function testRoleManagerEventsCarryExactGovernanceActionId() public {
+        _setRoleManagerGovernanceContext(roleManager, true, false);
+        bytes32 actionId = mockActionId;
+        require(actionId != bytes32(0), "manager update action");
+
+        vm.recordLogs();
+        registry.registerRoleManager(roleManager, false);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        logs.length.assertEq(2, "manager update event count");
+        _assertRoleMutationLog(logs[0], ROLE_MANAGER_CONFIG_V1, roleManager, false, actionId);
+        _assertRoleManagerUpdatedLog(logs[1], roleManager, false, actionId);
+        _clearRoleGovernanceContext();
     }
 
     function testGrantValidation() public {
@@ -772,6 +943,99 @@ contract StreamRoleRegistryTest is CharacterizationTestBase {
         );
         vm.prank(roleManager);
         registry.grantScopedRole(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, scope, holder);
+    }
+
+    function _assertRoleMutationLogs(
+        Vm.Log[] memory logs,
+        bytes32 role,
+        address account,
+        bool granted,
+        uint8 grantClass,
+        address actor,
+        bytes32 actionId,
+        bytes32 lifecycleTopic
+    ) private view {
+        logs.length.assertEq(2, "role mutation event count");
+        _assertRoleMutationLog(logs[0], role, account, granted, actionId);
+        _assertRoleLifecycleLog(logs[1], lifecycleTopic, role, account, grantClass, actor, actionId);
+    }
+
+    function _assertRoleMutationLog(
+        Vm.Log memory log,
+        bytes32 role,
+        address account,
+        bool granted,
+        bytes32 actionId
+    ) private view {
+        log.emitter.assertEq(address(registry), "role mutation emitter");
+        log.topics.length.assertEq(4, "role mutation topic count");
+        log.topics[0].assertEq(ROLE_MUTATION_COMMITTED_TOPIC, "role mutation topic0");
+        log.topics[1].assertEq(role, "role mutation role");
+        log.topics[2].assertEq(bytes32(uint256(uint160(account))), "role mutation holder");
+        log.topics[3].assertEq(actionId, "role mutation action");
+
+        (
+            uint16 schemaVersion,
+            bool eventGranted,
+            bytes32 roleChainHash,
+            uint64 roleRevision,
+            bytes32 globalChainHash,
+            uint64 globalRevision
+        ) = abi.decode(log.data, (uint16, bool, bytes32, uint64, bytes32, uint64));
+        uint256(schemaVersion).assertEq(1, "role mutation schema");
+        require(eventGranted == granted, "role mutation membership");
+        (bytes32 storedRoleChainHash, uint64 storedRoleRevision) = registry.roleMutationState(role);
+        (bytes32 storedGlobalChainHash, uint64 storedGlobalRevision) =
+            registry.globalRoleMutationState();
+        roleChainHash.assertEq(storedRoleChainHash, "role mutation role chain");
+        uint256(roleRevision).assertEq(uint256(storedRoleRevision), "role mutation role revision");
+        globalChainHash.assertEq(storedGlobalChainHash, "role mutation global chain");
+        uint256(globalRevision)
+            .assertEq(uint256(storedGlobalRevision), "role mutation global revision");
+    }
+
+    function _assertRoleLifecycleLog(
+        Vm.Log memory log,
+        bytes32 lifecycleTopic,
+        bytes32 role,
+        address account,
+        uint8 grantClass,
+        address actor,
+        bytes32 actionId
+    ) private view {
+        log.emitter.assertEq(address(registry), "role lifecycle emitter");
+        log.topics.length.assertEq(4, "role lifecycle topic count");
+        log.topics[0].assertEq(lifecycleTopic, "role lifecycle topic0");
+        log.topics[1].assertEq(role, "role lifecycle role");
+        log.topics[2].assertEq(bytes32(uint256(uint160(account))), "role lifecycle holder");
+        log.topics[3].assertEq(actionId, "role lifecycle action");
+        (uint16 schemaVersion, uint8 eventGrantClass, address eventActor) =
+            abi.decode(log.data, (uint16, uint8, address));
+        uint256(schemaVersion).assertEq(1, "role lifecycle schema");
+        uint256(eventGrantClass).assertEq(uint256(grantClass), "role lifecycle grant class");
+        eventActor.assertEq(actor, "role lifecycle actor");
+    }
+
+    function _assertRoleManagerUpdatedLog(
+        Vm.Log memory log,
+        address account,
+        bool enabled,
+        bytes32 actionId
+    ) private view {
+        log.emitter.assertEq(address(registry), "role manager emitter");
+        log.topics.length.assertEq(4, "role manager topic count");
+        log.topics[0].assertEq(ROLE_MANAGER_UPDATED_TOPIC, "role manager topic0");
+        log.topics[1].assertEq(bytes32(uint256(uint160(account))), "role manager account");
+        log.topics[2].assertEq(bytes32(uint256(uint160(address(this)))), "role manager admin");
+        log.topics[3].assertEq(actionId, "role manager action");
+        (uint16 schemaVersion, bool eventEnabled, bytes32 chainHash, uint64 revision) =
+            abi.decode(log.data, (uint16, bool, bytes32, uint64));
+        uint256(schemaVersion).assertEq(1, "role manager schema");
+        require(eventEnabled == enabled, "role manager enabled");
+        (bytes32 storedChainHash, uint64 storedRevision) =
+            registry.roleManagerConfigMutationState(account);
+        chainHash.assertEq(storedChainHash, "role manager config chain");
+        uint256(revision).assertEq(uint256(storedRevision), "role manager config revision");
     }
 
     function _rootGrant(bytes32 role, address account) private {

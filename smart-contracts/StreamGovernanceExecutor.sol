@@ -27,6 +27,10 @@ contract StreamGovernanceExecutor is
     Ownable,
     ReentrancyGuard
 {
+    uint256 private constant MAX_GOVERNANCE_REVERT_DATA_BYTES = 4_096;
+    uint256 private constant MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 64;
+    uint256 private constant MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 48;
+    uint256 private constant MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER = 8;
     /// @notice Batch calls-hash domain pinned by ADR 0004 [GOV-ACTION-ID].
     bytes32 private constant STREAM_GOVERNANCE_CALLS_V2 =
         0x10f09566fb70f7947b61639c2a53b3aec872069a8b46edd08ba14eb2b5942b70;
@@ -139,7 +143,7 @@ contract StreamGovernanceExecutor is
         _manifest.governanceRootRevision = newRevision;
         _transferOwnership(newRoot);
         emit GovernanceRootRotated(
-            oldRoot, newRoot, expectedCodeHash, newRevision, _currentActionId
+            SCHEMA_VERSION, oldRoot, newRoot, expectedCodeHash, newRevision, _currentActionId
         );
     }
 
@@ -408,18 +412,12 @@ contract StreamGovernanceExecutor is
         if (action.status != GovernanceActionStatus.SCHEDULED) {
             revert GovernanceActionNotScheduled(actionId);
         }
-        if (!_manifest.isSealed) {
-            if (msg.sender != genesisBootstrapAuthority && msg.sender != action.proposer) {
-                revert GovernanceActorNotAuthorized(msg.sender);
-            }
-        } else {
-            bool rootAuthorized = msg.sender == owner();
-            if (rootAuthorized) _requireGovernanceRootCodeHash();
-            if (!rootAuthorized && !_admin.cancellers[msg.sender] && msg.sender != action.proposer)
-            {
-                revert GovernanceActorNotAuthorized(msg.sender);
-            }
+        if (block.timestamp > action.expiresAfter) {
+            revert GovernanceActionExpiredWindow(actionId, action.expiresAfter);
         }
+        StreamGovernanceManifest.requireCancellationAuthority(
+            _manifest, _admin, action, genesisBootstrapAuthority, this.registerCanceller.selector
+        );
         action.status = GovernanceActionStatus.CANCELLED;
         action.canceller = msg.sender;
         _pendingScheduledActionCount -= 1;
@@ -539,22 +537,99 @@ contract StreamGovernanceExecutor is
         returns (address guardian, uint64 vetoDeadline)
     {
         _requireBoundRoleRegistry();
-        // Per-scope holder resolves first; fall back to a single global holder.
-        // Anything other than exactly one candidate returns the zero-address
-        // sentinel (never holder[0] paired with a live deadline).
+        // Per-scope and global holders are additive. Resolve an address only
+        // when their deduplicated union contains exactly one holder; otherwise
+        // return the sentinel and let callers enumerate the two role sets.
         bytes32 scopeRole = terminalFreezeVetoRole(scopeHash);
         uint256 scopeHolders = _manifest.roleRegistry.roleHolderCount(scopeRole);
-        if (scopeHolders == 1) {
-            guardian = _manifest.roleRegistry.roleHolderAt(scopeRole, 0);
-        } else if (scopeHolders == 0) {
-            if (_manifest.roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 1)
-            {
-                guardian =
-                    _manifest.roleRegistry.roleHolderAt(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, 0);
+        uint256 globalHolders =
+            _manifest.roleRegistry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO);
+        if (scopeHolders <= 1 && globalHolders <= 1) {
+            address scopedGuardian =
+                scopeHolders == 1 ? _manifest.roleRegistry.roleHolderAt(scopeRole, 0) : address(0);
+            address globalGuardian = globalHolders == 1
+                ? _manifest.roleRegistry.roleHolderAt(StreamRoles.ROLE_TERMINAL_FREEZE_VETO, 0)
+                : address(0);
+            if (scopedGuardian == address(0) || globalGuardian == address(0)) {
+                guardian = scopedGuardian == address(0) ? globalGuardian : scopedGuardian;
+            } else if (scopedGuardian == globalGuardian) {
+                guardian = scopedGuardian;
             }
         }
         // Earliest-deadline live action so a later decoy never shadows it.
         vetoDeadline = StreamGovernanceBootstrap.earliestTerminalFreezeDeadline(_policy, scopeHash);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function terminalFreezeVetoGuardianSet(bytes32 scopeHash)
+        external
+        view
+        override
+        returns (
+            address roleRegistryAddress,
+            bytes32 scopedRole,
+            uint256 scopedHolderCount,
+            bytes32 globalRole,
+            uint256 globalHolderCount,
+            uint64 vetoDeadline
+        )
+    {
+        _requireBoundRoleRegistry();
+        roleRegistryAddress = address(_manifest.roleRegistry);
+        scopedRole = terminalFreezeVetoRole(scopeHash);
+        globalRole = StreamRoles.ROLE_TERMINAL_FREEZE_VETO;
+        scopedHolderCount = _manifest.roleRegistry.roleHolderCount(scopedRole);
+        globalHolderCount = _manifest.roleRegistry.roleHolderCount(globalRole);
+        vetoDeadline = StreamGovernanceBootstrap.earliestTerminalFreezeDeadline(_policy, scopeHash);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function terminalFreezeLiveActionCaps()
+        external
+        pure
+        override
+        returns (uint256 totalCap, uint256 nonRootCap, uint256 perNonRootProposerCap)
+    {
+        return (
+            MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE,
+            MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE,
+            MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function terminalFreezeLiveActionUsage(bytes32 scopeHash, address proposer)
+        external
+        view
+        override
+        returns (uint256 totalMemberships, uint256 nonRootMemberships, uint256 proposerMemberships)
+    {
+        return (
+            _policy.terminalLiveActions[scopeHash].length,
+            _policy.terminalNonRootLiveCount[scopeHash],
+            _policy.terminalProposerLiveCount[scopeHash][proposer]
+        );
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function pruneElapsedTerminalFreezeActions(bytes32 scopeHash)
+        external
+        override
+        returns (uint256 prunedCount)
+    {
+        prunedCount =
+            StreamGovernanceBootstrap.pruneElapsedTerminalFreezeActions(_policy, scopeHash);
+    }
+
+    /// @inheritdoc IStreamGovernanceExecutor
+    function terminalFreezeActionPage(bytes32 scopeHash, uint256 cursor, uint256 limit)
+        external
+        view
+        override
+        returns (bytes32[] memory actionIds, uint64[] memory vetoDeadlines, uint256 nextCursor)
+    {
+        (actionIds, vetoDeadlines, nextCursor) =
+            StreamGovernanceBootstrap.terminalFreezeActionPage(_policy, scopeHash, cursor, limit);
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
@@ -802,17 +877,11 @@ contract StreamGovernanceExecutor is
         StreamGovernanceManifest.bind(
             _manifest,
             _policy,
-            _admin,
             binding,
             StreamGovernanceManifest.BindContext({
                 genesisBootstrapAuthority: genesisBootstrapAuthority,
                 governanceNonce: _nonce,
-                pendingScheduledActionCount: _pendingScheduledActionCount,
-                proposerSelector: this.registerProposer.selector,
-                cancellerSelector: this.registerCanceller.selector,
-                nativeReceiverSelector: this.setApprovedNativeReceiver.selector,
-                tighteningSelector: this.setTighteningCall.selector,
-                freezeSelector: this.registerFreezeSelector.selector
+                pendingScheduledActionCount: _pendingScheduledActionCount
             })
         );
     }
@@ -895,8 +964,9 @@ contract StreamGovernanceExecutor is
         if (_executing) revert GovernanceSchedulingDuringExecution();
         bool bootstrapAuthority =
             _manifest.bound && !_manifest.isSealed && msg.sender == genesisBootstrapAuthority;
+        bool privilegedProposer = bootstrapAuthority || msg.sender == owner();
         if (_manifest.isSealed) _requireGovernanceRootCodeHash();
-        if (!bootstrapAuthority && msg.sender != owner() && !_admin.proposers[msg.sender]) {
+        if (!privilegedProposer && !_admin.proposers[msg.sender]) {
             revert GovernanceActorNotAuthorized(msg.sender);
         }
         if (!_manifest.bound) {
@@ -930,16 +1000,24 @@ contract StreamGovernanceExecutor is
             revert BatchNewValueHashMismatch(derivedNewValueHash, ctx.newValueHash);
         }
         _validateWindow(ctx.actionClass, ctx.notBefore, ctx.expiresAfter);
-        _validateManifestTailComposition(msg.sender, ctx.actionClass, calls, !_manifest.isSealed);
+        uint256 nonceUsed = _nonce;
+        actionId = _computeActionId(ctx, callsHash, nonceUsed);
+        _validateManifestTailComposition(
+            actionId,
+            msg.sender,
+            ctx.actionClass,
+            calls,
+            !_manifest.isSealed,
+            true,
+            privilegedProposer
+        );
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
             _requireBoundRoleRegistry();
             StreamGovernanceBootstrap.validateTerminalFreezeGuardians(_manifest.roleRegistry, calls);
         }
 
-        uint256 nonceUsed = _nonce;
         _nonce = nonceUsed + 1;
-        actionId = _computeActionId(ctx, callsHash, nonceUsed);
 
         GovernanceAction storage action = _actions[actionId];
         if (action.status != GovernanceActionStatus.NONE) {
@@ -968,13 +1046,17 @@ contract StreamGovernanceExecutor is
         _pendingScheduledActionCount += 1;
 
         if (ctx.actionClass == StreamGovernanceActionClasses.TERMINAL_FREEZE) {
-            StreamGovernanceBootstrap.appendTerminalFreeze(_policy, actionId, ctx.notBefore, calls);
+            StreamGovernanceBootstrap.appendTerminalFreeze(
+                _policy, actionId, ctx.notBefore, calls, msg.sender, privilegedProposer
+            );
             bytes32 guardianConfigCommitment =
                 StreamGovernancePolicy.terminalFreezeGuardianConfigCommitment(
                     _manifest.roleRegistry, calls
                 );
             _terminalFreezeGuardianConfigCommitments[actionId] = guardianConfigCommitment;
-            emit TerminalFreezeGuardianConfigCommitted(actionId, guardianConfigCommitment);
+            emit TerminalFreezeGuardianConfigCommitted(
+                SCHEMA_VERSION, actionId, guardianConfigCommitment
+            );
         }
 
         StreamGovernanceBootstrap.emitActionScheduled(
@@ -1082,18 +1164,25 @@ contract StreamGovernanceExecutor is
     }
 
     function _validateManifestTailComposition(
+        bytes32 actionId,
         address proposer,
         uint8 actionClass,
         GovernanceCall[] memory calls,
-        bool bootstrapScoped
-    ) private view {
+        bool bootstrapScoped,
+        bool scheduling,
+        bool privilegedProposer
+    ) private {
         StreamGovernanceManifest.validateManifestTailComposition(
             _policy,
+            _admin,
             _manifest,
+            actionId,
             proposer,
             actionClass,
             calls,
             bootstrapScoped,
+            scheduling,
+            privilegedProposer,
             this.sealSystemManifestBootstrap.selector,
             this.registerSystemManifestTailTrigger.selector,
             this.registerEmergencyRestorationEligibility.selector
@@ -1175,7 +1264,7 @@ contract StreamGovernanceExecutor is
             && calls[0].target == address(this)
             && calls[0].selector == this.sealSystemManifestBootstrap.selector;
         _validateManifestTailComposition(
-            action.proposer, action.actionClass, calls, !_manifest.isSealed
+            actionId, action.proposer, action.actionClass, calls, !_manifest.isSealed, false, false
         );
         if (!_manifest.isSealed && action.proposer != genesisBootstrapAuthority) {
             revert GenesisBootstrapActorRequired(action.proposer);
@@ -1211,6 +1300,10 @@ contract StreamGovernanceExecutor is
         _currentActionClass = action.actionClass;
         _currentBatchLength = calls.length;
 
+        // Governed targets observe these values through currentAction() during
+        // each call. Clearing them immediately afterward is the security
+        // boundary, not a redundant write.
+        // slither-disable-start write-after-write
         for (uint256 i = 0; i < calls.length; i++) {
             _currentCallIndex = i;
             _currentScopeHash = calls[i].scopeHash;
@@ -1221,6 +1314,7 @@ contract StreamGovernanceExecutor is
             _currentOldValueHash = bytes32(0);
             _currentNewValueHash = bytes32(0);
         }
+        // slither-disable-end write-after-write
 
         if (bootstrapSeal) {
             emit SystemManifestBootstrapSealed(
@@ -1276,14 +1370,28 @@ contract StreamGovernanceExecutor is
         } else if (call_.target.code.length == 0) {
             revert TargetHasNoCode(callIndex, call_.target);
         }
-        (bool success, bytes memory returnData) = call_.target.call{ value: call_.value }(callData);
-        if (!success) {
-            if (returnData.length > 0) {
-                assembly ("memory-safe") {
-                    revert(add(returnData, 0x20), mload(returnData))
-                }
-            }
-            revert GovernanceCallFailed(actionId, callIndex);
+        address target = call_.target;
+        uint256 value = call_.value;
+        bool success;
+        uint256 returnDataBytes;
+        assembly ("memory-safe") {
+            // Successful governed calls have no return-value contract. Use a
+            // zero-sized output buffer so a target cannot force the Executor
+            // to allocate or copy an unbounded success payload.
+            success := call(gas(), target, value, add(callData, 0x20), mload(callData), 0x00, 0x00)
+            returnDataBytes := returndatasize()
+        }
+        if (success) return;
+        if (returnDataBytes == 0) revert GovernanceCallFailed(actionId, callIndex);
+        if (returnDataBytes > MAX_GOVERNANCE_REVERT_DATA_BYTES) {
+            revert GovernanceCallReturndataTooLarge(
+                actionId, callIndex, returnDataBytes, MAX_GOVERNANCE_REVERT_DATA_BYTES
+            );
+        }
+        assembly ("memory-safe") {
+            let returnData := mload(0x40)
+            returndatacopy(returnData, 0x00, returnDataBytes)
+            revert(returnData, returnDataBytes)
         }
     }
 

@@ -1291,9 +1291,7 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
         // forge-lint: disable-next-line(unsafe-typecast)
         uint64 notBefore = uint64(safeBoundary + 48 hours);
         StreamGovernanceBootstrap.validateActionWindow(
-            StreamGovernanceActionClasses.DELAYED_LOOSENING,
-            notBefore,
-            notBefore + 7 days
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, notBefore, notBefore + 7 days
         );
 
         uint256 unsafeTimestamp = safeBoundary + 1;
@@ -1304,9 +1302,7 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
             )
         );
         StreamGovernanceBootstrap.validateActionWindow(
-            StreamGovernanceActionClasses.DELAYED_LOOSENING,
-            notBefore,
-            notBefore + 7 days
+            StreamGovernanceActionClasses.DELAYED_LOOSENING, notBefore, notBefore + 7 days
         );
     }
 
@@ -2822,6 +2818,11 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
     uint256 private constant POINTER_ROWS = 32;
     uint256 private constant REGISTRY_ROWS = 8;
     uint256 private constant BIND_GAS_CEILING = 24_000_000;
+    bytes32 private constant STREAM_ROLE_GRANTED_TOPIC =
+        keccak256("StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)");
+    bytes32 private constant ROLE_MUTATION_COMMITTED_TOPIC = keccak256(
+        "RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)"
+    );
 
     event MaximumBootstrapBindGas(uint256 gasUsed);
 
@@ -2938,6 +2939,74 @@ contract StreamGovernanceBootstrapBindGasTest is StreamGovernanceBootstrapTestBa
             registry.roleHolderCount(StreamRoles.ROLE_TERMINAL_FREEZE_VETO) == 2,
             "both guardian grants committed"
         );
+    }
+
+    function testBootstrapGuardianGrantEventsUseZeroActionIdSentinel() public {
+        BindSetup memory setup = _buildBindSetup(false);
+        address roleRegistry = setup.binding.roleRegistry;
+        address[] memory guardians = setup.binding.initialTerminalFreezeVetoGuardians;
+
+        vm.recordLogs();
+        setup.executor.bindSystemManifestBootstrap(setup.binding);
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+
+        uint256 grantedMask;
+        uint256 mutationMask;
+        for (uint256 i = 0; i < logs.length; i++) {
+            Vm.Log memory log = logs[i];
+            if (log.emitter != roleRegistry || log.topics.length != 4) continue;
+            if (log.topics[0] == STREAM_ROLE_GRANTED_TOPIC) {
+                require(
+                    log.topics[1] == StreamRoles.ROLE_TERMINAL_FREEZE_VETO, "bootstrap grant role"
+                );
+                require(log.topics[3] == bytes32(0), "bootstrap grant action sentinel");
+                uint256 guardianBit = _bootstrapGuardianBit(log.topics[2], guardians);
+                require((grantedMask & guardianBit) == 0, "duplicate bootstrap grant event");
+                grantedMask |= guardianBit;
+                (uint16 schemaVersion, uint8 grantClass, address actor) =
+                    abi.decode(log.data, (uint16, uint8, address));
+                require(schemaVersion == 1, "bootstrap grant schema");
+                require(grantClass == StreamRoles.GRANT_CLASS_ROOT, "bootstrap grant class");
+                require(actor == address(setup.executor), "bootstrap grant actor");
+            } else if (log.topics[0] == ROLE_MUTATION_COMMITTED_TOPIC) {
+                require(
+                    log.topics[1] == StreamRoles.ROLE_TERMINAL_FREEZE_VETO,
+                    "bootstrap mutation role"
+                );
+                require(log.topics[3] == bytes32(0), "bootstrap mutation action sentinel");
+                uint256 guardianBit = _bootstrapGuardianBit(log.topics[2], guardians);
+                require((mutationMask & guardianBit) == 0, "duplicate bootstrap mutation event");
+                mutationMask |= guardianBit;
+                (
+                    uint16 schemaVersion,
+                    bool granted,
+                    bytes32 roleChainHash,
+                    uint64 roleRevision,
+                    bytes32 globalChainHash,
+                    uint64 globalRevision
+                ) = abi.decode(log.data, (uint16, bool, bytes32, uint64, bytes32, uint64));
+                require(schemaVersion == 1, "bootstrap mutation schema");
+                require(granted, "bootstrap mutation membership");
+                require(
+                    roleChainHash != bytes32(0) && globalChainHash != bytes32(0),
+                    "bootstrap mutation chains"
+                );
+                require(roleRevision != 0 && globalRevision != 0, "bootstrap mutation revisions");
+            }
+        }
+        require(grantedMask == 3, "both bootstrap grant events");
+        require(mutationMask == 3, "both bootstrap mutation events");
+    }
+
+    function _bootstrapGuardianBit(bytes32 holderTopic, address[] memory guardians)
+        private
+        pure
+        returns (uint256)
+    {
+        require(guardians.length == 2, "bootstrap guardian fixture");
+        if (holderTopic == bytes32(uint256(uint160(guardians[0])))) return 1;
+        if (holderTopic == bytes32(uint256(uint160(guardians[1])))) return 2;
+        revert("unexpected bootstrap guardian event");
     }
 
     function testLaterGuardianGrantFailureRollsBackEntireBind() public {

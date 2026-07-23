@@ -60,7 +60,8 @@ interface IStreamRoleRegistry {
         bytes32 indexed role,
         address indexed holder,
         uint8 grantClass,
-        address indexed actor
+        address actor,
+        bytes32 indexed actionId
     );
 
     event StreamRoleRevoked(
@@ -68,10 +69,19 @@ interface IStreamRoleRegistry {
         bytes32 indexed role,
         address indexed holder,
         uint8 grantClass,
-        address indexed actor
+        address actor,
+        bytes32 indexed actionId
     );
 
-    event RoleManagerUpdated(address indexed account, bool enabled, address indexed admin);
+    event RoleManagerUpdated(
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        address indexed admin,
+        bytes32 configChainHash,
+        uint64 configRevision,
+        bytes32 indexed actionId
+    );
 
     /// @notice Emitted for every successful role-holder mutation.
     /// @dev `roleChainHash` is scoped to `role`; `globalChainHash` commits to
@@ -79,13 +89,15 @@ interface IStreamRoleRegistry {
     ///      monotonic, so a holder set that returns A -> B -> A remains
     ///      distinguishable from the original A state.
     event RoleMutationCommitted(
+        uint16 schemaVersion,
         bytes32 indexed role,
         address indexed holder,
         bool granted,
         bytes32 roleChainHash,
         uint64 roleRevision,
         bytes32 globalChainHash,
-        uint64 globalRevision
+        uint64 globalRevision,
+        bytes32 indexed actionId
     );
 
     /// @notice ERC-165 identity used by executor-first bootstrap binding.

@@ -51,6 +51,7 @@ library StreamGovernanceManifest {
         bytes32[] pointerTypes;
         address[] registries;
         bytes32[] registryCodeHashes;
+        mapping(bytes32 => uint64) controlPlaneActionRootRevisions;
     }
 
     struct BootstrapStateView {
@@ -86,11 +87,6 @@ library StreamGovernanceManifest {
         address genesisBootstrapAuthority;
         uint256 governanceNonce;
         uint256 pendingScheduledActionCount;
-        bytes4 proposerSelector;
-        bytes4 cancellerSelector;
-        bytes4 nativeReceiverSelector;
-        bytes4 tighteningSelector;
-        bytes4 freezeSelector;
     }
 
     struct SealContext {
@@ -132,7 +128,6 @@ library StreamGovernanceManifest {
     function bind(
         LifecycleState storage state,
         StreamGovernanceBootstrap.PolicyState storage policy,
-        StreamGovernancePolicy.AdminState storage admin,
         SystemManifestBootstrapBinding calldata binding,
         BindContext memory ctx
     ) public {
@@ -227,15 +222,6 @@ library StreamGovernanceManifest {
         // phase; keep `bound` false until that phase is complete so callbacks
         // cannot publish or schedule against partial lifecycle state.
         state.bound = true;
-        StreamGovernancePolicy.seedExecutorClassifiers(
-            policy,
-            admin,
-            ctx.proposerSelector,
-            ctx.cancellerSelector,
-            ctx.nativeReceiverSelector,
-            ctx.tighteningSelector,
-            ctx.freezeSelector
-        );
         requireBootstrapCodeHashes(state);
         computeInventoryState(state);
 
@@ -386,16 +372,22 @@ library StreamGovernanceManifest {
 
     function validateManifestTailComposition(
         StreamGovernanceBootstrap.PolicyState storage policy,
+        StreamGovernancePolicy.AdminState storage admin,
         LifecycleState storage state,
+        bytes32 actionId,
         address proposer,
         uint8 actionClass,
         GovernanceCall[] memory calls,
         bool bootstrapScoped,
+        bool scheduling,
+        bool privilegedProposer,
         bytes4 sealSelector,
         bytes4 registerTailSelector,
         bytes4 registerEmergencySelector
-    ) public view {
-        _validateControlPlaneAuthority(state, proposer, actionClass, calls, sealSelector);
+    ) public {
+        bool controlPlaneAction = _validateControlPlaneAuthority(
+            state, proposer, actionClass, calls, sealSelector
+        );
         StreamGovernanceBootstrap.validateManifestTailComposition(
             policy,
             actionClass,
@@ -409,6 +401,15 @@ library StreamGovernanceManifest {
             registerTailSelector,
             registerEmergencySelector
         );
+        if (scheduling) {
+            _snapshotControlPlaneRootRevision(state, actionId, controlPlaneAction);
+            StreamGovernancePolicy.snapshotActionProposerRevision(
+                admin, actionId, proposer, privilegedProposer
+            );
+        } else {
+            if (controlPlaneAction) _requireControlPlaneRootRevision(state, actionId);
+            StreamGovernancePolicy.requireActionProposerRevision(admin, actionId, proposer);
+        }
     }
 
     /// @dev Scans the complete batch before the manifest-tail validator can
@@ -423,13 +424,14 @@ library StreamGovernanceManifest {
         uint8 actionClass,
         GovernanceCall[] memory calls,
         bytes4 bootstrapSealSelector
-    ) private view {
+    ) private view returns (bool controlPlaneAction) {
         for (uint256 i = 0; i < calls.length; i++) {
             GovernanceCall memory call_ = calls[i];
             bool executorControl = call_.target == address(this)
                 && (state.isSealed || call_.selector != bootstrapSealSelector);
             bool roleRegistryControl = call_.target == address(state.roleRegistry);
             if (!executorControl && !roleRegistryControl) continue;
+            controlPlaneAction = true;
             if (roleRegistryControl) {
                 bytes32 actualRoleRegistryCodeHash = call_.target.codehash;
                 if (actualRoleRegistryCodeHash != state.roleRegistryCodeHash) {
@@ -452,6 +454,54 @@ library StreamGovernanceManifest {
             ) {
                 revert IStreamGovernanceExecutor.RoleRegistryDelayedActionRequired(actionClass);
             }
+        }
+    }
+
+    function _snapshotControlPlaneRootRevision(
+        LifecycleState storage state,
+        bytes32 actionId,
+        bool controlPlaneAction
+    ) private {
+        if (controlPlaneAction) {
+            state.controlPlaneActionRootRevisions[actionId] = state.governanceRootRevision;
+        }
+    }
+
+    function _requireControlPlaneRootRevision(LifecycleState storage state, bytes32 actionId)
+        private
+        view
+    {
+        uint64 expected = state.controlPlaneActionRootRevisions[actionId];
+        uint64 actual = state.governanceRootRevision;
+        if (expected == 0 || expected != actual) {
+            revert IStreamGovernanceExecutor.GovernanceRootRevisionMismatch(
+                actionId, expected, actual
+            );
+        }
+    }
+
+    function requireCancellationAuthority(
+        LifecycleState storage state,
+        StreamGovernancePolicy.AdminState storage admin,
+        GovernanceAction storage action,
+        address genesisBootstrapAuthority,
+        bytes4 registerCancellerSelector
+    ) public view {
+        if (!state.isSealed) {
+            if (msg.sender != genesisBootstrapAuthority && msg.sender != action.proposer) {
+                revert IStreamGovernanceExecutor.GovernanceActorNotAuthorized(msg.sender);
+            }
+            return;
+        }
+        bool rootAuthorized = msg.sender == state.governanceRoot;
+        if (rootAuthorized) requireGovernanceRootCodeHash(state);
+        bool proposerAuthorized = msg.sender == action.proposer;
+        bool registeredCanceller = admin.cancellers[msg.sender];
+        bool cancellerRemoval = action.target == address(this)
+            && action.selector == registerCancellerSelector
+            && action.actionClass == StreamGovernanceActionClasses.DELAYED_LOOSENING;
+        if (!rootAuthorized && !proposerAuthorized && (!registeredCanceller || cancellerRemoval)) {
+            revert IStreamGovernanceExecutor.GovernanceActorNotAuthorized(msg.sender);
         }
     }
 
