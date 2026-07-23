@@ -135,7 +135,7 @@ def reviewed_artifact() -> str:
 - CI run or operator transcript: `ci-run-123`
 - Fork/testnet block or reference: `fork block 25316366`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001`
-- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local dry-run ceremony scripts`
+- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir`
 
 ## Participants And Governance
 

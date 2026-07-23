@@ -178,7 +178,7 @@ def reviewed_artifact() -> str:
         "CI run or operator transcript: `TBD`": "CI run or operator transcript: `ci-run-123`",
         "Fork/testnet block or reference: `TBD`": "Fork/testnet block or reference: `fork block 25316366`",
         "Network and deployment version: `TBD`": "Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001`",
-        "Command: `TBD`": 'Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir plus retained local randomizer lifecycle and reserve tests`',
+        "Command: `TBD`": 'Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir`',
         "VRF adapter: `TBD`": "VRF adapter: `0x0000000000000000000000000000000000000008`",
         "VRF coordinator: `TBD`": "VRF coordinator: `0x0000000000000000000000000000000000006535`",
         "VRF provider epoch: `TBD`": "VRF provider epoch: `1`",
