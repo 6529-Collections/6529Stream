@@ -8,6 +8,7 @@ import json
 import re
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 from unittest import mock
@@ -146,6 +147,12 @@ class MaterializerFixture:
                 "forge_version": "test",
                 "forge_version_sha256": ZERO_SHA256,
                 "sanitized_environment_prefixes": ["DAPP_", "FOUNDRY_"],
+                "restricted_source_roots": ["script", "test"],
+                "portable_compiler_paths": {
+                    "basePath": ".",
+                    "includePaths": ["."],
+                    "allowPaths": [".", "lib"],
+                },
             },
             "targets": [target],
         }
@@ -224,14 +231,32 @@ class MaterializerFixture:
         }
         write_json(self.candidate_path, self.candidate)
 
+    def file_snapshot(
+        self,
+        path: Path,
+    ) -> materializer.release_build.ReleaseFileSnapshot:
+        resolved = path.resolve()
+        raw = resolved.read_bytes()
+        return materializer.release_build.ReleaseFileSnapshot(
+            path=resolved,
+            raw=raw,
+            sha256=materializer.sha256_bytes(raw),
+        )
+
     def validator(
         self,
         _repo_root: Path,
-        _config_path: Path,
-        _foundry_config_path: Path,
+        config_path: Path,
+        foundry_config_path: Path,
         _output_dir: Path,
-    ) -> dict[str, Any]:
-        return copy.deepcopy(self.receipt)
+    ) -> materializer.release_build.ValidatedReleaseOutput:
+        return materializer.release_build.ValidatedReleaseOutput(
+            receipt=copy.deepcopy(self.receipt),
+            receipt_snapshot=self.file_snapshot(self.receipt_path),
+            config_snapshot=self.file_snapshot(config_path),
+            foundry_config_snapshot=self.file_snapshot(foundry_config_path),
+            artifact_snapshots=(self.file_snapshot(self.artifact_path),),
+        )
 
     def materialize(self) -> dict[str, Any]:
         return materializer.materialize_deployment_plan(
@@ -312,7 +337,7 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
         )
         self.assertEqual(
             first["generated_by"],
-            "scripts/materialize_canonical_deployment_plan.py:2",
+            "scripts/materialize_canonical_deployment_plan.py:3",
         )
         self.assertFalse(first["release_posture"]["production_candidate"])
         self.assertFalse(first["release_posture"]["readiness_evidence"])
@@ -343,6 +368,200 @@ class CanonicalDeploymentPlanTests(unittest.TestCase):
             deployment["libraries"][0]["runtime_positions"],
             [{"start": 1, "length": 20}],
         )
+
+    def test_reads_each_bound_input_once_and_reuses_artifact_snapshot(
+        self,
+    ) -> None:
+        duplicate = copy.deepcopy(self.fixture.candidate["instances"][0])
+        duplicate["order"] = 2
+        duplicate["instance_id"] = "fixture-copy"
+        self.fixture.candidate["instances"].append(duplicate)
+        self.fixture.write_candidate()
+
+        tracked_paths = {
+            self.fixture.candidate_path.resolve(),
+            self.fixture.receipt_path.resolve(),
+            (
+                self.root / "release-artifacts" / "contracts.json"
+            ).resolve(),
+            (self.root / "foundry.toml").resolve(),
+            self.fixture.artifact_path.resolve(),
+        }
+        read_counts = {path: 0 for path in tracked_paths}
+        original_read_bytes = Path.read_bytes
+
+        def counted_read_bytes(path: Path) -> bytes:
+            resolved = path.resolve()
+            if resolved in read_counts:
+                read_counts[resolved] += 1
+            return original_read_bytes(path)
+
+        with mock.patch.object(
+            Path,
+            "read_bytes",
+            new=counted_read_bytes,
+        ):
+            plan = self.fixture.materialize()
+
+        self.assertEqual(len(plan["deployments"]), 2)
+        self.assertEqual(
+            read_counts,
+            {path: 1 for path in tracked_paths},
+        )
+
+    def test_post_validation_disk_mutation_cannot_change_plan(self) -> None:
+        expected = self.fixture.materialize()
+
+        def validator_then_mutate(
+            repo_root: Path,
+            config_path: Path,
+            foundry_config_path: Path,
+            output_dir: Path,
+        ) -> materializer.release_build.ValidatedReleaseOutput:
+            validated = self.fixture.validator(
+                repo_root,
+                config_path,
+                foundry_config_path,
+                output_dir,
+            )
+            self.fixture.candidate_path.write_bytes(b"not-json")
+            self.fixture.receipt_path.write_bytes(b"not-json")
+            config_path.write_bytes(b"not-json")
+            foundry_config_path.write_bytes(b"not-toml")
+            self.fixture.artifact_path.write_bytes(b"not-json")
+            return validated
+
+        actual = materializer.materialize_deployment_plan(
+            self.root,
+            self.fixture.candidate_path,
+            receipt_validator=validator_then_mutate,
+        )
+        self.assertEqual(actual, expected)
+
+    def test_rejects_forged_release_snapshots(self) -> None:
+        validated = self.fixture.validator(
+            self.root,
+            self.root / "release-artifacts" / "contracts.json",
+            self.root / "foundry.toml",
+            self.root / "out-release",
+        )
+        extra_path = (self.root / "out-release" / "extra.json").resolve()
+        cases = (
+            (
+                "receipt path",
+                replace(
+                    validated,
+                    receipt_snapshot=replace(
+                        validated.receipt_snapshot,
+                        path=extra_path,
+                    ),
+                ),
+                "receipt snapshot path mismatch",
+            ),
+            (
+                "receipt digest",
+                replace(
+                    validated,
+                    receipt_snapshot=replace(
+                        validated.receipt_snapshot,
+                        sha256=ZERO_SHA256,
+                    ),
+                ),
+                "receipt snapshot digest mismatch",
+            ),
+            (
+                "parsed receipt",
+                replace(
+                    validated,
+                    receipt={"forged": True},
+                ),
+                "receipt snapshot disagrees",
+            ),
+            (
+                "missing artifact",
+                replace(validated, artifact_snapshots=()),
+                "snapshot set is incomplete",
+            ),
+            (
+                "mutable artifact collection",
+                replace(
+                    validated,
+                    artifact_snapshots=list(validated.artifact_snapshots),
+                ),
+                "snapshots are not an immutable tuple",
+            ),
+            (
+                "duplicate artifact",
+                replace(
+                    validated,
+                    artifact_snapshots=(
+                        validated.artifact_snapshots[0],
+                        validated.artifact_snapshots[0],
+                    ),
+                ),
+                "snapshot set contains a duplicate path",
+            ),
+            (
+                "unexpected artifact",
+                replace(
+                    validated,
+                    artifact_snapshots=(
+                        *validated.artifact_snapshots,
+                        materializer.release_build.ReleaseFileSnapshot(
+                            path=extra_path,
+                            raw=b"{}\n",
+                            sha256=materializer.sha256_bytes(b"{}\n"),
+                        ),
+                    ),
+                ),
+                "snapshot set contains an unexpected path",
+            ),
+        )
+        for label, forged, pattern in cases:
+            with self.subTest(label=label):
+                with self.assertRaisesRegex(
+                    materializer.DeploymentPlanError,
+                    pattern,
+                ):
+                    materializer.materialize_deployment_plan(
+                        self.root,
+                        self.fixture.candidate_path,
+                        receipt_validator=lambda *_args, result=forged: result,
+                    )
+
+    def test_strictly_decodes_carried_receipt_and_artifact_snapshots(
+        self,
+    ) -> None:
+        duplicate_receipt = (
+            b'{"schema_version":"one","schema_version":"two"}'
+        )
+        self.fixture.receipt_path.write_bytes(duplicate_receipt)
+        self.fixture.candidate["release_build"]["receipt_sha256"] = (
+            materializer.sha256_bytes(duplicate_receipt)
+        )
+        self.fixture.write_candidate()
+        self.assert_materialization_fails("duplicate JSON member")
+
+        self.fixture = MaterializerFixture(self.root / "artifact-json")
+        duplicate_artifact = b'{"abi":[],"abi":[]}'
+        self.fixture.artifact_path.write_bytes(duplicate_artifact)
+        artifact_sha256 = materializer.sha256_bytes(duplicate_artifact)
+        self.fixture.receipt["targets"][0][
+            "artifact_sha256"
+        ] = artifact_sha256
+        self.fixture.candidate["instances"][0]["target"][
+            "artifact_sha256"
+        ] = artifact_sha256
+        write_json(self.fixture.receipt_path, self.fixture.receipt)
+        binding = self.fixture.candidate["release_build"]
+        binding["receipt_sha256"] = materializer.file_sha256(
+            self.fixture.receipt_path
+        )
+        binding["target_catalog_sha256"] = (
+            materializer.target_catalog_sha256(self.fixture.receipt)
+        )
+        self.fixture.write_candidate()
+        self.assert_materialization_fails("duplicate JSON member")
 
     def test_refuses_production_and_readiness_claims(self) -> None:
         self.fixture.candidate["production_candidate"] = True

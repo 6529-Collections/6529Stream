@@ -1266,9 +1266,13 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                     encoding="utf-8"
                 )
             )
+            manifest_path = (
+                paths["output"] / builder.MANIFEST_FILENAME
+            ).resolve()
             tracked_paths = {
                 paths["config"].resolve(),
                 paths["foundry_config"].resolve(),
+                manifest_path,
             }
             for record in manifest["targets"]:
                 tracked_paths.add(
@@ -1280,6 +1284,10 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         / record["compiler_input_relative_path"]
                     ).resolve()
                 )
+            expected_raw = {
+                path: path.read_bytes()
+                for path in tracked_paths
+            }
             read_counts = {path: 0 for path in tracked_paths}
             original_read_bytes = Path.read_bytes
 
@@ -1290,7 +1298,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 return original_read_bytes(path)
 
             with patch.object(Path, "read_bytes", new=counted_read_bytes):
-                builder.validate_release_output(
+                validated = builder.validate_release_output_with_snapshots(
                     root,
                     paths["config"],
                     paths["foundry_config"],
@@ -1301,6 +1309,36 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 read_counts,
                 {path: 1 for path in tracked_paths},
             )
+            carried = (
+                validated.receipt_snapshot,
+                validated.config_snapshot,
+                validated.foundry_config_snapshot,
+                *validated.artifact_snapshots,
+            )
+            carried_by_path = {
+                snapshot.path: snapshot
+                for snapshot in carried
+            }
+            expected_carried_paths = {
+                manifest_path,
+                paths["config"].resolve(),
+                paths["foundry_config"].resolve(),
+                *(
+                    (
+                        paths["output"]
+                        / record["artifact_relative_path"]
+                    ).resolve()
+                    for record in manifest["targets"]
+                ),
+            }
+            self.assertEqual(len(carried), len(expected_carried_paths))
+            self.assertEqual(set(carried_by_path), expected_carried_paths)
+            for path, snapshot in carried_by_path.items():
+                self.assertEqual(snapshot.raw, expected_raw[path])
+                self.assertEqual(
+                    snapshot.sha256,
+                    builder.sha256_bytes(expected_raw[path]),
+                )
 
     def test_validator_rejects_cross_kind_source_binding_conflict_before_reads(
         self,

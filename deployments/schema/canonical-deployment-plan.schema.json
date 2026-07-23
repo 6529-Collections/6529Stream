@@ -19,7 +19,7 @@
       "const": "6529stream.canonical-deployment-plan.v1"
     },
     "generated_by": {
-      "const": "scripts/materialize_canonical_deployment_plan.py:2"
+      "const": "scripts/materialize_canonical_deployment_plan.py:3"
     },
     "release_posture": {
       "type": "object",
@@ -333,7 +333,9 @@
         "foundry_version",
         "forge_version",
         "forge_version_sha256",
-        "sanitized_environment_prefixes"
+        "sanitized_environment_prefixes",
+        "restricted_source_roots",
+        "portable_compiler_paths"
       ],
       "properties": {
         "compilation_unit": {
@@ -393,9 +395,33 @@
         },
         "sanitized_environment_prefixes": {
           "type": "array",
+          "uniqueItems": true,
           "items": {
             "type": "string",
             "minLength": 1
+          }
+        },
+        "restricted_source_roots": {
+          "const": ["script", "test"]
+        },
+        "portable_compiler_paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "basePath",
+            "includePaths",
+            "allowPaths"
+          ],
+          "properties": {
+            "basePath": {
+              "const": "."
+            },
+            "includePaths": {
+              "const": ["."]
+            },
+            "allowPaths": {
+              "const": [".", "lib"]
+            }
           }
         }
       }

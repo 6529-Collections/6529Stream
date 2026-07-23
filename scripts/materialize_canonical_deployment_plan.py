@@ -35,7 +35,7 @@ except ModuleNotFoundError:  # pragma: no cover - exercised only on broken toolc
 
 CANDIDATE_SCHEMA = "6529stream.canonical-deployment-candidate.v1"
 PLAN_SCHEMA = "6529stream.canonical-deployment-plan.v1"
-GENERATOR_VERSION = "2"
+GENERATOR_VERSION = "3"
 DEFAULT_CANDIDATE = Path(
     "deployments/config/canonical-deployment-candidate-non-production.json"
 )
@@ -89,7 +89,7 @@ class DeploymentPlanError(RuntimeError):
 
 ReceiptValidator = Callable[
     [Path, Path, Path, Path],
-    dict[str, Any],
+    release_build.ValidatedReleaseOutput,
 ]
 
 
@@ -163,13 +163,18 @@ def reject_non_unicode_scalars(value: Any, path: str) -> None:
             reject_non_unicode_scalars(item, f"{path}.{key}")
 
 
-def load_json_with_sha256(path: Path) -> tuple[Any, str]:
+def load_json_snapshot(path: Path) -> tuple[Any, bytes, str]:
     """Load and hash one immutable in-memory snapshot of a JSON file."""
     try:
         raw = path.read_bytes()
     except OSError as exc:
         raise DeploymentPlanError(f"cannot read required file {path}: {exc}") from exc
-    return decode_json_bytes(raw, path), sha256_bytes(raw)
+    return decode_json_bytes(raw, path), raw, sha256_bytes(raw)
+
+
+def load_json_with_sha256(path: Path) -> tuple[Any, str]:
+    value, _, digest = load_json_snapshot(path)
+    return value, digest
 
 
 def load_json(path: Path) -> Any:
@@ -333,6 +338,32 @@ def normalize_repo_path(repo_root: Path, value: Path, label: str) -> Path:
         return release_build.resolve_repo_path(repo_root, value, label)
     except release_build.ReleaseBuildError as exc:
         raise DeploymentPlanError(str(exc)) from exc
+
+
+def validate_release_file_snapshot(
+    snapshot: release_build.ReleaseFileSnapshot,
+    expected_path: Path,
+    label: str,
+) -> tuple[bytes, str]:
+    """Validate the identity and digest carried with one immutable snapshot."""
+    if type(snapshot) is not release_build.ReleaseFileSnapshot:
+        raise DeploymentPlanError(f"{label} is not a validated file snapshot")
+    if snapshot.path != expected_path:
+        raise DeploymentPlanError(
+            f"{label} snapshot path mismatch: expected {expected_path}, "
+            f"got {snapshot.path}"
+        )
+    if type(snapshot.raw) is not bytes:
+        raise DeploymentPlanError(f"{label} snapshot bytes are invalid")
+    if type(snapshot.sha256) is not str:
+        raise DeploymentPlanError(f"{label} snapshot digest is invalid")
+    actual_sha256 = sha256_bytes(snapshot.raw)
+    if snapshot.sha256 != actual_sha256:
+        raise DeploymentPlanError(
+            f"{label} snapshot digest mismatch: expected {snapshot.sha256}, "
+            f"got {actual_sha256}"
+        )
+    return snapshot.raw, actual_sha256
 
 
 def format_json_schema_path(parts: Sequence[Any]) -> str:
@@ -831,10 +862,10 @@ def default_receipt_validator(
     config_path: Path,
     foundry_config_path: Path,
     output_dir: Path,
-) -> dict[str, Any]:
-    """Validate the complete #674 receipt, compiler inputs, and artifact set."""
+) -> release_build.ValidatedReleaseOutput:
+    """Validate and retain exact #680 receipt/config/artifact snapshots."""
     try:
-        return release_build.validate_release_output(
+        return release_build.validate_release_output_with_snapshots(
             repo_root,
             config_path,
             foundry_config_path,
@@ -850,7 +881,13 @@ def validate_receipt_binding(
     repo_root: Path,
     candidate: dict[str, Any],
     validator: ReceiptValidator,
-) -> tuple[dict[str, Any], Path, str, list[dict[str, str]]]:
+) -> tuple[
+    dict[str, Any],
+    Path,
+    str,
+    list[dict[str, str]],
+    dict[Path, release_build.ReleaseFileSnapshot],
+]:
     """Validate the canonical receipt and the candidate's exact receipt binding."""
     binding = candidate["release_build"]
     config_path = normalize_repo_path(
@@ -873,29 +910,50 @@ def validate_receipt_binding(
         Path(binding["receipt_path"]),
         "canonical release receipt",
     )
+    validated_output = validator(
+        repo_root,
+        config_path,
+        foundry_config_path,
+        output_dir,
+    )
+    if type(validated_output) is not release_build.ValidatedReleaseOutput:
+        raise DeploymentPlanError(
+            "receipt validator did not return validated release snapshots"
+        )
     validated_receipt = require_dict(
-        validator(repo_root, config_path, foundry_config_path, output_dir),
+        validated_output.receipt,
         "validated release receipt",
     )
 
-    receipt_value, actual_receipt_sha = load_json_with_sha256(receipt_path)
+    receipt_raw, actual_receipt_sha = validate_release_file_snapshot(
+        validated_output.receipt_snapshot,
+        receipt_path,
+        "canonical release receipt",
+    )
+    receipt_value = decode_json_bytes(receipt_raw, receipt_path)
     receipt = require_dict(receipt_value, "canonical release receipt")
     if receipt != validated_receipt:
-        raise DeploymentPlanError(
-            "canonical release receipt changed during validation"
-        )
+        raise DeploymentPlanError("validated release receipt snapshot disagrees")
     if actual_receipt_sha != binding["receipt_sha256"]:
         raise DeploymentPlanError(
             "candidate release receipt hash is stale: "
             f"expected {binding['receipt_sha256']}, got {actual_receipt_sha}"
         )
-    actual_config_sha = file_sha256(config_path)
+    _, actual_config_sha = validate_release_file_snapshot(
+        validated_output.config_snapshot,
+        config_path,
+        "candidate release config",
+    )
     if actual_config_sha != binding["config_sha256"]:
         raise DeploymentPlanError(
             "candidate release config hash is stale: "
             f"expected {binding['config_sha256']}, got {actual_config_sha}"
         )
-    actual_foundry_config_sha = file_sha256(foundry_config_path)
+    _, actual_foundry_config_sha = validate_release_file_snapshot(
+        validated_output.foundry_config_snapshot,
+        foundry_config_path,
+        "candidate Foundry config",
+    )
     if actual_foundry_config_sha != binding["foundry_config_sha256"]:
         raise DeploymentPlanError(
             "candidate Foundry config hash is stale: "
@@ -922,7 +980,63 @@ def validate_receipt_binding(
             "candidate target catalog hash is stale: "
             f"expected {binding['target_catalog_sha256']}, got {actual_catalog_sha}"
         )
-    return receipt, receipt_path, actual_receipt_sha, catalog
+
+    expected_artifact_paths: set[Path] = set()
+    for record in catalog:
+        artifact_path = normalize_repo_path(
+            repo_root,
+            output_dir / Path(record["artifact_relative_path"]),
+            (
+                "validated release artifact "
+                f"{record['source']}:{record['name']}"
+            ),
+        )
+        if artifact_path in expected_artifact_paths:
+            raise DeploymentPlanError(
+                "release receipt contains duplicate artifact path: "
+                f"{artifact_path}"
+            )
+        expected_artifact_paths.add(artifact_path)
+    artifact_snapshots: dict[Path, release_build.ReleaseFileSnapshot] = {}
+    if type(validated_output.artifact_snapshots) is not tuple:
+        raise DeploymentPlanError(
+            "validated release artifact snapshots are not an immutable tuple"
+        )
+    for index, snapshot in enumerate(validated_output.artifact_snapshots):
+        if type(snapshot) is not release_build.ReleaseFileSnapshot:
+            raise DeploymentPlanError(
+                f"validated release artifact snapshot {index} is invalid"
+            )
+        snapshot_path = snapshot.path
+        if snapshot_path not in expected_artifact_paths:
+            raise DeploymentPlanError(
+                "validated release artifact snapshot set contains an "
+                f"unexpected path: {snapshot_path}"
+            )
+        validate_release_file_snapshot(
+            snapshot,
+            snapshot_path,
+            f"validated release artifact snapshot {index}",
+        )
+        if snapshot_path in artifact_snapshots:
+            raise DeploymentPlanError(
+                "validated release artifact snapshot set contains a duplicate "
+                f"path: {snapshot_path}"
+            )
+        artifact_snapshots[snapshot_path] = snapshot
+    if set(artifact_snapshots) != expected_artifact_paths:
+        missing = sorted(expected_artifact_paths - set(artifact_snapshots))
+        raise DeploymentPlanError(
+            "validated release artifact snapshot set is incomplete: "
+            + ", ".join(str(path) for path in missing)
+        )
+    return (
+        receipt,
+        receipt_path,
+        actual_receipt_sha,
+        catalog,
+        artifact_snapshots,
+    )
 
 
 def constructor_inputs(artifact: dict[str, Any], label: str) -> list[dict[str, Any]]:
@@ -1340,6 +1454,7 @@ def materialize_instance(
     repo_root: Path,
     instance: dict[str, Any],
     receipt_targets: dict[tuple[str, str, str], dict[str, str]],
+    artifact_snapshots: dict[Path, release_build.ReleaseFileSnapshot],
 ) -> dict[str, Any]:
     target = instance["target"]
     identity = (target["kind"], target["name"], target["source"])
@@ -1366,12 +1481,22 @@ def materialize_instance(
         raise DeploymentPlanError(
             f"{label} artifact path contaminates a non-canonical output"
         ) from exc
-    artifact_value, actual_artifact_sha = load_json_with_sha256(artifact_path)
+    artifact_snapshot = artifact_snapshots.get(artifact_path)
+    if artifact_snapshot is None:
+        raise DeploymentPlanError(
+            f"{label} artifact is missing from validated release snapshots"
+        )
+    artifact_raw, actual_artifact_sha = validate_release_file_snapshot(
+        artifact_snapshot,
+        artifact_path,
+        f"{label} artifact",
+    )
     if actual_artifact_sha != target["artifact_sha256"]:
         raise DeploymentPlanError(
             f"{label} artifact hash is stale or mutated: "
             f"expected {target['artifact_sha256']}, got {actual_artifact_sha}"
         )
+    artifact_value = decode_json_bytes(artifact_raw, artifact_path)
     artifact = require_dict(artifact_value, str(artifact_path))
 
     inputs = constructor_inputs(artifact, label)
@@ -1534,14 +1659,21 @@ def materialize_deployment_plan(
         candidate_value,
         "deployment candidate",
     )
-    receipt, receipt_path, receipt_sha, catalog = validate_receipt_binding(
-        repo_root,
-        candidate,
-        receipt_validator,
-    )
+    (
+        receipt,
+        receipt_path,
+        receipt_sha,
+        catalog,
+        artifact_snapshots,
+    ) = validate_receipt_binding(repo_root, candidate, receipt_validator)
     targets = receipt_target_map(catalog)
     deployments = [
-        materialize_instance(repo_root, instance, targets)
+        materialize_instance(
+            repo_root,
+            instance,
+            targets,
+            artifact_snapshots,
+        )
         for instance in candidate["instances"]
     ]
     plan = {

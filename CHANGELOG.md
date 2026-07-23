@@ -140,12 +140,19 @@ the release policy in `docs/release-policy.md`.
   artifact hashes, derives constructor ABI encoding plus creation/runtime
   library and immutable ranges, and emits ordered full initcode and expected
   runtime hashes from a pinned Anvil-only `DependencyRegistry` fixture. It
-  enforces the full 49,152-byte EIP-3860 initcode limit, directly pins its
-  `eth-abi` encoder, uses a directly pinned `jsonschema` engine for actual
-  Draft 2020-12 candidate/plan validation, and applies one runtime/schema
-  portable path policy that rejects Windows-invalid controls, characters,
-  device names, dot aliases, and trailing dot/space aliases. It checksum-binds
-  the implementation/tests and runs the unit plus real-fixture
+  carries the exact validated receipt, release-config, Foundry-config, and
+  artifact byte snapshots through plan construction without reopening those
+  files, strictly decodes the carried receipt and artifact JSON, and reuses a
+  single validated artifact snapshot across repeated instances so
+  post-validation filesystem replacement cannot alter the resulting plan.
+  Focused regressions cover exact read counts, post-validation mutation, forged
+  snapshot sets, and ambiguous carried JSON. It enforces the full 49,152-byte
+  EIP-3860 initcode limit,
+  directly pins its `eth-abi` encoder, uses a directly pinned `jsonschema`
+  engine for actual Draft 2020-12 candidate/plan validation, and applies one
+  runtime/schema portable path policy that rejects Windows-invalid controls,
+  characters, device names, dot aliases, and trailing dot/space aliases. It
+  checksum-binds the implementation/tests and runs the unit plus real-fixture
   materialize/reparse-check sequence after canonical builds in the Make, Bash,
   PowerShell, and Linux CI gates. The tool refuses production/readiness flags,
   writes only ephemeral `tmp/` output, and does not add a broadcaster, a strict

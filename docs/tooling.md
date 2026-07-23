@@ -443,13 +443,21 @@ The first issue #677 tooling slice is
 rebuilds, the validated `out-release/release-build-manifest.json` receipt and
 the exact configured artifacts produced by the canonical builder. Before
 materializing any bytecode, it runs the builder's complete
-`validate_release_output(...)` path, then checks the candidate's pinned receipt,
-catalog, release-config, Foundry-config, and artifact hashes. It derives the
-constructor ABI from each receipt-bound artifact, ABI-encodes the declared
-arguments, resolves the artifact's exact creation/runtime library positions
-and runtime immutable positions, and emits ordered full initcode plus expected
-runtime bytecode and Keccak-256 hashes. `eth-abi==5.2.0` is a reviewed direct
-toolchain pin because this encoder is part of the materialization boundary.
+`validate_release_output_with_snapshots(...)` path, then checks the candidate's
+pinned receipt, catalog, release-config, Foundry-config, and artifact hashes.
+That validator carries the exact validated receipt, config, Foundry config, and
+artifact bytes plus their paths and SHA-256 digests into the materializer.
+The materializer recomputes every carried digest, requires an exact
+receipt-to-artifact snapshot set, strictly decodes the carried receipt and
+artifact JSON bytes, and does not reopen those files. One artifact snapshot is
+reused when multiple candidate instances target it. A filesystem replacement
+after validation therefore cannot change the plan being constructed from the
+validated snapshot. It derives the constructor ABI from each receipt-bound
+artifact, ABI-encodes the declared arguments, resolves the artifact's exact
+creation/runtime library positions and runtime immutable positions, and emits
+ordered full initcode plus expected runtime bytecode and Keccak-256 hashes.
+`eth-abi==5.2.0` is a reviewed direct toolchain pin because this encoder is part
+of the materialization boundary.
 `jsonschema==4.25.1` is a reviewed direct pin because the checked path performs
 actual Draft 2020-12 validation rather than treating the schema documents as
 descriptive references.
@@ -468,7 +476,9 @@ and output shapes are documented by
 `deployments/schema/canonical-deployment-plan.schema.json`. The materializer
 checks that both schema documents are valid Draft 2020-12, validates the
 strictly decoded committed candidate, and validates every in-memory generated
-plan before it can be written or compared in `--check` mode.
+plan before it can be written or compared in `--check` mode. Generator version
+3 also requires the issue #680 restricted-source-root and portable compiler
+path policies in the materialized plan.
 
 After producing the canonical isolated build, run the focused tool as follows:
 

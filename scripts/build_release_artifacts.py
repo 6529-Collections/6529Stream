@@ -13,6 +13,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -51,6 +52,26 @@ TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 class ReleaseBuildError(RuntimeError):
     """Raised when canonical release artifacts cannot be built or validated."""
+
+
+@dataclass(frozen=True)
+class ReleaseFileSnapshot:
+    """One exact file version consumed by canonical release validation."""
+
+    path: Path
+    raw: bytes
+    sha256: str
+
+
+@dataclass(frozen=True)
+class ValidatedReleaseOutput:
+    """Validated receipt plus exact receipt/config/artifact file versions."""
+
+    receipt: dict[str, Any]
+    receipt_snapshot: ReleaseFileSnapshot
+    config_snapshot: ReleaseFileSnapshot
+    foundry_config_snapshot: ReleaseFileSnapshot
+    artifact_snapshots: tuple[ReleaseFileSnapshot, ...]
 
 
 CommandRunner = Callable[[list[str], Path], None]
@@ -1049,7 +1070,7 @@ def validate_manifest_source_binding_consistency(
                 binding_locations.setdefault(binding_key, location)
 
 
-def validate_release_output(
+def validate_release_output_with_snapshots(
     repo_root: Path,
     config_path: Path,
     foundry_config_path: Path,
@@ -1057,7 +1078,7 @@ def validate_release_output(
     *,
     declared_output_dir: Path | None = None,
     expected_forge_version: str | None = None,
-) -> dict[str, Any]:
+) -> ValidatedReleaseOutput:
     repo_root = repo_root.resolve()
     config_path = resolve_repo_path(repo_root, config_path, "contract config")
     foundry_config_path = resolve_repo_path(
@@ -1102,7 +1123,10 @@ def validate_release_output(
         output_dir / MANIFEST_FILENAME,
         "release build receipt",
     )
-    manifest = require_dict(load_json(manifest_path), str(manifest_path))
+    manifest_value, manifest_raw, manifest_sha256 = load_json_snapshot(
+        manifest_path
+    )
+    manifest = require_dict(manifest_value, str(manifest_path))
     if manifest.get("schema_version") != RELEASE_BUILD_SCHEMA:
         raise ReleaseBuildError(
             f"{manifest_path} schema must be {RELEASE_BUILD_SCHEMA!r}"
@@ -1150,6 +1174,7 @@ def validate_release_output(
     record_identity = []
     expected_files = {Path(MANIFEST_FILENAME)}
     compiler_input_snapshots: dict[Path, tuple[dict[str, Any], str]] = {}
+    artifact_snapshots: list[ReleaseFileSnapshot] = []
     for index, value in enumerate(records):
         record = require_dict(value, f"{manifest_path}.targets[{index}]")
         target = {
@@ -1209,7 +1234,16 @@ def validate_release_output(
         if record.get("compiler_input_sha256") != compiler_input_sha256:
             raise ReleaseBuildError(f"targets[{index}] compiler input hash is stale")
 
-        artifact_value, artifact_sha256 = load_json_with_sha256(actual_artifact_path)
+        artifact_value, artifact_raw, artifact_sha256 = load_json_snapshot(
+            actual_artifact_path
+        )
+        artifact_snapshots.append(
+            ReleaseFileSnapshot(
+                path=actual_artifact_path,
+                raw=artifact_raw,
+                sha256=artifact_sha256,
+            )
+        )
         artifact = require_dict(artifact_value, str(actual_artifact_path))
         _, bindings = validate_target_artifact_data(
             repo_root,
@@ -1250,7 +1284,45 @@ def validate_release_output(
             f"{output_dir} does not contain the exact configured artifact set: "
             + ", ".join(details)
         )
-    return manifest
+    return ValidatedReleaseOutput(
+        receipt=manifest,
+        receipt_snapshot=ReleaseFileSnapshot(
+            path=manifest_path,
+            raw=manifest_raw,
+            sha256=manifest_sha256,
+        ),
+        config_snapshot=ReleaseFileSnapshot(
+            path=config_path,
+            raw=config_raw,
+            sha256=config_sha256,
+        ),
+        foundry_config_snapshot=ReleaseFileSnapshot(
+            path=foundry_config_path,
+            raw=foundry_config_raw,
+            sha256=foundry_config_sha256,
+        ),
+        artifact_snapshots=tuple(artifact_snapshots),
+    )
+
+
+def validate_release_output(
+    repo_root: Path,
+    config_path: Path,
+    foundry_config_path: Path,
+    output_dir: Path,
+    *,
+    declared_output_dir: Path | None = None,
+    expected_forge_version: str | None = None,
+) -> dict[str, Any]:
+    """Validate canonical output while preserving the legacy receipt API."""
+    return validate_release_output_with_snapshots(
+        repo_root,
+        config_path,
+        foundry_config_path,
+        output_dir,
+        declared_output_dir=declared_output_dir,
+        expected_forge_version=expected_forge_version,
+    ).receipt
 
 
 def replace_output_directory(staged: Path, output_dir: Path, temp_root: Path) -> None:
