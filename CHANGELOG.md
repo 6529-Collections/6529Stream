@@ -20,6 +20,12 @@ the release policy in `docs/release-policy.md`.
   does not make Forge deployment scripts or broadcasts consume that canonical
   initcode; [issue #677](https://github.com/6529-Collections/6529Stream/issues/677)
   remains a production blocker. Protocol maturity is unchanged.
+- Made generated fork deployment, ceremony, and randomizer command provenance
+  quote-exact across Windows and POSIX shells. The non-local evidence generator
+  can now read a canonical retained Markdown `Command` field instead of
+  transporting shell-sensitive text through native argv, and the checker
+  rejects missing, ambiguous, malformed, or quote-drifted replay commands
+  without changing release readiness.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
   from the retired aggregate/facade Core-read seam to separately bound actual
   Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The

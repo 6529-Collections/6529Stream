@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -22,6 +24,11 @@ SPEC.loader.exec_module(generator)
 
 checker = generator.evidence_checker
 
+REPLAY_COMMAND = (
+    "forge script script/RehearseDeployment.s.sol:RehearseDeployment "
+    '--sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --via-ir'
+)
+
 
 def write_text(path: Path, value: str) -> None:
     """Write UTF-8 text while creating parent directories."""
@@ -35,6 +42,11 @@ def write_json(path: Path, value: object) -> None:
     with path.open("w", encoding="utf-8", newline="\n") as handle:
         json.dump(value, handle, indent=2)
         handle.write("\n")
+
+
+def retained_text(*, suffix: str = "") -> str:
+    """Return a retained artifact with a canonical quoted replay command."""
+    return f"- Command: `{REPLAY_COMMAND}`\n{suffix}"
 
 
 def seed_template(root: Path) -> Path:
@@ -95,9 +107,16 @@ def seed_template(root: Path) -> Path:
     return template_path
 
 
-def base_args(root: Path, template: Path, retained: Path, output: Path) -> list[str]:
+def base_args(
+    root: Path,
+    template: Path,
+    retained: Path,
+    output: Path,
+    *,
+    command_from_retained: bool = False,
+) -> list[str]:
     """Return common generator CLI args."""
-    return [
+    args = [
         "--repo-root",
         str(root),
         "--template",
@@ -112,8 +131,13 @@ def base_args(root: Path, template: Path, retained: Path, output: Path) -> list[
         "1",
         "--block-or-reference",
         "fork block 19000000",
-        "--command-or-source-system",
-        "forge script script/RehearseDeployment.s.sol",
+    ]
+    if command_from_retained:
+        args.append("--command-or-source-system-from-retained")
+    else:
+        args.extend(["--command-or-source-system", REPLAY_COMMAND])
+    return [
+        *args,
         "--owner",
         "release-operator",
         "--source-git-commit",
@@ -133,7 +157,7 @@ class NonLocalReleaseEvidenceGeneratorTests(unittest.TestCase):
             template = seed_template(root)
             retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
             output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
-            write_text(retained, "sanitized fork transcript\n")
+            write_text(retained, retained_text(suffix="sanitized fork transcript\n"))
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
                 result = generator.main(base_args(root, template, retained, output))
@@ -148,6 +172,7 @@ class NonLocalReleaseEvidenceGeneratorTests(unittest.TestCase):
             )
             self.assertEqual(evidence["retained_path"], "release-artifacts/evidence/fork/run.md")
             self.assertEqual(evidence["sha256"], checker.file_sha256(retained))
+            self.assertEqual(evidence["command_or_source_system"], REPLAY_COMMAND)
             checker.validate_evidence(output, root)
 
     def test_check_mode_accepts_current_output(self) -> None:
@@ -157,7 +182,7 @@ class NonLocalReleaseEvidenceGeneratorTests(unittest.TestCase):
             template = seed_template(root)
             retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
             output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
-            write_text(retained, "sanitized fork transcript\n")
+            write_text(retained, retained_text(suffix="sanitized fork transcript\n"))
             args = base_args(root, template, retained, output)
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
@@ -171,12 +196,15 @@ class NonLocalReleaseEvidenceGeneratorTests(unittest.TestCase):
             template = seed_template(root)
             retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
             output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
-            write_text(retained, "sanitized fork transcript\n")
+            write_text(retained, retained_text(suffix="sanitized fork transcript\n"))
             args = base_args(root, template, retained, output)
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
                 self.assertEqual(generator.main(args), 0)
-            write_text(retained, "updated sanitized fork transcript\n")
+            write_text(
+                retained,
+                retained_text(suffix="updated sanitized fork transcript\n"),
+            )
 
             stderr = StringIO()
             with redirect_stdout(StringIO()), redirect_stderr(stderr):
@@ -208,7 +236,7 @@ class NonLocalReleaseEvidenceGeneratorTests(unittest.TestCase):
             template = seed_template(root)
             retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
             output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
-            write_text(retained, "sanitized fork transcript\n")
+            write_text(retained, retained_text(suffix="sanitized fork transcript\n"))
 
             stderr = StringIO()
             with redirect_stdout(StringIO()), redirect_stderr(stderr):
@@ -223,6 +251,66 @@ class NonLocalReleaseEvidenceGeneratorTests(unittest.TestCase):
             self.assertEqual(result, 1)
             self.assertIn("reviewer must be set", stderr.getvalue())
             self.assertFalse(output.exists())
+
+    def test_cli_preserves_quoted_command_from_retained_file(self) -> None:
+        """File-backed CLI transport preserves quotes on Windows and POSIX."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = seed_template(root)
+            retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
+            output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
+            write_text(retained, retained_text(suffix="sanitized fork transcript\n"))
+            args = base_args(
+                root,
+                template,
+                retained,
+                output,
+                command_from_retained=True,
+            )
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT_PATH), *args],
+                cwd=SCRIPT_PATH.parent.parent,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            evidence = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(evidence["command_or_source_system"], REPLAY_COMMAND)
+            self.assertIn('--sig "run()"', evidence["command_or_source_system"])
+
+    def test_command_sources_are_mutually_exclusive(self) -> None:
+        """A generation run cannot mix direct and retained command sources."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = seed_template(root)
+            retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
+            output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
+
+            with self.assertRaises(SystemExit):
+                generator.build_parser().parse_args(
+                    [
+                        *base_args(root, template, retained, output),
+                        "--command-or-source-system-from-retained",
+                    ]
+                )
+
+    def test_command_source_is_required(self) -> None:
+        """Generation requires either direct or retained command provenance."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            template = seed_template(root)
+            retained = root / "release-artifacts" / "evidence" / "fork" / "run.md"
+            output = root / "release-artifacts" / "evidence" / "fork" / "evidence.json"
+            args = base_args(root, template, retained, output)
+            command_index = args.index("--command-or-source-system")
+            del args[command_index : command_index + 2]
+
+            with self.assertRaises(SystemExit):
+                generator.build_parser().parse_args(args)
 
 
 if __name__ == "__main__":

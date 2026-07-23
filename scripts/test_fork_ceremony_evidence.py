@@ -47,6 +47,7 @@ def valid_template() -> str:
 - CI run or operator transcript: `TBD`
 - Fork/testnet block or reference: `TBD`
 - Network and deployment version: `TBD`
+- Command: `TBD`
 
 ## Participants And Governance
 
@@ -101,7 +102,7 @@ def valid_template() -> str:
 ```sh
 python scripts/test_fork_ceremony_evidence.py
 python scripts/check_fork_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork/testnet block, Safe transaction set, or ceremony transcript reference>" --command-or-source-system "<ceremony transcript, Safe export, explorer source, or CI job>" --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "<fork/testnet block, Safe transaction set, or ceremony transcript reference>" --command-or-source-system-from-retained --owner "<operator>" --reviewer "<reviewer>" --source-git-commit "<release commit>" --source-ci-run "<ci run>"
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check
@@ -134,6 +135,7 @@ def reviewed_artifact() -> str:
 - CI run or operator transcript: `ci-run-123`
 - Fork/testnet block or reference: `fork block 25316366`
 - Network and deployment version: `fork-mainnet-6529stream-v0.1.0-001`
+- Command: `forge script script/RehearseDeployment.s.sol:RehearseDeployment --sig "run()" --rpc-url REDACTED_LOCAL_ANVIL_FORK --broadcast --unlocked --via-ir`
 
 ## Participants And Governance
 
@@ -188,7 +190,7 @@ def reviewed_artifact() -> str:
 ```sh
 python scripts/test_fork_ceremony_evidence.py
 python scripts/check_fork_ceremony_evidence.py
-python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366" --command-or-source-system "fork ceremony transcript" --owner release-operator --reviewer release-reviewer --source-git-commit 1234567890abcdef1234567890abcdef12345678 --source-ci-run ci-run-123
+python scripts/generate_non_local_release_evidence.py --template release-artifacts/evidence/public-beta-templates/fork-testnet-ceremony-evidence-template.json --retained-artifact release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md --output release-artifacts/evidence/fork-ceremony/fork-ceremony-evidence.json --environment fork --chain-id 1 --block-or-reference "fork block 25316366" --command-or-source-system-from-retained --owner release-operator --reviewer release-reviewer --source-git-commit 1234567890abcdef1234567890abcdef12345678 --source-ci-run ci-run-123
 python scripts/check_non_local_release_evidence.py
 python scripts/check_public_beta_evidence.py
 python scripts/generate_release_manifest.py --check

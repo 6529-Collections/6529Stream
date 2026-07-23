@@ -9,7 +9,7 @@
   "source": {
     "evidence_manifest": {
       "path": "release-artifacts/latest/public-beta-evidence.json",
-      "sha256": "sha256:0c3b9cf41f5a042749994cf3a1287d328124b2b4f6eaabf896d6e24524dbea19",
+      "sha256": "sha256:fd6fb1caf253972bc6148bfa30917f69a625a96b8c02a6ec57bc1678a1fc16d5",
       "size_bytes": 10255
     },
     "public_beta_blocker_report": {
@@ -24,8 +24,8 @@
     },
     "non_local_release_evidence_runbook": {
       "path": "docs/non-local-release-evidence.md",
-      "sha256": "sha256:ee363bb7b49c459217696a7a98a159a1ebdfcbff9b67919a1e1a1e90eea52234",
-      "size_bytes": 41673
+      "sha256": "sha256:e8cbe61d02051d8bdc6d0e2734ed67fcaa1383a6181c88abc14884336c30514c",
+      "size_bytes": 42458
     },
     "public_beta_template_dir": "release-artifacts/evidence/public-beta-templates",
     "production_release_template_dir": "release-artifacts/evidence/production-release-templates"
@@ -169,7 +169,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-deployment-rehearsal/fork-deployment-rehearsal-retained-artifact-template.md",
-        "sha256": "sha256:6fa3e8fdf4434522ca2be2c38d3540035e80e2af905189758f6b66022b8a931e",
+        "sha256": "sha256:aaa59b5164e35db367e4d8d8ed87a847bab3028b6dc389f5da9d83a78c4d5eba",
         "block_or_reference": "template-only fork block number, fork block hash, CI run, or deployment transcript reference",
         "command_or_source_system": "template-only fork deployment command, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork deployment command output, fork block reference, sanitized broadcast, generated manifest, address book, verification status, gas or invariant summary, and reviewer confirmation."
@@ -387,7 +387,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-        "sha256": "sha256:30a131c99634bfef21045cb34be016b061d8713574b911b568f1d28770f88b98",
+        "sha256": "sha256:b737343d9802fa9355a9251d2ae4fee58f3b1c23aef0acfd6a835cecff5b7952",
         "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
         "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet ceremony evidence for deployer class, Safe or multisig address, ownership transfers, role grants and revocations, signer setup, dry-run mint, auction result, emergency controls, and reviewer confirmation."
@@ -442,7 +442,7 @@
       },
       "retained_artifact_expectation": {
         "path": "release-artifacts/evidence/fork-randomizer-operations/fork-randomizer-operations-retained-artifact-template.md",
-        "sha256": "sha256:b4b165f99495f7b0e9319d304b5f37443d8adf4783853f9ec589d6efa6d108a1",
+        "sha256": "sha256:5f14ad5d2925ed6c721bc3c1a54d4583822eb060085f0d691174d62d451091ab",
         "block_or_reference": "template-only fork or testnet block, provider request, callback transaction, CI run, or operations transcript reference",
         "command_or_source_system": "template-only randomizer operations command, provider dashboard, CI job, or operator transcript",
         "operator_notes": "Replace this template with fork or testnet randomizer provider, funding, epoch, callback, reserve, migration, stale or failed request, retry, pause, emergency-control, and observed health evidence plus reviewer confirmation."

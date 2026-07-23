@@ -8,7 +8,7 @@
   "block_or_reference": "template-only fork or testnet block, Safe transaction, CI run, or ceremony transcript reference",
   "command_or_source_system": "template-only ceremony command, Safe transaction, CI job, or operator transcript",
   "retained_path": "release-artifacts/evidence/fork-ceremony/fork-ceremony-retained-artifact-template.md",
-  "sha256": "sha256:30a131c99634bfef21045cb34be016b061d8713574b911b568f1d28770f88b98",
+  "sha256": "sha256:b737343d9802fa9355a9251d2ae4fee58f3b1c23aef0acfd6a835cecff5b7952",
   "redaction_statement": "Template only; no raw logs, credentials, signing material, private URLs, or unreleased drop payloads are present.",
   "owner": "TBD",
   "reviewer": "TBD",

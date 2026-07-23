@@ -17,7 +17,19 @@ from release_evidence_paths import resolve_repo_relative_path
 
 EVIDENCE_SCHEMA = "6529stream.non-local-release-evidence.v1"
 DEFAULT_EVIDENCE = [
-    Path("release-artifacts/evidence/non-local-release-evidence-template.json")
+    Path("release-artifacts/evidence/non-local-release-evidence-template.json"),
+    Path(
+        "release-artifacts/evidence/fork-deployment-rehearsal/"
+        "fork-deployment-rehearsal-evidence.json"
+    ),
+    Path(
+        "release-artifacts/evidence/fork-ceremony/"
+        "fork-ceremony-evidence.json"
+    ),
+    Path(
+        "release-artifacts/evidence/fork-randomizer-operations/"
+        "fork-randomizer-operations-evidence.json"
+    ),
 ]
 PUBLIC_BETA_TEMPLATE_DIR = Path("release-artifacts/evidence/public-beta-templates")
 PUBLIC_BETA_TEMPLATE_REQUIREMENTS = frozenset(public_beta_checker.PUBLIC_BETA_REQUIREMENTS)
@@ -57,9 +69,20 @@ REVIEW_STATUSES = frozenset({"template", "pending_review", "reviewed"})
 ENVIRONMENTS = frozenset({"fork", "testnet", "live", "audit", "release_signing"})
 CHAINLESS_ENVIRONMENTS = frozenset({"audit", "release_signing"})
 REVIEWED_STATUSES = frozenset({"reviewed"})
+RETAINED_COMMAND_REQUIREMENTS = frozenset(
+    {
+        "fork_deployment_rehearsal",
+        "fork_testnet_ceremony_evidence",
+        "fork_testnet_randomizer_operations_evidence",
+    }
+)
 
 GIT_COMMIT_RE = re.compile(r"^[0-9a-fA-F]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+RETAINED_COMMAND_RE = re.compile(
+    r'^- Command: `(?P<command>[^`\r\n]+)`[ \t]*$',
+    re.MULTILINE,
+)
 SECRET_KEY_RE = re.compile(
     r"(^|[_\-\s])("
     r"private[_\-\s]?key|mnemonic|seed[_\-\s]?phrase|rpc[_\-\s]?url|"
@@ -365,8 +388,8 @@ def validate_reviewer(review_status: str, reviewer: str) -> None:
 
 def validate_retained_artifact_hash(
     evidence: dict[str, Any], repo_root: Path
-) -> None:
-    """Validate the retained_path and sha256 pair."""
+) -> Path:
+    """Validate the retained_path and sha256 pair and return the retained file."""
     retained_path = require_string(evidence.get("retained_path"), "retained_path")
     expected_hash = require_sha256(evidence.get("sha256"), "sha256")
     resolved = resolve_repo_file(repo_root, retained_path, "retained_path")
@@ -374,6 +397,55 @@ def validate_retained_artifact_hash(
     if actual_hash != expected_hash:
         raise NonLocalReleaseEvidenceError(
             f"sha256 mismatch for {retained_path}: expected {expected_hash}, got {actual_hash}"
+        )
+    return resolved
+
+
+def retained_command_or_source_system(path: Path) -> str:
+    """Read the one canonical command field from a retained Markdown artifact."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError as exc:
+        raise NonLocalReleaseEvidenceError(
+            f"retained Command references missing file: {path}"
+        ) from exc
+    except UnicodeDecodeError as exc:
+        raise NonLocalReleaseEvidenceError(
+            f"retained Command source must be valid UTF-8: {path}"
+        ) from exc
+    commands = [
+        match.group("command") for match in RETAINED_COMMAND_RE.finditer(text)
+    ]
+    if len(commands) != 1:
+        raise NonLocalReleaseEvidenceError(
+            f"{path} must contain exactly one canonical '- Command: `...`' field"
+        )
+    command = commands[0]
+    scan_for_secret_like_data(command, "retained.Command")
+    return command
+
+
+def validate_retained_command_fidelity(
+    evidence: dict[str, Any],
+    retained_path: Path,
+    record_type: str,
+    requirement_id: str,
+) -> None:
+    """Require selected evidence commands to match retained provenance exactly."""
+    if (
+        record_type != "evidence"
+        or requirement_id not in RETAINED_COMMAND_REQUIREMENTS
+    ):
+        return
+    retained_command = retained_command_or_source_system(retained_path)
+    envelope_command = require_string(
+        evidence.get("command_or_source_system"),
+        "command_or_source_system",
+    )
+    if envelope_command != retained_command:
+        raise NonLocalReleaseEvidenceError(
+            "command_or_source_system must exactly match the retained Command "
+            f"field for {requirement_id}"
         )
 
 
@@ -433,7 +505,13 @@ def validate_evidence_document(data: Any, repo_root: Path, label: str) -> None:
     template_notice = require_string(evidence.get("template_notice"), "template_notice")
     validate_template_notice(record_type, template_notice)
     require_string(evidence.get("operator_notes"), "operator_notes")
-    validate_retained_artifact_hash(evidence, repo_root)
+    retained_path = validate_retained_artifact_hash(evidence, repo_root)
+    validate_retained_command_fidelity(
+        evidence,
+        retained_path,
+        record_type,
+        requirement_id,
+    )
     scan_for_secret_like_data(evidence)
 
 
@@ -454,8 +532,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         type=Path,
         help=(
             "Evidence metadata JSON files to validate. Defaults to the generic "
-            "non-local template plus every public-beta and production-release "
-            "template."
+            "non-local template, retained fork envelopes with exact command "
+            "provenance, and every public-beta and production-release template."
         ),
     )
     return parser.parse_args(argv)

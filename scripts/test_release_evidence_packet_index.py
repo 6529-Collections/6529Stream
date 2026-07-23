@@ -417,7 +417,11 @@ class ReleaseEvidencePacketIndexTests(unittest.TestCase):
                 "release-artifacts/evidence/fork-ceremony/"
                 "fork-ceremony-reviewed-retained-artifact.md"
             )
-            write_text(root / retained_path, "reviewed ceremony retained artifact\n")
+            write_text(
+                root / retained_path,
+                "reviewed ceremony retained artifact\n"
+                "- Command: `reviewed fork evidence source`\n",
+            )
             evidence_path = Path("release-artifacts/evidence/fork-ceremony/evidence.json")
             write_json(
                 root / evidence_path,
