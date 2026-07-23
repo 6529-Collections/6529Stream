@@ -34,10 +34,12 @@ retired row to match that baseline. Target, contract-config, and baseline JSON
 inputs reject invalid UTF-8, duplicate members, non-finite/floating-point
 values, and integers outside the I-JSON safe range.
 
-Run after the production build profile:
+Build and validate the canonical target-isolated release profile first:
 
 ```sh
-forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 python scripts/check_contract_size_budget.py
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --snap release-artifacts/baselines/v0.1.0/gas-snapshot.snap
 python scripts/generate_release_artifacts.py
@@ -96,6 +98,19 @@ python scripts/generate_bytecode_release_proof.py
 python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 ```
+
+The retained compiler inputs validate Forge's exact repository-root path
+carriers and store them as the portable relative `.` / `lib` policy. Therefore
+an exact release-build receipt hash is stable across otherwise identical local
+and CI worktrees; absolute checkout paths are never retained as receipt
+authority.
+
+The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
+command remains useful for warnings and whole-tree size diagnostics, but
+Foundry compilation restrictions can admit `test/` helpers despite those skip
+flags. Its retained log remains warning evidence, but it is not an input to
+canonical release bytecode, explorer-verification inputs, or
+deployment-bytecode evidence.
 
 Check the committed artifacts without rewriting them:
 

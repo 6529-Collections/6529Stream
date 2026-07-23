@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_release_artifacts.py")
@@ -156,6 +157,15 @@ class ReleaseArtifactTests(unittest.TestCase):
             )
             self.assertEqual(interfaces["interfaces"]["IExample"]["interface_id_source"], "configured")
 
+            artifact_manifest = generator.load_json(
+                output_dir / "release-artifact-manifest.json"
+            )
+            for file_name, record in artifact_manifest["artifacts"].items():
+                self.assertEqual(
+                    record["sha256"],
+                    generator.sha256_bytes((output_dir / file_name).read_bytes()),
+                )
+
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
                 self.assertEqual(
                     generator.check_artifacts(root, config_path, out_dir, output_dir, "cast"),
@@ -259,6 +269,59 @@ class ReleaseArtifactTests(unittest.TestCase):
                 self.assertEqual(
                     generator.check_artifacts(root, config_path, out_dir, output_dir, "cast"),
                     1,
+                )
+
+    def test_generator_rejects_mutation_between_output_and_manifest_install(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            out_dir = root / "out"
+            output_dir = root / "release-artifacts" / "latest"
+            config_path = root / "release-artifacts" / "contracts.json"
+            artifact = {
+                "abi": [],
+                "bytecode": {"object": "0x6000"},
+                "deployedBytecode": {"object": "0x6001"},
+                "methodIdentifiers": {},
+            }
+            write_json(out_dir / "Example.sol" / "Example.json", artifact)
+            write_json(
+                config_path,
+                {
+                    "production_contracts": [
+                        {
+                            "name": "Example",
+                            "source": "smart-contracts/Example.sol",
+                        }
+                    ],
+                    "interfaces": [],
+                },
+            )
+            original_install = generator.install_exact_bytes
+
+            def mutate_before_manifest(path: Path, value: bytes) -> None:
+                if path.name == "release-artifact-manifest.json":
+                    (output_dir / "abi-checksums.json").write_bytes(b"mutated\n")
+                original_install(path, value)
+
+            with (
+                patch.object(
+                    generator,
+                    "install_exact_bytes",
+                    side_effect=mutate_before_manifest,
+                ),
+                self.assertRaisesRegex(
+                    generator.ArtifactError,
+                    "installed generated output changed before generation completed",
+                ),
+            ):
+                generator.generate_artifacts(
+                    root,
+                    config_path,
+                    out_dir,
+                    output_dir,
+                    "cast",
                 )
 
 

@@ -23,7 +23,7 @@ except ModuleNotFoundError:  # pragma: no cover - the checked toolchain is Pytho
 
 
 RELEASE_BUILD_SCHEMA = "6529stream.release-build.v1"
-GENERATOR_VERSION = "1"
+GENERATOR_VERSION = "3"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_OUTPUT_DIR = Path("out-release")
@@ -40,6 +40,12 @@ TARGET_GROUPS = (
     ("production_contract", "production_contracts"),
     ("interface", "interfaces"),
 )
+RESTRICTED_RELEASE_SOURCE_ROOTS = frozenset({"script", "test"})
+PORTABLE_COMPILER_PATHS = {
+    "allowPaths": [".", "lib"],
+    "basePath": ".",
+    "includePaths": ["."],
+}
 TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -50,14 +56,35 @@ class ReleaseBuildError(RuntimeError):
 CommandRunner = Callable[[list[str], Path], None]
 
 
-def load_json(path: Path) -> Any:
+def read_required_bytes(path: Path) -> bytes:
     try:
-        with path.open("r", encoding="utf-8") as handle:
-            return json.load(handle)
+        return path.read_bytes()
     except FileNotFoundError as exc:
         raise ReleaseBuildError(f"missing required file: {path}") from exc
-    except json.JSONDecodeError as exc:
+    except OSError as exc:
+        raise ReleaseBuildError(f"unable to read required file {path}: {exc}") from exc
+
+
+def load_json_bytes(raw: bytes, path: Path) -> Any:
+    try:
+        return json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ReleaseBuildError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def load_json_snapshot(path: Path) -> tuple[Any, bytes, str]:
+    raw = read_required_bytes(path)
+    return load_json_bytes(raw, path), raw, sha256_bytes(raw)
+
+
+def load_json_with_sha256(path: Path) -> tuple[Any, str]:
+    value, _, digest = load_json_snapshot(path)
+    return value, digest
+
+
+def load_json(path: Path) -> Any:
+    value, _ = load_json_with_sha256(path)
+    return value
 
 
 def write_json(path: Path, value: Any) -> None:
@@ -67,12 +94,19 @@ def write_json(path: Path, value: Any) -> None:
         handle.write("\n")
 
 
-def file_sha256(path: Path) -> str:
+def write_exact_bytes(path: Path, value: bytes, label: str) -> None:
     try:
-        content = path.read_bytes()
-    except FileNotFoundError as exc:
-        raise ReleaseBuildError(f"missing required file: {path}") from exc
-    return "sha256:" + hashlib.sha256(content).hexdigest()
+        written = path.write_bytes(value)
+    except OSError as exc:
+        raise ReleaseBuildError(f"unable to write {label} {path}: {exc}") from exc
+    if written != len(value):
+        raise ReleaseBuildError(
+            f"short write for {label} {path}: wrote {written} of {len(value)} bytes"
+        )
+
+
+def file_sha256(path: Path) -> str:
+    return sha256_bytes(read_required_bytes(path))
 
 
 def canonical_json_sha256(value: Any) -> str:
@@ -224,6 +258,20 @@ def resolve_repo_path(repo_root: Path, value: Path, label: str) -> Path:
     return resolved
 
 
+def reject_restricted_release_source(
+    repo_root: Path,
+    source_path: Path,
+    label: str,
+) -> None:
+    relative = normalize_path(source_path, repo_root)
+    parts = Path(relative).parts
+    if parts and parts[0].casefold() in RESTRICTED_RELEASE_SOURCE_ROOTS:
+        raise ReleaseBuildError(
+            f"{label} is under restricted canonical release source root "
+            f"{parts[0]!r}: {relative}"
+        )
+
+
 def resolve_canonical_output_path(repo_root: Path, value: Path) -> Path:
     lexical = lexical_repo_path(repo_root, value, "release output directory")
     canonical = repo_root / DEFAULT_OUTPUT_DIR
@@ -240,23 +288,27 @@ def resolve_canonical_output_path(repo_root: Path, value: Path) -> Path:
     return lexical.resolve()
 
 
-def load_foundry_profile(path: Path) -> dict[str, Any]:
+def load_foundry_profile_bytes(raw: bytes, path: Path) -> dict[str, Any]:
     if tomllib is None:
         raise ReleaseBuildError("Python 3.11+ is required to read foundry.toml")
     try:
-        with path.open("rb") as handle:
-            config = tomllib.load(handle)
-    except FileNotFoundError as exc:
-        raise ReleaseBuildError(f"missing required file: {path}") from exc
+        config = tomllib.loads(raw.decode("utf-8"))
+    except UnicodeDecodeError as exc:
+        raise ReleaseBuildError(f"invalid UTF-8 in {path}: {exc}") from exc
     except tomllib.TOMLDecodeError as exc:
         raise ReleaseBuildError(f"invalid TOML in {path}: {exc}") from exc
     profile = require_dict(config.get("profile"), "foundry.toml profile")
     return require_dict(profile.get("default"), "foundry.toml profile.default")
 
 
-def validate_foundry_profile(path: Path) -> None:
-    profile = load_foundry_profile(path)
+def load_foundry_profile(path: Path) -> dict[str, Any]:
+    return load_foundry_profile_bytes(read_required_bytes(path), path)
+
+
+def validate_foundry_profile_data(profile: dict[str, Any]) -> None:
     expected = {
+        "test": "test",
+        "script": "script",
         "solc_version": SOLC_VERSION,
         "auto_detect_solc": False,
         "evm_version": EVM_VERSION,
@@ -274,8 +326,15 @@ def validate_foundry_profile(path: Path) -> None:
             )
 
 
-def configured_targets(repo_root: Path, config_path: Path) -> list[dict[str, str]]:
-    config = require_dict(load_json(config_path), str(config_path))
+def validate_foundry_profile(path: Path) -> None:
+    validate_foundry_profile_data(load_foundry_profile(path))
+
+
+def configured_targets_from_config(
+    repo_root: Path,
+    config_path: Path,
+    config: dict[str, Any],
+) -> list[dict[str, str]]:
     targets: list[dict[str, str]] = []
     names: set[str] = set()
 
@@ -300,11 +359,21 @@ def configured_targets(repo_root: Path, config_path: Path) -> list[dict[str, str
                 Path(source),
                 f"{config_key}[{index}].source",
             )
+            reject_restricted_release_source(
+                repo_root,
+                source_path,
+                f"{config_key}[{index}].source",
+            )
             if source_path.suffix != ".sol" or not source_path.is_file():
                 raise ReleaseBuildError(f"configured Solidity source is missing: {source}")
             targets.append({"kind": kind, "name": name, "source": source})
 
     return sorted(targets, key=lambda item: (item["kind"], item["name"], item["source"]))
+
+
+def configured_targets(repo_root: Path, config_path: Path) -> list[dict[str, str]]:
+    config = require_dict(load_json(config_path), str(config_path))
+    return configured_targets_from_config(repo_root, config_path, config)
 
 
 def artifact_metadata(artifact: dict[str, Any], label: str) -> dict[str, Any]:
@@ -336,6 +405,11 @@ def metadata_source_records(
             f"{label}.metadata.sources.{source}.keccak256",
         )
         source_path = resolve_repo_path(repo_root, Path(source), f"{label} metadata source")
+        reject_restricted_release_source(
+            repo_root,
+            source_path,
+            f"{label} metadata source",
+        )
         if not source_path.is_file():
             raise ReleaseBuildError(f"{label} metadata source is missing: {source}")
         source_bytes = source_path.read_bytes()
@@ -356,11 +430,55 @@ def metadata_source_records(
     return records
 
 
+def canonicalize_build_info_compiler_paths(
+    repo_root: Path,
+    compiler_input: dict[str, Any],
+    label: str,
+) -> dict[str, Any]:
+    """Replace exact worktree path carriers with a portable retained form."""
+    repo_root = repo_root.resolve()
+    raw_root = repo_root.as_posix()
+    raw_lib = (repo_root / "lib").as_posix()
+    expected = {
+        "allowPaths": [raw_root, raw_lib],
+        "basePath": raw_root,
+        "includePaths": [raw_root],
+    }
+    for field, expected_value in expected.items():
+        if compiler_input.get(field) != expected_value:
+            raise ReleaseBuildError(
+                f"{label} compiler input {field} must be exactly "
+                f"{expected_value!r} before portable retention"
+            )
+
+    portable = dict(compiler_input)
+    portable.update(
+        {
+            field: list(value) if isinstance(value, list) else value
+            for field, value in PORTABLE_COMPILER_PATHS.items()
+        }
+    )
+    return portable
+
+
+def validate_portable_compiler_paths(
+    compiler_input: dict[str, Any],
+    label: str,
+) -> None:
+    for field, expected_value in PORTABLE_COMPILER_PATHS.items():
+        if compiler_input.get(field) != expected_value:
+            raise ReleaseBuildError(
+                f"{label} retained compiler input {field} must be exactly "
+                f"{expected_value!r}"
+            )
+
+
 def validate_compiler_input(
     repo_root: Path,
     compiler_input: dict[str, Any],
     label: str,
 ) -> dict[str, Any]:
+    validate_portable_compiler_paths(compiler_input, label)
     if compiler_input.get("language") != "Solidity":
         raise ReleaseBuildError(f"{label} compiler input language must be Solidity")
     sources = require_dict(compiler_input.get("sources"), f"{label}.input.sources")
@@ -377,6 +495,11 @@ def validate_compiler_input(
         source_path = resolve_repo_path(
             repo_root,
             Path(source),
+            f"{label} compiler input source",
+        )
+        reject_restricted_release_source(
+            repo_root,
+            source_path,
             f"{label} compiler input source",
         )
         try:
@@ -447,29 +570,40 @@ def load_build_info_input(build_info_dir: Path, label: str) -> dict[str, Any]:
     return require_dict(build_info.get("input"), f"{build_info_files[0]}.input")
 
 
-def load_retained_compiler_input(path: Path, label: str) -> dict[str, Any]:
+def load_retained_compiler_input_with_sha256(
+    path: Path,
+    label: str,
+) -> tuple[dict[str, Any], str]:
     try:
         raw = path.read_bytes()
     except FileNotFoundError as exc:
         raise ReleaseBuildError(f"missing retained compiler input: {path}") from exc
+    except OSError as exc:
+        raise ReleaseBuildError(
+            f"unable to read retained compiler input {path}: {exc}"
+        ) from exc
     try:
-        value = require_dict(json.loads(raw), label)
-    except json.JSONDecodeError as exc:
+        value = require_dict(json.loads(raw.decode("utf-8")), label)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise ReleaseBuildError(f"invalid retained compiler input JSON in {path}: {exc}") from exc
     if ordered_json_bytes(value) != raw:
         raise ReleaseBuildError(f"{path} is not the exact ordered compiler-input encoding")
+    return value, sha256_bytes(raw)
+
+
+def load_retained_compiler_input(path: Path, label: str) -> dict[str, Any]:
+    value, _ = load_retained_compiler_input_with_sha256(path, label)
     return value
 
 
-def validate_target_artifact(
+def validate_target_artifact_data(
     repo_root: Path,
-    artifact_path: Path,
+    artifact: dict[str, Any],
     target: dict[str, str],
     foundry_config_path: Path,
     compiler_input: dict[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     label = f"{target['source']}:{target['name']}"
-    artifact = require_dict(load_json(artifact_path), str(artifact_path))
     metadata = artifact_metadata(artifact, label)
     compiler = require_dict(metadata.get("compiler"), f"{label}.metadata.compiler")
     compiler_version = require_string(
@@ -571,6 +705,23 @@ def validate_target_artifact(
         ),
     }
     return artifact, bindings
+
+
+def validate_target_artifact(
+    repo_root: Path,
+    artifact_path: Path,
+    target: dict[str, str],
+    foundry_config_path: Path,
+    compiler_input: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    artifact = require_dict(load_json(artifact_path), str(artifact_path))
+    return validate_target_artifact_data(
+        repo_root,
+        artifact,
+        target,
+        foundry_config_path,
+        compiler_input,
+    )
 
 
 def find_target_artifact(out_dir: Path, target: dict[str, str]) -> Path:
@@ -753,6 +904,28 @@ def read_forge_version(forge_bin: str, repo_root: Path) -> str:
     return validate_forge_version(result.stdout)
 
 
+def build_policy(forge_version: str) -> dict[str, Any]:
+    return {
+        "compilation_unit": "one_configured_target_source_and_its_import_closure",
+        "restricted_source_roots": sorted(RESTRICTED_RELEASE_SOURCE_ROOTS),
+        "portable_compiler_paths": PORTABLE_COMPILER_PATHS,
+        "solc_version": SOLC_VERSION,
+        "solc_long_version": SOLC_LONG_VERSION,
+        "evm_version": EVM_VERSION,
+        "optimizer_enabled": True,
+        "optimizer_runs": OPTIMIZER_RUNS,
+        "via_ir": True,
+        "bytecode_hash": "none",
+        "cbor_metadata": False,
+        "controlled_forge_environment": CONTROLLED_FORGE_ENVIRONMENT,
+        "forge_profile": "default",
+        "foundry_version": FOUNDRY_VERSION,
+        "forge_version": forge_version,
+        "forge_version_sha256": sha256_bytes(forge_version.encode("utf-8")),
+        "sanitized_environment_prefixes": list(SANITIZED_ENVIRONMENT_PREFIXES),
+    }
+
+
 def build_manifest(
     repo_root: Path,
     config_path: Path,
@@ -760,33 +933,28 @@ def build_manifest(
     output_dir: Path,
     targets: list[dict[str, Any]],
     forge_version: str,
+    *,
+    config_sha256: str | None = None,
+    foundry_config_sha256: str | None = None,
 ) -> dict[str, Any]:
     return {
         "schema_version": RELEASE_BUILD_SCHEMA,
         "generated_by": f"scripts/build_release_artifacts.py:{GENERATOR_VERSION}",
         "source": {
             "config": normalize_path(config_path, repo_root),
-            "config_sha256": file_sha256(config_path),
+            "config_sha256": (
+                config_sha256
+                if config_sha256 is not None
+                else file_sha256(config_path)
+            ),
             "foundry_config": normalize_path(foundry_config_path, repo_root),
-            "foundry_config_sha256": file_sha256(foundry_config_path),
+            "foundry_config_sha256": (
+                foundry_config_sha256
+                if foundry_config_sha256 is not None
+                else file_sha256(foundry_config_path)
+            ),
         },
-        "policy": {
-            "compilation_unit": "one_configured_target_source_and_its_import_closure",
-            "solc_version": SOLC_VERSION,
-            "solc_long_version": SOLC_LONG_VERSION,
-            "evm_version": EVM_VERSION,
-            "optimizer_enabled": True,
-            "optimizer_runs": OPTIMIZER_RUNS,
-            "via_ir": True,
-            "bytecode_hash": "none",
-            "cbor_metadata": False,
-            "controlled_forge_environment": CONTROLLED_FORGE_ENVIRONMENT,
-            "forge_profile": "default",
-            "foundry_version": FOUNDRY_VERSION,
-            "forge_version": forge_version,
-            "forge_version_sha256": sha256_bytes(forge_version.encode("utf-8")),
-            "sanitized_environment_prefixes": list(SANITIZED_ENVIRONMENT_PREFIXES),
-        },
+        "policy": build_policy(forge_version),
         "output_dir": normalize_path(output_dir, repo_root),
         "targets": targets,
     }
@@ -794,6 +962,91 @@ def build_manifest(
 
 def expected_target_identity(targets: list[dict[str, str]]) -> list[tuple[str, str, str]]:
     return [(target["kind"], target["name"], target["source"]) for target in targets]
+
+
+def validate_manifest_source_binding_consistency(
+    repo_root: Path,
+    records: list[Any],
+    manifest_path: Path,
+) -> None:
+    """Require one immutable source identity across every receipt target."""
+    bindings: dict[str, tuple[str, str]] = {}
+    binding_locations: dict[str, str] = {}
+    binding_paths: dict[str, str] = {}
+    for target_index, value in enumerate(records):
+        record = require_dict(value, f"{manifest_path}.targets[{target_index}]")
+        target_label = (
+            f"targets[{target_index}] "
+            f"{record.get('kind')}:{record.get('source')}:{record.get('name')}"
+        )
+        for field in ("metadata_sources", "compiler_input_sources"):
+            source_records = require_list(
+                record.get(field),
+                f"{target_label}.{field}",
+            )
+            local_paths: set[str] = set()
+            for source_index, source_value in enumerate(source_records):
+                location = f"{target_label}.{field}[{source_index}]"
+                source_record = require_dict(source_value, location)
+                source_path = require_string(
+                    source_record.get("path"),
+                    f"{location}.path",
+                )
+                if source_path in local_paths:
+                    raise ReleaseBuildError(
+                        f"{target_label}.{field} contains duplicate source path "
+                        f"{source_path}"
+                    )
+                local_paths.add(source_path)
+                resolved_source = resolve_repo_path(
+                    repo_root,
+                    Path(source_path),
+                    f"{location}.path",
+                )
+                canonical_source_path = normalize_path(
+                    resolved_source,
+                    repo_root,
+                )
+                if source_path != canonical_source_path:
+                    raise ReleaseBuildError(
+                        f"{location}.path must use canonical repository spelling "
+                        f"{canonical_source_path!r}, got {source_path!r}"
+                    )
+                binding_key = (
+                    canonical_source_path.casefold()
+                    if os.name == "nt"
+                    else canonical_source_path
+                )
+                existing_path = binding_paths.get(binding_key)
+                if (
+                    existing_path is not None
+                    and existing_path != canonical_source_path
+                ):
+                    raise ReleaseBuildError(
+                        "release build receipt has case-aliased source paths "
+                        f"{existing_path!r} and {canonical_source_path!r}"
+                    )
+                identity = (
+                    require_string(
+                        source_record.get("sha256"),
+                        f"{location}.sha256",
+                    ),
+                    require_string(
+                        source_record.get("keccak256"),
+                        f"{location}.keccak256",
+                    ).lower(),
+                )
+                existing = bindings.get(binding_key)
+                if existing is not None and existing != identity:
+                    raise ReleaseBuildError(
+                        "release build receipt has conflicting source bindings for "
+                        f"{canonical_source_path}: "
+                        f"{binding_locations[binding_key]} records "
+                        f"{existing!r}, while {location} records {identity!r}"
+                    )
+                bindings[binding_key] = identity
+                binding_paths.setdefault(binding_key, canonical_source_path)
+                binding_locations.setdefault(binding_key, location)
 
 
 def validate_release_output(
@@ -832,8 +1085,18 @@ def validate_release_output(
                 "staged release output must be a build-owned .release-build-*/aggregate directory"
             )
 
-    configured = configured_targets(repo_root, config_path)
-    validate_foundry_profile(foundry_config_path)
+    config_raw = read_required_bytes(config_path)
+    config_sha256 = sha256_bytes(config_raw)
+    config = require_dict(load_json_bytes(config_raw, config_path), str(config_path))
+    configured = configured_targets_from_config(repo_root, config_path, config)
+
+    foundry_config_raw = read_required_bytes(foundry_config_path)
+    foundry_config_sha256 = sha256_bytes(foundry_config_raw)
+    foundry_profile = load_foundry_profile_bytes(
+        foundry_config_raw,
+        foundry_config_path,
+    )
+    validate_foundry_profile_data(foundry_profile)
     manifest_path = resolve_repo_path(
         repo_root,
         output_dir / MANIFEST_FILENAME,
@@ -852,11 +1115,11 @@ def validate_release_output(
     source = require_dict(manifest.get("source"), f"{manifest_path}.source")
     if source.get("config") != normalize_path(config_path, repo_root):
         raise ReleaseBuildError(f"{manifest_path} config path is stale")
-    if source.get("config_sha256") != file_sha256(config_path):
+    if source.get("config_sha256") != config_sha256:
         raise ReleaseBuildError(f"{manifest_path} config hash is stale")
     if source.get("foundry_config") != normalize_path(foundry_config_path, repo_root):
         raise ReleaseBuildError(f"{manifest_path} foundry config path is stale")
-    if source.get("foundry_config_sha256") != file_sha256(foundry_config_path):
+    if source.get("foundry_config_sha256") != foundry_config_sha256:
         raise ReleaseBuildError(f"{manifest_path} foundry config hash is stale")
     if manifest.get("output_dir") != normalize_path(declared, repo_root):
         raise ReleaseBuildError(f"{manifest_path} output directory is stale")
@@ -878,20 +1141,15 @@ def validate_release_output(
         raise ReleaseBuildError(
             f"{manifest_path} was built by a different Forge version"
         )
-    expected_policy = build_manifest(
-        repo_root,
-        config_path,
-        foundry_config_path,
-        declared,
-        [],
-        recorded_forge_version,
-    )["policy"]
+    expected_policy = build_policy(recorded_forge_version)
     if policy != expected_policy:
         raise ReleaseBuildError(f"{manifest_path} compiler policy is stale")
 
     records = require_list(manifest.get("targets"), f"{manifest_path}.targets")
+    validate_manifest_source_binding_consistency(repo_root, records, manifest_path)
     record_identity = []
     expected_files = {Path(MANIFEST_FILENAME)}
+    compiler_input_snapshots: dict[Path, tuple[dict[str, Any], str]] = {}
     for index, value in enumerate(records):
         record = require_dict(value, f"{manifest_path}.targets[{index}]")
         target = {
@@ -938,22 +1196,29 @@ def validate_release_output(
             f"targets[{index}] compiler input",
         )
         expected_files.add(relative_compiler_input)
-        if record.get("compiler_input_sha256") != file_sha256(
+        compiler_input_snapshot = compiler_input_snapshots.get(
             actual_compiler_input_path
-        ):
-            raise ReleaseBuildError(f"targets[{index}] compiler input hash is stale")
-        compiler_input = load_retained_compiler_input(
-            actual_compiler_input_path,
-            f"targets[{index}].compiler_input",
         )
-        _, bindings = validate_target_artifact(
+        if compiler_input_snapshot is None:
+            compiler_input_snapshot = load_retained_compiler_input_with_sha256(
+                actual_compiler_input_path,
+                f"targets[{index}].compiler_input",
+            )
+            compiler_input_snapshots[actual_compiler_input_path] = compiler_input_snapshot
+        compiler_input, compiler_input_sha256 = compiler_input_snapshot
+        if record.get("compiler_input_sha256") != compiler_input_sha256:
+            raise ReleaseBuildError(f"targets[{index}] compiler input hash is stale")
+
+        artifact_value, artifact_sha256 = load_json_with_sha256(actual_artifact_path)
+        artifact = require_dict(artifact_value, str(actual_artifact_path))
+        _, bindings = validate_target_artifact_data(
             repo_root,
-            actual_artifact_path,
+            artifact,
             target,
             foundry_config_path,
             compiler_input,
         )
-        if record.get("artifact_sha256") != file_sha256(actual_artifact_path):
+        if record.get("artifact_sha256") != artifact_sha256:
             raise ReleaseBuildError(f"targets[{index}] artifact hash is stale")
         for binding_name, expected_value in bindings.items():
             if record.get(binding_name) != expected_value:
@@ -1034,8 +1299,18 @@ def build_release_output(
     output_dir = resolve_canonical_output_path(repo_root, output_dir)
     output_dir.parent.mkdir(parents=True, exist_ok=True)
 
-    validate_foundry_profile(foundry_config_path)
-    targets = configured_targets(repo_root, config_path)
+    config_raw = read_required_bytes(config_path)
+    config_sha256 = sha256_bytes(config_raw)
+    config = require_dict(load_json_bytes(config_raw, config_path), str(config_path))
+    targets = configured_targets_from_config(repo_root, config_path, config)
+
+    foundry_config_raw = read_required_bytes(foundry_config_path)
+    foundry_config_sha256 = sha256_bytes(foundry_config_raw)
+    foundry_profile = load_foundry_profile_bytes(
+        foundry_config_raw,
+        foundry_config_path,
+    )
+    validate_foundry_profile_data(foundry_profile)
     forge_version = (
         validate_forge_version(forge_version_output)
         if forge_version_output is not None
@@ -1077,8 +1352,13 @@ def build_release_output(
                 ),
                 repo_root,
             )
-            compiler_input = load_build_info_input(
+            raw_compiler_input = load_build_info_input(
                 target_build_info,
+                source,
+            )
+            compiler_input = canonicalize_build_info_compiler_paths(
+                repo_root,
+                raw_compiler_input,
                 source,
             )
             validate_compiler_input(
@@ -1092,12 +1372,22 @@ def build_release_output(
             )
             compiler_input_destination = staged / compiler_input_relative
             compiler_input_destination.parent.mkdir(parents=True, exist_ok=True)
-            compiler_input_destination.write_bytes(ordered_json_bytes(compiler_input))
+            compiler_input_bytes = ordered_json_bytes(compiler_input)
+            compiler_input_sha256 = sha256_bytes(compiler_input_bytes)
+            write_exact_bytes(
+                compiler_input_destination,
+                compiler_input_bytes,
+                "retained compiler input",
+            )
             for target in source_targets:
                 artifact_path = find_target_artifact(target_out, target)
-                _, bindings = validate_target_artifact(
+                artifact_value, artifact_bytes, artifact_sha256 = load_json_snapshot(
+                    artifact_path
+                )
+                artifact_data = require_dict(artifact_value, str(artifact_path))
+                _, bindings = validate_target_artifact_data(
                     repo_root,
-                    artifact_path,
+                    artifact_data,
                     target,
                     foundry_config_path,
                     compiler_input,
@@ -1111,7 +1401,7 @@ def build_release_output(
                         f"configured targets collide at {relative_artifact.as_posix()}"
                     )
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(artifact_path, destination)
+                write_exact_bytes(destination, artifact_bytes, "release artifact")
                 records.append(
                     {
                         **target,
@@ -1120,15 +1410,13 @@ def build_release_output(
                             repo_root,
                         ),
                         "artifact_relative_path": relative_artifact.as_posix(),
-                        "artifact_sha256": file_sha256(destination),
+                        "artifact_sha256": artifact_sha256,
                         "compiler_input_path": normalize_path(
                             output_dir / compiler_input_relative,
                             repo_root,
                         ),
                         "compiler_input_relative_path": compiler_input_relative.as_posix(),
-                        "compiler_input_sha256": file_sha256(
-                            compiler_input_destination
-                        ),
+                        "compiler_input_sha256": compiler_input_sha256,
                         **bindings,
                     }
                 )
@@ -1142,6 +1430,8 @@ def build_release_output(
             output_dir,
             records,
             forge_version,
+            config_sha256=config_sha256,
+            foundry_config_sha256=foundry_config_sha256,
         )
         write_json(staged / MANIFEST_FILENAME, manifest)
         validate_release_output(

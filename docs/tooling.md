@@ -280,26 +280,34 @@ reason. The current baseline has 648 explicit exclusions, so it is a checked
 burn-down queue rather than proof that API documentation is complete. See
 [`natspec-coverage.md`](natspec-coverage.md).
 
-The aggregate size step is the ordinary development deployability gate. It
-skips test and script contracts so non-production artifacts do not pollute
-EIP-170/EIP-3860 evidence, and it uses `via_ir` because the current deployable
-`StreamCore` release profile needs the IR optimizer to fit under the runtime
-limit. The artifact-backed
-budget checker reads `release-artifacts/contracts.json`, treats unlinked
-Solidity library placeholders as their 20-byte deployed addresses for size
-counting, fails below the 384-byte `StreamCore` minimum margin, and reports a
-warning below the 512-byte future-work threshold. The checker also validates
-artifact compiler metadata, optimizer settings, EVM version, compilation target,
-and current-source Keccak hashes before trusting any reported runtime size, so
-stale artifacts from earlier local commands fail before they can become release
-evidence. Its 384-byte floor is an interim development control, not the
+The aggregate size step is a warning-collection and whole-tree size diagnostic,
+not a deployability or release-evidence gate. It uses `via_ir` because the
+current deployable `StreamCore` profile needs the IR optimizer, but Foundry
+compilation restrictions can still admit `test/` helpers despite the command's
+`--skip test --skip script` flags. The artifact-backed budget checker therefore
+validates the canonical build receipt and retained compiler inputs, then hashes
+the exact target-isolated `out-release/` artifact bytes it reads against that
+in-memory receipt before decoding them. For every artifact metadata source,
+including imports, the size and Core-spend consumers require a regular
+non-reparse checkout file and compare one read against both the receipt
+SHA-256/Keccak record and artifact metadata Keccak; deletion or non-file
+replacement after receipt validation fails closed. The checker reads
+`release-artifacts/contracts.json`, treats unlinked Solidity library
+placeholders as their 20-byte deployed addresses for size counting, fails below
+the 384-byte `StreamCore` minimum margin, and reports a warning below the
+512-byte future-work threshold. The checker also validates artifact compiler
+metadata, optimizer settings, EVM version, compilation target, and
+current-source Keccak hashes before trusting any reported runtime size. Missing
+or stale canonical artifacts in `out-release/` therefore fail validation;
+aggregate artifacts in `out/` remain diagnostic-only and are not consumed by
+the checker. Its 384-byte floor is an interim development control, not the
 governing production deployment threshold.
 
 The Core bytecode-spend policy is stricter than the EIP-170 floor. It reads the
-same production-size artifacts and pins the currently approved `StreamCore`
-runtime baseline from `release-artifacts/contracts.json`. A future PR may reduce
-Core runtime size without an exception, but any increase above the approved
-baseline must add an accepted exception record with an issue, rationale,
+same canonical target-isolated artifacts and pins the currently approved
+`StreamCore` runtime baseline from `release-artifacts/contracts.json`. A future
+PR may reduce Core runtime size without an exception, but any increase above
+the approved baseline must add an accepted exception record with an issue, rationale,
 measured delta, maximum approved runtime size, and mitigation before
 `python scripts/check_core_bytecode_spend_policy.py` will pass.
 Accepted headroom-recovery records use `measured_delta_bytes` as
@@ -361,20 +369,46 @@ import closure, an isolated temporary output/cache pair, pinned Foundry
 optimizer runs `200`, via-IR, and metadata bytecode disabled. Real Forge
 subprocesses discard inherited `FOUNDRY_*` and `DAPP_*` settings, then set only
 the controlled `FOUNDRY_PROFILE=default` override supported by the pinned Forge
-version. It copies only configured named artifacts into a staged aggregate
-alongside retained compiler inputs and the build receipt, then replaces
+version. It reads each configured artifact once, validates and hashes that
+captured byte snapshot, writes those exact bytes into a staged aggregate, and
+derives retained compiler-input bytes and hashes from one in-memory encoding.
+The config and Foundry-config target/policy validation and receipt hashes are
+likewise derived from the same captured bytes. The builder stages only
+configured named artifacts alongside retained compiler inputs and the build
+receipt, then replaces
 dedicated ignored `out-release/` with rollback on caught replacement failures.
 The output option is restricted to the literal repo-root `out-release/`, while
 ordinary Forge builds and scripts continue to use `out/`. Config, receipt,
 artifact, and compiler-input paths reject symlink, junction, and reparse
-components before resolution. Tests and scripts are excluded from those source
-closures. The deterministic ignored build receipt binds the
+components before resolution. The builder requires Forge's raw `basePath`,
+`includePaths`, and `allowPaths` to identify exactly the active repository root
+and its `lib/` directory, then retains those four worktree-specific values as
+the stable relative policy `basePath="."`, `includePaths=["."]`, and
+`allowPaths=[".", "lib"]`. Any missing, reordered, duplicate, aliased, or extra
+path fails before retention. This makes compiler-input bytes and the complete
+receipt hash portable across checkouts while preserving the exact source,
+settings, toolchain, and artifact bindings. Tests and scripts are excluded from
+those source closures. The deterministic ignored build receipt binds the
 config, Foundry config, exact Forge version output, explicit normalized Forge
 argv, compiler policy, target, complete metadata source universe and hashes,
-compiler-settings hash, canonical build-input hash, and artifact hash. Both the
-release-artifact and source-verification generators validate that receipt
-before consuming `out-release/`, so stale source inputs or post-build artifact
-mutation fail closed.
+compiler-settings hash, canonical build-input hash, and artifact hash. The
+release-artifact, source-verification, protocol-surface, and ABI-compatibility
+CLIs retain the validated receipt while consuming `out-release/`. Each matches
+the exact target kind, name, source, relative path, normalized path, and hash,
+then hashes and decodes one artifact byte snapshot; source-verification also
+carries that parsed snapshot into metadata collection, binds every checkout
+source read to the receipt's matching metadata/compiler-input SHA-256 and
+Keccak records, and reuses one snapshot per source instead of reopening files.
+Receipt validation first requires every occurrence of a source path to carry
+one identical SHA-256/Keccak identity across metadata and compiler-input
+records for all production and interface targets, so alternating a shared
+checkout source between target validations cannot yield a valid receipt.
+Source records must use their resolved canonical repository-relative spelling;
+Windows identity keys are case-folded after resolution to reject case and
+short/long aliases, while Linux receipt paths retain case-sensitive filesystem
+semantics.
+Stale source inputs or mutation after initial receipt validation therefore fail
+closed.
 
 The official Make target and repository check wrappers order the canonical
 builder before its size, Core-policy, release-artifact, source-verification, and
@@ -386,10 +420,14 @@ The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
 run remains useful for compiler warning collection and whole-tree diagnostic
 size output, but it is not release bytecode or explorer-verification evidence.
 This separation addresses
-[issue #674](https://github.com/6529-Collections/6529Stream/issues/674);
-the broader noncausal test-source leakage investigation remains tracked under
+[issue #674](https://github.com/6529-Collections/6529Stream/issues/674).
+The canonical builder additionally rejects any configured target, retained
+build-info compiler-input source, or artifact-metadata source whose resolved
+repository path starts under `test/` or `script/`. This fail-closed guard
+addresses the noncausal aggregate leakage tracked by
 [issue #675](https://github.com/6529-Collections/6529Stream/issues/675) without
-expanding this release-integrity change into a compiler redesign.
+changing `foundry.toml` or the via-IR test compilation behavior. Two-root
+regressions require byte-identical retained compiler inputs and full receipts.
 This helper canonicalizes release and verification evidence only. The current
 Forge deployment scripts can still recompile a larger script import universe
 and do not yet prove that broadcasts consume this canonical initcode;
@@ -398,8 +436,12 @@ a production blocker for that deployment binding.
 
 The artifact generator verifies that `release-artifacts/latest/` matches the
 canonical isolated build, including ABI checksums, bytecode checksums, interface
-IDs, and the event topic catalog. It automatically finds Foundry's `cast` in
-`~/.foundry/bin` when the shell has not added it to `PATH`.
+IDs, and the event topic catalog. Each generated JSON output is serialized once;
+its manifest hash is derived from those exact in-memory bytes, which are staged
+and atomically installed. Before reporting success, the generator rereads every
+installed output and requires byte-for-byte equality with its in-memory
+snapshot. It automatically finds Foundry's `cast` in `~/.foundry/bin` when the
+shell has not added it to `PATH`.
 
 The source-verification step generates and checks
 `release-artifacts/latest/source-verification-inputs.json` from the production
@@ -1279,8 +1321,9 @@ the pinned release asset and verified with SHA256 before extraction.
 
 ## Release Artifacts
 
-After changing any production contract ABI or event surface, run the production
-build and regenerate the tracked release baseline with:
+After changing any production contract ABI or event surface, optionally run the
+aggregate diagnostic, then build the canonical target-isolated artifacts and
+regenerate the tracked release baseline with:
 
 ```bash
 forge build --sizes --via-ir --skip test --skip script --force

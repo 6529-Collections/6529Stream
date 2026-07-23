@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import build_release_artifacts as release_build
 import generate_release_artifacts as release_artifacts
 
 
@@ -18,6 +19,7 @@ ABI_SURFACE_SCHEMA = "6529stream.abi-surface-baseline.v2"
 GENERATOR_VERSION = "2"
 
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
+DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_FOUNDRY_OUT = Path("out-release")
 DEFAULT_BASELINE = Path("release-artifacts/baselines/v0.1.0/abi-surface.json")
 DEFAULT_TARGET_MANIFEST = Path("release-artifacts/stream-core-permanent-interface.json")
@@ -380,12 +382,8 @@ def reject_json_constant(token: str) -> None:
     raise AbiCompatibilityError(f"non-I-JSON token is forbidden: {token}")
 
 
-def load_strict_json(path: Path) -> Any:
-    """Load strict UTF-8, duplicate-free JSON for normative checker inputs."""
-    try:
-        raw = path.read_bytes()
-    except FileNotFoundError as exc:
-        raise AbiCompatibilityError(f"missing required file: {path}") from exc
+def load_strict_json_bytes(raw: bytes, path: Path) -> Any:
+    """Decode duplicate-free I-JSON from an already captured byte snapshot."""
     try:
         text = raw.decode("utf-8", "strict")
     except UnicodeDecodeError as exc:
@@ -400,6 +398,55 @@ def load_strict_json(path: Path) -> Any:
         )
     except json.JSONDecodeError as exc:
         raise AbiCompatibilityError(f"invalid JSON in {path}: {exc}") from exc
+
+
+def load_strict_json(path: Path) -> Any:
+    """Load strict UTF-8, duplicate-free JSON for normative checker inputs."""
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError as exc:
+        raise AbiCompatibilityError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise AbiCompatibilityError(f"unable to read required file {path}: {exc}") from exc
+    return load_strict_json_bytes(raw, path)
+
+
+def load_release_config(
+    repo_root: Path,
+    config_path: Path,
+    release_manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    try:
+        raw = config_path.read_bytes()
+    except FileNotFoundError as exc:
+        raise AbiCompatibilityError(f"missing required file: {config_path}") from exc
+    except OSError as exc:
+        raise AbiCompatibilityError(
+            f"unable to read required file {config_path}: {exc}"
+        ) from exc
+    if release_manifest is not None:
+        source = release_manifest.get("source")
+        if not isinstance(source, dict):
+            raise AbiCompatibilityError(
+                "validated release receipt source must be an object"
+            )
+        normalized_path = release_artifacts.normalize_artifact_path(
+            config_path,
+            repo_root,
+        )
+        if source.get("config") != normalized_path:
+            raise AbiCompatibilityError(
+                "validated release receipt config path does not match "
+                f"{normalized_path}"
+            )
+        if source.get("config_sha256") != release_build.sha256_bytes(raw):
+            raise AbiCompatibilityError(
+                f"validated release receipt config hash is stale: {config_path}"
+            )
+    value = load_strict_json_bytes(raw, config_path)
+    if not isinstance(value, dict):
+        raise AbiCompatibilityError(f"{config_path} must contain a JSON object")
+    return value
 
 
 def require_exact_keys(
@@ -1493,8 +1540,9 @@ def build_abi_surface(
     repo_root: Path,
     config_path: Path,
     foundry_out: Path,
+    release_manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    config = load_strict_json(config_path)
+    config = load_release_config(repo_root, config_path, release_manifest)
     configured_contracts = configured_artifact_entries(
         config,
         "production_contracts",
@@ -1504,13 +1552,25 @@ def build_abi_surface(
 
     contracts: dict[str, Any] = {}
     for config_entry in sorted(configured_contracts, key=lambda item: item["name"]):
-        summary = release_artifacts.artifact_summary(config_entry, foundry_out, repo_root)
+        summary = release_artifacts.artifact_summary(
+            config_entry,
+            foundry_out,
+            repo_root,
+            release_manifest=release_manifest,
+            release_kind="production_contract",
+        )
         name = summary["name"]
         contracts[name] = build_contract_surface(summary)
 
     interfaces: dict[str, Any] = {}
     for config_entry in sorted(configured_interfaces, key=lambda item: item["name"]):
-        summary = release_artifacts.artifact_summary(config_entry, foundry_out, repo_root)
+        summary = release_artifacts.artifact_summary(
+            config_entry,
+            foundry_out,
+            repo_root,
+            release_manifest=release_manifest,
+            release_kind="interface",
+        )
         name = summary["name"]
         interfaces[name] = build_contract_surface(summary)
 
@@ -1740,9 +1800,15 @@ def check_compatibility(
     foundry_out: Path,
     baseline_path: Path,
     target_manifest: dict[str, Any] | None = None,
+    release_manifest: dict[str, Any] | None = None,
 ) -> int:
     baseline = load_baseline(baseline_path)
-    current = build_abi_surface(repo_root, config_path, foundry_out)
+    current = build_abi_surface(
+        repo_root,
+        config_path,
+        foundry_out,
+        release_manifest,
+    )
     if target_manifest is not None:
         validate_target_required_absence(target_manifest, current)
         validate_target_retirement_baseline_closure(target_manifest, baseline)
@@ -1756,8 +1822,14 @@ def write_baseline(
     config_path: Path,
     foundry_out: Path,
     baseline_path: Path,
+    release_manifest: dict[str, Any] | None = None,
 ) -> Path:
-    surface = build_abi_surface(repo_root, config_path, foundry_out)
+    surface = build_abi_surface(
+        repo_root,
+        config_path,
+        foundry_out,
+        release_manifest,
+    )
     release_artifacts.write_json(baseline_path, surface)
     return baseline_path
 
@@ -1765,6 +1837,7 @@ def write_baseline(
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--foundry-config", type=Path, default=DEFAULT_FOUNDRY_CONFIG)
     parser.add_argument("--foundry-out", type=Path, default=DEFAULT_FOUNDRY_OUT)
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--target-manifest", type=Path, default=DEFAULT_TARGET_MANIFEST)
@@ -1788,6 +1861,12 @@ def main(argv: list[str]) -> int:
         if args.target_only:
             print("StreamCore Permanent function/event interface target is valid")
             return 0
+        release_manifest = release_build.validate_release_output(
+            repo_root,
+            args.config,
+            args.foundry_config,
+            args.foundry_out,
+        )
         if args.check:
             return check_compatibility(
                 repo_root,
@@ -1795,14 +1874,20 @@ def main(argv: list[str]) -> int:
                 args.foundry_out,
                 args.baseline,
                 target_manifest,
+                release_manifest,
             )
         baseline_path = write_baseline(
             repo_root,
             args.config,
             args.foundry_out,
             args.baseline,
+            release_manifest,
         )
-    except (AbiCompatibilityError, release_artifacts.ArtifactError) as exc:
+    except (
+        AbiCompatibilityError,
+        release_artifacts.ArtifactError,
+        release_build.ReleaseBuildError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

@@ -7,6 +7,33 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Hardened canonical release builds so configured targets, retained build-info
+  compiler inputs, and artifact metadata fail closed if any resolved source is
+  under `test/` or `script/`; added focused regressions for both restricted
+  roots; made the runtime-size and Core bytecode-spend checker CLIs retain the
+  validated canonical receipt and hash the exact artifact bytes they consume;
+  extended that receipt-bound single-read/hash/decode model through the release,
+  source-verification, protocol-surface, and ABI consumers; made the canonical
+  producer derive config, Foundry-config, artifact, and retained compiler-input
+  receipt hashes from the exact snapshots it validates and writes; bound
+  source-verification checkout reads to the receipt's compiler/metadata source
+  hashes and carried each source snapshot forward without reopening it;
+  required one canonical-path, Windows-alias-safe manifest-wide source identity
+  across production and interface metadata/compiler records; bound every
+  size/Core artifact import read to that
+  identity with missing and non-file replacements rejected; made release JSON
+  generation hash one serialization, atomically install those exact bytes, and
+  verify installed bytes before success; and
+  consistently labeled the aggregate all-source size/warning build as
+  diagnostic rather than production evidence. Canonical retention now validates
+  the exact Forge worktree path
+  carriers and projects only those fields to stable `.` / `lib` values before
+  hashing, so otherwise identical checkouts produce byte-identical compiler
+  inputs and receipt hashes without weakening source or artifact binding. This
+  addresses
+  [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
+  without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test
+  compilation, or release maturity.
 - Made release bytecode generation reproducible under Solidity 0.8.19 by
   compiling each configured production source and its import closure in an
   isolated via-IR Forge invocation, retaining a deterministic build receipt,
@@ -690,10 +717,10 @@ the release policy in `docs/release-policy.md`.
   paths, local/Windows validation commands, release-readiness blockers, and
   release-manifest/checksum coverage.
 - Added live solc warning baseline enforcement for the warning-disposition gate:
-  production-size forge output is retained in local/CI logs and checked against
-  the reviewed warning rows so new or resolved compiler warnings require an
-  explicit code or disposition update, and removed or relocated accepted
-  warnings require a reviewed baseline refresh.
+  aggregate size/warning diagnostic output is retained in local/CI logs and
+  checked against the reviewed warning rows so new or resolved compiler
+  warnings require an explicit code or disposition update, and removed or
+  relocated accepted warnings require a reviewed baseline refresh.
 - Added a checked incident drill retained-artifact template and validation gate
   for mint pause, bid pause, settlement pause, withdrawal policy, failed
   randomness, stuck auction, bad metadata/dependency, bad Merkle root, and

@@ -9,6 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
+from unittest.mock import patch
 
 
 SCRIPT_PATH = Path(__file__).with_name("check_core_bytecode_spend_policy.py")
@@ -121,6 +122,69 @@ def write_tree(
     )
 
 
+def add_import_and_release_receipt(
+    root: Path,
+) -> tuple[Path, dict[str, Any]]:
+    dependency = root / "smart-contracts" / "Dependency.sol"
+    dependency.write_text(
+        "// SPDX-License-Identifier: MIT\n"
+        "pragma solidity 0.8.19;\n"
+        "library Dependency {}\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+    artifact_path = root / "out-release" / "StreamCore.sol" / "StreamCore.json"
+    artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+    artifact["metadata"]["sources"]["smart-contracts/Dependency.sol"] = {
+        "keccak256": size_checker.keccak256_hex(dependency.read_bytes())
+    }
+    write_json(artifact_path, artifact)
+
+    config_path = root / "release-artifacts" / "contracts.json"
+    source_records = []
+    for source in (
+        "smart-contracts/StreamCore.sol",
+        "smart-contracts/Dependency.sol",
+    ):
+        raw = (root / source).read_bytes()
+        source_records.append(
+            {
+                "path": source,
+                "sha256": checker.release_build.sha256_bytes(raw),
+                "keccak256": size_checker.keccak256_hex(raw),
+            }
+        )
+    receipt = {
+        "source": {
+            "config": checker.check_contract_size_budget.normalize_path(
+                config_path,
+                root,
+            ),
+            "config_sha256": checker.release_build.sha256_bytes(
+                config_path.read_bytes()
+            ),
+        },
+        "targets": [
+            {
+                "kind": "production_contract",
+                "name": "StreamCore",
+                "source": "smart-contracts/StreamCore.sol",
+                "artifact_relative_path": "StreamCore.sol/StreamCore.json",
+                "artifact_path": checker.check_contract_size_budget.normalize_path(
+                    artifact_path,
+                    root,
+                ),
+                "artifact_sha256": checker.release_build.sha256_bytes(
+                    artifact_path.read_bytes()
+                ),
+                "metadata_sources": source_records,
+                "compiler_input_sources": source_records,
+            }
+        ],
+    }
+    return dependency, receipt
+
+
 class CoreBytecodeSpendPolicyTests(unittest.TestCase):
     def test_current_baseline_passes_without_exception(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -132,6 +196,43 @@ class CoreBytecodeSpendPolicyTests(unittest.TestCase):
             )
 
         self.assertEqual(result, 0)
+
+    def test_core_checker_rejects_import_loss_after_receipt_validation(
+        self,
+    ) -> None:
+        for mutation in ("deleted", "directory"):
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    write_tree(root)
+                    dependency, receipt = add_import_and_release_receipt(root)
+
+                    def validate_then_remove_import(
+                        *_args: Any,
+                        **_kwargs: Any,
+                    ) -> dict[str, Any]:
+                        dependency.unlink()
+                        if mutation == "directory":
+                            dependency.mkdir()
+                        return receipt
+
+                    with (
+                        patch.object(
+                            checker.check_contract_size_budget,
+                            "validate_canonical_release_output",
+                            side_effect=validate_then_remove_import,
+                        ),
+                        self.assertRaisesRegex(
+                            checker.check_contract_size_budget.SizeBudgetError,
+                            "source file is missing or not a regular file",
+                        ),
+                    ):
+                        checker.check_canonical_policy(
+                            root,
+                            checker.DEFAULT_CONFIG,
+                            checker.DEFAULT_FOUNDRY_CONFIG,
+                            checker.DEFAULT_FOUNDRY_OUT,
+                        )
 
     def test_smaller_runtime_passes_without_exception(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

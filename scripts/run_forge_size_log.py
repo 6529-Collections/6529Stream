@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the production-size forge build while retaining a warning log."""
+"""Run the aggregate size/warning diagnostic while retaining its Forge log."""
 
 from __future__ import annotations
 

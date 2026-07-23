@@ -28,16 +28,22 @@ The current Gate A smoke baseline proves:
   aggregate diagnostic and warning-collection build. Canonical release
   bytecode instead comes from `python scripts/build_release_artifacts.py`,
   which compiles each configured source and import closure in isolation,
-  excludes test/script source units, validates a deterministic input/artifact
-  receipt, and uses staged replacement with rollback on caught failures to
-  restore configured artifacts plus retained compiler inputs and the receipt to
-  dedicated ignored `out-release/`. Ordinary Forge builds and scripts continue
-  to use `out/`. `python
+  rejects test/script source units in configured targets, retained build-info
+  compiler inputs, and artifact metadata, validates a deterministic
+  input/artifact receipt, projects only Forge's exact absolute worktree path
+  carriers to a checked stable `.` / `lib` representation so receipt hashes are
+  portable across otherwise identical checkouts, and uses staged replacement
+  with rollback on caught
+  failures to restore configured artifacts plus retained compiler inputs and
+  the receipt to dedicated ignored `out-release/`. Ordinary Forge builds and
+  scripts continue to use `out/`. `python
   scripts/check_contract_size_budget.py` checks those canonical artifacts
   against EIP-170 and enforces the interim `StreamCore` development floor from
   `release-artifacts/contracts.json`. This closes the local release and
   verification evidence gap tracked by
   [issue #674](https://github.com/6529-Collections/6529Stream/issues/674)
+  and makes the restricted-source boundary explicit under
+  [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
   without making Forge deployment scripts or broadcasts consume the canonical
   initcode. That deployment binding remains a production blocker under
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so

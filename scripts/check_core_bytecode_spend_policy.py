@@ -14,8 +14,9 @@ import check_contract_size_budget
 
 
 POLICY_SCHEMA = "6529stream.core-bytecode-spend-policy.v1"
-DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
-DEFAULT_FOUNDRY_OUT = Path("out-release")
+DEFAULT_CONFIG = release_build.DEFAULT_CONFIG
+DEFAULT_FOUNDRY_CONFIG = release_build.DEFAULT_FOUNDRY_CONFIG
+DEFAULT_FOUNDRY_OUT = release_build.DEFAULT_OUTPUT_DIR
 DEFAULT_CONTRACT = "StreamCore"
 EXPECTED_BASELINE_COMMAND = release_build.CANONICAL_BUILD_COMMAND
 DOC_BASELINE_PATHS = (Path("docs/architecture.md"), Path("docs/tooling.md"))
@@ -232,17 +233,35 @@ def assert_docs_match_baseline(repo_root: Path, baseline: int, margin: int) -> N
             )
 
 
-def current_core_size(repo_root: Path, config_path: Path, foundry_out: Path) -> int:
-    report = check_contract_size_budget.build_report(repo_root, config_path, foundry_out)
+def current_core_size(
+    repo_root: Path,
+    config_path: Path,
+    foundry_out: Path,
+    release_manifest: dict[str, Any] | None = None,
+) -> int:
+    report = check_contract_size_budget.build_report(
+        repo_root,
+        config_path,
+        foundry_out,
+        release_manifest,
+    )
     for row in report:
         if row["contract"] == DEFAULT_CONTRACT:
             return int(row["runtime_size_bytes"])
     raise CoreBytecodePolicyError(f"{DEFAULT_CONTRACT} was not present in the size report")
 
 
-def check_policy(repo_root: Path, config_path: Path, foundry_out: Path) -> int:
-    config_abs = config_path if config_path.is_absolute() else repo_root / config_path
-    config = require_dict(load_json(config_abs), str(config_abs))
+def check_policy(
+    repo_root: Path,
+    config_path: Path,
+    foundry_out: Path,
+    release_manifest: dict[str, Any] | None = None,
+) -> int:
+    config = check_contract_size_budget.load_release_config(
+        repo_root,
+        config_path,
+        release_manifest,
+    )
     policy = core_policy(config)
     assert_margin_consistency(config, policy)
     baseline = require_int(
@@ -254,7 +273,12 @@ def check_policy(repo_root: Path, config_path: Path, foundry_out: Path) -> int:
         "core_bytecode_spend_policy.approved_runtime_margin_bytes",
     )
     assert_docs_match_baseline(repo_root, baseline, margin)
-    runtime_size = current_core_size(repo_root, config_path, foundry_out)
+    runtime_size = current_core_size(
+        repo_root,
+        config_path,
+        foundry_out,
+        release_manifest,
+    )
     if runtime_size <= baseline:
         print(
             f"{DEFAULT_CONTRACT}: runtime {runtime_size} bytes, approved baseline "
@@ -283,10 +307,35 @@ def check_policy(repo_root: Path, config_path: Path, foundry_out: Path) -> int:
     return 1
 
 
+def check_canonical_policy(
+    repo_root: Path,
+    config_path: Path,
+    foundry_config_path: Path,
+    foundry_out: Path,
+) -> int:
+    release_manifest = check_contract_size_budget.validate_canonical_release_output(
+        repo_root,
+        config_path,
+        foundry_config_path,
+        foundry_out,
+    )
+    return check_policy(
+        repo_root,
+        config_path,
+        foundry_out,
+        release_manifest,
+    )
+
+
 def parse_args(argv: Sequence[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd())
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument(
+        "--foundry-config",
+        type=Path,
+        default=DEFAULT_FOUNDRY_CONFIG,
+    )
     parser.add_argument("--foundry-out", type=Path, default=DEFAULT_FOUNDRY_OUT)
     return parser.parse_args(argv)
 
@@ -295,7 +344,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv or sys.argv[1:])
     repo_root = args.repo_root.resolve()
     try:
-        return check_policy(repo_root, args.config, args.foundry_out)
+        return check_canonical_policy(
+            repo_root,
+            args.config,
+            args.foundry_config,
+            args.foundry_out,
+        )
     except (CoreBytecodePolicyError, check_contract_size_budget.SizeBudgetError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

@@ -415,7 +415,7 @@ jobs:
           python3 scripts/test_gas_envelopes.py 2>&1 | tee ci-logs/gas-envelope-tests.log
           python3 scripts/check_gas_envelopes.py 2>&1 | tee ci-logs/gas-envelope-check.log
 
-      - name: Production size
+      - name: Aggregate size and warning diagnostic
         shell: bash
         run: |
           set -o pipefail

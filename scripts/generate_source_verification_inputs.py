@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import build_release_artifacts as release_build
+import generate_release_artifacts as release_artifacts
 
 try:
     import tomllib
@@ -41,6 +42,8 @@ def load_json(path: Path) -> Any:
             return json.load(handle)
     except FileNotFoundError as exc:
         raise SourceVerificationError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise SourceVerificationError(f"unable to read required file {path}: {exc}") from exc
     except json.JSONDecodeError as exc:
         raise SourceVerificationError(f"invalid JSON in {path}: {exc}") from exc
 
@@ -105,18 +108,36 @@ def parse_scalar(value: str) -> Any:
         return value
 
 
-def load_foundry_config(path: Path) -> dict[str, Any]:
+def load_foundry_config(
+    path: Path,
+    expected_sha256: str | None = None,
+) -> dict[str, Any]:
     try:
         raw = path.read_bytes()
     except FileNotFoundError as exc:
         raise SourceVerificationError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise SourceVerificationError(f"unable to read required file {path}: {exc}") from exc
+
+    if expected_sha256 is not None and sha256_bytes(raw) != expected_sha256:
+        raise SourceVerificationError(
+            f"validated release receipt Foundry config hash is stale: {path}"
+        )
+
+    try:
+        decoded = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise SourceVerificationError(f"invalid UTF-8 in {path}: {exc}") from exc
 
     if tomllib is not None:
-        return tomllib.loads(raw.decode("utf-8"))
+        try:
+            return tomllib.loads(decoded)
+        except tomllib.TOMLDecodeError as exc:
+            raise SourceVerificationError(f"invalid TOML in {path}: {exc}") from exc
 
     parsed: dict[str, Any] = {}
     current: dict[str, Any] | None = None
-    for raw_line in raw.decode("utf-8").splitlines():
+    for raw_line in decoded.splitlines():
         line = raw_line.split("#", 1)[0].strip()
         if not line:
             continue
@@ -133,6 +154,31 @@ def load_foundry_config(path: Path) -> dict[str, Any]:
             continue
         current[key.strip()] = parse_scalar(value)
     return parsed
+
+
+def receipt_source_hash(
+    release_manifest: dict[str, Any],
+    repo_root: Path,
+    path: Path,
+    *,
+    path_key: str,
+    hash_key: str,
+    label: str,
+) -> str:
+    source = release_manifest.get("source")
+    if not isinstance(source, dict):
+        raise SourceVerificationError("validated release receipt source must be an object")
+    expected_path = normalize_path(path, repo_root)
+    if source.get(path_key) != expected_path:
+        raise SourceVerificationError(
+            f"validated release receipt {label} path does not match {expected_path}"
+        )
+    digest = source.get(hash_key)
+    if not isinstance(digest, str) or not digest:
+        raise SourceVerificationError(
+            f"validated release receipt {label} hash is missing"
+        )
+    return digest
 
 
 def foundry_profile(config: dict[str, Any]) -> dict[str, Any]:
@@ -297,17 +343,129 @@ def source_record(
     source_path: str,
     metadata_source: dict[str, Any],
     used_by: list[str],
+    source_snapshot: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    path = repo_root / source_path
-    if not path.is_file():
-        raise SourceVerificationError(f"metadata source file is missing: {source_path}")
+    if source_snapshot is None:
+        source_snapshot = load_source_snapshot(repo_root, source_path)
     return {
         "path": source_path,
-        "sha256": file_sha256(path),
+        "sha256": source_snapshot["sha256"],
         "solc_keccak256": metadata_source.get("keccak256", ""),
         "license": metadata_source.get("license", ""),
         "used_by": sorted(set(used_by)),
     }
+
+
+def load_source_snapshot(
+    repo_root: Path,
+    source_path: str,
+    expected: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    path = repo_root / source_path
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError as exc:
+        raise SourceVerificationError(
+            f"metadata source file is missing: {source_path}"
+        ) from exc
+    except OSError as exc:
+        raise SourceVerificationError(
+            f"unable to read metadata source {source_path}: {exc}"
+        ) from exc
+    snapshot = {
+        "sha256": sha256_bytes(raw),
+        "keccak256": release_build.keccak256_hex(raw),
+    }
+    if expected is not None:
+        if expected.get("sha256") != snapshot["sha256"]:
+            raise SourceVerificationError(
+                "validated release receipt source hash is stale for "
+                f"{source_path}"
+            )
+        expected_keccak = expected.get("keccak256")
+        if (
+            not isinstance(expected_keccak, str)
+            or expected_keccak.lower() != snapshot["keccak256"].lower()
+        ):
+            raise SourceVerificationError(
+                "validated release receipt source keccak is stale for "
+                f"{source_path}"
+            )
+    return snapshot
+
+
+def indexed_receipt_sources(
+    target_record: dict[str, Any],
+    target_label: str,
+) -> dict[str, dict[str, Any]]:
+    indexed: dict[str, dict[str, Any]] | None = None
+    for field in ("metadata_sources", "compiler_input_sources"):
+        records = target_record.get(field)
+        if not isinstance(records, list) or not records:
+            raise SourceVerificationError(
+                f"validated release receipt {field} is missing for {target_label}"
+            )
+        current: dict[str, dict[str, Any]] = {}
+        for index, value in enumerate(records):
+            if not isinstance(value, dict):
+                raise SourceVerificationError(
+                    f"validated release receipt {field}[{index}] must be an object "
+                    f"for {target_label}"
+                )
+            path = value.get("path")
+            if not isinstance(path, str) or not path or path in current:
+                raise SourceVerificationError(
+                    f"validated release receipt {field} has an invalid source path "
+                    f"for {target_label}"
+                )
+            current[path] = value
+        if indexed is None:
+            indexed = current
+        elif indexed != current:
+            raise SourceVerificationError(
+                "validated release receipt metadata/compiler source bindings "
+                f"disagree for {target_label}"
+            )
+    if indexed is None:  # pragma: no cover - both required fields are iterated.
+        raise SourceVerificationError(
+            f"validated release receipt source bindings are missing for {target_label}"
+        )
+    return indexed
+
+
+def receipt_source_bindings(
+    release_manifest: dict[str, Any],
+    contracts: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    bindings: dict[str, dict[str, Any]] = {}
+    for entry in contracts:
+        name = entry.get("name")
+        source = entry.get("source")
+        if not isinstance(name, str) or not isinstance(source, str):
+            raise SourceVerificationError(
+                "production contract name and source must be strings"
+            )
+        try:
+            target = release_artifacts.receipt_target(
+                release_manifest,
+                kind="production_contract",
+                name=name,
+                source=source,
+            )
+        except release_artifacts.ArtifactError as exc:
+            raise SourceVerificationError(str(exc)) from exc
+        for path, record in indexed_receipt_sources(
+            target,
+            f"{source}:{name}",
+        ).items():
+            existing = bindings.get(path)
+            if existing is not None and existing != record:
+                raise SourceVerificationError(
+                    "validated release receipt has conflicting source bindings "
+                    f"for {path}"
+                )
+            bindings[path] = record
+    return bindings
 
 
 def collect_source_usage(contract_records: list[dict[str, Any]]) -> dict[str, list[str]]:
@@ -318,16 +476,28 @@ def collect_source_usage(contract_records: list[dict[str, Any]]) -> dict[str, li
     return usage
 
 
-def artifact_record(
+def artifact_record_with_artifact(
     entry: dict[str, Any],
     repo_root: Path,
     foundry_out: Path,
     abi_checksums: dict[str, Any],
-) -> dict[str, Any]:
+    release_manifest: dict[str, Any] | None = None,
+    source_snapshots: dict[str, dict[str, Any]] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any]]:
     name = entry["name"]
     source = entry.get("source", "")
-    artifact_path = find_artifact(foundry_out, name, source)
-    artifact = require_dict(load_json(artifact_path), str(artifact_path))
+    try:
+        summary = release_artifacts.artifact_summary(
+            entry,
+            foundry_out,
+            repo_root,
+            release_manifest=release_manifest,
+            release_kind="production_contract",
+        )
+    except release_artifacts.ArtifactError as exc:
+        raise SourceVerificationError(str(exc)) from exc
+    artifact_path = summary["_artifact_file"]
+    artifact = require_dict(summary["artifact"], str(artifact_path))
     abi = require_list(artifact.get("abi"), f"{artifact_path}.abi")
     metadata = artifact_metadata(artifact, name)
 
@@ -350,8 +520,13 @@ def artifact_record(
         metadata_sources.get(source),
         f"{name}.metadata.sources.{source}",
     )
-    if not (repo_root / source).is_file():
-        raise SourceVerificationError(f"source file is missing for {name}: {source}")
+    primary_source_snapshot = (
+        source_snapshots.get(source) if source_snapshots is not None else None
+    )
+    if primary_source_snapshot is None:
+        primary_source_snapshot = load_source_snapshot(repo_root, source)
+        if source_snapshots is not None:
+            source_snapshots[source] = primary_source_snapshot
 
     checksum_contracts = require_dict(abi_checksums.get("contracts"), "abi-checksums.contracts")
     checksum_entry = require_dict(
@@ -392,10 +567,10 @@ def artifact_record(
         "metadata_sources": sorted(str(path) for path in metadata_sources),
         "contract": {
             "source": source,
-            "source_sha256": file_sha256(repo_root / source),
+            "source_sha256": primary_source_snapshot["sha256"],
             "source_solc_keccak256": primary_metadata_source.get("keccak256", ""),
             "artifact_path": normalized_artifact_path,
-            "artifact_sha256": file_sha256(artifact_path),
+            "artifact_sha256": summary["artifact_sha256"],
             "compilation_target": f"{source}:{name}",
             "compiler_version": compiler_version,
             "language": metadata.get("language", "Solidity"),
@@ -448,7 +623,26 @@ def artifact_record(
                 ),
             },
         },
-    }
+    }, artifact
+
+
+def artifact_record(
+    entry: dict[str, Any],
+    repo_root: Path,
+    foundry_out: Path,
+    abi_checksums: dict[str, Any],
+    release_manifest: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    source_snapshots: dict[str, dict[str, Any]] = {}
+    record, _ = artifact_record_with_artifact(
+        entry,
+        repo_root,
+        foundry_out,
+        abi_checksums,
+        release_manifest,
+        source_snapshots,
+    )
+    return record
 
 
 def sorted_unique(values: list[Any]) -> list[Any]:
@@ -462,10 +656,28 @@ def build_manifest(
     foundry_config_path: Path,
     foundry_out: Path,
     abi_checksums_path: Path,
+    release_manifest: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    contract_config = require_dict(load_json(contract_config_path), str(contract_config_path))
+    try:
+        contract_config = release_artifacts.load_release_config(
+            repo_root,
+            contract_config_path,
+            release_manifest,
+        )
+    except release_artifacts.ArtifactError as exc:
+        raise SourceVerificationError(str(exc)) from exc
     abi_checksums = require_dict(load_json(abi_checksums_path), str(abi_checksums_path))
-    foundry = load_foundry_config(foundry_config_path)
+    foundry_sha256 = None
+    if release_manifest is not None:
+        foundry_sha256 = receipt_source_hash(
+            release_manifest,
+            repo_root,
+            foundry_config_path,
+            path_key="foundry_config",
+            hash_key="foundry_config_sha256",
+            label="Foundry config",
+        )
+    foundry = load_foundry_config(foundry_config_path, foundry_sha256)
     profile = foundry_profile(foundry)
 
     contracts = require_list(
@@ -475,15 +687,46 @@ def build_manifest(
     if not contracts:
         raise SourceVerificationError("production_contracts list is empty")
 
-    artifact_records = [
-        artifact_record(entry, repo_root, foundry_out, abi_checksums)
+    expected_sources = (
+        receipt_source_bindings(release_manifest, contracts)
+        if release_manifest is not None
+        else {}
+    )
+    source_snapshots: dict[str, dict[str, Any]] = {}
+    for entry in contracts:
+        source = entry.get("source")
+        if not isinstance(source, str) or not source:
+            raise SourceVerificationError(
+                "production contract source must be a nonempty string"
+            )
+        expected_source = expected_sources.get(source)
+        if release_manifest is not None and expected_source is None:
+            raise SourceVerificationError(
+                f"validated release receipt source binding is missing for {source}"
+            )
+        if source not in source_snapshots:
+            source_snapshots[source] = load_source_snapshot(
+                repo_root,
+                source,
+                expected_source,
+            )
+
+    artifact_results = [
+        artifact_record_with_artifact(
+            entry,
+            repo_root,
+            foundry_out,
+            abi_checksums,
+            release_manifest,
+            source_snapshots,
+        )
         for entry in sorted(contracts, key=lambda item: item["name"])
     ]
+    artifact_records = [record for record, _ in artifact_results]
     source_usage = collect_source_usage(artifact_records)
 
     metadata_sources: dict[str, dict[str, Any]] = {}
-    for record in artifact_records:
-        artifact = load_json(repo_root / record["contract"]["artifact_path"])
+    for record, artifact in artifact_results:
         metadata = artifact_metadata(
             require_dict(artifact, record["contract"]["artifact_path"]),
             record["name"],
@@ -492,7 +735,34 @@ def build_manifest(
             metadata.get("sources"),
             "sources",
         ).items():
-            metadata_sources[source_path] = require_dict(metadata_source, f"sources.{source_path}")
+            normalized_metadata_source = require_dict(
+                metadata_source,
+                f"sources.{source_path}",
+            )
+            expected_source = expected_sources.get(source_path)
+            if release_manifest is not None and expected_source is None:
+                raise SourceVerificationError(
+                    "validated release receipt source binding is missing for "
+                    f"{source_path}"
+                )
+            if expected_source is not None:
+                metadata_keccak = normalized_metadata_source.get("keccak256")
+                if (
+                    not isinstance(metadata_keccak, str)
+                    or metadata_keccak.lower()
+                    != str(expected_source.get("keccak256", "")).lower()
+                ):
+                    raise SourceVerificationError(
+                        "artifact metadata source keccak does not match the "
+                        f"validated release receipt for {source_path}"
+                    )
+            if source_path not in source_snapshots:
+                source_snapshots[source_path] = load_source_snapshot(
+                    repo_root,
+                    source_path,
+                    expected_source,
+                )
+            metadata_sources[source_path] = normalized_metadata_source
 
     contract_map = {record["name"]: record["contract"] for record in artifact_records}
     compiler_versions = sorted_unique(
@@ -555,6 +825,7 @@ def build_manifest(
                 source_path,
                 metadata_sources[source_path],
                 source_usage.get(source_path, []),
+                source_snapshots[source_path],
             )
             for source_path in sorted(metadata_sources)
         },
@@ -569,6 +840,7 @@ def build_output_text(
     foundry_config_path: Path,
     foundry_out: Path,
     abi_checksums_path: Path,
+    release_manifest: dict[str, Any] | None = None,
 ) -> str:
     manifest = build_manifest(
         repo_root,
@@ -577,6 +849,7 @@ def build_output_text(
         foundry_config_path,
         foundry_out,
         abi_checksums_path,
+        release_manifest,
     )
     return json_text(manifest)
 
@@ -588,6 +861,7 @@ def write_output(
     foundry_config_path: Path,
     foundry_out: Path,
     abi_checksums_path: Path,
+    release_manifest: dict[str, Any] | None = None,
 ) -> Path:
     output_text = build_output_text(
         repo_root,
@@ -596,6 +870,7 @@ def write_output(
         foundry_config_path,
         foundry_out,
         abi_checksums_path,
+        release_manifest,
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(output_text, encoding="utf-8", newline="\n")
@@ -609,6 +884,7 @@ def check_output(
     foundry_config_path: Path,
     foundry_out: Path,
     abi_checksums_path: Path,
+    release_manifest: dict[str, Any] | None = None,
 ) -> int:
     if not output_path.exists():
         print(f"missing {normalize_path(output_path, repo_root)}", file=sys.stderr)
@@ -626,6 +902,7 @@ def check_output(
         foundry_config_path,
         foundry_out,
         abi_checksums_path,
+        release_manifest,
     )
 
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -660,7 +937,7 @@ def main(argv: list[str]) -> int:
     repo_root = Path.cwd()
 
     try:
-        release_build.validate_release_output(
+        release_manifest = release_build.validate_release_output(
             repo_root,
             args.contract_config,
             args.foundry_config,
@@ -674,6 +951,7 @@ def main(argv: list[str]) -> int:
                 args.foundry_config,
                 args.foundry_out,
                 args.abi_checksums,
+                release_manifest,
             )
         written = write_output(
             repo_root,
@@ -682,6 +960,7 @@ def main(argv: list[str]) -> int:
             args.foundry_config,
             args.foundry_out,
             args.abi_checksums,
+            release_manifest,
         )
     except (SourceVerificationError, release_build.ReleaseBuildError) as exc:
         print(f"error: {exc}", file=sys.stderr)

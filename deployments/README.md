@@ -47,10 +47,13 @@ material in this directory. Public deployment manifests, ABI hashes, checksums,
 and verification references are intentionally public release artifacts.
 
 The local ABI checksum, bytecode checksum, interface ID, and event topic catalog
-baseline is generated under `release-artifacts/latest/` with:
+baseline is generated under `release-artifacts/latest/` from the canonical
+target-isolated build with:
 
 ```sh
-forge build --sizes --via-ir --skip test --skip script --force
+python scripts/test_release_build_artifacts.py
+python scripts/build_release_artifacts.py
+python scripts/build_release_artifacts.py --check
 python scripts/generate_release_artifacts.py
 python scripts/generate_broadcast_manifest_input.py
 python scripts/generate_deployment_manifest.py
@@ -62,6 +65,10 @@ python scripts/test_randomizer_operations.py
 python scripts/check_randomizer_operations.py
 python scripts/generate_release_checksums.py
 ```
+
+The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
+command is diagnostic only and must not supply deployment-manifest bytecode or
+compiler inputs.
 
 Deployment manifests should reference those outputs, then replace any unlinked
 placeholder-bytecode hashes with broadcast or verification hashes once a live
