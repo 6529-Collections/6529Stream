@@ -23,7 +23,7 @@ except ModuleNotFoundError:  # pragma: no cover - the checked toolchain is Pytho
 
 
 RELEASE_BUILD_SCHEMA = "6529stream.release-build.v1"
-GENERATOR_VERSION = "2"
+GENERATOR_VERSION = "3"
 DEFAULT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_FOUNDRY_CONFIG = Path("foundry.toml")
 DEFAULT_OUTPUT_DIR = Path("out-release")
@@ -41,6 +41,11 @@ TARGET_GROUPS = (
     ("interface", "interfaces"),
 )
 RESTRICTED_RELEASE_SOURCE_ROOTS = frozenset({"script", "test"})
+PORTABLE_COMPILER_PATHS = {
+    "allowPaths": [".", "lib"],
+    "basePath": ".",
+    "includePaths": ["."],
+}
 TARGET_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -383,11 +388,55 @@ def metadata_source_records(
     return records
 
 
+def canonicalize_build_info_compiler_paths(
+    repo_root: Path,
+    compiler_input: dict[str, Any],
+    label: str,
+) -> dict[str, Any]:
+    """Replace exact worktree path carriers with a portable retained form."""
+    repo_root = repo_root.resolve()
+    raw_root = repo_root.as_posix()
+    raw_lib = (repo_root / "lib").as_posix()
+    expected = {
+        "allowPaths": [raw_root, raw_lib],
+        "basePath": raw_root,
+        "includePaths": [raw_root],
+    }
+    for field, expected_value in expected.items():
+        if compiler_input.get(field) != expected_value:
+            raise ReleaseBuildError(
+                f"{label} compiler input {field} must be exactly "
+                f"{expected_value!r} before portable retention"
+            )
+
+    portable = dict(compiler_input)
+    portable.update(
+        {
+            field: list(value) if isinstance(value, list) else value
+            for field, value in PORTABLE_COMPILER_PATHS.items()
+        }
+    )
+    return portable
+
+
+def validate_portable_compiler_paths(
+    compiler_input: dict[str, Any],
+    label: str,
+) -> None:
+    for field, expected_value in PORTABLE_COMPILER_PATHS.items():
+        if compiler_input.get(field) != expected_value:
+            raise ReleaseBuildError(
+                f"{label} retained compiler input {field} must be exactly "
+                f"{expected_value!r}"
+            )
+
+
 def validate_compiler_input(
     repo_root: Path,
     compiler_input: dict[str, Any],
     label: str,
 ) -> dict[str, Any]:
+    validate_portable_compiler_paths(compiler_input, label)
     if compiler_input.get("language") != "Solidity":
         raise ReleaseBuildError(f"{label} compiler input language must be Solidity")
     sources = require_dict(compiler_input.get("sources"), f"{label}.input.sources")
@@ -805,6 +854,7 @@ def build_manifest(
         "policy": {
             "compilation_unit": "one_configured_target_source_and_its_import_closure",
             "restricted_source_roots": sorted(RESTRICTED_RELEASE_SOURCE_ROOTS),
+            "portable_compiler_paths": PORTABLE_COMPILER_PATHS,
             "solc_version": SOLC_VERSION,
             "solc_long_version": SOLC_LONG_VERSION,
             "evm_version": EVM_VERSION,
@@ -1110,8 +1160,13 @@ def build_release_output(
                 ),
                 repo_root,
             )
-            compiler_input = load_build_info_input(
+            raw_compiler_input = load_build_info_input(
                 target_build_info,
+                source,
+            )
+            compiler_input = canonicalize_build_info_compiler_paths(
+                repo_root,
+                raw_compiler_input,
                 source,
             )
             validate_compiler_input(

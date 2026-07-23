@@ -369,8 +369,15 @@ dedicated ignored `out-release/` with rollback on caught replacement failures.
 The output option is restricted to the literal repo-root `out-release/`, while
 ordinary Forge builds and scripts continue to use `out/`. Config, receipt,
 artifact, and compiler-input paths reject symlink, junction, and reparse
-components before resolution. Tests and scripts are excluded from those source
-closures. The deterministic ignored build receipt binds the
+components before resolution. The builder requires Forge's raw `basePath`,
+`includePaths`, and `allowPaths` to identify exactly the active repository root
+and its `lib/` directory, then retains those four worktree-specific values as
+the stable relative policy `basePath="."`, `includePaths=["."]`, and
+`allowPaths=[".", "lib"]`. Any missing, reordered, duplicate, aliased, or extra
+path fails before retention. This makes compiler-input bytes and the complete
+receipt hash portable across checkouts while preserving the exact source,
+settings, toolchain, and artifact bindings. Tests and scripts are excluded from
+those source closures. The deterministic ignored build receipt binds the
 config, Foundry config, exact Forge version output, explicit normalized Forge
 argv, compiler policy, target, complete metadata source universe and hashes,
 compiler-settings hash, canonical build-input hash, and artifact hash. Both the
@@ -394,7 +401,8 @@ build-info compiler-input source, or artifact-metadata source whose resolved
 repository path starts under `test/` or `script/`. This fail-closed guard
 addresses the noncausal aggregate leakage tracked by
 [issue #675](https://github.com/6529-Collections/6529Stream/issues/675) without
-changing `foundry.toml` or the via-IR test compilation behavior.
+changing `foundry.toml` or the via-IR test compilation behavior. Two-root
+regressions require byte-identical retained compiler inputs and full receipts.
 This helper canonicalizes release and verification evidence only. The current
 Forge deployment scripts can still recompile a larger script import universe
 and do not yet prove that broadcasts consume this canonical initcode;

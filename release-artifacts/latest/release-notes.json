@@ -4,8 +4,8 @@
   "source": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:a52aefeee2397a01ea2c2066e73e960fd48b227a62f4997f901aab15217e2218",
-      "size_bytes": 111929
+      "sha256": "sha256:9bb8f5365915b5dae2f8ef3e93c4a614e7ce57f07070620f4e7a2654a2ec7851",
+      "size_bytes": 112900
     },
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
@@ -17,7 +17,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:e5164cb089770b0aeee68b964dabb53c15a0f89cf2386139bba82f4211404efa",
+      "sha256": "sha256:3234a679aa0c09c959533695c18fcda25abe5bc64c15e9df063dba6f87a00a95",
       "size_bytes": 25494
     },
     "json_output": "release-artifacts/latest/release-notes.json",
@@ -45,6 +45,7 @@
   "changelog": {
     "section": "Unreleased",
     "entries": [
+      "Hardened canonical release builds so configured targets, retained build-info compiler inputs, and artifact metadata fail closed if any resolved source is under `test/` or `script/`; added focused regressions for both restricted roots; made the runtime-size and Core bytecode-spend checker CLIs validate the canonical receipt before reading artifacts; and consistently labeled the aggregate all-source size/warning build as diagnostic rather than production evidence. Canonical retention now validates the exact Forge worktree path carriers and projects only those fields to stable `.` / `lib` values before hashing, so otherwise identical checkouts produce byte-identical compiler inputs and receipt hashes without weakening source or artifact binding. This addresses [issue #675](https://github.com/6529-Collections/6529Stream/issues/675) without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test compilation, or release maturity.",
       "Made release bytecode generation reproducible under Solidity 0.8.19 by compiling each configured production source and its import closure in an isolated via-IR Forge invocation, retaining a deterministic build receipt, and using staged replacement with rollback on caught failures to restore the configured named artifacts plus retained compiler inputs and receipt to dedicated ignored `out-release/` before release, ABI, size, and explorer-verification generators run. The aggregate all-source size build remains a diagnostic warning input, not the release-bytecode authority. This closes the local release/verification evidence gap tracked by [issue #674](https://github.com/6529-Collections/6529Stream/issues/674), but does not make Forge deployment scripts or broadcasts consume that canonical initcode; [issue #677](https://github.com/6529-Collections/6529Stream/issues/677) remains a production blocker. Protocol maturity is unchanged.",
       "Made generated fork deployment, ceremony, and randomizer command provenance quote-exact across Windows and POSIX shells. The non-local evidence generator can now read a canonical retained Markdown `Command` field instead of transporting shell-sensitive text through native argv, and the checker rejects missing, ambiguous, malformed, or quote-drifted replay commands without changing release readiness.",
       "Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over from the retired aggregate/facade Core-read seam to separately bound actual Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The registry now validates dependency code, the adapter's exact ERC-165 support, immutable bindings, canonical probe values, and exact 9-word/13-word aggregate returns through fixed-size buffers; hashes the actual Core rather than the adapter; requires exact discovery count, hash, and ordered component enumeration; bounds strict, preview, and diagnostic reads without copying attacker-sized returndata; rejects unknown metadata-mode, collection-status, and supply-mode values; enforces the actual Core's collection burn-block and freeze gates; compares aggregate supply as `uint256`; and removes the controller/facade gate and `facadeBindingSatisfied` preview field. Focused adapter, registry, preview, component-floor, ABI, domain-golden, malformed-dependency, impostor-binding, raw-scope, large-supply, discovery, and gate-parity tests cover the cutover. This is a zero-Core-delta change: `StreamCore` source, ABI, and runtime bytecode remain unchanged. It does not clear production deployment because the current Core, metadata, discovery, and sanction implementations remain incomplete for the target production path.",

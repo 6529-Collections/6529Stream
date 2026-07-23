@@ -99,6 +99,12 @@ python scripts/generate_release_candidate_lockfile.py
 python scripts/generate_release_checksums.py
 ```
 
+The retained compiler inputs validate Forge's exact repository-root path
+carriers and store them as the portable relative `.` / `lib` policy. Therefore
+an exact release-build receipt hash is stable across otherwise identical local
+and CI worktrees; absolute checkout paths are never retained as receipt
+authority.
+
 The aggregate `forge build --sizes --via-ir --skip test --skip script --force`
 command remains useful for warnings and whole-tree size diagnostics, but
 Foundry compilation restrictions can admit `test/` helpers despite those skip

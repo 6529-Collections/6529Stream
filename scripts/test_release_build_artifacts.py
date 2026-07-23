@@ -189,11 +189,13 @@ class FakeForge:
         *,
         wrong_target: bool = False,
         compiler_input_extra_source: str | None = None,
+        compiler_path_overrides: dict[str, object] | None = None,
     ) -> None:
         self.commands: list[list[str]] = []
         self.cwd_values: list[Path] = []
         self.wrong_target = wrong_target
         self.compiler_input_extra_source = compiler_input_extra_source
+        self.compiler_path_overrides = compiler_path_overrides
 
     def __call__(self, command: list[str], cwd: Path) -> None:
         self.commands.append(command)
@@ -250,6 +252,18 @@ class FakeForge:
                         "outputSelection": {"*": {"*": ["abi"]}},
                         "viaIR": True,
                     },
+                    **(
+                        self.compiler_path_overrides
+                        if self.compiler_path_overrides is not None
+                        else {
+                            "allowPaths": [
+                                cwd.resolve().as_posix(),
+                                (cwd.resolve() / "lib").as_posix(),
+                            ],
+                            "basePath": cwd.resolve().as_posix(),
+                            "includePaths": [cwd.resolve().as_posix()],
+                        }
+                    ),
                 },
             },
         )
@@ -380,6 +394,107 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                 records["Example"]["compiler_input_path"],
                 "out-release/compiler-inputs/000-Example.json",
             )
+            retained_input = json.loads(
+                (
+                    paths["output"]
+                    / "compiler-inputs"
+                    / "000-Example.json"
+                ).read_text(encoding="utf-8")
+            )
+            self.assertEqual(
+                {
+                    field: retained_input[field]
+                    for field in builder.PORTABLE_COMPILER_PATHS
+                },
+                builder.PORTABLE_COMPILER_PATHS,
+            )
+            self.assertEqual(
+                manifest["policy"]["portable_compiler_paths"],
+                builder.PORTABLE_COMPILER_PATHS,
+            )
+
+    def test_release_receipt_is_identical_across_worktree_roots(self) -> None:
+        with (
+            tempfile.TemporaryDirectory() as first_dir,
+            tempfile.TemporaryDirectory() as second_dir,
+        ):
+            roots = (Path(first_dir), Path(second_dir))
+            outputs: list[tuple[dict[str, Any], list[bytes]]] = []
+            for root in roots:
+                paths = seed_tree(root)
+                with redirect_stdout(StringIO()):
+                    manifest = builder.build_release_output(
+                        root,
+                        paths["config"],
+                        paths["foundry_config"],
+                        paths["output"],
+                        "fake-forge",
+                        FakeForge(),
+                        FAKE_FORGE_VERSION,
+                    )
+                retained = [
+                    path.read_bytes()
+                    for path in sorted(
+                        (paths["output"] / "compiler-inputs").glob("*.json")
+                    )
+                ]
+                outputs.append((manifest, retained))
+
+            self.assertEqual(outputs[0], outputs[1])
+            self.assertEqual(
+                builder.file_sha256(
+                    roots[0] / builder.DEFAULT_OUTPUT_DIR / builder.MANIFEST_FILENAME
+                ),
+                builder.file_sha256(
+                    roots[1] / builder.DEFAULT_OUTPUT_DIR / builder.MANIFEST_FILENAME
+                ),
+            )
+
+    def test_rejects_noncanonical_raw_compiler_path_controls(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            raw_root = root.resolve().as_posix()
+            raw_lib = (root.resolve() / "lib").as_posix()
+            cases = {
+                "outside base": {
+                    "allowPaths": [raw_root, raw_lib],
+                    "basePath": (root.parent / "outside").resolve().as_posix(),
+                    "includePaths": [raw_root],
+                },
+                "extra allow path": {
+                    "allowPaths": [raw_root, raw_lib, raw_root],
+                    "basePath": raw_root,
+                    "includePaths": [raw_root],
+                },
+                "reordered allow paths": {
+                    "allowPaths": [raw_lib, raw_root],
+                    "basePath": raw_root,
+                    "includePaths": [raw_root],
+                },
+                "extra include path": {
+                    "allowPaths": [raw_root, raw_lib],
+                    "basePath": raw_root,
+                    "includePaths": [raw_root, raw_lib],
+                },
+                "relative raw paths": builder.PORTABLE_COMPILER_PATHS,
+            }
+            for label, controls in cases.items():
+                with self.subTest(case=label):
+                    paths = seed_tree(root)
+                    with self.assertRaisesRegex(
+                        builder.ReleaseBuildError,
+                        "before portable retention",
+                    ):
+                        with redirect_stdout(StringIO()):
+                            builder.build_release_output(
+                                root,
+                                paths["config"],
+                                paths["foundry_config"],
+                                paths["output"],
+                                "fake-forge",
+                                FakeForge(compiler_path_overrides=controls),
+                                FAKE_FORGE_VERSION,
+                            )
 
     def test_rejects_test_and_script_sources_from_build_info_compiler_input(self) -> None:
         for restricted_source in (
@@ -924,6 +1039,7 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
         cases = (
             ("generator version", "generator identity is invalid"),
             ("restricted-root policy", "compiler policy is stale"),
+            ("portable-path policy", "compiler policy is stale"),
         )
         for mutation, expected_error in cases:
             with self.subTest(mutation=mutation):
@@ -948,8 +1064,10 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
                         manifest["generated_by"] = (
                             "scripts/build_release_artifacts.py:1"
                         )
-                    else:
+                    elif mutation == "restricted-root policy":
                         del manifest["policy"]["restricted_source_roots"]
+                    else:
+                        del manifest["policy"]["portable_compiler_paths"]
                     write_json(manifest_path, manifest)
 
                     stderr = StringIO()
@@ -994,6 +1112,49 @@ class ReleaseBuildArtifactTests(unittest.TestCase):
             )
 
             with self.assertRaisesRegex(builder.ReleaseBuildError, "compiler input hash is stale"):
+                builder.validate_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                )
+
+    def test_validator_rejects_absolute_path_reintroduced_into_receipt(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_tree(root)
+            with redirect_stdout(StringIO()):
+                builder.build_release_output(
+                    root,
+                    paths["config"],
+                    paths["foundry_config"],
+                    paths["output"],
+                    runner=FakeForge(),
+                    forge_version_output=FAKE_FORGE_VERSION,
+                )
+
+            relative_input = "compiler-inputs/000-Example.json"
+            compiler_input_path = paths["output"] / relative_input
+            compiler_input = json.loads(
+                compiler_input_path.read_text(encoding="utf-8")
+            )
+            compiler_input["basePath"] = root.resolve().as_posix()
+            compiler_input_path.write_bytes(
+                builder.ordered_json_bytes(compiler_input)
+            )
+
+            manifest_path = paths["output"] / builder.MANIFEST_FILENAME
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            updated_hash = builder.file_sha256(compiler_input_path)
+            for record in manifest["targets"]:
+                if record["compiler_input_relative_path"] == relative_input:
+                    record["compiler_input_sha256"] = updated_hash
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(
+                builder.ReleaseBuildError,
+                "retained compiler input basePath must be exactly",
+            ):
                 builder.validate_release_output(
                     root,
                     paths["config"],

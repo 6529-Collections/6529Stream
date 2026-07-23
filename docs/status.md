@@ -30,7 +30,10 @@ The current Gate A smoke baseline proves:
   which compiles each configured source and import closure in isolation,
   rejects test/script source units in configured targets, retained build-info
   compiler inputs, and artifact metadata, validates a deterministic
-  input/artifact receipt, and uses staged replacement with rollback on caught
+  input/artifact receipt, projects only Forge's exact absolute worktree path
+  carriers to a checked stable `.` / `lib` representation so receipt hashes are
+  portable across otherwise identical checkouts, and uses staged replacement
+  with rollback on caught
   failures to restore configured artifacts plus retained compiler inputs and
   the receipt to dedicated ignored `out-release/`. Ordinary Forge builds and
   scripts continue to use `out/`. `python

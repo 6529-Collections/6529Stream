@@ -13,7 +13,11 @@ the release policy in `docs/release-policy.md`.
   roots; made the runtime-size and Core bytecode-spend checker CLIs validate the
   canonical receipt before reading artifacts; and consistently labeled the
   aggregate all-source size/warning build as diagnostic rather than production
-  evidence. This addresses
+  evidence. Canonical retention now validates the exact Forge worktree path
+  carriers and projects only those fields to stable `.` / `lib` values before
+  hashing, so otherwise identical checkouts produce byte-identical compiler
+  inputs and receipt hashes without weakening source or artifact binding. This
+  addresses
   [issue #675](https://github.com/6529-Collections/6529Stream/issues/675)
   without changing `foundry.toml`, Solidity bytecode, ABI, via-IR test
   compilation, or release maturity.
