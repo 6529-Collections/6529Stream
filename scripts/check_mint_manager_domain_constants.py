@@ -860,7 +860,7 @@ def parse_exact_markdown_table(
                 f"malformed {label} row: expected {len(expected_headers)} cells, "
                 f"got {len(cells)}: {line!r}"
             )
-        rows.append(dict(zip(expected_headers, cells)))
+        rows.append(dict(zip(expected_headers, cells, strict=True)))
     return rows
 
 

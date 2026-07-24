@@ -243,7 +243,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:b38b271f8e00fbb1b5bd6581b8b8934b58c4620c0920f62fc3c9118e7ae30042"
+    "sha256": "sha256:127b999808009eb8fcd6330e305eae19f3362255f0e09df581ea8741d454cc90"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -1722,8 +1722,8 @@
     },
     {
       "path": "scripts/check_mint_manager_domain_constants.py",
-      "sha256": "sha256:385c554e4b68d3c34712223db1526ada5ea78e357b887036a28ff49c0f8195f6",
-      "size_bytes": 86697
+      "sha256": "sha256:56c4101ab05cbf3ab1b57e61904dcc8058605a9f09d5188049945cde4f5f327a",
+      "size_bytes": 86710
     },
     {
       "path": "scripts/check_monitoring_spec.py",
