@@ -86,7 +86,7 @@ The current Gate A smoke baseline proves:
   This keeps production blocked under
   [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).
 - The exact ADR 0017 identifier surface is checked at 22 GGP plus three GTP
-  rows, and the schemaed
+  rows, and the schema-validated
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json)
   now pins the exact launch policy, 50-binding host-profile coverage, failure classes,
   sizing/cadence evidence requirements, and fixed-stipend review obligations.

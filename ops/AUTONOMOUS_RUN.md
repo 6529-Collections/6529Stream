@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 11:35 UTC` |
+| Last updated | `2026-07-24 11:44 UTC` |
 
 ## Parallel Lane Coordination
 
@@ -142,8 +142,10 @@ artifacts cannot close them.
   first CodeRabbit pass reported three minor documentation findings, and a
   clean-checkout audit found that the checksum bundle had captured five mixed
   line endings in `scripts/check.ps1`; the current branch addresses those
-  findings and records the required all-CRLF checkout hash. CI and CodeRabbit's
-  incremental review are rerunning, and merge remains gated on both being clean.
+  findings, applies the requested wording correction consistently across every
+  new governed-inventory surface, and records the required all-CRLF checkout
+  hash. Latest-head CI must rerun after that follow-up, and merge remains gated
+  on the complete check set and resolved review state.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality

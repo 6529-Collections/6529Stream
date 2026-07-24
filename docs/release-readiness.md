@@ -255,7 +255,7 @@ production blocker tracked by
 structural profile gate is not concrete deployment evidence.
 
 Production mode also runs the governed-parameter inventory checker with
-`--require-complete`. The ordinary aggregate gate validates the schemaed
+`--require-complete`. The ordinary aggregate gate validates the schema-validated
 22-GGP/3-GTP planning artifact and permits explicitly `not_available`
 candidate bindings so development can continue without fabricated values.
 Production mode permits no such placeholder: every logical row and every
@@ -274,7 +274,7 @@ that stricter decision, so #684 and `RISK-GOV-004` remain open.
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
 | StreamCore deployment headroom | The last committed measurement passes the ordinary development floor at 24,152 runtime bytes and 424 bytes of EIP-170 margin. ADR 0017 avoids planned bytecode growth but does not shrink that Core; the normative production gate still requires a separate refactor and regenerated proof with at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
 | Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
-| Governed parameter completeness | The schemaed 22-GGP/3-GTP inventory now pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, sale-adapter/delegate-gate coverage, callback-provider coverage, and the shared Core completion buffer. Its candidate bindings remain honestly `not_available` and its guarded-consumer lists remain `planning`; production hosts, genesis values, immutable floors, exhaustive consumer review, reviewed sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are not yet complete. Self-reported complete candidates remain categorically rejected until #656 supplies the structured candidate reconciliation model, and self-reported complete evidence is rejected until #684 adds candidate-instance-bound measurement/cadence, reproduction, and reachable-raise-chain semantics. Issue #684 stays open; the shared-buffer code/tests/evidence remain open under #671; and `RISK-GOV-004` plus `--require-complete` make this a non-waivable production gate | No | Yes |
+| Governed parameter completeness | The schema-validated 22-GGP/3-GTP inventory now pins exact 50-binding host-profile policy, failure/cadence rules, evidence obligations, sale-adapter/delegate-gate coverage, callback-provider coverage, and the shared Core completion buffer. Its candidate bindings remain honestly `not_available` and its guarded-consumer lists remain `planning`; production hosts, genesis values, immutable floors, exhaustive consumer review, reviewed sizing/cadence evidence, fixed-stipend compatibility, and instance-aware addresses are not yet complete. Self-reported complete candidates remain categorically rejected until #656 supplies the structured candidate reconciliation model, and self-reported complete evidence is rejected until #684 adds candidate-instance-bound measurement/cadence, reproduction, and reachable-raise-chain semantics. Issue #684 stays open; the shared-buffer code/tests/evidence remain open under #671; and `RISK-GOV-004` plus `--require-complete` make this a non-waivable production gate | No | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
@@ -355,7 +355,7 @@ The current local baseline includes:
   ADR 0017 is a direct release-manifest governance document and a direct
   checksum-generator input, so any change to the raise-only target invalidates
   both artifacts until their canonical regeneration;
-- the schemaed governed-parameter inventory under
+- the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),
   its
   [`v1 schema`](../release-artifacts/schema/governed-parameter-inventory.v1.schema.json),

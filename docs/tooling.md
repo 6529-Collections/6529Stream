@@ -1364,7 +1364,7 @@ the release-manifest dependency chain, and CI.
 
 ## Governed Parameter Production Inventory
 
-Run the schemaed launch-inventory gate with:
+Run the schema-validated launch-inventory gate with:
 
 ```bash
 make governed-parameter-inventory-check

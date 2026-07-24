@@ -7,7 +7,7 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
-- Added the schemaed 25-row governed-parameter launch inventory, structural
+- Added the schema-validated 25-row governed-parameter launch inventory, structural
   checker, and focused mutation tests for the exact 22 GGP/3 GTP policy. The
   inventory makes multi-host coverage explicit across all four sale adapters
   and the primary plus selected fallback callback providers, and pins
