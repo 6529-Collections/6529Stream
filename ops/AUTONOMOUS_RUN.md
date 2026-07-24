@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 02:06 UTC` |
+| Last updated | `2026-07-24 02:41 UTC` |
 
 ## Current Run Notes
 
@@ -91,8 +91,14 @@ evidence, and audit/readiness gates.
   `bytecode_hash` and requires the existing `None` enum spelling, while the
   follow-up aligns the Slither timeout documentation and makes the release-mode
   integration test consume the real committed `RISK-GOV-003` gate while
-  suppressing only unrelated blockers. Latest-head CI and follow-up review are
-  pending.
+  suppressing only unrelated blockers. The replacement Slither job passed its
+  full live comparison in 29 minutes 18 seconds. The concurrent Foundry job
+  passed every preceding step through release-artifact verification, changelog,
+  and deployment-rehearsal parity, then GitHub canceled the final rehearsal's
+  three-file compile at the 30-minute job ceiling. Because this was a pure
+  timeout rather than a test failure, the Foundry-only budget is raised to 60
+  minutes and a focused workflow regression pins that headroom. Latest-head CI
+  and follow-up review are pending.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality

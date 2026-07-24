@@ -178,7 +178,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:c880909b9aa4748f41f8f69a1c0d712fbb12b5a29415ba7177db1ec56c2c2c84"
+    "sha256": "sha256:e9d63586ded9835d6c96053350088314186f7be0afb56465490856b46bd01feb"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -222,7 +222,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "sha256:ecfbbe176d6183196efebc72e7d67d7f26db34a15aa7f98b963ea604a3077e3c",
+      "sha256": "sha256:3aa33b24ce6c1aabead484e4e264271be4b23abdc5022dc835f898dfeb5a9c60",
       "size_bytes": 53319
     },
     {
