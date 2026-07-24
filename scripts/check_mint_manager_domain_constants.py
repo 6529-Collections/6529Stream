@@ -268,12 +268,20 @@ MINT_SPEC_PATH = Path("docs/mint-policy-and-accounting.md")
 SALES_SPEC_PATH = Path("docs/stream-sales-and-auctions.md")
 ADR_0008_PATH = Path("docs/adr/0008-revenue-splits-and-royalty-resolver.md")
 ADR_0018_PATH = Path("docs/adr/0018-batch-operation-root-and-token-identity.md")
+ADR_INDEX_PATH = Path("docs/adr/README.md")
 CONFORMANCE_PATH = Path("docs/launch-conformance-matrix.md")
 ENTROPY_SPEC_PATH = Path("docs/stream-entropy-coordinator.md")
+BACKLOG_PATH = Path("ops/EXECUTION_BACKLOG.md")
 OPERATION_DOMAIN_MARKER = "Identity-domain constants [MPA-OPERATION-DOMAINS]:"
 OPERATION_DOMAIN_END_MARKER = "\n```solidity"
 TARGET_OPERATION_DOMAINS: tuple[tuple[str, str], ...] = (
     ("MINT_REQUEST_COMMITMENT_DOMAIN", "6529STREAM_MINT_REQUEST_COMMITMENT_V1"),
+    ("MINT_VALIDATED_RESULT_DOMAIN", "6529STREAM_MINT_VALIDATED_RESULT_V1"),
+    (
+        "MINT_COUNTER_CONSUMPTIONS_DOMAIN",
+        "6529STREAM_MINT_COUNTER_CONSUMPTIONS_V1",
+    ),
+    ("MINT_NULLIFIERS_DOMAIN", "6529STREAM_MINT_NULLIFIERS_V1"),
     ("MINT_OPERATION_ROOT_DOMAIN", "6529STREAM_MINT_OPERATION_ROOT_V1"),
     ("MINT_TOKEN_OPERATION_ID_DOMAIN", "6529STREAM_MINT_TOKEN_OPERATION_ID_V1"),
     (
@@ -285,13 +293,13 @@ TARGET_OPERATION_DOMAINS: tuple[tuple[str, str], ...] = (
 TARGET_OPERATION_SELECTORS: tuple[tuple[str, str], ...] = (
     (
         "executeSingleStepMint((uint256,bytes32,address,address,address[],address[],"
-        "bytes[],bytes32[],bytes32,bytes),bytes,bytes)",
-        "0x32425026",
+        "bytes[],bytes32[],bytes32,bytes32,bytes),bytes)",
+        "0x8a6ace2e",
     ),
     (
         "executePreparedMint((uint256,bytes32,address,address,address[],address[],"
-        "bytes[],bytes32[],bytes32,bytes),bytes,bytes)",
-        "0xc4368a24",
+        "bytes[],bytes32[],bytes32,bytes32,bytes),bytes)",
+        "0x97c01727",
     ),
     ("nextOperationNonce()", "0x37f8eaa5"),
     (
@@ -309,11 +317,11 @@ TARGET_OPERATION_SELECTORS: tuple[tuple[str, str], ...] = (
 TARGET_OPERATION_ABI_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     MINT_SPEC_PATH: (
         "function executeSingleStepMint( MintBatch calldata batch, "
-        "bytes calldata gateData, bytes calldata settlementData ) external payable "
+        "bytes calldata gateData ) external "
         "returns ( uint256[] memory tokenIds, bytes32 operationRoot, "
         "bytes32[] memory operationIds );",
         "function executePreparedMint( MintBatch calldata batch, "
-        "bytes calldata gateData, bytes calldata settlementData ) external payable "
+        "bytes calldata gateData ) external "
         "returns ( uint256[] memory tokenIds, bytes32 operationRoot, "
         "bytes32[] memory operationIds );",
         "function nextOperationNonce() external view returns (uint256);",
@@ -332,6 +340,122 @@ TARGET_OPERATION_ABI_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "external returns (bytes32 tokenRoyaltyAssignmentHash);",
     ),
 }
+TARGET_OPERATION_PREIMAGES: dict[str, tuple[str, ...]] = {
+    "nullifiersHash": (
+        "MINT_NULLIFIERS_DOMAIN",
+        "canonicalNullifiers",
+    ),
+    "counterConsumptionsHash": (
+        "MINT_COUNTER_CONSUMPTIONS_DOMAIN",
+        "canonicalConsumptions",
+    ),
+    "validatedResultHash": (
+        "MINT_VALIDATED_RESULT_DOMAIN",
+        "address(gate)",
+        "bytes32(batch.authorizationId)",
+        "bytes32(nullifiersHash)",
+        "address(validatedAuthorizer)",
+        "uint8(validatedAuthorizerKind)",
+        "uint64(validatedMaxQuantity)",
+        "bytes32(validatedGateHash)",
+        "bytes32(counterConsumptionsHash)",
+    ),
+    "requestCommitmentHash": (
+        "MINT_REQUEST_COMMITMENT_DOMAIN",
+        "address(payer)",
+        "address(authorizer)",
+        "bytes32(initialRecipientsHash)",
+        "bytes32(beneficiariesHash)",
+        "bytes32(tokenDataArrayHash)",
+        "bytes32(mintCommitmentsHash)",
+        "bytes32(validatedResultHash)",
+    ),
+    "operationRoot": (
+        "MINT_OPERATION_ROOT_DOMAIN",
+        "uint256(block.chainid)",
+        "address(this)",
+        "address(core)",
+        "address(mintLedger)",
+        "bytes32(executionPath)",
+        "uint256(collectionId)",
+        "bytes32(phaseId)",
+        "bytes32(policyHash)",
+        "bytes32(batch.authorizationId)",
+        "bytes32(requestCommitmentHash)",
+        "bytes32(contextHash)",
+        "address(msg.sender)",
+        "uint256(firstOperationNonce)",
+        "uint256(quantity)",
+    ),
+    "operationId": (
+        "MINT_TOKEN_OPERATION_ID_DOMAIN",
+        "bytes32(operationRoot)",
+        "uint256(firstOperationNonce+tokenIndex)",
+        "uint256(tokenIndex)",
+        "bytes32(tokenDataHash)",
+        "bytes32(mintCommitment)",
+    ),
+}
+TARGET_MANAGER_ENTRY_PARAMETERS = (
+    "MintBatchcalldatabatch",
+    "bytescalldatagateData",
+)
+TARGET_MANAGER_ENTRY_RETURNS = (
+    "uint256[]memorytokenIds",
+    "bytes32operationRoot",
+    "bytes32[]memoryoperationIds",
+)
+TARGET_OPERATION_STRUCT_FIELDS: dict[str, tuple[str, ...]] = {
+    "MintBatch": (
+        "uint256 collectionId",
+        "bytes32 phaseId",
+        "address payer",
+        "address authorizer",
+        "address[] initialRecipients",
+        "address[] beneficiaries",
+        "bytes[] tokenData",
+        "bytes32[] mintCommitments",
+        "bytes32 authorizationId",
+        "bytes32 contextHash",
+        "bytes resolverData",
+    ),
+    "CounterConsumption": (
+        "bytes32 valueKey",
+        "uint256 collectionId",
+        "bytes32 phaseId",
+        "bytes32 counterId",
+        "bytes32 subjectKey",
+        "address payer",
+        "address recipient",
+        "address authorizer",
+        "address executor",
+        "uint64 increment",
+        "uint64 cap",
+        "bytes32 contextHash",
+        "bytes32 resolutionHash",
+    ),
+    "GateResult": (
+        "bytes32 authorizationId",
+        "bytes32[] nullifiers",
+        "address authorizer",
+        "uint8 authorizerKind",
+        "uint64 maxQuantity",
+        "bytes32 gateHash",
+    ),
+}
+SALE_AUTHORIZATION_TYPE_STRING = (
+    "SaleAuthorization(uint256 chainId,address saleAdapter,address mintManager,"
+    "uint256 collectionId,bytes32 phaseId,bytes32 saleId,uint8 saleKind,"
+    "bytes32 revenueClass,bytes32 expectedPrimaryPolicyHash,"
+    "uint8 primaryPolicyMode,bytes32 initialRecipientsHash,"
+    "bytes32 beneficiariesHash,bytes32 tokenDataArrayHash,"
+    "bytes32 mintCommitmentsHash,address payer,address executor,address asset,"
+    "uint256 unitPrice,uint256 quantity,bytes32 contentSelectionHash,"
+    "bytes32 policyHash,bytes32 nonce,uint64 deadline,uint64 finalizeBy)"
+)
+SALE_AUTHORIZATION_TYPEHASH = (
+    "0x6e5460498aa6274ffa516d53c6046a385c1ff9dd62d6adbfc54c339a4bb6e8d6"
+)
 TARGET_OPERATION_EVENTS: tuple[
     tuple[str, str, tuple[str, ...], tuple[str, ...]], ...
 ] = (
@@ -647,18 +771,296 @@ def validate_operation_selectors(
             )
 
 
+def _extract_solidity_source(markdown: str) -> str:
+    source = "\n".join(
+        match.group("body")
+        for match in re.finditer(
+            r"```solidity(?P<body>.*?)```",
+            markdown,
+            re.DOTALL,
+        )
+    )
+    source = re.sub(r"/\*.*?\*/", "", source, flags=re.DOTALL)
+    return re.sub(r"//[^\n]*", "", source)
+
+
 def validate_operation_abi(documents: dict[Path, str]) -> None:
     for path, fragments in TARGET_OPERATION_ABI_FRAGMENTS.items():
         text = documents.get(path)
         if text is None:
             raise MintManagerDomainError(f"missing operation ABI home: {path}")
-        normalized_text = re.sub(r"\s+", " ", text)
+        solidity_source = _extract_solidity_source(text)
         for fragment in fragments:
-            if fragment not in normalized_text:
+            name_match = re.match(r"function\s+([A-Za-z_][A-Za-z0-9_]*)", fragment)
+            if name_match is None:
+                raise MintManagerDomainError(
+                    f"invalid checked ABI fragment for {path}: {fragment!r}"
+                )
+            function_name = name_match.group(1)
+            name_count = len(
+                re.findall(
+                    rf"\bfunction\s+{re.escape(function_name)}\s*\(",
+                    solidity_source,
+                )
+            )
+            declarations = list(
+                re.finditer(
+                    rf"\bfunction\s+{re.escape(function_name)}\s*\(.*?;",
+                    solidity_source,
+                    re.DOTALL,
+                )
+            )
+            if name_count != 1 or len(declarations) != 1:
                 raise MintManagerDomainError(
                     f"operation identity ABI declaration drifted in {path}: "
-                    f"missing {fragment!r}"
+                    f"{function_name} must have exactly one Solidity declaration; "
+                    f"found names={name_count}, declarations={len(declarations)}"
                 )
+            actual = " ".join(declarations[0].group(0).split())
+            if actual != fragment:
+                raise MintManagerDomainError(
+                    f"operation identity ABI declaration drifted in {path}: "
+                    f"expected {fragment!r}, got {actual!r}"
+                )
+
+
+def _normalize_solidity_term(value: str) -> str:
+    without_comments = "\n".join(
+        line.split("//", 1)[0] for line in value.splitlines()
+    )
+    return re.sub(r"\s+", "", without_comments)
+
+
+def _split_top_level_commas(value: str) -> tuple[str, ...]:
+    terms: list[str] = []
+    start = 0
+    depth = 0
+    for index, character in enumerate(value):
+        if character in "([{" :
+            depth += 1
+        elif character in ")]}":
+            depth -= 1
+            if depth < 0:
+                raise MintManagerDomainError("unbalanced abi.encode preimage")
+        elif character == "," and depth == 0:
+            terms.append(_normalize_solidity_term(value[start:index]))
+            start = index + 1
+    if depth != 0:
+        raise MintManagerDomainError("unbalanced abi.encode preimage")
+    terms.append(_normalize_solidity_term(value[start:]))
+    if any(not term for term in terms):
+        raise MintManagerDomainError("empty abi.encode preimage term")
+    return tuple(terms)
+
+
+def parse_operation_preimage(markdown: str, variable_name: str) -> tuple[str, ...]:
+    pattern = re.compile(
+        rf"\bbytes32\s+{re.escape(variable_name)}\s*=\s*"
+        r"keccak256\s*\(\s*abi\.encode\s*\((?P<body>.*?)\)\s*\)\s*;",
+        re.DOTALL,
+    )
+    matches = list(pattern.finditer(markdown))
+    if len(matches) != 1:
+        raise MintManagerDomainError(
+            f"{variable_name} abi.encode preimage must appear exactly once; "
+            f"found {len(matches)}"
+        )
+    return _split_top_level_commas(matches[0].group("body"))
+
+
+def validate_operation_preimages(mint_spec_text: str) -> None:
+    for variable_name, expected_terms in TARGET_OPERATION_PREIMAGES.items():
+        actual_terms = parse_operation_preimage(mint_spec_text, variable_name)
+        normalized_expected = tuple(
+            _normalize_solidity_term(term) for term in expected_terms
+        )
+        if actual_terms != normalized_expected:
+            raise MintManagerDomainError(
+                f"{variable_name} abi.encode sequence drifted: "
+                f"expected {normalized_expected}, got {actual_terms}"
+            )
+
+
+def validate_operation_structs(mint_spec_text: str) -> None:
+    for struct_name, expected_fields in TARGET_OPERATION_STRUCT_FIELDS.items():
+        matches = list(
+            re.finditer(
+                rf"\bstruct\s+{re.escape(struct_name)}\s*\{{(?P<body>.*?)\}}",
+                mint_spec_text,
+                re.DOTALL,
+            )
+        )
+        if len(matches) != 1:
+            raise MintManagerDomainError(
+                f"{struct_name} target struct must appear exactly once; "
+                f"found {len(matches)}"
+            )
+        actual_fields = tuple(
+            _normalize_solidity_term(field)
+            for field in matches[0].group("body").split(";")
+            if _normalize_solidity_term(field)
+        )
+        normalized_expected = tuple(
+            _normalize_solidity_term(field) for field in expected_fields
+        )
+        if actual_fields != normalized_expected:
+            raise MintManagerDomainError(
+                f"{struct_name} target struct fields drifted: "
+                f"expected {normalized_expected}, got {actual_fields}"
+            )
+
+
+def extract_operation_solidity_block(mint_spec_text: str) -> str:
+    blocks = [
+        match.group("body")
+        for match in re.finditer(
+            r"```solidity(?P<body>.*?)```",
+            mint_spec_text,
+            re.DOTALL,
+        )
+        if "function executeSingleStepMint" in match.group("body")
+    ]
+    if len(blocks) != 1:
+        raise MintManagerDomainError(
+            "operation identity Solidity block must appear exactly once; "
+            f"found {len(blocks)}"
+        )
+    return blocks[0]
+
+
+def validate_manager_entry_ownership(mint_spec_text: str) -> None:
+    operation_block = extract_operation_solidity_block(mint_spec_text)
+    solidity_source = _extract_solidity_source(mint_spec_text)
+    for function_name in ("executeSingleStepMint", "executePreparedMint"):
+        global_count = len(
+            re.findall(
+                rf"\bfunction\s+{re.escape(function_name)}\s*\(",
+                solidity_source,
+            )
+        )
+        if global_count != 1:
+            raise MintManagerDomainError(
+                f"{function_name} declaration must appear exactly once across "
+                f"the owning Solidity blocks; found {global_count}"
+            )
+        pattern = re.compile(
+            rf"\bfunction\s+{function_name}\s*\((?P<parameters>.*?)\)\s*"
+            r"external(?P<mutability>.*?)returns\s*\((?P<returns>.*?)\)\s*;",
+            re.DOTALL,
+        )
+        matches = list(pattern.finditer(operation_block))
+        if len(matches) != 1:
+            raise MintManagerDomainError(
+                f"{function_name} declaration must appear exactly once; "
+                f"found {len(matches)}"
+            )
+        match = matches[0]
+        parameters = tuple(
+            _normalize_solidity_term(term)
+            for term in _split_top_level_commas(match.group("parameters"))
+        )
+        returns = tuple(
+            _normalize_solidity_term(term)
+            for term in _split_top_level_commas(match.group("returns"))
+        )
+        mutability = _normalize_solidity_term(match.group("mutability"))
+        if parameters != TARGET_MANAGER_ENTRY_PARAMETERS:
+            raise MintManagerDomainError(
+                f"{function_name} parameter/callback ownership drifted: "
+                f"expected {TARGET_MANAGER_ENTRY_PARAMETERS}, got {parameters}"
+            )
+        if mutability:
+            raise MintManagerDomainError(
+                f"{function_name} must be nonpayable with no mutability token; "
+                f"got {mutability!r}"
+            )
+        if returns != TARGET_MANAGER_ENTRY_RETURNS:
+            raise MintManagerDomainError(
+                f"{function_name} return ABI drifted: "
+                f"expected {TARGET_MANAGER_ENTRY_RETURNS}, got {returns}"
+            )
+    function_names = tuple(
+        re.findall(
+            r"\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+            operation_block,
+        )
+    )
+    expected_function_names = (
+        "executeSingleStepMint",
+        "executePreparedMint",
+        "nextOperationNonce",
+    )
+    if function_names != expected_function_names:
+        raise MintManagerDomainError(
+            "manager operation function inventory drifted: "
+            f"expected {expected_function_names}, got {function_names}"
+        )
+    forbidden_callback_tokens = (
+        "settlementData",
+        "callbackTarget",
+        "callbackSelector",
+        "callbackValue",
+        "delegatecall",
+        "call{value",
+    )
+    for token in forbidden_callback_tokens:
+        if token in solidity_source:
+            raise MintManagerDomainError(
+                f"manager operation ABI includes forbidden callback surface {token!r}"
+            )
+    if re.search(r"\bfunction\s+mint\s*\(\s*MintBatch\b", solidity_source):
+        raise MintManagerDomainError(
+            "superseded mint(MintBatch,bytes) declaration remains co-live"
+        )
+
+
+def validate_sale_authorization_typehash(
+    documents: dict[Path, str],
+    *,
+    keccak_fn: Callable[[str], str] = cast_keccak256,
+) -> None:
+    sales_text = documents.get(SALES_SPEC_PATH)
+    architecture_text = documents.get(DOC_PATH)
+    if sales_text is None or architecture_text is None:
+        raise MintManagerDomainError("missing sale-authorization typehash document")
+    assignment = re.search(
+        r"SALE_AUTHORIZATION_TYPEHASH\s*=\s*keccak256\s*\((?P<body>.*?)\)\s*;",
+        sales_text,
+        re.DOTALL,
+    )
+    if assignment is None:
+        raise MintManagerDomainError("missing SALE_AUTHORIZATION_TYPEHASH assignment")
+    actual_type_string = "".join(
+        re.findall(r'"([^"]*)"', assignment.group("body"))
+    )
+    if actual_type_string != SALE_AUTHORIZATION_TYPE_STRING:
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH type string drifted: "
+            f"expected {SALE_AUTHORIZATION_TYPE_STRING!r}, "
+            f"got {actual_type_string!r}"
+        )
+    computed = keccak_fn(actual_type_string).lower()
+    if computed != SALE_AUTHORIZATION_TYPEHASH:
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH checker golden drifted: "
+            f"expected {computed}, checker pins {SALE_AUTHORIZATION_TYPEHASH}"
+        )
+    sales_row = (
+        "| `SALE_AUTHORIZATION_TYPEHASH` | struct type string pinned in "
+        f"[SSA-AUTH] | {SALE_AUTHORIZATION_TYPEHASH} |"
+    )
+    if sales_row not in sales_text:
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH sales mirror row missing or drifted"
+        )
+    architecture_row = (
+        f"| `SALE_AUTHORIZATION_TYPEHASH` | `{SALE_AUTHORIZATION_TYPE_STRING}` | "
+        f"{SALE_AUTHORIZATION_TYPEHASH} |"
+    )
+    if architecture_row not in architecture_text:
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH protocol-v1 mirror row missing or drifted"
+        )
 
 
 def parse_event_signatures(
@@ -765,8 +1167,52 @@ def validate_operation_events(
 
 OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     MINT_SPEC_PATH: (
+        "Proposed\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the\n"
+        "candidate mint operation-identity and replay-ownership amendment; it remains\n"
+        "unaccepted",
         "Every batch of quantity `N` has one batch",
         "`operationRoot` and exactly `N` per-token `operationId` values.",
+        "Both manager entries are nonpayable and asset-agnostic.",
+        "`authorizationId` is a required nonzero typed request field.",
+        "A configured gate must return a nonzero `authorizationId` equal to\n"
+        "   `MintBatch.authorizationId`.",
+        "contains no generic settlement bytes, callback target, selector, value, or\n"
+        "delegatecall surface.",
+        "exactly `address(this)` for the executor term because the\n"
+        "adapter becomes the manager's `msg.sender`.",
+        "It never substitutes the\n"
+        "adapter's external caller, payer, relayer, or `tx.origin`.",
+        "substituting any payer, relayer, or arbitrary caller\n"
+        "for `address(this)` is an identity mismatch.",
+        "A direct payer\n"
+        "call and a relayed call carrying the same valid signed batch therefore\n"
+        "derive the same root",
+        "enabled counters appear in their policy-registration order;\n"
+        "   a context-keyed counter contributes exactly one row; every other counter\n"
+        "   contributes rows in ascending `tokenIndex`",
+        "two\n"
+        "equivalent presentations that validate to the same canonical result derive\n"
+        "the same hash",
+        "without a gate they equal `address(0)`, `uint8(AuthorizerKind.NONE)`, `0`,\n"
+        "   and `bytes32(0)` respectively, and the manager requires\n"
+        "   `batch.authorizer == address(0)` and an empty `canonicalNullifiers` array.",
+        "No ungated path infers an authorizer kind from the caller, payer, account\n"
+        "   code, or any phase field.",
+        "This operation preimage does not invent a primary-settlement result field",
+        "exact typed primary-settlement invocation, hostile callback\n"
+        "cases, and execution-specific settlement replay key remain an explicit ADR\n"
+        "0019 / issue #694 production blocker",
+        "A prepared path must verify the explicit manager/root through\n"
+        "the ledger and the current Core `PreparedMintRecord.operationId` before any\n"
+        "resolver or settlement effect.",
+        "A single-step path must preserve\n"
+        "preview -> settlement -> manager-return comparison with whole-transaction\n"
+        "rollback.",
+        "PRE-GENESIS REMOVED: the earlier generic manager entry",
+        "Emit manager batch/token events with the root, per-token operation IDs",
+        "changing the root, reserved token nonce, index,\n"
+        "    token-data hash, or mint commitment changes the token operation ID.",
         "bytes32 policyHash,\n        bytes32 operationRoot",
         "function isManagerOperationRootUsed(address manager, bytes32 operationRoot)",
         "event MintLedgerOperationRootConsumed(",
@@ -776,35 +1222,112 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "Entropy registration  owns tokenId plus mintCommitment; receives no root or operationId",
     ),
     REVENUE_DOC_PATH: (
+        "Proposed\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the\n"
+        "candidate operation-identity amendment and remains unaccepted.",
         "bytes32 operationRoot,\n    bytes32 operationId,\n    bytes32 revenueClass,",
         "event TokenRoyaltySnapshotted(",
         "Completion-time entropy registration correlates",
         "intentionally receives no\nroot or operation ID.",
+        "Before either\n"
+        "step may perform an effect, the resolver or settlement participant must verify\n"
+        "the explicit manager/root through\n"
+        "`isManagerOperationRootUsed(manager, operationRoot)` and the current Core\n"
+        "`preparedMint(tokenId).operationId`.",
+        "Known repeat-sale collision. The current `settlementKey` also lacks a\n"
+        "purchase/execution identity.",
+        "`operationRoot` is\n"
+        "not a universal replacement",
     ),
     ADR_0018_PATH: (
         "# ADR 0018: Batch Operation Root And Token Identity",
+        "Proposed only for the pre-genesis production target",
+        "This draft is not accepted, does not close issue #688",
         "Every successful manager batch of quantity `N > 0`",
+        "The manager entrypoints are nonpayable and asset-agnostic.",
+        "`MintBatch.authorizationId` is a required nonzero typed request field.",
+        "Root derivation, nonce-range reservation, all token operation IDs",
+        "The proposed `SALE_AUTHORIZATION_TYPEHASH` additionally binds "
+        "`tokenDataArrayHash` and\n`mintCommitmentsHash`",
+        "the executor term\nis exactly `address(this)`",
+        "## Settlement Invariant And Open Blocker",
+        "ADR 0019 / issue #694 must define the exact\n"
+        "typed invocation, hostile callback cases, and execution-ID-bound distinct-key\n"
+        "and replay tests.",
         "The ledger rejects a zero root and a root already used in the calling manager's\n"
         "scope before any ledger write.",
         "A downstream manager, Core, resolver, settlement, entropy, or\n"
         "receiver failure reverts all ledger writes and the manager nonce reservation.",
-        "The adapter compares those returned identities with its\n"
-        "preview before returning from the top-level call.",
+        "The adapter compares the returned identities with that preview\n"
+        "before returning from the top-level call.",
         "## Atomic Cutover And Core Replay Removal",
         "The generated event catalog remains an as-built artifact",
     ),
     ADR_0008_PATH: (
-        "`operationRoot` plus per-token `operationId` binding, as amended by ADR 0018,",
+        "`operationRoot` plus per-token `operationId` binding, as proposed by ADR 0018,",
     ),
     SALES_SPEC_PATH: (
         "-> StreamMintManager.executeSingleStepMint(...) or executePreparedMint(...)",
         "compares the\n   returned root and token operation IDs with its preview",
+        "uses exactly\n   its own `address(this)` for the manager-executor term",
+        "`tokenDataArrayHash` and `mintCommitmentsHash` are the exact canonical\n"
+        "   batch hashes",
+        "exact typed primary-settlement call\n"
+        "   and execution-specific repeat-sale key remain ADR 0019 / issue #694\n"
+        "   blockers",
     ),
     CONFORMANCE_PATH: (
-        "Every manager batch derives one nonzero `operationRoot`",
-        "no Core lifetime operation-ID replay",
-        "reentrancy guard on `executeSingleStepMint(...)` and "
-        "`executePreparedMint(...)`",
+        "Proposed\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) supplies draft\n"
+        "target mint-operation identity and replay gates. They remain unaccepted",
+        "exactly one root plus `N` token operation IDs",
+        "full normalized request/result/root/token preimage mutation coverage",
+        "adapter preview uses its own `address(this)` as manager executor",
+        "exact typed primary-settlement callback and execution-ID-bound "
+        "repeat-sale replay remain ADR 0019 / #694 blockers",
+    ),
+    BACKLOG_PATH: (
+        "one root plus `N` token\n   operation IDs",
+    ),
+    DOC_PATH: (
+        "Proposed\n"
+        "[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the\n"
+        "candidate operation-identity amendment and remains unaccepted",
+    ),
+    ADR_INDEX_PATH: (
+        "| [`0018-batch-operation-root-and-token-identity.md`]"
+        "(0018-batch-operation-root-and-token-identity.md) | Proposed | "
+        "[#688](https://github.com/6529-Collections/6529Stream/issues/688): "
+        "proposed one manager batch root, `N` token operation IDs",
+    ),
+}
+OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
+    MINT_SPEC_PATH: (
+        "bytes calldata settlementData",
+        "path, and its own caller\n   address",
+        "changes the token ID.",
+        "per-token IDs",
+    ),
+    ADR_0018_PATH: (
+        "Accepted for the pre-genesis production target",
+        "## Accepted Risks",
+        "exact request contents",
+        "token-ID model",
+        "all token IDs",
+        "Per-token IDs",
+    ),
+    SALES_SPEC_PATH: (
+        "0xffd150d67de6a2619775f6cb884eadc8802d3d37fbd584d32ad0ff83ceddb098",
+    ),
+    CONFORMANCE_PATH: (
+        "exactly one root plus `N` token IDs",
+    ),
+    BACKLOG_PATH: (
+        "one root plus `N` token IDs",
+    ),
+    ADR_INDEX_PATH: (
+        "| [`0018-batch-operation-root-and-token-identity.md`]"
+        "(0018-batch-operation-root-and-token-identity.md) | Accepted |",
     ),
 }
 
@@ -814,11 +1337,23 @@ def validate_operation_identity_fragments(documents: dict[Path, str]) -> None:
         text = documents.get(path)
         if text is None:
             raise MintManagerDomainError(f"missing operation identity document: {path}")
+        normalized_text = " ".join(text.split())
         for fragment in fragments:
-            if fragment not in text:
+            if " ".join(fragment.split()) not in normalized_text:
                 raise MintManagerDomainError(
                     f"operation identity contract drifted in {path}: "
                     f"missing {fragment!r}"
+                )
+    for path, forbidden_fragments in OPERATION_FORBIDDEN_FRAGMENTS.items():
+        text = documents.get(path)
+        if text is None:
+            raise MintManagerDomainError(f"missing operation identity document: {path}")
+        normalized_text = " ".join(text.split())
+        for fragment in forbidden_fragments:
+            if " ".join(fragment.split()) in normalized_text:
+                raise MintManagerDomainError(
+                    f"operation identity stale/forbidden contract in {path}: "
+                    f"found {fragment!r}"
                 )
 
 
@@ -830,13 +1365,23 @@ def validate_repo(repo_root: Path) -> None:
     mint_spec_text = (repo_root / MINT_SPEC_PATH).read_text(encoding="utf-8")
     validate_operation_domains(mint_spec_text, docs_text)
     validate_operation_selectors(mint_spec_text)
+    validate_operation_preimages(mint_spec_text)
+    validate_operation_structs(mint_spec_text)
+    validate_manager_entry_ownership(mint_spec_text)
     operation_documents = {
         path: (repo_root / path).read_text(encoding="utf-8")
         for path in set(OPERATION_IDENTITY_FRAGMENTS)
-        | {MINT_SPEC_PATH, REVENUE_DOC_PATH, ENTROPY_SPEC_PATH, CONFORMANCE_PATH}
+        | {
+            DOC_PATH,
+            MINT_SPEC_PATH,
+            REVENUE_DOC_PATH,
+            ENTROPY_SPEC_PATH,
+            CONFORMANCE_PATH,
+        }
     }
     validate_operation_abi(operation_documents)
     validate_operation_identity_fragments(operation_documents)
+    validate_sale_authorization_typehash(operation_documents)
     validate_operation_events(operation_documents)
 
 

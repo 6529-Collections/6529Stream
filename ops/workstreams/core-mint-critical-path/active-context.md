@@ -7,34 +7,37 @@
 - Baseline at branch creation:
   `b4af30a58c22f79bafad241c6e4fab7a4a76063b`
 - Current rebased base:
-  `06f36150c4b5be05851f8081c520e98a6703a0c3`
-- Current branch commit after the first upstream rebase:
-  `d6eefe1f4d3a0dc2be586cea42d8a7fb594fb327`
-- Intended result: a focused ADR and checked specification that pin one
+  `1031ffec0c2c7cfb0525d97790a66ecabfd8fe17`
+- Current branch commit after the `#689` rebase:
+  `c92eb1e47a32563f91578de98258f23668693144`
+- Intended result: a focused Proposed ADR and checked specification for one
   manager batch operation root, one per-token operation ID for each batch
   element, ledger-owned manager-scoped root replay, exact event/ABI ownership,
   single-step identity, rollback requirements, and the atomic implementation
-  cutover that permits later Core lifetime replay-state removal.
+  cutover that permits later Core lifetime replay-state removal. The slice does
+  not accept the ADR, close #688, or claim settlement/readiness completion.
 
 ## Integration Gate
 
-The fixed shared release-input train is
-`#687 -> #689 -> #688 -> #690 -> #658`. PR `#687` merged to `origin/main`
-at `06f36150c4b5be05851f8081c520e98a6703a0c3`. The immediate actions are:
+The fixed shared integration train is
+`#692 -> #688 -> #690 -> #669 -> #694 -> #691 -> #693 -> #670 -> #656 -> #677 -> #658`.
+PR `#692` for issue `#689` merged at
+`1031ffec0c2c7cfb0525d97790a66ecabfd8fe17`.
+The isolated #688 branch is rebased on that exact main commit without importing
+another worktree. The remaining publication work is to:
 
-1. preserve the current #688 draft in an issue-scoped commit;
-2. rebase onto `06f36150` and reconcile the governed inventory without
-   importing another worktree;
-3. regenerate the governed-inventory-dependent surfaces required at this
-   intermediate state;
-4. do not publish while `#689` remains unmerged;
-5. after `#689` merges, rebase again, add ADR 0018 to the canonical
-   manifest/checksum source inventories with tests, declare exact shared paths,
-   regenerate the canonical dependent tail, and run the full gate.
+1. keep the #689 canonical risk-tracker provenance correction intact;
+2. bind ADR 0018 into the release-manifest and checksum source inventories;
+3. repair every independent normative NO-GO finding and pass focused
+   source/checker review before any further regeneration;
+4. after independent GO, regenerate the canonical dependent tail in documented
+   order and run the authoritative Windows gate; and
+5. declare the exact shared paths and head before draft publication.
 
 Issue `#690` follows this first `#688` ADR/spec/checker slice with its own
-fail-closed/schema work. Issue `#658` is downstream of both slices for final
-generated-release evidence.
+fail-closed/schema work. Issues `#669`, `#694`, `#691`, `#693`, `#670`, `#656`,
+and `#677` remain serialized downstream before `#658` final generated-release
+evidence.
 The coordinator must not let `#658` finalize its release chain from a base that
 omits merged `#688`. Report the complete changed-path inventory, especially
 `CHANGELOG.md`, maturity/spec/tooling inputs, roadmap/backlog inputs, canonical
@@ -45,6 +48,17 @@ generator/test inventory changes, and every regenerated release artifact.
 Do not begin `#672` until the coordinator confirms the `#688` spec slice has
 merged. Do not begin `#654` until the required `#672` predecessor state has
 merged.
+
+Prior extraction reached a measured 21,792-byte Core runtime. The later
+manager/prepared-mint slice produced the current 24,152-byte transitional build
+while legacy mint behavior remained live; 24,152 is later duplication, not the
+pre-manager extraction baseline. The #672 slice must be either
+spec/test/measurement-only with zero Core delta, or pair any
+admission/completion-gas Core addition with a measured removal and prove an
+exact before/after net-negative runtime. The complete target must be at most
+22,576 bytes to preserve the exact 2,000-byte production margin, with
+restoration to the approved at-most-22,184-byte baseline as the objective.
+Historical scratch deltas are not additive savings.
 
 ## Future Core Dependency
 
@@ -84,7 +98,8 @@ target or add evidence; it must not make a deployment or readiness claim.
 
 ## Current Evidence
 
-- Focused operation-identity checker and nine negative/positive unit tests pass.
+- Focused operation-identity checker and twenty-four negative/positive unit tests
+  pass.
 - Domain hashes, function selectors, return/read ABI semantics, event topic
   hashes, indexed masks, and all target event field names are checker-pinned.
 - Markdown link tests/check, changelog gate, Python compilation, and Windows
@@ -96,8 +111,9 @@ target or add evidence; it must not make a deployment or readiness claim.
   surface drift; all findings were fixed and checker-pinned where appropriate.
 - Independent release review found the required risk-register and bytecode-proof
   release linkage plus ADR 0018 manifest/checksum inventory coverage. The
-  release-impact text is corrected; generator/test changes and artifact
-  regeneration wait for the `#687` rebase because those files overlap.
+  release-impact text, generator inventories, and focused tests are corrected;
+  independent repair review returned GO, and the canonical release tail was
+  regenerated exactly once on explicit coordinator authorization.
 - Meta-manager ordering requires merged `#688` upstream of `#658` final
   release-chain regeneration. The coordinator handoff must carry every
   release-input and shared-doc path.
@@ -105,21 +121,40 @@ target or add evidence; it must not make a deployment or readiness claim.
   parameter inventory tests/check, Markdown/changelog/whitespace checks, every
   six-step release-tail test/check, and the offline release verifier pass.
   Intermediate artifacts were regenerated in canonical order against the
-  governed inventory; ADR 0018 inventory wiring remains intentionally deferred
-  until the post-`#689` rebase.
+  governed inventory.
+- After rebasing merged `#689`, focused source-inventory tests confirm ADR 0018
+  is included in both the release-manifest governance-document inventory and
+  checksum coverage policy.
+- After the nine-item NO-GO repair, the operation checker and all 24 focused
+  tests, both one-test ADR-inventory checks, all 25 release-manifest unit tests,
+  all 16 Markdown-link tests, the Markdown checker, changelog gate, Python
+  compilation, and CRLF-aware whitespace check pass.
+- After the authorized regeneration, all six release-tail test/check stages
+  pass, including all 28 release-checksum tests. Offline release verification
+  passes with 379 checksum entries, 379 checksum-manifest records, 184 release-
+  manifest file records, 123 bytecode-proof file records, and 16 lockfile file
+  records.
+- The fresh authoritative Windows gate completed with exit `0` in 2,137.8
+  seconds. This validation result is evidence for the draft review slice only;
+  it is not an acceptance, deployment, release, or readiness claim.
 
 ## Open Decisions
 
-- No protocol decision is open for the spec slice.
-- PR publication remains gated on coordinator-confirmed merge of `#687` and
-  `#689`, a fresh `origin/main` rebase, exact shared-path declaration,
-  canonical artifact regeneration as required by the repository gates, and
-  final validation.
+- ADR 0018 remains Proposed only. Its manager operation boundary has completed
+  the nine-item NO-GO repair. Independent checker, protocol, and release
+  re-reviews are clean; the canonical release tail and full Windows gate are
+  green. The ADR cannot be described as accepted.
+- Exact typed primary settlement, hostile callback handling, and
+  execution-ID-bound repeated-sale replay remain ADR 0019 / #694 production
+  blockers; operation-root uniqueness does not close them.
+- PR publication remains gated on the final durable-context readback, exact
+  shared-path/head/gate-result handoff, and explicit coordinator publication
+  authorization.
 
 ## Current Shared-Path Inventory
 
-Refresh this list after the mandatory `#687` / `#689` rebase and again before
-publication:
+This exact list is refreshed against the post-`#692` base after canonical
+regeneration and the full Windows gate:
 
 - `CHANGELOG.md`
 - `docs/adr/0008-revenue-splits-and-royalty-resolver.md`
@@ -139,7 +174,11 @@ publication:
 - `ops/workstreams/core-mint-critical-path/active-context.md`
 - `ops/workstreams/core-mint-critical-path/run-log.md`
 - `scripts/check_mint_manager_domain_constants.py`
+- `scripts/generate_release_checksums.py`
+- `scripts/generate_release_manifest.py`
 - `scripts/test_mint_manager_domain_constants.py`
+- `scripts/test_release_checksums.py`
+- `scripts/test_release_manifest.py`
 - `release-artifacts/latest/risk-register.json`
 - `release-artifacts/latest/release-notes.json`
 - `release-artifacts/latest/release-notes.md`
@@ -151,24 +190,20 @@ publication:
 
 ## Next Actions
 
-1. Monitor the `#687 -> #689` integration gate without changing either branch.
-2. After both merge confirmations, fetch/rebase, reconcile shared surfaces, add ADR
-   0018 to manifest/checksum inventories with tests, regenerate the canonical
-   dependent artifact tail, and rerun the full gate.
-3. Refresh and declare the exact shared-path inventory.
-4. Commit, push, open a draft PR, request CodeRabbit, and iterate CI/review to a
-   review-ready handoff.
+1. Prove the durable-context-only correction does not change the regenerated
+   release tail, then report the exact final diff/head/full-gate result.
+2. Wait for explicit coordinator publication authorization.
+3. After authorization, commit, push, open a draft PR, request CodeRabbit, and
+   iterate CI/review to a review-ready handoff.
 
 The later `#672` and `#654` implementation PRs form a separate release train;
 do not stack them on or fold them into this ADR/spec/checker PR.
 
 A quiet ten-minute task heartbeat named
-`Resume 6529Stream #688 after upstream merges` monitors the train. After the
-coordinator resumed the workstream on merged `#687`, it may monitor the
-remaining `#689` gate but must not create unrelated edits or claim progress
-while that dependency remains open.
+`Resume 6529Stream #688 after upstream merges` monitored the serialized
+upstream gate and became obsolete when the coordinator confirmed merged
+`#689`.
 
 Historical blocker state: three consecutive audits previously found
 `origin/main` at `b4af30a5`, PR `#687` open, and no `#689` PR. Coordinator
-confirmation of the `#687` merge resumes the workstream. The next external gate
-is now `#689`.
+confirmation of the `#687` and `#689` merges resumed the workstream.

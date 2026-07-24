@@ -1848,8 +1848,9 @@ Acceptance criteria:
    independent acceptance criteria are satisfied.
 6. Before Core lifetime prepared-operation replay storage is removed, merge the
    ADR 0018 spec and atomically land ledger-owned manager-scoped batch-root
-   replay, derive/reserve-before-ledger ordering, one root plus `N` token IDs,
-   exact event joins, and whole-transaction rollback proof (#688).
+   replay, derive/reserve-before-ledger ordering, one root plus `N` token
+   operation IDs, exact event joins, and whole-transaction rollback proof
+   (#688).
 7. After #688 merges, prove and enforce the post-entropy completion tail gas
    required by #672; only its merged predecessor state may be measured by
    #654.

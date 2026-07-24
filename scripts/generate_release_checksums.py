@@ -179,6 +179,7 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/adr/0014-world-class-pass-round-5.md"),
     Path("docs/adr/0016-core-native-only-erc721.md"),
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
+    Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
     Path("docs/audit-package.md"),
     Path("docs/custom-errors.md"),
     Path("docs/dependency-operations.md"),

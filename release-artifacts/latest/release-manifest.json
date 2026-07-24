@@ -101,14 +101,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:c984e4e0e2d30738c5da4070a165ac696f33e63c8b2737c294983dd0d45b6bd2",
-        "size_bytes": 124875,
+        "sha256": "sha256:3c85737d8b805afdf12bbebac049420fed269984d485638f355ee9f7de9842e9",
+        "size_bytes": 125664,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:2b45d50b533a64f9a75226e7ec113b1fcb449cf3c878d0c3100ef2d8889c1d31",
-        "size_bytes": 121542
+        "sha256": "sha256:25f0b3386c8a700bda70b8055387dcfd39b918cdd047bef73cfbf9edda280b30",
+        "size_bytes": 122324
       }
     },
     "release_candidate_lockfile": {
@@ -185,7 +185,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:b33faf36eb33d342d36a0c02168d8765fffa9accace67b75b37811c51b0b5ecb",
+      "sha256": "sha256:7a76619422104ddd866faff077fd845334c8afa850ca3d0c19313e5a6541991f",
       "size_bytes": 32093,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2371,8 +2371,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c5114c735c0b4e6a3376844ec7dda0e03c069c7d37f9672e562f21ad21ab287b",
-      "size_bytes": 123476
+      "sha256": "sha256:3df3951924794dbf65d2fb8ae405b0631f9cac5070d01622e154399d14f0e23d",
+      "size_bytes": 124280
     },
     "governance_docs": [
       {
@@ -2467,8 +2467,8 @@
       },
       {
         "path": "docs/adr/README.md",
-        "sha256": "sha256:be593efc65582f7471e545e97cf0e45446baa801290f55c52c840bc44358f4a3",
-        "size_bytes": 3312
+        "sha256": "sha256:205a5ea274c3c0eaeaf5bc8fac78a2183a1bd112a3ea3018d4f2aeda88922cf9",
+        "size_bytes": 3677
       },
       {
         "path": "docs/adr/0004-admin-governance.md",
@@ -2477,8 +2477,8 @@
       },
       {
         "path": "docs/adr/0008-revenue-splits-and-royalty-resolver.md",
-        "sha256": "sha256:7ef2e6c12927698ace1e80509e49b286a3c4c2cfa72d478b4b8279dff19b846d",
-        "size_bytes": 117035
+        "sha256": "sha256:8e6a01c8bc7ff4670678365e05198be4bd52340cf944ee9b5f45ec6089291b2e",
+        "size_bytes": 117057
       },
       {
         "path": "docs/adr/0010-world-class-spec-pass.md",
@@ -2512,13 +2512,13 @@
       },
       {
         "path": "docs/launch-v1-target-architecture.md",
-        "sha256": "sha256:62c6bc07ff318576d6b76aafd3997679d8ca6188846cc5f5fa82f42ae32ba438",
-        "size_bytes": 157438
+        "sha256": "sha256:5d88aa0d8cb7020a9a3d6dbdae4caaee80363d1b63d7d291dd2a316522cd0a07",
+        "size_bytes": 159821
       },
       {
         "path": "docs/launch-conformance-matrix.md",
-        "sha256": "sha256:92277a72d040c3348e2d156ad2637bfd9c5e8988631adfea360d3cef0eecefc1",
-        "size_bytes": 132241
+        "sha256": "sha256:ca1cca2b1138e0ef68c20b1b2e205f6762494ca254e8368916c90f2ab59029a6",
+        "size_bytes": 137098
       },
       {
         "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -2526,19 +2526,24 @@
         "size_bytes": 12424
       },
       {
+        "path": "docs/adr/0018-batch-operation-root-and-token-identity.md",
+        "sha256": "sha256:a9efe5adfc2d5ffa1591d6e7f14b8ffd5815fc70fc4d9cc1160a6c4b170da62d",
+        "size_bytes": 19084
+      },
+      {
         "path": "docs/revenue-splits-and-royalties.md",
-        "sha256": "sha256:e3bceed02af33c27cc1799ae2cbfbb4937cbc7625d95787322ec475badfa347e",
-        "size_bytes": 233966
+        "sha256": "sha256:90eb7c677bbff32440dff18dc0eb763f7941e21d80b29375d1fa04e467779235",
+        "size_bytes": 238891
       },
       {
         "path": "docs/mint-policy-and-accounting.md",
-        "sha256": "sha256:2dd657c18d4b9789d58c4bde83c2d006f336af451cf1542744df07460953b71a",
-        "size_bytes": 180993
+        "sha256": "sha256:faa77ad1e7e27b37b558b4ef28638534d4c16a335252ae2adb13568278e89294",
+        "size_bytes": 198225
       },
       {
         "path": "docs/stream-sales-and-auctions.md",
-        "sha256": "sha256:210683395fc060946d65c6ff893731d00887103ce29e09d6d9442eec3d11cdc5",
-        "size_bytes": 219137
+        "sha256": "sha256:feddfe5d5e07ab3a2b3e320cad922d13e6771795f2090361fb4f121342b07e09",
+        "size_bytes": 220661
       },
       {
         "path": "docs/stream-artist-authority.md",
@@ -2592,8 +2597,8 @@
       },
       {
         "path": "docs/known-blockers.md",
-        "sha256": "sha256:846e80ca08159cf0ee02e750eb53813154aea86fc18cb1609f9c39cc9883fb75",
-        "size_bytes": 18148
+        "sha256": "sha256:8387a28e0a95b7aeb9bfe3641fb4ab5353cb2b0b7309ba772ef94b9e8be066f4",
+        "size_bytes": 19413
       },
       {
         "path": "docs/drop-authorization-signing.md",
@@ -2763,13 +2768,13 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:a776573557293a3c37469c4c3d63e6e701a9a565f4a0fb89d47f59a25f96619e",
-        "size_bytes": 109477
+        "sha256": "sha256:29c4b2261c35450b5145dfc664342fd3ed9af4355d71d20ac24566ccf3880852",
+        "size_bytes": 110213
       },
       {
         "path": "docs/status.md",
-        "sha256": "sha256:f3cef96250d2907041a17aa0e8e713da3bf0e4c104bee89a3376d8ee153f1af8",
-        "size_bytes": 36965
+        "sha256": "sha256:9bb69557266951cb34dd5f2caa58d34febffeafb2612ccf50df6222ccaf3ce3a",
+        "size_bytes": 38434
       }
     ]
   },

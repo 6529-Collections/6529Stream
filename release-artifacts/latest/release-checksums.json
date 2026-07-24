@@ -165,6 +165,7 @@
       "docs/adr/0014-world-class-pass-round-5.md",
       "docs/adr/0016-core-native-only-erc721.md",
       "docs/adr/0017-raise-only-parameter-governance.md",
+      "docs/adr/0018-batch-operation-root-and-token-identity.md",
       "docs/audit-package.md",
       "docs/custom-errors.md",
       "docs/dependency-operations.md",
@@ -226,7 +227,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:9619422dfd9923a2e5f612207fe1c8bbd96509fca318ecf4210af0778f8e0531"
+    "sha256": "sha256:2c413a035bc396965da0b4e26a649e0e43841b8c1f0ac08e661e5c33ac5251ab"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -280,8 +281,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:c5114c735c0b4e6a3376844ec7dda0e03c069c7d37f9672e562f21ad21ab287b",
-      "size_bytes": 123476
+      "sha256": "sha256:3df3951924794dbf65d2fb8ae405b0631f9cac5070d01622e154399d14f0e23d",
+      "size_bytes": 124280
     },
     {
       "path": "Makefile",
@@ -435,8 +436,8 @@
     },
     {
       "path": "docs/adr/0008-revenue-splits-and-royalty-resolver.md",
-      "sha256": "sha256:7ef2e6c12927698ace1e80509e49b286a3c4c2cfa72d478b4b8279dff19b846d",
-      "size_bytes": 117035
+      "sha256": "sha256:8e6a01c8bc7ff4670678365e05198be4bd52340cf944ee9b5f45ec6089291b2e",
+      "size_bytes": 117057
     },
     {
       "path": "docs/adr/0010-world-class-spec-pass.md",
@@ -474,9 +475,14 @@
       "size_bytes": 12424
     },
     {
+      "path": "docs/adr/0018-batch-operation-root-and-token-identity.md",
+      "sha256": "sha256:a9efe5adfc2d5ffa1591d6e7f14b8ffd5815fc70fc4d9cc1160a6c4b170da62d",
+      "size_bytes": 19084
+    },
+    {
       "path": "docs/adr/README.md",
-      "sha256": "sha256:be593efc65582f7471e545e97cf0e45446baa801290f55c52c840bc44358f4a3",
-      "size_bytes": 3312
+      "sha256": "sha256:205a5ea274c3c0eaeaf5bc8fac78a2183a1bd112a3ea3018d4f2aeda88922cf9",
+      "size_bytes": 3677
     },
     {
       "path": "docs/architecture.md",
@@ -630,18 +636,18 @@
     },
     {
       "path": "docs/known-blockers.md",
-      "sha256": "sha256:846e80ca08159cf0ee02e750eb53813154aea86fc18cb1609f9c39cc9883fb75",
-      "size_bytes": 18148
+      "sha256": "sha256:8387a28e0a95b7aeb9bfe3641fb4ab5353cb2b0b7309ba772ef94b9e8be066f4",
+      "size_bytes": 19413
     },
     {
       "path": "docs/launch-conformance-matrix.md",
-      "sha256": "sha256:92277a72d040c3348e2d156ad2637bfd9c5e8988631adfea360d3cef0eecefc1",
-      "size_bytes": 132241
+      "sha256": "sha256:ca1cca2b1138e0ef68c20b1b2e205f6762494ca254e8368916c90f2ab59029a6",
+      "size_bytes": 137098
     },
     {
       "path": "docs/launch-v1-target-architecture.md",
-      "sha256": "sha256:62c6bc07ff318576d6b76aafd3997679d8ca6188846cc5f5fa82f42ae32ba438",
-      "size_bytes": 157438
+      "sha256": "sha256:5d88aa0d8cb7020a9a3d6dbdae4caaee80363d1b63d7d291dd2a316522cd0a07",
+      "size_bytes": 159821
     },
     {
       "path": "docs/metadata-router-and-renderer.md",
@@ -650,8 +656,8 @@
     },
     {
       "path": "docs/mint-policy-and-accounting.md",
-      "sha256": "sha256:2dd657c18d4b9789d58c4bde83c2d006f336af451cf1542744df07460953b71a",
-      "size_bytes": 180993
+      "sha256": "sha256:faa77ad1e7e27b37b558b4ef28638534d4c16a335252ae2adb13568278e89294",
+      "size_bytes": 198225
     },
     {
       "path": "docs/monitoring.md",
@@ -720,8 +726,8 @@
     },
     {
       "path": "docs/revenue-splits-and-royalties.md",
-      "sha256": "sha256:e3bceed02af33c27cc1799ae2cbfbb4937cbc7625d95787322ec475badfa347e",
-      "size_bytes": 233966
+      "sha256": "sha256:90eb7c677bbff32440dff18dc0eb763f7941e21d80b29375d1fa04e467779235",
+      "size_bytes": 238891
     },
     {
       "path": "docs/royalty-policy.md",
@@ -740,8 +746,8 @@
     },
     {
       "path": "docs/status.md",
-      "sha256": "sha256:f3cef96250d2907041a17aa0e8e713da3bf0e4c104bee89a3376d8ee153f1af8",
-      "size_bytes": 36965
+      "sha256": "sha256:9bb69557266951cb34dd5f2caa58d34febffeafb2612ccf50df6222ccaf3ce3a",
+      "size_bytes": 38434
     },
     {
       "path": "docs/stream-artist-authority.md",
@@ -765,8 +771,8 @@
     },
     {
       "path": "docs/stream-sales-and-auctions.md",
-      "sha256": "sha256:210683395fc060946d65c6ff893731d00887103ce29e09d6d9442eec3d11cdc5",
-      "size_bytes": 219137
+      "sha256": "sha256:feddfe5d5e07ab3a2b3e320cad922d13e6771795f2090361fb4f121342b07e09",
+      "size_bytes": 220661
     },
     {
       "path": "docs/threat-model.md",
@@ -775,8 +781,8 @@
     },
     {
       "path": "docs/tooling.md",
-      "sha256": "sha256:a776573557293a3c37469c4c3d63e6e701a9a565f4a0fb89d47f59a25f96619e",
-      "size_bytes": 109477
+      "sha256": "sha256:29c4b2261c35450b5145dfc664342fd3ed9af4355d71d20ac24566ccf3880852",
+      "size_bytes": 110213
     },
     {
       "path": "docs/warning-dispositions.md",
@@ -790,8 +796,8 @@
     },
     {
       "path": "ops/EXECUTION_BACKLOG.md",
-      "sha256": "sha256:c72247a861339969e9b10bedcc53e329e7251be65280bddd8db78f401a71ea4f",
-      "size_bytes": 200963
+      "sha256": "sha256:996ef70faf23fb955c869a0827b9de619bba087dd76e955ec194522dcf9bf563",
+      "size_bytes": 202358
     },
     {
       "path": "ops/EXTERNAL_CALL_GAS_INVENTORY.json",
@@ -800,8 +806,8 @@
     },
     {
       "path": "ops/ROADMAP.md",
-      "sha256": "sha256:25ac5b6675256492209eda73917afc72ead306629aa734837e181a10ec3a5bfe",
-      "size_bytes": 281158
+      "sha256": "sha256:53b15bcf8d8601186709b3041f54dba1be86d7326119e5517454e8df733fa495",
+      "size_bytes": 282474
     },
     {
       "path": "ops/SLITHER_BASELINE.json",
@@ -1340,7 +1346,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:d3735c38aa5496f327e32488c68ed2779e87db631867d2124184b14b2245255d",
+      "sha256": "sha256:de3127bb00cb7e5c380b7b55665fe5274f0bb20429410d9286218dd80512d93e",
       "size_bytes": 150692
     },
     {
@@ -1405,7 +1411,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:660ed61192d681eafb1f87c7a5d9f47effe03950a985e09f0462bd5a196a48d0",
+      "sha256": "sha256:00df1a4af18c41e7b56f6220191ed8279568ee5a292131ef8f468d07187db953",
       "size_bytes": 9422
     },
     {
@@ -1455,22 +1461,22 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:64bacfd30ef87328776bd1faa5e14cddfc11502f9b867c54efe16e54b544c786",
-      "size_bytes": 141180
+      "sha256": "sha256:e766d7964f7760ade05011d59b3ef15e04f397b4ce61c91f498bbac67b48d99e",
+      "size_bytes": 141394
     },
     {
       "path": "release-artifacts/latest/release-notes.json",
-      "sha256": "sha256:c984e4e0e2d30738c5da4070a165ac696f33e63c8b2737c294983dd0d45b6bd2",
-      "size_bytes": 124875
+      "sha256": "sha256:3c85737d8b805afdf12bbebac049420fed269984d485638f355ee9f7de9842e9",
+      "size_bytes": 125664
     },
     {
       "path": "release-artifacts/latest/release-notes.md",
-      "sha256": "sha256:2b45d50b533a64f9a75226e7ec113b1fcb449cf3c878d0c3100ef2d8889c1d31",
-      "size_bytes": 121542
+      "sha256": "sha256:25f0b3386c8a700bda70b8055387dcfd39b918cdd047bef73cfbf9edda280b30",
+      "size_bytes": 122324
     },
     {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:b33faf36eb33d342d36a0c02168d8765fffa9accace67b75b37811c51b0b5ecb",
+      "sha256": "sha256:7a76619422104ddd866faff077fd845334c8afa850ca3d0c19313e5a6541991f",
       "size_bytes": 32093
     },
     {
@@ -1685,8 +1691,8 @@
     },
     {
       "path": "scripts/check_mint_manager_domain_constants.py",
-      "sha256": "sha256:f80e3b1a319060eefc1de40cc1cac729dd9440780b030e4f26ebecd644cee3a7",
-      "size_bytes": 12673
+      "sha256": "sha256:ce36a39316119259f7e89b2efb1146d905ee08030df60b8b20b83c3f3e622465",
+      "size_bytes": 55425
     },
     {
       "path": "scripts/check_monitoring_spec.py",
@@ -1820,13 +1826,13 @@
     },
     {
       "path": "scripts/generate_release_checksums.py",
-      "sha256": "sha256:8201f037b8c19c837fb09004926dee6e2d5ab1757e98a5680d45a11371c4420e",
-      "size_bytes": 26902
+      "sha256": "sha256:cd275e5031266e805f29b1a65b794313de0db00b87436fa96a0538515732dec1",
+      "size_bytes": 26972
     },
     {
       "path": "scripts/generate_release_manifest.py",
-      "sha256": "sha256:3196c8021619e8d47acb95c6ea12b3dd7836a9434619015c5025dee037d8fdc3",
-      "size_bytes": 69534
+      "sha256": "sha256:a670f9fed503023dd54256bf77a87b50c790d35cc79ab88f653c2ca4356eff10",
+      "size_bytes": 69604
     },
     {
       "path": "scripts/generate_release_notes.py",
@@ -1935,8 +1941,8 @@
     },
     {
       "path": "scripts/test_mint_manager_domain_constants.py",
-      "sha256": "sha256:72aeeb5fc517f0085278d8491b596de01bb7efc424f32d78d004f2b5f36fd883",
-      "size_bytes": 3137
+      "sha256": "sha256:c8c3ac0dbf19633026728233a4c393222ad6bb77ac9a40033db4b3ebda4d0c7a",
+      "size_bytes": 23086
     },
     {
       "path": "scripts/test_monitoring_spec.py",
@@ -1995,8 +2001,8 @@
     },
     {
       "path": "scripts/test_release_checksums.py",
-      "sha256": "sha256:6d0589d1ec487ca3c01f251bdeca03b89f284f9121ebd310cbd29017fa51772a",
-      "size_bytes": 42050
+      "sha256": "sha256:7b8963cc1b7a2477e8b872a133936c9b8f9a292d01e6a2417ec83fca172e86aa",
+      "size_bytes": 42285
     },
     {
       "path": "scripts/test_release_evidence_issue_links.py",
@@ -2005,8 +2011,8 @@
     },
     {
       "path": "scripts/test_release_manifest.py",
-      "sha256": "sha256:e67e6390a077fe4d45d615b5516b0a2e74fec77e94002355c50ccee7d078096b",
-      "size_bytes": 107821
+      "sha256": "sha256:6317bd2d1d347887c7710b2183e85f4d2436c9eff56144f0fbd9febfb6b73625",
+      "size_bytes": 108061
     },
     {
       "path": "scripts/test_release_mode.py",

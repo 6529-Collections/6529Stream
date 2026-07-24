@@ -12,11 +12,13 @@ amend this document),
 [ADR 0013](adr/0013-world-class-pass-round-4.md) (decisions U2, U6, U7,
 and U9 amend this document), and
 [ADR 0014](adr/0014-world-class-pass-round-5.md) (decisions V5 and V6
-amend this document), as superseded in part by
+amend this document). Those accepted decisions are superseded in part by
 [ADR 0017](adr/0017-raise-only-parameter-governance.md) for Governed Gas
-Parameter mutation and evidence surfaces, and amended by
-[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) for mint
-operation identity and replay ownership, and recorded in
+Parameter mutation and evidence surfaces. Proposed
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the
+candidate mint operation-identity and replay-ownership amendment; it remains
+unaccepted, and the target sections it introduces are blockers rather than
+acceptance or implementation evidence. The decisions are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -622,13 +624,43 @@ Identity-domain constants [MPA-OPERATION-DOMAINS]:
 | Constant | String preimage | Hash |
 | --- | --- | --- |
 | `MINT_REQUEST_COMMITMENT_DOMAIN` | `6529STREAM_MINT_REQUEST_COMMITMENT_V1` | `0xe4ac6b3cb3a129b5ff8903e5e77ae82e6b08a8c02d6e9afdd05f1a29c42b4e75` |
+| `MINT_VALIDATED_RESULT_DOMAIN` | `6529STREAM_MINT_VALIDATED_RESULT_V1` | `0x8e3555b7730150c391c4e441523a5bf6b2c5e667aea8facfbeac1c97c69ec90c` |
+| `MINT_COUNTER_CONSUMPTIONS_DOMAIN` | `6529STREAM_MINT_COUNTER_CONSUMPTIONS_V1` | `0xe83428ac54a108fee2b634426886f145961f53a6d605a72bcfa360097574859d` |
+| `MINT_NULLIFIERS_DOMAIN` | `6529STREAM_MINT_NULLIFIERS_V1` | `0xd3fc71c321324d8d53b808afb53c8595fd4023cab091446b7dfbdb02497500de` |
 | `MINT_OPERATION_ROOT_DOMAIN` | `6529STREAM_MINT_OPERATION_ROOT_V1` | `0xc9d0a19018dbe92565c101d5e487d327862969c80231480b2b154b3cf25e609c` |
 | `MINT_TOKEN_OPERATION_ID_DOMAIN` | `6529STREAM_MINT_TOKEN_OPERATION_ID_V1` | `0x5976353e4b31be7982321aea211f493bf54078d8fde1efd6da7b3ee98d841fae` |
 | `MINT_EXECUTION_PATH_SINGLE_STEP` | `6529STREAM_MINT_EXECUTION_PATH_SINGLE_STEP_V1` | `0x380e73f6deaf846e4de83f7ed9ebf6e54ec10954aca9f5fabaf63e42cdf8897b` |
 | `MINT_EXECUTION_PATH_PREPARED` | `6529STREAM_MINT_EXECUTION_PATH_PREPARED_V1` | `0xa82af2f0c9004270f5d9b44392994f6a6f276d860636bebffb8157a2fdae3397` |
 
 ```solidity
-// Level 1: the static request commitment binds the request contents.
+// Level 0: presentation bytes are excluded only after their validated,
+// canonical values are reconstructed. canonicalNullifiers is sorted ascending
+// with duplicates rejected. canonicalConsumptions is the exact counter-order,
+// then token-index-order CounterConsumption[] passed to the ledger.
+bytes32 nullifiersHash = keccak256(abi.encode(
+    MINT_NULLIFIERS_DOMAIN,
+    canonicalNullifiers
+));
+
+bytes32 counterConsumptionsHash = keccak256(abi.encode(
+    MINT_COUNTER_CONSUMPTIONS_DOMAIN,
+    canonicalConsumptions
+));
+
+bytes32 validatedResultHash = keccak256(abi.encode(
+    MINT_VALIDATED_RESULT_DOMAIN,
+    address(gate),
+    bytes32(batch.authorizationId),
+    bytes32(nullifiersHash),
+    address(validatedAuthorizer),
+    uint8(validatedAuthorizerKind),
+    uint64(validatedMaxQuantity),
+    bytes32(validatedGateHash),
+    bytes32(counterConsumptionsHash)
+));
+
+// Level 1: the request commitment binds the listed batch values and the
+// canonical validated-result digest, not raw proof/signature encodings.
 bytes32 requestCommitmentHash = keccak256(abi.encode(
     MINT_REQUEST_COMMITMENT_DOMAIN,
     address(payer),
@@ -636,7 +668,8 @@ bytes32 requestCommitmentHash = keccak256(abi.encode(
     bytes32(initialRecipientsHash),
     bytes32(beneficiariesHash),
     bytes32(tokenDataArrayHash),
-    bytes32(mintCommitmentsHash)
+    bytes32(mintCommitmentsHash),
+    bytes32(validatedResultHash)
 ));
 
 // Level 2: the operation root binds the request to chain, contracts,
@@ -651,7 +684,7 @@ bytes32 operationRoot = keccak256(abi.encode(
     uint256(collectionId),
     bytes32(phaseId),
     bytes32(policyHash),
-    bytes32(authorizationId),
+    bytes32(batch.authorizationId),
     bytes32(requestCommitmentHash),
     bytes32(contextHash),
     address(msg.sender), // executor
@@ -671,9 +704,8 @@ bytes32 operationId = keccak256(abi.encode(
 
 function executeSingleStepMint(
     MintBatch calldata batch,
-    bytes calldata gateData,
-    bytes calldata settlementData
-) external payable returns (
+    bytes calldata gateData
+) external returns (
     uint256[] memory tokenIds,
     bytes32 operationRoot,
     bytes32[] memory operationIds
@@ -681,9 +713,8 @@ function executeSingleStepMint(
 
 function executePreparedMint(
     MintBatch calldata batch,
-    bytes calldata gateData,
-    bytes calldata settlementData
-) external payable returns (
+    bytes calldata gateData
+) external returns (
     uint256[] memory tokenIds,
     bytes32 operationRoot,
     bytes32[] memory operationIds
@@ -692,12 +723,19 @@ function executePreparedMint(
 function nextOperationNonce() external view returns (uint256);
 ```
 
+Both manager entries are nonpayable and asset-agnostic. `gateData` is
+presentation-only input to the configured validation gate; the manager ABI
+contains no generic settlement bytes, callback target, selector, value, or
+delegatecall surface. A future typed primary-settlement callback belongs to
+ADR 0019 / issue #694 and requires separately accepted change control; ADR
+0018 does not freeze it.
+
 Operation-identity selector goldens [MPA-OPERATION-SELECTORS]:
 
 | Selector | Canonical external signature |
 | --- | --- |
-| `0x32425026` | `executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes),bytes,bytes)` |
-| `0xc4368a24` | `executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes),bytes,bytes)` |
+| `0x8a6ace2e` | `executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes),bytes)` |
+| `0x97c01727` | `executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes),bytes)` |
 | `0x37f8eaa5` | `nextOperationNonce()` |
 | `0x79e9746a` | `consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)` |
 | `0xe67d8006` | `isManagerOperationRootUsed(address,bytes32)` |
@@ -713,8 +751,9 @@ Requirements [MPA-OPERATION]:
 1. Every input term is defined in this document: `initialRecipientsHash`,
    `beneficiariesHash`, `tokenDataArrayHash`, and `mintCommitmentsHash`
    are the canonical batch hashes of `Recipient Binding`;
-   `policyHash` is the active phase policy hash; `authorizationId` is the
-   authorization replay key; `contextHash` is `MintBatch.contextHash`;
+   `policyHash` is the active phase policy hash;
+   `batch.authorizationId` is the explicit authorization replay key;
+   `contextHash` is `MintBatch.contextHash`;
    `executionPath` is exactly `MINT_EXECUTION_PATH_SINGLE_STEP` or
    `MINT_EXECUTION_PATH_PREPARED`; `firstOperationNonce` is the first value
    in a manager-local monotonic nonce range of length `quantity`;
@@ -722,6 +761,29 @@ Requirements [MPA-OPERATION]:
    `tokenIndex`. The per-token `mintCommitment` is the value the protocol
    v1 mirror table's inputs column labels `salt`, and
    `mintCommitmentsHash` is the value it labels `saltsHash`.
+   `canonicalNullifiers` is the ascending, duplicate-free validated nullifier
+   list. `canonicalConsumptions` is the manager's complete
+   `CounterConsumption[]`, encoded in the struct field order pinned under
+   `[MPA-LEDGER]`: enabled counters appear in their policy-registration order;
+   a context-keyed counter contributes exactly one row; every other counter
+   contributes rows in ascending `tokenIndex`; and no row may be omitted or
+   added. Duplicate `(counterId, valueKey)` rows remain in that deterministic
+   sequence while the manager separately aggregates their projected increments
+   for the pre-ledger cap check. The manager passes the same array
+   byte-for-byte to the ledger. Each row's `resolutionHash` is the canonical
+   typed resolver-result digest owned by the applicable counter policy, never
+   raw resolver proof bytes. `validatedAuthorizer`,
+   `validatedAuthorizerKind`, `validatedMaxQuantity`, and
+   `validatedGateHash` are the manager's normalized gate result. With a
+   configured gate they equal the returned `GateResult` fields after the
+   manager requires `gateResult.authorizationId == batch.authorizationId`;
+   without a gate they equal `address(0)`, `uint8(AuthorizerKind.NONE)`, `0`,
+   and `bytes32(0)` respectively, and the manager requires
+   `batch.authorizer == address(0)` and an empty `canonicalNullifiers` array.
+   No ungated path infers an authorizer kind from the caller, payer, account
+   code, or any phase field. A configured gate's `gateHash` is a
+   canonical digest of validated public inputs and results, never raw
+   signature, Merkle-proof, or proof-system encoding.
    `requestCommitmentHash` carries its own versioned domain,
    `MINT_REQUEST_COMMITMENT_DOMAIN`, because every named composite hash is
    domain-separated even when it is only consumed inside a domained
@@ -730,7 +792,7 @@ Requirements [MPA-OPERATION]:
    `operationId` — a named composite stored as Core's
    `PreparedMintRecord` lock key and indexed in prepared-mint events —
    carries its own versioned domain, `MINT_TOKEN_OPERATION_ID_DOMAIN`, under the
-   same rule (ADR 0012 decision T6); both domains are mirrored in the
+   same rule (ADR 0012 decision T6); all operation domains are mirrored in the
    protocol v1 domain-constants table.
 
    Implementation evidence (non-normative). The CON-014 slice computes
@@ -742,17 +804,26 @@ Requirements [MPA-OPERATION]:
    target domains and ordering above; the as-built mirror, manager
    constants, ABI/event catalogs, and release artifacts re-pin together
    only in the atomic implementation cutover.
-2. Deadline, sale adapter identity, price, asset, and the primary/royalty
-   policy hashes are bound transitively, not restated at the root: they
-   are inside the signed payload from which `authorizationId` must be
-   derived (`MintTicket` per `[MPA-TICKET]`, or the sale authorization per
-   `docs/stream-sales-and-auctions.md` `[SSA-AUTH]`). The manager enforces
-   `deadline` before consuming the authorization; the sale adapter rejects
-   settlement whose sale authorization digest does not map to the
-   `authorizationId` it supplied; the resolver snapshot hook re-verifies
-   the primary/royalty policy hashes it snapshots. A participant must
-   reject any mint call whose root- or token-scoped component it owns does not
-   match.
+2. Every state- or economics-affecting value inside the manager/ledger mint
+   boundary is bound either directly in the normalized preimages above or
+   transitively through a typed digest that is itself bound there. In a signed
+   sale, `batch.authorizationId` derives from the
+   full EIP-712 authorization digest, whose `[SSA-AUTH]` typehash includes sale
+   adapter, price, asset, deadline, policy fields, recipients,
+   `tokenDataArrayHash`, and `mintCommitmentsHash`. The canonical
+   `validatedResultHash` separately binds the verified gate identity/result,
+   nullifiers, and every typed ledger consumption, including canonical counter
+   resolver outcomes. Raw signature, Merkle-proof, `gateData`, or `resolverData`
+   encodings are presentation-only and are deliberately excluded: two
+   equivalent presentations that validate to the same canonical result derive
+   the same hash, while mutation of any canonical value or result changes it.
+   This operation preimage does not invent a primary-settlement result field:
+   ADR 0019 / issue #694 must bind its exact typed settlement result and
+   execution key under that component's accepted ABI before any production
+   integration claim.
+   The manager enforces the deadline before consuming authorization, and every
+   participant rejects a mismatch in the root- or token-scoped component it
+   owns.
 3. Before calling the ledger, the manager derives the root and all token
    operation IDs in memory, rejects any zero result, reserves
    `[firstOperationNonce, firstOperationNonce + quantity)`, and advances
@@ -766,21 +837,36 @@ Requirements [MPA-OPERATION]:
    `MINT_EXECUTION_PATH_SINGLE_STEP`; `PREPARED_MINT` uses
    `MINT_EXECUTION_PATH_PREPARED`. Otherwise identical requests under the two
    paths derive different roots. Both manager entrypoints return exactly the
-   token-ID array, batch root, and equally sized token-operation-ID array shown
-   above.
+   Core token-ID array, batch root, and equally sized token-operation-ID array
+   shown above.
 6. A pre-manager single-step deposit records the root derived from the signed
-   request and the manager's current `nextOperationNonce`. Its `policyHash` and
-   `authorizationId` inputs are the exact signed policy hash and authorization
-   replay key deterministically derived from the signed authorization and gate
-   data before the deposit, then independently revalidated or rederived by the
-   manager and gate. The adapter recomputes the remaining root inputs from the
-   batch, chain, configured manager dependencies, path, and its own caller
-   address. The manager independently derives and returns the same value and
-   token IDs in the same top-level transaction. Before returning, the adapter
-   compares those returned identities with its preview. A nonce race or
-   mismatch reverts the whole transaction, including the deposit. A free or
-   executor-only single-step batch still consumes a root.
-7. Core's immediate `mintFromManager` ABI does not gain an operation-ID or root
+   request and the manager's current `nextOperationNonce`. Its `policyHash` is
+   the exact signed policy hash, and `batch.authorizationId` is the exact
+   authorization replay key deterministically derived from the signed
+   authorization before the deposit, then independently revalidated or
+   rederived by the manager and gate. The adapter recomputes the remaining root inputs from the
+   batch, chain, configured manager dependencies, path, canonical validation
+   results, and exactly `address(this)` for the executor term because the
+   adapter becomes the manager's `msg.sender`. It never substitutes the
+   adapter's external caller, payer, relayer, or `tx.origin`. A direct payer
+   call and a relayed call carrying the same valid signed batch therefore
+   derive the same root; substituting any payer, relayer, or arbitrary caller
+   for `address(this)` is an identity mismatch. The manager independently
+   derives and returns the same value, Core token IDs, and token operation IDs
+   in the same top-level transaction. Before returning, the adapter compares
+   those returned identities with its preview. A nonce race or mismatch reverts
+   the whole transaction, including the deposit. A free or executor-only
+   single-step batch still consumes a root.
+7. ADR 0018 pins only the cross-component settlement invariant, not a settlement
+   callback ABI. A prepared path must verify the explicit manager/root through
+   the ledger and the current Core `PreparedMintRecord.operationId` before any
+   resolver or settlement effect. A single-step path must preserve
+   preview -> settlement -> manager-return comparison with whole-transaction
+   rollback. The exact typed primary-settlement invocation, hostile callback
+   cases, and execution-specific settlement replay key remain an explicit ADR
+   0019 / issue #694 production blocker; this proposal does not claim that
+   integration is closed.
+8. Core's immediate `mintFromManager` ABI does not gain an operation-ID or root
    argument. The manager event is the canonical root-to-token join for that
    path.
 
@@ -792,15 +878,17 @@ prepare, complete, or abort forwarder. Core `prepareMintFromManager` and
 from Core's private cached `MINT_MANAGER` satellite pointer
 and are never independent user flows. Completion must come from the same manager
 address that prepared the token; a replacement manager may abort a stranded
-prepared mint but cannot redirect completion. The manager calls the restricted
-resolver and settlement hooks between Core prepare and Core complete. If
-settlement, resolver snapshot, escrow/deposit, entropy registration, receiver
-acceptance, or completion fails, the manager must propagate the revert so the
-whole transaction unwinds and no prepared state persists. Committing prepare in
-an earlier transaction or intentionally pausing for out-of-band settlement or
-review is nonconformant. Recovery applies only if a nonconforming or compromised
-manager nevertheless committed such an incident record; it is never a second
-supported execution mode.
+prepared mint but cannot redirect completion. The manager owns the
+non-reentrant prepared lifecycle. Resolver and settlement effects must occur
+between Core prepare and Core complete under [MPA-OPERATION] rule 7, but the
+exact typed settlement call is intentionally unresolved pending ADR 0019 /
+issue #694. If settlement, resolver snapshot, escrow/deposit, entropy
+registration, receiver acceptance, or completion fails, the manager must
+propagate the revert so the whole transaction unwinds and no prepared state
+persists. Committing prepare in an earlier transaction or intentionally pausing
+for out-of-band settlement or review is nonconformant. Recovery applies only if
+a nonconforming or compromised manager nevertheless committed such an incident
+record; it is never a second supported execution mode.
 
 The manager's prepared-token lock must be externally verifiable through Core
 state. Core's `PreparedMintRecord.operationId` is the canonical current lock
@@ -2290,6 +2378,7 @@ struct MintBatch {
     address[] beneficiaries;
     bytes[] tokenData;
     bytes32[] mintCommitments;
+    bytes32 authorizationId;
     bytes32 contextHash;
     bytes resolverData;
 }
@@ -2322,14 +2411,19 @@ Rules:
 10. `tokenData` is opaque bytes. Renderer/schema code may interpret it as
     UTF-8, JSON, CBOR, or another format, but Core and the mint manager do not
     parse it.
-11. Each `tokenData[i]` must satisfy the collection metadata v1 limit
+11. `authorizationId` is a required nonzero typed request field. On a gated
+    phase it must equal the configured gate's returned `authorizationId`; on an
+    ungated phase it is the caller's explicit domain-separated authorization
+    replay ID. It is never inferred from `operationRoot`, `contextHash`, or raw
+    `gateData`.
+12. Each `tokenData[i]` must satisfy the collection metadata v1 limit
      `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
      calldata/gas cap. In the mint-manager path, Core validates token data after
      manager ledger consumption and before prepared mint state, payment
      settlement, or the completion-time entropy-registration boundary; an
      oversized token-data revert rolls back the whole transaction, including
      ledger counters and authorization usage.
-12. `contextHash` is optional, but should be nonzero for signed/drop/auction
+13. `contextHash` is optional, but should be nonzero for signed/drop/auction
    flows that need a stable external reference.
 
 ### Recipient Binding
@@ -2565,17 +2659,13 @@ Requirements [MPA-TICKET] (pinned EIP-712 surface, ADR 0010 decision D3.5):
 7. Typehashes and domains in this section are recorded in the protocol v1
    domain-constants mirror table with CI recomputation coverage.
 
-The manager entrypoint should be non-payable:
-
-```solidity
-function mint(
-    MintBatch calldata batch,
-    bytes calldata gateData
-) external returns (uint256 firstTokenId, uint256 quantity);
-```
-
-ETH and ERC-20 payments should be handled by a sale or settlement adapter that
-calls this function after its own checks.
+PRE-GENESIS REMOVED: the earlier generic manager entry
+`mint(MintBatch,bytes)` is superseded by the frozen nonpayable
+`executeSingleStepMint(MintBatch,bytes)` and
+`executePreparedMint(MintBatch,bytes)` pair in [MPA-OPERATION]. The atomic
+cutover migrates every caller and removes the old entry; it must not remain
+co-live in the final manager ABI. ETH and ERC-20 payments stay in sale or
+settlement adapters outside the asset-agnostic manager.
 
 ## Executor Authorization
 
@@ -2660,8 +2750,13 @@ interface IStreamMintGate {
 
 Gate behavior [MPA-GATES]:
 
-1. If `authorizationId != bytes32(0)`, the manager must ensure it has not been
-   used before and then ask the ledger to consume it before calling Core.
+1. A configured gate must return a nonzero `authorizationId` equal to
+   `MintBatch.authorizationId`. The manager rejects a mismatch, ensures the
+   explicit request ID is unused, and asks the ledger to consume it before
+   calling Core. Ungated phases follow the same nonzero request/ledger rule
+   without fabricating a gate result: they require
+   `MintBatch.authorizer == address(0)` and normalize the validated authorizer
+   result to `(address(0), uint8(AuthorizerKind.NONE), 0, bytes32(0))`.
 2. If `nullifiers` is non-empty, the manager must ensure each nullifier has not
    been used before and then ask the ledger to consume them before calling
    Core. A gate may return nullifiers only when its accepted specification
@@ -2672,8 +2767,13 @@ Gate behavior [MPA-GATES]:
    `NONE`, and emits it in mint events.
 4. If `maxQuantity != 0`, the batch quantity must be less than or equal to that
    gate limit.
-5. `gateHash` should commit to gate-specific evidence, such as a Merkle root,
-   ticket digest, settlement digest, or privacy proof public inputs.
+5. `gateHash` is the gate's canonical validated-result digest. It commits to
+   typed public inputs and the accepted result (for example a Merkle root and
+   canonical leaf values, a ticket digest, or privacy-proof public inputs), not
+   raw signature bytes, Merkle sibling ordering, or proof-system presentation
+   encoding. Equivalent presentations that validate to the same result must
+   return the same `gateHash`; changing any accepted value or result must change
+   it.
 6. Gate call gas is deterministic and governed (ADR 0010 decisions D1 and
    D10.3): the manager must call the gate with a limited-gas `staticcall`
    forwarding exactly `max(gateGasLimit, MINT_GATE_GAS_LIMIT)`, where
@@ -2981,7 +3081,7 @@ Canonical state-changing mint sequence:
     boundary, without calling external randomness providers.
 21. Core calls `_safeMint(initialRecipient, tokenId)`. This is the first point
     where an untrusted recipient callback can run.
-22. Emit manager batch/token events with the root, per-token IDs, and
+22. Emit manager batch/token events with the root, per-token operation IDs, and
     `policyHash`.
 
 Step 9 is mandatory on every mint path — including auction settlement,
@@ -3407,7 +3507,8 @@ function canMint(
 ```
 
 `canMint()` should never be the source of truth. It is a frontend/operator
-helper. The state-changing `mint()` function must repeat all checks.
+helper. Both state-changing manager entries, `executeSingleStepMint` and
+`executePreparedMint`, must repeat all checks.
 
 ## Admin Model
 
@@ -3546,8 +3647,8 @@ phase stricter or permanently closed.
    bounded counter list.
 5. Batch length and enabled counter count should have configurable hard caps.
 6. Counter resolvers and gates must not be able to reenter mint execution.
-7. `mint()` and the `PREPARED_MINT` entrypoint must use a reentrancy guard
-   or the manager operation lock (ADR 0010 decision D10.3); this maps to
+7. `executeSingleStepMint` and `executePreparedMint` must use a reentrancy
+   guard or the manager operation lock (ADR 0010 decision D10.3); this maps to
    the conformance-matrix mint-accounting gate, matching the split wallet,
    escrow flush, and coordinator guards, which are also musts.
 8. Gate validation must be repeated in the state-changing path.
@@ -4005,14 +4106,22 @@ Manager tests:
     back on every downstream failure.
 43. Quantity `N` returns and emits one root and exactly `N` unique operation
     IDs in token-index order; changing the root, reserved token nonce, index,
-    token-data hash, or mint commitment changes the token ID.
+    token-data hash, or mint commitment changes the token operation ID.
 44. `PRE_REVENUE_SINGLE_STEP` consumes a root even with no payment settlement,
     and a pre-manager deposit with a stale or mismatched previewed root reverts
     atomically.
-45. `MintBatchExecuted`, `MintTokenExecuted`, prepared events, ledger events,
+45. Direct and relayed adapter entry with the same valid signed request,
+    canonical validation results, adapter, and manager nonce derives the same
+    root because the executor term is the adapter's `address(this)`; substituting
+    payer, relayer, external caller, or `tx.origin` fails identity comparison.
+46. Mutating any typed request, validation-result, root, or per-token preimage
+    field changes the corresponding digest. Equivalent signature, Merkle-proof,
+    or resolver-proof presentations with the same canonical validated result do
+    not change it.
+47. `MintBatchExecuted`, `MintTokenExecuted`, prepared events, ledger events,
     resolver facts, and settlement facts reconstruct the exact root/token join
     without requiring a Core-specific mint event.
-46. Entropy registration receives only authoritative Core token identity and
+48. Entropy registration receives only authoritative Core token identity and
     mint commitment; it neither stores nor validates operation-root replay.
 
 Resolver/nullifier extension tests:

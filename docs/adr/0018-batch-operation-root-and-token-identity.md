@@ -2,9 +2,10 @@
 
 ## Status
 
-Accepted for the pre-genesis production target on 2026-07-24 under explicit
-protocol-owner direction in
+Proposed only for the pre-genesis production target under
 [issue #688](https://github.com/6529-Collections/6529Stream/issues/688).
+This draft is not accepted, does not close issue #688, and is neither
+implementation nor production-readiness evidence.
 
 This ADR amends the legacy paid-mint operation binding delegated by ADR 0008,
 the prepared-mint identity decisions recorded by ADR 0012 decision T6, and the
@@ -31,7 +32,7 @@ That arrangement leaves no durable batch replay owner outside byte-constrained
 Core, gives indexers no exact join from ledger accounting to prepared-token
 events, and makes the proposed Core replay-state removal unsafe.
 
-## Decision
+## Proposed Decision
 
 ### Cardinality And Domains
 
@@ -41,11 +42,12 @@ Every successful manager batch of quantity `N > 0`, whether it uses
 - one nonzero `operationRoot`; and
 - `N` nonzero, pairwise-distinct per-token `operationId` values.
 
-The normative derivation lives in
+The proposed normative derivation lives in
 [`docs/mint-policy-and-accounting.md`](../mint-policy-and-accounting.md)
 `[MPA-OPERATION]`. It uses the final generic mint domains
 `MINT_REQUEST_COMMITMENT_DOMAIN`, `MINT_OPERATION_ROOT_DOMAIN`, and
-`MINT_TOKEN_OPERATION_ID_DOMAIN`, plus an exact execution-path constant for
+`MINT_TOKEN_OPERATION_ID_DOMAIN`, canonical validation-result, counter-
+consumption, and nullifier domains, plus an exact execution-path constant for
 the selected paid-mint orchestration path.
 
 The manager reserves a contiguous nonce range
@@ -55,6 +57,44 @@ The root binds `firstOperationNonce` and `N`. Token `i` binds
 The manager advances `nextOperationNonce` by `N`. Any later revert unwinds that
 reservation.
 
+### Commitment Boundary
+
+The request commitment binds the typed payer, authorizer, recipient,
+beneficiary, token-data-array, mint-commitment-array, and canonical
+validated-result hashes in the exact order pinned by `[MPA-OPERATION]`. The
+validated-result hash binds the gate address and canonical gate result,
+ascending duplicate-free nullifiers, and the exact counter-order/token-index-
+order `CounterConsumption[]` passed to the ledger; projected increments are
+aggregated separately by `(counterId, valueKey)` for the pre-ledger cap check,
+without changing that array preimage. Each consumption's `resolutionHash`
+binds its canonical typed counter-resolver result. The outer root then binds
+chain, manager, Core, ledger,
+execution path, collection, phase, policy, authorization, request commitment,
+context, manager executor, nonce range, and quantity. Each token operation ID
+binds root, reserved token nonce, token index, token-data hash, and mint
+commitment.
+
+The manager entrypoints are nonpayable and asset-agnostic. They accept only
+`MintBatch` plus presentation-only `gateData`; they expose no generic
+settlement bytes, callback target, selector, value, or delegatecall.
+`MintBatch.authorizationId` is a required nonzero typed request field. A
+configured gate must return the same value; an ungated phase consumes the
+explicit request value, never an ID inferred from the root, context, or
+presentation bytes. Raw
+signature, Merkle-proof, and resolver-proof encodings may be excluded from the
+root only because their canonical validated values/results are bound. Two
+equivalent presentations that produce the same canonical result derive the
+same operation identity; changing any state- or economics-affecting typed value
+or validated result inside the manager/ledger mint boundary changes it. The
+proposal deliberately does not synthesize a primary-settlement result field;
+ADR 0019 / issue #694 must bind that component's exact typed result and
+execution key under its accepted ABI.
+
+Signed sale authority is separate from root uniqueness. The proposed
+`SALE_AUTHORIZATION_TYPEHASH` additionally binds `tokenDataArrayHash` and
+`mintCommitmentsHash`; a unique root cannot authorize content the signer did
+not commit.
+
 ### Identity Ownership
 
 Identity follows the scope of the state transition:
@@ -62,7 +102,7 @@ Identity follows the scope of the state transition:
 | Participant | Identity it owns or verifies |
 | --- | --- |
 | Sale adapter | Batch `operationRoot`; a token `operationId` only for a token-scoped settlement record |
-| Mint manager | Root derivation, nonce-range reservation, all token IDs, and batch/token events |
+| Mint manager | Root derivation, nonce-range reservation, all token operation IDs, and batch/token events |
 | Mint ledger | Manager-scoped durable `operationRoot` replay; no token operation-ID storage |
 | Core prepare/complete/abort | Current token's `operationId`; no batch root and no lifetime replay mapping |
 | Revenue resolver snapshot | Batch root plus the current token operation ID |
@@ -117,7 +157,8 @@ receiver failure reverts all ledger writes and the manager nonce reservation.
 
 ### Single-Step Identity
 
-`PRE_REVENUE_SINGLE_STEP` uses the same one-root-plus-`N`-token-ID model. Its
+`PRE_REVENUE_SINGLE_STEP` uses the same
+one-root-plus-`N`-token-operation-ID model. Its
 distinct execution-path constant prevents a prepared operation and a
 single-step operation with otherwise identical inputs from sharing an
 identity.
@@ -126,16 +167,43 @@ A sale adapter that records a deposit before entering the manager computes the
 root from the signed request and the manager's current
 `nextOperationNonce`, records that root with the settlement, and calls the
 manager in the same top-level transaction. The manager independently derives
-the exact root from the same request, caller, path, and nonce and returns it
-with the per-token IDs. The adapter compares those returned identities with its
-preview before returning from the top-level call. A nonce race or any mismatch
-reverts the whole transaction, including the earlier deposit. Free or
-executor-only single-step batches still derive and consume the root even when
-no settlement record exists.
+the same root from the bound values, its `msg.sender`, path, and nonce and
+returns it with the per-token operation IDs. In the adapter's preview, the
+executor term
+is exactly `address(this)` because the adapter becomes manager `msg.sender`; it
+is never the adapter's external caller, payer, relayer, or `tx.origin`. Direct
+and relayed calls carrying the same valid signed request therefore preview the
+same identity. The adapter compares the returned identities with that preview
+before returning from the top-level call. A nonce race or any mismatch reverts
+the whole transaction, including the earlier deposit. Free or executor-only
+single-step batches still derive and consume the root even when no settlement
+record exists.
 
 The immediate Core `mintFromManager` selector does not gain an operation-ID
 argument. The manager's per-token event is the canonical root-to-token join for
 single-step mints.
+
+### Settlement Invariant And Open Blocker
+
+This proposal does not invent or freeze ADR 0019 / issue #694's typed
+primary-settlement callback. It pins only the invariant required by operation
+identity:
+
+- prepared execution verifies the explicit manager/root through the ledger and
+  the current Core token operation ID before any resolver or settlement effect;
+- single-step execution preserves preview -> settlement -> manager-return
+  comparison with whole-transaction rollback; and
+- no generic bytes/target/selector/value/delegatecall callback enters the
+  manager ABI.
+
+The current revenue `settlementKey` also collides for repeated otherwise
+identical purchases because it lacks an execution ID. `operationRoot` is not a
+universal key: non-mint custody transfers have no root, while one batch root may
+cover multiple token-scoped facts. ADR 0019 / issue #694 must define the exact
+typed invocation, hostile callback cases, and execution-ID-bound distinct-key
+and replay tests. Until then, settlement integration and repeated-sale
+correlation/replay are explicit production blockers and are not closed by ADR
+0018.
 
 ### Events
 
@@ -167,8 +235,10 @@ multiple commits:
 1. add the ledger root storage, explicit read, validation, and final events;
 2. update the manager to derive all identities and reserve the nonce range
    before calling the final ledger ABI;
-3. update every manager, sale, resolver, settlement, test, and monitoring call
-   site to the exact root/token ownership model;
+3. remove the superseded `mint(MintBatch,bytes)` manager entry, migrate every
+   manager, sale, resolver, settlement, test, and monitoring call site to the
+   nonpayable two-entry root/token ownership model, and do not support a co-live
+   final manager ABI;
 4. prove zero/reused root rejection, manager scoping, cardinality, event joins,
    and whole-transaction rollback;
 5. remove Core's lifetime prepared-operation replay mapping while retaining
@@ -192,7 +262,7 @@ transitions.
 ### Ledger Stores Every Token Operation ID
 
 Rejected. The ledger consumes one batch and owns batch replay. Storing `N`
-token IDs duplicates manager/Core token facts, increases permanent storage,
+token operation IDs duplicates manager/Core token facts, increases permanent storage,
 and provides no stronger replay guarantee than one consumed root.
 
 ### Core Retains Lifetime Replay Storage
@@ -206,8 +276,8 @@ cutover proof exists.
 
 Rejected. Authorization and operation identities have different lifecycles.
 An authorization may cover policy and signer replay while the operation root
-also binds manager, Core, ledger, executor, path, nonce range, quantity, and
-exact request contents.
+also binds manager, Core, ledger, executor, path, nonce range, quantity, and the
+listed typed request/value/result digests.
 
 ### Prepared Mints Alone Get Operation Identity
 
@@ -217,7 +287,7 @@ have one uniform replay rule for every consuming manager path.
 ## Security And Bytecode Impact
 
 Manager-scoped ledger replay closes the gap that currently makes Core lifetime
-replay storage load-bearing. Per-token IDs remain collision-separated by root,
+replay storage load-bearing. Per-token operation IDs remain collision-separated by root,
 nonce, index, token data, and mint commitment. Explicit execution-path binding
 prevents cross-path identity confusion. Validation-before-write and EVM atomic
 rollback preserve counters, authorizations, nullifiers, manager nonces,
@@ -232,7 +302,7 @@ bytes).
 
 ## Release Impact
 
-This is an intentional pre-genesis MAJOR target correction. No production
+This is a proposed pre-genesis MAJOR target correction. No production
 deployment used the superseded prepared-only domains, rootless ledger ABI, or
 ambiguous shared-operation language.
 
@@ -251,8 +321,9 @@ artifacts from canonical generators.
 ## Test Plan
 
 - Spec checker tests recompute every identity-domain hash and fail on drift in
-  the exact root cardinality, ledger ABI order, replay read, and Core ownership
-  statements.
+  the root cardinality, full normalized request/result/root/token preimage
+  sequences, ledger ABI order, replay read, mutability/callback ownership, and
+  Core ownership statements.
 - Quantity `N` produces exactly one nonzero root and `N` nonzero pairwise
   distinct token operation IDs.
 - Token operation IDs change when the root, reserved token nonce, token index,
@@ -262,6 +333,17 @@ artifacts from canonical generators.
   pre-consume another manager's root.
 - Single-step and prepared batches with otherwise identical inputs derive
   different roots.
+- Direct and relayed adapter calls with the same signed request derive the same
+  preview because the executor is adapter `address(this)`; payer, relayer,
+  external-caller, and `tx.origin` substitutions fail.
+- Every typed request, validated-result, root, and token preimage field has a
+  mutation negative. Equivalent signature/Merkle/resolver proof encodings with
+  the same canonical result preserve identity; a changed result does not.
+- Manager ABI negatives reject `payable`, generic settlement bytes, callback
+  target/selector/value, and delegatecall absent later accepted change control.
+- Sale-authorization negatives reject token-data-array or mint-commitment-array
+  drift. ADR 0019 / #694 later owns distinct repeated-purchase keys and hostile
+  typed-settlement callback tests.
 - Ledger root, counter, authorization, and nullifier events join to the manager
   batch event; each manager token event joins one token operation ID to that
   root.
@@ -299,7 +381,7 @@ readiness claim.
   `#673`.
 - No production-readiness or audit-completion claim.
 
-## Accepted Risks
+## Known Risks
 
 - Until the implementation cutover lands, current source still lacks ledger
   root replay and retains Core lifetime replay storage.

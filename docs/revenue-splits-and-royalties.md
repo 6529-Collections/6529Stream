@@ -8,9 +8,11 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md), and
-[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by
-[ADR 0017](adr/0017-raise-only-parameter-governance.md) and
-[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md), and recorded in
+[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by accepted
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). Proposed
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the
+candidate operation-identity amendment and remains unaccepted. The decisions
+are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for
@@ -1247,8 +1249,8 @@ Requirements [RSR-ORCHESTRATION]:
    [PV1-MINT-ORDER] invariant 7; ADR 0014 decision V9).
 8. Mint manager verifies the signed `MintTicket` or equivalent sale
    authorization and binds the exact `mintCommitmentsHash`.
-9. Mint manager independently derives the exact root and token IDs and reserves
-   the contiguous nonce range before calling the ledger.
+9. Mint manager independently derives the batch root and token operation IDs
+   and reserves the contiguous nonce range before calling the ledger.
 10. Mint ledger verifies the manager-registered policy hash and consumes
    the manager-scoped root, counters, authorization IDs, and nullifiers.
 11. Core executes `mintFromManager`, writes token identity, registers the
@@ -1340,7 +1342,18 @@ entropy-coordinator boundary lands.
    the initial recipient while keeping the Core completion sentinel active, and
    clears that sentinel only after the ERC-721 receiver callback returns.
    Actual randomness-provider requests occur only after completion and are not
-   part of this Core call.
+    part of this Core call.
+
+Steps 8 and 9 pin an invariant, not a callable settlement ABI. Before either
+step may perform an effect, the resolver or settlement participant must verify
+the explicit manager/root through
+`isManagerOperationRootUsed(manager, operationRoot)` and the current Core
+`preparedMint(tokenId).operationId`. The exact typed manager-to-primary-
+settlement invocation, callback authorization, returndata bounds, value
+handling, reentrancy/rollback hostile cases, and execution-specific replay key
+remain an explicit ADR 0019 / issue #694 production blocker. ADR 0018 defines
+no generic callback bytes, target, selector, value, or delegatecall surface and
+does not close primary-settlement integration.
 
 Token-level economic snapshots written during `PREPARED_MINT` must be
 derivable solely from Core token identity, collection/default assignment state,
@@ -1358,7 +1371,7 @@ untrusted recipient callback, randomness provider callback, refund callback,
 split-wallet release, or arbitrary external hook may execute before the path's
 required ledger consumption, token identity mapping, assignment snapshots, and
 revenue accounting are complete.
-Both paths use the one-root-plus-`N`-token-ID model owned by
+Both paths use the one-root-plus-`N`-token-operation-ID model owned by
 `docs/mint-policy-and-accounting.md` `[MPA-OPERATION]` (ADR 0018). The sale
 adapter, manager, and ledger correlate the batch root. Core prepare/complete
 correlates only the current token operation ID; resolver and token-scoped
@@ -1682,6 +1695,19 @@ is renamed and retyped by this rule.
 settlement caller, and asset address are deliberately excluded from
 `settlementKey`; they are validation inputs and emitted evidence, not alternate
 replay domains for the same sale.
+
+Known repeat-sale collision. The current `settlementKey` also lacks a
+purchase/execution identity. Two otherwise identical purchases under the same
+sale — same `settlementId`, adapter-local `saleNonce`, collection/token scope,
+parties, and amount — derive the same key, so the second purchase cannot be
+recorded even when it is a legitimate distinct execution. `operationRoot` is
+not a universal replacement: custody transfers have no mint root, and one
+batch root may cover multiple token-scoped settlement facts. ADR 0019 / issue
+#694 must introduce an execution-ID-bound distinct settlement key (or an
+equally explicit typed execution commitment) and prove distinct repeated
+purchases, exact replay rejection, direct/relayed equivalence, and rollback.
+Until that lands, repeat-sale replay/correlation and the primary-settlement ABI
+remain production blockers; this document does not claim them complete.
 
 Sale context is emitted for reconstruction only:
 

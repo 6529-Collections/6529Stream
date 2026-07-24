@@ -1413,6 +1413,12 @@ class ReleaseManifestTests(unittest.TestCase):
             generator.DEFAULT_GOVERNANCE_DOCS,
         )
 
+    def test_default_governance_docs_cover_operation_identity_adr(self) -> None:
+        self.assertIn(
+            Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
+            generator.DEFAULT_GOVERNANCE_DOCS,
+        )
+
     def test_default_governance_docs_close_genesis_normative_anchors(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         profile = json.loads(

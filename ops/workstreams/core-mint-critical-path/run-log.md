@@ -48,10 +48,11 @@
   tooling, roadmap, backlog, and release inputs. The coordinator handoff must
   enumerate the full changed-path set and prevent `#658` final regeneration
   from using a base that omits merged `#688`.
-- Coordinator fixed the exact shared release-input train as
-  `#687 -> #689 -> #688 -> #690 -> #658`. Publication now waits for both
-  `#687` and `#689`, followed by a fresh `origin/main` rebase and exact
-  shared-path declaration. This first `#688` PR remains the focused
+- Coordinator fixed the current exact shared release-input train as
+  `#692 -> #688 -> #690 -> #669 -> #694 -> #691 -> #693 -> #670 -> #656 -> #677 -> #658`.
+  PR `#692` is now merged; publication follows a fresh `origin/main` rebase,
+  focused re-review, and exact shared-path declaration. This first `#688` PR
+  remains the focused
   operation-identity ADR/spec/checker slice; `#672` and `#654` use a separate
   later implementation train.
 - Resolved every independent protocol-review finding: the single-step adapter
@@ -96,3 +97,69 @@
   probe/registry consumer; #654 owns actual IERC165/exact-ID advertisement,
   `0xffffffff` rejection, the real batch emitter, fallback-only negatives, and
   measured Core impact before any production completeness claim.
+- Coordinator confirmed PR `#692` for issue `#689` merged to `origin/main` at
+  `1031ffec0c2c7cfb0525d97790a66ecabfd8fe17`. Rebased the isolated #688 branch
+  on that exact squash commit, resolved the changelog in release-train order,
+  and retained the #689 canonical risk-tracker provenance correction through
+  the generated-tail conflict.
+- Added ADR 0018 to the canonical release-manifest governance-document
+  inventory and release-checksum coverage policy, with one focused inclusion
+  test for each inventory. Both new focused tests pass before artifact
+  regeneration.
+- Recorded the later #672 Core-size admission rule: the slice must have zero
+  Core delta or prove an exact before/after net-negative runtime by pairing any
+  addition with a measured removal. The complete target remains at most 22,576
+  bytes, restoration to at most 22,184 bytes is the objective, and historical
+  scratch deltas do not count as additive savings.
+- Stopped the first post-#689 authoritative Windows gate on coordinator
+  direction after independent review returned substantive normative blockers.
+  Verified and terminated the exact `check.ps1 -> forge build -> solc-0.8.19`
+  process ancestry for this worktree. No commit, push, or PR publication
+  occurred.
+- Received the full nine-item independent NO-GO packet. ADR 0018 remains
+  Proposed only. Repairs cover nonpayable asset-agnostic manager entries,
+  adapter `address(this)` executor preview, complete typed value/result
+  commitments, sale-authority token-data/mint-commitment binding, full preimage
+  checker mutation coverage, explicit ADR 0019 / #694 settlement and
+  repeat-sale blockers, operation-ID terminology, the expanded integration
+  train, and corrected 21,792 -> 24,152 size history. Artifact regeneration
+  remains prohibited until the focused source/checker suite passes and
+  independent re-review returns GO.
+- Completed the focused repair gate without regeneration: the operation checker
+  and 23 tests pass, including every normalized preimage term, exact
+  MintBatch/CounterConsumption/GateResult field order, manager mutability and
+  callback ownership, return/read ABI, event field/index layout, caller
+  binding, signer-content binding, maturity, and terminology negatives.
+  Manifest/checksum ADR-inventory spot tests, all manifest unit tests,
+  Markdown/changelog checks, Python compilation, and whitespace checks pass.
+  The broad checksum suite reports only five expected stale-source-hash
+  failures while canonical regeneration remains held for independent GO.
+- A second read-only checker/protocol pass found and closed the remaining
+  focused gaps without regeneration: Proposed status is now pinned in the ADR
+  index and every maturity mirror; terminology distinguishes Core token IDs
+  from token operation IDs; all owning Solidity blocks are scanned for
+  duplicate/legacy/callback entries; every target ABI declaration is parsed
+  exactly once; the canonical ledger array is distinct from projected-cap
+  aggregation; `MintBatch.authorizationId` is an explicit nonzero typed field
+  with gated equality and ungated consumption; and unresolved primary-
+  settlement results remain wholly in ADR 0019 / #694 rather than appearing as
+  unsourceable manager preimage fields. The resulting manager selectors are
+  `0x8a6ace2e` and `0x97c01727`.
+- A final targeted protocol pass found one unsourced ungated
+  `validatedAuthorizerKind`. The no-gate path now deterministically normalizes
+  to `(address(0), AuthorizerKind.NONE, 0, bytes32(0))`, requires
+  `MintBatch.authorizer == address(0)`, and forbids inference from caller,
+  payer, account code, or phase state. The checker pins the full rule and
+  negative-tests kind and authorizer substitution. Independent checker,
+  protocol, and release re-reviews are now clean; all 24 focused tests pass.
+  Canonical artifacts remain intentionally stale and regeneration remains held
+  for explicit coordinator authorization.
+- Independent closure review returned GO, and the coordinator authorized one
+  canonical regeneration plus validation. Regenerated risk register, release
+  notes, release manifest, bytecode proof, release-candidate lockfile, and
+  checksums exactly once in documented order. Every stage's tests and
+  deterministic check passed; all 28 checksum tests passed; offline release
+  verification passed with 379 checksum entries. A fresh authoritative
+  Windows gate then completed with exit `0` in 2,137.8 seconds. No commit,
+  push, PR, or bot request occurred. The remaining publication gate is the
+  durable-context-only readback and coordinator authorization.

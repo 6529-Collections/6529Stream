@@ -564,6 +564,12 @@ class ReleaseChecksumTests(unittest.TestCase):
         }
         self.assert_committed_checksums_cover(expected_paths)
 
+    def test_default_covered_paths_bind_operation_identity_adr(self) -> None:
+        self.assertIn(
+            Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
+            generator.DEFAULT_COVERED_PATHS,
+        )
+
     def test_default_covered_paths_bind_parameter_and_abi_policy(self) -> None:
         expected_paths = {
             Path("Makefile"),

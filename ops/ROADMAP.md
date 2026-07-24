@@ -127,8 +127,9 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   baseline EIP-170 margin. The current headroom remains above the interim
   384-byte development floor but below the 512-byte warning threshold.
   The Core/mint critical path is sequential: issue
-  [#688](https://github.com/6529-Collections/6529Stream/issues/688) first pins
-  one ledger-owned batch root plus `N` token operation IDs and the atomic
+  [#688](https://github.com/6529-Collections/6529Stream/issues/688) first
+  proposes and, only after acceptance, pins one ledger-owned batch root plus
+  `N` token operation IDs and the atomic
   removal proof for Core lifetime replay storage; issue
   [#672](https://github.com/6529-Collections/6529Stream/issues/672) then proves
   and enforces post-entropy completion gas; only that merged predecessor state

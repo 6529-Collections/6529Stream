@@ -5,6 +5,9 @@
 Own the sequential `#688 -> #672 -> #654` Core/mint launch-conformance lane.
 Each issue remains one review-ready draft PR, based on the then-current
 `origin/main`, with no dependent implementation stacked on an unmerged PR.
+The current shared release-input train is
+`#692 -> #688 -> #690 -> #669 -> #694 -> #691 -> #693 -> #670 -> #656 -> #677 -> #658`;
+the implementation lane remains separately serialized as `#688 -> #672 -> #654`.
 
 ## Reload Order
 
