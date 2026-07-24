@@ -35,6 +35,7 @@ SOURCE_DOCUMENT_PATHS = [
     "release-artifacts/latest/public-beta-evidence.json",
     "release-artifacts/latest/public-beta-blockers.md",
     "release-artifacts/latest/production-release-blockers.md",
+    "release-artifacts/latest/release-evidence-issue-links.json",
 ]
 
 RISK_DEFINITIONS: list[dict[str, Any]] = [
@@ -137,8 +138,12 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/check_non_local_release_evidence.py",
         ],
         "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/216",
             "https://github.com/6529-Collections/6529Stream/issues/217",
-            "https://github.com/6529-Collections/6529Stream/issues/218",
+            "https://github.com/6529-Collections/6529Stream/issues/219",
+            "https://github.com/6529-Collections/6529Stream/issues/220",
+            "https://github.com/6529-Collections/6529Stream/issues/221",
+            "https://github.com/6529-Collections/6529Stream/issues/222",
         ],
     },
     {
@@ -169,7 +174,10 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_admin_ceremony_evidence.py",
             "python scripts/check_admin_ceremony_evidence.py",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/362"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/219",
+            "https://github.com/6529-Collections/6529Stream/issues/228",
+        ],
     },
     {
         "id": "RISK-GOV-002",
@@ -329,10 +337,8 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/check_marketplace_indexer_evidence.py",
         ],
         "tracking": [
-            "https://github.com/6529-Collections/6529Stream/issues/135",
-            "https://github.com/6529-Collections/6529Stream/issues/422",
-            "https://github.com/6529-Collections/6529Stream/issues/423",
             "https://github.com/6529-Collections/6529Stream/issues/424",
+            "https://github.com/6529-Collections/6529Stream/issues/473",
         ],
     },
     {
@@ -398,7 +404,10 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/check_randomizer_operations.py",
             "python scripts/check_public_beta_evidence.py",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/221"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/220",
+            "https://github.com/6529-Collections/6529Stream/issues/229",
+        ],
     },
     {
         "id": "RISK-REL-001",
@@ -428,7 +437,14 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_bytecode_release_proof.py",
             "python scripts/generate_bytecode_release_proof.py --check",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/384"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/223",
+            "https://github.com/6529-Collections/6529Stream/issues/224",
+            "https://github.com/6529-Collections/6529Stream/issues/225",
+            "https://github.com/6529-Collections/6529Stream/issues/226",
+            "https://github.com/6529-Collections/6529Stream/issues/227",
+            "https://github.com/6529-Collections/6529Stream/issues/230",
+        ],
     },
     {
         "id": "RISK-SIZE-001",

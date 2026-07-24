@@ -7,6 +7,10 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Corrected five external-evidence risk rows to derive their tracker provenance
+  from the canonical open evidence-issue registry, and hash-bound that registry
+  into the generated risk register. This does not change evidence status,
+  maturity, or release readiness; issue #689 tracks the correction.
 - Added the schema-validated 25-row governed-parameter launch inventory, structural
   checker, and focused mutation tests for the exact 22 GGP/3 GTP policy. The
   inventory makes multi-host coverage explicit across all four sale adapters
