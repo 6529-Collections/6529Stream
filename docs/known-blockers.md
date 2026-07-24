@@ -174,12 +174,26 @@ contributors who start from the README.
   This remains an independent production blocker even if all other release-mode
   checks pass.
 - ADR 0017 fixes the logical governed-parameter set at 22 GGP plus three GTP
-  rows, but the production implementations do not yet bind those rows to exact
-  host instances, genesis values, immutable floors, measurement/cadence
-  evidence, and fixed-stipend compatibility. Generic store-host tests are not
-  deployment evidence. [Issue #684](https://github.com/6529-Collections/6529Stream/issues/684)
-  remains open for the strict inventory and concrete candidate bindings, and
-  `RISK-GOV-004` keeps strict production release mode fail-closed meanwhile.
+  rows. The checked governed-parameter inventory now fixes their exact
+  host-profile policy, including every launch sale adapter, both the primary
+  and selected fallback callback provider, and the shared Core
+  `ROYALTY_RETURN_GAS_BUFFER` completion-buffer rule. It deliberately records
+  the current candidate bindings as unavailable: production implementations
+  do not yet provide exact host addresses, genesis values, immutable floors,
+  exhaustive guarded-consumer inventories, reviewed measurement/cadence
+  evidence, or fixed-stipend compatibility. Generic store-host tests and a
+  valid planning artifact are not deployment evidence.
+  [Issue #684](https://github.com/6529-Collections/6529Stream/issues/684)
+  therefore remains open, and `RISK-GOV-004` plus the production-only
+  `--require-complete` check keep release mode fail-closed. The checker also
+  rejects every self-reported complete candidate until #656 supplies the
+  structured production-candidate model and exact reconciliation proof, and
+  rejects self-reported complete evidence until #684 supplies candidate-bound
+  measurement/cadence, reproduction, and reachable raise-chain semantics.
+  The shared-buffer text is only the specification slice of
+  [issue #671](https://github.com/6529-Collections/6529Stream/issues/671);
+  Core implementation, threshold/raise-chain tests, candidate measurement,
+  and exact-target rehearsal remain open.
 - Dead public/allowlist mint-count mappings and retrieval APIs were removed
   from `StreamCore`; the retained airdrop counter now has explicit regression
   tests for zero initial state, authorized increments, and failed-mint rollback.

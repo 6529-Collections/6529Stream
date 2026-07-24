@@ -2966,7 +2966,11 @@ Requirements [SSA-GAS]:
 2. `DELEGATE_REGISTRY_GAS_LIMIT` (genesis value `150_000`) bounds delegate
    registry reads in the delegate gate and the adapter-side delegated
    sale-participation reads ([SSA-DELEGATE] rules 6 through 9; ADR 0013
-   decision U6).
+   decision U6). The fixed-stipend inventory distinguishes the adapters'
+   direct reads from the nested `StreamMintManager` ->
+   `StreamDelegateRegistryGate` -> registry chain: that nested read must remain
+   compatible with the manager's independently raiseable
+   `MINT_GATE_GAS_LIMIT`, not with a fictitious sale-adapter gate stipend.
 3. `SALE_ARTIST_AUTHORITY_GAS_LIMIT` (genesis value `150_000`) bounds
    artist-authority registry reads at adapter boundaries: the
    [SSA-CONTEST-STOP] contest-standing sync and the [SSA-IDENTITY]
@@ -3522,7 +3526,7 @@ pinned from its string preimage and recomputed by CI.
 | `SALE_AUTHORIZATION_REVOCATION_TYPEHASH` | struct type string pinned in [SSA-OFFER] rule 5 | 0x41d0d127fea4cbca0630f242fe7375e83ff775d8215636ae1fdd92b3d481a455 | sale adapters | `1` | `chainId; saleAdapter; authorizer; authorizationDigest` (ADR 0012 decision T6; authorizer field added by ADR 0013 decision U6) |
 | `SALE_CUSTODY_GRANT_REVOCATION_TYPEHASH` | struct type string pinned in [SSA-CUSTODY-ENTRY] rule 4 | 0x56747c6d524c5e2b5568c382f06c2f3c787067868f362f65933656e7a67e8344 | sale adapters | `1` | `chainId; saleAdapter; owner; grantDigest` (ADR 0014 decision V6) |
 | `GGP_SALE_ERC1271_GAS_LIMIT` | `6529STREAM_GGP_SALE_ERC1271_GAS_LIMIT` | 0x17b207440a43ce0136b5ee0bc3becf37652825825d88c68e1e0750bf59ec914c | sale adapters | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS] |
-| `GGP_DELEGATE_REGISTRY_GAS_LIMIT` | `6529STREAM_GGP_DELEGATE_REGISTRY_GAS_LIMIT` | 0xd75b7f96fae550dd69de8ac7536a203e30ec57da63811df1559129479b5ef185 | delegate gate | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS] |
+| `GGP_DELEGATE_REGISTRY_GAS_LIMIT` | `6529STREAM_GGP_DELEGATE_REGISTRY_GAS_LIMIT` | 0xd75b7f96fae550dd69de8ac7536a203e30ec57da63811df1559129479b5ef185 | `StreamDelegateRegistryGate`, `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter` | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-DELEGATE], [SSA-GAS] |
 | `GGP_SALE_ARTIST_AUTHORITY_GAS_LIMIT` | `6529STREAM_GGP_SALE_ARTIST_AUTHORITY_GAS_LIMIT` | 0xe8a88819edeabf6e6327f815980331deea6ed50c446b74f1a24055fbc65ad4d0 | sale adapters | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS]; ADR 0012 decision T4 |
 | `GGP_REVEAL_ATTEMPT_GAS_LIMIT` | `6529STREAM_GGP_REVEAL_ATTEMPT_GAS_LIMIT` | 0xd96deb8f5aad0fd19d6d79b209801e838cb0342c6967312895db5450ba01f01b | sale adapters | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS]; ADR 0013 decision U7 |
 | `GGP_SALE_NFT_DELIVERY_GAS_LIMIT` | `6529STREAM_GGP_SALE_NFT_DELIVERY_GAS_LIMIT` | 0xaccd7fad510e0ff312662187cf184397c8d9baaf0a6bb18dc3b804cc3ae3b372 | sale adapters | `1` | Governed Gas Parameter identifier per [LTA-GGP] rule 5; [SSA-GAS]; ADR 0013 decision U6 |

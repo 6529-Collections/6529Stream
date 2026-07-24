@@ -257,26 +257,33 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         "target_gate": "Gate G",
         "source": "ADR 0017 governed-parameter closed world and issue #684",
         "mitigation": (
-            "Add a versioned exact 22-GGP/3-GTP inventory; bind every row to "
-            "the required production profile instance, genesis value, immutable "
-            "floor, failure class or cadence rule, reviewed measurement evidence, "
-            "and fixed-stipend consumers; bind the concrete candidate and fail "
-            "strict production release mode on any unresolved row."
+            "Complete the checked versioned 22-GGP/3-GTP inventory by binding "
+            "every row to the required production profile instance, genesis "
+            "value, immutable floor, failure class or cadence rule, reviewed "
+            "candidate-bound measurement evidence, and reachable fixed-stipend "
+            "raise chains; bind the concrete candidate and keep strict production "
+            "release mode fail-closed on every unresolved row."
         ),
         "residual_risk": (
-            "The current identifier mirror and generic store-host tests do not prove "
-            "that the 37-entry production candidate registers every governed parameter "
-            "on the correct deployed host with safe values, floors, cadence evidence, "
-            "or downstream gas compatibility."
+            "The committed inventory is a structurally checked planning artifact. "
+            "It does not yet prove that the 37-entry production candidate registers "
+            "every governed parameter on the correct deployed host with safe values, "
+            "floors, cadence evidence, or downstream gas compatibility."
         ),
         "evidence_paths": [
             "docs/adr/0017-raise-only-parameter-governance.md",
             "docs/launch-v1-target-architecture.md",
             "docs/known-blockers.md",
+            "release-artifacts/governed-parameter-inventory.json",
+            "release-artifacts/schema/governed-parameter-inventory.v1.schema.json",
             "release-artifacts/genesis-deployment-profile.json",
+            "scripts/check_governed_parameter_inventory.py",
             "scripts/check_governed_parameter_identifiers.py",
         ],
         "checks": [
+            "python scripts/test_governed_parameter_inventory.py",
+            "python scripts/check_governed_parameter_inventory.py",
+            "python scripts/check_governed_parameter_inventory.py --require-complete",
             "python scripts/test_governed_parameter_identifiers.py",
             "python scripts/check_governed_parameter_identifiers.py",
             "python scripts/test_risk_register.py",
@@ -284,6 +291,8 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_release_mode.py",
         ],
         "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/656",
+            "https://github.com/6529-Collections/6529Stream/issues/671",
             "https://github.com/6529-Collections/6529Stream/issues/684",
         ],
     },

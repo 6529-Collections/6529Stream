@@ -253,8 +253,15 @@ class ReleaseModeTests(unittest.TestCase):
             return_value=[],
         )
         self.parameter_risk_patcher.start()
+        self.parameter_inventory_patcher = mock.patch.object(
+            checker.governed_parameter_inventory_checker,
+            "validate_inventory",
+            return_value={},
+        )
+        self.parameter_inventory_validator = self.parameter_inventory_patcher.start()
 
     def tearDown(self) -> None:
+        self.parameter_inventory_patcher.stop()
         self.parameter_risk_patcher.stop()
         self.risk_register_patcher.stop()
         self.slither_patcher.stop()
@@ -405,6 +412,58 @@ class ReleaseModeTests(unittest.TestCase):
             )
 
         parameter_blockers.assert_not_called()
+        self.parameter_inventory_validator.assert_not_called()
+
+    def test_production_requires_strict_governed_parameter_inventory(self) -> None:
+        """Production mode invokes the inventory check with fail-closed strictness."""
+        repo_root = Path(__file__).resolve().parents[1]
+        with mock.patch.object(
+            checker,
+            "release_mode_blockers",
+            return_value=[],
+        ), mock.patch.object(
+            checker,
+            "production_core_headroom_blocker",
+            return_value=None,
+        ), mock.patch.object(
+            checker.genesis_profile_checker,
+            "production_completeness_blockers",
+            return_value=[],
+        ):
+            checker.validate_release_mode(
+                repo_root / checker.DEFAULT_EVIDENCE,
+                repo_root,
+                "production-release",
+            )
+
+        self.parameter_inventory_validator.assert_called_once_with(
+            repo_root,
+            checker.DEFAULT_GOVERNED_PARAMETER_INVENTORY,
+            require_complete=True,
+        )
+
+    def test_incomplete_governed_parameter_inventory_blocks_production(self) -> None:
+        """Production mode cannot bypass planning or unavailable candidate bindings."""
+        repo_root = Path(__file__).resolve().parents[1]
+        self.parameter_inventory_validator.side_effect = (
+            checker.governed_parameter_inventory_checker.GovernedParameterInventoryError(
+                "parameters[0].candidate_binding.status must be 'complete'"
+            )
+        )
+        with mock.patch.object(
+            checker,
+            "release_mode_blockers",
+            return_value=[],
+        ):
+            with self.assertRaisesRegex(
+                checker.governed_parameter_inventory_checker.GovernedParameterInventoryError,
+                "candidate_binding.status must be 'complete'",
+            ):
+                checker.validate_release_mode(
+                    repo_root / checker.DEFAULT_EVIDENCE,
+                    repo_root,
+                    "production-release",
+                )
 
     def test_governed_parameter_risk_prevents_production(self) -> None:
         """Otherwise-ready production remains blocked by the real #684 risk."""

@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:7f3201d78b4ab12054dd2c7d490ed320f0312743ca363f9b05403285fed41441",
-      "size_bytes": 140879,
+      "sha256": "sha256:3b6bd0a1b49b9f4a357c4ce662cf7a66ac36d6af01eca9ce0806dc056fb4df6e",
+      "size_bytes": 141180,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:c00049a635d490e3e865428c7c37720b06b13acb7f9aba56540748c8f7a2a053",
+      "sha256": "sha256:0ac473391a02ec54f215c7c010c0b74b55597b66b8bff4cba1dd9c1ba5f49dca",
       "size_bytes": 150692,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,21 +73,27 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:10f28d9e4e4638be3af90317bce5a1d8bcc3cfd8f51e6211c5c3bcb06037af71",
-      "size_bytes": 30294,
+      "sha256": "sha256:cbc2aa85166e21454d592292e29b3f00bd80357b993aa44b275f2479578e55a2",
+      "size_bytes": 31293,
       "schema_version": "6529stream.risk-register.v1"
+    },
+    "governed_parameter_inventory": {
+      "path": "release-artifacts/governed-parameter-inventory.json",
+      "sha256": "sha256:40cabe05ba3d4522f5512a51ecb6b3b7d3119374043cb5cf6ec99be09667b2f8",
+      "size_bytes": 40488,
+      "schema_version": "6529stream.governed-parameter-inventory.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:c07eff479e3206d07abe6c2d8f92b955c9c88be61a49b6620fa43197398e9bc2",
-        "size_bytes": 123006,
+        "sha256": "sha256:083b2f40d99170204f1ed67fd2e953a0554a0d0e064b2333be662081f529896b",
+        "size_bytes": 124572,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:a687e590719dc84a7c056192bb34221b3f9804bc45a6a3551c11e2f68b622806",
-        "size_bytes": 119687
+        "sha256": "sha256:311d16e9a8efbd85f8a8855678868a5516ef70f9e58f9e2098c566de70875e99",
+        "size_bytes": 121246
       }
     },
     "blocker_reports": {
@@ -200,6 +206,8 @@
       "python scripts/generate_release_candidate_lockfile.py --check",
       "python scripts/test_release_manifest.py",
       "python scripts/generate_release_manifest.py --check",
+      "python scripts/test_governed_parameter_inventory.py",
+      "python scripts/check_governed_parameter_inventory.py",
       "python scripts/test_bytecode_release_proof.py",
       "python scripts/generate_bytecode_release_proof.py --check",
       "python scripts/test_release_checksums.py",

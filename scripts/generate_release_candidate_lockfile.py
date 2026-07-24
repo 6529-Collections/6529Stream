@@ -17,6 +17,8 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import check_release_signatures as release_signature_checker
+import check_governed_parameter_inventory as governed_parameter_inventory_checker
+import generate_release_checksums as release_checksum_policy
 
 
 LOCKFILE_SCHEMA = "6529stream.release-candidate-lockfile.v1"
@@ -29,8 +31,14 @@ DEFAULT_RELEASE_MANIFEST = Path("release-artifacts/latest/release-manifest.json"
 DEFAULT_BYTECODE_PROOF = Path("release-artifacts/latest/bytecode-release-proof.json")
 DEFAULT_RELEASE_ARTIFACTS_DIR = Path("release-artifacts/latest")
 DEFAULT_RELEASE_SIGNATURES_DIR = Path("release-artifacts/signatures")
+DEFAULT_GOVERNED_PARAMETER_INVENTORY = Path(
+    "release-artifacts/governed-parameter-inventory.json"
+)
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
+GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
+    "6529stream.governed-parameter-inventory.v1"
+)
 BYTECODE_PROOF_SCHEMA = "6529stream.bytecode-release-proof.v1"
 PUBLIC_BETA_EVIDENCE_SCHEMA = "6529stream.public-beta-evidence.v1"
 RISK_REGISTER_SCHEMA = "6529stream.risk-register.v1"
@@ -293,6 +301,38 @@ def build_lockfile(
         RISK_REGISTER_SCHEMA,
         str(risk_register_path),
     )
+    governed_parameter_inventory_path = (
+        repo_root / DEFAULT_GOVERNED_PARAMETER_INVENTORY
+    )
+    try:
+        governed_parameter_inventory = (
+            governed_parameter_inventory_checker.validate_inventory(
+                repo_root,
+                governed_parameter_inventory_path,
+                require_complete=False,
+            )
+        )
+    except (
+        governed_parameter_inventory_checker.GovernedParameterInventoryError
+    ) as exc:
+        raise ReleaseCandidateLockfileError(
+            "invalid governed-parameter inventory "
+            f"{governed_parameter_inventory_path}: {exc}"
+        ) from exc
+    try:
+        release_checksum_policy.validated_complete_governed_parameter_references(
+            repo_root,
+            governed_parameter_inventory,
+        )
+    except release_checksum_policy.ChecksumError as exc:
+        raise ReleaseCandidateLockfileError(
+            f"invalid governed-parameter inventory reference: {exc}"
+        ) from exc
+    require_schema(
+        load_json(governed_parameter_inventory_path),
+        GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+        str(governed_parameter_inventory_path),
+    )
     release_notes_json_path = release_artifacts_dir / RELEASE_NOTES_JSON_FILENAME
     require_schema(
         load_json(release_notes_json_path),
@@ -365,6 +405,11 @@ def build_lockfile(
             ),
             "risk_register": file_record(
                 risk_register_path,
+                repo_root,
+                schema_required=True,
+            ),
+            "governed_parameter_inventory": file_record(
+                governed_parameter_inventory_path,
                 repo_root,
                 schema_required=True,
             ),
@@ -459,6 +504,8 @@ def build_lockfile(
                 "python scripts/generate_release_candidate_lockfile.py --check",
                 "python scripts/test_release_manifest.py",
                 "python scripts/generate_release_manifest.py --check",
+                "python scripts/test_governed_parameter_inventory.py",
+                "python scripts/check_governed_parameter_inventory.py",
                 "python scripts/test_bytecode_release_proof.py",
                 "python scripts/generate_bytecode_release_proof.py --check",
                 "python scripts/test_release_checksums.py",

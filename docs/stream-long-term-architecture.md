@@ -1041,8 +1041,9 @@ A Governed Gas Parameter is:
    compiled-in constant;
 2. paired with an immutable per-parameter floor set at deployment from
    measured need plus margin, below which the value can never be set;
-3. recorded in the release manifest with its genesis value, floor,
-   measurement evidence, and host;
+3. recorded in the canonical governed-parameter inventory and release manifest
+   with its genesis value, floor, measurement evidence, and exact host profile
+   or profiles;
 4. a named member of the hard-fork/repricing review checklist (State
    Export And Archival Operations);
 5. identified by
@@ -1225,6 +1226,14 @@ production ABI is the byte-minimal host profile below; richer standalone
 parameter stores may retain the convenience enumeration and narrow reads of
 `IStreamGasParameterHost`.
 
+Despite its legacy royalty-specific name, `ROYALTY_RETURN_GAS_BUFFER` is the
+single launch-v1 Core parent-completion buffer for the bounded
+`royaltyInfo()`, `tokenURI()`, and `contractURI()` paths. Its immutable floor
+and every proposed raise are sized against the worst measured parent-side
+completion work across all three paths, with the evidence and cross-parameter
+coupling required by [RSR-2981-GAS] and [MRR-ROUTER-GGP]. Launch v1 does not
+add a metadata-specific completion-buffer parameter or a standalone probe.
+
 ```solidity
 interface IStreamCoreGasParameters {
     function gasParameterInfo(bytes32 parameterId)
@@ -1320,35 +1329,42 @@ GGP mutation is not a manifest-tail trigger.
 
 GGP inventory. The model is instantiated by the parameters below; each home
 owns host, genesis value, floor sizing, failure-direction class, measurement
-evidence, and fixed-stipend inventory. An inventory row whose home lacks a
-pinned class or sizing evidence is nonconformant. A row instantiated on more
-than one host retains one identifier while each deployed host registers and
-reports its own immutable facts. For every row the release manifest records
-the host or hosts, genesis value, floor, failure class, measurement evidence,
-and known fixed-caller-stipend consumers so repricing reviews can evaluate
-every monotonic raise:
+evidence, and fixed-stipend inventory. The checked
+[`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json)
+is the machine-readable launch inventory. Its ordinary checker may validate an
+honestly incomplete planning artifact, but production release uses
+`--require-complete` and rejects any missing concrete host binding, unavailable
+candidate value/floor, non-exhaustive guarded-consumer inventory, unreviewed
+sizing or cadence evidence, or unresolved fixed-stipend compatibility. An
+inventory row whose home lacks a pinned class or sizing evidence is
+nonconformant. A row instantiated on more than one host retains one identifier
+while each deployed host registers and reports its own immutable facts. For
+every row the release manifest records the host or hosts, genesis value, floor,
+failure class, measurement evidence, exhaustive guarded consumers, and known
+fixed-caller-stipend consumers so repricing reviews can evaluate every
+monotonic raise:
 
 | Parameter | Host | Normative home |
 | --- | --- | --- |
 | `ROYALTY_RESOLVER_GAS_LIMIT` | `StreamCore` | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-2981-GAS] |
-| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP] |
+| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` (shared `royaltyInfo()` / `tokenURI()` / `contractURI()` parent-completion buffer) | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-2981-GAS]; [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ROUTER-GGP] |
 | `ERC_1271_GAS_LIMIT` | split factory parameter store | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-1271] |
 | `ASSET_POLICY_GAS_LIMIT` | split factory parameter store | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-ASSET-POLICY] |
 | `WALLET_DEPOSIT_GAS_LIMIT` | split factory parameter store | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP] |
 | `FLUSH_GAS_FLOOR` | revenue escrow | [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP] |
-| `MINT_GATE_GAS_LIMIT` | mint manager | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-GATES] |
+| `MINT_GATE_GAS_LIMIT` | primary and pre-approved fallback `StreamMintManager` instances | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-GATES] |
 | `TICKET_ERC1271_GAS_LIMIT` | `StreamMintTicketGate` | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-TICKET] |
-| `ARTIST_AUTHORITY_GAS_LIMIT` | mint manager | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CONSENT] |
-| `SALE_ERC1271_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
-| `DELEGATE_REGISTRY_GAS_LIMIT` | delegate gate | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
-| `SALE_ARTIST_AUTHORITY_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS], [SSA-CONTEST-STOP] |
-| `REVEAL_ATTEMPT_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-REVEAL], [SSA-GAS] (ADR 0013 decision U7) |
-| `SALE_NFT_DELIVERY_GAS_LIMIT` | sale adapters | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] (ADR 0013 decision U6) |
+| `ARTIST_AUTHORITY_GAS_LIMIT` | primary and pre-approved fallback `StreamMintManager` instances | [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CONSENT] |
+| `SALE_ERC1271_GAS_LIMIT` | `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter` | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] |
+| `DELEGATE_REGISTRY_GAS_LIMIT` | `StreamDelegateRegistryGate`, `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter` | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-DELEGATE], [SSA-GAS] |
+| `SALE_ARTIST_AUTHORITY_GAS_LIMIT` | `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter` | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS], [SSA-CONTEST-STOP] |
+| `REVEAL_ATTEMPT_GAS_LIMIT` | `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter` | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-REVEAL], [SSA-GAS] (ADR 0013 decision U7) |
+| `SALE_NFT_DELIVERY_GAS_LIMIT` | `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter` | [`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] (ADR 0013 decision U6) |
 | `METADATA_ROUTER_GAS_LIMIT` | `StreamCore` | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ROUTER-GGP] |
 | `ENTROPY_VIEW_GAS_LIMIT` | metadata router | [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ENTROPY-READ] |
 | `ENTROPY_REGISTRATION_GAS_LIMIT` | `StreamCore` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-REGGAS] |
-| `ENTROPY_RESULT_PROBE_GAS_LIMIT` | entropy coordinator | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-INCIDENT-ROLE] |
-| `VRF_CALLBACK_GAS_LIMIT` | provider adapters | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) [EP-VRF-CONFIG] |
+| `ENTROPY_RESULT_PROBE_GAS_LIMIT` | primary and pre-approved fallback `StreamEntropyCoordinator` instances | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-INCIDENT-ROLE] |
+| `VRF_CALLBACK_GAS_LIMIT` | `StreamEntropyProviderVRF` and the selected launch fallback callback provider (`StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth`) | [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) [EP-CALLBACK], [EP-VRF-CONFIG] |
 | `ARTIST_ERC1271_VERIFY_GAS` | artist registry | [`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-SIGVER] |
 | `METADATA_ERC1271_VERIFY_GAS` | verifying metadata satellites (owner records, attestations, artist-attestation host) | [`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-SIGVER-GGP] |
 | `FINALITY_COMPONENT_READ_GAS` | finality registry | this document (Artwork Finality Freeze) |
@@ -1546,9 +1562,9 @@ timing policies (`requestTimeoutBlocks`, `requestSLOBlocks`,
 
 | Time parameter | Host | Normative home |
 | --- | --- | --- |
-| `ENTROPY_REQUEST_TIMEOUT_BLOCKS` | `StreamEntropyCoordinator` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
-| `ENTROPY_REVEAL_SLO_BLOCKS` | `StreamEntropyCoordinator` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
-| `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `StreamEntropyCoordinator` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
+| `ENTROPY_REQUEST_TIMEOUT_BLOCKS` | primary and pre-approved fallback `StreamEntropyCoordinator` instances | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
+| `ENTROPY_REVEAL_SLO_BLOCKS` | primary and pre-approved fallback `StreamEntropyCoordinator` instances | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
+| `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | primary and pre-approved fallback `StreamEntropyCoordinator` instances | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
 
 GTP membership is closed-world and decidable (ADR 0013 decision U9):
 

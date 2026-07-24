@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_release_manifest.py")
@@ -104,6 +105,9 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     natspec_coverage = root / "release-artifacts" / "baselines" / "v0.1.0" / "natspec-coverage.json"
     contract_config = root / "release-artifacts" / "contracts.json"
     genesis_deployment_profile = root / generator.DEFAULT_GENESIS_DEPLOYMENT_PROFILE
+    governed_parameter_inventory = (
+        root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+    )
     system_manifest_payload_vector = root / generator.DEFAULT_SYSTEM_MANIFEST_PAYLOAD_VECTOR
     stream_core_permanent_interface = root / generator.DEFAULT_STREAM_CORE_PERMANENT_INTERFACE
     external_call_gas_inventory = root / generator.DEFAULT_EXTERNAL_CALL_GAS_INVENTORY
@@ -222,6 +226,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         genesis_deployment_profile,
         {"schema_version": "6529stream.genesis-deployment-profile.v2"},
+    )
+    write_json(
+        governed_parameter_inventory,
+        {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
     )
     write_json(
         system_manifest_payload_vector,
@@ -1243,6 +1251,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "gas_envelopes": gas_envelopes,
         "contract_config": contract_config,
         "genesis_deployment_profile": genesis_deployment_profile,
+        "governed_parameter_inventory": governed_parameter_inventory,
         "system_manifest_payload_vector": system_manifest_payload_vector,
         "stream_core_permanent_interface": stream_core_permanent_interface,
         "external_call_gas_inventory": external_call_gas_inventory,
@@ -1277,6 +1286,127 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
 
 
 class ReleaseManifestTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.inventory_validation_patcher = mock.patch.object(
+            generator.governed_parameter_inventory_checker,
+            "validate_inventory",
+            return_value={
+                "candidate_binding": {"status": "not_available"},
+                "parameters": [],
+            },
+        )
+        self.inventory_validator = self.inventory_validation_patcher.start()
+
+    def tearDown(self) -> None:
+        self.inventory_validation_patcher.stop()
+
+    def test_governed_parameter_inventory_record_runs_semantic_validation(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+            write_json(
+                path,
+                {
+                    "schema_version": (
+                        generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA
+                    )
+                },
+            )
+
+            generator.governed_parameter_inventory_record(path, root)
+
+        self.inventory_validator.assert_called_once_with(
+            root,
+            path,
+            require_complete=False,
+        )
+
+    def test_governed_parameter_inventory_record_rejects_semantic_failure(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+            write_json(
+                path,
+                {
+                    "schema_version": (
+                        generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA
+                    )
+                },
+            )
+            self.inventory_validator.side_effect = (
+                generator.governed_parameter_inventory_checker.GovernedParameterInventoryError(
+                    "inventory.status must be 'planning'"
+                )
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "inventory.status must be 'planning'",
+            ):
+                generator.governed_parameter_inventory_record(path, root)
+
+    def test_governed_parameter_inventory_record_rejects_escaping_reference(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+            write_json(
+                path,
+                {
+                    "schema_version": (
+                        generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA
+                    )
+                },
+            )
+            self.inventory_validator.return_value = {
+                "candidate_binding": {
+                    "status": "complete",
+                    "candidate_artifact_path": "../candidate.json",
+                    "candidate_artifact_sha256": "1" * 64,
+                },
+                "parameters": [],
+            }
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "must stay inside the repository",
+            ):
+                generator.governed_parameter_inventory_record(path, root)
+
+    def test_governed_parameter_inventory_record_rejects_wrong_schema(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+            write_json(path, {"schema_version": "fixture.wrong-schema"})
+
+            with self.assertRaisesRegex(
+                generator.ReleaseManifestError,
+                "must use schema",
+            ):
+                generator.governed_parameter_inventory_record(path, root)
+
+    def test_committed_manifest_binds_governed_parameter_inventory(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        inventory_path = repo_root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+        manifest = json.loads(
+            (repo_root / generator.DEFAULT_OUTPUT).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(
+            manifest["release_artifacts"]["governed_parameter_inventory"],
+            {
+                "path": "release-artifacts/governed-parameter-inventory.json",
+                "sha256": generator.file_sha256(inventory_path),
+                "size_bytes": inventory_path.stat().st_size,
+                "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+            },
+        )
+
     def test_default_governance_docs_cover_raise_only_governance_adr(self) -> None:
         self.assertIn(
             Path("docs/adr/0017-raise-only-parameter-governance.md"),
@@ -1380,6 +1510,10 @@ class ReleaseManifestTests(unittest.TestCase):
                 "genesis_deployment_profile": (
                     paths["genesis_deployment_profile"],
                     "6529stream.genesis-deployment-profile.v2",
+                ),
+                "governed_parameter_inventory": (
+                    paths["governed_parameter_inventory"],
+                    generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
                 ),
                 "system_manifest_payload_vector": (
                     paths["system_manifest_payload_vector"],

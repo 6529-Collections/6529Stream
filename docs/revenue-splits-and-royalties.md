@@ -249,7 +249,7 @@ Revenue-layer GGPs and their hosts:
 | Parameter | Host | Guards | Genesis planning value |
 | --- | --- | --- | --- |
 | `ROYALTY_RESOLVER_GAS_LIMIT` | `StreamCore` storage | resolver `staticcall` in `royaltyInfo()` | 50,000 |
-| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` storage | parent-side decode reserve in `royaltyInfo()` | 15,000 |
+| `ROYALTY_RETURN_GAS_BUFFER` | `StreamCore` storage | shared parent-side completion reserve for bounded `royaltyInfo()`, `tokenURI()`, and `contractURI()` reads | 15,000 |
 | `ERC_1271_GAS_LIMIT` | split factory parameter store | `isValidSignature` staticcalls for release authorizations, sale authorizations, and `PaymentIntent`s | 400,000 |
 | `ASSET_POLICY_GAS_LIMIT` | split factory parameter store | asset-policy registry staticcalls from wallets, adapters, and escrow | 30,000 |
 | `WALLET_DEPOSIT_GAS_LIMIT` | split factory parameter store | gas-bounded split-wallet deposits from settlement and escrow flush | 50,000 |
@@ -275,8 +275,11 @@ Requirements [RSR-GGP]:
    requirement 4. The two Core-hosted royalty rows use the exact two-function
    ABI of [LTA-GGP-CORE] and emit no parameter-named Core alias event.
 5. Parameter sizing evidence is path-specific and reproducible:
-   `royaltyInfo()` measurement runs for `ROYALTY_RESOLVER_GAS_LIMIT` and
-   `ROYALTY_RETURN_GAS_BUFFER`; a maximum-supported-class ERC-1271
+   `royaltyInfo()` measurement runs for `ROYALTY_RESOLVER_GAS_LIMIT`;
+   `ROYALTY_RETURN_GAS_BUFFER` uses the worst measured parent-side completion
+   work across `royaltyInfo()`, `tokenURI()`, and `contractURI()`, including
+   maximum permitted returndata, canonical decoding, fallback construction,
+   and return handling; a maximum-supported-class ERC-1271
    verification (rule [RSR-1271].2) for `ERC_1271_GAS_LIMIT`; an all-cold
    `assetStatus` read for `ASSET_POLICY_GAS_LIMIT`; and a measured worst-case
    undeployed-wallet flush for `FLUSH_GAS_FLOOR`. The artifacts record exact
@@ -301,7 +304,8 @@ Requirements [RSR-GGP]:
    `ROYALTY_RESOLVER_GAS_LIMIT`, `ROYALTY_RETURN_GAS_BUFFER`,
    `ASSET_POLICY_GAS_LIMIT`, and `WALLET_DEPOSIT_GAS_LIMIT` — the genesis
    value must be at least four times the deepest measured all-cold guarded
-   path, and the immutable floor must be at least twice that measured path
+   path (for the shared return buffer, the worst of all three Core read paths),
+   and the immutable floor must be at least twice that measured path
    and at most the genesis value. `ERC_1271_GAS_LIMIT` is sized against
    the heaviest named wallet class per [RSR-1271].2, and
    `FLUSH_GAS_FLOOR` against measured worst-case flush, each with recorded
@@ -2650,7 +2654,8 @@ Requirements [RSR-2981-GAS]:
 
    ```text
    ROYALTY_RESOLVER_GAS_LIMIT   Governed Gas Parameter, genesis planning 50,000
-   ROYALTY_RETURN_GAS_BUFFER    Governed Gas Parameter, genesis planning 15,000
+   ROYALTY_RETURN_GAS_BUFFER    shared Core parent-completion Governed Gas
+                                Parameter, genesis planning 15,000
    resolver.staticcall{gas: current ROYALTY_RESOLVER_GAS_LIMIT}
    expected return length = 64 bytes
    failure fallback = (address(0), 0)
@@ -2666,7 +2671,11 @@ Requirements [RSR-2981-GAS]:
    ROYALTY_RETURN_GAS_BUFFER` falls back to `(address(0), 0)` — the
    64/63 term guarantees full-limit delivery through the caller's
    one-64th retention at every reachable limit value, and the buffer
-   covers Core's parent-side work. An additive `LIMIT + BUFFER`
+   covers Core's parent-side work. The same buffer also covers the bounded
+   `tokenURI()` and `contractURI()` parent-completion paths under
+   [MRR-ROUTER-GGP]; its floor is therefore sized from the worst measured
+   parent-side completion work across all three Core reads. An additive
+   `LIMIT + BUFFER`
    comparison guarantees full forwarding only while the buffer
    separately covers the one-64th retention, so an additive realization
    is conformant only with the rule 6 coupling floor enforced by the
@@ -2680,7 +2689,10 @@ Requirements [RSR-2981-GAS]:
    and the production ABI of [LTA-GGP-CORE] (ADR 0010 decision D1;
    ADR 0017): immutable floors/classes, a 48-hour delayed class-`1`
    monotonic raise bounded to 2x, V2 state commitments, change events, and
-   manifest recording. They are not deploy-time immutables and there is no
+   manifest recording. `ROYALTY_RETURN_GAS_BUFFER` is also the launch-v1
+   parent-completion buffer for the Core metadata-router reads; the legacy name
+   does not narrow its host invariant, and launch v1 adds no separate metadata
+   buffer parameter. They are not deploy-time immutables and there is no
    unreviewed runtime setter. A change is evented and never changes economic
    or artwork identity because GGP values are excluded from every economic preimage
    ([RSR-GGP].3). Frozen and finalized collections keep answering
@@ -2696,19 +2708,22 @@ Requirements [RSR-2981-GAS]:
    raise.
 6. Buffer-limit coupling invariant (ADR 0013 decision U7).
    `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
-   independently governed, so the pair's soundness is an explicit
-   invariant, never an accident of genesis sizing: at every reachable
-   value pair — not only at genesis — a call passing the precheck must
-   deliver the full current limit to the resolver and leave Core enough
-   gas to finish the 64-byte decode, validation, and `mulDiv` return.
-   Concretely:
-   - The release manifest records the measured parent-side work —
-     pre-call resolver-pointer and token-identity reads plus call setup,
-     and post-call decode, validation, `mulDiv`, and return — and
-     `ROYALTY_RETURN_GAS_BUFFER` must never be set below that recorded
-     work; buffer margin decay from repricing is remediated by a delayed
-     bounded raise of the buffer ([RSR-GGP].10; both parameters are
-     `FORWARDING_CAP`, [RSR-GGP].11; ADR 0017).
+   independently governed, so the pair's soundness is an explicit invariant,
+   never an accident of genesis sizing. The buffer is also coupled to
+   `METADATA_ROUTER_GAS_LIMIT`: at every reachable value tuple — not only at
+   genesis — a call passing any of the three Core prechecks must deliver the
+   full current external-call limit and leave Core enough gas to complete the
+   relevant bounded return path. Concretely:
+   - The release manifest records separate measured parent-side work for
+     `royaltyInfo()` (pre-call resolver-pointer and token-identity reads, call
+     setup, post-call decode, validation, `mulDiv`, and return), `tokenURI()`,
+     and `contractURI()` (router selection, bounded returndata copy/decode,
+     validation or fallback construction, and return). The immutable
+     `ROYALTY_RETURN_GAS_BUFFER` floor and current value must never be below
+     the worst of those three recorded measurements plus the published
+     margin. Buffer margin decay from repricing is remediated by a delayed
+     bounded raise of the buffer ([RSR-GGP].10; the relevant parameters are
+     `FORWARDING_CAP`, [RSR-GGP].11; [MRR-ROUTER-GGP]; ADR 0017).
    - An implementation realizing the precheck as the additive sum
      `LIMIT + BUFFER` must enforce, in the host at every set of either
      parameter,
@@ -2717,8 +2732,9 @@ Requirements [RSR-2981-GAS]:
      a legitimate 2x raise chain of the limit with an unchanged buffer
      re-opens the silent under-forwarding fallback-to-zero this section
      exists to prevent, and such an implementation is nonconformant.
-   - Every delayed raise of either parameter records a reproducible threshold
-     measurement at the proposed value pair as review evidence
+   - Every delayed raise of the resolver limit, metadata-router limit, or
+     shared buffer records reproducible threshold measurements for every
+     affected Core read at the proposed value tuple as review evidence
      ([RSR-GGP].5). The measurement does not authorize execution.
    - CI must include a golden test replaying the rule 2 threshold suite
      across simulated multi-step raise chains — repeated 2x raises of
@@ -3800,7 +3816,7 @@ Requirements [RSR-DOMAINS]:
 | `GGP_ERC_1271_GAS_LIMIT` | `6529STREAM_GGP_ERC_1271_GAS_LIMIT` | `0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_ASSET_POLICY_GAS_LIMIT` | `6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT` | `0xbfc1f824948b8dc9573791fa40eeb403e7322af41d0967f90518dbbb531bf648` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `6529STREAM_GGP_ROYALTY_RESOLVER_GAS_LIMIT` | `0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda` | `StreamCore` | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP], [RSR-2981-GAS]) |
-| `GGP_ROYALTY_RETURN_GAS_BUFFER` | `6529STREAM_GGP_ROYALTY_RETURN_GAS_BUFFER` | `0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7` | `StreamCore` | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
+| `GGP_ROYALTY_RETURN_GAS_BUFFER` | `6529STREAM_GGP_ROYALTY_RETURN_GAS_BUFFER` | `0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7` | `StreamCore` | `1` | shared `royaltyInfo()` / `tokenURI()` / `contractURI()` parent-completion `gasParameter`/`gasParameterFloor` key ([RSR-GGP], [RSR-2981-GAS], [MRR-ROUTER-GGP]) |
 | `GGP_WALLET_DEPOSIT_GAS_LIMIT` | `6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT` | `0xd208e16b8676adecbbdd17f529a9effcb9153af90ac08886fb2906298206ff45` | split factory parameter store | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 | `GGP_FLUSH_GAS_FLOOR` | `6529STREAM_GGP_FLUSH_GAS_FLOOR` | `0x99168b87a7d39f5ba4862568c012ad3b51c552ec78108b88c6be5f5a6426ebe6` | revenue escrow | `1` | `gasParameter`/`gasParameterFloor` key ([RSR-GGP]) |
 

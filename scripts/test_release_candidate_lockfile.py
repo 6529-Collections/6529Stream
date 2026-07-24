@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_release_candidate_lockfile.py")
@@ -53,6 +54,9 @@ def signature_result(status: str) -> dict[str, object]:
 def seed_release_tree(root: Path) -> dict[str, Path]:
     latest = root / "release-artifacts" / "latest"
     signatures = root / "release-artifacts" / "signatures"
+    governed_parameter_inventory = (
+        root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+    )
 
     write_json(
         latest / "release-manifest.json",
@@ -128,6 +132,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "schema_version": generator.RISK_REGISTER_SCHEMA,
             "risks": [{"id": "RISK-AUD-002"}],
         },
+    )
+    write_json(
+        governed_parameter_inventory,
+        {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
     )
     write_json(
         latest / "release-notes.json",
@@ -223,10 +231,25 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "output": latest / "release-candidate-lockfile.json",
         "release_manifest": latest / "release-manifest.json",
         "bytecode_proof": latest / "bytecode-release-proof.json",
+        "governed_parameter_inventory": governed_parameter_inventory,
     }
 
 
 class ReleaseCandidateLockfileTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.inventory_validation_patcher = mock.patch.object(
+            generator.governed_parameter_inventory_checker,
+            "validate_inventory",
+            return_value={
+                "candidate_binding": {"status": "not_available"},
+                "parameters": [],
+            },
+        )
+        self.inventory_validator = self.inventory_validation_patcher.start()
+
+    def tearDown(self) -> None:
+        self.inventory_validation_patcher.stop()
+
     def test_build_lockfile_records_status_artifacts_and_signature_evidence(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -263,6 +286,19 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
             self.assertEqual(
                 lockfile["locked_inputs"]["bytecode_release_proof"]["sha256"],
                 generator.file_sha256(paths["bytecode_proof"]),
+            )
+            self.assertEqual(
+                lockfile["locked_inputs"]["governed_parameter_inventory"],
+                {
+                    "path": "release-artifacts/governed-parameter-inventory.json",
+                    "sha256": generator.file_sha256(
+                        paths["governed_parameter_inventory"]
+                    ),
+                    "size_bytes": paths[
+                        "governed_parameter_inventory"
+                    ].stat().st_size,
+                    "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+                },
             )
             self.assertEqual(
                 lockfile["release_signature_evidence"][0]["signature_statuses"],
@@ -339,6 +375,81 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
             with self.assertRaisesRegex(
                 generator.ReleaseCandidateLockfileError,
                 "missing required file",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
+    def test_generator_rejects_wrong_governed_parameter_inventory_schema(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            write_json(
+                paths["governed_parameter_inventory"],
+                {"schema_version": "fixture.wrong-schema"},
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "must use schema",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
+    def test_generator_rejects_semantically_invalid_governed_parameter_inventory(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            self.inventory_validator.side_effect = (
+                generator.governed_parameter_inventory_checker.GovernedParameterInventoryError(
+                    "parameters[0].name must be invalid"
+                )
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "parameters\\[0\\].name must be invalid",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
+    def test_generator_rejects_escaping_governed_parameter_reference(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            self.inventory_validator.return_value = {
+                "candidate_binding": {
+                    "status": "complete",
+                    "candidate_artifact_path": "../candidate.json",
+                    "candidate_artifact_sha256": "1" * 64,
+                },
+                "parameters": [],
+            }
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "must stay inside the repository",
             ):
                 generator.build_lockfile(
                     root,
@@ -427,6 +538,20 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
         self.assertIn(
             "python scripts/generate_release_candidate_lockfile.py --check",
             lockfile["validation"]["commands"],
+        )
+        self.assertIn(
+            "python scripts/check_governed_parameter_inventory.py",
+            lockfile["validation"]["commands"],
+        )
+        inventory_path = repo_root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
+        self.assertEqual(
+            lockfile["locked_inputs"]["governed_parameter_inventory"],
+            {
+                "path": "release-artifacts/governed-parameter-inventory.json",
+                "sha256": generator.file_sha256(inventory_path),
+                "size_bytes": inventory_path.stat().st_size,
+                "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+            },
         )
         self.assertEqual(
             lockfile["checksum_bundle"]["coverage_expectation"][

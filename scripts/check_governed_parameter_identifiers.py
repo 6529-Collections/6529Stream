@@ -183,24 +183,64 @@ TARGET_ROW_METADATA: Final = (
 
 LTA_GGP_ROWS: Final = (
     ("ROYALTY_RESOLVER_GAS_LIMIT", "StreamCore", "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-2981-GAS]"),
-    ("ROYALTY_RETURN_GAS_BUFFER", "StreamCore", "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP]"),
+    (
+        "ROYALTY_RETURN_GAS_BUFFER",
+        "`StreamCore` (shared `royaltyInfo()` / `tokenURI()` / `contractURI()` parent-completion buffer)",
+        "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-2981-GAS]; [`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ROUTER-GGP]",
+    ),
     ("ERC_1271_GAS_LIMIT", "split factory parameter store", "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-1271]"),
     ("ASSET_POLICY_GAS_LIMIT", "split factory parameter store", "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP], [RSR-ASSET-POLICY]"),
     ("WALLET_DEPOSIT_GAS_LIMIT", "split factory parameter store", "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP]"),
     ("FLUSH_GAS_FLOOR", "revenue escrow", "[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md) [RSR-GGP]"),
-    ("MINT_GATE_GAS_LIMIT", "mint manager", "[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-GATES]"),
+    (
+        "MINT_GATE_GAS_LIMIT",
+        "primary and pre-approved fallback `StreamMintManager` instances",
+        "[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-GATES]",
+    ),
     ("TICKET_ERC1271_GAS_LIMIT", "StreamMintTicketGate", "[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-TICKET]"),
-    ("ARTIST_AUTHORITY_GAS_LIMIT", "mint manager", "[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CONSENT]"),
-    ("SALE_ERC1271_GAS_LIMIT", "sale adapters", "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS]"),
-    ("DELEGATE_REGISTRY_GAS_LIMIT", "delegate gate", "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS]"),
-    ("SALE_ARTIST_AUTHORITY_GAS_LIMIT", "sale adapters", "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS], [SSA-CONTEST-STOP]"),
-    ("REVEAL_ATTEMPT_GAS_LIMIT", "sale adapters", "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-REVEAL], [SSA-GAS] (ADR 0013 decision U7)"),
-    ("SALE_NFT_DELIVERY_GAS_LIMIT", "sale adapters", "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] (ADR 0013 decision U6)"),
+    (
+        "ARTIST_AUTHORITY_GAS_LIMIT",
+        "primary and pre-approved fallback `StreamMintManager` instances",
+        "[`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md) [MPA-CONSENT]",
+    ),
+    (
+        "SALE_ERC1271_GAS_LIMIT",
+        "`StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter`",
+        "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS]",
+    ),
+    (
+        "DELEGATE_REGISTRY_GAS_LIMIT",
+        "`StreamDelegateRegistryGate`, `StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter`",
+        "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-DELEGATE], [SSA-GAS]",
+    ),
+    (
+        "SALE_ARTIST_AUTHORITY_GAS_LIMIT",
+        "`StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter`",
+        "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS], [SSA-CONTEST-STOP]",
+    ),
+    (
+        "REVEAL_ATTEMPT_GAS_LIMIT",
+        "`StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter`",
+        "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-REVEAL], [SSA-GAS] (ADR 0013 decision U7)",
+    ),
+    (
+        "SALE_NFT_DELIVERY_GAS_LIMIT",
+        "`StreamFixedPriceSaleAdapter`, `StreamEnglishAuctionHouse`, `StreamDutchAuctionAdapter`, and `StreamPrivateSaleAdapter`",
+        "[`docs/stream-sales-and-auctions.md`](stream-sales-and-auctions.md) [SSA-GAS] (ADR 0013 decision U6)",
+    ),
     ("METADATA_ROUTER_GAS_LIMIT", "StreamCore", "[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ROUTER-GGP]"),
     ("ENTROPY_VIEW_GAS_LIMIT", "metadata router", "[`docs/metadata-router-and-renderer.md`](metadata-router-and-renderer.md) [MRR-ENTROPY-READ]"),
     ("ENTROPY_REGISTRATION_GAS_LIMIT", "StreamCore", "[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-REGGAS]"),
-    ("ENTROPY_RESULT_PROBE_GAS_LIMIT", "entropy coordinator", "[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-INCIDENT-ROLE]"),
-    ("VRF_CALLBACK_GAS_LIMIT", "provider adapters", "[`docs/stream-entropy-providers.md`](stream-entropy-providers.md) [EP-VRF-CONFIG]"),
+    (
+        "ENTROPY_RESULT_PROBE_GAS_LIMIT",
+        "primary and pre-approved fallback `StreamEntropyCoordinator` instances",
+        "[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-INCIDENT-ROLE]",
+    ),
+    (
+        "VRF_CALLBACK_GAS_LIMIT",
+        "`StreamEntropyProviderVRF` and the selected launch fallback callback provider (`StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth`)",
+        "[`docs/stream-entropy-providers.md`](stream-entropy-providers.md) [EP-CALLBACK], [EP-VRF-CONFIG]",
+    ),
     ("ARTIST_ERC1271_VERIFY_GAS", "artist registry", "[`docs/stream-artist-authority.md`](stream-artist-authority.md) [AA-SIGVER]"),
     ("METADATA_ERC1271_VERIFY_GAS", "verifying metadata satellites (owner records, attestations, artist-attestation host)", "[`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-SIGVER-GGP]"),
     ("FINALITY_COMPONENT_READ_GAS", "finality registry", "this document (Artwork Finality Freeze)"),
@@ -209,7 +249,7 @@ LTA_GGP_ROWS: Final = (
 LTA_GTP_ROWS: Final = tuple(
     (
         name,
-        "StreamEntropyCoordinator",
+        "primary and pre-approved fallback `StreamEntropyCoordinator` instances",
         "[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME]",
     )
     for name in GTP_NAMES

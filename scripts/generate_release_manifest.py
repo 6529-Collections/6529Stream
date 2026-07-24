@@ -14,14 +14,19 @@ from typing import Any
 
 import check_drop_authorization_signing_evidence as drop_signing_evidence_checker
 import check_admin_ceremony_evidence as admin_ceremony_checker
+import check_governed_parameter_inventory as governed_parameter_inventory_checker
 import check_non_local_release_evidence as non_local_evidence_checker
 import check_public_beta_evidence as public_beta_checker
 import check_risk_register as risk_register_checker
 import check_release_signatures as release_signature_checker
 import check_signer_custody_readiness as signer_custody_checker
+import generate_release_checksums as release_checksum_policy
 
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
+GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
+    "6529stream.governed-parameter-inventory.v1"
+)
 GENERATOR_VERSION = "1"
 
 DEFAULT_OUTPUT = Path("release-artifacts/latest/release-manifest.json")
@@ -34,6 +39,9 @@ NATSPEC_COVERAGE_FILENAME = "natspec-coverage.json"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
 DEFAULT_GENESIS_DEPLOYMENT_PROFILE = Path(
     "release-artifacts/genesis-deployment-profile.json"
+)
+DEFAULT_GOVERNED_PARAMETER_INVENTORY = Path(
+    "release-artifacts/governed-parameter-inventory.json"
 )
 DEFAULT_SYSTEM_MANIFEST_PAYLOAD_VECTOR = Path(
     "release-artifacts/system-manifest-payload-vector.json"
@@ -255,6 +263,39 @@ def file_record(path: Path, repo_root: Path, *, schema_required: bool = False) -
             raise ReleaseManifestError(f"{path} is missing a schema version")
         if schema is not None:
             record["schema_version"] = schema
+    return record
+
+
+def governed_parameter_inventory_record(
+    path: Path,
+    repo_root: Path,
+) -> dict[str, Any]:
+    try:
+        inventory = governed_parameter_inventory_checker.validate_inventory(
+            repo_root,
+            path,
+            require_complete=False,
+        )
+    except (
+        governed_parameter_inventory_checker.GovernedParameterInventoryError
+    ) as exc:
+        raise ReleaseManifestError(
+            f"invalid governed-parameter inventory {path}: {exc}"
+        ) from exc
+    try:
+        release_checksum_policy.validated_complete_governed_parameter_references(
+            repo_root,
+            inventory,
+        )
+    except release_checksum_policy.ChecksumError as exc:
+        raise ReleaseManifestError(
+            f"invalid governed-parameter inventory reference: {exc}"
+        ) from exc
+    record = file_record(path, repo_root, schema_required=True)
+    if record["schema_version"] != GOVERNED_PARAMETER_INVENTORY_SCHEMA:
+        raise ReleaseManifestError(
+            f"{path} must use schema {GOVERNED_PARAMETER_INVENTORY_SCHEMA}"
+        )
     return record
 
 
@@ -1141,6 +1182,10 @@ def build_manifest(
                 repo_root / DEFAULT_GENESIS_DEPLOYMENT_PROFILE,
                 repo_root,
                 schema_required=True,
+            ),
+            "governed_parameter_inventory": governed_parameter_inventory_record(
+                repo_root / DEFAULT_GOVERNED_PARAMETER_INVENTORY,
+                repo_root,
             ),
             "system_manifest_payload_vector": file_record(
                 repo_root / DEFAULT_SYSTEM_MANIFEST_PAYLOAD_VECTOR,

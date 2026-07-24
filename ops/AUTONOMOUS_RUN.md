@@ -35,15 +35,53 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/raise-only-gas-time-governance` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/683` |
+| Active PR branch | `codex/governed-parameter-inventory` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/686` (`b4af30a58c22f79bafad241c6e4fab7a4a76063b`) |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/684` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/686` |
-| Next issue | Bind the exact 25 governed parameters under #684, then enforce the closed-world action/native-value policy under #685. |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/687` |
+| Next issue | Continue #684 evidence/candidate binding work as implementation becomes available, while prioritizing #654 Core headroom recovery; then enforce the closed-world action/native-value policy under #685. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 07:24 UTC` |
+| Last updated | `2026-07-24 11:46 UTC` |
+
+## Parallel Lane Coordination
+
+The parallel implementation wave launched on 2026-07-24 keeps one isolated
+Codex task and worktree per lane. These worktrees are active integration inputs;
+the coordinator must not delete, repurpose, or import their unmerged state.
+
+| Lane | Ordered issue ownership | Codex task | Isolated worktree |
+| --- | --- | --- | --- |
+| Governance and governed gas | PR #687 / #684, then #685, #669, #671, and #673 as dependencies permit | `019f86dc-11c7-7ad2-8f6a-5125e1fb8de1` | `D:\repos\6529Stream-probe-raise-only` |
+| Core and mint | #688, then #672, then #654 | `019f93e7-21f8-7561-b02c-9e20e1bc7782` | `C:\Users\Administrator\.codex\worktrees\89f1\6529Stream` |
+| Canonical deployment | #677 | `019f93e7-21d9-7f11-84df-54411a27a820` | `C:\Users\Administrator\.codex\worktrees\4b42\6529Stream` |
+| Genesis and release safety | #656, then #609 | `019f93e7-3632-7aa1-b723-9c19be6ee3a1` | `C:\Users\Administrator\.codex\worktrees\b3c9\6529Stream` |
+| Slither dispositions | #658 through coherent small slices | `019f93e7-21eb-76b0-a0c2-25df987cad7f` | `C:\Users\Administrator\.codex\worktrees\7dc4\6529Stream` |
+| PaymentIntent settlement | #664 | `019f93e7-21ee-76a1-913a-feee249bf27a` | `C:\Users\Administrator\.codex\worktrees\d852\6529Stream` |
+| Finality and export | #667, then #668 | `019f93e7-21b6-7aa1-85ce-4eadad0c770b` | `C:\Users\Administrator\.codex\worktrees\e9dd\6529Stream` |
+| Installable targets | #670 | `019f93e7-21e9-7550-aa72-d6572b1bc462` | `C:\Users\Administrator\.codex\worktrees\bdda\6529Stream` |
+
+Workers may implement, validate, push, open review-ready draft PRs, and iterate
+CI/CodeRabbit, but they do not merge, deploy, release, or make readiness claims.
+The coordinator alone applies the existing merge authority after all repository
+gates permit it. Each dependent issue starts only after coordinator-confirmed
+merge of its predecessor and a fresh rebase from current `origin/main`.
+
+Core ABI, governance interfaces, deployment-candidate bindings, generated
+release artifacts, and checksum bundles are serialized integration surfaces.
+Any lane touching them must identify the overlap in its handoff, rebase current
+`origin/main`, rerun the canonical generators in documented order, and prove a
+clean checkout before merge. The 14 external-evidence trackers remain open
+unless their actual non-local reviewed evidence exists; templates and local-only
+artifacts cannot close them.
+
+Cross-lane finality ownership is additionally pinned: issue #667 owns only the
+artwork-finality registry lifecycle and its exact dependency interfaces; issue
+#670 owns only the satellite-compatible artist/owner recovery evidence surface;
+and the real Core batch-refresh emitter remains exclusively in the #688/#654
+Core/mint lane. The #667 and #670 workers must reconcile their shared interface
+before either PR is published, and neither lane may modify Core for this edge.
 
 ## Current Run Notes
 
@@ -76,29 +114,52 @@ evidence, and audit/readiness gates.
   control-plane ERC-165 cap, and added the canonical deployment-plan
   materializer. PR #683 then merged the Governance V2 foundation, and issue
   #665 closed for its named execution-context/ModuleRegistry scope.
-- The current `codex/raise-only-gas-time-governance` topic implements ADR
-  0017's 22-GGP/3-GTP raise-only target, removes probe/lower/emergency/rebind
-  surfaces, enforces per-parameter same-action replay rejection, and changes the
-  canonical genesis profile to 37 no-probe entries. The isolated release build
-  binds 53 targets; `StreamCore` remains 24,152 runtime bytes with 424 bytes of
-  margin, so issue #654 stays open. Issue #684 now owns exact production
-  parameter host/evidence binding, while #685 owns `RISK-GOV-003`.
+- PR #686 merged ADR 0017's 22-GGP/3-GTP raise-only target as
+  `b4af30a58c22f79bafad241c6e4fab7a4a76063b`: probe/lower/emergency/rebind
+  surfaces are absent, per-parameter same-action replay is rejected, and the
+  canonical genesis profile has 37 no-probe entries. The isolated release
+  build binds 53 targets; `StreamCore` remains 24,152 runtime bytes with 424
+  bytes of margin, so issue #654 stays open. Issue #684 owns exact production
+  parameter host/evidence binding, #671 owns the shared-buffer implementation,
+  tests, and measurement, while #685 owns `RISK-GOV-003`.
 - Final candidate validation passed on 2026-07-24: the isolated
   `make release-artifacts-verify` gate completed in 375.1 seconds, and the full
   Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   gate completed end to end in 2,107.4 seconds after the canonical non-production
   candidate receipt, target-catalog, and release-config pins were refreshed.
-- Ready PR #686 is open from `codex/raise-only-gas-time-governance` at
-  `https://github.com/6529-Collections/6529Stream/pull/686`. It establishes the
-  raise-only foundation and fail-closed evidence boundary for issue #684 but
-  does not close the issue's exact production host/sizing/candidate-binding
-  acceptance criteria. Next action is final-head CI and CodeRabbit iteration.
+- Branch `codex/governed-parameter-inventory` now carries the first focused
+  #684 slice: a schema-validated 25-row launch inventory and checker that pin exact
+  policy, multi-host profile coverage, evidence requirements, and
+  fixed-stipend review obligations. The committed candidate state remains
+  honestly incomplete (`not_available`), and guarded-consumer lists remain
+  explicitly non-exhaustive (`planning`). Production release invokes
+  `--require-complete`, so this slice does not close #684 or
+  `RISK-GOV-004`. The corrected target is 50 exact parameter/profile bindings:
+  the delegate-registry row covers its gate plus all four sale adapters, and
+  nested/fixed gas constraints require explicit evidence. The 32-test focused
+  inventory suite, ordinary checker, and the reconciled 19-test identifier
+  suite/check pass; strict inventory completeness fails as intended on 129
+  unresolved facts, and a self-reported complete candidate is categorically
+  rejected until #656 supplies structured instance and linked-library
+  reconciliation. Self-reported complete evidence is also categorically
+  rejected until #684 adds candidate-instance-bound measurement/cadence,
+  reproduction, and reachable-raise-chain semantics. The shared-buffer text is
+  only #671's specification slice; implementation, threshold/raise-chain tests,
+  measurement, and exact-target rehearsal remain open. PR #687 is open. The
+  first CodeRabbit pass reported three minor documentation findings, and a
+  clean-checkout audit found that the checksum bundle had captured five mixed
+  line endings in `scripts/check.ps1`; the current branch addresses those
+  findings, applies the requested wording correction consistently across every
+  new governed-inventory surface, and records the required all-CRLF checkout
+  hash. Latest-head CI must rerun after that follow-up, and merge remains gated
+  on the complete check set and resolved review state.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality
   reads; and concrete discovery, sanction, and deployment candidates remain
-  incomplete. The next planned slice after this branch is the exact 25-row
-  governed-parameter inventory and fail-closed candidate binding under #684.
+  incomplete. The current #684 slice establishes the exact 25-row inventory
+  and fail-closed completeness boundary; later #684 work must replace every
+  unavailable candidate binding with reviewed production facts.
 - Historical artifacts prove the earlier headroom work reduced Core to 21,792
   runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
   hooks while the legacy Drops/Minter path remained live, producing the current

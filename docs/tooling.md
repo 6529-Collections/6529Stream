@@ -236,6 +236,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_governed_parameter_identifiers.py
 python scripts/check_governed_parameter_identifiers.py
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
@@ -1310,9 +1312,10 @@ The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 `release-artifacts/latest/release-checksums.json` from the committed release
 artifact, public-beta evidence, release evidence issue backlog, release
 evidence issue-link map, release evidence issue body sync, deployment manifest,
-address-book, schema, ceremony evidence, release-manifest, bytecode proof, and
-release-candidate lockfile outputs, plus the checked mint-manager domain
-constant spec and Python toolchain provenance. This
+address-book, schema, ceremony evidence, governed-parameter inventory,
+release-manifest, bytecode proof, and release-candidate lockfile outputs, plus
+the checked governed-parameter inventory checker/tests, mint-manager domain
+constant spec, and Python toolchain provenance. This
 gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
@@ -1358,6 +1361,73 @@ deletion, coordinated catalog deletion, malformed/extra rows, owner/home/input
 drift, missing section identity, host-prefix drift, and commented-out canonical
 derivations. The gate is wired into `make check`, both aggregate shell wrappers,
 the release-manifest dependency chain, and CI.
+
+## Governed Parameter Production Inventory
+
+Run the schema-validated launch-inventory gate with:
+
+```bash
+make governed-parameter-inventory-check
+```
+
+The target runs:
+
+```bash
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
+```
+
+The checker validates
+[`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json)
+against
+[`governed-parameter-inventory.v1.schema.json`](../release-artifacts/schema/governed-parameter-inventory.v1.schema.json).
+It recomputes the exact 22 GGP and three GTP IDs, requires complete logical-row
+coverage and all 50 profile-host bindings, and pins raise-only policy plus the
+absence of standalone parameter probe contracts and probe bindings,
+immutable-floor requirements, failure classes or cadence rules, evidence
+bindings, guarded-consumer inventories, and known fixed-stipend compatibility.
+Multi-host rows are exact: the four adapter-only sale parameters bind all four
+launch sale adapters, `DELEGATE_REGISTRY_GAS_LIMIT` binds the delegate gate
+plus those four adapters, and
+`VRF_CALLBACK_GAS_LIMIT` binds both the primary VRF provider and whichever
+ARRNG-or-Pyth callback provider the genesis profile selects. The shared
+`ROYALTY_RETURN_GAS_BUFFER` policy covers Core completion after
+`royaltyInfo()`, `tokenURI()`, and `contractURI()` and requires floor/evidence
+for the worst measured parent-side work across those paths.
+
+The committed artifact uses explicit `not_available` candidate bindings where
+concrete deployment facts or reviewed evidence do not exist. That is valid for
+the ordinary aggregate check and is not a readiness claim. Each current
+`guarded_consumers.status` is likewise `planning`: the named consumers are
+review seeds, not an assertion that every call site has been found. The
+production decision runs:
+
+```bash
+python scripts/check_governed_parameter_inventory.py --require-complete
+```
+
+Strict mode rejects every unavailable or incomplete candidate binding,
+including a missing required host instance, candidate value/floor, evidence
+digest/status, non-complete guarded-consumer inventory, or fixed-stipend
+compatibility decision. The schema reserves exact candidate-instance, source,
+address, runtime-code-hash, immutable-authority, host-local value/floor,
+failure/cadence, revision, and source-verification facts. The checker still
+rejects every self-reported `complete` candidate until issue #656 supplies the
+structured production-candidate model and reconciliation checker; no opaque
+file can clear that boundary. Complete measurement/cadence and fixed-stipend
+evidence is likewise categorically rejected until issue #684 adds exact
+candidate-instance binding, recomputable results, reproduction artifacts, and
+reachable raise-chain semantics. It is called directly by production release
+mode; public-beta mode remains non-strict.
+`check_release_mode.py` accepts
+`--governed-parameter-inventory PATH` for a reviewed candidate artifact and
+defaults to the canonical file; the path must remain inside
+`release-artifacts/`, and the production phase always passes
+`require_complete=True` to its validator. The artifact, schema, checker, and
+tests are checksum-covered, and release-manifest generation/check depends on
+the ordinary inventory target so stale policy cannot enter the generated tail.
+The offline release verifier additionally requires the release manifest and
+candidate lockfile to carry matching canonical inventory records.
 
 ## External-Call Gas Inventory
 
@@ -1587,6 +1657,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_governed_parameter_identifiers.py
 python scripts/check_governed_parameter_identifiers.py
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
 python scripts/generate_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
@@ -1679,6 +1751,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_governed_parameter_identifiers.py
 python scripts/check_governed_parameter_identifiers.py
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py

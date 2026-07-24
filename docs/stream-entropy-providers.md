@@ -479,7 +479,7 @@ mirrors these rows. Release tooling computes and pins the hash values.
 | `STREAM_PYTH_RAW_V1` | `6529STREAM_PYTH_RAW_V1` | 0x904dfcae5221db62594fb78af05341a66a4e8d649ec151a90cee174eecf6e246 | `StreamEntropyProviderPyth` | `1` | genesis if selected fallback |
 | `STREAM_DRAND_RAW_V1` | `6529STREAM_DRAND_RAW_V1` | 0x81d2ca2a7da654d7cfe760fac3c357e03fc212d4790b5277459b5717b3f46201 | `StreamEntropyProviderDrand` | `1` | extension |
 | `STREAM_MULTI_SOURCE_RAW_V1` | `6529STREAM_MULTI_SOURCE_RAW_V1` | 0x94257c55589ad53441c332497f043fbe4820fe5089152303939a0aaba1f8f4f0 | multi-source mixer adapters | `1` | extension |
-| `GGP_VRF_CALLBACK_GAS_LIMIT` | `6529STREAM_GGP_VRF_CALLBACK_GAS_LIMIT` | 0xb54bc37de6ab63d94434a3fb47e0b24ad67118105c91c59db7b1c58d482f5491 | provider adapters | `1` | genesis (Governed Gas Parameter identifier per [LTA-GGP]; [EP-VRF-CONFIG]) |
+| `GGP_VRF_CALLBACK_GAS_LIMIT` | `6529STREAM_GGP_VRF_CALLBACK_GAS_LIMIT` | 0xb54bc37de6ab63d94434a3fb47e0b24ad67118105c91c59db7b1c58d482f5491 | `StreamEntropyProviderVRF` plus selected `StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth` fallback | `1` | genesis (Governed Gas Parameter identifier per [LTA-GGP]; [EP-CALLBACK]; [EP-VRF-CONFIG]) |
 
 ## Callback Delivery Discipline
 
@@ -528,6 +528,13 @@ Requirements [EP-CALLBACK]:
 6. These rules apply to every callback-receiving adapter family — VRF,
    ARRNG, Pyth, drand, Randcast, Supra, Witnet, and all future adapters —
    and to permissionless retry paths.
+7. The launch inventory registers `VRF_CALLBACK_GAS_LIMIT` independently on
+   both `StreamEntropyProviderVRF` and the selected callback-receiving fallback
+   (`StreamEntropyProviderARRNG` or `StreamEntropyProviderPyth`). The shared
+   identifier names one governed concept; each deployed host retains its own
+   genesis value, immutable floor, current value, revision, upstream ceiling,
+   and sizing evidence. Omitting the selected fallback host is a production
+   inventory failure.
 
 ## In-Flight Requests Under Raises And Repricings [EP-INFLIGHT]
 
@@ -855,9 +862,11 @@ Rules [EP-VRF-CONFIG]:
    `subscriptionId` and `callbackGasLimit` are Operational parameters
    excluded from the config hash [EP-CONFIGHASH].
 6. `callbackGasLimit` is the adapter-hosted `VRF_CALLBACK_GAS_LIMIT`
-   Governed Gas Parameter
-   ([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-GGP]): its genesis value must not be below its immutable floor
+   Governed Gas Parameter. The primary VRF adapter and selected launch
+   fallback callback provider each register that identifier with host-local
+   immutable facts under the model home,
+   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
+   [LTA-GGP]. Its genesis value must not be below its immutable floor
    `VRF_CALLBACK_GAS_FLOOR`, sized from the measured fulfillment envelope
    with margin [EP-CALLBACK item 5]; raising it is a service-restoring
    authority-only class-`1` action delayed at least 48 hours and bounded to

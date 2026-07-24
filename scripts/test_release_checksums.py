@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_release_checksums.py")
@@ -25,12 +26,300 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
+    def test_complete_governed_parameter_references_cover_every_reference_shape(
+        self,
+    ) -> None:
+        inventory = {
+            "genesis_profile": {
+                "path": "release-artifacts/genesis-deployment-profile.json",
+                "sha256": "0" * 64,
+            },
+            "candidate_binding": {
+                "status": "complete",
+                "candidate_artifact_path": "release-artifacts/candidate.json",
+                "candidate_artifact_sha256": "1" * 64,
+                "host_bindings": [
+                    {
+                        "source_verification_binding": {
+                            "path": (
+                                "release-artifacts/latest/"
+                                "source-verification-inputs.json"
+                            ),
+                            "sha256": "4" * 64,
+                        }
+                    }
+                ],
+            },
+            "parameters": [
+                {
+                    "measurement_evidence": {
+                        "status": "complete",
+                        "path": "release-artifacts/evidence/measurement.json",
+                        "sha256": "2" * 64,
+                    },
+                    "fixed_stipend_compatibility": {
+                        "status": "complete",
+                        "evidence_path": (
+                            "release-artifacts/evidence/fixed-stipend.json"
+                        ),
+                        "evidence_sha256": "3" * 64,
+                    },
+                }
+            ],
+        }
+
+        self.assertEqual(
+            generator.complete_governed_parameter_references(inventory),
+            [
+                (
+                    Path(
+                        "release-artifacts/genesis-deployment-profile.json"
+                    ),
+                    "0" * 64,
+                    "genesis_profile",
+                ),
+                (
+                    Path("release-artifacts/candidate.json"),
+                    "1" * 64,
+                    "candidate_binding",
+                ),
+                (
+                    Path(
+                        "release-artifacts/latest/"
+                        "source-verification-inputs.json"
+                    ),
+                    "4" * 64,
+                    (
+                        "candidate_binding.host_bindings[0]"
+                        ".source_verification_binding"
+                    ),
+                ),
+                (
+                    Path("release-artifacts/evidence/measurement.json"),
+                    "2" * 64,
+                    "parameters[0].measurement_evidence",
+                ),
+                (
+                    Path(
+                        "release-artifacts/evidence/fixed-stipend.json"
+                    ),
+                    "3" * 64,
+                    "parameters[0].fixed_stipend_compatibility",
+                ),
+            ],
+        )
+
+    def test_checksum_outputs_include_complete_governed_parameter_references(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            inventory_path = (
+                root
+                / generator.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+            )
+            candidate_path = root / "release-artifacts/candidate.json"
+            genesis_profile_path = (
+                root / "release-artifacts/genesis-deployment-profile.json"
+            )
+            source_verification_path = (
+                root
+                / "release-artifacts/latest/source-verification-inputs.json"
+            )
+            measurement_path = (
+                root / "release-artifacts/evidence/measurement.json"
+            )
+            fixed_path = (
+                root / "release-artifacts/evidence/fixed-stipend.json"
+            )
+            for path, content in (
+                (inventory_path, "{}\n"),
+                (candidate_path, '{"candidate":true}\n'),
+                (genesis_profile_path, '{"profile":true}\n'),
+                (
+                    source_verification_path,
+                    '{"source_verification":true}\n',
+                ),
+                (measurement_path, '{"measurement":true}\n'),
+                (fixed_path, '{"fixed_stipend":true}\n'),
+            ):
+                write_text(path, content)
+
+            inventory = {
+                "genesis_profile": {
+                    "path": (
+                        "release-artifacts/genesis-deployment-profile.json"
+                    ),
+                    "sha256": generator.file_sha256(
+                        genesis_profile_path
+                    ).removeprefix("sha256:"),
+                },
+                "candidate_binding": {
+                    "status": "complete",
+                    "candidate_artifact_path": (
+                        "release-artifacts/candidate.json"
+                    ),
+                    "candidate_artifact_sha256": generator.file_sha256(
+                        candidate_path
+                    ).removeprefix("sha256:"),
+                    "host_bindings": [
+                        {
+                            "source_verification_binding": {
+                                "path": (
+                                    "release-artifacts/latest/"
+                                    "source-verification-inputs.json"
+                                ),
+                                "sha256": generator.file_sha256(
+                                    source_verification_path
+                                ).removeprefix("sha256:"),
+                            }
+                        }
+                    ],
+                },
+                "parameters": [
+                    {
+                        "measurement_evidence": {
+                            "status": "complete",
+                            "path": (
+                                "release-artifacts/evidence/measurement.json"
+                            ),
+                            "sha256": generator.file_sha256(
+                                measurement_path
+                            ).removeprefix("sha256:"),
+                        },
+                        "fixed_stipend_compatibility": {
+                            "status": "complete",
+                            "evidence_path": (
+                                "release-artifacts/evidence/fixed-stipend.json"
+                            ),
+                            "evidence_sha256": generator.file_sha256(
+                                fixed_path
+                            ).removeprefix("sha256:"),
+                        },
+                    }
+                ],
+            }
+            with mock.patch.object(
+                generator.governed_parameter_inventory_checker,
+                "validate_inventory",
+                return_value=inventory,
+            ):
+                checksum_text, manifest_text = generator.build_outputs(
+                    root,
+                    [
+                        generator.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+                    ],
+                    root / generator.DEFAULT_OUTPUT_DIR,
+                )
+
+            checksum_paths = {
+                path
+                for _digest, path in generator.parse_checksum_file(checksum_text)
+            }
+            self.assertEqual(
+                checksum_paths,
+                {
+                    "release-artifacts/governed-parameter-inventory.json",
+                    "release-artifacts/genesis-deployment-profile.json",
+                    "release-artifacts/candidate.json",
+                    (
+                        "release-artifacts/latest/"
+                        "source-verification-inputs.json"
+                    ),
+                    "release-artifacts/evidence/measurement.json",
+                    "release-artifacts/evidence/fixed-stipend.json",
+                },
+            )
+            manifest = json.loads(manifest_text)
+            self.assertEqual(
+                {row["path"] for row in manifest["files"]},
+                checksum_paths,
+            )
+
+    def test_checksum_generation_rejects_semantically_invalid_inventory(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            inventory_path = (
+                root
+                / generator.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+            )
+            write_text(inventory_path, "{}\n")
+            with mock.patch.object(
+                generator.governed_parameter_inventory_checker,
+                "validate_inventory",
+                side_effect=(
+                    generator.governed_parameter_inventory_checker.GovernedParameterInventoryError(
+                        "inventory.status must be 'planning'"
+                    )
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    generator.ChecksumError,
+                    "inventory.status must be 'planning'",
+                ):
+                    generator.build_outputs(
+                        root,
+                        [
+                            generator.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+                        ],
+                        root / generator.DEFAULT_OUTPUT_DIR,
+                    )
+
+    def test_governed_parameter_references_cannot_escape_repository(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            invalid_paths = (
+                Path("../outside.json"),
+                Path("/Windows/win.ini"),
+                Path("C:Windows/win.ini"),
+            )
+            for path in invalid_paths:
+                with self.subTest(path=str(path)):
+                    with self.assertRaisesRegex(
+                        generator.ChecksumError,
+                        "must stay inside the repository",
+                    ):
+                        generator.resolve_governed_parameter_reference(
+                            root,
+                            path,
+                            "candidate_binding",
+                        )
+
+            outside = root.parent / f"{root.name}-outside"
+            outside.mkdir()
+            self.addCleanup(outside.rmdir)
+            link = root / "evidence-link"
+            link.symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "must not include symlinks",
+            ):
+                generator.resolve_governed_parameter_reference(
+                    root,
+                    Path("evidence-link/evidence.json"),
+                    "parameters[0].measurement_evidence",
+                )
+
     def assert_committed_checksums_cover(self, expected_paths: set[Path]) -> None:
         """Assert policy and both committed checksum outputs bind current files."""
 
-        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
-
         repo_root = SCRIPT_PATH.parent.parent
+        configured_paths = set(generator.DEFAULT_COVERED_PATHS)
+        for path in expected_paths:
+            self.assertTrue(
+                path in configured_paths
+                or any(
+                    configured in path.parents
+                    and (repo_root / configured).is_dir()
+                    for configured in configured_paths
+                ),
+                f"{path.as_posix()} is not covered by DEFAULT_COVERED_PATHS",
+            )
+
         checksum_text = (
             repo_root / generator.DEFAULT_OUTPUT_DIR / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
@@ -211,6 +500,18 @@ class ReleaseChecksumTests(unittest.TestCase):
         }
         self.assert_committed_checksums_cover(slither_baseline_paths)
 
+    def test_committed_checksums_cover_governed_parameter_inventory(self) -> None:
+        expected_paths = {
+            Path("release-artifacts/governed-parameter-inventory.json"),
+            Path(
+                "release-artifacts/schema/"
+                "governed-parameter-inventory.v1.schema.json"
+            ),
+            Path("scripts/check_governed_parameter_inventory.py"),
+            Path("scripts/test_governed_parameter_inventory.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
     def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
         expected_paths = {
             Path("CHANGELOG.md"),
@@ -233,6 +534,10 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("scripts/test_release_checksums.py"),
             Path("scripts/generate_release_manifest.py"),
             Path("scripts/test_release_manifest.py"),
+            Path("scripts/generate_release_candidate_lockfile.py"),
+            Path("scripts/test_release_candidate_lockfile.py"),
+            Path("scripts/verify_release_artifacts.py"),
+            Path("scripts/test_verify_release_artifacts.py"),
             Path("scripts/generate_risk_register.py"),
             Path("scripts/check_risk_register.py"),
             Path("scripts/test_risk_register.py"),

@@ -86,12 +86,27 @@ The current Gate A smoke baseline proves:
   This keeps production blocked under
   [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).
 - The exact ADR 0017 identifier surface is checked at 22 GGP plus three GTP
-  rows, but only generic store hosts currently implement registration. No
-  checked artifact yet binds every logical parameter to its production profile
-  instance, genesis value, immutable floor, failure class or cadence rule,
-  measurement evidence, and fixed-stipend consumers. This independent
-  production blocker is retained as `RISK-GOV-004` and tracked by
+  rows, and the schema-validated
+  [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json)
+  now pins the exact launch policy, 50-binding host-profile coverage, failure classes,
+  sizing/cadence evidence requirements, and fixed-stipend review obligations.
+  The committed inventory is intentionally incomplete: only generic store
+  hosts currently implement registration, and concrete candidate host
+  addresses, genesis values, immutable floors, reviewed evidence digests, and
+  fixed-stipend compatibility remain unavailable. Current guarded-consumer
+  lists are also explicitly planning rather than exhaustive. The ordinary
+  checker accepts that honest planning state; production release invokes
+  `--require-complete` and rejects it. It also rejects every self-reported
+  complete candidate until #656 supplies structured instance and linked-library
+  reconciliation, and rejects self-reported complete evidence until #684 adds
+  candidate-instance-bound measurement/cadence, reproduction, and reachable
+  raise-chain semantics. This independent production blocker is
+  retained as `RISK-GOV-004` and tracked by
   [issue #684](https://github.com/6529-Collections/6529Stream/issues/684).
+  The shared-buffer specification reconciliation is only the documentation
+  slice of [issue #671](https://github.com/6529-Collections/6529Stream/issues/671);
+  its Core implementation, threshold/raise-chain tests, candidate measurement,
+  and exact-target rehearsal remain open.
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass

@@ -96,6 +96,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_governed_parameter_identifiers.py
 python scripts/check_governed_parameter_identifiers.py
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
 python scripts/generate_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
@@ -229,6 +231,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_governed_parameter_identifiers.py
 python scripts/check_governed_parameter_identifiers.py
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
@@ -331,6 +335,55 @@ release candidate lockfile. Until that evidence exists and reconciles every role
 production remains blocked under issue #656. On-demand split-wallet instances
 and the no-authority deployer factory are explicitly outside the numbered
 production inventory.
+
+`governed-parameter-inventory.json` is the schema-validated, machine-readable launch
+inventory for the exact 22 GGP and three GTP logical rows. It recomputes every
+canonical identifier, fixes the raise-only policy and the absence of standalone
+parameter probe contracts and bindings, maps each row to
+the required genesis profile host or hosts (50 ordered host bindings in the
+complete target), and records failure class or wall-clock cadence policy,
+sizing-evidence requirements, and known guarded consumers and fixed-stipend
+compatibility. Multi-host policy is explicit: the four adapter-only sale rows
+bind all four launch sale adapters, `DELEGATE_REGISTRY_GAS_LIMIT` binds the
+delegate gate plus those four adapters, and
+`VRF_CALLBACK_GAS_LIMIT` is registered independently on the primary VRF
+provider and the selected ARRNG-or-Pyth fallback callback provider. The
+legacy-named `ROYALTY_RETURN_GAS_BUFFER` is the single Core
+parent-completion buffer for `royaltyInfo()`, `tokenURI()`, and
+`contractURI()`; its floor/evidence must cover the worst measured parent-side
+completion work across all three paths, and no metadata-specific 23rd GGP or
+standalone probe exists.
+
+The committed artifact is intentionally honest about the current candidate:
+its concrete candidate bindings are `not_available`, because exact deployed
+host instances, genesis values, immutable floors, reviewed measurement or
+cadence evidence, and fixed-stipend compatibility are not yet available.
+Every row also marks its current guarded-consumer list `planning`; those lists
+are useful review inputs but are not claimed exhaustive. Run
+`python scripts/test_governed_parameter_inventory.py` and
+`python scripts/check_governed_parameter_inventory.py` for the ordinary
+structural/policy gate. Production release mode directly applies
+`python scripts/check_governed_parameter_inventory.py --require-complete`,
+which rejects every `not_available` binding, non-complete guarded-consumer
+inventory, and incomplete required host coverage. The schema reserves exact
+instance, source, address, runtime-code-hash, immutable-authority, host-local
+value/floor, failure/cadence, and source-verification fields, but the checker
+deliberately rejects every self-reported `complete` candidate until issue #656
+provides and validates the structured production candidate it must reconcile.
+It also rejects every self-reported complete measurement/cadence or
+fixed-stipend document until issue #684 adds candidate-instance-bound
+measurement results, reproduction artifacts, and reachable raise-chain
+semantics; a `reviewed` label and opaque digest are not sufficient.
+The valid planning artifact therefore does not clear issue #684,
+`RISK-GOV-004`, or production readiness. The artifact, its
+`schema/governed-parameter-inventory.v1.schema.json` schema, checker, and tests
+are release-checksum inputs; the release manifest and release-candidate
+lockfile record the artifact directly, and the offline verifier requires those
+records to match the canonical file. `check_release_mode.py` also accepts
+`--governed-parameter-inventory PATH` for a reviewed candidate override, while
+defaulting to this canonical artifact; the override must remain inside the
+repository's `release-artifacts/` tree, and only production release applies
+strict completeness.
 
 `system-manifest-payload-vector.json` is the deterministic, non-production
 `target_abi_lock_fixture` derived from all 37 profile entries under the
@@ -871,6 +924,8 @@ python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
 python scripts/test_governed_parameter_identifiers.py
 python scripts/check_governed_parameter_identifiers.py
+python scripts/test_governed_parameter_inventory.py
+python scripts/check_governed_parameter_inventory.py
 python scripts/generate_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py

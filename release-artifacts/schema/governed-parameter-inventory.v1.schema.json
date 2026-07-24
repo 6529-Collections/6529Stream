@@ -1,0 +1,670 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/governed-parameter-inventory.v1.schema.json",
+  "title": "6529Stream Governed Parameter Inventory v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "normative_sources",
+    "genesis_profile",
+    "governance_policy",
+    "inventory_summary",
+    "candidate_binding",
+    "parameters"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.governed-parameter-inventory.v1"
+    },
+    "status": {
+      "enum": ["planning", "complete"]
+    },
+    "normative_sources": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "genesis_profile": {
+      "$ref": "#/$defs/genesisProfileRecord"
+    },
+    "governance_policy": {
+      "$ref": "#/$defs/governancePolicy"
+    },
+    "inventory_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ggp_count",
+        "gtp_count",
+        "logical_parameter_count",
+        "expected_host_binding_count"
+      ],
+      "properties": {
+        "ggp_count": { "const": 22 },
+        "gtp_count": { "const": 3 },
+        "logical_parameter_count": { "const": 25 },
+        "expected_host_binding_count": { "const": 50 }
+      }
+    },
+    "candidate_binding": {
+      "$ref": "#/$defs/candidateBinding"
+    },
+    "parameters": {
+      "type": "array",
+      "minItems": 25,
+      "maxItems": 25,
+      "items": {
+        "$ref": "#/$defs/parameter"
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": ["complete", "planning", "missing", "not_available"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "anchor"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "anchor": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "genesisProfileRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "schema_version", "sha256"],
+      "properties": {
+        "path": {
+          "const": "release-artifacts/genesis-deployment-profile.json"
+        },
+        "schema_version": {
+          "const": "6529stream.genesis-deployment-profile.v2"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "governancePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "action_class",
+        "minimum_delay_seconds",
+        "maximum_raise_multiplier",
+        "genesis_revision",
+        "one_write_per_action_per_parameter",
+        "mutation_model",
+        "domains",
+        "forbidden_surfaces"
+      ],
+      "properties": {
+        "status": { "const": "complete" },
+        "action_class": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "name"],
+          "properties": {
+            "id": { "const": 1 },
+            "name": { "const": "DELAYED_LOOSENING" }
+          }
+        },
+        "minimum_delay_seconds": { "const": 172800 },
+        "maximum_raise_multiplier": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["numerator", "denominator"],
+          "properties": {
+            "numerator": { "const": 2 },
+            "denominator": { "const": 1 }
+          }
+        },
+        "genesis_revision": { "const": 1 },
+        "one_write_per_action_per_parameter": { "const": true },
+        "mutation_model": { "const": "raise_only" },
+        "domains": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["gas_scope", "gas_state", "time_scope", "time_state"],
+          "properties": {
+            "gas_scope": { "$ref": "#/$defs/domain" },
+            "gas_state": { "$ref": "#/$defs/domain" },
+            "time_scope": { "$ref": "#/$defs/domain" },
+            "time_state": { "$ref": "#/$defs/domain" }
+          }
+        },
+        "forbidden_surfaces": {
+          "type": "array",
+          "prefixItems": [
+            { "const": "lower_mutation" },
+            { "const": "standalone_parameter_probe_contract" },
+            { "const": "probe_binding" },
+            { "const": "emergency_mutation" },
+            { "const": "rebind" },
+            { "const": "conditional_mutation" },
+            { "const": "permissionless_mutation" }
+          ],
+          "items": false,
+          "minItems": 7,
+          "maxItems": 7
+        }
+      }
+    },
+    "domain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preimage", "keccak256"],
+      "properties": {
+        "preimage": {
+          "type": "string",
+          "pattern": "^6529STREAM_(GAS|TIME)_PARAMETER_(SCOPE|STATE)_V2$"
+        },
+        "keccak256": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "value"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "value": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        }
+      }
+    },
+    "uint64Fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "value"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "value": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        }
+      }
+    },
+    "normativeSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "anchor"],
+      "properties": {
+        "status": { "const": "complete" },
+        "path": {
+          "type": "string",
+          "pattern": "^docs/[A-Za-z0-9_./-]+\\.md$"
+        },
+        "anchor": {
+          "type": "string",
+          "pattern": "^[A-Z0-9-]+$"
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "key"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        }
+      }
+    },
+    "expectedHosts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "count", "profiles"],
+      "properties": {
+        "status": { "const": "complete" },
+        "count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "profiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/profile"
+          }
+        }
+      }
+    },
+    "failureClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "id", "name"],
+      "properties": {
+        "status": { "const": "complete" },
+        "id": {
+          "enum": [1, 2, 3]
+        },
+        "name": {
+          "enum": [
+            "FORWARDING_CAP",
+            "FAIL_CLOSED_PRECHECK",
+            "MIN_GAS_GATE"
+          ]
+        }
+      }
+    },
+    "gasFacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["genesis_value", "immutable_floor", "failure_class"],
+      "properties": {
+        "genesis_value": { "$ref": "#/$defs/fact" },
+        "immutable_floor": { "$ref": "#/$defs/fact" },
+        "failure_class": { "$ref": "#/$defs/failureClass" }
+      }
+    },
+    "timeFacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "genesis_value_blocks",
+        "immutable_floor_blocks",
+        "wall_clock_floor_seconds"
+      ],
+      "properties": {
+        "genesis_value_blocks": { "$ref": "#/$defs/fact" },
+        "immutable_floor_blocks": { "$ref": "#/$defs/fact" },
+        "wall_clock_floor_seconds": { "$ref": "#/$defs/uint64Fact" }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "path", "sha256"],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "path": {
+          "type": ["string", "null"],
+          "pattern": "^release-artifacts/evidence/governed-parameters/[A-Za-z0-9][A-Za-z0-9._/-]*\\.json$"
+        },
+        "sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "fixedStipend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "disposition",
+        "consumers",
+        "evidence_path",
+        "evidence_sha256"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "disposition": {
+          "enum": [
+            "evidence_required",
+            "no_fixed_stipend_consumers_identified"
+          ]
+        },
+        "consumers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "evidence_path": {
+          "type": ["string", "null"],
+          "pattern": "^release-artifacts/evidence/governed-parameters/[A-Za-z0-9][A-Za-z0-9._/-]*\\.json$"
+        },
+        "evidence_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order",
+        "family",
+        "name",
+        "constant_name",
+        "preimage",
+        "parameter_id",
+        "identifier_schema_version",
+        "normative_source",
+        "expected_hosts",
+        "guarded_consumers",
+        "gas",
+        "time",
+        "measurement_evidence",
+        "fixed_stipend_compatibility"
+      ],
+      "properties": {
+        "order": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 25
+        },
+        "family": {
+          "enum": ["GGP", "GTP"]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "constant_name": {
+          "type": "string",
+          "pattern": "^G(G|T)P_[A-Z0-9_]+$"
+        },
+        "preimage": {
+          "type": "string",
+          "pattern": "^6529STREAM_G(G|T)P_[A-Z0-9_]+$"
+        },
+        "parameter_id": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "identifier_schema_version": {
+          "const": 1
+        },
+        "normative_source": {
+          "$ref": "#/$defs/normativeSource"
+        },
+        "expected_hosts": {
+          "$ref": "#/$defs/expectedHosts"
+        },
+        "guarded_consumers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status", "consumers"],
+          "properties": {
+            "status": {
+              "enum": ["complete", "planning"]
+            },
+            "consumers": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        "gas": {
+          "oneOf": [
+            { "$ref": "#/$defs/gasFacts" },
+            { "type": "null" }
+          ]
+        },
+        "time": {
+          "oneOf": [
+            { "$ref": "#/$defs/timeFacts" },
+            { "type": "null" }
+          ]
+        },
+        "measurement_evidence": {
+          "$ref": "#/$defs/evidence"
+        },
+        "fixed_stipend_compatibility": {
+          "$ref": "#/$defs/fixedStipend"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "family": { "const": "GGP" }
+            },
+            "required": ["family"]
+          },
+          "then": {
+            "properties": {
+              "gas": { "$ref": "#/$defs/gasFacts" },
+              "time": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "family": { "const": "GTP" }
+            },
+            "required": ["family"]
+          },
+          "then": {
+            "properties": {
+              "gas": { "type": "null" },
+              "time": { "$ref": "#/$defs/timeFacts" }
+            }
+          }
+        }
+      ]
+    },
+    "sourceVerificationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "target_name", "target_source"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^release-artifacts/latest/[A-Za-z0-9][A-Za-z0-9._/-]*\\.json$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "target_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "target_source": {
+          "type": "string",
+          "pattern": "^smart-contracts/[A-Za-z0-9_./-]+\\.sol$"
+        }
+      }
+    },
+    "candidateHostBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_instance_id",
+        "contract_name",
+        "contract_source",
+        "parameter_id",
+        "profile_id",
+        "profile_key",
+        "host_address",
+        "runtime_code_keccak256",
+        "governance_authority",
+        "source_verification_binding",
+        "genesis_value",
+        "immutable_floor",
+        "failure_class_id",
+        "wall_clock_floor_seconds",
+        "genesis_revision"
+      ],
+      "properties": {
+        "candidate_instance_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+        },
+        "contract_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "contract_source": {
+          "type": "string",
+          "pattern": "^smart-contracts/[A-Za-z0-9_./-]+\\.sol$"
+        },
+        "parameter_id": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{64}$"
+        },
+        "profile_id": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 37
+        },
+        "profile_key": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "host_address": {
+          "type": "string",
+          "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+        },
+        "runtime_code_keccak256": {
+          "type": "string",
+          "pattern": "^0x(?!0{64}$)[0-9a-f]{64}$"
+        },
+        "governance_authority": {
+          "type": "string",
+          "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+        },
+        "source_verification_binding": {
+          "$ref": "#/$defs/sourceVerificationBinding"
+        },
+        "genesis_value": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        },
+        "immutable_floor": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 115792089237316195423570985008687907853269984665640564039457584007913129639935
+        },
+        "failure_class_id": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 3
+        },
+        "wall_clock_floor_seconds": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 18446744073709551615
+        },
+        "genesis_revision": {
+          "const": 1
+        }
+      }
+    },
+    "candidateBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "blocked_by_issue",
+        "candidate_id",
+        "candidate_commit",
+        "candidate_artifact_path",
+        "candidate_artifact_sha256",
+        "host_bindings"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "blocked_by_issue": {
+          "type": ["string", "null"]
+        },
+        "candidate_id": {
+          "type": ["string", "null"]
+        },
+        "candidate_commit": {
+          "type": ["string", "null"]
+        },
+        "candidate_artifact_path": {
+          "type": ["string", "null"]
+        },
+        "candidate_artifact_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "host_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/candidateHostBinding"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": { "const": "complete" }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "blocked_by_issue": { "type": "null" },
+              "candidate_id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9._-]{0,127}$"
+              },
+              "candidate_commit": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{40}$"
+              },
+              "candidate_artifact_path": {
+                "type": "string",
+                "pattern": "^deployments/config/[A-Za-z0-9][A-Za-z0-9._/-]*\\.json$"
+              },
+              "candidate_artifact_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "host_bindings": {
+                "minItems": 50,
+                "maxItems": 50
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "blocked_by_issue": {
+                "const": "https://github.com/6529-Collections/6529Stream/issues/656"
+              },
+              "candidate_id": { "type": "null" },
+              "candidate_commit": { "type": "null" },
+              "candidate_artifact_path": { "type": "null" },
+              "candidate_artifact_sha256": { "type": "null" },
+              "host_bindings": { "maxItems": 0 }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
