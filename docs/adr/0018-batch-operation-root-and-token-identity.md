@@ -59,7 +59,7 @@ reservation.
 
 ### Commitment Boundary
 
-The request commitment binds the typed payer, authorizer, recipient,
+The request commitment binds the typed payer, `batch.authorizer`, recipient,
 beneficiary, token-data-array, mint-commitment-array, and canonical
 validated-result hashes in the exact order pinned by `[MPA-OPERATION]`. The
 validated-result hash binds the gate address and canonical gate result,
@@ -69,8 +69,12 @@ aggregated separately by `(counterId, valueKey)` for the pre-ledger cap check,
 without changing that array preimage. Each consumption's `resolutionHash`
 binds its canonical typed counter-resolver result. The outer root then binds
 chain, manager, Core, ledger,
-execution path, collection, phase, policy, authorization, request commitment,
-context, manager executor, nonce range, and quantity. Each token operation ID
+execution path, collection, phase, `currentPolicyHash`, `boundPolicyHash`,
+authorization, request commitment, context, manager executor, nonce range, and
+quantity. The request commitment also binds
+`batch.expectedPolicyHash`; this deliberate redundancy prevents the accepted
+request policy from being lost inside normalization while the root separately
+commits live config identity. Each token operation ID
 binds root, reserved token nonce, token index, token-data hash, and mint
 commitment.
 
@@ -78,7 +82,9 @@ The manager entrypoints are nonpayable and asset-agnostic. They accept only
 `MintBatch` plus presentation-only `gateData`; they expose no generic
 settlement bytes, callback target, selector, value, or delegatecall.
 `MintBatch.authorizationId` is a required nonzero typed request field. A
-configured gate must return the same value; an ungated phase consumes the
+configured gate must return the same value, return
+`GateResult.authorizer == batch.authorizer`, and return an authorizer kind valid
+for that same address; an ungated phase consumes the
 explicit request value, never an ID inferred from the root, context, or
 presentation bytes. Raw
 signature, Merkle-proof, and resolver-proof encodings may be excluded from the
@@ -94,6 +100,26 @@ Signed sale authority is separate from root uniqueness. The proposed
 `SALE_AUTHORIZATION_TYPEHASH` additionally binds `tokenDataArrayHash` and
 `mintCommitmentsHash`; a unique root cannot authorize content the signer did
 not commit.
+
+`MintBatch.expectedPolicyHash` appears immediately before `authorizationId`.
+The manager accepts it only as the nonzero current registered policy hash or
+the exact unexpired immediate predecessor, where the ledger stores
+`previousPolicyHash`, `previousPolicyRevision`, and
+`previousPolicyGraceUntil`, the revision is current minus one, and
+`block.timestamp <= previousPolicyGraceUntil`. A second rotation overwrites
+that tuple and invalidates the older predecessor. The manager then defines
+`boundPolicyHash = batch.expectedPolicyHash`. A configured gate and its signed
+payload bind that same value; configured and ungated phases accept the current
+or valid immediate-predecessor identity, while ungated authorizer
+normalization remains the exact zero/NONE tuple. The operation root explicitly
+binds `currentPolicyHash` then `boundPolicyHash`; the preview returns identities
+whose root commits both. `MintBatchExecuted` and the central
+`MintLedgerOperationRootConsumed` carry both hashes. Child ledger counter,
+authorization, and nullifier events carry `boundPolicyHash` and join through
+the root; configuration and consent events carry current identity. Current
+consent, modules, counter policies, caps, and increments govern execution even
+when the predecessor identity is accepted. ADR 0019 / issue #694 owns exact
+sale/settlement propagation of both where applicable.
 
 ### Identity Ownership
 
@@ -120,10 +146,12 @@ The final argument order is:
 
 ```solidity
 function consume(
+    uint256 collectionId,
+    bytes32 phaseId,
     CounterConsumption[] calldata consumptions,
     bytes32 authorizationId,
     bytes32[] calldata nullifiers,
-    bytes32 policyHash,
+    bytes32 boundPolicyHash,
     bytes32 operationRoot
 ) external;
 ```
@@ -149,11 +177,28 @@ scope before any ledger write. The same raw root may be used once by each of two
 different authorized managers; correctly derived roots already bind the
 manager address, but storage scoping does not rely on that cryptographic fact.
 
-The ledger validates caller scope, registered policy, root, authorization,
-nullifiers, counter keys, increments, aggregation, and caps before writing any
-of them. It then consumes the root, counters, authorization, and nullifiers in
-one call. A downstream manager, Core, resolver, settlement, entropy, or
-receiver failure reverts all ledger writes and the manager nonce reservation.
+The manager passes the exact batch `collectionId` and `phaseId`; the ledger
+uses `msg.sender` as manager scope and independently loads
+`currentPolicyHash` from
+`registeredPhasePolicyHashes[msg.sender][collectionId][phaseId]`. A zero or
+missing registration fails before writes. The caller never supplies
+`currentPolicyHash`, and the ledger never infers phase identity from counter
+rows or calls the manager.
+
+The ledger accepts nonzero `boundPolicyHash` only as the loaded current hash or
+the exact stored immediate predecessor with adjacent revision and unexpired
+grace. Every counter row must match the explicit collection/phase tuple, and
+current registered counter policies, caps, and increments always govern.
+`consumptions` may be empty: the ledger still validates and consumes the root
+plus any authorization/nullifiers and emits one
+`MintLedgerOperationRootConsumed` with loaded current plus supplied bound hash,
+but emits no counter or counter-context event. The ledger validates caller
+scope, phase registration, policy continuity, root, authorization, nullifiers,
+counter keys, increments, aggregation, and caps before writing any of them. An
+unregistered phase, cross-phase row, invalid bound hash, replay, counter
+mismatch, or downstream manager, Core, resolver, settlement, entropy, or
+receiver failure reverts all ledger writes, events, and the manager nonce
+reservation.
 
 ### Single-Step Identity
 
@@ -163,21 +208,35 @@ distinct execution-path constant prevents a prepared operation and a
 single-step operation with otherwise identical inputs from sharing an
 identity.
 
-A sale adapter that records a deposit before entering the manager computes the
-root from the signed request and the manager's current
-`nextOperationNonce`, records that root with the settlement, and calls the
-manager in the same top-level transaction. The manager independently derives
-the same root from the bound values, its `msg.sender`, path, and nonce and
-returns it with the per-token operation IDs. In the adapter's preview, the
-executor term
-is exactly `address(this)` because the adapter becomes manager `msg.sender`; it
-is never the adapter's external caller, payer, relayer, or `tx.origin`. Direct
-and relayed calls carrying the same valid signed request therefore preview the
-same identity. The adapter compares the returned identities with that preview
-before returning from the top-level call. A nonce race or any mismatch reverts
-the whole transaction, including the earlier deposit. Free or executor-only
-single-step batches still derive and consume the root even when no settlement
-record exists.
+A sale adapter that records a deposit before entering the manager first calls:
+
+```solidity
+function previewSingleStepMintOperation(
+    MintBatch calldata batch,
+    bytes calldata gateData
+) external view returns (
+    bytes32 operationRoot,
+    bytes32[] memory operationIds
+);
+```
+
+The preview is manager-owned, is safe for a `STATICCALL`, uses its `msg.sender`
+as executor, calls the configured gate and resolvers from the manager, shares
+byte-identical normalization and derivation code with execution, reads the
+current `nextOperationNonce`, and returns exactly `batch.beneficiaries.length`
+token operation IDs. It emits and writes nothing, consumes no replay state,
+and exposes no callback, settlement, value, or delegatecall surface. Because
+the adapter calls it, the executor term is exactly the adapter's
+`address(this)`; it is never an external caller, payer, relayer, or `tx.origin`.
+Direct and relayed adapter calls carrying the same valid signed request
+therefore preview the same identity. The adapter records that root with the
+settlement, calls the manager in the same top-level transaction, and compares
+the returned root and token operation ID vector with the preview. A caller
+substitution, nonce race, changed policy/gate/resolver result, any request
+mutation, or vector mismatch reverts the whole transaction, including the
+earlier deposit. The generic `canMint` helper is non-authoritative for operation
+identity. Free or executor-only single-step batches still derive and consume
+the root even when no settlement record exists.
 
 The immediate Core `mintFromManager` selector does not gain an operation-ID
 argument. The manager's per-token event is the canonical root-to-token join for
@@ -226,6 +285,13 @@ required facts are:
 The generated event catalog remains an as-built artifact until the atomic
 implementation cutover. This ADR and its owning specs define the target; they
 do not cause a spec-only PR to publish unimplemented ABI or event rows.
+
+`TokenRoyaltySnapshotted` is a newly introduced event, so its declaration
+starts with `uint16 schemaVersion`. Its token operation ID, token ID, and root
+remain indexed. The snapshot hook is `PREPARED_MINT`-only and verifies both
+ledger manager/root replay and the current Core prepared-record operation ID
+before writing. A `PRE_REVENUE_SINGLE_STEP` policy requiring a token-level
+primary or royalty snapshot is rejected; no third snapshot proof is introduced.
 
 ### Atomic Cutover And Core Replay Removal
 
@@ -336,6 +402,28 @@ artifacts from canonical generators.
 - Direct and relayed adapter calls with the same signed request derive the same
   preview because the executor is adapter `address(this)`; payer, relayer,
   external-caller, and `tx.origin` substitutions fail.
+- Preview is `external view`, staticcall-safe, state- and event-free, and
+  returns exactly `N` token operation IDs. Changed caller, nonce, expected
+  policy, gate/resolver result, request field, or vector length changes the
+  preview or makes execution fail; any preview/execution race rolls back the
+  deposit.
+- Configured and ungated execution accept the current or one unexpired
+  immediate-predecessor policy identity; expired, non-immediate, substituted,
+  zero, and gate-mismatched hashes fail. Missing current-policy artist consent
+  fails even when predecessor identity is valid. Boundary tests cover one
+  second before, exactly at, and one second after
+  `previousPolicyGraceUntil`, and a second rotation invalidates the older
+  predecessor.
+- Current consent, modules, counter policies, caps, and increments govern
+  predecessor-bound execution. The root commits `currentPolicyHash` and
+  `boundPolicyHash`; central ledger/root and manager/batch events carry both;
+  child counter, authorization, and nullifier events carry the bound hash and
+  join through the root. Preview/execution mutation, substitution, omission,
+  and rotation races prove these facts.
+- Configured gates reject authorizer/address-kind disagreement, zero or
+  mismatched authorizers, `CALLER_ADAPTER` inconsistency, and any result that
+  differs from `batch.authorizer`; ungated normalization remains the exact
+  zero/NONE tuple.
 - Every typed request, validated-result, root, and token preimage field has a
   mutation negative. Equivalent signature/Merkle/resolver proof encodings with
   the same canonical result preserve identity; a changed result does not.
@@ -350,6 +438,9 @@ artifacts from canonical generators.
 - Resolver and token-scoped settlement reject a mismatched root or token
   operation ID. Entropy registration proves its token-ID/mint-commitment
   boundary without acquiring replay ownership.
+- `snapshotTokenRoyaltyAtMint` succeeds only on `PREPARED_MINT` with the
+  existing prepared-record proof; single-step rejects snapshot-required
+  policies before any deposit, ledger, token, or snapshot effect.
 - Counter failure, authorization/nullifier failure, Core prepare/completion
   failure, resolver failure, settlement failure, entropy-registration failure,
   receiver rejection, and a later-token failure all roll back root use,

@@ -101,14 +101,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:3c85737d8b805afdf12bbebac049420fed269984d485638f355ee9f7de9842e9",
-        "size_bytes": 125664,
+        "sha256": "sha256:1048233ff0d4a1f3d17581b9afbb254e781004ca72612ddf8f65b8844897fbb7",
+        "size_bytes": 126254,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:25f0b3386c8a700bda70b8055387dcfd39b918cdd047bef73cfbf9edda280b30",
-        "size_bytes": 122324
+        "sha256": "sha256:8a77ef4b992125d53a07b4b122ffb9d1f3583a18c5a6ed0cde7c3ceeab7c6fd1",
+        "size_bytes": 122914
       }
     },
     "release_candidate_lockfile": {
@@ -185,7 +185,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:7a76619422104ddd866faff077fd845334c8afa850ca3d0c19313e5a6541991f",
+      "sha256": "sha256:6988ca0c9ebd9b9d37ba3ffc3fcf14058c1395870a4194e53df9a407078723ba",
       "size_bytes": 32093,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2371,8 +2371,8 @@
   "release_notes_and_policy": {
     "changelog": {
       "path": "CHANGELOG.md",
-      "sha256": "sha256:3df3951924794dbf65d2fb8ae405b0631f9cac5070d01622e154399d14f0e23d",
-      "size_bytes": 124280
+      "sha256": "sha256:6be515e9c8ef5c59411be83fae48094d87570b4f53c5225528cb5138b29fcbd3",
+      "size_bytes": 124888
     },
     "governance_docs": [
       {
@@ -2517,8 +2517,8 @@
       },
       {
         "path": "docs/launch-conformance-matrix.md",
-        "sha256": "sha256:ca1cca2b1138e0ef68c20b1b2e205f6762494ca254e8368916c90f2ab59029a6",
-        "size_bytes": 137098
+        "sha256": "sha256:31a330d1d23163c1bc61e5f6d6f6110a114145fb24d7ede1e74bba2b54d8f9e5",
+        "size_bytes": 137119
       },
       {
         "path": "docs/adr/0017-raise-only-parameter-governance.md",
@@ -2527,23 +2527,23 @@
       },
       {
         "path": "docs/adr/0018-batch-operation-root-and-token-identity.md",
-        "sha256": "sha256:a9efe5adfc2d5ffa1591d6e7f14b8ffd5815fc70fc4d9cc1160a6c4b170da62d",
-        "size_bytes": 19084
+        "sha256": "sha256:26f76965c30e7c18bd9fa4ca56198b9886a91b6c24ced520ceef68645220fe23",
+        "size_bytes": 24512
       },
       {
         "path": "docs/revenue-splits-and-royalties.md",
-        "sha256": "sha256:90eb7c677bbff32440dff18dc0eb763f7941e21d80b29375d1fa04e467779235",
-        "size_bytes": 238891
+        "sha256": "sha256:d94388671976b255ae0b5676028fc32056a671e7de559f90ce0a231b55317023",
+        "size_bytes": 240322
       },
       {
         "path": "docs/mint-policy-and-accounting.md",
-        "sha256": "sha256:faa77ad1e7e27b37b558b4ef28638534d4c16a335252ae2adb13568278e89294",
-        "size_bytes": 198225
+        "sha256": "sha256:5f9e2f1f6e01631d68b16563b07b06bf9597a869df276393a04f3dae5c7d1207",
+        "size_bytes": 207728
       },
       {
         "path": "docs/stream-sales-and-auctions.md",
-        "sha256": "sha256:feddfe5d5e07ab3a2b3e320cad922d13e6771795f2090361fb4f121342b07e09",
-        "size_bytes": 220661
+        "sha256": "sha256:d0199165441951269e755465f253235e9d67f7da8b37e30638e426ce2a4c0478",
+        "size_bytes": 221512
       },
       {
         "path": "docs/stream-artist-authority.md",
@@ -2768,8 +2768,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:29c4b2261c35450b5145dfc664342fd3ed9af4355d71d20ac24566ccf3880852",
-        "size_bytes": 110213
+        "sha256": "sha256:b10e1345c13777cc8eb034f84cc7e71f73f9b53ebfcf8bf11e85b25e0a81ef59",
+        "size_bytes": 111124
       },
       {
         "path": "docs/status.md",

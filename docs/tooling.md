@@ -1332,6 +1332,19 @@ release manifest intentionally marks checksum-bundle digests as
 would create a hash cycle. Detached signatures and signed git tags still
 require a release ceremony and are not produced by the local smoke gate.
 
+Canonical checksum generation uses the exact reviewed covered-path inventory
+and independently pins the 20-module release-tool runtime closure plus eight
+focused trust-policy tests as ordinary, in-repository files. Its deliberately
+narrow Python dependency grammar supports ordinary `Import`/`ImportFrom` and
+direct string-literal `importlib.import_module`, `__import__`, or
+`builtins.__import__` calls only. Importer objects may not escape those direct
+call sites. `exec`, `eval`, `compile`, `runpy`, `importlib.util` or
+`importlib.machinery` loader APIs, `exec_module`, and `load_module` fail closed;
+new alternate execution mechanisms require an explicit policy review. Broad
+directory entries do not stand in for reviewed tool files. Test-only subset
+bundles require the explicit `custom-subset` policy and a noncanonical output
+directory, and cannot overwrite or masquerade as `release-artifacts/latest`.
+
 The changelog gate checks release-impacting paths against `CHANGELOG.md`. If a
 branch changes contract surfaces, release artifacts, deployment artifacts, or
 release workflow files, `CHANGELOG.md` must be part of the change and its

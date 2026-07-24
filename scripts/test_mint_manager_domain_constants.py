@@ -72,6 +72,61 @@ def committed_operation_documents() -> dict[Path, str]:
     }
 
 
+def mutate_table_row_cell(
+    markdown: str,
+    row_key: str,
+    column_index: int,
+    replacement: str,
+) -> str:
+    matches = 0
+    output: list[str] = []
+    for raw_line in markdown.splitlines(keepends=True):
+        newline = "\n" if raw_line.endswith("\n") else ""
+        line = raw_line.removesuffix("\n")
+        stripped = line.strip()
+        if stripped.startswith("|") and stripped.endswith("|"):
+            cells = line.strip().strip("|").split("|")
+            if cells and checker.normalize_cell(cells[0]) == row_key:
+                cells[column_index] = f" {replacement} "
+                line = "|" + "|".join(cells) + "|"
+                matches += 1
+        output.append(line + newline)
+    if matches != 1:
+        raise AssertionError(
+            f"expected exactly one table row for {row_key}, found {matches}"
+        )
+    return "".join(output)
+
+
+def exact_table_row_line(markdown: str, row_key: str) -> str:
+    matches: list[str] = []
+    for raw_line in markdown.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|") or not line.endswith("|"):
+            continue
+        cells = line.strip("|").split("|")
+        if cells and checker.normalize_cell(cells[0]) == row_key:
+            matches.append(raw_line)
+    if len(matches) != 1:
+        raise AssertionError(
+            f"expected one exact table row for {row_key}, found {len(matches)}"
+        )
+    return matches[0]
+
+
+def exact_event_declaration(markdown: str, event_name: str) -> str:
+    matches = re.findall(
+        rf"\bevent\s+{re.escape(event_name)}\s*\(.*?\)\s*;",
+        markdown,
+        re.DOTALL,
+    )
+    if len(matches) != 1:
+        raise AssertionError(
+            f"expected one event declaration for {event_name}, found {len(matches)}"
+        )
+    return matches[0]
+
+
 class MintManagerDomainConstantTests(unittest.TestCase):
     def test_committed_domain_table_matches_solidity_constants(self) -> None:
         checker.validate_repo(SCRIPT_PATH.parent.parent)
@@ -123,19 +178,20 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             )
 
     def test_rejects_target_operation_hash_drift(self) -> None:
-        rows = [
-            checker.OPERATION_DOMAIN_MARKER,
-            "",
-            "| Constant | String preimage | Hash |",
-            "| --- | --- | --- |",
-        ]
-        for index, (name, preimage) in enumerate(checker.TARGET_OPERATION_DOMAINS):
-            digest = "0x" + ("00" if index == 0 else "11") * 32
-            rows.append(f"| `{name}` | `{preimage}` | `{digest}` |")
-        rows.extend(["", "```solidity", ""])
-        architecture = "\n".join(
-            f"| `{name}` | `{preimage}` | {'0x' + '11' * 32} |"
-            for name, preimage in checker.TARGET_OPERATION_DOMAINS
+        documents = committed_operation_documents()
+        name, _preimage = checker.TARGET_OPERATION_DOMAINS[0]
+        mint_spec = documents[checker.MINT_SPEC_PATH]
+        hash_match = re.search(
+            rf"(?m)^\| `{name}` \|.*?\| `(?P<hash>0x[0-9a-f]{{64}})` \|$",
+            mint_spec,
+        )
+        self.assertIsNotNone(hash_match)
+        assert hash_match is not None
+        stale_spec = (
+            mint_spec[: hash_match.start("hash")]
+            + "0x"
+            + "00" * 32
+            + mint_spec[hash_match.end("hash") :]
         )
 
         with self.assertRaisesRegex(
@@ -143,9 +199,8 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             "MINT_REQUEST_COMMITMENT_DOMAIN target hash drifted",
         ):
             checker.validate_operation_domains(
-                "\n".join(rows),
-                architecture,
-                keccak_fn=lambda _: "0x" + "11" * 32,
+                stale_spec,
+                documents[checker.DOC_PATH],
             )
 
     def test_rejects_missing_operation_identity_contract_fragment(self) -> None:
@@ -164,10 +219,7 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             checker.validate_operation_identity_fragments(documents)
 
     def test_rejects_target_operation_selector_drift(self) -> None:
-        mint_spec = "\n".join(
-            f"| `{selector}` | `{signature}` |"
-            for signature, selector in checker.TARGET_OPERATION_SELECTORS
-        )
+        mint_spec = committed_operation_documents()[checker.MINT_SPEC_PATH]
         first_selector = checker.TARGET_OPERATION_SELECTORS[0][1]
         stale_spec = mint_spec.replace(
             f"`{first_selector}`", "`0x00000000`", 1
@@ -179,12 +231,39 @@ class MintManagerDomainConstantTests(unittest.TestCase):
         ):
             checker.validate_operation_selectors(
                 stale_spec,
-                keccak_fn=lambda signature: next(
-                    selector + "0" * 56
-                    for expected_signature, selector in checker.TARGET_OPERATION_SELECTORS
-                    if expected_signature == signature
-                ),
             )
+
+    def test_rejects_legacy_consume_selector_and_signature(self) -> None:
+        documents = committed_operation_documents()
+        mint_spec = documents[checker.MINT_SPEC_PATH]
+        selector_mutation = mint_spec.replace(
+            "`0x82e8f383`",
+            "`0x79e9746a`",
+            1,
+        )
+        self.assertNotEqual(selector_mutation, mint_spec)
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity selector row missing or drifted",
+        ):
+            checker.validate_operation_selectors(selector_mutation)
+
+        legacy_abi = mint_spec.replace(
+            "function consume(\n"
+            "    uint256 collectionId,\n"
+            "    bytes32 phaseId,\n"
+            "    CounterConsumption[] calldata consumptions,",
+            "function consume(\n"
+            "    CounterConsumption[] calldata consumptions,",
+            1,
+        )
+        self.assertNotEqual(legacy_abi, mint_spec)
+        documents[checker.MINT_SPEC_PATH] = legacy_abi
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "consume ABI declaration block drifted",
+        ):
+            checker.validate_operation_abi(documents)
 
     def test_rejects_every_operation_preimage_field_mutation(self) -> None:
         for variable_name, terms in checker.TARGET_OPERATION_PREIMAGES.items():
@@ -365,9 +444,13 @@ class MintManagerDomainConstantTests(unittest.TestCase):
         documents[checker.MINT_SPEC_PATH] = documents[
             checker.MINT_SPEC_PATH
         ].replace(
-            "and exactly `address(this)` for the executor term",
-            "and the adapter external caller for the executor term",
+            "executor term is exactly the adapter's `address(this)`",
+            "executor term is the adapter's external caller",
             1,
+        )
+        self.assertNotEqual(
+            documents[checker.MINT_SPEC_PATH],
+            committed_operation_documents()[checker.MINT_SPEC_PATH],
         )
 
         with self.assertRaisesRegex(
@@ -445,8 +528,8 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             ),
             (
                 checker.MINT_SPEC_PATH,
-                "root, per-token operation IDs",
-                "root, per-token IDs",
+                "per-token operation IDs, `currentPolicyHash`",
+                "per-token IDs, `currentPolicyHash`",
             ),
         )
         for path, old, new in mutations:
@@ -488,7 +571,7 @@ class MintManagerDomainConstantTests(unittest.TestCase):
 
         with self.assertRaisesRegex(
             checker.MintManagerDomainError,
-            "protocol-v1 mirror row missing or drifted",
+            "protocol-v1 mirror Hash value drifted",
         ):
             checker.validate_sale_authorization_typehash(
                 documents,
@@ -539,6 +622,68 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             "consume must have exactly one Solidity declaration",
         ):
             checker.validate_operation_abi(documents)
+
+    def test_rejects_consume_phase_identity_omission_reorder_or_type_drift(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        mint_spec = documents[checker.MINT_SPEC_PATH]
+        declaration = checker.TARGET_LEDGER_CONSUME_DECLARATION
+        self.assertEqual(mint_spec.count(declaration), 1)
+        mutations = (
+            (
+                "    uint256 collectionId,\n    bytes32 phaseId,\n",
+                "    uint256 collectionId,\n",
+            ),
+            (
+                "    uint256 collectionId,\n    bytes32 phaseId,\n",
+                "    bytes32 phaseId,\n    uint256 collectionId,\n",
+            ),
+            (
+                "    uint256 collectionId,\n    bytes32 phaseId,\n",
+                "    bytes32 collectionId,\n    bytes32 phaseId,\n",
+            ),
+        )
+        for old, new in mutations:
+            with self.subTest(mutation=new):
+                mutated_declaration = declaration.replace(old, new, 1)
+                self.assertNotEqual(mutated_declaration, declaration)
+                mutated = dict(documents)
+                mutated[checker.MINT_SPEC_PATH] = mint_spec.replace(
+                    declaration,
+                    mutated_declaration,
+                    1,
+                )
+                self.assertNotEqual(
+                    mutated[checker.MINT_SPEC_PATH],
+                    mint_spec,
+                )
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    "consume ABI declaration block drifted",
+                ):
+                    checker.validate_operation_abi(mutated)
+
+    def test_rejects_removal_of_ledger_event_rollback_guarantee(self) -> None:
+        documents = committed_operation_documents()
+        adr = documents[checker.ADR_0018_PATH]
+        canonical = (
+            "receiver failure reverts all ledger writes, events, and the manager nonce\n"
+            "reservation."
+        )
+        mutated_text = adr.replace(
+            canonical,
+            "receiver failure reverts all ledger writes and the manager nonce\n"
+            "reservation.",
+            1,
+        )
+        self.assertNotEqual(mutated_text, adr)
+        documents[checker.ADR_0018_PATH] = mutated_text
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity contract drifted",
+        ):
+            checker.validate_operation_identity_fragments(documents)
 
     def test_rejects_target_operation_event_index_drift(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
@@ -591,6 +736,771 @@ class MintManagerDomainConstantTests(unittest.TestCase):
             "MintLedgerOperationRootConsumed target event signature/field layout drifted",
         ):
             checker.validate_operation_events(documents)
+
+    def test_rejects_non_view_operation_preview(self) -> None:
+        mint_spec = committed_operation_documents()[checker.MINT_SPEC_PATH]
+        mutated = mint_spec.replace(
+            ") external view returns (\n    bytes32 operationRoot,",
+            ") external pure returns (\n    bytes32 operationRoot,",
+            1,
+        )
+        self.assertNotEqual(mutated, mint_spec)
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "previewSingleStepMintOperation must be external view",
+        ):
+            checker.validate_manager_entry_ownership(mutated)
+
+    def test_rejects_duplicate_or_conflicting_selector_rows(self) -> None:
+        mint_spec = committed_operation_documents()[checker.MINT_SPEC_PATH]
+        signature, _selector = checker.TARGET_OPERATION_SELECTORS[0]
+        mutated = (
+            mint_spec
+            + f"\n| `0x00000000` | `{signature}` |\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "selector row cardinality/ownership drifted",
+        ):
+            checker.validate_operation_selectors(mutated)
+
+    def test_rejects_arbitrary_extra_selector_table_row(self) -> None:
+        mint_spec = committed_operation_documents()[checker.MINT_SPEC_PATH]
+        mutated = mint_spec.replace(
+            checker.OPERATION_SELECTOR_END_MARKER,
+            "| `0xdeadbeef` | `arbitraryCallback(bytes)` |"
+            + checker.OPERATION_SELECTOR_END_MARKER,
+            1,
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "selector table membership drifted",
+        ):
+            checker.validate_operation_selectors(mutated)
+
+    def test_rejects_duplicate_or_conflicting_operation_domain_mirrors(self) -> None:
+        documents = committed_operation_documents()
+        name, preimage = checker.TARGET_OPERATION_DOMAINS[0]
+        mutated = (
+            documents[checker.DOC_PATH]
+            + f"\n| `{name}` | `{preimage}` | {'0x' + '00' * 32} | "
+            "`StreamMintManager` | `1` | conflicting |\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "cardinality/ownership drifted",
+        ):
+            checker.validate_operation_domains(
+                documents[checker.MINT_SPEC_PATH],
+                mutated,
+            )
+
+    def test_rejects_every_operation_domain_mirror_column_drift(self) -> None:
+        documents = committed_operation_documents()
+        name, _preimage = checker.TARGET_OPERATION_DOMAINS[0]
+        columns = (
+            (0, "Constant name"),
+            (1, "String preimage"),
+            (2, "Hash value"),
+            (3, "Owner"),
+            (4, "Schema version"),
+            (5, "Inputs"),
+        )
+        for column_index, column_name in columns:
+            with self.subTest(column=column_name):
+                architecture = mutate_table_row_cell(
+                    documents[checker.DOC_PATH],
+                    name,
+                    column_index,
+                    f"mutated-{column_index}",
+                )
+                expected_error = (
+                    "cardinality/ownership drifted"
+                    if column_index == 0
+                    else f"mirror {re.escape(column_name)} drifted"
+                )
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    expected_error,
+                ):
+                    checker.validate_operation_domains(
+                        documents[checker.MINT_SPEC_PATH],
+                        architecture,
+                    )
+
+    def test_rejects_duplicate_operation_domain_row_outside_home(self) -> None:
+        documents = committed_operation_documents()
+        name, preimage = checker.TARGET_OPERATION_DOMAINS[0]
+        digest = checker.cast_keccak256(preimage)
+        mint_spec = (
+            documents[checker.MINT_SPEC_PATH]
+            + f"\n| `{name}` | `{preimage}` | `{digest}` |\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation-domain home row cardinality/ownership drifted",
+        ):
+            checker.validate_operation_domains(
+                mint_spec,
+                documents[checker.DOC_PATH],
+            )
+
+    def test_rejects_duplicate_sale_authorization_assignment(self) -> None:
+        documents = committed_operation_documents()
+        documents[checker.SALES_SPEC_PATH] += (
+            "\nSALE_AUTHORIZATION_TYPEHASH = keccak256(\n"
+            '    "SaleAuthorization(bytes32 conflicting)"\n'
+            ");\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "assignment cardinality/ownership drifted",
+        ):
+            checker.validate_sale_authorization_typehash(documents)
+
+    def test_rejects_sale_authorization_assignment_moved_outside_owner(self) -> None:
+        documents = committed_operation_documents()
+        sales_text = documents[checker.SALES_SPEC_PATH]
+        assignment_match = re.search(
+            r"SALE_AUTHORIZATION_TYPEHASH\s*=\s*keccak256\s*"
+            r"\(.*?\)\s*;",
+            sales_text,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(assignment_match)
+        assert assignment_match is not None
+        assignment = assignment_match.group(0)
+        documents[checker.SALES_SPEC_PATH] = (
+            sales_text[: assignment_match.start()]
+            + sales_text[assignment_match.end() :]
+            + "\n"
+            + assignment
+            + "\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "assignment cardinality/ownership drifted",
+        ):
+            checker.validate_sale_authorization_typehash(documents)
+
+    def test_rejects_sale_authorization_assignment_in_every_non_owner_doc(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        assignment_match = re.search(
+            r"SALE_AUTHORIZATION_TYPEHASH\s*=\s*keccak256\s*"
+            r"\(.*?\)\s*;",
+            documents[checker.SALES_SPEC_PATH],
+            re.DOTALL,
+        )
+        self.assertIsNotNone(assignment_match)
+        assert assignment_match is not None
+        assignment = assignment_match.group(0)
+        variants = (
+            ("duplicate", assignment),
+            (
+                "conflicting",
+                assignment.replace(
+                    "SaleAuthorization(",
+                    "SaleAuthorizationConflict(",
+                    1,
+                ),
+            ),
+        )
+        for path in sorted(set(documents) - {checker.SALES_SPEC_PATH}):
+            for label, candidate in variants:
+                with self.subTest(path=path, variant=label):
+                    mutated = dict(documents)
+                    mutated[path] += "\n" + candidate + "\n"
+                    with self.assertRaisesRegex(
+                        checker.MintManagerDomainError,
+                        re.escape(path.as_posix()),
+                    ):
+                        checker.validate_sale_authorization_typehash(mutated)
+
+    def test_rejects_sale_authorization_assignment_relocated_to_every_non_owner_doc(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        sales_text = documents[checker.SALES_SPEC_PATH]
+        assignment_match = re.search(
+            r"SALE_AUTHORIZATION_TYPEHASH\s*=\s*keccak256\s*"
+            r"\(.*?\)\s*;",
+            sales_text,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(assignment_match)
+        assert assignment_match is not None
+        assignment = assignment_match.group(0)
+        without_assignment = (
+            sales_text[: assignment_match.start()]
+            + sales_text[assignment_match.end() :]
+        )
+        for path in sorted(set(documents) - {checker.SALES_SPEC_PATH}):
+            with self.subTest(path=path):
+                mutated = dict(documents)
+                mutated[checker.SALES_SPEC_PATH] = without_assignment
+                mutated[path] += "\n" + assignment + "\n"
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    re.escape(path.as_posix()),
+                ):
+                    checker.validate_sale_authorization_typehash(mutated)
+
+    def test_sale_authorization_assignment_non_owner_paths_are_sorted(self) -> None:
+        documents = committed_operation_documents()
+        assignment_match = re.search(
+            r"SALE_AUTHORIZATION_TYPEHASH\s*=\s*keccak256\s*"
+            r"\(.*?\)\s*;",
+            documents[checker.SALES_SPEC_PATH],
+            re.DOTALL,
+        )
+        self.assertIsNotNone(assignment_match)
+        assert assignment_match is not None
+        assignment = assignment_match.group(0)
+        non_owners = sorted(set(documents) - {checker.SALES_SPEC_PATH})
+        selected = [non_owners[-1], non_owners[0]]
+        mutated = dict(documents)
+        for path in selected:
+            mutated[path] += "\n" + assignment + "\n"
+        with self.assertRaises(checker.MintManagerDomainError) as raised:
+            checker.validate_sale_authorization_typehash(mutated)
+        expected = sorted(path.as_posix() for path in selected)
+        self.assertIn(f"non_owners={expected}", str(raised.exception))
+
+    def test_rejects_duplicate_sale_authorization_rows_in_each_owner(self) -> None:
+        documents = committed_operation_documents()
+        for path in (checker.SALES_SPEC_PATH, checker.DOC_PATH):
+            with self.subTest(path=path):
+                mutated = dict(documents)
+                mutated[path] += (
+                    "\n| `SALE_AUTHORIZATION_TYPEHASH` | conflicting | "
+                    f"{checker.SALE_AUTHORIZATION_TYPEHASH} | owner | `1` | bad |\n"
+                )
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    "cardinality/ownership drifted",
+                ):
+                    checker.validate_sale_authorization_typehash(
+                        mutated,
+                        keccak_fn=lambda _: checker.SALE_AUTHORIZATION_TYPEHASH,
+                    )
+
+    def test_rejects_sale_authorization_rows_in_every_non_owner_doc(self) -> None:
+        documents = committed_operation_documents()
+        sales_row = exact_table_row_line(
+            documents[checker.SALES_SPEC_PATH],
+            "SALE_AUTHORIZATION_TYPEHASH",
+        )
+        variants = (
+            ("duplicate", sales_row),
+            (
+                "conflicting",
+                sales_row.replace("sale adapters", "conflicting owner", 1),
+            ),
+        )
+        non_owners = sorted(
+            set(documents) - {checker.SALES_SPEC_PATH, checker.DOC_PATH}
+        )
+        for path in non_owners:
+            for label, row in variants:
+                with self.subTest(path=path, variant=label):
+                    mutated = dict(documents)
+                    mutated[path] += "\n" + row + "\n"
+                    with self.assertRaisesRegex(
+                        checker.MintManagerDomainError,
+                        re.escape(path.as_posix()),
+                    ):
+                        checker.validate_sale_authorization_typehash(
+                            mutated,
+                            keccak_fn=lambda _: checker.SALE_AUTHORIZATION_TYPEHASH,
+                        )
+
+    def test_rejects_sale_authorization_rows_relocated_to_every_non_owner_doc(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        non_owners = sorted(
+            set(documents) - {checker.SALES_SPEC_PATH, checker.DOC_PATH}
+        )
+        for owner in (checker.SALES_SPEC_PATH, checker.DOC_PATH):
+            row = exact_table_row_line(
+                documents[owner],
+                "SALE_AUTHORIZATION_TYPEHASH",
+            )
+            without_row = documents[owner].replace(row, "", 1)
+            self.assertNotEqual(without_row, documents[owner])
+            for path in non_owners:
+                with self.subTest(owner=owner, path=path):
+                    mutated = dict(documents)
+                    mutated[owner] = without_row
+                    mutated[path] += "\n" + row + "\n"
+                    with self.assertRaisesRegex(
+                        checker.MintManagerDomainError,
+                        re.escape(path.as_posix()),
+                    ):
+                        checker.validate_sale_authorization_typehash(
+                            mutated,
+                            keccak_fn=lambda _: checker.SALE_AUTHORIZATION_TYPEHASH,
+                        )
+
+    def test_rejects_every_sale_authorization_home_row_column_drift(self) -> None:
+        documents = committed_operation_documents()
+        for column_index, column_name in enumerate(
+            (
+                "Constant name",
+                "String preimage",
+                "Hash value",
+                "Owner",
+                "Schema version",
+                "Inputs",
+            )
+        ):
+            with self.subTest(column=column_name):
+                mutated = dict(documents)
+                mutated[checker.SALES_SPEC_PATH] = mutate_table_row_cell(
+                    documents[checker.SALES_SPEC_PATH],
+                    "SALE_AUTHORIZATION_TYPEHASH",
+                    column_index,
+                    f"mutated-{column_index}",
+                )
+                expected_error = (
+                    "cardinality/ownership drifted"
+                    if column_index == 0
+                    else f"sales home {re.escape(column_name)} drifted"
+                )
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    expected_error,
+                ):
+                    checker.validate_sale_authorization_typehash(
+                        mutated,
+                        keccak_fn=lambda _: checker.SALE_AUTHORIZATION_TYPEHASH,
+                    )
+
+    def test_rejects_every_sale_authorization_architecture_column_drift(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        for column_index, column_name in enumerate(
+            (
+                "Constant name",
+                "String preimage",
+                "Hash value",
+                "Owner",
+                "Schema version",
+                "Inputs",
+            )
+        ):
+            with self.subTest(column=column_name):
+                mutated = dict(documents)
+                mutated[checker.DOC_PATH] = mutate_table_row_cell(
+                    documents[checker.DOC_PATH],
+                    "SALE_AUTHORIZATION_TYPEHASH",
+                    column_index,
+                    f"mutated-{column_index}",
+                )
+                expected_error = (
+                    "cardinality/ownership drifted"
+                    if column_index == 0
+                    else f"protocol-v1 mirror {re.escape(column_name)} drifted"
+                )
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    expected_error,
+                ):
+                    checker.validate_sale_authorization_typehash(
+                        mutated,
+                        keccak_fn=lambda _: checker.SALE_AUTHORIZATION_TYPEHASH,
+                    )
+
+    def test_rejects_duplicate_or_conflicting_event_topic_rows(self) -> None:
+        documents = committed_operation_documents()
+        signature = checker.TARGET_OPERATION_EVENTS[0][0]
+        name = signature.split("(", 1)[0]
+        documents[checker.CONFORMANCE_PATH] += (
+            f"\n| `{name}(bytes32)` | `{'0x' + '00' * 32}` | `bad` | mint ledger |\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "topic mirror cardinality/ownership drifted",
+        ):
+            checker.validate_operation_events(documents)
+
+    def test_rejects_arbitrary_extra_event_topic_table_row(self) -> None:
+        documents = committed_operation_documents()
+        documents[checker.CONFORMANCE_PATH] = documents[
+            checker.CONFORMANCE_PATH
+        ].replace(
+            checker.EVENT_TOPIC_END_MARKER,
+            "| `ArbitraryEvent(bytes32)` | `"
+            + "0x"
+            + "00" * 32
+            + "` | `value` | arbitrary |"
+            + checker.EVENT_TOPIC_END_MARKER,
+            1,
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "topic table membership drifted",
+        ):
+            checker.validate_operation_events(documents)
+
+    def test_rejects_duplicate_exact_target_event_declaration(self) -> None:
+        documents = committed_operation_documents()
+        event_match = re.search(
+            r"\bevent MintLedgerOperationRootConsumed\s*\(.*?\)\s*;",
+            documents[checker.MINT_SPEC_PATH],
+            re.DOTALL,
+        )
+        self.assertIsNotNone(event_match)
+        assert event_match is not None
+        documents[checker.MINT_SPEC_PATH] += (
+            "\n```solidity\n" + event_match.group(0) + "\n```\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "event declaration cardinality/ownership drifted",
+        ):
+            checker.validate_operation_events(documents)
+
+    def test_rejects_target_event_moved_to_wrong_document(self) -> None:
+        documents = committed_operation_documents()
+        event_match = re.search(
+            r"\bevent TokenRoyaltySnapshotted\s*\(.*?\)\s*;",
+            documents[checker.REVENUE_DOC_PATH],
+            re.DOTALL,
+        )
+        self.assertIsNotNone(event_match)
+        assert event_match is not None
+        event = event_match.group(0)
+        documents[checker.REVENUE_DOC_PATH] = (
+            documents[checker.REVENUE_DOC_PATH][: event_match.start()]
+            + documents[checker.REVENUE_DOC_PATH][event_match.end() :]
+        )
+        documents[checker.MINT_SPEC_PATH] += (
+            "\n```solidity\n" + event + "\n```\n"
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "event declaration cardinality/ownership drifted",
+        ):
+            checker.validate_operation_events(documents)
+
+    def test_rejects_each_target_event_in_every_non_owner_document(self) -> None:
+        documents = committed_operation_documents()
+        for signature, _topic, _indexed, _parameters in (
+            checker.TARGET_OPERATION_EVENTS
+        ):
+            name = signature.split("(", 1)[0]
+            owner = checker.TARGET_OPERATION_EVENT_OWNERS[name]
+            declaration = exact_event_declaration(documents[owner], name)
+            variants = (
+                ("duplicate", declaration),
+                ("conflicting", f"event {name}(bytes32 conflicting);"),
+            )
+            for path in sorted(set(documents) - {owner}):
+                for label, candidate in variants:
+                    with self.subTest(event=name, path=path, variant=label):
+                        mutated = dict(documents)
+                        mutated[path] += (
+                            "\n```solidity\n" + candidate + "\n```\n"
+                        )
+                        with self.assertRaisesRegex(
+                            checker.MintManagerDomainError,
+                            re.escape(path.as_posix()),
+                        ):
+                            checker.validate_operation_events(mutated)
+
+    def test_rejects_each_target_event_relocated_to_every_non_owner_document(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        for signature, _topic, _indexed, _parameters in (
+            checker.TARGET_OPERATION_EVENTS
+        ):
+            name = signature.split("(", 1)[0]
+            owner = checker.TARGET_OPERATION_EVENT_OWNERS[name]
+            declaration = exact_event_declaration(documents[owner], name)
+            without_declaration = documents[owner].replace(declaration, "", 1)
+            self.assertNotEqual(without_declaration, documents[owner])
+            for path in sorted(set(documents) - {owner}):
+                with self.subTest(event=name, path=path):
+                    mutated = dict(documents)
+                    mutated[owner] = without_declaration
+                    mutated[path] += (
+                        "\n```solidity\n" + declaration + "\n```\n"
+                    )
+                    with self.assertRaisesRegex(
+                        checker.MintManagerDomainError,
+                        re.escape(path.as_posix()),
+                    ):
+                        checker.validate_operation_events(mutated)
+
+    def test_rejects_each_event_topic_row_in_every_non_owner_document(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        for signature, _topic, _indexed, _parameters in (
+            checker.TARGET_OPERATION_EVENTS
+        ):
+            name = signature.split("(", 1)[0]
+            row = exact_table_row_line(
+                documents[checker.CONFORMANCE_PATH],
+                signature,
+            )
+            variants = (
+                ("duplicate", row),
+                (
+                    "conflicting",
+                    row.replace(signature, f"{name}(bytes32)", 1),
+                ),
+            )
+            for path in sorted(set(documents) - {checker.CONFORMANCE_PATH}):
+                for label, candidate in variants:
+                    with self.subTest(event=name, path=path, variant=label):
+                        mutated = dict(documents)
+                        mutated[path] += "\n" + candidate + "\n"
+                        with self.assertRaisesRegex(
+                            checker.MintManagerDomainError,
+                            re.escape(path.as_posix()),
+                        ):
+                            checker.validate_operation_events(mutated)
+
+    def test_rejects_each_event_topic_row_relocated_to_every_non_owner_document(
+        self,
+    ) -> None:
+        documents = committed_operation_documents()
+        for signature, _topic, _indexed, _parameters in (
+            checker.TARGET_OPERATION_EVENTS
+        ):
+            name = signature.split("(", 1)[0]
+            row = exact_table_row_line(
+                documents[checker.CONFORMANCE_PATH],
+                signature,
+            )
+            without_row = documents[checker.CONFORMANCE_PATH].replace(row, "", 1)
+            self.assertNotEqual(
+                without_row,
+                documents[checker.CONFORMANCE_PATH],
+            )
+            for path in sorted(set(documents) - {checker.CONFORMANCE_PATH}):
+                with self.subTest(event=name, path=path):
+                    mutated = dict(documents)
+                    mutated[checker.CONFORMANCE_PATH] = without_row
+                    mutated[path] += "\n" + row + "\n"
+                    with self.assertRaisesRegex(
+                        checker.MintManagerDomainError,
+                        re.escape(path.as_posix()),
+                    ):
+                        checker.validate_operation_events(mutated)
+
+    def test_rejects_snapshot_event_schema_version_not_first(self) -> None:
+        documents = committed_operation_documents()
+        revenue = documents[checker.REVENUE_DOC_PATH]
+        mutated = revenue.replace(
+            "event TokenRoyaltySnapshotted(\n    uint16 schemaVersion,\n"
+            "    bytes32 indexed operationId,",
+            "event TokenRoyaltySnapshotted(\n"
+            "    bytes32 indexed operationId,\n    uint16 schemaVersion,",
+            1,
+        )
+        self.assertNotEqual(mutated, revenue)
+        documents[checker.REVENUE_DOC_PATH] = mutated
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "TokenRoyaltySnapshotted target event signature/field layout drifted",
+        ):
+            checker.validate_operation_events(documents)
+
+    def test_rejects_current_bound_or_grace_contract_regression(self) -> None:
+        documents = committed_operation_documents()
+        mutations = (
+            (
+                checker.MINT_SPEC_PATH,
+                "`requireMintConsent(collectionId, phaseId, currentPolicyHash)`",
+                "`requireMintConsent(collectionId, phaseId, boundPolicyHash)`",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`boundPolicyHash` only when it equals that loaded current hash or "
+                "the exact\n   stored immediate predecessor with adjacent revision "
+                "and\n   `block.timestamp <= previousPolicyGraceUntil`.",
+                "`boundPolicyHash` only when it equals that loaded current hash or "
+                "the exact\n   stored immediate predecessor with adjacent revision "
+                "and\n   `block.timestamp < previousPolicyGraceUntil`.",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`gateResult.authorizer == batch.authorizer`",
+                "`gateResult.authorizer == msg.sender`",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "Missing current-policy artist consent",
+                "Missing predecessor-policy artist consent",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "Configured and ungated phases\n"
+                "   both accept the current or valid immediate-predecessor identity.",
+                "Ungated phases accept only the current identity.",
+            ),
+            (
+                checker.ADR_0018_PATH,
+                "The operation root explicitly\n"
+                "binds `currentPolicyHash` then `boundPolicyHash`",
+                "The operation root binds only `boundPolicyHash`",
+            ),
+            (
+                checker.ADR_0018_PATH,
+                "configured and ungated phases accept the current\n"
+                "or valid immediate-predecessor identity",
+                "configured phases accept a predecessor; ungated predecessor fails",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "Emit central manager batch and ledger root events with the root,\n"
+                "    per-token operation IDs, `currentPolicyHash`, and "
+                "`boundPolicyHash`.",
+                "Emit all events with only `boundPolicyHash`.",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "Child counter, authorization, and nullifier ledger events include\n"
+                "   `boundPolicyHash`; the central root event includes\n"
+                "   `currentPolicyHash` and `boundPolicyHash`",
+                "All ledger events include generic `policyHash`",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`MintLedgerCounterConsumed` carries\n"
+                "the `boundPolicyHash`, `operationRoot`, and cap/accounting values",
+                "`MintLedgerCounterConsumed` carries\n"
+                "the `policyHash`, `operationRoot`, and cap/accounting values",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "Preview returns `operationRoot` plus `operationIds`; it does not "
+                "separately\n     return either policy hash.",
+                "Every mint event, ledger consumption event, signed ticket, and "
+                "preview\n     response must include the active `policyHash`.",
+            ),
+            (
+                checker.REVENUE_DOC_PATH,
+                "Sale adapter calls the manager-owned\n"
+                "   `previewSingleStepMintOperation(batch, gateData)`.",
+                "Sale adapter derives the root from the request and nonce.",
+            ),
+            (
+                checker.REVENUE_DOC_PATH,
+                "currentPolicyHash)` on the artist authority registry",
+                "boundPolicyHash)` on the artist authority registry",
+            ),
+            (
+                checker.REVENUE_DOC_PATH,
+                "Mint manager passes the exact batch `collectionId` and `phaseId` "
+                "to the\n   ledger. Using the manager caller as scope, the ledger "
+                "independently loads\n   `currentPolicyHash` from that registered "
+                "phase tuple",
+                "Mint ledger verifies only the manager-registered policy hash",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`consume` receives explicit `collectionId` and `phaseId`;\n"
+                "   it never infers phase identity from `consumptions`, because a "
+                "valid phase\n   may consume an empty counter array.",
+                "`consume` infers phase identity from the first counter row.",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`registeredPhasePolicyHashes[msg.sender][collectionId][phaseId]`",
+                "`registeredPhasePolicyHashes[msg.sender][consumptions[0].phaseId]`",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`row.collectionId == collectionId` and "
+                "`row.phaseId == phaseId`",
+                "counter rows may span phases",
+            ),
+            (
+                checker.MINT_SPEC_PATH,
+                "`consumptions` may be empty. The ledger still validates manager, "
+                "explicit\n   phase, current/bound policy identity, root, "
+                "authorization, and nullifiers",
+                "empty consumptions revert",
+            ),
+            (
+                checker.ADR_0018_PATH,
+                "The caller never supplies\n"
+                "`currentPolicyHash`, and the ledger never infers phase identity "
+                "from counter\nrows or calls the manager.",
+                "The caller supplies currentPolicyHash.",
+            ),
+            (
+                checker.SALES_SPEC_PATH,
+                "Central manager-batch and ledger-root-consumption facts expose both\n"
+                "   `currentPolicyHash` and `boundPolicyHash`",
+                "Every emitted sale, mint, or consumption policy hash is the "
+                "same bound value",
+            ),
+        )
+        for path, old, new in mutations:
+            with self.subTest(path=path, mutation=new):
+                mutated = dict(documents)
+                mutated[path] = documents[path].replace(old, new, 1)
+                self.assertNotEqual(mutated[path], documents[path])
+                with self.assertRaises(checker.MintManagerDomainError):
+                    checker.validate_operation_identity_fragments(mutated)
+
+    def test_reports_missing_exact_selector_section_separately(self) -> None:
+        mint_spec = committed_operation_documents()[checker.MINT_SPEC_PATH]
+        mutated = mint_spec.replace(checker.OPERATION_SELECTOR_MARKER, "", 1)
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "missing section marker: Operation-identity selector goldens",
+        ):
+            checker.validate_operation_selectors(mutated)
+
+    def test_reports_missing_exact_domain_mirror_section_separately(self) -> None:
+        documents = committed_operation_documents()
+        architecture = documents[checker.DOC_PATH].replace(
+            checker.ARCHITECTURE_OPERATION_DOMAIN_MARKER,
+            "",
+            1,
+        )
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "missing section marker: ### Mint Manager And Ledger Extension",
+        ):
+            checker.validate_operation_domains(
+                documents[checker.MINT_SPEC_PATH],
+                architecture,
+            )
+
+    def test_rejects_current_bound_event_field_substitution(self) -> None:
+        documents = committed_operation_documents()
+        mint_spec = documents[checker.MINT_SPEC_PATH]
+        mutations = (
+            (
+                "bytes32 currentPolicyHash,\n    bytes32 indexed boundPolicyHash,",
+                "bytes32 boundPolicyHash,\n    bytes32 indexed boundPolicyHash,",
+            ),
+            (
+                "bytes32 currentPolicyHash,\n    bytes32 boundPolicyHash\n);",
+                "bytes32 boundPolicyHash,\n    bytes32 boundPolicyHash\n);",
+            ),
+        )
+        for old, new in mutations:
+            with self.subTest(mutation=new):
+                mutated = dict(documents)
+                mutated[checker.MINT_SPEC_PATH] = mint_spec.replace(old, new, 1)
+                self.assertNotEqual(mutated[checker.MINT_SPEC_PATH], mint_spec)
+                with self.assertRaisesRegex(
+                    checker.MintManagerDomainError,
+                    "target event signature/field layout drifted",
+                ):
+                    checker.validate_operation_events(mutated)
 
 
 if __name__ == "__main__":

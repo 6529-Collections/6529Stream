@@ -1454,16 +1454,16 @@ atomic source cutover:
 
 | Canonical event signature | `topic0` | Indexed fields | Owner |
 | --- | --- | --- | --- |
-| `MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32)` | `0xa215a224251a6dd2f93c4d92b6a4cd6d1621373615aa392244c3c23a81871cec` | `operationRoot,manager,policyHash` | mint ledger |
+| `MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32,bytes32)` | `0x32821c46b022bd0995b50921248ed67b1d69a27b6c7afcb0202dcb1fcbbebb24` | `operationRoot,manager,boundPolicyHash` | mint ledger |
 | `MintLedgerCounterConsumed(uint16,bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32,bytes32)` | `0x82be7e1cfba45b84607ebae03dd739d908e1f7f47c467e76baabb4e64e53e888` | `valueKey,collectionId,phaseId` | mint ledger |
 | `MintLedgerAuthorizationConsumed(uint16,bytes32,bytes32,address,bytes32)` | `0x4ae914c98ae10051092be8a5fecc1584bd19371f9b629bc8a75a747a7eb77a80` | `authorizationId,operationRoot,manager` | mint ledger |
 | `MintLedgerNullifierConsumed(uint16,bytes32,bytes32,address,bytes32)` | `0x23bb00045254ab08fcfb223713983797db786dc4692827878cb7cef34f395b06` | `nullifier,operationRoot,manager` | mint ledger |
-| `MintBatchExecuted(uint16,bytes32,uint256,bytes32,address,address,address,uint256,uint256,bytes32,bytes32,bytes32)` | `0xdc12d057e4bc4c53588c2cee354357f4f3a3a32b7222ea45ad90edc833825f08` | `operationRoot,collectionId,phaseId` | mint manager |
+| `MintBatchExecuted(uint16,bytes32,uint256,bytes32,address,address,address,uint256,uint256,bytes32,bytes32,bytes32,bytes32)` | `0x4ea33b3409cbd25468bbab85511b2b4d12d4663b1225af0c8d845063a7f52415` | `operationRoot,collectionId,phaseId` | mint manager |
 | `MintAuthorizationConsumed(uint16,uint256,bytes32,bytes32,bytes32,bytes32)` | `0x83fe1cd55fdb106a490131e3f5f7923949cb4abe4cb211e2d8d0e29232969c9b` | `collectionId,phaseId,authorizationId` | mint manager |
 | `MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)` | `0x9a7828375f9c6ee3bf4a1308318e0f533ec7219823ec6b8e475529a60ebcdb8f` | `operationId,tokenId,operationRoot` | mint manager |
 | `PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)` | `0x1e2d8a1f460486b578f1af40819ce76be1d843363ec34b385fe331604f6817ac` | `operationId,tokenId,collectionId` | mint manager |
 | `PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)` | `0x5e1526e787b4d79b30b4a423d4b531694eb879c8814cf7aadc233fe251aa80dc` | `operationId,tokenId,collectionId` | mint manager |
-| `TokenRoyaltySnapshotted(bytes32,uint256,bytes32,uint16,uint256,bytes32,bytes32)` | `0x8431f1d0f17c2df44e8b9c3b60ae8123a2820031fe05e1981c9193212cda6822` | `operationId,tokenId,operationRoot` | revenue resolver |
+| `TokenRoyaltySnapshotted(uint16,bytes32,uint256,bytes32,uint256,bytes32,bytes32)` | `0x64ac79953c00686f9a6cf01fc972ff2b4395007acd76701973ae83ec0bfac491` | `operationId,tokenId,operationRoot` | revenue resolver |
 | `PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,uint16,address,bytes32,uint8,uint256,uint256,bytes32,bytes32,uint256,address,address,bytes32)` | `0x4df3ddabf618d53eea4adf5fb2991418d0ce412b0c9ffdf9c9f038e65de410fb` | `settlementKey,revenueClass,profileId` | primary settlement |
 | `EntropyRegistered(uint16,uint256,uint256,address,bytes32)` | `0x252241903fa837f87f928a854aa3e6a9b3233bc0f24a1e11fb3c99fbfa1fb3ee` | `collectionId,tokenId,mintedTo` | entropy coordinator |
 

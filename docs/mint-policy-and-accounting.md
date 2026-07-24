@@ -664,7 +664,8 @@ bytes32 validatedResultHash = keccak256(abi.encode(
 bytes32 requestCommitmentHash = keccak256(abi.encode(
     MINT_REQUEST_COMMITMENT_DOMAIN,
     address(payer),
-    address(authorizer),
+    address(batch.authorizer),
+    bytes32(batch.expectedPolicyHash),
     bytes32(initialRecipientsHash),
     bytes32(beneficiariesHash),
     bytes32(tokenDataArrayHash),
@@ -683,7 +684,8 @@ bytes32 operationRoot = keccak256(abi.encode(
     bytes32(executionPath),
     uint256(collectionId),
     bytes32(phaseId),
-    bytes32(policyHash),
+    bytes32(currentPolicyHash),
+    bytes32(boundPolicyHash),
     bytes32(batch.authorizationId),
     bytes32(requestCommitmentHash),
     bytes32(contextHash),
@@ -720,6 +722,14 @@ function executePreparedMint(
     bytes32[] memory operationIds
 );
 
+function previewSingleStepMintOperation(
+    MintBatch calldata batch,
+    bytes calldata gateData
+) external view returns (
+    bytes32 operationRoot,
+    bytes32[] memory operationIds
+);
+
 function nextOperationNonce() external view returns (uint256);
 ```
 
@@ -734,16 +744,19 @@ Operation-identity selector goldens [MPA-OPERATION-SELECTORS]:
 
 | Selector | Canonical external signature |
 | --- | --- |
-| `0x8a6ace2e` | `executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes),bytes)` |
-| `0x97c01727` | `executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes),bytes)` |
+| `0x286cd1d1` | `executeSingleStepMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)` |
+| `0xc9281e5b` | `executePreparedMint((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)` |
+| `0xa5651f13` | `previewSingleStepMintOperation((uint256,bytes32,address,address,address[],address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)` |
 | `0x37f8eaa5` | `nextOperationNonce()` |
-| `0x79e9746a` | `consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)` |
+| `0x82e8f383` | `consume(uint256,bytes32,(bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)` |
 | `0xe67d8006` | `isManagerOperationRootUsed(address,bytes32)` |
 | `0x12837042` | `isOperationRootUsed(bytes32)` |
 | `0xc8323dfa` | `snapshotTokenRoyaltyAtMint(uint256,uint256,bytes32,bytes32,bytes32,bytes32)` |
 
-Return types do not enter a selector. The two manager rows return
+Return types do not enter a selector. The two state-changing manager rows return
 `(uint256[] tokenIds, bytes32 operationRoot, bytes32[] operationIds)` exactly;
+the single-step preview returns
+`(bytes32 operationRoot, bytes32[] operationIds)` exactly;
 the resolver selector's argument order is owned by the revenue spec.
 
 Requirements [MPA-OPERATION]:
@@ -751,9 +764,15 @@ Requirements [MPA-OPERATION]:
 1. Every input term is defined in this document: `initialRecipientsHash`,
    `beneficiariesHash`, `tokenDataArrayHash`, and `mintCommitmentsHash`
    are the canonical batch hashes of `Recipient Binding`;
-   `policyHash` is the active phase policy hash;
+   `currentPolicyHash` is recomputed from current phase configuration;
+   `batch.expectedPolicyHash` is the caller-declared policy identity and
+   `boundPolicyHash` is exactly that value after the manager accepts it as the
+   current policy hash or the one unexpired immediate predecessor;
    `batch.authorizationId` is the explicit authorization replay key;
-   `contextHash` is `MintBatch.contextHash`;
+   `contextHash` is `MintBatch.contextHash`. The request digest directly binds
+   `batch.expectedPolicyHash`, and the root deliberately binds both
+   `currentPolicyHash` and `boundPolicyHash`: this redundancy separates live
+   configuration/consent identity from caller authorization continuity.
    `executionPath` is exactly `MINT_EXECUTION_PATH_SINGLE_STEP` or
    `MINT_EXECUTION_PATH_PREPARED`; `firstOperationNonce` is the first value
    in a manager-local monotonic nonce range of length `quantity`;
@@ -776,7 +795,10 @@ Requirements [MPA-OPERATION]:
    `validatedAuthorizerKind`, `validatedMaxQuantity`, and
    `validatedGateHash` are the manager's normalized gate result. With a
    configured gate they equal the returned `GateResult` fields after the
-   manager requires `gateResult.authorizationId == batch.authorizationId`;
+   manager requires `gateResult.authorizationId == batch.authorizationId`,
+   `gateResult.authorizer == batch.authorizer`, a valid
+   `gateResult.authorizerKind` for that same address, and the gate's signed
+   payload and validation result bind `batch.expectedPolicyHash`;
    without a gate they equal `address(0)`, `uint8(AuthorizerKind.NONE)`, `0`,
    and `bytes32(0)` respectively, and the manager requires
    `batch.authorizer == address(0)` and an empty `canonicalNullifiers` array.
@@ -839,24 +861,31 @@ Requirements [MPA-OPERATION]:
    paths derive different roots. Both manager entrypoints return exactly the
    Core token-ID array, batch root, and equally sized token-operation-ID array
    shown above.
-6. A pre-manager single-step deposit records the root derived from the signed
-   request and the manager's current `nextOperationNonce`. Its `policyHash` is
-   the exact signed policy hash, and `batch.authorizationId` is the exact
+6. A pre-manager single-step deposit records the root returned by
+   `previewSingleStepMintOperation(batch, gateData)`. Its
+   `batch.expectedPolicyHash` is the exact signed policy hash, and
+   `batch.authorizationId` is the exact
    authorization replay key deterministically derived from the signed
    authorization before the deposit, then independently revalidated or
-   rederived by the manager and gate. The adapter recomputes the remaining root inputs from the
-   batch, chain, configured manager dependencies, path, canonical validation
-   results, and exactly `address(this)` for the executor term because the
-   adapter becomes the manager's `msg.sender`. It never substitutes the
+   rederived by the manager and gate. The preview is manager-owned: it uses
+   its own `msg.sender` as executor, invokes the configured gate and resolvers
+   from the manager, shares byte-identical normalization and derivation code
+   with execution, and reads the current `nextOperationNonce`. It emits no
+   event, writes or consumes no state, and exposes no callback, settlement,
+   value, or delegatecall surface; it is safe for `STATICCALL` and returns
+   exactly `batch.beneficiaries.length` operation IDs. Because the adapter calls
+   the preview, the
+   executor term is exactly the adapter's `address(this)`; it is never the
    adapter's external caller, payer, relayer, or `tx.origin`. A direct payer
    call and a relayed call carrying the same valid signed batch therefore
-   derive the same root; substituting any payer, relayer, or arbitrary caller
-   for `address(this)` is an identity mismatch. The manager independently
-   derives and returns the same value, Core token IDs, and token operation IDs
-   in the same top-level transaction. Before returning, the adapter compares
-   those returned identities with its preview. A nonce race or mismatch reverts
-   the whole transaction, including the deposit. A free or executor-only
-   single-step batch still consumes a root.
+   derive the same root; substituting a different preview caller is an identity
+   mismatch. The adapter then deposits, calls `executeSingleStepMint`, and
+   compares the returned root and exact-length token operation ID vector with
+   the preview before
+   returning. A changed nonce, policy, gate or resolver result, caller, or
+   request field causes a mismatch or execution revert and rolls back the whole
+   transaction, including the deposit. A free or executor-only single-step
+   batch still consumes a root.
 7. ADR 0018 pins only the cross-component settlement invariant, not a settlement
    callback ABI. A prepared path must verify the explicit manager/root through
    the ledger and the current Core `PreparedMintRecord.operationId` before any
@@ -1679,12 +1708,15 @@ struct LedgerCounterPolicy {
 
 struct LedgerPolicyGrace {
     bytes32 previousPolicyHash;
-    uint64 graceUntil;
+    uint64 previousPolicyRevision;
+    uint64 previousPolicyGraceUntil;
 }
 
 mapping(address => bool) public ledgerWriters;
 mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => bytes32 policyHash)))
     public registeredPhasePolicyHashes;
+mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => uint64 currentPolicyRevision)))
+    private _registeredPhasePolicyRevisions;
 mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => LedgerPolicyGrace)))
     public policyGraceWindows;
 mapping(address manager => mapping(uint256 collectionId => mapping(bytes32 phaseId => mapping(bytes32 counterId => LedgerCounterPolicy))))
@@ -1706,8 +1738,8 @@ The ledger must not depend on an arbitrary manager callback to "discover" the
 active policy hash during consumption. The manager registers or updates
 `registeredPhasePolicyHashes[manager][collectionId][phaseId]` through an
 authorized configuration path before the phase can mint. During consumption the
-ledger verifies that the supplied `policyHash` equals that registered value
-(or the grace-window predecessor under `[MPA-GRACE]`) and
+ledger verifies that supplied `boundPolicyHash` equals that registered value or
+the exact unexpired immediate predecessor under `[MPA-GRACE]`, and
 then repeats cap checks against `registeredCounterPolicies`. In protocol v1,
 the ledger rejects resolver cap/delta modes; verifies supplied `cap` equals
 `staticCap` for `STATIC`, is zero for `NONE`, and is in `[1, staticCap]` for
@@ -1716,7 +1748,8 @@ rejects any consumption with `increment == 0` regardless of mode
 (ADR 0010 decision D8.4). Because `staticIncrement` must itself be `>= 1`
 at registration, the exact-equality check and the nonzero rule can never
 disagree. This keeps ledger verification implementable and auditable while
-still ensuring events bind to the active manager policy.
+still ensuring the central operation event exposes current live policy identity
+separately from the accepted bound identity.
 
 Protocol v1 has one active registered policy hash per
 `(manager, collectionId, phaseId)`, plus at most one bounded grace-window
@@ -1833,13 +1866,15 @@ interface IStreamMintLedger {
         uint64 graceUntil
     ) external;
 
-    function consume(
-        CounterConsumption[] calldata consumptions,
-        bytes32 authorizationId,
-        bytes32[] calldata nullifiers,
-        bytes32 policyHash,
-        bytes32 operationRoot
-    ) external;
+function consume(
+    uint256 collectionId,
+    bytes32 phaseId,
+    CounterConsumption[] calldata consumptions,
+    bytes32 authorizationId,
+    bytes32[] calldata nullifiers,
+    bytes32 boundPolicyHash,
+    bytes32 operationRoot
+) external;
 
     function voidAuthorization(
         address manager,
@@ -1886,8 +1921,10 @@ Requirements [MPA-LEDGER]:
    never register, grace, or void under another manager's key; the ledger
    rejects cross-manager registration with a typed error and a test
    proves it (ADR 0010 decision D10.3).
-2. `consume` and `voidAuthorization` are scoped the same way:
-   `msg.sender` must equal the `manager` whose storage is written.
+2. `consume` and `voidAuthorization` use `msg.sender` as the exact manager
+   storage scope. `consume` receives explicit `collectionId` and `phaseId`;
+   it never infers phase identity from `consumptions`, because a valid phase
+   may consume an empty counter array.
 3. `voidAuthorization` marks an unused authorization ID consumed and emits
    `MintLedgerAuthorizationVoided` — a distinct event from consumption —
    giving signers durable revocation (ADR 0010 decision D10.4). The
@@ -1896,10 +1933,30 @@ Requirements [MPA-LEDGER]:
    authorization's own manager.
 4. Voiding an already-consumed or already-voided ID reverts; voiding is
    one-way and permanent.
-5. `consume` rejects `bytes32(0)` and a root already used in
-   `msg.sender`'s manager scope before any ledger write. The root, counters,
-   authorization, and nullifiers are consumed atomically.
-6. Root replay is manager-scoped: the same raw root may be consumed once in
+5. Before any write, `consume` loads `currentPolicyHash` from
+   `registeredPhasePolicyHashes[msg.sender][collectionId][phaseId]` and
+   rejects a missing or zero registration. It accepts a nonzero
+   `boundPolicyHash` only when it equals that loaded current hash or the exact
+   stored immediate predecessor with adjacent revision and
+   `block.timestamp <= previousPolicyGraceUntil`. The caller never supplies
+   `currentPolicyHash`, and the ledger never calls the manager to discover it.
+6. Every `CounterConsumption` row must have
+   `row.collectionId == collectionId` and `row.phaseId == phaseId` before any
+   cap, replay, or counter write. Counter policies, caps, and increments always
+   come from the loaded current registered phase tuple.
+7. `consumptions` may be empty. The ledger still validates manager, explicit
+   phase, current/bound policy identity, root, authorization, and nullifiers;
+   consumes the nonzero root plus any authorization/nullifiers atomically; and
+   emits exactly one `MintLedgerOperationRootConsumed` using the loaded
+   `currentPolicyHash` and supplied `boundPolicyHash`. It emits no
+   `MintLedgerCounterConsumed` or `MintLedgerCounterConsumptionContext` event
+   for an empty array.
+8. `consume` rejects `bytes32(0)` and a root already used in
+   `msg.sender`'s manager scope before any ledger write. On an unregistered
+   phase, cross-phase row, zero/invalid/expired/older bound hash, replay, or
+   counter mismatch, all root, authorization, nullifier, and counter state and
+   every event roll back atomically.
+9. Root replay is manager-scoped: the same raw root may be consumed once in
    each of two authorized manager scopes, and neither manager can pre-consume
    the other's root.
 
@@ -1946,7 +2003,8 @@ event MintLedgerOperationRootConsumed(
     uint16 schemaVersion,
     bytes32 indexed operationRoot,
     address indexed manager,
-    bytes32 indexed policyHash,
+    bytes32 currentPolicyHash,
+    bytes32 indexed boundPolicyHash,
     bytes32 authorizationId
 );
 
@@ -1961,7 +2019,7 @@ event MintLedgerCounterConsumed(
     uint64 increment,
     uint64 newValue,
     uint64 cap,
-    bytes32 policyHash,
+    bytes32 boundPolicyHash,
     bytes32 operationRoot
 );
 
@@ -1984,7 +2042,7 @@ event MintLedgerAuthorizationConsumed(
     bytes32 indexed authorizationId,
     bytes32 indexed operationRoot,
     address indexed manager,
-    bytes32 policyHash
+    bytes32 boundPolicyHash
 );
 
 event MintLedgerNullifierConsumed(
@@ -1992,7 +2050,7 @@ event MintLedgerNullifierConsumed(
     bytes32 indexed nullifier,
     bytes32 indexed operationRoot,
     address indexed manager,
-    bytes32 policyHash
+    bytes32 boundPolicyHash
 );
 
 event MintLedgerAuthorizationVoided(
@@ -2052,7 +2110,7 @@ event MintLedgerWriterUpdated(
 `MintLedgerOperationRootConsumed` appears exactly once per successful batch.
 Indexers reconstruct each counter consumption from the adjacent primary and
 context events in the same transaction. `MintLedgerCounterConsumed` carries
-the `policyHash`, `operationRoot`, and cap/accounting values;
+the `boundPolicyHash`, `operationRoot`, and cap/accounting values;
 `MintLedgerCounterConsumptionContext` carries payer, recipient, authorizer,
 executor, and context hashes under the same `valueKey`, `counterId`, and
 `subjectKey`. Authorization and nullifier events carry the same indexed root,
@@ -2309,8 +2367,21 @@ Requirements (continued):
 2. Governed Gas Parameter values are never inputs to `policyHash`
    (ADR 0010 decision D1.3): retuning gas must not rotate policy identity
    or invalidate outstanding tickets.
-3. Every mint event, ledger consumption event, signed ticket, and preview
-   response must include the active `policyHash`.
+3. Policy-hash identity is split exactly:
+   - `MintBatch.expectedPolicyHash` and signed-ticket authority bind the
+     authorized `boundPolicyHash`, which may be `currentPolicyHash` or one live
+     immediate predecessor under `[MPA-GRACE]`.
+   - Live consent, gate/module/config evaluation, counters, caps, and
+     increments are checked under `currentPolicyHash`.
+   - `operationRoot` commits `currentPolicyHash` and then `boundPolicyHash`.
+   - Preview returns `operationRoot` plus `operationIds`; it does not separately
+     return either policy hash.
+   - The central `MintBatchExecuted` and `MintLedgerOperationRootConsumed`
+     events expose `currentPolicyHash` and `boundPolicyHash`.
+   - Child authorization, nullifier, and counter-consumption events expose
+     `boundPolicyHash` plus `operationRoot`.
+   - Per-token events join through `operationRoot` and do not separately expose
+     either policy hash.
 4. A signed ticket issued against an older hash must be rejected by the
    state-changing mint unless that older hash is the registered
    grace-window predecessor under `[MPA-GRACE]`.
@@ -2322,9 +2393,9 @@ Requirements (continued):
    switch is therefore always reachable — see `[MPA-CONSENT]` rule 7 for
    the artist-consent carve-out.
 
-Policy hashes make long-lived operation easier because users, artists, operators,
-indexers, and auditors can tie a mint to the exact policy that was active at the
-time.
+The paired current and bound policy hashes make long-lived operation easier
+because users, artists, operators, indexers, and auditors can distinguish live
+configuration/economics from the accepted authorization-continuity identity.
 
 ## Policy Grace Windows
 
@@ -2338,15 +2409,27 @@ Requirements [MPA-GRACE]:
 
 1. `registerPhasePolicy` accepts `graceUntil`. When nonzero, the ledger
    records the immediately preceding registered hash as
-   `previousPolicyHash` with the supplied `graceUntil`; when zero, no
+   `previousPolicyHash`, its revision as `previousPolicyRevision`, and the
+   supplied deadline as `previousPolicyGraceUntil`; when zero, no
    grace exists and any prior grace is cleared.
 2. Bound: `graceUntil <= block.timestamp + MAX_POLICY_GRACE_SECONDS`,
    with `MAX_POLICY_GRACE_SECONDS = 2_592_000` (30 days) as a reviewed
    named constant. Registration reverts beyond the bound.
-3. During the window, `consume` accepts `policyHash` equal to either the
-   registered hash or `previousPolicyHash`; after `graceUntil`, only the
-   registered hash. At most one predecessor hash is ever valid; a new
-   registration replaces any existing grace record.
+3. The ledger stores the current `policyHash` and monotonically increasing
+   `currentPolicyRevision`. On rotation it stores only the tuple
+   `(previousPolicyHash, previousPolicyRevision, previousPolicyGraceUntil)`,
+   where `previousPolicyRevision + 1 == currentPolicyRevision` and
+   `previousPolicyGraceUntil = graceUntil`. `consume` accepts a nonzero supplied
+   hash only when it equals current `policyHash`, or when it equals the exact
+   `previousPolicyHash`, its revision is the immediate predecessor, and
+   `block.timestamp <= previousPolicyGraceUntil`. At
+   `block.timestamp > previousPolicyGraceUntil`, only current `policyHash` is
+   valid. A second rotation overwrites the tuple and immediately invalidates
+   the older predecessor regardless of its former expiry.
+   The manager performs this same check against
+   `MintBatch.expectedPolicyHash` and defines
+   `boundPolicyHash = batch.expectedPolicyHash`; it never substitutes the
+   current hash for the caller-bound value.
 4. Grace relaxes only the policy-hash equality check. Cap and increment
    verification always run against the currently registered counter
    policies, so a tightening change tightens immediately even for tickets
@@ -2356,7 +2439,7 @@ Requirements [MPA-GRACE]:
    never the old (looser) limits.
 6. Every grace registration emits `MintLedgerPolicyGraceSet` with both
    hashes and the deadline; consumption events carry the hash actually
-   bound, so indexers can distinguish grace-window mints.
+   bound (`boundPolicyHash`), so indexers can distinguish grace-window mints.
 7. Managers and gates must apply the same two-hash acceptance to ticket
    validation (`[MPA-TICKET-RULES]`), and sale adapters must emit the
    bound hash per `docs/stream-sales-and-auctions.md` `[SSA-GRACE]`.
@@ -2378,6 +2461,7 @@ struct MintBatch {
     address[] beneficiaries;
     bytes[] tokenData;
     bytes32[] mintCommitments;
+    bytes32 expectedPolicyHash;
     bytes32 authorizationId;
     bytes32 contextHash;
     bytes resolverData;
@@ -2408,22 +2492,28 @@ Rules:
    of `[MPA-AUTHZ]`, never by an `address(0)` convention: `authorizer`
    must be `address(0)` exactly when the effective authorizer kind is
    `NONE`, and must be nonzero for every other kind.
-10. `tokenData` is opaque bytes. Renderer/schema code may interpret it as
+10. `expectedPolicyHash` is nonzero. The manager accepts it only when it equals
+    the current registered policy hash or the one unexpired immediate
+    predecessor. A new registration makes any older predecessor invalid.
+    The same acceptance applies to configured and ungated batches; this is
+    identity continuity only, while current config, consent, modules, counter
+    policies, caps, and increments remain authoritative.
+11. `tokenData` is opaque bytes. Renderer/schema code may interpret it as
     UTF-8, JSON, CBOR, or another format, but Core and the mint manager do not
     parse it.
-11. `authorizationId` is a required nonzero typed request field. On a gated
+12. `authorizationId` is a required nonzero typed request field. On a gated
     phase it must equal the configured gate's returned `authorizationId`; on an
     ungated phase it is the caller's explicit domain-separated authorization
     replay ID. It is never inferred from `operationRoot`, `contextHash`, or raw
     `gateData`.
-12. Each `tokenData[i]` must satisfy the collection metadata v1 limit
+13. Each `tokenData[i]` must satisfy the collection metadata v1 limit
      `MAX_TOKEN_DATA_BYTES`, and the batch must satisfy any manager-level total
      calldata/gas cap. In the mint-manager path, Core validates token data after
      manager ledger consumption and before prepared mint state, payment
      settlement, or the completion-time entropy-registration boundary; an
      oversized token-data revert rolls back the whole transaction, including
      ledger counters and authorization usage.
-13. `contextHash` is optional, but should be nonzero for signed/drop/auction
+14. `contextHash` is optional, but should be nonzero for signed/drop/auction
    flows that need a stable external reference.
 
 ### Recipient Binding
@@ -2742,7 +2832,7 @@ interface IStreamMintGate {
         address[] calldata initialRecipients,
         address[] calldata beneficiaries,
         bytes32 contextHash,
-        bytes32 policyHash,
+        bytes32 expectedPolicyHash,
         bytes calldata gateData
     ) external view returns (GateResult memory);
 }
@@ -2751,12 +2841,18 @@ interface IStreamMintGate {
 Gate behavior [MPA-GATES]:
 
 1. A configured gate must return a nonzero `authorizationId` equal to
-   `MintBatch.authorizationId`. The manager rejects a mismatch, ensures the
+   `MintBatch.authorizationId`, return `authorizer` equal to
+   `MintBatch.authorizer`, and return an `authorizerKind` valid for that same
+   address. The gate receives and binds `MintBatch.expectedPolicyHash`; its
+   signed payload, if any, must bind the same hash. The manager rejects any
+   authorization, authorizer, kind, or policy-hash mismatch, ensures the
    explicit request ID is unused, and asks the ledger to consume it before
    calling Core. Ungated phases follow the same nonzero request/ledger rule
    without fabricating a gate result: they require
-   `MintBatch.authorizer == address(0)` and normalize the validated authorizer
-   result to `(address(0), uint8(AuthorizerKind.NONE), 0, bytes32(0))`.
+   `MintBatch.authorizer == address(0)`, accept
+   `MintBatch.expectedPolicyHash` under the same current-or-valid-immediate-
+   predecessor rule, and normalize the validated authorizer result to
+   `(address(0), uint8(AuthorizerKind.NONE), 0, bytes32(0))`.
 2. If `nullifiers` is non-empty, the manager must ensure each nullifier has not
    been used before and then ask the ledger to consume them before calling
    Core. A gate may return nullifiers only when its accepted specification
@@ -2825,8 +2921,10 @@ not define a second struct or a second preimage.
 
 Ticket rules [MPA-TICKET-RULES]:
 
-1. `policyHash` must equal the active phase policy hash or the registered
-   grace-window predecessor within its bound (`[MPA-GRACE]`).
+1. The ticket's `policyHash` is `MintBatch.expectedPolicyHash`; after validation
+   it becomes `boundPolicyHash` and must equal `currentPolicyHash` or the exact
+   registered immediate predecessor with
+   `block.timestamp <= previousPolicyGraceUntil` (`[MPA-GRACE]`).
 2. `deadline` must be enforced in the state-changing mint path.
 3. `authorizationId` must be derived from the full EIP-712 ticket digest
    per `[MPA-TICKET]` rule 4.
@@ -3043,8 +3141,11 @@ Canonical state-changing mint sequence:
 5. Check time bounds.
 6. Check array lengths and nonzero initial recipients and beneficiaries.
 7. Check `maxBatchQuantity`.
-8. Compute active `policyHash`.
-9. Call `requireMintConsent(collectionId, phaseId, policyHash)` on the
+8. Compute the current policy hash; validate `batch.expectedPolicyHash` as the
+   current hash or the one unexpired immediate predecessor; define
+   `boundPolicyHash = batch.expectedPolicyHash`. Configured and ungated phases
+   both accept the current or valid immediate-predecessor identity.
+9. Call `requireMintConsent(collectionId, phaseId, currentPolicyHash)` on the
    artist authority registry — the once-per-mint-transaction artist
    consent and contest check, executed before any counter, ledger, or
    token state is written — as a bounded read under
@@ -3054,7 +3155,8 @@ Canonical state-changing mint sequence:
    [`docs/stream-artist-authority.md`](stream-artist-authority.md)
    `[AA-CONSENT]` requirement 6, and it also enforces the
    platform-works contest stop of `[MPA-CONSENT]` rule 4 (ADR 0013
-   decision U6).
+   decision U6). Missing current-policy artist consent reverts even when
+   `boundPolicyHash` is a valid predecessor.
 10. Check configured gate and resolver modules against the module registry.
 11. Call optional gate and validate returned constraints.
 12. Load all enabled counters for the phase.
@@ -3066,8 +3168,14 @@ Canonical state-changing mint sequence:
 16. Derive the batch `operationRoot` and all per-token `operationId` values,
     reject zero or duplicate identities, reserve the contiguous manager nonce
     range, and advance `nextOperationNonce`.
-17. Ask `StreamMintLedger` to verify `policyHash` against the ledger's
-    registered hash for `(manager, collectionId, phaseId)`, repeat cap checks,
+17. Pass the exact batch `collectionId` and `phaseId` to
+    `StreamMintLedger.consume`. The ledger independently loads
+    `currentPolicyHash` from the calling manager's registered phase tuple,
+    verifies every counter row matches that explicit phase, and accepts
+    `boundPolicyHash` only as the nonzero loaded current policy hash or the
+    exact immediate predecessor whose
+    `block.timestamp <= previousPolicyGraceUntil`, repeat cap checks under the
+    current registered counter policies,
     reject zero or reused `operationRoot`, and consume the root, counter
     increments, authorization ID, and nullifiers.
 18. For each token, Core writes token identity, collection serial, and
@@ -3081,12 +3189,15 @@ Canonical state-changing mint sequence:
     boundary, without calling external randomness providers.
 21. Core calls `_safeMint(initialRecipient, tokenId)`. This is the first point
     where an untrusted recipient callback can run.
-22. Emit manager batch/token events with the root, per-token operation IDs, and
-    `policyHash`.
+22. Emit central manager batch and ledger root events with the root,
+    per-token operation IDs, `currentPolicyHash`, and `boundPolicyHash`.
+    Child ledger counter, authorization, and nullifier events carry
+    `boundPolicyHash` and join through `operationRoot`; config and consent
+    events carry current identity.
 
 Step 9 is mandatory on every mint path — including auction settlement,
 prepared mints, and free phases — and its placement is normative: after
-the active `policyHash` is computed (the consent read binds it) and
+`currentPolicyHash` is computed (the consent read binds it) and
 before the module, gate, counter, ledger, and Core steps, so a
 `DISPUTED`, `REVOKED`, or `CONTESTED` state stops the transaction
 before any irreversible-looking effect. The
@@ -3121,7 +3232,9 @@ minted tokens, are governed by
 
 1. `PRE_REVENUE_SINGLE_STEP`: sale adapter records split-wallet deposit or
    escrow before calling the mint manager, and token-level primary overrides or
-   required mint-time royalty snapshots are unavailable. In v1 manager
+   required mint-time royalty snapshots are unavailable. The manager must
+   reject any policy requiring a token-level primary or royalty snapshot on
+   this path. In v1 manager
    accounting, a `RECIPIENT`-keyed counter is keyed to `beneficiary`, not the
    temporary `initialRecipient`, and the manager is the enforcement point
    for recipient-owner equality [MPA-SINGLE-STEP]: when any
@@ -3325,7 +3438,8 @@ event MintBatchExecuted(
     uint256 quantity,
     bytes32 contextHash,
     bytes32 gateHash,
-    bytes32 policyHash
+    bytes32 currentPolicyHash,
+    bytes32 boundPolicyHash
 );
 
 event MintAuthorizationConsumed(
@@ -3333,7 +3447,7 @@ event MintAuthorizationConsumed(
     uint256 indexed collectionId,
     bytes32 indexed phaseId,
     bytes32 indexed authorizationId,
-    bytes32 policyHash,
+    bytes32 boundPolicyHash,
     bytes32 operationRoot
 );
 ```
@@ -3343,6 +3457,17 @@ policy, executor rights, counter configuration, module status, and allowance
 consumption. `MintBatchExecuted.operationRoot` joins exactly one batch to the
 ledger root-consumption event and the path-specific per-token completion events:
 `MintTokenExecuted` for single-step or `PreparedMintCompleted` for prepared.
+The central `MintLedgerOperationRootConsumed` and manager
+`MintBatchExecuted` events carry both hashes. Child ledger counter,
+authorization, and nullifier event fields named `boundPolicyHash` carry the
+accepted request identity used for grace and replay and join to the central
+fact through `operationRoot`. `MintBatchExecuted.currentPolicyHash` identifies the live
+configuration, consent, modules, counter policies, caps, and increments used
+for execution. Sale events that represent signed authorization continuity carry
+`boundPolicyHash`; live-economics/configuration events carry
+`currentPolicyHash`. Future sale/settlement events must carry and verify both
+where their accepted ADR requires them; ADR 0019 / #694 owns those exact event
+signatures.
 
 ## Errors
 
@@ -3508,7 +3633,10 @@ function canMint(
 
 `canMint()` should never be the source of truth. It is a frontend/operator
 helper. Both state-changing manager entries, `executeSingleStepMint` and
-`executePreparedMint`, must repeat all checks.
+`executePreparedMint`, must repeat all checks. It is not an authoritative
+operation-identity preview. Only `previewSingleStepMintOperation`, called by
+the eventual manager executor, returns the root and token operation IDs under
+the exact caller-sensitive execution transcript.
 
 ## Admin Model
 
@@ -3669,12 +3797,16 @@ phase stricter or permanently closed.
 14. All configured counters must be checked against the complete projected batch
     before minting.
 15. Ledger writes must be restricted to authorized manager contracts.
-16. The ledger must repeat cap checks and verify the supplied `policyHash`
-    against the ledger-registered `(manager, collectionId, phaseId)` hash
-    before writing counter values.
-17. Policy hashes must be emitted with mint and accounting events.
-18. Signed tickets must include the active policy hash and must fail if it does
-    not match.
+16. The ledger must repeat cap checks under current registered counter policies
+    and verify supplied `boundPolicyHash` as the current registered
+    `(manager, collectionId, phaseId)` hash or exact unexpired immediate
+    predecessor before writing counter values.
+17. Central root/batch events emit both `currentPolicyHash` and
+    `boundPolicyHash`; child consumption events emit the bound identity and join
+    through `operationRoot`.
+18. Signed tickets must include `expectedPolicyHash`; it must equal the
+    manager-accepted current or unexpired immediate-predecessor identity, while
+    current consent/config/module/counter/cap enforcement remains mandatory.
 19. ERC-1271 contract-wallet signatures must be supported where signed tickets
     are used.
 20. Gate and resolver modules must be checked against ERC-165 and the module
@@ -3710,7 +3842,9 @@ The implementation should be tested and reviewed against these invariants:
 5. Every successful signed or gated mint has a consumed authorization ID or
    nullifier when the gate returns one.
 6. `StreamCore` never mints except through the authorized mint manager.
-7. The `policyHash` emitted in mint and ledger events matches the active policy.
+7. The root and central mint/ledger events bind both the recomputed
+   `currentPolicyHash` and accepted `boundPolicyHash`; child consumption events
+   bind `boundPolicyHash` and join through the root.
 8. A stale signed ticket cannot mint under a materially different policy.
 9. A blocked module cannot be used for state-changing mint execution.
 10. No external recipient callback executes before the token's identity
@@ -4148,12 +4282,15 @@ Ledger tests:
 5. Nullifiers cannot be reused within a manager scope, and one manager
    cannot consume or pre-consume another manager's nullifier scope
    (cross-manager griefing test).
-6. Primary counter and authorization ledger events include `policyHash`; context
-   events are correlated by indexed key topics in the same transaction.
+6. Child counter, authorization, and nullifier ledger events include
+   `boundPolicyHash`; the central root event includes
+   `currentPolicyHash` and `boundPolicyHash`, and all child/context events join
+   through the root or indexed key topics in the same transaction.
 7. Multiple consumptions for the same value key aggregate correctly.
-8. Ledger verifies the active `policyHash` before writing consumption,
-   accepting the grace-window predecessor only until `graceUntil` and
-   always applying current counter policies.
+8. Ledger verifies nonzero `boundPolicyHash` as `currentPolicyHash` or the exact
+   immediate predecessor while
+   `block.timestamp <= previousPolicyGraceUntil` before writing consumption,
+   and always applies current counter policies, caps, and increments.
 9. `registerPhasePolicy` with `msg.sender != manager` reverts
    (cross-manager registration rejection).
 10. Grace registration beyond `MAX_POLICY_GRACE_SECONDS` reverts; expired
@@ -4174,6 +4311,16 @@ Ledger tests:
 16. Root, counter, authorization, and nullifier events carry the exact root and
     join to one manager batch event; a downstream failure leaves none of those
     events or writes.
+17. A registered zero-counter phase succeeds with an empty
+    `CounterConsumption[]` for both current-hash and live-predecessor grace
+    execution, consumes root plus authorization/nullifiers, emits one
+    `MintLedgerOperationRootConsumed` with the independently loaded
+    `currentPolicyHash` and supplied `boundPolicyHash`, and emits no counter or
+    counter-context event.
+18. An unregistered phase, a counter row whose collection or phase differs
+    from the explicit call tuple, a zero/expired/non-immediate predecessor, or
+    any attempt to supply or infer `currentPolicyHash` reverts without root,
+    authorization, nullifier, counter, or event residue.
 
 Integration tests:
 

@@ -1047,11 +1047,15 @@ Rules:
 10. Snapshot completion precedes `_safeMint` for tokens whose royalty policy
     requires mint-time economics. A malicious or replaced resolver cannot
     observe or reenter an in-progress mint before the recipient callback.
-11. The hook verifies `isManagerOperationRootUsed(msg.sender, operationRoot)`
-    through the ledger's explicit-manager read and verifies
-    `preparedMint(tokenId).operationId == operationId` through Core before
-    writing. It stores or emits both identities with the token-scoped snapshot
-    fact (ADR 0018).
+11. `snapshotTokenRoyaltyAtMint` is `PREPARED_MINT`-only. Before writing, the
+    hook verifies `isManagerOperationRootUsed(msg.sender, operationRoot)`
+    through the ledger's explicit-manager read and verifies the existing
+    prepared-record proof,
+    `preparedMint(tokenId).operationId == operationId`, through Core. It stores
+    or emits both identities with the token-scoped snapshot fact (ADR 0018).
+    `PRE_REVENUE_SINGLE_STEP` has no prepared record and must reject any policy
+    requiring a token-level primary or royalty snapshot; there is no third
+    snapshot proof.
 
 Recommended revenue-class examples for long-running collections:
 
@@ -1225,12 +1229,14 @@ Requirements [RSR-ORCHESTRATION]:
 2. Sale adapter resolves only collection/default primary policy. Token-level
    primary overrides and required mint-time royalty snapshots are unavailable in
    this path.
-3. Sale adapter derives the `MINT_EXECUTION_PATH_SINGLE_STEP` batch
-   `operationRoot` and `N` token operation IDs from the signed request and the
-   manager's current `nextOperationNonce` according to the mint identity home
-   `[MPA-OPERATION]` (ADR 0018). The preview uses the authorization's exact
-   signed `policyHash` and deterministically derived authorization replay key;
-   the manager and gate revalidate or rederive both during the later call.
+3. Sale adapter calls the manager-owned
+   `previewSingleStepMintOperation(batch, gateData)`. The manager preview uses
+   the adapter as `msg.sender`, current config and nonce, and byte-identical gate,
+   resolver, normalization, root, and token-operation derivation shared with
+   execution. It returns the `MINT_EXECUTION_PATH_SINGLE_STEP` root and exactly
+   `N` token operation IDs, commits both `currentPolicyHash` and the signed
+   `batch.expectedPolicyHash` accepted as `boundPolicyHash`, and emits, writes,
+   and consumes nothing.
 4. Sale adapter materializes the split profile if needed and deposits the
    accepted settlement asset — native ETH, or an approved standard
    ERC-20 pulled under the [RSR-PAYMENT-INTENT] payer-intent rules —
@@ -1239,19 +1245,26 @@ Requirements [RSR-ORCHESTRATION]:
    with the exact `operationRoot` (ADR 0014 decision V5; ADR 0018).
 5. Sale adapter calls the mint manager in the same top-level transaction,
    capturing the returned token IDs, operation root, and token operation IDs.
-6. Mint manager validates the phase and computes active `policyHash`.
+6. Mint manager validates the phase, recomputes `currentPolicyHash`, accepts
+   `batch.expectedPolicyHash` as the current or exact unexpired immediate
+   predecessor, and defines `boundPolicyHash = batch.expectedPolicyHash`.
 7. Mint manager calls `requireMintConsent(collectionId, phaseId,
-   policyHash)` on the artist authority registry — the
+   currentPolicyHash)` on the artist authority registry — the
    once-per-mint-transaction consent and contest check placed by the
    mint spec's Mint Execution Order step 9, executed after the active
-   `policyHash` is computed and before any gate, counter, ledger, or
+   current policy hash is computed and before any gate, counter, ledger, or
    Core step — and reverts on refusal (consent precedes creation,
    [PV1-MINT-ORDER] invariant 7; ADR 0014 decision V9).
 8. Mint manager verifies the signed `MintTicket` or equivalent sale
    authorization and binds the exact `mintCommitmentsHash`.
 9. Mint manager independently derives the batch root and token operation IDs
    and reserves the contiguous nonce range before calling the ledger.
-10. Mint ledger verifies the manager-registered policy hash and consumes
+10. Mint manager passes the exact batch `collectionId` and `phaseId` to the
+   ledger. Using the manager caller as scope, the ledger independently loads
+   `currentPolicyHash` from that registered phase tuple, accepts
+   `boundPolicyHash` as the loaded current hash or exact unexpired immediate
+   predecessor, requires every counter row to match the explicit phase,
+   enforces current registered counter policies/caps/increments, and consumes
    the manager-scoped root, counters, authorization IDs, and nullifiers.
 11. Core executes `mintFromManager`, writes token identity, registers the
    token's entropy request context with the entropy coordinator, and only
@@ -1315,9 +1328,11 @@ entropy-coordinator boundary lands.
 
 1. Sale adapter validates payment, sale authorization, price, quantity, payer,
    recipients, beneficiaries, deadline, nonce, and `expectedPrimaryPolicyHash`.
-2. Mint manager validates the phase and computes active `policyHash`.
+2. Mint manager validates the phase, recomputes `currentPolicyHash`, accepts
+   `batch.expectedPolicyHash` as the current or exact unexpired immediate
+   predecessor, and defines `boundPolicyHash = batch.expectedPolicyHash`.
 3. Mint manager calls `requireMintConsent(collectionId, phaseId,
-   policyHash)` — the same Mint Execution Order step 9 consent and
+   currentPolicyHash)` — the same Mint Execution Order step 9 consent and
    contest check as `PRE_REVENUE_SINGLE_STEP` step 6, in the same
    placement — and reverts on refusal ([PV1-MINT-ORDER] invariant 7;
    ADR 0014 decision V9).
@@ -1326,7 +1341,12 @@ entropy-coordinator boundary lands.
 5. Mint manager derives the `MINT_EXECUTION_PATH_PREPARED` root and exactly
    `N` token operation IDs, reserves the contiguous nonce range, and advances
    `nextOperationNonce` before calling the ledger.
-6. Mint ledger verifies the manager-registered policy hash and consumes
+6. Mint manager passes the exact batch `collectionId` and `phaseId` to the
+   ledger. Using the manager caller as scope, the ledger independently loads
+   `currentPolicyHash` from that registered phase tuple, accepts
+   `boundPolicyHash` as the loaded current hash or exact unexpired immediate
+   predecessor, requires every counter row to match the explicit phase,
+   enforces current registered counter policies/caps/increments, and consumes
    the manager-scoped root, counters, authorization IDs, and nullifiers.
 7. Core executes `prepareMintFromManager`, creating authoritative token identity
    but no entropy/randomizer request and no ERC-721 transfer.
@@ -3670,10 +3690,10 @@ event RevenueAssignmentSet(
 );
 
 event TokenRoyaltySnapshotted(
+    uint16 schemaVersion,
     bytes32 indexed operationId,
     uint256 indexed tokenId,
     bytes32 indexed operationRoot,
-    uint16 schemaVersion,
     uint256 collectionId,
     bytes32 revenueClass,
     bytes32 tokenRoyaltyAssignmentHash
@@ -4508,7 +4528,7 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   manager and ledger validation and reverts atomically on a later
   validation failure ([RSR-ORCHESTRATION] step 4 ERC-20 realization).
 - `requireMintConsent` executes exactly once per paid mint transaction
-  in each blessed path, after active `policyHash` computation and before
+  in each blessed path, after `currentPolicyHash` computation and before
   ticket verification, ledger consumption, and Core allocation
   ([RSR-ORCHESTRATION]; [PV1-MINT-ORDER] invariant 7).
 - EOA signatures on `ReleaseAuthorization`, `PaymentIntent`, and their

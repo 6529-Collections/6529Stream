@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -18,6 +19,9 @@ SPEC = importlib.util.spec_from_file_location("verify_release_artifacts", SCRIPT
 assert SPEC is not None and SPEC.loader is not None
 verifier = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(verifier)
+
+SOURCE_REPO_ROOT = SCRIPT_PATH.parent.parent
+RELEASE_TOOL_FIXTURE_PATH = "scripts/generate_bytecode_release_proof.py"
 
 
 def write_text(path: Path, value: str) -> None:
@@ -41,6 +45,20 @@ def file_record(root: Path, relative_path: str) -> dict[str, object]:
     }
 
 
+def seed_release_tool_trust_tree(root: Path) -> None:
+    required_paths = set(
+        verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+    )
+    required_paths.update(
+        verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
+    )
+    for relative_path in sorted(required_paths):
+        write_text(
+            root / relative_path,
+            (SOURCE_REPO_ROOT / relative_path).read_text(encoding="utf-8"),
+        )
+
+
 def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     latest = root / "release-artifacts" / "latest"
     checksum_lines = []
@@ -51,6 +69,16 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     ).as_posix()
     if (root / genesis_profile).is_file():
         effective_paths.add(genesis_profile)
+    required_trust_paths = set(
+        verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+    )
+    required_trust_paths.update(
+        verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
+    )
+    effective_paths.update(
+        path.as_posix()
+        for path in required_trust_paths
+    )
     for relative_path in sorted(effective_paths):
         path = root / relative_path
         digest = verifier.file_sha256(path).removeprefix("sha256:")
@@ -71,7 +99,15 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
             "generated_by": "unit-test",
             "algorithm": "sha256",
             "source": {
-                "covered_paths": ["release-artifacts/latest"],
+                "coverage_policy": (
+                    verifier.release_checksum_generator.CANONICAL_COVERAGE_POLICY
+                ),
+                "covered_paths": [
+                    path.as_posix()
+                    for path in (
+                        verifier.release_checksum_generator.DEFAULT_COVERED_PATHS
+                    )
+                ],
                 "output_dir": "release-artifacts/latest",
             },
             "text_checksum_file": {
@@ -124,6 +160,7 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
 
 def seed_release_bundle(root: Path) -> None:
     latest = root / "release-artifacts" / "latest"
+    seed_release_tool_trust_tree(root)
     write_text(latest / "abi-checksums.json", '{"schema_version":"fixture.abi"}\n')
     seed_governed_parameter_inventory_tree(root)
     write_text(
@@ -226,7 +263,26 @@ def seed_release_bundle(root: Path) -> None:
     )
 
 
+def seed_release_bundle_with_trust_input(root: Path) -> None:
+    seed_release_bundle(root)
+
+
 class ReleaseArtifactVerifierTests(unittest.TestCase):
+    def test_verifier_and_generator_reviewed_trust_literals_match(
+        self,
+    ) -> None:
+        self.assertEqual(
+            verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE,
+            (
+                verifier.release_checksum_generator
+                .REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+            ),
+        )
+        self.assertEqual(
+            verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS,
+            verifier.release_checksum_generator.RELEASE_TOOL_FOCUSED_TESTS,
+        )
+
     def test_offline_verifier_invokes_canonical_inventory_validator(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -378,9 +434,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     def test_main_json_output(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         stdout = StringIO()
-        with redirect_stdout(stdout), redirect_stderr(StringIO()):
+        stderr = StringIO()
+        with redirect_stdout(stdout), redirect_stderr(stderr):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
-        self.assertEqual(result, 0)
+        self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
         self.assertGreater(data["checksum_entries"], 0)
 
@@ -400,8 +457,414 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_release_bundle(root)
             summary = verifier.verify_release_artifacts(root)
-            self.assertEqual(summary.checksum_entries, 7)
-            self.assertEqual(summary.checksum_manifest_records, 7)
+            required_trust_count = len(
+                set(
+                    verifier.release_checksum_generator.release_tool_runtime_closure(
+                        root
+                    )
+                ).union(
+                    verifier.release_checksum_generator.RELEASE_TOOL_FOCUSED_TESTS
+                )
+            )
+            expected_count = 7 + required_trust_count
+            self.assertEqual(summary.checksum_entries, expected_count)
+            self.assertEqual(
+                summary.checksum_manifest_records,
+                expected_count,
+            )
+
+    def assert_release_tool_bundle_mutation_rejected(
+        self,
+        mutation: str,
+        expected_error: str,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle_with_trust_input(root)
+            latest = root / "release-artifacts" / "latest"
+            checksum_path = latest / "SHA256SUMS"
+            manifest_path = latest / "release-checksums.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+            if mutation.startswith("sha_"):
+                lines = checksum_path.read_text(encoding="utf-8").splitlines()
+                target_index = next(
+                    index
+                    for index, line in enumerate(lines)
+                    if line.endswith(f"  {RELEASE_TOOL_FIXTURE_PATH}")
+                )
+                if mutation == "sha_delete":
+                    lines.pop(target_index)
+                elif mutation == "sha_substitute":
+                    substitute = "scripts/substituted_release_tool.py"
+                    write_text(root / substitute, "VALUE = 2\n")
+                    digest = verifier.file_sha256(
+                        root / substitute
+                    ).removeprefix("sha256:")
+                    lines[target_index] = f"{digest}  {substitute}"
+                elif mutation == "sha_wrong_hash":
+                    lines[target_index] = (
+                        "0" * 64 + f"  {RELEASE_TOOL_FIXTURE_PATH}"
+                    )
+                else:
+                    raise AssertionError(f"unsupported SHA mutation {mutation}")
+                lines.sort()
+                checksum_text = "\n".join(lines) + "\n"
+                write_text(checksum_path, checksum_text)
+                manifest["text_checksum_file"]["sha256"] = (
+                    verifier.sha256_bytes(checksum_text.encode("utf-8"))
+                )
+            else:
+                target_entry = next(
+                    entry
+                    for entry in manifest["files"]
+                    if entry["path"] == RELEASE_TOOL_FIXTURE_PATH
+                )
+                if mutation == "manifest_delete":
+                    manifest["files"].remove(target_entry)
+                elif mutation == "manifest_substitute":
+                    manifest["files"].remove(target_entry)
+                    substitute = "scripts/substituted_release_tool.py"
+                    write_text(root / substitute, "VALUE = 2\n")
+                    manifest["files"].append(file_record(root, substitute))
+                    manifest["files"].sort(key=lambda entry: entry["path"])
+                elif mutation == "manifest_wrong_hash":
+                    target_entry["sha256"] = "sha256:" + "0" * 64
+                elif mutation == "manifest_wrong_size":
+                    target_entry["size_bytes"] += 1
+                else:
+                    raise AssertionError(
+                        f"unsupported checksum-manifest mutation {mutation}"
+                    )
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                expected_error,
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_required_trust_file_deleted_from_sha256sums(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "sha_delete",
+            (
+                "release-tool trust binding requires exactly one SHA256SUMS "
+                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+            ),
+        )
+
+    def test_verifier_rejects_required_trust_file_deleted_from_checksum_manifest(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "manifest_delete",
+            (
+                "release-tool trust binding requires exactly one "
+                "release-checksums.json entry for "
+                "scripts/generate_bytecode_release_proof.py: got 0"
+            ),
+        )
+
+    def test_verifier_rejects_required_trust_file_substituted_in_sha256sums(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "sha_substitute",
+            (
+                "release-tool trust binding requires exactly one SHA256SUMS "
+                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+            ),
+        )
+
+    def test_verifier_rejects_required_trust_file_substituted_in_checksum_manifest(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "manifest_substitute",
+            (
+                "release-tool trust binding requires exactly one "
+                "release-checksums.json entry for "
+                "scripts/generate_bytecode_release_proof.py: got 0"
+            ),
+        )
+
+    def test_verifier_rejects_required_trust_file_wrong_hash_in_sha256sums(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "sha_wrong_hash",
+            (
+                "release-tool trust binding SHA256SUMS hash mismatch for "
+                "scripts/generate_bytecode_release_proof.py"
+            ),
+        )
+
+    def test_verifier_rejects_required_trust_file_wrong_hash_in_checksum_manifest(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "manifest_wrong_hash",
+            (
+                "release-tool trust binding release-checksums.json hash "
+                "mismatch for "
+                "scripts/generate_bytecode_release_proof.py"
+            ),
+        )
+
+    def test_verifier_rejects_required_trust_file_wrong_size_in_checksum_manifest(
+        self,
+    ) -> None:
+        self.assert_release_tool_bundle_mutation_rejected(
+            "manifest_wrong_size",
+            (
+                "release-tool trust binding release-checksums.json size "
+                "mismatch for "
+                "scripts/generate_bytecode_release_proof.py"
+            ),
+        )
+
+    def assert_coordinated_release_tool_bundle_mutation_rejected(
+        self,
+        mutation: str,
+        expected_error: str,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle_with_trust_input(root)
+            latest = root / "release-artifacts" / "latest"
+            checksum_path = latest / "SHA256SUMS"
+            manifest_path = latest / "release-checksums.json"
+            lines = checksum_path.read_text(encoding="utf-8").splitlines()
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            target_line_index = next(
+                index
+                for index, line in enumerate(lines)
+                if line.endswith(f"  {RELEASE_TOOL_FIXTURE_PATH}")
+            )
+            target_entry = next(
+                entry
+                for entry in manifest["files"]
+                if entry["path"] == RELEASE_TOOL_FIXTURE_PATH
+            )
+            lines.pop(target_line_index)
+            manifest["files"].remove(target_entry)
+
+            if mutation == "delete":
+                pass
+            elif mutation == "substitute":
+                substitute = "scripts/substituted_release_tool.py"
+                write_text(root / substitute, "VALUE = 2\n")
+                digest = verifier.file_sha256(
+                    root / substitute
+                ).removeprefix("sha256:")
+                lines.append(f"{digest}  {substitute}")
+                manifest["files"].append(file_record(root, substitute))
+            else:
+                raise AssertionError(
+                    f"unsupported coordinated mutation {mutation}"
+                )
+
+            lines.sort()
+            manifest["files"].sort(key=lambda entry: entry["path"])
+            checksum_text = "\n".join(lines) + "\n"
+            write_text(checksum_path, checksum_text)
+            manifest["text_checksum_file"]["sha256"] = (
+                verifier.sha256_bytes(checksum_text.encode("utf-8"))
+            )
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                expected_error,
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_coordinated_trust_file_deletion(self) -> None:
+        self.assert_coordinated_release_tool_bundle_mutation_rejected(
+            "delete",
+            (
+                "release-tool trust binding requires exactly one SHA256SUMS "
+                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+            ),
+        )
+
+    def test_verifier_rejects_coordinated_trust_file_substitution(self) -> None:
+        self.assert_coordinated_release_tool_bundle_mutation_rejected(
+            "substitute",
+            (
+                "release-tool trust binding requires exactly one SHA256SUMS "
+                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+            ),
+        )
+
+    def test_verifier_rejects_coordinated_transitive_source_deletion(
+        self,
+    ) -> None:
+        target = "scripts/check_changelog.py"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts/latest"
+            checksum_path = latest / "SHA256SUMS"
+            manifest_path = latest / "release-checksums.json"
+            lines = [
+                line
+                for line in checksum_path.read_text(
+                    encoding="utf-8"
+                ).splitlines()
+                if not line.endswith(f"  {target}")
+            ]
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["files"] = [
+                entry
+                for entry in manifest["files"]
+                if entry["path"] != target
+            ]
+            (root / target).unlink()
+            checksum_text = "\n".join(lines) + "\n"
+            write_text(checksum_path, checksum_text)
+            manifest["text_checksum_file"]["sha256"] = (
+                verifier.sha256_bytes(checksum_text.encode("utf-8"))
+            )
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                re.escape(target),
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_coordinated_transitive_source_substitution(
+        self,
+    ) -> None:
+        target = "scripts/check_changelog.py"
+        substitute = "scripts/substituted_changelog_check.py"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts/latest"
+            checksum_path = latest / "SHA256SUMS"
+            manifest_path = latest / "release-checksums.json"
+            write_text(root / substitute, "VALUE = 1\n")
+            substitute_digest = verifier.file_sha256(
+                root / substitute
+            ).removeprefix("sha256:")
+            lines = checksum_path.read_text(
+                encoding="utf-8"
+            ).splitlines()
+            target_index = next(
+                index
+                for index, line in enumerate(lines)
+                if line.endswith(f"  {target}")
+            )
+            lines[target_index] = f"{substitute_digest}  {substitute}"
+            lines.sort()
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            target_entry = next(
+                entry
+                for entry in manifest["files"]
+                if entry["path"] == target
+            )
+            manifest["files"].remove(target_entry)
+            manifest["files"].append(file_record(root, substitute))
+            manifest["files"].sort(key=lambda entry: entry["path"])
+            checksum_text = "\n".join(lines) + "\n"
+            write_text(checksum_path, checksum_text)
+            manifest["text_checksum_file"]["sha256"] = (
+                verifier.sha256_bytes(checksum_text.encode("utf-8"))
+            )
+            write_json(manifest_path, manifest)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                re.escape(target),
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_symlinked_reviewed_transitive_source(
+        self,
+    ) -> None:
+        target = Path("scripts/check_changelog.py")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target_path = root / target
+            outside = root / "outside/check_changelog.py"
+            write_text(
+                outside,
+                target_path.read_text(encoding="utf-8"),
+            )
+            target_path.unlink()
+            try:
+                target_path.symlink_to(outside)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                re.escape(target.as_posix()),
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_noncanonical_trust_source_policy(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            manifest_path = (
+                root
+                / "release-artifacts/latest/release-checksums.json"
+            )
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["source"]["coverage_policy"] = (
+                verifier.release_checksum_generator.CUSTOM_SUBSET_COVERAGE_POLICY
+            )
+            write_json(manifest_path, manifest)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "require canonical coverage_policy",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_broad_trust_source_coverage(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            manifest_path = (
+                root
+                / "release-artifacts/latest/release-checksums.json"
+            )
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            removed = (
+                verifier.release_checksum_generator.RELEASE_TOOL_ROOTS[0]
+                .as_posix()
+            )
+            covered_paths = manifest["source"]["covered_paths"]
+            covered_paths.remove(removed)
+            covered_paths.append("scripts")
+            write_json(manifest_path, manifest)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                re.escape(removed),
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_mutated_release_tool_after_bundle_creation(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle_with_trust_input(root)
+            write_text(root / RELEASE_TOOL_FIXTURE_PATH, "VALUE = 2\n")
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                (
+                    "release-tool trust binding SHA256SUMS hash mismatch for "
+                    "scripts/generate_bytecode_release_proof.py"
+                ),
+            ):
+                verifier.verify_release_artifacts(root)
 
     def test_verifier_requires_direct_governed_parameter_inventory_bindings(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

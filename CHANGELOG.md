@@ -10,9 +10,18 @@ the release policy in `docs/release-policy.md`.
 - Added proposed ADR 0018 and checked target-spec semantics for mint operation
   identity: the proposal defines one manager-scoped ledger operation root and
   one unique operation ID per token; nonpayable asset-agnostic manager ABI,
-  typed request/result commitments, signer-bound token content, caller
-  identity, ledger ABI/read/event ownership, nonce reservation, and rollback
-  requirements are checker-pinned. Exact typed primary-settlement integration
+  a manager-owned caller-sensitive single-step preview, typed request/result
+  commitments, signer-bound token content, current-versus-grace-bound policy
+  identity, exact ledger/manager event ownership, schema-first royalty snapshot
+  events, nonce reservation, and rollback requirements are checker-pinned. The
+  proposed ledger call now receives explicit collection/phase identity, loads
+  current policy from that registered manager tuple, and permits zero-counter
+  phases without inferring scope. Canonical checksum generation and offline
+  verification independently bind the reviewed 20-file release-tool runtime
+  closure plus eight focused tests, reject broad/substituted coverage and
+  alternate importer escapes, and reserve custom subsets for explicit
+  noncanonical outputs.
+  Exact typed primary-settlement integration
   and repeat-sale replay remain ADR 0019 / #694 blockers. This is a spec-first
   pre-genesis proposal for
   [issue #688](https://github.com/6529-Collections/6529Stream/issues/688);

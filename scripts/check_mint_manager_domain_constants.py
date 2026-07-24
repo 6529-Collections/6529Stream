@@ -274,6 +274,26 @@ ENTROPY_SPEC_PATH = Path("docs/stream-entropy-coordinator.md")
 BACKLOG_PATH = Path("ops/EXECUTION_BACKLOG.md")
 OPERATION_DOMAIN_MARKER = "Identity-domain constants [MPA-OPERATION-DOMAINS]:"
 OPERATION_DOMAIN_END_MARKER = "\n```solidity"
+ARCHITECTURE_OPERATION_DOMAIN_MARKER = (
+    "### Mint Manager And Ledger Extension Mirror Rows"
+)
+ARCHITECTURE_OPERATION_DOMAIN_END_MARKER = (
+    "\n### Sales And Auctions Mirror Rows"
+)
+OPERATION_SELECTOR_MARKER = (
+    "Operation-identity selector goldens [MPA-OPERATION-SELECTORS]:"
+)
+OPERATION_SELECTOR_END_MARKER = "\nReturn types do not enter a selector."
+SALES_DOMAIN_MARKER = "## Domain Constants And Typehashes"
+SALES_DOMAIN_END_MARKER = "\n## Conformance Gates"
+SALE_AUTHORIZATION_ASSIGNMENT_MARKER = "## Signed Sale Authorization"
+SALE_AUTHORIZATION_ASSIGNMENT_END_MARKER = "\n## Fixed-Price Sales And Open Editions"
+ARCHITECTURE_SALES_MARKER = "### Sales And Auctions Mirror Rows"
+ARCHITECTURE_SALES_END_MARKER = "\n### Revenue Mirror Rows"
+EVENT_TOPIC_MARKER = (
+    "ADR 0018 target operation-event topic mirror [LCM-OPERATION-EVENTS]."
+)
+EVENT_TOPIC_END_MARKER = "\nChanging an indexed field set"
 TARGET_OPERATION_DOMAINS: tuple[tuple[str, str], ...] = (
     ("MINT_REQUEST_COMMITMENT_DOMAIN", "6529STREAM_MINT_REQUEST_COMMITMENT_V1"),
     ("MINT_VALIDATED_RESULT_DOMAIN", "6529STREAM_MINT_VALIDATED_RESULT_V1"),
@@ -290,22 +310,79 @@ TARGET_OPERATION_DOMAINS: tuple[tuple[str, str], ...] = (
     ),
     ("MINT_EXECUTION_PATH_PREPARED", "6529STREAM_MINT_EXECUTION_PATH_PREPARED_V1"),
 )
+TARGET_OPERATION_DOMAIN_MIRROR_METADATA: dict[str, tuple[str, str, str]] = {
+    "MINT_REQUEST_COMMITMENT_DOMAIN": (
+        "StreamMintManager",
+        "1",
+        "interior composite; mint spec `[MPA-OPERATION]` "
+        "(ADR 0011 decision R12; ADR 0018 proposal)",
+    ),
+    "MINT_VALIDATED_RESULT_DOMAIN": (
+        "StreamMintManager",
+        "1",
+        "canonical gate/counter result composite; raw proof encodings excluded; "
+        "mint spec `[MPA-OPERATION]` (ADR 0018 proposal)",
+    ),
+    "MINT_COUNTER_CONSUMPTIONS_DOMAIN": (
+        "StreamMintManager",
+        "1",
+        "exact counter-order/token-index-order `CounterConsumption[]` composite; "
+        "projected cap aggregation is separate; mint spec `[MPA-OPERATION]` "
+        "(ADR 0018 proposal)",
+    ),
+    "MINT_NULLIFIERS_DOMAIN": (
+        "StreamMintManager",
+        "1",
+        "ascending duplicate-free validated nullifier composite; mint spec "
+        "`[MPA-OPERATION]` (ADR 0018 proposal)",
+    ),
+    "MINT_OPERATION_ROOT_DOMAIN": (
+        "StreamMintManager",
+        "1",
+        "one root per manager batch; mint spec `[MPA-OPERATION]` "
+        "(ADR 0018 proposal)",
+    ),
+    "MINT_TOKEN_OPERATION_ID_DOMAIN": (
+        "StreamMintManager",
+        "1",
+        "per-token interior composite; mint spec `[MPA-OPERATION]` rule 1 "
+        "(ADR 0012 decision T6; ADR 0018 proposal)",
+    ),
+    "MINT_EXECUTION_PATH_SINGLE_STEP": (
+        "StreamMintManager",
+        "1",
+        "single-step execution-path identity; mint spec `[MPA-OPERATION]` "
+        "(ADR 0018 proposal)",
+    ),
+    "MINT_EXECUTION_PATH_PREPARED": (
+        "StreamMintManager",
+        "1",
+        "prepared execution-path identity; mint spec `[MPA-OPERATION]` "
+        "(ADR 0018 proposal)",
+    ),
+}
 TARGET_OPERATION_SELECTORS: tuple[tuple[str, str], ...] = (
     (
         "executeSingleStepMint((uint256,bytes32,address,address,address[],address[],"
-        "bytes[],bytes32[],bytes32,bytes32,bytes),bytes)",
-        "0x8a6ace2e",
+        "bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+        "0x286cd1d1",
     ),
     (
         "executePreparedMint((uint256,bytes32,address,address,address[],address[],"
-        "bytes[],bytes32[],bytes32,bytes32,bytes),bytes)",
-        "0x97c01727",
+        "bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+        "0xc9281e5b",
+    ),
+    (
+        "previewSingleStepMintOperation((uint256,bytes32,address,address,address[],"
+        "address[],bytes[],bytes32[],bytes32,bytes32,bytes32,bytes),bytes)",
+        "0xa5651f13",
     ),
     ("nextOperationNonce()", "0x37f8eaa5"),
     (
-        "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,"
-        "address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)",
-        "0x79e9746a",
+        "consume(uint256,bytes32,(bytes32,uint256,bytes32,bytes32,bytes32,address,"
+        "address,address,address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],"
+        "bytes32,bytes32)",
+        "0x82e8f383",
     ),
     ("isManagerOperationRootUsed(address,bytes32)", "0xe67d8006"),
     ("isOperationRootUsed(bytes32)", "0x12837042"),
@@ -313,6 +390,18 @@ TARGET_OPERATION_SELECTORS: tuple[tuple[str, str], ...] = (
         "snapshotTokenRoyaltyAtMint(uint256,uint256,bytes32,bytes32,bytes32,bytes32)",
         "0xc8323dfa",
     ),
+)
+TARGET_LEDGER_CONSUME_DECLARATION = """function consume(
+    uint256 collectionId,
+    bytes32 phaseId,
+    CounterConsumption[] calldata consumptions,
+    bytes32 authorizationId,
+    bytes32[] calldata nullifiers,
+    bytes32 boundPolicyHash,
+    bytes32 operationRoot
+) external;"""
+TARGET_LEDGER_CONSUME_ABI_FRAGMENT = " ".join(
+    TARGET_LEDGER_CONSUME_DECLARATION.split()
 )
 TARGET_OPERATION_ABI_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     MINT_SPEC_PATH: (
@@ -324,10 +413,11 @@ TARGET_OPERATION_ABI_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "bytes calldata gateData ) external "
         "returns ( uint256[] memory tokenIds, bytes32 operationRoot, "
         "bytes32[] memory operationIds );",
+        "function previewSingleStepMintOperation( MintBatch calldata batch, "
+        "bytes calldata gateData ) external view "
+        "returns ( bytes32 operationRoot, bytes32[] memory operationIds );",
         "function nextOperationNonce() external view returns (uint256);",
-        "function consume( CounterConsumption[] calldata consumptions, "
-        "bytes32 authorizationId, bytes32[] calldata nullifiers, "
-        "bytes32 policyHash, bytes32 operationRoot ) external;",
+        TARGET_LEDGER_CONSUME_ABI_FRAGMENT,
         "function isManagerOperationRootUsed(address manager, bytes32 operationRoot) "
         "external view returns (bool);",
         "function isOperationRootUsed(bytes32 operationRoot) external view "
@@ -338,6 +428,9 @@ TARGET_OPERATION_ABI_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "uint256 collectionId, bytes32 operationRoot, bytes32 operationId, "
         "bytes32 revenueClass, bytes32 expectedRoyaltyAssignmentHash ) "
         "external returns (bytes32 tokenRoyaltyAssignmentHash);",
+    ),
+    ADR_0018_PATH: (
+        TARGET_LEDGER_CONSUME_ABI_FRAGMENT,
     ),
 }
 TARGET_OPERATION_PREIMAGES: dict[str, tuple[str, ...]] = {
@@ -363,7 +456,8 @@ TARGET_OPERATION_PREIMAGES: dict[str, tuple[str, ...]] = {
     "requestCommitmentHash": (
         "MINT_REQUEST_COMMITMENT_DOMAIN",
         "address(payer)",
-        "address(authorizer)",
+        "address(batch.authorizer)",
+        "bytes32(batch.expectedPolicyHash)",
         "bytes32(initialRecipientsHash)",
         "bytes32(beneficiariesHash)",
         "bytes32(tokenDataArrayHash)",
@@ -379,7 +473,8 @@ TARGET_OPERATION_PREIMAGES: dict[str, tuple[str, ...]] = {
         "bytes32(executionPath)",
         "uint256(collectionId)",
         "bytes32(phaseId)",
-        "bytes32(policyHash)",
+        "bytes32(currentPolicyHash)",
+        "bytes32(boundPolicyHash)",
         "bytes32(batch.authorizationId)",
         "bytes32(requestCommitmentHash)",
         "bytes32(contextHash)",
@@ -405,6 +500,10 @@ TARGET_MANAGER_ENTRY_RETURNS = (
     "bytes32operationRoot",
     "bytes32[]memoryoperationIds",
 )
+TARGET_MANAGER_PREVIEW_RETURNS = (
+    "bytes32operationRoot",
+    "bytes32[]memoryoperationIds",
+)
 TARGET_OPERATION_STRUCT_FIELDS: dict[str, tuple[str, ...]] = {
     "MintBatch": (
         "uint256 collectionId",
@@ -415,6 +514,7 @@ TARGET_OPERATION_STRUCT_FIELDS: dict[str, tuple[str, ...]] = {
         "address[] beneficiaries",
         "bytes[] tokenData",
         "bytes32[] mintCommitments",
+        "bytes32 expectedPolicyHash",
         "bytes32 authorizationId",
         "bytes32 contextHash",
         "bytes resolverData",
@@ -456,18 +556,45 @@ SALE_AUTHORIZATION_TYPE_STRING = (
 SALE_AUTHORIZATION_TYPEHASH = (
     "0x6e5460498aa6274ffa516d53c6046a385c1ff9dd62d6adbfc54c339a4bb6e8d6"
 )
+SALE_AUTHORIZATION_HOME_ROW = {
+    "Constant name": "SALE_AUTHORIZATION_TYPEHASH",
+    "String preimage": "struct type string pinned in [SSA-AUTH]",
+    "Hash value": SALE_AUTHORIZATION_TYPEHASH,
+    "Owner": "sale adapters",
+    "Schema version": "1",
+    "Inputs": (
+        "EIP-712 struct fields per [SSA-AUTH] (`bytes32 revenueClass`, "
+        "`tokenDataArrayHash`, `mintCommitmentsHash`, and trailing "
+        "`uint64 finalizeBy`; ADR 0011 decisions R6 and R10; ADR 0018 proposal)"
+    ),
+}
+SALE_AUTHORIZATION_ARCHITECTURE_ROW = {
+    "Constant name": "SALE_AUTHORIZATION_TYPEHASH",
+    "String preimage": SALE_AUTHORIZATION_TYPE_STRING,
+    "Hash value": SALE_AUTHORIZATION_TYPEHASH,
+    "Owner": "sale adapters",
+    "Schema version": "1",
+    "Inputs": (
+        "EIP-712 struct fields as listed; sales spec `[SSA-AUTH]` "
+        "(`bytes32 revenueClass`, `tokenDataArrayHash`, `mintCommitmentsHash`, "
+        "and trailing `uint64 finalizeBy`; ADR 0011 decisions R6 and R10; "
+        "ADR 0018 proposal)"
+    ),
+}
 TARGET_OPERATION_EVENTS: tuple[
     tuple[str, str, tuple[str, ...], tuple[str, ...]], ...
 ] = (
     (
-        "MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32)",
-        "0xa215a224251a6dd2f93c4d92b6a4cd6d1621373615aa392244c3c23a81871cec",
-        ("operationRoot", "manager", "policyHash"),
+        "MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32,"
+        "bytes32)",
+        "0x32821c46b022bd0995b50921248ed67b1d69a27b6c7afcb0202dcb1fcbbebb24",
+        ("operationRoot", "manager", "boundPolicyHash"),
         (
             "schemaVersion",
             "operationRoot",
             "manager",
-            "policyHash",
+            "currentPolicyHash",
+            "boundPolicyHash",
             "authorizationId",
         ),
     ),
@@ -487,7 +614,7 @@ TARGET_OPERATION_EVENTS: tuple[
             "increment",
             "newValue",
             "cap",
-            "policyHash",
+            "boundPolicyHash",
             "operationRoot",
         ),
     ),
@@ -495,18 +622,30 @@ TARGET_OPERATION_EVENTS: tuple[
         "MintLedgerAuthorizationConsumed(uint16,bytes32,bytes32,address,bytes32)",
         "0x4ae914c98ae10051092be8a5fecc1584bd19371f9b629bc8a75a747a7eb77a80",
         ("authorizationId", "operationRoot", "manager"),
-        ("schemaVersion", "authorizationId", "operationRoot", "manager", "policyHash"),
+        (
+            "schemaVersion",
+            "authorizationId",
+            "operationRoot",
+            "manager",
+            "boundPolicyHash",
+        ),
     ),
     (
         "MintLedgerNullifierConsumed(uint16,bytes32,bytes32,address,bytes32)",
         "0x23bb00045254ab08fcfb223713983797db786dc4692827878cb7cef34f395b06",
         ("nullifier", "operationRoot", "manager"),
-        ("schemaVersion", "nullifier", "operationRoot", "manager", "policyHash"),
+        (
+            "schemaVersion",
+            "nullifier",
+            "operationRoot",
+            "manager",
+            "boundPolicyHash",
+        ),
     ),
     (
         "MintBatchExecuted(uint16,bytes32,uint256,bytes32,address,address,address,"
-        "uint256,uint256,bytes32,bytes32,bytes32)",
-        "0xdc12d057e4bc4c53588c2cee354357f4f3a3a32b7222ea45ad90edc833825f08",
+        "uint256,uint256,bytes32,bytes32,bytes32,bytes32)",
+        "0x4ea33b3409cbd25468bbab85511b2b4d12d4663b1225af0c8d845063a7f52415",
         ("operationRoot", "collectionId", "phaseId"),
         (
             "schemaVersion",
@@ -520,7 +659,8 @@ TARGET_OPERATION_EVENTS: tuple[
             "quantity",
             "contextHash",
             "gateHash",
-            "policyHash",
+            "currentPolicyHash",
+            "boundPolicyHash",
         ),
     ),
     (
@@ -532,7 +672,7 @@ TARGET_OPERATION_EVENTS: tuple[
             "collectionId",
             "phaseId",
             "authorizationId",
-            "policyHash",
+            "boundPolicyHash",
             "operationRoot",
         ),
     ),
@@ -586,15 +726,15 @@ TARGET_OPERATION_EVENTS: tuple[
         ),
     ),
     (
-        "TokenRoyaltySnapshotted(bytes32,uint256,bytes32,uint16,uint256,bytes32,"
+        "TokenRoyaltySnapshotted(uint16,bytes32,uint256,bytes32,uint256,bytes32,"
         "bytes32)",
-        "0x8431f1d0f17c2df44e8b9c3b60ae8123a2820031fe05e1981c9193212cda6822",
+        "0x64ac79953c00686f9a6cf01fc972ff2b4395007acd76701973ae83ec0bfac491",
         ("operationId", "tokenId", "operationRoot"),
         (
+            "schemaVersion",
             "operationId",
             "tokenId",
             "operationRoot",
-            "schemaVersion",
             "collectionId",
             "revenueClass",
             "tokenRoyaltyAssignmentHash",
@@ -631,6 +771,34 @@ TARGET_OPERATION_EVENTS: tuple[
         ("schemaVersion", "collectionId", "tokenId", "mintedTo", "mintCommitment"),
     ),
 )
+TARGET_OPERATION_EVENT_OWNERS: dict[str, Path] = {
+    "MintLedgerOperationRootConsumed": MINT_SPEC_PATH,
+    "MintLedgerCounterConsumed": MINT_SPEC_PATH,
+    "MintLedgerAuthorizationConsumed": MINT_SPEC_PATH,
+    "MintLedgerNullifierConsumed": MINT_SPEC_PATH,
+    "MintBatchExecuted": MINT_SPEC_PATH,
+    "MintAuthorizationConsumed": MINT_SPEC_PATH,
+    "MintTokenExecuted": MINT_SPEC_PATH,
+    "PreparedMintStarted": MINT_SPEC_PATH,
+    "PreparedMintCompleted": MINT_SPEC_PATH,
+    "TokenRoyaltySnapshotted": REVENUE_DOC_PATH,
+    "PrimaryRevenueSettlementContext": REVENUE_DOC_PATH,
+    "EntropyRegistered": ENTROPY_SPEC_PATH,
+}
+TARGET_OPERATION_EVENT_OWNER_LABELS: dict[str, str] = {
+    "MintLedgerOperationRootConsumed": "mint ledger",
+    "MintLedgerCounterConsumed": "mint ledger",
+    "MintLedgerAuthorizationConsumed": "mint ledger",
+    "MintLedgerNullifierConsumed": "mint ledger",
+    "MintBatchExecuted": "mint manager",
+    "MintAuthorizationConsumed": "mint manager",
+    "MintTokenExecuted": "mint manager",
+    "PreparedMintStarted": "mint manager",
+    "PreparedMintCompleted": "mint manager",
+    "TokenRoyaltySnapshotted": "revenue resolver",
+    "PrimaryRevenueSettlementContext": "primary settlement",
+    "EntropyRegistered": "entropy coordinator",
+}
 REVENUE_SECTION_MARKERS: tuple[tuple[Path, str, str], ...] = (
     (REVENUE_DOC_PATH, "Requirements [RSR-DOMAINS]:", "\n## "),
     (DOC_PATH, "### Revenue Mirror Rows", "\n### "),
@@ -647,6 +815,70 @@ def _extract_marked_section(markdown: str, start_marker: str, end_marker: str) -
             f"missing section end marker {end_marker!r} after {start_marker!r}"
         )
     return markdown[start:end]
+
+
+def parse_exact_markdown_table(
+    markdown: str,
+    start_marker: str,
+    end_marker: str,
+    expected_headers: tuple[str, ...],
+    *,
+    label: str,
+) -> list[dict[str, str]]:
+    section = _extract_marked_section(markdown, start_marker, end_marker)
+    lines = section.splitlines()
+    header_indexes: list[int] = []
+    for index, raw_line in enumerate(lines):
+        line = raw_line.strip()
+        if not line.startswith("|") or not line.endswith("|"):
+            continue
+        cells = tuple(normalize_cell(cell) for cell in line.strip("|").split("|"))
+        if cells == expected_headers:
+            header_indexes.append(index)
+    if len(header_indexes) != 1:
+        raise MintManagerDomainError(
+            f"{label} must contain exactly one target table header; "
+            f"found {len(header_indexes)}"
+        )
+    header_index = header_indexes[0]
+    if header_index + 1 >= len(lines):
+        raise MintManagerDomainError(f"{label} table separator missing")
+    separator = tuple(
+        normalize_cell(cell)
+        for cell in lines[header_index + 1].strip().strip("|").split("|")
+    )
+    if len(separator) != len(expected_headers) or set(separator) != {"---"}:
+        raise MintManagerDomainError(f"{label} table separator drifted")
+    rows: list[dict[str, str]] = []
+    for raw_line in lines[header_index + 2 :]:
+        line = raw_line.strip()
+        if not line.startswith("|") or not line.endswith("|"):
+            break
+        cells = tuple(normalize_cell(cell) for cell in line.strip("|").split("|"))
+        if len(cells) != len(expected_headers):
+            raise MintManagerDomainError(
+                f"malformed {label} row: expected {len(expected_headers)} cells, "
+                f"got {len(cells)}: {line!r}"
+            )
+        rows.append(dict(zip(expected_headers, cells)))
+    return rows
+
+
+def markdown_table_row_count(
+    markdown: str,
+    *,
+    column_index: int,
+    predicate: Callable[[str], bool],
+) -> int:
+    count = 0
+    for raw_line in markdown.splitlines():
+        line = raw_line.strip()
+        if not line.startswith("|") or not line.endswith("|"):
+            continue
+        cells = tuple(normalize_cell(cell) for cell in line.strip("|").split("|"))
+        if column_index < len(cells) and predicate(cells[column_index]):
+            count += 1
+    return count
 
 
 def validate_revenue_domain_prefixes(repo_root: Path) -> None:
@@ -732,9 +964,33 @@ def validate_operation_domains(
             f"; missing={missing or '[]'} extra={extra or '[]'}"
         )
 
+    mirror_rows = parse_exact_markdown_table(
+        architecture_text,
+        ARCHITECTURE_OPERATION_DOMAIN_MARKER,
+        ARCHITECTURE_OPERATION_DOMAIN_END_MARKER,
+        (
+            "Constant name",
+            "String preimage",
+            "Hash value",
+            "Owner",
+            "Schema version",
+            "Inputs",
+        ),
+        label="operation-domain architecture mirror",
+    )
     for name, preimage in expected.items():
         expected_hash = keccak_fn(preimage).lower()
         row = rows[name]
+        global_home_count = markdown_table_row_count(
+            mint_spec_text,
+            column_index=0,
+            predicate=lambda cell, target=name: cell == target,
+        )
+        if global_home_count != 1:
+            raise MintManagerDomainError(
+                f"{name} operation-domain home row cardinality/ownership "
+                f"drifted: owning=1, global={global_home_count}"
+            )
         if row["String preimage"] != preimage:
             raise MintManagerDomainError(
                 f"{name} target preimage drifted: expected {preimage!r}, "
@@ -745,11 +1001,37 @@ def validate_operation_domains(
                 f"{name} target hash drifted: expected {expected_hash}, "
                 f"got {row['Hash']}"
             )
-        mirror_fragment = f"| `{name}` | `{preimage}` | {expected_hash} |"
-        if mirror_fragment not in architecture_text:
+        target_rows = [
+            row for row in mirror_rows if row["Constant name"] == name
+        ]
+        global_count = markdown_table_row_count(
+            architecture_text,
+            column_index=0,
+            predicate=lambda cell, target=name: cell == target,
+        )
+        if len(target_rows) != 1 or global_count != 1:
             raise MintManagerDomainError(
-                f"{name} target protocol-v1 mirror row missing or drifted"
+                f"{name} target protocol-v1 mirror row cardinality/ownership "
+                f"drifted: owning={len(target_rows)}, global={global_count}"
             )
+        mirror_row = target_rows[0]
+        owner, schema_version, inputs = TARGET_OPERATION_DOMAIN_MIRROR_METADATA[name]
+        expected_mirror = {
+            "Constant name": name,
+            "String preimage": preimage,
+            "Hash value": expected_hash,
+            "Owner": owner,
+            "Schema version": schema_version,
+            "Inputs": inputs,
+        }
+        actual_mirror = dict(mirror_row)
+        actual_mirror["Hash value"] = actual_mirror["Hash value"].lower()
+        for column, expected_value in expected_mirror.items():
+            if actual_mirror[column] != expected_value:
+                raise MintManagerDomainError(
+                    f"{name} target protocol-v1 mirror {column} drifted: "
+                    f"expected {expected_value!r}, got {actual_mirror[column]!r}"
+                )
 
 
 def validate_operation_selectors(
@@ -757,6 +1039,29 @@ def validate_operation_selectors(
     *,
     keccak_fn: Callable[[str], str] = cast_keccak256,
 ) -> None:
+    selector_rows = parse_exact_markdown_table(
+        mint_spec_text,
+        OPERATION_SELECTOR_MARKER,
+        OPERATION_SELECTOR_END_MARKER,
+        ("Selector", "Canonical external signature"),
+        label="operation selector golden",
+    )
+    expected_signatures = {
+        signature for signature, _selector in TARGET_OPERATION_SELECTORS
+    }
+    actual_signatures = {
+        row["Canonical external signature"] for row in selector_rows
+    }
+    if (
+        actual_signatures != expected_signatures
+        or len(selector_rows) != len(TARGET_OPERATION_SELECTORS)
+    ):
+        raise MintManagerDomainError(
+            "operation selector table membership drifted: "
+            f"missing={sorted(expected_signatures - actual_signatures)} "
+            f"extra={sorted(actual_signatures - expected_signatures)} "
+            f"rows={len(selector_rows)}"
+        )
     for signature, pinned_selector in TARGET_OPERATION_SELECTORS:
         computed_selector = keccak_fn(signature).lower()[:10]
         if computed_selector != pinned_selector:
@@ -764,8 +1069,22 @@ def validate_operation_selectors(
                 f"{signature} checked selector constant drifted: "
                 f"expected {computed_selector}, checker pins {pinned_selector}"
             )
-        row = f"| `{pinned_selector}` | `{signature}` |"
-        if row not in mint_spec_text:
+        target_rows = [
+            row
+            for row in selector_rows
+            if row["Canonical external signature"] == signature
+        ]
+        global_count = markdown_table_row_count(
+            mint_spec_text,
+            column_index=1,
+            predicate=lambda cell, target=signature: cell == target,
+        )
+        if len(target_rows) != 1 or global_count != 1:
+            raise MintManagerDomainError(
+                "operation identity selector row cardinality/ownership drifted: "
+                f"{signature}; owning={len(target_rows)}, global={global_count}"
+            )
+        if target_rows[0]["Selector"].lower() != pinned_selector:
             raise MintManagerDomainError(
                 f"operation identity selector row missing or drifted: {signature}"
             )
@@ -797,6 +1116,17 @@ def validate_operation_abi(documents: dict[Path, str]) -> None:
                     f"invalid checked ABI fragment for {path}: {fragment!r}"
                 )
             function_name = name_match.group(1)
+            if (
+                function_name == "consume"
+                and fragment == TARGET_LEDGER_CONSUME_ABI_FRAGMENT
+            ):
+                exact_count = text.count(TARGET_LEDGER_CONSUME_DECLARATION)
+                if exact_count != 1:
+                    raise MintManagerDomainError(
+                        f"consume ABI declaration block drifted in {path}: "
+                        f"expected exactly one canonical seven-argument "
+                        f"declaration; found {exact_count}"
+                    )
             name_count = len(
                 re.findall(
                     rf"\bfunction\s+{re.escape(function_name)}\s*\(",
@@ -979,6 +1309,48 @@ def validate_manager_entry_ownership(mint_spec_text: str) -> None:
                 f"{function_name} return ABI drifted: "
                 f"expected {TARGET_MANAGER_ENTRY_RETURNS}, got {returns}"
             )
+    preview_name = "previewSingleStepMintOperation"
+    preview_count = len(
+        re.findall(
+            rf"\bfunction\s+{preview_name}\s*\(",
+            solidity_source,
+        )
+    )
+    preview_pattern = re.compile(
+        rf"\bfunction\s+{preview_name}\s*\((?P<parameters>.*?)\)\s*"
+        r"external(?P<mutability>.*?)returns\s*\((?P<returns>.*?)\)\s*;",
+        re.DOTALL,
+    )
+    preview_matches = list(preview_pattern.finditer(operation_block))
+    if preview_count != 1 or len(preview_matches) != 1:
+        raise MintManagerDomainError(
+            f"{preview_name} declaration must appear exactly once; "
+            f"found names={preview_count}, declarations={len(preview_matches)}"
+        )
+    preview = preview_matches[0]
+    preview_parameters = tuple(
+        _normalize_solidity_term(term)
+        for term in _split_top_level_commas(preview.group("parameters"))
+    )
+    preview_returns = tuple(
+        _normalize_solidity_term(term)
+        for term in _split_top_level_commas(preview.group("returns"))
+    )
+    preview_mutability = _normalize_solidity_term(preview.group("mutability"))
+    if preview_parameters != TARGET_MANAGER_ENTRY_PARAMETERS:
+        raise MintManagerDomainError(
+            f"{preview_name} parameter/callback ownership drifted: "
+            f"expected {TARGET_MANAGER_ENTRY_PARAMETERS}, got {preview_parameters}"
+        )
+    if preview_mutability != "view":
+        raise MintManagerDomainError(
+            f"{preview_name} must be external view; got {preview_mutability!r}"
+        )
+    if preview_returns != TARGET_MANAGER_PREVIEW_RETURNS:
+        raise MintManagerDomainError(
+            f"{preview_name} return ABI drifted: "
+            f"expected {TARGET_MANAGER_PREVIEW_RETURNS}, got {preview_returns}"
+        )
     function_names = tuple(
         re.findall(
             r"\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
@@ -988,6 +1360,7 @@ def validate_manager_entry_ownership(mint_spec_text: str) -> None:
     expected_function_names = (
         "executeSingleStepMint",
         "executePreparedMint",
+        "previewSingleStepMintOperation",
         "nextOperationNonce",
     )
     if function_names != expected_function_names:
@@ -1023,13 +1396,44 @@ def validate_sale_authorization_typehash(
     architecture_text = documents.get(DOC_PATH)
     if sales_text is None or architecture_text is None:
         raise MintManagerDomainError("missing sale-authorization typehash document")
-    assignment = re.search(
+    assignment_pattern = re.compile(
         r"SALE_AUTHORIZATION_TYPEHASH\s*=\s*keccak256\s*\((?P<body>.*?)\)\s*;",
-        sales_text,
         re.DOTALL,
     )
-    if assignment is None:
-        raise MintManagerDomainError("missing SALE_AUTHORIZATION_TYPEHASH assignment")
+    assignment_section = _extract_marked_section(
+        sales_text,
+        SALE_AUTHORIZATION_ASSIGNMENT_MARKER,
+        SALE_AUTHORIZATION_ASSIGNMENT_END_MARKER,
+    )
+    owning_assignments = list(assignment_pattern.finditer(assignment_section))
+    assignments_by_path = {
+        path: list(assignment_pattern.finditer(text))
+        for path, text in sorted(documents.items())
+    }
+    global_assignment_count = sum(
+        len(matches) for matches in assignments_by_path.values()
+    )
+    non_owner_assignment_paths = sorted(
+        path.as_posix()
+        for path, matches in assignments_by_path.items()
+        if path != SALES_SPEC_PATH
+        for _match in matches
+    )
+    sales_global_count = len(assignments_by_path.get(SALES_SPEC_PATH, []))
+    if (
+        len(owning_assignments) != 1
+        or sales_global_count != 1
+        or global_assignment_count != 1
+        or non_owner_assignment_paths
+    ):
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH assignment cardinality/ownership "
+            f"drifted: owning={len(owning_assignments)}, "
+            f"sales_global={sales_global_count}, "
+            f"global={global_assignment_count}, "
+            f"non_owners={non_owner_assignment_paths}"
+        )
+    assignment = owning_assignments[0]
     actual_type_string = "".join(
         re.findall(r'"([^"]*)"', assignment.group("body"))
     )
@@ -1045,28 +1449,104 @@ def validate_sale_authorization_typehash(
             "SALE_AUTHORIZATION_TYPEHASH checker golden drifted: "
             f"expected {computed}, checker pins {SALE_AUTHORIZATION_TYPEHASH}"
         )
-    sales_row = (
-        "| `SALE_AUTHORIZATION_TYPEHASH` | struct type string pinned in "
-        f"[SSA-AUTH] | {SALE_AUTHORIZATION_TYPEHASH} |"
+    headers = (
+        "Constant name",
+        "String preimage",
+        "Hash value",
+        "Owner",
+        "Schema version",
+        "Inputs",
     )
-    if sales_row not in sales_text:
-        raise MintManagerDomainError(
-            "SALE_AUTHORIZATION_TYPEHASH sales mirror row missing or drifted"
-        )
-    architecture_row = (
-        f"| `SALE_AUTHORIZATION_TYPEHASH` | `{SALE_AUTHORIZATION_TYPE_STRING}` | "
-        f"{SALE_AUTHORIZATION_TYPEHASH} |"
+    sales_rows = parse_exact_markdown_table(
+        sales_text,
+        SALES_DOMAIN_MARKER,
+        SALES_DOMAIN_END_MARKER,
+        headers,
+        label="sales domain/typehash home",
     )
-    if architecture_row not in architecture_text:
-        raise MintManagerDomainError(
-            "SALE_AUTHORIZATION_TYPEHASH protocol-v1 mirror row missing or drifted"
+    sales_targets = [
+        row
+        for row in sales_rows
+        if row["Constant name"] == "SALE_AUTHORIZATION_TYPEHASH"
+    ]
+    sale_rows_by_path = {
+        path: markdown_table_row_count(
+            text,
+            column_index=0,
+            predicate=lambda cell: cell == "SALE_AUTHORIZATION_TYPEHASH",
         )
+        for path, text in sorted(documents.items())
+    }
+    sales_global_row_count = sale_rows_by_path.get(SALES_SPEC_PATH, 0)
+    sales_non_owner_paths = sorted(
+        path.as_posix()
+        for path, count in sale_rows_by_path.items()
+        if path not in {SALES_SPEC_PATH, DOC_PATH}
+        for _index in range(count)
+    )
+    if (
+        len(sales_targets) != 1
+        or sales_global_row_count != 1
+        or sales_non_owner_paths
+    ):
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH sales mirror row cardinality/ownership "
+            f"drifted: owning={len(sales_targets)}, "
+            f"global={sales_global_row_count}, "
+            f"non_owners={sales_non_owner_paths}"
+        )
+    sales_target = sales_targets[0]
+    actual_sales_target = dict(sales_target)
+    actual_sales_target["Hash value"] = actual_sales_target["Hash value"].lower()
+    for column, expected_value in SALE_AUTHORIZATION_HOME_ROW.items():
+        if actual_sales_target[column] != expected_value:
+            raise MintManagerDomainError(
+                "SALE_AUTHORIZATION_TYPEHASH sales home "
+                f"{column} drifted: expected {expected_value!r}, "
+                f"got {actual_sales_target[column]!r}"
+            )
+    architecture_rows = parse_exact_markdown_table(
+        architecture_text,
+        ARCHITECTURE_SALES_MARKER,
+        ARCHITECTURE_SALES_END_MARKER,
+        headers,
+        label="sale typehash architecture mirror",
+    )
+    architecture_targets = [
+        row
+        for row in architecture_rows
+        if row["Constant name"] == "SALE_AUTHORIZATION_TYPEHASH"
+    ]
+    architecture_global_count = sale_rows_by_path.get(DOC_PATH, 0)
+    if (
+        len(architecture_targets) != 1
+        or architecture_global_count != 1
+        or sales_non_owner_paths
+    ):
+        raise MintManagerDomainError(
+            "SALE_AUTHORIZATION_TYPEHASH protocol-v1 mirror row "
+            "cardinality/ownership drifted: "
+            f"owning={len(architecture_targets)}, global={architecture_global_count}, "
+            f"non_owners={sales_non_owner_paths}"
+        )
+    architecture_target = architecture_targets[0]
+    actual_architecture_target = dict(architecture_target)
+    actual_architecture_target["Hash value"] = actual_architecture_target[
+        "Hash value"
+    ].lower()
+    for column, expected_value in SALE_AUTHORIZATION_ARCHITECTURE_ROW.items():
+        if actual_architecture_target[column] != expected_value:
+            raise MintManagerDomainError(
+                "SALE_AUTHORIZATION_TYPEHASH protocol-v1 mirror "
+                f"{column} drifted: expected {expected_value!r}, "
+                f"got {actual_architecture_target[column]!r}"
+            )
 
 
 def parse_event_signatures(
     markdown: str,
-) -> dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]]:
-    events: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {}
+) -> list[tuple[str, str, tuple[str, ...], tuple[str, ...]]]:
+    events: list[tuple[str, str, tuple[str, ...], tuple[str, ...]]] = []
     target_names = {
         signature.split("(", 1)[0]
         for signature, _topic, _indexed_names, _parameter_names
@@ -1097,17 +1577,14 @@ def parse_event_signatures(
                 parameter_names.append(tokens[-1])
                 if "indexed" in tokens:
                     indexed_names.append(tokens[-1])
-        event = (
-            f"{name}({','.join(parameter_types)})",
-            tuple(indexed_names),
-            tuple(parameter_names),
-        )
-        previous = events.get(name)
-        if previous is not None and previous != event:
-            raise MintManagerDomainError(
-                f"conflicting event definitions for {name}: {previous} vs {event}"
+        events.append(
+            (
+                name,
+                f"{name}({','.join(parameter_types)})",
+                tuple(indexed_names),
+                tuple(parameter_names),
             )
-        events[name] = event
+        )
     return events
 
 
@@ -1116,24 +1593,38 @@ def validate_operation_events(
     *,
     keccak_fn: Callable[[str], str] = cast_keccak256,
 ) -> None:
-    parsed: dict[str, tuple[str, tuple[str, ...], tuple[str, ...]]] = {}
-    for path in (MINT_SPEC_PATH, REVENUE_DOC_PATH, ENTROPY_SPEC_PATH):
-        text = documents.get(path)
-        if text is None:
-            raise MintManagerDomainError(f"missing operation event home: {path}")
-        for name, event in parse_event_signatures(text).items():
-            previous = parsed.get(name)
-            if previous is not None and previous != event:
-                raise MintManagerDomainError(
-                    f"conflicting cross-document event definitions for {name}"
-                )
-            parsed[name] = event
+    parsed_by_path: dict[
+        Path, list[tuple[str, str, tuple[str, ...], tuple[str, ...]]]
+    ] = {}
+    for owner_path in set(TARGET_OPERATION_EVENT_OWNERS.values()):
+        if owner_path not in documents:
+            raise MintManagerDomainError(
+                f"missing operation event home: {owner_path}"
+            )
+    for path, text in sorted(documents.items()):
+        parsed_by_path[path] = parse_event_signatures(text)
 
     mirror = documents.get(CONFORMANCE_PATH)
     if mirror is None:
         raise MintManagerDomainError(
             f"missing operation event topic mirror: {CONFORMANCE_PATH}"
         )
+
+    mirror_rows = parse_exact_markdown_table(
+        mirror,
+        EVENT_TOPIC_MARKER,
+        EVENT_TOPIC_END_MARKER,
+        ("Canonical event signature", "topic0", "Indexed fields", "Owner"),
+        label="operation-event topic mirror",
+    )
+    expected_event_signatures = {
+        signature
+        for signature, _topic, _indexed_names, _parameter_names
+        in TARGET_OPERATION_EVENTS
+    }
+    actual_event_signatures = {
+        row["Canonical event signature"] for row in mirror_rows
+    }
 
     for (
         signature,
@@ -1142,7 +1633,27 @@ def validate_operation_events(
         parameter_names,
     ) in TARGET_OPERATION_EVENTS:
         name = signature.split("(", 1)[0]
-        actual = parsed.get(name)
+        owner = TARGET_OPERATION_EVENT_OWNERS[name]
+        owner_matches = [
+            (event_signature, event_indexed, event_parameters)
+            for event_name, event_signature, event_indexed, event_parameters
+            in parsed_by_path[owner]
+            if event_name == name
+        ]
+        non_owner_matches = sorted(
+            path.as_posix()
+            for path, events in parsed_by_path.items()
+            if path != owner
+            for event_name, _signature, _indexed, _parameters in events
+            if event_name == name
+        )
+        if len(owner_matches) != 1 or non_owner_matches:
+            raise MintManagerDomainError(
+                f"{name} target event declaration cardinality/ownership drifted: "
+                f"owner={owner}, owning={len(owner_matches)}, "
+                f"non_owners={non_owner_matches}"
+            )
+        actual = owner_matches[0]
         expected = (signature, indexed_names, parameter_names)
         if actual != expected:
             raise MintManagerDomainError(
@@ -1155,14 +1666,58 @@ def validate_operation_events(
                 f"{name} checked topic constant drifted: expected {computed_topic}, "
                 f"checker pins {pinned_topic}"
             )
-        mirror_row = (
-            f"| `{signature}` | `{pinned_topic}` | "
-            f"`{','.join(indexed_names)}` |"
+        target_rows = [
+            row
+            for row in mirror_rows
+            if row["Canonical event signature"].split("(", 1)[0] == name
+        ]
+        topic_rows_by_path = {
+            path: markdown_table_row_count(
+                text,
+                column_index=0,
+                predicate=lambda cell, target=name: (
+                    cell.split("(", 1)[0] == target
+                ),
+            )
+            for path, text in sorted(documents.items())
+        }
+        global_count = topic_rows_by_path.get(CONFORMANCE_PATH, 0)
+        non_owner_topic_paths = sorted(
+            path.as_posix()
+            for path, count in topic_rows_by_path.items()
+            if path != CONFORMANCE_PATH
+            for _index in range(count)
         )
-        if mirror_row not in mirror:
+        if (
+            len(target_rows) != 1
+            or global_count != 1
+            or non_owner_topic_paths
+        ):
+            raise MintManagerDomainError(
+                f"{name} target event topic mirror cardinality/ownership drifted: "
+                f"owning={len(target_rows)}, global={global_count}, "
+                f"non_owners={non_owner_topic_paths}"
+            )
+        mirror_row = target_rows[0]
+        if (
+            mirror_row["Canonical event signature"] != signature
+            or mirror_row["topic0"].lower() != pinned_topic
+            or mirror_row["Indexed fields"] != ",".join(indexed_names)
+            or mirror_row["Owner"] != TARGET_OPERATION_EVENT_OWNER_LABELS[name]
+        ):
             raise MintManagerDomainError(
                 f"{name} target event topic mirror row missing or drifted"
             )
+    if (
+        actual_event_signatures != expected_event_signatures
+        or len(mirror_rows) != len(TARGET_OPERATION_EVENTS)
+    ):
+        raise MintManagerDomainError(
+            "operation-event topic table membership drifted: "
+            f"missing={sorted(expected_event_signatures - actual_event_signatures)} "
+            f"extra={sorted(actual_event_signatures - expected_event_signatures)} "
+            f"rows={len(mirror_rows)}"
+        )
 
 
 OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
@@ -1176,18 +1731,17 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "Both manager entries are nonpayable and asset-agnostic.",
         "`authorizationId` is a required nonzero typed request field.",
         "A configured gate must return a nonzero `authorizationId` equal to\n"
-        "   `MintBatch.authorizationId`.",
+        "   `MintBatch.authorizationId`, return `authorizer` equal to\n"
+        "   `MintBatch.authorizer`",
         "contains no generic settlement bytes, callback target, selector, value, or\n"
         "delegatecall surface.",
-        "exactly `address(this)` for the executor term because the\n"
-        "adapter becomes the manager's `msg.sender`.",
-        "It never substitutes the\n"
-        "adapter's external caller, payer, relayer, or `tx.origin`.",
-        "substituting any payer, relayer, or arbitrary caller\n"
-        "for `address(this)` is an identity mismatch.",
-        "A direct payer\n"
-        "call and a relayed call carrying the same valid signed batch therefore\n"
-        "derive the same root",
+        "The preview is manager-owned: it uses\n"
+        "   its own `msg.sender` as executor",
+        "It emits no\n"
+        "   event, writes or consumes no state",
+        "executor term is exactly the adapter's `address(this)`",
+        "substituting a different preview caller is an identity\n"
+        "   mismatch.",
         "enabled counters appear in their policy-registration order;\n"
         "   a context-keyed counter contributes exactly one row; every other counter\n"
         "   contributes rows in ascending `tokenIndex`",
@@ -1210,10 +1764,60 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "preview -> settlement -> manager-return comparison with whole-transaction\n"
         "rollback.",
         "PRE-GENESIS REMOVED: the earlier generic manager entry",
-        "Emit manager batch/token events with the root, per-token operation IDs",
+        "Emit central manager batch and ledger root events with the root,\n"
+        "    per-token operation IDs, `currentPolicyHash`, and `boundPolicyHash`.",
+        "The ticket's `policyHash` is `MintBatch.expectedPolicyHash`",
+        "Child counter, authorization, and nullifier ledger events include\n"
+        "   `boundPolicyHash`; the central root event includes\n"
+        "   `currentPolicyHash` and `boundPolicyHash`",
+        "`MintLedgerCounterConsumed` carries\n"
+        "the `boundPolicyHash`, `operationRoot`, and cap/accounting values",
+        "`MintBatch.expectedPolicyHash` and signed-ticket authority bind the\n"
+        "authorized `boundPolicyHash`",
+        "Live consent, gate/module/config evaluation, counters, caps, and\n"
+        "increments are checked under `currentPolicyHash`.",
+        "`operationRoot` commits `currentPolicyHash` and then `boundPolicyHash`.",
+        "Preview returns `operationRoot` plus `operationIds`; it does not separately\n"
+        "return either policy hash.",
+        "Child authorization, nullifier, and counter-consumption events expose\n"
+        "`boundPolicyHash` plus `operationRoot`.",
+        "Per-token events join through `operationRoot` and do not separately expose\n"
+        "either policy hash.",
         "changing the root, reserved token nonce, index,\n"
         "    token-data hash, or mint commitment changes the token operation ID.",
-        "bytes32 policyHash,\n        bytes32 operationRoot",
+        "bytes32 boundPolicyHash,\n        bytes32 operationRoot",
+        "bytes32(currentPolicyHash),\n    bytes32(boundPolicyHash)",
+        "bytes32(batch.expectedPolicyHash),\n    bytes32(initialRecipientsHash)",
+        "Configured and ungated phases\n"
+        "   both accept the current or valid immediate-predecessor identity.",
+        "`requireMintConsent(collectionId, phaseId, currentPolicyHash)`",
+        "The central `MintLedgerOperationRootConsumed` and manager\n"
+        "`MintBatchExecuted` events carry both hashes.",
+        "The ledger stores the current `policyHash` and monotonically increasing\n"
+        "   `currentPolicyRevision`.",
+        "`block.timestamp <= previousPolicyGraceUntil`",
+        "A second rotation overwrites the tuple and immediately invalidates\n"
+        "   the older predecessor",
+        "repeat cap checks under the\n"
+        "    current registered counter policies",
+        "`consume` receives explicit `collectionId` and `phaseId`;\n"
+        "   it never infers phase identity from `consumptions`, because a valid phase\n"
+        "   may consume an empty counter array.",
+        "`registeredPhasePolicyHashes[msg.sender][collectionId][phaseId]`",
+        "The caller never supplies\n"
+        "   `currentPolicyHash`, and the ledger never calls the manager to discover it.",
+        "`row.collectionId == collectionId` and `row.phaseId == phaseId`",
+        "`consumptions` may be empty. The ledger still validates manager, explicit\n"
+        "   phase, current/bound policy identity, root, authorization, and nullifiers",
+        "emits exactly one `MintLedgerOperationRootConsumed` using the loaded\n"
+        "   `currentPolicyHash` and supplied `boundPolicyHash`",
+        "It emits no\n"
+        "   `MintLedgerCounterConsumed` or `MintLedgerCounterConsumptionContext` event\n"
+        "   for an empty array.",
+        "Pass the exact batch `collectionId` and `phaseId` to\n"
+        "    `StreamMintLedger.consume`. The ledger independently loads\n"
+        "    `currentPolicyHash` from the calling manager's registered phase tuple",
+        "Missing current-policy artist consent",
         "function isManagerOperationRootUsed(address manager, bytes32 operationRoot)",
         "event MintLedgerOperationRootConsumed(",
         "event MintTokenExecuted(",
@@ -1238,6 +1842,18 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "purchase/execution identity.",
         "`operationRoot` is\n"
         "not a universal replacement",
+        "`snapshotTokenRoyaltyAtMint` is `PREPARED_MINT`-only.",
+        "`PRE_REVENUE_SINGLE_STEP` has no prepared record and must reject any policy\n"
+        "    requiring a token-level primary or royalty snapshot",
+        "Sale adapter calls the manager-owned\n"
+        "   `previewSingleStepMintOperation(batch, gateData)`.",
+        "Mint manager validates the phase, recomputes `currentPolicyHash`, accepts\n"
+        "   `batch.expectedPolicyHash` as the current or exact unexpired immediate\n"
+        "   predecessor, and defines `boundPolicyHash = batch.expectedPolicyHash`.",
+        "Mint manager passes the exact batch `collectionId` and `phaseId` to the\n"
+        "   ledger. Using the manager caller as scope, the ledger independently loads\n"
+        "   `currentPolicyHash` from that registered phase tuple",
+        "after `currentPolicyHash` computation and before",
     ),
     ADR_0018_PATH: (
         "# ADR 0018: Batch Operation Root And Token Identity",
@@ -1249,17 +1865,36 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "Root derivation, nonce-range reservation, all token operation IDs",
         "The proposed `SALE_AUTHORIZATION_TYPEHASH` additionally binds "
         "`tokenDataArrayHash` and\n`mintCommitmentsHash`",
-        "the executor term\nis exactly `address(this)`",
+        "The preview is manager-owned, is safe for a `STATICCALL`",
+        "returns exactly `batch.beneficiaries.length`\n"
+        "token operation IDs.",
+        "The operation root explicitly\n"
+        "binds `currentPolicyHash` then `boundPolicyHash`",
+        "`MintBatchExecuted` and the central\n"
+        "`MintLedgerOperationRootConsumed` carry both hashes.",
+        "configured and ungated phases accept the current\n"
+        "or valid immediate-predecessor identity",
+        "The manager passes the exact batch `collectionId` and `phaseId`; the ledger\n"
+        "uses `msg.sender` as manager scope and independently loads\n"
+        "`currentPolicyHash`",
+        "The caller never supplies\n"
+        "`currentPolicyHash`, and the ledger never infers phase identity from counter\n"
+        "rows or calls the manager.",
+        "`consumptions` may be empty: the ledger still validates and consumes the root\n"
+        "plus any authorization/nullifiers",
         "## Settlement Invariant And Open Blocker",
         "ADR 0019 / issue #694 must define the exact\n"
         "typed invocation, hostile callback cases, and execution-ID-bound distinct-key\n"
         "and replay tests.",
         "The ledger rejects a zero root and a root already used in the calling manager's\n"
         "scope before any ledger write.",
-        "A downstream manager, Core, resolver, settlement, entropy, or\n"
-        "receiver failure reverts all ledger writes and the manager nonce reservation.",
-        "The adapter compares the returned identities with that preview\n"
-        "before returning from the top-level call.",
+        "An\n"
+        "unregistered phase, cross-phase row, invalid bound hash, replay, counter\n"
+        "mismatch, or downstream manager, Core, resolver, settlement, entropy, or\n"
+        "receiver failure reverts all ledger writes, events, and the manager nonce\n"
+        "reservation.",
+        "compares\n"
+        "the returned root and token operation ID vector with the preview.",
         "## Atomic Cutover And Core Replay Removal",
         "The generated event catalog remains an as-built artifact",
     ),
@@ -1275,6 +1910,13 @@ OPERATION_IDENTITY_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "exact typed primary-settlement call\n"
         "   and execution-specific repeat-sale key remain ADR 0019 / issue #694\n"
         "   blockers",
+        "Central manager-batch and ledger-root-consumption facts expose both\n"
+        "   `currentPolicyHash` and `boundPolicyHash`",
+        "child authorization and consumption\n"
+        "   facts use `boundPolicyHash` and join through `operationRoot`.",
+        "the manager passes the exact batch `collectionId` and\n"
+        "`phaseId` to `StreamMintLedger.consume`; the ledger uses the manager caller as\n"
+        "scope, independently loads the current registered phase policy",
     ),
     CONFORMANCE_PATH: (
         "Proposed\n"
@@ -1307,6 +1949,14 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "path, and its own caller\n   address",
         "changes the token ID.",
         "per-token IDs",
+        "`MintLedgerCounterConsumed` carries\n"
+        "the `policyHash`, `operationRoot`, and cap/accounting values",
+        "Every mint event, ledger consumption event, signed ticket, and preview\n"
+        "response must include the active `policyHash`.",
+        "`0x79e9746a`",
+        "consume((bytes32,uint256,bytes32,bytes32,bytes32,address,address,address,"
+        "address,uint64,uint64,bytes32,bytes32)[],bytes32,bytes32[],bytes32,bytes32)",
+        "function consume(\n    CounterConsumption[] calldata consumptions,",
     ),
     ADR_0018_PATH: (
         "Accepted for the pre-genesis production target",
@@ -1315,9 +1965,15 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
         "token-ID model",
         "all token IDs",
         "Per-token IDs",
+        "an ungated phase accepts only the current hash",
+        "ungated predecessor",
+        "all expose the same bound hash",
+        "preview, ledger, sale, mint, and consumption facts all expose the same bound hash",
+        "function consume(\n    CounterConsumption[] calldata consumptions,",
     ),
     SALES_SPEC_PATH: (
         "0xffd150d67de6a2619775f6cb884eadc8802d3d37fbd584d32ad0ff83ceddb098",
+        "every emitted sale, mint, or consumption\n   policy hash are the same value",
     ),
     CONFORMANCE_PATH: (
         "exactly one root plus `N` token IDs",
@@ -1328,6 +1984,91 @@ OPERATION_FORBIDDEN_FRAGMENTS: dict[Path, tuple[str, ...]] = {
     ADR_INDEX_PATH: (
         "| [`0018-batch-operation-root-and-token-identity.md`]"
         "(0018-batch-operation-root-and-token-identity.md) | Accepted |",
+    ),
+}
+OPERATION_IDENTITY_EXACT_COUNTS: dict[
+    Path, tuple[tuple[str, int], ...]
+] = {
+    MINT_SPEC_PATH: (
+        (
+            "Emit central manager batch and ledger root events with the root,\n"
+            "per-token operation IDs, `currentPolicyHash`, and `boundPolicyHash`.",
+            1,
+        ),
+        (
+            "Child counter, authorization, and nullifier ledger events include\n"
+            "`boundPolicyHash`; the central root event includes\n"
+            "`currentPolicyHash` and `boundPolicyHash`",
+            1,
+        ),
+        (
+            "`MintLedgerCounterConsumed` carries\n"
+            "the `boundPolicyHash`, `operationRoot`, and cap/accounting values",
+            1,
+        ),
+        (
+            "Preview returns `operationRoot` plus `operationIds`; it does not separately\n"
+            "return either policy hash.",
+            1,
+        ),
+        (
+            "Per-token events join through `operationRoot` and do not separately expose\n"
+            "either policy hash.",
+            1,
+        ),
+        ("`block.timestamp <= previousPolicyGraceUntil`", 5),
+        ("`gateResult.authorizer == batch.authorizer`", 1),
+        (
+            "A second rotation overwrites the tuple and immediately invalidates\n"
+            "the older predecessor",
+            1,
+        ),
+        ("Missing current-policy artist consent", 1),
+        (
+            "`registeredPhasePolicyHashes[msg.sender][collectionId][phaseId]`",
+            1,
+        ),
+        (
+            "`row.collectionId == collectionId` and "
+            "`row.phaseId == phaseId`",
+            1,
+        ),
+        (
+            "`consumptions` may be empty. The ledger still validates manager, explicit\n"
+            "phase, current/bound policy identity, root, authorization, and nullifiers",
+            1,
+        ),
+    ),
+    REVENUE_DOC_PATH: (
+        (
+            "Sale adapter calls the manager-owned\n"
+            "`previewSingleStepMintOperation(batch, gateData)`.",
+            1,
+        ),
+        (
+            "Mint manager calls `requireMintConsent(collectionId, phaseId,\n"
+            "currentPolicyHash)`",
+            2,
+        ),
+        (
+            "Mint manager passes the exact batch `collectionId` and `phaseId` to the\n"
+            "ledger. Using the manager caller as scope, the ledger independently loads\n"
+            "`currentPolicyHash` from that registered phase tuple",
+            2,
+        ),
+    ),
+    ADR_0018_PATH: (
+        (
+            "The operation root explicitly\n"
+            "binds `currentPolicyHash` then `boundPolicyHash`",
+            1,
+        ),
+        (
+            "The manager passes the exact batch `collectionId` and `phaseId`; the ledger\n"
+            "uses `msg.sender` as manager scope and independently loads\n"
+            "`currentPolicyHash`",
+            1,
+        ),
     ),
 }
 
@@ -1354,6 +2095,19 @@ def validate_operation_identity_fragments(documents: dict[Path, str]) -> None:
                 raise MintManagerDomainError(
                     f"operation identity stale/forbidden contract in {path}: "
                     f"found {fragment!r}"
+                )
+    for path, exact_counts in OPERATION_IDENTITY_EXACT_COUNTS.items():
+        text = documents.get(path)
+        if text is None:
+            raise MintManagerDomainError(f"missing operation identity document: {path}")
+        normalized_text = " ".join(text.split())
+        for fragment, expected_count in exact_counts:
+            normalized_fragment = " ".join(fragment.split())
+            actual_count = normalized_text.count(normalized_fragment)
+            if actual_count != expected_count:
+                raise MintManagerDomainError(
+                    f"operation identity exact fragment count drifted in {path}: "
+                    f"expected {expected_count}, found {actual_count}: {fragment!r}"
                 )
 
 

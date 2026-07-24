@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import re
+import stat
 import sys
 from pathlib import Path
 from typing import Any, Iterable, NamedTuple, Sequence
@@ -44,6 +45,38 @@ ALLOWED_UNCHECKSUMMED_RELEASE_FILES = {
     CHECKSUM_FILE_NAME,
     CHECKSUM_MANIFEST_NAME,
 }
+REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
+    Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/check_changelog.py"),
+    Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governed_parameter_identifiers.py"),
+    Path("scripts/check_governed_parameter_inventory.py"),
+    Path("scripts/check_non_local_release_evidence.py"),
+    Path("scripts/check_public_beta_evidence.py"),
+    Path("scripts/check_release_evidence_issue_links.py"),
+    Path("scripts/check_release_signatures.py"),
+    Path("scripts/check_risk_register.py"),
+    Path("scripts/check_signer_custody_readiness.py"),
+    Path("scripts/check_slither_baseline.py"),
+    Path("scripts/generate_bytecode_release_proof.py"),
+    Path("scripts/generate_release_candidate_lockfile.py"),
+    Path("scripts/generate_release_checksums.py"),
+    Path("scripts/generate_release_manifest.py"),
+    Path("scripts/generate_release_notes.py"),
+    Path("scripts/generate_risk_register.py"),
+    Path("scripts/release_evidence_paths.py"),
+    Path("scripts/verify_release_artifacts.py"),
+)
+REVIEWED_RELEASE_TOOL_FOCUSED_TESTS = (
+    Path("scripts/test_changelog_check.py"),
+    Path("scripts/test_release_notes.py"),
+    Path("scripts/test_admin_ceremony_evidence.py"),
+    Path("scripts/test_drop_authorization_signing_evidence.py"),
+    Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_release_signatures.py"),
+    Path("scripts/test_signer_custody_readiness.py"),
+    Path("scripts/test_bytecode_release_proof.py"),
+)
 
 
 class ReleaseArtifactVerificationError(RuntimeError):
@@ -56,6 +89,14 @@ class VerificationSummary(NamedTuple):
     release_manifest_records: int
     bytecode_proof_records: int
     release_candidate_lockfile_records: int
+
+
+def _is_reparse_point(path: Path) -> bool:
+    try:
+        attributes = path.lstat().st_file_attributes
+    except (AttributeError, FileNotFoundError, OSError):
+        return False
+    return bool(attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT)
 
 
 def normalize_path(path: Path, repo_root: Path) -> str:
@@ -80,19 +121,22 @@ def require_no_symlink_components(
         if part == "..":
             raise ReleaseArtifactVerificationError(f"{field} must stay inside the repository")
         current = current / part
-        if current.is_symlink():
+        if current.is_symlink() or _is_reparse_point(current):
             try:
                 display_path = current.relative_to(repo_root.resolve()).as_posix()
             except ValueError:
                 display_path = current.as_posix()
             raise ReleaseArtifactVerificationError(
-                f"{field} must not include symlinks: {display_path}"
+                f"{field} must not include symlinks or reparse points: "
+                f"{display_path}"
             )
 
 
 def require_regular_file(path: Path, source: str) -> None:
-    if path.is_symlink():
-        raise ReleaseArtifactVerificationError(f"{source} must not be a symlink: {path}")
+    if path.is_symlink() or _is_reparse_point(path):
+        raise ReleaseArtifactVerificationError(
+            f"{source} must not be a symlink or reparse point: {path}"
+        )
     if not path.is_file():
         raise ReleaseArtifactVerificationError(f"{source} references missing file: {path}")
 
@@ -260,6 +304,155 @@ def verify_checksum_file(
             )
         digests[relative_path] = digest
     return digests
+
+
+def verify_release_tool_trust_bindings(
+    repo_root: Path,
+    checksum_path: Path,
+    checksum_manifest_path: Path,
+) -> tuple[str, ...]:
+    """Independently enforce canonical release-tool trust in both indexes."""
+
+    require_regular_file(checksum_path, CHECKSUM_FILE_NAME)
+    checksum_entries = parse_checksum_file(
+        checksum_path.read_text(encoding="utf-8")
+    )
+    checksum_entries_by_path: dict[str, list[str]] = {}
+    for digest, path in checksum_entries:
+        checksum_entries_by_path.setdefault(path, []).append(digest)
+
+    data = require_schema(
+        load_json(checksum_manifest_path),
+        CHECKSUM_SCHEMA,
+        CHECKSUM_MANIFEST_NAME,
+    )
+    source = require_dict(data.get("source"), "release-checksums.source")
+    if (
+        source.get("coverage_policy")
+        != release_checksum_generator.CANONICAL_COVERAGE_POLICY
+    ):
+        raise ReleaseArtifactVerificationError(
+            "release-tool trust bindings require canonical coverage_policy"
+        )
+    raw_covered_paths = source.get("covered_paths")
+    if not isinstance(raw_covered_paths, list) or not all(
+        isinstance(path, str) and path
+        for path in raw_covered_paths
+    ):
+        raise ReleaseArtifactVerificationError(
+            "release-tool trust bindings require string source.covered_paths"
+        )
+    for required_path in (
+        REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+        + REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
+    ):
+        relative_path = required_path.as_posix()
+        resolved = resolve_release_file(
+            repo_root,
+            relative_path,
+            f"release-tool reviewed source {relative_path}",
+        )
+        require_regular_file(
+            resolved,
+            f"release-tool reviewed source {relative_path}",
+        )
+    try:
+        runtime_closure = (
+            release_checksum_generator.validate_canonical_release_checksum_policy(
+                repo_root,
+                [Path(path) for path in raw_covered_paths],
+            )
+        )
+    except release_checksum_generator.ChecksumError as exc:
+        raise ReleaseArtifactVerificationError(
+            f"release-tool trust bindings rejected source.covered_paths: {exc}"
+        ) from exc
+    if runtime_closure != REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE:
+        missing = sorted(
+            path.as_posix()
+            for path in (
+                set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
+                - set(runtime_closure)
+            )
+        )
+        unexpected = sorted(
+            path.as_posix()
+            for path in (
+                set(runtime_closure)
+                - set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
+            )
+        )
+        raise ReleaseArtifactVerificationError(
+            "release-tool trust bindings runtime closure differs from the "
+            f"independent reviewed literal: missing={missing}; "
+            f"unexpected={unexpected}"
+        )
+
+    raw_files = data.get("files")
+    if not isinstance(raw_files, list):
+        raise ReleaseArtifactVerificationError(
+            "release-tool trust bindings require checksum manifest files"
+        )
+    manifest_entries_by_path: dict[str, list[dict[str, Any]]] = {}
+    for index, raw_entry in enumerate(raw_files):
+        entry = require_dict(
+            raw_entry,
+            f"release-checksums.files[{index}]",
+        )
+        path = require_string(
+            entry.get("path"),
+            f"release-checksums.files[{index}].path",
+        )
+        manifest_entries_by_path.setdefault(path, []).append(entry)
+
+    required_paths = tuple(
+        sorted(
+            set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE).union(
+                REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
+            )
+        )
+    )
+    for required_path in required_paths:
+        relative_path = required_path.as_posix()
+        checksum_matches = checksum_entries_by_path.get(relative_path, [])
+        if len(checksum_matches) != 1:
+            raise ReleaseArtifactVerificationError(
+                "release-tool trust binding requires exactly one SHA256SUMS "
+                f"entry for {relative_path}: got {len(checksum_matches)}"
+            )
+        manifest_matches = manifest_entries_by_path.get(relative_path, [])
+        if len(manifest_matches) != 1:
+            raise ReleaseArtifactVerificationError(
+                "release-tool trust binding requires exactly one "
+                f"release-checksums.json entry for {relative_path}: "
+                f"got {len(manifest_matches)}"
+            )
+
+        resolved = resolve_release_file(
+            repo_root,
+            relative_path,
+            f"release-tool trust binding {relative_path}",
+        )
+        require_regular_file(resolved, "release-tool trust binding")
+        expected_hash = file_sha256(resolved)
+        expected_size = resolved.stat().st_size
+        if checksum_matches[0] != expected_hash.removeprefix("sha256:"):
+            raise ReleaseArtifactVerificationError(
+                "release-tool trust binding SHA256SUMS hash mismatch for "
+                f"{relative_path}"
+            )
+        manifest_entry = manifest_matches[0]
+        if manifest_entry.get("sha256") != expected_hash:
+            raise ReleaseArtifactVerificationError(
+                "release-tool trust binding release-checksums.json hash "
+                f"mismatch for {relative_path}"
+            )
+        if manifest_entry.get("size_bytes") != expected_size:
+            raise ReleaseArtifactVerificationError(
+                "release-tool trust binding release-checksums.json size "
+                f"mismatch for {relative_path}"
+            )
+    return tuple(path.as_posix() for path in required_paths)
 
 
 def verify_release_directory_checksum_closure(
@@ -631,6 +824,11 @@ def verify_release_artifacts(
     bytecode_proof_path = resolved_release_dir / BYTECODE_PROOF_NAME
     release_candidate_lockfile_path = resolved_release_dir / RELEASE_CANDIDATE_LOCKFILE_NAME
 
+    verify_release_tool_trust_bindings(
+        repo_root,
+        checksum_path,
+        checksum_manifest_path,
+    )
     checksum_entries = verify_checksum_file(repo_root, checksum_path)
     verify_governed_parameter_reference_checksum_coverage(
         repo_root,

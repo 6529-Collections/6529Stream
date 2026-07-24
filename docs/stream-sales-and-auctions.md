@@ -104,6 +104,12 @@ Flow for every paid mint sale:
     -> StreamCore mint hooks
 ```
 
+For both manager paths, the manager passes the exact batch `collectionId` and
+`phaseId` to `StreamMintLedger.consume`; the ledger uses the manager caller as
+scope, independently loads the current registered phase policy, and never
+infers phase identity from counter rows or accepts a caller-supplied current
+policy hash.
+
 Sale adapters are the protocol's price and mechanic layer. They are the only
 contracts that hold buyer funds before official settlement, and they are
 deliberately kept out of Core, the manager, and the ledger so that new sale
@@ -616,13 +622,21 @@ Requirements [SSA-AUTH]:
    for every other field.
 9. A mint-executing adapter uses the exact operation identity owned by
    `docs/mint-policy-and-accounting.md` `[MPA-OPERATION]` (ADR 0018). It
-   derives and records the batch `operationRoot` before a
-   `PRE_REVENUE_SINGLE_STEP` deposit, supplies the same signed request and
+   calls the manager-owned
+   `previewSingleStepMintOperation(batch, gateData)` and records the returned
+   batch `operationRoot` before a `PRE_REVENUE_SINGLE_STEP` deposit, supplies
+   the same signed request and
    authorization ID to the manager in that top-level transaction, uses exactly
    its own `address(this)` for the manager-executor term (never the buyer,
    payer, relayer, external caller, or `tx.origin`), compares the returned root
    and token operation IDs with its preview before returning, and records a
    per-token `operationId` only when it creates a token-scoped settlement fact.
+   `batch.expectedPolicyHash`, the gate or signed-payload policy hash, and the
+   previewed `boundPolicyHash` are the same authorization-continuity value.
+   Central manager-batch and ledger-root-consumption facts expose both
+   `currentPolicyHash` and `boundPolicyHash`; consent, configuration, and live-
+   economics facts use current identity; child authorization and consumption
+   facts use `boundPolicyHash` and join through `operationRoot`.
    Direct and relayed calls with the same signed request therefore preview the
    same identity. The adapter neither stores ledger replay state nor substitutes
    the sale digest for the batch root. The exact typed primary-settlement call

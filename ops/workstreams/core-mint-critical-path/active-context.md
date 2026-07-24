@@ -8,8 +8,8 @@
   `b4af30a58c22f79bafad241c6e4fab7a4a76063b`
 - Current rebased base:
   `1031ffec0c2c7cfb0525d97790a66ecabfd8fe17`
-- Current branch commit after the `#689` rebase:
-  `c92eb1e47a32563f91578de98258f23668693144`
+- Current committed draft-PR head:
+  `c39b178b9fb7d4ed92816c4ff11f08eac589d43c`
 - Intended result: a focused Proposed ADR and checked specification for one
   manager batch operation root, one per-token operation ID for each batch
   element, ledger-owned manager-scoped root replay, exact event/ABI ownership,
@@ -28,11 +28,13 @@ another worktree. The remaining publication work is to:
 
 1. keep the #689 canonical risk-tracker provenance correction intact;
 2. bind ADR 0018 into the release-manifest and checksum source inventories;
-3. repair every independent normative NO-GO finding and pass focused
-   source/checker review before any further regeneration;
-4. after independent GO, regenerate the canonical dependent tail in documented
-   order and run the authoritative Windows gate; and
-5. declare the exact shared paths and head before draft publication.
+3. close the three verified post-publication-review P1 families: stale
+   current/bound policy-hash mirrors, global cross-document normative ownership,
+   and deterministic release-tool checksum trust closure;
+4. pass focused source/checker review before any further regeneration;
+5. after independent GO, regenerate the canonical dependent tail exactly once
+   in documented order and run a fresh authoritative Windows gate; and
+6. declare the exact shared paths and head before updating the draft PR.
 
 Issue `#690` follows this first `#688` ADR/spec/checker slice with its own
 fail-closed/schema work. Issues `#669`, `#694`, `#691`, `#693`, `#670`, `#656`,
@@ -98,87 +100,75 @@ target or add evidence; it must not make a deployment or readiness claim.
 
 ## Current Evidence
 
-- Focused operation-identity checker and twenty-four negative/positive unit tests
-  pass.
-- Domain hashes, function selectors, return/read ABI semantics, event topic
-  hashes, indexed masks, and all target event field names are checker-pinned.
+- `python -u scripts/test_mint_manager_domain_constants.py` exits `0` with
+  `56/56` tests passing in `152.951` seconds. The direct operation-identity
+  checker also exits `0`. The Proposed ledger ABI now carries explicit
+  collection and phase identity, has selector `0x82e8f383`, and independently
+  loads current policy state even when the counter array is empty.
+- The checker now scans all ten loaded normative documents for the
+  sale-authorization assignment and mirror rows, every target event
+  declaration, and every event-topic mirror. Exact duplicate, conflict,
+  relocation, wrong-column, and outside-owner mutations fail with stable,
+  sorted path diagnostics.
+- The checksum generator computes the recursive first-party Python AST import
+  closure rooted at the six canonical release-tail generators plus the offline
+  verifier. The reviewed closure is exactly 20 runtime files plus eight focused
+  tests. Its narrow dependency grammar allows ordinary static imports plus
+  direct literal `importlib.import_module` and `__import__` forms; importer
+  escapes and alternate loaders (`exec`/`eval`/`compile`, `runpy`,
+  `importlib.util`/`machinery`, `exec_module`, and `load_module`) fail closed.
+- Verifier tests reject independent or coordinated deletion, substitution,
+  corruption, post-bundle mutation, symlink/reparse redirection, broad
+  directory substitution, and removal of a non-root transitive runtime from
+  both checksum indexes and disk.
+- The canonical six-step release tail was regenerated exactly once in the
+  documented order. Structural checksum tests pass `55/55`, verifier tests pass
+  `47/47`, release-manifest tests pass `25/25`, and signed-tag integration
+  passes `14/14`; every generator check mode and offline verification pass. The
+  committed canonical outputs contain exactly 232 unique configured paths,
+  394 `SHA256SUMS` records, 394 JSON records, the exact 20-file runtime closure,
+  eight focused tests, and canonical coverage policy.
 - Markdown link tests/check, changelog gate, Python compilation, and Windows
-  CRLF-aware whitespace validation pass.
-- Independent checker review found two false-negative gaps; both were fixed and
-  covered by new tests.
-- Independent protocol review found single-step comparison observability,
-  stale one-ID language, path-event mirroring, legacy ADR lineage, and call
-  surface drift; all findings were fixed and checker-pinned where appropriate.
-- Independent release review found the required risk-register and bytecode-proof
-  release linkage plus ADR 0018 manifest/checksum inventory coverage. The
-  release-impact text, generator inventories, and focused tests are corrected;
-  independent repair review returned GO, and the canonical release tail was
-  regenerated exactly once on explicit coordinator authorization.
-- Meta-manager ordering requires merged `#688` upstream of `#658` final
-  release-chain regeneration. The coordinator handoff must carry every
-  release-input and shared-doc path.
-- After rebasing merged `#687`, the focused operation checker, all 32 governed
-  parameter inventory tests/check, Markdown/changelog/whitespace checks, every
-  six-step release-tail test/check, and the offline release verifier pass.
-  Intermediate artifacts were regenerated in canonical order against the
-  governed inventory.
-- After rebasing merged `#689`, focused source-inventory tests confirm ADR 0018
-  is included in both the release-manifest governance-document inventory and
-  checksum coverage policy.
-- After the nine-item NO-GO repair, the operation checker and all 24 focused
-  tests, both one-test ADR-inventory checks, all 25 release-manifest unit tests,
-  all 16 Markdown-link tests, the Markdown checker, changelog gate, Python
-  compilation, and CRLF-aware whitespace check pass.
-- After the authorized regeneration, all six release-tail test/check stages
-  pass, including all 28 release-checksum tests. Offline release verification
-  passes with 379 checksum entries, 379 checksum-manifest records, 184 release-
-  manifest file records, 123 bytecode-proof file records, and 16 lockfile file
-  records.
-- The fresh authoritative Windows gate completed with exit `0` in 2,137.8
-  seconds. This validation result is evidence for the draft review slice only;
-  it is not an acceptance, deployment, release, or readiness claim.
+  CRLF-aware whitespace validation pass after the repair.
+- A fresh authoritative Windows `scripts/check.ps1` gate exited `0` in
+  `2,341.3` seconds (`2026-07-24T20:19:51.9187786Z` through approximately
+  `2026-07-24T20:58:53.2187786Z`). One wrapper tree was preserved to terminal;
+  all Forge, release-artifact, rehearsal, verifier, and policy stages passed.
 
 ## Open Decisions
 
-- ADR 0018 remains Proposed only. Its manager operation boundary has completed
-  the nine-item NO-GO repair. Independent checker, protocol, and release
-  re-reviews are clean; the canonical release tail and full Windows gate are
-  green. The ADR cannot be described as accepted.
+- ADR 0018 remains Proposed only. The current corrective diff and generated
+  tail are green but still await final exact-diff readback and explicit
+  publication authorization. The ADR cannot be described as accepted.
 - Exact typed primary settlement, hostile callback handling, and
   execution-ID-bound repeated-sale replay remain ADR 0019 / #694 production
   blockers; operation-root uniqueness does not close them.
-- PR publication remains gated on the final durable-context readback, exact
-  shared-path/head/gate-result handoff, and explicit coordinator publication
-  authorization.
+- Draft-PR update and publication remain gated on exact shared-path/head
+  handoff and explicit coordinator publication authorization.
 
 ## Current Shared-Path Inventory
 
-This exact list is refreshed against the post-`#692` base after canonical
-regeneration and the full Windows gate:
+The exact 26-path diff against the post-`#692` base after canonical
+regeneration and the full Windows gate is:
 
 - `CHANGELOG.md`
-- `docs/adr/0008-revenue-splits-and-royalty-resolver.md`
 - `docs/adr/0018-batch-operation-root-and-token-identity.md`
-- `docs/adr/README.md`
-- `docs/known-blockers.md`
 - `docs/launch-conformance-matrix.md`
-- `docs/launch-v1-target-architecture.md`
 - `docs/mint-policy-and-accounting.md`
 - `docs/revenue-splits-and-royalties.md`
-- `docs/status.md`
 - `docs/stream-sales-and-auctions.md`
 - `docs/tooling.md`
-- `ops/EXECUTION_BACKLOG.md`
-- `ops/ROADMAP.md`
-- `ops/workstreams/core-mint-critical-path/README.md`
 - `ops/workstreams/core-mint-critical-path/active-context.md`
 - `ops/workstreams/core-mint-critical-path/run-log.md`
 - `scripts/check_mint_manager_domain_constants.py`
+- `scripts/check_signed_release_tag.py`
 - `scripts/generate_release_checksums.py`
-- `scripts/generate_release_manifest.py`
 - `scripts/test_mint_manager_domain_constants.py`
 - `scripts/test_release_checksums.py`
 - `scripts/test_release_manifest.py`
+- `scripts/test_signed_release_tag.py`
+- `scripts/test_verify_release_artifacts.py`
+- `scripts/verify_release_artifacts.py`
 - `release-artifacts/latest/risk-register.json`
 - `release-artifacts/latest/release-notes.json`
 - `release-artifacts/latest/release-notes.md`
@@ -190,11 +180,11 @@ regeneration and the full Windows gate:
 
 ## Next Actions
 
-1. Prove the durable-context-only correction does not change the regenerated
-   release tail, then report the exact final diff/head/full-gate result.
-2. Wait for explicit coordinator publication authorization.
-3. After authorization, commit, push, open a draft PR, request CodeRabbit, and
-   iterate CI/review to a review-ready handoff.
+1. Hand the exact 26-path diff, unchanged reviewed-source hashes, canonical
+   232/394 release proof, and authoritative gate result to final readback.
+2. After final publication authorization, create one visible corrective commit,
+   push it, update draft PR `#695`, resolve review threads with evidence, and
+   request one incremental CodeRabbit review.
 
 The later `#672` and `#654` implementation PRs form a separate release train;
 do not stack them on or fold them into this ADR/spec/checker PR.
