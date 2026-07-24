@@ -29,6 +29,8 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         uint256 floor;
         uint8 failureClass;
         uint64 revision;
+        // Auxiliary same-action consumption guard; intentionally outside _stateHash.
+        bytes32 lastActionId;
     }
 
     address public immutable override governanceAuthority;
@@ -127,9 +129,13 @@ abstract contract StreamGasParameterHost is IStreamGasParameterHost {
         bytes32 oldStateHash = _stateHash(scopeHash, parameter, oldValue, parameter.revision);
         bytes32 newStateHash = _stateHash(scopeHash, parameter, newValue, nextRevision);
         bytes32 actionId = _requireGovernanceContext(scopeHash, oldStateHash, newStateHash);
+        if (parameter.lastActionId == actionId) {
+            revert GasParameterActionAlreadyApplied(parameterId, actionId);
+        }
 
         parameter.value = newValue;
         parameter.revision = nextRevision;
+        parameter.lastActionId = actionId;
         emit GasParameterUpdated(
             GAS_PARAMETER_SCHEMA_VERSION,
             parameterId,

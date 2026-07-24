@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 
-PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v1"
+PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v2"
 CONTRACTS_SCHEMA = "6529stream.release-artifact-contracts.v1"
 CONCRETE_CANDIDATE_MODEL_BLOCKER = (
     "release-artifacts/contracts.json uses "
@@ -89,6 +89,7 @@ STREAM_CORE_EXACT_IMPLEMENTATION = {"mode": "exact", "names": ["StreamCore"]}
 
 GOVERNANCE_REQUIRED_INTERFACES = (
     "IStreamGovernanceExecutor",
+    "IStreamGovernedParameterAuthority",
     "IStreamRoleRegistry",
     "IStreamStateExportPublisher",
 )
@@ -131,6 +132,35 @@ STATE_EXPORT_PUBLISHER_EVENTS = (
         (False, True, True, True, False),
     ),
 )
+GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA = (
+    "6529stream.governed-parameter-authority-abi.v1"
+)
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE = "IStreamGovernedParameterAuthority"
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID = "0xd9f8d48c"
+GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256 = (
+    "sha256:720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"
+)
+GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS = (
+    (
+        "isStreamGovernedParameterAuthority()",
+        "0x8d96760d",
+        "view",
+        ("bool",),
+    ),
+    (
+        "currentAction()",
+        "0x546ea281",
+        "view",
+        ("bool", "bytes32", "uint8", "bytes32", "bytes32", "bytes32"),
+    ),
+)
+GOVERNED_PARAMETER_AUTHORITY_MARKERS = (
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_V1",
+    "GOVERNED_PARAMETER_AUTHORITY_MARKER_SELECTOR_0x8d96760d",
+    "GOVERNED_PARAMETER_AUTHORITY_CONTEXT_SELECTOR_0x546ea281",
+    "GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID_0xd9f8d48c",
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256_720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a",
+)
 GOVERNANCE_REQUIRED_MARKERS = (
     "ADR0004_TIMELOCK_ROLE_LAYER",
     "STATE_EXPORT_PUBLISHER_EVENTS_V1",
@@ -139,6 +169,7 @@ GOVERNANCE_REQUIRED_MARKERS = (
     "STATE_EXPORT_CHALLENGED_TOPIC_0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c",
     "STATE_EXPORT_SUPERSEDED_TOPIC_0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a",
     "STATE_EXPORT_PUBLISHER_ABI_SHA256_535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7",
+    *GOVERNED_PARAMETER_AUTHORITY_MARKERS,
 )
 
 SYSTEM_MANIFEST_MODULE_TYPE = (
@@ -386,6 +417,70 @@ def validate_state_export_publisher_abi_proof(value: Any, path: str) -> dict[str
     ):
         raise GenesisProfileError(
             f"{path} must exactly match the reviewed state-export publisher ABI surface"
+        )
+    return proof
+
+
+def governed_parameter_authority_abi_surface() -> dict[str, Any]:
+    """Return the reviewed marker/context authority surface."""
+    return {
+        "schema": GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA,
+        "required_interface": GOVERNED_PARAMETER_AUTHORITY_INTERFACE,
+        "interface_id": GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": signature,
+                "selector": selector,
+                "state_mutability": state_mutability,
+                "returns": list(returns),
+            }
+            for signature, selector, state_mutability, returns in GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS
+        ],
+        "events": [],
+    }
+
+
+def governed_parameter_authority_abi_proof() -> dict[str, Any]:
+    """Return the exact structured authority assertion required of governance."""
+    surface = governed_parameter_authority_abi_surface()
+    canonical = canonical_json_bytes(surface, "reviewed governed-parameter authority ABI")
+    digest = "sha256:" + hashlib.sha256(canonical).hexdigest()
+    if digest != GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256:
+        raise GenesisProfileError(
+            "reviewed governed-parameter authority ABI constants disagree with their fixed digest"
+        )
+    return {**surface, "surface_sha256": digest}
+
+
+def validate_governed_parameter_authority_abi_proof(
+    value: Any, path: str
+) -> dict[str, Any]:
+    """Reject partial or string-only claims about the authority ABI."""
+    proof = require_dict(value, path)
+    expected = governed_parameter_authority_abi_proof()
+    require_exact_keys(proof, set(expected), path)
+    candidate_surface = {
+        key: candidate_value
+        for key, candidate_value in proof.items()
+        if key != "surface_sha256"
+    }
+    candidate_canonical = canonical_json_bytes(candidate_surface, path)
+    candidate_digest = "sha256:" + hashlib.sha256(candidate_canonical).hexdigest()
+    if type(proof["surface_sha256"]) is not str or proof["surface_sha256"] != candidate_digest:
+        raise GenesisProfileError(
+            f"{path} must exactly match the reviewed governed-parameter authority ABI; "
+            "surface_sha256 does not match the candidate surface's canonical JSON bytes"
+        )
+    expected_canonical = canonical_json_bytes(
+        governed_parameter_authority_abi_surface(),
+        "reviewed governed-parameter authority ABI",
+    )
+    if (
+        candidate_canonical != expected_canonical
+        or candidate_digest != GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256
+    ):
+        raise GenesisProfileError(
+            f"{path} must exactly match the reviewed governed-parameter authority ABI"
         )
     return proof
 
@@ -797,6 +892,15 @@ def validate_contract_config(data: Any) -> list[dict[str, Any]]:
                 f"{path}.state_export_publisher_abi_proof",
             )
         )
+        authority_proof_value = candidate.get("governed_parameter_authority_abi_proof")
+        authority_proof = (
+            None
+            if authority_proof_value is None
+            else validate_governed_parameter_authority_abi_proof(
+                authority_proof_value,
+                f"{path}.governed_parameter_authority_abi_proof",
+            )
+        )
         names.append(name)
         result.append(
             {
@@ -805,6 +909,7 @@ def validate_contract_config(data: Any) -> list[dict[str, Any]]:
                 "verified_interfaces": verified_interfaces,
                 "verified_markers": verified_markers,
                 "state_export_publisher_abi_proof": publisher_proof,
+                "governed_parameter_authority_abi_proof": authority_proof,
             }
         )
     if len(names) != len(set(names)):
@@ -903,6 +1008,15 @@ def completeness_blockers(
                 f"{target_id} ({entry['key']})"
             )
         if (
+            entry["key"] != "GOVERNANCE_LAYER"
+            and candidate.get("governed_parameter_authority_abi_proof") is not None
+        ):
+            blockers.append(
+                f"candidate contract {name!r} must not claim the governance-only "
+                "governed-parameter authority ABI proof for non-governance profile entry "
+                f"{target_id} ({entry['key']})"
+            )
+        if (
             entry["key"] == "GOVERNANCE_LAYER"
             and candidate.get("state_export_publisher_abi_proof")
             != state_export_publisher_abi_proof()
@@ -912,6 +1026,17 @@ def completeness_blockers(
                 "state-export publisher ABI proof for profile entry 2; verified "
                 "interface or marker strings do not prove the five return types "
                 "and three event indexed masks or non-anonymous emission"
+            )
+        if (
+            entry["key"] == "GOVERNANCE_LAYER"
+            and candidate.get("governed_parameter_authority_abi_proof")
+            != governed_parameter_authority_abi_proof()
+        ):
+            blockers.append(
+                f"candidate contract {name!r} lacks the exact structured "
+                "governed-parameter authority ABI proof for profile entry 2; "
+                "verified interface or marker strings do not prove the marker "
+                "return or exact six-return currentAction context"
             )
 
     for entry in entries:

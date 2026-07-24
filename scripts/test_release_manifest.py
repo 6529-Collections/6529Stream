@@ -99,6 +99,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     gas_envelopes = root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-envelopes.json"
     natspec_coverage = root / "release-artifacts" / "baselines" / "v0.1.0" / "natspec-coverage.json"
     contract_config = root / "release-artifacts" / "contracts.json"
+    genesis_deployment_profile = root / generator.DEFAULT_GENESIS_DEPLOYMENT_PROFILE
+    system_manifest_payload_vector = root / generator.DEFAULT_SYSTEM_MANIFEST_PAYLOAD_VECTOR
+    stream_core_permanent_interface = root / generator.DEFAULT_STREAM_CORE_PERMANENT_INTERFACE
+    external_call_gas_inventory = root / generator.DEFAULT_EXTERNAL_CALL_GAS_INVENTORY
     deployment_config_dir = root / "deployments" / "config"
     deployment_broadcast_dir = root / "deployments" / "broadcasts"
     deployment_manifest_dir = root / "deployments" / "examples"
@@ -210,6 +214,22 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
             "production_contracts": [{"name": "Example", "source": "Example.sol"}],
             "interfaces": [],
         },
+    )
+    write_json(
+        genesis_deployment_profile,
+        {"schema_version": "6529stream.genesis-deployment-profile.v2"},
+    )
+    write_json(
+        system_manifest_payload_vector,
+        {"schema_version": "6529stream.system-manifest-payload-vector.v1"},
+    )
+    write_json(
+        stream_core_permanent_interface,
+        {"schema_version": "6529stream.stream-core-permanent-interface.v1"},
+    )
+    write_json(
+        external_call_gas_inventory,
+        {"schema_version": "6529stream.external-call-gas-inventory.v1"},
     )
     write_json(
         latest / "abi-checksums.json",
@@ -1218,6 +1238,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "gas_snapshot": gas_snapshot,
         "gas_envelopes": gas_envelopes,
         "contract_config": contract_config,
+        "genesis_deployment_profile": genesis_deployment_profile,
+        "system_manifest_payload_vector": system_manifest_payload_vector,
+        "stream_core_permanent_interface": stream_core_permanent_interface,
+        "external_call_gas_inventory": external_call_gas_inventory,
         "deployment_config_dir": deployment_config_dir,
         "deployment_broadcast_dir": deployment_broadcast_dir,
         "deployment_manifest_dir": deployment_manifest_dir,
@@ -1254,6 +1278,41 @@ class ReleaseManifestTests(unittest.TestCase):
             Path("docs/adr/0017-raise-only-parameter-governance.md"),
             generator.DEFAULT_GOVERNANCE_DOCS,
         )
+
+    def test_default_governance_docs_close_genesis_normative_anchors(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        profile = json.loads(
+            (repo_root / "release-artifacts/genesis-deployment-profile.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        normative_paths = {
+            Path(anchor.split("#", 1)[0])
+            for entry in profile["entries"]
+            for anchor in entry["normative_anchors"]
+        }
+        self.assertTrue(normative_paths <= set(generator.DEFAULT_GOVERNANCE_DOCS))
+
+    def test_default_governance_docs_bind_release_tail_sources(self) -> None:
+        expected_paths = {
+            Path("docs/known-blockers.md"),
+            Path("release-artifacts/README.md"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_GOVERNANCE_DOCS))
+
+    def test_default_governance_docs_bind_adr17_supersession_notices(self) -> None:
+        expected_paths = {
+            Path("docs/adr/README.md"),
+            Path("docs/adr/0008-revenue-splits-and-royalty-resolver.md"),
+            Path("docs/adr/0010-world-class-spec-pass.md"),
+            Path("docs/adr/0011-world-class-pass-round-2.md"),
+            Path("docs/adr/0012-world-class-pass-round-3.md"),
+            Path("docs/adr/0013-world-class-pass-round-4.md"),
+            Path("docs/adr/0014-world-class-pass-round-5.md"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_GOVERNANCE_DOCS))
+        repo_root = SCRIPT_PATH.parent.parent
+        self.assertTrue(all((repo_root / path).is_file() for path in expected_paths))
 
     def test_generator_writes_deterministic_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1313,6 +1372,34 @@ class ReleaseManifestTests(unittest.TestCase):
                 ]["path"],
                 "release-artifacts/latest/abi-checksums.json",
             )
+            direct_release_inputs = {
+                "genesis_deployment_profile": (
+                    paths["genesis_deployment_profile"],
+                    "6529stream.genesis-deployment-profile.v2",
+                ),
+                "system_manifest_payload_vector": (
+                    paths["system_manifest_payload_vector"],
+                    "6529stream.system-manifest-payload-vector.v1",
+                ),
+                "stream_core_permanent_interface": (
+                    paths["stream_core_permanent_interface"],
+                    "6529stream.stream-core-permanent-interface.v1",
+                ),
+                "external_call_gas_inventory": (
+                    paths["external_call_gas_inventory"],
+                    "6529stream.external-call-gas-inventory.v1",
+                ),
+            }
+            for key, (path, schema_version) in direct_release_inputs.items():
+                self.assertEqual(
+                    manifest["release_artifacts"][key],
+                    {
+                        "path": path.resolve().relative_to(root.resolve()).as_posix(),
+                        "sha256": generator.file_sha256(path),
+                        "size_bytes": path.stat().st_size,
+                        "schema_version": schema_version,
+                    },
+                )
             self.assertEqual(
                 manifest["release_artifacts"]["source_verification_inputs"]["schema_version"],
                 "6529stream.source-verification-inputs.v1",

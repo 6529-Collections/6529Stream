@@ -111,6 +111,27 @@ contract StreamGasParameterStoreTest is CharacterizationTestBase {
         Assertions.assertEq(uint256(revision), 3, "second revision");
     }
 
+    function testOneActionCannotCompoundMultipleRaisesForSameParameter() public {
+        _setContext(_store, PARAMETER_ID, 120_000, ACTION_ID, 1);
+        vm.prank(address(_authority));
+        _store.raiseGasParameter(PARAMETER_ID, 120_000);
+
+        _setContext(_store, PARAMETER_ID, 240_000, ACTION_ID, 1);
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterActionAlreadyApplied.selector,
+                PARAMETER_ID,
+                ACTION_ID
+            )
+        );
+        _store.raiseGasParameter(PARAMETER_ID, 240_000);
+
+        (uint256 value,,, uint64 revision) = _store.gasParameterInfo(PARAMETER_ID);
+        Assertions.assertEq(value, 120_000, "same action cannot compound value");
+        Assertions.assertEq(uint256(revision), 2, "same action cannot compound revision");
+    }
+
     function testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable() public {
         vm.expectRevert(
             abi.encodeWithSelector(

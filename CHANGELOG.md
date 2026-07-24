@@ -333,14 +333,20 @@ the release policy in `docs/release-policy.md`.
   `StreamTimeParameterHost` bases with concrete storage-backed stores,
   immutable deployment-time inventories and floors, deterministic parameter
   IDs, monotonic revisions, exact Governance V2 scope/old/new commitments, and
-  strict delayed authority-only raises bounded to at most `2x` per action.
+  strict delayed authority-only raises bounded to at most `2x` per action, with
+  same-parameter duplicate-action rejection and real-executor atomic rollback.
   Marker and `currentAction()` reads forward available gas, accept only exact
   canonical returndata, and reject EIP-7702 delegated authorities. Probe,
   emergency, lower, permissionless conditional mutation, and rebind surfaces
   are absent. This supersedes the earlier 60-entry probe-bearing target: the
   canonical genesis profile now has 37 entries, while governance action-class
   ID `6` remains reserved as `retired_pre_genesis`, forbidden, and never
-  reusable. Schema-v2 registration/update events and focused adversarial
+  reusable. The probe-removing profile grammar is explicitly versioned as
+  `6529stream.genesis-deployment-profile.v2` with a versioned schema resource;
+  pre-genesis v1 profile artifacts are intentionally unsupported rather than
+  silently accepted under a narrowed v1 grammar. Its governance row requires
+  the narrow `IStreamGovernedParameterAuthority` marker/context interface.
+  Schema-v2 registration/update events and focused adversarial
   suites cover malformed/high-gas authority reads, stale context, ABA/revision
   drift, over-bound raises, immutable zero-authority stores, and retired
   selector absence.

@@ -21,7 +21,7 @@ from typing import Any, Iterable, Sequence
 
 
 VECTOR_SCHEMA = "6529stream.system-manifest-payload-vector.v1"
-PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v1"
+PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v2"
 EVIDENCE_CLASS = "target_abi_lock_fixture"
 DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
 DEFAULT_OUTPUT = Path("release-artifacts/system-manifest-payload-vector.json")
@@ -114,6 +114,35 @@ STATE_EXPORT_PUBLISHER_MARKERS = (
     f"STATE_EXPORT_CHALLENGED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportChallenged(uint16,bytes32,bytes32,address,string)']}",
     f"STATE_EXPORT_SUPERSEDED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportSuperseded(uint16,bytes32,bytes32,bytes32,string)']}",
     f"STATE_EXPORT_PUBLISHER_ABI_SHA256_{STATE_EXPORT_PUBLISHER_ABI_SHA256.removeprefix('sha256:')}",
+)
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE = "IStreamGovernedParameterAuthority"
+GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA = (
+    "6529stream.governed-parameter-authority-abi.v1"
+)
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID = "0xd9f8d48c"
+GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256 = (
+    "sha256:720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"
+)
+GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS = (
+    (
+        "isStreamGovernedParameterAuthority()",
+        "0x8d96760d",
+        "view",
+        ("bool",),
+    ),
+    (
+        "currentAction()",
+        "0x546ea281",
+        "view",
+        ("bool", "bytes32", "uint8", "bytes32", "bytes32", "bytes32"),
+    ),
+)
+GOVERNED_PARAMETER_AUTHORITY_MARKERS = (
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_V1",
+    "GOVERNED_PARAMETER_AUTHORITY_MARKER_SELECTOR_0x8d96760d",
+    "GOVERNED_PARAMETER_AUTHORITY_CONTEXT_SELECTOR_0x546ea281",
+    "GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID_0xd9f8d48c",
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256_720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a",
 )
 
 VECTOR_DERIVATION_DOMAIN = "6529STREAM_SYSTEM_MANIFEST_TARGET_VECTOR_V1"
@@ -268,6 +297,37 @@ def state_export_publisher_surface() -> dict[str, Any]:
     if digest != STATE_EXPORT_PUBLISHER_ABI_SHA256:
         raise ManifestVectorError(
             "reviewed state-export publisher ABI constants disagree with their fixed digest"
+        )
+    return {**surface, "surface_sha256": digest}
+
+
+def governed_parameter_authority_surface() -> dict[str, Any]:
+    """Return the transparent, digest-locked governed authority ABI surface."""
+    surface = {
+        "schema": GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA,
+        "required_interface": GOVERNED_PARAMETER_AUTHORITY_INTERFACE,
+        "interface_id": GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": signature,
+                "selector": selector,
+                "state_mutability": state_mutability,
+                "returns": list(returns),
+            }
+            for signature, selector, state_mutability, returns in GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS
+        ],
+        "events": [],
+    }
+    canonical = json.dumps(
+        surface,
+        ensure_ascii=True,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("ascii")
+    digest = sha256_prefixed(canonical)
+    if digest != GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256:
+        raise ManifestVectorError(
+            "reviewed governed-parameter authority ABI constants disagree with their fixed digest"
         )
     return {**surface, "surface_sha256": digest}
 
@@ -643,17 +703,33 @@ def _require_profile(profile: Any) -> list[dict[str, Any]]:
     governance = entries[keys.index("GOVERNANCE_LAYER")]
     governance_interfaces = governance.get("required_interfaces")
     governance_markers = governance.get("required_markers")
+    if not isinstance(governance_interfaces, list) or not all(
+        isinstance(item, str) for item in governance_interfaces
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER required_interfaces must be a string array"
+        )
+    if not isinstance(governance_markers, list) or not all(
+        isinstance(marker, str) for marker in governance_markers
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER required_markers must be a string array"
+        )
     if (
-        not isinstance(governance_interfaces, list)
-        or not all(isinstance(item, str) for item in governance_interfaces)
-        or STATE_EXPORT_PUBLISHER_INTERFACE not in governance_interfaces
-        or not isinstance(governance_markers, list)
-        or not all(isinstance(marker, str) for marker in governance_markers)
+        STATE_EXPORT_PUBLISHER_INTERFACE not in governance_interfaces
         or not set(STATE_EXPORT_PUBLISHER_MARKERS).issubset(governance_markers)
     ):
         raise ManifestVectorError(
             "GOVERNANCE_LAYER must prove the state-export publisher interface "
             "and event marker before serving STATE_EXPORT_PUBLISHER"
+        )
+    if (
+        GOVERNED_PARAMETER_AUTHORITY_INTERFACE not in governance_interfaces
+        or not set(GOVERNED_PARAMETER_AUTHORITY_MARKERS).issubset(governance_markers)
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER must prove the exact governed-parameter authority "
+            "interface and ABI markers"
         )
     return entries
 
@@ -984,6 +1060,8 @@ def build_vector(profile: dict[str, Any], profile_raw: bytes) -> dict[str, Any]:
             ),
             "state_export_publisher_binding": "GOVERNANCE_LAYER",
             "state_export_publisher_surface": state_export_publisher_surface(),
+            "governed_parameter_authority_binding": "GOVERNANCE_LAYER",
+            "governed_parameter_authority_surface": governed_parameter_authority_surface(),
         },
         "constants": {
             "schema_version": SCHEMA_VERSION,

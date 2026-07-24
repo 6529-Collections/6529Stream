@@ -23,15 +23,17 @@ DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
 
 VECTOR_SCHEMA = "6529stream.system-manifest-payload-vector.v1"
 FIXTURE_DOMAIN = "6529STREAM_SYSTEM_MANIFEST_TARGET_VECTOR_V1"
-PROFILE_SHA256 = "sha256:11a1c3c1b079c24ce18ec27d2194fe5ae6b6ca99af2d112c806f2843d8e2fe4d"
+PROFILE_SHA256 = "sha256:e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135"
+PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v2"
+PROFILE_NORMATIVE_ANCHOR = "docs/stream-long-term-architecture.md#LTA-MANIFEST"
 PAYLOAD_BYTE_LENGTH = 55_109
-PAYLOAD_KECCAK = "0x048a6ca5b28c477088da016b12d1b999fbf2816bf1ce7d4b3378aa4473758466"
-PAYLOAD_SHA256 = "sha256:6739b1dbb6da37bb299a48dce24c0ca7ef8ce07b33e28cf07f803c127a6a1b97"
+PAYLOAD_KECCAK = "0x23e29269a33db5b039360ff416749b337910d39eaa82c04de7601ad984623d38"
+PAYLOAD_SHA256 = "sha256:a7ed330450881081d9c330d4cce88c6075960ca5fec65ff1206f20c338a87e3e"
 
 IDENTITY_DOMAIN = "0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a"
-IDENTITY_VIEW_HASH = "0x55476de63bc4702da8189d6d22e14862829a8736e482b485ee6a99c7f283904f"
+IDENTITY_VIEW_HASH = "0x4771bfdb1073d98ed9a969ec4beb32e5ba18eac629a6b1043f00c7828742456a"
 DEPLOYMENT_IDENTITY_HASH = (
-    "0xfc6972d6c0396b99c740a24b17637140d8a292c32504301c2be6837074c13e23"
+    "0xe372461cbfe0b9c8d89a54aa35ab81ea8a173e89bce196f47f1d7c350ac45b00"
 )
 
 CHUNK_BYTES = 24_575
@@ -42,42 +44,42 @@ SCHEMA_ID = "0x8844b744a67cdcdb84ea3c6e3d686883da175820b9ff07a19cffa14bf62e6e81"
 CANONICALIZATION_ID = (
     "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044"
 )
-CHUNK_LIST_HASH = "0x94e57f48ae73a04f20612a4198e666c848c5e6a3945ded649f7967a436af9fb0"
-PAYLOAD_ROOT_HASH = "0x4cc5f9457f44ac27374f7749fb099f7cd3918e1a89b5e07364cdf8a2b429b8f8"
+CHUNK_LIST_HASH = "0xf680bb0e85aa2bb5848b43dbb2ee1c2f55b68223ca97fa3e1b4ef35ca88f1855"
+PAYLOAD_ROOT_HASH = "0x7409ea442420e4cbbc31d888f48e74ea6a2e1728c8ba433767a572db9e2670e0"
 
 DESCRIPTOR_MAGIC = "0x6c9d2530"
 DESCRIPTOR_DYNAMIC_OFFSET = 224
 DESCRIPTOR_LENGTH = 544
-DESCRIPTOR_KECCAK = "0xb1f933cf2c3c3a28ae6c7ab834a922b8a0adb72cea296cee41a503482c88cd82"
+DESCRIPTOR_KECCAK = "0x697ab9f1b6075cdf5f957e688adb9635de0dcd7be2c4ea8e97fb5500ad3db49e"
 DESCRIPTOR_RUNTIME_HASH = (
-    "0x45efec4ce3e72621c73b1b01bb79bd04d429b44493146649edae6749e5a87ce2"
+    "0x7d117776fa2b116641cacdc3904c00c4b55b25d755d373eec4020f98ad6902ec"
 )
 
 # index, pointer, payload length, payload hash, leaf hash, SSTORE2 runtime hash
 CHUNK_GOLDENS = (
     (
         0,
-        "0xa8c3609cc189b28316435a19761fd15348ae9abf",
+        "0x3323cfaf8192dd4891a01ddd0ad05add50946817",
         24_575,
-        "0xb7bbf9bca419a35cb05958fc44270e2ed671717352420529a397e22b4131dfa9",
-        "0x26f22c35a297c0f6245c03c352637fb7b3328a3bd2017563aaa3f857546c72fb",
-        "0x6f2da875ced7ea4bad8e3f7d271633f13e2f8be28193f9f023fe7d5dd136c02f",
+        "0x2b45351f26b3c15d1fa9bdf1ddfc063c43822621a1534fb9750bd14dae26f722",
+        "0xc8f0457736e149911c8354caf19d7e097b3e4df571cf465de4814f5ca6dea5d3",
+        "0x6e3a62c8f33f16450961e5340314183b3b0d8ab53ab7a6212887f9921480aba9",
     ),
     (
         1,
-        "0x931042f319a86bb1cf15679de1d78ec4f43b539a",
+        "0x3168c46ba1b3b0e72f9f7eb5951d2794f5adc881",
         24_575,
-        "0x442108c3ec4c9edabdfb444f3b026f645e094a2116b19d9e9f2944ce32d708ce",
-        "0x804554d403a8bb22d376a06208b31694603872350dc877e0bf234555d0fe48e9",
-        "0x0b6e97b77db0d7c6287679e6a5a32d8b8820a551e2a7cc8bde35c67c59674a27",
+        "0x2fa2ab4aa6e175f14348983ee9d7c6b3540066334154dcd8be3c81f42415537a",
+        "0x6883496d9211c42718f3b447dc7979d83cec894419648588f8c6c06139aecfb9",
+        "0x511722dbede40fb8319cc9760988f5cd6f85928e124dab49608f1850bc48a414",
     ),
     (
         2,
-        "0x6211acda7cc7696540dfaf4afa7f095ade09f994",
+        "0x06f7d9cf78b0d834bc89786b2c3bfa9ecd4ad24c",
         5_959,
-        "0x474b5c055d206671291fe5c1353ef3a221f197082f67d088ac8e1b931090f38b",
-        "0x40a5eefb0f200bbdd5f4dc83e73b378876b9c72bc6307948773cc31ab5152edc",
-        "0x48797ac864e7a8c1fff7859eb63726c863de67f87dbe28b95a22890f6c15e333",
+        "0xf4fcc63861a1701907843ad2a0d9c172686d868f8bee662b311e648f62914a3e",
+        "0x943be1d600842f4d311d31ed7f9c5e764815361c903b18bf085625b98ca8e2ca",
+        "0x435d80d94cb2d137e2094123e149c9cefd89d09f6130f8e205cdf37cd5cfeacf",
     ),
 )
 
@@ -137,6 +139,23 @@ STATE_EXPORT_EVENT_INDEXED_MASKS = {
         False,
     ],
 }
+AUTHORITY_MARKER_SIGNATURE = "isStreamGovernedParameterAuthority()"
+AUTHORITY_MARKER_SELECTOR = "0x8d96760d"
+AUTHORITY_CONTEXT_SIGNATURE = "currentAction()"
+AUTHORITY_CONTEXT_SELECTOR = "0x546ea281"
+AUTHORITY_INTERFACE_ID = "0xd9f8d48c"
+AUTHORITY_ABI_SCHEMA = "6529stream.governed-parameter-authority-abi.v1"
+AUTHORITY_ABI_SHA256 = (
+    "sha256:720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"
+)
+AUTHORITY_CONTEXT_RETURNS = [
+    "bool",
+    "bytes32",
+    "uint8",
+    "bytes32",
+    "bytes32",
+    "bytes32",
+]
 
 
 class ReferenceVectorError(RuntimeError):
@@ -281,6 +300,16 @@ def _metadata_audit(vector: dict[str, Any]) -> None:
         "profile source path",
     )
     _expect(vector["source"]["profile_entry_count"], 37, "profile source entry count")
+    _expect(
+        vector["source"]["profile_schema_version"],
+        PROFILE_SCHEMA,
+        "profile source schema",
+    )
+    _expect(
+        vector["source"]["normative_anchor"],
+        PROFILE_NORMATIVE_ANCHOR,
+        "profile source normative anchor",
+    )
     expected_constants = {
         "schema_version": 1,
         "payload_schema_literal": "STREAM_SYSTEM_MANIFEST_PAYLOAD_V1",
@@ -346,6 +375,79 @@ def _metadata_audit(vector: dict[str, Any]) -> None:
         surface,
         {**surface_without_digest, "surface_sha256": computed_abi_digest},
         "complete state-export ABI surface",
+    )
+
+    derivation = vector["fixture_derivation"]
+    _expect(
+        derivation["state_export_publisher_binding"],
+        "GOVERNANCE_LAYER",
+        "state-export publisher binding",
+    )
+    _expect(
+        derivation["governed_parameter_authority_binding"],
+        "GOVERNANCE_LAYER",
+        "governed-parameter authority binding",
+    )
+    authority_marker_selector = (
+        "0x" + _keccak(AUTHORITY_MARKER_SIGNATURE.encode("ascii"))[:4].hex()
+    )
+    authority_context_selector = (
+        "0x" + _keccak(AUTHORITY_CONTEXT_SIGNATURE.encode("ascii"))[:4].hex()
+    )
+    _expect(
+        authority_marker_selector,
+        AUTHORITY_MARKER_SELECTOR,
+        "governed-parameter authority marker selector golden",
+    )
+    _expect(
+        authority_context_selector,
+        AUTHORITY_CONTEXT_SELECTOR,
+        "governed-parameter authority context selector golden",
+    )
+    authority_interface_id = (
+        int(authority_marker_selector, 16) ^ int(authority_context_selector, 16)
+    )
+    _expect(
+        f"0x{authority_interface_id:08x}",
+        AUTHORITY_INTERFACE_ID,
+        "governed-parameter authority interface ID golden",
+    )
+    authority_surface_without_digest = {
+        "schema": AUTHORITY_ABI_SCHEMA,
+        "required_interface": "IStreamGovernedParameterAuthority",
+        "interface_id": AUTHORITY_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": AUTHORITY_MARKER_SIGNATURE,
+                "selector": authority_marker_selector,
+                "state_mutability": "view",
+                "returns": ["bool"],
+            },
+            {
+                "signature": AUTHORITY_CONTEXT_SIGNATURE,
+                "selector": authority_context_selector,
+                "state_mutability": "view",
+                "returns": AUTHORITY_CONTEXT_RETURNS,
+            },
+        ],
+        "events": [],
+    }
+    computed_authority_digest = (
+        "sha256:"
+        + hashlib.sha256(_reference_jcs(authority_surface_without_digest)).hexdigest()
+    )
+    _expect(
+        computed_authority_digest,
+        AUTHORITY_ABI_SHA256,
+        "governed-parameter authority ABI digest",
+    )
+    _expect(
+        derivation["governed_parameter_authority_surface"],
+        {
+            **authority_surface_without_digest,
+            "surface_sha256": computed_authority_digest,
+        },
+        "complete governed-parameter authority ABI surface",
     )
 
 

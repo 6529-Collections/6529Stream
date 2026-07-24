@@ -43,6 +43,7 @@ interface IStreamTimeParameterHost {
     error TimeParameterActionContextInvalid();
     error TimeParameterActionNotExecuting();
     error TimeParameterActionIdZero();
+    error TimeParameterActionAlreadyApplied(bytes32 parameterId, bytes32 actionId);
     error TimeParameterActionClassMismatch(uint8 expectedClass, uint8 actualClass);
     error TimeParameterScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
     error TimeParameterOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
@@ -69,5 +70,6 @@ interface IStreamTimeParameterHost {
     function governanceAuthority() external view returns (address);
 
     /// @notice Delayed, authority-only, at-most-2x monotonic raise.
+    /// @dev One governance action may apply at most one raise to a parameter.
     function raiseTimeParameter(bytes32 parameterId, uint256 newValue) external;
 }

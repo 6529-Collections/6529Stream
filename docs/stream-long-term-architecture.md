@@ -1086,7 +1086,10 @@ Requirements:
    `DELAYED_LOOSENING` (`1`), whose launch minimum delay is 48 hours, and is
    bounded to at most 2x the current value. The host enforces a strict
    increase and the overflow-safe bound `newValue - currentValue <=
-   currentValue`; larger moves require multiple separately delayed actions.
+   currentValue`; it also rejects a second mutation of the same parameter under
+   one action ID. Larger moves require multiple separately delayed action IDs.
+   Their waiting windows may overlap because this is a per-action review and
+   commitment bound, not a separate wall-clock rate limit.
 2. Lowering does not exist on the launch deployment. The immutable floor
    remains a genesis-sizing, introspection, and repricing-review fact. It is
    not a lower-bound check for a mutation path. Emergency, conditional, and
@@ -1299,13 +1302,17 @@ only `value` and `revision`; immutable registration facts cannot drift outside
 the reviewed transition. Revision starts at `1`, increments exactly once,
 and overflow reverts. The host derives both hashes from storage and calldata
 and requires the executing action's scope/old/new context to match before
-writing. Stale actions and any attempted replay therefore fail.
+writing. Stale actions and any attempted replay therefore fail. The host also
+stores the last successfully applied action ID per parameter as auxiliary
+action-consumption metadata. It is intentionally outside the V2 parameter-state
+hash because it changes no value or immutable registration fact; a duplicate
+same-action call checks it after exact context validation and reverts.
 
 Target-side action-class and transition checks are exact:
 
 | Entry | Required class | Execution rechecks |
 | --- | --- | --- |
-| `raiseGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `newValue > value`; overflow-safe 2x bound `newValue - value <= value`; nonzero executing action ID; full scope/old/new hash match; row coupling invariants |
+| `raiseGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `newValue > value`; overflow-safe 2x bound `newValue - value <= value`; nonzero executing action ID not already applied to this row; full scope/old/new hash match; row coupling invariants |
 
 Core emits `GasParameterUpdated` for every successful raise. It exposes no
 lower, emergency, conditional, probe, or probe-rebind function or event, and a
@@ -1455,7 +1462,9 @@ GTP change discipline:
    hours of delay, staging events, and cancellation. There is no emergency,
    lower, rebind, conditional, or permissionless GTP mutation.
 2. A raise must strictly increase the current value and is bounded per action
-   to at most 2x. Larger moves require multiple separately delayed actions.
+   to at most 2x. The same action ID cannot mutate the same parameter twice.
+   Larger moves require multiple separately delayed action IDs; their waiting
+   windows may overlap because this is not an additional wall-clock rate limit.
 3. A host with zero governance authority is immutable. Permanent governance
    loss likewise freezes the live values; reads, exports, and event replay
    remain available without implying a zero-signer mutation path.
@@ -1525,16 +1534,21 @@ GTP change discipline:
    oldRevision + 1`. Genesis starts at revision `1`, overflow reverts, and the
    host independently checks executor/class/scope/old/new context. Because
    lowering does not exist, value state is monotonic; revision also prevents
-   stale-action replay.
+   stale-action replay. The host stores the last successfully applied action ID
+   as auxiliary action-consumption metadata outside the V2 state hash and
+   rejects a second same-action mutation after exact context validation.
 
-The GTP inventory is owned by the subsystem homes; the genesis rows are
-the coordinator-hosted entropy lifecycle windows —
-`ENTROPY_REQUEST_TIMEOUT_BLOCKS`, `ENTROPY_REVEAL_SLO_BLOCKS`, and
-`ENTROPY_RECOVERY_STEP_DELAY_BLOCKS`, overlaying the collection timing
-policies (`requestTimeoutBlocks`, `requestSLOBlocks`,
-`notBeforeBlocks`) — instantiated with their effective-window semantics
-by [EC-TIME] in
-[`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md).
+The GTP inventory is owned by the subsystem homes. The genesis members are the
+coordinator-hosted entropy lifecycle windows below, overlaying the collection
+timing policies (`requestTimeoutBlocks`, `requestSLOBlocks`,
+`notBeforeBlocks`) and instantiated with their effective-window semantics by
+[EC-TIME]:
+
+| Time parameter | Host | Normative home |
+| --- | --- | --- |
+| `ENTROPY_REQUEST_TIMEOUT_BLOCKS` | `StreamEntropyCoordinator` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
+| `ENTROPY_REVEAL_SLO_BLOCKS` | `StreamEntropyCoordinator` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
+| `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `StreamEntropyCoordinator` | [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md) [EC-TIME] |
 
 GTP membership is closed-world and decidable (ADR 0013 decision U9):
 

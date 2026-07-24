@@ -235,6 +235,63 @@ class ReleaseChecksumTests(unittest.TestCase):
         }
         self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
 
+    def test_default_covered_paths_bind_release_tail_provenance(self) -> None:
+        expected_paths = {
+            Path("scripts/generate_release_checksums.py"),
+            Path("scripts/test_release_checksums.py"),
+            Path("scripts/generate_release_manifest.py"),
+            Path("scripts/test_release_manifest.py"),
+            Path("scripts/generate_risk_register.py"),
+            Path("scripts/check_risk_register.py"),
+            Path("scripts/test_risk_register.py"),
+            Path("release-artifacts/README.md"),
+            Path("ops/ROADMAP.md"),
+            Path("ops/EXECUTION_BACKLOG.md"),
+            Path("docs/known-blockers.md"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
+    def test_default_covered_paths_bind_adr17_supersession_notices(self) -> None:
+        expected_paths = {
+            Path("docs/adr/README.md"),
+            Path("docs/adr/0008-revenue-splits-and-royalty-resolver.md"),
+            Path("docs/adr/0010-world-class-spec-pass.md"),
+            Path("docs/adr/0011-world-class-pass-round-2.md"),
+            Path("docs/adr/0012-world-class-pass-round-3.md"),
+            Path("docs/adr/0013-world-class-pass-round-4.md"),
+            Path("docs/adr/0014-world-class-pass-round-5.md"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+        repo_root = SCRIPT_PATH.parent.parent
+        self.assertTrue(all((repo_root / path).is_file() for path in expected_paths))
+
+    def test_default_covered_paths_bind_parameter_and_abi_policy(self) -> None:
+        expected_paths = {
+            Path("Makefile"),
+            Path("scripts/check.sh"),
+            Path("scripts/check.ps1"),
+            Path("ops/EXTERNAL_CALL_GAS_INVENTORY.json"),
+            Path("scripts/check_external_call_gas_inventory.py"),
+            Path("scripts/test_external_call_gas_inventory.py"),
+            Path("scripts/check_abi_compatibility.py"),
+            Path("scripts/test_abi_compatibility.py"),
+        }
+        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
+    def test_default_covered_paths_close_genesis_normative_anchors(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        profile = json.loads(
+            (repo_root / "release-artifacts/genesis-deployment-profile.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        normative_paths = {
+            Path(anchor.split("#", 1)[0])
+            for entry in profile["entries"]
+            for anchor in entry["normative_anchors"]
+        }
+        self.assertTrue(normative_paths <= set(generator.DEFAULT_COVERED_PATHS))
+
     def test_committed_checksums_cover_permanence_package_artifacts(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         expected_paths = {

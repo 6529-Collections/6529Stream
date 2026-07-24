@@ -37,6 +37,10 @@ values, and integers outside the I-JSON safe range.
 Build and validate the canonical target-isolated release profile first:
 
 ```sh
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --target-only
 python scripts/test_release_build_artifacts.py
 python scripts/build_release_artifacts.py
 python scripts/build_release_artifacts.py --check
@@ -64,9 +68,9 @@ python scripts/check_mint_manager_domain_constants.py
 python scripts/generate_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_permanence_manifest.py
 python scripts/check_public_beta_evidence.py
-python scripts/generate_risk_register.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
+python scripts/generate_risk_register.py
 python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
@@ -90,7 +94,13 @@ python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/generate_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/test_release_mode.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
@@ -217,6 +227,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
@@ -321,7 +333,8 @@ and the no-authority deployer factory are explicitly outside the numbered
 production inventory.
 
 `system-manifest-payload-vector.json` is the deterministic, non-production
-`target_abi_lock_fixture` derived from all 37 profile entries. Payload schema v1
+`target_abi_lock_fixture` derived from all 37 profile entries under the
+probe-free `6529stream.genesis-deployment-profile.v2` grammar. Payload schema v1
 retains `gasParameterProbes` as an exactly empty compatibility member. The
 fixture locks the RFC8785/I-JSON bytes, fixed 24,575-byte split,
 chunk/leaf/list/root commitments, and canonical ABI root descriptor. Every
@@ -337,7 +350,12 @@ independent fixed-golden
 `python scripts/test_system_manifest_payload_vector_reference.py` and
 `python scripts/check_system_manifest_payload_vector_reference.py` pair, not a
 generator `--check` mode. The reference scripts are required CI and
-checksum-covered release inputs. Production semantic reconciliation remains
+checksum-covered release inputs. `make system-manifest-payload-vector` validates
+the genesis profile and governed-parameter catalog before generation, then runs
+both validator pairs; the non-writing `-check` target follows the same
+prerequisite gates. The corresponding release-manifest targets depend on those
+vector targets, so they cannot consume an unchecked profile-to-vector chain.
+Production semantic reconciliation remains
 blocked by issue `#656` until an instance-aware candidate and live on-chain state
 replace the synthetic fixture facts.
 
@@ -817,6 +835,10 @@ inherited `supportsInterface` or event-only declarations.
 After any covered artifact changes, refresh the checksum bundle with:
 
 ```sh
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --check
 python scripts/check_contract_size_budget.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
@@ -845,6 +867,15 @@ python scripts/check_audit_package.py
 python scripts/check_react_next_reference.py
 python scripts/check_mobile_walletconnect.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
+python scripts/generate_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/generate_risk_register.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py

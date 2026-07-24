@@ -234,6 +234,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
@@ -881,6 +883,13 @@ independently encodes the audited JCS/ABI preimages and hard-pins the reviewed
 profile, payload, deployment-identity, chunk, commitment, and root-descriptor
 goldens. Update those goldens only after an independent recomputation and review.
 The generator has no `--check` mode; both checkers are fail-closed check commands.
+`make system-manifest-payload-vector` first validates the genesis profile and
+governed-parameter identifier catalog, regenerates the vector, and then runs
+both validator pairs. The non-writing
+`make system-manifest-payload-vector-check` runs the same prerequisites and
+validators. Release-manifest generation and check targets depend on the
+corresponding vector target, so a stale or invalid profile-to-vector chain
+cannot feed the release manifest.
 
 The non-waivable Core headroom threshold comes from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
@@ -1334,16 +1343,21 @@ python scripts/check_governed_parameter_identifiers.py
 
 The checker pins the launch catalog to exactly 22 GGP names and three GTP
 names in the [LTA-GGP]/[LTA-GTP] inventories and their target-architecture
-mirror rows. It verifies row order, `GGP_`/`GTP_` catalog labels, canonical
-string preimages, recomputed Ethereum Keccak hashes, identifier schema version,
-nonempty owners, and exactly one generic host derivation using each canonical
-`6529STREAM_GGP_` and `6529STREAM_GTP_` prefix. The generic hosts do not
+mirror rows. It requires the unique governed-identifier section and rejects
+every malformed or extra table row. It verifies row order, `GGP_`/`GTP_`
+catalog labels, canonical string preimages, recomputed Ethereum Keccak hashes,
+identifier schema version, exact target Owner/Inputs cells, exact LTA
+host/normative-home cells, the GTP coordinator home, and exactly one live
+generic host derivation using each canonical `6529STREAM_GGP_` and
+`6529STREAM_GTP_` prefix after stripping Solidity comments. The generic hosts do not
 declare one Solidity constant per parameter ID; the checked guarantee is exact
 prefix derivation plus the closed-world inventory/mirror correspondence.
 
 The focused regression suite rejects hash drift, unilateral inventory
-deletion, coordinated catalog deletion, and host-prefix drift. The gate is
-wired into `make check`, the Windows `scripts/check.ps1` path, and CI.
+deletion, coordinated catalog deletion, malformed/extra rows, owner/home/input
+drift, missing section identity, host-prefix drift, and commented-out canonical
+derivations. The gate is wired into `make check`, both aggregate shell wrappers,
+the release-manifest dependency chain, and CI.
 
 ## External-Call Gas Inventory
 
@@ -1505,6 +1519,10 @@ aggregate diagnostic, then build the canonical target-isolated artifacts and
 regenerate the tracked release baseline with:
 
 ```bash
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --target-only
 forge build --sizes --via-ir --skip test --skip script --force
 python scripts/test_release_build_artifacts.py
 python scripts/build_release_artifacts.py
@@ -1567,7 +1585,11 @@ python scripts/check_operator_dashboard_query_model.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/generate_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
 python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/generate_risk_register.py
@@ -1582,6 +1604,9 @@ python scripts/check_changelog.py
 The check mode is:
 
 ```bash
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
+python scripts/test_abi_compatibility.py
 python scripts/build_release_artifacts.py --check
 python scripts/generate_release_artifacts.py --check
 forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifacts/baselines/v0.1.0/gas-snapshot.snap
@@ -1652,6 +1677,8 @@ python scripts/check_monitoring_spec.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
@@ -1701,7 +1728,9 @@ The release-checksum generator covers `release-artifacts/contracts.json`,
 `requirements-tools.txt`, `requirements-tools.lock`, the ordinary CI and
 release-mode workflows, the Python toolchain checker and its tests, the
 canonical `release-artifacts/genesis-deployment-profile.json` and its checker,
-tests, release-mode integration, and normative inventory mirrors,
+tests, every profile normative-anchor document, release-mode integration,
+the aggregate release wrappers, the external-call gas inventory policy, the ABI
+compatibility verifier/goldens, and normative inventory mirrors,
 `release-artifacts/evidence/`,
 `release-artifacts/drop-authorization-signing/`,
 `release-artifacts/signer-custody-readiness/`,

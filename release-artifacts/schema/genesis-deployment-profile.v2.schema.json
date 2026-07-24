@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/genesis-deployment-profile.schema.json",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/release-artifacts/schema/genesis-deployment-profile.v2.schema.json",
   "title": "6529Stream Genesis Deployment Profile",
   "type": "object",
   "additionalProperties": false,
@@ -14,7 +14,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "6529stream.genesis-deployment-profile.v1"
+      "const": "6529stream.genesis-deployment-profile.v2"
     },
     "normative_source": {
       "type": "object",

@@ -112,9 +112,17 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
         self.assertEqual(publisher_pointer["interfaceId"], "0x77faad4f")
         self.assertEqual(governance_registry_record["interfaceId"], "0x77faad4f")
 
-        for field, expected_error in (
-            ("required_interfaces", "state-export publisher interface"),
-            ("required_markers", "state-export publisher interface"),
+        for field, removed, expected_error in (
+            (
+                "required_interfaces",
+                generator.STATE_EXPORT_PUBLISHER_INTERFACE,
+                "state-export publisher interface",
+            ),
+            (
+                "required_markers",
+                generator.STATE_EXPORT_PUBLISHER_MARKERS[0],
+                "state-export publisher interface",
+            ),
         ):
             with self.subTest(field=field):
                 mutated = copy.deepcopy(self.profile)
@@ -123,7 +131,7 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
                     for entry in mutated["entries"]
                     if entry["key"] == "GOVERNANCE_LAYER"
                 )
-                mutated_governance[field].pop()
+                mutated_governance[field].remove(removed)
                 with self.assertRaisesRegex(
                     generator.ManifestVectorError,
                     expected_error,
@@ -141,9 +149,112 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
                 mutated_governance[field][0] = {}
                 with self.assertRaisesRegex(
                     generator.ManifestVectorError,
-                    "state-export publisher interface",
+                    "must be a string array",
                 ):
                     generator._require_profile(mutated)
+
+    def test_governance_binding_proves_governed_parameter_authority_surface(self) -> None:
+        governance = next(
+            entry
+            for entry in self.profile["entries"]
+            if entry["key"] == "GOVERNANCE_LAYER"
+        )
+        self.assertIn(
+            generator.GOVERNED_PARAMETER_AUTHORITY_INTERFACE,
+            governance["required_interfaces"],
+        )
+        self.assertTrue(
+            set(generator.GOVERNED_PARAMETER_AUTHORITY_MARKERS).issubset(
+                governance["required_markers"]
+            )
+        )
+        derivation = self.vector["fixture_derivation"]
+        self.assertEqual(
+            derivation["governed_parameter_authority_binding"],
+            "GOVERNANCE_LAYER",
+        )
+        surface = derivation["governed_parameter_authority_surface"]
+        self.assertEqual(surface, generator.governed_parameter_authority_surface())
+        self.assertEqual(surface["interface_id"], "0xd9f8d48c")
+        self.assertEqual(
+            [function["selector"] for function in surface["functions"]],
+            ["0x8d96760d", "0x546ea281"],
+        )
+        self.assertEqual(surface["functions"][0]["returns"], ["bool"])
+        self.assertEqual(
+            surface["functions"][1]["returns"],
+            ["bool", "bytes32", "uint8", "bytes32", "bytes32", "bytes32"],
+        )
+        self.assertEqual(surface["events"], [])
+        self.assertEqual(
+            surface["surface_sha256"],
+            generator.GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256,
+        )
+
+        for field, removed in (
+            (
+                "required_interfaces",
+                generator.GOVERNED_PARAMETER_AUTHORITY_INTERFACE,
+            ),
+            (
+                "required_markers",
+                generator.GOVERNED_PARAMETER_AUTHORITY_MARKERS[0],
+            ),
+        ):
+            with self.subTest(field=field):
+                mutated = copy.deepcopy(self.profile)
+                mutated_governance = next(
+                    entry
+                    for entry in mutated["entries"]
+                    if entry["key"] == "GOVERNANCE_LAYER"
+                )
+                mutated_governance[field].remove(removed)
+                with self.assertRaisesRegex(
+                    generator.ManifestVectorError,
+                    "governed-parameter authority",
+                ):
+                    generator._require_profile(mutated)
+
+    def test_checker_rejects_full_authority_abi_surface_drift(self) -> None:
+        surface_mutations = (
+            (
+                "marker return",
+                lambda surface: surface["functions"][0]["returns"].clear(),
+            ),
+            (
+                "context returns",
+                lambda surface: surface["functions"][1]["returns"].pop(),
+            ),
+            (
+                "selector",
+                lambda surface: surface["functions"][1].__setitem__(
+                    "selector", "0x00000000"
+                ),
+            ),
+            (
+                "interface ID",
+                lambda surface: surface.__setitem__("interface_id", "0x00000000"),
+            ),
+            (
+                "digest",
+                lambda surface: surface.__setitem__(
+                    "surface_sha256", "sha256:" + "00" * 32
+                ),
+            ),
+        )
+        for label, mutate in surface_mutations:
+            with self.subTest(label=label):
+                candidate = copy.deepcopy(self.vector)
+                mutate(
+                    candidate["fixture_derivation"][
+                        "governed_parameter_authority_surface"
+                    ]
+                )
+                with self.assertRaisesRegex(
+                    generator.ManifestVectorError,
+                    "authority ABI surface",
+                ):
+                    checker.validate_vector_mechanics(candidate, self.profile)
 
     def test_checker_rejects_full_publisher_abi_and_synthetic_interface_id_drift(self) -> None:
         surface_mutations = (

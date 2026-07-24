@@ -244,6 +244,10 @@
       "source": "smart-contracts/IStreamGovernanceExecutor.sol"
     },
     {
+      "name": "IStreamGovernedParameterAuthority",
+      "source": "smart-contracts/IStreamGovernedParameterAuthority.sol"
+    },
+    {
       "name": "IStreamMinter",
       "source": "smart-contracts/IStreamMinter.sol"
     },

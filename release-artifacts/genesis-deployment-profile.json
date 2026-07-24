@@ -1,5 +1,5 @@
 {
-  "schema_version": "6529stream.genesis-deployment-profile.v1",
+  "schema_version": "6529stream.genesis-deployment-profile.v2",
   "normative_source": {
     "path": "docs/launch-conformance-matrix.md",
     "anchor": "LCM-GENESIS"
@@ -29,8 +29,8 @@
       "deployment_scope": "singleton",
       "multiplicity": { "minimum": 1, "maximum": 1 },
       "implementation": { "mode": "manifest_equivalent", "names": [] },
-      "required_interfaces": ["IStreamGovernanceExecutor", "IStreamRoleRegistry", "IStreamStateExportPublisher"],
-      "required_markers": ["ADR0004_TIMELOCK_ROLE_LAYER", "STATE_EXPORT_PUBLISHER_EVENTS_V1", "LATEST_STATE_EXPORT_SELECTOR_0x77faad4f", "STATE_EXPORT_PUBLISHED_TOPIC_0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045", "STATE_EXPORT_CHALLENGED_TOPIC_0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c", "STATE_EXPORT_SUPERSEDED_TOPIC_0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a", "STATE_EXPORT_PUBLISHER_ABI_SHA256_535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7"],
+      "required_interfaces": ["IStreamGovernanceExecutor", "IStreamGovernedParameterAuthority", "IStreamRoleRegistry", "IStreamStateExportPublisher"],
+      "required_markers": ["ADR0004_TIMELOCK_ROLE_LAYER", "STATE_EXPORT_PUBLISHER_EVENTS_V1", "LATEST_STATE_EXPORT_SELECTOR_0x77faad4f", "STATE_EXPORT_PUBLISHED_TOPIC_0x4b64ff5d268568999197a07e66632a3d1cf86adfb499394383bfa5e02577f045", "STATE_EXPORT_CHALLENGED_TOPIC_0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c", "STATE_EXPORT_SUPERSEDED_TOPIC_0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a", "STATE_EXPORT_PUBLISHER_ABI_SHA256_535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7", "GOVERNED_PARAMETER_AUTHORITY_ABI_V1", "GOVERNED_PARAMETER_AUTHORITY_MARKER_SELECTOR_0x8d96760d", "GOVERNED_PARAMETER_AUTHORITY_CONTEXT_SELECTOR_0x546ea281", "GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID_0xd9f8d48c", "GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256_720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"],
       "approved_aliases": [],
       "normative_anchors": ["docs/launch-conformance-matrix.md#LCM-GENESIS", "docs/adr/0004-admin-governance.md", "docs/adr/0017-raise-only-parameter-governance.md", "docs/stream-long-term-architecture.md#LTA-EXPORT"],
       "parameters": [],

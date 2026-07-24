@@ -4,11 +4,13 @@ pragma solidity ^0.8.19;
 import "../smart-contracts/IStreamGasParameterHost.sol";
 import "../smart-contracts/IStreamGovernanceExecutor.sol";
 import "../smart-contracts/IStreamRoleRegistry.sol";
+import "../smart-contracts/IStreamTimeParameterHost.sol";
 import "../smart-contracts/StreamGasParameterStore.sol";
 import "../smart-contracts/StreamGovernanceBootstrap.sol";
 import "../smart-contracts/StreamGovernanceExecutor.sol";
 import "../smart-contracts/StreamRoleRegistry.sol";
 import "../smart-contracts/StreamRoles.sol";
+import "../smart-contracts/StreamTimeParameterStore.sol";
 import "./helpers/StreamGovernanceBootstrapHarness.sol";
 import "./helpers/StreamGovernanceV2HolderRehearsalMocks.sol";
 
@@ -99,9 +101,14 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     uint256 private constant _SAFE_RAISED_GAS_VALUE = 75_000;
     uint256 private constant _GOVERNOR_RAISED_GAS_VALUE = 100_000;
     uint256 private constant _GAS_FLOOR = 10_000;
+    uint256 private constant _GENESIS_TIME_VALUE = 600;
+    uint256 private constant _TIME_FLOOR_BLOCKS = 300;
+    uint64 private constant _TIME_WALL_CLOCK_FLOOR_SECONDS = 3_600;
     uint256 private constant _NATIVE_REHEARSAL_VALUE = 0.25 ether;
     bytes32 private constant _PARAMETER_ID =
         0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda;
+    bytes32 private constant _TIME_PARAMETER_ID =
+        keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
     bytes32 private constant _SAFE_RUNTIME_CODE_HASH =
         0x07afc83f9eb3975b6a6a7a8fab7a53792576182a81549974e08d35f43545f9bb;
     bytes32 private constant _GOVERNOR_RUNTIME_CODE_HASH =
@@ -143,6 +150,7 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     StreamReferenceGovernorRehearsal private _governor;
     StreamGovernanceV2TerminalFreezeRehearsalTarget private _terminalTarget;
     StreamGasParameterStore private _store;
+    StreamTimeParameterStore private _timeStore;
 
     function setUp() public {
         vm.roll(_START_BLOCK);
@@ -187,6 +195,15 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
             failureClass: 1
         });
         _store = new StreamGasParameterStore(address(_executor), configs);
+        IStreamTimeParameterHost.TimeParameterConfig[] memory timeConfigs =
+            new IStreamTimeParameterHost.TimeParameterConfig[](1);
+        timeConfigs[0] = IStreamTimeParameterHost.TimeParameterConfig({
+            name: "ENTROPY_REQUEST_TIMEOUT_BLOCKS",
+            genesisValue: _GENESIS_TIME_VALUE,
+            floorBlocks: _TIME_FLOOR_BLOCKS,
+            wallClockFloorSeconds: _TIME_WALL_CLOCK_FLOOR_SECONDS
+        });
+        _timeStore = new StreamTimeParameterStore(address(_executor), timeConfigs);
 
         _grantTerminalVetoRoleThroughRoot(address(_vetoSafe));
         _registerProposerThroughRoot(address(_schedulingSafe));
@@ -416,6 +433,60 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         vm.prank(_SAFE_OWNER_THREE);
         _schedulingSafe.executeTransaction(transactionId);
         _assertParameterState(_GENESIS_GAS_VALUE, 1);
+    }
+
+    function testOneDelayedActionCannotCompoundGasParameterRaise() public {
+        RehearsalAction memory action =
+            _scheduleAsRoot(_duplicateGasRaiseAction(), keccak256("duplicate-gas-raise-action"));
+        GovernanceAction memory scheduled = _executor.governanceAction(action.actionId);
+        vm.warp(scheduled.notBefore);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterActionAlreadyApplied.selector,
+                _PARAMETER_ID,
+                action.actionId
+            )
+        );
+        _executor.executeGovernanceBatch(action.actionId, action.calls, action.callDatas);
+
+        _assertParameterState(_GENESIS_GAS_VALUE, 1);
+        require(
+            _executor.governanceAction(action.actionId).status == GovernanceActionStatus.SCHEDULED,
+            "failed gas batch left scheduled state"
+        );
+        _assertContextCleared();
+    }
+
+    function testOneDelayedActionCannotCompoundTimeParameterRaise() public {
+        RehearsalAction memory action = _scheduleAsRoot(
+            _duplicateTimeRaiseAction(), keccak256("duplicate-time-raise-action")
+        );
+        GovernanceAction memory scheduled = _executor.governanceAction(action.actionId);
+        vm.warp(scheduled.notBefore);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterActionAlreadyApplied.selector,
+                _TIME_PARAMETER_ID,
+                action.actionId
+            )
+        );
+        _executor.executeGovernanceBatch(action.actionId, action.calls, action.callDatas);
+
+        (uint256 value, uint256 floorBlocks, uint64 wallClockFloorSeconds, uint64 revision) =
+            _timeStore.timeParameterInfo(_TIME_PARAMETER_ID);
+        require(value == _GENESIS_TIME_VALUE, "failed time batch changed value");
+        require(floorBlocks == _TIME_FLOOR_BLOCKS, "time floor drift");
+        require(
+            wallClockFloorSeconds == _TIME_WALL_CLOCK_FLOOR_SECONDS, "time wall-clock floor drift"
+        );
+        require(revision == 1, "failed time batch changed revision");
+        require(
+            _executor.governanceAction(action.actionId).status == GovernanceActionStatus.SCHEDULED,
+            "failed time batch left scheduled state"
+        );
+        _assertContextCleared();
     }
 
     function testForgedSixReturnContextBlocksDelayedRaiseAtTarget() public {
@@ -793,6 +864,86 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         });
     }
 
+    function _duplicateGasRaiseAction() private view returns (RehearsalAction memory action) {
+        uint256 firstValue = _GENESIS_GAS_VALUE * 2;
+        uint256 secondValue = firstValue * 2;
+        action.callDatas = new bytes[](2);
+        action.callDatas[0] = abi.encodeCall(_store.raiseGasParameter, (_PARAMETER_ID, firstValue));
+        action.callDatas[1] = abi.encodeCall(_store.raiseGasParameter, (_PARAMETER_ID, secondValue));
+        action.calls = new GovernanceCall[](2);
+        action.calls[0] = GovernanceCall({
+            target: address(_store),
+            value: 0,
+            selector: IStreamGasParameterHost.raiseGasParameter.selector,
+            callDataHash: keccak256(action.callDatas[0]),
+            scopeHash: _scopeHash(),
+            oldValueHash: _stateHash(_GENESIS_GAS_VALUE, 1),
+            newValueHash: _stateHash(firstValue, 2)
+        });
+        action.calls[1] = GovernanceCall({
+            target: address(_store),
+            value: 0,
+            selector: IStreamGasParameterHost.raiseGasParameter.selector,
+            callDataHash: keccak256(action.callDatas[1]),
+            scopeHash: _scopeHash(),
+            oldValueHash: _stateHash(firstValue, 2),
+            newValueHash: _stateHash(secondValue, 3)
+        });
+    }
+
+    function _duplicateTimeRaiseAction() private view returns (RehearsalAction memory action) {
+        uint256 firstValue = _GENESIS_TIME_VALUE * 2;
+        uint256 secondValue = firstValue * 2;
+        action.callDatas = new bytes[](2);
+        action.callDatas[0] =
+            abi.encodeCall(_timeStore.raiseTimeParameter, (_TIME_PARAMETER_ID, firstValue));
+        action.callDatas[1] =
+            abi.encodeCall(_timeStore.raiseTimeParameter, (_TIME_PARAMETER_ID, secondValue));
+        action.calls = new GovernanceCall[](2);
+        action.calls[0] = GovernanceCall({
+            target: address(_timeStore),
+            value: 0,
+            selector: IStreamTimeParameterHost.raiseTimeParameter.selector,
+            callDataHash: keccak256(action.callDatas[0]),
+            scopeHash: _timeScopeHash(),
+            oldValueHash: _timeStateHash(_GENESIS_TIME_VALUE, 1),
+            newValueHash: _timeStateHash(firstValue, 2)
+        });
+        action.calls[1] = GovernanceCall({
+            target: address(_timeStore),
+            value: 0,
+            selector: IStreamTimeParameterHost.raiseTimeParameter.selector,
+            callDataHash: keccak256(action.callDatas[1]),
+            scopeHash: _timeScopeHash(),
+            oldValueHash: _timeStateHash(firstValue, 2),
+            newValueHash: _timeStateHash(secondValue, 3)
+        });
+    }
+
+    function _scheduleAsRoot(RehearsalAction memory action, bytes32 evidenceHash)
+        private
+        returns (RehearsalAction memory)
+    {
+        _executor.publishGovernanceCallData(action.callDatas);
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+            _aggregateHashes(action.calls);
+        uint64 notBefore = uint64(block.timestamp)
+            + _executor.minimumDelay(StreamGovernanceActionClasses.DELAYED_LOOSENING);
+        action.actionId = _executor.scheduleGovernanceBatch(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            action.calls,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            notBefore,
+            notBefore + 30 days,
+            evidenceHash,
+            "ipfs://local-governance-v2-holder-rehearsal/no-compound",
+            _bootstrap.manifestHash
+        );
+        return action;
+    }
+
     function _scheduleNativeViaSafe(address receiver, uint256 value, uint64 notBefore)
         private
         returns (RehearsalAction memory action)
@@ -1055,6 +1206,30 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
                 value,
                 _GAS_FLOOR,
                 uint8(1),
+                revision
+            )
+        );
+    }
+
+    function _timeScopeHash() private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_TIME_PARAMETER_SCOPE_V2"),
+                block.chainid,
+                address(_timeStore),
+                _TIME_PARAMETER_ID
+            )
+        );
+    }
+
+    function _timeStateHash(uint256 value, uint64 revision) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_TIME_PARAMETER_STATE_V2"),
+                _timeScopeHash(),
+                value,
+                _TIME_FLOOR_BLOCKS,
+                _TIME_WALL_CLOCK_FLOOR_SECONDS,
                 revision
             )
         );

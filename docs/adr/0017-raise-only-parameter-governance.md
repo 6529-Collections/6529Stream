@@ -51,10 +51,17 @@ class and avoids adding the superseded permanent machinery to `StreamCore`.
    of class `DELAYED_LOOSENING` (`1`). Its minimum delay is 48 hours. The host
    accepts only its immutable Governance V2 executor, independently verifies
    the executing action ID, class, scope hash, old-state hash, and new-state
-   hash, and emits the verified action ID.
+   hash, and emits the verified action ID. A nonzero constructor authority must
+   expose the exact `IStreamGovernedParameterAuthority` marker and six-word
+   `currentAction()` shape. The genesis `GOVERNANCE_LAYER` profile therefore
+   requires that narrow published interface in addition to the executor ABI.
 2. Parameter values are monotonic for the life of the deployment. A mutation
    must strictly increase the live value and may increase it by at most 2x per
-   action. A larger increase requires multiple separately delayed actions.
+   action. A host rejects a second mutation of the same parameter under the
+   same action ID, including an ordered duplicate inside one atomic batch. A
+   larger increase therefore requires multiple separately delayed action IDs.
+   Those actions may overlap their waiting windows: this is a per-action review
+   and commitment bound, not an additional wall-clock rate limit.
 3. There is no lowering, emergency raise, probe rebind, conditional raise, or
    conditional re-lower entry. No permissionless caller can mutate a parameter.
    A zero governance authority makes the host immutable after construction.
@@ -114,13 +121,24 @@ class and avoids adding the superseded permanent machinery to `StreamCore`.
    The GGP state tuple is `(domain, scopeHash, value, floor, failureClass,
    revision)`. The GTP state tuple is `(domain, scopeHash, value, floorBlocks,
    wallClockFloorSeconds, revision)`. Genesis revision is `1`; every successful
-   raise increments it exactly once; overflow reverts. This prevents
-   `A -> B -> A` replay because the deployment cannot return to `A`.
+    raise increments it exactly once; overflow reverts. This prevents
+    `A -> B -> A` replay because the deployment cannot return to `A`. Each host
+    also stores the last successfully applied action ID per parameter solely as
+    action-consumption metadata. That auxiliary field is deliberately excluded
+    from the V2 state tuple: it does not alter the parameter value or immutable
+    registration facts, but it makes a second same-action mutation revert.
 8. GGP and GTP probe interfaces and implementations, probe bindings, probe
    manifest rows, probe execution records, probe recency bounds, conditional
    action IDs, and probe-rebind manifest-tail triggers are removed from the
    launch source, genesis profile, system-manifest payload, deployment
    rehearsal, release catalogs, and audit scope.
+   Because those row kinds, deployment scopes, and implementation modes were
+   valid in the prior profile grammar, the narrowed probe-free genesis profile
+   is explicitly schema `6529stream.genesis-deployment-profile.v2`; it is not
+   silently published as a backward-compatible v1 schema. The schema has a
+   versioned `genesis-deployment-profile.v2.schema.json` resource and v1
+   pre-genesis artifacts are intentionally unsupported on this deployment line;
+   repository history remains their only archival source.
 9. Governance action-class ID `6`, formerly
    `EMERGENCY_RESTORATION`, is retired before genesis. Numeric action-class IDs
    are append-only: catalog row `6` remains reserved as
@@ -172,6 +190,8 @@ target and readiness language must cite this ADR.
   revision overflow.
 - Successful raises prove exact event fields and exactly-once revision
   increments. A second raise proves stale and ABA transition commitments fail.
+  Unit and real-executor atomic-batch tests prove one action ID cannot compound
+  two individually valid 2x transitions for the same GGP or GTP.
 - Constructor tests reject empty names, duplicate derived IDs, zero floors,
   genesis values below floors, invalid GGP failure classes, zero GTP
   wall-clock floors, and invalid nonzero authority contracts.

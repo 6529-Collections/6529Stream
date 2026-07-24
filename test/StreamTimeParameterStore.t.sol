@@ -96,6 +96,27 @@ contract StreamTimeParameterStoreTest is CharacterizationTestBase {
         Assertions.assertEq(uint256(revision), 2, "raised revision");
     }
 
+    function testOneActionCannotCompoundMultipleRaisesForSameParameter() public {
+        _setContext(_store, PARAMETER_ID, 1_200, ACTION_ID, 1);
+        vm.prank(address(_authority));
+        _store.raiseTimeParameter(PARAMETER_ID, 1_200);
+
+        _setContext(_store, PARAMETER_ID, 2_400, ACTION_ID, 1);
+        vm.prank(address(_authority));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterActionAlreadyApplied.selector,
+                PARAMETER_ID,
+                ACTION_ID
+            )
+        );
+        _store.raiseTimeParameter(PARAMETER_ID, 2_400);
+
+        (uint256 value,,, uint64 revision) = _store.timeParameterInfo(PARAMETER_ID);
+        Assertions.assertEq(value, 1_200, "same action cannot compound value");
+        Assertions.assertEq(uint256(revision), 2, "same action cannot compound revision");
+    }
+
     function testOnlyAuthorityCanRaiseAndZeroAuthorityIsImmutable() public {
         vm.expectRevert(
             abi.encodeWithSelector(

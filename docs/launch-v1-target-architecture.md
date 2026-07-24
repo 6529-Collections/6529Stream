@@ -317,7 +317,7 @@ paths:
 | `blockCollectionBurns(uint256)` (`0xfcfc7b26`), `collectionBurnsBlocked(uint256)` (`0x5923b379`), and `collectionBurnsBlockedAtBlock(uint256)` (`0x74a5ded9`) with one activation-height storage slot, terminal-freeze governance binding, and no duplicate boolean state, per the production-exact burn-block home ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-BURN]; ADR 0013 decision U4) | Core | Finality registry, artist registry steward minted-before checks, governance, indexers |
 | One-way `freezeCollection(uint256)` (`0xbcc405d0`) and derived `collectionFreezeStatus(uint256)` (`0x2ed330f7`), backed by one private activation-height slot with no height getter; terminal-governance class and exact per-call scope/state checks plus schema-v1 `CollectionFrozen(uint16,uint256,bytes32)` action-ID event; executes after the burn block and before registry finality, per [CMC-FREEZE] | Core | Finality registry, satellites, governance, monitoring, indexers |
 | Unified Core satellite-pointer ABI: `getSatellitePointer(bytes32)` (`0x3528d53c`), `updateSatellitePointer(bytes32,address)` (`0xac1e5708`), and one-way `freezeSatellitePointer(bytes32)` (`0xcdcdb71e`), with the exact ten-word return including monotonic per-family revision, private cached storage, live-`MODULE_REGISTRY`/executor-context/hash rechecks, old-registry bootstrap for a registry successor, same-target registry revalidation, exact-state no-op rejection, and no individual pointer getters or second staging state machine, per [LTA-POINTERS] | Core | Satellites, governance, `tokenURI()`/`contractURI()`, finality, monitoring, indexers |
-| Core-minimal raise-only GGP ABI: four-return `gasParameterInfo(bytes32)` (`0xec2ef90a`) with exactly `(value, floor, failureClass, revision)`; governed `raiseGasParameter(bytes32,uint256)` (`0x5c0df7da`) only; canonical `GasParameterUpdated` with `schemaVersion = 2`; exact V2 scope/state hashes, immutable Governance V2 authority, class `1`, 48-hour minimum delay, and an overflow-safe 2x step bound pinned at [LTA-GGP-CORE]; no action-ID calldata, lower, emergency, probe, rebind, conditional writer, convenience read, public constant getter, or subsystem alias event | Core | Governance, monitoring, bounded Core call paths |
+| Core-minimal raise-only GGP ABI: four-return `gasParameterInfo(bytes32)` (`0xec2ef90a`) with exactly `(value, floor, failureClass, revision)`; governed `raiseGasParameter(bytes32,uint256)` (`0x5c0df7da`) only; canonical `GasParameterUpdated` with `schemaVersion = 2`; exact V2 scope/state hashes, immutable Governance V2 authority, class `1`, 48-hour minimum delay, an overflow-safe 2x step bound, and same-parameter duplicate-action rejection pinned at [LTA-GGP-CORE]; no action-ID calldata, lower, emergency, probe, rebind, conditional writer, convenience read, public constant getter, or subsystem alias event | Core | Governance, monitoring, bounded Core call paths |
 | minimal `tokenURI()` delegation to router | Core | ERC-721 metadata callers |
 | minimal `contractURI()` delegation to the contract-metadata satellite (ADR 0009 decision 4) | Core | Marketplaces and indexers (ERC-7572) |
 | entropy registration call during mint | Core to coordinator | Mint path |
@@ -432,8 +432,11 @@ two-argument raise selector in [LTA-GGP-CORE]. GTP hosts use four-return
 `timeParameterInfo(bytes32)` (`0x5f2463b8`) and
 `raiseTimeParameter(bytes32,uint256)` (`0x046e1fd5`). Each host accepts only its
 immutable authority, derives the emitted action ID from `currentAction()`, and
-validates class `1` plus exact V2 scope/old/new state. No alternate writer,
-lower, emergency path, conditional action, or probe rebind survives cutover.
+validates class `1` plus exact V2 scope/old/new state. No constructor authority
+shape or deployment equivalent may omit the published
+`IStreamGovernedParameterAuthority` marker-and-context seam required by the
+genesis `GOVERNANCE_LAYER` profile. No alternate writer, lower, emergency path,
+conditional action, or probe rebind survives cutover.
 Canonical gas and time parameter change events use `schemaVersion = 2`.
 
 Rich standalone GGP/GTP hosts fix their inventory and authority at

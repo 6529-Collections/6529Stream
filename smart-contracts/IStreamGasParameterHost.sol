@@ -45,6 +45,7 @@ interface IStreamGasParameterHost {
     error GasParameterActionContextInvalid();
     error GasParameterActionNotExecuting();
     error GasParameterActionIdZero();
+    error GasParameterActionAlreadyApplied(bytes32 parameterId, bytes32 actionId);
     error GasParameterActionClassMismatch(uint8 expectedClass, uint8 actualClass);
     error GasParameterScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
     error GasParameterOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
@@ -71,5 +72,6 @@ interface IStreamGasParameterHost {
     function governanceAuthority() external view returns (address);
 
     /// @notice Delayed, authority-only, at-most-2x monotonic raise.
+    /// @dev One governance action may apply at most one raise to a parameter.
     function raiseGasParameter(bytes32 parameterId, uint256 newValue) external;
 }

@@ -18,7 +18,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 PROFILE_PATH = REPO_ROOT / checker.DEFAULT_PROFILE
 CONTRACTS_PATH = REPO_ROOT / checker.DEFAULT_CONTRACTS
-SCHEMA_PATH = REPO_ROOT / "release-artifacts/schema/genesis-deployment-profile.schema.json"
+SCHEMA_PATH = REPO_ROOT / "release-artifacts/schema/genesis-deployment-profile.v2.schema.json"
 
 
 def load_json(path: Path) -> object:
@@ -80,6 +80,9 @@ def complete_fixture(profile: dict[str, object]) -> tuple[dict[str, object], dic
         if entry["key"] == "GOVERNANCE_LAYER":
             candidate["state_export_publisher_abi_proof"] = (
                 checker.state_export_publisher_abi_proof()
+            )
+            candidate["governed_parameter_authority_abi_proof"] = (
+                checker.governed_parameter_authority_abi_proof()
             )
         candidates.append(candidate)
     return completed, candidate_config(candidates)
@@ -398,6 +401,10 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
             tuple(entries[1]["required_interfaces"]),
             checker.GOVERNANCE_REQUIRED_INTERFACES,
         )
+        self.assertIn(
+            "IStreamGovernedParameterAuthority",
+            entries[1]["required_interfaces"],
+        )
         self.assertEqual(
             tuple(entries[1]["required_markers"]),
             checker.GOVERNANCE_REQUIRED_MARKERS,
@@ -511,6 +518,46 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         ):
             checker.validate_state_export_publisher_abi_proof(candidate, "candidate.proof")
 
+    def test_governed_parameter_authority_abi_proof_locks_full_shape(self) -> None:
+        proof = checker.governed_parameter_authority_abi_proof()
+        self.assertEqual(
+            proof["surface_sha256"],
+            checker.GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256,
+        )
+        self.assertEqual(proof["interface_id"], "0xd9f8d48c")
+        self.assertEqual(
+            [function["selector"] for function in proof["functions"]],
+            ["0x8d96760d", "0x546ea281"],
+        )
+        self.assertEqual(proof["functions"][0]["returns"], ["bool"])
+        self.assertEqual(
+            proof["functions"][1]["returns"],
+            ["bool", "bytes32", "uint8", "bytes32", "bytes32", "bytes32"],
+        )
+        self.assertEqual(proof["events"], [])
+
+        mutations = (
+            ("marker return", lambda value: value["functions"][0]["returns"].clear()),
+            ("context returns", lambda value: value["functions"][1]["returns"].pop()),
+            ("selector", lambda value: value["functions"][1].__setitem__("selector", "0x00000000")),
+            ("interface ID", lambda value: value.__setitem__("interface_id", "0x00000000")),
+            ("surface digest", lambda value: value.__setitem__("surface_sha256", "sha256:" + "00" * 32)),
+        )
+        for label, mutate in mutations:
+            with self.subTest(label=label):
+                candidate = copy.deepcopy(proof)
+                mutate(candidate)
+                with self.assertRaisesRegex(
+                    checker.GenesisProfileError,
+                    "must exactly match",
+                ):
+                    checker.validate_governed_parameter_authority_abi_proof(
+                        candidate,
+                        "candidate.authority_proof",
+                    )
+
+        candidate = copy.deepcopy(proof)
+        candidate["functions"][1]["returns"].pop()
         candidate_surface = {
             key: value
             for key, value in candidate.items()
@@ -526,7 +573,10 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
             checker.GenesisProfileError,
             "must exactly match",
         ):
-            checker.validate_state_export_publisher_abi_proof(candidate, "candidate.proof")
+            checker.validate_governed_parameter_authority_abi_proof(
+                candidate,
+                "candidate.proof",
+            )
 
     def test_document_mirror_rejects_requirement_drift(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))

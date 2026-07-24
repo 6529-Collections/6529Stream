@@ -699,6 +699,30 @@ def validate_vector_mechanics(
             "fixture state-export publisher ABI surface or fixed digest drifted: "
             + publisher_difference
         )
+    if derivation.get("governed_parameter_authority_binding") != "GOVERNANCE_LAYER":
+        raise generator.ManifestVectorError(
+            "fixture governed-parameter authority binding must remain explicit"
+        )
+    authority_surface = _object(
+        derivation.get("governed_parameter_authority_surface"),
+        "vector.fixture_derivation.governed_parameter_authority_surface",
+    )
+    expected_authority_surface = generator.governed_parameter_authority_surface()
+    _exact_keys(
+        authority_surface,
+        expected_authority_surface,
+        "vector.fixture_derivation.governed_parameter_authority_surface",
+    )
+    authority_difference = _first_difference(
+        expected_authority_surface,
+        authority_surface,
+        "vector.fixture_derivation.governed_parameter_authority_surface",
+    )
+    if authority_difference:
+        raise generator.ManifestVectorError(
+            "fixture governed-parameter authority ABI surface or fixed digest drifted: "
+            + authority_difference
+        )
     if derivation.get("sstore2_carrier_policy") != (
         "root and chunk carriers are excluded from payload.contracts "
         "to avoid a self-address fixed point"

@@ -23,6 +23,8 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
         uint256 floorBlocks;
         uint64 wallClockFloorSeconds;
         uint64 revision;
+        // Auxiliary same-action consumption guard; intentionally outside _stateHash.
+        bytes32 lastActionId;
     }
 
     address public immutable override governanceAuthority;
@@ -125,9 +127,13 @@ abstract contract StreamTimeParameterHost is IStreamTimeParameterHost {
         bytes32 oldStateHash = _stateHash(scopeHash, parameter, oldValue, parameter.revision);
         bytes32 newStateHash = _stateHash(scopeHash, parameter, newValue, nextRevision);
         bytes32 actionId = _requireGovernanceContext(scopeHash, oldStateHash, newStateHash);
+        if (parameter.lastActionId == actionId) {
+            revert TimeParameterActionAlreadyApplied(parameterId, actionId);
+        }
 
         parameter.value = newValue;
         parameter.revision = nextRevision;
+        parameter.lastActionId = actionId;
         emit TimeParameterUpdated(
             TIME_PARAMETER_SCHEMA_VERSION,
             parameterId,
