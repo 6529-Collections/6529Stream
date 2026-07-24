@@ -11,36 +11,32 @@ not replace the generated release evidence status manifest in
 | Field | Value |
 | --- | --- |
 | Candidate source | `https://github.com/6529-Collections/6529Stream` |
-| Candidate commit | `b77e2338df10f223a0b892a58af4497d156d8576` |
-| Candidate summary | Current remote `main` after PR #660: locked Python audit/release toolchain, canonical genesis-profile and Slither drift gates, and unchanged blocked production posture |
-| Execution date | 2026-07-22 |
+| Candidate branch | `codex/raise-only-gas-time-governance` |
+| Candidate source commit | `55a2e817876eac754355a14ae3907053e3d3deed` |
+| Candidate summary | ADR 0017 raise-only GGP/GTP hosts, 37-entry no-probe genesis profile, and exact Governance V2 authority/replay binding on top of merged PR #683 |
+| Execution date | 2026-07-24 |
 | Readiness posture | Public beta blocked; production release blocked |
 | No-secret posture | No private keys, RPC URLs, API keys, signer-service secrets, or unreleased drop payloads were used or retained in this packet |
 
-This commit is the comparison baseline for the next remediation PR, not a
-freeze. Any contract or release-artifact change after this point must rerun the
+The Solidity, canonical isolated-build, and Slither results below were rerun
+against this committed source snapshot. The packet remains a working candidate,
+not a freeze: any later contract or release-artifact change must rerun the
 relevant focused checks, the full candidate gate, and the deterministic
 artifact generators in canonical order.
-
-ADR 0017 now supersedes this packet's parameter-probe target. The active
-pre-genesis target has 37 profile entries, no probe deployments or bindings,
-raise-only GGP/GTP hosts, and retired/forbidden/never-reuse action-class ID
-`6`. The measured size and analysis rows below remain the frozen comparison
-evidence for commit `b77e2338`; they are not measurements of the ADR-0017
-candidate.
 
 ## Local Candidate Results
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Full ordinary repository gate | Passed on PR #660 before merge | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; Foundry, Slither, and Windows CI passed on the reviewed final head |
+| Full ordinary repository gate | Passed | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1` passed end to end in 2,107.4 seconds after the final release-tail refresh; focused gas/time host, executor, holder-rehearsal, profile, vector, release-build, size, exact Slither, and standalone release-artifact gates also pass |
 | Production size build | Measured, release-blocking | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py` records canonical `StreamCore` at 24,152 runtime bytes; the aggregate all-source size build is diagnostic only |
 | `StreamCore` production headroom | Blocked | 424 bytes of EIP-170 margin, 1,576 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
-| Genesis deployment profile | Blocked | At this packet's baseline the checked profile had 60 entries. ADR 0017 supersedes it with the canonical 37-entry, no-probe target, including Permanent `StreamSystemManifest` entry 36 and immutable Permanent `StreamCoreFinalityAdapter` entry 37; the implementation catalog still must prove deployment-instance identity and fallback distinctness, so issue #656 continues to own reconciliation |
-| Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 33 Open production rows (3 High, 30 Medium): one confirmed gap, five design-review rows, and 27 pending dispositions; issue #658 owns remediation and reviewed disposition |
-| Governance Executor native-value authority | Blocked | Bounded assembly makes the proposal-selected value-bearing call invisible to Slither without removing the authority; High open blocker `RISK-GOV-003` requires a closed-world target/selector/value policy, deployment binding, adversarial tests, and independent review under issues #658 and #665 |
+| Genesis deployment profile | Blocked | The canonical profile has 37 entries and rejects probes, but the implementation catalog still must prove deployment-instance identity and fallback distinctness; issue #656 owns reconciliation |
+| Governed parameter inventory | Blocked | The 22 GGP and three GTP identifiers are exact, but production hosts, genesis values, immutable floors, sizing/cadence evidence, fixed-stipend compatibility, and candidate bindings remain open under issue #684 and fail closed through `RISK-GOV-004` |
+| Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 30 Open production rows (3 High, 27 Medium): one confirmed gap, five design-review rows, and 24 pending dispositions; issue #658 owns remediation and reviewed disposition |
+| Governance Executor native-value authority | Blocked | Bounded assembly makes the proposal-selected value-bearing call invisible to Slither without removing the authority; High open blocker `RISK-GOV-003` requires a closed-world target/selector/value policy, deployment binding, adversarial tests, and independent review under issues #658 and #685 |
 | Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
-| Production release mode | Blocked | External evidence, Core headroom, genesis completeness, open Slither findings, and `RISK-GOV-003` must all fail closed before production release |
+| Production release mode | Blocked | External evidence, Core headroom, genesis and governed-parameter completeness, open Slither findings, and `RISK-GOV-003` must all fail closed before production release |
 
 The successful local gates are regression evidence only. They do not replace
 external audit, reviewed testnet evidence, production signatures, signed tags,
@@ -104,8 +100,10 @@ Before any public beta or production-release claim:
 3. Run `python scripts/check_slither_baseline.py --run-slither`; remediate or
    produce issue-linked reviewed proof for every first-party production
    High/Medium row. Baseline equality alone is not acceptance.
-4. Restore at least 2,000 bytes of `StreamCore` EIP-170 margin under issue #654
-   and complete instance-aware genesis reconciliation under issue #656.
+4. Restore at least 2,000 bytes of `StreamCore` EIP-170 margin under issue #654,
+   complete instance-aware genesis reconciliation under issue #656, bind every
+   governed parameter to exact production hosts and evidence under issue #684,
+   and complete the closed-world action/native-value policy under issue #685.
 5. Complete the public-beta evidence rows in the generated blocker report.
 6. Run `python scripts/check_release_mode.py --phase public-beta`; it must pass
    before production-release execution starts.

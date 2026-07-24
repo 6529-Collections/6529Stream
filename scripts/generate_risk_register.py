@@ -244,7 +244,47 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ],
         "tracking": [
             "https://github.com/6529-Collections/6529Stream/issues/658",
-            "https://github.com/6529-Collections/6529Stream/issues/665",
+            "https://github.com/6529-Collections/6529Stream/issues/685",
+        ],
+    },
+    {
+        "id": "RISK-GOV-004",
+        "title": "Governed parameter production bindings and sizing evidence are incomplete",
+        "area": "governance",
+        "severity": "high",
+        "status": "open_blocker",
+        "owner": "protocol",
+        "target_gate": "Gate G",
+        "source": "ADR 0017 governed-parameter closed world and issue #684",
+        "mitigation": (
+            "Add a versioned exact 22-GGP/3-GTP inventory; bind every row to "
+            "the required production profile instance, genesis value, immutable "
+            "floor, failure class or cadence rule, reviewed measurement evidence, "
+            "and fixed-stipend consumers; bind the concrete candidate and fail "
+            "strict production release mode on any unresolved row."
+        ),
+        "residual_risk": (
+            "The current identifier mirror and generic store-host tests do not prove "
+            "that the 37-entry production candidate registers every governed parameter "
+            "on the correct deployed host with safe values, floors, cadence evidence, "
+            "or downstream gas compatibility."
+        ),
+        "evidence_paths": [
+            "docs/adr/0017-raise-only-parameter-governance.md",
+            "docs/launch-v1-target-architecture.md",
+            "docs/known-blockers.md",
+            "release-artifacts/genesis-deployment-profile.json",
+            "scripts/check_governed_parameter_identifiers.py",
+        ],
+        "checks": [
+            "python scripts/test_governed_parameter_identifiers.py",
+            "python scripts/check_governed_parameter_identifiers.py",
+            "python scripts/test_risk_register.py",
+            "python scripts/check_risk_register.py",
+            "python scripts/test_release_mode.py",
+        ],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/684",
         ],
     },
     {

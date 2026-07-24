@@ -48,9 +48,8 @@ The current Gate A smoke baseline proves:
   initcode. That deployment binding remains a production blocker under
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
   the pre-audit, not-production-ready posture is unchanged. The committed
-  `release-artifacts/latest/bytecode-release-proof.json` records the last
-  pre-ADR-0017 measured `StreamCore` production runtime size as 24,152 bytes,
-  leaving
+  `release-artifacts/latest/bytecode-release-proof.json` records the current
+  target-isolated `StreamCore` production runtime size as 24,152 bytes, leaving
   424 bytes of EIP-170
   headroom under the IR-optimized deployment profile. This passes EIP-170 and
   the interim 384-byte development floor, but it is below the 512-byte warning
@@ -86,6 +85,13 @@ The current Gate A smoke baseline proves:
   manifest model cannot yet prove every required distinct deployment instance.
   This keeps production blocked under
   [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).
+- The exact ADR 0017 identifier surface is checked at 22 GGP plus three GTP
+  rows, but only generic store hosts currently implement registration. No
+  checked artifact yet binds every logical parameter to its production profile
+  instance, genesis value, immutable floor, failure class or cadence rule,
+  measurement evidence, and fixed-stipend consumers. This independent
+  production blocker is retained as `RISK-GOV-004` and tracked by
+  [issue #684](https://github.com/6529-Collections/6529Stream/issues/684).
 - `python scripts/test_solidity_formatting.py` and
   `python scripts/check_solidity_formatting.py` enforce the scoped Solidity
   formatting policy: 34 formatting-required first-party/provider files pass
@@ -476,13 +482,13 @@ The current Gate A smoke baseline proves:
 - `scripts/check_slither_baseline.py` keeps a canonical normalized first-party
   production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
   provenance without invoking Slither during the fast default gate, and runs a
-  dedicated pinned exact-drift analysis in CI. The current set is 33 Open rows
-  (3 High, 30 Medium): one confirmed gap, five design-review rows, and 27
+  dedicated pinned exact-drift analysis in CI. The current set is 30 Open rows
+  (3 High, 27 Medium): one confirmed gap, five design-review rows, and 24
   pending dispositions. This is a release blocker and not a risk acceptance.
   Bounded assembly made the Governance Executor's proposal-selected
   native-value authority invisible to Slither without removing it, so
   `RISK-GOV-003` preserves that authority as a separate High open blocker under
-  issues #658 and #665. The Governance V2 foundation remains pre-audit and not
+  issues #658 and #685. The Governance V2 foundation remains pre-audit and not
   production-ready.
 - `scripts/test_release_readiness.py` and
   `scripts/check_release_readiness.py` prove

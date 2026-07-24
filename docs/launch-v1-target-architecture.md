@@ -360,7 +360,7 @@ pointer reads. Root/chunk data carriers are excluded from their own payload and
 deploy only after every inventoried address and canonical byte is fixed; the
 actual root is recorded at atomic seal/publication, never pinned in executor
 initcode or the bootstrap bind. ABI lock requires a deterministic non-production
-60-profile fixture proving canonical bytes, chunk/root mechanics, profile-drift
+canonical-profile fixture proving canonical bytes, chunk/root mechanics, profile-drift
 detection, and decoded/RPC wire-size arithmetic. Measured maximum-size writer
 gas/RPC fixtures remain mandatory implementation and deployment gates once the
 writer exists; the target fixture is not that evidence. Live semantic equality to the

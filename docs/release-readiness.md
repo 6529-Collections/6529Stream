@@ -186,16 +186,17 @@ Current maturity:
 - Evidence status: local baseline plus reviewed fork metadata and marketplace
   evidence; current CON-015 fork deployment, fork ceremony, and fork randomizer
   artifacts are pending re-review after deployment/release artifacts changed.
-- Public beta status: blocked by 33 Open first-party production Slither
+- Public beta status: blocked by 30 Open first-party production Slither
   High/Medium findings, High open Governance risk `RISK-GOV-003`, missing
   external audit, pending fork deployment review, missing testnet deployment
   evidence, pending fork ceremony review, pending fork randomizer review,
   verified deployed addresses, and explorer verification.
-- Production release status: blocked by the same 33 Open Slither findings and
+- Production release status: blocked by the same 30 Open Slither findings and
   `RISK-GOV-003`, sub-threshold Core headroom and its confirmed state gap,
-  incomplete instance-aware genesis evidence, missing production signatures,
-  signed Git tags, verified deployed addresses, explorer verification,
-  non-local retained evidence, and post-audit remediation evidence.
+  incomplete instance-aware genesis evidence, incomplete governed-parameter
+  host/value/floor/evidence bindings under #684 and `RISK-GOV-004`, missing production signatures,
+  signed Git tags, verified deployed addresses, explorer verification, non-local
+  retained evidence, and post-audit remediation evidence.
 
 This dashboard covers release-readiness evidence only. It does not perform a
 real release, does not create production signatures, and does not assert that
@@ -229,7 +230,7 @@ Both release phases validate the canonical normalized
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) and its checked
 Markdown mirror. Any Open first-party production High/Medium row blocks the
 release decision even when the live analyzer exactly matches the baseline. The
-current 33 Open rows therefore keep public beta and production red under
+current 30 Open rows therefore keep public beta and production red under
 [issue #658](https://github.com/6529-Collections/6529Stream/issues/658).
 
 The bounded assembly call in `StreamGovernanceExecutor` prevents returndata
@@ -239,7 +240,7 @@ separate High open blocker. It cannot clear until the closed-world
 target/selector/value policy, deployment binding, adversarial value-flow tests,
 and independent review tracked by
 [#658](https://github.com/6529-Collections/6529Stream/issues/658) and
-[#665](https://github.com/6529-Collections/6529Stream/issues/665) are complete.
+[#685](https://github.com/6529-Collections/6529Stream/issues/685) are complete.
 The Governance V2 foundation is pre-audit and not production-ready.
 
 Strict release mode now proves whether the implementation catalog satisfies the
@@ -259,11 +260,12 @@ structural profile gate is not concrete deployment evidence.
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
 | StreamCore deployment headroom | The last committed measurement passes the ordinary development floor at 24,152 runtime bytes and 424 bytes of EIP-170 margin. ADR 0017 avoids planned bytecode growth but does not shrink that Core; the normative production gate still requires a separate refactor and regenerated proof with at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
 | Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
+| Governed parameter completeness | The exact 22-GGP/3-GTP identifier set is checked, but production hosts, genesis values, immutable floors, sizing/cadence evidence, fixed-stipend compatibility, and instance-aware bindings are not yet complete; issue #684 owns the inventory/evidence and `RISK-GOV-004` makes it a non-waivable production gate | No | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
 | Release artifacts | Release manifest, checksum bundle, bytecode-to-release proof, release-candidate lockfile, risk register, ABI baseline, gas snapshot, gas envelope baseline, protocol surface report, source verification inputs, address books, ceremony evidence, admin ceremony evidence schema/template/checker, randomizer operations evidence, release-signature evidence, production release-signing checker and retained artifact, drop authorization signing fixtures, unsigned payload-generator examples, drop authorization signing evidence schema/template/checker, signer custody readiness schema/template/checker, 1/1 provenance manifest schema/template/checker/generated catalog, collector-verifiable permanence package schema/template/checker/generated one-of-one permanence manifest, public-beta evidence status, generated public-beta and production-release blocker reports, release evidence packet index, release evidence issue backlog, release evidence issue links, release evidence issue body sync, release evidence issue closure readiness, non-local release evidence runbook/schema/generic template, external audit retained-artifact template/checker, testnet deployment retained-artifact template/checker, public-beta verified-addresses checker and retained artifact, reviewed fork retained artifact/evidence envelope, per-requirement public-beta and production-release templates, and checker exist for the local baseline | Live release artifacts, live bytecode proof, production signing evidence, reviewed 1/1 provenance evidence where used for collector-facing claims, reviewed permanence packages with browser proof and output hashes where used for collector-facing claims, reviewed signer custody readiness, reviewed admin ceremony evidence, reviewed testnet/live retained evidence, verified deployed addresses, explorer verification, and completed external audit evidence missing | Production signatures, signed Git tags, reviewed 1/1 provenance evidence and reviewed collector permanence evidence where used for production collector-facing claims, and reviewed live bytecode proof missing |
-| Static analysis and tests | The normalized first-party production Slither baseline contains 3 High and 30 Medium open findings; `RISK-GOV-003` separately preserves the Governance Executor native-value authority hidden from Slither by bounded assembly; an exact metadata/drift gate, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Yes: all 33 Slither rows and `RISK-GOV-003` remain Open, and testnet/live invariant and gas evidence is missing | Yes: open Slither findings, `RISK-GOV-003`, external audit, and production evidence are missing |
+| Static analysis and tests | The normalized first-party production Slither baseline contains 3 High and 27 Medium open findings; `RISK-GOV-003` separately preserves the Governance Executor native-value authority hidden from Slither by bounded assembly; an exact metadata/drift gate, warning disposition baseline, NatSpec coverage baseline, test matrix, invariants, local gas snapshot, and local gas envelope ceilings are tracked | Yes: all 30 Slither rows and `RISK-GOV-003` remain Open, and testnet/live invariant and gas evidence is missing | Yes: open Slither findings, `RISK-GOV-003`, external audit, and production evidence are missing |
 
 ## Local Evidence Already Passing
 
@@ -381,7 +383,7 @@ The current local baseline includes:
   and [`scripts/test_slither_baseline.py`](../scripts/test_slither_baseline.py)
   with `python scripts/test_slither_baseline.py`,
   `python scripts/check_slither_baseline.py --baseline-only`, and
-  `python scripts/check_slither_baseline.py --run-slither`; the 3 High and 30
+  `python scripts/check_slither_baseline.py --run-slither`; the 3 High and 27
   Medium first-party production rows remain Open and block release;
 - source verification inputs under
   [`release-artifacts/latest/source-verification-inputs.json`](../release-artifacts/latest/source-verification-inputs.json);

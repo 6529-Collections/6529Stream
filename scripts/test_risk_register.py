@@ -80,6 +80,30 @@ def minimal_register(root: Path) -> dict[str, object]:
                 "risk_acceptance": None,
             }
         )
+    present_ids = {risk["id"] for risk in risks}
+    for risk_id, required_status in checker.REQUIRED_RISK_STATUSES.items():
+        if risk_id in present_ids:
+            continue
+        risks.append(
+            {
+                "id": risk_id,
+                "title": "required governance risk",
+                "area": "governance",
+                "severity": "high",
+                "status": required_status,
+                "owner": "TBD",
+                "target_gate": "Gate G",
+                "source": "unit test",
+                "mitigation": "Retain evidence and track remediation.",
+                "residual_risk": "The risk remains until evidence is reviewed.",
+                "evidence": [file_ref(evidence, root)],
+                "checks": ["python scripts/check_risk_register.py"],
+                "tracking": [
+                    "https://github.com/6529-Collections/6529Stream/issues/684"
+                ],
+                "risk_acceptance": None,
+            }
+        )
     risks = sorted(risks, key=lambda item: item["id"])
     return {
         "schema_version": checker.RISK_REGISTER_SCHEMA,
@@ -187,6 +211,55 @@ class RiskRegisterTests(unittest.TestCase):
             ):
                 checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
 
+    def test_rejects_missing_governed_parameter_completeness_risk(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            register["risks"] = [
+                risk
+                for risk in register["risks"]
+                if risk["id"] != checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID
+            ]
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(
+                checker.RiskRegisterError,
+                checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID,
+            ):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_governed_parameter_completeness_risk_must_remain_open(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            risk = next(
+                risk
+                for risk in register["risks"]
+                if risk["id"] == checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID
+            )
+            risk["status"] = "planned_mitigation"
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(
+                checker.RiskRegisterError,
+                "RISK-GOV-004.status must remain 'open_blocker'",
+            ):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_generator_preserves_governed_parameter_completeness_blocker(self) -> None:
+        risk = next(
+            risk
+            for risk in generator.RISK_DEFINITIONS
+            if risk["id"] == checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID
+        )
+
+        self.assertEqual(risk["severity"], "high")
+        self.assertEqual(risk["status"], "open_blocker")
+        self.assertEqual(
+            risk["tracking"],
+            ["https://github.com/6529-Collections/6529Stream/issues/684"],
+        )
+
     def test_generator_preserves_governance_native_value_semantic_anchor(self) -> None:
         risk = next(
             risk
@@ -209,7 +282,7 @@ class RiskRegisterTests(unittest.TestCase):
             risk["tracking"],
             [
                 "https://github.com/6529-Collections/6529Stream/issues/658",
-                "https://github.com/6529-Collections/6529Stream/issues/665",
+                "https://github.com/6529-Collections/6529Stream/issues/685",
             ],
         )
 
@@ -221,7 +294,7 @@ class RiskRegisterTests(unittest.TestCase):
             if risk["id"] == generator.SLITHER_RISK_ID
         )
 
-        self.assertIn("3 High and 30 Medium open", risk["residual_risk"])
+        self.assertIn("3 High and 27 Medium open", risk["residual_risk"])
 
     def test_rejects_duplicate_risk_ids(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

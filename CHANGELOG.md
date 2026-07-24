@@ -102,25 +102,25 @@ the release policy in `docs/release-policy.md`.
   authority as a separate High open blocker pending a closed-world
   target/selector/value policy and deployment evidence. Deployment-input
   generators, that action-policy catalog, target-side cutover hooks, and
-  candidate artifacts remain separate follow-up release-evidence slices. This
-  partial source/test slice does not complete [GOV-V2-CUTOVER], close #665, or
-  clear the static-analysis blocker in #658. This is pre-audit work and not a
-  production-readiness claim.
+  candidate artifacts remain separate follow-up release-evidence slices. PR
+  #683 completed this slice's named Governance V2/ModuleRegistry transition
+  scope and closed #665; issue #685 now owns the remaining closed-world
+  target/selector/native-value boundary. This does not clear the static-analysis
+  blocker in #658 and is not a production-readiness claim.
 - Refreshed the canonical unfiltered Slither 0.11.5 capture at source commit
-  `c0be71915bc650569940b249fa9e5c801c0587fc` on
-  `2026-07-23T23:52:41Z`. The exact first-party production High/Medium
-  inventory is now 33 Open rows (3 High, 30 Medium; one confirmed gap, five
-  design-review rows, and 27 pending dispositions). Two explicit Executor
-  schedule-context initializations, the Executor total-value assignment, and
-  ModuleRegistry's complete governance-context consumption resolve four prior
-  analyzer rows; three Cadence findings moved only by source identity and keep
-  their Open dispositions. The fifth analyzer disappearance is not a security
-  resolution: bounded assembly hides the Executor's proposal-selected
-  native-value call from `arbitrary-send-eth`, so mandatory High open blocker
-  `RISK-GOV-003` preserves that authority under issues #658 and #665. The full
-  3,143-row capture, normalized scope counts, provenance hashes, deterministic
-  reviewer mirror, release-mode blocker, and generated risk/release evidence
-  are checked together. This refresh is not an audit or readiness claim.
+  `55a2e817876eac754355a14ae3907053e3d3deed` on
+  `2026-07-24T04:58:03Z`. The exact first-party production High/Medium
+  inventory is now 30 Open rows (3 High, 27 Medium; one confirmed gap, five
+  design-review rows, and 24 pending dispositions). All 30 retained semantic
+  fingerprints are unchanged and no new row appeared. The three retired rows
+  were `StreamCadenceProbe` equality findings; their removal records source
+  retirement under ADR 0017, not finding acceptance. Bounded assembly still
+  hides the Executor's proposal-selected native-value call from
+  `arbitrary-send-eth`, so mandatory High open blocker `RISK-GOV-003` preserves
+  that authority under issues #658 and #685. The full 3,017-row capture,
+  normalized scope counts, provenance hashes, deterministic reviewer mirror,
+  release-mode blocker, and generated risk/release evidence are checked
+  together. This refresh is not an audit or readiness claim.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
   from the retired aggregate/facade Core-read seam to separately bound actual
   Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The
@@ -252,7 +252,8 @@ the release policy in `docs/release-policy.md`.
   `check_abi_compatibility.py --target-only`. Custom errors, constructor, and
   Medium/Replaceable surfaces remain separately cataloged; fallback and receive
   are fail-closed `required_absent` categories enforced against implementation
-  ABI output. The canonical genesis target now contains 60 derived entries:
+  ABI output. The pre-ADR-0017 v1 canonical genesis target at this stage
+  contained 60 derived entries:
   `StreamSystemManifest` is Permanent deployment entry 36,
   `StreamCoreFinalityAdapter` is immutable Permanent entry 37, the 22
   per-parameter GGP probes occupy entries 38-59, and the shared cadence probe is
@@ -313,16 +314,16 @@ the release policy in `docs/release-policy.md`.
   first-party production High/Medium row remains Open. Release-mode Make targets
   and the protected-branch workflow also rerun the live exact Slither comparison
   before evaluating the strict decision.
-- Added the canonical machine-readable Genesis Deployment Profile and a
-  structural checker plus catalog-level diagnostics. The profile derives its
-  exhaustive count from contiguous entries, pins every contract role and
-  GGP/GTP probe, keeps legacy aliases unapproved by default, distinguishes the
+- Added the pre-ADR-0017 v1 machine-readable Genesis Deployment Profile and a
+  structural checker plus catalog-level diagnostics. That superseded profile
+  derives its exhaustive count from contiguous entries, pins every contract
+  role and GGP/GTP probe, keeps legacy aliases unapproved by default, distinguishes the
   SplitWallet implementation from on-demand clones, and records the required
   fallback roles. The v1 `contracts.json` catalog can report missing, extra,
   duplicate, ambiguous, wrong-scope, wrong-interface, and wrong-marker mapping
   gaps, but it can never clear production mode because it cannot prove
-  deployment-instance identity, fallback-address distinctness, or probe
-  parameter bindings. Production remains fail-closed until a checked,
+  deployment-instance identity, fallback-address distinctness, or governed
+  parameter host bindings. Production remains fail-closed until a checked,
   instance-aware candidate reconciles deployment manifests, address books,
   source-verification inputs, the on-chain system-manifest payload, retained
   rehearsal/live evidence, and the release candidate lockfile. This is a
@@ -349,7 +350,16 @@ the release policy in `docs/release-policy.md`.
   Schema-v2 registration/update events and focused adversarial
   suites cover malformed/high-gas authority reads, stale context, ABA/revision
   drift, over-bound raises, immutable zero-authority stores, and retired
-  selector absence.
+  selector absence. Only the generic store hosts are implemented in this slice;
+  exact production host, value, floor, sizing/cadence evidence, and
+  fixed-stipend bindings for all 25 logical parameters remain blocked under
+  issue #684; generated `RISK-GOV-004` and strict production release mode fail
+  closed until they are complete. The ABI baseline deliberately first-publishes the post-ADR-0017
+  `IStreamGasParameterHost`, `IStreamGovernanceExecutor`,
+  `IStreamGovernedParameterAuthority`, and `IStreamTimeParameterHost` surfaces;
+  it intentionally does not preserve the superseded pre-genesis probe, lower,
+  emergency, rebind, or action-class-6 drafts as published compatibility
+  commitments.
 - Added the staged-governance machinery and canonical module registry:
   `StreamGovernanceExecutor` implements the ADR 0004 [GOV-ACTION-ID] and
   [GOV-BATCH] canonical action identity (golden-tested

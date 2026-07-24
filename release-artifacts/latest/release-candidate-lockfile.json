@@ -41,7 +41,7 @@
         "verified_deployed_addresses"
       ]
     },
-    "risk_count": 13
+    "risk_count": 14
   },
   "source_lock": {
     "mode": "pre_audit_local_baseline",
@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:4f151b5272afcf4086a7a39d51bbc2177b259f187630797919ebf06772b78256",
-      "size_bytes": 135412,
+      "sha256": "sha256:b0ef117079625b1efcb6334a31e603535cd04b019e991b7156160c4dd76710ec",
+      "size_bytes": 140879,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:739637bb68c0b364ef7abbf4aa625ba58f337e8a5f9e6295c521f299f9f0041e",
+      "sha256": "sha256:5f2b3d9c5e0db047e816a06988fa01764e803735b534383db8941ab65edd096b",
       "size_bytes": 150692,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,21 +73,21 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:718d97675e5193501c8d15de39b12204b36d10ea23e100e10b202aa31a64849f",
-      "size_bytes": 27808,
+      "sha256": "sha256:cdf9b9f5dd49ba8c10eae3564566e4800c0cc6181354b409fb71f407d3fb5690",
+      "size_bytes": 30294,
       "schema_version": "6529stream.risk-register.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:c0c48a47e07ba08821f64e3b1a60cf892865bf0f33ca8c4e2d7d6d9c01ba10fb",
-        "size_bytes": 122033,
+        "sha256": "sha256:915f8c6d71edb8d47728297f7668e1efd62975b7384c91d33f692851f7427141",
+        "size_bytes": 123006,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:c434719bb1482f2d4e053a82c770b61f003a40ea05bfabc8d8e3a512c14e7cad",
-        "size_bytes": 118712
+        "sha256": "sha256:a687e590719dc84a7c056192bb34221b3f9804bc45a6a3551c11e2f68b622806",
+        "size_bytes": 119687
       }
     },
     "blocker_reports": {

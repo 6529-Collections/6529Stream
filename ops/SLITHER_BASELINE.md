@@ -3,27 +3,27 @@
 This is the current first-party production High/Medium Slither inventory.
 Passing the drift gate means the inventory matches the analyzed source; it does
 not accept any finding, complete a security audit, or make the protocol ready for
-public beta or production. All 33 current rows remain `Open` under issue #658.
+public beta or production. All 30 current rows remain `Open` under issue #658.
 
 ## Capture Provenance
 
 | Field | Value |
 | --- | --- |
-| Analyzed commit | `c0be71915bc650569940b249fa9e5c801c0587fc` |
-| Captured at | `2026-07-23T23:52:41Z` |
+| Analyzed commit | `55a2e817876eac754355a14ae3907053e3d3deed` |
+| Captured at | `2026-07-24T04:58:03Z` |
 | Slither | `0.11.5` |
 | crytic-compile | `0.3.11` |
 | Solidity compiler | `0.8.19` |
 | solc-select | `1.2.0` |
 | Foundry | `1.7.1` |
-| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:5f3f9f39a5b1cb46a11fd9e4104e2b9b0dce6abf83a90a939c7bc39a6b93ea1c` |
+| Production Solidity tree (`smart-contracts/**/*.sol`) | `sha256:6e0f6b677c3958058b411a23ac0b55e93a93735e994c41e5c2da07c9ef513fbb` |
 | Slither config | `sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1` |
 | Foundry config | `sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313` |
 | Current gate tool requirements | `sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771` |
 | Capture command | `python -m slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>` |
 | Gate command | `python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none` |
-| Capture process | Native exit `-1`; JSON `success=true`; `319431599` bytes |
-| Raw JSON SHA-256 | `sha256:a58f7c87ed81fc8d10a06c91d3d1ffed2f6ced57d83a6301ceb7dbcd00e76d77` |
+| Capture process | Native exit `1`; JSON `success=true`; `300288371` bytes |
+| Raw JSON SHA-256 | `sha256:e9f127cfbaa7b63cfd73991b46720de08e91c1740d5ac1141fef5c8b02c28628` |
 
 The default Slither process exit is non-zero while findings exist. The checked
 gate uses `--fail-none`, then independently requires native success, JSON
@@ -34,11 +34,11 @@ gate uses `--fail-none`, then independently requires native success, JSON
 | Impact | Count |
 | --- | ---: |
 | High | 47 |
-| Medium | 840 |
-| Low | 1208 |
-| Informational | 1008 |
+| Medium | 728 |
+| Low | 1212 |
+| Informational | 990 |
 | Optimization | 40 |
-| Total | 3143 |
+| Total | 3017 |
 
 ## High/Medium Scope Separation
 
@@ -47,9 +47,9 @@ test, and script rows stay visible as separately classified diagnostic input.
 
 | Scope | High | Medium | Total |
 | --- | ---: | ---: | ---: |
-| first party production | 3 | 30 | 33 |
+| first party production | 3 | 27 | 30 |
 | vendored | 1 | 9 | 10 |
-| test | 43 | 794 | 837 |
+| test | 43 | 685 | 728 |
 | script | 0 | 7 | 7 |
 | other | 0 | 0 | 0 |
 
@@ -63,9 +63,6 @@ by `scripts/check_slither_baseline.py --baseline-only`.
 | `sha256:77bce4c4046ae81daf80a4d234e0494830405ae8b8546a9f6afa3d2def340dc6` | High | `arbitrary-send-eth` | Medium | smart-contracts/StreamPrimarySaleSettlement.sol:97-122 `settleNativePrimarySale(IStreamPrimarySaleSettlement.PrimarySale)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive primary-sale settlement forwards native value to a resolver-derived recipient. Resolver trust and payment invariants require review; the row is not accepted. | Trace recipient and amount provenance through the revenue resolver and document every trust boundary.<br>Add adversarial recipient, value, rollback, and double-settlement tests.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:72a1556afb03e730b5aa301499199b27356a55f7ba37edf561c634a5a67a3f8e` | High | `uninitialized-state` | High | smart-contracts/StreamArtworkFinalityRegistry.sol:76-76 `_scopedComponents` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither reports state variable _scopedComponents as uninitialized at smart-contracts/StreamArtworkFinalityRegistry.sol:76 _scopedComponents. Writer/read reachability has not yet been proven, so the row remains open. | Trace every read and possible write, including inheritance and assembly paths.<br>Either add the intended authorized writer with focused tests or prove the state is deliberately immutable/default-only and remove or document it.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
 | `sha256:1728b8f1d12b639b534009b5dd9fe2d30e641675ef26974d4fc426e94dbe7a0b` | High | `uninitialized-state` | High | smart-contracts/StreamCore.sol:185-185 `collectionBurnsBlockedAtBlockHeights` | `Open` | `confirmed_gap` | Protocol maintainers and independent security reviewers | [#654](https://github.com/6529-Collections/6529Stream/issues/654), [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Confirmed read-never-written StreamCore burn-block state. Issue #654 tracks the missing writer and compatibility-safe remediation; this row is not accepted or suppressed. | Implement or remove the state surface under issue #654 with an explicit compatibility decision.<br>Add writer authorization, transition, read-path, and negative tests, plus golden ABI and behavior evidence.<br>Obtain independent review of the remediation before changing this row to Fixed or accepted risk. | Gate C / Gate F |
-| `sha256:3bc316ecb61bd95cde3aea3a544c8f20d9006b3ef8588559a66b2d2913ac8874` | Medium | `incorrect-equality` | High | smart-contracts/StreamCadenceProbe.sol:166-189 `finalizeCadenceSample()` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:166 finalizeCadenceSample. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
-| `sha256:ad98e5ff03a85d92d01c4e9baf629b40598d5be8d97db8d4eea4afefae674c8d` | Medium | `incorrect-equality` | High | smart-contracts/StreamCadenceProbe.sol:166-189 `finalizeCadenceSample()` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:166 finalizeCadenceSample. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
-| `sha256:163888a4d551cb6414757058646b0ab62bb566b2c4e2a778662a46332fac40b7` | Medium | `incorrect-equality` | High | smart-contracts/StreamCadenceProbe.sol:209-270 `recordCadenceRun(bytes32,uint256)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:209 recordCadenceRun. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
 | `sha256:90ef539fab80ace49c0a8dca086cfa95aac8f85bf426d8cedec385d83eb963f7` | Medium | `incorrect-equality` | High | smart-contracts/StreamSplitWallet.sol:200-251 `release(address,address,address)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamSplitWallet.sol:200 release. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
 | `sha256:ead8503a828dfb6d9804aef0e48de4ac7f475a1cb08b0e1f2706fc2bf98ead38` | Medium | `incorrect-equality` | High | smart-contracts/StreamSplitWallet.sol:253-270 `_recordObservation(address,uint256)` | `Open` | `pending_disposition` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Slither flags strict equality in smart-contracts/StreamSplitWallet.sol:253 _recordObservation. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open. | Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.<br>Add focused boundary tests on both sides of the equality and for any sentinel transition.<br>Record independent reviewer disposition or a reviewed fix under issue #658. | Gate C / Gate F |
 | `sha256:9b9ad9788b8d83f271b0d0150b0c021d388aa4526b30856b229984ce54d3578c` | Medium | `reentrancy-no-eth` | Medium | smart-contracts/StreamCore.sol:521-543 `completePreparedMintFromManager(uint256,address,bytes32,uint256)` | `Open` | `design_review` | Protocol maintainers and independent security reviewers | [#658](https://github.com/6529-Collections/6529Stream/issues/658) | Design-sensitive external-call ordering in prepared-mint completion and its receiver/randomizer callbacks requires a complete effects/callback review. The row is not accepted or suppressed. | Document the call graph, all trusted and untrusted callbacks, and the state committed before each external call.<br>Add adversarial tests for duplicate completion, callback reentry, rollback, and state-ordering.<br>Record independent reviewer disposition under issue #658. | Gate C / Gate F |
@@ -100,8 +97,8 @@ by `scripts/check_slither_baseline.py --baseline-only`.
 | --- | ---: |
 | `confirmed_gap` | 1 |
 | `design_review` | 5 |
-| `pending_disposition` | 27 |
-| Total | 33 |
+| `pending_disposition` | 24 |
+| Total | 30 |
 
 ## Triage Boundary
 

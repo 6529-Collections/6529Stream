@@ -42,31 +42,35 @@ def minimal_risk_register(root: Path, source_path: Path, evidence_path: Path) ->
     for index, area in enumerate(
         sorted(generator.risk_register_checker.REQUIRED_AREAS), start=1
     ):
-        risk_id = f"RISK-T{index:02d}-{index:03d}"
+        risk_ids = [f"RISK-T{index:02d}-{index:03d}"]
         if area == "audit_boundary":
-            risk_id = "RISK-AUD-002"
+            risk_ids = ["RISK-AUD-002"]
         elif area == "governance":
-            risk_id = generator.risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
-        risks.append(
-            {
-                "id": risk_id,
-                "title": f"{area} fixture risk",
-                "area": area,
-                "severity": "medium",
-                "status": "open_blocker",
-                "owner": "TBD",
-                "target_gate": "Gate F",
-                "source": "release manifest unit fixture",
-                "mitigation": "Retain evidence and track remediation.",
-                "residual_risk": "The fixture risk remains until evidence is reviewed.",
-                "evidence": [evidence],
-                "checks": ["python scripts/check_risk_register.py"],
-                "tracking": [
-                    "https://github.com/6529-Collections/6529Stream/issues/388"
-                ],
-                "risk_acceptance": None,
-            }
-        )
+            risk_ids = [
+                generator.risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID,
+                generator.risk_register_checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID,
+            ]
+        for risk_id in risk_ids:
+            risks.append(
+                {
+                    "id": risk_id,
+                    "title": f"{area} fixture risk",
+                    "area": area,
+                    "severity": "medium",
+                    "status": "open_blocker",
+                    "owner": "TBD",
+                    "target_gate": "Gate F",
+                    "source": "release manifest unit fixture",
+                    "mitigation": "Retain evidence and track remediation.",
+                    "residual_risk": "The fixture risk remains until evidence is reviewed.",
+                    "evidence": [evidence],
+                    "checks": ["python scripts/check_risk_register.py"],
+                    "tracking": [
+                        "https://github.com/6529-Collections/6529Stream/issues/388"
+                    ],
+                    "risk_acceptance": None,
+                }
+            )
     return {
         "schema_version": generator.risk_register_checker.RISK_REGISTER_SCHEMA,
         "generated_by": "unit-test",
@@ -1543,13 +1547,20 @@ class ReleaseManifestTests(unittest.TestCase):
                 risk_register["schema_version"],
                 generator.risk_register_checker.RISK_REGISTER_SCHEMA,
             )
+            fixture_risk_count = len(
+                json.loads(
+                    (paths["latest"] / "risk-register.json").read_text(
+                        encoding="utf-8"
+                    )
+                )["risks"]
+            )
             self.assertEqual(
                 risk_register["risk_count"],
-                len(generator.risk_register_checker.REQUIRED_AREAS),
+                fixture_risk_count,
             )
             self.assertEqual(
                 risk_register["open_blocker_count"],
-                len(generator.risk_register_checker.REQUIRED_AREAS),
+                fixture_risk_count,
             )
             public_beta_blockers = manifest["release_artifacts"][
                 "public_beta_blocker_report"

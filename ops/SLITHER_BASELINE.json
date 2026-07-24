@@ -1,8 +1,8 @@
 {
   "schema_version": "6529stream.slither-first-party-hm.v1",
   "provenance": {
-    "analyzed_commit": "c0be71915bc650569940b249fa9e5c801c0587fc",
-    "captured_at_utc": "2026-07-23T23:52:41Z",
+    "analyzed_commit": "55a2e817876eac754355a14ae3907053e3d3deed",
+    "captured_at_utc": "2026-07-24T04:58:03Z",
     "slither_version": "0.11.5",
     "crytic_compile_version": "0.3.11",
     "solc_version": "0.8.19",
@@ -10,11 +10,11 @@
     "foundry_version": "1.7.1",
     "capture_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --json <temp-file>",
     "gate_command": "python -m slither . --config-file slither.config.json --foundry-compile-all --exclude-low --exclude-informational --exclude-optimization --json-types detectors --json <temp-file> --fail-none",
-    "capture_native_exit_code": -1,
+    "capture_native_exit_code": 1,
     "capture_json_success": true,
-    "raw_json_size_bytes": 319431599,
-    "raw_json_sha256": "sha256:a58f7c87ed81fc8d10a06c91d3d1ffed2f6ced57d83a6301ceb7dbcd00e76d77",
-    "solidity_tree_sha256": "sha256:5f3f9f39a5b1cb46a11fd9e4104e2b9b0dce6abf83a90a939c7bc39a6b93ea1c",
+    "raw_json_size_bytes": 300288371,
+    "raw_json_sha256": "sha256:e9f127cfbaa7b63cfd73991b46720de08e91c1740d5ac1141fef5c8b02c28628",
+    "solidity_tree_sha256": "sha256:6e0f6b677c3958058b411a23ac0b55e93a93735e994c41e5c2da07c9ef513fbb",
     "slither_config_sha256": "sha256:3bafba7616f241b59b845a2e84781f94877af67f442214e35d05af99d49d0cc1",
     "foundry_config_sha256": "sha256:b3556d63127477e5d7a4f4731f7fcd97a87d14d6b93abf285d54b29368437313",
     "requirements_tools_sha256": "sha256:6480608eb95a6368e9f258a44c355801930750b303d9373d36f06583a5622771"
@@ -37,17 +37,17 @@
   },
   "capture_counts": {
     "High": 47,
-    "Medium": 840,
-    "Low": 1208,
-    "Informational": 1008,
+    "Medium": 728,
+    "Low": 1212,
+    "Informational": 990,
     "Optimization": 40,
-    "total": 3143
+    "total": 3017
   },
   "captured_high_medium_scope_counts": {
     "first_party_production": {
       "High": 3,
-      "Medium": 30,
-      "total": 33
+      "Medium": 27,
+      "total": 30
     },
     "vendored": {
       "High": 1,
@@ -56,8 +56,8 @@
     },
     "test": {
       "High": 43,
-      "Medium": 794,
-      "total": 837
+      "Medium": 685,
+      "total": 728
     },
     "script": {
       "High": 0,
@@ -72,8 +72,8 @@
   },
   "counts": {
     "High": 3,
-    "Medium": 30,
-    "total": 33
+    "Medium": 27,
+    "total": 30
   },
   "findings": [
     {
@@ -219,144 +219,6 @@
         "Implement or remove the state surface under issue #654 with an explicit compatibility decision.",
         "Add writer authorization, transition, read-path, and negative tests, plus golden ABI and behavior evidence.",
         "Obtain independent review of the remediation before changing this row to Fixed or accepted risk."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "incorrect-equality",
-      "impact": "Medium",
-      "confidence": "High",
-      "source": {
-        "path": "smart-contracts/StreamCadenceProbe.sol",
-        "start_line": 166,
-        "end_line": 189,
-        "element_type": "function",
-        "name": "finalizeCadenceSample",
-        "signature": "finalizeCadenceSample()"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamCadenceProbe.sol",
-          "start_line": 166,
-          "end_line": 189,
-          "element_type": "function",
-          "name": "finalizeCadenceSample",
-          "signature": "finalizeCadenceSample()"
-        },
-        {
-          "path": "smart-contracts/StreamCadenceProbe.sol",
-          "start_line": 177,
-          "end_line": 177,
-          "element_type": "node",
-          "name": "secondsElapsed == 0",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:3bc316ecb61bd95cde3aea3a544c8f20d9006b3ef8588559a66b2d2913ac8874",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:166 finalizeCadenceSample. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.",
-        "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
-        "Record independent reviewer disposition or a reviewed fix under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "incorrect-equality",
-      "impact": "Medium",
-      "confidence": "High",
-      "source": {
-        "path": "smart-contracts/StreamCadenceProbe.sol",
-        "start_line": 166,
-        "end_line": 189,
-        "element_type": "function",
-        "name": "finalizeCadenceSample",
-        "signature": "finalizeCadenceSample()"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamCadenceProbe.sol",
-          "start_line": 166,
-          "end_line": 189,
-          "element_type": "function",
-          "name": "finalizeCadenceSample",
-          "signature": "finalizeCadenceSample()"
-        },
-        {
-          "path": "smart-contracts/StreamCadenceProbe.sol",
-          "start_line": 168,
-          "end_line": 168,
-          "element_type": "node",
-          "name": "pending.startBlock == 0",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:ad98e5ff03a85d92d01c4e9baf629b40598d5be8d97db8d4eea4afefae674c8d",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:166 finalizeCadenceSample. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.",
-        "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
-        "Record independent reviewer disposition or a reviewed fix under issue #658."
-      ],
-      "owner": "Protocol maintainers and independent security reviewers",
-      "gate": "Gate C / Gate F"
-    },
-    {
-      "detector": "incorrect-equality",
-      "impact": "Medium",
-      "confidence": "High",
-      "source": {
-        "path": "smart-contracts/StreamCadenceProbe.sol",
-        "start_line": 209,
-        "end_line": 270,
-        "element_type": "function",
-        "name": "recordCadenceRun",
-        "signature": "recordCadenceRun(bytes32,uint256)"
-      },
-      "semantic_elements": [
-        {
-          "path": "smart-contracts/StreamCadenceProbe.sol",
-          "start_line": 209,
-          "end_line": 270,
-          "element_type": "function",
-          "name": "recordCadenceRun",
-          "signature": "recordCadenceRun(bytes32,uint256)"
-        },
-        {
-          "path": "smart-contracts/StreamCadenceProbe.sol",
-          "start_line": 221,
-          "end_line": 221,
-          "element_type": "node",
-          "name": "sample.endBlock == 0",
-          "signature": ""
-        }
-      ],
-      "fingerprint": "sha256:163888a4d551cb6414757058646b0ab62bb566b2c4e2a778662a46332fac40b7",
-      "source_kind": "first_party_production",
-      "status": "Open",
-      "triage_class": "pending_disposition",
-      "rationale": "Slither flags strict equality in smart-contracts/StreamCadenceProbe.sol:209 recordCadenceRun. Sentinel and boundary semantics have not yet been independently reviewed, so the row remains open.",
-      "issues": [
-        "https://github.com/6529-Collections/6529Stream/issues/658"
-      ],
-      "required_proof": [
-        "Identify the exact equality expression and document whether skipped, repeated, or saturated values are reachable.",
-        "Add focused boundary tests on both sides of the equality and for any sentinel transition.",
-        "Record independent reviewer disposition or a reviewed fix under issue #658."
       ],
       "owner": "Protocol maintainers and independent security reviewers",
       "gate": "Gate C / Gate F"

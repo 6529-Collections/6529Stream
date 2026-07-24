@@ -32,6 +32,7 @@ SECRET_LIKE_RE = re.compile(
     r"api[_-]?key\s*[:=]|secret\s*[:=]|token\s*=|rpc[_-]?url\s*[:=])",
     re.IGNORECASE,
 )
+MARKDOWN_HEADING_RE = re.compile(r"^#{1,6}(?:[ \t]+|$)")
 
 
 class ReleaseNotesError(RuntimeError):
@@ -107,7 +108,12 @@ def unreleased_bullets(changelog_text: str) -> list[str]:
                 entries.append(" ".join(current))
             current = [stripped[2:].strip()]
             continue
-        if current and stripped and not stripped.startswith("#"):
+        if MARKDOWN_HEADING_RE.match(stripped):
+            if current:
+                entries.append(" ".join(current))
+                current = []
+            continue
+        if current and stripped:
             current.append(stripped)
     if current:
         entries.append(" ".join(current))
