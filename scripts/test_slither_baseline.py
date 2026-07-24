@@ -203,8 +203,10 @@ class SlitherBaselineTests(unittest.TestCase):
         release = (REPO_ROOT / ".github/workflows/release-mode.yml").read_text(
             encoding="utf-8"
         )
+        documentation = (REPO_ROOT / "docs/slither.md").read_text(encoding="utf-8")
         self.assertIn("slither-baseline:", ci)
         self.assertIn("timeout-minutes: 45", ci)
+        self.assertIn("45-minute timeout", documentation)
         self.assertIn("version: v1.7.1", ci)
         self.assertIn("solc-select install 0.8.19", ci)
         self.assertIn("solc-select use 0.8.19", ci)

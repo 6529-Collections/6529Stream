@@ -333,30 +333,30 @@ class ReleaseModeTests(unittest.TestCase):
         self.assertIn("RISK-GOV-003 remains open_blocker", blockers[0])
 
     def test_governance_native_value_blocker_prevents_public_beta(self) -> None:
-        """Otherwise-ready evidence cannot bypass the manual authority risk."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            path = root / checker.DEFAULT_EVIDENCE
-            write_json(
-                path,
-                evidence_document(
-                    root,
-                    public_beta_status="ready",
-                    production_status="blocked",
-                    production_requirement_status="missing",
-                ),
+        """The real committed manual authority risk blocks public beta."""
+        repo_root = Path(__file__).resolve().parents[1]
+        self.risk_register_patcher.stop()
+        try:
+            self.assertIs(
+                checker.governance_native_value_blockers,
+                REAL_GOVERNANCE_NATIVE_VALUE_BLOCKERS,
             )
-
             with mock.patch.object(
                 checker,
-                "governance_native_value_blockers",
-                return_value=["RISK-GOV-003 remains open_blocker"],
+                "release_mode_blockers",
+                return_value=[],
             ):
                 with self.assertRaisesRegex(
                     checker.ReleaseModeError,
                     "RISK-GOV-003 remains open_blocker",
                 ):
-                    checker.validate_release_mode(path, root, "public-beta")
+                    checker.validate_release_mode(
+                        repo_root / checker.DEFAULT_EVIDENCE,
+                        repo_root,
+                        "public-beta",
+                    )
+        finally:
+            self.risk_register_patcher.start()
 
     def test_missing_slither_baseline_fails_closed(self) -> None:
         """The static-analysis release gate rejects absent canonical evidence."""

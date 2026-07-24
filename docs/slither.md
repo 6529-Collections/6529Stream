@@ -91,7 +91,7 @@ The complete target first runs the fast metadata gate, then invokes
 `scripts/check_slither_baseline.py --run-slither` with the pinned toolchain and
 compares the normalized first-party High and Medium rows with the tracked
 baseline. New rows and stale rows fail the check. CI runs this target in a
-dedicated Ubuntu job with a 15-minute timeout so live analyzer cost does not
+dedicated Ubuntu job with a 45-minute timeout so live analyzer cost does not
 make the default wrappers slow.
 
 The canonical machine-readable baseline is

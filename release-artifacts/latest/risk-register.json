@@ -537,7 +537,7 @@
         },
         {
           "path": "docs/slither.md",
-          "sha256": "sha256:e25bbacf207262ccfe1f151f37e083f9b607eefe5914e1844b4c2817bb3a7237"
+          "sha256": "sha256:caa3edc32dc4f84b7f3a53c1278eb4fba9babe009b9c96c2823e346b53841fe2"
         },
         {
           "path": "scripts/check_slither_baseline.py",

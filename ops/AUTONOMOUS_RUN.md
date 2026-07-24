@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 01:49 UTC` |
+| Last updated | `2026-07-24 02:06 UTC` |
 
 ## Current Run Notes
 
@@ -86,9 +86,13 @@ evidence, and audit/readiness gates.
   baseline unit/schema checks but GitHub canceled the live pinned-toolchain run
   at the job's 15-minute limit on `2026-07-24 01:47 UTC`; local canonical
   capture timing is about 27 minutes, so the Slither-only CI timeout is raised
-  to 45 minutes and latest-head CI is pending. CodeRabbit remained
-  rate-limited after the required review requests and produced no substantive
-  review or unresolved thread.
+  to 45 minutes. CodeRabbit then completed a substantive current-head review:
+  pinned Foundry v1.7.1 rejects the suggested lowercase governed-profile
+  `bytecode_hash` and requires the existing `None` enum spelling, while the
+  follow-up aligns the Slither timeout documentation and makes the release-mode
+  integration test consume the real committed `RISK-GOV-003` gate while
+  suppressing only unrelated blockers. Latest-head CI and follow-up review are
+  pending.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality
