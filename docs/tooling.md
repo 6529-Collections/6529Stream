@@ -714,7 +714,16 @@ The mint-manager domain constants step validates the checked
 [`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
 `StreamMintManager` domain table against `StreamMintManager.sol` and recomputes
 each listed `keccak256` preimage with `cast`, failing on source, spec, or hash
-drift.
+drift. It also checks the Proposed ADR 0018 target operation-domain mirrors;
+the full normalized request/result/root/token `abi.encode` term order; exact
+`MintBatch`, `CounterConsumption`, and `GateResult` field layouts; selector,
+return, and replay-read ABI goldens; nonpayable manager ownership with no
+generic callback or co-live legacy `mint` entry; the sale-authorization
+typehash and content-hash fields; one-root/`N`-token-operation-ID cardinality,
+caller binding, zero/reused-root and rollback semantics; exact event field
+layouts/topics; and Core/entropy/settlement-blocker boundary statements. Those
+target checks are spec-first: they do not treat the current CON-014 Solidity or
+generated as-built event catalog as already aligned.
 
 The audit-package step validates [`audit-package.md`](audit-package.md), the
 single auditor-facing index over maturity, scope, ADRs, tests, static analysis,
@@ -1322,6 +1331,19 @@ release manifest intentionally marks checksum-bundle digests as
 `release-manifest.json`; embedding the final bundle digest in that covered file
 would create a hash cycle. Detached signatures and signed git tags still
 require a release ceremony and are not produced by the local smoke gate.
+
+Canonical checksum generation uses the exact reviewed covered-path inventory
+and independently pins the 20-module release-tool runtime closure plus eight
+focused trust-policy tests as ordinary, in-repository files. Its deliberately
+narrow Python dependency grammar supports ordinary `Import`/`ImportFrom` and
+direct string-literal `importlib.import_module`, `__import__`, or
+`builtins.__import__` calls only. Importer objects may not escape those direct
+call sites. `exec`, `eval`, `compile`, `runpy`, `importlib.util` or
+`importlib.machinery` loader APIs, `exec_module`, and `load_module` fail closed;
+new alternate execution mechanisms require an explicit policy review. Broad
+directory entries do not stand in for reviewed tool files. Test-only subset
+bundles require the explicit `custom-subset` policy and a noncanonical output
+directory, and cannot overwrite or masquerade as `release-artifacts/latest`.
 
 The changelog gate checks release-impacting paths against `CHANGELOG.md`. If a
 branch changes contract surfaces, release artifacts, deployment artifacts, or

@@ -3,7 +3,10 @@
 Specification status: Draft; the gate set tracks the Draft specs it
 enforces. This document follows [`docs/spec-policy.md`](spec-policy.md).
 Governed gas/time parameter and action-class gates incorporate
-[ADR 0017](adr/0017-raise-only-parameter-governance.md).
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). Proposed
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) supplies draft
+target mint-operation identity and replay gates. They remain unaccepted
+deployment blockers, not acceptance or implementation evidence.
 
 This document turns the Stream protocol specification into deployment gates.
 It is not a roadmap. A production deployment is conformant only when every
@@ -241,7 +244,7 @@ matrix.
 | Token identity | Core mint boundary, `tokenCollectionIdentity`, and lifecycle/high-water reads | Core-owned global/collection-serial allocation, mapping-existence read, prepared-incomplete identity, burn-retained mapping, and no ID reuse; replay processes schema-versioned `TokenCollectionRegistered` at identity write and `TokenCollectionRegistrationReverted` on incident abort, erasing the replayed token identity while retaining the consumed global and collection-serial high-water gaps; the reconstructed result is compared with `tokenLifecycle`, `tokenCollectionIdentity`, and a state-only sequential walker that crosses the aborted gap ([MPA-CORE-ABI]; ADR 0010 decision D10.1; ADR 0011 decision R12; [PV1-RECON].9) | token identity schema and registered/reverted replay vectors | mandatory |
 | Token-level metadata | collection metadata satellite | token data/field overrides, token locks, burned archival reads | token metadata schema | mandatory |
 | Burn | Core burn boundary | owner/approved, mapping retained, finalized burn blocked; production-exact `blockCollectionBurns(uint256)`/boolean/height selectors and `CollectionBurnsBlocked(uint16,uint256,bytes32)` topic; immutable governance-executor caller, executing nonzero action ID, target-side `TERMINAL_FREEZE == 2`, exact collection scope and old/new state hashes, registered freeze selector and 72-hour veto floor; unknown/non-`CLOSED`/already-blocked rejection; one height slot written exactly once, boolean derived from height, action-ID event join, collection isolation, and every native ownership-to-zero path blocked afterward; atomic burn-block-before-finality batch ordering ([CMC-BURN]; ADR 0010 decision D10.5) | burn policy manifest | mandatory |
-| Mint accounting | mint manager, ledger, `StreamMintTicketGate` | duplicate-key aggregation, static caps, signed ticket binding; reentrancy guard on `mint()` and prepared entrypoints; `registerPhasePolicy` binds `msg.sender` to its manager argument; gate calls forward `max(gateGasLimit, MINT_GATE_GAS_LIMIT)` with returndata/nullifier bounds ([MPA-GATES]); `AuthorizerKind` enforcement with zero-`ecrecover` and non-canonical-signature negatives ([MPA-AUTHZ]); zero-increment rejection; manager-scoped nullifiers; Merkle allowlist cap mode ([MPA-MERKLE]); `GLOBAL` counter scope with reserved-constant `(0, 0)` derivation goldens ([MPA-SCOPES]); counter-continuity import ([MPA-CONTINUITY]); policy grace windows ([MPA-GRACE]); ticket revocation | policy hash schema | mandatory |
+| Mint accounting | mint manager, ledger, `StreamMintTicketGate` | duplicate-key aggregation, static caps, signed ticket binding; nonpayable asset-agnostic `executeSingleStepMint(MintBatch,bytes)` / `executePreparedMint(MintBatch,bytes)` with no generic settlement callback surface and pre-genesis removal of old `mint(MintBatch,bytes)`; exactly one root plus `N` token operation IDs derived/reserved before ledger consumption; full normalized request/result/root/token preimage mutation coverage, including token-data/mint-commitment hashes and canonical gate/resolver outcomes; sale authorization signer binding of `tokenDataArrayHash` and `mintCommitmentsHash`; adapter preview uses its own `address(this)` as manager executor, with direct/relayed equivalence and payer/relayer/`tx.origin` substitution negatives; zero/reused root rejection; manager-scoped root replay and caller-independent read; whole-batch root/counter/authorization/nullifier/manager-nonce rollback; exact root/token event joins; no Core lifetime operation-ID replay ([MPA-OPERATION]; ADR 0018 proposal); exact typed primary-settlement callback and execution-ID-bound repeat-sale replay remain ADR 0019 / #694 blockers; `registerPhasePolicy` binds `msg.sender` to its manager argument; gate calls forward `max(gateGasLimit, MINT_GATE_GAS_LIMIT)` with returndata/nullifier bounds ([MPA-GATES]); `AuthorizerKind` enforcement with zero-`ecrecover` and non-canonical-signature negatives ([MPA-AUTHZ]); zero-increment rejection; manager-scoped nullifiers; Merkle allowlist cap mode ([MPA-MERKLE]); `GLOBAL` counter scope with reserved-constant `(0, 0)` derivation goldens ([MPA-SCOPES]); counter-continuity import ([MPA-CONTINUITY]); policy grace windows ([MPA-GRACE]); ticket revocation | policy hash and mint-operation identity schemas; ADR 0019 / #694 settlement blocker evidence | mandatory |
 | Artist authority | `StreamArtistRegistry` plus consuming satellites | the fourteen [AA-GATES] suites: two-sided binding, sanction-required finality, consent modes (including signature-free pause in every attribution state, ADR 0011 decision R6), economics consent and royalty freeze, signature verification (ERC-1271, GGP sizing/raise-only behavior, per-identity unordered nonces), key lifecycle (rotation contest windows, guardians, identity recovery, permissionless estate activation, dormancy), disputes and platform-works contests, attribution display, record-family write authority, identity archival, content authority, recovery approval, ceremony tooling, and history import (the [AA-IMPORT] commit-verify-cutover round-trip; ADR 0012 decision T4; ADR 0017) — the ceremony-tooling suite (gate 13) is verified through the Artist ceremony rehearsal gate row below | artist registry manifest, consent/sanction schema hashes | mandatory |
 | Artist ceremony rehearsal | artist signing tool and rehearsal deployment over `StreamArtistRegistry` plus consuming satellites | the full [AA-TOOLING] suite (ADR 0011 decisions R7.7 and R12): named signing tool renders a human-readable summary of every typed payload family before signature; rehearsed end-to-end onboarding through mint and finality sanction with total ceremony count and per-ceremony signing latency recorded and verified at or below the normative ceremony budget pinned at [AA-TOOLING] rule 6 — `ARTIST_CEREMONY_MAX_SIGNATURES` and `ARTIST_CEREMONY_MAX_ACTIVE_SIGNING_MINUTES` for the canonical single-artist collection's EOA leg, release-evidence ceilings the gate fails on exceeding and only an ADR may raise (ADR 0012 decision T9); the rehearsal includes at least one artist identity held by a Safe-class ERC-1271 contract wallet completing the full ceremony chain from acceptance through sanction, with its per-ceremony latency recorded separately and verified at or below the Safe-class ceremony ceiling pinned at [AA-TOOLING] rule 6 — the signature budget is shared, and the contract-wallet leg carries its own active-coordination-time ceiling, raisable only by ADR like the EOA ceilings (ADR 0014 decision V4) — and the signing tool's supported wallet classes stated in the artifact (ADR 0012 decision T5); consent-churn drift detection and stale-ceremony invalidation; independent operator-free hash recomputation tool; estate/dormancy paths exercised to staging; plus the artist's recorded acknowledgment of the disclosure-only royalty term captured during rehearsal and presented beside the affirmative-case summary — royalty-freeze right, economics-consent standing, and marketplace royalty-resolution coverage (protocol v1 [PV1-EXCL] item 1) | checksum-covered artist ceremony rehearsal artifact per [AA-TOOLING]: tool name, version, and build hash; payload summaries; ceremony-count and latency measurements with budget compliance on both legs; end-to-end time-to-first-drop record for the canonical single-artist collection — signing sessions, cumulative active signing minutes, and calendar span from binding acceptance to first public mint — with the same side-by-side competitor-comparison treatment as the collector budget artifacts, so onboarding friction is published in numbers rather than narrative; contract-wallet ceremony record and supported wallet classes; acknowledgment record with the affirmative-case summary | mandatory |
 | Entropy lifecycle | entropy coordinator, provider | identity written and entropy registered before `_safeMint` callback; non-reentrant request/fulfill; single active request; no instant provider calls from mint path; `ENTROPY_REGISTRATION_GAS_LIMIT` GGP semantics ([EC-REGGAS]); `maxFeeWei` binding with pull-credit refunds ([EC-FEEBIND]); callback persistence and retry ([EP-CALLBACK]); `INSTANT` restricted to declared `LOW_SECURITY` collections; lifecycle mapping matches [EC-LIFECYCLE]; the scope-request suite ([EC-SCOPE]: registration, async-only lifecycle parity, incident recovery, commitment finality) and the reveal suite ([EC-REVEAL]: mandatory `ASYNC` reveal policy at freeze, `AT_MINT` attempt-and-catch never unwinding a mint, SLO-lapse permissionless fallback, escrow-first fee draw) per ADR 0011 decision R8; incident evidence gate ([EC-INCIDENT] rule 3 three-part check) | entropy policy manifest; measured `fulfillEntropy` gas envelope with callback margin and `VRF_CALLBACK_GAS_FLOOR` record; reveal operations manifest (owner, float, exhaustion alarms, keeper obligation, latency target — the reveal SLO and every subsystem obligation window sized against the holder's recorded worst-case latency per the [LTA-GOV] rule 6 discipline, ADR 0012 decision T5 — plus the live escrow-versus-quoted-fee margin alarm with its named top-up obligation and the post-freeze `updateRevealFeePerToken` remedy path, [EC-REVEAL] rules 8–9, ADR 0012 decision T7; rehearsal evidence) | mandatory |
@@ -732,9 +735,12 @@ Additional paid-mint/finality/escrow deployment tests:
    factory.
 7. ERC-1271 alternate-recipient release authorization is gas-capped and tested
    against a malicious contract wallet.
-8. `PREPARED_MINT` exposes and verifies one canonical `operationId` across sale
-   adapter, manager, ledger, Core prepare/complete, resolver snapshot, entropy
-   registration, and escrow/deposit path.
+8. Every manager batch derives one nonzero `operationRoot` and exactly `N`
+   nonzero pairwise-distinct token `operationId` values. The ledger durably
+   consumes only the root in manager scope; Core prepare/complete verifies only
+   the current token ID; resolver and token-scoped settlement verify both;
+   entropy owns only authoritative Core token identity and `mintCommitment`
+   (ADR 0018).
 9. Token-level primary and royalty snapshots taken during `PREPARED_MINT` are
    independent of entropy seed/status and renderer output.
 10. Open-ended collections can finalize a token, release, season, or view scope
@@ -972,10 +978,13 @@ accidental drift would break indexers, marketplaces, or satellite contracts:
     [LTA-GUARDIAN] capability bits, and
     `GovernanceActionStatus` match the manifest-pinned Numeric ID
     Catalog.
-22. Any satellite function reachable during `PREPARED_MINT`, including resolver
-    snapshot hooks, escrow/deposit paths, and entropy registration helpers,
-    reads or re-verifies Core `preparedMint(tokenId).operationId` and reverts
-    on mismatch before any state write or external call.
+22. Any token-scoped resolver or settlement function reachable during
+    `PREPARED_MINT` reads or re-verifies Core
+    `preparedMint(tokenId).operationId`, checks the manager/root pair through
+    the ledger's caller-independent replay read, and reverts on mismatch before
+    any state write or external call. Entropy registration instead verifies
+    authoritative Core token identity and `mintCommitment`; it receives no
+    synthetic mint operation identity (ADR 0018).
 23. Catalog, module-registry, or pointer updates that change
     `streamSystemManifest()` fields must end with exactly one same-class final
     publication to the irreversibly bound Permanent satellite in the same
@@ -1433,8 +1442,30 @@ indexed field families:
    events where the payee profile is material.
 4. `revenueClass` on primary and royalty assignment, escrow, and settlement
    events.
-5. `operationId` or `actionId` on governance staging, cancellation, execution,
-   and recovery events.
+5. `operationRoot` on manager-batch and ledger-consumption events;
+   `operationId` on manager-token/prepared events; or `actionId` on governance
+   staging, cancellation, execution, and recovery events.
+
+ADR 0018 target operation-event topic mirror [LCM-OPERATION-EVENTS]. The owning
+mint, revenue, and entropy specs define field names and indexed masks; this
+checked table pins canonical type signatures and `topic0` values without
+publishing them into the generated current-as-built event catalog before the
+atomic source cutover:
+
+| Canonical event signature | `topic0` | Indexed fields | Owner |
+| --- | --- | --- | --- |
+| `MintLedgerOperationRootConsumed(uint16,bytes32,address,bytes32,bytes32,bytes32)` | `0x32821c46b022bd0995b50921248ed67b1d69a27b6c7afcb0202dcb1fcbbebb24` | `operationRoot,manager,boundPolicyHash` | mint ledger |
+| `MintLedgerCounterConsumed(uint16,bytes32,uint256,bytes32,address,bytes32,bytes32,uint64,uint64,uint64,bytes32,bytes32)` | `0x82be7e1cfba45b84607ebae03dd739d908e1f7f47c467e76baabb4e64e53e888` | `valueKey,collectionId,phaseId` | mint ledger |
+| `MintLedgerAuthorizationConsumed(uint16,bytes32,bytes32,address,bytes32)` | `0x4ae914c98ae10051092be8a5fecc1584bd19371f9b629bc8a75a747a7eb77a80` | `authorizationId,operationRoot,manager` | mint ledger |
+| `MintLedgerNullifierConsumed(uint16,bytes32,bytes32,address,bytes32)` | `0x23bb00045254ab08fcfb223713983797db786dc4692827878cb7cef34f395b06` | `nullifier,operationRoot,manager` | mint ledger |
+| `MintBatchExecuted(uint16,bytes32,uint256,bytes32,address,address,address,uint256,uint256,bytes32,bytes32,bytes32,bytes32)` | `0x4ea33b3409cbd25468bbab85511b2b4d12d4663b1225af0c8d845063a7f52415` | `operationRoot,collectionId,phaseId` | mint manager |
+| `MintAuthorizationConsumed(uint16,uint256,bytes32,bytes32,bytes32,bytes32)` | `0x83fe1cd55fdb106a490131e3f5f7923949cb4abe4cb211e2d8d0e29232969c9b` | `collectionId,phaseId,authorizationId` | mint manager |
+| `MintTokenExecuted(uint16,bytes32,uint256,bytes32,uint256,bytes32,uint256,address,address,bytes32,bytes32)` | `0x9a7828375f9c6ee3bf4a1308318e0f533ec7219823ec6b8e475529a60ebcdb8f` | `operationId,tokenId,operationRoot` | mint manager |
+| `PreparedMintStarted(uint16,bytes32,uint256,uint256,bytes32,uint256,address,bytes32,bytes32)` | `0x1e2d8a1f460486b578f1af40819ce76be1d843363ec34b385fe331604f6817ac` | `operationId,tokenId,collectionId` | mint manager |
+| `PreparedMintCompleted(uint16,bytes32,uint256,uint256,bytes32,address)` | `0x5e1526e787b4d79b30b4a423d4b531694eb879c8814cf7aadc233fe251aa80dc` | `operationId,tokenId,collectionId` | mint manager |
+| `TokenRoyaltySnapshotted(uint16,bytes32,uint256,bytes32,uint256,bytes32,bytes32)` | `0x64ac79953c00686f9a6cf01fc972ff2b4395007acd76701973ae83ec0bfac491` | `operationId,tokenId,operationRoot` | revenue resolver |
+| `PrimaryRevenueSettlementContext(bytes32,bytes32,bytes32,uint16,address,bytes32,uint8,uint256,uint256,bytes32,bytes32,uint256,address,address,bytes32)` | `0x4df3ddabf618d53eea4adf5fb2991418d0ce412b0c9ffdf9c9f038e65de410fb` | `settlementKey,revenueClass,profileId` | primary settlement |
+| `EntropyRegistered(uint16,uint256,uint256,address,bytes32)` | `0x252241903fa837f87f928a854aa3e6a9b3233bc0f24a1e11fb3c99fbfa1fb3ee` | `collectionId,tokenId,mintedTo` | entropy coordinator |
 
 Changing an indexed field set after deployment is an event replacement, not a
 semantic edit. The new event must supersede the old one in the event catalog.

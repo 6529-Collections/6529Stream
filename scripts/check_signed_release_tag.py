@@ -155,6 +155,7 @@ def verify_checksum_bundle(
     repo_root: Path,
     covered_paths: Sequence[Path],
     output_dir: Path,
+    coverage_policy: str = checksum_generator.CANONICAL_COVERAGE_POLICY,
 ) -> set[str]:
     checksum_path = repo_root / output_dir / checksum_generator.CHECKSUM_FILE_NAME
     manifest_path = repo_root / output_dir / checksum_generator.CHECKSUM_MANIFEST_NAME
@@ -172,6 +173,7 @@ def verify_checksum_bundle(
             repo_root,
             list(covered_paths),
             repo_root / output_dir,
+            coverage_policy=coverage_policy,
         )
         mismatches = checksum_generator.verify_committed_checksum_file(repo_root, current_text)
     except checksum_generator.ChecksumError as exc:
@@ -294,6 +296,7 @@ def check_signed_release_tag(
     evidence: Sequence[Path] | None = None,
     covered_paths: Sequence[Path] = DEFAULT_COVERED_PATHS,
     output_dir: Path = DEFAULT_OUTPUT_DIR,
+    coverage_policy: str = checksum_generator.CANONICAL_COVERAGE_POLICY,
     runner: GitRunner | None = None,
 ) -> Path | None:
     if mode == "non-release":
@@ -315,7 +318,12 @@ def check_signed_release_tag(
             f"release tag {tag} points at {peeled_tag_commit}, not HEAD {head}"
         )
     tag_verification_output = verify_tag_signature(repo_root, runner, tag)
-    checksum_covered_paths = verify_checksum_bundle(repo_root, covered_paths, output_dir)
+    checksum_covered_paths = verify_checksum_bundle(
+        repo_root,
+        covered_paths,
+        output_dir,
+        coverage_policy,
+    )
     return matching_release_evidence(
         repo_root,
         tag,
@@ -345,6 +353,11 @@ def parse_args(argv: Sequence[str]) -> argparse.Namespace:
         help="Checksum covered path. Defaults to the release checksum generator defaults.",
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument(
+        "--coverage-policy",
+        choices=checksum_generator.COVERAGE_POLICIES,
+        default=checksum_generator.CANONICAL_COVERAGE_POLICY,
+    )
     return parser.parse_args(argv)
 
 
@@ -360,6 +373,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             evidence=args.evidence,
             covered_paths=covered_paths,
             output_dir=args.output_dir,
+            coverage_policy=args.coverage_policy,
         )
     except SignedReleaseTagError as exc:
         print(f"error: {exc}", file=sys.stderr)

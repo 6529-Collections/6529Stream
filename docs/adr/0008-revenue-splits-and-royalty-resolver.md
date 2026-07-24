@@ -1140,7 +1140,8 @@ Target fixed-price flow:
 Launch paid primary mints must use exactly one of the two atomic paths —
 `PRE_REVENUE_SINGLE_STEP` and `PREPARED_MINT` — whose normative step
 sequences, snapshot independence rules, revert atomicity, and
-`STREAM_PREPARED_MINT_OPERATION_V1` operation-ID binding are defined once
+`operationRoot` plus per-token `operationId` binding, as proposed by ADR 0018,
+are defined once
 in `docs/revenue-splits-and-royalties.md` (Normative Paid Mint
 Orchestration), realizing the canonical protocol v1 mint ordering
 invariants of `docs/launch-v1-target-architecture.md`. The two-path rule

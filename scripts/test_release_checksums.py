@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -14,10 +15,44 @@ from unittest import mock
 
 
 SCRIPT_PATH = Path(__file__).with_name("generate_release_checksums.py")
+CUSTOM_OUTPUT_DIR = Path("release-artifacts/custom-checksums")
 SPEC = importlib.util.spec_from_file_location("generate_release_checksums", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 generator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(generator)
+
+EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE = (
+    Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/check_changelog.py"),
+    Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governed_parameter_identifiers.py"),
+    Path("scripts/check_governed_parameter_inventory.py"),
+    Path("scripts/check_non_local_release_evidence.py"),
+    Path("scripts/check_public_beta_evidence.py"),
+    Path("scripts/check_release_evidence_issue_links.py"),
+    Path("scripts/check_release_signatures.py"),
+    Path("scripts/check_risk_register.py"),
+    Path("scripts/check_signer_custody_readiness.py"),
+    Path("scripts/check_slither_baseline.py"),
+    Path("scripts/generate_bytecode_release_proof.py"),
+    Path("scripts/generate_release_candidate_lockfile.py"),
+    Path("scripts/generate_release_checksums.py"),
+    Path("scripts/generate_release_manifest.py"),
+    Path("scripts/generate_release_notes.py"),
+    Path("scripts/generate_risk_register.py"),
+    Path("scripts/release_evidence_paths.py"),
+    Path("scripts/verify_release_artifacts.py"),
+)
+EXPECTED_RELEASE_TOOL_FOCUSED_TESTS = (
+    Path("scripts/test_changelog_check.py"),
+    Path("scripts/test_release_notes.py"),
+    Path("scripts/test_admin_ceremony_evidence.py"),
+    Path("scripts/test_drop_authorization_signing_evidence.py"),
+    Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_release_signatures.py"),
+    Path("scripts/test_signer_custody_readiness.py"),
+    Path("scripts/test_bytecode_release_proof.py"),
+)
 
 
 def write_text(path: Path, value: str) -> None:
@@ -26,6 +61,866 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
+    def test_release_tool_runtime_closure_matches_reviewed_literal(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        self.assertEqual(
+            generator.release_tool_runtime_closure(repo_root),
+            EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE,
+        )
+        self.assertEqual(
+            generator.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE,
+            EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE,
+        )
+        self.assertEqual(
+            generator.RELEASE_TOOL_FOCUSED_TESTS,
+            EXPECTED_RELEASE_TOOL_FOCUSED_TESTS,
+        )
+
+    def test_release_tool_trust_policy_has_exact_configured_cardinality(
+        self,
+    ) -> None:
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 232)
+        self.assertEqual(
+            len(set(generator.DEFAULT_COVERED_PATHS)),
+            len(generator.DEFAULT_COVERED_PATHS),
+        )
+
+    def test_canonical_build_rejects_each_missing_release_tool_root(
+        self,
+    ) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        for path in generator.RELEASE_TOOL_ROOTS:
+            with self.subTest(path=path):
+                covered = [
+                    candidate
+                    for candidate in generator.DEFAULT_COVERED_PATHS
+                    if candidate != path
+                ]
+                with self.assertRaisesRegex(
+                    generator.ChecksumError,
+                    re.escape(path.as_posix()),
+                ):
+                    generator.build_outputs(
+                        repo_root,
+                        covered,
+                        repo_root / generator.DEFAULT_OUTPUT_DIR,
+                    )
+
+    def test_canonical_build_and_check_reject_same_cardinality_substitution(
+        self,
+    ) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        removed = generator.RELEASE_TOOL_ROOTS[0]
+        covered = [
+            candidate
+            for candidate in generator.DEFAULT_COVERED_PATHS
+            if candidate != removed
+        ]
+        covered.append(Path(".editorconfig"))
+        with self.assertRaisesRegex(
+            generator.ChecksumError,
+            re.escape(removed.as_posix()),
+        ):
+            generator.build_outputs(
+                repo_root,
+                covered,
+                repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+
+        stderr = StringIO()
+        with redirect_stdout(StringIO()), redirect_stderr(stderr):
+            result = generator.check_outputs(
+                repo_root,
+                covered,
+                repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+        self.assertEqual(result, 1)
+        self.assertIn(removed.as_posix(), stderr.getvalue())
+        self.assertIn(".editorconfig", stderr.getvalue())
+
+    def test_canonical_build_rejects_focused_test_substitution(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        removed = generator.RELEASE_TOOL_FOCUSED_TESTS[0]
+        covered = [
+            candidate
+            for candidate in generator.DEFAULT_COVERED_PATHS
+            if candidate != removed
+        ]
+        covered.append(Path(".editorconfig"))
+        with self.assertRaisesRegex(
+            generator.ChecksumError,
+            re.escape(removed.as_posix()),
+        ):
+            generator.build_outputs(
+                repo_root,
+                covered,
+                repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+
+    def test_canonical_build_rejects_transitive_runtime_substitution(
+        self,
+    ) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        removed = Path("scripts/check_changelog.py")
+        covered = [
+            candidate
+            for candidate in generator.DEFAULT_COVERED_PATHS
+            if candidate != removed
+        ]
+        covered.append(Path(".editorconfig"))
+        with self.assertRaisesRegex(
+            generator.ChecksumError,
+            re.escape(removed.as_posix()),
+        ):
+            generator.build_outputs(
+                repo_root,
+                covered,
+                repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+
+    def test_canonical_preflight_rejects_missing_or_symlinked_reviewed_runtime(
+        self,
+    ) -> None:
+        reviewed_paths = list(
+            generator.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+        ) + list(generator.RELEASE_TOOL_FOCUSED_TESTS)
+        target = Path("scripts/check_changelog.py")
+        for mutation in ("missing", "symlink"):
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    for path in reviewed_paths:
+                        write_text(root / path, "VALUE = 1\n")
+                    target_path = root / target
+                    target_path.unlink()
+                    if mutation == "symlink":
+                        outside = root.parent / f"{root.name}-check-changelog.py"
+                        write_text(outside, "VALUE = 1\n")
+                        self.addCleanup(outside.unlink)
+                        target_path.symlink_to(outside)
+                    with mock.patch.object(
+                        generator,
+                        "DEFAULT_COVERED_PATHS",
+                        reviewed_paths,
+                    ):
+                        with self.assertRaisesRegex(
+                            generator.ChecksumError,
+                            re.escape(target.as_posix()),
+                        ):
+                            generator.build_outputs(
+                                root,
+                                reviewed_paths,
+                                root / generator.DEFAULT_OUTPUT_DIR,
+                            )
+
+    def test_canonical_build_rejects_broad_and_duplicate_coverage(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        removed = generator.RELEASE_TOOL_ROOTS[0]
+        broad = [
+            candidate
+            for candidate in generator.DEFAULT_COVERED_PATHS
+            if candidate != removed
+        ]
+        broad.append(Path("scripts"))
+        with self.assertRaisesRegex(
+            generator.ChecksumError,
+            re.escape(removed.as_posix()),
+        ):
+            generator.build_outputs(
+                repo_root,
+                broad,
+                repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+        with self.assertRaisesRegex(
+            generator.ChecksumError,
+            "duplicates=.*scripts/generate_risk_register.py",
+        ):
+            generator.build_outputs(
+                repo_root,
+                list(generator.DEFAULT_COVERED_PATHS)
+                + [generator.RELEASE_TOOL_ROOTS[0]],
+                repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+        with self.assertRaisesRegex(
+            generator.ChecksumError,
+            "scripts/check_admin_ceremony_evidence.py",
+        ):
+            generator.validate_release_tool_checksum_closure(
+                repo_root,
+                [Path("scripts")],
+            )
+
+    def test_custom_subset_requires_explicit_noncanonical_mode_and_output(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            source = Path("input.txt")
+            write_text(root / source, "input\n")
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "must use a noncanonical output directory",
+            ):
+                generator.build_outputs(
+                    root,
+                    [source],
+                    root / generator.DEFAULT_OUTPUT_DIR,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+                )
+
+            checksum_text, manifest_text = generator.build_outputs(
+                root,
+                [source],
+                root / CUSTOM_OUTPUT_DIR,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
+            self.assertIn("  input.txt\n", checksum_text)
+            manifest = json.loads(manifest_text)
+            self.assertEqual(
+                manifest["source"]["coverage_policy"],
+                generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
+            self.assertEqual(
+                manifest["source"]["output_dir"],
+                CUSTOM_OUTPUT_DIR.as_posix(),
+            )
+
+    def test_cli_rejects_implicit_custom_subset_and_canonical_output(
+        self,
+    ) -> None:
+        stderr = StringIO()
+        with redirect_stderr(stderr):
+            result = generator.main(
+                ["--covered-path", ".editorconfig"]
+            )
+        self.assertEqual(result, 1)
+        self.assertIn(
+            "--covered-path requires --coverage-policy custom-subset",
+            stderr.getvalue(),
+        )
+
+        stderr = StringIO()
+        with redirect_stderr(stderr):
+            result = generator.main(
+                [
+                    "--coverage-policy",
+                    generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+                    "--covered-path",
+                    ".editorconfig",
+                ]
+            )
+        self.assertEqual(result, 1)
+        self.assertIn(
+            "must use a noncanonical output directory",
+            stderr.getvalue(),
+        )
+
+    def test_release_tool_closure_rejects_each_missing_runtime_or_test(
+        self,
+    ) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        for path in EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE:
+            with self.subTest(kind="runtime", path=path):
+                covered = [
+                    candidate
+                    for candidate in generator.DEFAULT_COVERED_PATHS
+                    if candidate != path
+                ]
+                with self.assertRaisesRegex(
+                    generator.ChecksumError,
+                    re.escape(path.as_posix()),
+                ):
+                    generator.validate_release_tool_checksum_closure(
+                        repo_root,
+                        covered,
+                    )
+        for path in EXPECTED_RELEASE_TOOL_FOCUSED_TESTS:
+            with self.subTest(kind="test", path=path):
+                covered = [
+                    candidate
+                    for candidate in generator.DEFAULT_COVERED_PATHS
+                    if candidate != path
+                ]
+                with self.assertRaisesRegex(
+                    generator.ChecksumError,
+                    re.escape(path.as_posix()),
+                ):
+                    generator.validate_release_tool_checksum_closure(
+                        repo_root,
+                        covered,
+                    )
+
+    def test_release_tool_closure_rejects_hidden_first_party_import(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            for path in generator.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE:
+                source = (
+                    "import hidden_release_dependency\n"
+                    if path == generator.RELEASE_TOOL_ROOTS[0]
+                    else "VALUE = 1\n"
+                )
+                write_text(root / path, source)
+            for path in generator.RELEASE_TOOL_FOCUSED_TESTS:
+                write_text(root / path, "VALUE = 1\n")
+            write_text(
+                root / "scripts/hidden_release_dependency.py",
+                "VALUE = 1\n",
+            )
+            covered = list(generator.RELEASE_TOOL_ROOTS) + list(
+                generator.RELEASE_TOOL_FOCUSED_TESTS
+            )
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "scripts/hidden_release_dependency.py",
+            ):
+                generator.validate_release_tool_checksum_closure(
+                    root,
+                    covered,
+                )
+
+    def test_release_tool_import_parser_covers_relative_package_and_dynamic_forms(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(root / "scripts/root.py", "\n".join(
+                (
+                    "import importlib",
+                    "import importlib as il",
+                    "import builtins as bi",
+                    "import package.submodule",
+                    "from package import imported_submodule",
+                    "from . import relative_dependency",
+                    "from .relative_second import VALUE",
+                    'importlib.import_module("dynamic_one")',
+                    'il.import_module("dynamic_two")',
+                    '__import__("dynamic_four")',
+                    'bi.__import__("dynamic_five")',
+                    "",
+                )
+            ))
+            write_text(root / "scripts/package/__init__.py", "VALUE = 1\n")
+            write_text(root / "scripts/package/submodule.py", "VALUE = 1\n")
+            write_text(
+                root / "scripts/package/imported_submodule.py",
+                "VALUE = 1\n",
+            )
+            for name in (
+                "relative_dependency",
+                "relative_second",
+                "dynamic_one",
+                "dynamic_two",
+                "dynamic_four",
+                "dynamic_five",
+            ):
+                write_text(root / f"scripts/{name}.py", "VALUE = 1\n")
+
+            self.assertEqual(
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                ),
+                (
+                    Path("scripts/dynamic_five.py"),
+                    Path("scripts/dynamic_four.py"),
+                    Path("scripts/dynamic_one.py"),
+                    Path("scripts/dynamic_two.py"),
+                    Path("scripts/package/__init__.py"),
+                    Path("scripts/package/imported_submodule.py"),
+                    Path("scripts/package/submodule.py"),
+                    Path("scripts/relative_dependency.py"),
+                    Path("scripts/relative_second.py"),
+                ),
+            )
+
+    def test_release_tool_import_parser_rejects_alternate_loaders(self) -> None:
+        cases = (
+            (
+                "exec literal import",
+                'exec("import hidden")\n',
+                "alternate loader API exec in scripts/root.py:1",
+            ),
+            (
+                "eval import",
+                "eval(\"__import__('hidden')\")\n",
+                "alternate loader API eval in scripts/root.py:1",
+            ),
+            (
+                "exec compile",
+                'exec(compile("import hidden", "<test>", "exec"))\n',
+                "alternate loader API exec in scripts/root.py:1",
+            ),
+            (
+                "runpy run_path",
+                "import runpy\nrunpy.run_path('hidden.py')\n",
+                "alternate loader API runpy in scripts/root.py:1",
+            ),
+            (
+                "runpy run_module",
+                "import runpy\nrunpy.run_module('hidden')\n",
+                "alternate loader API runpy in scripts/root.py:1",
+            ),
+            (
+                "importlib util loader",
+                "import importlib.util\n"
+                "spec = importlib.util.spec_from_file_location('hidden', 'hidden.py')\n"
+                "module = importlib.util.module_from_spec(spec)\n"
+                "spec.loader.exec_module(module)\n",
+                "alternate loader API importlib.util in scripts/root.py:1",
+            ),
+            (
+                "importlib machinery loader",
+                "import importlib.machinery\n"
+                "loader = importlib.machinery.SourceFileLoader('hidden', 'hidden.py')\n"
+                "loader.load_module()\n",
+                "alternate loader API importlib.machinery in scripts/root.py:1",
+            ),
+            (
+                "builtins compile",
+                "import builtins\nbuiltins.compile('x', '<test>', 'eval')\n",
+                "alternate loader API builtins.compile in scripts/root.py:2",
+            ),
+            (
+                "builtins alias compile",
+                "import builtins as bi\nbi.compile('x', '<test>', 'eval')\n",
+                "alternate loader API bi.compile in scripts/root.py:2",
+            ),
+            (
+                "exec assignment escape",
+                "loader = exec\nloader('import hidden')\n",
+                "alternate loader API exec in scripts/root.py:1",
+            ),
+            (
+                "eval container escape",
+                "loaders = [eval]\nloaders[0](\"__import__('hidden')\")\n",
+                "alternate loader API eval in scripts/root.py:1",
+            ),
+            (
+                "compile argument escape",
+                "consume(compile)\n",
+                "alternate loader API compile in scripts/root.py:1",
+            ),
+        )
+        for label, source, diagnostic in cases:
+            with self.subTest(label=label):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    write_text(root / "scripts/root.py", source)
+                    write_text(root / "scripts/hidden.py", "VALUE = 1\n")
+                    with self.assertRaisesRegex(
+                        generator.ChecksumError,
+                        re.escape(diagnostic),
+                    ):
+                        generator._repo_local_script_imports(
+                            root,
+                            Path("scripts/root.py"),
+                        )
+
+    def test_release_tool_import_parser_allows_unrelated_compile_attributes(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(
+                root / "scripts/root.py",
+                "import re\n"
+                "re.compile('x')\n"
+                "class Helper:\n"
+                "    def compile(self, value):\n"
+                "        return value\n"
+                "Helper().compile('x')\n",
+            )
+            self.assertEqual(
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                ),
+                (),
+            )
+
+    def test_release_tool_import_parser_rejects_builtin_name_escapes(
+        self,
+    ) -> None:
+        source_templates = (
+            "{name}('payload')\n",
+            "loader = {name}\n",
+            "loaders = [{name}]\n",
+            "loaders = ({name},)\n",
+            "loaders = {{'load': {name}}}\n",
+            "consume({name})\n",
+            "def loader():\n    return {name}\n",
+            "loader = lambda: {name}\n",
+            "loader = {name} if ENABLED else None\n",
+        )
+        for name in ("exec", "eval", "compile"):
+            for source_template in source_templates:
+                source = source_template.format(name=name)
+                with self.subTest(name=name, source=source):
+                    with tempfile.TemporaryDirectory() as temp_dir:
+                        root = Path(temp_dir)
+                        write_text(root / "scripts/root.py", source)
+                        with self.assertRaisesRegex(
+                            generator.ChecksumError,
+                            re.escape(
+                                "release-tool checksum closure forbids "
+                                f"alternate loader API {name} in "
+                                "scripts/root.py:"
+                            ),
+                        ):
+                            generator._repo_local_script_imports(
+                                root,
+                                Path("scripts/root.py"),
+                            )
+
+    def test_release_tool_import_parser_rejects_importer_callable_aliases(
+        self,
+    ) -> None:
+        cases = (
+            (
+                "importlib assignment",
+                "import importlib\n"
+                "load = importlib.import_module\n"
+                'load("hidden")\n',
+                "importer callable escape from importlib.import_module",
+            ),
+            (
+                "__import__ assignment",
+                "load = __import__\n"
+                'load("hidden")\n',
+                "importer callable escape from __import__",
+            ),
+            (
+                "importlib from-import alias",
+                "from importlib import import_module as load\n"
+                'load("hidden")\n',
+                "importer callable alias import importlib.import_module",
+            ),
+            (
+                "builtins from-import alias",
+                "from builtins import __import__ as load\n"
+                'load("hidden")\n',
+                "importer callable alias import builtins.__import__",
+            ),
+            (
+                "getattr",
+                "import importlib\n"
+                'getattr(importlib, "import_module")("hidden")\n',
+                "dynamic importer construction via getattr",
+            ),
+            (
+                "nonliteral getattr",
+                "import importlib\n"
+                "getattr(importlib, ATTRIBUTE)(\"hidden\")\n",
+                "nonliteral dynamic importer construction",
+            ),
+            (
+                "chained assignment",
+                "import importlib\n"
+                "first = second = importlib.import_module\n",
+                "importer callable escape from importlib.import_module",
+            ),
+            (
+                "annotated assignment",
+                "load: object = __import__\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "named expression",
+                "import importlib\n"
+                "(load := importlib.import_module)\n",
+                "importer callable escape from importlib.import_module",
+            ),
+            (
+                "list escape",
+                "import importlib\n"
+                "loaders = [importlib.import_module]\n"
+                'loaders[0]("hidden")\n',
+                "importer callable escape from importlib.import_module",
+            ),
+            (
+                "tuple escape",
+                "loaders = (__import__,)\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "return escape",
+                "import importlib\n"
+                "def loader():\n"
+                "    return importlib.import_module\n",
+                "importer callable escape from importlib.import_module",
+            ),
+            (
+                "dict escape",
+                "loaders = {'load': __import__}\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "set escape",
+                "loaders = {__import__}\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "yield escape",
+                "def loader():\n"
+                "    yield __import__\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "lambda escape",
+                "import importlib\n"
+                "loader = lambda: importlib.import_module\n",
+                "importer callable escape from importlib.import_module",
+            ),
+            (
+                "argument escape",
+                "consume(__import__)\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "conditional escape",
+                "loader = __import__ if ENABLED else None\n",
+                "importer callable escape from __import__",
+            ),
+            (
+                "subscript escape",
+                "loader = (__import__,)[0]\n",
+                "importer callable escape from __import__",
+            ),
+        )
+        for label, source, diagnostic in cases:
+            with self.subTest(label=label):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    write_text(root / "scripts/root.py", source)
+                    write_text(root / "scripts/hidden.py", "VALUE = 1\n")
+                    with self.assertRaisesRegex(
+                        generator.ChecksumError,
+                        re.escape(diagnostic),
+                    ):
+                        generator._repo_local_script_imports(
+                            root,
+                            Path("scripts/root.py"),
+                        )
+
+    def test_release_tool_import_parser_rejects_module_alias_rebinding(
+        self,
+    ) -> None:
+        cases = (
+            "import importlib\nimportlib = object()\n",
+            "import importlib as il\ndef f(il):\n    return il\n",
+            "import builtins\nclass builtins:\n    pass\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    write_text(root / "scripts/root.py", source)
+                    with self.assertRaisesRegex(
+                        generator.ChecksumError,
+                        "importer module alias rebinding",
+                    ):
+                        generator._repo_local_script_imports(
+                            root,
+                            Path("scripts/root.py"),
+                        )
+
+    def test_release_tool_import_parser_rejects_module_object_escapes(
+        self,
+    ) -> None:
+        cases = (
+            "import importlib\nil = importlib\nil.import_module('hidden')\n",
+            "import importlib\n[importlib][0].import_module('hidden')\n",
+            "import builtins\nb = builtins\nb.__import__('hidden')\n",
+            "import importlib\nmodules = (importlib,)\n",
+            "import importlib\nmodules = {'loader': importlib}\n",
+            "import importlib\nmodules = {importlib}\n",
+            "import importlib\nconsume(importlib)\n",
+            "import importlib\ndef f():\n    return importlib\n",
+            "import importlib\ndef f():\n    yield importlib\n",
+            "import importlib\nf = lambda: importlib\n",
+            "import importlib\nmodule = importlib if ENABLED else None\n",
+            "import importlib\nmodule = [importlib][0]\n",
+            "import importlib\nholder.loader = importlib\n",
+            "import importlib\nfirst = second = importlib\n",
+            "import importlib\nmodule: object = importlib\n",
+            "import importlib\n(module := importlib)\n",
+        )
+        for source in cases:
+            with self.subTest(source=source):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    write_text(root / "scripts/root.py", source)
+                    write_text(root / "scripts/hidden.py", "VALUE = 1\n")
+                    with self.assertRaisesRegex(
+                        generator.ChecksumError,
+                        "importer module alias escape",
+                    ):
+                        generator._repo_local_script_imports(
+                            root,
+                            Path("scripts/root.py"),
+                        )
+
+    def test_release_tool_import_parser_applies_package_precedence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(root / "scripts/root.py", "import package\n")
+            write_text(root / "scripts/package.py", "VALUE = 'module'\n")
+            write_text(
+                root / "scripts/package/__init__.py",
+                "VALUE = 'package'\n",
+            )
+            self.assertEqual(
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                ),
+                (Path("scripts/package/__init__.py"),),
+            )
+
+    def test_release_tool_import_parser_includes_scripts_package_init_chain(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(
+                root / "scripts/root.py",
+                "import scripts.package.submodule\n",
+            )
+            write_text(root / "scripts/__init__.py", "VALUE = 1\n")
+            write_text(root / "scripts/package/__init__.py", "VALUE = 1\n")
+            write_text(
+                root / "scripts/package/submodule.py",
+                "VALUE = 1\n",
+            )
+            self.assertEqual(
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                ),
+                (
+                    Path("scripts/__init__.py"),
+                    Path("scripts/package/__init__.py"),
+                    Path("scripts/package/submodule.py"),
+                ),
+            )
+
+    def test_release_tool_import_parser_rejects_nonliteral_dynamic_imports(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(
+                root / "scripts/root.py",
+                "import importlib\nimportlib.import_module(MODULE_NAME)\n",
+            )
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "requires a string-literal dynamic import.*scripts/root.py:2",
+            ):
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                )
+
+    def test_release_tool_import_parser_rejects_relative_dynamic_imports(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(
+                root / "scripts/root.py",
+                '__import__("hidden", globals(), locals(), [], 1)\n',
+            )
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "does not support relative dynamic imports.*scripts/root.py:1",
+            ):
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                )
+
+    def test_release_tool_import_parser_rejects_outside_and_symlink_sources(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            outside = root.parent / f"{root.name}-outside.py"
+            write_text(outside, "VALUE = 1\n")
+            self.addCleanup(outside.unlink)
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "must stay below scripts",
+            ):
+                generator._repo_local_script_imports(
+                    root,
+                    Path("../outside.py"),
+                )
+
+            source_link = root / "scripts/root.py"
+            source_link.parent.mkdir(parents=True)
+            source_link.symlink_to(outside)
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "must not include symlinks or reparse points",
+            ):
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                )
+
+    def test_release_tool_import_parser_rejects_symlinked_package_init(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            outside = root.parent / f"{root.name}-package-init.py"
+            write_text(outside, "VALUE = 1\n")
+            self.addCleanup(outside.unlink)
+            write_text(root / "scripts/root.py", "import package\n")
+            package_init = root / "scripts/package/__init__.py"
+            package_init.parent.mkdir(parents=True)
+            package_init.symlink_to(outside)
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "must not include symlinks or reparse points",
+            ):
+                generator._repo_local_script_imports(
+                    root,
+                    Path("scripts/root.py"),
+                )
+
+    def test_check_mode_rejects_mutated_release_tool_after_bundle_creation(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            required_path = Path(
+                "scripts/generate_bytecode_release_proof.py"
+            )
+            output_dir = root / CUSTOM_OUTPUT_DIR
+            write_text(root / required_path, "VALUE = 1\n")
+            generator.write_outputs(
+                root,
+                [required_path],
+                output_dir,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
+            write_text(root / required_path, "VALUE = 2\n")
+            stderr = StringIO()
+            with redirect_stderr(stderr):
+                result = generator.check_outputs(
+                    root,
+                    [required_path],
+                    output_dir,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+                )
+            self.assertEqual(result, 1)
+            self.assertIn(
+                "hash mismatch for scripts/generate_bytecode_release_proof.py",
+                stderr.getvalue(),
+            )
+
     def test_complete_governed_parameter_references_cover_every_reference_shape(
         self,
     ) -> None:
@@ -209,7 +1104,10 @@ class ReleaseChecksumTests(unittest.TestCase):
                     [
                         generator.governed_parameter_inventory_checker.DEFAULT_INVENTORY
                     ],
-                    root / generator.DEFAULT_OUTPUT_DIR,
+                    root / CUSTOM_OUTPUT_DIR,
+                    coverage_policy=(
+                        generator.CUSTOM_SUBSET_COVERAGE_POLICY
+                    ),
                 )
 
             checksum_paths = {
@@ -264,7 +1162,10 @@ class ReleaseChecksumTests(unittest.TestCase):
                         [
                             generator.governed_parameter_inventory_checker.DEFAULT_INVENTORY
                         ],
-                        root / generator.DEFAULT_OUTPUT_DIR,
+                        root / CUSTOM_OUTPUT_DIR,
+                        coverage_policy=(
+                            generator.CUSTOM_SUBSET_COVERAGE_POLICY
+                        ),
                     )
 
     def test_governed_parameter_references_cannot_escape_repository(
@@ -309,7 +1210,7 @@ class ReleaseChecksumTests(unittest.TestCase):
 
         repo_root = SCRIPT_PATH.parent.parent
         configured_paths = set(generator.DEFAULT_COVERED_PATHS)
-        for path in expected_paths:
+        for path in sorted(expected_paths):
             self.assertTrue(
                 path in configured_paths
                 or any(
@@ -336,19 +1237,56 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         manifest_entries = {entry["path"]: entry for entry in manifest["files"]}
 
-        for path in expected_paths:
+        for path in sorted(expected_paths):
             relative_path = path.as_posix()
             absolute_path = repo_root / path
             expected_hash = generator.file_sha256(absolute_path)
+            if relative_path not in checksum_entries:
+                self.fail(f"SHA256SUMS missing required path {relative_path}")
             self.assertEqual(
                 checksum_entries[relative_path],
                 expected_hash.removeprefix("sha256:"),
+                f"SHA256SUMS digest drift for {relative_path}",
             )
-            self.assertEqual(manifest_entries[relative_path]["sha256"], expected_hash)
+            if relative_path not in manifest_entries:
+                self.fail(
+                    f"release-checksums.json missing required path {relative_path}"
+                )
+            self.assertEqual(
+                manifest_entries[relative_path]["sha256"],
+                expected_hash,
+                f"release-checksums.json digest drift for {relative_path}",
+            )
             self.assertEqual(
                 manifest_entries[relative_path]["size_bytes"],
                 absolute_path.stat().st_size,
+                f"release-checksums.json size drift for {relative_path}",
             )
+
+    def test_committed_checksums_cover_release_tool_trust_closure(self) -> None:
+        expected_paths = set(EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE) | set(
+            EXPECTED_RELEASE_TOOL_FOCUSED_TESTS
+        )
+        self.assert_committed_checksums_cover(expected_paths)
+        repo_root = SCRIPT_PATH.parent.parent
+        manifest = json.loads(
+            (
+                repo_root
+                / generator.DEFAULT_OUTPUT_DIR
+                / generator.CHECKSUM_MANIFEST_NAME
+            ).read_text(encoding="utf-8")
+        )
+        checksum_text = (
+            repo_root
+            / generator.DEFAULT_OUTPUT_DIR
+            / generator.CHECKSUM_FILE_NAME
+        ).read_text(encoding="utf-8")
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 232)
+        self.assertEqual(len(manifest["files"]), 394)
+        self.assertEqual(
+            len(generator.parse_checksum_file(checksum_text)),
+            394,
+        )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
         expected_paths = {
@@ -563,6 +1501,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("docs/adr/0014-world-class-pass-round-5.md"),
         }
         self.assert_committed_checksums_cover(expected_paths)
+
+    def test_default_covered_paths_bind_operation_identity_adr(self) -> None:
+        path = Path("docs/adr/0018-batch-operation-root-and-token-identity.md")
+        self.assertIn(path, generator.DEFAULT_COVERED_PATHS)
+        self.assert_committed_checksums_cover({path})
 
     def test_default_covered_paths_bind_parameter_and_abi_policy(self) -> None:
         expected_paths = {
@@ -793,10 +1736,11 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_generator_writes_sorted_checksums_and_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
-            write_text(output_dir / "event-topic-catalog.json", '{"events":[]}\n')
-            write_text(output_dir / "abi-checksums.json", '{"abis":[]}\n')
-            write_text(output_dir / "release-manifest.json", '{"release":{}}\n')
+            output_dir = root / CUSTOM_OUTPUT_DIR
+            latest_dir = root / "release-artifacts" / "latest"
+            write_text(latest_dir / "event-topic-catalog.json", '{"events":[]}\n')
+            write_text(latest_dir / "abi-checksums.json", '{"abis":[]}\n')
+            write_text(latest_dir / "release-manifest.json", '{"release":{}}\n')
             write_text(
                 root / "release-artifacts" / "baselines" / "v0.1.0" / "gas-snapshot.snap",
                 "StreamGasSnapshotTest:testGasFixedPriceMint() (gas: 1)\n",
@@ -814,6 +1758,7 @@ class ReleaseChecksumTests(unittest.TestCase):
                     Path("deployments/examples"),
                 ],
                 output_dir,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
             )
             self.assertEqual(
                 [path.name for path in written],
@@ -840,7 +1785,14 @@ class ReleaseChecksumTests(unittest.TestCase):
             )
             self.assertEqual(manifest["schema_version"], generator.CHECKSUM_SCHEMA)
             self.assertEqual(manifest["algorithm"], "sha256")
-            self.assertEqual(manifest["source"]["output_dir"], "release-artifacts/latest")
+            self.assertEqual(
+                manifest["source"]["coverage_policy"],
+                generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
+            self.assertEqual(
+                manifest["source"]["output_dir"],
+                CUSTOM_OUTPUT_DIR.as_posix(),
+            )
             self.assertEqual(
                 manifest["source"]["covered_paths"],
                 [
@@ -861,25 +1813,39 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_check_mode_accepts_current_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
-            write_text(output_dir / "abi-checksums.json", '{"abis":[]}\n')
-            generator.write_outputs(root, [Path("release-artifacts/latest")], output_dir)
+            output_dir = root / CUSTOM_OUTPUT_DIR
+            write_text(
+                root / "release-artifacts/latest/abi-checksums.json",
+                '{"abis":[]}\n',
+            )
+            generator.write_outputs(
+                root,
+                [Path("release-artifacts/latest")],
+                output_dir,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
 
             with redirect_stdout(StringIO()), redirect_stderr(StringIO()):
                 result = generator.check_outputs(
                     root,
                     [Path("release-artifacts/latest")],
                     output_dir,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
                 )
             self.assertEqual(result, 0)
 
     def test_check_mode_rejects_hash_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
-            artifact = output_dir / "abi-checksums.json"
+            output_dir = root / CUSTOM_OUTPUT_DIR
+            artifact = root / "release-artifacts/latest/abi-checksums.json"
             write_text(artifact, '{"abis":[]}\n')
-            generator.write_outputs(root, [Path("release-artifacts/latest")], output_dir)
+            generator.write_outputs(
+                root,
+                [Path("release-artifacts/latest")],
+                output_dir,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
             write_text(artifact, '{"abis":["changed"]}\n')
 
             stderr = StringIO()
@@ -888,21 +1854,30 @@ class ReleaseChecksumTests(unittest.TestCase):
                     root,
                     [Path("release-artifacts/latest")],
                     output_dir,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
                 )
             self.assertEqual(result, 1)
             self.assertIn(
                 "hash mismatch for release-artifacts/latest/abi-checksums.json",
                 stderr.getvalue(),
             )
-            self.assertIn("changed release-artifacts/latest/SHA256SUMS", stderr.getvalue())
+            self.assertIn(
+                f"changed {CUSTOM_OUTPUT_DIR.as_posix()}/SHA256SUMS",
+                stderr.getvalue(),
+            )
 
     def test_check_mode_rejects_deleted_covered_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
-            artifact = output_dir / "abi-checksums.json"
+            output_dir = root / CUSTOM_OUTPUT_DIR
+            artifact = root / "release-artifacts/latest/abi-checksums.json"
             write_text(artifact, '{"abis":[]}\n')
-            generator.write_outputs(root, [Path("release-artifacts/latest")], output_dir)
+            generator.write_outputs(
+                root,
+                [Path("release-artifacts/latest")],
+                output_dir,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
             artifact.unlink()
 
             stderr = StringIO()
@@ -911,7 +1886,8 @@ class ReleaseChecksumTests(unittest.TestCase):
                     root,
                     [Path("release-artifacts/latest")],
                     output_dir,
-            )
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+                )
             self.assertEqual(result, 1)
             missing_message = (
                 "missing covered file listed in SHA256SUMS: "
@@ -925,9 +1901,17 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_check_mode_rejects_missing_generated_output(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
-            write_text(output_dir / "abi-checksums.json", '{"abis":[]}\n')
-            generator.write_outputs(root, [Path("release-artifacts/latest")], output_dir)
+            output_dir = root / CUSTOM_OUTPUT_DIR
+            write_text(
+                root / "release-artifacts/latest/abi-checksums.json",
+                '{"abis":[]}\n',
+            )
+            generator.write_outputs(
+                root,
+                [Path("release-artifacts/latest")],
+                output_dir,
+                coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+            )
             (output_dir / "SHA256SUMS").unlink()
 
             stderr = StringIO()
@@ -936,26 +1920,40 @@ class ReleaseChecksumTests(unittest.TestCase):
                     root,
                     [Path("release-artifacts/latest")],
                     output_dir,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
                 )
             self.assertEqual(result, 1)
-            self.assertIn("missing release-artifacts/latest/SHA256SUMS", stderr.getvalue())
+            self.assertIn(
+                f"missing {CUSTOM_OUTPUT_DIR.as_posix()}/SHA256SUMS",
+                stderr.getvalue(),
+            )
 
     def test_generator_rejects_missing_covered_root(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
+            output_dir = root / CUSTOM_OUTPUT_DIR
 
             with self.assertRaisesRegex(generator.ChecksumError, "covered path does not exist"):
-                generator.build_outputs(root, [Path("missing")], output_dir)
+                generator.build_outputs(
+                    root,
+                    [Path("missing")],
+                    output_dir,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+                )
 
     def test_generator_rejects_empty_covered_set(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            output_dir = root / "release-artifacts" / "latest"
+            output_dir = root / CUSTOM_OUTPUT_DIR
             (root / "empty").mkdir()
 
             with self.assertRaisesRegex(generator.ChecksumError, "did not contain any files"):
-                generator.build_outputs(root, [Path("empty")], output_dir)
+                generator.build_outputs(
+                    root,
+                    [Path("empty")],
+                    output_dir,
+                    coverage_policy=generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+                )
 
     def test_checksum_parser_rejects_parent_directory_paths(self) -> None:
         checksum = (

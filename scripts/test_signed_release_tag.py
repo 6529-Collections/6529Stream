@@ -22,6 +22,24 @@ SPEC.loader.exec_module(checker)
 
 COMMIT = "a" * 40
 TAG = "v0.1.0"
+CUSTOM_OUTPUT_DIR = Path("release-artifacts/test-signed-release-checksums")
+CUSTOM_COVERED_PATHS = (
+    Path("release-artifacts/schema"),
+    Path("release-artifacts/signatures"),
+)
+
+
+def check_release_tag(
+    root: Path,
+    **kwargs: object,
+) -> Path | None:
+    kwargs.setdefault("covered_paths", CUSTOM_COVERED_PATHS)
+    kwargs.setdefault("output_dir", CUSTOM_OUTPUT_DIR)
+    kwargs.setdefault(
+        "coverage_policy",
+        checker.checksum_generator.CUSTOM_SUBSET_COVERAGE_POLICY,
+    )
+    return checker.check_signed_release_tag(root, **kwargs)
 
 
 class FakeRunner:
@@ -133,7 +151,9 @@ def write_release_tree(
         },
         "artifacts": {
             "release_manifest": self_ref("release-artifacts/latest/release-manifest.json"),
-            "checksum_bundle": self_ref("release-artifacts/latest/SHA256SUMS"),
+            "checksum_bundle": self_ref(
+                f"{CUSTOM_OUTPUT_DIR.as_posix()}/SHA256SUMS"
+            ),
         },
         "signing_identity": {
             "status": "active",
@@ -147,8 +167,9 @@ def write_release_tree(
                 "format": "gpg",
                 "artifact_path": "release-artifacts/post-checksum-signatures/SHA256SUMS.asc",
                 "verification_command": (
-                    "gpg --verify release-artifacts/post-checksum-signatures/SHA256SUMS.asc "
-                    "release-artifacts/latest/SHA256SUMS"
+                    "gpg --verify "
+                    "release-artifacts/post-checksum-signatures/SHA256SUMS.asc "
+                    f"{CUSTOM_OUTPUT_DIR.as_posix()}/SHA256SUMS"
                 ),
                 "evidence": [checksum_signature],
                 "notes": "Signed checksum bundle.",
@@ -183,8 +204,11 @@ def write_release_tree(
     write_json(evidence_path, evidence)
     checker.checksum_generator.write_outputs(
         root,
-        [Path("release-artifacts/schema"), Path("release-artifacts/signatures")],
-        root / "release-artifacts/latest",
+        list(CUSTOM_COVERED_PATHS),
+        root / CUSTOM_OUTPUT_DIR,
+        coverage_policy=(
+            checker.checksum_generator.CUSTOM_SUBSET_COVERAGE_POLICY
+        ),
     )
     return evidence_path
 
@@ -240,7 +264,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             write_release_tree(root)
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "not HEAD"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -257,7 +281,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             write_release_tree(root)
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "signature verification failed"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -274,7 +298,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             write_release_tree(root)
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "good-signature marker"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -294,7 +318,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             write_text(root / "release-artifacts/signatures/late-file.txt", "late\n")
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "checksum"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -311,7 +335,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             write_release_tree(root, evidence_commit="d" * 40)
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "no release signature evidence"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -328,7 +352,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             evidence_path = write_release_tree(root)
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "signer fingerprint"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -352,7 +376,7 @@ class SignedReleaseTagTests(unittest.TestCase):
                 checker.SignedReleaseTagError,
                 "public_key_fingerprint",
             ):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -370,7 +394,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             evidence_path = write_release_tree(root, post_bundle_evidence=False)
 
             with self.assertRaisesRegex(checker.SignedReleaseTagError, "post-bundle"):
-                checker.check_signed_release_tag(
+                check_release_tag(
                     root,
                     mode="release",
                     tag=TAG,
@@ -387,7 +411,7 @@ class SignedReleaseTagTests(unittest.TestCase):
             root = Path(temp_dir)
             evidence_path = write_release_tree(root)
 
-            matched = checker.check_signed_release_tag(
+            matched = check_release_tag(
                 root,
                 mode="release",
                 tag=TAG,

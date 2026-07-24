@@ -46,7 +46,8 @@ Boundaries with the neighboring homes:
 2. [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
    owns mint policy, counters, the durable mint ledger, signed mint
    tickets, gates, the module registry, policy grace windows, and the
-   prepared-mint operation identity. Adapters are mint executors under that
+   batch operation-root and per-token operation identity. Adapters are mint
+   executors under that
    specification.
 3. The artist identity, consent, and sanction model lives in
    [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010 decision D2). Sale
@@ -98,10 +99,16 @@ Flow for every paid mint sale:
   buyer or executor
     -> sale adapter (price, asset, custody, sale authorization)
     -> revenue settlement (split wallet deposit or escrow; revenue spec)
-    -> StreamMintManager.mint(...) or prepared-mint pair (mint spec)
+    -> StreamMintManager.executeSingleStepMint(...) or executePreparedMint(...) (mint spec)
     -> StreamMintLedger.consume(...)
     -> StreamCore mint hooks
 ```
+
+For both manager paths, the manager passes the exact batch `collectionId` and
+`phaseId` to `StreamMintLedger.consume`; the ledger uses the manager caller as
+scope, independently loads the current registered phase policy, and never
+infers phase identity from counter rows or accepts a caller-supplied current
+policy hash.
 
 Sale adapters are the protocol's price and mechanic layer. They are the only
 contracts that hold buyer funds before official settlement, and they are
@@ -494,6 +501,7 @@ SALE_AUTHORIZATION_TYPEHASH = keccak256(
     "bytes32 saleId,uint8 saleKind,bytes32 revenueClass,"
     "bytes32 expectedPrimaryPolicyHash,uint8 primaryPolicyMode,"
     "bytes32 initialRecipientsHash,bytes32 beneficiariesHash,"
+    "bytes32 tokenDataArrayHash,bytes32 mintCommitmentsHash,"
     "address payer,address executor,address asset,uint256 unitPrice,"
     "uint256 quantity,bytes32 contentSelectionHash,bytes32 policyHash,"
     "bytes32 nonce,uint64 deadline,uint64 finalizeBy)"
@@ -532,6 +540,10 @@ Requirements [SSA-AUTH]:
 2. State-changing execution must recompute every hash from calldata and
    chain state and reject the authorization if any field differs, if
    `deadline` has passed, or if the nonce was consumed or voided.
+   `tokenDataArrayHash` and `mintCommitmentsHash` are the exact canonical
+   batch hashes from the mint spec's Recipient Binding; signer authority is
+   invalid if either differs from the manager request. Root uniqueness never
+   substitutes for signer authorization.
 3. `unitPrice` is denominated in the base units of `asset`
    (`asset = address(0)` for native ETH). For fixed-price kinds it is the
    exact charged price; for time-varying kinds (`DUTCH_AUCTION`,
@@ -608,6 +620,29 @@ Requirements [SSA-AUTH]:
    [Deferred Settlement Drift Envelopes](#deferred-settlement-drift-envelopes);
    execution recomputes and rejects a mismatch exactly as rule 2 requires
    for every other field.
+9. A mint-executing adapter uses the exact operation identity owned by
+   `docs/mint-policy-and-accounting.md` `[MPA-OPERATION]` (ADR 0018). It
+   calls the manager-owned
+   `previewSingleStepMintOperation(batch, gateData)` and records the returned
+   batch `operationRoot` before a `PRE_REVENUE_SINGLE_STEP` deposit, supplies
+   the same signed request and
+   authorization ID to the manager in that top-level transaction, uses exactly
+   its own `address(this)` for the manager-executor term (never the buyer,
+   payer, relayer, external caller, or `tx.origin`), compares the returned root
+   and token operation IDs with its preview before returning, and records a
+   per-token `operationId` only when it creates a token-scoped settlement fact.
+   `batch.expectedPolicyHash`, the gate or signed-payload policy hash, and the
+   previewed `boundPolicyHash` are the same authorization-continuity value.
+   Central manager-batch and ledger-root-consumption facts expose both
+   `currentPolicyHash` and `boundPolicyHash`; consent, configuration, and live-
+   economics facts use current identity; child authorization and consumption
+   facts use `boundPolicyHash` and join through `operationRoot`.
+   Direct and relayed calls with the same signed request therefore preview the
+   same identity. The adapter neither stores ledger replay state nor substitutes
+   the sale digest for the batch root. The exact typed primary-settlement call
+   and execution-specific repeat-sale key remain ADR 0019 / issue #694
+   blockers; this rule does not define a generic callback ABI or claim
+   settlement replay complete.
 
 ## Fixed-Price Sales And Open Editions
 
@@ -3519,7 +3554,7 @@ pinned from its string preimage and recomputed by CI.
 | `STREAM_CONTENT_CONSUMED_V1` | `6529STREAM_CONTENT_CONSUMED_V1` | 0x4a1bb00019fd08daa7e378b30312e4fdceb2c209f31effa024f891745f97f84a | content-consumption extension | `1` | `domain; chainid; core; collectionId; contentId` |
 | `STREAM_SEALED_BID_V1` | `6529STREAM_SEALED_BID_V1` | 0x3f5199758c189f6205a065046fe5778bc3e349f7c373fa5c9f419b0718e3e3c6 | sealed-bid extension | `1` | `domain; chainid; auctionContract; auctionId; bidder; amount; salt` |
 | `STREAM_RAFFLE_DRAW_V1` | `6529STREAM_RAFFLE_DRAW_V1` | 0x7bac77537b9b49e1c88e29e0fac9da7b983e54a03de6f7327c4eed66b617622c | raffle extension | `1` | `domain; chainid; saleAdapter; saleId; scopeSeed; entryRoot; drawIndex` |
-| `SALE_AUTHORIZATION_TYPEHASH` | struct type string pinned in [SSA-AUTH] | 0xffd150d67de6a2619775f6cb884eadc8802d3d37fbd584d32ad0ff83ceddb098 | sale adapters | `1` | EIP-712 struct fields per [SSA-AUTH] (`bytes32 revenueClass`, trailing `uint64 finalizeBy`; ADR 0011 decisions R6 and R10) |
+| `SALE_AUTHORIZATION_TYPEHASH` | struct type string pinned in [SSA-AUTH] | 0x6e5460498aa6274ffa516d53c6046a385c1ff9dd62d6adbfc54c339a4bb6e8d6 | sale adapters | `1` | EIP-712 struct fields per [SSA-AUTH] (`bytes32 revenueClass`, `tokenDataArrayHash`, `mintCommitmentsHash`, and trailing `uint64 finalizeBy`; ADR 0011 decisions R6 and R10; ADR 0018 proposal) |
 | `SALE_OFFER_TYPEHASH` | struct type string pinned in [SSA-OFFER] | 0x5befc984e6ca9dc13fb8238b12d2d8c7f77bcfbe46489470a66bbdda2b482d1b | sale adapters | `1` | EIP-712 struct fields per [SSA-OFFER] (trailing `uint64 finalizeBy`; ADR 0011 decision R6) |
 | `SALE_CUSTODY_GRANT_TYPEHASH` | struct type string pinned in [SSA-CUSTODY-ENTRY] | 0xb829ff4936e00a75578357cfc3d855c59e780debb698eb3e8c8e9aff1b013041 | sale adapters | `1` | EIP-712 struct fields per [SSA-CUSTODY-ENTRY] (ADR 0012 decision T6) |
 | `SALE_OFFER_REVOCATION_TYPEHASH` | struct type string pinned in [SSA-OFFER] rule 5 | 0xb80f6e5d7ac663ccfb28bbcfae73c4b3111804ebe80d7ac845e1eb88a44d191c | sale adapters | `1` | `chainId; saleAdapter; offerDigest` (ADR 0012 decision T6) |

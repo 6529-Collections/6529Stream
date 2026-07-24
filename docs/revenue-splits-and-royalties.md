@@ -8,8 +8,11 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md), and
-[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by
-[ADR 0017](adr/0017-raise-only-parameter-governance.md), and recorded in
+[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by accepted
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). Proposed
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md) tracks the
+candidate operation-identity amendment and remains unaccepted. The decisions
+are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for
@@ -1011,6 +1014,8 @@ Recommended resolver hook:
 function snapshotTokenRoyaltyAtMint(
     uint256 tokenId,
     uint256 collectionId,
+    bytes32 operationRoot,
+    bytes32 operationId,
     bytes32 revenueClass,
     bytes32 expectedRoyaltyAssignmentHash
 ) external returns (bytes32 tokenRoyaltyAssignmentHash);
@@ -1023,8 +1028,9 @@ collection/default royalty policy hash does not equal the expected value.
 
 Rules:
 
-1. Only the authorized mint manager, drop contract, auction contract, or Core
-   mint boundary can call the snapshot hook.
+1. Only the active authorized mint manager can call the production snapshot
+   hook. Drop, auction, and sale adapters enter through that manager; Core
+   never calls the resolver snapshot directly.
 2. The hook is idempotent for the same token and same expected assignment.
 3. The hook reverts if a different token-level royalty assignment already
    exists.
@@ -1041,6 +1047,15 @@ Rules:
 10. Snapshot completion precedes `_safeMint` for tokens whose royalty policy
     requires mint-time economics. A malicious or replaced resolver cannot
     observe or reenter an in-progress mint before the recipient callback.
+11. `snapshotTokenRoyaltyAtMint` is `PREPARED_MINT`-only. Before writing, the
+    hook verifies `isManagerOperationRootUsed(msg.sender, operationRoot)`
+    through the ledger's explicit-manager read and verifies the existing
+    prepared-record proof,
+    `preparedMint(tokenId).operationId == operationId`, through Core. It stores
+    or emits both identities with the token-scoped snapshot fact (ADR 0018).
+    `PRE_REVENUE_SINGLE_STEP` has no prepared record and must reject any policy
+    requiring a token-level primary or royalty snapshot; there is no third
+    snapshot proof.
 
 Recommended revenue-class examples for long-running collections:
 
@@ -1214,37 +1229,60 @@ Requirements [RSR-ORCHESTRATION]:
 2. Sale adapter resolves only collection/default primary policy. Token-level
    primary overrides and required mint-time royalty snapshots are unavailable in
    this path.
-3. Sale adapter materializes the split profile if needed and deposits the
+3. Sale adapter calls the manager-owned
+   `previewSingleStepMintOperation(batch, gateData)`. The manager preview uses
+   the adapter as `msg.sender`, current config and nonce, and byte-identical gate,
+   resolver, normalization, root, and token-operation derivation shared with
+   execution. It returns the `MINT_EXECUTION_PATH_SINGLE_STEP` root and exactly
+   `N` token operation IDs, commits both `currentPolicyHash` and the signed
+   `batch.expectedPolicyHash` accepted as `boundPolicyHash`, and emits, writes,
+   and consumes nothing.
+4. Sale adapter materializes the split profile if needed and deposits the
    accepted settlement asset — native ETH, or an approved standard
    ERC-20 pulled under the [RSR-PAYMENT-INTENT] payer-intent rules —
    into the verified split wallet, or records escrowed revenue under the
    asset-keyed `(revenueClass, profileId, wallet, asset)` credit
-   (ADR 0014 decision V5).
-4. Sale adapter calls the mint manager.
-5. Mint manager validates the phase and computes active `policyHash`.
-6. Mint manager calls `requireMintConsent(collectionId, phaseId,
-   policyHash)` on the artist authority registry — the
+   with the exact `operationRoot` (ADR 0014 decision V5; ADR 0018).
+5. Sale adapter calls the mint manager in the same top-level transaction,
+   capturing the returned token IDs, operation root, and token operation IDs.
+6. Mint manager validates the phase, recomputes `currentPolicyHash`, accepts
+   `batch.expectedPolicyHash` as the current or exact unexpired immediate
+   predecessor, and defines `boundPolicyHash = batch.expectedPolicyHash`.
+7. Mint manager calls `requireMintConsent(collectionId, phaseId,
+   currentPolicyHash)` on the artist authority registry — the
    once-per-mint-transaction consent and contest check placed by the
    mint spec's Mint Execution Order step 9, executed after the active
-   `policyHash` is computed and before any gate, counter, ledger, or
+   current policy hash is computed and before any gate, counter, ledger, or
    Core step — and reverts on refusal (consent precedes creation,
    [PV1-MINT-ORDER] invariant 7; ADR 0014 decision V9).
-7. Mint manager verifies the signed `MintTicket` or equivalent sale
+8. Mint manager verifies the signed `MintTicket` or equivalent sale
    authorization and binds the exact `mintCommitmentsHash`.
-8. Mint ledger verifies the manager-registered policy hash and consumes
-   counters, authorization IDs, and nullifiers.
-9. Core executes `mintFromManager`, writes token identity, registers the
+9. Mint manager independently derives the batch root and token operation IDs
+   and reserves the contiguous nonce range before calling the ledger.
+10. Mint manager passes the exact batch `collectionId` and `phaseId` to the
+   ledger. Using the manager caller as scope, the ledger independently loads
+   `currentPolicyHash` from that registered phase tuple, accepts
+   `boundPolicyHash` as the loaded current hash or exact unexpired immediate
+   predecessor, requires every counter row to match the explicit phase,
+   enforces current registered counter policies/caps/increments, and consumes
+   the manager-scoped root, counters, authorization IDs, and nullifiers.
+11. Core executes `mintFromManager`, writes token identity, registers the
    token's entropy request context with the entropy coordinator, and only
    then `_safeMint`s to the initial recipient. Entropy registration must
    precede any untrusted recipient callback; the conformance-matrix entropy
    gate enforces this ordering at deployment.
+12. Before returning from the top-level call, the sale adapter compares the
+    manager-returned root and token operation IDs with its step 3 preview. A
+    nonce race or identity mismatch reverts the manager call and the step 4
+    deposit atomically.
 
-The step 3 deposit deliberately precedes manager validation, the consent
+The step 4 deposit deliberately precedes manager validation, the consent
 check, and ledger consumption
-(steps 5–8), and that ordering satisfies [PV1-MINT-ORDER] invariant 1,
+(steps 6–12), and that ordering satisfies [PV1-MINT-ORDER] invariant 1,
 whose validation-before-effects rule is scoped per layer and per
 observability (ADR 0012 decision T7): the sale adapter completes its own
-layer's validation (steps 1–2) before its deposit effect; the deposit
+layer's validation and identity derivation (steps 1–3) before its deposit
+effect; the deposit
 executes no untrusted code — split-wallet `receive` is non-reverting,
 storage-free, and recipient-code-free, and an escrow credit is internal
 accounting — so no untrusted party can observe the deposit before
@@ -1253,7 +1291,7 @@ at any later step reverts the deposit atomically under this section's
 single-transaction rule, so no effect survives a later validation
 failure.
 
-The ERC-20 realization of step 3 carries its own stated justification,
+The ERC-20 realization of step 4 carries its own stated justification,
 never one inherited by argument from enabled-caller or asset vetting —
 the same anti-inheritance discipline [RSR-SETTLEMENT-BOUNDARY].11
 applies to guards (ADR 0014 decision V5). The only external code an
@@ -1271,7 +1309,7 @@ reentrancy guard on the settlement surface holds independently of that
 evidence, so even a mis-approved callback asset cannot double-record a
 `settlementKey` or leave any partially validated effect standing: any
 interference reverts the single transaction, restoring every effect.
-An earlier revision stated step 3 for native ETH only; that reading —
+An earlier revision described the deposit step for native ETH only; that reading —
 which would have forced every ERC-20 fixed-price sale into
 `PREPARED_MINT` — is superseded, both blessed paths deposit the
 accepted settlement asset, and the conformance matrix's paid-mint suite
@@ -1290,29 +1328,52 @@ entropy-coordinator boundary lands.
 
 1. Sale adapter validates payment, sale authorization, price, quantity, payer,
    recipients, beneficiaries, deadline, nonce, and `expectedPrimaryPolicyHash`.
-2. Mint manager validates the phase and computes active `policyHash`.
+2. Mint manager validates the phase, recomputes `currentPolicyHash`, accepts
+   `batch.expectedPolicyHash` as the current or exact unexpired immediate
+   predecessor, and defines `boundPolicyHash = batch.expectedPolicyHash`.
 3. Mint manager calls `requireMintConsent(collectionId, phaseId,
-   policyHash)` — the same Mint Execution Order step 9 consent and
+   currentPolicyHash)` — the same Mint Execution Order step 9 consent and
    contest check as `PRE_REVENUE_SINGLE_STEP` step 6, in the same
    placement — and reverts on refusal ([PV1-MINT-ORDER] invariant 7;
    ADR 0014 decision V9).
 4. Mint manager verifies the signed `MintTicket` or equivalent sale
    authorization and binds the exact `mintCommitmentsHash`.
-5. Mint ledger verifies the manager-registered policy hash and consumes
-   counters, authorization IDs, and nullifiers.
-6. Core executes `prepareMintFromManager`, creating authoritative token identity
+5. Mint manager derives the `MINT_EXECUTION_PATH_PREPARED` root and exactly
+   `N` token operation IDs, reserves the contiguous nonce range, and advances
+   `nextOperationNonce` before calling the ledger.
+6. Mint manager passes the exact batch `collectionId` and `phaseId` to the
+   ledger. Using the manager caller as scope, the ledger independently loads
+   `currentPolicyHash` from that registered phase tuple, accepts
+   `boundPolicyHash` as the loaded current hash or exact unexpired immediate
+   predecessor, requires every counter row to match the explicit phase,
+   enforces current registered counter policies/caps/increments, and consumes
+   the manager-scoped root, counters, authorization IDs, and nullifiers.
+7. Core executes `prepareMintFromManager`, creating authoritative token identity
    but no entropy/randomizer request and no ERC-721 transfer.
-7. Resolver snapshots any required token-level primary or royalty assignment
-   from Core's authoritative mapping.
-8. Sale adapter deposits the accepted settlement asset into the verified split
+8. Resolver snapshots any required token-level primary or royalty assignment
+   from Core's authoritative mapping after verifying the ledger root and Core
+   token operation ID.
+9. Sale adapter deposits the accepted settlement asset into the verified split
    wallet or records escrowed revenue under
-   `(revenueClass, profileId, wallet, asset)`.
-9. Core executes `completePreparedMintFromManager`, clears the prepared record,
+   `(revenueClass, profileId, wallet, asset)`, recording the root and the token
+   operation ID for a token-scoped settlement.
+10. Core executes `completePreparedMintFromManager`, clears the prepared record,
    registers bounded entropy state for the completed identity, `_safeMint`s to
    the initial recipient while keeping the Core completion sentinel active, and
    clears that sentinel only after the ERC-721 receiver callback returns.
    Actual randomness-provider requests occur only after completion and are not
-   part of this Core call.
+    part of this Core call.
+
+Steps 8 and 9 pin an invariant, not a callable settlement ABI. Before either
+step may perform an effect, the resolver or settlement participant must verify
+the explicit manager/root through
+`isManagerOperationRootUsed(manager, operationRoot)` and the current Core
+`preparedMint(tokenId).operationId`. The exact typed manager-to-primary-
+settlement invocation, callback authorization, returndata bounds, value
+handling, reentrancy/rollback hostile cases, and execution-specific replay key
+remain an explicit ADR 0019 / issue #694 production blocker. ADR 0018 defines
+no generic callback bytes, target, selector, value, or delegatecall surface and
+does not close primary-settlement integration.
 
 Token-level economic snapshots written during `PREPARED_MINT` must be
 derivable solely from Core token identity, collection/default assignment state,
@@ -1330,11 +1391,14 @@ untrusted recipient callback, randomness provider callback, refund callback,
 split-wallet release, or arbitrary external hook may execute before the path's
 required ledger consumption, token identity mapping, assignment snapshots, and
 revenue accounting are complete.
-`PREPARED_MINT` uses the canonical `STREAM_PREPARED_MINT_OPERATION_V1`
-`operationId` defined in `docs/mint-policy-and-accounting.md`; the sale
-adapter, manager, ledger, Core prepare/complete, resolver snapshot hook,
-completion-time entropy/randomizer boundary, and escrow/deposit path must
-reject mismatched operation IDs.
+Both paths use the one-root-plus-`N`-token-operation-ID model owned by
+`docs/mint-policy-and-accounting.md` `[MPA-OPERATION]` (ADR 0018). The sale
+adapter, manager, and ledger correlate the batch root. Core prepare/complete
+correlates only the current token operation ID; resolver and token-scoped
+settlement correlate both. Completion-time entropy registration correlates
+authoritative Core token ID and `mintCommitment` and intentionally receives no
+root or operation ID. A component rejects a mismatch in the identity it owns;
+no participant pretends one token ID identifies the whole batch.
 
 The v1 primary settlement surface includes native ETH and approved standard
 ERC-20 assets. ERC-20 settlement must live in a payment adapter or
@@ -1651,6 +1715,19 @@ is renamed and retyped by this rule.
 settlement caller, and asset address are deliberately excluded from
 `settlementKey`; they are validation inputs and emitted evidence, not alternate
 replay domains for the same sale.
+
+Known repeat-sale collision. The current `settlementKey` also lacks a
+purchase/execution identity. Two otherwise identical purchases under the same
+sale — same `settlementId`, adapter-local `saleNonce`, collection/token scope,
+parties, and amount — derive the same key, so the second purchase cannot be
+recorded even when it is a legitimate distinct execution. `operationRoot` is
+not a universal replacement: custody transfers have no mint root, and one
+batch root may cover multiple token-scoped settlement facts. ADR 0019 / issue
+#694 must introduce an execution-ID-bound distinct settlement key (or an
+equally explicit typed execution commitment) and prove distinct repeated
+purchases, exact replay rejection, direct/relayed equivalence, and rollback.
+Until that lands, repeat-sale replay/correlation and the primary-settlement ABI
+remain production blockers; this document does not claim them complete.
 
 Sale context is emitted for reconstruction only:
 
@@ -3612,6 +3689,16 @@ event RevenueAssignmentSet(
     bytes32 looseningTermsHash
 );
 
+event TokenRoyaltySnapshotted(
+    uint16 schemaVersion,
+    bytes32 indexed operationId,
+    uint256 indexed tokenId,
+    bytes32 indexed operationRoot,
+    uint256 collectionId,
+    bytes32 revenueClass,
+    bytes32 tokenRoyaltyAssignmentHash
+);
+
 event RevenueAssignmentCleared(
     bytes32 indexed revenueClass,
     uint8 indexed scope,
@@ -3657,6 +3744,8 @@ event PrimaryRevenueSettlementContext(
     uint8 policyMode,
     uint256 collectionId,
     uint256 tokenId,
+    bytes32 operationRoot,
+    bytes32 operationId,
     uint256 saleNonce,
     address poster,
     address beneficiary,
@@ -3759,6 +3848,10 @@ event GlobalRevenueFreezeSet(
    advertised-loosening marker and terms hash so the canonical
    `assignmentHash` of [Assignment Semantics](#assignment-semantics) is
    reconstructable from events alone (ADR 0012 decision T7).
+   `TokenRoyaltySnapshotted` is the exact token-scoped resolver fact: its three
+   indexed identities join the Core prepared record, manager token event, and
+   ledger batch root, while the unindexed fields reconstruct the snapshotted
+   assignment.
 4. Profile creation must emit `SplitProfileCreated`, then entries in
    canonical index order, then `SplitWalletDeployed` if deployment happens
    in the same transaction.
@@ -3770,7 +3863,13 @@ event GlobalRevenueFreezeSet(
    Sale-kind discriminators and sale-side event schemas are owned by
    `docs/stream-sales-and-auctions.md`; the v1 `saleContextHash` preimage
    deliberately binds no `saleKind`.
-6. Governed Gas Parameter changes emit the canonical GGP change event
+6. A settlement in either paid-mint path records the exact nonzero
+   `operationRoot` in `PrimaryRevenueSettlementContext`. A token-scoped record
+   also carries that token's nonzero `operationId`; a batch-only record uses
+   zero for `operationId`. A non-mint custody transfer uses zero for both
+   operation fields and remains identified by `settlementKey`, `settlementId`,
+   and token ID. These zero cases do not enter ledger replay.
+7. Governed Gas Parameter changes emit the canonical GGP change event
    defined in the model home ([RSR-GGP].4); this document defines no
    duplicate event for them.
 
@@ -4427,9 +4526,9 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
 - An ERC-20 `PRE_REVENUE_SINGLE_STEP` paid mint deposits the approved
   settlement asset (or records the asset-keyed escrow credit) before
   manager and ledger validation and reverts atomically on a later
-  validation failure ([RSR-ORCHESTRATION] step 3 ERC-20 realization).
+  validation failure ([RSR-ORCHESTRATION] step 4 ERC-20 realization).
 - `requireMintConsent` executes exactly once per paid mint transaction
-  in each blessed path, after active `policyHash` computation and before
+  in each blessed path, after `currentPolicyHash` computation and before
   ticket verification, ledger consumption, and Core allocation
   ([RSR-ORCHESTRATION]; [PV1-MINT-ORDER] invariant 7).
 - EOA signatures on `ReleaseAuthorization`, `PaymentIntent`, and their

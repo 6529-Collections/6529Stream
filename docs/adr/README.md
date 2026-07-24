@@ -31,6 +31,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0015-collection-identity-and-facade-readiness.md`](0015-collection-identity-and-facade-readiness.md) | Superseded in part | W1/W2 identity signal and evidence gate remain; W3-W5 launch facade path superseded by ADR 0016 |
 | [`0016-core-native-only-erc721.md`](0016-core-native-only-erc721.md) | Accepted | Core-native-only launch line; facade ownership machinery deferred to a successor design |
 | [`0017-raise-only-parameter-governance.md`](0017-raise-only-parameter-governance.md) | Accepted | Raise-only GGP/GTP launch model; probes, lowering, emergency class `6`, and permissionless parameter mutation removed pre-genesis |
+| [`0018-batch-operation-root-and-token-identity.md`](0018-batch-operation-root-and-token-identity.md) | Proposed | [#688](https://github.com/6529-Collections/6529Stream/issues/688): proposed one manager batch root, `N` token operation IDs, ledger-owned root replay, and atomic Core replay-state cutover; settlement integration remains blocked on ADR 0019 / #694 |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

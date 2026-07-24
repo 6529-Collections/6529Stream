@@ -68,6 +68,26 @@ The current Gate A smoke baseline proves:
   cutover now requires a single permanent target ABI and zero-Core-delta or
   measured net-negative slices until the complete hook build is at or below
   22,576 bytes.
+  Proposed ADR 0018 describes the required pre-genesis operation-identity
+  cutover: one manager batch root is replay-protected in the ledger, exactly one
+  unique operation ID identifies each token transition, and Core eventually
+  retains only its current prepared-pair equality lock. The ADR is not accepted
+  and does not close #688; exact typed primary settlement and repeated-sale
+  replay remain ADR 0019 / #694 blockers. Current Solidity still derives its
+  prepared-only root after ledger consumption, the ledger carries no root, and
+  Core retains lifetime operation-ID replay storage; the proposal is not
+  implementation evidence. The subsequent Core measurement must also
+  include the target restricted ERC-4906 single/batch refresh emitters required
+  by #667. Their selectors exist in the permanent target artifact, but current
+  Core source does not yet implement the restricted external helpers.
+  The final recovery boundary is
+  `IStreamFinalityRecoveryCore`: `lastAllocatedTokenId()` (`0x254b22bc`) XOR
+  `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) produces
+  ERC-165 ID `0xb5c73a01`. The #654 target must advertise IERC165 and that
+  exact ID, reject `0xffffffff`, and implement the real batch emitter; a
+  fallback-only target is not conformance evidence. Issue #667 owns only the
+  fail-closed interface probe and registry consumer and remains blocked from a
+  production-completeness claim until the #654 Core seam lands.
   The stricter bytecode-spend ceiling remains the reviewed 22,184-byte approved
   baseline with 2,392 bytes of baseline margin.
   The architecture policy in

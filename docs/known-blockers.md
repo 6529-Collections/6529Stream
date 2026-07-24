@@ -161,7 +161,24 @@ contributors who start from the README.
   API: satellite-only slices must keep zero Core delta and Core-changing slices
   must measure net-negative until the complete linked production-profile
   `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
-  not a bytecode measurement.
+  not a bytecode measurement. Proposed ADR 0018 describes one ledger-owned root
+  plus `N` token operation IDs, but is not accepted and current source still
+  calls the rootless ledger
+  before deriving its prepared-only root and retains lifetime replay storage in
+  Core. The sequential #688 -> #672 -> #654 lane must implement and validate
+  that cutover, prove post-entropy completion gas, and include the real
+  restricted Core ERC-4906 single/batch refresh emitters required by #667
+  before the exact production margin can pass. Exact typed primary settlement
+  and execution-ID-bound repeated-sale replay also remain blocked on ADR 0019 /
+  #694; operation-root uniqueness does not close them. The final Core recovery seam is
+  the canonical `IStreamFinalityRecoveryCore` interface:
+  `lastAllocatedTokenId()` (`0x254b22bc`) XOR
+  `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) gives the
+  exact ERC-165 interface ID `0xb5c73a01`. Core must advertise IERC165 and
+  exactly that ID, reject `0xffffffff`, and implement the real batch emitter;
+  fallback-only selector handling is nonconformant. Issue #667 owns its
+  fail-closed constructor probe and registry consumer without editing Core;
+  #654 owns the Core ABI, implementation, negative tests, and measured runtime.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,

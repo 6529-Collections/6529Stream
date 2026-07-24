@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import json
 import re
+import stat
 import sys
 from pathlib import Path
 from typing import Any
@@ -16,6 +18,53 @@ import check_governed_parameter_inventory as governed_parameter_inventory_checke
 
 CHECKSUM_SCHEMA = "6529stream.release-checksums.v1"
 GENERATOR_VERSION = "1"
+CANONICAL_COVERAGE_POLICY = "canonical"
+CUSTOM_SUBSET_COVERAGE_POLICY = "custom-subset"
+COVERAGE_POLICIES = (
+    CANONICAL_COVERAGE_POLICY,
+    CUSTOM_SUBSET_COVERAGE_POLICY,
+)
+RELEASE_TOOL_ROOTS = (
+    Path("scripts/generate_risk_register.py"),
+    Path("scripts/generate_release_notes.py"),
+    Path("scripts/generate_release_manifest.py"),
+    Path("scripts/generate_bytecode_release_proof.py"),
+    Path("scripts/generate_release_candidate_lockfile.py"),
+    Path("scripts/generate_release_checksums.py"),
+    Path("scripts/verify_release_artifacts.py"),
+)
+RELEASE_TOOL_FOCUSED_TESTS = (
+    Path("scripts/test_changelog_check.py"),
+    Path("scripts/test_release_notes.py"),
+    Path("scripts/test_admin_ceremony_evidence.py"),
+    Path("scripts/test_drop_authorization_signing_evidence.py"),
+    Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_release_signatures.py"),
+    Path("scripts/test_signer_custody_readiness.py"),
+    Path("scripts/test_bytecode_release_proof.py"),
+)
+REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
+    Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/check_changelog.py"),
+    Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_governed_parameter_identifiers.py"),
+    Path("scripts/check_governed_parameter_inventory.py"),
+    Path("scripts/check_non_local_release_evidence.py"),
+    Path("scripts/check_public_beta_evidence.py"),
+    Path("scripts/check_release_evidence_issue_links.py"),
+    Path("scripts/check_release_signatures.py"),
+    Path("scripts/check_risk_register.py"),
+    Path("scripts/check_signer_custody_readiness.py"),
+    Path("scripts/check_slither_baseline.py"),
+    Path("scripts/generate_bytecode_release_proof.py"),
+    Path("scripts/generate_release_candidate_lockfile.py"),
+    Path("scripts/generate_release_checksums.py"),
+    Path("scripts/generate_release_manifest.py"),
+    Path("scripts/generate_release_notes.py"),
+    Path("scripts/generate_risk_register.py"),
+    Path("scripts/release_evidence_paths.py"),
+    Path("scripts/verify_release_artifacts.py"),
+)
 
 DEFAULT_COVERED_PATHS = [
     Path("requirements-tools.txt"),
@@ -33,8 +82,23 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_materialize_canonical_deployment_plan.py"),
     Path("scripts/generate_release_checksums.py"),
     Path("scripts/test_release_checksums.py"),
+    Path("scripts/check_changelog.py"),
+    Path("scripts/test_changelog_check.py"),
+    Path("scripts/check_admin_ceremony_evidence.py"),
+    Path("scripts/test_admin_ceremony_evidence.py"),
+    Path("scripts/check_drop_authorization_signing_evidence.py"),
+    Path("scripts/test_drop_authorization_signing_evidence.py"),
+    Path("scripts/check_non_local_release_evidence.py"),
+    Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/check_release_signatures.py"),
+    Path("scripts/test_release_signatures.py"),
+    Path("scripts/check_signer_custody_readiness.py"),
+    Path("scripts/test_signer_custody_readiness.py"),
+    Path("scripts/generate_bytecode_release_proof.py"),
+    Path("scripts/test_bytecode_release_proof.py"),
     Path("scripts/generate_release_manifest.py"),
     Path("scripts/test_release_manifest.py"),
+    Path("scripts/test_release_notes.py"),
     Path("scripts/generate_release_candidate_lockfile.py"),
     Path("scripts/test_release_candidate_lockfile.py"),
     Path("scripts/generate_risk_register.py"),
@@ -179,6 +243,7 @@ DEFAULT_COVERED_PATHS = [
     Path("docs/adr/0014-world-class-pass-round-5.md"),
     Path("docs/adr/0016-core-native-only-erc721.md"),
     Path("docs/adr/0017-raise-only-parameter-governance.md"),
+    Path("docs/adr/0018-batch-operation-root-and-token-identity.md"),
     Path("docs/audit-package.md"),
     Path("docs/custom-errors.md"),
     Path("docs/dependency-operations.md"),
@@ -411,11 +476,739 @@ def configured_path_covers(
     return True
 
 
+def _is_reparse_point(path: Path) -> bool:
+    try:
+        attributes = path.lstat().st_file_attributes
+    except (AttributeError, FileNotFoundError, OSError):
+        return False
+    return bool(attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT)
+
+
+def _validated_release_tool_source(
+    repo_root: Path,
+    relative_path: Path,
+    *,
+    required: bool,
+) -> Path | None:
+    """Resolve one regular scripts/*.py file without following redirections."""
+
+    root = repo_root.resolve()
+    if (
+        relative_path.is_absolute()
+        or relative_path.drive
+        or relative_path.root
+        or relative_path.anchor
+        or not relative_path.parts
+        or relative_path.parts[0] != "scripts"
+        or any(part in {"", ".", ".."} for part in relative_path.parts)
+    ):
+        raise ChecksumError(
+            "release-tool checksum closure source must stay below scripts/: "
+            f"{relative_path.as_posix()}"
+        )
+
+    current = root
+    for part in relative_path.parts:
+        current = current / part
+        if current.is_symlink() or _is_reparse_point(current):
+            raise ChecksumError(
+                "release-tool checksum closure source must not include "
+                f"symlinks or reparse points: {relative_path.as_posix()}"
+            )
+
+    if not current.exists():
+        if required:
+            raise ChecksumError(
+                "release-tool checksum closure source is missing: "
+                f"{relative_path.as_posix()}"
+            )
+        return None
+    if not current.is_file():
+        raise ChecksumError(
+            "release-tool checksum closure source must be a regular file: "
+            f"{relative_path.as_posix()}"
+        )
+    try:
+        resolved = current.resolve(strict=True)
+        resolved.relative_to(root)
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        raise ChecksumError(
+            "release-tool checksum closure source resolves outside the "
+            f"repository: {relative_path.as_posix()}"
+        ) from exc
+    if resolved != current:
+        raise ChecksumError(
+            "release-tool checksum closure source must not redirect: "
+            f"{relative_path.as_posix()}"
+        )
+    return resolved
+
+
+def _repo_local_script_imports(
+    repo_root: Path,
+    relative_path: Path,
+) -> tuple[Path, ...]:
+    """Resolve supported first-party imports from one scripts/*.py module.
+
+    The deliberately narrow fail-closed grammar supports ordinary absolute and
+    static relative Import/ImportFrom nodes plus direct string-literal targets
+    passed to an importlib module alias's import_module(), direct __import__(),
+    or a builtins module alias's __import__(). Importer callable/module escapes,
+    dynamic non-literal or relative targets, exec/eval/compile, runpy,
+    importlib.util/importlib.machinery loaders, exec_module(), and load_module()
+    are forbidden because their dependencies cannot be reviewed deterministically.
+    """
+
+    source_path = _validated_release_tool_source(
+        repo_root,
+        relative_path,
+        required=True,
+    )
+    assert source_path is not None
+    try:
+        tree = ast.parse(
+            read_text(source_path),
+            filename=relative_path.as_posix(),
+        )
+    except SyntaxError as exc:
+        raise ChecksumError(
+            f"release-tool checksum closure cannot parse "
+            f"{relative_path.as_posix()}: {exc}"
+        ) from exc
+
+    importlib_aliases: set[str] = set()
+    builtins_aliases: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Import):
+            continue
+        for alias in node.names:
+            if alias.name == "importlib":
+                importlib_aliases.add(alias.asname or "importlib")
+            elif alias.name == "builtins":
+                builtins_aliases.add(alias.asname or "builtins")
+
+    def reject_alternate_loader(node: ast.AST, api: str) -> None:
+        raise ChecksumError(
+            "release-tool checksum closure forbids alternate loader API "
+            f"{api} in {relative_path.as_posix()}:{getattr(node, 'lineno', 0)}"
+        )
+
+    alternate_parent_by_node = {
+        child: parent
+        for parent in ast.walk(tree)
+        for child in ast.iter_child_nodes(parent)
+    }
+
+    def is_direct_call_func(node: ast.AST) -> bool:
+        parent = alternate_parent_by_node.get(node)
+        return isinstance(parent, ast.Call) and parent.func is node
+
+    def attribute_chain(node: ast.AST) -> tuple[str, ...] | None:
+        parts: list[str] = []
+        current = node
+        while isinstance(current, ast.Attribute):
+            parts.append(current.attr)
+            current = current.value
+        if not isinstance(current, ast.Name):
+            return None
+        parts.append(current.id)
+        return tuple(reversed(parts))
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "runpy" or alias.name.startswith("runpy."):
+                    reject_alternate_loader(node, alias.name)
+                if alias.name in {
+                    "importlib.util",
+                    "importlib.machinery",
+                } or alias.name.startswith(
+                    ("importlib.util.", "importlib.machinery.")
+                ):
+                    reject_alternate_loader(node, alias.name)
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if module == "runpy" or module.startswith("runpy."):
+                reject_alternate_loader(node, module)
+            if module in {
+                "importlib.util",
+                "importlib.machinery",
+            } or module.startswith(
+                ("importlib.util.", "importlib.machinery.")
+            ):
+                reject_alternate_loader(node, module)
+            if module == "importlib":
+                for alias in node.names:
+                    if alias.name in {"util", "machinery"}:
+                        reject_alternate_loader(
+                            node,
+                            f"importlib.{alias.name}",
+                        )
+            if module == "builtins":
+                for alias in node.names:
+                    if alias.name in {"exec", "eval", "compile"}:
+                        reject_alternate_loader(node, f"builtins.{alias.name}")
+        elif (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Load)
+            and node.id in {"exec", "eval", "compile"}
+        ):
+            reject_alternate_loader(node, node.id)
+        elif isinstance(node, ast.Call):
+            if (
+                isinstance(node.func, ast.Name)
+                and node.func.id in {"exec", "eval", "compile"}
+            ):
+                reject_alternate_loader(node.func, node.func.id)
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr in {"exec_module", "load_module"}
+            ):
+                reject_alternate_loader(node.func, node.func.attr)
+            if (
+                (
+                    isinstance(node.func, ast.Name)
+                    and node.func.id == "__import__"
+                )
+                or (
+                    isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "import_module"
+                    and isinstance(node.func.value, ast.Name)
+                    and node.func.value.id in importlib_aliases
+                )
+                or (
+                    isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "__import__"
+                    and isinstance(node.func.value, ast.Name)
+                    and node.func.value.id in builtins_aliases
+                )
+            ) and (
+                node.args
+                and isinstance(node.args[0], ast.Constant)
+                and node.args[0].value
+                in {"runpy", "importlib.util", "importlib.machinery"}
+            ):
+                reject_alternate_loader(node, str(node.args[0].value))
+        elif isinstance(node, ast.Attribute):
+            chain = attribute_chain(node)
+            if (
+                node.attr in {"exec", "eval", "compile"}
+                and isinstance(node.value, ast.Name)
+                and node.value.id in builtins_aliases
+                and is_direct_call_func(node)
+            ):
+                reject_alternate_loader(
+                    node,
+                    f"{node.value.id}.{node.attr}",
+                )
+            if chain is not None and chain[0] in importlib_aliases:
+                importlib_api = ".".join(chain)
+                if (
+                    len(chain) >= 2
+                    and chain[1] in {"util", "machinery"}
+                ):
+                    reject_alternate_loader(node, importlib_api)
+
+    def repo_script_candidates(
+        module_name: str,
+        *,
+        package_parts: tuple[str, ...] = (),
+    ) -> tuple[Path, ...]:
+        has_scripts_prefix = module_name == "scripts" or module_name.startswith(
+            "scripts."
+        )
+        module_parts = tuple(
+            part for part in module_name.split(".") if part
+        )
+        if module_parts and module_parts[0] == "scripts":
+            module_parts = module_parts[1:]
+        parts = package_parts + module_parts
+        resolved_candidates: list[Path] = []
+        prefix_parts: tuple[str, ...] = ()
+        if has_scripts_prefix:
+            scripts_init = Path("scripts/__init__.py")
+            if _validated_release_tool_source(
+                repo_root,
+                scripts_init,
+                required=False,
+            ) is not None:
+                resolved_candidates.append(scripts_init)
+        for part in parts[:-1]:
+            prefix_parts += (part,)
+            package_init = Path("scripts", *prefix_parts, "__init__.py")
+            if _validated_release_tool_source(
+                repo_root,
+                package_init,
+                required=False,
+            ) is not None:
+                resolved_candidates.append(package_init)
+        if not parts:
+            return tuple(resolved_candidates)
+        module_candidate = Path("scripts", *parts).with_suffix(".py")
+        package_candidate = Path("scripts", *parts, "__init__.py")
+        module_exists = (
+            _validated_release_tool_source(
+                repo_root,
+                module_candidate,
+                required=False,
+            )
+            is not None
+        )
+        package_exists = (
+            _validated_release_tool_source(
+                repo_root,
+                package_candidate,
+                required=False,
+            )
+            is not None
+        )
+        if package_exists:
+            resolved_candidates.append(package_candidate)
+        elif module_exists:
+            resolved_candidates.append(module_candidate)
+        return tuple(resolved_candidates)
+
+    def add_module_candidates(
+        candidates: set[Path],
+        module_name: str,
+        *,
+        package_parts: tuple[str, ...] = (),
+    ) -> None:
+        candidates.update(
+            repo_script_candidates(
+                module_name,
+                package_parts=package_parts,
+            )
+        )
+
+    current_parts = relative_path.with_suffix("").parts
+    if not current_parts or current_parts[0] != "scripts":
+        raise ChecksumError(
+            "release-tool checksum closure source must be below scripts/: "
+            f"{relative_path.as_posix()}"
+        )
+    current_package = tuple(current_parts[1:-1])
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                if alias.name == "importlib":
+                    importlib_aliases.add(alias.asname or "importlib")
+                elif alias.name.startswith("importlib.") and alias.asname is None:
+                    # `import importlib.util` binds the top-level importlib name.
+                    importlib_aliases.add("importlib")
+                elif alias.name == "builtins":
+                    builtins_aliases.add(alias.asname or "builtins")
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and node.module == "importlib"
+        ):
+            for alias in node.names:
+                if alias.name == "import_module":
+                    raise ChecksumError(
+                        "release-tool checksum closure does not support "
+                        "importer callable alias import "
+                        f"importlib.import_module in "
+                        f"{relative_path.as_posix()}:{node.lineno}"
+                    )
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and node.module == "builtins"
+        ):
+            for alias in node.names:
+                if alias.name == "__import__":
+                    raise ChecksumError(
+                        "release-tool checksum closure does not support "
+                        "importer callable alias import builtins.__import__ in "
+                        f"{relative_path.as_posix()}:{node.lineno}"
+                    )
+
+    protected_module_aliases = importlib_aliases | builtins_aliases
+    for node in ast.walk(tree):
+        shadowed_name: str | None = None
+        if (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, (ast.Store, ast.Del))
+            and node.id in protected_module_aliases
+        ):
+            shadowed_name = node.id
+        elif isinstance(node, ast.arg) and node.arg in protected_module_aliases:
+            shadowed_name = node.arg
+        elif (
+            isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+            and node.name in protected_module_aliases
+        ):
+            shadowed_name = node.name
+        if shadowed_name is not None:
+            raise ChecksumError(
+                "release-tool checksum closure does not support importer "
+                f"module alias rebinding for {shadowed_name} in "
+                f"{relative_path.as_posix()}:{node.lineno}"
+            )
+
+    def importer_callable_source(node: ast.AST) -> str | None:
+        if isinstance(node, ast.Name) and node.id == "__import__":
+            return "__import__"
+        if (
+            isinstance(node, ast.Attribute)
+            and node.attr == "import_module"
+            and isinstance(node.value, ast.Name)
+            and node.value.id in importlib_aliases
+        ):
+            return f"{node.value.id}.import_module"
+        if (
+            isinstance(node, ast.Attribute)
+            and node.attr == "__import__"
+            and isinstance(node.value, ast.Name)
+            and node.value.id in builtins_aliases
+        ):
+            return f"{node.value.id}.__import__"
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "getattr"
+            and len(node.args) >= 2
+            and isinstance(node.args[0], ast.Name)
+            and node.args[0].id in importlib_aliases
+        ):
+            attribute = node.args[1]
+            if (
+                not isinstance(attribute, ast.Constant)
+                or not isinstance(attribute.value, str)
+            ):
+                raise ChecksumError(
+                    "release-tool checksum closure does not support nonliteral "
+                    "dynamic importer construction in "
+                    f"{relative_path.as_posix()}:{node.lineno}"
+                )
+            if attribute.value == "import_module":
+                raise ChecksumError(
+                    "release-tool checksum closure does not support dynamic "
+                    "importer construction via getattr in "
+                    f"{relative_path.as_posix()}:{node.lineno}"
+                )
+        return None
+
+    parent_by_node = {
+        child: parent
+        for parent in ast.walk(tree)
+        for child in ast.iter_child_nodes(parent)
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call):
+            importer_callable_source(node)
+    for node in ast.walk(tree):
+        importer_source = importer_callable_source(node)
+        if importer_source is not None:
+            parent = parent_by_node.get(node)
+            if not (
+                isinstance(parent, ast.Call)
+                and parent.func is node
+            ):
+                raise ChecksumError(
+                    "release-tool checksum closure does not support importer "
+                    f"callable escape from {importer_source} in "
+                    f"{relative_path.as_posix()}:{node.lineno}"
+                )
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Name)
+            and isinstance(node.ctx, ast.Load)
+            and node.id in protected_module_aliases
+        ):
+            continue
+        parent = parent_by_node.get(node)
+        grandparent = parent_by_node.get(parent) if parent is not None else None
+        direct_importer_call = (
+            isinstance(parent, ast.Attribute)
+            and parent.value is node
+            and importer_callable_source(parent) is not None
+            and isinstance(grandparent, ast.Call)
+            and grandparent.func is parent
+        )
+        getattr_construction = (
+            isinstance(parent, ast.Call)
+            and isinstance(parent.func, ast.Name)
+            and parent.func.id == "getattr"
+            and parent.args
+            and parent.args[0] is node
+        )
+        if not direct_importer_call and not getattr_construction:
+            raise ChecksumError(
+                "release-tool checksum closure does not support importer "
+                f"module alias escape for {node.id} in "
+                f"{relative_path.as_posix()}:{node.lineno}"
+            )
+
+    candidates: set[Path] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                add_module_candidates(candidates, alias.name)
+        elif isinstance(node, ast.ImportFrom):
+            if node.level:
+                ascents = node.level - 1
+                if ascents > len(current_package):
+                    raise ChecksumError(
+                        "release-tool checksum closure relative import escapes "
+                        f"scripts/: {relative_path.as_posix()}:{node.lineno}"
+                    )
+                package_parts = current_package[
+                    : len(current_package) - ascents
+                ]
+                if node.module:
+                    add_module_candidates(
+                        candidates,
+                        node.module,
+                        package_parts=package_parts,
+                    )
+                    for alias in node.names:
+                        add_module_candidates(
+                            candidates,
+                            f"{node.module}.{alias.name}",
+                            package_parts=package_parts,
+                        )
+                else:
+                    for alias in node.names:
+                        add_module_candidates(
+                            candidates,
+                            alias.name,
+                            package_parts=package_parts,
+                        )
+            elif node.module == "scripts":
+                add_module_candidates(candidates, "scripts")
+                for alias in node.names:
+                    add_module_candidates(candidates, alias.name)
+            elif node.module:
+                add_module_candidates(candidates, node.module)
+                for alias in node.names:
+                    add_module_candidates(
+                        candidates,
+                        f"{node.module}.{alias.name}",
+                    )
+        elif isinstance(node, ast.Call):
+            is_dynamic_import = (
+                isinstance(node.func, ast.Name)
+                and node.func.id == "__import__"
+            ) or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "import_module"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in importlib_aliases
+            ) or (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr == "__import__"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in builtins_aliases
+            )
+            if not is_dynamic_import:
+                continue
+            if (
+                not node.args
+                or not isinstance(node.args[0], ast.Constant)
+                or not isinstance(node.args[0].value, str)
+            ):
+                raise ChecksumError(
+                    "release-tool checksum closure requires a string-literal "
+                    f"dynamic import in {relative_path.as_posix()}:{node.lineno}"
+                )
+            module_name = node.args[0].value
+            if (
+                (
+                    isinstance(node.func, ast.Name)
+                    and node.func.id == "__import__"
+                )
+                or (
+                    isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "__import__"
+                    and isinstance(node.func.value, ast.Name)
+                    and node.func.value.id in builtins_aliases
+                )
+            ):
+                level_node = (
+                    node.args[4]
+                    if len(node.args) >= 5
+                    else next(
+                        (
+                            keyword.value
+                            for keyword in node.keywords
+                            if keyword.arg == "level"
+                        ),
+                        None,
+                    )
+                )
+                if level_node is not None and (
+                    not isinstance(level_node, ast.Constant)
+                    or not isinstance(level_node.value, int)
+                    or isinstance(level_node.value, bool)
+                ):
+                    raise ChecksumError(
+                        "release-tool checksum closure requires a literal "
+                        "__import__ level in "
+                        f"{relative_path.as_posix()}:{node.lineno}"
+                    )
+                if level_node is not None and level_node.value != 0:
+                    raise ChecksumError(
+                        "release-tool checksum closure does not support "
+                        "relative dynamic imports in "
+                        f"{relative_path.as_posix()}:{node.lineno}"
+                    )
+            if module_name.startswith("."):
+                raise ChecksumError(
+                    "release-tool checksum closure does not support relative "
+                    f"dynamic imports in {relative_path.as_posix()}:{node.lineno}"
+                )
+            add_module_candidates(candidates, module_name)
+    return tuple(sorted(candidates))
+
+
+def release_tool_runtime_closure(
+    repo_root: Path,
+    roots: tuple[Path, ...] = RELEASE_TOOL_ROOTS,
+) -> tuple[Path, ...]:
+    """Return the deterministic recursive first-party Python import closure."""
+
+    pending = list(sorted(roots, reverse=True))
+    visited: set[Path] = set()
+    while pending:
+        path = pending.pop()
+        if path in visited:
+            continue
+        visited.add(path)
+        for dependency in reversed(_repo_local_script_imports(repo_root, path)):
+            if dependency not in visited:
+                pending.append(dependency)
+    return tuple(sorted(visited))
+
+
+def validate_release_tool_checksum_closure(
+    repo_root: Path,
+    covered_paths: list[Path],
+) -> tuple[Path, ...]:
+    """Fail closed unless reviewed release tools/tests are exact file entries."""
+
+    for path in REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE:
+        _validated_release_tool_source(
+            repo_root,
+            path,
+            required=True,
+        )
+    for path in RELEASE_TOOL_FOCUSED_TESTS:
+        _validated_release_tool_source(
+            repo_root,
+            path,
+            required=True,
+        )
+    runtime_closure = release_tool_runtime_closure(repo_root)
+    if runtime_closure != REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE:
+        missing_reviewed = sorted(
+            path.as_posix()
+            for path in (
+                set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
+                - set(runtime_closure)
+            )
+        )
+        unexpected_runtime = sorted(
+            path.as_posix()
+            for path in (
+                set(runtime_closure)
+                - set(REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
+            )
+        )
+        raise ChecksumError(
+            "release-tool runtime closure differs from the reviewed literal: "
+            f"missing={missing_reviewed}; unexpected={unexpected_runtime}"
+        )
+    exact_covered_paths = set(covered_paths)
+    missing_runtime = [
+        path.as_posix()
+        for path in runtime_closure
+        if path not in exact_covered_paths
+    ]
+    if missing_runtime:
+        raise ChecksumError(
+            "release-tool checksum trust closure missing runtime dependencies: "
+            f"{missing_runtime}"
+        )
+    missing_tests = [
+        path.as_posix()
+        for path in RELEASE_TOOL_FOCUSED_TESTS
+        if path not in exact_covered_paths
+    ]
+    if missing_tests:
+        raise ChecksumError(
+            "release-tool checksum trust closure missing focused tests: "
+            f"{missing_tests}"
+        )
+    return runtime_closure
+
+
+def validate_canonical_release_checksum_policy(
+    repo_root: Path,
+    covered_paths: list[Path],
+) -> tuple[Path, ...]:
+    """Require the exact reviewed canonical policy before generating outputs."""
+
+    def normalized_configured_path(path: Path) -> Path:
+        if (
+            path.is_absolute()
+            or path.drive
+            or path.root
+            or path.anchor
+            or any(part in {"", ".", ".."} for part in path.parts)
+        ):
+            raise ChecksumError(
+                "canonical release checksum coverage path must be a normalized "
+                "repository-relative path: "
+                f"{path.as_posix()}"
+            )
+        normalized = Path(*path.parts)
+        if normalized.as_posix() != path.as_posix():
+            raise ChecksumError(
+                "canonical release checksum coverage path must be normalized: "
+                f"{path.as_posix()}"
+            )
+        return normalized
+
+    normalized_paths = [
+        normalized_configured_path(path)
+        for path in covered_paths
+    ]
+    expected = set(DEFAULT_COVERED_PATHS)
+    actual = set(normalized_paths)
+    duplicates = sorted(
+        {
+            path.as_posix()
+            for path in normalized_paths
+            if normalized_paths.count(path) > 1
+        }
+    )
+    missing = sorted(path.as_posix() for path in expected - actual)
+    unexpected = sorted(path.as_posix() for path in actual - expected)
+    if duplicates or missing or unexpected:
+        raise ChecksumError(
+            "canonical release checksum coverage policy mismatch: "
+            f"missing={missing}; unexpected={unexpected}; "
+            f"duplicates={duplicates}"
+        )
+    return validate_release_tool_checksum_closure(repo_root, normalized_paths)
+
+
 def release_checksum_inputs(
     repo_root: Path,
     covered_paths: list[Path],
+    *,
+    coverage_policy: str = CANONICAL_COVERAGE_POLICY,
 ) -> tuple[list[Path], list[tuple[Path, str, str]]]:
     """Validate an in-scope inventory and add all complete references."""
+    if coverage_policy == CANONICAL_COVERAGE_POLICY:
+        validate_canonical_release_checksum_policy(repo_root, covered_paths)
+    elif coverage_policy != CUSTOM_SUBSET_COVERAGE_POLICY:
+        raise ChecksumError(
+            f"unsupported release checksum coverage policy: {coverage_policy}"
+        )
+
     inventory_path = governed_parameter_inventory_checker.DEFAULT_INVENTORY
     if not any(
         configured_path_covers(repo_root, path, inventory_path)
@@ -494,6 +1287,7 @@ def build_manifest(
     output_dir: Path,
     files: list[Path],
     checksum_text: str,
+    coverage_policy: str,
 ) -> dict[str, Any]:
     output_dir_relative = normalize_path(output_dir, repo_root)
     checksum_path = output_dir / CHECKSUM_FILE_NAME
@@ -504,6 +1298,7 @@ def build_manifest(
         "generated_by": f"scripts/generate_release_checksums.py:{GENERATOR_VERSION}",
         "algorithm": "sha256",
         "source": {
+            "coverage_policy": coverage_policy,
             "covered_paths": [
                 normalize_path(resolve_repo_path(repo_root, path), repo_root)
                 for path in covered_paths
@@ -534,10 +1329,23 @@ def build_outputs(
     repo_root: Path,
     covered_paths: list[Path],
     output_dir: Path,
+    *,
+    coverage_policy: str = CANONICAL_COVERAGE_POLICY,
 ) -> tuple[str, str]:
+    output_dir = resolve_repo_path(repo_root, output_dir)
+    canonical_output_dir = (repo_root / DEFAULT_OUTPUT_DIR).resolve()
+    if (
+        coverage_policy == CUSTOM_SUBSET_COVERAGE_POLICY
+        and output_dir.resolve() == canonical_output_dir
+    ):
+        raise ChecksumError(
+            "custom-subset release checksum coverage must use a noncanonical "
+            f"output directory, not {DEFAULT_OUTPUT_DIR.as_posix()}"
+        )
     effective_paths, governed_references = release_checksum_inputs(
         repo_root,
         covered_paths,
+        coverage_policy=coverage_policy,
     )
     files = collect_files(repo_root, effective_paths, output_dir)
     files_by_path = {
@@ -564,12 +1372,25 @@ def build_outputs(
         output_dir,
         files,
         checksum_text,
+        coverage_policy,
     )
     return checksum_text, json_text(manifest)
 
 
-def write_outputs(repo_root: Path, covered_paths: list[Path], output_dir: Path) -> list[Path]:
-    checksum_text, manifest_text = build_outputs(repo_root, covered_paths, output_dir)
+def write_outputs(
+    repo_root: Path,
+    covered_paths: list[Path],
+    output_dir: Path,
+    *,
+    coverage_policy: str = CANONICAL_COVERAGE_POLICY,
+) -> list[Path]:
+    output_dir = resolve_repo_path(repo_root, output_dir)
+    checksum_text, manifest_text = build_outputs(
+        repo_root,
+        covered_paths,
+        output_dir,
+        coverage_policy=coverage_policy,
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
 
     checksum_path = output_dir / CHECKSUM_FILE_NAME
@@ -612,7 +1433,14 @@ def verify_committed_checksum_file(repo_root: Path, checksum_text: str) -> list[
     return mismatches
 
 
-def check_outputs(repo_root: Path, covered_paths: list[Path], output_dir: Path) -> int:
+def check_outputs(
+    repo_root: Path,
+    covered_paths: list[Path],
+    output_dir: Path,
+    *,
+    coverage_policy: str = CANONICAL_COVERAGE_POLICY,
+) -> int:
+    output_dir = resolve_repo_path(repo_root, output_dir)
     checksum_path = output_dir / CHECKSUM_FILE_NAME
     manifest_path = output_dir / CHECKSUM_MANIFEST_NAME
     mismatches = []
@@ -631,7 +1459,10 @@ def check_outputs(repo_root: Path, covered_paths: list[Path], output_dir: Path) 
 
     try:
         expected_checksum_text, expected_manifest_text = build_outputs(
-            repo_root, covered_paths, output_dir
+            repo_root,
+            covered_paths,
+            output_dir,
+            coverage_policy=coverage_policy,
         )
     except ChecksumError as exc:
         mismatches.append(str(exc))
@@ -668,6 +1499,11 @@ def check_outputs(repo_root: Path, covered_paths: list[Path], output_dir: Path) 
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--covered-path", type=Path, action="append", dest="covered_paths")
+    parser.add_argument(
+        "--coverage-policy",
+        choices=COVERAGE_POLICIES,
+        default=CANONICAL_COVERAGE_POLICY,
+    )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--check", action="store_true")
     return parser.parse_args(argv)
@@ -678,11 +1514,37 @@ def main(argv: list[str]) -> int:
     repo_root = Path.cwd()
     covered_paths = args.covered_paths or DEFAULT_COVERED_PATHS
     output_dir = args.output_dir
+    if args.coverage_policy == CANONICAL_COVERAGE_POLICY and args.covered_paths:
+        print(
+            "error: --covered-path requires "
+            f"--coverage-policy {CUSTOM_SUBSET_COVERAGE_POLICY}",
+            file=sys.stderr,
+        )
+        return 1
+    if (
+        args.coverage_policy == CUSTOM_SUBSET_COVERAGE_POLICY
+        and not args.covered_paths
+    ):
+        print(
+            "error: custom-subset coverage policy requires --covered-path",
+            file=sys.stderr,
+        )
+        return 1
 
     try:
         if args.check:
-            return check_outputs(repo_root, covered_paths, output_dir)
-        written = write_outputs(repo_root, covered_paths, output_dir)
+            return check_outputs(
+                repo_root,
+                covered_paths,
+                output_dir,
+                coverage_policy=args.coverage_policy,
+            )
+        written = write_outputs(
+            repo_root,
+            covered_paths,
+            output_dir,
+            coverage_policy=args.coverage_policy,
+        )
     except ChecksumError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

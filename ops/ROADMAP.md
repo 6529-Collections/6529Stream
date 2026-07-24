@@ -126,6 +126,25 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   approved bytecode-spend baseline remains 22,184 bytes with 2,392 bytes of
   baseline EIP-170 margin. The current headroom remains above the interim
   384-byte development floor but below the 512-byte warning threshold.
+  The Core/mint critical path is sequential: issue
+  [#688](https://github.com/6529-Collections/6529Stream/issues/688) first
+  proposes and, only after acceptance, pins one ledger-owned batch root plus
+  `N` token operation IDs and the atomic
+  removal proof for Core lifetime replay storage; issue
+  [#672](https://github.com/6529-Collections/6529Stream/issues/672) then proves
+  and enforces post-entropy completion gas; only that merged predecessor state
+  may feed #654's complete-target measurement. The real restricted Core
+  ERC-4906 single/batch refresh emitters required by #667 also compile in the
+  #654 stage; their already-pinned selectors are not evidence that current Core
+  source implements them, and their runtime cost must be present before the
+  exact 2,000-byte margin is claimed. The recovery consumer probes the
+  canonical `IStreamFinalityRecoveryCore` ERC-165 ID `0xb5c73a01`, computed as
+  `lastAllocatedTokenId()` (`0x254b22bc`) XOR
+  `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`). Final Core
+  advertises IERC165 and that exact ID, rejects `0xffffffff`, and implements the
+  real emitter; fallback-only handling is nonconformant. Issue #667 owns the
+  fail-closed probe/consumer, while #654 exclusively owns the Core ABI,
+  implementation, negatives, and measurement.
 - A clean-main reviewer reassessment at commit
   `dd61e79d1fba5dbfec105b46ee0544fed105b95e` reported that
   `forge build`, `forge test -vvv` with 316 tests, gas snapshot checks, and the
