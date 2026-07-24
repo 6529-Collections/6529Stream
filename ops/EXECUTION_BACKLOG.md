@@ -1857,8 +1857,12 @@ Acceptance criteria:
    `emitMetadataUpdate(uint256,bytes32)` and
    `emitBatchMetadataUpdate(uint256,uint256,bytes32)` Core helpers needed by
    #667's satellite refresh engine, without absorbing #667 or #670 satellite
-   work. Report their selector/event ABI and measured runtime delta before
-   finalizing the 2,000-byte margin.
+   work. The canonical `IStreamFinalityRecoveryCore` boundary is
+   `lastAllocatedTokenId()` (`0x254b22bc`) XOR the batch helper
+   (`0x908c18bd`) = ERC-165 ID `0xb5c73a01`. Core advertises IERC165 and exactly
+   `0xb5c73a01`, rejects `0xffffffff`, implements the real batch emitter, and
+   fails fallback-only conformance negatives. Report the interface/event ABI
+   and measured runtime delta before finalizing the 2,000-byte margin.
 
 Current target-lock evidence additionally requires an independently reviewed
 exact active-surface digest rather than count-only ABI checks plus a separate

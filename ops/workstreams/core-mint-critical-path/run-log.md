@@ -77,3 +77,22 @@
   Rebase and governed-inventory reconciliation are authorized now; publication
   remains gated on `#689`, followed by a second rebase and final inventory,
   artifact, and full-gate pass.
+- Preserved the #688 draft in commit `7945488e`, rebased it onto merged
+  `#687`, resolved the sole changelog conflict in train order, and produced
+  rebased commit `d6eefe1f` on base `06f36150`.
+- Confirmed the rebase preserved the operation-identity checker and the merged
+  governed inventory: nine operation tests/check, 32 governed-inventory
+  tests/check, Markdown/changelog/whitespace gates, every release-tail
+  test/check, and offline verification all pass.
+- Regenerated the intermediate dependent tail in canonical order: risk
+  register, release notes, release manifest, bytecode proof, release-candidate
+  lockfile, and checksums. This is not publication; `#689` remains the immediate
+  gate, after which ADR 0018 manifest/checksum inventory wiring/tests and the
+  final canonical tail/full gate are still required.
+- Coordinator pinned the #667-to-#654 Core recovery dependency:
+  `IStreamFinalityRecoveryCore` has ERC-165 ID `0xb5c73a01`
+  (`lastAllocatedTokenId()` selector `0x254b22bc` XOR batch-refresh selector
+  `0x908c18bd`). #688 records the dependency; #667 owns only the fail-closed
+  probe/registry consumer; #654 owns actual IERC165/exact-ID advertisement,
+  `0xffffffff` rejection, the real batch emitter, fallback-only negatives, and
+  measured Core impact before any production completeness claim.

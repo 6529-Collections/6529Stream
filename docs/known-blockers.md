@@ -167,7 +167,15 @@ contributors who start from the README.
   Core. The sequential #688 -> #672 -> #654 lane must implement and validate
   that cutover, prove post-entropy completion gas, and include the real
   restricted Core ERC-4906 single/batch refresh emitters required by #667
-  before the exact production margin can pass.
+  before the exact production margin can pass. The final Core recovery seam is
+  the canonical `IStreamFinalityRecoveryCore` interface:
+  `lastAllocatedTokenId()` (`0x254b22bc`) XOR
+  `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`) gives the
+  exact ERC-165 interface ID `0xb5c73a01`. Core must advertise IERC165 and
+  exactly that ID, reject `0xffffffff`, and implement the real batch emitter;
+  fallback-only selector handling is nonconformant. Issue #667 owns its
+  fail-closed constructor probe and registry consumer without editing Core;
+  #654 owns the Core ABI, implementation, negative tests, and measured runtime.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,

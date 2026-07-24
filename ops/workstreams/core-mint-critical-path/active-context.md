@@ -6,6 +6,10 @@
 - Branch: `codex/issue-688-operation-identity`
 - Baseline at branch creation:
   `b4af30a58c22f79bafad241c6e4fab7a4a76063b`
+- Current rebased base:
+  `06f36150c4b5be05851f8081c520e98a6703a0c3`
+- Current branch commit after the first upstream rebase:
+  `d6eefe1f4d3a0dc2be586cea42d8a7fb594fb327`
 - Intended result: a focused ADR and checked specification that pin one
   manager batch operation root, one per-token operation ID for each batch
   element, ledger-owned manager-scoped root replay, exact event/ABI ownership,
@@ -50,6 +54,9 @@ permanent target already pins:
 
 - `emitMetadataUpdate(uint256,bytes32)` (`0xb826aa0c`);
 - `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`);
+- `lastAllocatedTokenId()` (`0x254b22bc`);
+- canonical `IStreamFinalityRecoveryCore` ERC-165 ID `0xb5c73a01`, the XOR of
+  those last two selectors;
 - standard ERC-4906 `MetadataUpdate` / `BatchMetadataUpdate`; and
 - `StreamMetadataRefresh(uint16,bytes32,uint256,uint256)`.
 
@@ -61,6 +68,14 @@ implement `#667`'s registry lifecycle or `#670`'s artist/royalty satellites in
 this lane. Before finalizing `#654`, report the emitter's selector/event ABI,
 caller/range validation, measured runtime delta, and release-artifact overlap
 to the coordinator.
+
+The #654 conformance proof must also show `supportsInterface(IERC165) == true`,
+`supportsInterface(0xb5c73a01) == true`, and
+`supportsInterface(0xffffffff) == false`, plus a real batch-emitter execution
+path. A fallback-only target is nonconformant. Issue #667 owns the fail-closed
+constructor probe and registry consumer and may merge its satellite source
+without Core edits, but no production candidate or completeness claim can
+precede the #654 Core seam.
 
 ## Maturity Guard
 
@@ -86,6 +101,12 @@ target or add evidence; it must not make a deployment or readiness claim.
 - Meta-manager ordering requires merged `#688` upstream of `#658` final
   release-chain regeneration. The coordinator handoff must carry every
   release-input and shared-doc path.
+- After rebasing merged `#687`, the focused operation checker, all 32 governed
+  parameter inventory tests/check, Markdown/changelog/whitespace checks, every
+  six-step release-tail test/check, and the offline release verifier pass.
+  Intermediate artifacts were regenerated in canonical order against the
+  governed inventory; ADR 0018 inventory wiring remains intentionally deferred
+  until the post-`#689` rebase.
 
 ## Open Decisions
 
@@ -119,6 +140,14 @@ publication:
 - `ops/workstreams/core-mint-critical-path/run-log.md`
 - `scripts/check_mint_manager_domain_constants.py`
 - `scripts/test_mint_manager_domain_constants.py`
+- `release-artifacts/latest/risk-register.json`
+- `release-artifacts/latest/release-notes.json`
+- `release-artifacts/latest/release-notes.md`
+- `release-artifacts/latest/release-manifest.json`
+- `release-artifacts/latest/bytecode-release-proof.json`
+- `release-artifacts/latest/release-candidate-lockfile.json`
+- `release-artifacts/latest/SHA256SUMS`
+- `release-artifacts/latest/release-checksums.json`
 
 ## Next Actions
 
@@ -134,9 +163,10 @@ The later `#672` and `#654` implementation PRs form a separate release train;
 do not stack them on or fold them into this ADR/spec/checker PR.
 
 A quiet ten-minute task heartbeat named
-`Resume 6529Stream #688 after upstream merges` monitors the gate and resumes
-this branch only after both upstream merges. It must not create unrelated edits
-or claim progress while either dependency remains open.
+`Resume 6529Stream #688 after upstream merges` monitors the train. After the
+coordinator resumed the workstream on merged `#687`, it may monitor the
+remaining `#689` gate but must not create unrelated edits or claim progress
+while that dependency remains open.
 
 Historical blocker state: three consecutive audits previously found
 `origin/main` at `b4af30a5`, PR `#687` open, and no `#689` PR. Coordinator

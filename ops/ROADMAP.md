@@ -136,7 +136,14 @@ requirements needed to move toward a 10/10 open-source protocol repo.
   ERC-4906 single/batch refresh emitters required by #667 also compile in the
   #654 stage; their already-pinned selectors are not evidence that current Core
   source implements them, and their runtime cost must be present before the
-  exact 2,000-byte margin is claimed.
+  exact 2,000-byte margin is claimed. The recovery consumer probes the
+  canonical `IStreamFinalityRecoveryCore` ERC-165 ID `0xb5c73a01`, computed as
+  `lastAllocatedTokenId()` (`0x254b22bc`) XOR
+  `emitBatchMetadataUpdate(uint256,uint256,bytes32)` (`0x908c18bd`). Final Core
+  advertises IERC165 and that exact ID, rejects `0xffffffff`, and implements the
+  real emitter; fallback-only handling is nonconformant. Issue #667 owns the
+  fail-closed probe/consumer, while #654 exclusively owns the Core ABI,
+  implementation, negatives, and measurement.
 - A clean-main reviewer reassessment at commit
   `dd61e79d1fba5dbfec105b46ee0544fed105b95e` reported that
   `forge build`, `forge test -vvv` with 316 tests, gas snapshot checks, and the
