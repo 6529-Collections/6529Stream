@@ -8,7 +8,8 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md), and
-[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded
+[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md), and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the dedicated entropy subsystem that moves
@@ -353,9 +354,10 @@ Requirements [EC-REGGAS]:
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
    [LTA-GGP] requirement 5. If the precheck fails, the mint reverts
    before the coordinator call.
-4. Raise and lower governance follows [LTA-GGP] requirements 1–2
-   unchanged; parameter changes execute as canonical ADR 0004 governance
-   actions through the exact Core-minimal entries pinned at [LTA-GGP-CORE].
+4. Mutation follows [LTA-GGP] requirements 1–2 as amended by ADR 0017:
+   authority-only class-`1` raises have a 48-hour minimum delay, must strictly
+   increase, and are bounded to 2x per action. Lower, emergency, probe-rebind,
+   conditional, and permissionless writers do not exist.
 5. The parameter is Operational-layer per [LTA-GGP] requirement 3; in
    this subsystem the exclusion additionally covers entropy policy
    manifests and seed derivation, so retuning gas never touches artwork
@@ -371,26 +373,20 @@ Requirements [EC-REGGAS]:
 8. The parameter is a member of the hard-fork/repricing review checklist
    ([LTA-GGP]). Every change emits Core's canonical
    `GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)`
-   event with the executing `actionId`; Core emits no parameter-named alias
-   event ([LTA-GGP-CORE]; ADR 0014 decision V6).
+   event with `schemaVersion = 2` and the executing `actionId`; Core emits no
+   parameter-named alias event ([LTA-GGP-CORE]; ADR 0014 decision V6;
+   ADR 0017).
 
 The parameter's release-manifest failure-direction class is
-`FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10): raises are
-governance-only, and it is not a permissionless conditional-raise member
-(ADR 0012 decision T1). Its named probe is a Permanent-class probe
-contract ([LTA-GGP-PROBES]) that executes a faithful equivalent of the
-guarded operation: the coordinator's all-cold registration write
-sequence, replicated in probe-owned storage with the production struct
-packing and slot shape, run under exactly the probed stipend against a
-pinned input corpus with no caller-supplied gas shaping. The probe
-records each run on itself, and `evidenceHash` commits to the run's
-measurement artifact. A release golden test asserts probe equivalence:
-probe-path gas must match measured production registration gas within
-the tolerance recorded in the release manifest.
+`FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10). Reproducible sizing
+evidence executes the coordinator's all-cold registration write sequence
+against a pinned input corpus with production struct packing and slot shape.
+The artifact commits the input and measurements. It has no onchain
+authorization role (ADR 0017).
 
 Registration failure can never permanently brick minting. The recovery
-chain is explicit (ADR 0010 decision D1.5): the registration cap is
-raisable without limit above the floor, and the Core coordinator pointer
+chain is explicit (ADR 0010 decision D1.5): the registration cap is raisable
+through repeated delayed 2x steps while governance functions, and the Core coordinator pointer
 is replaceable under the Core Satellite Pointer Policy with a pre-approved
 safe-mode coordinator whose registration write fits a leaner storage
 layout behind the same read ABI. Accepted terminal risk: the residual
@@ -858,7 +854,10 @@ Requirements [EC-EVENTS]:
    leading declaration field — declared before every indexed parameter,
    so it is also the first data-section field — and declares at most
    three indexed parameters. Genesis emits every such event with
-   `schemaVersion = 1`.
+   `schemaVersion = 1`, except the raise-only parameter-family
+   `GasParameterRegistered`, `GasParameterUpdated`,
+   `TimeParameterRegistered`, and `TimeParameterUpdated` events, whose
+   `schemaVersion` is `2` under ADR 0017.
 2. The only exempt signatures are the standard ERC-4906 refresh events
    (`MetadataUpdate` / `BatchMetadataUpdate`), emitted by Core with
    their standard signatures and named in the conformance-matrix
@@ -873,11 +872,12 @@ Requirements [EC-EVENTS]:
    `bytes32 actionId` ([GOV-ACTION-ID] in
    [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md))
    alongside the governance events themselves. In this vocabulary the
-   subsystem-owned hosts are `EntropyProviderStateUpdated` and the GTP alias
-   event. Core pointer changes use `CoreSatellitePointerUpdated`, and the
-   Core-hosted registration GGP uses canonical `GasParameterUpdated`; all carry
-   the action ID directly, so reconstructing which staged action authorized a
-   change never requires transaction-level correlation. Which
+   subsystem-owned events are `EntropyProviderStateUpdated` and canonical
+   `TimeParameterUpdated`. Core pointer changes use
+   `CoreSatellitePointerUpdated`, and the Core-hosted registration GGP uses
+   canonical `GasParameterUpdated`; all carry the action ID directly, so
+   reconstructing which staged action authorized a change never requires
+   transaction-level correlation. Which
    coordinator selectors execute as canonical actions is stated in
    [EC-ROLES] rule 2.
 
@@ -908,7 +908,7 @@ reveal policy's `requestSLOBlocks` — is a collection timing policy: a
 frozen declared floor applied through the effective-window rule of
 [EC-TIME] (ADR 0012 decision T1). Collection timing policies are not
 Governed Time Parameters and sit outside the GTP closed world: no
-parameter identifier, cadence probe, or mirror-row obligation attaches
+parameter identifier, state-commitment, or mirror-row obligation attaches
 to a frozen per-collection declaration (ADR 0013 decision U9).
 
 Fresh recovery policy is separate from the main config because most genesis
@@ -1368,7 +1368,7 @@ Requirements [EC-TIME]:
    The frozen declaration is never the parameter: it is a collection
    timing policy (ADR 0013 decision U9) — the collection's promised
    minimum, bounding every retune from below, with none of the GTP
-   closed world's identifier, probe, or mirror-row obligations — so
+   closed world's identifier, host-state, or mirror-row obligations — so
    the pre-lapse public-request exclusivity (ADR 0009 decision 22) and
    the original provider's declared patience hold for the life of the
    collection.
@@ -1378,30 +1378,27 @@ Requirements [EC-TIME]:
    reroll or exclusivity hazard and whose late firing is a bounded
    liveness cost. The immutable floors, the frozen declarations, and
    the max() rule enforce onchain that no governed retune opens a
-   gate earlier, in block terms, than both allow; a governed lower
-   restores a cadence-inflated window only down to those bounds. What
+   gate earlier, in block terms, than both allow. The launch host cannot lower
+   a cadence-inflated window; tightening requires a successor. What
    no block-denominated rule can enforce is wall-clock ordering under
    consensus-timing change: cadence moves a frozen block count's
    wall-clock meaning in both directions, and the acceleration
    direction carries the review and staging obligations of rules 6
    and 8 (ADR 0014 decision V7).
-4. Change discipline is the pattern home's, cited not restated: the
-   canonical governance action on the normal delay class, per-action
-   raise and lower bounds, cadence-probe-gated lowers, and no emergency
-   or permissionless conditional path for any time parameter
-   ([LTA-GTP]; ADR 0012 decision T1).
+4. Change discipline is the pattern home's, cited not restated: an
+   authority-only class-`1` action delayed at least 48 hours, a strict
+   monotonic increase bounded to 2x per action, exact V2 state commitments,
+   and no lower, emergency, probe-rebind, or permissionless path
+   ([LTA-GTP]; ADR 0017).
 5. The values are Operational-layer ([LTA-GTP]): excluded from entropy
    identity, policy manifests, provider config hashes, seed derivation,
    and provider epochs, exactly as [EC-CONFIG] rule 12 excludes gas
    (ADR 0010 decision D1.3). Retuning a window never disturbs a frozen
    collection and never changes any seed.
-6. Cadence probe: the three parameters share the coordinator's named
-   cadence probe — a Permanent-class probe contract under
-   [LTA-GGP-PROBES], recorded per parameter in the release manifest
-   with its `probeMaxAgeBlocks` — whose recorded observed-cadence runs
-   gate lowers and feed the review ([LTA-GTP]). Observed cadence
-   drift beyond the manifest tolerance — slower or faster — is a
-   monitored review trigger under the same incident regime as
+6. Cadence review: public-chain cadence measurements for all three parameters
+   are release/operations evidence, not an onchain probe or authorization
+   record. Observed cadence drift beyond the manifest tolerance — slower or
+   faster — is a monitored review trigger under the same incident regime as
    [EC-REVEAL] rule 8: a faster cadence triggers the same review
    obligation as a slower one, remeasuring every effective window
    against its pinned wall-clock floor ([LTA-GTP] definition item 2;
@@ -1416,8 +1413,8 @@ Requirements [EC-TIME]:
    sizing rationale, not from this prose.
 8. Cadence residuals bind in both directions (ADR 0012 decision T1;
    ADR 0014 decision V7). Slowdown: cadence slowdown lengthens frozen
-   declared windows in wall-clock terms, and no governance action may
-   shorten a window below a collection's frozen declaration —
+   declared windows in wall-clock terms, and the launch host cannot shorten a
+   window —
    escalations arrive wall-clock-late, and delivery retry,
    reveal-owner and admin requests, and incident handling all remain
    available throughout the longer wait. Acceleration: faster block
@@ -1439,21 +1436,10 @@ Requirements [EC-TIME]:
    escalation, but the [EC-INCIDENT] rule 3 three-part evidence rule
    and Request Commitment Finality still block every fresh draw they
    would block at the intended cadence.
-9. Every change emits the parameter-named alias event below — an alias
-   member of the canonical `TimeParameterUpdated` change-event family
-   per [LTA-GTP], tagged as such in the event catalog and binding the
-   authorizing action ID (ADR 0014 decision V6):
-
-```solidity
-event EntropyTimeParameterUpdated(
-    uint16 schemaVersion,
-    bytes32 indexed parameterId,
-    bytes32 indexed actionId,
-    uint256 oldValueBlocks,
-    uint256 newValueBlocks,
-    uint256 floorBlocks
-);
-```
+9. Every change emits the canonical `TimeParameterUpdated` event with
+   `schemaVersion = 2` and the executor-derived authorizing action ID
+   ([LTA-GTP]; ADR 0014 decision V6; ADR 0017). No parameter-named alias event
+   exists.
 
 ## Token Registration Flow
 
@@ -2521,14 +2507,12 @@ Rules [EC-INCIDENT]:
 `ENTROPY_RESULT_PROBE_GAS_LIMIT` carries the release-manifest
 failure-direction class `FORWARDING_CAP` ([LTA-GGP] requirement 10): it
 bounds a fail-safe staticcall whose failure reads as "not safe to
-recover," and raising it restores recovery capability. Its named health
-probe — a Permanent-class probe contract ([LTA-GGP-PROBES]; ADR 0012
-decision T1) — executes `providerResultStatus` staticcalls against each
-registered production adapter for a pinned fixture corpus of request
-IDs under exactly the probed cap, with no caller-supplied gas shaping;
-it records each run on itself, treats out-of-gas, revert, or malformed
-returndata as failure, and commits the measurement artifact through
-`evidenceHash`.
+recover," and raising it restores recovery capability. Its reproducible sizing
+evidence executes `providerResultStatus` staticcalls against each registered
+production adapter for a pinned fixture corpus of request IDs under the
+candidate cap, treats out-of-gas, revert, or malformed returndata as failure,
+and commits the measurements in release evidence. It has no onchain probe or
+mutation authority (ADR 0017).
 
 One provider-side condition deserves explicit statement: a frame-level
 callback loss after upstream fulfillment — the in-flight repricing mode
@@ -3131,20 +3115,17 @@ Core integration tests:
 9. Emergency switch to a pre-approved safe-mode coordinator preserves
    registration semantics.
 10. `ENTROPY_REGISTRATION_GAS_LIMIT` behaves per [EC-REGGAS] and
-   [LTA-GGP] requirements 1–2 (ADR 0011 decision R5): staged raises on
-   the normal delay class bounded to 2x per action, the raise-only
-   probe-gated emergency path, lower only with a recorded passing probe
-   run at the proposed value, floor rejection below
-   `ENTROPY_REGISTRATION_GAS_FLOOR`, and change events with old and new
+   [LTA-GGP] requirements 1–2 (ADR 0017): authority-only class-`1` raises
+   delayed at least 48 hours and bounded to 2x per action, exact V2
+   commitments, lower/same-value rejection, and change events with old and new
    values.
 11. The EIP-150 parent precheck is exercised at, below, and above the
     threshold and reads the live parameter value after a raise.
 12. Gas parameter values appear in no finality manifest, frozen-route
     identity, entropy policy manifest, or seed derivation input.
-13. The registration-gas probe satisfies its golden equivalence test,
-    records failing and passing runs on itself, and the parameter's
-    `FAIL_CLOSED_PRECHECK` class excludes it from permissionless
-    conditional-raise registration (ADR 0012 decision T1).
+13. The registration-gas sizing fixture is reproducible and the source/ABI
+    goldens prove no probe or permissionless parameter mutation surface exists
+    (ADR 0017).
 
 Coordinator config tests:
 
@@ -3168,11 +3149,11 @@ Coordinator config tests:
 10. Rotating the holder behind a frozen `incidentDeclarerRole` through
     ADR 0004 governance requires no policy or config change, and incident
     declaration honors the post-rotation holder.
-11. Governed time parameters [EC-TIME]: values below their immutable
-    floors are rejected; raises and lowers respect the per-action bounds
-    and the normal delay class; every change emits
-    `EntropyTimeParameterUpdated`; no emergency or permissionless
-    conditional path exists for a time parameter.
+11. Governed time parameters [EC-TIME]: same-value and lower values are
+    rejected; raises use class `1`, wait at least 48 hours, and respect the 2x
+    per-action bound; every change emits canonical schema-v2
+    `TimeParameterUpdated`; no
+    probe, emergency, rebind, or permissionless path exists.
 12. Effective windows apply the max() rule: a governed raise lengthens
     the effective timeout, SLO, and recovery-step delay for a frozen
     collection without touching its config, policy hashes, provider
@@ -3188,7 +3169,7 @@ Coordinator config tests:
     `CoreSatellitePointerUpdated`, `EntropyProviderStateUpdated`, Core's
     canonical `GasParameterUpdated`
     for `ENTROPY_REGISTRATION_GAS_LIMIT`, and
-    `EntropyTimeParameterUpdated` — carry an `actionId` equal to the
+    canonical `TimeParameterUpdated` — carry an `actionId` equal to the
     canonical governance action that executed the change, matching the
     ADR 0004 governance events [EC-EVENTS] rule 4 (ADR 0014 decision V6).
 
@@ -3288,9 +3269,9 @@ Incident recovery tests:
     eligibility opens only after the maximum of the frozen declaration
     and the live governed value [EC-TIME], and a governed raise defers
     an otherwise-eligible declaration.
-17. The result-probe parameter's named health probe records runs on
-    itself and treats out-of-gas, revert, and malformed returndata as
-    failing runs (ADR 0012 decision T1).
+17. Reproducible offchain and fork evidence for the result-status path treats
+    out-of-gas, revert, and malformed returndata as failed measurements. The
+    evidence cannot authorize a parameter mutation (ADR 0017).
 18. For an artist-bound collection, a fresh recovery request without a
     verified artist content consent or a recorded unavailability
     finding reverts; with one, the consent or finding record hash is
@@ -3428,9 +3409,11 @@ Renderer integration tests:
    with typed errors (ADR 0009 decision 25).
 7. `ENTROPY_REGISTRATION_GAS_LIMIT` and every coordinator-side external
    call cap are Governed Gas Parameters with immutable floors, staged
-   raise/lower, health probes, and exclusion from finality identity; the
+   authority-only class-`1` monotonic raises, reproducible offchain/fork sizing
+   evidence, and exclusion from finality identity; the
    never-brick recovery chain — raisable cap plus replaceable coordinator
-   pointer — is explicit (ADR 0010 decisions D1.1 through D1.5).
+   pointer — is explicit (ADR 0010 decisions D1.1 through D1.5 as amended by
+   ADR 0017).
 8. Request payment binds `msg.value` as `maxFeeWei` against a
    same-transaction provider quote with pull-credit refund of excess
    [EC-FEEBIND] (ADR 0010 decision D8.7).

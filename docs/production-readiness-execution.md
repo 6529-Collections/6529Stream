@@ -22,6 +22,13 @@ freeze. Any contract or release-artifact change after this point must rerun the
 relevant focused checks, the full candidate gate, and the deterministic
 artifact generators in canonical order.
 
+ADR 0017 now supersedes this packet's parameter-probe target. The active
+pre-genesis target has 37 profile entries, no probe deployments or bindings,
+raise-only GGP/GTP hosts, and retired/forbidden/never-reuse action-class ID
+`6`. The measured size and analysis rows below remain the frozen comparison
+evidence for commit `b77e2338`; they are not measurements of the ADR-0017
+candidate.
+
 ## Local Candidate Results
 
 | Gate | Result | Evidence |
@@ -29,7 +36,7 @@ artifact generators in canonical order.
 | Full ordinary repository gate | Passed on PR #660 before merge | `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`; Foundry, Slither, and Windows CI passed on the reviewed final head |
 | Production size build | Measured, release-blocking | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py` records canonical `StreamCore` at 24,152 runtime bytes; the aggregate all-source size build is diagnostic only |
 | `StreamCore` production headroom | Blocked | 424 bytes of EIP-170 margin, 1,576 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
-| Genesis deployment profile | Blocked | The active target specification expands the checked profile to 60 entries, including Permanent `StreamSystemManifest` entry 36 and immutable Permanent `StreamCoreFinalityAdapter` entry 37, but the current v1 implementation catalog cannot prove deployment-instance identity, fallback distinctness, or parameterized probe bindings; issue #656 owns reconciliation |
+| Genesis deployment profile | Blocked | At this packet's baseline the checked profile had 60 entries. ADR 0017 supersedes it with the canonical 37-entry, no-probe target, including Permanent `StreamSystemManifest` entry 36 and immutable Permanent `StreamCoreFinalityAdapter` entry 37; the implementation catalog still must prove deployment-instance identity and fallback distinctness, so issue #656 continues to own reconciliation |
 | Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 33 Open production rows (3 High, 30 Medium): one confirmed gap, five design-review rows, and 27 pending dispositions; issue #658 owns remediation and reviewed disposition |
 | Governance Executor native-value authority | Blocked | Bounded assembly makes the proposal-selected value-bearing call invisible to Slither without removing the authority; High open blocker `RISK-GOV-003` requires a closed-world target/selector/value policy, deployment binding, adversarial tests, and independent review under issues #658 and #665 |
 | Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |

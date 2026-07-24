@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IStreamGovernanceExecutor.sol";
-import "../smart-contracts/IStreamGasParameterHost.sol";
 import "../smart-contracts/IStreamRoleRegistry.sol";
 import "../smart-contracts/StreamGovernanceEvidence.sol";
 import "../smart-contracts/StreamGovernanceExecutor.sol";
@@ -2139,10 +2138,9 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         );
         registryMutations[4] =
             abi.encodeCall(IStreamRoleRegistry.registerRoleManager, (stranger, true));
-        uint8[3] memory rejectedClasses = [
+        uint8[2] memory rejectedClasses = [
             StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING,
-            StreamGovernanceActionClasses.TERMINAL_FREEZE,
-            StreamGovernanceActionClasses.EMERGENCY_RESTORATION
+            StreamGovernanceActionClasses.TERMINAL_FREEZE
         ];
         for (uint256 mutationIndex = 0; mutationIndex < registryMutations.length; mutationIndex++) {
             GovernanceCall[] memory calls = new GovernanceCall[](1);
@@ -2170,14 +2168,6 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
                     vm.expectRevert(
                         abi.encodeWithSelector(
                             IStreamGovernanceExecutor.NotClassifiedTightening.selector,
-                            address(roleRegistry),
-                            calls[0].selector
-                        )
-                    );
-                } else if (actionClass == StreamGovernanceActionClasses.EMERGENCY_RESTORATION) {
-                    vm.expectRevert(
-                        abi.encodeWithSelector(
-                            IStreamGovernanceExecutor.EmergencyRestorationCallNotEligible.selector,
                             address(roleRegistry),
                             calls[0].selector
                         )
@@ -2330,7 +2320,7 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         executor.cancelGovernanceAction(staleActionId, keccak256("ABA regression cleanup"));
     }
 
-    function testRoleRegistryCannotEnterFastEmergencyFreezeOrTailPolicyLanes() public {
+    function testRoleRegistryCannotEnterFastFreezeOrTailPolicyLanes() public {
         bytes4 roleSelector = IStreamRoleRegistry.grantRole.selector;
         uint256 initialTailCount = executor.systemManifestTailTriggerCount();
 
@@ -2387,33 +2377,6 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         executor.executeGovernanceBatch(freezeActionId, freezeCalls, freezeCallDatas);
         executor.cancelGovernanceAction(freezeActionId, keccak256("freeze cleanup"));
 
-        bytes memory emergencyCallData = abi.encodeCall(
-            StreamGovernanceExecutor.registerEmergencyRestorationEligibility,
-            (address(roleRegistry), IStreamGasParameterHost.emergencyRaiseGasParameter.selector)
-        );
-        (
-            bytes32 emergencyActionId,
-            GovernanceCall[] memory emergencyCalls,
-            bytes[] memory emergencyCallDatas,
-            uint64 emergencyNotBefore
-        ) = _scheduleConfigCall(
-            StreamGovernanceActionClasses.TERMINAL_FREEZE,
-            emergencyCallData,
-            SCOPE,
-            OLD_VALUE,
-            NEW_VALUE
-        );
-        vm.warp(emergencyNotBefore);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                address(roleRegistry),
-                IStreamGasParameterHost.emergencyRaiseGasParameter.selector
-            )
-        );
-        executor.executeGovernanceBatch(emergencyActionId, emergencyCalls, emergencyCallDatas);
-        executor.cancelGovernanceAction(emergencyActionId, keccak256("emergency cleanup"));
-
         bytes memory tailCallData = abi.encodeCall(
             StreamGovernanceExecutor.registerSystemManifestTailTrigger,
             (address(roleRegistry), roleSelector, uint8(0x02))
@@ -2437,7 +2400,6 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         executor.executeGovernanceBatch(tailActionId, tailCalls, tailCallDatas);
         executor.cancelGovernanceAction(tailActionId, keccak256("tail cleanup"));
 
-        executor.emergencyRestorationEligibilityCount().assertEq(0, "no emergency admission");
         executor.isTighteningCall(address(roleRegistry), roleSelector)
             .assertFalse("no tightening admission");
         executor.isFreezeSelector(address(roleRegistry), roleSelector)
@@ -2752,11 +2714,42 @@ contract StreamGovernanceExecutorTest is StreamGovernanceBootstrapHarness {
         );
         _scheduleWindow(calls, notBefore, tooLate);
 
-        // Unknown action class.
-        vm.expectRevert(
-            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, 7)
+        // Retired class 6 and every unknown successor are forbidden.
+        for (uint8 actionClass = 6; actionClass <= 7; actionClass++) {
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    IStreamGovernanceExecutor.UnknownActionClass.selector, actionClass
+                )
+            );
+            _scheduleClass(actionClass, calls, notBefore, notBefore + 7 days);
+        }
+    }
+
+    function testExecutionBoundaryRejectsCorruptedRetiredClassSixRecord() public {
+        bytes memory callData = abi.encodeCall(target.setValue, (77));
+        (GovernanceCall[] memory calls, bytes[] memory callDatas) = _singleCall(0, callData);
+        (uint64 notBefore, uint64 expiresAfter) = _defaultWindow();
+        bytes32 actionId = _schedule(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            calls,
+            callDatas,
+            notBefore,
+            expiresAfter
         );
-        _scheduleClass(7, calls, notBefore, notBefore + 7 days);
+
+        // `_actions` is the first derived-contract mapping after Ownable and
+        // ReentrancyGuard (slot 2); status/class share the first value word.
+        bytes32 actionSlot = keccak256(abi.encode(actionId, uint256(2)));
+        uint256 actionHeader = uint256(vm.load(address(executor), actionSlot));
+        actionHeader = (actionHeader & ~(uint256(0xff) << 8)) | (uint256(6) << 8);
+        vm.store(address(executor), actionSlot, bytes32(actionHeader));
+
+        vm.warp(notBefore);
+        vm.expectRevert(
+            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, uint8(6))
+        );
+        executor.executeGovernanceBatch(actionId, calls, callDatas);
+        target.value().assertEq(0, "retired class reached target");
     }
 
     function _expectDelayRevert(

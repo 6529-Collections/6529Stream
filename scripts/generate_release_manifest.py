@@ -93,6 +93,7 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/non-local-release-evidence.md"),
     Path("docs/architecture.md"),
     Path("docs/launch-v1-target-architecture.md"),
+    Path("docs/adr/0017-raise-only-parameter-governance.md"),
     Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),
     Path("docs/audit-finding-workflow.md"),

@@ -781,8 +781,8 @@ class AbiCompatibilityTests(unittest.TestCase):
             entry for entry in manifest["events"] if entry["status"] == "active_target"
         ]
         self.assertEqual(manifest["coverage"]["completeness"], "complete_permanent_functions_and_events")
-        self.assertEqual(len(active_functions), 58)
-        self.assertEqual(len(active_events), 19)
+        self.assertEqual(len(active_functions), 53)
+        self.assertEqual(len(active_events), 18)
         self.assertIn("custom_errors", manifest["coverage"]["excluded_abi_categories"])
         self.assertEqual(
             manifest["coverage"]["required_absent_abi_categories"],
@@ -1146,11 +1146,27 @@ class AbiCompatibilityTests(unittest.TestCase):
             ],
             "Current metadata router, current artwork finality registry, or exact nonzero coordinatorAtMint(tokenId); token lifecycle must be MINTED or BURNED",
         )
+        for removed_signature in (
+            "conditionalRaiseGasParameter(bytes32,uint256)",
+            "conditionalRelowerGasParameter(bytes32,uint256)",
+            "emergencyRaiseGasParameter(bytes32,uint256)",
+            "lowerGasParameter(bytes32,uint256)",
+            "rebindGasParameterProbe(bytes32,address)",
+        ):
+            self.assertNotIn(removed_signature, function_by_signature)
+        self.assertNotIn(
+            "GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)",
+            event_by_signature,
+        )
+        self.assertIn(
+            "strict monotonic raise bounded to at most 2x per action",
+            function_by_signature["raiseGasParameter(bytes32,uint256)"]["authorization_model"],
+        )
         self.assertEqual(
-            function_by_signature["rebindGasParameterProbe(bytes32,address)"][
-                "authorization_model"
-            ],
-            "Immutable governance executor during a verified POINTER_REPLACEMENT (3) action with same-batch system-manifest satellite publication",
+            event_by_signature[
+                "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)"
+            ]["schema_version"],
+            2,
         )
         self.assertEqual(
             function_by_signature["abortPreparedMintFromManager(uint256,bytes32)"][
@@ -1195,9 +1211,7 @@ class AbiCompatibilityTests(unittest.TestCase):
             "gasParameterInfo(bytes32)": (
                 "uint256",
                 "uint256",
-                "address",
                 "uint8",
-                "uint64",
                 "uint64",
             ),
             "getSatellitePointer(bytes32)": (

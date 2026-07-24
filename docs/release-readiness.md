@@ -7,8 +7,9 @@ production release.
 
 The canonical requirement inventory is
 [`release-artifacts/genesis-deployment-profile.json`](../release-artifacts/genesis-deployment-profile.json).
-Its default checker keeps the numbered `[LCM-GENESIS]` roles and exact probe
-rows structurally synchronized; production release mode additionally requires
+Its default checker keeps the 37 numbered `[LCM-GENESIS]` roles structurally
+synchronized and rejects every probe row or binding under ADR 0017; production
+release mode additionally requires
 the current candidate to satisfy every entry exactly once. The committed
 implementation catalog remains incomplete and does not yet constitute a
 concrete deployment-instance manifest, so this gate is red without changing
@@ -216,7 +217,11 @@ normative 2,000-byte EIP-170 deployment headroom rule from the
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 and [`Core Hook Budget`](launch-v1-target-architecture.md#core-hook-budget).
 Missing, malformed, inconsistent, or sub-threshold size fields fail closed.
-The current 24,152-byte runtime has only 424 bytes of headroom, so
+The last committed measurement is a 24,152-byte runtime with only 424 bytes of
+headroom. ADR 0017 avoids adding superseded machinery to the planned target;
+that machinery was not present in this measured Core, so the decision does not
+shrink the baseline. A separate Core refactor and regenerated canonical proof
+remain necessary. Until then,
 [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
 production release even after evidence rows become complete.
 
@@ -241,8 +246,8 @@ Strict release mode now proves whether the implementation catalog satisfies the
 canonical
 [`Genesis Deployment Profile`](launch-conformance-matrix.md#genesis-deployment-profile)
 as a closed world. The committed catalog fails that check, and the current
-manifest model still cannot prove distinct deployment instances for fallbacks
-and parameter-bound probes. That reconciliation remains an independent
+manifest model still cannot prove every required distinct deployment instance
+for the 37-entry, no-probe target. That reconciliation remains an independent
 production blocker tracked by
 [issue #656](https://github.com/6529-Collections/6529Stream/issues/656); the
 structural profile gate is not concrete deployment evidence.
@@ -252,8 +257,8 @@ structural profile gate is not concrete deployment evidence.
 | Area | Current state | Blocks public beta | Blocks production release |
 | --- | --- | --- | --- |
 | CI and local gates | Passing local/CI baseline exists for build, tests, size, local deployment rehearsals, incident response, release artifacts, architecture/threat model, audit package, release manifest, checksums, and changelog | No | No, but release commit CI must be green |
-| StreamCore deployment headroom | The ordinary development size floor passes at 24,152 runtime bytes and 424 bytes of EIP-170 margin, but the normative production deployment gate requires at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
-| Genesis inventory completeness | The canonical launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every distinct fallback and probe deployment instance; issue #656 tracks reconciliation | No | Yes |
+| StreamCore deployment headroom | The last committed measurement passes the ordinary development floor at 24,152 runtime bytes and 424 bytes of EIP-170 margin. ADR 0017 avoids planned bytecode growth but does not shrink that Core; the normative production gate still requires a separate refactor and regenerated proof with at least 2,000 bytes; issue #654 tracks recovery | No | Yes |
+| Genesis inventory completeness | The canonical 37-entry no-probe launch profile and fail-closed production checker exist, but the current implementation catalog is incomplete and the manifest model cannot yet prove every required distinct deployment instance; issue #656 tracks reconciliation | No | Yes |
 | Protocol maturity | Pre-audit, not production-ready, local baseline only | Yes | Yes |
 | External audit | Audit package and external audit retained-artifact template/checker exist; completed external audit report and post-audit remediation do not exist | Yes | Yes |
 | Deployment evidence | Local Anvil deployment, auction, metadata-browser, and emergency redeployment rehearsals exist; fork deployment rehearsal evidence is retained but pending re-review for the CON-015 artifact set; fork ceremony evidence is retained but pending re-review for the CON-015 artifact set; testnet rehearsal retained-artifact template/checker and admin ceremony evidence template/checker exist | Pending CON-015 fork deployment review, reviewed testnet/live evidence, reviewed admin ceremony evidence, pending CON-015 fork ceremony review, verified deployed addresses, explorer verification, and pending fork/testnet randomizer evidence | Production broadcast retention, production admin ceremony evidence, verified deployed addresses, and explorer verification missing |
@@ -331,6 +336,9 @@ The current local baseline includes:
   [`release-artifacts/latest/release-manifest.json`](../release-artifacts/latest/release-manifest.json),
   [`release-artifacts/latest/SHA256SUMS`](../release-artifacts/latest/SHA256SUMS),
   and [`release-artifacts/latest/release-checksums.json`](../release-artifacts/latest/release-checksums.json);
+  ADR 0017 is a direct release-manifest governance document and a direct
+  checksum-generator input, so any change to the raise-only target invalidates
+  both artifacts until their canonical regeneration;
 - protocol surface report guidance and generated output under
   [`docs/protocol-surface.md`](protocol-surface.md) and
   [`release-artifacts/latest/protocol-surface-report.json`](../release-artifacts/latest/protocol-surface-report.json),

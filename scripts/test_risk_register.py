@@ -99,6 +99,12 @@ def minimal_register(root: Path) -> dict[str, object]:
 
 
 class RiskRegisterTests(unittest.TestCase):
+    def test_generator_directly_covers_raise_only_governance_adr(self) -> None:
+        self.assertIn(
+            "docs/adr/0017-raise-only-parameter-governance.md",
+            generator.SOURCE_DOCUMENT_PATHS,
+        )
+
     def test_accepts_committed_risk_register(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
         with redirect_stdout(StringIO()), redirect_stderr(StringIO()):

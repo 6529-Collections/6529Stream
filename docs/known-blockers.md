@@ -142,15 +142,19 @@ contributors who start from the README.
   canonical isolated `python scripts/build_release_artifacts.py` output. The
   aggregate `forge build --sizes --via-ir --skip test --skip script --force`
   output remains diagnostic only. The
-  committed `release-artifacts/latest/bytecode-release-proof.json` currently
-  records `StreamCore` runtime size at 24,152 bytes with 424 bytes of EIP-170 headroom,
+  committed `release-artifacts/latest/bytecode-release-proof.json` records the
+  last pre-ADR-0017 `StreamCore` runtime measurement at 24,152 bytes with
+  424 bytes of EIP-170 headroom,
   which passes deployability and the interim 384-byte development floor but
   sits below the 512-byte warning threshold and the normative 2,000-byte
   production deployment minimum. The accepted CON-012 development exception
   cannot survive the deployment gate;
   [issue #654](https://github.com/6529-Collections/6529Stream/issues/654) blocks
   production release until real headroom is recovered while every mandatory
-  Core hook is retained. Historical measurements show the prior refactor reached
+  Core hook is retained. ADR 0017 avoids adding the superseded
+  probe/lower/emergency/conditional/rebinding machinery, but that machinery was
+  not present in the measured Core and the ADR does not reduce this baseline.
+  Historical measurements show the prior refactor reached
   21,792 bytes, then the manager/prepared-mint boundary added roughly 2,330 bytes
   while the legacy Drops/Minter route remained live. The remediation is a
   pre-genesis ABI cutover and caller migration, not another additive parallel
@@ -161,10 +165,11 @@ contributors who start from the README.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
-  unapproved-alias, fallback, or probe entries. The current
+  unapproved-alias, or fallback entries. ADR 0017 fixes the canonical launch
+  profile at 37 entries and requires no probe rows or bindings. The current
   `release-artifacts/contracts.json` implementation catalog remains incomplete
-  and cannot represent the required distinct fallback and probe deployment
-  instances; manifest/address-book/source-verification reconciliation remains
+  and still does not prove all required distinct deployment instances;
+  manifest/address-book/source-verification reconciliation remains
   open under [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).
   This remains an independent production blocker even if all other release-mode
   checks pass.

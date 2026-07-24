@@ -175,7 +175,7 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(bytes32(bytes4(0x83beaacb)), "terminal page-limit error");
     }
 
-    function testManifestAndEmergencySelectorGoldens() public {
+    function testManifestSelectorGoldens() public {
         bytes32(IStreamGovernanceExecutor.systemManifestBatchTailRule.selector)
             .assertEq(bytes32(bytes4(0xffd6babe)), "tail rule selector");
         bytes32(IStreamGovernanceExecutor.registerSystemManifestTailTrigger.selector)
@@ -194,16 +194,26 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
             .assertEq(bytes32(bytes4(0x8a2d979b)), "bootstrap state selector");
         bytes32(IStreamGovernanceExecutor.sealSystemManifestBootstrap.selector)
             .assertEq(bytes32(bytes4(0xbd1f39cd)), "bootstrap seal selector");
-        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibility.selector)
-            .assertEq(bytes32(bytes4(0xf23a1e43)), "emergency eligibility selector");
-        bytes32(IStreamGovernanceExecutor.registerEmergencyRestorationEligibility.selector)
-            .assertEq(bytes32(bytes4(0x9e842aea)), "register emergency selector");
-        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibilityCount.selector)
-            .assertEq(bytes32(bytes4(0xffd0e631)), "emergency count selector");
-        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibilityAt.selector)
-            .assertEq(bytes32(bytes4(0xe249cded)), "emergency at selector");
-        bytes32(IStreamGovernanceExecutor.emergencyRestorationEligibilityChainHash.selector)
-            .assertEq(bytes32(bytes4(0x927836c4)), "emergency chain selector");
+    }
+
+    function testRetiredEmergencyEligibilitySelectorsAreAbsent() public {
+        bytes[] memory calls = new bytes[](5);
+        calls[0] = abi.encodeWithSignature(
+            "emergencyRestorationEligibility(address,bytes4)", address(this), bytes4(0x12345678)
+        );
+        calls[1] = abi.encodeWithSignature(
+            "registerEmergencyRestorationEligibility(address,bytes4)",
+            address(this),
+            bytes4(0x12345678)
+        );
+        calls[2] = abi.encodeWithSignature("emergencyRestorationEligibilityCount()");
+        calls[3] = abi.encodeWithSignature("emergencyRestorationEligibilityAt(uint256)", uint256(0));
+        calls[4] = abi.encodeWithSignature("emergencyRestorationEligibilityChainHash()");
+        for (uint256 i = 0; i < calls.length; i++) {
+            (bool ok, bytes memory returnData) = address(executor).call(calls[i]);
+            ok.assertFalse("retired emergency selector accepted");
+            returnData.length.assertEq(0, "retired emergency selector returned custom error");
+        }
     }
 
     function testV1DomainGettersAreRetired() public {
@@ -525,8 +535,10 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         uint256(StreamGovernanceActionClasses.FUNDS_RECOVERY).assertEq(4, "FUNDS_RECOVERY = 4");
         uint256(StreamGovernanceActionClasses.SUCCESSOR_DECLARATION)
             .assertEq(5, "SUCCESSOR_DECLARATION = 5");
-        uint256(StreamGovernanceActionClasses.EMERGENCY_RESTORATION)
-            .assertEq(6, "EMERGENCY_RESTORATION = 6");
+        // ID 6 was retired before genesis. It remains reserved and must never
+        // be reassigned even though it is not an executable action class.
+        uint8 retiredEmergencyRestoration = 6;
+        uint256(retiredEmergencyRestoration).assertEq(6, "retired class 6 remains reserved");
     }
 
     function testGovernanceWindowFloorConstants() public {
@@ -543,13 +555,10 @@ contract StreamGovernanceTypehashGoldenTest is CharacterizationTestBase {
         uint256(executor.minimumDelay(StreamGovernanceActionClasses.SUCCESSOR_DECLARATION))
             .assertEq(30 days, "successor declaration floor");
         uint256(7 days).assertEq(604_800, "open-to-execute floor catalog pin");
-        uint256(4 hours).assertEq(14_400, "emergency assumption latency catalog pin");
-        uint256(executor.minimumDelay(StreamGovernanceActionClasses.EMERGENCY_RESTORATION))
-            .assertEq(0, "emergency restoration delay");
         vm.expectRevert(
-            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, 7)
+            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, 6)
         );
-        executor.minimumDelay(7);
+        executor.minimumDelay(6);
     }
 
     function testStreamModuleSelectorGolden() public {

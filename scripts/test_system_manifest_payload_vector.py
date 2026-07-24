@@ -48,7 +48,7 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
             generator.EXPECTED_PROFILE_ENTRIES,
         )
         self.assertEqual(len(validated["payload"]["pointers"]), 11)
-        self.assertEqual(len(validated["payload"]["gasParameterProbes"]), 40)
+        self.assertEqual(validated["payload"]["gasParameterProbes"], [])
         self.assertGreater(len(validated["chunks"]), 1)
 
     def test_governance_binding_proves_state_export_publisher_surface(self) -> None:
@@ -237,21 +237,12 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
             generator.PAYLOAD_LIST_DOMAIN: b"6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1",
             generator.PAYLOAD_ROOT_DOMAIN: b"6529STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1",
             generator.DEPLOYMENT_IDENTITY_DOMAIN: b"6529STREAM_DEPLOYMENT_IDENTITY_V1",
-            generator.GGP_PROBE_BINDING_DOMAIN: b"6529STREAM_GGP_PROBE_BINDING_V1",
         }
         for digest, preimage in expected.items():
             self.assertEqual(generator.hex_keccak(preimage), digest)
         self.assertEqual(
             "0x" + generator.keccak256(b"STREAM_SYSTEM_MANIFEST_ROOT")[:4].hex(),
             generator.ROOT_DESCRIPTOR_MAGIC,
-        )
-        self.assertEqual(
-            int("c04c14e3", 16) ^ int("cfc07fec", 16),
-            int("0f8c6b0f", 16),
-        )
-        self.assertEqual(
-            int("c04c14e3", 16) ^ int("76896171", 16),
-            int("b6c57592", 16),
         )
 
     def test_deployment_identity_is_one_global_profile_bound_digest(self) -> None:
@@ -273,10 +264,6 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
             *(item["deploymentManifestHash"] for item in payload["contracts"]),
             *(item["deploymentManifestHash"] for item in payload["pointers"]),
             *(item["deploymentManifestHash"] for item in payload["registryEntries"]),
-            *(
-                item["probeDeploymentManifestHash"]
-                for item in payload["gasParameterProbes"]
-            ),
             *(item["deploymentManifestHash"] for item in payload["criticalFallbacks"]),
         ]
         self.assertTrue(occurrences)
@@ -287,12 +274,6 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
             ("contract entry", "contracts", 1, "deploymentManifestHash"),
             ("pointer", "pointers", 0, "deploymentManifestHash"),
             ("registry entry", "registryEntries", 0, "deploymentManifestHash"),
-            (
-                "probe binding",
-                "gasParameterProbes",
-                0,
-                "probeDeploymentManifestHash",
-            ),
             ("critical fallback", "criticalFallbacks", 0, "deploymentManifestHash"),
         )
         replacement = "0x" + "ff" * 32
@@ -499,6 +480,14 @@ class SystemManifestPayloadVectorTests(unittest.TestCase):
         timestamp_member["payload"]["registryEntries"][0]["registeredAt"] = "1"
         with self.assertRaisesRegex(generator.ManifestVectorError, "extra"):
             checker.validate_vector_mechanics(timestamp_member, self.profile)
+
+        nonempty_reserved_probes = copy.deepcopy(self.vector)
+        nonempty_reserved_probes["payload"]["gasParameterProbes"] = [{}]
+        with self.assertRaisesRegex(
+            generator.ManifestVectorError,
+            "reserved in schema v1 and must be empty",
+        ):
+            checker.validate_vector_mechanics(nonempty_reserved_probes, self.profile)
 
     def test_checker_rejects_canonical_bytes_and_chunk_boundary_drift(self) -> None:
         changed_bytes = copy.deepcopy(self.vector)

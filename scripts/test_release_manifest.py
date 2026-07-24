@@ -172,6 +172,7 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         root / "docs" / "non-local-release-evidence.md",
         root / "docs" / "architecture.md",
         root / "docs" / "launch-v1-target-architecture.md",
+        root / "docs" / "adr" / "0017-raise-only-parameter-governance.md",
         root / "docs" / "threat-model.md",
         root / "docs" / "audit-package.md",
         root / "docs" / "incident-response.md",
@@ -1248,6 +1249,12 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
 
 
 class ReleaseManifestTests(unittest.TestCase):
+    def test_default_governance_docs_cover_raise_only_governance_adr(self) -> None:
+        self.assertIn(
+            Path("docs/adr/0017-raise-only-parameter-governance.md"),
+            generator.DEFAULT_GOVERNANCE_DOCS,
+        )
+
     def test_generator_writes_deterministic_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

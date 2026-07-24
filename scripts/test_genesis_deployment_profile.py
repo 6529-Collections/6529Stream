@@ -34,11 +34,7 @@ def write_json(path: Path, value: object) -> None:
 
 
 def copy_normative_documents(root: Path) -> None:
-    for relative in (
-        Path(checker.NORMATIVE_SOURCE),
-        checker.GGP_INVENTORY_SOURCE,
-        checker.GTP_MIRROR_SOURCE,
-    ):
+    for relative in (Path(checker.NORMATIVE_SOURCE),):
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text((REPO_ROOT / relative).read_text(encoding="utf-8"), encoding="utf-8", newline="\n")
@@ -111,9 +107,7 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         self.assertNotIn("total", profile)
         self.assertNotIn("entry_count", profile)
         entries = checker.validate_profile_document(profile)
-        expected_count = (
-            len(checker.FIXED_CONTRACT_KEYS) + len(checker.GGP_PARAMETERS) + 1
-        )
+        expected_count = len(checker.FIXED_CONTRACT_KEYS)
         self.assertEqual(len(entries), expected_count)
         self.assertEqual([entry["id"] for entry in entries], list(range(1, len(entries) + 1)))
         checker.validate_document_mirrors(entries, REPO_ROOT)
@@ -157,13 +151,28 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
     def test_json_schema_semantic_conditionals_match_checker_rules(self) -> None:
         schema = load_json(SCHEMA_PATH)
         conditionals = schema["$defs"]["entry"]["allOf"]
+        self.assertEqual(schema["$defs"]["entry"]["properties"]["kind"]["const"], "contract")
+        self.assertEqual(
+            set(schema["$defs"]["entry"]["properties"]["deployment_scope"]["enum"]),
+            {"singleton", "implementation", "fallback_instance"},
+        )
+        self.assertEqual(
+            set(schema["$defs"]["implementation"]["properties"]["mode"]["enum"]),
+            {
+                "exact",
+                "one_of",
+                "manifest_equivalent",
+                "distinct_instance",
+                "role_bound",
+            },
+        )
 
         kind_rules = {
             rule["if"]["properties"]["kind"]["const"]: rule["then"]["properties"]
             for rule in conditionals
             if "kind" in rule["if"]["properties"]
         }
-        self.assertEqual(set(kind_rules), {"contract", "ggp_probe", "gtp_probe"})
+        self.assertEqual(set(kind_rules), {"contract"})
         self.assertEqual(
             set(kind_rules["contract"]["implementation"]["properties"]["mode"]["enum"]),
             {
@@ -175,32 +184,6 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
             },
         )
         self.assertEqual(kind_rules["contract"]["parameters"]["maxItems"], 0)
-        self.assertEqual(
-            kind_rules["ggp_probe"]["implementation"]["properties"]["mode"]["const"],
-            "parameter_bound",
-        )
-        self.assertEqual(
-            kind_rules["ggp_probe"]["implementation"]["properties"]["names"]["maxItems"],
-            0,
-        )
-        self.assertEqual(
-            (
-                kind_rules["ggp_probe"]["parameters"]["minItems"],
-                kind_rules["ggp_probe"]["parameters"]["maxItems"],
-            ),
-            (1, 1),
-        )
-        self.assertEqual(
-            kind_rules["gtp_probe"]["implementation"]["properties"]["mode"]["const"],
-            "shared_parameter_bound",
-        )
-        self.assertEqual(
-            (
-                kind_rules["gtp_probe"]["parameters"]["minItems"],
-                kind_rules["gtp_probe"]["parameters"]["maxItems"],
-            ),
-            (3, 3),
-        )
 
         mode_rules = {}
         for rule in conditionals:
@@ -214,15 +197,13 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
                 ]["properties"]["names"]
         self.assertEqual(
             mode_rules[
-                frozenset(
-                    {"exact", "one_of", "distinct_instance", "shared_parameter_bound"}
-                )
+                frozenset({"exact", "one_of", "distinct_instance"})
             ]["minItems"],
             1,
         )
         self.assertEqual(
             mode_rules[
-                frozenset({"manifest_equivalent", "role_bound", "parameter_bound"})
+                frozenset({"manifest_equivalent", "role_bound"})
             ]["maxItems"],
             0,
         )
@@ -243,21 +224,20 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
 
     def test_forbidden_independent_total_fails_closed(self) -> None:
         profile = copy.deepcopy(self.profile)
-        profile["total"] = (
-            len(checker.FIXED_CONTRACT_KEYS) + len(checker.GGP_PARAMETERS) + 1
-        )
+        profile["total"] = len(checker.FIXED_CONTRACT_KEYS)
         with self.assertRaisesRegex(checker.GenesisProfileError, "unsupported fields: total"):
             checker.validate_profile_document(profile)
 
-    def test_exact_ggp_probe_inventory_includes_newest_rows(self) -> None:
+    def test_profile_is_exactly_the_contract_inventory(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
-        parameters = tuple(
-            entry["parameters"][0]
-            for entry in entries[len(checker.FIXED_CONTRACT_KEYS) : -1]
-        )
-        self.assertEqual(parameters, checker.GGP_PARAMETERS)
-        self.assertIn("REVEAL_ATTEMPT_GAS_LIMIT", parameters)
-        self.assertIn("SALE_NFT_DELIVERY_GAS_LIMIT", parameters)
+        self.assertEqual(tuple(entry["key"] for entry in entries), checker.FIXED_CONTRACT_KEYS)
+        self.assertTrue(all(entry["kind"] == "contract" for entry in entries))
+        self.assertTrue(all(entry["parameters"] == [] for entry in entries))
+
+        profile = copy.deepcopy(self.profile)
+        profile["entries"][0]["kind"] = "service"
+        with self.assertRaisesRegex(checker.GenesisProfileError, "must be 'contract'"):
+            checker.validate_profile_document(profile)
 
     def test_stream_system_manifest_requirement_is_exact_and_complete(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
@@ -409,13 +389,6 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
                     "exactly one deployment|complete canonical Permanent StreamCoreFinalityAdapter profile row",
                 ):
                     checker.validate_profile_document(profile)
-
-    def test_shared_cadence_probe_serves_exact_gtp_inventory(self) -> None:
-        entries = checker.validate_profile_document(copy.deepcopy(self.profile))
-        cadence = entries[-1]
-        self.assertEqual(cadence["kind"], "gtp_probe")
-        self.assertEqual(tuple(cadence["parameters"]), checker.GTP_PARAMETERS)
-        self.assertEqual(cadence["multiplicity"], {"minimum": 1, "maximum": 1})
 
     def test_governance_and_provider_disjunctions_are_pinned(self) -> None:
         entries = checker.validate_profile_document(copy.deepcopy(self.profile))
@@ -569,21 +542,6 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
                 checker.LCM_GENESIS_HEADING,
                 "LCM-GENESIS section heading",
             ),
-            (
-                checker.GGP_INVENTORY_SOURCE,
-                checker.GGP_INVENTORY_LABEL,
-                "GGP inventory label",
-            ),
-            (
-                checker.GTP_MIRROR_SOURCE,
-                checker.TARGET_PARAMETER_SECTION_HEADING,
-                "target parameter mirror section heading",
-            ),
-            (
-                checker.GTP_MIRROR_SOURCE,
-                checker.TARGET_PARAMETER_TABLE_END,
-                "target parameter table end heading",
-            ),
         )
         for relative, marker, diagnostic in cases:
             with self.subTest(source=str(relative), marker=marker):
@@ -619,22 +577,9 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         with self.assertRaisesRegex(checker.GenesisProfileError, "alias"):
             checker.validate_profile_document(profile)
 
-    def test_malformed_probe_kind_raises_profile_error(self) -> None:
-        profile = copy.deepcopy(self.profile)
-        probe = profile["entries"][len(checker.FIXED_CONTRACT_KEYS)]
-        probe["kind"] = "contract"
-        probe["deployment_scope"] = "singleton"
-        probe["implementation"] = {"mode": "role_bound", "names": []}
-        probe["parameters"] = []
-        with self.assertRaises(checker.GenesisProfileError):
-            checker.validate_profile_document(profile)
-
     def test_committed_candidate_is_explicitly_incomplete(self) -> None:
         audit = checker.audit_profile(checker.DEFAULT_PROFILE, checker.DEFAULT_CONTRACTS, REPO_ROOT)
-        self.assertEqual(
-            audit.entry_count,
-            len(checker.FIXED_CONTRACT_KEYS) + len(checker.GGP_PARAMETERS) + 1,
-        )
+        self.assertEqual(audit.entry_count, len(checker.FIXED_CONTRACT_KEYS))
         self.assertGreater(len(audit.blockers), 0)
         joined = "\n".join(audit.blockers)
         self.assertIn("StreamMintManager", joined)
@@ -642,7 +587,6 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
         self.assertIn("STREAM_SYSTEM_MANIFEST", joined)
         self.assertIn("STREAM_CORE_FINALITY_ADAPTER", joined)
         self.assertIn("expected 'implementation'", joined)
-        self.assertIn("SHARED_ENTROPY_CADENCE_PROBE", joined)
 
     def test_synthesized_exact_candidate_passes(self) -> None:
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
@@ -751,14 +695,16 @@ class GenesisDeploymentProfileTests(unittest.TestCase):
     def test_missing_and_extra_candidates_fail(self) -> None:
         profile, contracts = complete_fixture(copy.deepcopy(self.profile))
         entries, candidates = validate_complete_fixture(profile, contracts)
-        cadence_fixture_name = f"FixtureGenesisEntry{len(entries):02d}"
         missing = [
             candidate
             for candidate in candidates
-            if candidate["name"] != cadence_fixture_name
+            if candidate["name"] != "StreamCoreFinalityAdapter"
         ]
         self.assertTrue(
-            any("SHARED_ENTROPY_CADENCE_PROBE" in blocker for blocker in checker.completeness_blockers(entries, missing))
+            any(
+                "STREAM_CORE_FINALITY_ADAPTER" in blocker
+                for blocker in checker.completeness_blockers(entries, missing)
+            )
         )
         extra = candidates + [
             {

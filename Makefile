@@ -37,6 +37,8 @@ release-manifest-check: fork-ceremony-evidence-check fork-randomizer-operations-
 .PHONY: python-toolchain-check
 .PHONY: external-call-gas-inventory-check
 .PHONY: canonical-deployment-plan-check
+.PHONY: governed-parameter-identifiers-check
+check: governed-parameter-identifiers-check
 
 build:
 	forge build
@@ -562,6 +564,10 @@ warning-dispositions-check: size
 genesis-deployment-profile-check:
 	$(PYTHON) scripts/test_genesis_deployment_profile.py
 	$(PYTHON) scripts/check_genesis_deployment_profile.py
+
+governed-parameter-identifiers-check:
+	$(PYTHON) scripts/test_governed_parameter_identifiers.py
+	$(PYTHON) scripts/check_governed_parameter_identifiers.py
 
 system-manifest-payload-vector:
 	$(PYTHON) scripts/generate_system_manifest_payload_vector.py

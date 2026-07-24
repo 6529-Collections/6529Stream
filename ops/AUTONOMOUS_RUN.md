@@ -54,8 +54,8 @@ evidence, and audit/readiness gates.
   work also merged through PR #661.
 - PR #661 merged the fail-closed canonical genesis deployment profile. The
   current v1 contract catalog cannot prove deployment-instance identity,
-  fallback distinctness, or parameterized probe bindings, so issue #656 remains
-  a production blocker.
+  or fallback distinctness, so issue #656 remains a production blocker. ADR
+  0017 removes parameter-probe bindings from the canonical 37-entry target.
 - PR #662 merged the canonical normalized Slither gate. The fresh unfiltered
   capture at source commit `c0be71915bc650569940b249fa9e5c801c0587fc` on
   `2026-07-23T23:52:41Z` records 3,143 findings across all impacts/scopes and

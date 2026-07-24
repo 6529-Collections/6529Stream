@@ -235,6 +235,15 @@
       "source": "smart-contracts/IStreamDrops.sol"
     },
     {
+      "name": "IStreamGasParameterHost",
+      "source": "smart-contracts/IStreamGasParameterHost.sol",
+      "interface_id": "0xc5eef2ab"
+    },
+    {
+      "name": "IStreamGovernanceExecutor",
+      "source": "smart-contracts/IStreamGovernanceExecutor.sol"
+    },
+    {
       "name": "IStreamMinter",
       "source": "smart-contracts/IStreamMinter.sol"
     },
@@ -273,6 +282,11 @@
     {
       "name": "IStreamSplitWallet",
       "source": "smart-contracts/IStreamSplitWallet.sol"
+    },
+    {
+      "name": "IStreamTimeParameterHost",
+      "source": "smart-contracts/IStreamTimeParameterHost.sol",
+      "interface_id": "0xc185242a"
     }
   ]
 }

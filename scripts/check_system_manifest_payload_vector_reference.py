@@ -23,15 +23,15 @@ DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
 
 VECTOR_SCHEMA = "6529stream.system-manifest-payload-vector.v1"
 FIXTURE_DOMAIN = "6529STREAM_SYSTEM_MANIFEST_TARGET_VECTOR_V1"
-PROFILE_SHA256 = "sha256:46218ca52a9653b2e547b0afb7e67dd29da177d84a22356b6012f0409f360fb0"
-PAYLOAD_BYTE_LENGTH = 117_980
-PAYLOAD_KECCAK = "0x2887af58895fdeb2fd47d7617bb5e6031fe46f98a07948579b0536221b221fc9"
-PAYLOAD_SHA256 = "sha256:f728642f2a784dae88d1a8cfe429fac7bc793542901b49aae11a5742781aac3a"
+PROFILE_SHA256 = "sha256:11a1c3c1b079c24ce18ec27d2194fe5ae6b6ca99af2d112c806f2843d8e2fe4d"
+PAYLOAD_BYTE_LENGTH = 55_109
+PAYLOAD_KECCAK = "0x048a6ca5b28c477088da016b12d1b999fbf2816bf1ce7d4b3378aa4473758466"
+PAYLOAD_SHA256 = "sha256:6739b1dbb6da37bb299a48dce24c0ca7ef8ce07b33e28cf07f803c127a6a1b97"
 
 IDENTITY_DOMAIN = "0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a"
-IDENTITY_VIEW_HASH = "0xd2e4e6fee9d6e85b22c09325035e11abc20d7473645e008aa800875962f946ab"
+IDENTITY_VIEW_HASH = "0x55476de63bc4702da8189d6d22e14862829a8736e482b485ee6a99c7f283904f"
 DEPLOYMENT_IDENTITY_HASH = (
-    "0xc35b448ac1a5be9889a3fb597640708ac18286b63bf98d31139892d1ed713641"
+    "0xfc6972d6c0396b99c740a24b17637140d8a292c32504301c2be6837074c13e23"
 )
 
 CHUNK_BYTES = 24_575
@@ -42,58 +42,42 @@ SCHEMA_ID = "0x8844b744a67cdcdb84ea3c6e3d686883da175820b9ff07a19cffa14bf62e6e81"
 CANONICALIZATION_ID = (
     "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044"
 )
-CHUNK_LIST_HASH = "0xe4595941d7e03e31b791f669900c508fc21896241758492d897c3ffae57211c1"
-PAYLOAD_ROOT_HASH = "0x9627cd2700527e8a8c99ad6350e99245971459b0a5c2c3da7e76e49b147feee5"
+CHUNK_LIST_HASH = "0x94e57f48ae73a04f20612a4198e666c848c5e6a3945ded649f7967a436af9fb0"
+PAYLOAD_ROOT_HASH = "0x4cc5f9457f44ac27374f7749fb099f7cd3918e1a89b5e07364cdf8a2b429b8f8"
 
 DESCRIPTOR_MAGIC = "0x6c9d2530"
 DESCRIPTOR_DYNAMIC_OFFSET = 224
-DESCRIPTOR_LENGTH = 736
-DESCRIPTOR_KECCAK = "0xa3a7614a40193785e1b36b076a64336a17f1212e91f3618ba513b5f5fb4fb56d"
+DESCRIPTOR_LENGTH = 544
+DESCRIPTOR_KECCAK = "0xb1f933cf2c3c3a28ae6c7ab834a922b8a0adb72cea296cee41a503482c88cd82"
 DESCRIPTOR_RUNTIME_HASH = (
-    "0x949b2c0c2252a7037c67eb95f085c11adfb4cfde6491f430d573b9593bee7354"
+    "0x45efec4ce3e72621c73b1b01bb79bd04d429b44493146649edae6749e5a87ce2"
 )
 
 # index, pointer, payload length, payload hash, leaf hash, SSTORE2 runtime hash
 CHUNK_GOLDENS = (
     (
         0,
-        "0x39f3db82158bb9705e6d58007744ad635d8f4249",
+        "0xa8c3609cc189b28316435a19761fd15348ae9abf",
         24_575,
-        "0x9618285f98458c83c7804f75544458782bb168f77301dda09e817cfcda16f99b",
-        "0xf4b5289402f3961bdea28f7a3963f9ccdec2f59e2764c0d985f4424830939010",
-        "0x91a0a692f047ecf4b41fc5f173828e2d6673dad6dd1612b0cc32d59e42802bb1",
+        "0xb7bbf9bca419a35cb05958fc44270e2ed671717352420529a397e22b4131dfa9",
+        "0x26f22c35a297c0f6245c03c352637fb7b3328a3bd2017563aaa3f857546c72fb",
+        "0x6f2da875ced7ea4bad8e3f7d271633f13e2f8be28193f9f023fe7d5dd136c02f",
     ),
     (
         1,
-        "0xd090ea23dfcb27ce9f8363e6cf68d49b06eea45a",
+        "0x931042f319a86bb1cf15679de1d78ec4f43b539a",
         24_575,
-        "0xc961c9714d866da5d708cff9ad45e828af0460faa593a56f81e4f8b62303c4f9",
-        "0x6db1dae5d9dd7f238a4d22fc1ae81c180401e9d74d8a33a09e7acfbfd159007c",
-        "0x3978602ad9935512fa083ca24b57e3ff134e4b1c0fc7a0277ee1de261d3f7efc",
+        "0x442108c3ec4c9edabdfb444f3b026f645e094a2116b19d9e9f2944ce32d708ce",
+        "0x804554d403a8bb22d376a06208b31694603872350dc877e0bf234555d0fe48e9",
+        "0x0b6e97b77db0d7c6287679e6a5a32d8b8820a551e2a7cc8bde35c67c59674a27",
     ),
     (
         2,
-        "0x2007591c79ab6fedbd8988c0b2e282bbcd8e635f",
-        24_575,
-        "0xa5362feec8e9915a4b8d732969de5abda4507d8f68e80465dacd7c6f9df4a68c",
-        "0x5f291512e8f81e1f7fe703705762c1d4d98d0f476708491ab1c6385e40c988cc",
-        "0xcaf186870171cf9102779114dd36ecbc69d4500c0fd386148625b6922163e102",
-    ),
-    (
-        3,
-        "0xc95fbdf7ee0727f55c26ffaecf8fb2ddb474502b",
-        24_575,
-        "0xdd490a300756199989e7bbda2efdddccb7dbe4a1dd7b339d80dc3c580d324fe9",
-        "0x5689035c71e64d2c011d227d7177eb1eb8302f995262a978380968616f9d8342",
-        "0x3ca0a6417075a40dd8a85ee431d63a3d207af6292e9c1655ab9035cdd341dc23",
-    ),
-    (
-        4,
-        "0xda7617fb1b8db0fb2c1dc666c13facb080c226e0",
-        19_680,
-        "0xc5057b0a9114464d02eab51da174e17a2a6417fe29c8e50fd0665042de49225f",
-        "0xf1182a98aa760cb1f7449dd6883b6f56e3588d6158638bb21bd431909c94c563",
-        "0xc763fc567cb6bfeb6f0db9eb2dbfbba6c2f352c86143cc40891dff09c737bca6",
+        "0x6211acda7cc7696540dfaf4afa7f095ade09f994",
+        5_959,
+        "0x474b5c055d206671291fe5c1353ef3a221f197082f67d088ac8e1b931090f38b",
+        "0x40a5eefb0f200bbdd5f4dc83e73b378876b9c72bc6307948773cc31ab5152edc",
+        "0x48797ac864e7a8c1fff7859eb63726c863de67f87dbe28b95a22890f6c15e333",
     ),
 )
 
@@ -296,7 +280,7 @@ def _metadata_audit(vector: dict[str, Any]) -> None:
         "release-artifacts/genesis-deployment-profile.json",
         "profile source path",
     )
-    _expect(vector["source"]["profile_entry_count"], 60, "profile source entry count")
+    _expect(vector["source"]["profile_entry_count"], 37, "profile source entry count")
     expected_constants = {
         "schema_version": 1,
         "payload_schema_literal": "STREAM_SYSTEM_MANIFEST_PAYLOAD_V1",
@@ -457,8 +441,6 @@ def _identity_audit(vector: dict[str, Any], profile_raw: bytes) -> None:
         occurrences.append(row["deploymentManifestHash"])
     for row in payload["registryEntries"]:
         occurrences.append(row["deploymentManifestHash"])
-    for row in payload["gasParameterProbes"]:
-        occurrences.append(row["probeDeploymentManifestHash"])
     for row in payload["criticalFallbacks"]:
         occurrences.append(row["deploymentManifestHash"])
     if not occurrences or any(value != identity_hash for value in occurrences):
@@ -652,10 +634,10 @@ def audit_vector(vector: dict[str, Any], profile_raw: bytes) -> None:
     _descriptor_audit(vector)
 
     payload_counts = (
-        ("contracts", 60),
+        ("contracts", 37),
         ("pointers", 11),
-        ("registryEntries", 60),
-        ("gasParameterProbes", 40),
+        ("registryEntries", 37),
+        ("gasParameterProbes", 0),
         ("criticalFallbacks", 2),
     )
     for name, expected in payload_counts:

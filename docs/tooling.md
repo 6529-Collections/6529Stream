@@ -580,12 +580,12 @@ validation checks that policy declaration, and implementation `--check` fails
 if either ABI category appears even though ordinary additive ABI changes remain
 compatible. A transparent active-surface lock pins the ordered function/event
 shapes to SHA-256
-`2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`.
+`sha256:8ed0f91ed4f96b18f7b2c1cf4328e0a125cc54d870e6ba49ff30c07dd3e6a701`.
 A separate reviewer-pinned canonical-JSON lock covers every target semantic,
 including all top-level metadata, authorization and ownership policy, normative
 homes, coverage counts, bytecode-budget groups, required-absence and bootstrap
 policy, and every ordered active or retired function/event row, at SHA-256
-`18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`.
+`sha256:f008d29d2089098be693c39db018517ba634736298a8b323bb49ea263582ec4d`.
 Implementation `--check` also closes the retirement catalog in both directions:
 every current baseline Core function/event shape must have exactly one active or
 retired disposition, and every retired row must match a current-baseline shape.
@@ -829,8 +829,8 @@ three safety-critical Core, system-manifest, and finality-adapter entries. The
 governance entry remains intentionally composite but requires its exact
 structured state-export publisher ABI proof; every non-governance candidate is
 forbidden from presenting that proof. That catalog is diagnostic only: it has
-no deployment addresses, instance identity, probe-parameter bindings, or
-on-chain manifest reconciliation and therefore can never clear production
+  no deployment addresses, instance identity, or on-chain manifest
+  reconciliation and therefore can never clear production
 mode. The
 local `make release-mode-public-beta-check` and
 `make release-mode-production-release-check` targets run the aggregate `check`
@@ -854,7 +854,7 @@ malformed, boolean-as-integer, or arithmetically inconsistent `StreamCore` size
 fields, and requires at least 2,000 bytes of EIP-170 runtime headroom. That
 mode also invokes the genesis checker in strict completeness mode: missing,
 extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,
-unapproved-alias, fallback, and probe gaps are production blockers. Even a v1
+unapproved-alias, and fallback gaps are production blockers. Even a v1
 catalog with no mapping gaps remains categorically insufficient. Production
 stays fail-closed until a checked schema for an instance-aware genesis
 deployment candidate reconciles deployment manifests, address books,
@@ -863,11 +863,13 @@ rehearsal/live evidence, and the release candidate lockfile. That remaining
 work is tracked by
 [issue #656](https://github.com/6529-Collections/6529Stream/issues/656). The
 checked `release-artifacts/system-manifest-payload-vector.json` is deliberately
-only a `target_abi_lock_fixture`: it consumes all 60 planning entries and proves
-RFC8785/I-JSON, fixed-chunk, commitment, and canonical root-descriptor mechanics,
-including one synthetic release-wide deployment-identity digest reused by every
-payload occurrence under the production outer domain. Its deterministic
-synthetic addresses and hashes are not deployment or readiness evidence.
+only a `target_abi_lock_fixture`: it consumes all 37 contract entries, retains
+the payload-v1 `gasParameterProbes` compatibility member as exactly empty, and
+proves RFC8785/I-JSON, fixed-chunk, commitment, and canonical root-descriptor
+mechanics, including one synthetic release-wide deployment-identity digest
+reused by every payload occurrence under the production outer domain. Its
+deterministic synthetic addresses and hashes are not deployment or readiness
+evidence.
 Regenerate it with
 `python scripts/generate_system_manifest_payload_vector.py`; validate drift with
 `python scripts/test_system_manifest_payload_vector.py` followed by
@@ -1315,6 +1317,34 @@ release workflow files, `CHANGELOG.md` must be part of the change and its
 `Unreleased` section must contain a non-placeholder bullet. The release-impact
 rules are documented in [`release-policy.md`](release-policy.md).
 
+## Governed Parameter Identifier Catalog
+
+Run the closed-world GGP/GTP identifier gate with:
+
+```bash
+make governed-parameter-identifiers-check
+```
+
+The target runs:
+
+```bash
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
+```
+
+The checker pins the launch catalog to exactly 22 GGP names and three GTP
+names in the [LTA-GGP]/[LTA-GTP] inventories and their target-architecture
+mirror rows. It verifies row order, `GGP_`/`GTP_` catalog labels, canonical
+string preimages, recomputed Ethereum Keccak hashes, identifier schema version,
+nonempty owners, and exactly one generic host derivation using each canonical
+`6529STREAM_GGP_` and `6529STREAM_GTP_` prefix. The generic hosts do not
+declare one Solidity constant per parameter ID; the checked guarantee is exact
+prefix derivation plus the closed-world inventory/mirror correspondence.
+
+The focused regression suite rejects hash drift, unilateral inventory
+deletion, coordinated catalog deletion, and host-prefix drift. The gate is
+wired into `make check`, the Windows `scripts/check.ps1` path, and CI.
+
 ## External-Call Gas Inventory
 
 Run the deterministic external-call gas policy gate with:
@@ -1349,14 +1379,11 @@ tied to issue #669. They are not accepted-risk exceptions and must be removed
 or connected to the Global Gas Parameter system in later focused slices. The
 inventory is strict duplicate-free I-JSON: object keys are exact, floats,
 non-finite values, unsafe integers, and Unicode surrogates fail closed. The
-separate exception is pinned to the sole exact
-`StreamGasProbe._provedStaticcall` use and the normative
-`[LTA-GGP-PROBES]` authority; local, moved, or additional probe rationales
-cannot create waivers. That row records deliberate probe-under-test semantics,
-not a production-path immutable gas policy. Because this is a lexical policy
-gate rather than a Solidity data-flow engine, normal review and focused
-behavioral tests remain required when gas is computed through helper functions
-or structured state.
+v1 `explicit_probe_call_gas_expressions` member is retained for schema
+compatibility but must be exactly empty; the checker rejects every attempted
+exception row. Because this is a lexical policy gate rather than a Solidity
+data-flow engine, normal review and focused behavioral tests remain required
+when gas is computed through helper functions or structured state.
 
 ## Solidity Formatting
 

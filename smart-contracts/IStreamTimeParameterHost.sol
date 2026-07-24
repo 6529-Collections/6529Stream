@@ -1,32 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-/// @notice Host surface for Governed Time Parameters per
-///         `docs/stream-long-term-architecture.md` [LTA-GTP]: storage-backed
-///         block-count windows with immutable block floors, pinned wall-clock
-///         floors binding in both directions, cadence-probe-gated lowering, and
-///         governance-only change discipline — no emergency path and no
-///         permissionless conditional path exists for GTPs (change discipline 1).
+/// @notice Minimal host surface for launch-v1 Governed Time Parameters.
+/// @dev Block-count windows are fixed at deployment and may only increase
+///      through a delayed Governance-V2 action. Cadence-probe lowering and
+///      probe-rebinding paths do not exist.
 interface IStreamTimeParameterHost {
     /// @notice Per-parameter registration input, fixed at deployment.
-    /// @dev    `name` is the bare constant name (for example
-    ///         "ENTROPY_REQUEST_TIMEOUT_BLOCKS"); the host derives
-    ///         `parameterId = keccak256("6529STREAM_GTP_" || name)` per
-    ///         [LTA-GTP] definition item 3.
     struct TimeParameterConfig {
         string name;
         uint256 genesisValue;
         uint256 floorBlocks;
         uint64 wallClockFloorSeconds;
-        address cadenceProbe;
-        uint64 probeMaxAgeBlocks;
-        bytes32 expectedProbeModuleVersion;
-        bytes32 expectedProbeRuntimeCodeHash;
-        bytes32 expectedProbeModuleManifestHash;
-        bytes32 expectedProbeDeploymentManifestHash;
     }
 
-    /// @notice Canonical GTP change event ([LTA-GTP] change discipline 4).
+    /// @notice Canonical monotonic GTP change event.
     event TimeParameterUpdated(
         uint16 schemaVersion,
         bytes32 indexed parameterId,
@@ -34,156 +22,52 @@ interface IStreamTimeParameterHost {
         bytes32 indexed actionId,
         uint256 oldValue,
         uint256 newValue,
-        uint256 floor
+        uint256 floorBlocks
     );
 
-    /// @notice Registration record for indexers: genesis value, both floors, the
-    ///         cadence-probe binding, and the recency bound.
+    /// @notice Immutable registration facts for one launch parameter.
     event TimeParameterRegistered(
         uint16 schemaVersion,
         bytes32 indexed parameterId,
         string name,
         uint256 genesisValue,
         uint256 floorBlocks,
-        uint64 wallClockFloorSeconds,
-        address cadenceProbe,
-        uint64 probeMaxAgeBlocks
+        uint64 wallClockFloorSeconds
     );
 
-    /// @notice Emitted when a parameter's cadence-probe binding moves to a
-    ///         successor Permanent-class probe through governance
-    ///         ([LTA-GGP-PROBES] rule 3, inherited by GTP cadence probes).
-    event TimeParameterProbeRebound(
-        uint16 schemaVersion,
-        bytes32 indexed parameterId,
-        address indexed host,
-        bytes32 indexed actionId,
-        address oldCadenceProbe,
-        address newCadenceProbe
-    );
-
-    /// @notice Reverts when a parameterId is not registered on this host.
     error TimeParameterUnknown(bytes32 parameterId);
-    /// @notice Reverts when a parameter name is registered twice.
     error TimeParameterAlreadyRegistered(bytes32 parameterId);
-    /// @notice Reverts when a registration config violates [LTA-GTP] invariants.
     error TimeParameterInvalidConfig(bytes32 parameterId);
-    /// @notice Reverts when the expected genesis registry is absent, has no code,
-    ///         or does not return the exact canonical ERC-165 module-registry marker.
-    error TimeParameterInvalidModuleRegistry(address moduleRegistry);
-    /// @notice Reverts when the immutable Core pointer source is absent or invalid.
-    error TimeParameterInvalidCore(address core);
-    /// @notice Reverts when Core does not expose one exact live canonical
-    ///         `MODULE_REGISTRY` pointer record.
-    error TimeParameterLiveModuleRegistryInvalid(address core);
-    /// @notice Reverts when a bound cadence probe does not pin the parameter's
-    ///         wall-clock floor.
-    error TimeParameterProbeMismatch(bytes32 parameterId, address cadenceProbe);
-    /// @notice Reverts when a cadence probe lacks the exact live ACTIVE registry
-    ///         binding required by [LTA-GTP]/[LTA-GGP-PROBES], or when a cached
-    ///         binding has drifted before a probe-dependent operation.
-    error TimeParameterProbeBindingInvalid(bytes32 parameterId, address cadenceProbe);
-    /// @notice Reverts when a rebind would preserve the exact cached probe state.
-    error TimeParameterProbeRebindNoOp(bytes32 parameterId, address cadenceProbe);
-    /// @notice Reverts when a governed entry point is called by anyone but the
-    ///         governance authority.
     error TimeParameterNotAuthority(address caller);
-    /// @notice Reverts when the configured authority fails the wiring marker check.
     error TimeParameterInvalidAuthority(address authority);
-    /// @notice Reverts when a raise receives a value at or below current.
+    error TimeParameterActionContextInvalid();
+    error TimeParameterActionNotExecuting();
+    error TimeParameterActionIdZero();
+    error TimeParameterActionClassMismatch(uint8 expectedClass, uint8 actualClass);
+    error TimeParameterScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    error TimeParameterOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    error TimeParameterNewStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    error TimeParameterRevisionOverflow(bytes32 parameterId);
     error TimeParameterNotARaise(bytes32 parameterId, uint256 currentValue, uint256 newValue);
-    /// @notice Reverts when a raise exceeds the 2x per-action bound
-    ///         ([LTA-GTP] change discipline 2).
     error TimeParameterRaiseBoundExceeded(
         bytes32 parameterId, uint256 currentValue, uint256 newValue
     );
-    /// @notice Reverts when a lower receives a value at or above current.
-    error TimeParameterNotALower(bytes32 parameterId, uint256 currentValue, uint256 newValue);
-    /// @notice Reverts when a lower steps below half the current value per action
-    ///         ([LTA-GTP] change discipline 2).
-    error TimeParameterLowerBoundExceeded(
-        bytes32 parameterId, uint256 currentValue, uint256 newValue
-    );
-    /// @notice Reverts when a lower would cross the immutable block floor.
-    error TimeParameterBelowFloor(bytes32 parameterId, uint256 newValue, uint256 floorBlocks);
-    /// @notice Reverts when a cadence-gated lower finds no recorded run at the
-    ///         proposed value.
-    error TimeParameterProbeRecordMissing(bytes32 parameterId, uint256 probedValue);
-    /// @notice Reverts when the recorded cadence run is older than
-    ///         `probeMaxAgeBlocks`.
-    error TimeParameterProbeRecordStale(
-        bytes32 parameterId, uint256 probedValue, uint64 probedAtBlock, uint64 probeMaxAgeBlocks
-    );
-    /// @notice Reverts when the recorded cadence run at the proposed value failed
-    ///         the wall-clock-floor coverage check ([LTA-GTP] change discipline 3).
-    error TimeParameterProbeNotPassing(bytes32 parameterId, uint256 probedValue);
-    /// @notice Reverts when the governance executor is the caller but is not
-    ///         currently executing an action.
-    error TimeParameterActionNotExecuting();
-    /// @notice Reverts when an executing governance context exposes a zero id.
-    error TimeParameterActionIdZero();
-    /// @notice Reverts when the executing action class is not the exact class
-    ///         required by the target entry point.
-    error TimeParameterActionClassMismatch(uint8 expectedClass, uint8 actualClass);
-    /// @notice Reverts when the current call's parameter scope commitment differs.
-    error TimeParameterScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
-    /// @notice Reverts when the current call's complete old-state commitment differs.
-    error TimeParameterOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
-    /// @notice Reverts when the current call's complete new-state commitment differs.
-    error TimeParameterNewStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
-    /// @notice Reverts instead of wrapping the monotonic per-parameter revision.
-    error TimeParameterRevisionOverflow(bytes32 parameterId);
 
-    /// @notice Canonical pinned host introspection ([LTA-GTP] definition item 7),
-    ///         including the monotonic mutation revision. Returns the zeroed
-    ///         tuple for an unregistered parameterId.
+    /// @notice Returns zeroes for an unregistered id.
     function timeParameterInfo(bytes32 parameterId)
         external
         view
-        returns (
-            uint256 value,
-            uint256 floorBlocks,
-            uint64 wallClockFloorSeconds,
-            address cadenceProbe,
-            uint64 probeMaxAgeBlocks,
-            uint64 revision
-        );
+        returns (uint256 value, uint256 floorBlocks, uint64 wallClockFloorSeconds, uint64 revision);
 
-    /// @notice Live storage-backed window read for guarded paths
-    ///         ([LTA-GTP] definition item 1). Reverts for an unregistered id.
+    /// @notice Current storage-backed value. Reverts for an unregistered id.
     function timeParameter(bytes32 parameterId) external view returns (uint256 value);
 
-    /// @notice All parameterIds registered on this host, registration order.
+    /// @notice Registered ids in constructor order.
     function timeParameterIds() external view returns (bytes32[] memory);
 
-    /// @notice The governance action executor wired at deployment; address(0)
-    ///         means no governance (all governed change paths permanently revert).
+    /// @notice Immutable Governance-V2 executor; zero permanently disables raises.
     function governanceAuthority() external view returns (address);
 
-    /// @notice Core's current canonical module-registry pointer target, validated
-    ///         against the exact ten-word pointer record. Reverts before the
-    ///         pointer is initialized or while it is malformed.
-    function moduleRegistry() external view returns (address);
-
-    /// @notice Staged raise on the normal delay class ([LTA-GTP] change
-    ///         discipline 1-2). Authority-only; at most 2x current per action.
+    /// @notice Delayed, authority-only, at-most-2x monotonic raise.
     function raiseTimeParameter(bytes32 parameterId, uint256 newValue) external;
-
-    /// @notice Staged lower on the normal delay class ([LTA-GTP] change
-    ///         discipline 1-3). Authority-only; no less than half current per
-    ///         action; reverts below the immutable block floor; execution recheck
-    ///         requires a recorded passing cadence run at exactly `newValue`
-    ///         within `probeMaxAgeBlocks` proving the proposed count still covers
-    ///         the pinned wall-clock floor at the observed cadence.
-    function lowerTimeParameter(bytes32 parameterId, uint256 newValue) external;
-
-    /// @notice Moves the parameter's cadence-probe binding to a successor
-    ///         Permanent-class probe on pointer-replacement class `3`; its exact
-    ///         target/selector pair is a [GOV-MANIFEST-TAIL] trigger
-    ///         ([LTA-GGP-PROBES] rule 3). Authority-only — with governance lost
-    ///         the binding is frozen. The successor must pin the identical
-    ///         wall-clock floor for this row (`pinnedWallClockFloorSeconds`
-    ///         recheck), so a rebind can never change the width a candidate must
-    ///         prove.
-    function rebindTimeParameterProbe(bytes32 parameterId, address newCadenceProbe) external;
 }

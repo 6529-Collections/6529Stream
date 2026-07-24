@@ -8,9 +8,10 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md),
-[ADR 0014](adr/0014-world-class-pass-round-5.md), and
-[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md) and
-recorded in
+[ADR 0014](adr/0014-world-class-pass-round-5.md),
+[ADR 0015](adr/0015-collection-identity-and-facade-readiness.md),
+[ADR 0016](adr/0016-core-native-only-erc721.md), and
+[ADR 0017](adr/0017-raise-only-parameter-governance.md), and are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the umbrella architecture specification for making
@@ -39,8 +40,8 @@ Companion specs:
 - `docs/stream-entropy-providers.md`
 
 This document is the normative home of the cross-cutting patterns:
-the Governed Gas Parameter model and its probe permanence rules, the
-Governed Time Parameter model, the module registry record shape, the
+the raise-only Governed Gas Parameter and Governed Time Parameter models,
+the module registry record shape, the
 Core satellite pointer policy, the token identity model, the collection
 identity-mode doctrine, the token enumeration posture, the freeze model,
 the artwork finality model, the guardian module pattern, the state export
@@ -199,7 +200,7 @@ address.
 The Permanent ABI name `deploymentManifestHash` denotes one release-wide
 **pre-publication deployment-identity digest**, not the checksum of a later
 release/deployment-manifest file. The identical digest appears in every module
-getter, registry record, pointer record, probe/fallback binding, and `contracts`
+getter, registry record, pointer record, fallback binding, and `contracts`
 entry for that deployment.
 
 Tooling first forms an address-free deployment-identity view. After the same
@@ -676,9 +677,10 @@ meaning of a freeze. Pointer changes therefore need their own shared policy.
 
 No writer in this section may be deployed against the transitional governance
 interface. ADR 0004 [GOV-V2-CUTOVER] — seven-word call descriptors, per-call
-context, call-data publication, action-class ID `6`, batch-tail enforcement,
-tooling/tests, and V1 retirement — is a completed precondition before any new
-Core pointer, GGP, or manifest writer becomes reachable.
+context, call-data publication, active action classes `0..5`, rejected and
+permanently reserved ID `6`, batch-tail enforcement, tooling/tests, and V1
+retirement — is a completed precondition before any new Core pointer, GGP, or
+manifest writer becomes reachable.
 
 Core satellite pointer families:
 
@@ -1026,9 +1028,11 @@ verification, finality component reads, gate calls, asset-policy checks,
 escrow flush floors, and any future bound — is a Governed Gas Parameter
 (GGP).
 
-This section is the single normative home of the pattern. Subsystem specs
-instantiate parameters — hosts, genesis values, floors, probes — and cite
-this section; restating the model is a defect under the precedence rule.
+This section is the single normative home of the pattern, as amended by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). Subsystem specs
+instantiate parameters — hosts, genesis values, floors, and classifications —
+and cite this section; restating the model is a defect under the precedence
+rule.
 
 A Governed Gas Parameter is:
 
@@ -1044,210 +1048,49 @@ A Governed Gas Parameter is:
 5. identified by
    `parameterId = keccak256("6529STREAM_GGP_" || <constant name>)`,
    recorded in the owning subsystem's domain table;
-6. paired with a named probe contract — a Permanent-class genesis
-   inventory member under the probe permanence rules of
-   [LTA-GGP-PROBES], recorded per parameter in the release manifest,
-   never a production read path — that anyone can call to execute the
-   guarded path (or a faithful equivalent of it) at a candidate value
-   and record the outcome onchain. The probe record is the verification
-   locus for probe-gated lowering, emergency raising, and the
-   permissionless conditional raise and re-lower (requirements 1–2
-   and 11; ADR 0011 decision R5; ADR 0012 decision T1; ADR 0014
-   decision V7).
+6. mutable only through the host's immutable Governance V2 authority under
+   the monotonic raise discipline below. The launch profile has no parameter
+   probe, probe record, lowering, emergency, rebinding, conditional action, or
+   permissionless mutation surface (ADR 0017).
 
-The probe surface is canonical so that a Safe, an autonomous governor,
-and a 2075 archivist verify the same onchain evidence:
+### Removed Probe Design [LTA-GGP-PROBES]
 
-```solidity
-event GasParameterProbed(
-    uint16 schemaVersion,
-    bytes32 indexed parameterId,
-    bytes32 indexed probeRunId,
-    bool passed,
-    uint256 probedValue,
-    bytes32 evidenceHash
-);
+The probe design previously specified at this anchor is retired before
+genesis by ADR 0017. This anchor remains as a stable citation target for
+historical ADRs and review records only. No `IStreamGasParameterProbe`,
+`IStreamTimeParameterProbe`, `GasParameterProbed`, `TimeParameterProbed`,
+probe binding, probe age, probe module type, probe rebind, or zero-signer
+parameter-repair promise is part of the launch target. Release and deployment
+artifacts must contain no probe contract or probe binding.
 
-function lastProbeRun(bytes32 parameterId, uint256 probedValue)
-    external
-    view
-    returns (bytes32 probeRunId, bool passed, uint64 probedAtBlock);
+### Genesis commitments and authority
 
-function probedParameterId() external view returns (bytes32 parameterId);
-```
+Each host fixes its complete parameter inventory during construction. A GGP
+row fixes name-derived ID, genesis value, floor, and failure class. A GTP row
+fixes name-derived ID, genesis value, block floor, and wall-clock floor.
+Registration rejects empty names, duplicate derived IDs, zero floors, genesis
+values below their floors, GGP failure classes outside `1..3` (including
+sentinel `NONE = 0`), and zero GTP wall-clock floors. Genesis revision is `1`.
 
-These two reads form the required `IStreamGasParameterProbe` base interface:
-their selectors are `0xc04c14e3` and `0xcfc07fec`, and their ERC-165 interface
-ID is `0x0f8c6b0f`. Every probe reports that interface and module type
-`keccak256("STREAM_GGP_PROBE") =
-0xe358a47f0dcbc7a22cc88ea7cd9ff433ec85ce6d9c7d0dc3f329e98b621cd6c8`;
-parameter-specific execution functions may extend, but never replace, this
-base.
-
-A probe run must execute the guarded operation itself, or a faithful
-equivalent measured on the production path, at `probedValue`;
-`evidenceHash` commits to the run's measurement artifact. The
-`GasParameterProbed` event and the `lastProbeRun` read are hosted on
-the probe contract itself — the probe-run record lives on the probe,
-never on the host (ADR 0012 decision T1) — and hosts consume the record
-through the probe address bound at parameter registration. A probe may
-additionally emit a parameter-named diagnostic alias event alongside
-the canonical record; the event catalog must tag every such alias as a
-member of the probe-record family, mirroring the requirement 4
-change-event alias rule, and the canonical
-`GasParameterProbed`/`lastProbeRun` record remains the only
-verification locus (ADR 0013 decision U7). Each
-parameter's release-manifest entry records its probe contract and the
-probe recency bound `probeMaxAgeBlocks` consumed by the execution
-rechecks below.
-
-### GGP Probe Contracts [LTA-GGP-PROBES]
-
-The probe record is the only evidence that can move a parameter after
-total governance loss, so the probe is hardened like the surfaces it
-protects (ADR 0012 decision T1):
-
-1. Probe contracts are Permanent-class members of the genesis
-   deployment inventory: named in the conformance-matrix genesis
-   deployment profile, deployed deterministically ([LTA-DEPLOY]), and
-   covered by the matrix static permanence checks, the golden interface
-   tests, and the audit plan. A probe outside the production inventory
-   is nonconformant.
-2. Probes are immutable and permissionless: no owner, no upgrade path,
-   no selfdestruct, no pause switch, and callable by anyone forever.
-   A probe run must be executable with no role, allowlist, or fee.
-3. The probe-run record — `GasParameterProbed` and `lastProbeRun` —
-   lives on the probe contract. The host verifies probe records at
-   execution rechecks through the probe address bound at parameter
-   registration. While governance functions, a parameter's probe
-   binding may move to a successor Permanent-class probe only through class-3
-   `rebindGasParameterProbe`, with a live-registry `ACTIVE` record, exact
-   interface/type/code/manifest checks, a manifest-tail publication, staging
-   events, and cancellation; with
-   governance lost the binding is frozen, which is why every probe is
-   Permanent-class.
-4. Probe inputs are pinned per parameter: each probe executes a fixed,
-   caller-independent scenario whose input corpus is recorded in the
-   release manifest and committed by `evidenceHash`. No caller-supplied
-   argument may select code paths, shape contract state, or alter the
-   measured gas of the guarded execution.
-5. Genuine-failure rule: before recording any outcome, the probe must
-   prove the guarded execution actually received `probedValue` (or the
-   live current value, for current-value runs). A run the prober
-   under-funded, gas-shaped, or otherwise starved must revert without
-   recording. A recordable failing run exists only when the guarded
-   operation was genuinely given the probed value and still failed.
-6. `probeMaxAgeBlocks` is recorded per parameter in the release
-   manifest, enforced by the host at execution rechecks, and must be at
-   least `PROBE_MAX_AGE_FLOOR_BLOCKS`. The planning floor is 50,400
-   blocks (roughly seven days at twelve-second cadence); the deployed
-   floor is pinned in the release manifest. The floor is generous by
-   design: with governance gone nobody can widen the recency bound, and
-   an over-tight bound would strand the conditional raise and
-   re-lower it exists to serve.
-7. A probe's own executability must not depend on a healthy value of
-   any parameter it probes; a probe callable only when the guarded path
-   is already healthy is nonconformant.
-8. Probes hold no pointer, no funds, and no protocol authority beyond
-   writing their own probe records; no production read path routes
-   through a probe.
-9. The zero-signer museum-mode drill executes the
-   probe-and-conditional-raise path — and its conditional-re-lower
-   twin ([LTA-GGP] requirement 11) — end to end against the deployed
-   probe contracts with no governance signer (State Export And Archival
-   Operations).
-
-### Genesis commitments and live registry resolution
-
-A rich standalone GGP or GTP host receives two distinct registry dependencies
-at construction: the already-deployed external Core whose
-`MODULE_REGISTRY` pointer will become canonical, and the expected genesis
-registry address used only in the constructor-time probe-binding commitment.
-Core must be a nonzero external code-bearing contract; the rich host cannot
-name itself as Core. The genesis registry must be nonzero and code-bearing and
-must return exactly one canonical 32-byte `true` word from
-`supportsInterface(type(IStreamModuleRegistry).interfaceId)` while the host
-forwards the EIP-150-clamped available gas with no compiled-in call cap. That
-ERC-165 answer establishes only the registry selector family: because return types do
-not contribute to function selectors, it does not prove the revision-appended
-Registry-V2 `moduleRecord(address)` shape, any particular row, or Core-pointer
-initialization. Those facts remain subject to the bounded live checks below.
-
-Every constructor row supplies four nonzero expected facts: probe module
-version, runtime code hash, module-manifest hash, and deployment-manifest hash.
-The host derives the authenticated binding against the expected genesis
-registry, fixed probe module type and interface, and those four facts. It must
-not call `moduleRecord` while registering the row. This permits a reviewed
-counterfactual deployment order in which the probe address is predicted but
-not yet code-bearing. If code is already present, construction additionally
-requires the expected runtime hash and the probe's immutable row pin to match
-(`probedParameterId()` for a GGP probe, or the pinned wall-clock floor for a
-GTP cadence probe). A zero probe, zero expected fact, mismatched present code,
-or mismatched present row pin rejects construction.
-
-Every probe-dependent use resolves the live registry afresh. An external host
-performs a bounded read of exactly the canonical 320-byte return from Core's
-`getSatellitePointer(keccak256("MODULE_REGISTRY"))`; Core's byte-minimal
-in-Core profile applies the equivalent checks to its own cached pointer. The
-pointer target must be nonzero and code-bearing with the exact cached code
-hash, `MODULE_REGISTRY` module type, canonical registry interface ID, `ACTIVE`
-status, nonzero module/deployment manifest hashes, and nonzero revision. A
-frozen pointer is valid. The target is the registry used for the row lookup;
-the pointer record's historical registry/provenance field must be nonzero but
-is never substituted for the live target.
-
-The live target's unchanged `moduleRecord(address)` selector must return the
-canonical Registry-V2 tuple, including a nonzero revision, within the bounded
-return budget. The host rejects malformed or noncanonical ABI, an empty or
-over-2,048-byte manifest URI, a non-`ACTIVE` row, wrong type/interface, zero
-version, code-hash drift, zero manifests, or zero revision. It then repeats the
-probe row-pin check and recomputes the full binding against the live target.
-Ordinary storage reads and an otherwise valid governed raise do not consume
-probe evidence and remain available before Core initializes the pointer;
-`moduleRegistry()`, emergency/conditional actions, lowering, and rebinding
-fail closed until all live facts validate.
-
-A class-3 rebind validates only the proposed probe against Core's current live
-registry before comparing the transition commitments; it does not require the
-old registry or old row to remain callable. This permits an atomic registry
-`A -> B` cutover followed by same-address rebindings even when `A` is
-unavailable. Before the irreversible bootstrap seal, instance-aware deployment
-checking must reconcile every constructor commitment — including every
-counterfactual predicted address — to present code, the live Core pointer, and
-the exact Registry-V2 row. Constructor admission alone is not that evidence.
+Each host also fixes one Governance V2 authority. A nonzero authority must be a
+code-bearing canonical parameter authority at construction; an EIP-7702
+delegated EOA is not accepted. A zero authority permanently disables mutation.
+Parameter hosts do not depend on Core's module-registry pointer, a module row,
+or any runtime registry lookup. That deletion is intentional: no launch
+parameter transition can be authorized by a probe or by mutable registry
+state (ADR 0017).
 
 Requirements:
 
-1. Raising a GGP is a service-restoring action with a bounded blast
-   radius (ADR 0011 decision R5). Every raise — staged, emergency, or
-   conditional — is bounded per action to at most 2x the parameter's
-   current value; the host enforces the bound, and larger moves take
-   multiple actions. Staged raises use the normal delay class. The
-   emergency raise path is raise-only and health-probe-gated: it
-   executes only while the parameter's named probe has recorded, within
-   `probeMaxAgeBlocks`, a failing run at the current value — proof that
-   the guarded path is actually degraded — and it may repeat, one
-   bounded step at a time, while fresh probe runs keep proving failure.
-   A failing run is recordable only under the genuine-failure rule
-   ([LTA-GGP-PROBES] rule 5), so a manufactured under-funded call can
-   never arm this path. An emergency path that could raise a healthy
-   parameter is nonconformant; requirement 10 states why the raise
-   direction needs this guard.
-2. Lowering a GGP through governance must use the normal delay class,
-   must revert below the
-   immutable floor, and is probe-gated at the named locus: the lower's
-   execution recheck must verify, through the parameter's named probe
-   contract, a recorded passing run at exactly the proposed value no
-   older than `probeMaxAgeBlocks` (ADR 0011 decision R5). The probe
-   record is onchain evidence — a lower whose probe obligation is
-   satisfiable only by an offchain artifact is nonconformant, because an
-   autonomous governor could not verify it and a Safe could not prove
-   it. Probe executions at candidate values live on the parameter's
-   Permanent-class probe contract ([LTA-GGP-PROBES]), never in
-   production read paths. The `FORWARDING_CAP` conditional re-lower of
-   requirement 11 is the single permissionless exception, probe-gated
-   at this same locus with its own per-action bound (ADR 0014
-   decision V7).
+1. A GGP may only increase. Every raise uses Governance V2
+   `DELAYED_LOOSENING` (`1`), whose launch minimum delay is 48 hours, and is
+   bounded to at most 2x the current value. The host enforces a strict
+   increase and the overflow-safe bound `newValue - currentValue <=
+   currentValue`; larger moves require multiple separately delayed actions.
+2. Lowering does not exist on the launch deployment. The immutable floor
+   remains a genesis-sizing, introspection, and repricing-review fact. It is
+   not a lower-bound check for a mutation path. Emergency, conditional, and
+   permissionless GGP mutations likewise do not exist (ADR 0017).
 3. GGP values are Operational-layer. They must be excluded from finality
    manifests, frozen-route identity, policy hashes, assignment hashes, and
    every Permanent preimage, so retuning gas never touches artwork or
@@ -1270,69 +1113,41 @@ Requirements:
    );
    ```
 
-   A host spec may instead pin a parameter-named alias event carrying at
-   least `(schemaVersion, oldValue, newValue, floor)` where the parameter
-   and host are implied by the emitter; the event catalog must tag every
-   alias as a member of the GGP change family so indexers reconstruct
-   every parameter's value history uniformly.
-   The two [LTA-GGP] requirement 11 functions are the explicit exception:
-   `conditionalRaiseGasParameter` and `conditionalRelowerGasParameter` are
-   direct permissionless calls under their pre-registered standing IDs, not
-   scheduled executor actions. Their `GasParameterUpdated.actionId` is exactly
-   the applicable `STREAM_GGP_CONDITIONAL_RAISE_V1` or
-   `STREAM_GGP_CONDITIONAL_RELOWER_V1` derivation; there is no governance action
-   record to look up. The domain catalog and release manifest enumerate both
-   standing IDs per eligible `(host, parameterId)`, and indexers classify the
-   event by selector/domain while reconstructing the same value history.
+   `schemaVersion` is exactly `2` for this raise-only event shape. Parameter-
+   named alias events are not part of the launch target; the canonical
+   schema-v2 event is the single owning event so indexers reconstruct every
+   parameter's value history uniformly.
+   There is no direct-call event exception: every emitted `actionId` comes from
+   the host-verified executing Governance V2 context.
 5. Every EIP-150 63/64 parent-gas precheck reads the current GGP value at
    call time, never a compiled-in constant (ADR 0010 decision D1.4).
 6. Monitoring must alert when a measured guarded path exceeds two-thirds
    of its current GGP value or when margin falls below the
    release-manifest SLO, whichever is stricter.
 7. The remediation order for a guarded path outgrowing its bound is:
-   staged (or emergency raise-only) GGP raise first; a storage-compressed
-   successor implementation second; a new deployment line only when the
-   host contract itself is obsolete. Cap exhaustion is a recoverable
-   operational incident, never a permanent outage.
+   stage a bounded GGP raise first; use a storage-compressed successor
+   implementation second; use a new deployment line when the host itself is
+   obsolete or a value must be tightened. The 48-hour delay is part of the
+   disclosed incident-recovery envelope.
 8. The mint-path never-brick chain is explicit (ADR 0010 decision D1.5):
    entropy registration failure cannot permanently brick minting, because
    `ENTROPY_REGISTRATION_GAS_LIMIT` has no ceiling above its floor — any
    needed value is reachable in bounded 2x-per-action steps through
-   staged governance, and the governed emergency raise path stays
-   available while the probe proves failure (requirement 1) — ([EC-REGGAS]
-   in
+   delayed governance — ([EC-REGGAS] in
    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md))
    and the `ENTROPY_COORDINATOR` pointer is replaceable under the Core
-   Satellite Pointer Policy. As a `FAIL_CLOSED_PRECHECK` parameter it has
-   no permissionless conditional raise — requirement 11 is
-   `FORWARDING_CAP`-only (ADR 0012 decision T1): mint liveness is a
-   governed-liveness guarantee, while read survival is the permissionless
-   museum-mode guarantee. The same two-step recovery chain — raise the
-   cap, then replace the pointer — applies to every guarded satellite
-   read.
-9. GGP floor/raise/lower/probe behavior is conformance-gated: the matrix
-   governance gates must include a floor-rejection test, a raise-path
-   test with a per-action raise-bound rejection, an emergency-raise
-   probe-gate test (a healthy probe record blocks; a failing record
-   admits), a probe-gated lower test, a permissionless
-   conditional-raise test and a permissionless conditional-re-lower
-   test, each executed with no governance signer, for every
-   `FORWARDING_CAP` parameter (requirement 11), a scope-rejection test
-   proving no conditional-raise or conditional-re-lower action exists
-   — or that its execution reverts — for every `FAIL_CLOSED_PRECHECK`
-   and `MIN_GAS_GATE` parameter, which the requirement 10
-   reclassification rule extends to every parameter whose precheck
-   shortfall reverts a user entry or settlement call, a
-   forged-failure probe-integrity test proving an under-funded or
-   input-shaped probe call reverts without recording a failing run
-   ([LTA-GGP-PROBES] rules 4–5), the [LTA-GGP-PROBES] permanence checks
-   (static permanence, golden interface, museum-mode drill), a
-   host-introspection test proving `gasParameterInfo` (requirement 12)
-   returns the live value, pinned floor, probe binding, failure class,
-   recency bound, and monotonic revision for every deployed parameter;
-   revision increments exactly once for every successful change or probe
-   rebind and prevents same-value ABA state-hash reuse; and change-event
-   assertions for every deployed GGP.
+   Satellite Pointer Policy. The same governed recovery chain — raise the cap,
+   then replace the pointer if required — applies to every guarded satellite
+   read. This is a governed-liveness guarantee, not a zero-signer museum-mode
+   guarantee.
+9. GGP registration, authority, transition, and event behavior is
+   conformance-gated. Tests cover invalid and duplicate registration, every
+   invalid authority shape, unregistered IDs, same-value and lower-value
+   writes, the per-action raise bound, wrong caller, zero/non-executing/wrong-
+   class contexts, forged scope/old/new commitments, stale action replay,
+   exact-once revision increments, overflow, introspection, and exact events.
+   ABI goldens prove every removed probe, lower, emergency, rebind, and
+   conditional surface remains absent.
 10. Raise direction is not uniformly safe, and each parameter says so
     (ADR 0011 decision R5). Every release-manifest GGP entry records the
     parameter's failure-direction class: `FORWARDING_CAP` (bounds gas
@@ -1357,80 +1172,17 @@ Requirements:
     raising is
     service-restoring — holds only for `FORWARDING_CAP` parameters. For
     the other two classes the raise direction is itself a
-    denial-of-service lever, which is exactly why every raise is bounded
-    per action, staged raises take the normal delay class with staging
-    events and cancellation, and the emergency path cannot fire while
-    the probe reports the guarded path healthy (requirement 1). The
-    probe for a `FAIL_CLOSED_PRECHECK` or `MIN_GAS_GATE` parameter must
-    prove the guarded operation itself succeeds at the probed value — a
-    registration completes, a flush is admitted — never merely that a
-    read returns, and the staging artifact for any raise of such a
-    parameter must record the proposed value as a fraction of the
-    current block gas limit so reviewers see the halt threshold
-    approaching. The permissionless conditional raise and re-lower of
-    requirement 11
-    never apply to these two classes (ADR 0012 decision T1).
-11. Lost-governance survivability: permissionless conditional raises
-    and re-lowers, for `FORWARDING_CAP` parameters only (ADR 0011
-    decision R5; ADR 0012 decision T1; ADR 0014 decision V7). The
-    host of every `FORWARDING_CAP` parameter
-    must register at deployment a pre-approved conditional-raise action
-    — a standing pre-authorized action in the spirit of the
-    guardian-module pattern ([LTA-GUARDIAN]) — executable by anyone,
-    with no live governance signer, when the parameter's named probe
-    has recorded a failing run at the current value within
-    `probeMaxAgeBlocks`. A conditional raise takes the same bounded
-    per-action step as every other raise, may repeat while fresh probe
-    runs keep proving failure, can never lower a value or touch any
-    other parameter or pointer, and emits the canonical change event
-    carrying the pre-registered action ID. Because probe runs are
-    themselves permissionless, a gas repricing that degrades
-    `tokenURI()`/`royaltyInfo()` for frozen collections after total
-    governance loss is recoverable by anyone: run the probe, execute the
-    conditional raise, and repeat until the probe passes. Read-only
-    museum mode (State Export And Archival Operations) lists this as a
-    surviving mechanism, and the museum-mode drills exercise it.
-
-    The surviving ratchet is two-way (ADR 0014 decision V7). The host
-    of every `FORWARDING_CAP` parameter must likewise register at
-    deployment a pre-approved conditional re-lower action, executable
-    by anyone with no live governance signer, whose execution recheck
-    verifies through the parameter's named probe a recorded passing
-    run at exactly the proposed lower value within
-    `probeMaxAgeBlocks`. A conditional re-lower takes a bounded
-    per-action step symmetric with the raise — no lower than half the
-    current value per action — reverts below the immutable floor, can
-    never raise a value or touch any other parameter or pointer, and
-    emits the canonical change event carrying its pre-registered
-    action ID. It exists because every raise also raises the minimum
-    parent gas the parameter's EIP-150 precheck implies for callers,
-    and onchain consumers that forward fixed caller stipends —
-    2300-gas-class sends and capped `staticcall` wrappers in royalty
-    engines and marketplace settlement paths — silently receive the
-    fail-safe fallback below that threshold while `eth_call` readers
-    see service restored. When a repricing that armed conditional
-    raises is later reversed, anyone can walk the value back down to
-    a probe-passing level instead of leaving fixed-stipend readers
-    zeroed forever: probe runs, bounded raises, and bounded re-lowers
-    together make the post-governance-loss cap self-correcting in
-    both directions.
-
-    No permissionless raise or re-lower exists for
-    `FAIL_CLOSED_PRECHECK` or `MIN_GAS_GATE` parameters: registering a
-    conditional-raise or conditional-re-lower action
-    for either class is nonconformant, and those parameters raise only
-    through governance (staged, or the requirement 1 emergency path).
-    For a fail-closed or minimum-gas parameter the raise direction is a
-    denial-of-service lever (requirement 10) — a manufactured failing
-    run would let anyone ratchet a mint precheck or flush floor past
-    what parent transactions can supply, and the corrective lower is a
-    delayed governed action. The museum-mode guarantee never depended on
-    those classes: with governance gone, reads survive permissionlessly;
-    minting and flushing are governed-liveness surfaces (ADR 0012
-    decision T1).
-12. Pinned host introspection (ADR 0013 decision U2). Every GGP host
-    exposes, for each parameter it hosts, the canonical storage-backed
-    introspection read:
+    denial-of-service lever. That is why every class uses the same 48-hour
+    delayed authority path and 2x bound. The staging artifact for a raise of a
+    `FAIL_CLOSED_PRECHECK` or `MIN_GAS_GATE` parameter must record the proposed
+    value as a fraction of the current block gas limit so reviewers see the
+    halt threshold approaching.
+11. Lost-governance posture is explicit. If governance is permanently lost,
+    parameter reads survive but parameter mutation does not. Museum-mode
+    export and replay documentation must not promise a zero-signer repair
+    path. This accepted tradeoff removes the unauditable standing authority
+    and permanent probe fleet (ADR 0017).
+12. Every GGP host exposes the canonical storage-backed introspection read:
 
     ```solidity
     function gasParameterInfo(bytes32 parameterId)
@@ -1439,52 +1191,27 @@ Requirements:
         returns (
             uint256 value,
             uint256 floor,
-            address probe,
             uint8 failureClass,
-            uint64 probeMaxAgeBlocks,
             uint64 revision
         );
     ```
 
-    `value` and `floor` are the host's live storage values; `probe` is
-    the probe binding consumed by the execution rechecks;
-    `failureClass` is the requirement 10 failure-direction class with
-    pinned numeric IDs `NONE = 0` (unregistered `parameterId`),
-    `FORWARDING_CAP = 1`, `FAIL_CLOSED_PRECHECK = 2`, and
-    `MIN_GAS_GATE = 3`, mirrored in the Numeric ID Catalog;
-    `probeMaxAgeBlocks` is the recency bound the host enforces; `revision` is
-    the monotonic per-parameter mutation generation. An
-    unregistered `parameterId` returns the zeroed tuple. Release
-    manifests and mirror tables remain evidence and convenience — this
-    read is the normative source on the lost-governance raise path, so
-    a stranger executing requirement 11 locates the probe, floor,
-    class, and recency bound from host state alone, with no manifest
-    and no mirror. Hosts may keep narrower reads (for example the
-    split-factory `gasParameter`/`gasParameterFloor` keys); the
-    introspection read is additionally required of every host from
-    genesis, golden-tested per host (requirement 9), and exercised by
-    the zero-signer museum-mode drill ([LTA-GGP-PROBES] rule 9).
+    `value` is live state. `floor` and `failureClass` are immutable registration
+    facts. The pinned numeric IDs remain `NONE = 0` (unregistered
+    `parameterId`), `FORWARDING_CAP = 1`, `FAIL_CLOSED_PRECHECK = 2`, and
+    `MIN_GAS_GATE = 3`. `NONE = 0` is never valid for a registered row;
+    it appears only in the zeroed tuple for an unregistered ID. `revision`
+    starts at `1` and increments once per
+    successful raise. An unregistered ID returns the zeroed tuple. Rich
+    standalone stores may additionally expose `gasParameter`,
+    `gasParameterIds`, `governanceAuthority`, and schema/failure-class constant
+    getters; byte-constrained hosts keep only the launch-required surface.
 
-Governance-V2 host floor. Before ADR 0004 action class `6` is enabled, every
-existing GGP and GTP host must replace authority-only acceptance with an
-independent `currentAction()` recheck. Ordinary governed raise/lower operations
-require their delayed class; only the exact emergency-raise selector may accept
-`EMERGENCY_RESTORATION`, and only after its `(host, selector, runtimeCodeHash)`
-is terminal-registered under [GOV-EMERGENCY-RESTORATION]. A caller-supplied or
-event-only action ID is never proof of class. Every manifest-inventoried probe
-rebind, including all genesis GGP probes, is a class-3 pointer replacement and
-an exact [GOV-MANIFEST-TAIL] trigger. Lower, rebind, time-parameter mutation,
-and unrelated selectors explicitly reject class `6` at the host even though
-the executor also rejects them. The V2 migration gate runs these negative
-goldens against every concrete host, not only the Core profile below.
-The migration does not preserve the legacy three-argument writer ABI. Every
-GGP host uses the same two-argument governed mutation signatures/selectors
-pinned at [LTA-GGP-CORE], and every GTP host uses the two-argument signatures
-pinned below. No host accepts, ignores, or equality-checks caller-supplied
-`actionId` calldata; the verified ID comes only from `currentAction()` and is
-the ID emitted. Rich standalone stores may retain only additional read/
-enumeration conveniences, not alternate authority-bearing writers. Therefore
-the bind-recorded [GOV-MANIFEST-TAIL] rebind pair is unambiguous for every host.
+Governance-V2 host floor. Every GGP and GTP host accepts only its immutable
+authority and independently verifies `currentAction()` is executing with a
+nonzero action ID, class `DELAYED_LOOSENING` (`1`), and the exact scope,
+old-state, and new-state commitments. No writer accepts a caller-supplied
+`actionId`. Class `6` is retired before genesis, forbidden, and never reusable.
 
 ### Core-Minimal GGP ABI [LTA-GGP-CORE]
 
@@ -1503,9 +1230,7 @@ interface IStreamCoreGasParameters {
         returns (
             uint256 value,
             uint256 floor,
-            address probe,
             uint8 failureClass,
-            uint64 probeMaxAgeBlocks,
             uint64 revision
         );
 
@@ -1513,50 +1238,8 @@ interface IStreamCoreGasParameters {
         bytes32 parameterId,
         uint256 newValue
     ) external;
-
-    function emergencyRaiseGasParameter(
-        bytes32 parameterId,
-        uint256 newValue
-    ) external;
-
-    function lowerGasParameter(
-        bytes32 parameterId,
-        uint256 newValue
-    ) external;
-
-    function rebindGasParameterProbe(
-        bytes32 parameterId,
-        address newProbe
-    ) external;
-
-    function conditionalRaiseGasParameter(
-        bytes32 parameterId,
-        uint256 newValue
-    ) external;
-
-    function conditionalRelowerGasParameter(
-        bytes32 parameterId,
-        uint256 newValue
-    ) external;
 }
-
-event GasParameterProbeRebound(
-    uint16 schemaVersion,
-    bytes32 indexed parameterId,
-    address indexed host,
-    bytes32 indexed actionId,
-    address oldProbe,
-    address newProbe
-);
 ```
-
-The rebound event topic is
-`0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c`
-for
-`GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)`.
-Its schema version is `1`; `parameterId`, `host`, and the executor-verified
-`actionId` are indexed, and it emits only after the complete binding state is
-stored.
 
 The selectors are production-exact:
 
@@ -1564,33 +1247,21 @@ The selectors are production-exact:
 | --- | --- |
 | `gasParameterInfo(bytes32)` | `0xec2ef90a` |
 | `raiseGasParameter(bytes32,uint256)` | `0x5c0df7da` |
-| `emergencyRaiseGasParameter(bytes32,uint256)` | `0x4fa1b5ad` |
-| `lowerGasParameter(bytes32,uint256)` | `0x908dc981` |
-| `rebindGasParameterProbe(bytes32,address)` | `0xb98f30e0` |
-| `conditionalRaiseGasParameter(bytes32,uint256)` | `0x0671a369` |
-| `conditionalRelowerGasParameter(bytes32,uint256)` | `0x59bf6beb` |
 
 Core does not expose the redundant `gasParameter(bytes32)`,
-`gasParameterIds()`, `conditionalGasParameterActions(bytes32)`, or
-`governanceAuthority()` convenience reads, and it does not inherit public
-failure-class/schema constant getters. The fixed four-row inventory and IDs
-are catalog-pinned; `gasParameterInfo` already returns the live value and all
-lost-governance execution facts; `streamSystemManifest()` exposes the
-immutable governance address after discovery through Core's
-`SYSTEM_MANIFEST` pointer;
-and the conditional action IDs are deterministically
-derived from their pinned domains, chain ID, Core address, and `parameterId`.
-An unregistered ID returns the zeroed `gasParameterInfo` tuple and every
-mutation rejects it.
+`gasParameterIds()`, or `governanceAuthority()` convenience reads, and it does
+not inherit public failure-class/schema constant getters. The fixed four-row
+inventory and IDs are catalog-pinned. An unregistered ID returns the zeroed
+`gasParameterInfo` tuple and the mutation rejects it.
 
-The four governed mutations accept only Core's immutable governance executor
-during an executing action. None accepts a redundant caller-supplied
+The single governed mutation accepts only Core's immutable governance executor
+during an executing class-`1` action. It does not accept a caller-supplied
 `actionId`: Core obtains the nonzero action ID and class from `currentAction()`
 and emits that verified ID. The executor's published calldata and `callsHash`
-bind the exact parameter, proposed value or probe, and selector; Core remains
-the execution-recheck locus for the exact transition commitments below, the
-immutable floor, 2x raise bound, exact-value fresh probe, failure-direction
-class, probe binding, and every subsystem coupling invariant. In particular,
+bind the exact parameter, proposed value, and selector; Core remains the
+execution-recheck locus for the exact transition commitments below, the 2x
+raise bound, failure-direction class, and every subsystem coupling invariant.
+In particular,
 every change to either royalty row rechecks the resolver-limit/return-buffer
 coupling required by [RSR-2981-GAS].
 
@@ -1598,190 +1269,57 @@ Core's per-call scope and complete parameter-state commitments are
 production-exact:
 
 ```solidity
-bytes32 constant STREAM_GAS_PARAMETER_SCOPE_V1 =
-    0x8d8b74997070792410ba6f4dd511d967fec29b82366868401baa2bfb3681da69;
-    // keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V1")
+bytes32 constant STREAM_GAS_PARAMETER_SCOPE_V2 =
+    0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71;
+    // keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V2")
 
-bytes32 constant STREAM_GAS_PARAMETER_STATE_V1 =
-    0xa16fd6b2f079cdf0a8f1a952c35496a693958895d1782fecc8b6440e06594977;
-    // keccak256("6529STREAM_GAS_PARAMETER_STATE_V1")
-
-bytes32 constant STREAM_GGP_CONDITIONAL_RAISE_V1 =
-    0x88d201cde2efee286ecd558414d10dd0599848f47e6dcdfa51a2e0287e4fb2eb;
-    // keccak256("6529STREAM_GGP_CONDITIONAL_RAISE_V1")
-
-bytes32 constant STREAM_GGP_CONDITIONAL_RELOWER_V1 =
-    0xb30115be75ee59eeed3fa156242dc7c0eda20b383f4f251c8adcfa616b2276a1;
-    // keccak256("6529STREAM_GGP_CONDITIONAL_RELOWER_V1")
-
-bytes32 constant STREAM_GGP_PROBE_BINDING_V1 =
-    0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4;
-    // keccak256("6529STREAM_GGP_PROBE_BINDING_V1")
-
-bytes32 conditionalRaiseActionId = failureClass == FORWARDING_CAP
-    ? keccak256(abi.encode(
-        STREAM_GGP_CONDITIONAL_RAISE_V1,
-        uint256(block.chainid),
-        address(core),
-        parameterId
-    ))
-    : bytes32(0);
-
-bytes32 conditionalRelowerActionId = failureClass == FORWARDING_CAP
-    ? keccak256(abi.encode(
-        STREAM_GGP_CONDITIONAL_RELOWER_V1,
-        uint256(block.chainid),
-        address(core),
-        parameterId
-    ))
-    : bytes32(0);
+bytes32 constant STREAM_GAS_PARAMETER_STATE_V2 =
+    0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c;
+    // keccak256("6529STREAM_GAS_PARAMETER_STATE_V2")
 
 bytes32 scopeHash = keccak256(abi.encode(
-    STREAM_GAS_PARAMETER_SCOPE_V1,
+    STREAM_GAS_PARAMETER_SCOPE_V2,
     uint256(block.chainid),
-    address(core),
+    address(host),
     parameterId
 ));
 
-bytes32 probeBindingHash = keccak256(abi.encode(
-    STREAM_GGP_PROBE_BINDING_V1,
-    probeRegistry,
-    probe,
-    probeModuleType,
-    probeInterfaceId,
-    probeModuleVersion,
-    probeRuntimeCodeHash,
-    probeModuleManifestHash,
-    probeDeploymentManifestHash
-));
-
 bytes32 gasParameterStateHash = keccak256(abi.encode(
-    STREAM_GAS_PARAMETER_STATE_V1,
+    STREAM_GAS_PARAMETER_STATE_V2,
     scopeHash,
     value,
     floor,
-    probe,
-    probeRuntimeCodeHash,
-    probeBindingHash,
     uint8(failureClass),
-    uint64(probeMaxAgeBlocks),
-    conditionalRaiseActionId,
-    conditionalRelowerActionId,
     uint64(revision)
 ));
 ```
 
-`oldValueHash` is the hash of the complete live tuple. The byte-constrained
-Core caches `probeRuntimeCodeHash` and `probeBindingHash`; the system-manifest
-payload expands the latter into the exact registry, type, interface, version,
-runtime code hash, and module/deployment manifest hashes above. For a raise or
-lower, `newValueHash` changes only `value`; for a probe rebind it changes the
-probe address and both compact immutability commitments. Every successful
-raise, lower, conditional step, or probe rebind increments `revision` exactly
-once (`0 -> 1` at genesis registration; overflow reverts), and governed
-`newValueHash` commits `oldRevision + 1`. Core derives both hashes from storage and calldata and requires this
-call's V2 `GovernanceCall` scope/old/new context to match before writing. The
-floor, class, recency bound, and conditional IDs therefore cannot drift outside
-the reviewed transition even though they have no separate Core getters.
-The revision prevents an `A -> B -> A` value or probe cycle from reviving an
-older scheduled action whose apparent tuple values match again.
+`oldValueHash` and `newValueHash` are complete state hashes. A raise changes
+only `value` and `revision`; immutable registration facts cannot drift outside
+the reviewed transition. Revision starts at `1`, increments exactly once,
+and overflow reverts. The host derives both hashes from storage and calldata
+and requires the executing action's scope/old/new context to match before
+writing. Stale actions and any attempted replay therefore fail.
 
 Target-side action-class and transition checks are exact:
 
 | Entry | Required class | Execution rechecks |
 | --- | --- | --- |
-| `raiseGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `newValue > value`; overflow-safe 2x bound `newValue - value <= value`; full scope/old/new hash match; row coupling invariants |
-| `emergencyRaiseGasParameter` | `EMERGENCY_RESTORATION` (`6`) | every normal raise check plus a recorded failing run from the bound probe at exactly the current `value`, no older than `probeMaxAgeBlocks` |
-| `lowerGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `floor <= newValue < value`; a recorded passing run at exactly `newValue`, no older than `probeMaxAgeBlocks`; full hash/coupling checks |
-| `rebindGasParameterProbe` | `POINTER_REPLACEMENT` (`3`) | nonzero deployed `newProbe`; resolve Core's live `MODULE_REGISTRY`, require an `ACTIVE` record with module type `STREAM_GGP_PROBE`, interface `0x0f8c6b0f`, exact live runtime code hash, nonzero module/deployment manifest hashes, and the reviewed version; require `probedParameterId() == parameterId`; cache the code/binding hashes and match the full state/coupling commitments; allow the same probe address only when its live registry/binding commitment changes, and reject an exact complete-state no-op; exact selector is a class-3 [GOV-MANIFEST-TAIL] trigger whose final satellite publication expands and commits the new probe binding |
+| `raiseGasParameter` | `DELAYED_LOOSENING` (`1`) | registered row; `newValue > value`; overflow-safe 2x bound `newValue - value <= value`; nonzero executing action ID; full scope/old/new hash match; row coupling invariants |
 
-Every governed entry also requires `msg.sender` to be Core's immutable
-executor, `currentAction().executing == true`, and a nonzero current action ID.
-The emergency class is zero-delay but not unchecked: a stale, missing, passing,
-wrong-value, or wrong-probe record reverts at Core, and an emergency step can
-never exceed the overflow-safe 2x bound. Normal raise and lower require class
-`1`; rebind requires class `3`; all three reject class `6`. Emergency
-raise rejects classes `0` through `5`. Before trusting `lastProbeRun`, every
-lower, emergency raise, and permissionless conditional call resolves the
-host's live canonical module registry, requires the probe's record to remain
-`ACTIVE`, recomputes the full binding against that registry and requires it to
-equal cached `probeBindingHash`, rechecks `probe.codehash` against cached
-`probeRuntimeCodeHash`, and rechecks `probedParameterId()`. A status-revoked,
-record-drifted, wrong-registry, or mutable same-address probe cannot arm a
-repair merely because its address or code hash still matches.
+Core emits `GasParameterUpdated` for every successful raise. It exposes no
+lower, emergency, conditional, probe, or probe-rebind function or event, and a
+GGP mutation is not a manifest-tail trigger.
 
-Core's `rebindGasParameterProbe(bytes32,address)` (`0xb98f30e0`) is registered
-in the executor's manifest-tail rule set as a class-3 trigger. Probe bindings
-are manifest-inventoried protocol facts, so a conforming batch executes the
-rebind first and exactly one final `StreamSystemManifest` publication second;
-either both state changes commit or both revert. Goldens reject class `1` or
-`6`, a missing/duplicate/non-final publisher, a manifest payload that retains
-the old probe, an inactive or wrong-registry record, zero/mismatched manifest
-hashes, wrong module type/interface/version/runtime hash, a mutable same-address
-impostor, and a probe whose parameter binding differs from the reviewed
-`newValueHash`. The successful golden proves the GGP event's
-verified action ID and the satellite publication event carry the same action
-ID.
-
-Replacing the live `MODULE_REGISTRY` invalidates the registry-address component
-of every cached probe binding. A conforming class-3 replacement batch therefore
-updates the Core registry pointer first, performs same-address
-`rebindGasParameterProbe` revalidations against the successor registry for
-every affected Core and satellite GGP/GTP host second, and publishes the system
-manifest last. The rebind entry permits these same-address binding changes but
-rejects an exact complete-state no-op. Atomicity prevents an observable state
-where the new registry is live while old bindings remain trusted. Goldens cover
-successful successor revalidation, omitted host revalidation, registry/status
-drift, `INCIDENT_REVOKED`, and a same-address no-op.
-
-The two conditional functions are permissionless only for the three
-`FORWARDING_CAP` rows. They use the deployment-derived standing action IDs and
-the exact domain formulas above, so no conditional-action getter is needed.
-They do not require or synthesize an executor `currentAction()` record; the
-standing ID is authorization evidence only after the target independently
-proves the fixed parameter scope, live Permanent probe binding, fresh outcome,
-direction, floor, 2x/half-step bound, and coupling invariants.
-Conditional raise requires a fresh failing run at the current value and a
-strictly higher value no greater than 2x. Conditional re-lower requires a fresh
-passing run at the proposed value, `floor <= newValue < value`, and
-`newValue >= (value / 2) + (value % 2)`; both repeat the full row-coupling
-checks. Both
-functions reject `ENTROPY_REGISTRATION_GAS_LIMIT`, whose
-`FAIL_CLOSED_PRECHECK` raise path remains governance-only. Core emits the
-canonical `GasParameterUpdated` event for every value change and
-`GasParameterProbeRebound` for a probe move; subsystem-specific duplicate GGP
-alias events are prohibited on bytecode-constrained Core.
-
-GGP inventory. The model is instantiated by the parameters below; each
-home owns host, genesis value, floor sizing, failure-direction class,
-and probe definition — what the probe executes, what the faithful
-equivalent is for permissioned guarded paths, and what `evidenceHash`
-commits to. An inventory row whose home lacks a probe definition or a
-pinned failure-direction class is nonconformant; the matrix verifies
-one probe definition and one class per row, mirroring the
-GGP-identifier completeness rule (ADR 0012 decision T1). A row
-instantiated on more than one host — `METADATA_ERC1271_VERIFY_GAS`
-across the verifying metadata satellites, `VRF_CALLBACK_GAS_LIMIT`
-across provider adapters — still binds exactly one Permanent-class
-probe contract, counted once per row in the genesis inventory
-(ADR 0013 decision U9): every host binds that probe at parameter
-registration, the probe's pinned scenario executes the guarded path of
-every bound host, `evidenceHash` commits to the per-host measurements,
-a run records `passed = true` only when every bound host's guarded
-execution genuinely received `probedValue` and succeeded, and each
-host enforces its own `probeMaxAgeBlocks` recheck against the shared
-record. For every row
-the release manifest records the probe contract, `probeMaxAgeBlocks`,
-failure-direction class, and — for `FORWARDING_CAP` rows — the
-conditional-raise and conditional-re-lower registrations plus the
-row's fixed-stipend inventory (requirements 10–11; ADR 0014 decision
-V7): every known fixed-caller-stipend consumer class of the guarded
-read — 2300-gas-class sends and the capped `staticcall` wrappers of
-pinned marketplace and royalty-engine integrations — together with
-the minimum parent gas the row's precheck implies at the genesis
-value, so repricing reviews and the marketplace evidence gates can
-prove that pinned integrators' forwarded stipends clear the
-threshold at genesis and across raise chains:
+GGP inventory. The model is instantiated by the parameters below; each home
+owns host, genesis value, floor sizing, failure-direction class, measurement
+evidence, and fixed-stipend inventory. An inventory row whose home lacks a
+pinned class or sizing evidence is nonconformant. A row instantiated on more
+than one host retains one identifier while each deployed host registers and
+reports its own immutable facts. For every row the release manifest records
+the host or hosts, genesis value, floor, failure class, measurement evidence,
+and known fixed-caller-stipend consumers so repricing reviews can evaluate
+every monotonic raise:
 
 | Parameter | Host | Normative home |
 | --- | --- | --- |
@@ -1827,8 +1365,8 @@ block-count window that gates a liveness, recovery, or SLO path —
 entropy request timeouts, reveal SLO windows, fresh-recovery waiting
 periods, and any future host-level block-denominated window — is
 therefore a Governed Time
-Parameter (GTP) under the same floor/raise/probe discipline as gas
-(ADR 0012 decision T1); the per-collection declarations those windows
+Parameter (GTP) under the same monotonic raise discipline as gas
+(ADR 0017); the per-collection declarations those windows
 overlay are collection timing policies, a distinct non-parameter
 concept (membership rules below; ADR 0013 decision U9). This
 subsection is the single normative home of
@@ -1852,8 +1390,8 @@ A Governed Time Parameter is:
    never be reconfigured;
 2. paired with an immutable per-parameter floor (in blocks) plus a
    pinned wall-clock floor: the host stores, immutably per parameter,
-   the minimum wall-clock width in seconds the window must cover — the
-   value the cadence probe verifies candidates against — and the
+   the minimum wall-clock width in seconds the launch value was sized to cover,
+   and the
    release manifest records genesis value, block floor, wall-clock
    floor, host, and sizing evidence;
 3. identified by
@@ -1869,19 +1407,13 @@ A Governed Time Parameter is:
    block-denominated window past its declared wall-clock intent, and
    acceleration shrinks it below (ADR 0014 decision V7) — remeasures
    every GTP row against its wall-clock
-   intent and publishes raise/lower recommendations before user impact;
-6. paired with a named cadence probe — a Permanent-class probe contract
-   under [LTA-GGP-PROBES], with its own release-manifest entry and
-   `probeMaxAgeBlocks` under those rules — that anyone can call to
-   record observed block cadence onchain over a sampling window at
-   least `CADENCE_SAMPLE_FLOOR_BLOCKS` wide (planning value 1,000
-   blocks; deployed value pinned in the release manifest) and to record
-   pass/fail for a candidate value against the parameter's pinned
-   wall-clock floor at that observed cadence. One cadence probe
-   contract may serve every GTP row of its host — observed cadence is
-   a chain fact, not a per-parameter path — counted once in the
-   genesis inventory, with the binding recorded per row in the release
-   manifest (ADR 0013 decision U9);
+   intent and publishes raise recommendations before user impact. If review
+   concludes that a window should shorten, it instead recommends a successor
+   host or deployment line; the launch host cannot lower;
+6. fixed at deployment without a cadence-probe binding, probe record, or
+   module-registry dependency. Operations measure cadence offchain from public
+   chain data and preserve the reviewed evidence in the release/operations
+   packet; that evidence informs a delayed raise but cannot authorize one;
 7. readable through the canonical host introspection read, mirroring
    [LTA-GGP] requirement 12 (ADR 0013 decision U2):
 
@@ -1893,63 +1425,40 @@ A Governed Time Parameter is:
            uint256 value,
            uint256 floorBlocks,
            uint64 wallClockFloorSeconds,
-           address cadenceProbe,
-           uint64 probeMaxAgeBlocks,
            uint64 revision
        );
    ```
 
-   Live value, both floors, the cadence-probe binding, the recency bound, and
-   the monotonic per-parameter mutation revision
-   bound come from host state alone — never from a release manifest or
-   mirror — with the same per-host golden-test and museum-mode drill
-   obligations as the GGP read; an unregistered `parameterId` returns
-   the zeroed six-word tuple.
+   Live value, both immutable floors, and the monotonic revision come from host
+   state alone. An unregistered `parameterId` returns the zeroed four-word
+   tuple.
 
    The exact Governance-V2 GTP ABI is:
 
    ```solidity
    function raiseTimeParameter(bytes32 parameterId, uint256 newValue) external;
-   function lowerTimeParameter(bytes32 parameterId, uint256 newValue) external;
-   function rebindTimeParameterProbe(bytes32 parameterId, address newCadenceProbe)
-       external;
    ```
 
    | Signature | Selector |
    | --- | --- |
    | `timeParameterInfo(bytes32)` | `0x5f2463b8` |
    | `raiseTimeParameter(bytes32,uint256)` | `0x046e1fd5` |
-   | `lowerTimeParameter(bytes32,uint256)` | `0xa4e24c49` |
-   | `rebindTimeParameterProbe(bytes32,address)` | `0xc07b3459` |
 
-   Raise and lower require the normal delayed class. Probe rebind requires
-   class `3`, is an exact [GOV-MANIFEST-TAIL] trigger for every inventoried host,
-   and ends in the same-batch manifest publication. All three independently
-   verify the V2 action ID, class, scope hash, old-state hash, and new-state hash
-   through `currentAction()`.
+   The raise requires class `1` and independently verifies the action ID,
+   class, scope hash, old-state hash, and new-state hash through
+   `currentAction()`.
 
 GTP change discipline:
 
 1. Every change executes through the canonical governance action
-   ([GOV-ACTION-ID]) on the normal delay class, with staging events and
-   cancellation. There is no emergency and no permissionless
-   conditional raise or re-lower for GTPs: the lost-governance
-   machinery exists for `FORWARDING_CAP` read survival only
-   (requirement 11),
-   and both GTP directions move liveness semantics — a raise delays
-   recovery and fallback rights; a lower trips them early.
-2. Raises are bounded per action to at most 2x the current value;
-   lowers are bounded per action to no less than half the current
-   value and revert below the floor. Larger moves take multiple
-   staged actions.
-3. A lower is probe-gated at the cadence locus: its execution recheck
-   must verify a recorded cadence-probe run no older than the
-   parameter's `probeMaxAgeBlocks` proving the proposed count still
-   covers the pinned wall-clock floor at the observed cadence.
-   Every probe-dependent use applies the same live-registry `ACTIVE`, complete
-   binding-hash, live code-hash, and parameter-specific row-pin checks as GGP
-   (`probedParameterId()` for a GGP probe; pinned wall-clock floor for GTP); a
-   revoked or registry-stale cadence probe is not evidence.
+   ([GOV-ACTION-ID]) on class `DELAYED_LOOSENING` (`1`) with at least 48
+   hours of delay, staging events, and cancellation. There is no emergency,
+   lower, rebind, conditional, or permissionless GTP mutation.
+2. A raise must strictly increase the current value and is bounded per action
+   to at most 2x. Larger moves require multiple separately delayed actions.
+3. A host with zero governance authority is immutable. Permanent governance
+   loss likewise freezes the live values; reads, exports, and event replay
+   remain available without implying a zero-signer mutation path.
 4. Every GTP change emits the canonical change event:
 
    ```solidity
@@ -1960,78 +1469,63 @@ GTP change discipline:
        bytes32 indexed actionId,
        uint256 oldValue,
        uint256 newValue,
-       uint256 floor
+       uint256 floorBlocks
    );
    ```
 
-   The cadence probe emits `TimeParameterProbed` with the same field
-   shape as `GasParameterProbed`. A host spec may pin parameter-named
-   alias events under the same event-catalog family rule as GGP
+   `schemaVersion` is exactly `2` for this raise-only event shape. Parameter-
+   named aliases are absent under the same single-owner rule as GGP
    requirement 4.
 5. The staging artifact for every GTP change records the observed
-   seconds-per-block from the latest cadence-probe run and the implied
-   wall-clock window before and after the change, so reviewers see
+   seconds-per-block from the reviewed public-chain measurement and the
+   implied wall-clock window before and after the raise, so reviewers see
    intent, not raw block counts.
-6. GTP behavior is conformance-gated alongside GGPs: floor rejection,
-   per-action raise and lower bounds, cadence-probe-gated lower, the
-   host-introspection test (`timeParameterInfo`, definition item 7) proving the
-   live value, both floors, authenticated probe binding, recency bound, and
-   monotonic revision, exact-once revision increments for every successful
-   change or probe rebind, same-value ABA state-hash rejection, and change-event
-   assertions for every deployed GTP (Release Gates, governance gate 7).
-7. Wall-clock floors bind in both directions, and scheduled
-   acceleration is handled at the activation boundary (ADR 0014
-   decision V7). Cadence slowdown lengthens every frozen
-   block-denominated window, so escalations arrive late; a slot-time
-   reduction shrinks every effective window's wall-clock width, so
-   liveness, incident-eligibility, and recovery-pacing gates open
-   early until corrective raises land. When a scheduled
-   consensus-timing change would shrink any GTP-governed effective
-   window below its pinned wall-clock floor or recorded intent,
-   operations must stage the corrective GTP raises to execute at or
-   before the change's activation — mirroring the activation-boundary
-   drain rule of [EP-INFLIGHT] in
-   [`docs/stream-entropy-providers.md`](stream-entropy-providers.md) —
-   and the pre-activation staging alert joins the release-manifest
-   monitoring plan. Instantiating homes state both residuals, never
-   only the slowdown ([EC-TIME] in
+6. GTP behavior is conformance-gated alongside GGPs: invalid registration and
+   authority shapes, unregistered IDs, same-value/lower-value rejection, the
+   per-action raise bound, exact Governance V2 context checks, introspection,
+   exact-once revision increments, stale-action rejection, and change-event
+   assertions for every deployed GTP. ABI goldens prove the removed lower,
+   cadence-probe, and rebind surfaces remain absent.
+7. Repricing review still evaluates cadence in both directions. A slot-time
+   reduction shrinks effective wall-clock windows, so operations must stage
+   corrective raises to execute at or before a scheduled activation. A
+   slowdown lengthens windows and may delay escalation, fallback, and recovery;
+   the launch host cannot correct that direction by lowering. Operations must
+   disclose the residual, and a requirement to shorten the window triggers a
+   successor-host or deployment-line decision. Instantiating homes state both
+   residuals ([EC-TIME] in
    [`docs/stream-entropy-coordinator.md`](stream-entropy-coordinator.md)).
 8. Every host uses exact V2 per-call transition commitments:
 
    ```solidity
-   bytes32 constant STREAM_TIME_PARAMETER_SCOPE_V1 =
-       0xcb90eddcfa663732d90ca0d1892636ba1216e3900df55acc72d58187eee359a8;
-       // keccak256("6529STREAM_TIME_PARAMETER_SCOPE_V1")
-   bytes32 constant STREAM_TIME_PARAMETER_STATE_V1 =
-       0x2cdcb8724d05b4fa9d1ad4f857f9c5fa49ca997d15870fe7f9df6fbae1402583;
-       // keccak256("6529STREAM_TIME_PARAMETER_STATE_V1")
+   bytes32 constant STREAM_TIME_PARAMETER_SCOPE_V2 =
+       0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24;
+       // keccak256("6529STREAM_TIME_PARAMETER_SCOPE_V2")
+   bytes32 constant STREAM_TIME_PARAMETER_STATE_V2 =
+       0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384;
+       // keccak256("6529STREAM_TIME_PARAMETER_STATE_V2")
 
    bytes32 scopeHash = keccak256(abi.encode(
-       STREAM_TIME_PARAMETER_SCOPE_V1,
+       STREAM_TIME_PARAMETER_SCOPE_V2,
        uint256(block.chainid),
        address(host),
        parameterId
    ));
    bytes32 timeParameterStateHash = keccak256(abi.encode(
-       STREAM_TIME_PARAMETER_STATE_V1,
+       STREAM_TIME_PARAMETER_STATE_V2,
        scopeHash,
        value,
        floorBlocks,
        wallClockFloorSeconds,
-       cadenceProbe,
-       probeRuntimeCodeHash,
-       probeBindingHash,
-       probeMaxAgeBlocks,
        revision
    ));
    ```
 
-   A governed value change modifies only `value` and sets
-   `newRevision = oldRevision + 1`; a class-3 probe rebind modifies the probe
-   and authenticated binding facts and applies the same revision increment.
-   Genesis starts at revision `1`, overflow reverts, and the host independently
-   checks the executor/class/scope/old/new context. Thus an `A -> B -> A` value
-   or binding cycle cannot revive an older scheduled action.
+   A governed raise modifies only `value` and sets `newRevision =
+   oldRevision + 1`. Genesis starts at revision `1`, overflow reverts, and the
+   host independently checks executor/class/scope/old/new context. Because
+   lowering does not exist, value state is monotonic; revision also prevents
+   stale-action replay.
 
 The GTP inventory is owned by the subsystem homes; the genesis rows are
 the coordinator-hosted entropy lifecycle windows —
@@ -2046,9 +1540,9 @@ GTP membership is closed-world and decidable (ADR 0013 decision U9):
 
 1. The name Governed Time Parameter is reserved for members of this
    pattern — host-hosted, block-denominated windows carrying the full
-   identifier, floor, cadence-probe, and mirror-row obligations above.
-   Labeling any other value a governed time parameter, or claiming
-   this pattern's "floor-and-probe discipline" for it, is
+   identifier, immutable floors, raise-only authority, state commitment, and
+   mirror-row obligations above. Labeling any other value a governed time
+   parameter, or claiming this pattern's discipline for it, is
    nonconformant.
 2. A future host-level block-count liveness window that is not a GTP
    is nonconformant; the release manifest is the authoritative
@@ -2056,14 +1550,14 @@ GTP membership is closed-world and decidable (ADR 0013 decision U9):
 3. Collection timing policies are outside the GTP closed world: they
    are per-collection artist-elected timing declarations — overlaid
    policy minima, bound into collection configuration — and carry no
-   `parameterId`, no cadence probe, no mirror row, and no inventory or
-   probe-contract-count membership. Their semantics are owned by the
+   `parameterId`, no mirror row, and no inventory membership. Their semantics
+   are owned by the
    instantiating homes (definition item 1; [EC-TIME]).
 4. Seconds-denominated governed windows — deadline, notice, and
    coverage widths hosted by subsystem contracts and remeasured by
    wall-clock intent rather than block cadence — are not GTPs: they
-   carry none of this pattern's probe, identifier, or mirror
-   obligations, and their floors and staged change discipline are
+   carry none of this pattern's identifier, state-commitment, or mirror
+   obligations, and their floors and change discipline are
    owned by their subsystem homes. An auditor decides membership by
    denomination and host: block-denominated host window means GTP,
    full suite required; anything else means no GTP obligations and no
@@ -3547,16 +3041,11 @@ component read, and future repricing is remediated by raising the value —
 archival verification never becomes permanently impractical behind a fixed
 cap. Its failure-direction class is `FORWARDING_CAP` (it bounds gas
 forwarded to fail-safe diagnostic reads; raising restores the
-diagnostic), so it carries the conditional-raise and
-conditional-re-lower registrations
-([LTA-GGP] requirement 11). Its probe definition: the probe executes
-`verifyFinalityRange` at the candidate value against a
-release-manifest-pinned reference set of finalized collections
-(including the deepest-component collection at pinning time), with
-`evidenceHash` committing to the pinned collection set, range bounds,
-and per-component gas measurements; the probe records a failing run
-only when a pinned component read that received the probed value ran
-out of that budget ([LTA-GGP-PROBES]). If any component read reverts,
+diagnostic). Its release sizing evidence executes `verifyFinalityRange`
+against a release-manifest-pinned reference set of finalized collections
+(including the deepest-component collection at pinning time) and commits the
+collection set, range bounds, and per-component gas measurements. Future
+raises use the delayed authority-only path in [LTA-GGP]. If any component read reverts,
 runs out of its gas cap, returns malformed data, has no code, or no longer
 matches the expected code hash, the read returns `currentRouteMatches = false`
 or `false` and still returns the stored finality hash. It must not revert merely
@@ -4471,7 +3960,7 @@ exactly these required top-level members and no others:
 | `contracts` | array | complete protocol-contract inventory records; excludes this payload's SSTORE2 root/chunk data carriers |
 | `pointers` | array | every actual Core pointer record; no governance pseudo-pointer |
 | `registryEntries` | array | every `moduleAt` entry from every live/historical registry instance |
-| `gasParameterProbes` | array | every GGP/GTP host/parameter's stable Permanent probe-binding inventory facts |
+| `gasParameterProbes` | array | reserved payload-v1 compatibility member; launch value is exactly `[]` and no probe binding may be published |
 | `criticalFallbacks` | array | every pre-approved critical-family fallback record |
 | `securityContact` | object | exactly `policyHash` and `uri` from [LTA-DISCLOSURE] |
 
@@ -4495,15 +3984,11 @@ A `registryEntries` element has exactly `registry`, `enumerationIndex`,
 `moduleManifestHash`, `moduleManifestURI`, and `revision`. Execution-generated
 `registeredAt` and `statusUpdatedAt` remain authoritative in `moduleAt` but are
 forbidden here: a delayed action cannot precompute its execution timestamp for
-the same-batch manifest tail. A `gasParameterProbes` element has exactly `host`,
-`parameterId`, `probe`, `probeRegistry`, `probeModuleType`,
-`probeInterfaceId`, `probeModuleVersion`, `probeRuntimeCodeHash`,
-`probeModuleManifestHash`, `probeDeploymentManifestHash`,
-`probeBindingHash`, and `probeMaxAgeBlocks`. It deliberately excludes live
-parameter value, floor, failure class, standing IDs, and parameter revision:
-those operational facts come from `gasParameterInfo`/`timeParameterInfo`, and a
-permissionless conditional GGP step must not require a manifest publication.
-A `criticalFallbacks` element has
+the same-batch manifest tail. `gasParameterProbes` is retained only to preserve
+the payload-v1 top-level shape and must be the empty array; an element is
+nonconformant under ADR 0017. Parameter facts come from
+`gasParameterInfo`/`timeParameterInfo` and release sizing evidence. A
+`criticalFallbacks` element has
 exactly `pointerType`, `target`, `runtimeCodeHash`, `moduleType`, `interfaceId`,
 `registry`, `moduleManifestHash`, and `deploymentManifestHash`.
 Every field named `deploymentManifestHash` is the one release-wide digest
@@ -4514,12 +3999,9 @@ byte-identical.
 The live executor registries are intentionally outside this payload.
 `manifestTailTriggers`, `emergencyRestorationEligibilities`, and
 `governanceRegistryRoots` are forbidden top-level members, not optional
-snapshots. State-only clients recover the authoritative trigger and class-6
-eligibility inventories from their respective `count`/`At`/`ChainHash` reads
-under [GOV-MANIFEST-TAIL] and [GOV-EMERGENCY-RESTORATION], recomputing both
-chains at a single block tag. Registration can therefore remain isolated and
-append-only without making an otherwise-current system-manifest payload stale
-or requiring a non-atomic follow-up publication.
+snapshots. State-only clients recover the authoritative manifest-tail trigger
+inventory from its `count`/`At`/`ChainHash` reads under [GOV-MANIFEST-TAIL].
+There is no class-`6` eligibility inventory in the launch executor (ADR 0017).
 
 The current root descriptor and its chunk contracts are also deliberately
 outside `contracts`: their addresses are derived only after these bytes exist,
@@ -4541,12 +4023,12 @@ whitespace, or trailing newline survives canonicalization.
 
 Arrays are uniquely and deterministically ordered: `contracts` by ascending
 `inventoryId`; `pointers` by ascending raw `pointerType`; `registryEntries` by
-ascending registry address then `enumerationIndex`; `gasParameterProbes` by
-host address then `parameterId`; and `criticalFallbacks` by `pointerType` then
-target address. Every referenced address appears exactly once in `contracts`,
+ascending registry address then `enumerationIndex`; `gasParameterProbes` is
+empty; and `criticalFallbacks` by `pointerType` then target address. Every
+referenced address appears exactly once in `contracts`,
 every registry array is a complete `0..moduleCount-1` walk whose records match
-state, the aggregate/catalog objects equal the cached tuple, and every probe
-binding recomputes the [LTA-GGP-CORE] binding hash. The schema-catalog and
+state, and the aggregate/catalog objects equal the cached tuple. The
+schema-catalog and
 canonicalization-catalog payloads must include the exact
 `STREAM_SYSTEM_MANIFEST_PAYLOAD_V1` and `RFC8785_JCS` IDs above; their returned
 catalog hashes therefore commit the format used to decode this payload.
@@ -4556,11 +4038,11 @@ Before ABI lock, the checked release golden
 non-production target fixture containing the complete generated fixture
 object, exact canonical UTF-8 hex, ordered segment hex and hashes, encoded
 root-descriptor bytes, `totalBytes`, and the resulting `manifestHash`. Its
-generator and CI checker consume all 60 canonical genesis-profile entries,
+generator and CI checker consume all 37 canonical genesis-profile entries,
 detect profile drift, recompute every byte, and prove the JCS, chunk, list,
 root, hash, and `1..32`-chunk mechanics. Because the current profile does not
-contain live addresses, code hashes, registry/pointer state, or parameterized
-probe bindings, this fixture does not prove equality to a deployed cached
+contain live addresses, code hashes, or registry/pointer state, this fixture
+does not prove equality to a deployed cached
 aggregate/discovery tuple and is not deployment-readiness evidence. Production
 semantic reconciliation remains fail-closed until the instance-aware genesis
 deployment candidate, onchain payload, address book, verification inputs, and
@@ -4650,7 +4132,7 @@ Publication rules [LTA-MANIFEST-PUBLISH]:
    enforced [GOV-MANIFEST-TAIL]'s exact trigger code hash and allowed-class
    mask: registry tightening uses class `0`, registration/status loosening/
    registry-manifest publication uses class `1`, pointer freeze uses class `2`,
-   pointer/catalog/probe replacement uses class `3`, and standalone catalog/
+   pointer/catalog replacement uses class `3`, and standalone catalog/
    payload publication is class `3` only.
    The satellite still verifies the executor caller, nonzero action, class membership,
    and this tail call's own exact hashes rather than accepting a bare class
@@ -4737,8 +4219,8 @@ Publication rules [LTA-MANIFEST-PUBLISH]:
    old manifest payload or vice versa.
    Golden batches cover class-0 module revocation; class-1 module registration,
    status loosening, and registry-manifest publication; class-2
-   `freezeSatellitePointer`; and class-3 `updateSatellitePointer`, Core GGP
-   probe rebind, and every genesis catalog trigger, each with one final
+   `freezeSatellitePointer`; and class-3 `updateSatellitePointer` and every
+   genesis catalog trigger, each with one final
    publication. They also cover standalone class-3 publication and every
    wrong-mask/mixed-class/missing-tail permutation. A class-0/1/2 tail that
    changes any cached address or discovery hash, including one mixed into an
@@ -4767,14 +4249,14 @@ Core/satellite code hashes, atomically validates and materializes the complete
 bounded supplied trigger table into its normal mapping/enumeration/chain, and
 stores the pointer/registry lists, manifest content hash, and final live-
 inventory root/count. Release tooling proves supplied-list completeness against
-the 60-entry profile; the executor proves order, code hashes, masks, and equality
+the 37-entry profile; the executor proves order, code hashes, masks, and equality
 to the irreversibly bound state.
 
 Only after that bind does the constrained pre-seal governance lane activate.
 The sole authority completes the governed registry registrations and Core
 pointer writes through the bounded
 pre-seal no-tail branch while no manifest has yet been published. It verifies
-the final registry, probe, fallback, catalog, and pointer inventory, sets Core's
+the final registry, fallback, catalog, and pointer inventory, sets Core's
 `SYSTEM_MANIFEST` pointer to the bound satellite, and executes its class-2
 terminal freeze with the full veto evidence. Canonical chunks and the root
 descriptor deploy after the bytes and all inventoried addresses are fixed; the
@@ -4803,10 +4285,10 @@ payloads stay locatable from state ([LTA-PAYLOAD-DISCOVERY] rule 2);
 `streamSystemManifestPointer()` returns the current entry, and the
 current `manifestHash` is the exact leaf/list/root commitment to the canonical
 bytes traversed from that stored root descriptor. The payload must name every genesis-profile contract — Core,
-satellites, probe contracts, pre-approved fallback targets, sale
+satellites, pre-approved fallback targets, sale
 adapters, settlement contracts, the ticket gate, the claim router, the
 schema registry, the record satellites, and every registry instance —
-with module types, code hashes, probe and fallback bindings, and the
+with module types, code hashes, fallback bindings, and the
 security-contact field ([LTA-DISCLOSURE]), so state-only discovery of
 the deployment inventory bottoms out in state reads, never in a
 mirrored document ([LTA-PAYLOAD-DISCOVERY] rule 3): the tuple above
@@ -5737,7 +5219,8 @@ runbook note. Funding requirements [LTA-FUNDING] (ADR 0010 decision D4.8):
    failure, never a launch posture. For every recurring obligation
    whose trigger and deliverable are mechanically computable — fixity
    sampling and sweeps, export cadence and material-change exports
-   ([LTA-EXPORT] requirements 3 and 6), probe runs, staleness and
+   ([LTA-EXPORT] requirements 3 and 6), parameter-margin measurements,
+   staleness and
    exhaustion alarms — the operating model records an automation
    posture: automated through named Operational tooling (keeper
    contracts, scheduled jobs) or manual with a recorded rationale;
@@ -5772,8 +5255,9 @@ by construction. That visibility is the mechanism, not a defect:
 preservation programs decay silently exactly where misses are not
 computable. What never depends on the steward is the permanence core —
 ownership, identity, frozen-artwork and royalty reads, split release
-and escrow flush, the permissionless conditional raises and re-lowers
-([LTA-GGP] requirement 11), the independent preservation and fixity
+and escrow flush, storage-backed parameter reads and their immutable
+registration facts ([LTA-GGP] requirements 11 and 12), the independent
+preservation and fixity
 lanes, and independent export reproduction all survive steward
 collapse (read-only museum mode, below), and `ENDOWED` families hold
 committed payloads without renewal payments ([LTA-ARCHIVE]
@@ -5860,16 +5344,11 @@ reconstruction, the ADR 0016 Core-native interface invariant — the five
 identity-mode/controller functions and three alternate events remain absent,
 every sampled token follows the contract-wide ERC-721 approval, transfer,
 safe-transfer, mint-event, and burn-event behavior, governance role reads show
-zero signers and no signer-replacement path — and the permissionless probe-gated conditional-raise
-and conditional-re-lower paths for
-`FORWARDING_CAP` Governed Gas Parameters, executed end to end against the
-deployed Permanent-class probe contracts with zero governance signers,
-resolving each parameter's probe binding, floor, failure class, and
-recency bound through the host introspection reads alone
-([LTA-GGP] requirements 11–12; [LTA-GGP-PROBES] rule 9). If a degraded-mode
-item depends on immutable gas assumptions that can fail under a future
-gas schedule, the drill report must say so rather than treating the
-guarantee as absolute.
+zero signers and no signer-replacement path — and GGP/GTP introspection proves
+the final live values and immutable sizing facts remain readable while every
+parameter mutation rejects. If a degraded-mode item depends on a parameter
+that can no longer be raised under total governance loss, the drill report
+must say so rather than treating the guarantee as absolute (ADR 0017).
 
 Read-only museum mode is the explicit posture when all governance is lost.
 Ownership, transfer, approvals, supply and sequential-ID iteration reads
@@ -5877,13 +5356,8 @@ Ownership, transfer, approvals, supply and sequential-ID iteration reads
 frozen/finalized metadata reads, royalty disclosure as configured, split-wallet
 release, already-deployed-wallet escrow flush, finality verification ranges,
 state-export discovery, the GGP/GTP host introspection reads
-([LTA-GGP] requirement 12), permissionless GGP probe runs with their
-pre-approved conditional raises and re-lowers for `FORWARDING_CAP`
-read-survival
-parameters ([LTA-GGP] requirement 11) — so a later
-gas repricing cannot permanently zero `tokenURI()`/`royaltyInfo()` for
-frozen collections, and a repricing's later reversal cannot strand
-fixed-stipend readers behind a raised threshold — the
+([LTA-GGP] requirement 12) — with values readable but immutable after
+governance loss — the
 permissionless independent preservation and
 fixity lanes, which keep accepting institution-signed records with no
 operator or governance
@@ -6413,45 +5887,13 @@ Required practices:
 
 Royalty resolver readiness is a deployment gate. Before public sale, governance
 should stage, execute, and optionally freeze or timelock the resolver pointer;
-readiness evidence comes from recorded `probeRoyaltyInfo` runs covering
+readiness evidence comes from reproducible `eth_call`/fork rehearsals covering
 resolver health, configured defaults, gas behavior, and fallback-to-zero
-incidents.
+incidents. ADR 0017 removes the onchain `probeRoyaltyInfo` contract and event
+surface; diagnostic evidence has no authority to mutate a parameter.
 
-Example diagnostic surface:
-
-```solidity
-function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
-    external
-    returns (
-        bool resolverCallSucceeded,
-        address receiver,
-        uint256 royaltyAmount,
-        bytes32 assignmentHash,
-        bytes32 failureReason
-    );
-```
-
-`probeRoyaltyInfo` is hosted on the two named Permanent-class royalty
-probe contracts — the `ROYALTY_RESOLVER_GAS_LIMIT` and
-`ROYALTY_RETURN_GAS_BUFFER` probes of
-[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
-[RSR-GGP] rules 5 and 11, genesis inventory members under
-[LTA-GGP-PROBES] — never on Core, the resolver, or any governed
-satellite (ADR 0013 decision U7). The probe is not used by
-marketplaces. It exists so anyone can record incident evidence that
-`royaltyInfo()` itself cannot emit because it is `view`: a run writes
-the canonical `GasParameterProbed`/`lastProbeRun` record that gates
-lowering, emergency raising, and the permissionless conditional raise
-and re-lower,
-and additionally emits `RoyaltyInfoProbed` — the parameter-named
-diagnostic alias, tagged in the event catalog as a member of the
-probe-record family ([LTA-GGP]). The alias schema is defined once at
-its home,
-[`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
-[RSR-2981-PROBE]; this document does not restate it.
-
-Diagnostics are operational tools, not permanent marketplace surfaces. If a
-diagnostic such as `probeRoyaltyInfo`, full `verifyFinality`, or a catalog
+Diagnostics are operational tools, not permanent marketplace surfaces. If
+full `verifyFinality`, a royalty rehearsal, or a catalog
 consistency read becomes impractical under future gas schedules, the first
 remediation is raising the relevant Governed Gas Parameter ([LTA-GGP]);
 only if the diagnostic remains impractical at any justifiable value does
@@ -6640,14 +6082,10 @@ same CI recomputation before any gate consumes them.
 | `STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | 0x852f4811a2eb32694863d94ba41b545a65ef4c76086a32c35881f0c4e250a7b5 | `StreamSystemManifest` | `1` | chunk index; payload length; recomputed segment hash ([LTA-MANIFEST]) |
 | `STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | 0xa93750a5551ac5668c8f24cca85acaf1d5f8334fac9406f845fce1ce35548839 | `StreamSystemManifest` | `1` | total bytes; ordered chunk leaf hashes ([LTA-MANIFEST]) |
 | `STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | 0xd6ab89b077c61a288c7168cf8f1c9a7a19464b10475735dae37cb46a0c94c40b | `StreamSystemManifest` | `1` | schema version/ID; canonicalization ID; total bytes; chunk count; list hash ([LTA-MANIFEST]) |
-| `STREAM_GAS_PARAMETER_SCOPE_V1` | `6529STREAM_GAS_PARAMETER_SCOPE_V1` | 0x8d8b74997070792410ba6f4dd511d967fec29b82366868401baa2bfb3681da69 | GGP hosts | `1` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
-| `STREAM_GAS_PARAMETER_STATE_V1` | `6529STREAM_GAS_PARAMETER_STATE_V1` | 0xa16fd6b2f079cdf0a8f1a952c35496a693958895d1782fecc8b6440e06594977 | GGP hosts | `1` | domain; scopeHash; value; floor; probe; probe runtime/binding hashes; failureClass; probeMaxAgeBlocks; conditional action IDs; monotonic revision ([LTA-GGP-CORE]) |
-| `STREAM_GGP_PROBE_BINDING_V1` | `6529STREAM_GGP_PROBE_BINDING_V1` | 0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4 | GGP hosts | `1` | registry; probe; module type/interface/version; runtime code hash; module/deployment manifest hashes ([LTA-GGP-CORE]) |
-| `STREAM_GGP_PROBE` module type | `STREAM_GGP_PROBE` | 0xe358a47f0dcbc7a22cc88ea7cd9ff433ec85ce6d9c7d0dc3f329e98b621cd6c8 | module registry / GGP probes | `1` | base probe module type; interface ID `0x0f8c6b0f` ([LTA-GGP-PROBES]) |
-| `STREAM_GGP_CONDITIONAL_RAISE_V1` | `6529STREAM_GGP_CONDITIONAL_RAISE_V1` | 0x88d201cde2efee286ecd558414d10dd0599848f47e6dcdfa51a2e0287e4fb2eb | GGP hosts | `1` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
-| `STREAM_GGP_CONDITIONAL_RELOWER_V1` | `6529STREAM_GGP_CONDITIONAL_RELOWER_V1` | 0xb30115be75ee59eeed3fa156242dc7c0eda20b383f4f251c8adcfa616b2276a1 | GGP hosts | `1` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
-| `STREAM_TIME_PARAMETER_SCOPE_V1` | `6529STREAM_TIME_PARAMETER_SCOPE_V1` | 0xcb90eddcfa663732d90ca0d1892636ba1216e3900df55acc72d58187eee359a8 | GTP hosts | `1` | domain; chainid; host; parameterId ([LTA-GTP]) |
-| `STREAM_TIME_PARAMETER_STATE_V1` | `6529STREAM_TIME_PARAMETER_STATE_V1` | 0x2cdcb8724d05b4fa9d1ad4f857f9c5fa49ca997d15870fe7f9df6fbae1402583 | GTP hosts | `1` | scope; value/floors; authenticated cadence-probe binding; recency; monotonic revision ([LTA-GTP]) |
+| `STREAM_GAS_PARAMETER_SCOPE_V2` | `6529STREAM_GAS_PARAMETER_SCOPE_V2` | 0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71 | GGP hosts | `2` | domain; chainid; host; parameterId ([LTA-GGP-CORE]) |
+| `STREAM_GAS_PARAMETER_STATE_V2` | `6529STREAM_GAS_PARAMETER_STATE_V2` | 0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c | GGP hosts | `2` | domain; scopeHash; value; floor; failureClass; monotonic revision ([LTA-GGP-CORE]) |
+| `STREAM_TIME_PARAMETER_SCOPE_V2` | `6529STREAM_TIME_PARAMETER_SCOPE_V2` | 0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24 | GTP hosts | `2` | domain; chainid; host; parameterId ([LTA-GTP]) |
+| `STREAM_TIME_PARAMETER_STATE_V2` | `6529STREAM_TIME_PARAMETER_STATE_V2` | 0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384 | GTP hosts | `2` | scope; value; block floor; wall-clock floor; monotonic revision ([LTA-GTP]) |
 | `STREAM_FINALITY_COMPONENTS_V1` | `6529STREAM_FINALITY_COMPONENTS_V1` | 0xf57efb77611ea13bd3a60968beee86ec330159736aa5d42707a9c0676dbc8898 | finality registry | `1` | domain; sorted `FinalityComponentExpectation[]` (Artwork Finality Freeze) |
 | `STREAM_CORE_COLLECTION_FACTS_V1` | `6529STREAM_CORE_COLLECTION_FACTS_V1` | 0x387b66c3b8fdca5febff2a13faa7057fef7f711c4155493c8c8087e48b28c764 | `StreamCoreFinalityAdapter` / finality registry | `1` | domain; chainid; actual Core; collectionId; adapter-derived facts with no `createdAt` and `uint256` supply fields ([LTA-CORE-FINALITY-ADAPTER]) |
 | `STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | `6529STREAM_CORE_COLLECTION_CONFIG_EMPTY_V1` | 0x6adebabfe6f92286e8678fc5f206cacb6b1a3b912afc80b6039e9240567e7f26 | `StreamCoreFinalityAdapter` | `1` | domain; chainid; actual Core; collectionId; adapter-computed empty-config fact, not a Core read ([LTA-CORE-FINALITY-ADAPTER]) |
@@ -6765,16 +6203,12 @@ Governance gates:
    manifest hashes, bytecode sizes, governance delay configuration, and
    the deterministic-deployment factory, salts, and init-code hashes
    ([LTA-DEPLOY]);
-7. GGP floor-rejection, raise-bound, emergency and conditional
-   probe-gated raise, probe-gated lower and conditional re-lower,
-   conditional-raise/re-lower
-   scope-rejection, forged-failure probe-integrity,
-   host-introspection-read ([LTA-GGP] requirement 12), and change-event
-   tests for every deployed parameter, plus the [LTA-GGP-PROBES]
-   permanence checks and the [LTA-GTP] floor/bound/cadence-probe/
-   introspection/change-event suite for every deployed Governed Time
-   Parameter
-   ([LTA-GGP] requirement 9; [LTA-GTP]);
+7. GGP/GTP registration, immutable-authority, monotonic raise-bound,
+   Governance V2 context, state-commitment, stale-action, revision,
+   introspection, and change-event tests for every deployed parameter, plus
+   ABI/source/profile checks proving every probe, lower, emergency, rebind,
+   conditional writer, and class-`6` path remains absent
+   ([LTA-GGP] requirement 9; [LTA-GTP]; ADR 0017);
 8. terminal-freeze veto path exercised, and window widths verified against
    the recorded worst-case holder latencies ([LTA-GOV] rules 4 and 6);
 9. batch-action atomicity tests for every cross-contract "same governed
@@ -6848,10 +6282,11 @@ Operations gates:
    entire protocol life on one randomness vendor.
 8. Governed Gas Parameters reintroduce a governance dependency into read
    paths that could have been fully static, accepted for survivability:
-   immutable floors, per-action raise bounds, staged delays, and probes
-   bound the risk, and an immutable cap that strands a frozen collection
+   immutable floors, per-action raise bounds, 48-hour authority-only delays,
+   and reproducible offchain/fork sizing evidence bound the risk, and an
+   immutable cap that strands a frozen collection
    after a repricing is the worse permanence failure (ADR 0010 decision
-   D1; ADR 0011 decision R5).
+   D1; ADR 0011 decision R5 as amended by ADR 0017).
 9. Transfer openness permanently precludes soulbound tokens, rental
    standards, and every transfer-conditioned mechanic on this Core line
    ([LTA-STANDARDS]); the open-transfer guarantee to collectors and

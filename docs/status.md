@@ -48,18 +48,23 @@ The current Gate A smoke baseline proves:
   initcode. That deployment binding remains a production blocker under
   [issue #677](https://github.com/6529-Collections/6529Stream/issues/677), so
   the pre-audit, not-production-ready posture is unchanged. The committed
-  `release-artifacts/latest/bytecode-release-proof.json` records the current
-  measured `StreamCore` production runtime size as 24,152 bytes, leaving
+  `release-artifacts/latest/bytecode-release-proof.json` records the last
+  pre-ADR-0017 measured `StreamCore` production runtime size as 24,152 bytes,
+  leaving
   424 bytes of EIP-170
   headroom under the IR-optimized deployment profile. This passes EIP-170 and
   the interim 384-byte development floor, but it is below the 512-byte warning
   threshold and fails the normative 2,000-byte production deployment minimum.
   The accepted CON-012 development exception cannot survive the deployment
   gate; [issue #654](https://github.com/6529-Collections/6529Stream/issues/654)
-  blocks production release until real headroom is recovered. Historical
+  blocks production release until real headroom is recovered. ADR 0017 avoids
+  adding the superseded probe/lower/emergency/conditional/rebinding machinery
+  to the target; that machinery was not present in the measured Core, so the
+  decision does not reduce the 24,152-byte baseline. A separate measured Core
+  refactor is still required. Historical
   artifacts show the extraction work did reduce Core to 21,792 bytes; the later
   manager/prepared-mint slice added roughly 2,330 bytes before the legacy mint
-  path was retired. The current 24,152-byte runtime is therefore a duplicated,
+  path was retired. The 24,152-byte baseline is therefore a duplicated,
   incomplete transition rather than the promised post-extraction target. The
   cutover now requires a single permanent target ABI and zero-Core-delta or
   measured net-negative slices until the complete hook build is at or below
@@ -74,8 +79,10 @@ The current Gate A smoke baseline proves:
   otherwise.
 - The strict release-mode profile now compares the current implementation
   catalog with the canonical exhaustive genesis profile and fails closed on
-  missing, extra, ambiguous, wrong-scope, interface, marker, fallback, and
-  probe entries. The catalog remains incomplete, and its singleton-oriented
+  missing, extra, ambiguous, wrong-scope, interface, marker, and fallback
+  entries. ADR 0017 reduces the canonical launch profile to 37 entries and
+  forbids probe rows or bindings. The catalog remains incomplete, and its
+  singleton-oriented
   manifest model cannot yet prove every required distinct deployment instance.
   This keeps production blocked under
   [issue #656](https://github.com/6529-Collections/6529Stream/issues/656).

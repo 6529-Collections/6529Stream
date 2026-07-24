@@ -205,7 +205,10 @@ Local deployment and release evidence:
 - [`release-artifacts/latest/release-checksums.json`](../release-artifacts/latest/release-checksums.json)
   is the machine-readable checksum bundle and includes the bytecode-to-release
   proof even though the proof is intentionally not embedded into the release
-  manifest to avoid a manifest/proof hash cycle.
+  manifest to avoid a manifest/proof hash cycle. ADR 0017 is listed directly
+  in both the release-manifest governance-document inputs and the checksum
+  generator; the committed outputs must be regenerated after this ADR/spec
+  cutover before they can be current evidence.
 - [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json)
   is the generated risk register for launch blockers, accepted local-baseline
   risks, and planned mitigations. Its source-document and evidence hashes are
@@ -299,9 +302,11 @@ unresolved production blockers:
   use no-secret placeholders and do not claim production status.
 - The bytecode-to-release proof is local/fork release-artifact proof; it does
   not replace live RPC or explorer bytecode verification.
-- Runtime size remains under the EIP-170 limit and above the current release
-  floor, but close enough to the limit that large future `StreamCore` changes
-  need explicit size-budget review.
+- The last committed runtime measurement remains under EIP-170 but fails the
+  2,000-byte production-headroom rule. ADR 0017 avoids adding superseded
+  machinery to the planned Core; it does not shrink the measured Core because
+  that machinery was not present. A separate refactor and regenerated
+  canonical isolated bytecode proof are still required.
 - Accepted warning-disposition rows are local-baseline review inputs only; new
   first-party warning categories must be fixed or explicitly dispositioned in
   [`docs/warning-dispositions.md`](warning-dispositions.md).

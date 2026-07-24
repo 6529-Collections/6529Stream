@@ -43,6 +43,11 @@ resolution moment.
 
 ### U2. Registry and manifest state-onlyness
 
+Amended by [ADR 0017](0017-raise-only-parameter-governance.md): the registry,
+manifest, allocation, enumeration, and export decisions remain; GGP/GTP host
+reads now expose only live value, immutable registration facts, and monotonic
+revision. Probe binding and probe-age fields are removed.
+
 The module registry interface gains append-only enumeration
 (`moduleCount()`/`moduleAt(index)`) and a record-chain accumulator lane for
 registrations, exported as a record-chain leaf and cited as the state-side

@@ -73,15 +73,16 @@ the release policy in `docs/release-policy.md`.
 - Replaced the transitional Governance V1 executor boundary with the atomic
   Governance V2 schema: seven-field per-call transition commitments, derived
   batch scope/old/new hashes, six-return target context, exact SSTORE2 calldata
-  publication, action classes `0..6`, target-scoped terminal-freeze veto
-  indexing, manifest-tail composition, append-only class-6 eligibility, and an
-  executor-first one-way system-manifest bootstrap bind/seal ceremony.
+  publication, active action classes `0..5`, target-scoped terminal-freeze veto
+  indexing, manifest-tail composition, and an executor-first one-way
+  system-manifest bootstrap bind/seal ceremony. Pre-genesis class ID `6` is
+  retired, forbidden, and permanently reserved from reuse.
   ModuleRegistry, RoleRegistry, and governed gas/time hosts now recheck the
-  executing action ID, class, scope, old state, new state, revision, and probe
-  evidence; V1 action-ID calldata and domains are rejected. Bootstrap and
+  executing action ID, class, scope, old state, new state, and revision; V1
+  action-ID calldata and domains are rejected. Bootstrap and
   live-registry reads forward EIP-150-clamped available gas with bounded
   returndata and canonical decoding instead of compiled-in call caps. Added
-  focused malformed-return, high-gas, sequential-probe, role-history,
+  focused malformed-return, high-gas, raise-only parameter, role-history,
   bootstrap-envelope, and holder-rehearsal coverage. Additional hardening
   rejects cancellation after expiry; classifies Executor configuration from
   exact canonical calldata and direction; forbids self-targeted mutable
@@ -327,28 +328,22 @@ the release policy in `docs/release-policy.md`.
   rehearsal/live evidence, and the release candidate lockfile. This is a
   permanently production-blocking foundation for issue #656, not completion of
   that issue.
-- Added the Governed Gas Parameter and Governed Time Parameter machinery per
-  `[LTA-GGP]`/`[LTA-GGP-PROBES]`/`[LTA-GTP]`: reusable
-  `StreamGasParameterHost`/`StreamTimeParameterHost` bases with concrete
-  `StreamGasParameterStore`/`StreamTimeParameterStore` deployables (storage-backed
-  values, immutable floors, derived `keccak256("6529STREAM_GGP_"||name)` ids,
-  2x-per-action raise bounds, probe-gated emergency raise and exact-value
-  probe-gated lowering, `FORWARDING_CAP`-only permissionless conditional
-  raise/re-lower standing actions registered at deployment, governed
-  rebinding of probe bindings to successor Permanent-class probes with
-  `GasParameterProbeRebound`/`TimeParameterProbeRebound` events, canonical
-  `GasParameterUpdated`/`TimeParameterUpdated` events, and
-  `gasParameterInfo`/`timeParameterInfo` introspection), the Permanent-class
-  probe family (`StreamGasProbe` base enforcing the genuine-failure
-  gas-delivery proof and a run-time codeless-target guard so a scenario
-  target that loses its code can never record a vacuous pass,
-  `StreamForwardingCapProbe` reference probe,
-  `StreamCadenceProbe` for block-cadence observation with pinned wall-clock
-  floors), the `IStreamGovernedParameterAuthority` governance-executor wiring
-  seam, and the requirement 9 conformance suites including parameterId
-  derivation goldens against the spec-pinned catalog, scope-rejection tests,
-  forged-failure probe-integrity tests, and the zero-signer museum-mode
-  conditional raise/re-lower drill.
+- Added the ADR 0017 raise-only Governed Gas Parameter and Governed Time
+  Parameter machinery: reusable `StreamGasParameterHost` and
+  `StreamTimeParameterHost` bases with concrete storage-backed stores,
+  immutable deployment-time inventories and floors, deterministic parameter
+  IDs, monotonic revisions, exact Governance V2 scope/old/new commitments, and
+  strict delayed authority-only raises bounded to at most `2x` per action.
+  Marker and `currentAction()` reads forward available gas, accept only exact
+  canonical returndata, and reject EIP-7702 delegated authorities. Probe,
+  emergency, lower, permissionless conditional mutation, and rebind surfaces
+  are absent. This supersedes the earlier 60-entry probe-bearing target: the
+  canonical genesis profile now has 37 entries, while governance action-class
+  ID `6` remains reserved as `retired_pre_genesis`, forbidden, and never
+  reusable. Schema-v2 registration/update events and focused adversarial
+  suites cover malformed/high-gas authority reads, stale context, ABA/revision
+  drift, over-bound raises, immutable zero-authority stores, and retired
+  selector absence.
 - Added the staged-governance machinery and canonical module registry:
   `StreamGovernanceExecutor` implements the ADR 0004 [GOV-ACTION-ID] and
   [GOV-BATCH] canonical action identity (golden-tested

@@ -29,6 +29,7 @@ SOURCE_DOCUMENT_PATHS = [
     "docs/royalty-policy.md",
     "docs/warning-dispositions.md",
     "docs/known-blockers.md",
+    "docs/adr/0017-raise-only-parameter-governance.md",
     "ops/SLITHER_BASELINE.json",
     "ops/SLITHER_BASELINE.md",
     "release-artifacts/latest/public-beta-evidence.json",

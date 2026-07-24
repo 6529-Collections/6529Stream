@@ -191,6 +191,8 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("release-artifacts/genesis-deployment-profile.json"),
             Path("scripts/check_genesis_deployment_profile.py"),
             Path("scripts/test_genesis_deployment_profile.py"),
+            Path("scripts/check_governed_parameter_identifiers.py"),
+            Path("scripts/test_governed_parameter_identifiers.py"),
             Path("release-artifacts/system-manifest-payload-vector.json"),
             Path("scripts/generate_system_manifest_payload_vector.py"),
             Path("scripts/check_system_manifest_payload_vector.py"),
@@ -202,6 +204,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("docs/launch-conformance-matrix.md"),
             Path("docs/stream-long-term-architecture.md"),
             Path("docs/adr/0004-admin-governance.md"),
+            Path("docs/adr/0017-raise-only-parameter-governance.md"),
         }
         self.assertTrue(genesis_profile_paths <= set(generator.DEFAULT_COVERED_PATHS))
         slither_baseline_paths = {
@@ -228,6 +231,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("docs/integrations/events-and-indexing.md"),
             Path("docs/tooling.md"),
             Path("docs/status.md"),
+            Path("docs/adr/0017-raise-only-parameter-governance.md"),
         }
         self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
 

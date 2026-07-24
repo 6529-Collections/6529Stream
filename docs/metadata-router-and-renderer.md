@@ -36,7 +36,10 @@ hybrid collections gain the script-work sale-follows coverage lane
 registry-sourced artist display name and identity-document linkage,
 the first-release content ratification reaches the router's
 content-affecting surfaces, and the strictly-`STATIC` genesis renderer
-posture is recorded with its rationale. It is further amended by
+posture is recorded with its rationale. Governed parameter mutation is
+superseded by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). It is further
+amended by
 [ADR 0015](adr/0015-collection-identity-and-facade-readiness.md): the
 per-collection contract-metadata read path is promoted to the Permanent,
 normative marketplace collection-identity signal, the collection-display
@@ -337,16 +340,16 @@ home,
 
 1. The parameter is Core-hosted with immutable floor
    `METADATA_ROUTER_GAS_FLOOR`, set at deployment from the measured
-   deepest cold read path plus margin; floor, raise/lower classes,
-   Operational-layer exclusion, change events, EIP-150 live-value
+   deepest cold read path plus margin; failure class, authority-only delayed
+   2x-bounded raise, Operational-layer exclusion, change events, EIP-150 live-value
    prechecks, repricing-checklist membership, and release-manifest
-   recording follow [LTA-GGP] unchanged. Its Core mutation and
-   introspection entries use the seven-function production ABI pinned at
+   recording follow [LTA-GGP] as amended by ADR 0017. Its Core mutation and
+   introspection entries use the two-function production ABI pinned at
    [LTA-GGP-CORE], and this document adds no convenience getter, public
    constant getter, alias event, or pattern rule of its own.
-2. The health probe for lowering is a recorded `tokenURI()` +
-   `contractURI()` read sweep over the deepest known routes at the
-   proposed value.
+2. Reproducible sizing and raise-review evidence runs a `tokenURI()` +
+   `contractURI()` read sweep over the deepest known routes at the candidate
+   value. It has no onchain authorization role.
 3. A deploy-time immutable cap is nonconformant for this Core line
    because a future opcode repricing would otherwise permanently degrade
    `tokenURI()` for every frozen collection; raising the cap is the cure
@@ -363,16 +366,10 @@ home,
 
 5. The parameter's release-manifest failure-direction class is
    `FORWARDING_CAP` ([LTA-GGP] requirement 10): it bounds the fail-safe
-   `tokenURI()`/`contractURI()` routing read, raising restores metadata
-   service, and it is a permissionless conditional-raise and
-   conditional-re-lower member per [LTA-GGP] requirement 11
-   (ADR 0012 decision T1; ADR 0014 decision V7). Its named probe is
-   a Permanent-class probe contract ([LTA-GGP-PROBES]) executing the
-   rule 2 read sweep — Core's bounded router-call frame replicated over
-   the deepest known routes for pinned fixture tokens under exactly the
-   probed cap, with no caller-supplied gas shaping — recording runs on
-   itself and committing the measurement artifact through
-   `evidenceHash`.
+   `tokenURI()`/`contractURI()` routing read, and raising restores metadata
+   service. It uses the same authority-only class-`1` path as every other
+   GGP; no lower, emergency, probe, rebind, conditional, or permissionless
+   mutation exists (ADR 0017).
 
 The fallback JSON schema must be canonicalized and hash-committed in the
 release manifest. The schema defines exact required fields, optional fields,
@@ -610,14 +607,10 @@ tokens. Entropy read rules [MRR-ENTROPY-READ]:
    `FORWARDING_CAP` ([LTA-GGP] requirement 10): it bounds the fail-safe
    coordinator status read behind rendering (rule 3 renders
    `PENDING_UNKNOWN` instead of reverting), raising restores live
-   entropy display, and it is a permissionless conditional-raise and
-   conditional-re-lower member per [LTA-GGP] requirement 11
-   (ADR 0012 decision T1; ADR 0014 decision V7). Its named probe
-   is a Permanent-class probe contract ([LTA-GGP-PROBES]) executing the
-   router's bounded coordinator read frame for a pinned fixture token
-   corpus under exactly the probed cap, with no caller-supplied gas
-   shaping, recording runs on itself and committing the measurement
-   artifact through `evidenceHash`.
+   entropy display. It uses the same authority-only class-`1` raise path as
+   every other GGP. Reproducible sizing evidence executes the router's bounded
+   coordinator read frame for a pinned fixture corpus; it has no probe or
+   mutation authority (ADR 0017).
 
 ## Metadata Router Responsibilities
 
@@ -1572,8 +1565,8 @@ Offchain content binding [MRR-OFFCHAIN-BINDING]:
    the collection reaching Core status `CLOSED`.
 7. The coverage deadlines are governed wall-clock deadline parameters
    hardened in the direction that matters for a deadline (ADR 0012
-   decision T2), under the same floor-and-probe discipline family as
-   the [LTA-GGP] parameters. They are seconds-denominated operator
+   decision T2), under the explicit floor, ceiling, and staged-change
+   discipline owned by this section. They are seconds-denominated operator
    deadlines, not members of the block-denominated Governed Time
    Parameter closed world of [LTA-GTP], whose name they do not claim
    (ADR 0013 decision U9). Two values exist, each recorded in the
@@ -2866,8 +2859,9 @@ Core tests:
 9. EIP-150 63/64 precheck threshold tests: `tokenURI()` and `contractURI()`
    calls just below, at, and above the precheck threshold behave as
    specified [MRR-CORE-TOKENURI].
-10. Governed Gas Parameter tests for `METADATA_ROUTER_GAS_LIMIT`: raise
-    path, lower path with health probe, floor rejection, change event, and
+10. Governed Gas Parameter tests for `METADATA_ROUTER_GAS_LIMIT`:
+    registration, authority-only delayed 2x raise, exact V2 context, compact
+    introspection, lower/emergency/probe surface absence, change event, and
     exclusion from finality identity [MRR-ROUTER-GGP].
 11. The restricted ERC-4906 helper golden test enumerates the exact
     authorized routes — current metadata router and finality registry on both

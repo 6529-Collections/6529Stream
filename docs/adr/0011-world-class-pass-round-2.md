@@ -68,6 +68,12 @@ class; renewal-funded families cannot satisfy both slots.
 
 ### R5. GGP raise bounds, probe locus, and lost-governance posture
 
+Superseded in its probe, emergency, lowering, and lost-governance repair
+portions by [ADR 0017](0017-raise-only-parameter-governance.md). The retained
+rule is the overflow-safe `<= 2x` per-action raise bound. The launch target has
+only authority-controlled Governance V2 class-`1` raises delayed at least 48
+hours; permanent governance loss makes parameters immutable.
+
 GGP raises are bounded per action (at most 2x current value) under the
 normal delay class; the emergency path is raise-only, health-probe-gated,
 and service-restoring. Each parameter family names its probe contract in

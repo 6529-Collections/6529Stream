@@ -125,6 +125,12 @@ outside-the-reviewed-set gap).
 
 ### V7. GGP/GTP refinements
 
+Amended by [ADR 0017](0017-raise-only-parameter-governance.md):
+failure-direction classification, fixed-stipend inventory, bidirectional
+cadence review, and wall-clock intent remain. Permissionless re-lowering,
+cadence probes, and every lower/emergency/conditional/rebinding path are
+superseded; launch hosts are monotonic raise-only.
+
 FORWARDING_CAP classification is tightened: parameters on purchase or
 mint paths whose raise increases a revert threshold are reclassified
 FAIL_CLOSED_PRECHECK regardless of read-path association (closing the

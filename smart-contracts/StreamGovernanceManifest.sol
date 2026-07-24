@@ -382,8 +382,7 @@ library StreamGovernanceManifest {
         bool scheduling,
         bool privilegedProposer,
         bytes4 sealSelector,
-        bytes4 registerTailSelector,
-        bytes4 registerEmergencySelector
+        bytes4 registerTailSelector
     ) public {
         bool controlPlaneAction = _validateControlPlaneAuthority(
             state, proposer, actionClass, calls, sealSelector
@@ -398,8 +397,7 @@ library StreamGovernanceManifest {
             state.systemManifestSatellite,
             state.systemManifestSatelliteCodeHash,
             sealSelector,
-            registerTailSelector,
-            registerEmergencySelector
+            registerTailSelector
         );
         if (scheduling) {
             _snapshotControlPlaneRootRevision(state, actionId, controlPlaneAction);
