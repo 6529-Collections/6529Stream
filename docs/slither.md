@@ -1,8 +1,8 @@
 # Slither Baseline
 
 6529Stream pins its Slither toolchain and tracks a normalized first-party
-high/medium baseline. The current baseline contains 38 open findings: 4 High
-and 34 Medium. Those rows are a review and burn-down queue; they are not proof
+high/medium baseline. The current baseline contains 33 open findings: 3 High
+and 30 Medium. Those rows are a review and burn-down queue; they are not proof
 of exploitability, an audit completion claim, or evidence that the protocol is
 ready for public beta or production.
 
@@ -19,6 +19,30 @@ hash-locked for the Linux CI/release boundary through
 | Slither | `0.11.5` |
 | Crytic Compile | `0.3.11` |
 | solc-select | `1.2.0` |
+
+## Current Capture
+
+The canonical unfiltered capture was produced at source commit
+`c0be71915bc650569940b249fa9e5c801c0587fc` on
+`2026-07-23T23:52:41Z`. It contains 3,143 findings across all impacts and
+scopes: 47 High, 840 Medium, 1,208 Low, 1,008 Informational, and 40
+Optimization. The High/Medium scope split is:
+
+| Scope | High | Medium | Total |
+| --- | ---: | ---: | ---: |
+| First-party production | 3 | 30 | 33 |
+| Vendored | 1 | 9 | 10 |
+| Test | 43 | 794 | 837 |
+| Script | 0 | 7 | 7 |
+| Other | 0 | 0 | 0 |
+
+Bounded assembly prevents `StreamGovernanceExecutor` governed-call returndata
+bombs, but makes its proposal-selected native-value authority invisible to
+Slither's `arbitrary-send-eth` detector. The row's disappearance is not a
+remediation or acceptance: High open blocker `RISK-GOV-003` preserves the
+semantic risk until closed-world target/selector/value policy, deployment
+binding, adversarial value-flow tests, and independent review are complete
+under issues #658 and #665.
 
 The reproducible Linux CI/release path installs the hashed lock before selecting
 the compiler:
@@ -67,7 +91,7 @@ The complete target first runs the fast metadata gate, then invokes
 `scripts/check_slither_baseline.py --run-slither` with the pinned toolchain and
 compares the normalized first-party High and Medium rows with the tracked
 baseline. New rows and stale rows fail the check. CI runs this target in a
-dedicated Ubuntu job with a 15-minute timeout so live analyzer cost does not
+dedicated Ubuntu job with a 45-minute timeout so live analyzer cost does not
 make the default wrappers slow.
 
 The canonical machine-readable baseline is
@@ -101,10 +125,10 @@ normalized baseline:
 slither . --config-file slither.config.json --foundry-compile-all --json /tmp/slither-report.json
 ```
 
-A current raw report is approximately 128 MB. Raw Slither JSON is temporary
-working data and must never be committed; only the compact normalized baseline
-and reviewer-facing Markdown inventory belong in the repository. On Windows, write
-the temporary report outside the repository or to an ignored local path.
+Raw Slither JSON can be large, is temporary working data, and must never be
+committed; only the compact normalized baseline and reviewer-facing Markdown
+inventory belong in the repository. On Windows, write the temporary report
+outside the repository or to an ignored local path.
 
 ## Baseline Review Process
 

@@ -144,9 +144,15 @@ Static-analysis review inputs:
 - [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json) is the canonical
   normalized first-party production high/medium finding set;
   [`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md) is its reviewer-facing
-  mirror. All 38 rows (4 High and 34 Medium) are Open: one confirmed gap, six
-  design-review rows, and 31 pending dispositions. No row is accepted or marked
+  mirror. All 33 rows (3 High and 30 Medium) are Open: one confirmed gap, five
+  design-review rows, and 27 pending dispositions. No row is accepted or marked
   false positive.
+- The bounded assembly call in `StreamGovernanceExecutor` makes its
+  proposal-selected native-value authority invisible to Slither without
+  removing that authority. The generated risk register therefore preserves it
+  independently as High open blocker `RISK-GOV-003` pending closed-world
+  target/selector/value policy, deployment binding, hostile-target tests, and
+  independent review.
 - [`scripts/check_slither_baseline.py`](../scripts/check_slither_baseline.py)
   validates metadata without running Slither and can run the pinned analyzer to
   fail on any exact normalized drift; focused behavior is covered by
@@ -269,9 +275,10 @@ Known unresolved blockers are tracked in
 [`docs/known-blockers.md`](known-blockers.md) and
 [`ops/ROADMAP.md`](../ops/ROADMAP.md), then summarized in the generated
 [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json).
-Current major unresolved categories include the 38 open first-party production
-Slither high/medium findings and external evidence gaps for fork/testnet/live
-deployment ceremonies, production broadcast retention,
+Current major unresolved categories include the 33 open first-party production
+Slither high/medium findings, the separately tracked `RISK-GOV-003` Governance
+Executor native-value blocker, and external evidence gaps for
+fork/testnet/live deployment ceremonies, production broadcast retention,
 live explorer verification, production address books, production release
 signatures, reviewed signer custody readiness evidence, non-local randomizer
 operations evidence, non-local metadata browser evidence, live bytecode proof,
@@ -286,7 +293,8 @@ unresolved production blockers:
 
 - The normalized first-party production Slither rows are all Open. Test,
   vendored, and script findings are reported outside that release-blocking set;
-  they are not used to accept or suppress any of the 38 rows.
+  they are not used to accept or suppress any of the 33 analyzer-visible rows
+  or the separately tracked `RISK-GOV-003` authority.
 - Local Anvil ceremony, randomizer operations, and release signature evidence
   use no-secret placeholders and do not claim production status.
 - The bytecode-to-release proof is local/fork release-artifact proof; it does

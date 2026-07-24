@@ -174,13 +174,13 @@ contributors who start from the README.
 - P0-INIT-001 explicitly initialized the then-known first-party production
   `uninitialized-local` defaults and added regressions for string counting,
   delegation status/gating, empty-script rendering, and minter return indexes.
-  Later-added production surfaces now contribute 12 Open `uninitialized-local`
+  Later-added production surfaces now contribute 9 Open `uninitialized-local`
   rows to the canonical baseline; those rows remain undispositioned under
   [issue #658](https://github.com/6529-Collections/6529Stream/issues/658) and are
   not cleared by the historical regressions.
-- The normalized first-party production Slither baseline contains 38 open
-  findings: 4 High and 34 Medium. One row is a confirmed Core state gap, six
-  rows require design review, and 31 remain pending disposition. None is
+- The normalized first-party production Slither baseline contains 33 open
+  findings: 3 High and 30 Medium. One row is a confirmed Core state gap, five
+  rows require design review, and 27 remain pending disposition. None is
   accepted or classified as a false positive. The machine-readable source is
   `ops/SLITHER_BASELINE.json`, its reviewer mirror is
   `ops/SLITHER_BASELINE.md`, and issue
@@ -189,6 +189,16 @@ contributors who start from the README.
   exact normalized high/medium drift gate; low, informational, optimization,
   vendored, test, and script findings remain reported separately and do not
   reduce the first-party blocker.
+- Bounded assembly in `StreamGovernanceExecutor` prevents governed-call
+  returndata bombs but makes the proposal-selected native-value call invisible
+  to Slither's `arbitrary-send-eth` detector. That analyzer disappearance is not
+  remediation: `RISK-GOV-003` preserves the authority as a High open blocker
+  until a closed-world target/selector/value policy, balance-source and
+  destination review, hostile-target and value-exhaustion regressions,
+  deployment binding, and independent review are complete. Issues
+  [#658](https://github.com/6529-Collections/6529Stream/issues/658) and
+  [#665](https://github.com/6529-Collections/6529Stream/issues/665) remain open;
+  the Governance V2 foundation is pre-audit and not production-ready.
 - Auction custody, auction bid/outbid payment, auction settlement-credit,
   fixed-price pull-payment, curator reward-credit, StreamMinter
   emergency-surplus, randomizer request lifecycle, randomizer callback

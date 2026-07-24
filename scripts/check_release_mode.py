@@ -11,6 +11,7 @@ from typing import Any
 
 import check_public_beta_evidence as evidence_checker
 import check_genesis_deployment_profile as genesis_profile_checker
+import check_risk_register as risk_register_checker
 import check_slither_baseline as slither_baseline_checker
 
 
@@ -18,6 +19,7 @@ DEFAULT_EVIDENCE = evidence_checker.DEFAULT_EVIDENCE
 DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
 DEFAULT_GENESIS_PROFILE = genesis_profile_checker.DEFAULT_PROFILE
 DEFAULT_CONTRACT_CONFIG = genesis_profile_checker.DEFAULT_CONTRACTS
+DEFAULT_RISK_REGISTER = risk_register_checker.DEFAULT_REGISTER
 DEFAULT_SLITHER_BASELINE = slither_baseline_checker.DEFAULT_BASELINE
 DEFAULT_SLITHER_MARKDOWN = slither_baseline_checker.DEFAULT_MARKDOWN
 PUBLIC_BETA_PHASE = evidence_checker.PUBLIC_BETA_PHASE
@@ -183,6 +185,30 @@ def slither_baseline_blockers(
     ]
 
 
+def governance_native_value_blockers(
+    register_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    """Return the fail-closed Governance Executor native-value blocker."""
+    resolved_register = (
+        register_path if register_path.is_absolute() else repo_root / register_path
+    )
+    register = risk_register_checker.validate_risk_register(repo_root, resolved_register)
+    risk = next(
+        row
+        for row in register["risks"]
+        if row["id"] == risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
+    )
+    if risk["status"] != "open_blocker":
+        return []
+    return [
+        f"{risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID} remains "
+        "open_blocker: Governance Executor proposal-selected native-value "
+        "authority requires closed-world target/selector/value policy, deployment "
+        "binding, and independent review; see issues #658 and #665"
+    ]
+
+
 def accepted_risk_blocker(
     requirement: dict[str, Any], as_of: date
 ) -> str | None:
@@ -259,6 +285,7 @@ def validate_release_mode(
     abi_checksums: Path = DEFAULT_ABI_CHECKSUMS,
     genesis_profile: Path = DEFAULT_GENESIS_PROFILE,
     contract_config: Path = DEFAULT_CONTRACT_CONFIG,
+    risk_register: Path = DEFAULT_RISK_REGISTER,
     slither_baseline: Path = DEFAULT_SLITHER_BASELINE,
     slither_markdown: Path = DEFAULT_SLITHER_MARKDOWN,
 ) -> None:
@@ -269,6 +296,7 @@ def validate_release_mode(
     blockers.extend(
         slither_baseline_blockers(slither_baseline, slither_markdown, repo_root)
     )
+    blockers.extend(governance_native_value_blockers(risk_register, repo_root))
     if normalized_phase == PRODUCTION_PHASE:
         headroom_blocker = production_core_headroom_blocker(
             abi_checksums, repo_root
@@ -317,6 +345,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Current implementation catalog compared to the genesis profile.",
     )
     parser.add_argument(
+        "--risk-register",
+        type=Path,
+        default=DEFAULT_RISK_REGISTER,
+        help="Canonical risk register carrying manual release blockers.",
+    )
+    parser.add_argument(
         "--slither-baseline",
         type=Path,
         default=DEFAULT_SLITHER_BASELINE,
@@ -343,12 +377,14 @@ def main(argv: list[str] | None = None) -> int:
             abi_checksums=args.abi_checksums,
             genesis_profile=args.genesis_profile,
             contract_config=args.contract_config,
+            risk_register=args.risk_register,
             slither_baseline=args.slither_baseline,
             slither_markdown=args.slither_markdown,
         )
     except (
         evidence_checker.PublicBetaEvidenceError,
         genesis_profile_checker.GenesisProfileError,
+        risk_register_checker.RiskRegisterError,
         slither_baseline_checker.SlitherBaselineError,
         ReleaseModeError,
     ) as exc:

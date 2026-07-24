@@ -92,8 +92,8 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_committed_baseline_and_markdown_validate(self) -> None:
         data = checker.validate_baseline(REPO_ROOT, BASELINE_PATH, MARKDOWN_PATH)
-        self.assertEqual(data["counts"], {"High": 4, "Medium": 34, "total": 38})
-        self.assertEqual(len(data["findings"]), 38)
+        self.assertEqual(data["counts"], {"High": 3, "Medium": 30, "total": 33})
+        self.assertEqual(len(data["findings"]), 33)
         self.assertEqual(
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )
@@ -203,8 +203,10 @@ class SlitherBaselineTests(unittest.TestCase):
         release = (REPO_ROOT / ".github/workflows/release-mode.yml").read_text(
             encoding="utf-8"
         )
+        documentation = (REPO_ROOT / "docs/slither.md").read_text(encoding="utf-8")
         self.assertIn("slither-baseline:", ci)
-        self.assertIn("timeout-minutes: 15", ci)
+        self.assertIn("timeout-minutes: 45", ci)
+        self.assertIn("45-minute timeout", documentation)
         self.assertIn("version: v1.7.1", ci)
         self.assertIn("solc-select install 0.8.19", ci)
         self.assertIn("solc-select use 0.8.19", ci)

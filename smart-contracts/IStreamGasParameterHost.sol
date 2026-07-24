@@ -19,6 +19,10 @@ interface IStreamGasParameterHost {
         address probe;
         uint8 failureClass;
         uint64 probeMaxAgeBlocks;
+        bytes32 expectedProbeModuleVersion;
+        bytes32 expectedProbeRuntimeCodeHash;
+        bytes32 expectedProbeModuleManifestHash;
+        bytes32 expectedProbeDeploymentManifestHash;
     }
 
     /// @notice Canonical GGP change event ([LTA-GGP] requirement 4). Emitted on
@@ -76,6 +80,38 @@ interface IStreamGasParameterHost {
     error GasParameterNotAuthority(address caller);
     /// @notice Reverts when the configured authority fails the wiring marker check.
     error GasParameterInvalidAuthority(address authority);
+    /// @notice Reverts when the expected genesis registry is absent, has no code,
+    ///         or does not return the exact canonical ERC-165 module-registry marker.
+    error GasParameterInvalidModuleRegistry(address moduleRegistry);
+    /// @notice Reverts when the immutable Core pointer source is absent or invalid.
+    error GasParameterInvalidCore(address core);
+    /// @notice Reverts when Core does not expose one exact live canonical
+    ///         `MODULE_REGISTRY` pointer record.
+    error GasParameterLiveModuleRegistryInvalid(address core);
+    /// @notice Reverts when the probe is not an ACTIVE, manifest-bound canonical
+    ///         GGP probe in Core's live module registry, or when its live
+    ///         code/binding no longer matches the cached registration facts.
+    error GasParameterProbeBindingInvalid(bytes32 parameterId, address probe);
+    /// @notice Reverts when the governance authority is not currently executing
+    ///         a target call.
+    error GasParameterActionNotExecuting();
+    /// @notice Reverts when an executing governance context exposes a zero id.
+    error GasParameterActionIdZero();
+    /// @notice Reverts when a governed writer receives the wrong action class.
+    error GasParameterActionClassMismatch(uint8 expectedClass, uint8 actualClass);
+    /// @notice Reverts when the executor's per-call scope differs from the
+    ///         parameter row being mutated.
+    error GasParameterScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when the executor's per-call old-state commitment differs
+    ///         from the complete live parameter state.
+    error GasParameterOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when the executor's per-call new-state commitment differs
+    ///         from the complete proposed parameter state.
+    error GasParameterNewStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts instead of wrapping the per-parameter mutation generation.
+    error GasParameterRevisionOverflow(bytes32 parameterId);
+    /// @notice Reverts when a probe rebind would preserve the complete binding.
+    error GasParameterProbeRebindNoOp(bytes32 parameterId, address probe);
     /// @notice Reverts when a raise path receives a value at or below current.
     error GasParameterNotARaise(bytes32 parameterId, uint256 currentValue, uint256 newValue);
     /// @notice Reverts when a raise exceeds the 2x per-action bound
@@ -111,8 +147,9 @@ interface IStreamGasParameterHost {
     ///         conditional actions exist for `FORWARDING_CAP` rows only).
     error GasParameterConditionalActionUnavailable(bytes32 parameterId, uint8 failureClass);
 
-    /// @notice Canonical pinned host introspection ([LTA-GGP] requirement 12).
-    ///         Returns the zeroed tuple for an unregistered parameterId.
+    /// @notice Canonical pinned host introspection ([LTA-GGP] requirement 12),
+    ///         including the monotonic mutation revision. Returns the zeroed
+    ///         tuple for an unregistered parameterId.
     function gasParameterInfo(bytes32 parameterId)
         external
         view
@@ -121,7 +158,8 @@ interface IStreamGasParameterHost {
             uint256 floor,
             address probe,
             uint8 failureClass,
-            uint64 probeMaxAgeBlocks
+            uint64 probeMaxAgeBlocks,
+            uint64 revision
         );
 
     /// @notice Live storage-backed value read for guarded paths and EIP-150 63/64
@@ -145,31 +183,37 @@ interface IStreamGasParameterHost {
     ///         no governance (governed entry points permanently revert).
     function governanceAuthority() external view returns (address);
 
-    /// @notice Staged raise on the normal delay class ([LTA-GGP] requirement 1).
-    ///         Authority-only; bounded to at most 2x current per action.
-    function raiseGasParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
+    /// @notice Core's current canonical module-registry pointer target, validated
+    ///         against the exact ten-word pointer record. Reverts before the
+    ///         pointer is initialized or while it is malformed.
+    function moduleRegistry() external view returns (address);
 
-    /// @notice Emergency raise ([LTA-GGP] requirement 1): raise-only,
-    ///         authority-only, bounded to 2x per action, and admitted only while the
-    ///         bound probe has recorded a failing run at the current value within
-    ///         `probeMaxAgeBlocks`. Repeatable while fresh runs keep proving failure.
-    function emergencyRaiseGasParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId)
-        external;
+    /// @notice Staged raise on the normal delay class ([LTA-GGP] requirement 1).
+    ///         Requires an exact executing class-1 Governance-V2 context and is
+    ///         bounded to at most 2x current per action.
+    function raiseGasParameter(bytes32 parameterId, uint256 newValue) external;
+
+    /// @notice Emergency raise ([LTA-GGP] requirement 1): raise-only, requires
+    ///         an exact class-6 context, is bounded to 2x per action, and is
+    ///         admitted only while the bound probe has recorded a failing run at
+    ///         the current value within `probeMaxAgeBlocks`. Repeatable while
+    ///         fresh runs keep proving failure.
+    function emergencyRaiseGasParameter(bytes32 parameterId, uint256 newValue) external;
 
     /// @notice Governed lower on the normal delay class ([LTA-GGP] requirement 2).
-    ///         Authority-only; reverts below the immutable floor; execution recheck
-    ///         requires a recorded passing run at exactly `newValue` within
-    ///         `probeMaxAgeBlocks`.
-    function lowerGasParameter(bytes32 parameterId, uint256 newValue, bytes32 actionId) external;
+    ///         Requires an exact executing class-1 context, reverts below the
+    ///         immutable floor, and requires a recorded passing run at exactly
+    ///         `newValue` within `probeMaxAgeBlocks` at execution.
+    function lowerGasParameter(bytes32 parameterId, uint256 newValue) external;
 
     /// @notice Moves the parameter's probe binding to a successor Permanent-class
     ///         probe on the normal delay class ([LTA-GGP-PROBES] rule 3).
-    ///         Authority-only — with governance lost the binding is frozen, which
-    ///         is why every probe is Permanent-class. The successor must serve the
+    ///         Requires an exact executing class-3 context; with governance lost
+    ///         the binding is frozen, which is why every probe is Permanent-class.
+    ///         The successor must serve the
     ///         same parameterId (`probedParameterId()` recheck), so a binding can
     ///         never move to a probe that does not execute this row's guarded path.
-    function rebindGasParameterProbe(bytes32 parameterId, address newProbe, bytes32 actionId)
-        external;
+    function rebindGasParameterProbe(bytes32 parameterId, address newProbe) external;
 
     /// @notice Permissionless conditional raise ([LTA-GGP] requirement 11),
     ///         `FORWARDING_CAP` rows only. Callable by anyone with no governance

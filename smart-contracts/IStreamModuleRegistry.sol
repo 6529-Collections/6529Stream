@@ -26,6 +26,7 @@ struct StreamModuleRecord {
     string moduleManifestURI;
     uint64 registeredAt;
     uint64 statusUpdatedAt;
+    uint64 revision;
 }
 
 /// @notice Registration request consumed by the governed
@@ -92,7 +93,7 @@ interface IStreamModuleRegistry {
     function moduleRegistryManifest()
         external
         view
-        returns (bytes32 manifestHash, string memory manifestURI);
+        returns (bytes32 manifestHash, string memory manifestURI, uint64 revision);
 
     // Append-only module enumeration index (requirement 6;
     // ADR 0013 decision U2).

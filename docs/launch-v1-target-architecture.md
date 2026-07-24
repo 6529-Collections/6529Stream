@@ -434,6 +434,18 @@ return `timeParameterInfo(bytes32)` (`0x5f2463b8`),
 the emitted action ID and validates class/scope/old/new state from
 `currentAction()`; no alternate three-argument writer survives cutover.
 
+Rich standalone GGP/GTP hosts use the genesis/live registry split defined by
+the [LTA-GGP] rules. Construction commits the expected genesis registry plus four
+nonzero expected probe facts without reading a module row and may admit a
+reviewed predicted codeless probe address. The constructor's exact,
+bounded-returndata ERC-165 registry response forwards the EIP-150-clamped
+available gas with no compiled-in call cap and proves only the selector family.
+Every probe-dependent use instead resolves Core's current `MODULE_REGISTRY` target,
+validates the canonical 320-byte pointer and bounded revision-appended
+Registry-V2 row, and uses that live target rather than the pointer's historical
+registry field. Instance-aware checking must reconcile predicted code and rows
+before the irreversible bootstrap seal.
+
 This hook table is the normative home of the Core refresh-emitter caller
 set (ADR 0010 decision D3.6). Both restricted ERC-4906 helpers accept the
 current metadata router and current artwork finality registry resolved from
@@ -1215,6 +1227,13 @@ inputs, replay semantics, and window floors.
 | `STREAM_GOVERNANCE_BATCH_SCOPE_V2` | `6529STREAM_GOVERNANCE_BATCH_SCOPE_V2` | 0x6cfd5dfd67f064adac45602c05057edddda810734779c0ebe11b447e6985e31c | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; callsHash and ordered per-call scope hashes |
 | `STREAM_GOVERNANCE_BATCH_OLD_STATE_V2` | `6529STREAM_GOVERNANCE_BATCH_OLD_STATE_V2` | 0xc5029f937b44065c2ad92d9253e07f06117567480206189fcc1409d5509222b7 | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; callsHash and ordered per-call old-state hashes |
 | `STREAM_GOVERNANCE_BATCH_NEW_STATE_V2` | `6529STREAM_GOVERNANCE_BATCH_NEW_STATE_V2` | 0xce958009248d20d9574439fa374bc00c142940af2b496896b5bdbc00b882e98b | ADR 0004 governance timelock layer | `2` | ADR 0004 `[GOV-ACTION-ID]`; callsHash and ordered per-call new-state hashes |
+| `STREAM_ROLE_MUTATION_V1` | `6529STREAM_ROLE_MUTATION_V1` | 0xa8dba5d6fcfd6e5b3cd0487118fc42e1d598c9ba0fb59aefad69b419212bc91e | `StreamRoleRegistry` | `1` | prior role chain; chain ID; registry; role; holder; new membership; next role revision |
+| `STREAM_GLOBAL_ROLE_MUTATION_V1` | `6529STREAM_GLOBAL_ROLE_MUTATION_V1` | 0x2da8f94be4b1e85c976aae097d48589ff562492679ebc2842c866ba5b986d39c | `StreamRoleRegistry` | `1` | prior global chain; chain ID; registry; role; holder; new membership; next global revision |
+| `STREAM_ROLE_MUTATION_SCOPE_V1` | `6529STREAM_ROLE_MUTATION_SCOPE_V1` | 0x51943e9f337cf7f50fc89b1f37701a670f4477d8d6e3efbd34d986b27f35d271 | `StreamRoleRegistry` | `1` | chain ID; registry; role; holder |
+| `STREAM_ROLE_MUTATION_STATE_V1` | `6529STREAM_ROLE_MUTATION_STATE_V1` | 0xf80e0ae6730f5e4e48b5a6c1b46bfb06af297aefb0eaa569f87f095a7f99153d | `StreamRoleRegistry` | `1` | scope; membership; role chain/revision; global chain/revision |
+| `STREAM_ROLE_MANAGER_CONFIG_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_V1` | 0x6b7160b8472382fb5a6b7cad94720fd10007c4124b0b0d405aa6523763ad0fe7 | `StreamRoleRegistry` | `1` | closed pseudo-role key for manager configuration audit history |
+| `STREAM_ROLE_MANAGER_CONFIG_STATE_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_STATE_V1` | 0x00ef486fa9550ecdc9851c2df1073c1c991e7d56e6a0d388357ba5f5a89c4263 | `StreamRoleRegistry` | `1` | chain ID; registry; scope; enabled bit; account-scoped config chain/revision |
+| `STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1` | 0xbd1ca24b4e56b656dee2d7ca30433716550c54ab67aab3e6b9eba46ac0ff79d6 | `StreamRoleRegistry` | `1` | prior account config chain; chain ID; registry; manager account; new enabled bit; next account revision |
 | `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_SCOPE_V1` | 0x2c9b0dbea692b77bd1679258ca569c13c24eb261671f5a6b78b9fa59cd29c7f1 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; domain, chainid, executor, trigger target, trigger selector |
 | `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_STATE_V1` | 0xd41313fe7ee9b51221beebf9c314d67aebec3677907eb1365fff4caa4248f493 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; scope, registered bit, trigger code hash, allowed-class mask, append-only count/chain, immutable tail facts |
 | `STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1` | `6529STREAM_SYSTEM_MANIFEST_TAIL_TRIGGER_RECORD_V1` | 0xe52b2b6e65acb1eae2c217c4b26e893c7d0e7f32afc148867b79c133b3a134fa | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; index, exact pair, code hash, mask |

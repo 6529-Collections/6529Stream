@@ -70,6 +70,56 @@ the release policy in `docs/release-policy.md`.
   transporting shell-sensitive text through native argv, and the checker
   rejects missing, ambiguous, malformed, or quote-drifted replay commands
   without changing release readiness.
+- Replaced the transitional Governance V1 executor boundary with the atomic
+  Governance V2 schema: seven-field per-call transition commitments, derived
+  batch scope/old/new hashes, six-return target context, exact SSTORE2 calldata
+  publication, action classes `0..6`, target-scoped terminal-freeze veto
+  indexing, manifest-tail composition, append-only class-6 eligibility, and an
+  executor-first one-way system-manifest bootstrap bind/seal ceremony.
+  ModuleRegistry, RoleRegistry, and governed gas/time hosts now recheck the
+  executing action ID, class, scope, old state, new state, revision, and probe
+  evidence; V1 action-ID calldata and domains are rejected. Bootstrap and
+  live-registry reads forward EIP-150-clamped available gas with bounded
+  returndata and canonical decoding instead of compiled-in call caps. Added
+  focused malformed-return, high-gas, sequential-probe, role-history,
+  bootstrap-envelope, and holder-rehearsal coverage. Additional hardening
+  rejects cancellation after expiry; classifies Executor configuration from
+  exact canonical calldata and direction; forbids self-targeted mutable
+  classifier configuration; bounds governed-call failure returndata while
+  ignoring successful returndata; caps and reserves terminal-freeze discovery
+  capacity with schedule-time root classification; commits the exact terminal
+  guardian registry, role histories, holder ordering, and holder code hashes;
+  emits replay-complete per-scope membership mutations; and attributes every
+  governed RoleRegistry mutation to its exact action ID. Executor and
+  RoleRegistry control-plane actions bind the scheduling root revision, and
+  non-root proposer actions bind the proposer's configuration revision, so
+  address ABA cannot revive stale queues; a registered canceller also cannot
+  cancel its own delayed removal unless it is the root or action proposer.
+  The bounded assembly call prevents governed-call returndata bombs, but it also
+  removes the Executor's proposal-selected native-value authority from
+  Slither's `arbitrary-send-eth` view; `RISK-GOV-003` therefore preserves that
+  authority as a separate High open blocker pending a closed-world
+  target/selector/value policy and deployment evidence. Deployment-input
+  generators, that action-policy catalog, target-side cutover hooks, and
+  candidate artifacts remain separate follow-up release-evidence slices. This
+  partial source/test slice does not complete [GOV-V2-CUTOVER], close #665, or
+  clear the static-analysis blocker in #658. This is pre-audit work and not a
+  production-readiness claim.
+- Refreshed the canonical unfiltered Slither 0.11.5 capture at source commit
+  `c0be71915bc650569940b249fa9e5c801c0587fc` on
+  `2026-07-23T23:52:41Z`. The exact first-party production High/Medium
+  inventory is now 33 Open rows (3 High, 30 Medium; one confirmed gap, five
+  design-review rows, and 27 pending dispositions). Two explicit Executor
+  schedule-context initializations, the Executor total-value assignment, and
+  ModuleRegistry's complete governance-context consumption resolve four prior
+  analyzer rows; three Cadence findings moved only by source identity and keep
+  their Open dispositions. The fifth analyzer disappearance is not a security
+  resolution: bounded assembly hides the Executor's proposal-selected
+  native-value call from `arbitrary-send-eth`, so mandatory High open blocker
+  `RISK-GOV-003` preserves that authority under issues #658 and #665. The full
+  3,143-row capture, normalized scope counts, provenance hashes, deterministic
+  reviewer mirror, release-mode blocker, and generated risk/release evidence
+  are checked together. This refresh is not an audit or readiness claim.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
   from the retired aggregate/facade Core-read seam to separately bound actual
   Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The
@@ -251,8 +301,8 @@ the release policy in `docs/release-policy.md`.
   implemented fixed-golden JCS/Keccak/ABI oracle prevents the generator and
   primary checker from self-confirming the same codec or formula defect.
 - Added a canonical normalized Slither baseline and fail-closed drift gate for
-  first-party production High/Medium findings. The current 38 rows (4 High and
-  34 Medium) are all explicitly Open: one confirmed gap, six design-review
+  first-party production High/Medium findings. The initial 38 rows (4 High and
+  34 Medium) were all explicitly Open: one confirmed gap, six design-review
   rows, and 31 pending dispositions, with no suppressions, acceptances, or
   false-positive claims. Fast default checks validate provenance, counts,
   classifications, and Markdown parity; a dedicated pinned CI job reruns

@@ -1157,6 +1157,65 @@ protects (ADR 0012 decision T1):
    probe contracts with no governance signer (State Export And Archival
    Operations).
 
+### Genesis commitments and live registry resolution
+
+A rich standalone GGP or GTP host receives two distinct registry dependencies
+at construction: the already-deployed external Core whose
+`MODULE_REGISTRY` pointer will become canonical, and the expected genesis
+registry address used only in the constructor-time probe-binding commitment.
+Core must be a nonzero external code-bearing contract; the rich host cannot
+name itself as Core. The genesis registry must be nonzero and code-bearing and
+must return exactly one canonical 32-byte `true` word from
+`supportsInterface(type(IStreamModuleRegistry).interfaceId)` while the host
+forwards the EIP-150-clamped available gas with no compiled-in call cap. That
+ERC-165 answer establishes only the registry selector family: because return types do
+not contribute to function selectors, it does not prove the revision-appended
+Registry-V2 `moduleRecord(address)` shape, any particular row, or Core-pointer
+initialization. Those facts remain subject to the bounded live checks below.
+
+Every constructor row supplies four nonzero expected facts: probe module
+version, runtime code hash, module-manifest hash, and deployment-manifest hash.
+The host derives the authenticated binding against the expected genesis
+registry, fixed probe module type and interface, and those four facts. It must
+not call `moduleRecord` while registering the row. This permits a reviewed
+counterfactual deployment order in which the probe address is predicted but
+not yet code-bearing. If code is already present, construction additionally
+requires the expected runtime hash and the probe's immutable row pin to match
+(`probedParameterId()` for a GGP probe, or the pinned wall-clock floor for a
+GTP cadence probe). A zero probe, zero expected fact, mismatched present code,
+or mismatched present row pin rejects construction.
+
+Every probe-dependent use resolves the live registry afresh. An external host
+performs a bounded read of exactly the canonical 320-byte return from Core's
+`getSatellitePointer(keccak256("MODULE_REGISTRY"))`; Core's byte-minimal
+in-Core profile applies the equivalent checks to its own cached pointer. The
+pointer target must be nonzero and code-bearing with the exact cached code
+hash, `MODULE_REGISTRY` module type, canonical registry interface ID, `ACTIVE`
+status, nonzero module/deployment manifest hashes, and nonzero revision. A
+frozen pointer is valid. The target is the registry used for the row lookup;
+the pointer record's historical registry/provenance field must be nonzero but
+is never substituted for the live target.
+
+The live target's unchanged `moduleRecord(address)` selector must return the
+canonical Registry-V2 tuple, including a nonzero revision, within the bounded
+return budget. The host rejects malformed or noncanonical ABI, an empty or
+over-2,048-byte manifest URI, a non-`ACTIVE` row, wrong type/interface, zero
+version, code-hash drift, zero manifests, or zero revision. It then repeats the
+probe row-pin check and recomputes the full binding against the live target.
+Ordinary storage reads and an otherwise valid governed raise do not consume
+probe evidence and remain available before Core initializes the pointer;
+`moduleRegistry()`, emergency/conditional actions, lowering, and rebinding
+fail closed until all live facts validate.
+
+A class-3 rebind validates only the proposed probe against Core's current live
+registry before comparing the transition commitments; it does not require the
+old registry or old row to remain callable. This permits an atomic registry
+`A -> B` cutover followed by same-address rebindings even when `A` is
+unavailable. Before the irreversible bootstrap seal, instance-aware deployment
+checking must reconcile every constructor commitment — including every
+counterfactual predicted address — to present code, the live Core pointer, and
+the exact Registry-V2 row. Constructor admission alone is not that evidence.
+
 Requirements:
 
 1. Raising a GGP is a service-restoring action with a bounded blast
@@ -1888,7 +1947,8 @@ GTP change discipline:
    parameter's `probeMaxAgeBlocks` proving the proposed count still
    covers the pinned wall-clock floor at the observed cadence.
    Every probe-dependent use applies the same live-registry `ACTIVE`, complete
-   binding-hash, live code-hash, and `probedParameterId()` checks as GGP; a
+   binding-hash, live code-hash, and parameter-specific row-pin checks as GGP
+   (`probedParameterId()` for a GGP probe; pinned wall-clock floor for GTP); a
    revoked or registry-stale cadence probe is not evidence.
 4. Every GTP change emits the canonical change event:
 
@@ -6525,7 +6585,9 @@ Recovery principles:
 
 This document is the normative home of the Core pointer, system-manifest,
 Governed Gas Parameter transition and standing-action, finality, state-export,
-module-registry, and governance-guardian hash domains.
+module-registry, and governance-guardian hash domains. It also carries the
+checker-verified RoleRegistry and Executor control-plane mirror rows whose
+normative home remains ADR 0004.
 Every constant
 is Permanent: recorded
 here with its string preimage and ordered inputs, mirrored as
@@ -6548,6 +6610,26 @@ same CI recomputation before any gate consumes them.
 | `STREAM_MODULE_STATUS_STATE_V1` | `6529STREAM_MODULE_STATUS_STATE_V1` | 0x6f5722acd3286491268d034cc0bc3af67af3b10ce36c277911e48af850e23139 | module registry | `1` | scope; complete record facts/status/revision; invariant count and chain ([LTA-REGISTRY-GOVERNANCE]) |
 | `STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1` | `6529STREAM_MODULE_REGISTRY_MANIFEST_SCOPE_V1` | 0x5feb32edce5c714adb3bee16efa1716d2dc85cb717441aa69cfd15a6b192399b | module registry | `1` | domain; chainid; registry ([LTA-REGISTRY-GOVERNANCE]) |
 | `STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1` | `6529STREAM_MODULE_REGISTRY_MANIFEST_STATE_V1` | 0x2bf0ed54c30fe5b785759f01b7aa59991c942125ff19ccbc12912111aaeb9c62 | module registry | `1` | scope; manifest hash; manifest URI hash; monotonic revision ([LTA-REGISTRY-GOVERNANCE]) |
+| `STREAM_ROLE_MUTATION_V1` | `6529STREAM_ROLE_MUTATION_V1` | 0xa8dba5d6fcfd6e5b3cd0487118fc42e1d598c9ba0fb59aefad69b419212bc91e | `StreamRoleRegistry` | `1` | prior role chain; chain ID; registry; role; holder; new membership; next role revision (ADR 0004 `[GOV-ROLES]`) |
+| `STREAM_GLOBAL_ROLE_MUTATION_V1` | `6529STREAM_GLOBAL_ROLE_MUTATION_V1` | 0x2da8f94be4b1e85c976aae097d48589ff562492679ebc2842c866ba5b986d39c | `StreamRoleRegistry` | `1` | prior global chain; chain ID; registry; role; holder; new membership; next global revision (ADR 0004 `[GOV-ROLES]`) |
+| `STREAM_ROLE_MUTATION_SCOPE_V1` | `6529STREAM_ROLE_MUTATION_SCOPE_V1` | 0x51943e9f337cf7f50fc89b1f37701a670f4477d8d6e3efbd34d986b27f35d271 | `StreamRoleRegistry` | `1` | chain ID; registry; role; holder (ADR 0004 `[GOV-ROLES]`) |
+| `STREAM_ROLE_MUTATION_STATE_V1` | `6529STREAM_ROLE_MUTATION_STATE_V1` | 0xf80e0ae6730f5e4e48b5a6c1b46bfb06af297aefb0eaa569f87f095a7f99153d | `StreamRoleRegistry` | `1` | scope; membership; role chain/revision; global chain/revision (ADR 0004 `[GOV-ROLES]`) |
+| `STREAM_ROLE_MANAGER_CONFIG_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_V1` | 0x6b7160b8472382fb5a6b7cad94720fd10007c4124b0b0d405aa6523763ad0fe7 | `StreamRoleRegistry` | `1` | closed pseudo-role key for manager configuration audit history (ADR 0004 `[GOV-ROLES]`) |
+| `STREAM_ROLE_MANAGER_CONFIG_STATE_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_STATE_V1` | 0x00ef486fa9550ecdc9851c2df1073c1c991e7d56e6a0d388357ba5f5a89c4263 | `StreamRoleRegistry` | `1` | chain ID; registry; scope; enabled bit; account-scoped config chain/revision (ADR 0004 `[GOV-ROLES]`) |
+| `STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1` | 0xbd1ca24b4e56b656dee2d7ca30433716550c54ab67aab3e6b9eba46ac0ff79d6 | `StreamRoleRegistry` | `1` | prior account config chain; chain ID; registry; manager account; new enabled bit; next account revision (ADR 0004 `[GOV-ROLES]`) |
+| `GOVERNANCE_CONFIG_SCOPE_V1` | `6529STREAM_GOVERNANCE_CONFIG_SCOPE_V1` | 0x3c84722ce639aca105835269de227cc0ffea495f13383068c46ec2e7aae88016 | governance Executor | `1` | chain ID; Executor; durable config kind; address key, or target plus selector (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_CONFIG_STATE_V1` | `6529STREAM_GOVERNANCE_CONFIG_STATE_V1` | 0x05000ed56f03029aee74f99fd9d1a7319ad482fa3148ae863053ea955d1e9a4b | governance Executor | `1` | chain ID; Executor; config kind; address key/enabled/revision, or target/selector/enabled/runtime code hash/revision (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_ROOT_SCOPE_V1` | `6529STREAM_GOVERNANCE_ROOT_SCOPE_V1` | 0x6aadc831e79f225350483abeae2839b877650539b2bbb4a19c70ade78ea2e42c | governance Executor | `1` | chain ID; Executor (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_ROOT_STATE_V1` | `6529STREAM_GOVERNANCE_ROOT_STATE_V1` | 0xd9975385cd3dcefe66cfc6e447a2c92f84d20f043e1198e1b6f5c65be5805d90 | governance Executor | `1` | chain ID; Executor; root; root runtime code hash; revision (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_CONFIG_PROPOSER` | `6529STREAM_GOVERNANCE_CONFIG_PROPOSER` | 0x3159801de288c136cc45c5fbc40879c4e5a4c7bba9806400495d2120cd681905 | governance Executor | `1` | durable proposer-configuration key; no additional `abi.encode` inputs (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_CONFIG_CANCELLER` | `6529STREAM_GOVERNANCE_CONFIG_CANCELLER` | 0x334c6d45b3bad249a3f870b97f4a79b845676c102c028972e94f21b49628217b | governance Executor | `1` | durable canceller-configuration key; no additional `abi.encode` inputs (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_CONFIG_NATIVE_RECEIVER` | `6529STREAM_GOVERNANCE_CONFIG_NATIVE_RECEIVER` | 0x19222bb517f28c7f9a05615c9b0fac13b5258c5b61fcaec4605f5b56aa239cf4 | governance Executor | `1` | durable approved-native-receiver key; no additional `abi.encode` inputs (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_CONFIG_TIGHTENING_CALL` | `6529STREAM_GOVERNANCE_CONFIG_TIGHTENING_CALL` | 0xc3f9be103fb546fd998001a0d6447e98378926dd86bc995bb06019fd4eac50cf | governance Executor | `1` | durable tightening-pair key; no additional `abi.encode` inputs (ADR 0004 `[GOV-ACTION-ID]`) |
+| `GOVERNANCE_CONFIG_FREEZE_SELECTOR` | `6529STREAM_GOVERNANCE_CONFIG_FREEZE_SELECTOR` | 0x034b6f0b02fadd47ce4775cbf1d72a3b570a62a973efcec85059bf135bf5da91 | governance Executor | `1` | durable terminal-freeze-pair key; no additional `abi.encode` inputs (ADR 0004 `[GOV-ACTION-ID]`) |
+| `TERMINAL_GUARDIAN_CONFIG_V1` | `6529STREAM_TERMINAL_GUARDIAN_CONFIG_V1` | 0x08d0b0fbace471ddf2e5f522c3621b3fdd92b1a17fce4c1effb39e5ad1d9243e | governance Executor | `1` | chain ID; Executor; RoleRegistry/code hash; global terminal-role chain/revision; ordered holder and distinct-scope commitment; distinct-scope count (ADR 0004 `[GOV-WINDOWS]`) |
+| `TERMINAL_GUARDIAN_SCOPE_V1` | `6529STREAM_TERMINAL_GUARDIAN_SCOPE_V1` | 0x077788610e4d141120fd85c2372b9673a8a4ac7633f4d79522bf19565809252a | governance Executor | `1` | prior guardian commitment; scope hash; derived scoped role; scoped role chain/revision (ADR 0004 `[GOV-WINDOWS]`) |
+| `INITIAL_TERMINAL_GUARDIAN_SET_V1` | `6529STREAM_INITIAL_TERMINAL_GUARDIAN_SET_V1` | 0x9ee586231c2f5d832b7ab74ebdf30550f7b6ac36ff7f5d4ceedebd713c364b99 | governance Executor | `1` | chain ID; Executor; RoleRegistry; strictly ascending guardian count/list; terminal-role chain/revision (ADR 0004 `[GOV-WINDOWS]`) |
+| `TERMINAL_GUARDIAN_HOLDER_V1` | `6529STREAM_TERMINAL_GUARDIAN_HOLDER_V1` | 0x6043687fb0254773308ed2f9a8d9a86c356d45779c952f0ffd71d8beaa5a57d8 | governance Executor | `1` | rolling global/scoped holder enumeration or bootstrap holder enumeration, each with index, holder, and runtime code hash (ADR 0004 `[GOV-WINDOWS]`) |
 | `STREAM_SYSTEM_MANIFEST_SCOPE_V1` | `6529STREAM_SYSTEM_MANIFEST_SCOPE_V1` | 0xf73b4d7b4d260fce0823707f836fdf29a1767a2a2a9cfbce14ec8c5e49e47841 | `StreamSystemManifest` | `1` | domain; chainid; systemManifest satellite ([LTA-MANIFEST-PUBLISH]) |
 | `STREAM_SYSTEM_MANIFEST_STATE_V1` | `6529STREAM_SYSTEM_MANIFEST_STATE_V1` | 0x3764ccb415d0aac07f1bddb8d4841ad6d4c2f9b2fe7ce7d221c586bc056aaf60 | `StreamSystemManifest` | `1` | domain; scopeHash; manifestHash; manifestURI hash; payloadPointer; moduleAddressesHash; discoveryHashesHash; append-only revision ([LTA-MANIFEST-PUBLISH]) |
 | `STREAM_DEPLOYMENT_IDENTITY_V1` | `6529STREAM_DEPLOYMENT_IDENTITY_V1` | 0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a | release tooling / module identity | `1` | domain; Keccak-256 of the RFC8785-JCS address-free deployment-identity view ([LTA-DEPLOYMENT-IDENTITY]) |
@@ -6595,6 +6677,7 @@ same CI recomputation before any gate consumes them.
 | `STREAM_EXPORT_EVENT_HISTORY_V1` | `6529STREAM_EXPORT_EVENT_HISTORY_V1` | 0xde2f44be2a232fbd4b086150b751c9483f78c1de4779a09d9d2acc84d4ac76ae | `STATE_EXPORT_V1` profile | `1` | domain; chainId; core; startBlock; endBlock; recordCount; `EventHistoryChunk[]` ([LTA-EVENT-HISTORY]) |
 | `GGP_FINALITY_COMPONENT_READ_GAS` | `6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS` | 0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221 | finality registry | `1` | `keccak256` of the string preimage; no `abi.encode` inputs ([LTA-GGP]; `_ID` suffix retired, ADR 0013 decision U9) |
 | `STREAM_MODULE_REGISTRATION_RECORD_V1` | `6529STREAM_MODULE_REGISTRATION_RECORD_V1` | 0x4b5b157069f454a5c1b78a95a28e2016af2d428d4eb4037917b271a668490869 | module registry | `1` | domain; module; moduleType; interfaceId; moduleVersion; runtimeCodeHash; deploymentManifestHash; moduleManifestHash ([LTA-REGISTRY] requirement 7) |
+| `STREAM_RECORD_CHAIN_V1` | `6529STREAM_RECORD_CHAIN_V1` | 0x0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa1609 | module registry and record-lane satellites | `1` | domain; prior chain; record hash; monotonic next count ([CMC-RECORD-CHAIN]; [LTA-REGISTRY-GOVERNANCE]) |
 | `STREAM_GUARDIAN_SCOPE_V1` | `6529STREAM_GUARDIAN_SCOPE_V1` | 0x411f2ec1515973db8ec5774ffd6b9e7fbcd8e9c0fb9ffc2b8de7eab7f4325433 | guardian module | `1` | domain; chainid; guardianModule; ascending unique `targets` address array ([LTA-GUARDIAN]) |
 | `STREAM_GUARDIAN_AUTHORIZATION_V1` | `6529STREAM_GUARDIAN_AUTHORIZATION_V1` | 0x1d7c055e54305625ad501d8d2766e4a0af244277f03ea3ce785360e63ef118fd | guardian module | `1` | domain; chainid; guardianModule; agent; capabilityMask; scopeHash; notAfter; maxUses; grantNonce ([LTA-GUARDIAN]) |
 

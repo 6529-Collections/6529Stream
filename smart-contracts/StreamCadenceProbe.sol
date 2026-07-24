@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamTimeParameterProbe.sol";
+import "./ERC165.sol";
 
 /// @notice Permanent-class cadence probe for Governed Time Parameters
 ///         ([LTA-GTP] definition item 6, under the [LTA-GGP-PROBES] rules).
@@ -24,7 +25,7 @@ import "./IStreamTimeParameterProbe.sol";
 ///         caller, and a candidate run demands a fresh finalized sample — so a
 ///         recordable failing run exists only when the candidate genuinely fails
 ///         to cover the pinned wall-clock floor at honestly observed cadence.
-contract StreamCadenceProbe is IStreamTimeParameterProbe {
+contract StreamCadenceProbe is IStreamTimeParameterProbe, ERC165 {
     /// @notice Schema version carried by every canonical probe-record event.
     uint16 public constant TIME_PARAMETER_PROBE_SCHEMA_VERSION = 1;
 
@@ -69,6 +70,13 @@ contract StreamCadenceProbe is IStreamTimeParameterProbe {
     PendingSample private _pendingSample;
     FinalizedSample private _latestSample;
     uint256 private _runNonce;
+
+    /// @notice Advertises the canonical cadence-probe read surface required by
+    ///         the module registry before a GTP host can bind this probe.
+    function supportsInterface(bytes4 interfaceId) public view override returns (bool) {
+        return interfaceId == type(IStreamTimeParameterProbe).interfaceId
+            || super.supportsInterface(interfaceId);
+    }
 
     /// @notice Diagnostic record of a finalized cadence observation.
     event CadenceSampleRecorded(

@@ -4,8 +4,8 @@ pragma solidity ^0.8.19;
 /// @notice Role-resolution registry for the ADR 0004 [GOV-ROLES] vocabulary.
 /// @dev Long-lived authorities are `bytes32` role references resolved through
 ///     this registry at call time, never raw stored addresses (ADR 0013
-///     decision U5). Root-class roles are granted and revoked only by
-///     `GovernanceRoot` (the registry owner); operational-class roles are also
+///     decision U5). Root-class roles are granted and revoked only by the
+///     permanently owning governance Executor; operational-class roles are also
 ///     grantable by registered role managers. Role-redundancy semantics for
 ///     the [GOV-WINDOWS] rule 2 emergency assumption are exposed as views so
 ///     conformance-matrix gates can verify them onchain.
@@ -30,13 +30,38 @@ interface IStreamRoleRegistry {
     error DisjointRoleConflict(bytes32 role, bytes32 conflictingRole, address holder);
     /// @notice Reverts when a holder enumeration index is out of bounds.
     error RoleHolderIndexOutOfBounds(bytes32 role, uint256 index);
+    /// @notice Reverts if a role's append-only mutation counter can no longer advance.
+    error RoleMutationRevisionOverflow(bytes32 role);
+    error InvalidGovernanceExecutor(address governanceExecutor);
+    error DirectRoleRegistryOwnershipMutationDisabled();
+    error TerminalFreezeVetoGuardianFloor(uint256 holderCount);
+    error TerminalFreezeVetoGuardianMustHaveCode(address holder);
+    error TerminalFreezeVetoGuardianDelegatedEOA(address holder);
+    error TerminalFreezeVetoGuardianCap(uint256 holderCount);
+    error GovernanceIdentityRoleOverlap(address account, bytes32 role);
+    /// @notice Reverts when an Executor-owned mutation is not the active
+    ///         target call of a Governance V2 batch.
+    error RoleGovernanceActionNotExecuting();
+    /// @notice Reverts when the active Executor context exposes no action id.
+    error RoleGovernanceActionIdZero();
+    /// @notice Reverts when an Executor-owned mutation is not delayed class 1.
+    error RoleGovernanceActionClassMismatch(uint8 expectedClass, uint8 actualClass);
+    /// @notice Reverts when the per-call role/config scope is not exact.
+    error RoleGovernanceScopeHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when the live pre-mutation role state is not committed.
+    error RoleGovernanceOldStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when the complete post-mutation role state is not committed.
+    error RoleGovernanceNewStateHashMismatch(bytes32 expectedHash, bytes32 actualHash);
+    /// @notice Reverts when a RoleManager configuration write changes nothing.
+    error RoleManagerConfigNoOp(address account, bool enabled);
 
     event StreamRoleGranted(
         uint16 schemaVersion,
         bytes32 indexed role,
         address indexed holder,
         uint8 grantClass,
-        address indexed actor
+        address actor,
+        bytes32 indexed actionId
     );
 
     event StreamRoleRevoked(
@@ -44,10 +69,39 @@ interface IStreamRoleRegistry {
         bytes32 indexed role,
         address indexed holder,
         uint8 grantClass,
-        address indexed actor
+        address actor,
+        bytes32 indexed actionId
     );
 
-    event RoleManagerUpdated(address indexed account, bool enabled, address indexed admin);
+    event RoleManagerUpdated(
+        uint16 schemaVersion,
+        address indexed account,
+        bool enabled,
+        address indexed admin,
+        bytes32 configChainHash,
+        uint64 configRevision,
+        bytes32 indexed actionId
+    );
+
+    /// @notice Emitted for every successful role-holder mutation.
+    /// @dev `roleChainHash` is scoped to `role`; `globalChainHash` commits to
+    ///      every grant/revoke across the registry. Both counters are
+    ///      monotonic, so a holder set that returns A -> B -> A remains
+    ///      distinguishable from the original A state.
+    event RoleMutationCommitted(
+        uint16 schemaVersion,
+        bytes32 indexed role,
+        address indexed holder,
+        bool granted,
+        bytes32 roleChainHash,
+        uint64 roleRevision,
+        bytes32 globalChainHash,
+        uint64 globalRevision,
+        bytes32 indexed actionId
+    );
+
+    /// @notice ERC-165 identity used by executor-first bootstrap binding.
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool);
 
     /// @notice Grants `role` to `holder` under the role's grant class rules.
     function grantRole(bytes32 role, address holder) external;
@@ -77,11 +131,36 @@ interface IStreamRoleRegistry {
     /// @notice Returns true when `account` currently holds `role`.
     function hasRole(bytes32 role, address account) external view returns (bool);
 
+    /// @notice Returns true when `account` holds the global terminal-veto role
+    ///         or any derived per-scope instance of it.
+    function hasAnyTerminalFreezeVetoRole(address account) external view returns (bool);
+
+    /// @notice Returns the exact number of global plus scoped terminal-veto
+    ///         memberships currently held by `account`.
+    function terminalFreezeVetoMembershipCount(address account) external view returns (uint256);
+
     /// @notice Returns the number of current holders of `role`.
     function roleHolderCount(bytes32 role) external view returns (uint256);
 
     /// @notice Returns the holder of `role` at `index` (unordered enumeration).
     function roleHolderAt(bytes32 role, uint256 index) external view returns (address);
+
+    /// @notice Returns the append-only mutation chain and revision for an
+    ///         exact role key. The role key may be either a base role or a
+    ///         derived scoped role returned by `scopedRole`.
+    function roleMutationState(bytes32 role)
+        external
+        view
+        returns (bytes32 chainHash, uint64 revision);
+
+    /// @notice Returns the append-only mutation state for a derived scoped role.
+    function scopedRoleMutationState(bytes32 baseRole, bytes32 scopeHash)
+        external
+        view
+        returns (bytes32 role, bytes32 chainHash, uint64 revision);
+
+    /// @notice Returns the append-only aggregate of every role grant/revoke.
+    function globalRoleMutationState() external view returns (bytes32 chainHash, uint64 revision);
 
     /// @notice Resolves `role` to its single current holder; reverts when the
     ///         role has zero or multiple holders.
@@ -98,15 +177,15 @@ interface IStreamRoleRegistry {
     /// @notice Returns true when `role` is in the pinned [GOV-ROLES] vocabulary.
     function isKnownRole(bytes32 role) external pure returns (bool);
 
-    /// @notice Returns the holder count and the count of holders with deployed
-    ///         code observed at call time, for [GOV-WINDOWS] rule 2 redundancy gates.
+    /// @notice Returns the holder count and the count of non-EIP-7702 holders
+    ///         with deployed code observed at call time, for [GOV-WINDOWS]
+    ///         rule 2 redundancy gates.
     /// @dev The contract-holder count is a necessary-but-insufficient onchain
     ///     proxy for redundancy: it cannot prove the holders are independently
-    ///     controlled, and a code-bearing account may be an EIP-7702 delegated
-    ///     EOA (code presence is a per-observation fact, [GOV-1271-CLASS]).
-    ///     True independent control and delegated-EOA exclusion are a
+    ///     controlled. The exact EIP-7702 designation is rejected on grant and
+    ///     excluded if observed later, while true independent control remains a
     ///     ceremony/off-chain governance obligation ([GOV-MATERIAL];
-    ///     [LTA-GUARDIAN] rule 8), verified at the deployment gate, not here.
+    ///     [LTA-GUARDIAN] rule 8).
     function roleRedundancy(bytes32 role)
         external
         view
@@ -115,14 +194,31 @@ interface IStreamRoleRegistry {
     /// @notice Returns true when `role` satisfies the onchain proxy for the
     ///         [GOV-WINDOWS] rule 2 emergency-holder floor: at least two
     ///         holders, all of which expose deployed code at observation time
-    ///         (no single-signer EOA).
+    ///         and none of which carries the exact EIP-7702 delegation
+    ///         designation.
     /// @dev Necessary but not sufficient. This gate cannot establish that the
-    ///     holders are independently controlled or that a code-bearing holder
-    ///     is not an EIP-7702 delegated EOA; those are ceremony/off-chain
-    ///     obligations ([GOV-MATERIAL]; [LTA-GUARDIAN] rule 8). A `true` result
-    ///     is a floor, not a proof of redundancy.
+    ///     holders are independently controlled; that remains a ceremony/
+    ///     off-chain obligation ([GOV-MATERIAL]; [LTA-GUARDIAN] rule 8). A
+    ///     `true` result is a floor, not a proof of redundancy.
     function isRoleRedundant(bytes32 role) external view returns (bool);
 
     /// @notice Returns true when `account` is a registered role manager.
     function isRoleManager(address account) external view returns (bool);
+
+    /// @notice Enables or disables an operational-role manager through the
+    ///         exact Governance V2 transition committed for `account`.
+    /// @dev Enablement is delayed class 1. Disabling an existing manager is
+    ///      immediate tightening class 0 and uses the account-scoped config
+    ///      chain so the manager cannot censor its own removal.
+    function registerRoleManager(address account, bool enabled) external;
+
+    /// @notice Returns the manager-address-scoped exact governance mutation
+    ///         chain and revision used to schedule manager enable/disable.
+    /// @dev This state is intentionally independent from manager-controlled
+    ///      operational-role and global audit mutations, so a compromised
+    ///      manager cannot stale its own root-initiated removal.
+    function roleManagerConfigMutationState(address account)
+        external
+        view
+        returns (bytes32 chainHash, uint64 revision);
 }

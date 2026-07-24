@@ -21,10 +21,16 @@ contract StreamGasParameterStore is StreamGasParameterHost {
     ///        (`IStreamGovernedParameterAuthority`), or address(0) for a store with
     ///        no governance — conditional paths remain live for `FORWARDING_CAP`
     ///        rows per [LTA-GGP] requirement 11.
+    /// @param core_ The immutable Core source of the live module-registry pointer.
+    /// @param genesisModuleRegistry_ The expected genesis registry committed into
+    ///        every constructor-time probe binding.
     /// @param configs The full parameter inventory hosted by this store.
-    constructor(address authority, GasParameterConfig[] memory configs)
-        StreamGasParameterHost(authority)
-    {
+    constructor(
+        address authority,
+        address core_,
+        address genesisModuleRegistry_,
+        GasParameterConfig[] memory configs
+    ) StreamGasParameterHost(authority, core_, genesisModuleRegistry_) {
         uint256 count = configs.length;
         for (uint256 i = 0; i < count;) {
             _registerGasParameter(configs[i]);

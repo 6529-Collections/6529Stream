@@ -102,6 +102,14 @@ def write_gate_tree(
 class DeploymentRehearsalGateTests(unittest.TestCase):
     """Regression coverage for rehearsal gate parity."""
 
+    def test_committed_foundry_job_has_rehearsal_timeout_headroom(self) -> None:
+        """The aggregate CI lane retains enough time for final rehearsals."""
+        repo_root = Path(__file__).resolve().parents[1]
+        workflow = (repo_root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        foundry_header = workflow.split("  foundry:", 1)[1].split("    steps:", 1)[0]
+
+        self.assertIn("timeout-minutes: 60", foundry_header)
+
     def test_accepts_committed_repo_wiring(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]
 

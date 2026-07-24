@@ -45,6 +45,8 @@ def minimal_risk_register(root: Path, source_path: Path, evidence_path: Path) ->
         risk_id = f"RISK-T{index:02d}-{index:03d}"
         if area == "audit_boundary":
             risk_id = "RISK-AUD-002"
+        elif area == "governance":
+            risk_id = generator.risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
         risks.append(
             {
                 "id": risk_id,

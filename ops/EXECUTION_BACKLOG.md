@@ -1003,6 +1003,37 @@ Evidence artifacts:
 
 Dependencies: `GOV-001`.
 
+### GOV-011: Implement Governance V2 And Bind The Production Cutover
+
+Status: Active PR #683 / issue #665 on branch
+`codex/governance-v2-foundation`; the source/test foundation is validated
+locally and under review, while deployment, action-policy, non-local rehearsal,
+and audit evidence remain open.
+
+Gate: C/E/F/G.
+
+Problem: the transitional governance layer does not yet provide one
+replay-complete, deployment-bound, closed-world authority model suitable for
+irreversible ownership cutover. Gas/time probe semantics and proposal-selected
+native-value authority also remain unsafe launch boundaries.
+
+Acceptance criteria:
+
+1. Governance V2 execution context, schedule classification, revision epochs,
+   terminal freeze, bootstrap inventory, role attribution, and target-side
+   transition rechecks are exact and adversarially tested.
+2. Production targets, selectors, and native-value permissions are constrained
+   by a reviewed closed-world action-policy catalog enforced on both sides of
+   the call boundary.
+3. Probe-dependent lower/rebind/emergency semantics are removed or replaced by
+   a reviewed raise-only gas/time policy that does not rely on forgeable warm
+   same-transaction success.
+4. Instance-aware deployment inputs, holder/bootstrap ceremonies, non-local
+   rehearsal, release-catalog/event/error/ABI evidence, and independent review
+   are retained before ownership cutover.
+5. Issue #665 and `RISK-GOV-003` remain open until those full cutover criteria
+   are met; a foundation PR alone is not production readiness.
+
 ### ADV-001: Add End-To-End Protocol State-Machine Harness
 
 Status: Merged in PR #371; issue #370 closed completed.
@@ -1785,9 +1816,9 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: Active issue #654 on branch `codex/finality-adapter-cutover`; the target
-lock is merged and the adapter cutover is pending local validation and
-publication.
+Status: Remaining work tracked under issue #654; the target lock merged in PR
+#663 and the zero-Core-delta adapter/caller cutover merged in PR #666. Measured
+net-negative Core retirement work remains.
 
 Gate: C/E/G.
 
@@ -1837,8 +1868,8 @@ blocks finality-registry pointer cutover from stranding old-registry plans.
 These close review gaps without claiming the target implementation or issue
 #654 is complete.
 
-PR #663 merged the machine-checked permanent target lock. The active
-zero-Core-delta cutover now implements `StreamCoreFinalityAdapter` and migrates
+PR #663 merged the machine-checked permanent target lock. PR #666 then merged
+the zero-Core-delta `StreamCoreFinalityAdapter` cutover and migrated
 the finality registry, preview, and tests away from the retired aggregate and
 facade seams. Discovery is mandatory; burn and freeze gates are read from the
 actual Core; collection supply and expected leaf counts remain `uint256`; and
@@ -1851,9 +1882,8 @@ This evidence does not make the system production- or audit-ready. The current
 Core lacks the granular target getters and target one-way freeze semantic, the
 current collection metadata contract lacks the target finality reads, and
 concrete discovery, sanction, and deployment candidates remain incomplete.
-After this cutover is reviewed and merged, issue #665 is the next planned slice
-for governance V2 and exact module-registry binding; measured net-negative Core
-cutover work remains required to complete #654.
+Issue #665 Governance V2 work is now active in `GOV-011`; measured net-negative
+Core cutover work remains required to complete #654.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -4017,7 +4047,7 @@ unless an external dependency changes.
 | `CON-014` | Add StreamMintManager phase policy and execution integration | C/G | Merged in PR #637; issue #636 closed completed |
 | `CON-015` | Add collection metadata and preservation record satellites | C/G | Merged in PR #639; issue #638 closed completed |
 | `CON-016` | Add mint gate interface and module registry foundation | C/G | Merged in PR #641; issue #640 closed completed |
-| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | Active issue #654 on branch `codex/finality-adapter-cutover`; target lock merged in PR #663, zero-Core-delta adapter/caller cutover pending local validation and publication, then governance V2 under #665 and measured net-negative Core slices |
+| `CON-017` | Lock the pre-genesis Core target and restore production headroom | C/E/G | In progress under issue #654; target lock merged in PR #663 and zero-Core-delta adapter/caller cutover merged in PR #666; measured net-negative Core retirement remains after the Governance V2 foundation |
 | `CON-003` | Add missing integration read views if `INT` docs identify gaps | D/G | Merged in PR #523; issue #522 closed completed |
 | `CON-004` | Complete security-relevant custom error documentation and assertions | C/D | Merged in PR #455; issue #454 closed completed |
 | `CON-005` | Recover additional `StreamCore` bytecode headroom before major features | E/G | Merged in PR #479; issue #478 closed completed; the policy gate enforces reviewed Core bytecode-spend exceptions after measured no-gain/negative-gain refactor attempts, with prior size reports in issues #430 and #432 |
@@ -4063,6 +4093,7 @@ unless an external dependency changes.
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | Merged in PR #517; issue #516 closed completed |
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
+| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | Active PR #683 / issue #665 on branch `codex/governance-v2-foundation`; foundation source/tests are locally green, but raise-only gas/time policy, closed-world action catalog, deployment/rehearsal evidence, and independent review remain |
 
 ### Integration Readiness
 
@@ -4084,7 +4115,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for all 38 open first-party production Slither High/Medium findings while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; issue #658 remains an independent blocker and all 38 rows remain Open: one confirmed gap, six design-review rows, and 31 pending dispositions |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture has 33 Open rows under issue #658: one confirmed gap, five design-review rows, and 27 pending dispositions. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issues #658 and #665 remain blockers |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |

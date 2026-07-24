@@ -843,9 +843,12 @@ waivable public-beta rows, requires completed external-audit evidence and every
 production evidence row, and requires public-beta readiness before production
 release readiness. Both phases validate the canonical normalized
 `ops/SLITHER_BASELINE.json` plus its checked Markdown mirror and reject any
-first-party production High/Medium row that remains Open. The current 38-row
+first-party production High/Medium row that remains Open. The current 33-row
 set is a non-waivable technical blocker under issue #658; exact analyzer drift
-parity is not acceptance. Production mode then reads the checksum-covered
+parity is not acceptance. Release mode also fails closed on the separately
+tracked High Governance Executor native-value authority in `RISK-GOV-003`,
+which bounded assembly makes invisible to Slither. Production mode then reads
+the checksum-covered
 `release-artifacts/latest/abi-checksums.json` measurement, rejects missing,
 malformed, boolean-as-integer, or arithmetically inconsistent `StreamCore` size
 fields, and requires at least 2,000 bytes of EIP-170 runtime headroom. That
@@ -1697,12 +1700,17 @@ toolchain. That target invokes `scripts/check_slither_baseline.py --run-slither`
 and fails when the live normalized first-party High/Medium set adds a new row or
 leaves a tracked row stale.
 
-The current checked baseline has 38 open findings: 4 High and 34 Medium. The
+The current checked baseline has 33 open findings: 3 High and 30 Medium. The
 compact normalized JSON lives at
 [`ops/SLITHER_BASELINE.json`](../ops/SLITHER_BASELINE.json), with reviewer-facing
 classifications, rationales, and open proof requirements in
-[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The approximately
-128 MB raw Slither JSON is temporary analyzer output and is never committed.
+[`ops/SLITHER_BASELINE.md`](../ops/SLITHER_BASELINE.md). The unfiltered capture
+at source commit `c0be71915bc650569940b249fa9e5c801c0587fc` on
+`2026-07-23T23:52:41Z` records 3,143 findings: 47 High, 840 Medium, 1,208 Low,
+1,008 Informational, and 40 Optimization. Its High/Medium scope totals are
+first-party production `3/30/33`, vendored `1/9/10`, test `43/794/837`, script
+`0/7/7`, and other `0/0/0`. Raw Slither JSON is temporary analyzer output and
+is never committed.
 After a production-source edit intentionally stales the strict provenance hash,
 use the diagnostic `--candidate-slither-json` plus `--candidate-output` mode to
 materialize semantic identities and scope counts in an OS temporary directory

@@ -41,7 +41,7 @@ contract StreamForwardingCapProbe is StreamGasProbe {
     constructor(string memory parameterName, address target, bytes memory callData)
         StreamGasProbe(parameterName)
     {
-        if (target == address(0) || target.code.length == 0) {
+        if (target == address(0) || target.code.length == 0 || _isEip7702DelegatedEOA(target)) {
             revert StreamGasProbeInvalidScenario();
         }
         scenarioTarget = target;
@@ -78,5 +78,17 @@ contract StreamForwardingCapProbe is StreamGasProbe {
                 keccak256(returndata)
             )
         );
+    }
+
+    /// @dev A delegated EOA can execute a contract's code today but can clear or
+    ///      replace that delegation later, so it cannot be a pinned scenario.
+    function _isEip7702DelegatedEOA(address account) private view returns (bool delegated) {
+        if (account.code.length != 23) return false;
+        bytes3 prefix;
+        assembly ("memory-safe") {
+            extcodecopy(account, 0, 0, 3)
+            prefix := mload(0)
+        }
+        return prefix == 0xef0100;
     }
 }

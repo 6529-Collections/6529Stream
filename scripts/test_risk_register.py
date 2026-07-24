@@ -12,6 +12,7 @@ from io import StringIO
 from pathlib import Path
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 CHECKER_PATH = Path(__file__).with_name("check_risk_register.py")
 CHECKER_SPEC = importlib.util.spec_from_file_location("check_risk_register", CHECKER_PATH)
 assert CHECKER_SPEC is not None and CHECKER_SPEC.loader is not None
@@ -59,6 +60,8 @@ def minimal_register(root: Path) -> dict[str, object]:
         risk_id = f"RISK-T{index:02d}-{index:03d}"
         if area == "audit_boundary":
             risk_id = "RISK-AUD-002"
+        elif area == "governance":
+            risk_id = checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
         risks.append(
             {
                 "id": risk_id,
@@ -142,6 +145,77 @@ class RiskRegisterTests(unittest.TestCase):
                 checker.RiskRegisterError, "RISK-AUD-002|audit_boundary"
             ):
                 checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_rejects_missing_governance_native_value_risk(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            register["risks"] = [
+                risk
+                for risk in register["risks"]
+                if risk["id"] != checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
+            ]
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(
+                checker.RiskRegisterError,
+                checker.GOVERNANCE_NATIVE_VALUE_RISK_ID,
+            ):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_governance_native_value_risk_must_remain_open(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            risk = next(
+                risk
+                for risk in register["risks"]
+                if risk["id"] == checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
+            )
+            risk["status"] = "mitigated_local"
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(
+                checker.RiskRegisterError,
+                "RISK-GOV-003.status must remain 'open_blocker'",
+            ):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_generator_preserves_governance_native_value_semantic_anchor(self) -> None:
+        risk = next(
+            risk
+            for risk in generator.RISK_DEFINITIONS
+            if risk["id"] == checker.GOVERNANCE_NATIVE_VALUE_RISK_ID
+        )
+
+        self.assertEqual(risk["severity"], "high")
+        self.assertEqual(risk["status"], "open_blocker")
+        self.assertIn(
+            "sha256:c1b7db0f62e7ff01758e147d41188f1d33ea9a448efb0162d98b14e3ef11cbe8",
+            risk["source"],
+        )
+        self.assertIn(
+            "StreamGovernanceExecutor._executeCall(bytes32,uint256,GovernanceCall,bytes) "
+            "assembly call",
+            risk["source"],
+        )
+        self.assertEqual(
+            risk["tracking"],
+            [
+                "https://github.com/6529-Collections/6529Stream/issues/658",
+                "https://github.com/6529-Collections/6529Stream/issues/665",
+            ],
+        )
+
+    def test_generator_derives_slither_inventory_from_validated_baseline(self) -> None:
+        register = generator.build_register(REPO_ROOT)
+        risk = next(
+            risk
+            for risk in register["risks"]
+            if risk["id"] == generator.SLITHER_RISK_ID
+        )
+
+        self.assertIn("3 High and 30 Medium open", risk["residual_risk"])
 
     def test_rejects_duplicate_risk_ids(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

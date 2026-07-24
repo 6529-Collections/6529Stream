@@ -188,6 +188,164 @@ The governance root can:
 The governance root should not be used for routine mint, metadata, auction, or
 randomness operations.
 
+### Control-Plane Scheduling Boundary
+
+After seal, a registered proposer may schedule ordinary governed target calls;
+registration does not delegate `GovernanceRoot` authority over governance's own
+control plane. The Executor scans every call descriptor at scheduling and again
+at execution. The stored proposer must equal the live governance root for every
+Executor self-call and every call to the permanently owned RoleRegistry. The
+only self-call exception is the exact pre-seal bootstrap seal proposed by
+`genesisBootstrapAuthority`; that exception disappears permanently at seal.
+Changing the root after scheduling therefore invalidates every still-pending
+control-plane action proposed by the former root.
+
+The root-only Executor selectors are `rotateGovernanceRoot`,
+`registerProposer`, `registerCanceller`, `setTighteningCall`,
+`registerFreezeSelector`, `setApprovedNativeReceiver`,
+`registerEmergencyRestorationEligibility`, and
+`registerSystemManifestTailTrigger`. Every Executor-mediated RoleRegistry call
+is also root-only. Ordinary role mutations and manager enablement use
+`DELAYED_LOOSENING` (`1`). The sole immediate exception is
+`registerRoleManager(account, false)`: the Executor canonically decodes that
+exact target/selector/value/calldata at scheduling and execution and requires
+`IMMEDIATE_TIGHTENING` (`0`). Manager enablement through the same selector
+remains class `1`; no other RoleRegistry selector enters the immediate,
+terminal-freeze, emergency-restoration, or manifest-tail classifier lanes. A
+registered `RoleManager` may still call the RoleRegistry directly for
+operational-class grants and revocations; it cannot mutate root or scoped
+terminal-veto roles or any manager-config chain.
+
+Every RoleRegistry mutation originating from its permanently owning Executor
+also enforces the exact Governance V2 per-call context target-side. The action
+ID is nonzero, the class is the transition-specific class above, and the scope
+is:
+
+```solidity
+keccak256(abi.encode(
+    STREAM_ROLE_MUTATION_SCOPE_V1,
+    block.chainid,
+    address(roleRegistry),
+    roleKey,
+    holder
+))
+```
+
+The old and new commitments are respectively:
+
+```solidity
+keccak256(abi.encode(
+    STREAM_ROLE_MUTATION_STATE_V1,
+    block.chainid,
+    address(roleRegistry),
+    scopeHash,
+    granted,
+    roleMutationChain,
+    roleMutationRevision,
+    globalRoleMutationChain,
+    globalRoleMutationRevision
+))
+```
+
+The new commitment uses the post-write membership, both incremented `uint64`
+revisions, and both next chain hashes. Direct operational-manager grants and
+revocations use the same append-only audit chains, so an intervening manager
+write invalidates a stale scheduled ordinary role transition.
+
+The per-role next chain is:
+
+```solidity
+keccak256(abi.encode(
+    STREAM_ROLE_MUTATION_V1,
+    priorRoleMutationChain,
+    block.chainid,
+    address(roleRegistry),
+    roleKey,
+    holder,
+    newGranted,
+    nextRoleMutationRevision
+))
+```
+
+The global next chain is:
+
+```solidity
+keccak256(abi.encode(
+    STREAM_GLOBAL_ROLE_MUTATION_V1,
+    priorGlobalRoleMutationChain,
+    block.chainid,
+    address(roleRegistry),
+    roleKey,
+    holder,
+    newGranted,
+    nextGlobalRoleMutationRevision
+))
+```
+
+Manager configuration has a separate liveness-safe commitment. The closed
+internal role key remains `keccak256("6529STREAM_ROLE_MANAGER_CONFIG_V1")`, but
+each manager address has its own chain and revision, exposed by
+`roleManagerConfigMutationState(account)`. The exact state is:
+
+`registerRoleManager(address,bool)` and that account-scoped getter are both
+part of the canonical `IStreamRoleRegistry` ERC-165 surface. The complete
+pre-genesis interface ID is `0xd77ee305`; omitting the writer from an otherwise
+successful interface probe is nonconformant.
+
+```solidity
+keccak256(abi.encode(
+    STREAM_ROLE_MANAGER_CONFIG_STATE_V1,
+    block.chainid,
+    address(roleRegistry),
+    scopeHash,
+    enabled,
+    accountConfigChain,
+    accountConfigRevision
+))
+```
+
+Its next chain is:
+
+```solidity
+keccak256(abi.encode(
+    STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1,
+    priorAccountConfigChain,
+    block.chainid,
+    address(roleRegistry),
+    account,
+    newEnabled,
+    nextAccountConfigRevision
+))
+```
+
+The target updates that address-scoped chain and then appends the same mutation
+to the shared pseudo-role/global audit chains. Those audit chains remain a
+complete execution-ordered history but are deliberately excluded from the
+pre-scheduled manager-config state: otherwise a compromised manager could
+front-run every removal with a cheap operational grant/revoke and censor its
+own revocation forever. Independent address-scoped chains also let the root
+disable multiple compromised managers in any order. Roles previously granted
+by those managers persist; incident response disables every compromised
+manager first, then executes the ordinary delayed role cleanup after the
+manager-controlled mutation surface is gone. No-op manager writes reject.
+
+The only non-executing owner exception is the initial
+`ROLE_TERMINAL_FREEZE_VETO` population inside the one-way bootstrap bind, while
+the Executor reports this exact registry but `bound == false` and
+`sealed == false`. That exception is unreachable once bind returns.
+
+The seven exact domains are:
+
+| Domain | Preimage | Value |
+| --- | --- | --- |
+| `STREAM_ROLE_MUTATION_V1` | `6529STREAM_ROLE_MUTATION_V1` | `0xa8dba5d6fcfd6e5b3cd0487118fc42e1d598c9ba0fb59aefad69b419212bc91e` |
+| `STREAM_GLOBAL_ROLE_MUTATION_V1` | `6529STREAM_GLOBAL_ROLE_MUTATION_V1` | `0x2da8f94be4b1e85c976aae097d48589ff562492679ebc2842c866ba5b986d39c` |
+| `STREAM_ROLE_MUTATION_SCOPE_V1` | `6529STREAM_ROLE_MUTATION_SCOPE_V1` | `0x51943e9f337cf7f50fc89b1f37701a670f4477d8d6e3efbd34d986b27f35d271` |
+| `STREAM_ROLE_MUTATION_STATE_V1` | `6529STREAM_ROLE_MUTATION_STATE_V1` | `0xf80e0ae6730f5e4e48b5a6c1b46bfb06af297aefb0eaa569f87f095a7f99153d` |
+| `STREAM_ROLE_MANAGER_CONFIG_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_V1` | `0x6b7160b8472382fb5a6b7cad94720fd10007c4124b0b0d405aa6523763ad0fe7` |
+| `STREAM_ROLE_MANAGER_CONFIG_STATE_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_STATE_V1` | `0x00ef486fa9550ecdc9851c2df1073c1c991e7d56e6a0d388357ba5f5a89c4263` |
+| `STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1` | `6529STREAM_ROLE_MANAGER_CONFIG_MUTATION_V1` | `0xbd1ca24b4e56b656dee2d7ca30433716550c54ab67aab3e6b9eba46ac0ff79d6` |
+
 ### Function Admins
 
 Function-admin grants must be keyed by:
@@ -663,8 +821,10 @@ function materializeExpiredAction(bytes32 actionId) external;
 
 `EXPIRED` may be materialized by a state-changing cleanup call or returned
 virtually by the read when `status == SCHEDULED && block.timestamp >
-expiresAfter`. Expired actions cannot execute. They must be cancelled or
-rescheduled with a new nonce and new action ID.
+expiresAfter`. Expired actions cannot execute. They must be materialized or
+rescheduled with a new nonce and new action ID. Cancellation is intentionally
+closed after `expiresAfter`: an expired action remains virtually `EXPIRED`
+until permissionless materialization and cannot be rewritten to `CANCELLED`.
 
 ### Normative Homes (Current)
 
@@ -919,9 +1079,9 @@ payload, runtime code whose first byte is not `0x00`, and
 approved-native-receiver case; it is not an empty publication. It stores one immutable
 pointer at `publishedCallData[callDataKey]`; republishing byte-identical content
 is idempotent and returns the existing pointer. A new publication emits
-`GovernanceCallDataPublished(bytes32 indexed callDataKey, address pointer,
-address publisher)`, topic
-`0x4ac1b161ad3fa578344338460c39347b0ca6f7690548acc6d22d3b4ea81c059f`.
+schema-v1 `GovernanceCallDataPublished(uint16 schemaVersion, bytes32 indexed
+callDataKey, address pointer, address publisher)`, topic
+`0x5922e6285b4b955740f916aa25accf8dcd9f75131e4bde259347d27adfaf1cce`.
 
 `scheduleGovernanceBatch` does not accept a second copy of `callDatas`. It
 derives `callDataKey` from the ordered descriptors, requires the pointer to
@@ -938,6 +1098,141 @@ one-call descriptor, producing the byte-identical V2 action ID. Execution
 repeats pointer format, decode, hash, selector, and descriptor checks before
 the first target call; the supplied execution bytes must equal the scheduled
 content, not merely collide at an action-level composite.
+
+#### Executor Control-Plane Commitments
+
+Executor self-configuration is never classified by a mutable selector-wide
+registry. Scheduling and execution both decode the exact canonical ABI for the
+five self-configuration selectors, require zero call value, and require an
+isolated one-call batch proposed by the live governance root. Non-canonical
+address, `bool`, or `bytes4` words reject. The two selector-pair registries
+also reject `target == address(executor)`, because neither mutable registry may
+classify the Executor's own hard-coded control plane.
+
+The address-keyed configuration scope and state are:
+
+```solidity
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_CONFIG_SCOPE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    configKind,
+    key
+));
+
+bytes32 stateHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_CONFIG_STATE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    configKind,
+    key,
+    enabled,
+    uint64(revision)
+));
+```
+
+The selector-keyed variants append `bytes4 selector` to the scope and append
+`bytes4 selector, bool enabled, bytes32 targetCodeHash, uint64 revision` after
+`target` in the state. Enabling a selector-keyed rule records the target's
+current nonzero runtime code hash; disabling requires that recorded hash still
+match and stores zero. Every successful mutation increments its exact-key
+`uint64` revision, rejects overflow and no-op writes, and requires the per-call
+old/new commitments to use the pre/post values exactly.
+
+| Selector | `configKind` preimage | `true` class | `false` class |
+| --- | --- | --- | --- |
+| `registerProposer(address,bool)` | `6529STREAM_GOVERNANCE_CONFIG_PROPOSER` | `DELAYED_LOOSENING` (`1`) | `IMMEDIATE_TIGHTENING` (`0`) |
+| `registerCanceller(address,bool)` | `6529STREAM_GOVERNANCE_CONFIG_CANCELLER` | `IMMEDIATE_TIGHTENING` (`0`) | `DELAYED_LOOSENING` (`1`) |
+| `setApprovedNativeReceiver(address,bool)` | `6529STREAM_GOVERNANCE_CONFIG_NATIVE_RECEIVER` | `DELAYED_LOOSENING` (`1`) | `IMMEDIATE_TIGHTENING` (`0`) |
+| `setTighteningCall(address,bytes4,bool)` | `6529STREAM_GOVERNANCE_CONFIG_TIGHTENING_CALL` | `DELAYED_LOOSENING` (`1`) | `IMMEDIATE_TIGHTENING` (`0`) |
+| `registerFreezeSelector(address,bytes4,bool)` | `6529STREAM_GOVERNANCE_CONFIG_FREEZE_SELECTOR` | `IMMEDIATE_TIGHTENING` (`0`) | `DELAYED_LOOSENING` (`1`) |
+
+Governance-root rotation is an isolated `POINTER_REPLACEMENT` (`3`) self-call.
+Scheduling and execution both require zero call value, exactly 68 calldata
+bytes for `rotateGovernanceRoot(address,bytes32)`, a canonical nonzero address
+word, and a nonzero expected code hash. Trailing calldata, a noncanonical
+address word, any other class, or a multi-call batch rejects before an action
+is recorded. Its exact scope and state are:
+
+```solidity
+bytes32 scopeHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_ROOT_SCOPE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor)
+));
+
+bytes32 stateHash = keccak256(abi.encode(
+    STREAM_GOVERNANCE_ROOT_STATE_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    governanceRoot,
+    governanceRootCodeHash,
+    uint64(revision)
+));
+```
+
+The root runtime code hash is rechecked on every sealed schedule and execution.
+A root rotation increments the revision, rejects a no-op or invalid holder,
+and every Executor/RoleRegistry control-plane action snapshots the nonzero root
+revision at schedule time. Execution requires both the live root address and
+that exact revision, so an address rotation `A -> B -> A` cannot revive an
+action queued under the first `A` epoch. The expected revision reconstructs
+from the action-schedule and root-rotation event streams.
+
+Every action scheduled by a registered non-root proposer likewise snapshots
+that proposer's nonzero configuration revision. Disabling the proposer or a
+disable/re-enable address ABA permanently invalidates the queued action at
+execution; governance-root and bootstrap actions use their separate authority
+rules. A registered canceller may cancel ordinary queued actions, but cannot
+cancel an isolated `registerCanceller(account,false)` removal unless it is also
+the live root or that action's proposer. Thus a compromised canceller cannot
+entrench itself across the delayed-removal window.
+
+The exact domain and durable configuration-key values are:
+
+| Constant | String preimage | Value |
+| --- | --- | --- |
+| `STREAM_GOVERNANCE_CONFIG_SCOPE_V1` | `6529STREAM_GOVERNANCE_CONFIG_SCOPE_V1` | `0x3c84722ce639aca105835269de227cc0ffea495f13383068c46ec2e7aae88016` |
+| `STREAM_GOVERNANCE_CONFIG_STATE_V1` | `6529STREAM_GOVERNANCE_CONFIG_STATE_V1` | `0x05000ed56f03029aee74f99fd9d1a7319ad482fa3148ae863053ea955d1e9a4b` |
+| `STREAM_GOVERNANCE_ROOT_SCOPE_V1` | `6529STREAM_GOVERNANCE_ROOT_SCOPE_V1` | `0x6aadc831e79f225350483abeae2839b877650539b2bbb4a19c70ade78ea2e42c` |
+| `STREAM_GOVERNANCE_ROOT_STATE_V1` | `6529STREAM_GOVERNANCE_ROOT_STATE_V1` | `0xd9975385cd3dcefe66cfc6e447a2c92f84d20f043e1198e1b6f5c65be5805d90` |
+| `GOVERNANCE_CONFIG_PROPOSER` | `6529STREAM_GOVERNANCE_CONFIG_PROPOSER` | `0x3159801de288c136cc45c5fbc40879c4e5a4c7bba9806400495d2120cd681905` |
+| `GOVERNANCE_CONFIG_CANCELLER` | `6529STREAM_GOVERNANCE_CONFIG_CANCELLER` | `0x334c6d45b3bad249a3f870b97f4a79b845676c102c028972e94f21b49628217b` |
+| `GOVERNANCE_CONFIG_NATIVE_RECEIVER` | `6529STREAM_GOVERNANCE_CONFIG_NATIVE_RECEIVER` | `0x19222bb517f28c7f9a05615c9b0fac13b5258c5b61fcaec4605f5b56aa239cf4` |
+| `GOVERNANCE_CONFIG_TIGHTENING_CALL` | `6529STREAM_GOVERNANCE_CONFIG_TIGHTENING_CALL` | `0xc3f9be103fb546fd998001a0d6447e98378926dd86bc995bb06019fd4eac50cf` |
+| `GOVERNANCE_CONFIG_FREEZE_SELECTOR` | `6529STREAM_GOVERNANCE_CONFIG_FREEZE_SELECTOR` | `0x034b6f0b02fadd47ce4775cbf1d72a3b570a62a973efcec85059bf135bf5da91` |
+
+These configuration keys are durable permission identifiers, not replaceable
+display labels. The machine governance action-policy catalog required by
+[GOV-WINDOWS] must carry these exact rows and must also cover every downstream
+protected selector before any downstream ownership is transferred to the
+Executor. Until that closed-world catalog, target enforcement, deployment
+checker, and release evidence exist, Governance V2 foundation code does not
+satisfy [GOV-V2-CUTOVER] and no production ownership cutover is permitted.
+
+The security-critical Governance V2 error ABI added by this foundation is
+exact:
+
+| Error signature | Selector |
+| --- | --- |
+| `GovernanceRootProposerRequired(address,address,address,bytes4)` | `0x572c5e0b` |
+| `RoleRegistryDelayedActionRequired(uint8)` | `0x5e6cae4c` |
+| `InvalidExecutorConfigCall(address,bytes4)` | `0x988f5a6d` |
+| `ExecutorConfigActionClassMismatch(address,bytes4,bool,uint8,uint8)` | `0x53eb2651` |
+| `ExecutorControlActionClassMismatch(address,bytes4,uint8,uint8)` | `0x25f6871f` |
+| `GovernanceSelfCallContextRequired()` | `0xd13ef67d` |
+| `GovernanceRootRevisionMismatch(bytes32,uint64,uint64)` | `0xfdd2ef9e` |
+| `GovernanceProposerAuthorizationDrift(bytes32,address,uint64,uint64,bool)` | `0x18cd5aee` |
+| `TighteningCallSelfTargetForbidden(bytes4)` | `0x67bbddf4` |
+| `FreezeSelectorSelfTargetForbidden(bytes4)` | `0x500fc8d8` |
+| `GovernanceCallReturndataTooLarge(bytes32,uint256,uint256,uint256)` | `0x29111b54` |
+| `GovernanceActionExpiredWindow(bytes32,uint64)` | `0xc797754c` |
+| `TerminalFreezeGuardianConfigDrift(bytes32,bytes32,bytes32)` | `0x3ef646fd` |
+| `TerminalFreezeLiveActionCapExceeded(bytes32,uint256)` | `0xed1b395d` |
+| `TerminalFreezeNonRootLiveActionCapExceeded(bytes32,uint256)` | `0x441113a4` |
+| `TerminalFreezeProposerLiveActionCapExceeded(bytes32,address,uint256)` | `0xea2c035f` |
+| `TerminalFreezePageCursorOutOfBounds(bytes32,uint256,uint256)` | `0x204cb92b` |
+| `TerminalFreezePageLimitExceeded(uint256,uint256)` | `0x83beaacb` |
 
 Batch rules [GOV-BATCH]:
 
@@ -957,6 +1252,12 @@ Batch rules [GOV-BATCH]:
    wei forwarded to that call, execution requires
    `msg.value == sum(calls[].value)`, and any refunded surplus reverts the
    batch rather than stranding in the governance contract.
+   The executor requests no output bytes from a successful governed call and
+   ignores its returndata. On failure it bubbles at most 4,096 bytes; a larger
+   revert payload fails with
+   `GovernanceCallReturndataTooLarge(bytes32,uint256,uint256,uint256)` rather
+   than allocating attacker-selected memory. Ordinary bounded revert data is
+   preserved exactly.
 3. The single-call `GovernanceAction` storage shape remains valid: it
    stores `callsHash` in `callHash` for batches, and the stored
    `target`/`selector` are those of the first call for indexing.
@@ -1255,6 +1556,10 @@ struct SystemManifestBootstrapTriggerExpectation {
 }
 
 struct SystemManifestBootstrapBinding {
+    address roleRegistry;
+    address governanceRoot;
+    bytes32 governanceRootCodeHash;
+    address[] initialTerminalFreezeVetoGuardians;
     address core;
     address systemManifestSatellite;
     bytes32 expectedManifestHash;
@@ -1276,7 +1581,16 @@ function systemManifestBootstrapState()
     view
     returns (
         bool bound,
-        bool sealed,
+        bool isSealed,
+        address roleRegistry,
+        bytes32 roleRegistryCodeHash,
+        address governanceRoot,
+        bytes32 governanceRootCodeHash,
+        uint64 governanceRootRevision,
+        bytes32 initialGuardianSetHash,
+        uint256 initialGuardianCount,
+        bytes32 terminalFreezeVetoMutationChain,
+        uint64 terminalFreezeVetoMutationRevision,
         address core,
         bytes32 coreCodeHash,
         address systemManifestSatellite,
@@ -1315,16 +1629,24 @@ event SystemManifestBootstrapBound(
     bytes32 expectedInventoryStateRoot,
     bytes32 expectedTriggerSetHash,
     uint256 triggerCount,
-    address genesisBootstrapAuthority
+    address genesisBootstrapAuthority,
+    address roleRegistry,
+    bytes32 roleRegistryCodeHash,
+    address governanceRoot,
+    bytes32 governanceRootCodeHash,
+    bytes32 initialGuardianSetHash,
+    uint256 initialGuardianCount,
+    bytes32 terminalFreezeVetoMutationChain,
+    uint64 terminalFreezeVetoMutationRevision
 );
 ```
 
-The bind, pending-count, state, and seal selectors are `0x6528ac7f`,
+The bind, pending-count, state, and seal selectors are `0x32212927`,
 `0x20662991`, `0x8a2d979b`, and `0xbd1f39cd`, respectively.
 The bind event topic is
-`0xa8c56f141d0cb94dcbf4cff03abdcda92d641351e75e365a198ac13ab6855ce0`
+`0x0af9f59ce766b6c1564dcbc54493155eaac34589421982b2521a49b0fd056a44`
 for
-`SystemManifestBootstrapBound(uint16,address,address,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,address)`;
+`SystemManifestBootstrapBound(uint16,address,address,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,address,address,bytes32,address,bytes32,bytes32,uint256,bytes32,uint64)`;
 schema version is `1`, and Core, satellite, and expected manifest hash are
 indexed. The seal event topic is
 `0xf8424a276e804e284aa6e3c67ceb87c4c23caff3164e0666e558d34893b13cf9`
@@ -1356,9 +1678,17 @@ the observed Core and satellite `extcodehash` values and never accepts caller-
 supplied expected code hashes for either contract.
 
 The trigger array is bounded by
-`MAX_GENESIS_MANIFEST_TAIL_TRIGGERS = 128`; it and the pointer/registry arrays
-must be nonempty, strictly ascending in their canonical orders, and duplicate-
-free. Every supplied trigger has a nonzero target/selector, an
+`MAX_GENESIS_MANIFEST_TAIL_TRIGGERS = 128`. The independent launch-inventory
+bounds are `MAX_STRICT_POINTERS = 32`, `MAX_STRICT_REGISTRIES = 8`,
+`MAX_STRICT_REGISTRY_MODULES = 128`, and
+`MAX_STRICT_INVENTORY_LEAVES = 80`; the total includes pointers, registry
+headers, and registry modules. The pointer/registry arrays must be nonempty,
+strictly ascending in their canonical orders, duplicate-free, and the pointer
+list must contain the exact `SYSTEM_MANIFEST` pointer type. The expected leaf
+count cannot exceed
+`pointerCount + registryCount + 128 * registryCount`, so the irreversible bind
+cannot commit to a state that its listed registries can never reach. Every
+supplied trigger has a nonzero target/selector, an
 observed live code hash equal to its supplied trigger code hash, and a valid
 nonzero class mask within `0x0f`. In the same transaction the bind appends every
 record to the normal trigger array/mapping, computes every record/chain step,
@@ -1376,14 +1706,26 @@ The executor rechecks the recorded Core/satellite code hashes on every
 bootstrap-scoped schedule and execution and on seal.
 
 The executor can enforce order, bounds, live code hashes, masks, and equality
-to the irreversibly bound set; it cannot know the external 60-entry release
+to the irreversibly bound set; it cannot know the external 60-module release
 profile from constructor state. Checksum-covered release tooling and deployment
 conformance—not the bind—prove that the supplied trigger and pointer/registry
 lists are complete against the normative profile/spec. The implementation gate
 measures the full-profile bind, including all trigger SSTOREs and hashing, under
-the deployment block-gas envelope and retains margin; the 128-row bound is also
-gas-tested. A prose estimate or target JSON fixture is not measured bind-gas
-evidence.
+the deployment block-gas envelope and retains margin. The current
+pre-integration fixture separately measures a cold-state shape corresponding to
+the 72-leaf launch inventory (11 pointers, one registry header, and 60 modules)
+at 17,650,763 gas, plus adversarial 80-leaf boundary shapes with maximum-size
+canonical URIs. The module-heavy boundary is the worst measured fixture shape
+at 20,868,946 gas, below the fixed 24,000,000-gas execute-only ceiling. These
+measurements use bounded Registry and SystemManifest mocks and therefore are
+not production-runtime gas evidence. The production gate must repeat the cold
+rehearsal against Registry V2 and the real `StreamSystemManifest`, including an
+actual population-to-80 and successful seal. A warm same-test call is not
+seal-gas evidence. The execute-only ceiling preserves the remaining deployment
+block envelope for transaction intrinsic gas, calldata, and ceremony overhead.
+The 80-leaf total is a launch envelope chosen to retain block-gas margin, not a
+claim about theoretical lifetime registry capacity. A prose estimate or target
+JSON fixture is not measured bind/seal-gas evidence.
 
 This ordering has no CREATE2 fixed point. Executor initcode contains no value
 derived from an executor-bound deployment; downstream addresses and runtime
@@ -1422,6 +1764,15 @@ bytes32 bootstrapStateHash = keccak256(abi.encode(
     bootstrapScopeHash,
     bound,
     sealed,
+    roleRegistry,
+    roleRegistryCodeHash,
+    governanceRoot,
+    governanceRootCodeHash,
+    uint64(governanceRootRevision),
+    initialGuardianSetHash,
+    initialGuardianCount,
+    terminalFreezeVetoMutationChain,
+    uint64(terminalFreezeVetoMutationRevision),
     core,
     coreCodeHash,
     systemManifestSatellite,
@@ -1444,8 +1795,9 @@ The one-way bind stores the complete nonempty ascending list of actual Core
 pointer types and the complete nonempty ascending list of registry instances
 represented by the first payload, plus `expectedInventoryStateRoot` and
 `expectedInventoryLeafCount`. Duplicate or unsorted list entries reject the
-bind. The executor recomputes the live inventory at scheduling and
-execution in this one canonical order: every Core pointer in raw
+bind. The executor recomputes and strictly validates the live inventory at the
+irreversible seal execution boundary; the same canonical read is available for
+offchain preflight before scheduling. The order is every Core pointer in raw
 `pointerType` order; then, for each registry in address order, one registry
 header followed by every `moduleAt(0..moduleCount-1)` record. Leaf kinds are
 `0 = CORE_POINTER`, `1 = REGISTRY_HEADER`, and `2 = REGISTRY_MODULE`; a pointer
@@ -1469,6 +1821,7 @@ bytes32 pointerFactsHash = keccak256(abi.encode(
 ));
 
 bytes32 registryHeaderFactsHash = keccak256(abi.encode(
+    registry.codehash,
     moduleCount,
     registrationChainHash,
     uint64(registrationRecordCount),
@@ -1515,8 +1868,9 @@ bytes32 inventoryStateRoot = keccak256(abi.encode(
 ```
 
 `pointerFactsHash` is formed from the exact ten trailing fields returned by
-`getSatellitePointer(pointerType)`. The registry header requires
-`registrationRecordCount == moduleCount`; each module leaf resolves the address
+`getSatellitePointer(pointerType)`. The registry header commits the live
+registry runtime code hash and requires `registrationRecordCount == moduleCount`;
+each module leaf resolves the address
 from `moduleAt` and the remaining fields from `moduleRecord`. The execution-
 generated `registeredAt` and `statusUpdatedAt` fields are deliberately excluded
 for the same reason they are excluded from scheduled registry transition hashes
@@ -1726,6 +2080,14 @@ eligible exact pair from state. It has no remove,
 replace, wildcard, target-only, owner-direct, or class-6 registration path.
 The entry additionally requires `sealed == true`; class-6 eligibility is never
 part of the pre-seal ceremony and cannot be queued across the bootstrap sunset.
+The launch implementation narrows the selector to the single reviewed
+`emergencyRaiseGasParameter(bytes32,uint256)` entrypoint (`0x4fa1b5ad`) and
+requires a canonical `governanceAuthority()` read from the target to equal this
+Executor. RoleRegistry and arbitrary selector pairs are rejected before any
+eligibility count or chain write. Adding another class-6 selector requires an
+explicit specification and implementation revision plus a code-hash-pinned
+catalog/deployment allowlist; terminal registration alone is not proof that a
+target enforces the class-6 incident predicate.
 
 At both scheduling and execution, every class-6 call must have nonempty
 selector-bearing calldata, `value == 0`, deployed target code, an exact eligible
@@ -1819,6 +2181,11 @@ governor-contract latency, not for fast single signers:
    latency; no emergency path may presume a single hot key. The terminal-freeze veto window floor is 72
    hours (ADR 0011 decision R10) so governor-contract holders can
    realistically exercise it.
+   The launch policy separately enforces a four-hour minimum class-`6`
+   open-to-execute window (`expiresAfter - notBefore`). The operational
+   coordination-latency assumption and the protocol-enforced open-window floor
+   are distinct controls even though both are pinned to 14,400 seconds at
+   launch; class `6` retains zero scheduling delay.
 3. Unpause is a dedicated operational class: a distinct `ROLE_UNPAUSE`
    (grantable to a Safe or governor contract) executes unpause with no
    timelock and an evented reason. Pause guardians cannot unpause; unpause
@@ -1847,7 +2214,8 @@ Execution rules:
    calldata-aware tightening classifier proves it cannot loosen policy, or is
    exact eligible class `6` under [GOV-EMERGENCY-RESTORATION].
 3. `expiresAfter` must be greater than `notBefore` and within a launch-pinned
-   maximum action lifetime.
+   maximum action lifetime. Delayed classes keep the seven-day floor above;
+   class `6` keeps its distinct four-hour emergency open-window floor.
 4. The stored `callHash` is the V2 `callsHash`, never
    `keccak256(singleCallData)`. Execution recomputes every descriptor and the
    three action-level aggregates, requires the ordered supplied calldata to be
@@ -1868,11 +2236,20 @@ Execution rules:
    tail/eligibility rules, and action ID match. The first-call target/selector
    fields retained for indexing are never execution authority, and arbitrary
    caller-selected bytes cannot execute.
+   The bounded-returndata assembly call used for execution does not remove the
+   underlying authority risk of forwarding proposal-selected native value;
+   it only prevents a returndata bomb. Slither no longer recognizes that
+   assembly call as `arbitrary-send-eth`, so issue #658 and the closed-world
+   action-policy/deployment gate remain the manual fail-closed security record
+   for destination, value, balance-source, and rollback review.
 8. A successful execution stores `EXECUTED`, records `executor`, emits
    `GovernanceActionExecuted`, and cannot be replayed.
-9. Cancellation is allowed only while `SCHEDULED` and before execution; it
-   stores `CANCELLED`, records `canceller`, and emits
-   `GovernanceActionCancelled`.
+9. Cancellation is allowed only while stored status is `SCHEDULED`, before
+   execution, and while `block.timestamp <= expiresAfter`; it stores
+   `CANCELLED`, records `canceller`, and emits `GovernanceActionCancelled`.
+   Once `block.timestamp > expiresAfter`, cancellation reverts with
+   `GovernanceActionExpiredWindow` and cannot replace the virtual `EXPIRED`
+   status.
 10. `materializeExpiredAction` may be called by anyone after `expiresAfter` to
     store `EXPIRED` and make the virtual expiry explicit.
 
@@ -1881,7 +2258,7 @@ Transition table:
 ```text
 NONE       -> SCHEDULED   schedule valid action
 SCHEDULED  -> EXECUTED    execute after notBefore and before expiresAfter
-SCHEDULED  -> CANCELLED   authorized cancellation before execution
+SCHEDULED  -> CANCELLED   authorized cancellation no later than expiresAfter
 SCHEDULED  -> VETOED      terminal-freeze guardian veto before deadline
 SCHEDULED  -> EXPIRED     virtual or materialized after expiresAfter
 CANCELLED  -> terminal
@@ -1917,12 +2294,217 @@ function terminalFreezeVetoGuardian(bytes32 scopeHash)
     view
     returns (address guardian, uint64 vetoDeadline);
 
+function terminalFreezeVetoGuardianSet(bytes32 scopeHash)
+    external
+    view
+    returns (
+        address roleRegistry,
+        bytes32 scopedRole,
+        uint256 scopedHolderCount,
+        bytes32 globalRole,
+        uint256 globalHolderCount,
+        uint64 vetoDeadline
+    );
+
+function terminalFreezeGuardianConfigCommitment(bytes32 actionId)
+    external
+    view
+    returns (bytes32 commitment);
+
+function terminalFreezeLiveActionCaps()
+    external
+    pure
+    returns (uint256 totalCap, uint256 nonRootCap, uint256 proposerCap);
+
+function terminalFreezeLiveActionUsage(bytes32 scopeHash, address proposer)
+    external
+    view
+    returns (
+        uint256 totalMemberships,
+        uint256 nonRootMemberships,
+        uint256 proposerMemberships
+    );
+
+function pruneElapsedTerminalFreezeActions(bytes32 scopeHash)
+    external
+    returns (uint256 prunedCount);
+
+function terminalFreezeActionPage(bytes32 scopeHash, uint256 cursor, uint256 limit)
+    external
+    view
+    returns (
+        bytes32[] memory actionIds,
+        uint64[] memory vetoDeadlines,
+        uint256 nextCursor
+    );
+
 function vetoTerminalFreeze(bytes32 actionId, bytes32 reasonHash) external;
 ```
 
-The guardian can only veto while the action is scheduled and before the veto
-deadline. It cannot edit the action, execute a different action, sweep funds,
-or unfreeze an already executed terminal freeze.
+At least two global `ROLE_TERMINAL_FREEZE_VETO` contract holders satisfying the
+role-redundancy floor are required to schedule or execute a terminal freeze.
+The scoped role
+`keccak256(abi.encode(ROLE_TERMINAL_FREEZE_VETO, scopeHash))` is additive to,
+not a fallback for, that global set. A global holder or a holder for any
+distinct affected scope may veto the whole atomic batch while it is scheduled
+and strictly before `notBefore`. A vetoer cannot edit the action, execute a
+different action, sweep funds, or unfreeze an already executed terminal freeze.
+
+`terminalFreezeVetoGuardian` is a compatibility singleton view: it returns a
+nonzero address only when the deduplicated scoped-plus-global union has exactly
+one holder; zero means zero or multiple holders and never means that the veto
+surface is absent. Integrations enumerate both additive sets from the returned
+RoleRegistry and role keys in `terminalFreezeVetoGuardianSet`. Both views
+return the earliest still-open deadline for the scope, so a later decoy action
+cannot shadow an earlier veto deadline.
+
+Every terminal action snapshots the exact relevant guardian configuration at
+schedule and rechecks it at execution. Let `appendHolders(role, h)` be:
+
+```solidity
+h = keccak256(abi.encode(
+    TERMINAL_GUARDIAN_HOLDER_V1,
+    h,
+    role,
+    roleHolderCount(role)
+));
+for (uint256 i; i < roleHolderCount(role); ++i) {
+    address holder = roleHolderAt(role, i);
+    h = keccak256(abi.encode(
+        TERMINAL_GUARDIAN_HOLDER_V1,
+        h,
+        role,
+        i,
+        holder,
+        holder.codehash
+    ));
+}
+```
+
+The schedule-time commitment is:
+
+```solidity
+bytes32 h = keccak256(abi.encode(
+    TERMINAL_GUARDIAN_CONFIG_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    address(roleRegistry),
+    address(roleRegistry).codehash,
+    globalTerminalRoleMutationChain,
+    uint64(globalTerminalRoleMutationRevision)
+));
+h = appendHolders(ROLE_TERMINAL_FREEZE_VETO, h);
+
+uint256 distinctScopeCount;
+for (uint256 i; i < calls.length; ++i) {
+    if (_scopeSeenBefore(calls, i, calls[i].scopeHash)) continue;
+    bytes32 scopedRole = keccak256(abi.encode(
+        ROLE_TERMINAL_FREEZE_VETO,
+        calls[i].scopeHash
+    ));
+    (bytes32 chain, uint64 revision) = roleMutationState(scopedRole);
+    h = keccak256(abi.encode(
+        TERMINAL_GUARDIAN_SCOPE_V1,
+        h,
+        calls[i].scopeHash,
+        scopedRole,
+        chain,
+        revision
+    ));
+    h = appendHolders(scopedRole, h);
+    ++distinctScopeCount;
+}
+bytes32 commitment = keccak256(abi.encode(
+    TERMINAL_GUARDIAN_CONFIG_V1,
+    h,
+    distinctScopeCount
+));
+```
+
+Distinct scopes are processed in first-call order; holder order is the exact
+RoleRegistry enumeration order. The commitment therefore detects registry
+runtime-code drift, global or relevant scoped A-to-B-to-A role history, holder
+order/membership changes, and holder runtime-code drift. Unrelated role changes
+do not invalidate it. Execution reverts with
+`TerminalFreezeGuardianConfigDrift` on any mismatch.
+
+The one-way bootstrap's initial global set uses a separate initial envelope:
+
+```solidity
+bytes32 setHash = keccak256(abi.encode(
+    INITIAL_TERMINAL_GUARDIAN_SET_V1,
+    uint256(block.chainid),
+    address(governanceExecutor),
+    address(roleRegistry),
+    guardians.length,
+    terminalRoleMutationChain,
+    uint64(terminalRoleMutationRevision)
+));
+for (uint256 i; i < guardians.length; ++i) {
+    setHash = keccak256(abi.encode(
+        TERMINAL_GUARDIAN_HOLDER_V1,
+        setHash,
+        i,
+        guardians[i],
+        guardians[i].codehash
+    ));
+}
+```
+
+The initial array contains 2 through 16 distinct code-bearing, non-EIP-7702
+holders in strictly increasing address order. The role chain/revision and
+enumeration produced by bootstrap grants must match that array exactly.
+
+The four terminal-guardian domains are:
+
+| Constant | String preimage | Value |
+| --- | --- | --- |
+| `TERMINAL_GUARDIAN_CONFIG_V1` | `6529STREAM_TERMINAL_GUARDIAN_CONFIG_V1` | `0x08d0b0fbace471ddf2e5f522c3621b3fdd92b1a17fce4c1effb39e5ad1d9243e` |
+| `TERMINAL_GUARDIAN_SCOPE_V1` | `6529STREAM_TERMINAL_GUARDIAN_SCOPE_V1` | `0x077788610e4d141120fd85c2372b9673a8a4ac7633f4d79522bf19565809252a` |
+| `INITIAL_TERMINAL_GUARDIAN_SET_V1` | `6529STREAM_INITIAL_TERMINAL_GUARDIAN_SET_V1` | `0x9ee586231c2f5d832b7ab74ebdf30550f7b6ac36ff7f5d4ceedebd713c364b99` |
+| `TERMINAL_GUARDIAN_HOLDER_V1` | `6529STREAM_TERMINAL_GUARDIAN_HOLDER_V1` | `0x6043687fb0254773308ed2f9a8d9a86c356d45779c952f0ffd71d8beaa5a57d8` |
+
+Terminal-freeze discovery is bounded against proposer denial of service. One
+distinct action occupies at most one membership in each distinct call scope,
+even if that scope repeats in the batch. Each scope permits 64 raw memberships:
+at most 48 may be scheduled by non-root proposers, each non-root proposer may
+occupy at most 8, and the remaining 16 are reserved for the live governance
+root or the exact pre-seal bootstrap authority. Root-capacity classification is
+snapshotted when the action schedules; a later root rotation neither
+reclassifies old memberships nor changes their cleanup accounting.
+
+Raw membership includes an elapsed veto deadline until bounded compaction.
+Scheduling compacts each distinct scope before applying caps; anyone may also
+call `pruneElapsedTerminalFreezeActions`. Pruning removes only discovery
+memberships and quota counters and does not change action status or the
+pending-action count. Every distinct-scope append and every actual removal
+emits schema-v1
+`TerminalFreezeActionMembershipUpdated(uint16,bytes32,bytes32,address,bool,uint8,bool,uint64,uint256,uint256)`
+after the membership and quota post-state is written. `present` is `true` only
+for an append. `mutationCause` is `1` for append, `2` for elapsed compaction,
+and `3` for action-terminal cleanup. `rawIndex` is zero-based and
+`remainingCount` is the post-mutation raw membership count. On removal,
+indexers deterministically apply the same swap-and-pop rule: when `rawIndex <
+remainingCount`, the prior last member moves into `rawIndex`; equality means
+there was no swap. The event owns raw membership and quota replay, while the
+governance lifecycle event owns action status. `present` describes raw
+membership, not whether the veto deadline remains live at the current block.
+On scheduling, all distinct-scope append events precede
+`TerminalFreezeGuardianConfigCommitted`, which precedes
+`GovernanceActionScheduled`. On execute, veto, cancel, or materialized expiry,
+all action-terminal membership removals precede the corresponding lifecycle
+event. Elapsed compaction intentionally leaves the private action-to-scope
+cleanup relation until a later terminal transition. Later execute, veto,
+cancel, or expiry cleanup tolerates an already-deindexed scope. All
+multi-scope writes, membership events,
+nonce/pending writes, and counter changes roll back if any later scope fails a
+cap.
+
+`terminalFreezeActionPage` exposes the raw swap-and-pop order with a maximum
+limit of 64. `cursor` may equal the current membership count, a zero limit is
+valid, and entries may be elapsed; callers compare each deadline to the current
+timestamp. The existing dense live-count/index views continue to skip elapsed
+memberships without mutating storage.
 
 ### Role Vocabulary [GOV-ROLES]
 
@@ -1971,7 +2553,7 @@ its current holder. Pause-guardian authority binds `ROLE_PAUSE_GUARDIAN`
 authority uses the constant, and the registry maps it to the current
 holder set.
 
-### Future Governance Events
+### Governance Event Schemas [GOV-EVENTS]
 
 Every admin mutation must emit an event. At minimum:
 
@@ -2069,6 +2651,54 @@ event AdminPermissionUpdated(
     address actor
 );
 ```
+
+The Governance V2 foundation and RoleRegistry event rows below are
+production-exact. `topic0` is the Keccak-256 hash of `signature`; every row is
+schema version `1`, and no row has more than three indexed fields.
+
+| Signature | `topic0` | Indexed fields | Unindexed fields |
+| --- | --- | --- | --- |
+| `GovernanceCallDataPublished(uint16,bytes32,address,address)` | `0x5922e6285b4b955740f916aa25accf8dcd9f75131e4bde259347d27adfaf1cce` | `callDataKey` | `schemaVersion`, `pointer`, `publisher` |
+| `GovernanceRootRotated(uint16,address,address,bytes32,uint64,bytes32)` | `0x08d370ac1a1f9fb20901f4973ecd503905441935a5b50d55949383fb2e577022` | `oldRoot`, `newRoot`, `actionId` | `schemaVersion`, `newRootCodeHash`, `revision` |
+| `TerminalFreezeGuardianConfigCommitted(uint16,bytes32,bytes32)` | `0x53acfef70a58072f772f652e17d1aae14ab4389a12ad30c9423ed0a887f8ba65` | `actionId`, `commitment` | `schemaVersion` |
+| `GovernanceProposerUpdated(uint16,address,bool,uint64,bytes32)` | `0x220035fc1066049066bc625ffc68a6dd5d26c64d3bcf552113a2b83726f5ccc3` | `account`, `actionId` | `schemaVersion`, `enabled`, `revision` |
+| `GovernanceCancellerUpdated(uint16,address,bool,uint64,bytes32)` | `0x25f1eb9ffcadbf70fdce20cb2089d1d75b4acc808a30caf8730a8cac77191a47` | `account`, `actionId` | `schemaVersion`, `enabled`, `revision` |
+| `TighteningCallUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)` | `0x036c8ff514a46d08a6d064b8303207c224554087f3a378bf88ca1d8f8d4ece58` | `target`, `selector`, `actionId` | `schemaVersion`, `tightening`, `targetCodeHash`, `revision` |
+| `ApprovedNativeReceiverUpdated(uint16,address,bool,uint64,bytes32)` | `0xd02c58454df06c3acae4d99fd37a3031799db442605179362d1ee19588f9f3b4` | `receiver`, `actionId` | `schemaVersion`, `approved`, `revision` |
+| `FreezeSelectorUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)` | `0x99b0305b9daf0dfcf7c496155ec00fbc7f4c03a7d91f6436f7edc0a3cef91ac3` | `target`, `selector`, `actionId` | `schemaVersion`, `freeze`, `targetCodeHash`, `revision` |
+| `TerminalFreezeActionMembershipUpdated(uint16,bytes32,bytes32,address,bool,uint8,bool,uint64,uint256,uint256)` | `0xfca432e480c87cddba2b629d363f2ad28733127441639c4f7a1d84edca17d676` | `scopeHash`, `actionId`, `proposer` | `schemaVersion`, `present`, `mutationCause`, `usesRootCapacity`, `vetoDeadline`, `rawIndex`, `remainingCount` |
+| `StreamRoleGranted(uint16,bytes32,address,uint8,address,bytes32)` | `0x9b9b410e01df674848a6af9c4677f982bcd5957194cd51eb34ed04532bc7a2aa` | `role`, `holder`, `actionId` | `schemaVersion`, `grantClass`, `actor` |
+| `StreamRoleRevoked(uint16,bytes32,address,uint8,address,bytes32)` | `0x674124c7fd9b40a7e8da58914611e15b27e8f0645cae8abf147adb7eb68d841f` | `role`, `holder`, `actionId` | `schemaVersion`, `grantClass`, `actor` |
+| `RoleManagerUpdated(uint16,address,bool,address,bytes32,uint64,bytes32)` | `0xb08dd46dd5caf79cdfd7060f42cebba12dc707c2d25f0646753c6c240ea5b627` | `account`, `admin`, `actionId` | `schemaVersion`, `enabled`, `configChainHash`, `configRevision` |
+| `RoleMutationCommitted(uint16,bytes32,address,bool,bytes32,uint64,bytes32,uint64,bytes32)` | `0xe7db8fc830e4a9ad4e109992e6cf9d48e383ea6b7b37cf64be502d2ad4143666` | `role`, `holder`, `actionId` | `schemaVersion`, `granted`, `roleChainHash`, `roleRevision`, `globalChainHash`, `globalRevision` |
+
+Executor-mediated RoleRegistry grant, revoke, scoped mutation, and manager
+configuration events carry the exact nonzero executing action ID. A direct
+registered-RoleManager mutation of an operational role is not a staged action
+and uses `bytes32(0)` in both its `StreamRole*` and
+`RoleMutationCommitted` events. The one bootstrap global terminal-guardian
+grant exception also uses that zero sentinel. The sentinel is selected from the
+actual actor/path; a direct manager must never inherit an unrelated in-flight
+Executor context. `RoleManagerUpdated` has no direct or bootstrap path and
+therefore always carries a nonzero action ID.
+
+For the [LCM-EVENTS] one-fact/one-owner catalog, `StreamRoleGranted` owns a
+role-membership grant and `StreamRoleRevoked` owns a role-membership revoke,
+including the grant class and actor. `RoleMutationCommitted` instead owns the
+role-local and global chain/revision commitments. Its `role`, `holder`,
+`granted`, and `actionId` fields are required same-execution mirrors in the
+corresponding role-membership fact family; they are not a second membership
+owner. The generated catalog must encode those owner and required-mirror tags
+before this event family enters a production release profile.
+
+`TerminalFreezeActionMembershipUpdated` owns the raw terminal-discovery
+membership and quota facts. Its `actionId` identifies the affected action; it
+is not an authorizing governance context for permissionless elapsed
+compaction. `GovernanceCallDataPublished` announces content-addressed
+pre-action bytes and does not assert that any action used them. Every actual
+governed configuration row above carries its authorizing action ID as required
+by [LCM-EVENTS]. These rows must enter the generated release event catalog
+before Governance V2 is in a production deployment profile.
 
 Implementation may split events by subsystem, but indexers must be able to
 reconstruct every admin permission, pointer, delay, and freeze change from

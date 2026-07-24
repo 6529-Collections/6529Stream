@@ -64,9 +64,12 @@ The raw analyzer command remains useful for investigation:
 make slither
 ```
 
-The live baseline currently contains 4 High and 34 Medium first-party findings,
+The live baseline currently contains 3 High and 30 Medium first-party findings,
 so raw Slither can exit non-zero. The baseline gates detect unreviewed drift;
 they do not establish audit completion or public-beta/production readiness.
+The Governance Executor's proposal-selected native-value authority is also
+tracked separately as High open blocker `RISK-GOV-003`: bounded assembly made
+that behavior invisible to Slither without removing the underlying authority.
 
 ## Pull Request Expectations
 
