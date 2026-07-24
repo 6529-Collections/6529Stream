@@ -163,6 +163,45 @@ struct names do not enter selectors.
 | `finalityRecoveryOldValueHash(((uint8,uint256,uint256,bytes32),bytes32,bytes32,bytes32,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),bytes32,string))` | `0x1a58a89d` | Governance per-call pre-state helper. |
 | `finalityRecoveryNewValueHash(((uint8,uint256,uint256,bytes32),bytes32,bytes32,bytes32,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),bytes32,string))` | `0xa26d5f0c` | Governance per-call post-state helper. |
 
+The exact named-field order underlying the request tuple is:
+
+```text
+StreamFinalityScope
+  1. scopeType: uint8
+  2. collectionId: uint256
+  3. tokenId: uint256
+  4. scopeId: bytes32
+
+StreamFinalityComponentExpectation
+  1. componentType: bytes32
+  2. component: address
+  3. interfaceId: bytes4
+  4. codeHash: bytes32
+  5. moduleVersion: bytes32
+  6. manifestHash: bytes32
+  7. dataHash: bytes32
+
+StreamFinalityManifestRef
+  1. uri: string
+  2. uriHash: bytes32
+  3. contentHash: bytes32
+  4. schemaId: bytes32
+  5. canonicalizationHash: bytes32
+
+StreamFinalityRecoveryRequest
+  1. scope: StreamFinalityScope
+  2. expectedOriginalFinalityRecordHash: bytes32
+  3. expectedPredecessorRecoveryId: bytes32
+  4. expectedOldRouteHash: bytes32
+  5. replacementRoute: StreamFinalityComponentExpectation
+  6. recoveryManifest: StreamFinalityManifestRef
+  7. reasonHash: bytes32
+  8. reasonURI: string
+```
+
+Therefore the canonical request ABI tuple is exactly
+`((uint8,uint256,uint256,bytes32),bytes32,bytes32,bytes32,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),bytes32,string)`.
+
 The proposed auxiliary ERC-165 ID is `0x83685f5c`. Acceptance must pin every
 expanded tuple spelling from the reviewed Solidity ABI before source
 publication. This proposal does not alter the permanent
