@@ -33,7 +33,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0017-raise-only-parameter-governance.md`](0017-raise-only-parameter-governance.md) | Accepted | Raise-only GGP/GTP launch model; probes, lowering, emergency class `6`, and permissionless parameter mutation removed pre-genesis |
 | [`0018-batch-operation-root-and-token-identity.md`](0018-batch-operation-root-and-token-identity.md) | Proposed | [#688](https://github.com/6529-Collections/6529Stream/issues/688): proposed one manager batch root, `N` token operation IDs, ledger-owned root replay, and atomic Core replay-state cutover; settlement integration remains blocked on ADR 0019 / #694 |
 | [`0019-payment-intent-orchestration.md`](0019-payment-intent-orchestration.md) | Proposed | [#664](https://github.com/6529-Collections/6529Stream/issues/664) contract-20 payer boundary and narrow sale/revenue settlement callbacks |
-| [`0020-executor-only-finality-recovery.md`](0020-executor-only-finality-recovery.md) | Proposed | [#667](https://github.com/6529-Collections/6529Stream/issues/667); executor-only append-only recovery proposal; current LTA/LCM remain authoritative pending acceptance |
+| [`0020-executor-only-finality-recovery.md`](0020-executor-only-finality-recovery.md) | Proposed | [#667](https://github.com/6529-Collections/6529Stream/issues/667); executor-only append-only recovery with dedicated Core pointer and recovery-aware serving; owner evidence and serving integration remain acceptance blockers; current LTA/LCM remain authoritative |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

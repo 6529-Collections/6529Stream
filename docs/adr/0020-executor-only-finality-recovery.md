@@ -16,8 +16,12 @@ explicitly marked Accepted:
 - no legacy recovery selector is deprecated or removed by this document.
 
 Acceptance and normative reconciliation are a later, separate change-control
-slice. They are blocked on independent security review and exact integration
-with the merged outcomes of #670, #688, #654, and #685.
+slice. They are blocked on independent security review, exact integration with
+the merged outcomes of #670, #688, #654, and #685, an installable
+`StreamOwnerRecords`-hosted owner-recovery-evidence target, and the exact Core
+pointer plus metadata-router serving integration defined below. No owner-
+evidence implementation issue is assigned as of this proposal; acceptance and
+source authorization remain blocked until that ownership is explicit.
 
 ## Metadata
 
@@ -27,7 +31,7 @@ with the merged outcomes of #670, #688, #654, and #685.
 | Issue | [#667](https://github.com/6529-Collections/6529Stream/issues/667) |
 | Related issues | [#654](https://github.com/6529-Collections/6529Stream/issues/654), [#670](https://github.com/6529-Collections/6529Stream/issues/670), [#685](https://github.com/6529-Collections/6529Stream/issues/685), [#688](https://github.com/6529-Collections/6529Stream/issues/688) |
 | Related ADR | [ADR 0004](0004-admin-governance.md) `[GOV-ACTION-ID]`, `[GOV-BATCH]`, `[GOV-V2-CUTOVER]` |
-| Proposed affected contracts | New replaceable recovery companion and auxiliary interfaces only |
+| Proposed affected contracts | New replaceable recovery companion and auxiliary interfaces; later #654 Core pointer/emitter authorization and metadata-router serving integration are explicit dependencies |
 | Permanent interface impact | None; `IStreamArtworkFinalityRegistry` remains unchanged |
 | Work type | Pre-genesis incompatible auxiliary-interface proposal |
 
@@ -81,41 +85,111 @@ legacy wrappers.
    its immutable Governance Executor while `currentAction()` reports an active,
    nonzero, class-`TERMINAL_FREEZE` (`2`) action with the exact per-call scope,
    old-state, and new-state commitments.
-3. `currentAction().actionId` is the recovery ID. A successful execution
-   consumes that ID once. A reverted execution consumes nothing.
-4. The original finality registry, its records, component arrays, and permanent
+3. `currentAction().actionId` is the recovery ID. Exactly one
+   `executeFinalityRecovery` call is permitted in a Governance action batch.
+   A successful execution consumes that ID once. A reverted execution consumes
+   nothing. A second recovery append, even for another scope or companion,
+   makes the batch invalid; multiple recoveries require distinct Governance
+   actions and action IDs.
+4. The companion is discovered through a new Core satellite pointer family,
+   `ARTWORK_FINALITY_RECOVERY`. It does not replace
+   `ARTWORK_FINALITY_REGISTRY`. The current metadata router is the
+   authoritative onchain consumer of its recovery-aware route-resolution read.
+5. The original finality registry, its records, component arrays, and permanent
    interface never change. The companion appends executed recovery records and
    maintains a separate exact-scope head and monotonic generation.
-5. A request commits its canonical scope, original finality record hash,
+6. A request commits its canonical scope, original finality record hash,
    predecessor recovery ID, old route hash, exact replacement component
    expectation, recovery manifest, reason hash, and reason URI.
-6. Canonical staged manifest bytes bind the executable intent. The manifest
+7. Canonical staged manifest bytes bind the executable intent. The manifest
    content hash must equal the hash of those bytes; route, scope, reason, or
    lineage substitution therefore invalidates both the manifest and artist
    approval.
-7. Artist and owner evidence are read from separately owned append-only
+8. Artist and owner evidence are read from separately owned append-only
    targets and snapshotted at execution. The scheduled action identity does not
    contain mutable evidence values.
-8. Every route replacement is fail-closed as
+9. Every route replacement is fail-closed as
    `artworkBytesChanged = true`. A component's self-reported `dataHash` is not a
    generic byte-equivalence proof. A non-artwork-changing class requires a
    separately accepted and versioned equivalence verifier.
-9. Exact scoped finality and its exact scoped recovery take precedence. If no
-   exact scoped finality exists, a collection finality/recovery is inherited.
-10. Each exact scope has one append-only predecessor chain. Competing
+10. Route selection is, in order: exact-scope recovery, exact-scope permanent
+    finality, collection recovery, then collection permanent finality. A first
+    exact-scope recovery over inherited collection finality starts a new exact
+    chain at predecessor zero and generation one; it never treats the
+    collection recovery head as its predecessor.
+11. Each exact scope has one append-only predecessor chain. Competing
     Governance actions may wait concurrently, but after one executes, every
     action committing the stale predecessor or old route fails before mutation.
-11. Execution creates or supersedes one bounded refresh plan. Permissionless
+12. Execution creates or supersedes one bounded refresh plan. Permissionless
     continuation advances exactly one chunk of at most 5,000 IDs, calls Core
     exactly once, and relies on transaction atomicity to roll back cursor,
     count, and events if Core rejects.
-12. The global incomplete-plan count and zero-count assertion retain their
+13. The global incomplete-plan count and zero-count assertion retain their
     existing selectors. Governance action policy, not the companion, must
-    enforce the predecessor assertion immediately before the exact pointer
-    update with no intervening-call or generic-path bypass.
-13. No wrapper preserves the old local schedule, cancel, execute, record,
+    enforce the predecessor assertion immediately before the exact
+    `ARTWORK_FINALITY_RECOVERY` pointer update with no intervening-call or
+    generic-path bypass.
+14. No wrapper preserves the old local schedule, cancel, execute, record,
     active-route, plan, or continuation selector. A wrapper would preserve the
     duplicate local authority this ADR exists to remove.
+
+## Topology, Discovery, And Serving Authority
+
+This proposal chooses a new pointer and Core caller-authentication seam. It
+rejects making the companion a façade for the permanent finality registry:
+forwarding that registry's state-changing ABI would either change its authority
+model or introduce another writer. The exact new pointer identity is:
+
+```text
+pointer name: ARTWORK_FINALITY_RECOVERY
+pointer key:  keccak256("ARTWORK_FINALITY_RECOVERY")
+              = 0xead6d91d79d13e47343aa9d24c2198c5e4fcd612fdd9531d8b2549bab7651474
+module type:  keccak256("STREAM_ARTWORK_FINALITY_RECOVERY")
+              = 0x50e132608386d4b0bf237635eb7bfd9473f667085fa7d7b18f81c5045c289050
+interface:    IStreamArtworkFinalityRecovery
+interface ID: 0x83685f5c
+```
+
+If this ADR is Accepted, the reconciliation train must add
+`ARTWORK_FINALITY_RECOVERY` to the closed Core pointer inventory. The target
+must be nonzero, code-bearing, registered under the exact module type, advertise
+IERC-165 and `0x83685f5c`, reject `0xffffffff`, and bind the same Core,
+Governance Executor, permanent original finality registry, artist-evidence
+target, and owner-evidence target named by the deployment profile. The
+`ARTWORK_FINALITY_REGISTRY` pointer continues to name the unchanged permanent
+registry. `getSatellitePointer(ARTWORK_FINALITY_RECOVERY)` is the only canonical
+discovery read; companion addresses must not come from a router-local allowlist
+or operator configuration.
+
+The current metadata router is the authoritative onchain serving consumer. For
+every frozen route component it resolves, it:
+
+1. reads the current recovery companion from Core;
+2. verifies the pointer's exact module/interface facts;
+3. calls both `resolvedFinalityRoute(routeType, scope)` and
+   `finalityRecoveryRouteStatus(routeType, scope)` on that companion, requiring
+   identical `pinned`, `componentRouteHash`, and `recoveryId` facts; and
+4. serves through the returned `module` only when `pinned` and
+   `currentRouteMatches` are both true.
+
+The companion resolves both original and recovered components, so after this
+pointer is installed the router does not fall back directly to permanent
+`verifyFinality` or component reads. A zero pointer, wrong interface, unreadable
+companion, malformed return, `pinned = false` for a supposedly finalized route,
+`currentRouteMatches = false`, inconsistent resolver/status results, or
+inconsistent original-registry binding fails closed for that frozen serving
+route. This avoids a split brain in which some callers serve the original route
+while others observe recovery.
+
+#654 owns the Core consequences: adding the pointer family and admitting the
+current `ARTWORK_FINALITY_RECOVERY` target, in addition to the already accepted
+callers, to the restricted batch-refresh emitter. #667 makes no Core edit; it
+owns the companion and the exact route-resolution behavior. #685 owns
+closed-world Governance classification and the adjacent old-companion
+zero-incomplete assertion followed by
+`updateSatellitePointer(ARTWORK_FINALITY_RECOVERY, successor)`. Metadata-router
+serving integration is a source-authorization prerequisite and must be assigned
+to an implementation owner before this ADR can be Accepted.
 
 ## Exact Function Migration
 
@@ -202,10 +276,86 @@ StreamFinalityRecoveryRequest
 Therefore the canonical request ABI tuple is exactly
 `((uint8,uint256,uint256,bytes32),bytes32,bytes32,bytes32,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),bytes32,string)`.
 
-The proposed auxiliary ERC-165 ID is `0x83685f5c`. Acceptance must pin every
-expanded tuple spelling from the reviewed Solidity ABI before source
-publication. This proposal does not alter the permanent
-`IStreamArtworkFinalityRegistry` interface or ID.
+### Exact return schemas
+
+Return types do not enter function selectors. They are nevertheless normative
+ABI and indexer facts. `StreamFinalityRecoveryArtistEvidenceKind` has ABI type
+`uint8`. The remaining returned structs have these exact ordered fields:
+
+```text
+StreamFinalityRecoveryEvidenceSnapshot
+  1. artistEvidenceKind: uint8
+  2. artistEvidenceHash: bytes32
+  3. artistSigner: address
+  4. artistId: bytes32
+  5. artistAuthorityClass: uint8
+  6. artistNoticeEndsAt: uint64
+  7. ownerEvidenceHash: bytes32
+  8. ownerEvidenceRevision: uint64
+  9. ownerAcknowledgementCount: uint32
+ 10. ownerObjectionCount: uint32
+
+StreamFinalityRecoveryRecord
+  1. executed: bool
+  2. recoveryId: bytes32
+  3. scope: StreamFinalityScope
+  4. originalFinalityRecordHash: bytes32
+  5. predecessorRecoveryId: bytes32
+  6. generation: uint64
+  7. oldRouteHash: bytes32
+  8. recoveryRouteHash: bytes32
+  9. artworkBytesChanged: bool
+ 10. replacementRoute: StreamFinalityComponentExpectation
+ 11. recoveryManifest: StreamFinalityManifestRef
+ 12. evidence: StreamFinalityRecoveryEvidenceSnapshot
+ 13. reasonHash: bytes32
+ 14. reasonURI: string
+ 15. executedAt: uint64
+
+StreamFinalityRecoveryRefreshPlan
+  1. exists: bool
+  2. complete: bool
+  3. superseded: bool
+  4. manifestContentHash: bytes32
+  5. supersededByRecoveryId: bytes32
+  6. lastAllocatedTokenIdAtExecution: uint256
+  7. rangeStart: uint256
+  8. rangeEnd: uint256
+  9. processedThrough: uint256
+ 10. chunksEmitted: uint256
+```
+
+The exact function outputs are:
+
+| Function | Exact outputs |
+| --- | --- |
+| `stageFinalityRecoveryManifest` | `(bytes32 contentHash)` |
+| `finalityRecoveryManifestStored` | `(bool stored)` |
+| `finalityRecoveryManifestBytes` | `(bytes manifestBytes)` |
+| `finalityRecoveryIntentBytes` | `(bytes intentBytes)` |
+| `executeFinalityRecovery` | no return data |
+| `finalityRecoveryRecord` | `(StreamFinalityRecoveryRecord record)`, ABI tuple `(bool,bytes32,(uint8,uint256,uint256,bytes32),bytes32,bytes32,uint64,bytes32,bytes32,bool,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),(uint8,bytes32,address,bytes32,uint8,uint64,bytes32,uint64,uint32,uint32),bytes32,string,uint64)` |
+| `activeFinalityRecovery` | `(bytes32 recoveryId, bytes32 recoveryRouteHash, uint64 generation)` |
+| `resolvedFinalityRoute` | `(bool pinned, address module, bytes32 componentRouteHash, bytes32 originalFinalityRecordHash, bytes32 recoveryId)` |
+| `finalityRecoveryRouteStatus` | `(bool pinned, bool currentRouteMatches, bytes32 componentRouteHash, bytes32 recoveryId)` |
+| `finalityRecoveryRefreshPlan` | `(StreamFinalityRecoveryRefreshPlan plan)`, ABI tuple `(bool,bool,bool,bytes32,bytes32,uint256,uint256,uint256,uint256,uint256)` |
+| `continueFinalityRecoveryRefresh` | no return data |
+| `incompleteFinalityRecoveryRefreshPlanCount` | `(uint256 count)` |
+| `assertNoIncompleteFinalityRecoveryRefreshPlans` | no return data |
+| `finalityRecoveryScopeHash` | `(bytes32 scopeHash)` |
+| `finalityRecoveryOldValueHash` | `(bytes32 oldValueHash)` |
+| `finalityRecoveryNewValueHash` | `(bytes32 newValueHash)` |
+
+For both route reads, the first `bytes32` input is named `routeType` and is the
+exact `StreamFinalityComponentExpectation.componentType` to resolve. It is not
+an original-record hash or recovery ID. `componentRouteHash` is the hash of the
+one selected component expectation; it is distinct from the composite
+`recoveryRouteHash` stored on an executed record.
+
+The proposed auxiliary ERC-165 ID is `0x83685f5c`. The input and output tuple
+spellings above are the proposed exact ABI pin; acceptance must prove the
+reviewed Solidity ABI matches them without drift. This proposal does not alter
+the permanent `IStreamArtworkFinalityRegistry` interface or ID.
 
 ## Exact Event Migration
 
@@ -335,6 +485,18 @@ keccak256(abi.encode(
 ))
 ```
 
+The storage lineage key used by the old-state commitment is not the Governance
+scope hash. It is exactly:
+
+```solidity
+bytes32 scopeKey = keccak256(abi.encode(
+    uint8(request.scope.scopeType),
+    request.scope.collectionId,
+    request.scope.tokenId,
+    request.scope.scopeId
+));
+```
+
 Old state:
 
 ```solidity
@@ -389,6 +551,71 @@ hash must match; and its schema and canonicalization hashes must be nonzero.
 This replaces both Draft local recovery-ID preimages. Governance V2's
 `STREAM_GOVERNANCE_ACTION_V2` action ID is authoritative.
 
+### Component and recovered-route hashes
+
+The hash of one original or replacement component route is:
+
+```solidity
+bytes32 componentRouteHash = keccak256(abi.encode(
+    StreamFinalityComponentExpectation({
+        componentType: route.componentType,
+        component: route.component,
+        interfaceId: route.interfaceId,
+        codeHash: route.codeHash,
+        moduleVersion: route.moduleVersion,
+        manifestHash: route.manifestHash,
+        dataHash: route.dataHash
+    })
+));
+```
+
+Because `abi.encode(route)` uses the same seven ordered fields, implementations
+may write `keccak256(abi.encode(route))`. `oldRouteHash`,
+`expectedOldRouteHash`, `replacementRouteHash`, and the
+`componentRouteHash` returned by route reads all use this formula.
+
+The composite executed-record `recoveryRouteHash` uses the existing collection
+and scoped recovery domain strings, now over an exact append preimage rather
+than a caller-supplied opaque value:
+
+| Scope class | String preimage | Domain hash |
+| --- | --- | --- |
+| `COLLECTION` | `6529STREAM_FINALITY_RECOVERY_V1` | `0x521e8df5a00a793a5b47409e1e7711b4b8857ba9e6c833fe59a48dfa865b19ac` |
+| `TOKEN`, `RELEASE`, `SEASON`, or `VIEW` | `6529STREAM_SCOPED_FINALITY_RECOVERY_V1` | `0x7111cd2afae740dbddcd349ab0b8b9269b6a81c331cef7ca8d542e87308bc54a` |
+
+```solidity
+bytes32 routeDomain =
+    request.scope.scopeType == StreamFinalityScopeType.COLLECTION
+    ? STREAM_FINALITY_RECOVERY_V1
+    : STREAM_SCOPED_FINALITY_RECOVERY_V1;
+
+bytes32 recoveryRouteHash = keccak256(bytes.concat(
+    abi.encode(
+        routeDomain,
+        block.chainid,
+        address(recoveryCompanion),
+        recoveryId,
+        originalFinalityRecordHash,
+        predecessorRecoveryId,
+        newGeneration
+    ),
+    abi.encode(
+        request.scope,
+        request.replacementRoute,
+        request.recoveryManifest.contentHash,
+        evidence,
+        request.reasonHash
+    )
+));
+```
+
+Here `evidence` is the exact ten-field
+`StreamFinalityRecoveryEvidenceSnapshot` tuple above. The staged manifest
+content hash transitively binds the full canonical intent, including the
+reason-URI hash. `recoveryRouteHash` therefore identifies the executed append
+and its evidence; it is not interchangeable with the hash of the one selected
+component route.
+
 ## Authorization, Replay, Timing, And Revert Semantics
 
 1. Direct calls reject. The immutable Executor is the only mutation caller.
@@ -399,30 +626,35 @@ This replaces both Draft local recovery-ID preimages. Governance V2's
 6. Missing or mismatched original finality rejects.
 7. A stale predecessor or stale old route rejects, so competing actions have a
    deterministic first-valid-execution winner.
-8. A consumed action ID rejects replay.
-9. A missing, malformed, unstaged, or intent-mismatched recovery manifest
+8. Governance policy permits exactly one `executeFinalityRecovery` call in the
+   full `GovernanceCall[]` for an action. A second append targeting the same or
+   another recovery companion or scope rejects at scheduling/classification;
+   it is not deferred to an inevitably reverting atomic execution. Other
+   policy-compatible calls may coexist in the batch.
+9. A consumed action ID rejects replay.
+10. A missing, malformed, unstaged, or intent-mismatched recovery manifest
    rejects before evidence or state.
-10. A missing, type-mismatched, duplicated/ambiguous, code-drifted, reverting,
+11. A missing, type-mismatched, duplicated/ambiguous, code-drifted, reverting,
     malformed, unfrozen, or state-mismatched replacement route rejects.
-11. Required artist evidence that reverts, is short, oversized, malformed,
+12. Required artist evidence that reverts, is short, oversized, malformed,
     invalid, zero-identity, or still inside the action-bound unavailability
     notice rejects.
-12. Required owner evidence that reverts, is short, oversized, malformed,
+13. Required owner evidence that reverts, is short, oversized, malformed,
     invalid, zero-hash, or zero-revision rejects.
-13. Artist approval deadlines and nonce/digest revocation are submission-time
+14. Artist approval deadlines and nonce/digest revocation are submission-time
     admission gates only. Once recorded, approval does not later expire or
     become invalid through revocation. Only explicit adjudicated supersession
     under the artist identity rules may invalidate it.
-14. Governance V2 supplies the terminal-freeze delay, cancellation, veto,
+15. Governance V2 supplies the terminal-freeze delay, cancellation, veto,
     expiry, and retry behavior. The artist-unavailability notice is an
     additional execution-time timestamp gate and its exact end is snapshotted.
-15. A successful append activates exactly one route generation. Any revert
+16. A successful append activates exactly one route generation. Any revert
     leaves the action unconsumed and every head, record, plan, and count
     unchanged.
-16. Refresh state advances before the Core call under a reentrancy guard, but
+17. Refresh state advances before the Core call under a reentrancy guard, but
     transaction rollback restores every field and suppresses progress events
     when Core rejects.
-17. Missing, wrong-scope, complete, superseded, inactive, or manifest-mismatched
+18. Missing, wrong-scope, complete, superseded, inactive, or manifest-mismatched
     plans reject continuation.
 
 ## Proposed Error Catalog
@@ -485,8 +717,9 @@ The exact Draft error migration is:
 
 Historical finality and current route health are separate facts:
 
-- `resolvedFinalityRoute` selects exact scoped finality/recovery first and
-  inherited collection finality/recovery otherwise.
+- `resolvedFinalityRoute` selects an exact recovery first, then exact permanent
+  finality, then an inherited collection recovery, then inherited collection
+  permanent finality.
 - A stored route is historically pinned even if its component later loses
   code, changes codehash, reverts, returns malformed/oversized data, reports
   unfrozen state, or drifts from the stored expectation.
@@ -494,6 +727,32 @@ Historical finality and current route health are separate facts:
   exact live match. It does not rewrite history.
 - Original component types must be unique for a recoverable route. A duplicate
   type fails closed rather than guessing which historical route to replace.
+
+The exact selection and append matrix is:
+
+| Requested scope state | Selected route before a new exact append | `originalFinalityRecordHash` | `predecessorRecoveryId` / old generation | Mutation on success |
+| --- | --- | --- | --- | --- |
+| `COLLECTION` with collection recovery head | Collection recovery override for `routeType`, otherwise the collection permanent component | Collection permanent record | Collection head / collection generation | Append and replace collection head |
+| `COLLECTION` without recovery head | Collection permanent component | Collection permanent record | zero / `0` | Append collection generation `1` |
+| Non-collection scope with exact recovery head | Exact recovery override for `routeType`, otherwise the permanent component belonging to that exact lineage | Original record captured by the exact lineage | Exact head / exact generation | Append and replace only the exact head |
+| Non-collection scope with exact permanent finality and no exact recovery | Exact permanent component | Exact permanent record | zero / `0` | Append exact generation `1` |
+| Non-collection scope without exact permanent finality or recovery, but with collection recovery | Inherited collection recovery override for `routeType`, otherwise the collection permanent component | Collection permanent record | zero / `0`; the collection head is not a predecessor | Append exact generation `1`; collection head is unchanged |
+| Non-collection scope without exact permanent finality or recovery and without collection recovery | Inherited collection permanent component | Collection permanent record | zero / `0` | Append exact generation `1`; collection state is unchanged |
+| No exact or collection permanent finality | none | zero | n/a | Reject `FinalityRecoveryOriginalRecordMissing(scopeKey)` |
+
+For every row, `oldRouteHash` is the `componentRouteHash` of the selected route
+immediately before mutation. A request replacing component type `T` must carry
+the hash selected for `T`; it cannot substitute another component type. When an
+exact lineage began from collection inheritance, every successor keeps that
+lineage's original collection finality-record hash. The later appearance of a
+different exact permanent record does not silently rebase the recovery chain:
+it is a base-record mismatch requiring separately reviewed migration semantics.
+
+Read selection uses the same order but does not treat a broader collection head
+as an exact predecessor. An exact permanent record suppresses collection
+inheritance even when the collection has a newer recovery. Conversely, an exact
+recovery begun from inherited collection finality remains the selected exact
+route until explicitly superseded in its exact chain.
 
 Every accepted replacement creates a refresh plan because this version always
 classifies it artwork-affecting:
@@ -525,14 +784,27 @@ If Accepted, this is a pre-genesis breaking migration:
    Execution and refresh topics remain, while manifest-staged, lineage, and
    evidence-snapshot topics are added.
 5. Collection and scoped plan/read paths collapse into unified scope-aware
-   calls. Exact scoped finality wins; otherwise collection recovery is
-   inherited.
-6. Consumers must distinguish historical `pinned` from
+   calls. The current companion is discovered only through Core's
+   `ARTWORK_FINALITY_RECOVERY` pointer. The current metadata router uses its
+   `resolvedFinalityRoute(routeType, scope)` result as the serving route.
+6. Permanent-registry `verifyFinality` and `verifyArtworkScopeFinality` remain
+   diagnostics of the immutable original finality record and original component
+   set. They do not report a recovered serving route. Indexers that need serving
+   truth join those historical reads with the companion's exact
+   `resolvedFinalityRoute`, `finalityRecoveryRouteStatus`, record, and lineage
+   outputs.
+7. Consumers must distinguish historical `pinned` from
    `currentRouteMatches`; an active recovery record is not proof that the live
    component still conforms.
-7. ABI, error, event, domain, numeric-ID, interface, monitoring, state-export,
+8. A route index is keyed by `(pointer revision, routeType, canonical
+   scopeKey)`. It records `componentRouteHash`,
+   `originalFinalityRecordHash`, and the route-specific `recoveryId`. A zero
+   `recoveryId` means the companion selected the permanent original component;
+   it does not mean the companion was bypassed.
+9. ABI, error, event, domain, numeric-ID, pointer, interface, monitoring,
+   state-export,
    acquisition/condition, and deployment catalogs must all migrate together.
-8. Repository history is the only archive of the superseded pre-genesis Draft
+10. Repository history is the only archive of the superseded pre-genesis Draft
    interface. No onchain state migration exists.
 
 ## Dependencies And Non-Goals
@@ -543,20 +815,55 @@ Dependencies before acceptance or source authorization:
   installable target. The proposed consumer only reads and snapshots it.
 - #688 must settle the canonical Governance action identity/context consumed
   by this target.
-- #654 must implement the real Core refresh emitter and advertise the exact
-  recovery Core interface:
+- #654 must add the exact `ARTWORK_FINALITY_RECOVERY` pointer family, admit
+  only its current target to the recovery batch-refresh caller set, implement
+  the real Core refresh emitter, and advertise the exact recovery Core
+  interface:
   `lastAllocatedTokenId()` `0x254b22bc` XOR
   `emitBatchMetadataUpdate(uint256,uint256,bytes32)` `0x908c18bd`, ERC-165 ID
   `0xb5c73a01`, with `0xffffffff` rejected.
-- #685 must enforce the closed-world action policy and exact adjacent
-  predecessor-zero-count/pointer-update batch shape.
-- The future owner-records recovery-evidence read remains absent and blocks
-  production completeness.
+- #685 must enforce exactly one recovery append per Governance action, the
+  closed-world action policy, and the exact adjacent old-companion
+  zero-count/`ARTWORK_FINALITY_RECOVERY` pointer-update batch shape.
+- An installable `StreamOwnerRecords`-hosted target must advertise IERC-165 and
+  the one-selector `IStreamFinalityRecoveryOwnerEvidence` interface before
+  acceptance or source authorization:
+
+  ```solidity
+  function verifyRecoveryOwnerEvidence(
+      StreamFinalityScope calldata scope,
+      bytes32 recoveryId,
+      bytes32 recoveryManifestHash
+  )
+      external
+      view
+      returns (
+          bool valid,
+          bytes32 evidenceHash,
+          uint64 revision,
+          uint32 acknowledgementCount,
+          uint32 objectionCount
+      );
+  ```
+
+  Its canonical selector and interface ID are both `0x20279cd8`. The target
+  owns append-only owner acknowledgements, objections, accumulator/hash, and
+  revision semantics; #667 only performs an exact-size read and snapshots the
+  returned revision. Missing code, missing IERC-165/`0x20279cd8`, `0xffffffff`
+  acceptance, revert, malformed return, `valid = false`, zero evidence hash, or
+  zero revision fails before mutation. No implementation owner or tracker is
+  assigned yet, so this is an explicit acceptance and source blocker rather
+  than a production-only follow-up.
+- The metadata-router serving integration defined under topology must have an
+  explicit implementation owner and real-target tests before acceptance or
+  source authorization. An offchain convention or deployment promise is not a
+  serving integration.
 
 Non-goals:
 
 - no Governance V2 redesign or action-policy edit in this ADR;
-- no Core implementation or bytecode change;
+- no Core or metadata-router implementation or bytecode change in this
+  Proposed ADR, and no Core edit in #667;
 - no artist-registry write, authority, nonce, revocation, or storage change;
 - no owner-records implementation;
 - no change to the permanent finality interface or original finality storage;
@@ -577,11 +884,13 @@ explicitly; it may not relabel the old blocks silently.
 | `docs/stream-long-term-architecture.md` `[LTA-FINALITY]`, access-control rules 3-5 | Replace local finality-admin schedule/cancel and permissionless local-delay execution with Governance V2 action authority while retaining the artist gate. |
 | `docs/stream-long-term-architecture.md` `[LTA-FINALITY]`, scoped-finality scope rules 7-8 | Replace the separate scoped status machine and legacy scoped recovery-ID preimage; retain exact-scope identity and deterministic broader-record coexistence. |
 | `docs/stream-long-term-architecture.md` `[LTA-FINALITY]`, “Scoped recovery mirrors collection recovery” | Remove or mark superseded every separate scoped schedule/cancel/execute/record/active/plan/continue signature and scheduled/cancelled event. |
-| `docs/stream-long-term-architecture.md` `[LTA-FINALITY]`, “Finality Recovery” functions/events/selectors and rules 1-18 | Reconcile local status/storage, legacy recovery-ID preimage, authority/timing, caller-supplied artwork-change class, selector block, evidence, route resolution, refresh, supersession, count, monitoring, and pointer-cutover wording to the accepted interface. |
+| `docs/stream-long-term-architecture.md` `[LTA-FINALITY]`, “Finality Recovery” functions/events/selectors and rules 1-18 | Reconcile local status/storage, legacy recovery-ID preimage, authority/timing, caller-supplied artwork-change class, selector and exact-return block, evidence, route resolution, permanent-verify compatibility, refresh, supersession, count, monitoring, and pointer-cutover wording to the accepted interface. |
+| `docs/stream-long-term-architecture.md` `[LTA-POINTERS]` inventory and pointer lifecycle | Add the exact `ARTWORK_FINALITY_RECOVERY` key/module/interface family and change the old-companion drain assertion adjacency without replacing `ARTWORK_FINALITY_REGISTRY`. |
 | `docs/launch-v1-target-architecture.md`, artwork-recovery invalidation mirror | Replace separate continuation selectors and document the exact Core auxiliary dependency without adding Core bytecode in #667. |
-| `docs/launch-conformance-matrix.md` `[LCM-GOLDEN]` gate 17 | Replace local scheduling and split continuation/read goldens; add action-context, manifest-intent, lineage/evidence, inherited-route, fail-closed artwork-change, and exact dependency gates. |
+| `docs/metadata-router-and-renderer.md` `[MRR-FINALITY]` and `[MRR-REFRESH-EMITTERS]` | Make the current recovery pointer the frozen-route serving resolver and add its current target to the exact Core batch-emitter caller set through #654; retain the permanent registry as original-history owner. |
+| `docs/launch-conformance-matrix.md` `[LCM-GOLDEN]` gate 17 | Replace local scheduling and split continuation/read goldens; add action-context, one-append-per-action cardinality, exact return schemas, manifest-intent, lineage/evidence, inherited-route, serving-pointer, fail-closed artwork-change, and exact dependency gates. |
 | `docs/adr/0004-admin-governance.md` `[GOV-ACTION-ID]` | Cite recovery action ID ownership and exact target-side scope/old/new commitments. |
-| `docs/adr/0004-admin-governance.md` `[GOV-BATCH]` | Pin the exact adjacent predecessor assertion/pointer update and bypass negatives through #685's accepted policy. |
+| `docs/adr/0004-admin-governance.md` `[GOV-BATCH]` | Pin exactly one recovery append per batch plus the exact adjacent predecessor assertion/pointer update and bypass negatives through #685's accepted policy. |
 | `docs/adr/0004-admin-governance.md` `[GOV-V2-CUTOVER]` | Add the recovery companion to the exact accepted Governance V2 host/cutover inventory after dependency acceptance. |
 | `docs/stream-artist-authority.md` `[AA-RECOVERY]` | Cite the canonical manifest-bound execution read and preserve append-only recorded-approval semantics; keep artist writes and authority in #670. |
 | `docs/collection-metadata-contract.md`, owner-record recovery-response rules and acquisition/condition surfaces | Pin the owner evidence read/snapshot and downstream display/export fields without moving owner writes into #667. |
@@ -640,13 +949,15 @@ Residual risks requiring review:
 - a global-ID refresh superset may invalidate unrelated IDs but is safer than
   missing affected non-enumerable members;
 - operator/indexer migration is breaking;
-- missing real owner, artist, Core, and Governance policy integrations prevent
-  production proof; and
+- missing real owner, artist, Core pointer/emitter, metadata-router serving,
+  and Governance policy integrations prevent acceptance, source authorization,
+  and production proof; and
 - predecessor zero-count/pointer adjacency is outside the companion and must be
   enforced by the accepted Governance action policy.
 
-No Core bytecode is added by this ADR. Any future source PR must rebase the
-then-current main, measure optimized runtime size, and run a live canonical
+No Core bytecode is added by this Proposed ADR or by #667. #654 owns the
+required Core pointer and caller-set change. Any future source PR must rebase
+the then-current main, measure optimized runtime size, and run a live canonical
 Slither semantic comparison. It cannot rely on a static-analysis artifact
 generated before the new Solidity exists.
 
@@ -662,6 +973,8 @@ documented generator order:
 - LCM gate 17 and traceability;
 - ABI, selector, error, event, interface-ID, and domain goldens;
 - generated interface and event catalogs;
+- the Core pointer inventory, module registry, metadata-router serving
+  bindings, and deployment profile;
 - monitoring, indexer, state-export, acquisition, and condition-report
   migration notes;
 - the deployment candidate only after its real dependencies are installable;
@@ -679,8 +992,12 @@ Before acceptance:
 
 - independent architecture and security review of every selector, event,
   commitment, evidence boundary, transition, and migration consequence;
-- reconcile the exact ABI against merged #670, #688, #654, and #685 outcomes;
+- reconcile the exact ABI against merged #670, #688, #654, and #685 outcomes,
+  the installable owner-evidence target, and the metadata-router serving
+  integration;
 - prove no permanent finality interface change and no legacy wrapper;
+- prove exact pointer discovery, one recovery append per Governance action, and
+  no direct-original serving fallback after companion installation;
 - decide whether duplicate component types require a versioned route-identity
   model before acceptance.
 
@@ -699,8 +1016,11 @@ After acceptance and source authorization:
 - empty, token, 5,000-boundary, multi-chunk, final-short-chunk, Core rollback,
   completion, supersession, inactive-plan, count, and reentrancy tests;
 - exact-target Governance schedule/cancel/veto/expiry/retry and action-ID
-  integration tests;
+  integration tests, including rejection of two recovery append calls in one
+  batch and acceptance of distinct actions for distinct recoveries;
 - predecessor zero-count/pointer adjacency and bypass-negative tests;
+- metadata-router exact/inherited/original/recovered serving selection and
+  missing/wrong/unreadable recovery-pointer fail-closed tests;
 - optimized bytecode measurement, full Foundry suite, canonical Slither
   semantic comparison, repository check, deployment rehearsal, and release
   currentness.
@@ -717,8 +1037,9 @@ deployment proof.
    and migration surface.
 4. Only after that accepted reconciliation, authorize a new source branch from
    then-current `origin/main`.
-5. Land the canonical dependency implementations and exact Governance policy
-   before any exact-target deployment candidate or readiness claim.
+5. Land the canonical dependency implementations, owner-evidence target,
+   metadata-router serving integration, and exact Governance policy before any
+   exact-target deployment candidate or readiness claim.
 6. Regenerate static-analysis and release evidence from the final merged source.
 
 This ADR does not authorize merge of any implementation, deployment, release,
@@ -738,5 +1059,6 @@ If later Accepted, the protocol owner would accept:
   requiring a new action ID and fresh review;
 - mandatory dependency availability for artist, owner, Core, and Governance
   policy checks; and
-- a larger replaceable companion audit surface in exchange for keeping the
-  permanent finality registry and Core unchanged.
+- a larger replaceable companion plus a narrow Core pointer/caller-set and
+  metadata-router integration surface in exchange for keeping the permanent
+  finality registry and its interface unchanged.
