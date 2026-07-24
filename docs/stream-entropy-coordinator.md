@@ -2511,8 +2511,11 @@ recover," and raising it restores recovery capability. Its reproducible sizing
 evidence executes `providerResultStatus` staticcalls against each registered
 production adapter for a pinned fixture corpus of request IDs under the
 candidate cap, treats out-of-gas, revert, or malformed returndata as failure,
-and commits the measurements in release evidence. It has no onchain probe or
-mutation authority (ADR 0017).
+and commits the measurements in release evidence. The coordinator performs the
+bounded `providerResultStatus` staticcall required by [EC-INCIDENT] rule 3.2
+under `ENTROPY_RESULT_PROBE_GAS_LIMIT`; the evidence has no authorization role,
+and no standalone probe contract or probe-authorized parameter-mutation path
+exists (ADR 0017).
 
 One provider-side condition deserves explicit statement: a frame-level
 callback loss after upstream fulfillment — the in-flight repricing mode

@@ -635,14 +635,6 @@ def validate_entry(value: Any, index: int) -> dict[str, Any]:
 
     if parameters:
         raise GenesisProfileError(f"{path}.parameters must be empty for contract entries")
-    if scope not in {
-        "singleton",
-        "implementation",
-        "fallback_instance",
-    }:
-        raise GenesisProfileError(
-            f"{path}.deployment_scope is invalid for a contract entry: {scope!r}"
-        )
     return entry
 
 

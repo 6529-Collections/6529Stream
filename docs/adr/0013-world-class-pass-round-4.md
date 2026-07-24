@@ -55,10 +55,10 @@ address-set derivation for event-history reproduction. The system-manifest
 payload joins the onchain-bytes catalog class (SSTORE2 bytes with a
 state-readable pointer), so state-only payload discovery no longer
 bootstraps through an offchain document; the genesis deployment profile
-remains the human mirror. GGP/GTP metadata (floor, failure class, probe
-binding, probeMaxAgeBlocks) gains a pinned host read per parameter so the
-permissionless raise path depends on state, not mirrors. Collection-ID
-allocation and enumeration are pinned (sequential from 1, count read).
+remains the human mirror. Each GGP/GTP parameter gains pinned host reads for
+live value, immutable registration facts, and monotonic revision so governed
+raises depend on state, not mirrors. Collection-ID allocation and enumeration
+are pinned (sequential from 1, count read).
 Between-snapshot history loss is answered by an export-on-material-change
 rule for assignment/pointer families in addition to the cadence.
 

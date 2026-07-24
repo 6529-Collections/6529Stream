@@ -216,7 +216,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:536b6056ce5a0670846db3e3a0509d2f53ba9e06205907cec194a753234bd490"
+    "sha256": "sha256:085d35e0225d423d148081801beef052bfb907bc8bfffc27b89da85f00e291ac"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -445,13 +445,13 @@
     },
     {
       "path": "docs/adr/0013-world-class-pass-round-4.md",
-      "sha256": "sha256:afad57c6c1742cbe564739b172401fb833809ea7ef72515c9573b7378c99bd30",
-      "size_bytes": 12564
+      "sha256": "sha256:b8dd4ec9d87d91bdb54754a19057b547eba94b86647b1bcd00b5dcbac352a04f",
+      "size_bytes": 12552
     },
     {
       "path": "docs/adr/0014-world-class-pass-round-5.md",
-      "sha256": "sha256:da92fe450249c6ffb99de0fb7f1f432e1fc5d07d1d0432408c986f0dfb857911",
-      "size_bytes": 11205
+      "sha256": "sha256:7921dc10483e1c583b1fa2857f51075e928140442c37cfb66524cee44c2affc8",
+      "size_bytes": 11221
     },
     {
       "path": "docs/adr/0016-core-native-only-erc721.md",
@@ -740,8 +740,8 @@
     },
     {
       "path": "docs/stream-entropy-coordinator.md",
-      "sha256": "sha256:b945a687aa5164a2abed74a01df8a7f7fe9ee7f8c753670ad04dd3ffbb50c6bf",
-      "size_bytes": 164297
+      "sha256": "sha256:d6bad53c4b9b2c9c8162f4ff5a98874697e5a769f292f63c99321bc85911b934",
+      "size_bytes": 164521
     },
     {
       "path": "docs/stream-entropy-providers.md",
@@ -1325,7 +1325,7 @@
     },
     {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:2d186aa5b0b2a747217e8408fae51d4074666a5dd57c867f2b5ca51c926f8fe2",
+      "sha256": "sha256:c00049a635d490e3e865428c7c37720b06b13acb7f9aba56540748c8f7a2a053",
       "size_bytes": 150692
     },
     {
@@ -1390,7 +1390,7 @@
     },
     {
       "path": "release-artifacts/latest/release-candidate-lockfile.json",
-      "sha256": "sha256:ee09147bbc6f4b92aecb7ee325fb93f50a619c02e221c88f4446ba5762e79876",
+      "sha256": "sha256:12ae1e188a5b27365316847db7cccc62980a5cc62144bf1522e836206c4a293f",
       "size_bytes": 8998
     },
     {
@@ -1440,7 +1440,7 @@
     },
     {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:15dacfbcd992c793acf66e39f8df528ef0d32d44b80083d3b7281ce4171ce2d8",
+      "sha256": "sha256:7f3201d78b4ab12054dd2c7d490ed320f0312743ca363f9b05403285fed41441",
       "size_bytes": 140879
     },
     {
@@ -1625,8 +1625,8 @@
     },
     {
       "path": "scripts/check_genesis_deployment_profile.py",
-      "sha256": "sha256:47bfe8768ce5d8cbb715fc62229bdcfdae3538b40b2f5bdbcf0b9a0adeba80b3",
-      "size_bytes": 45903
+      "sha256": "sha256:5ae926e6f3c7fb75e097859d6cbe853eb7d143d22f209b3ff5a1bca3b1f21a66",
+      "size_bytes": 45671
     },
     {
       "path": "scripts/check_governed_parameter_identifiers.py",
@@ -1940,8 +1940,8 @@
     },
     {
       "path": "scripts/test_release_checksums.py",
-      "sha256": "sha256:d1ceff0bd94ce1d1345e69024395966bda88ac38cf573d58b320e8ed130fd53e",
-      "size_bytes": 30293
+      "sha256": "sha256:a1a813f16e3bcc9300b54d7dc261b6aaf54413e5824623d51f459ba9652f0ec4",
+      "size_bytes": 29719
     },
     {
       "path": "scripts/test_release_manifest.py",

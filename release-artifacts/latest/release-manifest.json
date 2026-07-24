@@ -2491,13 +2491,13 @@
       },
       {
         "path": "docs/adr/0013-world-class-pass-round-4.md",
-        "sha256": "sha256:afad57c6c1742cbe564739b172401fb833809ea7ef72515c9573b7378c99bd30",
-        "size_bytes": 12564
+        "sha256": "sha256:b8dd4ec9d87d91bdb54754a19057b547eba94b86647b1bcd00b5dcbac352a04f",
+        "size_bytes": 12552
       },
       {
         "path": "docs/adr/0014-world-class-pass-round-5.md",
-        "sha256": "sha256:da92fe450249c6ffb99de0fb7f1f432e1fc5d07d1d0432408c986f0dfb857911",
-        "size_bytes": 11205
+        "sha256": "sha256:7921dc10483e1c583b1fa2857f51075e928140442c37cfb66524cee44c2affc8",
+        "size_bytes": 11221
       },
       {
         "path": "docs/adr/0016-core-native-only-erc721.md",
@@ -2551,8 +2551,8 @@
       },
       {
         "path": "docs/stream-entropy-coordinator.md",
-        "sha256": "sha256:b945a687aa5164a2abed74a01df8a7f7fe9ee7f8c753670ad04dd3ffbb50c6bf",
-        "size_bytes": 164297
+        "sha256": "sha256:d6bad53c4b9b2c9c8162f4ff5a98874697e5a769f292f63c99321bc85911b934",
+        "size_bytes": 164521
       },
       {
         "path": "docs/stream-entropy-providers.md",

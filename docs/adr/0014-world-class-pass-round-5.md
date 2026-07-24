@@ -134,12 +134,12 @@ superseded; launch hosts are monotonic raise-only.
 FORWARDING_CAP classification is tightened: parameters on purchase or
 mint paths whose raise increases a revert threshold are reclassified
 FAIL_CLOSED_PRECHECK regardless of read-path association (closing the
-ratchet loophole); a permissionless re-lower to the last probe-passing
-value is added for FORWARDING_CAP parameters (bounded, probe-gated,
-symmetric with the raise); fixed caller stipends (2300-gas class) are
-inventoried and their interaction with raises documented per parameter.
-GTP cadence handles acceleration: faster block cadence triggers the same
-review obligation, and wall-clock floors bind in both directions.
+ratchet loophole). Fixed caller stipends (2300-gas class) are inventoried and
+their interaction with raises documented per parameter. GTP cadence evidence
+handles both acceleration and deceleration: cadence changes trigger review,
+and wall-clock floors bind in both directions. The original permissionless
+probe-gated re-lowering requirement is historical and is not an active
+implementation or release-gate requirement under ADR 0017.
 
 ### V8. Museum floor and packet completion
 
