@@ -30,9 +30,10 @@ artifact generators in canonical order.
 | Production size build | Measured, release-blocking | `python scripts/build_release_artifacts.py` followed by `python scripts/check_contract_size_budget.py` records canonical `StreamCore` at 24,152 runtime bytes; the aggregate all-source size build is diagnostic only |
 | `StreamCore` production headroom | Blocked | 424 bytes of EIP-170 margin, 1,576 bytes below the non-waivable 2,000-byte production minimum; issue #654 owns remediation |
 | Genesis deployment profile | Blocked | The active target specification expands the checked profile to 60 entries, including Permanent `StreamSystemManifest` entry 36 and immutable Permanent `StreamCoreFinalityAdapter` entry 37, but the current v1 implementation catalog cannot prove deployment-instance identity, fallback distinctness, or parameterized probe bindings; issue #656 owns reconciliation |
-| Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 38 Open production rows (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending dispositions; issue #658 owns remediation and reviewed disposition |
+| Slither first-party High/Medium | Blocked | Pinned Slither 0.11.5 analysis records 33 Open production rows (3 High, 30 Medium): one confirmed gap, five design-review rows, and 27 pending dispositions; issue #658 owns remediation and reviewed disposition |
+| Governance Executor native-value authority | Blocked | Bounded assembly makes the proposal-selected value-bearing call invisible to Slither without removing the authority; High open blocker `RISK-GOV-003` requires a closed-world target/selector/value policy, deployment binding, adversarial tests, and independent review under issues #658 and #665 |
 | Slither exact drift automation | Implemented on `main` by PR #662 | `python scripts/test_slither_baseline.py`, `python scripts/check_slither_baseline.py --baseline-only`, and `python scripts/check_slither_baseline.py --run-slither`; matching the baseline is not acceptance |
-| Production release mode | Blocked | External evidence, Core headroom, genesis completeness, and open Slither findings must all fail closed before production release |
+| Production release mode | Blocked | External evidence, Core headroom, genesis completeness, open Slither findings, and `RISK-GOV-003` must all fail closed before production release |
 
 The successful local gates are regression evidence only. They do not replace
 external audit, reviewed testnet evidence, production signatures, signed tags,

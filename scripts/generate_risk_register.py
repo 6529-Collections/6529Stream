@@ -12,10 +12,12 @@ from pathlib import Path
 from typing import Any
 
 import check_risk_register as checker
+import check_slither_baseline as slither_baseline_checker
 
 
 GENERATOR_VERSION = "1"
 DEFAULT_OUTPUT = checker.DEFAULT_REGISTER
+SLITHER_RISK_ID = "RISK-SLITHER-001"
 
 SOURCE_DOCUMENT_PATHS = [
     "release-artifacts/schema/risk-register.schema.json",
@@ -200,6 +202,51 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         "tracking": ["ops/EXECUTION_BACKLOG.md"],
     },
     {
+        "id": "RISK-GOV-003",
+        "title": "Governance Executor proposal-selected native-value authority",
+        "area": "governance",
+        "severity": "high",
+        "status": "open_blocker",
+        "owner": "security",
+        "target_gate": "Gate F",
+        "source": (
+            "Historical Slither arbitrary-send-eth fingerprint "
+            "sha256:c1b7db0f62e7ff01758e147d41188f1d33ea9a448efb0162d98b14e3ef11cbe8; "
+            "live semantic anchor "
+            "StreamGovernanceExecutor._executeCall(bytes32,uint256,GovernanceCall,bytes) "
+            "assembly call"
+        ),
+        "mitigation": (
+            "Implement and bind a closed-world target, selector, and native-value "
+            "action policy; review every balance source and destination; retain hostile "
+            "target, reentrancy, value-exhaustion, refund, and atomic-rollback tests; "
+            "prove the policy in deployment evidence; and complete independent review "
+            "before governance ownership cutover."
+        ),
+        "residual_risk": (
+            "The Executor can forward proposal-selected native value from a governed "
+            "batch. Bounded assembly prevents returndata bombs but is invisible to "
+            "Slither's arbitrary-send-eth detector and does not constrain destination, "
+            "value, balance source, or downstream call semantics."
+        ),
+        "evidence_paths": [
+            "smart-contracts/StreamGovernanceExecutor.sol",
+            "docs/adr/0004-admin-governance.md",
+            "docs/known-blockers.md",
+            "test/StreamGovernanceExecutor.t.sol",
+        ],
+        "checks": [
+            "forge test --match-path test/StreamGovernanceExecutor.t.sol -vvv",
+            "python scripts/test_risk_register.py",
+            "python scripts/check_risk_register.py",
+            "python scripts/test_release_mode.py",
+        ],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/658",
+            "https://github.com/6529-Collections/6529Stream/issues/665",
+        ],
+    },
+    {
         "id": "RISK-META-001",
         "title": "Marketplace, indexer, and metadata browser evidence is incomplete",
         "area": "metadata_marketplace",
@@ -368,7 +415,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ],
     },
     {
-        "id": "RISK-SLITHER-001",
+        "id": SLITHER_RISK_ID,
         "title": "First-party production Slither findings remain open",
         "area": "static_analysis",
         "severity": "high",
@@ -382,9 +429,9 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "exact normalized baseline drift gate green."
         ),
         "residual_risk": (
-            "The current normalized baseline contains 4 High and 34 Medium open "
-            "first-party production findings; local normalization and drift detection "
-            "do not establish that any finding is safe."
+            "The current normalized baseline contains open first-party production "
+            "findings; local normalization and drift detection do not establish that "
+            "any finding is safe."
         ),
         "evidence_paths": [
             "ops/SLITHER_BASELINE.json",
@@ -447,11 +494,32 @@ def file_ref(repo_root: Path, relative_path: str) -> dict[str, str]:
     return {"path": relative_path, "sha256": checker.file_sha256(resolved)}
 
 
+def slither_open_residual_risk(repo_root: Path) -> str:
+    """Describe the validated live baseline without duplicating mutable counts."""
+    baseline = slither_baseline_checker.validate_baseline(
+        repo_root,
+        repo_root / slither_baseline_checker.DEFAULT_BASELINE,
+        repo_root / slither_baseline_checker.DEFAULT_MARKDOWN,
+    )
+    open_counts = {impact: 0 for impact in slither_baseline_checker.IMPACTS}
+    for finding in baseline["findings"]:
+        if finding["status"] == "Open":
+            open_counts[finding["impact"]] += 1
+    return (
+        "The current normalized baseline contains "
+        f"{open_counts['High']} High and {open_counts['Medium']} Medium open "
+        "first-party production findings; local normalization and drift detection "
+        "do not establish that any finding is safe."
+    )
+
+
 def build_register(repo_root: Path) -> dict[str, Any]:
     """Build the deterministic risk register object."""
     risks = []
     for definition in sorted(RISK_DEFINITIONS, key=lambda item: str(item["id"])):
         risk = {key: value for key, value in definition.items() if key != "evidence_paths"}
+        if risk["id"] == SLITHER_RISK_ID:
+            risk["residual_risk"] = slither_open_residual_risk(repo_root)
         risk["evidence"] = [
             file_ref(repo_root, evidence_path) for evidence_path in definition["evidence_paths"]
         ]

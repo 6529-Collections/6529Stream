@@ -20,6 +20,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import test_genesis_deployment_profile as genesis_profile_test_support
+import generate_risk_register as risk_register_generator
 
 SCRIPT_PATH = SCRIPT_DIR / "check_release_mode.py"
 SPEC = importlib.util.spec_from_file_location("check_release_mode", SCRIPT_PATH)
@@ -29,6 +30,7 @@ SPEC.loader.exec_module(checker)
 
 evidence_checker = checker.evidence_checker
 REAL_SLITHER_BASELINE_BLOCKERS = checker.slither_baseline_blockers
+REAL_GOVERNANCE_NATIVE_VALUE_BLOCKERS = checker.governance_native_value_blockers
 
 
 def write_text(path: Path, value: str) -> None:
@@ -236,12 +238,19 @@ class ReleaseModeTests(unittest.TestCase):
             return_value=[],
         )
         self.slither_patcher.start()
+        self.risk_register_patcher = mock.patch.object(
+            checker,
+            "governance_native_value_blockers",
+            return_value=[],
+        )
+        self.risk_register_patcher.start()
 
     def tearDown(self) -> None:
+        self.risk_register_patcher.stop()
         self.slither_patcher.stop()
 
     def test_committed_slither_baseline_is_a_release_blocker(self) -> None:
-        """A matching 38-row baseline remains blocked rather than accepted."""
+        """A matching 33-row baseline remains blocked rather than accepted."""
         repo_root = Path(__file__).resolve().parents[1]
 
         blockers = REAL_SLITHER_BASELINE_BLOCKERS(
@@ -251,8 +260,8 @@ class ReleaseModeTests(unittest.TestCase):
         )
 
         self.assertEqual(len(blockers), 1)
-        self.assertIn("38 Open High/Medium", blockers[0])
-        self.assertIn("High=4, Medium=34", blockers[0])
+        self.assertIn("33 Open High/Medium", blockers[0])
+        self.assertIn("High=3, Medium=30", blockers[0])
         self.assertIn("issue #658", blockers[0])
 
     def test_slither_blocker_prevents_otherwise_complete_public_beta(self) -> None:
@@ -273,11 +282,79 @@ class ReleaseModeTests(unittest.TestCase):
             with mock.patch.object(
                 checker,
                 "slither_baseline_blockers",
-                return_value=["38 Open High/Medium Slither findings"],
+                return_value=["33 Open High/Medium Slither findings"],
             ):
                 with self.assertRaisesRegex(
                     checker.ReleaseModeError,
-                    "38 Open High/Medium Slither findings",
+                    "33 Open High/Medium Slither findings",
+                ):
+                    checker.validate_release_mode(path, root, "public-beta")
+
+    def test_generated_governance_native_value_risk_is_a_release_blocker(self) -> None:
+        """The manual risk preserves the Slither-blind native-value blocker."""
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            register_path = Path(temp_dir) / "risk-register.json"
+            write_json(
+                register_path,
+                risk_register_generator.build_register(repo_root),
+            )
+
+            blockers = REAL_GOVERNANCE_NATIVE_VALUE_BLOCKERS(
+                register_path,
+                repo_root,
+            )
+
+        self.assertEqual(len(blockers), 1)
+        self.assertIn("RISK-GOV-003 remains open_blocker", blockers[0])
+        self.assertIn("issues #658 and #665", blockers[0])
+
+    def test_governance_native_value_blocker_reads_validated_snapshot_once(self) -> None:
+        """The release decision consumes the exact snapshot that was validated."""
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            register_path = Path(temp_dir) / "risk-register.json"
+            write_json(
+                register_path,
+                risk_register_generator.build_register(repo_root),
+            )
+            with mock.patch.object(
+                checker.risk_register_checker,
+                "load_json",
+                wraps=checker.risk_register_checker.load_json,
+            ) as load_json:
+                blockers = REAL_GOVERNANCE_NATIVE_VALUE_BLOCKERS(
+                    register_path,
+                    repo_root,
+                )
+
+        self.assertEqual(load_json.call_count, 1)
+        self.assertEqual(len(blockers), 1)
+        self.assertIn("RISK-GOV-003 remains open_blocker", blockers[0])
+
+    def test_governance_native_value_blocker_prevents_public_beta(self) -> None:
+        """Otherwise-ready evidence cannot bypass the manual authority risk."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            path = root / checker.DEFAULT_EVIDENCE
+            write_json(
+                path,
+                evidence_document(
+                    root,
+                    public_beta_status="ready",
+                    production_status="blocked",
+                    production_requirement_status="missing",
+                ),
+            )
+
+            with mock.patch.object(
+                checker,
+                "governance_native_value_blockers",
+                return_value=["RISK-GOV-003 remains open_blocker"],
+            ):
+                with self.assertRaisesRegex(
+                    checker.ReleaseModeError,
+                    "RISK-GOV-003 remains open_blocker",
                 ):
                     checker.validate_release_mode(path, root, "public-beta")
 

@@ -30,10 +30,10 @@ EXPECTED_CRYTIC_COMPILE_VERSION = "0.3.11"
 EXPECTED_SOLC_VERSION = "0.8.19"
 EXPECTED_SOLC_SELECT_VERSION = "1.2.0"
 EXPECTED_FOUNDRY_VERSION = "1.7.1"
-EXPECTED_ANALYZED_COMMIT = "ce8fed6d7ec4366c42aab381ad739a00fe08bc08"
-EXPECTED_CAPTURED_AT_UTC = "2026-07-22T19:23:25Z"
+EXPECTED_ANALYZED_COMMIT = "c0be71915bc650569940b249fa9e5c801c0587fc"
+EXPECTED_CAPTURED_AT_UTC = "2026-07-23T23:52:41Z"
 EXPECTED_CAPTURE_COMMAND = (
-    "slither . --config-file slither.config.json --foundry-compile-all "
+    "python -m slither . --config-file slither.config.json --foundry-compile-all "
     "--json <temp-file>"
 )
 EXPECTED_GATE_COMMAND = (
@@ -42,40 +42,40 @@ EXPECTED_GATE_COMMAND = (
     "--json-types detectors --json <temp-file> --fail-none"
 )
 EXPECTED_CAPTURE_NATIVE_EXIT_CODE = -1
-EXPECTED_RAW_JSON_SIZE_BYTES = 143_333_855
+EXPECTED_RAW_JSON_SIZE_BYTES = 319_431_599
 EXPECTED_RAW_JSON_SHA256 = (
-    "sha256:d98273df2d70954fd4442b11ca1b628b575788bf93cfc18f8918a91a9323c14c"
+    "sha256:a58f7c87ed81fc8d10a06c91d3d1ffed2f6ced57d83a6301ceb7dbcd00e76d77"
 )
 
 IMPACTS = ("High", "Medium")
-EXPECTED_COUNTS = {"High": 4, "Medium": 34, "total": 38}
+EXPECTED_COUNTS = {"High": 3, "Medium": 30, "total": 33}
 EXPECTED_CAPTURE_COUNTS = {
-    "High": 46,
-    "Medium": 579,
-    "Low": 692,
-    "Informational": 853,
-    "Optimization": 34,
-    "total": 2204,
+    "High": 47,
+    "Medium": 840,
+    "Low": 1208,
+    "Informational": 1008,
+    "Optimization": 40,
+    "total": 3143,
 }
 EXPECTED_SCOPE_COUNTS = {
-    "first_party_production": {"High": 4, "Medium": 34, "total": 38},
+    "first_party_production": {"High": 3, "Medium": 30, "total": 33},
     "vendored": {"High": 1, "Medium": 9, "total": 10},
-    "test": {"High": 41, "Medium": 529, "total": 570},
+    "test": {"High": 43, "Medium": 794, "total": 837},
     "script": {"High": 0, "Medium": 7, "total": 7},
     "other": {"High": 0, "Medium": 0, "total": 0},
 }
 EXPECTED_TRIAGE_COUNTS = {
     "confirmed_gap": 1,
-    "design_review": 6,
-    "pending_disposition": 31,
+    "design_review": 5,
+    "pending_disposition": 27,
 }
 EXPECTED_DETECTOR_COUNTS = {
-    ("High", "arbitrary-send-eth"): 2,
+    ("High", "arbitrary-send-eth"): 1,
     ("High", "uninitialized-state"): 2,
     ("Medium", "incorrect-equality"): 5,
     ("Medium", "reentrancy-no-eth"): 4,
-    ("Medium", "uninitialized-local"): 12,
-    ("Medium", "unused-return"): 13,
+    ("Medium", "uninitialized-local"): 9,
+    ("Medium", "unused-return"): 12,
 }
 VENDORED_PATHS = (
     "smart-contracts/Base64.sol",
@@ -679,7 +679,7 @@ def render_markdown(data: Mapping[str, Any]) -> str:
         "This is the current first-party production High/Medium Slither inventory.",
         "Passing the drift gate means the inventory matches the analyzed source; it does",
         "not accept any finding, complete a security audit, or make the protocol ready for",
-        "public beta or production. All 38 current rows remain `Open` under issue #658.",
+        f"public beta or production. All {data['counts']['total']} current rows remain `Open` under issue #658.",
         "",
         "## Capture Provenance",
         "",
@@ -785,8 +785,10 @@ def render_markdown(data: Mapping[str, Any]) -> str:
             "",
             "- `confirmed_gap` is the unwritten Core burn-block activation-height mapping;",
             "  it remains owned by #654 and cannot be accepted or marked fixed here.",
-            "- `design_review` covers two governed/native-value transfer rows and four",
-            "  callback/order rows. Existing guards do not replace threat-model and",
+            "- `design_review` covers one analyzer-visible native-value transfer row and",
+            "  four callback/order rows. The Executor's analyzer-blind proposal-selected",
+            "  native-value authority is tracked separately as required open risk",
+            "  `RISK-GOV-003`. Existing guards do not replace threat-model and",
             "  adversarial-test evidence.",
             "- `pending_disposition` covers default/sentinel/ignored-field candidates. Each",
             "  row needs its own executable proof before `Accepted` or `False Positive`.",

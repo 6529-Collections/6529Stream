@@ -41,7 +41,7 @@
         "verified_deployed_addresses"
       ]
     },
-    "risk_count": 12
+    "risk_count": 13
   },
   "source_lock": {
     "mode": "pre_audit_local_baseline",
@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:0d4bcf0d0f0d110ea4b294c877f10113e7e056cf9ca9cdc690c01eee6790e71c",
+      "sha256": "sha256:e5cb2466a48c7da35ea1310d191d36fc2b2a79f0b3a946984cd1fee8eab05b8d",
       "size_bytes": 135412,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:a5f6cb98a9c4ad67e08d45a26374fa6e2ec96713b8b64561dd6f4039feb49957",
+      "sha256": "sha256:d8191f3307d17c47f1d8f0291b3c587831a9e1e5770bf4016b26f0dbf62a0ee4",
       "size_bytes": 150692,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,21 +73,21 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:d20cbc117228c457b0ce40ad1755c6977ba3c5ee8289549adce14f0e38632f59",
-      "size_bytes": 25494,
+      "sha256": "sha256:a545f82b59a42537d76c080047285abe92b7670271f80dcebf688b48feba56eb",
+      "size_bytes": 27808,
       "schema_version": "6529stream.risk-register.v1"
     },
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:107247020290c6adb6064f007ae73499d3fba64c23c262a7214fb2921119e117",
-        "size_bytes": 118407,
+        "sha256": "sha256:ca878fc379be9c75d4bf14608e10cd03db95d3ad0ac59caf746c5b39639c91ec",
+        "size_bytes": 122033,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:21f09b0a5967e05a83087a13621c0c57c901ec530bf09016a06d6fe47e7c5ce5",
-        "size_bytes": 115100
+        "sha256": "sha256:c434719bb1482f2d4e053a82c770b61f003a40ea05bfabc8d8e3a512c14e7cad",
+        "size_bytes": 118712
       }
     },
     "blocker_reports": {

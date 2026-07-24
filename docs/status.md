@@ -469,9 +469,14 @@ The current Gate A smoke baseline proves:
 - `scripts/check_slither_baseline.py` keeps a canonical normalized first-party
   production set in `ops/SLITHER_BASELINE.json`, checks its Markdown mirror and
   provenance without invoking Slither during the fast default gate, and runs a
-  dedicated pinned exact-drift analysis in CI. The current set is 38 Open rows
-  (4 High, 34 Medium): one confirmed gap, six design-review rows, and 31 pending
-  dispositions. This is a release blocker and not a risk acceptance.
+  dedicated pinned exact-drift analysis in CI. The current set is 33 Open rows
+  (3 High, 30 Medium): one confirmed gap, five design-review rows, and 27
+  pending dispositions. This is a release blocker and not a risk acceptance.
+  Bounded assembly made the Governance Executor's proposal-selected
+  native-value authority invisible to Slither without removing it, so
+  `RISK-GOV-003` preserves that authority as a separate High open blocker under
+  issues #658 and #665. The Governance V2 foundation remains pre-audit and not
+  production-ready.
 - `scripts/test_release_readiness.py` and
   `scripts/check_release_readiness.py` prove
   `docs/release-readiness.md` remains a Gate G dashboard that separates

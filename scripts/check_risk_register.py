@@ -82,7 +82,11 @@ VALID_STATUSES = frozenset(
     }
 )
 VALID_GATES = frozenset({"Gate D", "Gate E", "Gate F", "Gate G"})
-REQUIRED_RISK_IDS = frozenset({"RISK-AUD-002"})
+GOVERNANCE_NATIVE_VALUE_RISK_ID = "RISK-GOV-003"
+REQUIRED_RISK_STATUSES = {
+    GOVERNANCE_NATIVE_VALUE_RISK_ID: "open_blocker",
+}
+REQUIRED_RISK_IDS = frozenset({"RISK-AUD-002"}) | frozenset(REQUIRED_RISK_STATUSES)
 
 RISK_ID_RE = re.compile(r"^RISK-[A-Z0-9]+-\d{3}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -353,8 +357,8 @@ def validate_risk(value: Any, repo_root: Path, index: int) -> dict[str, str]:
     return {"id": risk_id, "area": area, "severity": severity, "status": status}
 
 
-def validate_risk_register(repo_root: Path, register_path: Path) -> None:
-    """Validate the canonical release risk register."""
+def validate_risk_register(repo_root: Path, register_path: Path) -> dict[str, Any]:
+    """Validate and return the exact canonical release risk-register snapshot."""
     data = require_dict(load_json(register_path), "risk_register")
     require_exact_keys(data, "risk_register", TOP_LEVEL_FIELDS)
     validate_no_secret_shape(data)
@@ -387,6 +391,7 @@ def validate_risk_register(repo_root: Path, register_path: Path) -> None:
     seen_ids: set[str] = set()
     areas: set[str] = set()
     ordered_ids: list[str] = []
+    normalized_risks: dict[str, dict[str, str]] = {}
     for index, risk in enumerate(risks):
         normalized = validate_risk(risk, repo_root, index)
         risk_id = normalized["id"]
@@ -395,6 +400,7 @@ def validate_risk_register(repo_root: Path, register_path: Path) -> None:
         seen_ids.add(risk_id)
         ordered_ids.append(risk_id)
         areas.add(normalized["area"])
+        normalized_risks[risk_id] = normalized
 
     if sorted(seen_ids) != ordered_ids:
         raise RiskRegisterError("risks must be sorted by id")
@@ -405,11 +411,20 @@ def validate_risk_register(repo_root: Path, register_path: Path) -> None:
             "risk register is missing required risk id(s): " + ", ".join(missing_ids)
         )
 
+    for risk_id, required_status in sorted(REQUIRED_RISK_STATUSES.items()):
+        actual_status = normalized_risks[risk_id]["status"]
+        if actual_status != required_status:
+            raise RiskRegisterError(
+                f"{risk_id}.status must remain {required_status!r}, "
+                f"got {actual_status!r}"
+            )
+
     missing_areas = sorted(REQUIRED_AREAS - areas)
     if missing_areas:
         raise RiskRegisterError(
             "risk register is missing required area(s): " + ", ".join(missing_areas)
         )
+    return data
 
 
 def parse_args(argv: list[str]) -> argparse.Namespace:
