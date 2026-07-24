@@ -25,6 +25,9 @@
     "IStreamCore": "0xba77d620",
     "IStreamCoreFinalityAdapter": "0xebf35615",
     "IStreamDrops": "0xd7c2abe3",
+    "IStreamGasParameterHost": "0xc5eef2ab",
+    "IStreamGovernanceExecutor": "0x1e0c9ab7",
+    "IStreamGovernedParameterAuthority": "0xd9f8d48c",
     "IStreamMintGate": "0xa5d7921d",
     "IStreamMintLedger": "0x79bc7192",
     "IStreamMintManager": "0xfc2559eb",
@@ -34,7 +37,8 @@
     "IStreamPrimarySaleSettlement": "0x53f97e17",
     "IStreamRevenueResolver": "0x3503c22e",
     "IStreamSplitFactory": "0x1748deee",
-    "IStreamSplitWallet": "0x0ea5f02c"
+    "IStreamSplitWallet": "0x0ea5f02c",
+    "IStreamTimeParameterHost": "0xc185242a"
   },
   "interfaces": {
     "IDependencyRegistry": {
@@ -954,6 +958,268 @@
         }
       ]
     },
+    "IStreamGasParameterHost": {
+      "source": "smart-contracts/IStreamGasParameterHost.sol",
+      "artifact_path": "out-release/IStreamGasParameterHost.sol/IStreamGasParameterHost.json",
+      "abi_sha256": "sha256:f0d81e1d437ffb5cd8547b7c1056cd7ae94f1380eb1b911594ee6d8c754980e6",
+      "interface_id": "0xc5eef2ab",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xc5eef2ab",
+      "function_selectors": [
+        {
+          "signature": "gasParameter(bytes32)",
+          "selector": "0xbf8c2502"
+        },
+        {
+          "signature": "gasParameterIds()",
+          "selector": "0x025c6291"
+        },
+        {
+          "signature": "gasParameterInfo(bytes32)",
+          "selector": "0xec2ef90a"
+        },
+        {
+          "signature": "governanceAuthority()",
+          "selector": "0xc81dbbe8"
+        },
+        {
+          "signature": "raiseGasParameter(bytes32,uint256)",
+          "selector": "0x5c0df7da"
+        }
+      ]
+    },
+    "IStreamGovernanceExecutor": {
+      "source": "smart-contracts/IStreamGovernanceExecutor.sol",
+      "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
+      "abi_sha256": "sha256:45d4e15112d46ca5ef35df433fb96ce00af8bf9e4b4c088878398e0ae3d6637b",
+      "interface_id": "0x1e0c9ab7",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0x1e0c9ab7",
+      "function_selectors": [
+        {
+          "signature": "approvedNativeReceiverConfig(address)",
+          "selector": "0x8688cbd7"
+        },
+        {
+          "signature": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[]))",
+          "selector": "0x32212927"
+        },
+        {
+          "signature": "cancelGovernanceAction(bytes32,bytes32)",
+          "selector": "0xe2a10db5"
+        },
+        {
+          "signature": "cancellerConfig(address)",
+          "selector": "0x6322bbe5"
+        },
+        {
+          "signature": "currentAction()",
+          "selector": "0x546ea281"
+        },
+        {
+          "signature": "executeGovernanceAction(bytes32,bytes)",
+          "selector": "0xed8259ec"
+        },
+        {
+          "signature": "executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])",
+          "selector": "0x2eccc33e"
+        },
+        {
+          "signature": "freezeSelectorConfig(address,bytes4)",
+          "selector": "0xa2bd6690"
+        },
+        {
+          "signature": "governanceAction(bytes32)",
+          "selector": "0x5ecd50c9"
+        },
+        {
+          "signature": "governanceNonce()",
+          "selector": "0xd9be832c"
+        },
+        {
+          "signature": "governanceRootState()",
+          "selector": "0x6b4e85f3"
+        },
+        {
+          "signature": "isApprovedNativeReceiver(address)",
+          "selector": "0x2010260f"
+        },
+        {
+          "signature": "isCanceller(address)",
+          "selector": "0xb426475e"
+        },
+        {
+          "signature": "isFreezeSelector(address,bytes4)",
+          "selector": "0xdfcca064"
+        },
+        {
+          "signature": "isProposer(address)",
+          "selector": "0x74ec29a0"
+        },
+        {
+          "signature": "isTighteningCall(address,bytes4)",
+          "selector": "0x01b1b9b0"
+        },
+        {
+          "signature": "liveTerminalFreezeActionAt(bytes32,uint256)",
+          "selector": "0x2d3e4e28"
+        },
+        {
+          "signature": "liveTerminalFreezeActionCount(bytes32)",
+          "selector": "0xb806c467"
+        },
+        {
+          "signature": "materializeExpiredAction(bytes32)",
+          "selector": "0x2098cfe6"
+        },
+        {
+          "signature": "minimumDelay(uint8)",
+          "selector": "0x89000972"
+        },
+        {
+          "signature": "pendingScheduledActionCount()",
+          "selector": "0x20662991"
+        },
+        {
+          "signature": "proposerConfig(address)",
+          "selector": "0x27a7802b"
+        },
+        {
+          "signature": "pruneElapsedTerminalFreezeActions(bytes32)",
+          "selector": "0xace3628e"
+        },
+        {
+          "signature": "publishGovernanceCallData(bytes[])",
+          "selector": "0x5447021f"
+        },
+        {
+          "signature": "publishedCallData(bytes32)",
+          "selector": "0x95a2b189"
+        },
+        {
+          "signature": "registerCanceller(address,bool)",
+          "selector": "0xcb585072"
+        },
+        {
+          "signature": "registerFreezeSelector(address,bytes4,bool)",
+          "selector": "0xb1b73b69"
+        },
+        {
+          "signature": "registerProposer(address,bool)",
+          "selector": "0x0794ec84"
+        },
+        {
+          "signature": "registerSystemManifestTailTrigger(address,bytes4,uint8)",
+          "selector": "0xc64f0807"
+        },
+        {
+          "signature": "rotateGovernanceRoot(address,bytes32)",
+          "selector": "0x46bf8975"
+        },
+        {
+          "signature": "scheduleGovernanceAction((uint8,address,uint256,bytes4,bytes,bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32))",
+          "selector": "0xd1699cf2"
+        },
+        {
+          "signature": "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)",
+          "selector": "0x9c954144"
+        },
+        {
+          "signature": "scheduledCallData(bytes32)",
+          "selector": "0x72a3c7b8"
+        },
+        {
+          "signature": "scheduledCallDataPointer(bytes32)",
+          "selector": "0x38f8ce24"
+        },
+        {
+          "signature": "sealSystemManifestBootstrap()",
+          "selector": "0xbd1f39cd"
+        },
+        {
+          "signature": "setApprovedNativeReceiver(address,bool)",
+          "selector": "0x31ac9e82"
+        },
+        {
+          "signature": "setTighteningCall(address,bytes4,bool)",
+          "selector": "0x250885fb"
+        },
+        {
+          "signature": "systemManifestBatchTailRule(address,bytes4)",
+          "selector": "0xffd6babe"
+        },
+        {
+          "signature": "systemManifestBootstrapState()",
+          "selector": "0x8a2d979b"
+        },
+        {
+          "signature": "systemManifestTailTriggerAt(uint256)",
+          "selector": "0xd83d70b6"
+        },
+        {
+          "signature": "systemManifestTailTriggerChainHash()",
+          "selector": "0xa05cac72"
+        },
+        {
+          "signature": "systemManifestTailTriggerCount()",
+          "selector": "0xeee99df8"
+        },
+        {
+          "signature": "terminalFreezeActionPage(bytes32,uint256,uint256)",
+          "selector": "0xc8b276ba"
+        },
+        {
+          "signature": "terminalFreezeGuardianConfigCommitment(bytes32)",
+          "selector": "0xd0477f1f"
+        },
+        {
+          "signature": "terminalFreezeLiveActionCaps()",
+          "selector": "0x1b630d16"
+        },
+        {
+          "signature": "terminalFreezeLiveActionUsage(bytes32,address)",
+          "selector": "0x481eae00"
+        },
+        {
+          "signature": "terminalFreezeVetoGuardian(bytes32)",
+          "selector": "0xe6f22dba"
+        },
+        {
+          "signature": "terminalFreezeVetoGuardianSet(bytes32)",
+          "selector": "0x2b33c302"
+        },
+        {
+          "signature": "terminalFreezeVetoRole(bytes32)",
+          "selector": "0xce900170"
+        },
+        {
+          "signature": "tighteningCallConfig(address,bytes4)",
+          "selector": "0x4f6eff63"
+        },
+        {
+          "signature": "vetoTerminalFreeze(bytes32,bytes32)",
+          "selector": "0x2d1585ec"
+        }
+      ]
+    },
+    "IStreamGovernedParameterAuthority": {
+      "source": "smart-contracts/IStreamGovernedParameterAuthority.sol",
+      "artifact_path": "out-release/IStreamGovernedParameterAuthority.sol/IStreamGovernedParameterAuthority.json",
+      "abi_sha256": "sha256:2781c74c319f8cf9256fc141171c74c00f8280fb1be9b23152387144f99b73ab",
+      "interface_id": "0xd9f8d48c",
+      "interface_id_source": "selector_xor",
+      "computed_selector_xor": "0xd9f8d48c",
+      "function_selectors": [
+        {
+          "signature": "currentAction()",
+          "selector": "0x546ea281"
+        },
+        {
+          "signature": "isStreamGovernedParameterAuthority()",
+          "selector": "0x8d96760d"
+        }
+      ]
+    },
     "IStreamMintGate": {
       "source": "smart-contracts/IStreamMintGate.sol",
       "artifact_path": "out-release/IStreamMintGate.sol/IStreamMintGate.json",
@@ -1567,6 +1833,36 @@
         {
           "signature": "uniqueAccountCount()",
           "selector": "0x3e6f2291"
+        }
+      ]
+    },
+    "IStreamTimeParameterHost": {
+      "source": "smart-contracts/IStreamTimeParameterHost.sol",
+      "artifact_path": "out-release/IStreamTimeParameterHost.sol/IStreamTimeParameterHost.json",
+      "abi_sha256": "sha256:dca1fe88797e3c08be08c7eb99dcc42b5b58a08c23626e75c88b764ca515963c",
+      "interface_id": "0xc185242a",
+      "interface_id_source": "configured",
+      "computed_selector_xor": "0xc185242a",
+      "function_selectors": [
+        {
+          "signature": "governanceAuthority()",
+          "selector": "0xc81dbbe8"
+        },
+        {
+          "signature": "raiseTimeParameter(bytes32,uint256)",
+          "selector": "0x046e1fd5"
+        },
+        {
+          "signature": "timeParameter(bytes32)",
+          "selector": "0x4e92a03f"
+        },
+        {
+          "signature": "timeParameterIds()",
+          "selector": "0x1c404390"
+        },
+        {
+          "signature": "timeParameterInfo(bytes32)",
+          "selector": "0x5f2463b8"
         }
       ]
     }

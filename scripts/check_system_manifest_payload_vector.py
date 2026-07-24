@@ -77,22 +77,6 @@ REGISTRY_ENTRY_KEYS = frozenset(
         "revision",
     }
 )
-PROBE_KEYS = frozenset(
-    {
-        "host",
-        "parameterId",
-        "probe",
-        "probeRegistry",
-        "probeModuleType",
-        "probeInterfaceId",
-        "probeModuleVersion",
-        "probeRuntimeCodeHash",
-        "probeModuleManifestHash",
-        "probeDeploymentManifestHash",
-        "probeBindingHash",
-        "probeMaxAgeBlocks",
-    }
-)
 FALLBACK_KEYS = frozenset(
     {
         "pointerType",
@@ -213,7 +197,6 @@ def _validate_global_deployment_identity(
         ("contracts", "deploymentManifestHash"),
         ("pointers", "deploymentManifestHash"),
         ("registryEntries", "deploymentManifestHash"),
-        ("gasParameterProbes", "probeDeploymentManifestHash"),
         ("criticalFallbacks", "deploymentManifestHash"),
     )
     for array_name, field_name in array_fields:
@@ -509,83 +492,10 @@ def validate_payload_schema(
         )
 
     probes = _array(payload["gasParameterProbes"], "payload.gasParameterProbes")
-    previous_probe_sort: tuple[str, str] | None = None
-    seen_probe_pairs: set[tuple[str, str]] = set()
-    for index, raw_probe in enumerate(probes):
-        probe = _object(raw_probe, f"payload.gasParameterProbes[{index}]")
-        _exact_keys(probe, PROBE_KEYS, f"payload.gasParameterProbes[{index}]")
-        host = _address(probe["host"], f"payload.gasParameterProbes[{index}].host")
-        parameter_id = _bytes32(
-            probe["parameterId"], f"payload.gasParameterProbes[{index}].parameterId"
+    if probes:
+        raise generator.ManifestVectorError(
+            "payload.gasParameterProbes is reserved in schema v1 and must be empty"
         )
-        sort_key = (host, parameter_id)
-        if previous_probe_sort is not None and sort_key <= previous_probe_sort:
-            raise generator.ManifestVectorError(
-                "payload.gasParameterProbes is not strictly host/parameterId ordered"
-            )
-        previous_probe_sort = sort_key
-        if sort_key in seen_probe_pairs:
-            raise generator.ManifestVectorError("duplicate host/parameter probe binding")
-        seen_probe_pairs.add(sort_key)
-        probe_address = _address(
-            probe["probe"], f"payload.gasParameterProbes[{index}].probe"
-        )
-        registry = _address(
-            probe["probeRegistry"],
-            f"payload.gasParameterProbes[{index}].probeRegistry",
-        )
-        referenced_addresses.extend((host, probe_address, registry))
-        if any(
-            address not in contract_by_address
-            for address in (host, probe_address, registry)
-        ):
-            raise generator.ManifestVectorError("probe binding references an unknown contract")
-        _bytes4(
-            probe["probeInterfaceId"],
-            f"payload.gasParameterProbes[{index}].probeInterfaceId",
-        )
-        for field in (
-            "probeModuleType",
-            "probeModuleVersion",
-            "probeRuntimeCodeHash",
-            "probeModuleManifestHash",
-            "probeDeploymentManifestHash",
-            "probeBindingHash",
-        ):
-            _bytes32(probe[field], f"payload.gasParameterProbes[{index}].{field}")
-        _decimal(
-            probe["probeMaxAgeBlocks"],
-            f"payload.gasParameterProbes[{index}].probeMaxAgeBlocks",
-        )
-        expected_binding = generator._probe_binding_hash(
-            registry,
-            probe_address,
-            probe["probeModuleType"],
-            probe["probeInterfaceId"],
-            probe["probeModuleVersion"],
-            probe["probeRuntimeCodeHash"],
-            probe["probeModuleManifestHash"],
-            probe["probeDeploymentManifestHash"],
-        )
-        if probe["probeBindingHash"] != expected_binding:
-            raise generator.ManifestVectorError(
-                f"payload.gasParameterProbes[{index}] binding hash does not recompute"
-            )
-        probe_record = registry_by_module[probe_address]
-        if (
-            probe["probeRegistry"] != canonical_registry
-            or probe["probeModuleType"] != probe_record["moduleType"]
-            or probe["probeInterfaceId"] != probe_record["interfaceId"]
-            or probe["probeModuleVersion"] != probe_record["moduleVersion"]
-            or probe["probeRuntimeCodeHash"] != probe_record["runtimeCodeHash"]
-            or probe["probeModuleManifestHash"]
-            != probe_record["moduleManifestHash"]
-            or probe["probeDeploymentManifestHash"]
-            != probe_record["deploymentManifestHash"]
-        ):
-            raise generator.ManifestVectorError(
-                "probe binding facts disagree with the canonical registry record"
-            )
 
     fallbacks = _array(payload["criticalFallbacks"], "payload.criticalFallbacks")
     previous_fallback_sort: tuple[str, str] | None = None
@@ -788,6 +698,30 @@ def validate_vector_mechanics(
         raise generator.ManifestVectorError(
             "fixture state-export publisher ABI surface or fixed digest drifted: "
             + publisher_difference
+        )
+    if derivation.get("governed_parameter_authority_binding") != "GOVERNANCE_LAYER":
+        raise generator.ManifestVectorError(
+            "fixture governed-parameter authority binding must remain explicit"
+        )
+    authority_surface = _object(
+        derivation.get("governed_parameter_authority_surface"),
+        "vector.fixture_derivation.governed_parameter_authority_surface",
+    )
+    expected_authority_surface = generator.governed_parameter_authority_surface()
+    _exact_keys(
+        authority_surface,
+        expected_authority_surface,
+        "vector.fixture_derivation.governed_parameter_authority_surface",
+    )
+    authority_difference = _first_difference(
+        expected_authority_surface,
+        authority_surface,
+        "vector.fixture_derivation.governed_parameter_authority_surface",
+    )
+    if authority_difference:
+        raise generator.ManifestVectorError(
+            "fixture governed-parameter authority ABI surface or fixed digest drifted: "
+            + authority_difference
         )
     if derivation.get("sstore2_carrier_policy") != (
         "root and chunk carriers are excluded from payload.contracts "
@@ -1036,7 +970,6 @@ def validate_vector_mechanics(
             "contract_count",
             "pointer_count",
             "registry_entry_count",
-            "gas_parameter_probe_binding_count",
             "critical_fallback_count",
             "all_profile_entry_addresses",
         ),
@@ -1060,8 +993,6 @@ def validate_vector_mechanics(
         or semantic["contract_count"] != len(payload["contracts"])
         or semantic["pointer_count"] != len(payload["pointers"])
         or semantic["registry_entry_count"] != len(payload["registryEntries"])
-        or semantic["gas_parameter_probe_binding_count"]
-        != len(payload["gasParameterProbes"])
         or semantic["critical_fallback_count"] != len(payload["criticalFallbacks"])
     ):
         raise generator.ManifestVectorError(

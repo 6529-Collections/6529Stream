@@ -30,6 +30,7 @@ Expected ADRs are tracked in `ops/ROADMAP.md`:
 | [`0014-world-class-pass-round-5.md`](0014-world-class-pass-round-5.md) | Accepted | Nine-lens round-5 resolutions |
 | [`0015-collection-identity-and-facade-readiness.md`](0015-collection-identity-and-facade-readiness.md) | Superseded in part | W1/W2 identity signal and evidence gate remain; W3-W5 launch facade path superseded by ADR 0016 |
 | [`0016-core-native-only-erc721.md`](0016-core-native-only-erc721.md) | Accepted | Core-native-only launch line; facade ownership machinery deferred to a successor design |
+| [`0017-raise-only-parameter-governance.md`](0017-raise-only-parameter-governance.md) | Accepted | Raise-only GGP/GTP launch model; probes, lowering, emergency class `6`, and permissionless parameter mutation removed pre-genesis |
 
 Each ADR should include problem, current behavior, intended behavior,
 alternatives, security impact, release impact, test plan, rollout plan,

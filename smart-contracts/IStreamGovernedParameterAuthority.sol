@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 /// @notice Narrow target-side seam between Governed Gas/Time Parameter hosts
 ///         and the canonical Governance-V2 executor of ADR 0004
-///         [GOV-ACTION-ID].
+///         [GOV-ACTION-ID], as rebaselined by ADR 0017.
 /// @dev Hosts accept no caller-supplied action id. Every governed mutation is
 ///      callable only by the immutable authority and independently verifies
 ///      the six-return in-flight action context before writing. The executor

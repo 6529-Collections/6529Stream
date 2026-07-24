@@ -205,7 +205,32 @@ def governance_native_value_blockers(
         f"{risk_register_checker.GOVERNANCE_NATIVE_VALUE_RISK_ID} remains "
         "open_blocker: Governance Executor proposal-selected native-value "
         "authority requires closed-world target/selector/value policy, deployment "
-        "binding, and independent review; see issues #658 and #665"
+        "binding, and independent review; see issues #658 and #685"
+    ]
+
+
+def governed_parameter_completeness_blockers(
+    register_path: Path,
+    repo_root: Path,
+) -> list[str]:
+    """Return the fail-closed production governed-parameter blocker."""
+    resolved_register = (
+        register_path if register_path.is_absolute() else repo_root / register_path
+    )
+    register = risk_register_checker.validate_risk_register(repo_root, resolved_register)
+    risk = next(
+        row
+        for row in register["risks"]
+        if row["id"]
+        == risk_register_checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID
+    )
+    if risk["status"] != "open_blocker":
+        return []
+    return [
+        f"{risk_register_checker.GOVERNED_PARAMETER_COMPLETENESS_RISK_ID} remains "
+        "open_blocker: exact 22-GGP/3-GTP production hosts, genesis values, "
+        "immutable floors, sizing/cadence evidence, fixed-stipend compatibility, "
+        "and candidate bindings are incomplete; see issue #684"
     ]
 
 
@@ -298,6 +323,9 @@ def validate_release_mode(
     )
     blockers.extend(governance_native_value_blockers(risk_register, repo_root))
     if normalized_phase == PRODUCTION_PHASE:
+        blockers.extend(
+            governed_parameter_completeness_blockers(risk_register, repo_root)
+        )
         headroom_blocker = production_core_headroom_blocker(
             abi_checksums, repo_root
         )

@@ -707,71 +707,6 @@ contract StreamGovernanceExecutor is
     }
 
     /// @inheritdoc IStreamGovernanceExecutor
-    function emergencyRestorationEligibility(address target, bytes4 selector)
-        external
-        view
-        override
-        returns (bool eligible, bytes32 targetCodeHash)
-    {
-        targetCodeHash = _policy.emergencyCodeHash[target][selector];
-        eligible = targetCodeHash != bytes32(0);
-    }
-
-    /// @inheritdoc IStreamGovernanceExecutor
-    function registerEmergencyRestorationEligibility(address target, bytes4 selector)
-        external
-        override
-    {
-        _requireIsolatedSelfCall(StreamGovernanceActionClasses.TERMINAL_FREEZE);
-        bytes32 codeHash = StreamGovernanceBootstrap.registerEmergencyEligibility(
-            _policy,
-            target,
-            selector,
-            address(_manifest.roleRegistry),
-            _manifest.systemManifestSatellite,
-            _currentScopeHash,
-            _currentOldValueHash,
-            _currentNewValueHash,
-            _manifest.isSealed
-        );
-        emit EmergencyRestorationEligibilityRegistered(
-            SCHEMA_VERSION, target, selector, codeHash, _currentActionId
-        );
-    }
-
-    /// @inheritdoc IStreamGovernanceExecutor
-    function emergencyRestorationEligibilityCount() external view override returns (uint256) {
-        return _policy.emergencyEntries.length;
-    }
-
-    /// @inheritdoc IStreamGovernanceExecutor
-    function emergencyRestorationEligibilityAt(uint256 index)
-        external
-        view
-        override
-        returns (address target, bytes4 selector, bytes32 targetCodeHash)
-    {
-        if (index >= _policy.emergencyEntries.length) {
-            revert EmergencyRestorationEligibilityIndexOutOfBounds(index);
-        }
-        EmergencyRestorationEligibilityEntry storage entry = _policy.emergencyEntries[index];
-        target = entry.target;
-        selector = entry.selector;
-        targetCodeHash = _policy.emergencyCodeHash[target][selector];
-    }
-
-    /// @inheritdoc IStreamGovernanceExecutor
-    function emergencyRestorationEligibilityChainHash()
-        external
-        view
-        override
-        returns (bytes32 chainHash, uint64 recordCount)
-    {
-        chainHash = _policy.emergencyChainHash;
-        recordCount = uint64(_policy.emergencyEntries.length);
-    }
-
-    /// @inheritdoc IStreamGovernanceExecutor
     function systemManifestBatchTailRule(address triggerTarget, bytes4 triggerSelector)
         external
         view
@@ -1184,8 +1119,7 @@ contract StreamGovernanceExecutor is
             scheduling,
             privilegedProposer,
             this.sealSystemManifestBootstrap.selector,
-            this.registerSystemManifestTailTrigger.selector,
-            this.registerEmergencyRestorationEligibility.selector
+            this.registerSystemManifestTailTrigger.selector
         );
     }
 
@@ -1228,6 +1162,10 @@ contract StreamGovernanceExecutor is
         if (block.timestamp > action.expiresAfter) {
             revert GovernanceActionExpiredWindow(actionId, action.expiresAfter);
         }
+        // Defense in depth: records with a retired or unknown class can never
+        // cross the execution boundary, even if storage or imported state is
+        // corrupted outside the ordinary scheduling path.
+        StreamGovernanceBootstrap.validateActionClass(action.actionClass);
 
         // [GOV-BATCH] rule 1: recompute callsHash and actionId from the
         // supplied batch and require both to match the stored action.

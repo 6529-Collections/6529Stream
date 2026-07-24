@@ -8,7 +8,8 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md), and
-[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded in
+[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md), and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative revenue and royalty specification for
@@ -39,7 +40,8 @@ and T7, by
 [ADR 0013](adr/0013-world-class-pass-round-4.md) decisions U1, U6,
 and U7, and by
 [ADR 0014](adr/0014-world-class-pass-round-5.md) decisions V4, V5,
-V6, and V9.
+V6, and V9, as superseded for parameter mutation by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md).
 The cross-cutting 50+ year architecture principles, including the Governed
 Gas Parameter model, live in `docs/stream-long-term-architecture.md`. Sale
 and auction mechanics live in `docs/stream-sales-and-auctions.md` (ADR 0010
@@ -234,11 +236,11 @@ pull release from split wallets:
 
 ## Governed Gas Parameters In The Revenue Layer
 
-The Governed Gas Parameter (GGP) model — storage-backed governed values,
-immutable per-parameter floors, staged raise/lower classes, health probes,
-change events, release-manifest recording, and exclusion from finality and
-frozen-route identity — is defined once in
-`docs/stream-long-term-architecture.md` (ADR 0010 decision D1). This
+The Governed Gas Parameter (GGP) model — storage-backed values, immutable
+floors and failure classes, authority-only delayed monotonic raises, exact V2
+state commitments, change events, release-manifest recording, and exclusion
+from finality and frozen-route identity — is defined once in
+`docs/stream-long-term-architecture.md` (ADR 0010 decision D1; ADR 0017). This
 section applies that model to the revenue layer; it does not restate the
 model.
 
@@ -260,36 +262,26 @@ Requirements [RSR-GGP]:
    revenue-layer contract may hard-code an external-call gas cap, and this
    document adds no pattern rules of its own — rules 2, 3, 4, 7, 8, and 10
    below bind the model's rules to this layer by citation.
-2. Raise and lower governance follows [LTA-GGP] requirements 1–2 unchanged
-   (ADR 0011 decision R5): every raise is bounded to at most 2x the
-   current value per action and staged raises use the normal delay class;
-   the emergency path is raise-only and executes only against a recorded
-   failing probe run at the current value; lowers use the normal delay
-   class with a recorded passing probe run at the proposed value and
-   revert below the immutable floor. Lowers stage through
-   [RSR-STAGED-GOVERNANCE] rule 1.
+2. Mutation follows [LTA-GGP] requirements 1–2 as amended by ADR 0017:
+   every raise is authority-only, class `1`, delayed at least 48 hours,
+   strictly monotonic, and bounded to at most 2x the current value per action.
+   Lowering, emergency, probe-rebind, conditional, and permissionless writers
+   do not exist.
 3. GGP values are Operational-layer per [LTA-GGP] requirement 3; in this
    layer the exclusion covers `assignmentHash` and every economic preimage
    in this document.
 4. Every revenue-layer GGP change emits the canonical change event and
    records genesis value and floor in the release manifest per [LTA-GGP]
-   requirement 4. The two Core-hosted royalty rows use the exact seven-function
+   requirement 4. The two Core-hosted royalty rows use the exact two-function
    ABI of [LTA-GGP-CORE] and emit no parameter-named Core alias event.
-5. Health probes are parameter-specific and must be recorded as release or
-   governance evidence: `probeRoyaltyInfo` runs for
-   `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` (probe
-   locus and probe-event home:
-   [Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events));
-   a
-   maximum-supported-class ERC-1271 verification (rule [RSR-1271].2) for
-   `ERC_1271_GAS_LIMIT`; an all-cold `assetStatus` read for
-   `ASSET_POLICY_GAS_LIMIT`; and a measured worst-case undeployed-wallet
-   flush for `FLUSH_GAS_FLOOR`. Each probe above lives in the named
-   per-parameter probe contract recorded in the release manifest with its
-   `probeMaxAgeBlocks` ([LTA-GGP] definition item 6; ADR 0011 decision
-   R5), emitting the canonical `GasParameterProbed` record that gates
-   lowering, emergency raising, and the permissionless conditional raise.
-   Probe placement follows [LTA-GGP] requirement 2.
+5. Parameter sizing evidence is path-specific and reproducible:
+   `royaltyInfo()` measurement runs for `ROYALTY_RESOLVER_GAS_LIMIT` and
+   `ROYALTY_RETURN_GAS_BUFFER`; a maximum-supported-class ERC-1271
+   verification (rule [RSR-1271].2) for `ERC_1271_GAS_LIMIT`; an all-cold
+   `assetStatus` read for `ASSET_POLICY_GAS_LIMIT`; and a measured worst-case
+   undeployed-wallet flush for `FLUSH_GAS_FLOOR`. The artifacts record exact
+   inputs and measurements but have no onchain authority and do not gate a
+   mutation.
 6. Split wallets, settlement adapters, and the escrow must read the current
    values of `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
    `WALLET_DEPOSIT_GAS_LIMIT` from the
@@ -315,42 +307,20 @@ Requirements [RSR-GGP]:
    `FLUSH_GAS_FLOOR` against measured worst-case flush, each with recorded
    margin rather than the 4x multiple. All measurements, multiples, and
    floors are release artifacts.
-10. Remediation for a guarded path outgrowing its cap follows the
-    [LTA-GGP] requirement 7 order (raise first, compressed successor
-    second, new deployment line last): cap exhaustion is a recoverable
-    operational incident, never a permanent outage of royalty disclosure,
-    release, or flush.
-11. Failure-direction classes and probe discipline (ADR 0012 decision
-    T1). Every revenue-layer GGP release-manifest entry records its
-    failure-direction class per [LTA-GGP] requirement 10, and each named
-    probe of rule 5 is a Permanent-class probe contract under
-    [LTA-GGP-PROBES]: pinned caller-independent inputs, run records
-    hosted on the probe, and an `evidenceHash` committing to the run's
-    measurement artifact. `ROYALTY_RESOLVER_GAS_LIMIT` and
-    `ROYALTY_RETURN_GAS_BUFFER` are `FORWARDING_CAP` — they bound the
-    fail-safe `royaltyInfo()` read path, raising restores disclosure,
-    and each is a permissionless conditional-raise and
-    conditional-re-lower member per [LTA-GGP] requirement 11
-    (ADR 0014 decision V7): the host registers both pre-approved
-    actions at deployment — the raise gated on a recorded failing
-    probe run at the current value, the re-lower gated on a recorded
-    passing probe run at exactly the proposed lower value, bounded per
-    action and never below the floor — probed by `probeRoyaltyInfo`
-    exactly as rule 5 states, so a post-governance-loss raise chain is
-    walkable back down when a repricing reverses. `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
-    `WALLET_DEPOSIT_GAS_LIMIT` are `FAIL_CLOSED_PRECHECK` — signature
-    verification, asset-status resolution, and wallet deposits fail
-    closed for the guarded operation, so raises are governance-only and
-    registering a conditional raise is nonconformant. `FLUSH_GAS_FLOOR`
-    is `MIN_GAS_GATE` (the minimum-gasleft admission gate named at the
-    model home; governance-only raises). For the fail-closed and
-    minimum-gas parameters the rule 5 probes prove the guarded operation
-    itself succeeds at the probed value — a maximum-supported-class
-    ERC-1271 verification completes with the magic value, an all-cold
-    `assetStatus` read completes with well-formed returndata, a
-    measured worst-case undeployed-wallet flush (deposit included) is
-    admitted — replicated as a faithful probe-owned equivalent where the
-    production path is permissioned, never merely that a call returns.
+10. Remediation for a guarded path outgrowing its cap follows [LTA-GGP]
+    requirement 7: delayed bounded raise first, compressed successor second,
+    and a new deployment line when the host is obsolete or the value must be
+    tightened. Operators must disclose the 48-hour recovery envelope.
+11. Every revenue-layer GGP release-manifest entry records its
+    failure-direction class per [LTA-GGP] requirement 10.
+    `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
+    `FORWARDING_CAP`; `ERC_1271_GAS_LIMIT`, `ASSET_POLICY_GAS_LIMIT`, and
+    `WALLET_DEPOSIT_GAS_LIMIT` are `FAIL_CLOSED_PRECHECK`; and
+    `FLUSH_GAS_FLOOR` is `MIN_GAS_GATE`. Classification informs staging,
+    monitoring, block-gas-limit review, and fixed-stipend compatibility, but
+    every class uses the same authority-only class-`1` raise path. No class has
+    a probe, lower, emergency, or permissionless mutation exception
+    (ADR 0017).
 
 ## Split Profile Model
 
@@ -1984,8 +1954,9 @@ against onchain owed balances. A reorg cannot create or destroy contractual owed
 balances on the canonical chain, but offchain reports must be able to roll back
 or replay escrow events deterministically.
 If a future gas-schedule change makes the current `FLUSH_GAS_FLOOR`
-insufficient, the correction path is a staged (or emergency) GGP raise on
-the deployed escrow — not a new deployment line. Successor-wallet or
+insufficient, the correction path is a delayed bounded GGP raise on
+the deployed escrow. A successor is required if the value must be tightened.
+Successor-wallet or
 escrow-credit recovery remains reserved for incident-class failures.
 Monitoring must alert when measured flush gas approaches the current value
 with insufficient margin: production operations alert when measured
@@ -1996,7 +1967,7 @@ Accepted residual risk: if a gas-schedule change outruns the current floor
 while governance quorum is simultaneously lost so no raise can execute, and
 a credit's wallet was never deployed, that owed escrow may be unavailable
 until quorum or a social successor process outside the old escrow contract
-is restored. This risk is bounded by the raise-only emergency path, by
+is restored. This risk is bounded by the delayed bounded raise-only path, by
 encouraging permissionless pre-deployment of split wallets, and by the
 already-deployed best-effort flush path above; it is not solved by hidden
 admin sweep power.
@@ -2520,10 +2491,9 @@ Requirements [RSR-ROYALTY-HASH]:
    `revenueClass = ROYALTY_ERC2981` scope context. Because `royaltyBps` is
    bound here, any bps change — even one that keeps the same profile and
    wallet — changes the royalty policy hash.
-2. `probeRoyaltyInfo`, mint-time royalty snapshots, royalty-side signed
-   surfaces, and royalty assignment events must use this preimage or a
-   later versioned replacement. The `assignmentHash` returned by
-   `probeRoyaltyInfo` is this `royaltyAssignmentHash`.
+2. Mint-time royalty snapshots, royalty-side signed surfaces, royalty
+   assignment events, and reproducible royalty measurement fixtures must use
+   this preimage or a later versioned replacement.
 3. The mint-time snapshot hook's expected-hash argument is this
    `royaltyAssignmentHash` of the resolved collection/default assignment;
    the hook must revert on mismatch so royalty economics cannot drift
@@ -2668,11 +2638,9 @@ equivalent `mulDiv` implementation after validating the returned bps. Returning
 is reserved for resolver unavailability, malformed return data, zero receiver,
 zero bps, bps above `MAX_ROYALTY_BPS`, or explicit no-royalty configuration.
 Because `royaltyInfo()` is `view`, it cannot emit fallback events. Monitoring
-must use off-chain calls, indexer comparisons, and the non-view
-`probeRoyaltyInfo` diagnostic hosted on the two Permanent-class royalty
-probe contracts
-([Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events));
-it does not live on Core (ADR 0013 decision U7).
+must use off-chain calls, fork rehearsals, and indexer comparisons. ADR 0017
+removes the non-view royalty probe contracts; measurement evidence has no
+mutation authority.
 
 A resolver-backed Core path must use explicit gas and return-shape limits.
 
@@ -2709,23 +2677,18 @@ Requirements [RSR-2981-GAS]:
    under-forwarded gas.
 3. `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` are
    Governed Gas Parameters hosted in `StreamCore` storage under [RSR-GGP]
-   and the production ABI of [LTA-GGP-CORE] (ADR 0010 decision D1): staged
-   raise with a raise-only emergency path,
-   probe-gated lower, immutable floors, change events, and manifest
-   recording. They are not deploy-time immutables and there is no
-   unreviewed runtime setter: every change flows through the GGP
-   governance classes, is evented, and never changes economic or artwork
-   identity because GGP values are excluded from every economic preimage
+   and the production ABI of [LTA-GGP-CORE] (ADR 0010 decision D1;
+   ADR 0017): immutable floors/classes, a 48-hour delayed class-`1`
+   monotonic raise bounded to 2x, V2 state commitments, change events, and
+   manifest recording. They are not deploy-time immutables and there is no
+   unreviewed runtime setter. A change is evented and never changes economic
+   or artwork identity because GGP values are excluded from every economic preimage
    ([RSR-GGP].3). Frozen and finalized collections keep answering
-   marketplace reads under any future gas schedule because the cap can
-   always be raised; a gas repricing can therefore never permanently zero
-   royalty disclosure for this Core line.
-4. The health probe for both parameters is `probeRoyaltyInfo` run against
-   representative default, collection, token, premint, burned, and
-   malformed cases; a lower executes only after a recorded passing probe
-   run at the proposed value ([RSR-GGP].5). Probe locus and probe-event
-   schema are owned by
-   [Royalty Probe Contracts And Probe Events](#royalty-probe-contracts-and-probe-events).
+   marketplace reads while governance can complete corrective raises; total
+   governance loss freezes the current values.
+4. Reproducible sizing and readiness measurements cover representative
+   default, collection, token, premint, burned, and malformed cases. They are
+   release evidence only and do not authorize a mutation.
 5. The resolver must keep the default-scope royalty assignment readable
    from a single packed storage slot so the deepest default-fallback
    answer stays servable at the immutable floor even if intermediate-scope
@@ -2743,24 +2706,20 @@ Requirements [RSR-2981-GAS]:
      pre-call resolver-pointer and token-identity reads plus call setup,
      and post-call decode, validation, `mulDiv`, and return — and
      `ROYALTY_RETURN_GAS_BUFFER` must never be set below that recorded
-     work; buffer margin decay from repricing is remediated by raising
-     the buffer ([RSR-GGP].10; both parameters are `FORWARDING_CAP`
-     conditional-raise and conditional-re-lower members, [RSR-GGP].11;
-     ADR 0014 decision V7).
+     work; buffer margin decay from repricing is remediated by a delayed
+     bounded raise of the buffer ([RSR-GGP].10; both parameters are
+     `FORWARDING_CAP`, [RSR-GGP].11; ADR 0017).
    - An implementation realizing the precheck as the additive sum
      `LIMIT + BUFFER` must enforce, in the host at every set of either
-     parameter (staged, emergency, or conditional),
+     parameter,
      `ROYALTY_RETURN_GAS_BUFFER >= ceil(ROYALTY_RESOLVER_GAS_LIMIT / 63)
      + the recorded parent-side work`; without that host-enforced floor
      a legitimate 2x raise chain of the limit with an unchanged buffer
      re-opens the silent under-forwarding fallback-to-zero this section
      exists to prevent, and such an implementation is nonconformant.
-   - Every staged raise or lower of either parameter records, as change
-     evidence, a passing `probeRoyaltyInfo` threshold run at the
-     proposed value pair ([RSR-GGP].5); emergency and conditional raises
-     keep their failing-run gates unchanged, and the conditional
-     re-lower keeps its passing-run gate at exactly the proposed value
-     pair (ADR 0014 decision V7).
+   - Every delayed raise of either parameter records a reproducible threshold
+     measurement at the proposed value pair as review evidence
+     ([RSR-GGP].5). The measurement does not authorize execution.
    - CI must include a golden test replaying the rule 2 threshold suite
      across simulated multi-step raise chains — repeated 2x raises of
      the limit with unchanged and with re-verified buffers — proving
@@ -2813,9 +2772,9 @@ implementation must compress assignment storage, set a higher genesis cap
 that preserves the required multiple, or reduce resolver work. It must not
 deploy with a cap that causes ordinary cold reads to silently return
 `(address(0), 0)`. After deployment, the remediation order for margin decay
-is the [RSR-GGP].10 chain: staged or emergency GGP raise first,
-compressed-storage successor resolver second, successor Core line never
-required for gas alone.
+is the [RSR-GGP].10 chain: delayed bounded GGP raise first,
+compressed-storage successor resolver second, and a successor Core line if a
+value must be tightened.
 
 Production Core must use capped assembly returndata handling, not a
 high-level `bytes memory` decode that can allocate unbounded returndata. The
@@ -2863,94 +2822,21 @@ There is no Core-local fixed receiver fallback in the v1 architecture. If
 the resolver returns zero, malformed data, or no configured default assignment,
 `royaltyInfo()` returns `(address(0), 0)`.
 
-### Royalty Probe Contracts And Probe Events
+### Removed Royalty Probe Surface
 
-This section is the single normative home for the royalty probe locus and
-the `RoyaltyInfoProbed` event schema; `docs/stream-long-term-architecture.md`
-and ADR 0008 cite it and define no second location or schema.
+Requirements [RSR-2981-PROBE] (superseded by ADR 0017):
 
-Requirements [RSR-2981-PROBE] (ADR 0013 decision U7):
-
-1. Locus. The non-view royalty diagnostic `probeRoyaltyInfo` is hosted
-   exclusively on the two named Permanent-class probe contracts for the
-   royalty Governed Gas Parameters — the per-parameter probe contracts
-   for `ROYALTY_RESOLVER_GAS_LIMIT` and `ROYALTY_RETURN_GAS_BUFFER` in
-   the genesis deployment profile of `docs/launch-conformance-matrix.md`,
-   recorded per parameter in the release manifest with their
-   `probeMaxAgeBlocks` ([RSR-GGP].5 and [RSR-GGP].11) — each satisfying
-   every `docs/stream-long-term-architecture.md` [LTA-GGP-PROBES] rule
-   (immutable, ownerless, permissionless, pinned caller-independent
-   inputs, probe-run records hosted on the probe, and no production
-   authority). The probe does not live on Core, on the
-   revenue resolver, or on any governed satellite: a governed
-   Replaceable module cannot satisfy the Permanent-class probe model,
-   and no revenue diagnostics satellite exists in the genesis inventory.
-   An earlier revision placing `probeRoyaltyInfo` on "the approved
-   revenue diagnostics satellite or on the revenue resolver" is
-   superseded and void.
-2. Probe body parity. The probe surface is:
-
-   ```solidity
-   function probeRoyaltyInfo(uint256 tokenId, uint256 salePrice)
-       external
-       returns (
-           bool resolverCallSucceeded,
-           address receiver,
-           uint256 royaltyAmount,
-           bytes32 assignmentHash,
-           bytes32 failureReason
-       );
-   ```
-
-   The probe must use the exact same resolver selector, gas cap, parent
-   gas precheck ([RSR-2981-GAS].2 shape under the [RSR-2981-GAS].6
-   coupling), returndata-size limit, and decode rules as production
-   `royaltyInfo()`, executed at the probed value pair under the
-   [LTA-GGP-PROBES] rule 5 genuine-failure discipline: a run that did
-   not actually deliver the probed values must revert without recording.
-   A diagnostic path with a looser cap is not a valid readiness signal.
-   The representative case corpus — default, collection, token, premint,
-   burned, and malformed cases ([RSR-2981-GAS].4) — is the probe's
-   pinned caller-independent input set per [LTA-GGP-PROBES] rule 4.
-   `assignmentHash` is the canonical `royaltyAssignmentHash` of
-   [RSR-ROYALTY-HASH].
-3. Probe-run event split. The gate record — the only evidence that gates
-   probe-gated lowering, emergency raising, and the permissionless
-   conditional raise for the two royalty GGPs — is the canonical
-   `GasParameterProbed` record and `lastProbeRun` read hosted on each
-   probe contract ([LTA-GGP] definition item 6; [LTA-GGP-PROBES]
-   rule 3). `RoyaltyInfoProbed` is the royalty-resolution detail record
-   of the same run:
-
-   ```solidity
-   event RoyaltyInfoProbed(
-       uint16 schemaVersion,
-       uint256 indexed tokenId,
-       address indexed receiver,
-       uint256 royaltyAmount,
-       bool resolverCallSucceeded,
-       bytes32 assignmentHash,
-       bytes32 failureReason
-   );
-   ```
-
-   It is emitted by the same probe contracts, carries the per-case
-   receiver, amount, canonical assignment hash, and failure reason that
-   the generic gate record does not, and is catalog-tagged in the
-   machine-readable event catalog as a parameter-named alias member of
-   the probe-record family. It is never a substitute for
-   `GasParameterProbed`: indexers
-   read raise/lower/conditional-raise evidence exclusively from
-   `GasParameterProbed` and read fallback-to-zero diagnosis from
-   `RoyaltyInfoProbed`. Emitting one family without the other for the
-   same run, or hosting either record anywhere but the probe contract,
-   is nonconformant.
-4. Gate. Running the rule 2 case corpus on both probe contracts is a
-   deployment gate so fallback-to-zero cannot remain invisible during
-   public sale readiness checks. The probe is not a marketplace surface,
-   holds no pointer, funds, or protocol authority beyond its own probe
-   records ([LTA-GGP-PROBES] rule 8), and its results gate parameter
-   governance and release readiness only.
+1. The launch target contains no `probeRoyaltyInfo` function,
+   `RoyaltyInfoProbed` event, `GasParameterProbed` record, or Permanent royalty
+   probe contract. This anchor remains only so historical citations resolve.
+2. Release readiness still runs a reproducible case corpus covering default,
+   collection, token, premint, burned, malformed, OOG, and returndata-shape
+   behavior against the exact production `royaltyInfo()` selector, gas cap,
+   parent-gas precheck, returndata limit, and decode rules.
+3. The evidence records the canonical royalty assignment hash, exact inputs,
+   compiler/EVM configuration, measured gas, and expected fallback result.
+   It is an offchain/fork audit artifact, not an onchain authorization record,
+   and cannot gate or execute a parameter mutation.
 
 ### Resolver Replacement And Frozen Economic Continuity
 
@@ -3150,8 +3036,9 @@ preimage carried the same slot as an undefined `policyHash` input; this
 definition is its single normative meaning, and no other derivation is
 conformant.
 
-`expectedPrimaryPolicyHash`, primary resolver probes, and assignment events must
-all use these preimages or a later versioned replacement.
+`expectedPrimaryPolicyHash`, primary resolver evaluation evidence, and
+assignment events must all use these preimages or a later versioned
+replacement.
 Event-only display fields, human labels, and mutable URIs are excluded from
 economic authority unless their hashes are explicitly included above.
 
@@ -3226,7 +3113,7 @@ Requirements [RSR-STAGED-GOVERNANCE]:
    timelock or two-step staging: default-scope assignment changes, default
    royalty changes, global freezes, resolver pointer replacement,
    asset-policy status transitions away from `ACTIVE`
-   ([RSR-ASSET-POLICY].7), Governed Gas Parameter lowers ([RSR-GGP].2),
+   ([RSR-ASSET-POLICY].7), Governed Gas Parameter raises ([RSR-GGP].2),
    and escrow recovery scheduling — an ADR 0004 `FUNDS_RECOVERY`-floor
    action; an economics-changing recovery additionally satisfies the
    consent-or-terminal-delay requirement of [RSR-ESCROW-RECOVERY]
@@ -4059,9 +3946,9 @@ Requirements [RSR-DOMAINS]:
 - Resolver replacement runbook (for implementation or storage changes, not
   gas retuning): deploy new resolver, register and approve its module
   identity/code hash/manifest hash, stage the Core resolver pointer update,
-  replay or intentionally remap default and collection assignments, run
-  `probeRoyaltyInfo` against representative default, collection, token,
-  premint, burned, and malformed cases, emit a manifest-backed reason,
+  replay or intentionally remap default and collection assignments, run the
+  reproducible royalty measurement corpus against representative default,
+  collection, token, premint, burned, and malformed cases, emit a manifest-backed reason,
   execute after the delay, monitor fallback-to-zero diagnostics, and
   optionally freeze the new pointer after operational confidence.
   Replacement must not mutate old resolver state in place and must satisfy
@@ -4263,8 +4150,9 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   hash until the timelocked successor-wallet recovery path is executed.
 - Governed Gas Parameters reintroduce a governance dependency into read and
   release paths that were fully static; accepted for survivability, bounded
-  by immutable floors, staged delays, and health probes (ADR 0010
-  decision D1).
+  by immutable floors, 48-hour authority-only class-`1` raises, per-action
+  `<= 2x` bounds, and reproducible sizing evidence (ADR 0010 decision D1 as
+  amended by ADR 0017).
 - Entitlements of lost-key EOA accounts in existing wallets are permanently
   unclaimable ([RSR-ESTATE].3); disclosed, not mitigated.
 - Marketplace royalty behavior remains external, uneven, and cache-prone;
@@ -4353,9 +4241,10 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
 - Static analysis proves the production resolver royalty path contains no
   external-call or creation opcodes.
 - Core royalty resolver gas parameters are Governed Gas Parameters:
-  raise, emergency raise, probe-gated lower, below-floor rejection, change
-  events, and manifest recording are all tested, and fallback behavior is
-  deterministic just below and above the current limit.
+  registration, authority-only delayed 2x-bounded raise, V2 transition
+  commitments, removed lower/emergency/probe surfaces, change events, and
+  manifest recording are all tested, and fallback behavior is deterministic
+  just below and above the current limit.
 - Huge resolver returndata cannot make Core OOG.
 - Core royalty math returns the exact `floor(salePrice * royaltyBps / 10_000)` for
   every `uint256 salePrice` and allowed bps using full-precision arithmetic;
@@ -4417,8 +4306,8 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
 - Escrow flush tests include a wallet/factory harness that reverts on the Nth
   deposit or deployment step and proves the cached owed amount is restored.
 - Escrow flush rejects early when `gasleft()` is below the current
-  `FLUSH_GAS_FLOOR` Governed Gas Parameter value, and floor raise/lower
-  governance is tested against the immutable minimum.
+  `FLUSH_GAS_FLOOR` Governed Gas Parameter value, and raise-only governance is
+  tested against the immutable registration facts.
 - Escrow can be credited against an undeployed official wallet only when the
   profile exists in the factory, the predicted address has no code, and the
   factory exposes permissionless deployment.
@@ -4467,14 +4356,10 @@ Requirements [RSR-MARKETPLACE-ROYALTY]:
   public mint when collection economics are promised immutable.
 - Royalty resolver ABI, selector, gas cap, and malformed-return fallback are
   fixed and tested.
-- `royaltyInfo()` fallback-to-zero is paired with a non-view diagnostic probe
-  and deployment readiness gate.
-- `probeRoyaltyInfo` uses the same selector, gas cap, parent gas precheck,
-  returndata cap, and decode rules as production `royaltyInfo()`.
-- `probeRoyaltyInfo` is hosted only on the two Permanent-class royalty
-  probe contracts; each run records the `GasParameterProbed` gate fact
-  and the `RoyaltyInfoProbed` detail fact on the probe contract, and the
-  event catalog tags them as one probe-record family ([RSR-2981-PROBE]).
+- `royaltyInfo()` fallback-to-zero is paired with a reproducible offchain/fork
+  deployment-readiness corpus using the same selector, gas cap, parent-gas
+  precheck, returndata cap, and decode rules. The launch target has no
+  production probe contract or probe event ([RSR-2981-PROBE]; ADR 0017).
 - The [RSR-2981-GAS].6 buffer-limit coupling holds across simulated
   multi-step raise chains: the golden threshold suite passes at every
   step, and an additive-precheck implementation rejects any value change

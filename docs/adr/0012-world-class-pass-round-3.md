@@ -30,6 +30,11 @@ Cited from the specs as "(ADR 0012 decision T<n>)".
 
 ### T1. Probe contracts are Permanent-class; conditional raises are scoped
 
+Superseded in full by
+[ADR 0017](0017-raise-only-parameter-governance.md). No gas/time probe
+contract, probe record, conditional mutation, or zero-signer repair path is a
+launch member. This historical text remains review evidence only.
+
 Probe contracts join the genesis inventory as Permanent-class members: no
 owner, no upgrade path, no selfdestruct, permissionlessly callable forever,
 covered by the static permanence checks, golden interface tests,

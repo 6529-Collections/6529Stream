@@ -37,13 +37,13 @@ TARGET_ACTIVE_SURFACE_LOCK_SCHEMA = (
     "6529stream.stream-core-active-surface-lock.v1"
 )
 TARGET_ACTIVE_SURFACE_LOCK_SHA256 = (
-    "sha256:2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4"
+    "sha256:8ed0f91ed4f96b18f7b2c1cf4328e0a125cc54d870e6ba49ff30c07dd3e6a701"
 )
 TARGET_FULL_MANIFEST_LOCK_SCHEMA = (
     "6529stream.stream-core-permanent-interface-semantic-lock.v1"
 )
 TARGET_FULL_MANIFEST_LOCK_SHA256 = (
-    "sha256:18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55"
+    "sha256:f008d29d2089098be693c39db018517ba634736298a8b323bb49ea263582ec4d"
 )
 TARGET_ACTIVE_FUNCTION_SURFACES = (
     ("abortPreparedMintFromManager(uint256,bytes32)", "nonpayable", ()),
@@ -66,12 +66,9 @@ TARGET_ACTIVE_FUNCTION_SURFACES = (
         "nonpayable",
         (),
     ),
-    ("conditionalRaiseGasParameter(bytes32,uint256)", "nonpayable", ()),
-    ("conditionalRelowerGasParameter(bytes32,uint256)", "nonpayable", ()),
     ("contractURI()", "view", ("string",)),
     ("coordinatorAtMint(uint256)", "view", ("address",)),
     ("createCollection(uint8,bool,uint256,uint8)", "nonpayable", ("uint256",)),
-    ("emergencyRaiseGasParameter(bytes32,uint256)", "nonpayable", ()),
     ("emitBatchMetadataUpdate(uint256,uint256,bytes32)", "nonpayable", ()),
     ("emitContractURIUpdated()", "nonpayable", ()),
     ("emitMetadataUpdate(uint256,bytes32)", "nonpayable", ()),
@@ -80,7 +77,7 @@ TARGET_ACTIVE_FUNCTION_SURFACES = (
     (
         "gasParameterInfo(bytes32)",
         "view",
-        ("uint256", "uint256", "address", "uint8", "uint64", "uint64"),
+        ("uint256", "uint256", "uint8", "uint64"),
     ),
     ("getApproved(uint256)", "view", ("address",)),
     (
@@ -102,7 +99,6 @@ TARGET_ACTIVE_FUNCTION_SURFACES = (
     ("isApprovedForAll(address,address)", "view", ("bool",)),
     ("lastAllocatedCollectionId()", "view", ("uint256",)),
     ("lastAllocatedTokenId()", "view", ("uint256",)),
-    ("lowerGasParameter(bytes32,uint256)", "nonpayable", ()),
     (
         "mintFromManager(uint256,address,bytes,bytes32,bytes32)",
         "nonpayable",
@@ -118,7 +114,6 @@ TARGET_ACTIVE_FUNCTION_SURFACES = (
         ("uint256", "uint256"),
     ),
     ("raiseGasParameter(bytes32,uint256)", "nonpayable", ()),
-    ("rebindGasParameterProbe(bytes32,address)", "nonpayable", ()),
     ("royaltyInfo(uint256,uint256)", "view", ("address", "uint256")),
     ("safeTransferFrom(address,address,uint256,bytes)", "nonpayable", ()),
     ("safeTransferFrom(address,address,uint256)", "nonpayable", ()),
@@ -165,16 +160,10 @@ TARGET_ACTIVE_EVENT_SURFACES = (
         1,
     ),
     (
-        "GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)",
-        (False, True, True, True, False, False),
-        False,
-        1,
-    ),
-    (
         "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
         (False, True, True, True, False, False, False),
         False,
-        1,
+        2,
     ),
     ("MetadataUpdate(uint256)", (False,), False, None),
     (

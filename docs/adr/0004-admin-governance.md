@@ -4,6 +4,13 @@
 
 Accepted.
 
+[ADR 0017](0017-raise-only-parameter-governance.md) supersedes this ADR's
+`[GOV-EMERGENCY-RESTORATION]` launch design and the class-`6` portions of
+`[GOV-WINDOWS]`. The active launch action classes are exactly IDs `0..5`.
+ID `6` is reserved `retired_pre_genesis`, forbidden at scheduling and
+execution, and never reusable. The superseded section remains below only as
+historical design evidence and is not a target interface or release input.
+
 Implementation status (labeled non-normative implementation evidence:
 this paragraph records the as-built P0-ADMIN baseline, and the normative
 sections below win wherever the baseline diverges — ADR 0012 decision
@@ -688,26 +695,24 @@ Governance principles:
    pointer governance, not hidden implementation replacement.
 
 The production action-class IDs are append-only. Existing IDs `0` through `5`
-never change meaning; protocol v1 appends the narrowly checked emergency
-restoration class as ID `6`:
+never change meaning. ADR 0017 retires ID `6` before genesis; the row remains
+reserved so it can never acquire a different meaning:
 
-| Numeric ID | Action class | Minimum scheduling delay |
-| --- | --- | --- |
-| `0` | `IMMEDIATE_TIGHTENING` | `0` |
-| `1` | `DELAYED_LOOSENING` | at least 48 hours |
-| `2` | `TERMINAL_FREEZE` | at least 48 hours plus the independent veto floor below |
-| `3` | `POINTER_REPLACEMENT` | at least 48 hours |
-| `4` | `FUNDS_RECOVERY` | the 14-day floor below |
-| `5` | `SUCCESSOR_DECLARATION` | the 30-day floor below |
-| `6` | `EMERGENCY_RESTORATION` | `0`; target-side fresh-failure and bounded-transition checks are mandatory |
+| Numeric ID | Action class | Minimum scheduling delay | Launch status |
+| --- | --- | --- | --- |
+| `0` | `IMMEDIATE_TIGHTENING` | `0` | active |
+| `1` | `DELAYED_LOOSENING` | at least 48 hours | active |
+| `2` | `TERMINAL_FREEZE` | at least 48 hours plus the independent veto floor below | active |
+| `3` | `POINTER_REPLACEMENT` | at least 48 hours | active |
+| `4` | `FUNDS_RECOVERY` | the 14-day floor below | active |
+| `5` | `SUCCESSOR_DECLARATION` | the 30-day floor below | active |
+| `6` | `EMERGENCY_RESTORATION` | not applicable | `retired_pre_genesis`; forbidden; never reuse |
 
 The implementation keeps the two ordinary delay tiers — zero delay for
 proved tightening and at least 48 hours for every other ordinary material
-action — plus the named exception floors. `EMERGENCY_RESTORATION` is not a
-generic third tier and is never inferred from a proposer label: it is admitted
-only by a target entrypoint that explicitly requires numeric ID `6` and proves
-the incident fact and bounded restoration at execution. Registering any other
-selector as ID `6`-eligible is nonconformant.
+action — plus the named exception floors. `EMERGENCY_RESTORATION` is not an
+executable tier: the class validator, scheduler, executor, policy catalog, and
+every target reject numeric ID `6`.
 
 Three action families keep explicit longer launch floors even under the
 two-tier model:
@@ -944,25 +949,23 @@ Core-hosted GGP writer can merge, one atomic governance cutover must:
 
 1. replace the executor and `IStreamGovernanceExecutor` call descriptor with
    the seven-word `GovernanceCall`, the six-return `currentAction()`, and the V2
-   action/calls domains and selectors below; append action class
-   `EMERGENCY_RESTORATION = 6` without changing IDs `0..5`, teach
-   `minimumDelay(6)` and the class validator the zero-delay target-checked
-   exception, implement [GOV-EMERGENCY-RESTORATION]'s exact eligibility
-   registry, and keep every class-6 writer unreachable until this lands;
+   action/calls domains and selectors below; retain active classes `0..5`,
+   reserve ID `6` as `retired_pre_genesis`, and make every class validator,
+   scheduler, executor, policy catalog, and target reject ID `6`;
 2. update the governance call-data publisher, action-ID builder, Safe/governor
    transaction builder, monitoring decoder, and release checker to derive V2
    descriptors and per-call contexts from the same published bytes; migrate
-   every existing GGP/GTP host from authority-only acceptance to independent
-   action-class/context enforcement before registering any emergency selector;
+   every existing GGP/GTP host to independent class-`1` action/context
+   enforcement for its raise-only writer;
 3. add golden tests for every selector, domain, and numeric action-class ID,
-   including unknown-class rejection above `6`, per-call context rotation and
-   clearing, one-call-wrapper equivalence, SSTORE2 publication and decoding,
-   batch atomicity/value conservation, V1 rejection, and target-side forged-
-   context rejection;
-4. rehearse one class-6 schedule/execute path from every supported material
-   holder class and retain the target-side failing-probe/bounded-raise evidence;
-   regenerate the governance ABI/interface artifact, selector and event
-   catalogs, numeric-ID/domain catalogs (including the row for ID `6`),
+   including rejection of retired ID `6` and every unknown ID above it,
+   per-call context rotation and clearing, one-call-wrapper equivalence,
+   SSTORE2 publication and decoding, batch atomicity/value conservation, V1
+   rejection, and target-side forged-context rejection;
+4. rehearse each active material class from every supported holder class and
+   the delayed class-`1` parameter raise path; regenerate the governance
+   ABI/interface artifact, selector and event catalogs, numeric-ID/domain
+   catalogs (including the reserved retired row for ID `6`),
    deployment inputs, release manifest, and checksum bundle; and
 5. retire the V1 structs, V1 action/calls domains, V1 executor entrypoints, and
    every pending V1 action. There is no compatibility wrapper that schedules or
@@ -1478,10 +1481,9 @@ Before any protected writer is enabled, the genesis bind—or, after seal, a
 separate completed registration action—must cover Core's
 `updateSatellitePointer(bytes32,address)` (`0xac1e5708`) as
 mask `0x08`, `freezeSatellitePointer(bytes32)` (`0xcdcdb71e`) as mask `0x04`,
-Core's `rebindGasParameterProbe(bytes32,address)` (`0xb98f30e0`) as mask
-`0x08`, every other manifest-inventoried GGP/GTP host's exact probe-rebind pair
-as mask `0x08`, and every exact deployed catalog-publisher `(target, selector)`
+and every exact deployed catalog-publisher `(target, selector)`
 that can change one of the seven cached discovery hashes as mask `0x08`.
+Raise-only GGP/GTP mutations are not manifest-tail triggers (ADR 0017).
 Current module-registry inventory is equally protected: each exact deployed
 `registerModule((address,bytes32,bytes32,bytes4,uint32,bytes32,bytes32,bytes32,string))`
 pair (`0x77bfa48d`) is registered with mask `0x02`; each exact polymorphic
@@ -1502,8 +1504,7 @@ wildcard or an unsafe mutable policy administrator.
 
 Tail/class goldens cover at least: class-2 pointer freeze followed by one final
 publication; class-3 pointer update followed by one final publication; every
-Core probe rebind, other inventoried GGP/GTP probe rebind, and genesis catalog
-trigger followed by one final publication; module registration and status
+genesis catalog trigger followed by one final publication; module registration and status
 loosening under class `1` followed by one final publication; incident status
 revocation under class `0` followed by one final publication; registry-
 manifest publication under class `1` followed by one final publication; and
@@ -1532,14 +1533,14 @@ lane. Scheduling is allowed only when `bound && !sealed`,
 calls all drawn from the already-bound trigger table with a compatible single
 class and no tail; or the exact seal/publication batch below. The same
 form and proposer checks run again at execution. Native transfers, role/admin
-changes, class-6 eligibility registration, and every unrelated target/selector
-are forbidden until after seal; they cannot be queued to survive the bootstrap
+changes, any class-`6` action, and every unrelated target/selector are
+forbidden until after seal; they cannot be queued to survive the bootstrap
 authority's sunset. Checking only the caller that submits or executes the
 transaction is insufficient. The bind materializes its entire supplied trigger
 table from index zero through the final record atomically, so no later proposer
 can add an extra, skipped, substituted, or out-of-order pre-seal record. Any
-executor-mediated registry, catalog, GGP/GTP
-probe-binding, or Core-pointer mutation that contributes to the first payload
+executor-mediated registry, catalog, or Core-pointer mutation that contributes
+to the first payload
 but is absent from the bound expected table rejects while unsealed. Every
 schedule increments the executor-wide pending scheduled count from zero to
 one; execution, cancellation, veto, or explicit expiry materialization returns
@@ -1655,8 +1656,8 @@ for
 schema version is `1`, and trigger-set hash, root pointer, and action ID are
 indexed. Bootstrap transition hashes are:
 
-Before `bound == true`, every scheduling, execution, cancellation,
-registration, eligibility, and seal path reverts; read-only inspection and the
+Before `bound == true`, every scheduling, execution, cancellation, registration,
+and seal path reverts; read-only inspection and the
 exact direct bind call are the only available surfaces. The bind requires
 `msg.sender == genesisBootstrapAuthority`, `bound == sealed == false`, no
 action nonce or record ever created, nonzero distinct code-bearing Core and
@@ -1935,7 +1936,7 @@ seal; a pre-seal action proposed by any identity other than the exact
 genesis authority at scheduling or execution; missing, extra, skipped,
 substituted, or out-of-order triggers; a wrong trigger code hash or mask; an
 unregistered or non-expected protected writer; any pre-seal tail outside the
-seal batch; any pre-seal class-6 eligibility, role/admin, native-value, or other
+seal batch; any pre-seal class-`6`, role/admin, native-value, or other
 non-ceremony action; an attempt to queue a second action; any cancelled,
 vetoed, or virtually expired action whose pending-count accounting is not
 materialized back to zero; a seal whose sole pending/current-action invariant
@@ -1952,6 +1953,13 @@ and that the identical call shape fails without a tail immediately after
 seal.
 
 ### Emergency-Restoration Eligibility [GOV-EMERGENCY-RESTORATION]
+
+> **Superseded in full by ADR 0017.** The launch target has no emergency-
+> restoration registry, selectors, events, domains, class-`6` writer, or
+> eligibility records. The material below is retained only to preserve the
+> decision history; it is non-normative for implementation, conformance, and
+> release artifacts. Class ID `6` is reserved `retired_pre_genesis`,
+> forbidden, and never reusable.
 
 Numeric class `6` is fail-closed to an exact append-only eligibility registry;
 the zero delay is never available merely because a proposer labels an action
@@ -2180,27 +2188,16 @@ governor-contract latency, not for fast single signers:
    single-signer EOA — and assume at least 4 hours of coordination
    latency; no emergency path may presume a single hot key. The terminal-freeze veto window floor is 72
    hours (ADR 0011 decision R10) so governor-contract holders can
-   realistically exercise it.
-   The launch policy separately enforces a four-hour minimum class-`6`
-   open-to-execute window (`expiresAfter - notBefore`). The operational
-   coordination-latency assumption and the protocol-enforced open-window floor
-   are distinct controls even though both are pinned to 14,400 seconds at
-   launch; class `6` retains zero scheduling delay.
+   realistically exercise it. Class ID `6` is retired before genesis and is
+   not an emergency path.
 3. Unpause is a dedicated operational class: a distinct `ROLE_UNPAUSE`
    (grantable to a Safe or governor contract) executes unpause with no
    timelock and an evented reason. Pause guardians cannot unpause; unpause
    holders cannot pause. The two-tier delay model does not apply to
    unpause.
-4. `EMERGENCY_RESTORATION` (numeric ID `6`) has zero scheduling delay only
-   for exact target/selector pairs terminal-registered under
-   [GOV-EMERGENCY-RESTORATION] whose target implementation explicitly requires that ID and
-   rechecks a fresh, target-owned failing probe plus a bounded restorative
-   transition. For the Core GGP host this is solely
-   `emergencyRaiseGasParameter(bytes32,uint256)` and means a failing run at the
-   exact current value within `probeMaxAgeBlocks`, `newValue > currentValue`,
-   and the overflow-safe 2x bound
-   `newValue - currentValue <= currentValue`. The ordinary proposer/canceller roles,
-   event, action-ID, call-data publication, and execution checks still apply.
+4. `EMERGENCY_RESTORATION` (numeric ID `6`) is
+   `retired_pre_genesis`. Scheduling and execution reject it, no selector can
+   be registered for it, and the numeric ID is never reusable (ADR 0017).
 
 Execution rules:
 
@@ -2211,11 +2208,9 @@ Execution rules:
    `scheduleGovernanceAction` is the equivalent one-call wrapper.
 2. `notBefore` must be at least `block.timestamp + minimumDelay(actionClass)`
    unless the action is `IMMEDIATE_TIGHTENING` and the implementation's
-   calldata-aware tightening classifier proves it cannot loosen policy, or is
-   exact eligible class `6` under [GOV-EMERGENCY-RESTORATION].
+   calldata-aware tightening classifier proves it cannot loosen policy.
 3. `expiresAfter` must be greater than `notBefore` and within a launch-pinned
-   maximum action lifetime. Delayed classes keep the seven-day floor above;
-   class `6` keeps its distinct four-hour emergency open-window floor.
+   maximum action lifetime. Delayed classes keep the seven-day floor above.
 4. The stored `callHash` is the V2 `callsHash`, never
    `keccak256(singleCallData)`. Execution recomputes every descriptor and the
    three action-level aggregates, requires the ordered supplied calldata to be
@@ -2223,7 +2218,7 @@ Execution rules:
    `msg.value == sum(calls[].value)`. Each nonempty calldata element has length
    at least four, its leading selector matches, and its target has code. The
    sole empty-calldata exception has selector zero, positive value, and an
-   approved native receiver; class `6` admits no such exception.
+   approved native receiver.
 5. Anyone may execute a scheduled action after `notBefore` unless the action
    class requires a named executor in the manifest. Permission to schedule and
    cancel remains role-gated.
@@ -2269,8 +2264,8 @@ VETOED     -> terminal
 
 The release manifest must include a machine-readable governance action policy
 catalog. Each protected selector is mapped to role, action class, minimum delay,
-tightening/loosening classifier, old/new value predicate, emergency eligibility,
-and whether permissionless execution after delay is allowed. Governance code
+tightening/loosening classifier, old/new value predicate, and whether
+permissionless execution after delay is allowed. Governance code
 and CI use this catalog as the conformance target; prose examples are not
 authority.
 

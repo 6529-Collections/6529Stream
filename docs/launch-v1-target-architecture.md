@@ -7,7 +7,9 @@ inline are resolved by
 [ADR 0010](adr/0010-world-class-spec-pass.md),
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md), and
-[ADR 0013](adr/0013-world-class-pass-round-4.md) and recorded in
+[ADR 0013](adr/0013-world-class-pass-round-4.md),
+[ADR 0014](adr/0014-world-class-pass-round-5.md), and
+[ADR 0017](adr/0017-raise-only-parameter-governance.md), and are recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative protocol v1 specification for 6529Stream. It
@@ -315,7 +317,7 @@ paths:
 | `blockCollectionBurns(uint256)` (`0xfcfc7b26`), `collectionBurnsBlocked(uint256)` (`0x5923b379`), and `collectionBurnsBlockedAtBlock(uint256)` (`0x74a5ded9`) with one activation-height storage slot, terminal-freeze governance binding, and no duplicate boolean state, per the production-exact burn-block home ([`docs/collection-metadata-contract.md`](collection-metadata-contract.md) [CMC-BURN]; ADR 0013 decision U4) | Core | Finality registry, artist registry steward minted-before checks, governance, indexers |
 | One-way `freezeCollection(uint256)` (`0xbcc405d0`) and derived `collectionFreezeStatus(uint256)` (`0x2ed330f7`), backed by one private activation-height slot with no height getter; terminal-governance class and exact per-call scope/state checks plus schema-v1 `CollectionFrozen(uint16,uint256,bytes32)` action-ID event; executes after the burn block and before registry finality, per [CMC-FREEZE] | Core | Finality registry, satellites, governance, monitoring, indexers |
 | Unified Core satellite-pointer ABI: `getSatellitePointer(bytes32)` (`0x3528d53c`), `updateSatellitePointer(bytes32,address)` (`0xac1e5708`), and one-way `freezeSatellitePointer(bytes32)` (`0xcdcdb71e`), with the exact ten-word return including monotonic per-family revision, private cached storage, live-`MODULE_REGISTRY`/executor-context/hash rechecks, old-registry bootstrap for a registry successor, same-target registry revalidation, exact-state no-op rejection, and no individual pointer getters or second staging state machine, per [LTA-POINTERS] | Core | Satellites, governance, `tokenURI()`/`contractURI()`, finality, monitoring, indexers |
-| Core-minimal GGP ABI: six-return `gasParameterInfo(bytes32)` (`0xec2ef90a`) including monotonic per-parameter revision; governed `raiseGasParameter(bytes32,uint256)` (`0x5c0df7da`), `emergencyRaiseGasParameter(bytes32,uint256)` (`0x4fa1b5ad`), `lowerGasParameter(bytes32,uint256)` (`0x908dc981`), and `rebindGasParameterProbe(bytes32,address)` (`0xb98f30e0`); and `FORWARDING_CAP`-only conditional raise (`0x0671a369`) and re-lower (`0x59bf6beb`), with authenticated Permanent probe bindings, full per-call state hashes, action classes `1`/`3`/`6`, schema-v1 `GasParameterProbeRebound` topic `0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c`, and class-3 rebind-plus-manifest-tail atomicity pinned at [LTA-GGP-CORE]; no action-ID calldata, generic convenience reads, public constant getters, or subsystem alias events | Core | Governance, permissionless museum-mode repair, monitoring, bounded Core call paths |
+| Core-minimal raise-only GGP ABI: four-return `gasParameterInfo(bytes32)` (`0xec2ef90a`) with exactly `(value, floor, failureClass, revision)`; governed `raiseGasParameter(bytes32,uint256)` (`0x5c0df7da`) only; canonical `GasParameterUpdated` with `schemaVersion = 2`; exact V2 scope/state hashes, immutable Governance V2 authority, class `1`, 48-hour minimum delay, an overflow-safe 2x step bound, and same-parameter duplicate-action rejection pinned at [LTA-GGP-CORE]; no action-ID calldata, lower, emergency, probe, rebind, conditional writer, convenience read, public constant getter, or subsystem alias event | Core | Governance, monitoring, bounded Core call paths |
 | minimal `tokenURI()` delegation to router | Core | ERC-721 metadata callers |
 | minimal `contractURI()` delegation to the contract-metadata satellite (ADR 0009 decision 4) | Core | Marketplaces and indexers (ERC-7572) |
 | entropy registration call during mint | Core to coordinator | Mint path |
@@ -358,7 +360,7 @@ pointer reads. Root/chunk data carriers are excluded from their own payload and
 deploy only after every inventoried address and canonical byte is fixed; the
 actual root is recorded at atomic seal/publication, never pinned in executor
 initcode or the bootstrap bind. ABI lock requires a deterministic non-production
-60-profile fixture proving canonical bytes, chunk/root mechanics, profile-drift
+canonical-profile fixture proving canonical bytes, chunk/root mechanics, profile-drift
 detection, and decoded/RPC wire-size arithmetic. Measured maximum-size writer
 gas/RPC fixtures remain mandatory implementation and deployment gates once the
 writer exists; the target fixture is not that evidence. Live semantic equality to the
@@ -425,26 +427,22 @@ permissionless keepers drain active plans before cutover; omission, intervening
 calls, generic-path bypass, or a nonzero count fail without changing Core.
 
 Governance V2 removes the legacy caller-supplied `actionId` argument from every
-GGP/GTP host, not only Core. All GGP hosts use the six-return info read and
-exact two-argument mutation selectors in [LTA-GGP-CORE]. All GTP hosts use six-
-return `timeParameterInfo(bytes32)` (`0x5f2463b8`),
-`raiseTimeParameter(bytes32,uint256)` (`0x046e1fd5`),
-`lowerTimeParameter(bytes32,uint256)` (`0xa4e24c49`), and class-3 tail-triggered
-`rebindTimeParameterProbe(bytes32,address)` (`0xc07b3459`). Each host derives
-the emitted action ID and validates class/scope/old/new state from
-`currentAction()`; no alternate three-argument writer survives cutover.
+GGP/GTP host, not only Core. GGP hosts use the four-return info read and
+two-argument raise selector in [LTA-GGP-CORE]. GTP hosts use four-return
+`timeParameterInfo(bytes32)` (`0x5f2463b8`) and
+`raiseTimeParameter(bytes32,uint256)` (`0x046e1fd5`). Each host accepts only its
+immutable authority, derives the emitted action ID from `currentAction()`, and
+validates class `1` plus exact V2 scope/old/new state. No constructor authority
+shape or deployment equivalent may omit the published
+`IStreamGovernedParameterAuthority` marker-and-context seam required by the
+genesis `GOVERNANCE_LAYER` profile. No alternate writer, lower, emergency path,
+conditional action, or probe rebind survives cutover.
+Canonical gas and time parameter change events use `schemaVersion = 2`.
 
-Rich standalone GGP/GTP hosts use the genesis/live registry split defined by
-the [LTA-GGP] rules. Construction commits the expected genesis registry plus four
-nonzero expected probe facts without reading a module row and may admit a
-reviewed predicted codeless probe address. The constructor's exact,
-bounded-returndata ERC-165 registry response forwards the EIP-150-clamped
-available gas with no compiled-in call cap and proves only the selector family.
-Every probe-dependent use instead resolves Core's current `MODULE_REGISTRY` target,
-validates the canonical 320-byte pointer and bounded revision-appended
-Registry-V2 row, and uses that live target rather than the pointer's historical
-registry field. Instance-aware checking must reconcile predicted code and rows
-before the irreversible bootstrap seal.
+Rich standalone GGP/GTP hosts fix their inventory and authority at
+construction. They do not depend on Core, the module registry, a probe row, or
+a runtime registry lookup. A zero authority permanently disables raises
+(ADR 0017).
 
 This hook table is the normative home of the Core refresh-emitter caller
 set (ADR 0010 decision D3.6). Both restricted ERC-4906 helpers accept the
@@ -554,7 +552,7 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
 
    | Order | Cutover slice | Required result before the next slice |
    | --- | --- | --- |
-   | 1 | Complete ADR 0004 [GOV-V2-CUTOVER] before any new Core writer | Executor and interfaces use the seven-word `GovernanceCall` and six-return per-call context; published calldata is SSTORE2-backed and decoded at schedule/execute; action classes `0..6`, append-only exact class-6 eligibility [GOV-EMERGENCY-RESTORATION], every existing GGP/GTP host's independent class/context checks, and [GOV-MANIFEST-TAIL] are enforced; executor-first deployment plus the irreversible downstream bind has no CREATE2 fixed point and rejects every action before bind; V1 is rejected/retired; Safe/governor tooling, monitoring, golden/adversarial tests, rehearsal evidence, ABI/event/numeric-ID/domain catalogs, deployment inputs, manifest, and checksums agree |
+   | 1 | Complete ADR 0004 [GOV-V2-CUTOVER] as amended by ADR 0017 before any new Core writer | Executor and interfaces use the seven-word `GovernanceCall` and six-return per-call context; published calldata is SSTORE2-backed and decoded at schedule/execute; active action classes are exactly `0..5`, class ID `6` is retired/forbidden/never-reuse, every GGP/GTP host independently verifies the raise-only class/context, and [GOV-MANIFEST-TAIL] is enforced; executor-first deployment plus the irreversible downstream bind has no CREATE2 fixed point and rejects every action before bind; V1 is rejected/retired; Safe/governor tooling, monitoring, golden/adversarial tests, rehearsal evidence, ABI/event/numeric-ID/domain catalogs, deployment inputs, manifest, and checksums agree |
    | 2 | Deploy and test Permanent `StreamSystemManifest` plus the collection-metadata/router/renderer and entropy-coordinator/provider satellites without changing Core | Satellite ABIs, including system-manifest module type/interface, bounded calls, failure posture, governance, SSTORE2/history/tail behavior, and focused tests are complete; Core delta is zero |
    | 3 | Move `StreamDrops`, auction-start timing/state, and every other live mint caller to the manager/ledger/sale-adapter path | No production caller reaches legacy `StreamMinter` or Core `mint(...)`; the operation-bound prepared settlement seam records all required economics before `_safeMint` |
    | 4 | Replace Core's rich metadata state and rendering with packed collection facts, cached satellite pointers, bounded `tokenURI`, and bounded `contractURI` | Output/fallback golden tests pass and the measured Core delta is net-negative |
@@ -563,15 +561,12 @@ Pre-genesis Core cutover [PV1-CORE-CUTOVER]:
    | 7 | Land the governed collection burn-block writer and guards in a net-negative Core slice | [CMC-BURN] selector, event, terminal-freeze, scope/value hash, veto, replay, height, boolean-equivalence, and controlled-burn tests pass |
    | 8 | Land any remaining Permanent hooks, remove superseded ABI, and refresh release artifacts once against the complete target | Full production size proof is at or below 22,576 bytes and all interface/event/manifest gates agree |
 
-   In particular, Core's
-   `emergencyRaiseGasParameter(bytes32,uint256)` selector is unreachable until
-   the executor accepts append-only action class ID `6`, reports zero minimum
-   delay for that class, terminal-registers the exact target/selector/code hash,
-   rejects value/native/unregistered calls, publishes/decodes the V2 calldata,
-   migrates every existing GGP/GTP host away from authority-only checks, and the target
-   harness proves stale, missing, passing, wrong-value, over-2x, wrong-class,
-   and forged-context rejection. Existing executor code and tests that stop at
-   ID `5` are transitional evidence, not an implementation of this gate.
+   In particular, the target contains no
+   `emergencyRaiseGasParameter(bytes32,uint256)` selector or class-`6`
+   eligibility registry. The executor rejects ID `6`, every parameter host
+   accepts only class `1`, and the target harness proves missing/non-executing,
+   same-value, lower-value, over-2x, stale, wrong-class, and forged-context
+   rejection (ADR 0017).
 
 5. Rich legacy Core responsibilities are expressly retirement candidates after
    their prerequisite cutovers: display strings, script/dependency chunks,
@@ -652,8 +647,8 @@ Core requirements [PV1-2981]:
 1. Use an immutable or tightly governed resolver address. The read gas
    cap is the `ROYALTY_RESOLVER_GAS_LIMIT` Governed Gas Parameter with an
    immutable per-parameter floor (ADR 0010 decision D1), never a
-   deploy-time immutable; its floors, raise/lower governance, probes, and
-   genesis values are owned by
+   deploy-time immutable; its floor, raise-only governance, sizing evidence,
+   and genesis value are owned by
    [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md)
    ([RSR-2981-GAS], [RSR-GGP]).
 2. Own an immutable `maxRoyaltyBps` cap of 1000 (ADR 0009 decision 7). The
@@ -691,9 +686,10 @@ Core intentionally falls back to zero rather than a stale default
 receiver/bps because a Core-local fallback would become a second royalty
 source of truth. This accepts temporary royalty-disclosure loss during
 resolver incidents in exchange for avoiding silent payment to a wrong or
-superseded wallet. Deployment readiness must include resolver-health probes
-that use the same selector, gas cap, parent-gas precheck, returndata-size
-rule, and decode path as `royaltyInfo()`.
+superseded wallet. Deployment readiness must include reproducible
+resolver-health rehearsals that use the same selector, gas cap, parent-gas
+precheck, returndata-size rule, and decode path as `royaltyInfo()`. Those
+measurements are evidence only and have no parameter-mutation authority.
 
 Primary-sale deposits and escrow credits must account for the full received
 amount. Split-wallet per-recipient floors may leave bounded rounding dust,
@@ -764,7 +760,7 @@ Sourcing). Every table must include:
 
 | Field | Meaning |
 | --- | --- |
-| Constant name | Solidity constant name |
+| Constant name | Solidity constant name where one exists; for GGP/GTP identifier mirrors, the checked `GGP_`/`GTP_` catalog label derived from the parameter name |
 | String preimage | Human-readable preimage |
 | Hash value | Expected `keccak256` |
 | Owner | Contract or module that owns the domain |
@@ -777,9 +773,11 @@ authorization IDs, nullifiers, entropy request keys, entropy seeds, metadata
 record hashes, freeze manifests, schema commitments, governance action and
 batch-call domains, Governed Gas Parameter identifiers, public interface
 selectors, and module capability selectors (ADR 0011 decision R12).
-CI must include a checked test that recomputes every listed `keccak256`
-preimage and fails on drift between Solidity constants, docs, and release
-artifacts.
+CI must include checked tests that recompute every listed `keccak256`
+preimage and fail on drift between Solidity constants where they exist, docs,
+and release artifacts. GGP/GTP identifiers have no row-specific Solidity
+constants: their checker instead proves exact generic host prefix derivation
+plus the closed-world LTA inventory and mirror rows.
 
 In-struct chainId discipline (ADR 0013 decision U7). This paragraph is
 the one cross-cutting rule for domain-material duplication inside signed
@@ -862,11 +860,15 @@ Rules:
    subsection heading and Inputs cell; ordered `abi.encode` field lists
    live only at the home. Mirrors carry the constant name, exact string
    preimage, hash value, owner, and schema version for the CI
-   recomputation test, which must fail on drift between Solidity
-   constants, the home tables, these mirrors, and release artifacts.
+   recomputation test, which must fail on drift between Solidity constants
+   where they exist, the home tables, these mirrors, and release artifacts.
+   Governed-parameter identifier rows are the exception to the per-row
+   Solidity-constant expectation: the generic hosts derive IDs from the exact
+   checked prefixes and configured names.
 2. Every hash value is computed from the adjacent string preimage and
    pinned, and CI recomputes each one, failing on drift between Solidity
-   constants, the home tables, these mirrors, and release artifacts
+   constants where they exist, generic host derivation where applicable, the
+   home tables, these mirrors, and release artifacts
    (ADR 0013 decision U9). A newly added domain may carry an unpinned hash
    placeholder — always with its exact string preimage adjacent, at the
    home and in its mirror row alike — only between the ADR that adds the
@@ -877,8 +879,9 @@ Rules:
 3. Adding a hash domain anywhere in the spec set without a mirror row
    here is a conformance defect. Completeness is closed-world across
    every domain family — including the ADR 0004 governance action and
-   batch-call domains and every Governed Gas Parameter identifier in
-   the [LTA-GGP] inventory (ADR 0011 decision R12) — and the
+   batch-call domains and every Governed Gas or Time Parameter identifier in
+   the [LTA-GGP]/[LTA-GTP] inventories (ADR 0011 decision R12; ADR 0013
+   decision U9) — and the
    release-artifact generator builds the deployed domain-constants
    manifest from these mirrors plus the checked manager table above.
 
@@ -1118,14 +1121,10 @@ with ERC-5267.
 | `STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LEAF_V1` | `0x852f4811a2eb32694863d94ba41b545a65ef4c76086a32c35881f0c4e250a7b5` | `StreamSystemManifest` | `1` | chunk index, length, payload hash; Umbrella `[LTA-MANIFEST]` |
 | `STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_LIST_V1` | `0xa93750a5551ac5668c8f24cca85acaf1d5f8334fac9406f845fce1ce35548839` | `StreamSystemManifest` | `1` | total bytes and ordered leaf hashes; Umbrella `[LTA-MANIFEST]` |
 | `STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | `6529STREAM_SYSTEM_MANIFEST_PAYLOAD_ROOT_V1` | `0xd6ab89b077c61a288c7168cf8f1c9a7a19464b10475735dae37cb46a0c94c40b` | `StreamSystemManifest` | `1` | schema/canonicalization IDs, total/count, list hash; Umbrella `[LTA-MANIFEST]` |
-| `STREAM_GAS_PARAMETER_SCOPE_V1` | `6529STREAM_GAS_PARAMETER_SCOPE_V1` | `0x8d8b74997070792410ba6f4dd511d967fec29b82366868401baa2bfb3681da69` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId |
-| `STREAM_GAS_PARAMETER_STATE_V1` | `6529STREAM_GAS_PARAMETER_STATE_V1` | `0xa16fd6b2f079cdf0a8f1a952c35496a693958895d1782fecc8b6440e06594977` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; value/floor, authenticated probe binding, class/recency, standing IDs, monotonic revision |
-| `STREAM_GGP_PROBE_BINDING_V1` | `6529STREAM_GGP_PROBE_BINDING_V1` | `0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; registry/type/interface/version/code/module/deployment facts |
-| `STREAM_GGP_PROBE` module type | `STREAM_GGP_PROBE` | `0xe358a47f0dcbc7a22cc88ea7cd9ff433ec85ce6d9c7d0dc3f329e98b621cd6c8` | module registry / GGP probes | `1` | base interface `0x0f8c6b0f`; Umbrella `[LTA-GGP-PROBES]` |
-| `STREAM_GGP_CONDITIONAL_RAISE_V1` | `6529STREAM_GGP_CONDITIONAL_RAISE_V1` | `0x88d201cde2efee286ecd558414d10dd0599848f47e6dcdfa51a2e0287e4fb2eb` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId standing raise action ID |
-| `STREAM_GGP_CONDITIONAL_RELOWER_V1` | `6529STREAM_GGP_CONDITIONAL_RELOWER_V1` | `0xb30115be75ee59eeed3fa156242dc7c0eda20b383f4f251c8adcfa616b2276a1` | GGP hosts | `1` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId standing re-lower action ID |
-| `STREAM_TIME_PARAMETER_SCOPE_V1` | `6529STREAM_TIME_PARAMETER_SCOPE_V1` | `0xcb90eddcfa663732d90ca0d1892636ba1216e3900df55acc72d58187eee359a8` | GTP hosts | `1` | Umbrella `[LTA-GTP]`; domain, chainid, host, parameterId |
-| `STREAM_TIME_PARAMETER_STATE_V1` | `6529STREAM_TIME_PARAMETER_STATE_V1` | `0x2cdcb8724d05b4fa9d1ad4f857f9c5fa49ca997d15870fe7f9df6fbae1402583` | GTP hosts | `1` | Umbrella `[LTA-GTP]`; value/floors, authenticated cadence-probe binding, recency, monotonic revision |
+| `STREAM_GAS_PARAMETER_SCOPE_V2` | `6529STREAM_GAS_PARAMETER_SCOPE_V2` | `0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71` | GGP hosts | `2` | Umbrella `[LTA-GGP-CORE]`; domain, chainid, host, parameterId |
+| `STREAM_GAS_PARAMETER_STATE_V2` | `6529STREAM_GAS_PARAMETER_STATE_V2` | `0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c` | GGP hosts | `2` | Umbrella `[LTA-GGP-CORE]`; value, immutable floor/class, monotonic revision |
+| `STREAM_TIME_PARAMETER_SCOPE_V2` | `6529STREAM_TIME_PARAMETER_SCOPE_V2` | `0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24` | GTP hosts | `2` | Umbrella `[LTA-GTP]`; domain, chainid, host, parameterId |
+| `STREAM_TIME_PARAMETER_STATE_V2` | `6529STREAM_TIME_PARAMETER_STATE_V2` | `0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384` | GTP hosts | `2` | Umbrella `[LTA-GTP]`; value, immutable block/wall-clock floors, monotonic revision |
 | `STREAM_TOKEN_CONTENT_LEAF_V1` | `6529STREAM_TOKEN_CONTENT_LEAF_V1` | `0x61d75cd1a57d24657b860f99f77c15e5f8556fb725b56a96dd770205f9352b0d` | `StreamCollectionMetadata` | `1` | CM spec `[CMC-CONTENT-ROOT]` |
 | `STREAM_TOKEN_CONTENT_NODE_V1` | `6529STREAM_TOKEN_CONTENT_NODE_V1` | `0x7239fc0713b7ccc92b7eef3087150a1f32037aff6ab05f5bf78db4f8ab71a6ea` | `StreamCollectionMetadata` | `1` | CM spec `[CMC-CONTENT-ROOT]` |
 | `STREAM_RECORD_CHAIN_V1` | `6529STREAM_RECORD_CHAIN_V1` | `0x0e7a0feb85d4a4a3e90074703c19de35786e11afaae8f9868aa2a911bcfa1609` | record-lane satellites | `1` | CM spec `[CMC-RECORD-CHAIN]` |
@@ -1205,8 +1204,8 @@ below (ADR 0011 decision R12).
 ### Governance Mirror Rows
 
 Home: [`docs/adr/0004-admin-governance.md`](adr/0004-admin-governance.md)
-([GOV-ACTION-ID], [GOV-BATCH], [GOV-MANIFEST-TAIL],
-[GOV-EMERGENCY-RESTORATION]). ADR 0004 is the owner-designated
+([GOV-ACTION-ID], [GOV-BATCH], [GOV-MANIFEST-TAIL]), as amended by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md). ADR 0004 is the owner-designated
 normative home of the canonical governance action identity (ADR 0010
 decision D3.4); these rows complete the mirror for the most-executed
 preimages in the system — every staged governance action, batch, and GGP
@@ -1244,11 +1243,6 @@ inputs, replay semantics, and window floors.
 | `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_LEAF_V1` | 0x389d432187327bb28628b23403c9b3c549d0cf950e480ad6d69b7d9fa7b48b9d | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; typed Core-pointer, registry-header, or registry-module live-state leaf |
 | `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_CHAIN_V1` | 0x9efe6891a30e5198982f60b2d916e3275b866addbee37b7d4b875e52d5251e89 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; prior chain, global leaf index, inventory leaf hash |
 | `STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1` | `6529STREAM_SYSTEM_MANIFEST_BOOTSTRAP_INVENTORY_ROOT_V1` | 0xb524bfb9f69adc6c2d0e07003dd39a76b1d6a728dd95dbd495f709428d21b4ec | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-MANIFEST-TAIL]`; chainid, executor, bound Core, leaf count, final inventory chain |
-| `STREAM_EMERGENCY_RESTORATION_SCOPE_V1` | `6529STREAM_EMERGENCY_RESTORATION_SCOPE_V1` | 0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; domain, chainid, executor, target, selector |
-| `STREAM_EMERGENCY_RESTORATION_STATE_V1` | `6529STREAM_EMERGENCY_RESTORATION_STATE_V1` | 0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; scope, eligible bit, code hash, append-only count/chain |
-| `STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1` | `6529STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_RECORD_V1` | 0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; index, target, selector, code hash |
-| `STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1` | `6529STREAM_EMERGENCY_RESTORATION_ELIGIBILITY_CHAIN_V1` | 0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340 | ADR 0004 governance executor | `1` | ADR 0004 `[GOV-EMERGENCY-RESTORATION]`; chainid, executor, prior chain, record, index |
-
 Governance action-class numeric IDs are catalog values, not enum ordinals that
 may be reordered. The protocol-v1 mirror is append-only:
 
@@ -1260,7 +1254,7 @@ may be reordered. The protocol-v1 mirror is append-only:
 | `3` | `POINTER_REPLACEMENT` | retained |
 | `4` | `FUNDS_RECOVERY` | retained |
 | `5` | `SUCCESSOR_DECLARATION` | retained |
-| `6` | `EMERGENCY_RESTORATION` | appended target ID; zero delay only for an exact terminal-registered target/selector/code hash under ADR 0004 `[GOV-EMERGENCY-RESTORATION]`, plus the target-side fresh-failing-probe and bounded-restoration checks in `[GOV-WINDOWS]` and `[LTA-GGP-CORE]` |
+| `6` | `EMERGENCY_RESTORATION` | `retired_pre_genesis`; forbidden for scheduling and execution; reserved and never reusable (ADR 0017) |
 
 ### Governed Gas Parameter Identifier Mirror Rows
 
@@ -1269,24 +1263,25 @@ Pattern home:
 ([LTA-GGP]). Every `parameterId` is the `keccak256` of the string
 preimage — `"6529STREAM_GGP_" || <constant name>` per [LTA-GGP] rule 5 —
 with no `abi.encode` inputs; the per-parameter host, genesis value,
-floor, and probe are owned by the subsystem home named in each Inputs
+floor, failure class, and sizing evidence are owned by the subsystem home named in each Inputs
 cell. This table carries exactly one row per [LTA-GGP] inventory entry
 (ADR 0011 decision R12): an inventory entry without a row here, or a row
 without an inventory entry, is a conformance defect, and inventory
 growth by spec amendment must land with its mirror row in the same
 change. Governed Time Parameters — the entropy lifecycle block-count
-windows governed under the floor/raise/probe discipline of their own
-pattern home ([LTA-GTP]; ADR 0012 decision T1) — are consolidated in
+windows governed under the raise-only discipline of their own
+pattern home ([LTA-GTP]; ADR 0017) — are consolidated in
 this same table under the same closed-world rule: one row per [LTA-GTP]
 genesis instantiation, with `parameterId` computed as
 `keccak256("6529STREAM_GTP_" || <constant name>)` per [LTA-GTP] rule 3
-and the per-parameter host, genesis value, floors, and cadence probe
+and the per-parameter host, genesis value, floors, and sizing evidence
 owned by the subsystem home named in each Inputs cell. Identifier
 constant names are uniform (ADR 0013 decision U9): exactly `GGP_` or
 `GTP_` followed by the parameter constant name, with no additional
-suffix — the CI checker verifies these names row-for-row against the
-Solidity constants, so a stray suffix is a naming defect, never a style
-choice.
+suffix — the CI checker verifies these labels row-for-row against the exact
+closed-world LTA inventories and verifies the generic hosts' exact GGP/GTP
+prefix derivations, so a stray suffix is a naming defect, never a style
+choice. There are no row-specific Solidity identifier constants.
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |

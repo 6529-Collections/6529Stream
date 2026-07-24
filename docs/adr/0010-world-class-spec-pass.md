@@ -36,6 +36,12 @@ line previously instructed the bare-numeral shape).
 
 ### D1. Governed Gas Parameters (GGP) — no immutable gas caps anywhere
 
+Amended by [ADR 0017](0017-raise-only-parameter-governance.md): immutable
+floors, storage-backed values, stable identifiers, change events, the `<= 2x`
+step bound, and repricing review remain; probe-gated lowering and emergency,
+conditional, permissionless, and rebinding paths are superseded. Every launch
+mutation is an authority-only Governance V2 class-`1` delayed monotonic raise.
+
 1. Every external-call gas cap in the protocol (royalty resolver read,
    metadata router read, entropy registration, ERC-1271 verification,
    finality component reads, gate calls, asset-policy checks, escrow flush
@@ -385,7 +391,9 @@ GGP floors). Release artifacts regenerate through the full chain.
 
 ## Test Plan
 
-Every decision maps to matrix gates: GGP floor/raise/lower and probe tests;
+Every decision maps to matrix gates: GGP floor, authority, delayed monotonic
+raise, per-action bound, revision, schema-v2 event, and removed-surface tests
+(ADR 0017);
 artist acceptance/sanction/consent-mode and estate-transition tests; content
 root and reference-render finality gates; export root and record-chain
 reconstruction tests; auction increment/anti-snipe/Dutch-rebate and

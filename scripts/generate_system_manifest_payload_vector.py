@@ -21,13 +21,13 @@ from typing import Any, Iterable, Sequence
 
 
 VECTOR_SCHEMA = "6529stream.system-manifest-payload-vector.v1"
-PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v1"
+PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v2"
 EVIDENCE_CLASS = "target_abi_lock_fixture"
 DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
 DEFAULT_OUTPUT = Path("release-artifacts/system-manifest-payload-vector.json")
 BLOCKER_ISSUE = "https://github.com/6529-Collections/6529Stream/issues/656"
 
-EXPECTED_PROFILE_ENTRIES = 60
+EXPECTED_PROFILE_ENTRIES = 37
 CHAIN_ID = 1
 SCHEMA_VERSION = 1
 CHUNK_PAYLOAD_BYTES = 24_575
@@ -56,9 +56,6 @@ PAYLOAD_ROOT_DOMAIN = (
 )
 DEPLOYMENT_IDENTITY_DOMAIN = (
     "0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a"
-)
-GGP_PROBE_BINDING_DOMAIN = (
-    "0x4efb354b2a3c37f3c74fe57912e40eb08d83026611be9740d785f348cc2332c4"
 )
 STATE_EXPORT_PUBLISHER_INTERFACE = "IStreamStateExportPublisher"
 STATE_EXPORT_PUBLISHER_ABI_SCHEMA = "6529stream.state-export-publisher-abi.v1"
@@ -117,6 +114,35 @@ STATE_EXPORT_PUBLISHER_MARKERS = (
     f"STATE_EXPORT_CHALLENGED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportChallenged(uint16,bytes32,bytes32,address,string)']}",
     f"STATE_EXPORT_SUPERSEDED_TOPIC_{STATE_EXPORT_EVENT_TOPICS['StateExportSuperseded(uint16,bytes32,bytes32,bytes32,string)']}",
     f"STATE_EXPORT_PUBLISHER_ABI_SHA256_{STATE_EXPORT_PUBLISHER_ABI_SHA256.removeprefix('sha256:')}",
+)
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE = "IStreamGovernedParameterAuthority"
+GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA = (
+    "6529stream.governed-parameter-authority-abi.v1"
+)
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID = "0xd9f8d48c"
+GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256 = (
+    "sha256:720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"
+)
+GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS = (
+    (
+        "isStreamGovernedParameterAuthority()",
+        "0x8d96760d",
+        "view",
+        ("bool",),
+    ),
+    (
+        "currentAction()",
+        "0x546ea281",
+        "view",
+        ("bool", "bytes32", "uint8", "bytes32", "bytes32", "bytes32"),
+    ),
+)
+GOVERNED_PARAMETER_AUTHORITY_MARKERS = (
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_V1",
+    "GOVERNED_PARAMETER_AUTHORITY_MARKER_SELECTOR_0x8d96760d",
+    "GOVERNED_PARAMETER_AUTHORITY_CONTEXT_SELECTOR_0x546ea281",
+    "GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID_0xd9f8d48c",
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256_720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a",
 )
 
 VECTOR_DERIVATION_DOMAIN = "6529STREAM_SYSTEM_MANIFEST_TARGET_VECTOR_V1"
@@ -207,65 +233,6 @@ AGGREGATE_TARGETS = {
     "stateExportPublisher": "GOVERNANCE_LAYER",
 }
 
-GGP_HOSTS: dict[str, tuple[str, ...]] = {
-    "ROYALTY_RESOLVER_GAS_LIMIT": ("STREAM_CORE",),
-    "ROYALTY_RETURN_GAS_BUFFER": ("STREAM_CORE",),
-    "ERC_1271_GAS_LIMIT": ("SPLIT_FACTORY",),
-    "ASSET_POLICY_GAS_LIMIT": ("SPLIT_FACTORY",),
-    "WALLET_DEPOSIT_GAS_LIMIT": ("SPLIT_FACTORY",),
-    "FLUSH_GAS_FLOOR": ("REVENUE_ESCROW",),
-    "MINT_GATE_GAS_LIMIT": ("MINT_MANAGER",),
-    "TICKET_ERC1271_GAS_LIMIT": ("MINT_TICKET_GATE",),
-    "ARTIST_AUTHORITY_GAS_LIMIT": ("MINT_MANAGER",),
-    "SALE_ERC1271_GAS_LIMIT": (
-        "FIXED_PRICE_SALE_ADAPTER",
-        "ENGLISH_AUCTION_HOUSE",
-        "DUTCH_AUCTION_ADAPTER",
-        "PRIVATE_SALE_ADAPTER",
-    ),
-    "DELEGATE_REGISTRY_GAS_LIMIT": ("DELEGATE_REGISTRY_GATE",),
-    "SALE_ARTIST_AUTHORITY_GAS_LIMIT": (
-        "FIXED_PRICE_SALE_ADAPTER",
-        "ENGLISH_AUCTION_HOUSE",
-        "DUTCH_AUCTION_ADAPTER",
-        "PRIVATE_SALE_ADAPTER",
-    ),
-    "REVEAL_ATTEMPT_GAS_LIMIT": (
-        "FIXED_PRICE_SALE_ADAPTER",
-        "ENGLISH_AUCTION_HOUSE",
-        "DUTCH_AUCTION_ADAPTER",
-        "PRIVATE_SALE_ADAPTER",
-    ),
-    "SALE_NFT_DELIVERY_GAS_LIMIT": (
-        "FIXED_PRICE_SALE_ADAPTER",
-        "ENGLISH_AUCTION_HOUSE",
-        "DUTCH_AUCTION_ADAPTER",
-        "PRIVATE_SALE_ADAPTER",
-    ),
-    "METADATA_ROUTER_GAS_LIMIT": ("STREAM_CORE",),
-    "ENTROPY_VIEW_GAS_LIMIT": ("METADATA_ROUTER",),
-    "ENTROPY_REGISTRATION_GAS_LIMIT": ("STREAM_CORE",),
-    "ENTROPY_RESULT_PROBE_GAS_LIMIT": ("ENTROPY_COORDINATOR",),
-    "VRF_CALLBACK_GAS_LIMIT": (
-        "ENTROPY_PROVIDER_VRF",
-        "ENTROPY_PROVIDER_FALLBACK",
-    ),
-    "ARTIST_ERC1271_VERIFY_GAS": ("ARTIST_REGISTRY",),
-    "METADATA_ERC1271_VERIFY_GAS": (
-        "OWNER_RECORDS",
-        "COLLECTION_ATTESTATIONS",
-        "ARTIST_REGISTRY",
-    ),
-    "FINALITY_COMPONENT_READ_GAS": ("ARTWORK_FINALITY_REGISTRY",),
-}
-
-GTP_HOSTS: dict[str, tuple[str, ...]] = {
-    "ENTROPY_REQUEST_TIMEOUT_BLOCKS": ("ENTROPY_COORDINATOR",),
-    "ENTROPY_REVEAL_SLO_BLOCKS": ("ENTROPY_COORDINATOR",),
-    "ENTROPY_RECOVERY_STEP_DELAY_BLOCKS": ("ENTROPY_COORDINATOR",),
-}
-
-
 class ManifestVectorError(RuntimeError):
     """Raised when generation inputs or a derived vector are nonconformant."""
 
@@ -330,6 +297,37 @@ def state_export_publisher_surface() -> dict[str, Any]:
     if digest != STATE_EXPORT_PUBLISHER_ABI_SHA256:
         raise ManifestVectorError(
             "reviewed state-export publisher ABI constants disagree with their fixed digest"
+        )
+    return {**surface, "surface_sha256": digest}
+
+
+def governed_parameter_authority_surface() -> dict[str, Any]:
+    """Return the transparent, digest-locked governed authority ABI surface."""
+    surface = {
+        "schema": GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA,
+        "required_interface": GOVERNED_PARAMETER_AUTHORITY_INTERFACE,
+        "interface_id": GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": signature,
+                "selector": selector,
+                "state_mutability": state_mutability,
+                "returns": list(returns),
+            }
+            for signature, selector, state_mutability, returns in GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS
+        ],
+        "events": [],
+    }
+    canonical = json.dumps(
+        surface,
+        ensure_ascii=True,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("ascii")
+    digest = sha256_prefixed(canonical)
+    if digest != GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256:
+        raise ManifestVectorError(
+            "reviewed governed-parameter authority ABI constants disagree with their fixed digest"
         )
     return {**surface, "surface_sha256": digest}
 
@@ -685,6 +683,10 @@ def _require_profile(profile: Any) -> list[dict[str, Any]]:
             raise ManifestVectorError(f"profile.entries[{index}].id must be an integer")
         if not isinstance(key, str) or not KEY_RE.fullmatch(key):
             raise ManifestVectorError(f"profile.entries[{index}].key is not canonical")
+        if raw_entry.get("kind") != "contract":
+            raise ManifestVectorError(
+                f"profile.entries[{index}].kind must be 'contract'"
+            )
         actual_ids.append(entry_id)
         keys.append(key)
     if actual_ids != expected_ids:
@@ -701,17 +703,33 @@ def _require_profile(profile: Any) -> list[dict[str, Any]]:
     governance = entries[keys.index("GOVERNANCE_LAYER")]
     governance_interfaces = governance.get("required_interfaces")
     governance_markers = governance.get("required_markers")
+    if not isinstance(governance_interfaces, list) or not all(
+        isinstance(item, str) for item in governance_interfaces
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER required_interfaces must be a string array"
+        )
+    if not isinstance(governance_markers, list) or not all(
+        isinstance(marker, str) for marker in governance_markers
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER required_markers must be a string array"
+        )
     if (
-        not isinstance(governance_interfaces, list)
-        or not all(isinstance(item, str) for item in governance_interfaces)
-        or STATE_EXPORT_PUBLISHER_INTERFACE not in governance_interfaces
-        or not isinstance(governance_markers, list)
-        or not all(isinstance(marker, str) for marker in governance_markers)
+        STATE_EXPORT_PUBLISHER_INTERFACE not in governance_interfaces
         or not set(STATE_EXPORT_PUBLISHER_MARKERS).issubset(governance_markers)
     ):
         raise ManifestVectorError(
             "GOVERNANCE_LAYER must prove the state-export publisher interface "
             "and event marker before serving STATE_EXPORT_PUBLISHER"
+        )
+    if (
+        GOVERNED_PARAMETER_AUTHORITY_INTERFACE not in governance_interfaces
+        or not set(GOVERNED_PARAMETER_AUTHORITY_MARKERS).issubset(governance_markers)
+    ):
+        raise ManifestVectorError(
+            "GOVERNANCE_LAYER must prove the exact governed-parameter authority "
+            "interface and ABI markers"
         )
     return entries
 
@@ -719,10 +737,6 @@ def _require_profile(profile: Any) -> list[dict[str, Any]]:
 def _module_type(entry: dict[str, Any]) -> str:
     if entry["key"] == "STREAM_SYSTEM_MANIFEST":
         return hex_keccak(b"STREAM_SYSTEM_MANIFEST")
-    if entry.get("kind") == "ggp_probe":
-        return hex_keccak(b"STREAM_GGP_PROBE")
-    if entry.get("kind") == "gtp_probe":
-        return hex_keccak(b"STREAM_GTP_PROBE")
     return hex_keccak(entry["key"].encode("ascii"))
 
 
@@ -735,12 +749,6 @@ def _interface_id(entry: dict[str, Any]) -> str:
         # Events do not contribute to ERC-165; the one-function publisher
         # interface ID is therefore latestStateExport()'s selector.
         return STATE_EXPORT_PUBLISHER_INTERFACE_ID
-    if entry.get("kind") == "ggp_probe":
-        return "0x0f8c6b0f"
-    if entry.get("kind") == "gtp_probe":
-        # IStreamTimeParameterProbe: lastProbeRun(bytes32,uint256) XOR
-        # pinnedWallClockFloorSeconds(bytes32).
-        return "0xb6c57592"
     interfaces = entry.get("required_interfaces")
     if not isinstance(interfaces, list) or not all(isinstance(item, str) for item in interfaces):
         raise ManifestVectorError(f"{entry['key']} required_interfaces must be strings")
@@ -759,7 +767,6 @@ def _entry_facts(
         facts[entry["key"]] = {
             "id": entry["id"],
             "key": entry["key"],
-            "kind": entry.get("kind"),
             "entry_hash": entry_hash,
             "address": derive_address("contract-address", entry["id"], entry["key"]),
             "runtime_code_hash": derive_hash("runtime-code-hash", *identity),
@@ -770,7 +777,6 @@ def _entry_facts(
             "module_type": _module_type(entry),
             "module_version": module_version,
             "interface_id": _interface_id(entry),
-            "parameters": tuple(entry.get("parameters", [])),
         }
     return facts
 
@@ -847,96 +853,6 @@ def _pointers(facts: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(result, key=lambda item: item["pointerType"])
 
 
-def _parameter_id(kind: str, name: str) -> str:
-    prefix = "6529STREAM_GGP_" if kind == "ggp_probe" else "6529STREAM_GTP_"
-    return hex_keccak((prefix + name).encode("ascii"))
-
-
-def _probe_binding_hash(
-    registry: str,
-    probe: str,
-    module_type: str,
-    interface_id: str,
-    module_version: str,
-    runtime_code_hash: str,
-    module_manifest_hash: str,
-    deployment_manifest_hash: str,
-) -> str:
-    encoded = abi_encode_static(
-        (
-            ("bytes32", GGP_PROBE_BINDING_DOMAIN),
-            ("address", registry),
-            ("address", probe),
-            ("bytes32", module_type),
-            ("bytes4", interface_id),
-            ("bytes32", module_version),
-            ("bytes32", runtime_code_hash),
-            ("bytes32", module_manifest_hash),
-            ("bytes32", deployment_manifest_hash),
-        )
-    )
-    return hex_keccak(encoded)
-
-
-def _gas_parameter_probes(
-    entries: Sequence[dict[str, Any]], facts: dict[str, dict[str, Any]]
-) -> list[dict[str, Any]]:
-    registry = facts["MODULE_REGISTRY"]["address"]
-    rows: list[dict[str, Any]] = []
-    seen_parameters: set[str] = set()
-    for entry in entries:
-        kind = entry.get("kind")
-        if kind not in {"ggp_probe", "gtp_probe"}:
-            continue
-        probe = facts[entry["key"]]
-        host_map = GGP_HOSTS if kind == "ggp_probe" else GTP_HOSTS
-        parameters = entry.get("parameters")
-        if not isinstance(parameters, list) or not parameters:
-            raise ManifestVectorError(f"{entry['key']} must bind at least one parameter")
-        for parameter in parameters:
-            if parameter not in host_map:
-                raise ManifestVectorError(f"no fixture host mapping for {parameter}")
-            seen_parameters.add(parameter)
-            parameter_id = _parameter_id(kind, parameter)
-            for host_key in host_map[parameter]:
-                binding_hash = _probe_binding_hash(
-                    registry,
-                    probe["address"],
-                    probe["module_type"],
-                    probe["interface_id"],
-                    probe["module_version"],
-                    probe["runtime_code_hash"],
-                    probe["module_manifest_hash"],
-                    probe["deployment_manifest_hash"],
-                )
-                rows.append(
-                    {
-                        "host": facts[host_key]["address"],
-                        "parameterId": parameter_id,
-                        "probe": probe["address"],
-                        "probeRegistry": registry,
-                        "probeModuleType": probe["module_type"],
-                        "probeInterfaceId": probe["interface_id"],
-                        "probeModuleVersion": probe["module_version"],
-                        "probeRuntimeCodeHash": probe["runtime_code_hash"],
-                        "probeModuleManifestHash": probe["module_manifest_hash"],
-                        "probeDeploymentManifestHash": probe[
-                            "deployment_manifest_hash"
-                        ],
-                        "probeBindingHash": binding_hash,
-                        "probeMaxAgeBlocks": "7200",
-                    }
-                )
-    expected = set(GGP_HOSTS) | set(GTP_HOSTS)
-    if seen_parameters != expected:
-        raise ManifestVectorError(
-            "profile probe parameters drifted; "
-            f"missing={sorted(expected - seen_parameters)}, "
-            f"extra={sorted(seen_parameters - expected)}"
-        )
-    return sorted(rows, key=lambda row: (row["host"], row["parameterId"]))
-
-
 def _critical_fallbacks(facts: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     registry = facts["MODULE_REGISTRY"]["address"]
     pairs = (
@@ -971,7 +887,6 @@ def build_payload(
         key: derive_hash("catalog-hash", key, profile_sha256) for key in CATALOG_KEYS
     }
     aggregate = {key: facts[target]["address"] for key, target in AGGREGATE_TARGETS.items()}
-    gas_rows = _gas_parameter_probes(entries, facts)
     payload = {
         "schema": PAYLOAD_SCHEMA_LITERAL,
         "schemaVersion": SCHEMA_VERSION,
@@ -989,7 +904,7 @@ def build_payload(
         "contracts": _contract_records(entries, facts),
         "pointers": _pointers(facts),
         "registryEntries": _registry_entries(entries, facts),
-        "gasParameterProbes": gas_rows,
+        "gasParameterProbes": [],
         "criticalFallbacks": _critical_fallbacks(facts),
         "securityContact": {
             "policyHash": derive_hash("security-policy-hash", profile_sha256),
@@ -1139,16 +1054,14 @@ def build_vector(profile: dict[str, Any], profile_raw: bytes) -> dict[str, Any]:
                 "catalog field name",
                 "raw genesis-profile SHA-256",
             ],
-            "probe_interface_ids": {
-                "IStreamGasParameterProbe": "0x0f8c6b0f",
-                "IStreamTimeParameterProbe": "0xb6c57592",
-            },
             "sstore2_carrier_policy": (
                 "root and chunk carriers are excluded from payload.contracts "
                 "to avoid a self-address fixed point"
             ),
             "state_export_publisher_binding": "GOVERNANCE_LAYER",
             "state_export_publisher_surface": state_export_publisher_surface(),
+            "governed_parameter_authority_binding": "GOVERNANCE_LAYER",
+            "governed_parameter_authority_surface": governed_parameter_authority_surface(),
         },
         "constants": {
             "schema_version": SCHEMA_VERSION,
@@ -1208,7 +1121,6 @@ def build_vector(profile: dict[str, Any], profile_raw: bytes) -> dict[str, Any]:
             "contract_count": len(contracts),
             "pointer_count": len(payload["pointers"]),
             "registry_entry_count": len(payload["registryEntries"]),
-            "gas_parameter_probe_binding_count": len(payload["gasParameterProbes"]),
             "critical_fallback_count": len(payload["criticalFallbacks"]),
             "all_profile_entry_addresses": [
                 facts[record["key"]]["address"] for record in contracts

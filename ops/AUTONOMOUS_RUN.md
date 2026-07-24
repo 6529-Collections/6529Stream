@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/governance-v2-foundation` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/682` |
-| Active issue | `https://github.com/6529-Collections/6529Stream/issues/665` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/683` |
-| Next issue | Replace the unsafe probe-dependent gas/time control plane with a reviewed raise-only policy, then bind a closed-world governance action catalog before ownership cutover. |
+| Active PR branch | `codex/raise-only-gas-time-governance` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/683` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/684` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/686` |
+| Next issue | Bind the exact 25 governed parameters under #684, then enforce the closed-world action/native-value policy under #685. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 02:41 UTC` |
+| Last updated | `2026-07-24 07:24 UTC` |
 
 ## Current Run Notes
 
@@ -54,18 +54,19 @@ evidence, and audit/readiness gates.
   work also merged through PR #661.
 - PR #661 merged the fail-closed canonical genesis deployment profile. The
   current v1 contract catalog cannot prove deployment-instance identity,
-  fallback distinctness, or parameterized probe bindings, so issue #656 remains
-  a production blocker.
+  or fallback distinctness, so issue #656 remains a production blocker. ADR
+  0017 removes parameter-probe bindings from the canonical 37-entry target.
 - PR #662 merged the canonical normalized Slither gate. The fresh unfiltered
-  capture at source commit `c0be71915bc650569940b249fa9e5c801c0587fc` on
-  `2026-07-23T23:52:41Z` records 3,143 findings across all impacts/scopes and
-  normalizes to 33 Open first-party production High/Medium rows under issue
-  #658: 3 High, 30 Medium, one confirmed gap, five design-review rows, and 27
-  pending dispositions.
+  capture at source commit `55a2e817876eac754355a14ae3907053e3d3deed` on
+  `2026-07-24T04:58:03Z` records 3,017 findings across all impacts/scopes and
+  normalizes to 30 Open first-party production High/Medium rows under issue
+  #658: 3 High, 27 Medium, one confirmed gap, five design-review rows, and 24
+  pending dispositions. All 30 retained fingerprints are unchanged; only three
+  retired `StreamCadenceProbe` rows disappeared, with no new row.
 - The Governance Executor's proposal-selected native-value row disappeared
   only because bounded assembly makes the call invisible to Slither; the
   authority remains independently tracked as High open blocker `RISK-GOV-003`.
-  Issues #658 and #665 remain open, and the Governance V2 foundation remains
+  Issues #658 and #685 remain open, and the Governance V2 foundation remains
   pre-audit and not production-ready.
 - PR #660 subsequently merged the locked CPython audit/release toolchain and
   checksum provenance. The permanent pre-genesis target lock merged in PR #663,
@@ -73,38 +74,31 @@ evidence, and audit/readiness gates.
 - PRs #678 through #682 then isolated canonical release builds, preserved
   quote-exact fork evidence, hardened release receipts, removed the fixed
   control-plane ERC-165 cap, and added the canonical deployment-plan
-  materializer. PR #682 is the current `origin/main` baseline.
-- The current `codex/governance-v2-foundation` topic implements the Governance
-  V2 executor/bootstrap/evidence/manifest/policy foundation, exact target-side
-  execution-context rechecks, root/proposer revision epochs, replay-complete
-  membership events, bounded returndata, and governed gas/time hosts under
-  issue #665. The post-rebase full Forge run passes 1,165 tests across 86
-  suites, and the Windows aggregate check passes end to end. The slice does not
-  add instance-aware deployment inputs, production candidates, a closed-world
-  action-policy catalog, non-local rehearsal evidence, or audit completion.
-  PR #683 is published for review. Its first Slither CI attempt passed the
-  baseline unit/schema checks but GitHub canceled the live pinned-toolchain run
-  at the job's 15-minute limit on `2026-07-24 01:47 UTC`; local canonical
-  capture timing is about 27 minutes, so the Slither-only CI timeout is raised
-  to 45 minutes. CodeRabbit then completed a substantive current-head review:
-  pinned Foundry v1.7.1 rejects the suggested lowercase governed-profile
-  `bytecode_hash` and requires the existing `None` enum spelling, while the
-  follow-up aligns the Slither timeout documentation and makes the release-mode
-  integration test consume the real committed `RISK-GOV-003` gate while
-  suppressing only unrelated blockers. The replacement Slither job passed its
-  full live comparison in 29 minutes 18 seconds. The concurrent Foundry job
-  passed every preceding step through release-artifact verification, changelog,
-  and deployment-rehearsal parity, then GitHub canceled the final rehearsal's
-  three-file compile at the 30-minute job ceiling. Because this was a pure
-  timeout rather than a test failure, the Foundry-only budget is raised to 60
-  minutes and a focused workflow regression pins that headroom. Latest-head CI
-  and follow-up review are pending.
+  materializer. PR #683 then merged the Governance V2 foundation, and issue
+  #665 closed for its named execution-context/ModuleRegistry scope.
+- The current `codex/raise-only-gas-time-governance` topic implements ADR
+  0017's 22-GGP/3-GTP raise-only target, removes probe/lower/emergency/rebind
+  surfaces, enforces per-parameter same-action replay rejection, and changes the
+  canonical genesis profile to 37 no-probe entries. The isolated release build
+  binds 53 targets; `StreamCore` remains 24,152 runtime bytes with 424 bytes of
+  margin, so issue #654 stays open. Issue #684 now owns exact production
+  parameter host/evidence binding, while #685 owns `RISK-GOV-003`.
+- Final candidate validation passed on 2026-07-24: the isolated
+  `make release-artifacts-verify` gate completed in 375.1 seconds, and the full
+  Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
+  gate completed end to end in 2,107.4 seconds after the canonical non-production
+  candidate receipt, target-catalog, and release-config pins were refreshed.
+- Ready PR #686 is open from `codex/raise-only-gas-time-governance` at
+  `https://github.com/6529-Collections/6529Stream/pull/686`. It establishes the
+  raise-only foundation and fail-closed evidence boundary for issue #684 but
+  does not close the issue's exact production host/sizing/candidate-binding
+  acceptance criteria. Next action is final-head CI and CodeRabbit iteration.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality
   reads; and concrete discovery, sanction, and deployment candidates remain
-  incomplete. The next planned slice after this branch is governance V2 and
-  exact module-registry binding under issue #665.
+  incomplete. The next planned slice after this branch is the exact 25-row
+  governed-parameter inventory and fail-closed candidate binding under #684.
 - Historical artifacts prove the earlier headroom work reduced Core to 21,792
   runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
   hooks while the legacy Drops/Minter path remained live, producing the current
