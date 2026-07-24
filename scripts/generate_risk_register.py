@@ -12,12 +12,46 @@ from pathlib import Path
 from typing import Any
 
 import check_risk_register as checker
+import check_release_evidence_issue_links as issue_links_checker
 import check_slither_baseline as slither_baseline_checker
 
 
 GENERATOR_VERSION = "1"
 DEFAULT_OUTPUT = checker.DEFAULT_REGISTER
 SLITHER_RISK_ID = "RISK-SLITHER-001"
+ISSUE_LINKS_PATH = issue_links_checker.DEFAULT_ISSUE_LINKS.as_posix()
+ISSUE_BACKLOG_PATH = issue_links_checker.DEFAULT_BACKLOG.as_posix()
+
+RISK_TRACKING_REQUIREMENTS: dict[str, list[tuple[str, str]]] = {
+    "RISK-EXT-001": [
+        ("public_beta", "fork_deployment_rehearsal"),
+        ("public_beta", "testnet_deployment_rehearsal"),
+        ("public_beta", "fork_testnet_ceremony_evidence"),
+        ("public_beta", "fork_testnet_randomizer_operations_evidence"),
+        ("public_beta", "verified_deployed_addresses"),
+        ("public_beta", "explorer_verification_status"),
+    ],
+    "RISK-GOV-001": [
+        ("public_beta", "fork_testnet_ceremony_evidence"),
+        ("production_release", "live_ceremony_evidence"),
+    ],
+    "RISK-RAND-001": [
+        ("public_beta", "fork_testnet_randomizer_operations_evidence"),
+        ("production_release", "live_randomizer_operations_evidence"),
+    ],
+    "RISK-REL-001": [
+        ("production_release", "production_signatures"),
+        ("production_release", "signed_git_tag"),
+        ("production_release", "production_address_books"),
+        ("production_release", "production_broadcast_retention"),
+        ("production_release", "live_deployment_manifest"),
+        ("production_release", "live_explorer_verification"),
+    ],
+    "RISK-META-001": [
+        ("production_release", "live_marketplace_indexer_evidence"),
+        ("production_release", "live_metadata_browser_evidence"),
+    ],
+}
 
 SOURCE_DOCUMENT_PATHS = [
     "release-artifacts/schema/risk-register.schema.json",
@@ -35,6 +69,7 @@ SOURCE_DOCUMENT_PATHS = [
     "release-artifacts/latest/public-beta-evidence.json",
     "release-artifacts/latest/public-beta-blockers.md",
     "release-artifacts/latest/production-release-blockers.md",
+    ISSUE_LINKS_PATH,
 ]
 
 RISK_DEFINITIONS: list[dict[str, Any]] = [
@@ -136,10 +171,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_non_local_release_evidence.py",
             "python scripts/check_non_local_release_evidence.py",
         ],
-        "tracking": [
-            "https://github.com/6529-Collections/6529Stream/issues/217",
-            "https://github.com/6529-Collections/6529Stream/issues/218",
-        ],
+        "tracking_requirements": RISK_TRACKING_REQUIREMENTS["RISK-EXT-001"],
     },
     {
         "id": "RISK-GOV-001",
@@ -169,7 +201,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_admin_ceremony_evidence.py",
             "python scripts/check_admin_ceremony_evidence.py",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/362"],
+        "tracking_requirements": RISK_TRACKING_REQUIREMENTS["RISK-GOV-001"],
     },
     {
         "id": "RISK-GOV-002",
@@ -328,12 +360,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_marketplace_indexer_evidence.py",
             "python scripts/check_marketplace_indexer_evidence.py",
         ],
-        "tracking": [
-            "https://github.com/6529-Collections/6529Stream/issues/135",
-            "https://github.com/6529-Collections/6529Stream/issues/422",
-            "https://github.com/6529-Collections/6529Stream/issues/423",
-            "https://github.com/6529-Collections/6529Stream/issues/424",
-        ],
+        "tracking_requirements": RISK_TRACKING_REQUIREMENTS["RISK-META-001"],
     },
     {
         "id": "RISK-ONE-001",
@@ -398,7 +425,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/check_randomizer_operations.py",
             "python scripts/check_public_beta_evidence.py",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/221"],
+        "tracking_requirements": RISK_TRACKING_REQUIREMENTS["RISK-RAND-001"],
     },
     {
         "id": "RISK-REL-001",
@@ -428,7 +455,7 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
             "python scripts/test_bytecode_release_proof.py",
             "python scripts/generate_bytecode_release_proof.py --check",
         ],
-        "tracking": ["https://github.com/6529-Collections/6529Stream/issues/384"],
+        "tracking_requirements": RISK_TRACKING_REQUIREMENTS["RISK-REL-001"],
     },
     {
         "id": "RISK-SIZE-001",
@@ -544,6 +571,65 @@ def file_ref(repo_root: Path, relative_path: str) -> dict[str, str]:
     return {"path": relative_path, "sha256": checker.file_sha256(resolved)}
 
 
+def canonical_issue_urls(repo_root: Path) -> dict[tuple[str, str], str]:
+    """Load validated evidence-issue URLs by canonical phase and requirement ID."""
+    issue_links_path = repo_root / ISSUE_LINKS_PATH
+    backlog_path = repo_root / ISSUE_BACKLOG_PATH
+    issue_links = issue_links_checker.require_dict(
+        issue_links_checker.load_json(issue_links_path),
+        str(issue_links_path),
+    )
+    backlog = issue_links_checker.require_dict(
+        issue_links_checker.load_json(backlog_path),
+        str(backlog_path),
+    )
+    issue_links_checker.validate_links_document(
+        issue_links,
+        backlog,
+        repo_root,
+        backlog_path,
+    )
+
+    urls: dict[tuple[str, str], str] = {}
+    for index, raw_link in enumerate(
+        issue_links_checker.require_list(issue_links.get("links"), "links")
+    ):
+        link = issue_links_checker.require_dict(raw_link, f"links[{index}]")
+        key = (
+            issue_links_checker.require_string(
+                link.get("phase"),
+                f"links[{index}].phase",
+            ),
+            issue_links_checker.require_string(
+                link.get("requirement_id"),
+                f"links[{index}].requirement_id",
+            ),
+        )
+        if key in urls:
+            raise issue_links_checker.ReleaseEvidenceIssueLinksError(
+                "duplicate canonical evidence issue key: " + ".".join(key)
+            )
+        urls[key] = issue_links_checker.require_string(
+            link.get("issue_url"),
+            f"links[{index}].issue_url",
+        )
+    return urls
+
+
+def resolve_tracking_urls(
+    issue_urls: dict[tuple[str, str], str],
+    requirement_keys: list[tuple[str, str]],
+) -> list[str]:
+    """Resolve ordered risk tracking URLs from canonical requirement keys."""
+    missing = [key for key in requirement_keys if key not in issue_urls]
+    if missing:
+        raise issue_links_checker.ReleaseEvidenceIssueLinksError(
+            "missing canonical evidence issue key(s): "
+            + ", ".join(".".join(key) for key in missing)
+        )
+    return [issue_urls[key] for key in requirement_keys]
+
+
 def slither_open_residual_risk(repo_root: Path) -> str:
     """Describe the validated live baseline without duplicating mutable counts."""
     baseline = slither_baseline_checker.validate_baseline(
@@ -565,9 +651,20 @@ def slither_open_residual_risk(repo_root: Path) -> str:
 
 def build_register(repo_root: Path) -> dict[str, Any]:
     """Build the deterministic risk register object."""
+    issue_urls = canonical_issue_urls(repo_root)
     risks = []
     for definition in sorted(RISK_DEFINITIONS, key=lambda item: str(item["id"])):
-        risk = {key: value for key, value in definition.items() if key != "evidence_paths"}
+        risk = {
+            key: value
+            for key, value in definition.items()
+            if key not in {"evidence_paths", "tracking_requirements"}
+        }
+        tracking_requirements = definition.get("tracking_requirements")
+        if tracking_requirements is not None:
+            risk["tracking"] = resolve_tracking_urls(
+                issue_urls,
+                tracking_requirements,
+            )
         if risk["id"] == SLITHER_RISK_ID:
             risk["residual_risk"] = slither_open_residual_risk(repo_root)
         risk["evidence"] = [

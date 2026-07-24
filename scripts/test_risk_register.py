@@ -13,6 +13,38 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+ISSUE_LINKS_PATH = "release-artifacts/latest/release-evidence-issue-links.json"
+ISSUE_BACKLOG_PATH = "release-artifacts/latest/release-evidence-issue-backlog.json"
+RISK_TRACKING_REQUIREMENTS = {
+    "RISK-EXT-001": [
+        ("public_beta", "fork_deployment_rehearsal"),
+        ("public_beta", "testnet_deployment_rehearsal"),
+        ("public_beta", "fork_testnet_ceremony_evidence"),
+        ("public_beta", "fork_testnet_randomizer_operations_evidence"),
+        ("public_beta", "verified_deployed_addresses"),
+        ("public_beta", "explorer_verification_status"),
+    ],
+    "RISK-GOV-001": [
+        ("public_beta", "fork_testnet_ceremony_evidence"),
+        ("production_release", "live_ceremony_evidence"),
+    ],
+    "RISK-RAND-001": [
+        ("public_beta", "fork_testnet_randomizer_operations_evidence"),
+        ("production_release", "live_randomizer_operations_evidence"),
+    ],
+    "RISK-REL-001": [
+        ("production_release", "production_signatures"),
+        ("production_release", "signed_git_tag"),
+        ("production_release", "production_address_books"),
+        ("production_release", "production_broadcast_retention"),
+        ("production_release", "live_deployment_manifest"),
+        ("production_release", "live_explorer_verification"),
+    ],
+    "RISK-META-001": [
+        ("production_release", "live_marketplace_indexer_evidence"),
+        ("production_release", "live_metadata_browser_evidence"),
+    ],
+}
 CHECKER_PATH = Path(__file__).with_name("check_risk_register.py")
 CHECKER_SPEC = importlib.util.spec_from_file_location("check_risk_register", CHECKER_PATH)
 assert CHECKER_SPEC is not None and CHECKER_SPEC.loader is not None
@@ -49,6 +81,14 @@ def seed_file(root: Path, relative_path: str, text: str = "seed\n") -> Path:
     path = root / relative_path
     write_text(path, text)
     return path
+
+
+def seed_issue_link_inputs(root: Path) -> tuple[dict[str, object], dict[str, object]]:
+    issue_links = json.loads((REPO_ROOT / ISSUE_LINKS_PATH).read_text(encoding="utf-8"))
+    backlog = json.loads((REPO_ROOT / ISSUE_BACKLOG_PATH).read_text(encoding="utf-8"))
+    write_json(root / ISSUE_LINKS_PATH, issue_links)
+    write_json(root / ISSUE_BACKLOG_PATH, backlog)
+    return issue_links, backlog
 
 
 def minimal_register(root: Path) -> dict[str, object]:
@@ -123,6 +163,66 @@ def minimal_register(root: Path) -> dict[str, object]:
 
 
 class RiskRegisterTests(unittest.TestCase):
+    def test_external_risks_track_canonical_evidence_issues(self) -> None:
+        issue_links = json.loads((REPO_ROOT / ISSUE_LINKS_PATH).read_text(encoding="utf-8"))
+        keys = [(link["phase"], link["requirement_id"]) for link in issue_links["links"]]
+        self.assertEqual(len(keys), len(set(keys)), "duplicate canonical evidence link key")
+        links_by_key = {
+            (link["phase"], link["requirement_id"]): link["issue_url"]
+            for link in issue_links["links"]
+        }
+        generated = generator.build_register(REPO_ROOT)
+        risks_by_id = {risk["id"]: risk for risk in generated["risks"]}
+        definitions_by_id = {risk["id"]: risk for risk in generator.RISK_DEFINITIONS}
+
+        for risk_id, requirement_keys in RISK_TRACKING_REQUIREMENTS.items():
+            expected = [links_by_key[key] for key in requirement_keys]
+            self.assertEqual(risks_by_id[risk_id]["tracking"], expected)
+            self.assertNotIn("tracking", definitions_by_id[risk_id])
+            self.assertEqual(
+                definitions_by_id[risk_id]["tracking_requirements"],
+                generator.RISK_TRACKING_REQUIREMENTS[risk_id],
+            )
+
+        self.assertIn(ISSUE_LINKS_PATH, generator.SOURCE_DOCUMENT_PATHS)
+
+    def test_generator_rejects_missing_canonical_issue_link(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            issue_links, backlog = seed_issue_link_inputs(root)
+            removed_link = issue_links["links"].pop(0)
+            backlog["entries"] = [
+                entry
+                for entry in backlog["entries"]
+                if entry["entry_id"] != removed_link["entry_id"]
+            ]
+            write_json(root / ISSUE_LINKS_PATH, issue_links)
+            write_json(root / ISSUE_BACKLOG_PATH, backlog)
+
+            issue_urls = generator.canonical_issue_urls(root)
+
+            with self.assertRaisesRegex(
+                generator.issue_links_checker.ReleaseEvidenceIssueLinksError,
+                "missing canonical evidence issue key",
+            ):
+                generator.resolve_tracking_urls(
+                    issue_urls,
+                    [(removed_link["phase"], removed_link["requirement_id"])],
+                )
+
+    def test_generator_rejects_mismatched_canonical_issue_key(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            issue_links, _ = seed_issue_link_inputs(root)
+            issue_links["links"][0]["requirement_id"] = "wrong_requirement"
+            write_json(root / ISSUE_LINKS_PATH, issue_links)
+
+            with self.assertRaisesRegex(
+                generator.issue_links_checker.ReleaseEvidenceIssueLinksError,
+                "requirement_id does not match backlog entry",
+            ):
+                generator.canonical_issue_urls(root)
+
     def test_generator_directly_covers_raise_only_governance_adr(self) -> None:
         self.assertIn(
             "docs/adr/0017-raise-only-parameter-governance.md",

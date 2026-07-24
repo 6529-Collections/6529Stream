@@ -55,13 +55,13 @@
   "locked_inputs": {
     "release_manifest": {
       "path": "release-artifacts/latest/release-manifest.json",
-      "sha256": "sha256:3b6bd0a1b49b9f4a357c4ce662cf7a66ac36d6af01eca9ce0806dc056fb4df6e",
+      "sha256": "sha256:64bacfd30ef87328776bd1faa5e14cddfc11502f9b867c54efe16e54b544c786",
       "size_bytes": 141180,
       "schema_version": "6529stream.release-manifest.v1"
     },
     "bytecode_release_proof": {
       "path": "release-artifacts/latest/bytecode-release-proof.json",
-      "sha256": "sha256:0ac473391a02ec54f215c7c010c0b74b55597b66b8bff4cba1dd9c1ba5f49dca",
+      "sha256": "sha256:d3735c38aa5496f327e32488c68ed2779e87db631867d2124184b14b2245255d",
       "size_bytes": 150692,
       "schema_version": "6529stream.bytecode-release-proof.v1"
     },
@@ -73,8 +73,8 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:cbc2aa85166e21454d592292e29b3f00bd80357b993aa44b275f2479578e55a2",
-      "size_bytes": 31293,
+      "sha256": "sha256:b33faf36eb33d342d36a0c02168d8765fffa9accace67b75b37811c51b0b5ecb",
+      "size_bytes": 32093,
       "schema_version": "6529stream.risk-register.v1"
     },
     "governed_parameter_inventory": {
@@ -86,14 +86,14 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:083b2f40d99170204f1ed67fd2e953a0554a0d0e064b2333be662081f529896b",
-        "size_bytes": 124572,
+        "sha256": "sha256:c984e4e0e2d30738c5da4070a165ac696f33e63c8b2737c294983dd0d45b6bd2",
+        "size_bytes": 124875,
         "schema_version": "6529stream.release-notes.v1"
       },
       "markdown": {
         "path": "release-artifacts/latest/release-notes.md",
-        "sha256": "sha256:311d16e9a8efbd85f8a8855678868a5516ef70f9e58f9e2098c566de70875e99",
-        "size_bytes": 121246
+        "sha256": "sha256:2b45d50b533a64f9a75226e7ec113b1fcb449cf3c878d0c3100ef2d8889c1d31",
+        "size_bytes": 121542
       }
     },
     "blocker_reports": {
