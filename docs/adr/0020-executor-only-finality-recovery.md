@@ -101,13 +101,17 @@ legacy wrappers.
 6. A request commits its canonical scope, original finality record hash,
    predecessor recovery ID, old route hash, exact replacement component
    expectation, recovery manifest, reason hash, and reason URI.
-7. Canonical staged manifest bytes bind the executable intent. The manifest
-   content hash must equal the hash of those bytes; route, scope, reason, or
-   lineage substitution therefore invalidates both the manifest and artist
-   approval.
+7. Canonical staged manifest bytes bind the executable intent. Only the
+   self-referential manifest `contentHash` is excluded from those bytes; its
+   URI hash, schema ID, and canonicalization hash are included. The content hash
+   must equal the hash of the staged intent bytes, so route, scope, reason,
+   lineage, URI, schema, or canonicalization substitution invalidates both the
+   manifest and artist approval.
 8. Artist and owner evidence are read from separately owned append-only
    targets and snapshotted at execution. The scheduled action identity does not
-   contain mutable evidence values.
+   contain mutable evidence values. Owner evidence is valid only after its
+   action-, scope-, and manifest-bound notice has remained open for the full
+   pinned 72-hour objection interval; the exact end is snapshotted permanently.
 9. Every route replacement is fail-closed as
    `artworkBytesChanged = true`. A component's self-reported `dataHash` is not a
    generic byte-equivalence proof. A non-artwork-changing class requires a
@@ -292,8 +296,9 @@ StreamFinalityRecoveryEvidenceSnapshot
   6. artistNoticeEndsAt: uint64
   7. ownerEvidenceHash: bytes32
   8. ownerEvidenceRevision: uint64
-  9. ownerAcknowledgementCount: uint32
- 10. ownerObjectionCount: uint32
+  9. ownerNoticeEndsAt: uint64
+ 10. ownerAcknowledgementCount: uint32
+ 11. ownerObjectionCount: uint32
 
 StreamFinalityRecoveryRecord
   1. executed: bool
@@ -334,7 +339,7 @@ The exact function outputs are:
 | `finalityRecoveryManifestBytes` | `(bytes manifestBytes)` |
 | `finalityRecoveryIntentBytes` | `(bytes intentBytes)` |
 | `executeFinalityRecovery` | no return data |
-| `finalityRecoveryRecord` | `(StreamFinalityRecoveryRecord record)`, ABI tuple `(bool,bytes32,(uint8,uint256,uint256,bytes32),bytes32,bytes32,uint64,bytes32,bytes32,bool,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),(uint8,bytes32,address,bytes32,uint8,uint64,bytes32,uint64,uint32,uint32),bytes32,string,uint64)` |
+| `finalityRecoveryRecord` | `(StreamFinalityRecoveryRecord record)`, ABI tuple `(bool,bytes32,(uint8,uint256,uint256,bytes32),bytes32,bytes32,uint64,bytes32,bytes32,bool,(bytes32,address,bytes4,bytes32,bytes32,bytes32,bytes32),(string,bytes32,bytes32,bytes32,bytes32),(uint8,bytes32,address,bytes32,uint8,uint64,bytes32,uint64,uint64,uint32,uint32),bytes32,string,uint64)` |
 | `activeFinalityRecovery` | `(bytes32 recoveryId, bytes32 recoveryRouteHash, uint64 generation)` |
 | `resolvedFinalityRoute` | `(bool pinned, address module, bytes32 componentRouteHash, bytes32 originalFinalityRecordHash, bytes32 recoveryId)` |
 | `finalityRecoveryRouteStatus` | `(bool pinned, bool currentRouteMatches, bytes32 componentRouteHash, bytes32 recoveryId)` |
@@ -390,7 +395,7 @@ Governance action ID rather than a caller-supplied local preimage.
 | --- | --- | --- |
 | `FinalityRecoveryManifestStaged(uint16,bytes32,uint256,address)` | `0x96e23e9d953aadb6216d8b8836ac606a796a56148a5adec007e25e57d9e869cf` | `manifestContentHash` |
 | `FinalityRecoveryLineageRecorded(uint16,bytes32,bytes32,bytes32,uint64,bytes32,bytes32)` | `0xaeb5797308416112ddc363bbc8df6684801ed02091d25986526320bb98568643` | `recoveryId`, `predecessorRecoveryId`, `originalFinalityRecordHash` |
-| `FinalityRecoveryEvidenceSnapshotted(uint16,bytes32,uint8,bytes32,address,bytes32,uint8,uint64,bytes32,uint64,uint32,uint32)` | `0xce92effcd0a486c77e4176ac15f40c90bd9fccd7104511f90831c4e88f0ae4ea` | `recoveryId` |
+| `FinalityRecoveryEvidenceSnapshotted(uint16,bytes32,uint8,bytes32,address,bytes32,uint8,uint64,bytes32,uint64,uint64,uint32,uint32)` | `0x20cad72b08caad16079db34a3c8279a26bc6e9fb3655c04acfd281a5d5f7ad90` | `recoveryId` |
 
 Acceptance must add these facts to the generated event catalog and remove the
 four local lifecycle facts. This Proposed slice changes neither catalog.
@@ -451,6 +456,7 @@ artistAuthorityClass
 artistNoticeEndsAt
 ownerEvidenceHash
 ownerEvidenceRevision
+ownerNoticeEndsAt
 ownerAcknowledgementCount
 ownerObjectionCount
 ```
@@ -537,16 +543,23 @@ bytes.concat(
         request.expectedPredecessorRecoveryId,
         request.expectedOldRouteHash,
         request.replacementRoute,
+        request.recoveryManifest.uriHash,
+        request.recoveryManifest.schemaId,
+        request.recoveryManifest.canonicalizationHash,
         request.reasonHash,
         keccak256(bytes(request.reasonURI))
     )
 )
 ```
 
-The recovery manifest reference is intentionally excluded from its own intent
-bytes to avoid a content-hash fixed point. Its `contentHash` must equal
-`keccak256(intentBytes)`. Its canonical bytes must already be staged; its URI
-hash must match; and its schema and canonicalization hashes must be nonzero.
+Only `request.recoveryManifest.contentHash` is excluded from its own intent
+bytes to avoid a fixed point. The URI hash, schema ID, and canonicalization hash
+are included above. The content hash must equal `keccak256(intentBytes)`;
+the exact intent bytes must already be staged; `uriHash` must equal
+`keccak256(bytes(request.recoveryManifest.uri))`; and the schema and
+canonicalization hashes must be nonzero. Consequently the artist approval over
+the manifest content hash binds the URI and every other manifest metadata field
+without hashing `contentHash` into itself.
 
 This replaces both Draft local recovery-ID preimages. Governance V2's
 `STREAM_GOVERNANCE_ACTION_V2` action ID is authoritative.
@@ -609,12 +622,14 @@ bytes32 recoveryRouteHash = keccak256(bytes.concat(
 ));
 ```
 
-Here `evidence` is the exact ten-field
+Here `evidence` is the exact eleven-field
 `StreamFinalityRecoveryEvidenceSnapshot` tuple above. The staged manifest
-content hash transitively binds the full canonical intent, including the
-reason-URI hash. `recoveryRouteHash` therefore identifies the executed append
-and its evidence; it is not interchangeable with the hash of the one selected
-component route.
+content hash transitively binds the full canonical intent, including manifest
+URI hash, schema ID, canonicalization hash, and the reason-URI hash. Artist
+evidence over that content hash and the composite `recoveryRouteHash` therefore
+bind every manifest metadata field. `recoveryRouteHash` identifies the executed
+append and its evidence; it is not interchangeable with the hash of the one
+selected component route.
 
 ## Authorization, Replay, Timing, And Revert Semantics
 
@@ -640,7 +655,15 @@ component route.
     invalid, zero-identity, or still inside the action-bound unavailability
     notice rejects.
 13. Required owner evidence that reverts, is short, oversized, malformed,
-    invalid, zero-hash, or zero-revision rejects.
+    invalid, zero-hash, zero-revision, or zero notice end rejects. The
+    `StreamOwnerRecords` target may return `valid = true` only for evidence
+    bound to this exact canonical scope, Governance action ID, and manifest
+    content hash after at least 72 hours from the recorded notice. The
+    companion independently rejects `block.timestamp < ownerNoticeEndsAt`
+    before mutation and snapshots the end. Evidence created late does not
+    inherit elapsed Governance delay; its own full interval still runs. If that
+    end falls after Governance expiry, the action expires and a new action plus
+    new bound notice is required.
 14. Artist approval deadlines and nonce/digest revocation are submission-time
     admission gates only. Once recorded, approval does not later expire or
     become invalid through revocation. Only explicit adjudicated supersession
@@ -680,6 +703,7 @@ component route.
 | `FinalityRecoveryOriginalRecordMissing(bytes32)` | `0x6bbf39b8` |
 | `FinalityRecoveryOwnerEvidenceInvalid()` | `0xf17d89ad` |
 | `FinalityRecoveryOwnerEvidenceUnreadable()` | `0x781ae739` |
+| `FinalityRecoveryOwnerNoticeOpen(uint64)` | `0x00298c68` |
 | `FinalityRecoveryPredecessorMismatch(bytes32,bytes32)` | `0x0ec06b7e` |
 | `FinalityRecoveryReasonHashZero()` | `0xc5387390` |
 | `FinalityRecoveryRecordMissing(bytes32)` | `0xa6859b78` |
@@ -701,6 +725,10 @@ component route.
 The four existing refresh/count errors whose signatures remain present keep
 their selectors. All other error compatibility is intentionally broken if this
 ADR is Accepted.
+
+For owner timing, a zero `ownerNoticeEndsAt` or `valid = false` uses
+`FinalityRecoveryOwnerEvidenceInvalid()`. A nonzero end later than the current
+block timestamp uses `FinalityRecoveryOwnerNoticeOpen(ownerNoticeEndsAt)`.
 
 The exact Draft error migration is:
 
@@ -779,7 +807,9 @@ If Accepted, this is a pre-genesis breaking migration:
 2. Indexers reconstruct pending, cancellation, veto, expiry, and retry state
    only from Governance V2 action records/events.
 3. Indexers key executed recovery records by Governance action ID and join
-   execution, lineage, evidence, and refresh events on that ID.
+   execution, lineage, evidence, and refresh events on that ID. The evidence
+   record and event carry `ownerNoticeEndsAt`; later owner responses do not
+   rewrite that execution-time snapshot.
 4. Scheduled and cancelled recovery events disappear from the recovery target.
    Execution and refresh topics remain, while manifest-staged, lineage, and
    evidence-snapshot topics are added.
@@ -841,19 +871,29 @@ Dependencies before acceptance or source authorization:
           bool valid,
           bytes32 evidenceHash,
           uint64 revision,
+          uint64 ownerNoticeEndsAt,
           uint32 acknowledgementCount,
           uint32 objectionCount
       );
   ```
 
-  Its canonical selector and interface ID are both `0x20279cd8`. The target
-  owns append-only owner acknowledgements, objections, accumulator/hash, and
-  revision semantics; #667 only performs an exact-size read and snapshots the
-  returned revision. Missing code, missing IERC-165/`0x20279cd8`, `0xffffffff`
-  acceptance, revert, malformed return, `valid = false`, zero evidence hash, or
-  zero revision fails before mutation. No implementation owner or tracker is
-  assigned yet, so this is an explicit acceptance and source blocker rather
-  than a production-only follow-up.
+  The exact return ABI is
+  `(bool,bytes32,uint64,uint64,uint32,uint32)`. Its canonical selector and
+  interface ID are both `0x20279cd8`; the added output does not change either.
+  The target owns append-only owner
+  acknowledgements, objections, notice delivery/evidence, accumulator/hash,
+  revision, and the pinned `OWNER_RECOVERY_OBJECTION_WINDOW = 72 hours`. A
+  notice record is keyed by the canonical scope, Governance action ID, and
+  recovery-manifest content hash. Its `ownerNoticeEndsAt` is no earlier than 72
+  hours after notice recording, and the read may return `valid = true` only
+  after that end. #667 accepts exactly 192 bytes of canonical ABI return data,
+  independently checks the nonzero elapsed end, and snapshots the returned
+  revision and end. Missing
+  code, missing IERC-165/`0x20279cd8`, `0xffffffff` acceptance, revert,
+  malformed return, `valid = false`, zero evidence hash, zero revision, zero
+  notice end, or future notice end fails before mutation. No implementation
+  owner or tracker is assigned yet, so this is an explicit acceptance and
+  source blocker rather than a production-only follow-up.
 - The metadata-router serving integration defined under topology must have an
   explicit implementation owner and real-target tests before acceptance or
   source authorization. An offchain convention or deployment promise is not a
@@ -893,7 +933,7 @@ explicitly; it may not relabel the old blocks silently.
 | `docs/adr/0004-admin-governance.md` `[GOV-BATCH]` | Pin exactly one recovery append per batch plus the exact adjacent predecessor assertion/pointer update and bypass negatives through #685's accepted policy. |
 | `docs/adr/0004-admin-governance.md` `[GOV-V2-CUTOVER]` | Add the recovery companion to the exact accepted Governance V2 host/cutover inventory after dependency acceptance. |
 | `docs/stream-artist-authority.md` `[AA-RECOVERY]` | Cite the canonical manifest-bound execution read and preserve append-only recorded-approval semantics; keep artist writes and authority in #670. |
-| `docs/collection-metadata-contract.md`, owner-record recovery-response rules and acquisition/condition surfaces | Pin the owner evidence read/snapshot and downstream display/export fields without moving owner writes into #667. |
+| `docs/collection-metadata-contract.md`, owner-record recovery-response rules and acquisition/condition surfaces | Pin the action/scope/manifest-bound 72-hour owner notice, exact evidence read/snapshot including `ownerNoticeEndsAt`, and downstream display/export fields without moving owner writes into #667. |
 | `docs/spec-policy.md` event/domain/interface catalog requirements and `docs/launch-conformance-matrix.md` `[LCM-EVENTS]` | Reconcile generated one-fact/one-owner events, topic/indexed masks, interface IDs, and domain tables only after acceptance. |
 
 Maturity documents and release artifacts are downstream evidence rather than
@@ -937,9 +977,12 @@ Accepted ADR and an explicit reconciliation slice supersede them.
 The proposed single authority removes schedule/cancel state divergence and
 binds every append to Governance V2's current action and exact transition
 commitments. Manifest-bound intent prevents an artist-approved manifest from
-being paired with a different route, scope, reason, or lineage. Append-only
-heads and consumed action IDs prevent replay and stale overwrite. Exact-size
-dependency reads, live route matching, and mandatory evidence fail closed.
+being paired with a different route, scope, reason, lineage, URI, schema, or
+canonicalization rule. The action/manifest-bound elapsed owner notice closes
+the late-notice shortcut without putting mutable responses into the scheduled
+action identity. Append-only heads and consumed action IDs prevent replay and
+stale overwrite. Exact-size dependency reads, live route matching, and
+mandatory evidence fail closed.
 
 Residual risks requiring review:
 
@@ -1008,10 +1051,12 @@ After acceptance and source authorization:
   new-state preimage;
 - direct caller, missing/zero/wrong action context, wrong class, stale
   predecessor, replay, scope/old/new substitution, malformed scope, original
-  mismatch, manifest substitution, route drift, and ambiguous route tests;
-- approval, unavailability, owner evidence, short/oversized/malformed return,
-  post-record deadline/revocation, and adjudicated supersession tests against
-  real merged targets;
+  mismatch, manifest URI, URI-hash, schema, canonicalization, content, route,
+  and reason substitution, route drift, and ambiguous route tests;
+- approval, unavailability, owner evidence, late-created owner evidence, wrong
+  owner action/scope/manifest binding, zero/future owner notice end,
+  short/oversized/malformed return, post-record deadline/revocation, and
+  adjudicated supersession tests against real merged targets;
 - exact scoped precedence and inherited collection recovery tests;
 - empty, token, 5,000-boundary, multi-chunk, final-short-chunk, Core rollback,
   completion, supersession, inactive-plan, count, and reentrancy tests;
