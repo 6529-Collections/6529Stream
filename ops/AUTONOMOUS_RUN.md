@@ -43,7 +43,7 @@ evidence, and audit/readiness gates.
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 11:44 UTC` |
+| Last updated | `2026-07-24 11:46 UTC` |
 
 ## Parallel Lane Coordination
 
@@ -75,6 +75,13 @@ Any lane touching them must identify the overlap in its handoff, rebase current
 clean checkout before merge. The 14 external-evidence trackers remain open
 unless their actual non-local reviewed evidence exists; templates and local-only
 artifacts cannot close them.
+
+Cross-lane finality ownership is additionally pinned: issue #667 owns only the
+artwork-finality registry lifecycle and its exact dependency interfaces; issue
+#670 owns only the satellite-compatible artist/owner recovery evidence surface;
+and the real Core batch-refresh emitter remains exclusively in the #688/#654
+Core/mint lane. The #667 and #670 workers must reconcile their shared interface
+before either PR is published, and neither lane may modify Core for this edge.
 
 ## Current Run Notes
 
