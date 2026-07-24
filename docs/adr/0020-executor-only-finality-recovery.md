@@ -654,16 +654,21 @@ selected component route.
 12. Required artist evidence that reverts, is short, oversized, malformed,
     invalid, zero-identity, or still inside the action-bound unavailability
     notice rejects.
-13. Required owner evidence that reverts, is short, oversized, malformed,
-    invalid, zero-hash, zero-revision, or zero notice end rejects. The
-    `StreamOwnerRecords` target may return `valid = true` only for evidence
-    bound to this exact canonical scope, Governance action ID, and manifest
-    content hash after at least 72 hours from the recorded notice. The
-    companion independently rejects `block.timestamp < ownerNoticeEndsAt`
-    before mutation and snapshots the end. Evidence created late does not
-    inherit elapsed Governance delay; its own full interval still runs. If that
-    end falls after Governance expiry, the action expires and a new action plus
-    new bound notice is required.
+13. Required owner evidence follows one total validation order before any
+    mutation: a reverting read or non-192-byte, malformed, or noncanonical
+    return uses `FinalityRecoveryOwnerEvidenceUnreadable`; after exact decode,
+    zero evidence hash, revision, or notice end uses
+    `FinalityRecoveryOwnerEvidenceInvalid`; a nonzero
+    `ownerNoticeEndsAt > block.timestamp` uses
+    `FinalityRecoveryOwnerNoticeOpen(ownerNoticeEndsAt)` regardless of the
+    returned `valid` bit; only after the end has elapsed does `valid = false`
+    use `FinalityRecoveryOwnerEvidenceInvalid`. The `StreamOwnerRecords` target
+    may return `valid = true` only for evidence bound to this exact canonical
+    scope, Governance action ID, and manifest content hash after at least 72
+    hours from the recorded notice. Evidence created late does not inherit
+    elapsed Governance delay; its own full interval still runs. If that end
+    falls after Governance expiry, the action expires and a new action plus new
+    bound notice is required. A successful execution snapshots the elapsed end.
 14. Artist approval deadlines and nonce/digest revocation are submission-time
     admission gates only. Once recorded, approval does not later expire or
     become invalid through revocation. Only explicit adjudicated supersession
@@ -726,9 +731,19 @@ The four existing refresh/count errors whose signatures remain present keep
 their selectors. All other error compatibility is intentionally broken if this
 ADR is Accepted.
 
-For owner timing, a zero `ownerNoticeEndsAt` or `valid = false` uses
-`FinalityRecoveryOwnerEvidenceInvalid()`. A nonzero end later than the current
-block timestamp uses `FinalityRecoveryOwnerNoticeOpen(ownerNoticeEndsAt)`.
+Owner-error precedence is normative and total:
+
+1. failed read or non-192-byte/malformed/noncanonical return:
+   `FinalityRecoveryOwnerEvidenceUnreadable()`;
+2. decoded zero evidence hash, revision, or notice end:
+   `FinalityRecoveryOwnerEvidenceInvalid()`;
+3. nonzero future notice end, even when `valid = false`:
+   `FinalityRecoveryOwnerNoticeOpen(ownerNoticeEndsAt)`; then
+4. elapsed notice end with `valid = false`:
+   `FinalityRecoveryOwnerEvidenceInvalid()`.
+
+No owner return can match more than one disposition because the companion
+checks in that order.
 
 The exact Draft error migration is:
 
@@ -887,11 +902,13 @@ Dependencies before acceptance or source authorization:
   recovery-manifest content hash. Its `ownerNoticeEndsAt` is no earlier than 72
   hours after notice recording, and the read may return `valid = true` only
   after that end. #667 accepts exactly 192 bytes of canonical ABI return data,
-  independently checks the nonzero elapsed end, and snapshots the returned
-  revision and end. Missing
-  code, missing IERC-165/`0x20279cd8`, `0xffffffff` acceptance, revert,
-  malformed return, `valid = false`, zero evidence hash, zero revision, zero
-  notice end, or future notice end fails before mutation. No implementation
+  applies the total error precedence above, and snapshots the returned revision
+  and elapsed end. Missing code, missing IERC-165/`0x20279cd8`, or
+  `0xffffffff` acceptance fails construction/interface probing. At execution,
+  revert or non-192-byte/malformed/noncanonical return is Unreadable; decoded
+  zero evidence hash/revision/notice end is Invalid; a nonzero future end is
+  NoticeOpen even when `valid = false`; and only an elapsed `valid = false`
+  result is Invalid. Every failure occurs before mutation. No implementation
   owner or tracker is assigned yet, so this is an explicit acceptance and
   source blocker rather than a production-only follow-up.
 - The metadata-router serving integration defined under topology must have an
@@ -1055,8 +1072,11 @@ After acceptance and source authorization:
   and reason substitution, route drift, and ambiguous route tests;
 - approval, unavailability, owner evidence, late-created owner evidence, wrong
   owner action/scope/manifest binding, zero/future owner notice end,
-  short/oversized/malformed return, post-record deadline/revocation, and
-  adjudicated supersession tests against real merged targets;
+  future-end-plus-`valid = false` NoticeOpen precedence,
+  elapsed-end-plus-`valid = false` Invalid precedence,
+  short/oversized/malformed/noncanonical return, post-record
+  deadline/revocation, and adjudicated supersession tests against real merged
+  targets;
 - exact scoped precedence and inherited collection recovery tests;
 - empty, token, 5,000-boundary, multi-chunk, final-short-chunk, Core rollback,
   completion, supersession, inactive-plan, count, and reentrancy tests;
