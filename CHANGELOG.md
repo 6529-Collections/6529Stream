@@ -7,6 +7,16 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added ADR 0018 and checked target-spec semantics for mint operation identity:
+  every manager batch now has one manager-scoped ledger operation root and one
+  unique operation ID per token; the final ledger ABI/read/event ownership,
+  single-step and prepared path correlation, nonce reservation, rollback
+  proofs, and atomic Core lifetime-replay removal sequence are pinned. This is
+  a spec-first pre-genesis correction for
+  [issue #688](https://github.com/6529-Collections/6529Stream/issues/688);
+  current Solidity and generated as-built ABI/event catalogs remain unchanged
+  until the separately validated atomic implementation cutover. Protocol
+  maturity and production readiness are unchanged.
 - Corrected five external-evidence risk rows to derive their tracker provenance
   from the canonical open evidence-issue registry, and hash-bound that registry
   into the generated risk register. This does not change evidence status,

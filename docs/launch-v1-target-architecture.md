@@ -9,7 +9,9 @@ inline are resolved by
 [ADR 0012](adr/0012-world-class-pass-round-3.md), and
 [ADR 0013](adr/0013-world-class-pass-round-4.md),
 [ADR 0014](adr/0014-world-class-pass-round-5.md), and
-[ADR 0017](adr/0017-raise-only-parameter-governance.md), and are recorded in
+[ADR 0017](adr/0017-raise-only-parameter-governance.md), and
+[ADR 0018](adr/0018-batch-operation-root-and-token-identity.md), and are
+recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative protocol v1 specification for 6529Stream. It
@@ -181,12 +183,15 @@ following invariants:
    completed; and no state-changing effect may survive a later
    validation failure — the transaction is atomic, so a manager,
    ledger, or Core validation failure reverts every earlier effect,
-   including the `PRE_REVENUE_SINGLE_STEP` step 3 deposit, which
+   including the `PRE_REVENUE_SINGLE_STEP` step 4 deposit, which
    [RSR-ORCHESTRATION] deliberately places before manager and ledger
    validation. Cross-layer ordering is governed by invariants 2–7.
-2. Ledger before Core execution. Mint ledger counters, authorization IDs,
-   and any nullifiers must be consumed before Core token allocation for
-   the same operation (`mintFromManager` or `prepareMintFromManager`).
+2. Identity and ledger before Core execution. The manager derives one batch
+   root and `N` token operation IDs and reserves its nonce range before the
+   ledger call. The mint ledger then consumes that manager-scoped root,
+   counters, authorization IDs, and any nullifiers before Core token allocation
+   for the same operation (`mintFromManager` or
+   `prepareMintFromManager`) (ADR 0018).
 3. Identity at allocation. Core writes `tokenId -> collectionId` and
    `tokenId -> collectionSerial` and emits `TokenCollectionRegistered`
    (ADR 0010 decision D10.1; ABI and event home
@@ -211,7 +216,7 @@ following invariants:
    `requireMintConsent(collectionId, phaseId, policyHash)` read exactly
    once per mint transaction — a bounded read under the
    `ARTIST_AUTHORITY_GAS_LIMIT` Governed Gas Parameter — and reverts on
-   refusal before that transaction's ledger counter, authorization, and
+   refusal before that transaction's ledger root, counter, authorization, and
    nullifier consumption (invariant 2) and before any Core token
    allocation, so no token is ever created against a refused, disputed,
    contested, or unset consent state ([AA-CONSENT] requirements 5–6;
@@ -814,9 +819,12 @@ move pause out of policy identity and add the codehash pin modes
 (ADR 0011 decisions R6 and R12), are defined at the home and mirrored in
 the extension mirror rows below; the as-built rows here re-pin to the V2
 values together with the manager constants and this checker at
-implementation time. `operationId` values are derived from
-`OPERATION_DOMAIN` through `operationRoot` and then bind
+implementation time. In the as-built row, `operationId` values are derived
+from `OPERATION_DOMAIN` through `operationRoot` and then bind
 `operationRoot`, `operationNonce`, `tokenIndex`, `tokenDataHash`, and `salt`.
+The ADR 0018 target root/token/path domains are separate extension-mirror rows
+below; their implementation cutover re-pins this table and the Solidity
+constants atomically.
 Three input labels below are historical aliases pinned by the CI
 checker: `tokenDataHash` and `saltsHash` inside `requestCommitmentHash`,
 and the per-token `salt`, name the values the mint spec calls
@@ -901,7 +909,10 @@ above remain as-built CON-014 evidence only.
 | `GATE_CONFIG_DOMAIN_V2` | `6529STREAM_MINT_MANAGER_GATE_CONFIG_V2` | 0xf4e6498f6418d2366655c59c7d35ae06469289fe2aed030e292f700ec8f3bcb7 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (adds `gateCodehashPinMode`; ADR 0011 decision R12) |
 | `COUNTER_BINDING_DOMAIN_V2` | `6529STREAM_MINT_COUNTER_BINDING_V2` | 0xd7ec90fda31887c4e19d4b086ce826d3696cead8f764c2ff30b7e270a7984aa4 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (adds `resolverCodehashPinMode`; ADR 0011 decision R12) |
 | `COUNTER_SET_DOMAIN` | `6529STREAM_MINT_MANAGER_COUNTER_SET_V1` | 0x9f547260725c60c0f995ca79086156721bb77e52911472b28d1da7fd2dcc1c39 | `StreamMintManager` | `1` | mint spec `[MPA-POLICY-HASH]` (`orderedCounterConfigHash`; ADR 0011 decision R12) |
-| `REQUEST_COMMITMENT_DOMAIN` | `6529STREAM_PREPARED_MINT_REQUEST_COMMITMENT_V1` | 0x789a9a34af13467a6c8515b149f7ee0c2af1291710bba4b4d2cc2e47b58dba92 | `StreamMintManager` | `1` | interior composite; mint spec `[MPA-OPERATION]` (ADR 0011 decision R12) |
+| `MINT_REQUEST_COMMITMENT_DOMAIN` | `6529STREAM_MINT_REQUEST_COMMITMENT_V1` | 0xe4ac6b3cb3a129b5ff8903e5e77ae82e6b08a8c02d6e9afdd05f1a29c42b4e75 | `StreamMintManager` | `1` | interior composite; mint spec `[MPA-OPERATION]` (ADR 0011 decision R12; ADR 0018) |
+| `MINT_OPERATION_ROOT_DOMAIN` | `6529STREAM_MINT_OPERATION_ROOT_V1` | 0xc9d0a19018dbe92565c101d5e487d327862969c80231480b2b154b3cf25e609c | `StreamMintManager` | `1` | one root per manager batch; mint spec `[MPA-OPERATION]` (ADR 0018) |
+| `MINT_EXECUTION_PATH_SINGLE_STEP` | `6529STREAM_MINT_EXECUTION_PATH_SINGLE_STEP_V1` | 0x380e73f6deaf846e4de83f7ed9ebf6e54ec10954aca9f5fabaf63e42cdf8897b | `StreamMintManager` | `1` | single-step execution-path identity; mint spec `[MPA-OPERATION]` (ADR 0018) |
+| `MINT_EXECUTION_PATH_PREPARED` | `6529STREAM_MINT_EXECUTION_PATH_PREPARED_V1` | 0xa82af2f0c9004270f5d9b44392994f6a6f276d860636bebffb8157a2fdae3397 | `StreamMintManager` | `1` | prepared execution-path identity; mint spec `[MPA-OPERATION]` (ADR 0018) |
 | `BATCH_RECIPIENTS_DOMAIN` | `6529STREAM_MINT_BATCH_RECIPIENTS_V1` | 0x4324becaa6aa4425a98ab5655b06dc69742271052ab6945737af6b60d6165d37 | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
 | `BATCH_BENEFICIARIES_DOMAIN` | `6529STREAM_MINT_BATCH_BENEFICIARIES_V1` | 0x0a6973855e884044cad2078ec0474c97f36787e5da302fce966608e212c3a0eb | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
 | `BATCH_TOKEN_DATA_DOMAIN` | `6529STREAM_MINT_BATCH_TOKEN_DATA_V1` | 0x1fe692f6c80a4afdd93c4053f730e1d47a294a2e89853b4abb4decd686e48d36 | `StreamMintManager` | `1` | interior composite; mint spec Recipient Binding (ADR 0011 decision R12) |
@@ -914,7 +925,7 @@ above remain as-built CON-014 evidence only.
 | `COUNTER_IMPORT_ROOT_DOMAIN` | `6529STREAM_MINT_COUNTER_IMPORT_V1` | 0x6dd9e27258df6de7d90e2f57379fe4a494122e64fa53a60c20c4ba3c8b0115aa | `StreamMintLedger` | `1` | mint spec `[MPA-CONTINUITY]` |
 | `COUNTER_IMPORT_LEAF_DOMAIN` | `6529STREAM_MINT_COUNTER_IMPORT_LEAF_V1` | 0x90ddadcf5f0f075c58161de017414ee881fad42cba07129ddde22e8526e76964 | `StreamMintLedger` | `1` | double-hashed leaf; mint spec `[MPA-CONTINUITY]` |
 | `NULLIFIER_IMPORT_LEAF_DOMAIN` | `6529STREAM_MINT_NULLIFIER_IMPORT_LEAF_V1` | 0x27d76ee5cfde14d2fcba9ae951193a9e841809b974e387704313fcd83f75f54d | `StreamMintLedger` | `1` | double-hashed leaf; mint spec `[MPA-CONTINUITY]` |
-| `OPERATION_ID_DOMAIN` | `6529STREAM_PREPARED_MINT_OPERATION_ID_V1` | 0x27132a6bc16b13ba532007a4c4bdd0cd97cb70232de3b1ec8b779ae8358d0c98 | `StreamMintManager` | `1` | per-token interior composite; mint spec `[MPA-OPERATION]` rule 1 (ADR 0012 decision T6) |
+| `MINT_TOKEN_OPERATION_ID_DOMAIN` | `6529STREAM_MINT_TOKEN_OPERATION_ID_V1` | 0x5976353e4b31be7982321aea211f493bf54078d8fde1efd6da7b3ee98d841fae | `StreamMintManager` | `1` | per-token interior composite; mint spec `[MPA-OPERATION]` rule 1 (ADR 0012 decision T6; ADR 0018) |
 | `VALUE_KEY_DOMAIN` | `6529STREAM_MINT_COUNTER_VALUE_KEY_V1` | 0x7d176e04f80e4c60917bbf81304af356dc3c9316698808f36eac4eff01a4e39e | `StreamMintLedger` | `1` | exported counter value-key identity; mint spec `[MPA-COUNTERS]` (ADR 0012 decision T6) |
 
 ### Sales And Auctions Mirror Rows

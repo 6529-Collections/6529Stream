@@ -1820,9 +1820,9 @@ Acceptance criteria:
 
 ### CON-017: Lock The Pre-Genesis Core Target And Restore Production Headroom
 
-Status: Remaining work tracked under issue #654; the target lock merged in PR
-#663 and the zero-Core-delta adapter/caller cutover merged in PR #666. Measured
-net-negative Core retirement work remains.
+Status: Remaining work is sequentially gated by issues #688, #672, and #654;
+the target lock merged in PR #663 and the zero-Core-delta adapter/caller cutover
+merged in PR #666. Measured net-negative Core retirement work remains.
 
 Gate: C/E/G.
 
@@ -1846,6 +1846,19 @@ Acceptance criteria:
 5. Regenerate release artifacts in canonical order, pass the full repository
    gate, and keep audit/external-evidence readiness claims blocked until their
    independent acceptance criteria are satisfied.
+6. Before Core lifetime prepared-operation replay storage is removed, merge the
+   ADR 0018 spec and atomically land ledger-owned manager-scoped batch-root
+   replay, derive/reserve-before-ledger ordering, one root plus `N` token IDs,
+   exact event joins, and whole-transaction rollback proof (#688).
+7. After #688 merges, prove and enforce the post-entropy completion tail gas
+   required by #672; only its merged predecessor state may be measured by
+   #654.
+8. Implement the already-targeted restricted
+   `emitMetadataUpdate(uint256,bytes32)` and
+   `emitBatchMetadataUpdate(uint256,uint256,bytes32)` Core helpers needed by
+   #667's satellite refresh engine, without absorbing #667 or #670 satellite
+   work. Report their selector/event ABI and measured runtime delta before
+   finalizing the 2,000-byte margin.
 
 Current target-lock evidence additionally requires an independently reviewed
 exact active-surface digest rather than count-only ABI checks plus a separate
@@ -1862,10 +1875,14 @@ is governance-exclusive. Evidence also requires an explicit
 `IStreamStateExportPublisher` selector/event proof for that governance-hosted
 genesis publisher and a fixed-golden system-manifest vector oracle that shares
 no generator/checker codec implementation. The target architecture also closes
-recovery-refresh executability with a zero-Core-delta finality-registry plan:
-execution snapshots the monotonic token high-water mark and permissionless
-collection/scoped continuations advance exactly one bounded existing-Core batch
-call per transaction using only the stored recovery-manifest content hash. A
+recovery-refresh executability with a satellite-owned finality-registry plan
+whose Core seam is owned by the Core/mint lane: execution snapshots the
+monotonic token high-water mark and permissionless collection/scoped
+continuations advance exactly one bounded target-Core batch call per
+transaction using only the stored recovery-manifest content hash. The
+permanent target artifact already pins that selector, but current Core source
+does not implement the restricted external helper; #654 must include and
+measure it. A
 new route atomically carries forward an incomplete predecessor invalidation,
 and a global active-incomplete count plus exact same-batch zero-count assertion
 blocks finality-registry pointer cutover from stranding old-registry plans.

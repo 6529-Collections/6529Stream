@@ -714,7 +714,12 @@ The mint-manager domain constants step validates the checked
 [`launch-v1-target-architecture.md`](launch-v1-target-architecture.md)
 `StreamMintManager` domain table against `StreamMintManager.sol` and recomputes
 each listed `keccak256` preimage with `cast`, failing on source, spec, or hash
-drift.
+drift. It also checks the ADR 0018 target operation-domain mirrors and exact
+operation-identity selector goldens, plus the one-root/`N`-token cardinality,
+function return/read ABI, zero/reused-root and rollback semantics, exact event
+field layouts/topics, and Core/entropy boundary statements. Those target checks
+are spec-first: they do not treat the current CON-014 Solidity or generated
+as-built event catalog as already aligned.
 
 The audit-package step validates [`audit-package.md`](audit-package.md), the
 single auditor-facing index over maturity, scope, ADRs, tests, static analysis,

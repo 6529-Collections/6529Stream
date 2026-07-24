@@ -86,6 +86,141 @@ class MintManagerDomainConstantTests(unittest.TestCase):
                 keccak_fn=lambda _: "0x" + "11" * 32,
             )
 
+    def test_rejects_target_operation_hash_drift(self) -> None:
+        rows = [
+            checker.OPERATION_DOMAIN_MARKER,
+            "",
+            "| Constant | String preimage | Hash |",
+            "| --- | --- | --- |",
+        ]
+        for index, (name, preimage) in enumerate(checker.TARGET_OPERATION_DOMAINS):
+            digest = "0x" + ("00" if index == 0 else "11") * 32
+            rows.append(f"| `{name}` | `{preimage}` | `{digest}` |")
+        rows.extend(["", "```solidity", ""])
+        architecture = "\n".join(
+            f"| `{name}` | `{preimage}` | {'0x' + '11' * 32} |"
+            for name, preimage in checker.TARGET_OPERATION_DOMAINS
+        )
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "MINT_REQUEST_COMMITMENT_DOMAIN target hash drifted",
+        ):
+            checker.validate_operation_domains(
+                "\n".join(rows),
+                architecture,
+                keccak_fn=lambda _: "0x" + "11" * 32,
+            )
+
+    def test_rejects_missing_operation_identity_contract_fragment(self) -> None:
+        documents = {
+            path: "\n".join(fragments)
+            for path, fragments in checker.OPERATION_IDENTITY_FRAGMENTS.items()
+        }
+        documents[checker.ADR_0018_PATH] = documents[checker.ADR_0018_PATH].replace(
+            "## Atomic Cutover And Core Replay Removal", ""
+        )
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity contract drifted",
+        ):
+            checker.validate_operation_identity_fragments(documents)
+
+    def test_rejects_target_operation_selector_drift(self) -> None:
+        mint_spec = "\n".join(
+            f"| `{selector}` | `{signature}` |"
+            for signature, selector in checker.TARGET_OPERATION_SELECTORS
+        )
+        stale_spec = mint_spec.replace("`0x32425026`", "`0x00000000`", 1)
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity selector row missing or drifted",
+        ):
+            checker.validate_operation_selectors(
+                stale_spec,
+                keccak_fn=lambda signature: next(
+                    selector + "0" * 56
+                    for expected_signature, selector in checker.TARGET_OPERATION_SELECTORS
+                    if expected_signature == signature
+                ),
+            )
+
+    def test_rejects_target_operation_return_abi_drift(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        documents = {
+            path: (repo_root / path).read_text(encoding="utf-8")
+            for path in checker.TARGET_OPERATION_ABI_FRAGMENTS
+        }
+        documents[checker.MINT_SPEC_PATH] = documents[
+            checker.MINT_SPEC_PATH
+        ].replace(
+            "uint256[] memory tokenIds,\n    bytes32 operationRoot,\n"
+            "    bytes32[] memory operationIds",
+            "uint256[] memory tokenIds,\n    bytes32[] memory operationIds,\n"
+            "    bytes32 operationRoot",
+            1,
+        )
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "operation identity ABI declaration drifted",
+        ):
+            checker.validate_operation_abi(documents)
+
+    def test_rejects_target_operation_event_index_drift(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        documents = {
+            path: (repo_root / path).read_text(encoding="utf-8")
+            for path in (
+                checker.MINT_SPEC_PATH,
+                checker.REVENUE_DOC_PATH,
+                checker.ENTROPY_SPEC_PATH,
+                checker.CONFORMANCE_PATH,
+            )
+        }
+        documents[checker.MINT_SPEC_PATH] = documents[
+            checker.MINT_SPEC_PATH
+        ].replace(
+            "bytes32 indexed operationRoot,\n    address indexed manager,",
+            "bytes32 operationRoot,\n    address indexed manager,",
+            1,
+        )
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "MintLedgerOperationRootConsumed target event signature/field layout drifted",
+        ):
+            checker.validate_operation_events(documents)
+
+    def test_rejects_target_operation_event_unindexed_name_drift(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        documents = {
+            path: (repo_root / path).read_text(encoding="utf-8")
+            for path in (
+                checker.MINT_SPEC_PATH,
+                checker.REVENUE_DOC_PATH,
+                checker.ENTROPY_SPEC_PATH,
+                checker.CONFORMANCE_PATH,
+            )
+        }
+        documents[checker.MINT_SPEC_PATH] = documents[
+            checker.MINT_SPEC_PATH
+        ].replace(
+            "bytes32 authorizationId\n);\n\n"
+            "event MintLedgerCounterConsumed",
+            "bytes32 replayId\n);\n\n"
+            "event MintLedgerCounterConsumed",
+            1,
+        )
+
+        with self.assertRaisesRegex(
+            checker.MintManagerDomainError,
+            "MintLedgerOperationRootConsumed target event signature/field layout drifted",
+        ):
+            checker.validate_operation_events(documents)
+
 
 if __name__ == "__main__":
     unittest.main()

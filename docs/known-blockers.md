@@ -161,7 +161,13 @@ contributors who start from the README.
   API: satellite-only slices must keep zero Core delta and Core-changing slices
   must measure net-negative until the complete linked production-profile
   `StreamCore` runtime passes at or below 22,576 bytes. The target ABI alone is
-  not a bytecode measurement.
+  not a bytecode measurement. ADR 0018 pins one ledger-owned root plus `N`
+  token operation IDs, but current source still calls the rootless ledger
+  before deriving its prepared-only root and retains lifetime replay storage in
+  Core. The sequential #688 -> #672 -> #654 lane must implement and validate
+  that cutover, prove post-entropy completion gas, and include the real
+  restricted Core ERC-4906 single/batch refresh emitters required by #667
+  before the exact production margin can pass.
 - Strict release mode now consumes the canonical checked
   `release-artifacts/genesis-deployment-profile.json` and fails on missing,
   extra, duplicate, ambiguous, wrong-scope, wrong-interface, wrong-marker,

@@ -46,7 +46,8 @@ Boundaries with the neighboring homes:
 2. [`docs/mint-policy-and-accounting.md`](mint-policy-and-accounting.md)
    owns mint policy, counters, the durable mint ledger, signed mint
    tickets, gates, the module registry, policy grace windows, and the
-   prepared-mint operation identity. Adapters are mint executors under that
+   batch operation-root and per-token operation identity. Adapters are mint
+   executors under that
    specification.
 3. The artist identity, consent, and sanction model lives in
    [`docs/stream-artist-authority.md`](stream-artist-authority.md) (ADR 0010 decision D2). Sale
@@ -98,7 +99,7 @@ Flow for every paid mint sale:
   buyer or executor
     -> sale adapter (price, asset, custody, sale authorization)
     -> revenue settlement (split wallet deposit or escrow; revenue spec)
-    -> StreamMintManager.mint(...) or prepared-mint pair (mint spec)
+    -> StreamMintManager.executeSingleStepMint(...) or executePreparedMint(...) (mint spec)
     -> StreamMintLedger.consume(...)
     -> StreamCore mint hooks
 ```
@@ -608,6 +609,15 @@ Requirements [SSA-AUTH]:
    [Deferred Settlement Drift Envelopes](#deferred-settlement-drift-envelopes);
    execution recomputes and rejects a mismatch exactly as rule 2 requires
    for every other field.
+9. A mint-executing adapter uses the exact operation identity owned by
+   `docs/mint-policy-and-accounting.md` `[MPA-OPERATION]` (ADR 0018). It
+   derives and records the batch `operationRoot` before a
+   `PRE_REVENUE_SINGLE_STEP` deposit, supplies the same signed request and
+   authorization ID to the manager in that top-level transaction, compares the
+   returned root and token operation IDs with its preview before returning, and
+   records a per-token `operationId` only when it creates a token-scoped
+   settlement fact. It neither stores ledger replay state nor substitutes the
+   sale digest for the batch root.
 
 ## Fixed-Price Sales And Open Editions
 
