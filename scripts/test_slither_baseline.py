@@ -204,7 +204,7 @@ class SlitherBaselineTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("slither-baseline:", ci)
-        self.assertIn("timeout-minutes: 15", ci)
+        self.assertIn("timeout-minutes: 45", ci)
         self.assertIn("version: v1.7.1", ci)
         self.assertIn("solc-select install 0.8.19", ci)
         self.assertIn("solc-select use 0.8.19", ci)

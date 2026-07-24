@@ -178,7 +178,7 @@
   "text_checksum_file": {
     "path": "release-artifacts/latest/SHA256SUMS",
     "format": "sha256sum",
-    "sha256": "sha256:ae772e55a01bd57528c2721af59884a570097e3653044dbff0ae5c37459d9ccb"
+    "sha256": "sha256:9afa2855ad1bbe496d951a2783c3af1d8cff7970b132d8cc62b5fc62c46007a2"
   },
   "manifest_file": {
     "path": "release-artifacts/latest/release-checksums.json",
@@ -222,7 +222,7 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "sha256:446e611184ac9fb4869bdaad9d66929e19ddd58cb3b8e8715f3365f2e7768abb",
+      "sha256": "sha256:ecfbbe176d6183196efebc72e7d67d7f26db34a15aa7f98b963ea604a3077e3c",
       "size_bytes": 53319
     },
     {
@@ -1737,7 +1737,7 @@
     },
     {
       "path": "scripts/test_slither_baseline.py",
-      "sha256": "sha256:b20145b7d9ebf293d02fd1bd8bb0c868e8721bcf12e1672eb76f52b648d473e3",
+      "sha256": "sha256:44f19f27ef6d28096b056546c0791b09e349d452c78ec95d89662bf20680c282",
       "size_bytes": 19128
     },
     {
