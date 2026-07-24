@@ -257,7 +257,19 @@ class RiskRegisterTests(unittest.TestCase):
         self.assertEqual(risk["status"], "open_blocker")
         self.assertEqual(
             risk["tracking"],
-            ["https://github.com/6529-Collections/6529Stream/issues/684"],
+            [
+                "https://github.com/6529-Collections/6529Stream/issues/656",
+                "https://github.com/6529-Collections/6529Stream/issues/671",
+                "https://github.com/6529-Collections/6529Stream/issues/684",
+            ],
+        )
+        self.assertIn(
+            "release-artifacts/governed-parameter-inventory.json",
+            risk["evidence_paths"],
+        )
+        self.assertIn(
+            "scripts/check_governed_parameter_inventory.py",
+            risk["evidence_paths"],
         )
 
     def test_generator_preserves_governance_native_value_semantic_anchor(self) -> None:

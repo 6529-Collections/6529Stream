@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+import check_governed_parameter_inventory as governed_parameter_inventory_checker
+
 
 CHECKSUM_SCHEMA = "6529stream.release-checksums.v1"
 GENERATOR_VERSION = "1"
@@ -33,11 +35,14 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_release_checksums.py"),
     Path("scripts/generate_release_manifest.py"),
     Path("scripts/test_release_manifest.py"),
+    Path("scripts/generate_release_candidate_lockfile.py"),
+    Path("scripts/test_release_candidate_lockfile.py"),
     Path("scripts/generate_risk_register.py"),
     Path("scripts/check_risk_register.py"),
     Path("scripts/test_risk_register.py"),
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/genesis-deployment-profile.json"),
+    Path("release-artifacts/governed-parameter-inventory.json"),
     Path("release-artifacts/stream-core-permanent-interface.json"),
     Path("release-artifacts/system-manifest-payload-vector.json"),
     Path("release-artifacts/README.md"),
@@ -63,6 +68,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/test_abi_compatibility.py"),
     Path("scripts/check_governed_parameter_identifiers.py"),
     Path("scripts/test_governed_parameter_identifiers.py"),
+    Path("scripts/check_governed_parameter_inventory.py"),
+    Path("scripts/test_governed_parameter_inventory.py"),
     Path("scripts/generate_system_manifest_payload_vector.py"),
     Path("scripts/check_system_manifest_payload_vector.py"),
     Path("scripts/test_system_manifest_payload_vector.py"),
@@ -138,6 +145,7 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/run_forge_size_log.py"),
     Path("scripts/generate_release_notes.py"),
     Path("scripts/verify_release_artifacts.py"),
+    Path("scripts/test_verify_release_artifacts.py"),
     Path("deployments/broadcasts"),
     Path("deployments/config"),
     Path("deployments/examples"),
@@ -271,6 +279,173 @@ def output_paths(output_dir: Path) -> set[Path]:
     }
 
 
+def complete_governed_parameter_references(
+    inventory: dict[str, Any],
+) -> list[tuple[Path, str, str]]:
+    """Return candidate and evidence files from a validated inventory."""
+    references: list[tuple[Path, str, str]] = []
+    genesis_profile = inventory.get("genesis_profile")
+    if genesis_profile is not None:
+        references.append(
+            (
+                Path(genesis_profile["path"]),
+                genesis_profile["sha256"],
+                "genesis_profile",
+            )
+        )
+    candidate = inventory["candidate_binding"]
+    if candidate["status"] == "complete":
+        references.append(
+            (
+                Path(candidate["candidate_artifact_path"]),
+                candidate["candidate_artifact_sha256"],
+                "candidate_binding",
+            )
+        )
+        for index, binding in enumerate(candidate.get("host_bindings", [])):
+            source_verification = binding["source_verification_binding"]
+            references.append(
+                (
+                    Path(source_verification["path"]),
+                    source_verification["sha256"],
+                    (
+                        f"candidate_binding.host_bindings[{index}]"
+                        ".source_verification_binding"
+                    ),
+                )
+            )
+
+    for index, parameter in enumerate(inventory["parameters"]):
+        measurement = parameter["measurement_evidence"]
+        if measurement["status"] == "complete":
+            references.append(
+                (
+                    Path(measurement["path"]),
+                    measurement["sha256"],
+                    f"parameters[{index}].measurement_evidence",
+                )
+            )
+        fixed = parameter["fixed_stipend_compatibility"]
+        if fixed["status"] == "complete":
+            references.append(
+                (
+                    Path(fixed["evidence_path"]),
+                    fixed["evidence_sha256"],
+                    f"parameters[{index}].fixed_stipend_compatibility",
+                )
+            )
+    return references
+
+
+def resolve_governed_parameter_reference(
+    repo_root: Path,
+    path: Path,
+    source: str,
+) -> Path:
+    """Reject absolute, escaping, or symlinked governed-parameter references."""
+    raw = path.as_posix()
+    relative = Path(*raw.split("/"))
+    if (
+        governed_parameter_inventory_checker.REPO_PATH_RE.fullmatch(raw) is None
+        or relative.is_absolute()
+        or relative.drive
+        or relative.root
+        or relative.anchor
+        or any(part in {".", ".."} for part in relative.parts)
+    ):
+        raise ChecksumError(
+            f"{source} complete reference must stay inside the repository: {path}"
+        )
+    root = repo_root.resolve()
+    current = root
+    for part in relative.parts:
+        current = current / part
+        if current.is_symlink():
+            raise ChecksumError(
+                f"{source} complete reference must not include symlinks: {path}"
+            )
+    resolved = (root / relative).resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError as exc:
+        raise ChecksumError(
+            f"{source} complete reference must stay inside the repository: {path}"
+        ) from exc
+    return relative
+
+
+def validated_complete_governed_parameter_references(
+    repo_root: Path,
+    inventory: dict[str, Any],
+) -> list[tuple[Path, str, str]]:
+    references = complete_governed_parameter_references(inventory)
+    return [
+        (
+            resolve_governed_parameter_reference(repo_root, path, source),
+            sha256,
+            source,
+        )
+        for path, sha256, source in references
+    ]
+
+
+def configured_path_covers(
+    repo_root: Path,
+    configured_path: Path,
+    required_path: Path,
+) -> bool:
+    configured = resolve_repo_path(repo_root, configured_path).resolve()
+    required = resolve_repo_path(repo_root, required_path).resolve()
+    if configured == required:
+        return True
+    if not configured.is_dir():
+        return False
+    try:
+        required.relative_to(configured)
+    except ValueError:
+        return False
+    return True
+
+
+def release_checksum_inputs(
+    repo_root: Path,
+    covered_paths: list[Path],
+) -> tuple[list[Path], list[tuple[Path, str, str]]]:
+    """Validate an in-scope inventory and add all complete references."""
+    inventory_path = governed_parameter_inventory_checker.DEFAULT_INVENTORY
+    if not any(
+        configured_path_covers(repo_root, path, inventory_path)
+        for path in covered_paths
+    ):
+        return list(covered_paths), []
+
+    try:
+        inventory = governed_parameter_inventory_checker.validate_inventory(
+            repo_root,
+            inventory_path,
+            require_complete=False,
+        )
+    except (
+        governed_parameter_inventory_checker.GovernedParameterInventoryError
+    ) as exc:
+        raise ChecksumError(
+            f"invalid governed-parameter inventory {inventory_path}: {exc}"
+        ) from exc
+
+    references = validated_complete_governed_parameter_references(
+        repo_root,
+        inventory,
+    )
+    effective_paths = list(covered_paths)
+    for path, _sha256, _source in references:
+        if not any(
+            configured_path_covers(repo_root, configured, path)
+            for configured in effective_paths
+        ):
+            effective_paths.append(path)
+    return effective_paths, references
+
+
 def collect_files(repo_root: Path, covered_paths: list[Path], output_dir: Path) -> list[Path]:
     excluded = output_paths(output_dir)
     files_by_relative_path: dict[str, Path] = {}
@@ -356,9 +531,36 @@ def build_outputs(
     covered_paths: list[Path],
     output_dir: Path,
 ) -> tuple[str, str]:
-    files = collect_files(repo_root, covered_paths, output_dir)
+    effective_paths, governed_references = release_checksum_inputs(
+        repo_root,
+        covered_paths,
+    )
+    files = collect_files(repo_root, effective_paths, output_dir)
+    files_by_path = {
+        normalize_path(path, repo_root): path
+        for path in files
+    }
+    for path, recorded_sha256, source in governed_references:
+        relative_path = normalize_path(resolve_repo_path(repo_root, path), repo_root)
+        covered = files_by_path.get(relative_path)
+        if covered is None:
+            raise ChecksumError(
+                f"{source} complete reference is excluded from checksum coverage: "
+                f"{relative_path}"
+            )
+        actual_sha256 = file_sha256(covered).removeprefix("sha256:")
+        if actual_sha256 != recorded_sha256:
+            raise ChecksumError(
+                f"{source} checksum input hash mismatch for {relative_path}"
+            )
     checksum_text = "\n".join(build_checksum_lines(files, repo_root)) + "\n"
-    manifest = build_manifest(repo_root, covered_paths, output_dir, files, checksum_text)
+    manifest = build_manifest(
+        repo_root,
+        effective_paths,
+        output_dir,
+        files,
+        checksum_text,
+    )
     return checksum_text, json_text(manifest)
 
 

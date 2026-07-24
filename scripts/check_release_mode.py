@@ -11,6 +11,7 @@ from typing import Any
 
 import check_public_beta_evidence as evidence_checker
 import check_genesis_deployment_profile as genesis_profile_checker
+import check_governed_parameter_inventory as governed_parameter_inventory_checker
 import check_risk_register as risk_register_checker
 import check_slither_baseline as slither_baseline_checker
 
@@ -19,6 +20,9 @@ DEFAULT_EVIDENCE = evidence_checker.DEFAULT_EVIDENCE
 DEFAULT_ABI_CHECKSUMS = Path("release-artifacts/latest/abi-checksums.json")
 DEFAULT_GENESIS_PROFILE = genesis_profile_checker.DEFAULT_PROFILE
 DEFAULT_CONTRACT_CONFIG = genesis_profile_checker.DEFAULT_CONTRACTS
+DEFAULT_GOVERNED_PARAMETER_INVENTORY = (
+    governed_parameter_inventory_checker.DEFAULT_INVENTORY
+)
 DEFAULT_RISK_REGISTER = risk_register_checker.DEFAULT_REGISTER
 DEFAULT_SLITHER_BASELINE = slither_baseline_checker.DEFAULT_BASELINE
 DEFAULT_SLITHER_MARKDOWN = slither_baseline_checker.DEFAULT_MARKDOWN
@@ -310,6 +314,7 @@ def validate_release_mode(
     abi_checksums: Path = DEFAULT_ABI_CHECKSUMS,
     genesis_profile: Path = DEFAULT_GENESIS_PROFILE,
     contract_config: Path = DEFAULT_CONTRACT_CONFIG,
+    governed_parameter_inventory: Path = DEFAULT_GOVERNED_PARAMETER_INVENTORY,
     risk_register: Path = DEFAULT_RISK_REGISTER,
     slither_baseline: Path = DEFAULT_SLITHER_BASELINE,
     slither_markdown: Path = DEFAULT_SLITHER_MARKDOWN,
@@ -323,6 +328,11 @@ def validate_release_mode(
     )
     blockers.extend(governance_native_value_blockers(risk_register, repo_root))
     if normalized_phase == PRODUCTION_PHASE:
+        governed_parameter_inventory_checker.validate_inventory(
+            repo_root,
+            governed_parameter_inventory,
+            require_complete=True,
+        )
         blockers.extend(
             governed_parameter_completeness_blockers(risk_register, repo_root)
         )
@@ -373,6 +383,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="Current implementation catalog compared to the genesis profile.",
     )
     parser.add_argument(
+        "--governed-parameter-inventory",
+        type=Path,
+        default=DEFAULT_GOVERNED_PARAMETER_INVENTORY,
+        help=(
+            "Canonical governed-parameter inventory; production requires every "
+            "candidate binding and retained evidence row to be complete."
+        ),
+    )
+    parser.add_argument(
         "--risk-register",
         type=Path,
         default=DEFAULT_RISK_REGISTER,
@@ -405,6 +424,7 @@ def main(argv: list[str] | None = None) -> int:
             abi_checksums=args.abi_checksums,
             genesis_profile=args.genesis_profile,
             contract_config=args.contract_config,
+            governed_parameter_inventory=args.governed_parameter_inventory,
             risk_register=args.risk_register,
             slither_baseline=args.slither_baseline,
             slither_markdown=args.slither_markdown,
@@ -412,6 +432,7 @@ def main(argv: list[str] | None = None) -> int:
     except (
         evidence_checker.PublicBetaEvidenceError,
         genesis_profile_checker.GenesisProfileError,
+        governed_parameter_inventory_checker.GovernedParameterInventoryError,
         risk_register_checker.RiskRegisterError,
         slither_baseline_checker.SlitherBaselineError,
         ReleaseModeError,

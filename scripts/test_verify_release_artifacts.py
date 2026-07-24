@@ -10,6 +10,7 @@ import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_PATH = Path(__file__).with_name("verify_release_artifacts.py")
@@ -44,7 +45,13 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     latest = root / "release-artifacts" / "latest"
     checksum_lines = []
     files = []
-    for relative_path in sorted(covered_paths):
+    effective_paths = set(covered_paths)
+    genesis_profile = (
+        verifier.governed_parameter_inventory_checker.GENESIS_PROFILE
+    ).as_posix()
+    if (root / genesis_profile).is_file():
+        effective_paths.add(genesis_profile)
+    for relative_path in sorted(effective_paths):
         path = root / relative_path
         digest = verifier.file_sha256(path).removeprefix("sha256:")
         checksum_lines.append(f"{digest}  {relative_path}")
@@ -81,9 +88,44 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     )
 
 
+def seed_governed_parameter_inventory_tree(root: Path) -> None:
+    source_root = SCRIPT_PATH.parent.parent
+    inventory = json.loads(
+        (
+            source_root
+            / verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+        ).read_text(encoding="utf-8")
+    )
+    write_json(
+        root / verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY,
+        inventory,
+    )
+
+    dependency_paths = {
+        Path(source["path"])
+        for source in inventory["normative_sources"]
+    }
+    dependency_paths.update(
+        Path(parameter["normative_source"]["path"])
+        for parameter in inventory["parameters"]
+    )
+    dependency_paths.add(
+        verifier.governed_parameter_inventory_checker.GENESIS_PROFILE
+    )
+    dependency_paths.add(
+        verifier.governed_parameter_inventory_checker.DEFAULT_SCHEMA
+    )
+    for relative_path in dependency_paths:
+        write_text(
+            root / relative_path,
+            (source_root / relative_path).read_text(encoding="utf-8"),
+        )
+
+
 def seed_release_bundle(root: Path) -> None:
     latest = root / "release-artifacts" / "latest"
     write_text(latest / "abi-checksums.json", '{"schema_version":"fixture.abi"}\n')
+    seed_governed_parameter_inventory_tree(root)
     write_text(
         root / "deployments" / "examples" / "anvil.json",
         '{"schema_version":"fixture.deployment"}\n',
@@ -98,7 +140,14 @@ def seed_release_bundle(root: Path) -> None:
                 "abi_checksums": file_record(
                     root,
                     "release-artifacts/latest/abi-checksums.json",
-                )
+                ),
+                "governed_parameter_inventory": {
+                    **file_record(
+                        root,
+                        verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
+                    ),
+                    "schema_version": verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+                },
             },
             "deployment_artifacts": {
                 "manifests": [
@@ -145,6 +194,13 @@ def seed_release_bundle(root: Path) -> None:
                     root,
                     "release-artifacts/latest/bytecode-release-proof.json",
                 ),
+                "governed_parameter_inventory": {
+                    **file_record(
+                        root,
+                        verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
+                    ),
+                    "schema_version": verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+                },
             },
             "checksum_bundle": {
                 "outputs": [
@@ -160,6 +216,8 @@ def seed_release_bundle(root: Path) -> None:
         root,
         [
             "deployments/examples/anvil.json",
+            verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
+            verifier.governed_parameter_inventory_checker.GENESIS_PROFILE.as_posix(),
             "release-artifacts/latest/abi-checksums.json",
             "release-artifacts/latest/bytecode-release-proof.json",
             "release-artifacts/latest/release-candidate-lockfile.json",
@@ -169,6 +227,147 @@ def seed_release_bundle(root: Path) -> None:
 
 
 class ReleaseArtifactVerifierTests(unittest.TestCase):
+    def test_offline_verifier_invokes_canonical_inventory_validator(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            with mock.patch.object(
+                verifier.governed_parameter_inventory_checker,
+                "validate_inventory",
+                wraps=(
+                    verifier.governed_parameter_inventory_checker.validate_inventory
+                ),
+            ) as validate_inventory:
+                verifier.verify_release_artifacts(root)
+
+        validate_inventory.assert_called_once_with(
+            root.resolve(),
+            verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY,
+            require_complete=False,
+        )
+
+    def test_offline_verifier_rejects_malformed_planning_inventory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            inventory_path = (
+                root
+                / verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+            )
+            inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+            inventory["status"] = "complete"
+            write_json(inventory_path, inventory)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "semantic validation failed.*inventory.status must be 'planning'",
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_every_complete_inventory_reference_requires_checksum_coverage(
+        self,
+    ) -> None:
+        inventory = {
+            "genesis_profile": {
+                "path": "release-artifacts/genesis-deployment-profile.json",
+                "sha256": "0" * 64,
+            },
+            "candidate_binding": {
+                "status": "complete",
+                "candidate_artifact_path": "release-artifacts/candidate.json",
+                "candidate_artifact_sha256": "1" * 64,
+                "host_bindings": [
+                    {
+                        "source_verification_binding": {
+                            "path": (
+                                "release-artifacts/latest/"
+                                "source-verification-inputs.json"
+                            ),
+                            "sha256": "4" * 64,
+                        }
+                    }
+                ],
+            },
+            "parameters": [
+                {
+                    "measurement_evidence": {
+                        "status": "complete",
+                        "path": "release-artifacts/evidence/measurement.json",
+                        "sha256": "2" * 64,
+                    },
+                    "fixed_stipend_compatibility": {
+                        "status": "complete",
+                        "evidence_path": (
+                            "release-artifacts/evidence/fixed-stipend.json"
+                        ),
+                        "evidence_sha256": "3" * 64,
+                    },
+                }
+            ],
+        }
+        references = (
+            verifier.release_checksum_generator.complete_governed_parameter_references(
+                inventory
+            )
+        )
+        all_entries = {
+            path.as_posix(): sha256
+            for path, sha256, _source in references
+        }
+        for missing_path, recorded_sha256, source in references:
+            with self.subTest(source=source):
+                checksum_entries = dict(all_entries)
+                del checksum_entries[missing_path.as_posix()]
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "complete reference is not covered",
+                ):
+                    verifier.verify_governed_parameter_reference_checksum_coverage(
+                        Path.cwd(),
+                        inventory,
+                        checksum_entries,
+                    )
+                checksum_entries = dict(all_entries)
+                checksum_entries[missing_path.as_posix()] = (
+                    "f" * 64 if recorded_sha256 != "f" * 64 else "e" * 64
+                )
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "complete reference hash does not match",
+                ):
+                    verifier.verify_governed_parameter_reference_checksum_coverage(
+                        Path.cwd(),
+                        inventory,
+                        checksum_entries,
+                    )
+
+    def test_full_verifier_rejects_unchecksummed_complete_candidate_reference(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            inventory = {
+                "candidate_binding": {
+                    "status": "complete",
+                    "candidate_artifact_path": (
+                        "release-artifacts/candidate.json"
+                    ),
+                    "candidate_artifact_sha256": "1" * 64,
+                },
+                "parameters": [],
+            }
+            with mock.patch.object(
+                verifier,
+                "validate_governed_parameter_inventory_semantics",
+                return_value=inventory,
+            ):
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "candidate_binding complete reference is not covered",
+                ):
+                    verifier.verify_release_artifacts(root)
+
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
@@ -201,8 +400,26 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             root = Path(temp_dir)
             seed_release_bundle(root)
             summary = verifier.verify_release_artifacts(root)
-            self.assertEqual(summary.checksum_entries, 5)
-            self.assertEqual(summary.checksum_manifest_records, 5)
+            self.assertEqual(summary.checksum_entries, 7)
+            self.assertEqual(summary.checksum_manifest_records, 7)
+
+    def test_verifier_requires_direct_governed_parameter_inventory_bindings(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            del lockfile["locked_inputs"]["governed_parameter_inventory"]
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "governed_parameter_inventory",
+            ):
+                verifier.verify_governed_parameter_inventory_bindings(
+                    release_manifest,
+                    lockfile,
+                )
 
     def test_verifier_rejects_unchecksummed_extra_release_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -418,6 +635,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 [
                     "deployments/examples/anvil.json",
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
                     "release-artifacts/latest/release-candidate-lockfile.json",
@@ -437,6 +655,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             write_checksum_bundle(
                 root,
                 [
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
                     "release-artifacts/latest/release-candidate-lockfile.json",
@@ -488,6 +707,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 [
                     "deployments/examples/anvil.json",
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
                     "release-artifacts/latest/release-candidate-lockfile.json",
@@ -512,6 +732,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 [
                     "deployments/examples/anvil.json",
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
                     "release-artifacts/latest/release-candidate-lockfile.json",
@@ -532,6 +753,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 [
                     "deployments/examples/anvil.json",
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
                 ],
@@ -550,6 +772,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 root,
                 [
                     "deployments/examples/anvil.json",
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     "release-artifacts/latest/abi-checksums.json",
                     "release-artifacts/latest/bytecode-release-proof.json",
                     "release-artifacts/latest/release-manifest.json",

@@ -811,10 +811,10 @@ mirrors these rows, and release tooling computes and pins the hash values.
 | `STREAM_ENTROPY_SCOPE_REQUEST_V1` | `6529STREAM_ENTROPY_SCOPE_REQUEST_V1` | 0xda5ba2e7e598a368f9e05c751fa0bbce4620c6fe030d47737c9eeb15099a3b81 | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 | `STREAM_ENTROPY_SCOPE_SEED_V1` | `6529STREAM_ENTROPY_SCOPE_SEED_V1` | 0x6111edc8a4ae25589e49af170892e9083107d07df6b48b7201458e32ba38365b | `StreamEntropyCoordinator` | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 | `GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_REGISTRATION_GAS_LIMIT` | 0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17 | `StreamCore` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-REGGAS] |
-| `GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | 0xaf00713aa70c259c23836c61245814e6e3b5fab1fe61b8879c0bd5450f23537c | `StreamEntropyCoordinator` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-INCIDENT-ROLE] |
-| `GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS` | `6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS` | 0x63722ca7b016ab346b7839fe4e01fa7e0627bd5fb99531f7dbe5ec8c34e35c8d | `StreamEntropyCoordinator` | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
-| `GTP_ENTROPY_REVEAL_SLO_BLOCKS` | `6529STREAM_GTP_ENTROPY_REVEAL_SLO_BLOCKS` | 0x823057688d7c18dca4c528004d7912dfe0a32c36528a2cff1eb0e2a9164ab5e0 | `StreamEntropyCoordinator` | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
-| `GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `6529STREAM_GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | 0x0be33ccf48a79079b125936b770c51cdd786fd29d574ce9071323b86838bccd8 | `StreamEntropyCoordinator` | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
+| `GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | `6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT` | 0xaf00713aa70c259c23836c61245814e6e3b5fab1fe61b8879c0bd5450f23537c | primary and pre-approved fallback `StreamEntropyCoordinator` instances | `1` | Governed Gas Parameter identifier per [LTA-GGP]; [EC-INCIDENT-ROLE] |
+| `GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS` | `6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS` | 0x63722ca7b016ab346b7839fe4e01fa7e0627bd5fb99531f7dbe5ec8c34e35c8d | primary and pre-approved fallback `StreamEntropyCoordinator` instances | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
+| `GTP_ENTROPY_REVEAL_SLO_BLOCKS` | `6529STREAM_GTP_ENTROPY_REVEAL_SLO_BLOCKS` | 0x823057688d7c18dca4c528004d7912dfe0a32c36528a2cff1eb0e2a9164ab5e0 | primary and pre-approved fallback `StreamEntropyCoordinator` instances | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
+| `GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | `6529STREAM_GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` | 0x0be33ccf48a79079b125936b770c51cdd786fd29d574ce9071323b86838bccd8 | primary and pre-approved fallback `StreamEntropyCoordinator` instances | `1` | Governed Time Parameter identifier per [LTA-GTP]; [EC-TIME] |
 | `STREAM_ENTROPY_SCOPE_RANKING_V1` | `6529STREAM_ENTROPY_SCOPE_RANKING_V1` | 0x395f4d0c11d290e3bb32531f328ce6129c034100a89d45d65d1c55d248a6b0d3 | fair-allocation consumers ([EC-SCOPE-RAFFLE]) | `1` | [Scope Entropy Requests](#scope-entropy-requests) |
 
 The three scope-request rows (ADR 0011 decision R8) carry values pinned
@@ -1329,7 +1329,7 @@ consensus-timing change. They are therefore Governed Time Parameters
 (GTPs) under the pattern home
 [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
 [LTA-GTP] (ADR 0012 decision T1); this section instantiates the
-coordinator-hosted parameters and the per-collection freeze semantics
+primary-and-fallback-coordinator-hosted parameters and the per-collection freeze semantics
 the pattern home delegates here.
 
 | Parameter | Immutable floor | Window it governs |
@@ -1341,7 +1341,8 @@ the pattern home delegates here.
 Requirements [EC-TIME]:
 
 1. `ENTROPY_REQUEST_TIMEOUT_BLOCKS`, `ENTROPY_REVEAL_SLO_BLOCKS`, and
-   `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` are coordinator-hosted GTPs
+   `ENTROPY_RECOVERY_STEP_DELAY_BLOCKS` are hosted independently by both the
+   primary and pre-approved fallback coordinator instances
    under the [LTA-GTP] pattern: storage-backed host values paired with
    deploy-time immutable floors, identified by the `GTP_`-prefixed
    parameter identifiers in the
@@ -2511,7 +2512,9 @@ recover," and raising it restores recovery capability. Its reproducible sizing
 evidence executes `providerResultStatus` staticcalls against each registered
 production adapter for a pinned fixture corpus of request IDs under the
 candidate cap, treats out-of-gas, revert, or malformed returndata as failure,
-and commits the measurements in release evidence. The coordinator performs the
+and commits the measurements in release evidence. The primary and pre-approved
+fallback coordinator instances each register the identifier independently and
+carry host-local values, floors, revisions, and evidence. Each coordinator performs the
 bounded `providerResultStatus` staticcall required by [EC-INCIDENT] rule 3.2
 under `ENTROPY_RESULT_PROBE_GAS_LIMIT`; the evidence has no authorization role,
 and no standalone probe contract or probe-authorized parameter-mutation path

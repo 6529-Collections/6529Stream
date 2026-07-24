@@ -16,6 +16,9 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable, NamedTuple, Sequence
 
+import check_governed_parameter_inventory as governed_parameter_inventory_checker
+import generate_release_checksums as release_checksum_generator
+
 
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 SHA256_PREFIX_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -23,8 +26,14 @@ CHECKSUM_SCHEMA = "6529stream.release-checksums.v1"
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
 BYTECODE_PROOF_SCHEMA = "6529stream.bytecode-release-proof.v1"
 RELEASE_CANDIDATE_LOCKFILE_SCHEMA = "6529stream.release-candidate-lockfile.v1"
+GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
+    governed_parameter_inventory_checker.SCHEMA_VERSION
+)
 
 DEFAULT_RELEASE_DIR = Path("release-artifacts/latest")
+GOVERNED_PARAMETER_INVENTORY_PATH = (
+    governed_parameter_inventory_checker.DEFAULT_INVENTORY.as_posix()
+)
 CHECKSUM_FILE_NAME = "SHA256SUMS"
 CHECKSUM_MANIFEST_NAME = "release-checksums.json"
 RELEASE_MANIFEST_NAME = "release-manifest.json"
@@ -470,6 +479,115 @@ def require_checksum_covered(checksum_entries: dict[str, str], required_paths: S
         )
 
 
+def verify_governed_parameter_inventory_bindings(
+    release_manifest: dict[str, Any],
+    release_candidate_lockfile: dict[str, Any],
+) -> None:
+    """Require both release documents to bind the same canonical inventory."""
+    release_artifacts = require_dict(
+        release_manifest.get("release_artifacts"),
+        "release-manifest.release_artifacts",
+    )
+    locked_inputs = require_dict(
+        release_candidate_lockfile.get("locked_inputs"),
+        "release-candidate-lockfile.locked_inputs",
+    )
+    manifest_record = require_dict(
+        release_artifacts.get("governed_parameter_inventory"),
+        "release-manifest.release_artifacts.governed_parameter_inventory",
+    )
+    lockfile_record = require_dict(
+        locked_inputs.get("governed_parameter_inventory"),
+        "release-candidate-lockfile.locked_inputs.governed_parameter_inventory",
+    )
+
+    for source, record in (
+        ("release-manifest", manifest_record),
+        ("release-candidate-lockfile", lockfile_record),
+    ):
+        if record.get("path") != GOVERNED_PARAMETER_INVENTORY_PATH:
+            raise ReleaseArtifactVerificationError(
+                f"{source} governed-parameter inventory path must be "
+                f"{GOVERNED_PARAMETER_INVENTORY_PATH}"
+            )
+        if record.get("schema_version") != GOVERNED_PARAMETER_INVENTORY_SCHEMA:
+            raise ReleaseArtifactVerificationError(
+                f"{source} governed-parameter inventory must use schema "
+                f"{GOVERNED_PARAMETER_INVENTORY_SCHEMA}"
+            )
+        require_string(
+            record.get("sha256"),
+            f"{source}.governed_parameter_inventory.sha256",
+        )
+        size_bytes = record.get("size_bytes")
+        if (
+            isinstance(size_bytes, bool)
+            or not isinstance(size_bytes, int)
+            or size_bytes < 0
+        ):
+            raise ReleaseArtifactVerificationError(
+                f"{source}.governed_parameter_inventory.size_bytes must be "
+                "a non-negative integer"
+            )
+
+    for field in ("path", "sha256", "size_bytes", "schema_version"):
+        if manifest_record[field] != lockfile_record[field]:
+            raise ReleaseArtifactVerificationError(
+                "release manifest and release-candidate lockfile governed-parameter "
+                f"inventory {field} values do not match"
+            )
+
+
+def validate_governed_parameter_inventory_semantics(
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Run the canonical ordinary semantic validator for offline consumers."""
+    try:
+        return governed_parameter_inventory_checker.validate_inventory(
+            repo_root,
+            governed_parameter_inventory_checker.DEFAULT_INVENTORY,
+            require_complete=False,
+        )
+    except (
+        governed_parameter_inventory_checker.GovernedParameterInventoryError
+    ) as exc:
+        raise ReleaseArtifactVerificationError(
+            f"governed-parameter inventory semantic validation failed: {exc}"
+        ) from exc
+
+
+def verify_governed_parameter_reference_checksum_coverage(
+    repo_root: Path,
+    inventory: dict[str, Any],
+    checksum_entries: dict[str, str],
+) -> None:
+    """Require every complete candidate/evidence file in the checksum bundle."""
+    try:
+        references = (
+            release_checksum_generator.validated_complete_governed_parameter_references(
+                repo_root,
+                inventory,
+            )
+        )
+    except release_checksum_generator.ChecksumError as exc:
+        raise ReleaseArtifactVerificationError(
+            f"invalid governed-parameter inventory reference: {exc}"
+        ) from exc
+    for path, recorded_sha256, source in references:
+        relative_path = path.as_posix()
+        bundled_sha256 = checksum_entries.get(relative_path)
+        if bundled_sha256 is None:
+            raise ReleaseArtifactVerificationError(
+                f"{source} complete reference is not covered by "
+                f"{CHECKSUM_FILE_NAME}: {relative_path}"
+            )
+        if bundled_sha256 != recorded_sha256:
+            raise ReleaseArtifactVerificationError(
+                f"{source} complete reference hash does not match "
+                f"{CHECKSUM_FILE_NAME}: {relative_path}"
+            )
+
+
 def verify_bytecode_proof_release_manifest_binding(
     repo_root: Path,
     bytecode_proof: dict[str, Any],
@@ -504,6 +622,9 @@ def verify_release_artifacts(
 ) -> VerificationSummary:
     repo_root = repo_root.resolve()
     resolved_release_dir = resolve_release_dir(repo_root, release_dir)
+    governed_parameter_inventory = (
+        validate_governed_parameter_inventory_semantics(repo_root)
+    )
     checksum_path = resolved_release_dir / CHECKSUM_FILE_NAME
     checksum_manifest_path = resolved_release_dir / CHECKSUM_MANIFEST_NAME
     release_manifest_path = resolved_release_dir / RELEASE_MANIFEST_NAME
@@ -511,6 +632,11 @@ def verify_release_artifacts(
     release_candidate_lockfile_path = resolved_release_dir / RELEASE_CANDIDATE_LOCKFILE_NAME
 
     checksum_entries = verify_checksum_file(repo_root, checksum_path)
+    verify_governed_parameter_reference_checksum_coverage(
+        repo_root,
+        governed_parameter_inventory,
+        checksum_entries,
+    )
     required_paths = [
         normalize_path(release_manifest_path, repo_root),
         normalize_path(bytecode_proof_path, repo_root),
@@ -543,6 +669,10 @@ def verify_release_artifacts(
         load_json(release_candidate_lockfile_path),
         RELEASE_CANDIDATE_LOCKFILE_SCHEMA,
         RELEASE_CANDIDATE_LOCKFILE_NAME,
+    )
+    verify_governed_parameter_inventory_bindings(
+        release_manifest,
+        release_candidate_lockfile,
     )
 
     release_manifest_records = verify_nested_file_records(

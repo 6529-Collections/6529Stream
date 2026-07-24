@@ -2094,9 +2094,9 @@ the protocol v1 GGP identifier table:
 
 | Constant name | String preimage | Hash value | Owner | Schema version | Inputs |
 | --- | --- | --- | --- | --- | --- |
-| `GGP_MINT_GATE_GAS_LIMIT` | `6529STREAM_GGP_MINT_GATE_GAS_LIMIT` | 0xf896db78d4fb703c92d45856189181cb6daa113dada9718f74206095d4fbf817 | `StreamMintManager` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-GATES]` |
+| `GGP_MINT_GATE_GAS_LIMIT` | `6529STREAM_GGP_MINT_GATE_GAS_LIMIT` | 0xf896db78d4fb703c92d45856189181cb6daa113dada9718f74206095d4fbf817 | primary and pre-approved fallback `StreamMintManager` instances | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-GATES]` |
 | `GGP_TICKET_ERC1271_GAS_LIMIT` | `6529STREAM_GGP_TICKET_ERC1271_GAS_LIMIT` | 0x6a05447612b16e61c6b274125ccdfb6545e058d195b5d82128b41a7205e4a5b6 | `StreamMintTicketGate` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-TICKET]` |
-| `GGP_ARTIST_AUTHORITY_GAS_LIMIT` | `6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT` | 0x194fce9f57e4e64ea539858df133e20abf69979b77fd4c2556f7c185ac391fe3 | `StreamMintManager` | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-CONSENT]` |
+| `GGP_ARTIST_AUTHORITY_GAS_LIMIT` | `6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT` | 0x194fce9f57e4e64ea539858df133e20abf69979b77fd4c2556f7c185ac391fe3 | primary and pre-approved fallback `StreamMintManager` instances | `1` | Governed Gas Parameter identifier per [LTA-GGP]; `[MPA-CONSENT]` |
 
 Requirements (continued):
 
@@ -2578,7 +2578,11 @@ Gate behavior [MPA-GATES]:
    offchain and fork evidence executes the manager's gate-call frame
    against a production-depth reference gate over pinned fixture inputs
    and records the measurement artifact outside the permanent launch
-   system.
+   system. Both the primary and pre-approved fallback `StreamMintManager`
+   instances register `MINT_GATE_GAS_LIMIT` and
+   `ARTIST_AUTHORITY_GAS_LIMIT` independently, with host-local genesis
+   values, immutable floors, revisions, and reviewed sizing evidence; omitting
+   either profile instance is a production inventory failure.
 7. Gate returndata is bounded: the manager must reject returndata larger
    than `MAX_GATE_RETURNDATA_BYTES = 2_048` or more than
    `MAX_GATE_NULLIFIERS = 16` nullifiers, with typed errors. A failed,

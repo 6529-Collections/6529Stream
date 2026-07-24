@@ -7,6 +7,28 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added the schemaed 25-row governed-parameter launch inventory, structural
+  checker, and focused mutation tests for the exact 22 GGP/3 GTP policy. The
+  inventory makes multi-host coverage explicit across all four sale adapters
+  and the primary plus selected fallback callback providers, and pins
+  `ROYALTY_RETURN_GAS_BUFFER` as the shared Core parent-completion buffer for
+  `royaltyInfo()`, `tokenURI()`, and `contractURI()` with worst-path
+  floor/evidence requirements. Ordinary checks accept the artifact's honest
+  `not_available` candidate bindings; production release mode invokes
+  `--require-complete` and fails closed until exact host instances, values,
+  floors, exhaustive guarded-consumer inventories, reviewed sizing/cadence
+  evidence, and fixed-stipend compatibility exist. The artifact, schema,
+  checker, and tests are checksum-covered and the
+  release manifest/candidate lockfile record the inventory directly. Issue
+  #684 and `RISK-GOV-004` remain open. A self-reported `complete` candidate is
+  rejected until #656 supplies the structured production-candidate model and
+  reconciliation checker. Self-reported complete measurement/cadence or
+  fixed-stipend evidence is likewise rejected until #684 adds the
+  candidate-instance-bound measurement, reproduction, and reachable-raise-chain
+  model; this is not a production-readiness claim. The
+  shared-buffer text is the specification-only part of #671: implementation,
+  threshold and reachable-raise-chain tests, candidate-bound measurement, and
+  exact-target rehearsal are still required, so #671 remains open.
 - Removed the immutable 30,000-gas ERC-165 probe ceiling from governed
   `StreamModuleRegistry` registration. The registry now forwards available gas
   into a bounded read, accepts only successful exact 32-byte canonical `true`

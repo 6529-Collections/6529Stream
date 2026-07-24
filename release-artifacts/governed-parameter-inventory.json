@@ -1,0 +1,1302 @@
+{
+  "schema_version": "6529stream.governed-parameter-inventory.v1",
+  "status": "planning",
+  "normative_sources": [
+    {
+      "path": "docs/stream-long-term-architecture.md",
+      "anchor": "LTA-GGP"
+    },
+    {
+      "path": "docs/stream-long-term-architecture.md",
+      "anchor": "LTA-GTP"
+    },
+    {
+      "path": "docs/adr/0017-raise-only-parameter-governance.md",
+      "anchor": "Decision"
+    },
+    {
+      "path": "release-artifacts/genesis-deployment-profile.json",
+      "anchor": "6529stream.genesis-deployment-profile.v2"
+    }
+  ],
+  "genesis_profile": {
+    "path": "release-artifacts/genesis-deployment-profile.json",
+    "schema_version": "6529stream.genesis-deployment-profile.v2",
+    "sha256": "e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135"
+  },
+  "governance_policy": {
+    "status": "complete",
+    "action_class": {
+      "id": 1,
+      "name": "DELAYED_LOOSENING"
+    },
+    "minimum_delay_seconds": 172800,
+    "maximum_raise_multiplier": {
+      "numerator": 2,
+      "denominator": 1
+    },
+    "genesis_revision": 1,
+    "one_write_per_action_per_parameter": true,
+    "mutation_model": "raise_only",
+    "domains": {
+      "gas_scope": {
+        "preimage": "6529STREAM_GAS_PARAMETER_SCOPE_V2",
+        "keccak256": "0x9533611d402c2b44cf950a4a8900d25f6829bfac541dc4d5353094f966bb1a71"
+      },
+      "gas_state": {
+        "preimage": "6529STREAM_GAS_PARAMETER_STATE_V2",
+        "keccak256": "0x5059a253d3f7dd63b5d9fd1f0568caf72967f501a3db678b31cefe911334159c"
+      },
+      "time_scope": {
+        "preimage": "6529STREAM_TIME_PARAMETER_SCOPE_V2",
+        "keccak256": "0xd14cc3d71aa1ccb50b6f723d516042b10a7ef31958f86ccb049a09dbcfefff24"
+      },
+      "time_state": {
+        "preimage": "6529STREAM_TIME_PARAMETER_STATE_V2",
+        "keccak256": "0x26290762a61f3dda3fad05a62e5a95dcb1c59db2eaf506cb363c2aa2ab7b8384"
+      }
+    },
+    "forbidden_surfaces": [
+      "lower_mutation",
+      "standalone_parameter_probe_contract",
+      "probe_binding",
+      "emergency_mutation",
+      "rebind",
+      "conditional_mutation",
+      "permissionless_mutation"
+    ]
+  },
+  "inventory_summary": {
+    "ggp_count": 22,
+    "gtp_count": 3,
+    "logical_parameter_count": 25,
+    "expected_host_binding_count": 50
+  },
+  "candidate_binding": {
+    "status": "not_available",
+    "blocked_by_issue": "https://github.com/6529-Collections/6529Stream/issues/656",
+    "candidate_id": null,
+    "candidate_commit": null,
+    "candidate_artifact_path": null,
+    "candidate_artifact_sha256": null,
+    "host_bindings": []
+  },
+  "parameters": [
+    {
+      "order": 1,
+      "family": "GGP",
+      "name": "ROYALTY_RESOLVER_GAS_LIMIT",
+      "constant_name": "GGP_ROYALTY_RESOLVER_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ROYALTY_RESOLVER_GAS_LIMIT",
+      "parameter_id": "0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/revenue-splits-and-royalties.md",
+        "anchor": "RSR-GGP"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 1, "key": "STREAM_CORE" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["StreamCore.royaltyInfo(uint256,uint256)"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 50000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["royaltyInfo(uint256,uint256)"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 2,
+      "family": "GGP",
+      "name": "ROYALTY_RETURN_GAS_BUFFER",
+      "constant_name": "GGP_ROYALTY_RETURN_GAS_BUFFER",
+      "preimage": "6529STREAM_GGP_ROYALTY_RETURN_GAS_BUFFER",
+      "parameter_id": "0x0af6f5a1a5059e398191fa0af185be12fee6d609933826603244c7f247793be7",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/revenue-splits-and-royalties.md",
+        "anchor": "RSR-GGP"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 1, "key": "STREAM_CORE" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": [
+          "StreamCore.royaltyInfo(uint256,uint256)",
+          "StreamCore.tokenURI(uint256)",
+          "StreamCore.contractURI()"
+        ]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 15000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": [
+          "royaltyInfo(uint256,uint256)",
+          "tokenURI(uint256)",
+          "contractURI()"
+        ],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 3,
+      "family": "GGP",
+      "name": "ERC_1271_GAS_LIMIT",
+      "constant_name": "GGP_ERC_1271_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ERC_1271_GAS_LIMIT",
+      "parameter_id": "0xa0c8ff821dc961fbadc34e975a6ca4d3e499b23388ea86883bae7cd5a1d84157",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/revenue-splits-and-royalties.md",
+        "anchor": "RSR-1271"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 5, "key": "SPLIT_FACTORY" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["revenue-layer ERC-1271 verification"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 400000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 4,
+      "family": "GGP",
+      "name": "ASSET_POLICY_GAS_LIMIT",
+      "constant_name": "GGP_ASSET_POLICY_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ASSET_POLICY_GAS_LIMIT",
+      "parameter_id": "0xbfc1f824948b8dc9573791fa40eeb403e7322af41d0967f90518dbbb531bf648",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/revenue-splits-and-royalties.md",
+        "anchor": "RSR-ASSET-POLICY"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 5, "key": "SPLIT_FACTORY" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["asset-policy registry reads"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 30000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["split-wallet deposit asset-policy subcall"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 5,
+      "family": "GGP",
+      "name": "WALLET_DEPOSIT_GAS_LIMIT",
+      "constant_name": "GGP_WALLET_DEPOSIT_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_WALLET_DEPOSIT_GAS_LIMIT",
+      "parameter_id": "0xd208e16b8676adecbbdd17f529a9effcb9153af90ac08886fb2906298206ff45",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/revenue-splits-and-royalties.md",
+        "anchor": "RSR-GGP"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 5, "key": "SPLIT_FACTORY" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["split-wallet deposits"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 50000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 6,
+      "family": "GGP",
+      "name": "FLUSH_GAS_FLOOR",
+      "constant_name": "GGP_FLUSH_GAS_FLOOR",
+      "preimage": "6529STREAM_GGP_FLUSH_GAS_FLOOR",
+      "parameter_id": "0x99168b87a7d39f5ba4862568c012ad3b51c552ec78108b88c6be5f5a6426ebe6",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/revenue-splits-and-royalties.md",
+        "anchor": "RSR-GGP"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 7, "key": "REVENUE_ESCROW" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["revenue escrow flush"]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 3,
+          "name": "MIN_GAS_GATE"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 7,
+      "family": "GGP",
+      "name": "MINT_GATE_GAS_LIMIT",
+      "constant_name": "GGP_MINT_GATE_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_MINT_GATE_GAS_LIMIT",
+      "parameter_id": "0xf896db78d4fb703c92d45856189181cb6daa113dada9718f74206095d4fbf817",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/mint-policy-and-accounting.md",
+        "anchor": "MPA-GATES"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 11, "key": "MINT_MANAGER" },
+          { "id": 35, "key": "MINT_MANAGER_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["mint gate calls"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 400000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 8,
+      "family": "GGP",
+      "name": "TICKET_ERC1271_GAS_LIMIT",
+      "constant_name": "GGP_TICKET_ERC1271_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_TICKET_ERC1271_GAS_LIMIT",
+      "parameter_id": "0x6a05447612b16e61c6b274125ccdfb6545e058d195b5d82128b41a7205e4a5b6",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/mint-policy-and-accounting.md",
+        "anchor": "MPA-TICKET"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 13, "key": "MINT_TICKET_GATE" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["mint-ticket ERC-1271 verification"]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["mint-manager ticket-gate ERC-1271 subcall"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 9,
+      "family": "GGP",
+      "name": "ARTIST_AUTHORITY_GAS_LIMIT",
+      "constant_name": "GGP_ARTIST_AUTHORITY_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ARTIST_AUTHORITY_GAS_LIMIT",
+      "parameter_id": "0x194fce9f57e4e64ea539858df133e20abf69979b77fd4c2556f7c185ac391fe3",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/mint-policy-and-accounting.md",
+        "anchor": "MPA-CONSENT"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 11, "key": "MINT_MANAGER" },
+          { "id": 35, "key": "MINT_MANAGER_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["mint artist-authority reads"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 150000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 10,
+      "family": "GGP",
+      "name": "SALE_ERC1271_GAS_LIMIT",
+      "constant_name": "GGP_SALE_ERC1271_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_SALE_ERC1271_GAS_LIMIT",
+      "parameter_id": "0x17b207440a43ce0136b5ee0bc3becf37652825825d88c68e1e0750bf59ec914c",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-sales-and-auctions.md",
+        "anchor": "SSA-GAS"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 4,
+        "profiles": [
+          { "id": 14, "key": "FIXED_PRICE_SALE_ADAPTER" },
+          { "id": 15, "key": "ENGLISH_AUCTION_HOUSE" },
+          { "id": 16, "key": "DUTCH_AUCTION_ADAPTER" },
+          { "id": 17, "key": "PRIVATE_SALE_ADAPTER" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["sale ERC-1271 verification"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 400000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 11,
+      "family": "GGP",
+      "name": "DELEGATE_REGISTRY_GAS_LIMIT",
+      "constant_name": "GGP_DELEGATE_REGISTRY_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_DELEGATE_REGISTRY_GAS_LIMIT",
+      "parameter_id": "0xd75b7f96fae550dd69de8ac7536a203e30ec57da63811df1559129479b5ef185",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-sales-and-auctions.md",
+        "anchor": "SSA-GAS"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 5,
+        "profiles": [
+          { "id": 19, "key": "DELEGATE_REGISTRY_GATE" },
+          { "id": 14, "key": "FIXED_PRICE_SALE_ADAPTER" },
+          { "id": 15, "key": "ENGLISH_AUCTION_HOUSE" },
+          { "id": 16, "key": "DUTCH_AUCTION_ADAPTER" },
+          { "id": 17, "key": "PRIVATE_SALE_ADAPTER" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["delegate-registry reads"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 150000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": [
+          "StreamMintManager MINT_GATE_GAS_LIMIT -> StreamDelegateRegistryGate -> delegate registry"
+        ],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 12,
+      "family": "GGP",
+      "name": "SALE_ARTIST_AUTHORITY_GAS_LIMIT",
+      "constant_name": "GGP_SALE_ARTIST_AUTHORITY_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_SALE_ARTIST_AUTHORITY_GAS_LIMIT",
+      "parameter_id": "0xe8a88819edeabf6e6327f815980331deea6ed50c446b74f1a24055fbc65ad4d0",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-sales-and-auctions.md",
+        "anchor": "SSA-GAS"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 4,
+        "profiles": [
+          { "id": 14, "key": "FIXED_PRICE_SALE_ADAPTER" },
+          { "id": 15, "key": "ENGLISH_AUCTION_HOUSE" },
+          { "id": 16, "key": "DUTCH_AUCTION_ADAPTER" },
+          { "id": 17, "key": "PRIVATE_SALE_ADAPTER" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["sale artist-authority reads"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 150000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 13,
+      "family": "GGP",
+      "name": "REVEAL_ATTEMPT_GAS_LIMIT",
+      "constant_name": "GGP_REVEAL_ATTEMPT_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_REVEAL_ATTEMPT_GAS_LIMIT",
+      "parameter_id": "0xd96deb8f5aad0fd19d6d79b209801e838cb0342c6967312895db5450ba01f01b",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-sales-and-auctions.md",
+        "anchor": "SSA-REVEAL"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 4,
+        "profiles": [
+          { "id": 14, "key": "FIXED_PRICE_SALE_ADAPTER" },
+          { "id": 15, "key": "ENGLISH_AUCTION_HOUSE" },
+          { "id": 16, "key": "DUTCH_AUCTION_ADAPTER" },
+          { "id": 17, "key": "PRIVATE_SALE_ADAPTER" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["AT_MINT entropy request attempts"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 400000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 14,
+      "family": "GGP",
+      "name": "SALE_NFT_DELIVERY_GAS_LIMIT",
+      "constant_name": "GGP_SALE_NFT_DELIVERY_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_SALE_NFT_DELIVERY_GAS_LIMIT",
+      "parameter_id": "0xaccd7fad510e0ff312662187cf184397c8d9baaf0a6bb18dc3b804cc3ae3b372",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-sales-and-auctions.md",
+        "anchor": "SSA-GAS"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 4,
+        "profiles": [
+          { "id": 14, "key": "FIXED_PRICE_SALE_ADAPTER" },
+          { "id": 15, "key": "ENGLISH_AUCTION_HOUSE" },
+          { "id": 16, "key": "DUTCH_AUCTION_ADAPTER" },
+          { "id": 17, "key": "PRIVATE_SALE_ADAPTER" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["sale NFT delivery attempts"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 300000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 15,
+      "family": "GGP",
+      "name": "METADATA_ROUTER_GAS_LIMIT",
+      "constant_name": "GGP_METADATA_ROUTER_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_METADATA_ROUTER_GAS_LIMIT",
+      "parameter_id": "0x02ad62929eaa837b9d1704745193125454925fd11a6bf273d7bb1faa23272e93",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/metadata-router-and-renderer.md",
+        "anchor": "MRR-ROUTER-GGP"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 1, "key": "STREAM_CORE" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": [
+          "StreamCore.tokenURI(uint256)",
+          "StreamCore.contractURI()"
+        ]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["tokenURI(uint256)", "contractURI()"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 16,
+      "family": "GGP",
+      "name": "ENTROPY_VIEW_GAS_LIMIT",
+      "constant_name": "GGP_ENTROPY_VIEW_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ENTROPY_VIEW_GAS_LIMIT",
+      "parameter_id": "0x2bef811c095d83c93627f797c5c71bc97b747ab91fba78266f8f86513f50f5f6",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/metadata-router-and-renderer.md",
+        "anchor": "MRR-ENTROPY-READ"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 22, "key": "METADATA_ROUTER" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["metadata-router entropy reads"]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["StreamCore metadata-router entropy-view subcall"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 17,
+      "family": "GGP",
+      "name": "ENTROPY_REGISTRATION_GAS_LIMIT",
+      "constant_name": "GGP_ENTROPY_REGISTRATION_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ENTROPY_REGISTRATION_GAS_LIMIT",
+      "parameter_id": "0x51125071e3dfb233a2711689d4cc377bbda429f1356ebc09a58d763548541e17",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-entropy-coordinator.md",
+        "anchor": "EC-REGGAS"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 1, "key": "STREAM_CORE" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["StreamCore mint entropy registration"]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 18,
+      "family": "GGP",
+      "name": "ENTROPY_RESULT_PROBE_GAS_LIMIT",
+      "constant_name": "GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_ENTROPY_RESULT_PROBE_GAS_LIMIT",
+      "parameter_id": "0xaf00713aa70c259c23836c61245814e6e3b5fab1fe61b8879c0bd5450f23537c",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-entropy-coordinator.md",
+        "anchor": "EC-INCIDENT-ROLE"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 30, "key": "ENTROPY_COORDINATOR" },
+          { "id": 34, "key": "ENTROPY_COORDINATOR_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": [
+          "StreamEntropyCoordinator.providerResultStatus(bytes32)"
+        ]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 19,
+      "family": "GGP",
+      "name": "VRF_CALLBACK_GAS_LIMIT",
+      "constant_name": "GGP_VRF_CALLBACK_GAS_LIMIT",
+      "preimage": "6529STREAM_GGP_VRF_CALLBACK_GAS_LIMIT",
+      "parameter_id": "0xb54bc37de6ab63d94434a3fb47e0b24ad67118105c91c59db7b1c58d482f5491",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-entropy-providers.md",
+        "anchor": "EP-VRF-CONFIG"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 31, "key": "ENTROPY_PROVIDER_VRF" },
+          { "id": 32, "key": "ENTROPY_PROVIDER_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["provider callback fulfillment"]
+      },
+      "gas": {
+        "genesis_value": { "status": "missing", "value": null },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["upstream provider callback fulfillment"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 20,
+      "family": "GGP",
+      "name": "ARTIST_ERC1271_VERIFY_GAS",
+      "constant_name": "GGP_ARTIST_ERC1271_VERIFY_GAS",
+      "preimage": "6529STREAM_GGP_ARTIST_ERC1271_VERIFY_GAS",
+      "parameter_id": "0x04bd88d7a1b04a4fc7476b74a962c2fea893f8ad4e6711b1c13e828f151458b5",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-artist-authority.md",
+        "anchor": "AA-SIGVER"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 21, "key": "ARTIST_REGISTRY" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": [
+          "artist-registry ERC-1271 verification"
+        ]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 150000 },
+        "immutable_floor": { "status": "planning", "value": 90000 },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 21,
+      "family": "GGP",
+      "name": "METADATA_ERC1271_VERIFY_GAS",
+      "constant_name": "GGP_METADATA_ERC1271_VERIFY_GAS",
+      "preimage": "6529STREAM_GGP_METADATA_ERC1271_VERIFY_GAS",
+      "parameter_id": "0x3ca324ef8262b1ff4cb8753a082cd8780e50f754c1a323a433e0e7665a5ec9f9",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/collection-metadata-contract.md",
+        "anchor": "CMC-SIGVER-GGP"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 3,
+        "profiles": [
+          { "id": 24, "key": "COLLECTION_METADATA" },
+          { "id": 26, "key": "OWNER_RECORDS" },
+          { "id": 28, "key": "COLLECTION_ATTESTATIONS" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": [
+          "metadata-satellite ERC-1271 verification"
+        ]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 150000 },
+        "immutable_floor": { "status": "planning", "value": 90000 },
+        "failure_class": {
+          "status": "complete",
+          "id": 2,
+          "name": "FAIL_CLOSED_PRECHECK"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 22,
+      "family": "GGP",
+      "name": "FINALITY_COMPONENT_READ_GAS",
+      "constant_name": "GGP_FINALITY_COMPONENT_READ_GAS",
+      "preimage": "6529STREAM_GGP_FINALITY_COMPONENT_READ_GAS",
+      "parameter_id": "0xbf54fb4ba4a0942771e26fe4b1f829f8324f6f98ef66e080fd6885b75bdf3221",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-long-term-architecture.md",
+        "anchor": "LTA-FINALITY"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 1,
+        "profiles": [
+          { "id": 33, "key": "ARTWORK_FINALITY_REGISTRY" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["finality component reads"]
+      },
+      "gas": {
+        "genesis_value": { "status": "planning", "value": 30000 },
+        "immutable_floor": { "status": "missing", "value": null },
+        "failure_class": {
+          "status": "complete",
+          "id": 1,
+          "name": "FORWARDING_CAP"
+        }
+      },
+      "time": null,
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "evidence_required",
+        "consumers": ["finality 32-component diagnostic aggregation"],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 23,
+      "family": "GTP",
+      "name": "ENTROPY_REQUEST_TIMEOUT_BLOCKS",
+      "constant_name": "GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS",
+      "preimage": "6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS",
+      "parameter_id": "0x63722ca7b016ab346b7839fe4e01fa7e0627bd5fb99531f7dbe5ec8c34e35c8d",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-entropy-coordinator.md",
+        "anchor": "EC-TIME"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 30, "key": "ENTROPY_COORDINATOR" },
+          { "id": 34, "key": "ENTROPY_COORDINATOR_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["entropy request-timeout eligibility"]
+      },
+      "gas": null,
+      "time": {
+        "genesis_value_blocks": { "status": "planning", "value": 7200 },
+        "immutable_floor_blocks": { "status": "planning", "value": 7200 },
+        "wall_clock_floor_seconds": {
+          "status": "planning",
+          "value": 86400
+        }
+      },
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 24,
+      "family": "GTP",
+      "name": "ENTROPY_REVEAL_SLO_BLOCKS",
+      "constant_name": "GTP_ENTROPY_REVEAL_SLO_BLOCKS",
+      "preimage": "6529STREAM_GTP_ENTROPY_REVEAL_SLO_BLOCKS",
+      "parameter_id": "0x823057688d7c18dca4c528004d7912dfe0a32c36528a2cff1eb0e2a9164ab5e0",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-entropy-coordinator.md",
+        "anchor": "EC-TIME"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 30, "key": "ENTROPY_COORDINATOR" },
+          { "id": 34, "key": "ENTROPY_COORDINATOR_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["entropy reveal-SLO eligibility"]
+      },
+      "gas": null,
+      "time": {
+        "genesis_value_blocks": { "status": "planning", "value": 300 },
+        "immutable_floor_blocks": { "status": "planning", "value": 300 },
+        "wall_clock_floor_seconds": {
+          "status": "planning",
+          "value": 3600
+        }
+      },
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    },
+    {
+      "order": 25,
+      "family": "GTP",
+      "name": "ENTROPY_RECOVERY_STEP_DELAY_BLOCKS",
+      "constant_name": "GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS",
+      "preimage": "6529STREAM_GTP_ENTROPY_RECOVERY_STEP_DELAY_BLOCKS",
+      "parameter_id": "0x0be33ccf48a79079b125936b770c51cdd786fd29d574ce9071323b86838bccd8",
+      "identifier_schema_version": 1,
+      "normative_source": {
+        "status": "complete",
+        "path": "docs/stream-entropy-coordinator.md",
+        "anchor": "EC-TIME"
+      },
+      "expected_hosts": {
+        "status": "complete",
+        "count": 2,
+        "profiles": [
+          { "id": 30, "key": "ENTROPY_COORDINATOR" },
+          { "id": 34, "key": "ENTROPY_COORDINATOR_FALLBACK" }
+        ]
+      },
+      "guarded_consumers": {
+        "status": "planning",
+        "consumers": ["entropy recovery-step eligibility"]
+      },
+      "gas": null,
+      "time": {
+        "genesis_value_blocks": { "status": "planning", "value": 300 },
+        "immutable_floor_blocks": { "status": "planning", "value": 300 },
+        "wall_clock_floor_seconds": {
+          "status": "planning",
+          "value": 3600
+        }
+      },
+      "measurement_evidence": {
+        "status": "missing",
+        "path": null,
+        "sha256": null
+      },
+      "fixed_stipend_compatibility": {
+        "status": "missing",
+        "disposition": "no_fixed_stipend_consumers_identified",
+        "consumers": [],
+        "evidence_path": null,
+        "evidence_sha256": null
+      }
+    }
+  ]
+}

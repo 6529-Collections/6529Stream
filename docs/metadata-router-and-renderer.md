@@ -314,11 +314,14 @@ Production implementation requirements [MRR-CORE-TOKENURI]:
    `ROUTER_NO_CODE`.
 3. Core calls the router through low-level `staticcall` with the current
    `METADATA_ROUTER_GAS_LIMIT` value, after a parent gas precheck that
-   accounts for EIP-150's 63/64 gas forwarding rule plus a named return
-   buffer, so a caller cannot pass the precheck while the router receives
-   less than `METADATA_ROUTER_GAS_LIMIT`. CI must test calls just below, at,
-   and above the precheck threshold, mirroring the royalty-path precheck
-   tests in [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md).
+   accounts for EIP-150's 63/64 gas forwarding rule plus the current
+   `ROYALTY_RETURN_GAS_BUFFER`, the shared launch-v1 Core parent-completion
+   buffer, so a caller cannot pass the precheck while the router receives less
+   than `METADATA_ROUTER_GAS_LIMIT`. The multiplicative reference threshold is
+   `(METADATA_ROUTER_GAS_LIMIT * 64) / 63 +
+   ROYALTY_RETURN_GAS_BUFFER`. CI must test calls just below, at, and above the
+   precheck threshold, mirroring the royalty-path precheck tests in
+   [`docs/revenue-splits-and-royalties.md`](revenue-splits-and-royalties.md).
 4. Core copies at most `MAX_TOKEN_URI_RETURNDATA` bytes from returndata before
    decoding. A router cannot force unbounded memory allocation.
 5. Revert, malformed ABI, oversized returndata, or an empty required response
@@ -329,9 +332,9 @@ Production implementation requirements [MRR-CORE-TOKENURI]:
 7. The fallback payload is intentionally small and deterministic. It includes a
    name, description, optional empty image, and `properties.stream.error`.
 8. The release manifest records the router gas-parameter genesis value and
-   floor, returndata limit, fallback schema hash, and gas measurements for
-   success, revert, malformed return, oversized return, no-code router, and
-   unset router cases.
+   floor, the shared completion-buffer value and floor, returndata limit,
+   fallback schema hash, and gas measurements for success, revert, malformed
+   return, oversized return, no-code router, and unset router cases.
 
 `METADATA_ROUTER_GAS_LIMIT` is a Governed Gas Parameter under the model
 home,
@@ -346,10 +349,19 @@ home,
    recording follow [LTA-GGP] as amended by ADR 0017. Its Core mutation and
    introspection entries use the two-function production ABI pinned at
    [LTA-GGP-CORE], and this document adds no convenience getter, public
-   constant getter, alias event, or pattern rule of its own.
+   constant getter, alias event, or pattern rule of its own. The precheck also
+   reads Core's `ROYALTY_RETURN_GAS_BUFFER`; despite its legacy name, that
+   existing GGP is the shared parent-completion buffer for `royaltyInfo()`,
+   `tokenURI()`, and `contractURI()`. Launch v1 defines no 23rd,
+   metadata-specific buffer parameter.
 2. Reproducible sizing and raise-review evidence runs a `tokenURI()` +
    `contractURI()` read sweep over the deepest known routes at the candidate
-   value. It has no onchain authorization role.
+   value. The shared buffer's immutable floor and current value must cover,
+   with published margin, the worst measured parent-side completion work
+   across those two reads and `royaltyInfo()` under [RSR-2981-GAS]. Every raise
+   of `METADATA_ROUTER_GAS_LIMIT` or the shared buffer replays all affected
+   threshold measurements at the proposed value tuple. This evidence has no
+   onchain authorization role, and there is no standalone probe.
 3. A deploy-time immutable cap is nonconformant for this Core line
    because a future opcode repricing would otherwise permanently degrade
    `tokenURI()` for every frozen collection; raising the cap is the cure
@@ -412,8 +424,9 @@ a bounded staticcall with a returndata cap, returning the documented
 fallback payload instead of reverting when the satellite read is unset,
 code-less, reverting, oversized, or malformed. The delegated read uses the
 same `METADATA_ROUTER_GAS_LIMIT` Governed Gas Parameter and the same
-EIP-150 63/64 parent precheck as `tokenURI()` [MRR-CORE-TOKENURI], with CI
-threshold tests just below, at, and above the precheck threshold. The hook
+EIP-150 63/64 parent precheck and shared `ROYALTY_RETURN_GAS_BUFFER` as
+`tokenURI()` [MRR-CORE-TOKENURI], with CI threshold tests just below, at, and
+above the precheck threshold. The hook
 is part of the Core hook budget and is covered by the measured Core size
 proof (ADR 0009 decision 2). The router serves the same ERC-7572-shaped
 contract metadata through its own reads:

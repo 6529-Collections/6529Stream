@@ -35,15 +35,15 @@ evidence, and audit/readiness gates.
 | Field | Value |
 | --- | --- |
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
-| Active PR branch | `codex/raise-only-gas-time-governance` |
-| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/683` |
+| Active PR branch | `codex/governed-parameter-inventory` |
+| Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/686` (`b4af30a58c22f79bafad241c6e4fab7a4a76063b`) |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/684` |
-| Active PR | `https://github.com/6529-Collections/6529Stream/pull/686` |
-| Next issue | Bind the exact 25 governed parameters under #684, then enforce the closed-world action/native-value policy under #685. |
+| Active PR | `TBD` |
+| Next issue | Continue #684 evidence/candidate binding work as implementation becomes available, while prioritizing #654 Core headroom recovery; then enforce the closed-world action/native-value policy under #685. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 07:24 UTC` |
+| Last updated | `2026-07-24 09:31 UTC` |
 
 ## Current Run Notes
 
@@ -76,29 +76,47 @@ evidence, and audit/readiness gates.
   control-plane ERC-165 cap, and added the canonical deployment-plan
   materializer. PR #683 then merged the Governance V2 foundation, and issue
   #665 closed for its named execution-context/ModuleRegistry scope.
-- The current `codex/raise-only-gas-time-governance` topic implements ADR
-  0017's 22-GGP/3-GTP raise-only target, removes probe/lower/emergency/rebind
-  surfaces, enforces per-parameter same-action replay rejection, and changes the
-  canonical genesis profile to 37 no-probe entries. The isolated release build
-  binds 53 targets; `StreamCore` remains 24,152 runtime bytes with 424 bytes of
-  margin, so issue #654 stays open. Issue #684 now owns exact production
-  parameter host/evidence binding, while #685 owns `RISK-GOV-003`.
+- PR #686 merged ADR 0017's 22-GGP/3-GTP raise-only target as
+  `b4af30a58c22f79bafad241c6e4fab7a4a76063b`: probe/lower/emergency/rebind
+  surfaces are absent, per-parameter same-action replay is rejected, and the
+  canonical genesis profile has 37 no-probe entries. The isolated release
+  build binds 53 targets; `StreamCore` remains 24,152 runtime bytes with 424
+  bytes of margin, so issue #654 stays open. Issue #684 owns exact production
+  parameter host/evidence binding, #671 owns the shared-buffer implementation,
+  tests, and measurement, while #685 owns `RISK-GOV-003`.
 - Final candidate validation passed on 2026-07-24: the isolated
   `make release-artifacts-verify` gate completed in 375.1 seconds, and the full
   Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   gate completed end to end in 2,107.4 seconds after the canonical non-production
   candidate receipt, target-catalog, and release-config pins were refreshed.
-- Ready PR #686 is open from `codex/raise-only-gas-time-governance` at
-  `https://github.com/6529-Collections/6529Stream/pull/686`. It establishes the
-  raise-only foundation and fail-closed evidence boundary for issue #684 but
-  does not close the issue's exact production host/sizing/candidate-binding
-  acceptance criteria. Next action is final-head CI and CodeRabbit iteration.
+- Branch `codex/governed-parameter-inventory` now carries the first focused
+  #684 slice: a schemaed 25-row launch inventory and checker that pin exact
+  policy, multi-host profile coverage, evidence requirements, and
+  fixed-stipend review obligations. The committed candidate state remains
+  honestly incomplete (`not_available`), and guarded-consumer lists remain
+  explicitly non-exhaustive (`planning`). Production release invokes
+  `--require-complete`, so this slice does not close #684 or
+  `RISK-GOV-004`. The corrected target is 50 exact parameter/profile bindings:
+  the delegate-registry row covers its gate plus all four sale adapters, and
+  nested/fixed gas constraints require explicit evidence. The 32-test focused
+  inventory suite, ordinary checker, and the reconciled 19-test identifier
+  suite/check pass; strict inventory completeness fails as intended on 129
+  unresolved facts, and a self-reported complete candidate is categorically
+  rejected until #656 supplies structured instance and linked-library
+  reconciliation. Self-reported complete evidence is also categorically
+  rejected until #684 adds candidate-instance-bound measurement/cadence,
+  reproduction, and reachable-raise-chain semantics. The shared-buffer text is
+  only #671's specification slice; implementation, threshold/raise-chain tests,
+  measurement, and exact-target rehearsal remain open. Next action is
+  generated-tail refresh, combined validation,
+  PR creation, CI/CodeRabbit iteration, and merge only when clean.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality
   reads; and concrete discovery, sanction, and deployment candidates remain
-  incomplete. The next planned slice after this branch is the exact 25-row
-  governed-parameter inventory and fail-closed candidate binding under #684.
+  incomplete. The current #684 slice establishes the exact 25-row inventory
+  and fail-closed completeness boundary; later #684 work must replace every
+  unavailable candidate binding with reviewed production facts.
 - Historical artifacts prove the earlier headroom work reduced Core to 21,792
   runtime bytes; CON-012 then added roughly 2,330 bytes of manager/prepared-mint
   hooks while the legacy Drops/Minter path remained live, producing the current
