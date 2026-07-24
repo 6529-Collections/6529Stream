@@ -92,8 +92,8 @@ class SlitherBaselineTests(unittest.TestCase):
 
     def test_committed_baseline_and_markdown_validate(self) -> None:
         data = checker.validate_baseline(REPO_ROOT, BASELINE_PATH, MARKDOWN_PATH)
-        self.assertEqual(data["counts"], {"High": 3, "Medium": 30, "total": 33})
-        self.assertEqual(len(data["findings"]), 33)
+        self.assertEqual(data["counts"], {"High": 3, "Medium": 27, "total": 30})
+        self.assertEqual(len(data["findings"]), 30)
         self.assertEqual(
             MARKDOWN_PATH.read_text(encoding="utf-8"), checker.render_markdown(data)
         )
@@ -329,7 +329,7 @@ class SlitherBaselineTests(unittest.TestCase):
             ("captured_at_utc", "2026-07-22T10:02:34Z", "captured_at_utc must be"),
             ("capture_command", "slither arbitrary", "capture_command must be"),
             ("gate_command", "slither arbitrary --fail-none", "gate_command must be"),
-            ("capture_native_exit_code", 123, "capture_native_exit_code must retain"),
+            ("capture_native_exit_code", 123, "must retain the audited 1 exit"),
             ("raw_json_size_bytes", 1, "raw_json_size_bytes must be"),
             ("raw_json_sha256", "sha256:" + "0" * 64, "raw_json_sha256 must be"),
         )

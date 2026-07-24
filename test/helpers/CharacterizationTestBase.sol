@@ -24,6 +24,7 @@ interface Vm {
     function expectRevert() external;
     function recordLogs() external;
     function getRecordedLogs() external returns (Log[] memory);
+    function load(address target, bytes32 slot) external view returns (bytes32 value);
     function parseJson(string calldata json) external pure returns (bytes memory);
     function parseJson(string calldata json, string calldata key)
         external
@@ -34,6 +35,7 @@ interface Vm {
     function revertToState(uint256 snapshotId) external returns (bool);
     function resumeGasMetering() external;
     function snapshotState() external returns (uint256);
+    function store(address target, bytes32 slot, bytes32 value) external;
 }
 
 abstract contract CharacterizationTestBase {

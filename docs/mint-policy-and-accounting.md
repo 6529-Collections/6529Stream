@@ -12,7 +12,9 @@ amend this document),
 [ADR 0013](adr/0013-world-class-pass-round-4.md) (decisions U2, U6, U7,
 and U9 amend this document), and
 [ADR 0014](adr/0014-world-class-pass-round-5.md) (decisions V5 and V6
-amend this document) and recorded in
+amend this document), as superseded in part by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md) for Governed Gas
+Parameter mutation and evidence surfaces, and recorded in
 [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document is the normative home (ADR 0010 decision D3.1) for the Core
@@ -2291,13 +2293,13 @@ Requirements [MPA-AUTHZ]:
    Parameter with the 63/64 parent-gas precheck; anything but the exact
    magic value is invalid. The parameter's release-manifest
    failure-direction class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP]
-   requirement 10): raises are governance-only, with no permissionless
-   conditional raise (ADR 0012 decision T1), and its named
-   Permanent-class probe ([LTA-GGP-PROBES]) proves a
-   maximum-supported-class ([GOV-1271-CLASS]) `isValidSignature`
-   verification completes with the magic value under exactly the probed
-   cap against pinned fixture inputs, recording runs on itself with
-   `evidenceHash` committing to the measurement artifact.
+   requirement 10). Its only mutation is an authority-only Governance V2
+   class-1 raise delayed at least 48 hours, monotonic, and bounded to at
+   most twice the current value. It has no lower, emergency, conditional,
+   probe, module-registry, or module-rebinding path. Reproducible offchain
+   and fork evidence demonstrates that the maximum supported class
+   ([GOV-1271-CLASS]) completes `isValidSignature` with the magic value
+   under the configured cap.
 4. `CALLER_ADAPTER` requires `authorizer == msg.sender` and that the
    caller is a registry-`ACTIVE` sale adapter per
    `docs/stream-sales-and-auctions.md` `[SSA-REGISTRY]`.
@@ -2569,15 +2571,14 @@ Gate behavior [MPA-GATES]:
    63/64 parent-gas precheck applies; insufficient parent gas reverts
    (fail closed). The parameter's release-manifest failure-direction
    class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10, which
-   names it): raises are governance-only, with no permissionless
-   conditional raise (ADR 0012 decision T1). Its named probe is a
-   Permanent-class probe contract ([LTA-GGP-PROBES]) that proves the
-   guarded operation itself succeeds at the probed value: it executes
-   the manager's gate-call frame as a faithful probe-owned equivalent —
-   a `staticcall` forwarding exactly the probed value to a
-   production-depth reference gate over pinned fixture inputs, with no
-   caller-supplied gas shaping — records each run on itself, and
-   commits the measurement artifact through `evidenceHash`.
+   names it). Its only mutation is an authority-only Governance V2
+   class-1 raise delayed at least 48 hours, monotonic, and bounded to at
+   most twice the current value. No lower, emergency, conditional, probe,
+   module-registry, or module-rebinding path exists. Reproducible
+   offchain and fork evidence executes the manager's gate-call frame
+   against a production-depth reference gate over pinned fixture inputs
+   and records the measurement artifact outside the permanent launch
+   system.
 7. Gate returndata is bounded: the manager must reject returndata larger
    than `MAX_GATE_RETURNDATA_BYTES = 2_048` or more than
    `MAX_GATE_NULLIFIERS = 16` nullifiers, with typed errors. A failed,
@@ -2762,13 +2763,12 @@ Requirements [MPA-CONSENT]:
    unavailable registry fails closed for
    consent-bound configuration. The parameter's release-manifest
    failure-direction class is `FAIL_CLOSED_PRECHECK` ([LTA-GGP]
-   requirement 10): raises are governance-only, with no permissionless
-   conditional raise (ADR 0012 decision T1), and its named
-   Permanent-class probe ([LTA-GGP-PROBES]) proves the consent
-   verification read completes for a pinned fixture binding under
-   exactly the probed cap — a faithful probe-owned equivalent of the
-   manager's bounded registry read — recording runs on itself with
-   `evidenceHash` committing to the measurement artifact.
+   requirement 10). Its only mutation is an authority-only Governance V2
+   class-1 raise delayed at least 48 hours, monotonic, and bounded to at
+   most twice the current value. No lower, emergency, conditional, probe,
+   module-registry, or module-rebinding path exists. Reproducible
+   offchain and fork evidence demonstrates the bounded registry read
+   against a pinned fixture at the configured cap.
 3. Consent evidence is evented: the manager emits
    `MintPhaseConsentRecorded` (Events) binding the consent mode, the
    consent evidence hash, and the consented `policyHash`, so every

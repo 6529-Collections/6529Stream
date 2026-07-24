@@ -1005,17 +1005,18 @@ Dependencies: `GOV-001`.
 
 ### GOV-011: Implement Governance V2 And Bind The Production Cutover
 
-Status: Active PR #683 / issue #665 on branch
-`codex/governance-v2-foundation`; the source/test foundation is validated
-locally and under review, while deployment, action-policy, non-local rehearsal,
-and audit evidence remain open.
+Status: Foundation merged in PR #683 and issue #665 closed. ADR 0017's
+raise-only gas/time target is implemented in the current candidate; exact
+parameter host/evidence binding (#684), the closed-world action/native-value
+policy (#685), deployment, non-local rehearsal, and audit evidence remain open.
 
 Gate: C/E/F/G.
 
-Problem: the transitional governance layer does not yet provide one
-replay-complete, deployment-bound, closed-world authority model suitable for
-irreversible ownership cutover. Gas/time probe semantics and proposal-selected
-native-value authority also remain unsafe launch boundaries.
+Problem: the Governance V2 execution foundation is replay-complete at the
+source/test boundary, but the deployment-bound closed world required for
+irreversible ownership cutover is incomplete. Exact parameter host/evidence
+bindings and proposal-selected native-value authority remain unsafe launch
+boundaries.
 
 Acceptance criteria:
 
@@ -1025,14 +1026,15 @@ Acceptance criteria:
 2. Production targets, selectors, and native-value permissions are constrained
    by a reviewed closed-world action-policy catalog enforced on both sides of
    the call boundary.
-3. Probe-dependent lower/rebind/emergency semantics are removed or replaced by
-   a reviewed raise-only gas/time policy that does not rely on forgeable warm
-   same-transaction success.
+3. The reviewed raise-only gas/time policy is bound to exact production hosts,
+   floors, measurement/cadence evidence, and fixed-stipend compatibility under
+   issue #684, without probe/lower/rebind/emergency mutation.
 4. Instance-aware deployment inputs, holder/bootstrap ceremonies, non-local
    rehearsal, release-catalog/event/error/ABI evidence, and independent review
    are retained before ownership cutover.
-5. Issue #665 and `RISK-GOV-003` remain open until those full cutover criteria
-   are met; a foundation PR alone is not production readiness.
+5. Issues #684 and #685 plus `RISK-GOV-003` and `RISK-GOV-004` remain open until
+   those full cutover criteria are met; closing #665's foundation scope is not
+   production readiness.
 
 ### ADV-001: Add End-To-End Protocol State-Machine Harness
 
@@ -1882,8 +1884,9 @@ This evidence does not make the system production- or audit-ready. The current
 Core lacks the granular target getters and target one-way freeze semantic, the
 current collection metadata contract lacks the target finality reads, and
 concrete discovery, sanction, and deployment candidates remain incomplete.
-Issue #665 Governance V2 work is now active in `GOV-011`; measured net-negative
-Core cutover work remains required to complete #654.
+PR #683 completed the Governance V2 foundation tracked by #665. Issues #684 and #685
+now own the remaining governed-parameter and action-policy cutover work;
+measured net-negative Core cutover work remains required to complete #654.
 
 ### CON-001: Re-Audit Public Entry Point And Event Surface
 
@@ -4093,7 +4096,9 @@ unless an external dependency changes.
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | Merged in PR #517; issue #516 closed completed |
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
-| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | Active PR #683 / issue #665 on branch `codex/governance-v2-foundation`; foundation source/tests are locally green, but raise-only gas/time policy, closed-world action catalog, deployment/rehearsal evidence, and independent review remain |
+| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | PR #683 merged the foundation and #665 closed; ADR 0017's raise-only target is in the current candidate, while #684 parameter bindings, #685 action/native-value policy, deployment/rehearsal evidence, and independent review remain |
+| `GOV-012` | Bind the exact 22-GGP/3-GTP inventory to production hosts and sizing/cadence evidence | C/E/F/G | Active PR #686 / issue #684 on branch `codex/raise-only-gas-time-governance`; the PR establishes raise-only hosts and fail-closed evidence, but the 37-entry production target and concrete candidate remain unbound |
+| `GOV-013` | Enforce the closed-world Governance V2 target/selector/native-value action policy | C/E/F/G | Open issue #685; `RISK-GOV-003` remains High and non-waivable |
 
 ### Integration Readiness
 
@@ -4115,7 +4120,7 @@ unless an external dependency changes.
 | `AUD-003` | Add external audit finding intake template and remediation workflow | F | Merged in PR #521; issue #520 closed completed |
 | `AUD-004` | Add post-audit remediation evidence checker | F/G | Merged in PR #475; issue #231 remains open for future completed post-audit remediation evidence |
 | `AUD-005` | Retain completed external audit report and reviewer acceptance | F | audit vendor/report |
-| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture has 33 Open rows under issue #658: one confirmed gap, five design-review rows, and 27 pending dispositions. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issues #658 and #665 remain blockers |
+| `AUD-006` | Remediate or produce reviewed issue-linked dispositions for every open first-party production Slither High/Medium finding while preserving exact normalized drift CI | C/F/G | PR #662 merged the inventory and exact-drift gate; the current capture has 30 Open rows under issue #658: one confirmed gap, five design-review rows, and 24 pending dispositions. `RISK-GOV-003` separately preserves the High Governance Executor native-value authority that bounded assembly makes invisible to Slither; issues #658 and #685 remain blockers |
 | `OSS-002` | Add first-30-minutes contributor guide | A/G | Merged in PR #499; issue #498 closed completed |
 | `OSS-003` | Add issue templates for integration, audit finding, release evidence | G | Merged in PR #501; issue #500 closed completed |
 | `OSS-004` | Add PR template release-impact checklist | G | Merged in PR #503; issue #502 closed completed |

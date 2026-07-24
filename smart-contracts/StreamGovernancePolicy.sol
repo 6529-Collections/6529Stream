@@ -308,11 +308,6 @@ library StreamGovernancePolicy {
         if (freeze && target == manifestTailTarget && selector == manifestTailSelector) {
             revert IStreamGovernanceExecutor.InvalidManifestTailTrigger(target, selector);
         }
-        if (freeze && policy.emergencyCodeHash[target][selector] != bytes32(0)) {
-            revert IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility(
-                target, selector
-            );
-        }
         if (
             freeze && policy.tailRules[target][selector].triggerCodeHash != bytes32(0)
                 && (policy.tailRules[target][selector].allowedActionClassMask & 0x04) == 0

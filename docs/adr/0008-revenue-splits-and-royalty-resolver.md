@@ -4,6 +4,13 @@
 
 Accepted.
 
+[ADR 0017](0017-raise-only-parameter-governance.md) supersedes this ADR's
+probe-gated lowering, emergency raise, conditional mutation, and probe-
+rebinding requirements for revenue-layer Governed Gas Parameters. Those
+parameters now use only authority-controlled Governance V2 class-`1` raises
+with a 48-hour minimum delay, monotonic value, and per-action `<= 2x` bound.
+Historical text below remains decision evidence, not a launch interface.
+
 Accepted 2026-07-04 through
 [ADR 0009](0009-protocol-v1-open-question-resolutions.md) (decision 10),
 amended by ADR 0009 decisions 8 (deployment-wide global freeze blocks new
@@ -2135,8 +2142,9 @@ accepted as a permanent, disclosed, artist-facing term.
   pending the timelocked successor-wallet recovery operation.
 - Governed Gas Parameters reintroduce a governance dependency into read and
   release paths that were fully static; accepted for survivability and
-  bounded by immutable floors, staged delays, and health probes (ADR 0010
-  decision D1).
+  bounded by immutable floors, authority-only class-`1` raises delayed at
+  least 48 hours, `<= 2x` per-action bounds, and reproducible sizing evidence
+  (ADR 0010 decision D1 as amended by ADR 0017).
 - Entitlements of lost-key EOA accounts in existing wallets are permanently
   unclaimable; the succession posture and disclosure rules are
   `docs/revenue-splits-and-royalties.md` [RSR-ESTATE].

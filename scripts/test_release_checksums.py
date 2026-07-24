@@ -25,38 +25,9 @@ def write_text(path: Path, value: str) -> None:
 
 
 class ReleaseChecksumTests(unittest.TestCase):
-    def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
-        expected_paths = {
-            Path("scripts/materialize_canonical_deployment_plan.py"),
-            Path("scripts/test_materialize_canonical_deployment_plan.py"),
-        }
-        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+    def assert_committed_checksums_cover(self, expected_paths: set[Path]) -> None:
+        """Assert policy and both committed checksum outputs bind current files."""
 
-        repo_root = SCRIPT_PATH.parent.parent
-        checksum_text = (
-            repo_root / generator.DEFAULT_OUTPUT_DIR / generator.CHECKSUM_FILE_NAME
-        ).read_text(encoding="utf-8")
-        checksum_entries = {
-            relative_path: digest
-            for digest, relative_path in generator.parse_checksum_file(checksum_text)
-        }
-        for path in expected_paths:
-            self.assertEqual(
-                checksum_entries[path.as_posix()],
-                generator.file_sha256(repo_root / path).removeprefix("sha256:"),
-            )
-
-    def test_default_covered_paths_include_python_toolchain_provenance(self) -> None:
-        """Policy and committed bundles bind every reviewed Python toolchain input."""
-
-        expected_paths = {
-            Path("requirements-tools.txt"),
-            Path("requirements-tools.lock"),
-            Path(".github/workflows/ci.yml"),
-            Path(".github/workflows/release-mode.yml"),
-            Path("scripts/check_python_toolchain.py"),
-            Path("scripts/test_python_toolchain.py"),
-        }
         self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
 
         repo_root = SCRIPT_PATH.parent.parent
@@ -78,7 +49,8 @@ class ReleaseChecksumTests(unittest.TestCase):
 
         for path in expected_paths:
             relative_path = path.as_posix()
-            expected_hash = generator.file_sha256(repo_root / path)
+            absolute_path = repo_root / path
+            expected_hash = generator.file_sha256(absolute_path)
             self.assertEqual(
                 checksum_entries[relative_path],
                 expected_hash.removeprefix("sha256:"),
@@ -86,8 +58,28 @@ class ReleaseChecksumTests(unittest.TestCase):
             self.assertEqual(manifest_entries[relative_path]["sha256"], expected_hash)
             self.assertEqual(
                 manifest_entries[relative_path]["size_bytes"],
-                (repo_root / path).stat().st_size,
+                absolute_path.stat().st_size,
             )
+
+    def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
+        expected_paths = {
+            Path("scripts/materialize_canonical_deployment_plan.py"),
+            Path("scripts/test_materialize_canonical_deployment_plan.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_default_covered_paths_include_python_toolchain_provenance(self) -> None:
+        """Policy and committed bundles bind every reviewed Python toolchain input."""
+
+        expected_paths = {
+            Path("requirements-tools.txt"),
+            Path("requirements-tools.lock"),
+            Path(".github/workflows/ci.yml"),
+            Path(".github/workflows/release-mode.yml"),
+            Path("scripts/check_python_toolchain.py"),
+            Path("scripts/test_python_toolchain.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
 
     def test_default_covered_paths_include_evidence_artifacts(self) -> None:
         self.assertIn(
@@ -191,6 +183,8 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("release-artifacts/genesis-deployment-profile.json"),
             Path("scripts/check_genesis_deployment_profile.py"),
             Path("scripts/test_genesis_deployment_profile.py"),
+            Path("scripts/check_governed_parameter_identifiers.py"),
+            Path("scripts/test_governed_parameter_identifiers.py"),
             Path("release-artifacts/system-manifest-payload-vector.json"),
             Path("scripts/generate_system_manifest_payload_vector.py"),
             Path("scripts/check_system_manifest_payload_vector.py"),
@@ -202,8 +196,9 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("docs/launch-conformance-matrix.md"),
             Path("docs/stream-long-term-architecture.md"),
             Path("docs/adr/0004-admin-governance.md"),
+            Path("docs/adr/0017-raise-only-parameter-governance.md"),
         }
-        self.assertTrue(genesis_profile_paths <= set(generator.DEFAULT_COVERED_PATHS))
+        self.assert_committed_checksums_cover(genesis_profile_paths)
         slither_baseline_paths = {
             Path("ops/SLITHER_BASELINE.json"),
             Path("ops/SLITHER_BASELINE.md"),
@@ -214,7 +209,7 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("slither.config.json"),
             Path("foundry.toml"),
         }
-        self.assertTrue(slither_baseline_paths <= set(generator.DEFAULT_COVERED_PATHS))
+        self.assert_committed_checksums_cover(slither_baseline_paths)
 
     def test_default_covered_paths_include_release_manifest_source_docs(self) -> None:
         expected_paths = {
@@ -228,8 +223,64 @@ class ReleaseChecksumTests(unittest.TestCase):
             Path("docs/integrations/events-and-indexing.md"),
             Path("docs/tooling.md"),
             Path("docs/status.md"),
+            Path("docs/adr/0017-raise-only-parameter-governance.md"),
         }
-        self.assertTrue(expected_paths <= set(generator.DEFAULT_COVERED_PATHS))
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_default_covered_paths_bind_release_tail_provenance(self) -> None:
+        expected_paths = {
+            Path("scripts/generate_release_checksums.py"),
+            Path("scripts/test_release_checksums.py"),
+            Path("scripts/generate_release_manifest.py"),
+            Path("scripts/test_release_manifest.py"),
+            Path("scripts/generate_risk_register.py"),
+            Path("scripts/check_risk_register.py"),
+            Path("scripts/test_risk_register.py"),
+            Path("release-artifacts/README.md"),
+            Path("ops/ROADMAP.md"),
+            Path("ops/EXECUTION_BACKLOG.md"),
+            Path("docs/known-blockers.md"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_default_covered_paths_bind_adr17_supersession_notices(self) -> None:
+        expected_paths = {
+            Path("docs/adr/README.md"),
+            Path("docs/adr/0008-revenue-splits-and-royalty-resolver.md"),
+            Path("docs/adr/0010-world-class-spec-pass.md"),
+            Path("docs/adr/0011-world-class-pass-round-2.md"),
+            Path("docs/adr/0012-world-class-pass-round-3.md"),
+            Path("docs/adr/0013-world-class-pass-round-4.md"),
+            Path("docs/adr/0014-world-class-pass-round-5.md"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_default_covered_paths_bind_parameter_and_abi_policy(self) -> None:
+        expected_paths = {
+            Path("Makefile"),
+            Path("scripts/check.sh"),
+            Path("scripts/check.ps1"),
+            Path("ops/EXTERNAL_CALL_GAS_INVENTORY.json"),
+            Path("scripts/check_external_call_gas_inventory.py"),
+            Path("scripts/test_external_call_gas_inventory.py"),
+            Path("scripts/check_abi_compatibility.py"),
+            Path("scripts/test_abi_compatibility.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_default_covered_paths_close_genesis_normative_anchors(self) -> None:
+        repo_root = SCRIPT_PATH.parent.parent
+        profile = json.loads(
+            (repo_root / "release-artifacts/genesis-deployment-profile.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        normative_paths = {
+            Path(anchor.split("#", 1)[0])
+            for entry in profile["entries"]
+            for anchor in entry["normative_anchors"]
+        }
+        self.assert_committed_checksums_cover(normative_paths)
 
     def test_committed_checksums_cover_permanence_package_artifacts(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent

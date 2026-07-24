@@ -180,6 +180,30 @@ class ReleaseNotesTests(unittest.TestCase):
             markdown = paths["md_output"].read_text(encoding="utf-8")
             self.assertIn("wrapped continuation lines", markdown)
 
+    def test_unreleased_bullets_preserves_issue_continuations_not_headings(self) -> None:
+        entries = generator.unreleased_bullets(
+            "# Changelog\n\n"
+            "## Unreleased\n\n"
+            "### Changed\n\n"
+            "- Adopted the reviewed governance transition in\n"
+            "  #683 and retained the issue reference.\n"
+            "    #123 records the prerequisite review.\n\n"
+            "#### Fixed\n\n"
+            "- Added the parser regression.\n"
+        )
+
+        self.assertEqual(
+            entries,
+            [
+                "Adopted the reviewed governance transition in "
+                "#683 and retained the issue reference. "
+                "#123 records the prerequisite review.",
+                "Added the parser regression.",
+            ],
+        )
+        self.assertNotIn("Changed", " ".join(entries))
+        self.assertNotIn("Fixed", " ".join(entries))
+
     def test_check_mode_accepts_current_outputs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

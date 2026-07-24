@@ -8,7 +8,8 @@ inline are resolved by
 [ADR 0011](adr/0011-world-class-pass-round-2.md),
 [ADR 0012](adr/0012-world-class-pass-round-3.md),
 [ADR 0013](adr/0013-world-class-pass-round-4.md), and
-[ADR 0014](adr/0014-world-class-pass-round-5.md) and recorded
+[ADR 0014](adr/0014-world-class-pass-round-5.md), as amended by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md), and recorded
 in [`docs/spec-open-questions.md`](spec-open-questions.md).
 
 This document specifies the Stream-native entropy provider adapter contracts
@@ -394,7 +395,10 @@ carries `uint16 schemaVersion` as its leading declaration field —
 declared before every indexed parameter, so it is also the first
 data-section field — and declares at most three indexed parameters;
 genesis emits every such event with `schemaVersion = 1` (ADR 0013
-decision U7). For the genesis adapters these blocks are the
+decision U7), except the raise-only parameter-family
+`GasParameterRegistered` and `GasParameterUpdated` events, whose
+`schemaVersion` is `2` under ADR 0017. For the genesis
+adapters these blocks are the
 production-exact signatures the machine-readable event catalog must
 reproduce; extension-family blocks bind their separately accepted
 adapter specs the same way. The conformance-matrix "snippet is
@@ -834,12 +838,13 @@ Rules [EP-VRF-CONFIG]:
    policy catalog; because its parameter set spans randomness identity
    (rule 5) and a Governed Gas Parameter (rule 6), the selector is
    catalog-classed as a canonical ADR 0004 governance action, with its
-   delay class and emergency eligibility recorded there.
+   class-`1` delay recorded there. It has no emergency eligibility
+   (ADR 0017).
 2. Emit `VRFConfigUpdated` binding the authorizing canonical action ID
    (ADR 0014 decision V6). `VRFConfigUpdated` is not a GGP family
    alias — it carries no old value and no floor — so a change touching
    `callbackGasLimit` additionally emits the canonical
-   `GasParameterUpdated` family event ([LTA-GGP] requirement 4 in
+   schema-v2 `GasParameterUpdated` family event ([LTA-GGP] requirement 4 in
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)),
    bound to the same action ID.
 3. Existing requests retain the provenance values emitted at request time.
@@ -852,10 +857,11 @@ Rules [EP-VRF-CONFIG]:
 6. `callbackGasLimit` is the adapter-hosted `VRF_CALLBACK_GAS_LIMIT`
    Governed Gas Parameter
    ([`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-GGP]): it must never be set below its immutable floor
+   [LTA-GGP]): its genesis value must not be below its immutable floor
    `VRF_CALLBACK_GAS_FLOOR`, sized from the measured fulfillment envelope
    with margin [EP-CALLBACK item 5]; raising it is a service-restoring
-   action, and the floor, genesis value, and measured envelope are
+   authority-only class-`1` action delayed at least 48 hours and bounded to
+   2x, and the floor, genesis value, and measured envelope are
    recorded in the release manifest. A raise binds future requests only
    — in-flight requests keep their submitted limit — and the upstream
    coordinator's own maximum callback gas bounds every raise; the
@@ -867,17 +873,14 @@ Rules [EP-VRF-CONFIG]:
 8. The parameter's release-manifest failure-direction class is
    `FORWARDING_CAP` ([LTA-GGP] requirement 10): it caps the gas the
    upstream forwards to the adapter callback, and raising it restores
-   delivery for future requests. Its named probe — a Permanent-class
-   probe contract ([LTA-GGP-PROBES] in
-   [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md);
-   ADR 0012 decision T1) — executes a faithful equivalent of the
+   delivery for future requests. Reproducible sizing evidence executes a
+   faithful equivalent of the
    callback frame: the persist writes plus a fulfillment-shaped subcall
    replicating the published coordinator envelope ([EC-FULFILL]
-   rule 13), under exactly the probed value against a pinned fixture
-   corpus with no caller-supplied gas shaping. It records each run on
-   itself and commits measurements through `evidenceHash`; a release
-   golden test asserts probe gas matches the measured production
-   envelope within the recorded tolerance.
+   rule 13), under the candidate value against a pinned fixture corpus. A
+   release golden asserts measurement parity with the production envelope.
+   The evidence has no onchain authorization role, and no lower, emergency,
+   probe, rebind, conditional, or permissionless writer exists (ADR 0017).
 
 Event ([EP-EVENTS]):
 
@@ -1594,13 +1597,13 @@ VRF tests:
     `callbackGasLimit` raise executes under its submitted limit; an
     induced coordinator-frame failure persists the result and remains
     retryable; a simulated frame-level loss leaves the adapter with no
-    result, the probe reporting `rawRandomnessReceived = false`, and
+    result, the result-status read reporting `rawRandomnessReceived = false`, and
     coordinator fresh recovery blocked by the [EC-INCIDENT] rule 3
     evidence requirements.
-11. The callback-gas probe reproduces the published fulfillment
-    envelope within the recorded tolerance, and its failing and passing
-    runs gate the parameter's raise and lower paths per [LTA-GGP]
-    [EP-VRF-CONFIG].
+11. The callback-gas sizing fixture reproduces the published fulfillment
+    envelope within the recorded tolerance. ABI/source goldens prove it does
+    not authorize a mutation and no lower/probe surface exists
+    ([LTA-GGP], [EP-VRF-CONFIG], ADR 0017).
 12. The adapter's subscription-ID typing matches the bound upstream
     coordinator version — `uint256` for the recommended v2.5 reference
     shape — and integration tests request and receive against that

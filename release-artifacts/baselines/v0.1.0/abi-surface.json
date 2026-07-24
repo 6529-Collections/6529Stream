@@ -30762,6 +30762,4708 @@
         "receives": []
       }
     },
+    "IStreamGasParameterHost": {
+      "source": "smart-contracts/IStreamGasParameterHost.sol",
+      "artifact_path": "out-release/IStreamGasParameterHost.sol/IStreamGasParameterHost.json",
+      "abi_sha256": "sha256:f0d81e1d437ffb5cd8547b7c1056cd7ae94f1380eb1b911594ee6d8c754980e6",
+      "abi_entries": 23,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 5,
+        "events": 2,
+        "errors": 16,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "gasParameter(bytes32)",
+            "kind": "function",
+            "name": "gasParameter",
+            "signature": "gasParameter(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "gasParameterIds()",
+            "kind": "function",
+            "name": "gasParameterIds",
+            "signature": "gasParameterIds()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "gasParameterInfo(bytes32)",
+            "kind": "function",
+            "name": "gasParameterInfo",
+            "signature": "gasParameterInfo(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "floor",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "failureClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "governanceAuthority()",
+            "kind": "function",
+            "name": "governanceAuthority",
+            "signature": "governanceAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "raiseGasParameter(bytes32,uint256)",
+            "kind": "function",
+            "name": "raiseGasParameter",
+            "signature": "raiseGasParameter(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+            "kind": "event",
+            "name": "GasParameterRegistered",
+            "signature": "GasParameterRegistered(uint16,bytes32,string,uint256,uint256,uint8)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              },
+              {
+                "name": "genesisValue",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "floor",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "failureClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+            "kind": "event",
+            "name": "GasParameterUpdated",
+            "signature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "host",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "oldValue",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "floor",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "GasParameterActionAlreadyApplied(bytes32,bytes32)",
+            "kind": "error",
+            "name": "GasParameterActionAlreadyApplied",
+            "signature": "GasParameterActionAlreadyApplied(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterActionClassMismatch(uint8,uint8)",
+            "kind": "error",
+            "name": "GasParameterActionClassMismatch",
+            "signature": "GasParameterActionClassMismatch(uint8,uint8)",
+            "inputs": [
+              {
+                "name": "expectedClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterActionContextInvalid()",
+            "kind": "error",
+            "name": "GasParameterActionContextInvalid",
+            "signature": "GasParameterActionContextInvalid()",
+            "inputs": []
+          },
+          {
+            "key": "GasParameterActionIdZero()",
+            "kind": "error",
+            "name": "GasParameterActionIdZero",
+            "signature": "GasParameterActionIdZero()",
+            "inputs": []
+          },
+          {
+            "key": "GasParameterActionNotExecuting()",
+            "kind": "error",
+            "name": "GasParameterActionNotExecuting",
+            "signature": "GasParameterActionNotExecuting()",
+            "inputs": []
+          },
+          {
+            "key": "GasParameterAlreadyRegistered(bytes32)",
+            "kind": "error",
+            "name": "GasParameterAlreadyRegistered",
+            "signature": "GasParameterAlreadyRegistered(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterInvalidAuthority(address)",
+            "kind": "error",
+            "name": "GasParameterInvalidAuthority",
+            "signature": "GasParameterInvalidAuthority(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterInvalidConfig(bytes32)",
+            "kind": "error",
+            "name": "GasParameterInvalidConfig",
+            "signature": "GasParameterInvalidConfig(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterNewStateHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "GasParameterNewStateHashMismatch",
+            "signature": "GasParameterNewStateHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterNotARaise(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "GasParameterNotARaise",
+            "signature": "GasParameterNotARaise(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "currentValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterNotAuthority(address)",
+            "kind": "error",
+            "name": "GasParameterNotAuthority",
+            "signature": "GasParameterNotAuthority(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterOldStateHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "GasParameterOldStateHashMismatch",
+            "signature": "GasParameterOldStateHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterRaiseBoundExceeded(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "GasParameterRaiseBoundExceeded",
+            "signature": "GasParameterRaiseBoundExceeded(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "currentValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterRevisionOverflow(bytes32)",
+            "kind": "error",
+            "name": "GasParameterRevisionOverflow",
+            "signature": "GasParameterRevisionOverflow(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterScopeHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "GasParameterScopeHashMismatch",
+            "signature": "GasParameterScopeHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GasParameterUnknown(bytes32)",
+            "kind": "error",
+            "name": "GasParameterUnknown",
+            "signature": "GasParameterUnknown(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamGovernanceExecutor": {
+      "source": "smart-contracts/IStreamGovernanceExecutor.sol",
+      "artifact_path": "out-release/IStreamGovernanceExecutor.sol/IStreamGovernanceExecutor.json",
+      "abi_sha256": "sha256:45d4e15112d46ca5ef35df433fb96ce00af8bf9e4b4c088878398e0ae3d6637b",
+      "abi_entries": 162,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 51,
+        "events": 17,
+        "errors": 94,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "approvedNativeReceiverConfig(address)",
+            "kind": "function",
+            "name": "approvedNativeReceiverConfig",
+            "signature": "approvedNativeReceiverConfig(address)",
+            "inputs": [
+              {
+                "name": "receiver",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "stateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[]))",
+            "kind": "function",
+            "name": "bindSystemManifestBootstrap",
+            "signature": "bindSystemManifestBootstrap((address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[]))",
+            "inputs": [
+              {
+                "name": "binding",
+                "type": "(address,address,bytes32,address[],address,address,bytes32,bytes32,uint64,(address,bytes4,bytes32,uint8)[],bytes32[],address[])",
+                "internal_type": "struct SystemManifestBootstrapBinding",
+                "components": [
+                  {
+                    "name": "roleRegistry",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "governanceRoot",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "governanceRootCodeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "initialTerminalFreezeVetoGuardians",
+                    "type": "address[]",
+                    "internal_type": "address[]"
+                  },
+                  {
+                    "name": "core",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "systemManifestSatellite",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "expectedManifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInventoryStateRoot",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "expectedInventoryLeafCount",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "expectedTriggers",
+                    "type": "(address,bytes4,bytes32,uint8)[]",
+                    "internal_type": "struct SystemManifestBootstrapTriggerExpectation[]",
+                    "components": [
+                      {
+                        "name": "triggerTarget",
+                        "type": "address",
+                        "internal_type": "address"
+                      },
+                      {
+                        "name": "triggerSelector",
+                        "type": "bytes4",
+                        "internal_type": "bytes4"
+                      },
+                      {
+                        "name": "triggerCodeHash",
+                        "type": "bytes32",
+                        "internal_type": "bytes32"
+                      },
+                      {
+                        "name": "allowedActionClassMask",
+                        "type": "uint8",
+                        "internal_type": "uint8"
+                      }
+                    ]
+                  },
+                  {
+                    "name": "pointerTypes",
+                    "type": "bytes32[]",
+                    "internal_type": "bytes32[]"
+                  },
+                  {
+                    "name": "registries",
+                    "type": "address[]",
+                    "internal_type": "address[]"
+                  }
+                ]
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "cancelGovernanceAction(bytes32,bytes32)",
+            "kind": "function",
+            "name": "cancelGovernanceAction",
+            "signature": "cancelGovernanceAction(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "cancellerConfig(address)",
+            "kind": "function",
+            "name": "cancellerConfig",
+            "signature": "cancellerConfig(address)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "stateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "currentAction()",
+            "kind": "function",
+            "name": "currentAction",
+            "signature": "currentAction()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "executing",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "oldValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "newValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "executeGovernanceAction(bytes32,bytes)",
+            "kind": "function",
+            "name": "executeGovernanceAction",
+            "signature": "executeGovernanceAction(bytes32,bytes)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "callData",
+                "type": "bytes",
+                "internal_type": "bytes"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "payable"
+          },
+          {
+            "key": "executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])",
+            "kind": "function",
+            "name": "executeGovernanceBatch",
+            "signature": "executeGovernanceBatch(bytes32,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes[])",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "calls",
+                "type": "(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct GovernanceCall[]",
+                "components": [
+                  {
+                    "name": "target",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "value",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "selector",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "callDataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "scopeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "oldValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "newValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "callDatas",
+                "type": "bytes[]",
+                "internal_type": "bytes[]"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "payable"
+          },
+          {
+            "key": "freezeSelectorConfig(address,bytes4)",
+            "kind": "function",
+            "name": "freezeSelectorConfig",
+            "signature": "freezeSelectorConfig(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "freeze",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "targetCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "stateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "governanceAction(bytes32)",
+            "kind": "function",
+            "name": "governanceAction",
+            "signature": "governanceAction(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "(uint8,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,address,address,address,address,bytes32,string,bytes32)",
+                "internal_type": "struct GovernanceAction",
+                "components": [
+                  {
+                    "name": "status",
+                    "type": "uint8",
+                    "internal_type": "enum GovernanceActionStatus"
+                  },
+                  {
+                    "name": "actionClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "target",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "value",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "selector",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "callHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "scopeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "oldValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "newValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "notBefore",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "expiresAfter",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "proposer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "executor",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "canceller",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "vetoer",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "reasonHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "reasonURI",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "governanceNonce()",
+            "kind": "function",
+            "name": "governanceNonce",
+            "signature": "governanceNonce()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "governanceRootState()",
+            "kind": "function",
+            "name": "governanceRootState",
+            "signature": "governanceRootState()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "governanceRoot",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "codeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isApprovedNativeReceiver(address)",
+            "kind": "function",
+            "name": "isApprovedNativeReceiver",
+            "signature": "isApprovedNativeReceiver(address)",
+            "inputs": [
+              {
+                "name": "receiver",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isCanceller(address)",
+            "kind": "function",
+            "name": "isCanceller",
+            "signature": "isCanceller(address)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isFreezeSelector(address,bytes4)",
+            "kind": "function",
+            "name": "isFreezeSelector",
+            "signature": "isFreezeSelector(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isProposer(address)",
+            "kind": "function",
+            "name": "isProposer",
+            "signature": "isProposer(address)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isTighteningCall(address,bytes4)",
+            "kind": "function",
+            "name": "isTighteningCall",
+            "signature": "isTighteningCall(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "liveTerminalFreezeActionAt(bytes32,uint256)",
+            "kind": "function",
+            "name": "liveTerminalFreezeActionAt",
+            "signature": "liveTerminalFreezeActionAt(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "vetoDeadline",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "liveTerminalFreezeActionCount(bytes32)",
+            "kind": "function",
+            "name": "liveTerminalFreezeActionCount",
+            "signature": "liveTerminalFreezeActionCount(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "materializeExpiredAction(bytes32)",
+            "kind": "function",
+            "name": "materializeExpiredAction",
+            "signature": "materializeExpiredAction(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "minimumDelay(uint8)",
+            "kind": "function",
+            "name": "minimumDelay",
+            "signature": "minimumDelay(uint8)",
+            "inputs": [
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "pendingScheduledActionCount()",
+            "kind": "function",
+            "name": "pendingScheduledActionCount",
+            "signature": "pendingScheduledActionCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "proposerConfig(address)",
+            "kind": "function",
+            "name": "proposerConfig",
+            "signature": "proposerConfig(address)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "stateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "pruneElapsedTerminalFreezeActions(bytes32)",
+            "kind": "function",
+            "name": "pruneElapsedTerminalFreezeActions",
+            "signature": "pruneElapsedTerminalFreezeActions(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "prunedCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "publishGovernanceCallData(bytes[])",
+            "kind": "function",
+            "name": "publishGovernanceCallData",
+            "signature": "publishGovernanceCallData(bytes[])",
+            "inputs": [
+              {
+                "name": "callDatas",
+                "type": "bytes[]",
+                "internal_type": "bytes[]"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "publishedCallData(bytes32)",
+            "kind": "function",
+            "name": "publishedCallData",
+            "signature": "publishedCallData(bytes32)",
+            "inputs": [
+              {
+                "name": "callDataKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "registerCanceller(address,bool)",
+            "kind": "function",
+            "name": "registerCanceller",
+            "signature": "registerCanceller(address,bool)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "registerFreezeSelector(address,bytes4,bool)",
+            "kind": "function",
+            "name": "registerFreezeSelector",
+            "signature": "registerFreezeSelector(address,bytes4,bool)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "freeze",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "registerProposer(address,bool)",
+            "kind": "function",
+            "name": "registerProposer",
+            "signature": "registerProposer(address,bool)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "registerSystemManifestTailTrigger(address,bytes4,uint8)",
+            "kind": "function",
+            "name": "registerSystemManifestTailTrigger",
+            "signature": "registerSystemManifestTailTrigger(address,bytes4,uint8)",
+            "inputs": [
+              {
+                "name": "triggerTarget",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "triggerSelector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "allowedActionClassMask",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "rotateGovernanceRoot(address,bytes32)",
+            "kind": "function",
+            "name": "rotateGovernanceRoot",
+            "signature": "rotateGovernanceRoot(address,bytes32)",
+            "inputs": [
+              {
+                "name": "newRoot",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expectedCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "scheduleGovernanceAction((uint8,address,uint256,bytes4,bytes,bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32))",
+            "kind": "function",
+            "name": "scheduleGovernanceAction",
+            "signature": "scheduleGovernanceAction((uint8,address,uint256,bytes4,bytes,bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32))",
+            "inputs": [
+              {
+                "name": "request",
+                "type": "(uint8,address,uint256,bytes4,bytes,bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)",
+                "internal_type": "struct GovernanceActionRequest",
+                "components": [
+                  {
+                    "name": "actionClass",
+                    "type": "uint8",
+                    "internal_type": "uint8"
+                  },
+                  {
+                    "name": "target",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "value",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "selector",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "callData",
+                    "type": "bytes",
+                    "internal_type": "bytes"
+                  },
+                  {
+                    "name": "scopeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "oldValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "newValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "notBefore",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "expiresAfter",
+                    "type": "uint64",
+                    "internal_type": "uint64"
+                  },
+                  {
+                    "name": "reasonHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "reasonURI",
+                    "type": "string",
+                    "internal_type": "string"
+                  },
+                  {
+                    "name": "manifestHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              }
+            ],
+            "outputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)",
+            "kind": "function",
+            "name": "scheduleGovernanceBatch",
+            "signature": "scheduleGovernanceBatch(uint8,(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[],bytes32,bytes32,bytes32,uint64,uint64,bytes32,string,bytes32)",
+            "inputs": [
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "calls",
+                "type": "(address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32)[]",
+                "internal_type": "struct GovernanceCall[]",
+                "components": [
+                  {
+                    "name": "target",
+                    "type": "address",
+                    "internal_type": "address"
+                  },
+                  {
+                    "name": "value",
+                    "type": "uint256",
+                    "internal_type": "uint256"
+                  },
+                  {
+                    "name": "selector",
+                    "type": "bytes4",
+                    "internal_type": "bytes4"
+                  },
+                  {
+                    "name": "callDataHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "scopeHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "oldValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  },
+                  {
+                    "name": "newValueHash",
+                    "type": "bytes32",
+                    "internal_type": "bytes32"
+                  }
+                ]
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "oldValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "newValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "reasonURI",
+                "type": "string",
+                "internal_type": "string"
+              },
+              {
+                "name": "manifestHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "scheduledCallData(bytes32)",
+            "kind": "function",
+            "name": "scheduledCallData",
+            "signature": "scheduledCallData(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes[]",
+                "internal_type": "bytes[]"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "scheduledCallDataPointer(bytes32)",
+            "kind": "function",
+            "name": "scheduledCallDataPointer",
+            "signature": "scheduledCallDataPointer(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "sealSystemManifestBootstrap()",
+            "kind": "function",
+            "name": "sealSystemManifestBootstrap",
+            "signature": "sealSystemManifestBootstrap()",
+            "inputs": [],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setApprovedNativeReceiver(address,bool)",
+            "kind": "function",
+            "name": "setApprovedNativeReceiver",
+            "signature": "setApprovedNativeReceiver(address,bool)",
+            "inputs": [
+              {
+                "name": "receiver",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "setTighteningCall(address,bytes4,bool)",
+            "kind": "function",
+            "name": "setTighteningCall",
+            "signature": "setTighteningCall(address,bytes4,bool)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "tightening",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "systemManifestBatchTailRule(address,bytes4)",
+            "kind": "function",
+            "name": "systemManifestBatchTailRule",
+            "signature": "systemManifestBatchTailRule(address,bytes4)",
+            "inputs": [
+              {
+                "name": "triggerTarget",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "triggerSelector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "registered",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "triggerCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "allowedActionClassMask",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "tailTarget",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "tailSelector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "tailCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "systemManifestBootstrapState()",
+            "kind": "function",
+            "name": "systemManifestBootstrapState",
+            "signature": "systemManifestBootstrapState()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "bound",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "isSealed",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "roleRegistry",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "roleRegistryCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "governanceRoot",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "governanceRootCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "governanceRootRevision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "initialGuardianSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "initialGuardianCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "terminalFreezeVetoMutationChain",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "terminalFreezeVetoMutationRevision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "coreCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "systemManifestSatellite",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "systemManifestSatelliteCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "triggerSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "triggerCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedTriggerSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedTriggerCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "expectedManifestHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedInventoryStateRoot",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedInventoryLeafCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "inventoryStateRoot",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "inventoryLeafCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "genesisBootstrapAuthority",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "sealedPayloadPointer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "systemManifestTailTriggerAt(uint256)",
+            "kind": "function",
+            "name": "systemManifestTailTriggerAt",
+            "signature": "systemManifestTailTriggerAt(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "triggerTarget",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "triggerSelector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "triggerCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "allowedActionClassMask",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "systemManifestTailTriggerChainHash()",
+            "kind": "function",
+            "name": "systemManifestTailTriggerChainHash",
+            "signature": "systemManifestTailTriggerChainHash()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "chainHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "recordCount",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "systemManifestTailTriggerCount()",
+            "kind": "function",
+            "name": "systemManifestTailTriggerCount",
+            "signature": "systemManifestTailTriggerCount()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "terminalFreezeActionPage(bytes32,uint256,uint256)",
+            "kind": "function",
+            "name": "terminalFreezeActionPage",
+            "signature": "terminalFreezeActionPage(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "cursor",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "limit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "actionIds",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              },
+              {
+                "name": "vetoDeadlines",
+                "type": "uint64[]",
+                "internal_type": "uint64[]"
+              },
+              {
+                "name": "nextCursor",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "terminalFreezeGuardianConfigCommitment(bytes32)",
+            "kind": "function",
+            "name": "terminalFreezeGuardianConfigCommitment",
+            "signature": "terminalFreezeGuardianConfigCommitment(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "commitment",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "terminalFreezeLiveActionCaps()",
+            "kind": "function",
+            "name": "terminalFreezeLiveActionCaps",
+            "signature": "terminalFreezeLiveActionCaps()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "totalCap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "nonRootCap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "perNonRootProposerCap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "terminalFreezeLiveActionUsage(bytes32,address)",
+            "kind": "function",
+            "name": "terminalFreezeLiveActionUsage",
+            "signature": "terminalFreezeLiveActionUsage(bytes32,address)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "proposer",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "totalMemberships",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "nonRootMemberships",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "proposerMemberships",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "terminalFreezeVetoGuardian(bytes32)",
+            "kind": "function",
+            "name": "terminalFreezeVetoGuardian",
+            "signature": "terminalFreezeVetoGuardian(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "guardian",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "vetoDeadline",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "terminalFreezeVetoGuardianSet(bytes32)",
+            "kind": "function",
+            "name": "terminalFreezeVetoGuardianSet",
+            "signature": "terminalFreezeVetoGuardianSet(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "roleRegistryAddress",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "scopedRole",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "scopedHolderCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "globalRole",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "globalHolderCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "vetoDeadline",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "terminalFreezeVetoRole(bytes32)",
+            "kind": "function",
+            "name": "terminalFreezeVetoRole",
+            "signature": "terminalFreezeVetoRole(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "pure"
+          },
+          {
+            "key": "tighteningCallConfig(address,bytes4)",
+            "kind": "function",
+            "name": "tighteningCallConfig",
+            "signature": "tighteningCallConfig(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "tightening",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "targetCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "stateHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "vetoTerminalFreeze(bytes32,bytes32)",
+            "kind": "function",
+            "name": "vetoTerminalFreeze",
+            "signature": "vetoTerminalFreeze(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          }
+        ],
+        "events": [
+          {
+            "key": "ApprovedNativeReceiverUpdated(uint16,address,bool,uint64,bytes32)",
+            "kind": "event",
+            "name": "ApprovedNativeReceiverUpdated",
+            "signature": "ApprovedNativeReceiverUpdated(uint16,address,bool,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "receiver",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "approved",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "FreezeSelectorUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)",
+            "kind": "event",
+            "name": "FreezeSelectorUpdated",
+            "signature": "FreezeSelectorUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": true
+              },
+              {
+                "name": "freeze",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "targetCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionCancelled(uint16,bytes32,uint8,address,bytes4,bytes32,bytes32,address,bytes32,string)",
+            "kind": "event",
+            "name": "GovernanceActionCancelled",
+            "signature": "GovernanceActionCancelled(uint16,bytes32,uint8,address,bytes4,bytes32,bytes32,address,bytes32,string)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": false
+              },
+              {
+                "name": "callHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "canceller",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "reasonURI",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionExecuted(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,address,bytes32)",
+            "kind": "event",
+            "name": "GovernanceActionExecuted",
+            "signature": "GovernanceActionExecuted(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,address,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": false
+              },
+              {
+                "name": "callHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "oldValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "newValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "executor",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "manifestHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionExpired(uint16,bytes32,uint8,address)",
+            "kind": "event",
+            "name": "GovernanceActionExpired",
+            "signature": "GovernanceActionExpired(uint16,bytes32,uint8,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "materializer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionScheduled(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint256,address,bytes32,string,bytes32)",
+            "kind": "event",
+            "name": "GovernanceActionScheduled",
+            "signature": "GovernanceActionScheduled(uint16,bytes32,uint8,address,uint256,bytes4,bytes32,bytes32,bytes32,bytes32,uint64,uint64,uint256,address,bytes32,string,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": false
+              },
+              {
+                "name": "callHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "oldValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "newValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "proposer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "reasonURI",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              },
+              {
+                "name": "manifestHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionVetoed(uint16,bytes32,uint8,address,bytes32,bytes32)",
+            "kind": "event",
+            "name": "GovernanceActionVetoed",
+            "signature": "GovernanceActionVetoed(uint16,bytes32,uint8,address,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": true
+              },
+              {
+                "name": "vetoer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "reasonHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceCallDataPublished(uint16,bytes32,address,address)",
+            "kind": "event",
+            "name": "GovernanceCallDataPublished",
+            "signature": "GovernanceCallDataPublished(uint16,bytes32,address,address)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "callDataKey",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "pointer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "publisher",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "GovernanceCancellerUpdated(uint16,address,bool,uint64,bytes32)",
+            "kind": "event",
+            "name": "GovernanceCancellerUpdated",
+            "signature": "GovernanceCancellerUpdated(uint16,address,bool,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "GovernanceProposerUpdated(uint16,address,bool,uint64,bytes32)",
+            "kind": "event",
+            "name": "GovernanceProposerUpdated",
+            "signature": "GovernanceProposerUpdated(uint16,address,bool,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "GovernanceRootRotated(uint16,address,address,bytes32,uint64,bytes32)",
+            "kind": "event",
+            "name": "GovernanceRootRotated",
+            "signature": "GovernanceRootRotated(uint16,address,address,bytes32,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "oldRoot",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newRoot",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "newRootCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "SystemManifestBootstrapBound(uint16,address,address,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,address,address,bytes32,address,bytes32,bytes32,uint256,bytes32,uint64)",
+            "kind": "event",
+            "name": "SystemManifestBootstrapBound",
+            "signature": "SystemManifestBootstrapBound(uint16,address,address,bytes32,bytes32,bytes32,bytes32,bytes32,uint256,address,address,bytes32,address,bytes32,bytes32,uint256,bytes32,uint64)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "core",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "systemManifestSatellite",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "coreCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "systemManifestSatelliteCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "expectedManifestHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "expectedInventoryStateRoot",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "expectedTriggerSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "triggerCount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "genesisBootstrapAuthority",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "roleRegistry",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "roleRegistryCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "governanceRoot",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "governanceRootCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "initialGuardianSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "initialGuardianCount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "terminalFreezeVetoMutationChain",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "terminalFreezeVetoMutationRevision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "SystemManifestBootstrapSealed(uint16,bytes32,uint256,address,bytes32,bytes32)",
+            "kind": "event",
+            "name": "SystemManifestBootstrapSealed",
+            "signature": "SystemManifestBootstrapSealed(uint16,bytes32,uint256,address,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "triggerSetHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "triggerCount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "payloadPointer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "manifestHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "SystemManifestTailTriggerRegistered(uint16,address,bytes4,bytes32,uint8,address,bytes4,bytes32)",
+            "kind": "event",
+            "name": "SystemManifestTailTriggerRegistered",
+            "signature": "SystemManifestTailTriggerRegistered(uint16,address,bytes4,bytes32,uint8,address,bytes4,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "triggerTarget",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "triggerSelector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": true
+              },
+              {
+                "name": "triggerCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "allowedActionClassMask",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "tailTarget",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": false
+              },
+              {
+                "name": "tailSelector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeActionMembershipUpdated(uint16,bytes32,bytes32,address,bool,uint8,bool,uint64,uint256,uint256)",
+            "kind": "event",
+            "name": "TerminalFreezeActionMembershipUpdated",
+            "signature": "TerminalFreezeActionMembershipUpdated(uint16,bytes32,bytes32,address,bool,uint8,bool,uint64,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "proposer",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "present",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "mutationCause",
+                "type": "uint8",
+                "internal_type": "uint8",
+                "indexed": false
+              },
+              {
+                "name": "usesRootCapacity",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "vetoDeadline",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "rawIndex",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "remainingCount",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeGuardianConfigCommitted(uint16,bytes32,bytes32)",
+            "kind": "event",
+            "name": "TerminalFreezeGuardianConfigCommitted",
+            "signature": "TerminalFreezeGuardianConfigCommitted(uint16,bytes32,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "commitment",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          },
+          {
+            "key": "TighteningCallUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)",
+            "kind": "event",
+            "name": "TighteningCallUpdated",
+            "signature": "TighteningCallUpdated(uint16,address,bytes4,bool,bytes32,uint64,bytes32)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4",
+                "indexed": true
+              },
+              {
+                "name": "tightening",
+                "type": "bool",
+                "internal_type": "bool",
+                "indexed": false
+              },
+              {
+                "name": "targetCodeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": false
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "ActionIdMismatch(bytes32)",
+            "kind": "error",
+            "name": "ActionIdMismatch",
+            "signature": "ActionIdMismatch(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "BatchNewValueHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "BatchNewValueHashMismatch",
+            "signature": "BatchNewValueHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "supplied",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "BatchOldValueHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "BatchOldValueHashMismatch",
+            "signature": "BatchOldValueHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "supplied",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "BatchScopeHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "BatchScopeHashMismatch",
+            "signature": "BatchScopeHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "supplied",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "BatchValueMismatch(uint256,uint256)",
+            "kind": "error",
+            "name": "BatchValueMismatch",
+            "signature": "BatchValueMismatch(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "supplied",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "BatchValueSurplus(uint256)",
+            "kind": "error",
+            "name": "BatchValueSurplus",
+            "signature": "BatchValueSurplus(uint256)",
+            "inputs": [
+              {
+                "name": "surplus",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "BootstrapActionNotPermitted()",
+            "kind": "error",
+            "name": "BootstrapActionNotPermitted",
+            "signature": "BootstrapActionNotPermitted()",
+            "inputs": []
+          },
+          {
+            "key": "CallDataCountMismatch(uint256,uint256)",
+            "kind": "error",
+            "name": "CallDataCountMismatch",
+            "signature": "CallDataCountMismatch(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "callCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "callDataCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CallDataHashMismatch(uint256)",
+            "kind": "error",
+            "name": "CallDataHashMismatch",
+            "signature": "CallDataHashMismatch(uint256)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CallDataNotPublished(bytes32)",
+            "kind": "error",
+            "name": "CallDataNotPublished",
+            "signature": "CallDataNotPublished(bytes32)",
+            "inputs": [
+              {
+                "name": "callDataKey",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "CallDataTooShort(uint256)",
+            "kind": "error",
+            "name": "CallDataTooShort",
+            "signature": "CallDataTooShort(uint256)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CallSelectorMismatch(uint256)",
+            "kind": "error",
+            "name": "CallSelectorMismatch",
+            "signature": "CallSelectorMismatch(uint256)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "CallsHashMismatch(bytes32)",
+            "kind": "error",
+            "name": "CallsHashMismatch",
+            "signature": "CallsHashMismatch(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "DelayBelowClassMinimum(uint8,uint64,uint64)",
+            "kind": "error",
+            "name": "DelayBelowClassMinimum",
+            "signature": "DelayBelowClassMinimum(uint8,uint64,uint64)",
+            "inputs": [
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "earliest",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "DirectOwnershipMutationDisabled()",
+            "kind": "error",
+            "name": "DirectOwnershipMutationDisabled",
+            "signature": "DirectOwnershipMutationDisabled()",
+            "inputs": []
+          },
+          {
+            "key": "EmptyGovernanceBatch()",
+            "kind": "error",
+            "name": "EmptyGovernanceBatch",
+            "signature": "EmptyGovernanceBatch()",
+            "inputs": []
+          },
+          {
+            "key": "ExecutorConfigActionClassMismatch(address,bytes4,bool,uint8,uint8)",
+            "kind": "error",
+            "name": "ExecutorConfigActionClassMismatch",
+            "signature": "ExecutorConfigActionClassMismatch(address,bytes4,bool,uint8,uint8)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "expectedClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "ExecutorControlActionClassMismatch(address,bytes4,uint8,uint8)",
+            "kind": "error",
+            "name": "ExecutorControlActionClassMismatch",
+            "signature": "ExecutorControlActionClassMismatch(address,bytes4,uint8,uint8)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "expectedClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "FreezeSelectorSelfTargetForbidden(bytes4)",
+            "kind": "error",
+            "name": "FreezeSelectorSelfTargetForbidden",
+            "signature": "FreezeSelectorSelfTargetForbidden(bytes4)",
+            "inputs": [
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "GenesisBootstrapActorRequired(address)",
+            "kind": "error",
+            "name": "GenesisBootstrapActorRequired",
+            "signature": "GenesisBootstrapActorRequired(address)",
+            "inputs": [
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionExpiredWindow(bytes32,uint64)",
+            "kind": "error",
+            "name": "GovernanceActionExpiredWindow",
+            "signature": "GovernanceActionExpiredWindow(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionNotExecutable(bytes32,uint64)",
+            "kind": "error",
+            "name": "GovernanceActionNotExecutable",
+            "signature": "GovernanceActionNotExecutable(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionNotExpired(bytes32,uint64)",
+            "kind": "error",
+            "name": "GovernanceActionNotExpired",
+            "signature": "GovernanceActionNotExpired(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionNotScheduled(bytes32)",
+            "kind": "error",
+            "name": "GovernanceActionNotScheduled",
+            "signature": "GovernanceActionNotScheduled(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActionUnknown(bytes32)",
+            "kind": "error",
+            "name": "GovernanceActionUnknown",
+            "signature": "GovernanceActionUnknown(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceActorNotAuthorized(address)",
+            "kind": "error",
+            "name": "GovernanceActorNotAuthorized",
+            "signature": "GovernanceActorNotAuthorized(address)",
+            "inputs": [
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceCallFailed(bytes32,uint256)",
+            "kind": "error",
+            "name": "GovernanceCallFailed",
+            "signature": "GovernanceCallFailed(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceCallReturndataTooLarge(bytes32,uint256,uint256,uint256)",
+            "kind": "error",
+            "name": "GovernanceCallReturndataTooLarge",
+            "signature": "GovernanceCallReturndataTooLarge(bytes32,uint256,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "returnDataBytes",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxReturnDataBytes",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceConfigNoOp(bytes32,address,bool)",
+            "kind": "error",
+            "name": "GovernanceConfigNoOp",
+            "signature": "GovernanceConfigNoOp(bytes32,address,bool)",
+            "inputs": [
+              {
+                "name": "configKind",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "key",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceIdentityRoleOverlap(address,bytes32)",
+            "kind": "error",
+            "name": "GovernanceIdentityRoleOverlap",
+            "signature": "GovernanceIdentityRoleOverlap(address,bytes32)",
+            "inputs": [
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "role",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernancePolicyCodeHashMismatch(address,bytes4,bytes32,bytes32)",
+            "kind": "error",
+            "name": "GovernancePolicyCodeHashMismatch",
+            "signature": "GovernancePolicyCodeHashMismatch(address,bytes4,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceProposerAuthorizationDrift(bytes32,address,uint64,uint64,bool)",
+            "kind": "error",
+            "name": "GovernanceProposerAuthorizationDrift",
+            "signature": "GovernanceProposerAuthorizationDrift(bytes32,address,uint64,uint64,bool)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "proposer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "expected",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "actual",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceRevisionOverflow(bytes32,address)",
+            "kind": "error",
+            "name": "GovernanceRevisionOverflow",
+            "signature": "GovernanceRevisionOverflow(bytes32,address)",
+            "inputs": [
+              {
+                "name": "configKind",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "key",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceRootCodeHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "GovernanceRootCodeHashMismatch",
+            "signature": "GovernanceRootCodeHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceRootNoOp(address)",
+            "kind": "error",
+            "name": "GovernanceRootNoOp",
+            "signature": "GovernanceRootNoOp(address)",
+            "inputs": [
+              {
+                "name": "governanceRoot",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceRootProposerRequired(address,address,address,bytes4)",
+            "kind": "error",
+            "name": "GovernanceRootProposerRequired",
+            "signature": "GovernanceRootProposerRequired(address,address,address,bytes4)",
+            "inputs": [
+              {
+                "name": "proposer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "governanceRoot",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceRootRevisionMismatch(bytes32,uint64,uint64)",
+            "kind": "error",
+            "name": "GovernanceRootRevisionMismatch",
+            "signature": "GovernanceRootRevisionMismatch(bytes32,uint64,uint64)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expected",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "actual",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceSchedulingDuringExecution()",
+            "kind": "error",
+            "name": "GovernanceSchedulingDuringExecution",
+            "signature": "GovernanceSchedulingDuringExecution()",
+            "inputs": []
+          },
+          {
+            "key": "GovernanceSelfCallContextRequired()",
+            "kind": "error",
+            "name": "GovernanceSelfCallContextRequired",
+            "signature": "GovernanceSelfCallContextRequired()",
+            "inputs": []
+          },
+          {
+            "key": "GovernanceTimestampOverflow(uint256)",
+            "kind": "error",
+            "name": "GovernanceTimestampOverflow",
+            "signature": "GovernanceTimestampOverflow(uint256)",
+            "inputs": [
+              {
+                "name": "timestamp",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "GovernanceTransitionContextMismatch()",
+            "kind": "error",
+            "name": "GovernanceTransitionContextMismatch",
+            "signature": "GovernanceTransitionContextMismatch()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidActionWindow(uint64,uint64)",
+            "kind": "error",
+            "name": "InvalidActionWindow",
+            "signature": "InvalidActionWindow(uint64,uint64)",
+            "inputs": [
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "InvalidExecutorConfigCall(address,bytes4)",
+            "kind": "error",
+            "name": "InvalidExecutorConfigCall",
+            "signature": "InvalidExecutorConfigCall(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "InvalidGenesisBootstrapAuthority(address)",
+            "kind": "error",
+            "name": "InvalidGenesisBootstrapAuthority",
+            "signature": "InvalidGenesisBootstrapAuthority(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidGovernanceRoot(address)",
+            "kind": "error",
+            "name": "InvalidGovernanceRoot",
+            "signature": "InvalidGovernanceRoot(address)",
+            "inputs": [
+              {
+                "name": "governanceRoot",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidManifestTail()",
+            "kind": "error",
+            "name": "InvalidManifestTail",
+            "signature": "InvalidManifestTail()",
+            "inputs": []
+          },
+          {
+            "key": "InvalidManifestTailTrigger(address,bytes4)",
+            "kind": "error",
+            "name": "InvalidManifestTailTrigger",
+            "signature": "InvalidManifestTailTrigger(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "InvalidModuleRegistryStatusCall(address)",
+            "kind": "error",
+            "name": "InvalidModuleRegistryStatusCall",
+            "signature": "InvalidModuleRegistryStatusCall(address)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidRoleManagerConfigCall(address)",
+            "kind": "error",
+            "name": "InvalidRoleManagerConfigCall",
+            "signature": "InvalidRoleManagerConfigCall(address)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidRoleRegistry(address)",
+            "kind": "error",
+            "name": "InvalidRoleRegistry",
+            "signature": "InvalidRoleRegistry(address)",
+            "inputs": [
+              {
+                "name": "registry",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "InvalidSystemManifestBootstrap()",
+            "kind": "error",
+            "name": "InvalidSystemManifestBootstrap",
+            "signature": "InvalidSystemManifestBootstrap()",
+            "inputs": []
+          },
+          {
+            "key": "LiveTerminalFreezeIndexOutOfBounds(bytes32,uint256)",
+            "kind": "error",
+            "name": "LiveTerminalFreezeIndexOutOfBounds",
+            "signature": "LiveTerminalFreezeIndexOutOfBounds(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ManifestTailActionClassNotAllowed(address,bytes4,uint8)",
+            "kind": "error",
+            "name": "ManifestTailActionClassNotAllowed",
+            "signature": "ManifestTailActionClassNotAllowed(address,bytes4,uint8)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "ManifestTailCodeHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "ManifestTailCodeHashMismatch",
+            "signature": "ManifestTailCodeHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "ManifestTailRequired()",
+            "kind": "error",
+            "name": "ManifestTailRequired",
+            "signature": "ManifestTailRequired()",
+            "inputs": []
+          },
+          {
+            "key": "ManifestTailTriggerAlreadyRegistered(address,bytes4)",
+            "kind": "error",
+            "name": "ManifestTailTriggerAlreadyRegistered",
+            "signature": "ManifestTailTriggerAlreadyRegistered(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "ManifestTailTriggerIndexOutOfBounds(uint256)",
+            "kind": "error",
+            "name": "ManifestTailTriggerIndexOutOfBounds",
+            "signature": "ManifestTailTriggerIndexOutOfBounds(uint256)",
+            "inputs": [
+              {
+                "name": "index",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ManifestTailTriggerRegistrationNotIsolated()",
+            "kind": "error",
+            "name": "ManifestTailTriggerRegistrationNotIsolated",
+            "signature": "ManifestTailTriggerRegistrationNotIsolated()",
+            "inputs": []
+          },
+          {
+            "key": "ModuleRegistryStatusActionClassMismatch(address,address,uint8,uint8,uint8,uint8)",
+            "kind": "error",
+            "name": "ModuleRegistryStatusActionClassMismatch",
+            "signature": "ModuleRegistryStatusActionClassMismatch(address,address,uint8,uint8,uint8,uint8)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "module",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "currentStatus",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "requestedStatus",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "expectedClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "NativeReceiverNotApproved(address)",
+            "kind": "error",
+            "name": "NativeReceiverNotApproved",
+            "signature": "NativeReceiverNotApproved(address)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "NoTerminalFreezeVetoGuardianConfigured(bytes32)",
+            "kind": "error",
+            "name": "NoTerminalFreezeVetoGuardianConfigured",
+            "signature": "NoTerminalFreezeVetoGuardianConfigured(bytes32)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "NonCanonicalCallDataPublication()",
+            "kind": "error",
+            "name": "NonCanonicalCallDataPublication",
+            "signature": "NonCanonicalCallDataPublication()",
+            "inputs": []
+          },
+          {
+            "key": "NotClassifiedTightening(address,bytes4)",
+            "kind": "error",
+            "name": "NotClassifiedTightening",
+            "signature": "NotClassifiedTightening(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "NotTerminalFreezeAction(bytes32)",
+            "kind": "error",
+            "name": "NotTerminalFreezeAction",
+            "signature": "NotTerminalFreezeAction(bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "NotTerminalFreezeVetoGuardian(address)",
+            "kind": "error",
+            "name": "NotTerminalFreezeVetoGuardian",
+            "signature": "NotTerminalFreezeVetoGuardian(address)",
+            "inputs": [
+              {
+                "name": "actor",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "OpenWindowBelowFloor(uint64,uint64)",
+            "kind": "error",
+            "name": "OpenWindowBelowFloor",
+            "signature": "OpenWindowBelowFloor(uint64,uint64)",
+            "inputs": [
+              {
+                "name": "notBefore",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "expiresAfter",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "PendingGovernanceActionExists(uint256)",
+            "kind": "error",
+            "name": "PendingGovernanceActionExists",
+            "signature": "PendingGovernanceActionExists(uint256)",
+            "inputs": [
+              {
+                "name": "count",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "RoleManagerConfigActionClassMismatch(address,address,bool,uint8,uint8)",
+            "kind": "error",
+            "name": "RoleManagerConfigActionClassMismatch",
+            "signature": "RoleManagerConfigActionClassMismatch(address,address,bool,uint8,uint8)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "account",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "enabled",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "expectedClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "RoleRegistryCodeHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "RoleRegistryCodeHashMismatch",
+            "signature": "RoleRegistryCodeHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expected",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actual",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "RoleRegistryDelayedActionRequired(uint8)",
+            "kind": "error",
+            "name": "RoleRegistryDelayedActionRequired",
+            "signature": "RoleRegistryDelayedActionRequired(uint8)",
+            "inputs": [
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "ScheduledCallDataMismatch(uint256)",
+            "kind": "error",
+            "name": "ScheduledCallDataMismatch",
+            "signature": "ScheduledCallDataMismatch(uint256)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "SystemManifestBootstrapAlreadyBound()",
+            "kind": "error",
+            "name": "SystemManifestBootstrapAlreadyBound",
+            "signature": "SystemManifestBootstrapAlreadyBound()",
+            "inputs": []
+          },
+          {
+            "key": "SystemManifestBootstrapAlreadySealed()",
+            "kind": "error",
+            "name": "SystemManifestBootstrapAlreadySealed",
+            "signature": "SystemManifestBootstrapAlreadySealed()",
+            "inputs": []
+          },
+          {
+            "key": "SystemManifestBootstrapNotBound()",
+            "kind": "error",
+            "name": "SystemManifestBootstrapNotBound",
+            "signature": "SystemManifestBootstrapNotBound()",
+            "inputs": []
+          },
+          {
+            "key": "SystemManifestBootstrapNotSealed()",
+            "kind": "error",
+            "name": "SystemManifestBootstrapNotSealed",
+            "signature": "SystemManifestBootstrapNotSealed()",
+            "inputs": []
+          },
+          {
+            "key": "TargetHasNoCode(uint256,address)",
+            "kind": "error",
+            "name": "TargetHasNoCode",
+            "signature": "TargetHasNoCode(uint256,address)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeClassRequired(address,bytes4)",
+            "kind": "error",
+            "name": "TerminalFreezeClassRequired",
+            "signature": "TerminalFreezeClassRequired(address,bytes4)",
+            "inputs": [
+              {
+                "name": "target",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeGuardianConfigDrift(bytes32,bytes32,bytes32)",
+            "kind": "error",
+            "name": "TerminalFreezeGuardianConfigDrift",
+            "signature": "TerminalFreezeGuardianConfigDrift(bytes32,bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "expectedCommitment",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualCommitment",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeLiveActionCapExceeded(bytes32,uint256)",
+            "kind": "error",
+            "name": "TerminalFreezeLiveActionCapExceeded",
+            "signature": "TerminalFreezeLiveActionCapExceeded(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeNonRootLiveActionCapExceeded(bytes32,uint256)",
+            "kind": "error",
+            "name": "TerminalFreezeNonRootLiveActionCapExceeded",
+            "signature": "TerminalFreezeNonRootLiveActionCapExceeded(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezePageCursorOutOfBounds(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "TerminalFreezePageCursorOutOfBounds",
+            "signature": "TerminalFreezePageCursorOutOfBounds(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "cursor",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "membershipCount",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezePageLimitExceeded(uint256,uint256)",
+            "kind": "error",
+            "name": "TerminalFreezePageLimitExceeded",
+            "signature": "TerminalFreezePageLimitExceeded(uint256,uint256)",
+            "inputs": [
+              {
+                "name": "limit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "maxLimit",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TerminalFreezeProposerLiveActionCapExceeded(bytes32,address,uint256)",
+            "kind": "error",
+            "name": "TerminalFreezeProposerLiveActionCapExceeded",
+            "signature": "TerminalFreezeProposerLiveActionCapExceeded(bytes32,address,uint256)",
+            "inputs": [
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "proposer",
+                "type": "address",
+                "internal_type": "address"
+              },
+              {
+                "name": "cap",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TighteningCallSelfTargetForbidden(bytes4)",
+            "kind": "error",
+            "name": "TighteningCallSelfTargetForbidden",
+            "signature": "TighteningCallSelfTargetForbidden(bytes4)",
+            "inputs": [
+              {
+                "name": "selector",
+                "type": "bytes4",
+                "internal_type": "bytes4"
+              }
+            ]
+          },
+          {
+            "key": "UnknownActionClass(uint8)",
+            "kind": "error",
+            "name": "UnknownActionClass",
+            "signature": "UnknownActionClass(uint8)",
+            "inputs": [
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "VetoDeadlinePassed(bytes32,uint64)",
+            "kind": "error",
+            "name": "VetoDeadlinePassed",
+            "signature": "VetoDeadlinePassed(bytes32,uint64)",
+            "inputs": [
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "vetoDeadline",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ]
+          },
+          {
+            "key": "ZeroCanceller()",
+            "kind": "error",
+            "name": "ZeroCanceller",
+            "signature": "ZeroCanceller()",
+            "inputs": []
+          },
+          {
+            "key": "ZeroFreezeSelector()",
+            "kind": "error",
+            "name": "ZeroFreezeSelector",
+            "signature": "ZeroFreezeSelector()",
+            "inputs": []
+          },
+          {
+            "key": "ZeroFreezeTarget()",
+            "kind": "error",
+            "name": "ZeroFreezeTarget",
+            "signature": "ZeroFreezeTarget()",
+            "inputs": []
+          },
+          {
+            "key": "ZeroGovernanceTarget(uint256)",
+            "kind": "error",
+            "name": "ZeroGovernanceTarget",
+            "signature": "ZeroGovernanceTarget(uint256)",
+            "inputs": [
+              {
+                "name": "callIndex",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "ZeroNativeReceiver()",
+            "kind": "error",
+            "name": "ZeroNativeReceiver",
+            "signature": "ZeroNativeReceiver()",
+            "inputs": []
+          },
+          {
+            "key": "ZeroProposer()",
+            "kind": "error",
+            "name": "ZeroProposer",
+            "signature": "ZeroProposer()",
+            "inputs": []
+          },
+          {
+            "key": "ZeroTighteningSelector()",
+            "kind": "error",
+            "name": "ZeroTighteningSelector",
+            "signature": "ZeroTighteningSelector()",
+            "inputs": []
+          },
+          {
+            "key": "ZeroTighteningTarget()",
+            "kind": "error",
+            "name": "ZeroTighteningTarget",
+            "signature": "ZeroTighteningTarget()",
+            "inputs": []
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamGovernedParameterAuthority": {
+      "source": "smart-contracts/IStreamGovernedParameterAuthority.sol",
+      "artifact_path": "out-release/IStreamGovernedParameterAuthority.sol/IStreamGovernedParameterAuthority.json",
+      "abi_sha256": "sha256:2781c74c319f8cf9256fc141171c74c00f8280fb1be9b23152387144f99b73ab",
+      "abi_entries": 2,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 2,
+        "events": 0,
+        "errors": 0,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "currentAction()",
+            "kind": "function",
+            "name": "currentAction",
+            "signature": "currentAction()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "executing",
+                "type": "bool",
+                "internal_type": "bool"
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actionClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "scopeHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "oldValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "newValueHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "isStreamGovernedParameterAuthority()",
+            "kind": "function",
+            "name": "isStreamGovernedParameterAuthority",
+            "signature": "isStreamGovernedParameterAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bool",
+                "internal_type": "bool"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [],
+        "errors": [],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
     "IStreamMintGate": {
       "source": "smart-contracts/IStreamMintGate.sol",
       "artifact_path": "out-release/IStreamMintGate.sol/IStreamMintGate.json",
@@ -38867,6 +43569,469 @@
             "name": "ZeroRecipient",
             "signature": "ZeroRecipient()",
             "inputs": []
+          }
+        ],
+        "fallbacks": [],
+        "receives": []
+      }
+    },
+    "IStreamTimeParameterHost": {
+      "source": "smart-contracts/IStreamTimeParameterHost.sol",
+      "artifact_path": "out-release/IStreamTimeParameterHost.sol/IStreamTimeParameterHost.json",
+      "abi_sha256": "sha256:dca1fe88797e3c08be08c7eb99dcc42b5b58a08c23626e75c88b764ca515963c",
+      "abi_entries": 23,
+      "entry_counts": {
+        "constructors": 0,
+        "functions": 5,
+        "events": 2,
+        "errors": 16,
+        "fallbacks": 0,
+        "receives": 0
+      },
+      "entries": {
+        "constructors": [],
+        "functions": [
+          {
+            "key": "governanceAuthority()",
+            "kind": "function",
+            "name": "governanceAuthority",
+            "signature": "governanceAuthority()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "raiseTimeParameter(bytes32,uint256)",
+            "kind": "function",
+            "name": "raiseTimeParameter",
+            "signature": "raiseTimeParameter(bytes32,uint256)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "outputs": [],
+            "state_mutability": "nonpayable"
+          },
+          {
+            "key": "timeParameter(bytes32)",
+            "kind": "function",
+            "name": "timeParameter",
+            "signature": "timeParameter(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "timeParameterIds()",
+            "kind": "function",
+            "name": "timeParameterIds",
+            "signature": "timeParameterIds()",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "",
+                "type": "bytes32[]",
+                "internal_type": "bytes32[]"
+              }
+            ],
+            "state_mutability": "view"
+          },
+          {
+            "key": "timeParameterInfo(bytes32)",
+            "kind": "function",
+            "name": "timeParameterInfo",
+            "signature": "timeParameterInfo(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ],
+            "outputs": [
+              {
+                "name": "value",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "floorBlocks",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "wallClockFloorSeconds",
+                "type": "uint64",
+                "internal_type": "uint64"
+              },
+              {
+                "name": "revision",
+                "type": "uint64",
+                "internal_type": "uint64"
+              }
+            ],
+            "state_mutability": "view"
+          }
+        ],
+        "events": [
+          {
+            "key": "TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+            "kind": "event",
+            "name": "TimeParameterRegistered",
+            "signature": "TimeParameterRegistered(uint16,bytes32,string,uint256,uint256,uint64)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "name",
+                "type": "string",
+                "internal_type": "string",
+                "indexed": false
+              },
+              {
+                "name": "genesisValue",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "floorBlocks",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "wallClockFloorSeconds",
+                "type": "uint64",
+                "internal_type": "uint64",
+                "indexed": false
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+            "kind": "event",
+            "name": "TimeParameterUpdated",
+            "signature": "TimeParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
+            "anonymous": false,
+            "inputs": [
+              {
+                "name": "schemaVersion",
+                "type": "uint16",
+                "internal_type": "uint16",
+                "indexed": false
+              },
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "host",
+                "type": "address",
+                "internal_type": "address",
+                "indexed": true
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32",
+                "indexed": true
+              },
+              {
+                "name": "oldValue",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              },
+              {
+                "name": "floorBlocks",
+                "type": "uint256",
+                "internal_type": "uint256",
+                "indexed": false
+              }
+            ]
+          }
+        ],
+        "errors": [
+          {
+            "key": "TimeParameterActionAlreadyApplied(bytes32,bytes32)",
+            "kind": "error",
+            "name": "TimeParameterActionAlreadyApplied",
+            "signature": "TimeParameterActionAlreadyApplied(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actionId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterActionClassMismatch(uint8,uint8)",
+            "kind": "error",
+            "name": "TimeParameterActionClassMismatch",
+            "signature": "TimeParameterActionClassMismatch(uint8,uint8)",
+            "inputs": [
+              {
+                "name": "expectedClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              },
+              {
+                "name": "actualClass",
+                "type": "uint8",
+                "internal_type": "uint8"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterActionContextInvalid()",
+            "kind": "error",
+            "name": "TimeParameterActionContextInvalid",
+            "signature": "TimeParameterActionContextInvalid()",
+            "inputs": []
+          },
+          {
+            "key": "TimeParameterActionIdZero()",
+            "kind": "error",
+            "name": "TimeParameterActionIdZero",
+            "signature": "TimeParameterActionIdZero()",
+            "inputs": []
+          },
+          {
+            "key": "TimeParameterActionNotExecuting()",
+            "kind": "error",
+            "name": "TimeParameterActionNotExecuting",
+            "signature": "TimeParameterActionNotExecuting()",
+            "inputs": []
+          },
+          {
+            "key": "TimeParameterAlreadyRegistered(bytes32)",
+            "kind": "error",
+            "name": "TimeParameterAlreadyRegistered",
+            "signature": "TimeParameterAlreadyRegistered(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterInvalidAuthority(address)",
+            "kind": "error",
+            "name": "TimeParameterInvalidAuthority",
+            "signature": "TimeParameterInvalidAuthority(address)",
+            "inputs": [
+              {
+                "name": "authority",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterInvalidConfig(bytes32)",
+            "kind": "error",
+            "name": "TimeParameterInvalidConfig",
+            "signature": "TimeParameterInvalidConfig(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterNewStateHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "TimeParameterNewStateHashMismatch",
+            "signature": "TimeParameterNewStateHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterNotARaise(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "TimeParameterNotARaise",
+            "signature": "TimeParameterNotARaise(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "currentValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterNotAuthority(address)",
+            "kind": "error",
+            "name": "TimeParameterNotAuthority",
+            "signature": "TimeParameterNotAuthority(address)",
+            "inputs": [
+              {
+                "name": "caller",
+                "type": "address",
+                "internal_type": "address"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterOldStateHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "TimeParameterOldStateHashMismatch",
+            "signature": "TimeParameterOldStateHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterRaiseBoundExceeded(bytes32,uint256,uint256)",
+            "kind": "error",
+            "name": "TimeParameterRaiseBoundExceeded",
+            "signature": "TimeParameterRaiseBoundExceeded(bytes32,uint256,uint256)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "currentValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              },
+              {
+                "name": "newValue",
+                "type": "uint256",
+                "internal_type": "uint256"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterRevisionOverflow(bytes32)",
+            "kind": "error",
+            "name": "TimeParameterRevisionOverflow",
+            "signature": "TimeParameterRevisionOverflow(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterScopeHashMismatch(bytes32,bytes32)",
+            "kind": "error",
+            "name": "TimeParameterScopeHashMismatch",
+            "signature": "TimeParameterScopeHashMismatch(bytes32,bytes32)",
+            "inputs": [
+              {
+                "name": "expectedHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              },
+              {
+                "name": "actualHash",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
+          },
+          {
+            "key": "TimeParameterUnknown(bytes32)",
+            "kind": "error",
+            "name": "TimeParameterUnknown",
+            "signature": "TimeParameterUnknown(bytes32)",
+            "inputs": [
+              {
+                "name": "parameterId",
+                "type": "bytes32",
+                "internal_type": "bytes32"
+              }
+            ]
           }
         ],
         "fallbacks": [],

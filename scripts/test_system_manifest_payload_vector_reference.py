@@ -62,6 +62,19 @@ class SystemManifestPayloadVectorReferenceTests(unittest.TestCase):
         ):
             self.audit_copy(mutate)
 
+    def test_profile_source_metadata_mutations_are_rejected(self) -> None:
+        for field, replacement, expected_error in (
+            ("profile_schema_version", "6529stream.genesis-deployment-profile.v1", "profile source schema"),
+            ("normative_anchor", "docs/unreviewed.md#DRIFT", "profile source normative anchor"),
+        ):
+            with self.subTest(field=field):
+                candidate = copy.deepcopy(self.vector)
+                candidate["source"][field] = replacement
+                with self.assertRaisesRegex(
+                    reference.ReferenceVectorError, expected_error
+                ):
+                    reference.audit_vector(candidate, self.profile_raw)
+
     def test_complete_state_export_abi_mutations_are_rejected(self) -> None:
         mutations = (
             (
@@ -106,6 +119,58 @@ class SystemManifestPayloadVectorReferenceTests(unittest.TestCase):
                     "complete state-export ABI surface",
                 ):
                     reference.audit_vector(candidate, self.profile_raw)
+
+    def test_complete_governed_parameter_authority_abi_mutations_are_rejected(self) -> None:
+        mutations = (
+            (
+                "marker return",
+                lambda surface: surface["functions"][0]["returns"].clear(),
+            ),
+            (
+                "context returns",
+                lambda surface: surface["functions"][1]["returns"].pop(),
+            ),
+            (
+                "context selector",
+                lambda surface: surface["functions"][1].__setitem__(
+                    "selector", "0x00000000"
+                ),
+            ),
+            (
+                "interface ID",
+                lambda surface: surface.__setitem__("interface_id", "0x00000000"),
+            ),
+            (
+                "surface digest",
+                lambda surface: surface.__setitem__(
+                    "surface_sha256", "sha256:" + "00" * 32
+                ),
+            ),
+        )
+        for label, mutate in mutations:
+            with self.subTest(label=label):
+                candidate = copy.deepcopy(self.vector)
+                mutate(
+                    candidate["fixture_derivation"][
+                        "governed_parameter_authority_surface"
+                    ]
+                )
+                with self.assertRaisesRegex(
+                    reference.ReferenceVectorError,
+                    "complete governed-parameter authority ABI surface",
+                ):
+                    reference.audit_vector(candidate, self.profile_raw)
+
+    def test_governed_parameter_authority_binding_mutation_is_rejected(self) -> None:
+        candidate = copy.deepcopy(self.vector)
+        candidate["fixture_derivation"][
+            "governed_parameter_authority_binding"
+        ] = "UNREVIEWED_LAYER"
+        with self.assertRaisesRegex(
+            reference.ReferenceVectorError,
+            "governed-parameter authority binding",
+        ):
+            reference.audit_vector(candidate, self.profile_raw)
 
     def test_synthetic_governance_interface_id_is_rejected(self) -> None:
         candidate = copy.deepcopy(self.vector)

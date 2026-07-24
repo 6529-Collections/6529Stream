@@ -9,6 +9,8 @@ T6, and T7, by
 [ADR 0013](adr/0013-world-class-pass-round-4.md) decisions U6, U7, and
 U9, and by
 [ADR 0014](adr/0014-world-class-pass-round-5.md) decisions V5 and V6.
+Its Governed Gas Parameter mutation posture is superseded by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md).
 It is a new protocol v1 specification: the sale and auction layer enters
 the genesis inventory at the same EIP-grade depth as the mint, ledger, and
 revenue specifications instead of remaining an integration sketch.
@@ -2990,13 +2992,13 @@ Requirements [SSA-GAS]:
    `[MPA-GAS-BUDGET]`) plus receiver headroom.
 6. All five are Governed Gas Parameters under the model home,
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-GGP] (ADR 0010 decision D1): floors, governance classes, probes,
-   change events, manifest recording, and repricing-checklist membership
-   follow the home unchanged, and the Operational-layer exclusion covers
-   sale identity in this layer. This document adds no pattern rules of
-   its own.
-7. Failure-direction classes and probe discipline (ADR 0012 decision
-   T1; ADR 0013 decisions U6 and U7; ADR 0014 decision V7). All five
+   [LTA-GGP] (ADR 0010 decision D1; ADR 0017): immutable floors/classes,
+   authority-only 48-hour delayed raises bounded to 2x, V2 state
+   commitments, change events, manifest recording, and repricing-checklist
+   membership follow the home. The Operational-layer exclusion covers sale
+   identity in this layer. This document adds no pattern rules of its own.
+7. Failure-direction classes and sizing evidence (ADR 0013 decisions U6
+   and U7; ADR 0014 decision V7; ADR 0017). All five
    parameters carry the release-manifest failure-direction class
    `FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10). Parameters 1
    through 3 fail closed directly: authorization verification,
@@ -3012,28 +3014,26 @@ Requirements [SSA-GAS]:
    on the guarded call, never read-path association ([LTA-GGP]
    requirement 10; ADR 0014 decision V7): raising either parameter
    raises every purchaser's revert threshold, so raises for all five
-   are governance-only, and registering a permissionless conditional
-   raise or conditional re-lower for any of them is nonconformant —
-   the matrix scope-rejection test proves the absence. Each parameter's
-   named probe is a Permanent-class probe contract ([LTA-GGP-PROBES])
-   proving the guarded operation itself succeeds at the probed value
-   over pinned caller-independent fixture inputs, with run records
-   hosted on the probe and `evidenceHash` committing to the measurement
-   artifact: for `SALE_ERC1271_GAS_LIMIT`, a maximum-supported-class
+   use the same authority-only raise path. No lower, emergency, probe,
+   rebind, conditional, or permissionless mutation exists. Reproducible
+   sizing evidence proves the guarded operation succeeds at the candidate
+   value over pinned caller-independent fixture inputs: for
+   `SALE_ERC1271_GAS_LIMIT`, a maximum-supported-class
    ([GOV-1271-CLASS]) `isValidSignature` verification completing with
-   the magic value under exactly the probed cap; for
+   the magic value under the candidate cap; for
    `DELEGATE_REGISTRY_GAS_LIMIT`, an all-cold delegate-registry
    resolution for a pinned fixture delegation completing with
    well-formed returndata; for `SALE_ARTIST_AUTHORITY_GAS_LIMIT`, an
    all-cold contest-standing read ([AA-PLATFORM]) and consent
    verification read ([AA-SALE-CONSENT]) for pinned fixture records
-   completing with well-formed returndata under exactly the probed cap;
+   completing with well-formed returndata under the candidate cap;
    for `REVEAL_ATTEMPT_GAS_LIMIT`, an all-cold representative
    `requestEntropy` attempt through the coordinator and a
    production-depth reference provider fixture completing under
-   exactly the probed cap; for `SALE_NFT_DELIVERY_GAS_LIMIT`, an
+   the candidate cap; for `SALE_NFT_DELIVERY_GAS_LIMIT`, an
    all-cold Core `safeTransferFrom` to a pinned accepting-receiver
-   fixture completing under exactly the probed cap.
+   fixture completing under the candidate cap. The measurements are release
+   evidence only and have no authorization role.
 
 ## Events
 

@@ -73,15 +73,16 @@ the release policy in `docs/release-policy.md`.
 - Replaced the transitional Governance V1 executor boundary with the atomic
   Governance V2 schema: seven-field per-call transition commitments, derived
   batch scope/old/new hashes, six-return target context, exact SSTORE2 calldata
-  publication, action classes `0..6`, target-scoped terminal-freeze veto
-  indexing, manifest-tail composition, append-only class-6 eligibility, and an
-  executor-first one-way system-manifest bootstrap bind/seal ceremony.
+  publication, active action classes `0..5`, target-scoped terminal-freeze veto
+  indexing, manifest-tail composition, and an executor-first one-way
+  system-manifest bootstrap bind/seal ceremony. Pre-genesis class ID `6` is
+  retired, forbidden, and permanently reserved from reuse.
   ModuleRegistry, RoleRegistry, and governed gas/time hosts now recheck the
-  executing action ID, class, scope, old state, new state, revision, and probe
-  evidence; V1 action-ID calldata and domains are rejected. Bootstrap and
+  executing action ID, class, scope, old state, new state, and revision; V1
+  action-ID calldata and domains are rejected. Bootstrap and
   live-registry reads forward EIP-150-clamped available gas with bounded
   returndata and canonical decoding instead of compiled-in call caps. Added
-  focused malformed-return, high-gas, sequential-probe, role-history,
+  focused malformed-return, high-gas, raise-only parameter, role-history,
   bootstrap-envelope, and holder-rehearsal coverage. Additional hardening
   rejects cancellation after expiry; classifies Executor configuration from
   exact canonical calldata and direction; forbids self-targeted mutable
@@ -101,25 +102,25 @@ the release policy in `docs/release-policy.md`.
   authority as a separate High open blocker pending a closed-world
   target/selector/value policy and deployment evidence. Deployment-input
   generators, that action-policy catalog, target-side cutover hooks, and
-  candidate artifacts remain separate follow-up release-evidence slices. This
-  partial source/test slice does not complete [GOV-V2-CUTOVER], close #665, or
-  clear the static-analysis blocker in #658. This is pre-audit work and not a
-  production-readiness claim.
+  candidate artifacts remain separate follow-up release-evidence slices. PR
+  #683 completed this slice's named Governance V2/ModuleRegistry transition
+  scope and closed #665; issue #685 now owns the remaining closed-world
+  target/selector/native-value boundary. This does not clear the static-analysis
+  blocker in #658 and is not a production-readiness claim.
 - Refreshed the canonical unfiltered Slither 0.11.5 capture at source commit
-  `c0be71915bc650569940b249fa9e5c801c0587fc` on
-  `2026-07-23T23:52:41Z`. The exact first-party production High/Medium
-  inventory is now 33 Open rows (3 High, 30 Medium; one confirmed gap, five
-  design-review rows, and 27 pending dispositions). Two explicit Executor
-  schedule-context initializations, the Executor total-value assignment, and
-  ModuleRegistry's complete governance-context consumption resolve four prior
-  analyzer rows; three Cadence findings moved only by source identity and keep
-  their Open dispositions. The fifth analyzer disappearance is not a security
-  resolution: bounded assembly hides the Executor's proposal-selected
-  native-value call from `arbitrary-send-eth`, so mandatory High open blocker
-  `RISK-GOV-003` preserves that authority under issues #658 and #665. The full
-  3,143-row capture, normalized scope counts, provenance hashes, deterministic
-  reviewer mirror, release-mode blocker, and generated risk/release evidence
-  are checked together. This refresh is not an audit or readiness claim.
+  `55a2e817876eac754355a14ae3907053e3d3deed` on
+  `2026-07-24T04:58:03Z`. The exact first-party production High/Medium
+  inventory is now 30 Open rows (3 High, 27 Medium; one confirmed gap, five
+  design-review rows, and 24 pending dispositions). All 30 retained semantic
+  fingerprints are unchanged and no new row appeared. The three retired rows
+  were `StreamCadenceProbe` equality findings; their removal records source
+  retirement under ADR 0017, not finding acceptance. Bounded assembly still
+  hides the Executor's proposal-selected native-value call from
+  `arbitrary-send-eth`, so mandatory High open blocker `RISK-GOV-003` preserves
+  that authority under issues #658 and #685. The full 3,017-row capture,
+  normalized scope counts, provenance hashes, deterministic reviewer mirror,
+  release-mode blocker, and generated risk/release evidence are checked
+  together. This refresh is not an audit or readiness claim.
 - Cut `StreamArtworkFinalityRegistry` and `StreamArtworkFinalityPreview` over
   from the retired aggregate/facade Core-read seam to separately bound actual
   Core, collection metadata, and `StreamCoreFinalityAdapter` dependencies. The
@@ -251,7 +252,8 @@ the release policy in `docs/release-policy.md`.
   `check_abi_compatibility.py --target-only`. Custom errors, constructor, and
   Medium/Replaceable surfaces remain separately cataloged; fallback and receive
   are fail-closed `required_absent` categories enforced against implementation
-  ABI output. The canonical genesis target now contains 60 derived entries:
+  ABI output. The pre-ADR-0017 v1 canonical genesis target at this stage
+  contained 60 derived entries:
   `StreamSystemManifest` is Permanent deployment entry 36,
   `StreamCoreFinalityAdapter` is immutable Permanent entry 37, the 22
   per-parameter GGP probes occupy entries 38-59, and the shared cadence probe is
@@ -312,43 +314,52 @@ the release policy in `docs/release-policy.md`.
   first-party production High/Medium row remains Open. Release-mode Make targets
   and the protected-branch workflow also rerun the live exact Slither comparison
   before evaluating the strict decision.
-- Added the canonical machine-readable Genesis Deployment Profile and a
-  structural checker plus catalog-level diagnostics. The profile derives its
-  exhaustive count from contiguous entries, pins every contract role and
-  GGP/GTP probe, keeps legacy aliases unapproved by default, distinguishes the
+- Added the pre-ADR-0017 v1 machine-readable Genesis Deployment Profile and a
+  structural checker plus catalog-level diagnostics. That superseded profile
+  derives its exhaustive count from contiguous entries, pins every contract
+  role and GGP/GTP probe, keeps legacy aliases unapproved by default, distinguishes the
   SplitWallet implementation from on-demand clones, and records the required
   fallback roles. The v1 `contracts.json` catalog can report missing, extra,
   duplicate, ambiguous, wrong-scope, wrong-interface, and wrong-marker mapping
   gaps, but it can never clear production mode because it cannot prove
-  deployment-instance identity, fallback-address distinctness, or probe
-  parameter bindings. Production remains fail-closed until a checked,
+  deployment-instance identity, fallback-address distinctness, or governed
+  parameter host bindings. Production remains fail-closed until a checked,
   instance-aware candidate reconciles deployment manifests, address books,
   source-verification inputs, the on-chain system-manifest payload, retained
   rehearsal/live evidence, and the release candidate lockfile. This is a
   permanently production-blocking foundation for issue #656, not completion of
   that issue.
-- Added the Governed Gas Parameter and Governed Time Parameter machinery per
-  `[LTA-GGP]`/`[LTA-GGP-PROBES]`/`[LTA-GTP]`: reusable
-  `StreamGasParameterHost`/`StreamTimeParameterHost` bases with concrete
-  `StreamGasParameterStore`/`StreamTimeParameterStore` deployables (storage-backed
-  values, immutable floors, derived `keccak256("6529STREAM_GGP_"||name)` ids,
-  2x-per-action raise bounds, probe-gated emergency raise and exact-value
-  probe-gated lowering, `FORWARDING_CAP`-only permissionless conditional
-  raise/re-lower standing actions registered at deployment, governed
-  rebinding of probe bindings to successor Permanent-class probes with
-  `GasParameterProbeRebound`/`TimeParameterProbeRebound` events, canonical
-  `GasParameterUpdated`/`TimeParameterUpdated` events, and
-  `gasParameterInfo`/`timeParameterInfo` introspection), the Permanent-class
-  probe family (`StreamGasProbe` base enforcing the genuine-failure
-  gas-delivery proof and a run-time codeless-target guard so a scenario
-  target that loses its code can never record a vacuous pass,
-  `StreamForwardingCapProbe` reference probe,
-  `StreamCadenceProbe` for block-cadence observation with pinned wall-clock
-  floors), the `IStreamGovernedParameterAuthority` governance-executor wiring
-  seam, and the requirement 9 conformance suites including parameterId
-  derivation goldens against the spec-pinned catalog, scope-rejection tests,
-  forged-failure probe-integrity tests, and the zero-signer museum-mode
-  conditional raise/re-lower drill.
+- Added the ADR 0017 raise-only Governed Gas Parameter and Governed Time
+  Parameter machinery: reusable `StreamGasParameterHost` and
+  `StreamTimeParameterHost` bases with concrete storage-backed stores,
+  immutable deployment-time inventories and floors, deterministic parameter
+  IDs, monotonic revisions, exact Governance V2 scope/old/new commitments, and
+  strict delayed authority-only raises bounded to at most `2x` per action, with
+  same-parameter duplicate-action rejection and real-executor atomic rollback.
+  Marker and `currentAction()` reads forward available gas, accept only exact
+  canonical returndata, and reject EIP-7702 delegated authorities. Probe,
+  emergency, lower, permissionless conditional mutation, and rebind surfaces
+  are absent. This supersedes the earlier 60-entry probe-bearing target: the
+  canonical genesis profile now has 37 entries, while governance action-class
+  ID `6` remains reserved as `retired_pre_genesis`, forbidden, and never
+  reusable. The probe-removing profile grammar is explicitly versioned as
+  `6529stream.genesis-deployment-profile.v2` with a versioned schema resource;
+  pre-genesis v1 profile artifacts are intentionally unsupported rather than
+  silently accepted under a narrowed v1 grammar. Its governance row requires
+  the narrow `IStreamGovernedParameterAuthority` marker/context interface.
+  Schema-v2 registration/update events and focused adversarial
+  suites cover malformed/high-gas authority reads, stale context, ABA/revision
+  drift, over-bound raises, immutable zero-authority stores, and retired
+  selector absence. Only the generic store hosts are implemented in this slice;
+  exact production host, value, floor, sizing/cadence evidence, and
+  fixed-stipend bindings for all 25 logical parameters remain blocked under
+  issue #684; generated `RISK-GOV-004` and strict production release mode fail
+  closed until they are complete. The ABI baseline deliberately first-publishes the post-ADR-0017
+  `IStreamGasParameterHost`, `IStreamGovernanceExecutor`,
+  `IStreamGovernedParameterAuthority`, and `IStreamTimeParameterHost` surfaces;
+  it intentionally does not preserve the superseded pre-genesis probe, lower,
+  emergency, rebind, or action-class-6 drafts as published compatibility
+  commitments.
 - Added the staged-governance machinery and canonical module registry:
   `StreamGovernanceExecutor` implements the ADR 0004 [GOV-ACTION-ID] and
   [GOV-BATCH] canonical action identity (golden-tested

@@ -31,6 +31,9 @@ SPEC.loader.exec_module(checker)
 evidence_checker = checker.evidence_checker
 REAL_SLITHER_BASELINE_BLOCKERS = checker.slither_baseline_blockers
 REAL_GOVERNANCE_NATIVE_VALUE_BLOCKERS = checker.governance_native_value_blockers
+REAL_GOVERNED_PARAMETER_COMPLETENESS_BLOCKERS = (
+    checker.governed_parameter_completeness_blockers
+)
 
 
 def write_text(path: Path, value: str) -> None:
@@ -244,13 +247,20 @@ class ReleaseModeTests(unittest.TestCase):
             return_value=[],
         )
         self.risk_register_patcher.start()
+        self.parameter_risk_patcher = mock.patch.object(
+            checker,
+            "governed_parameter_completeness_blockers",
+            return_value=[],
+        )
+        self.parameter_risk_patcher.start()
 
     def tearDown(self) -> None:
+        self.parameter_risk_patcher.stop()
         self.risk_register_patcher.stop()
         self.slither_patcher.stop()
 
     def test_committed_slither_baseline_is_a_release_blocker(self) -> None:
-        """A matching 33-row baseline remains blocked rather than accepted."""
+        """A matching 30-row baseline remains blocked rather than accepted."""
         repo_root = Path(__file__).resolve().parents[1]
 
         blockers = REAL_SLITHER_BASELINE_BLOCKERS(
@@ -260,8 +270,8 @@ class ReleaseModeTests(unittest.TestCase):
         )
 
         self.assertEqual(len(blockers), 1)
-        self.assertIn("33 Open High/Medium", blockers[0])
-        self.assertIn("High=3, Medium=30", blockers[0])
+        self.assertIn("30 Open High/Medium", blockers[0])
+        self.assertIn("High=3, Medium=27", blockers[0])
         self.assertIn("issue #658", blockers[0])
 
     def test_slither_blocker_prevents_otherwise_complete_public_beta(self) -> None:
@@ -282,11 +292,11 @@ class ReleaseModeTests(unittest.TestCase):
             with mock.patch.object(
                 checker,
                 "slither_baseline_blockers",
-                return_value=["33 Open High/Medium Slither findings"],
+                return_value=["30 Open High/Medium Slither findings"],
             ):
                 with self.assertRaisesRegex(
                     checker.ReleaseModeError,
-                    "33 Open High/Medium Slither findings",
+                    "30 Open High/Medium Slither findings",
                 ):
                     checker.validate_release_mode(path, root, "public-beta")
 
@@ -307,7 +317,7 @@ class ReleaseModeTests(unittest.TestCase):
 
         self.assertEqual(len(blockers), 1)
         self.assertIn("RISK-GOV-003 remains open_blocker", blockers[0])
-        self.assertIn("issues #658 and #665", blockers[0])
+        self.assertIn("issues #658 and #685", blockers[0])
 
     def test_governance_native_value_blocker_reads_validated_snapshot_once(self) -> None:
         """The release decision consumes the exact snapshot that was validated."""
@@ -357,6 +367,74 @@ class ReleaseModeTests(unittest.TestCase):
                     )
         finally:
             self.risk_register_patcher.start()
+
+    def test_generated_governed_parameter_risk_is_a_production_blocker(self) -> None:
+        """The manual risk preserves the missing #684 production boundary."""
+        repo_root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            register_path = Path(temp_dir) / "risk-register.json"
+            write_json(
+                register_path,
+                risk_register_generator.build_register(repo_root),
+            )
+
+            blockers = REAL_GOVERNED_PARAMETER_COMPLETENESS_BLOCKERS(
+                register_path,
+                repo_root,
+            )
+
+        self.assertEqual(len(blockers), 1)
+        self.assertIn("RISK-GOV-004 remains open_blocker", blockers[0])
+        self.assertIn("issue #684", blockers[0])
+
+    def test_governed_parameter_risk_is_production_only(self) -> None:
+        """Public beta does not consume the production parameter-binding gate."""
+        repo_root = Path(__file__).resolve().parents[1]
+        with mock.patch.object(
+            checker,
+            "governed_parameter_completeness_blockers",
+        ) as parameter_blockers, mock.patch.object(
+            checker,
+            "release_mode_blockers",
+            return_value=[],
+        ):
+            checker.validate_release_mode(
+                repo_root / checker.DEFAULT_EVIDENCE,
+                repo_root,
+                "public-beta",
+            )
+
+        parameter_blockers.assert_not_called()
+
+    def test_governed_parameter_risk_prevents_production(self) -> None:
+        """Otherwise-ready production remains blocked by the real #684 risk."""
+        repo_root = Path(__file__).resolve().parents[1]
+        self.parameter_risk_patcher.stop()
+        try:
+            with mock.patch.object(
+                checker,
+                "release_mode_blockers",
+                return_value=[],
+            ), mock.patch.object(
+                checker,
+                "production_core_headroom_blocker",
+                return_value=None,
+            ), mock.patch.object(
+                checker.genesis_profile_checker,
+                "production_completeness_blockers",
+                return_value=[],
+            ):
+                with self.assertRaisesRegex(
+                    checker.ReleaseModeError,
+                    "RISK-GOV-004 remains open_blocker",
+                ):
+                    checker.validate_release_mode(
+                        repo_root / checker.DEFAULT_EVIDENCE,
+                        repo_root,
+                        "production-release",
+                    )
+        finally:
+            self.parameter_risk_patcher.start()
 
     def test_missing_slither_baseline_fails_closed(self) -> None:
         """The static-analysis release gate rejects absent canonical evidence."""

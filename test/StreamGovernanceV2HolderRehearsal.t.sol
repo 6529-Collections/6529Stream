@@ -3,14 +3,14 @@ pragma solidity ^0.8.19;
 
 import "../smart-contracts/IStreamGasParameterHost.sol";
 import "../smart-contracts/IStreamGovernanceExecutor.sol";
-import "../smart-contracts/IStreamModuleRegistry.sol";
 import "../smart-contracts/IStreamRoleRegistry.sol";
-import "../smart-contracts/StreamForwardingCapProbe.sol";
+import "../smart-contracts/IStreamTimeParameterHost.sol";
 import "../smart-contracts/StreamGasParameterStore.sol";
 import "../smart-contracts/StreamGovernanceBootstrap.sol";
 import "../smart-contracts/StreamGovernanceExecutor.sol";
 import "../smart-contracts/StreamRoleRegistry.sol";
 import "../smart-contracts/StreamRoles.sol";
+import "../smart-contracts/StreamTimeParameterStore.sol";
 import "./helpers/StreamGovernanceBootstrapHarness.sol";
 import "./helpers/StreamGovernanceV2HolderRehearsalMocks.sol";
 
@@ -79,24 +79,10 @@ contract StreamGovernanceV2TerminalFreezeRehearsalTarget {
 
 /// @notice Executable local evidence for ADR 0004 [GOV-V2-CUTOVER] item 4.
 /// @dev This is deliberately not production-holder evidence. It proves against
-///      the production executor and production GGP host that calls scheduled and
-///      executed by each supported contract-holder class preserve the complete
-///      Governance V2 context and target-side emergency-restoration invariants.
+///      the production executor and production GGP host that delayed raises
+///      scheduled and executed by each supported contract-holder class preserve
+///      the complete Governance V2 context and target-side monotonic invariants.
 contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarness {
-    struct GasParameterStateCommitment {
-        bytes32 scopeHash;
-        uint256 value;
-        uint256 floor;
-        address probe;
-        bytes32 probeRuntimeCodeHash;
-        bytes32 probeBindingHash;
-        uint8 failureClass;
-        uint64 probeMaxAgeBlocks;
-        bytes32 conditionalRaiseActionId;
-        bytes32 conditionalRelowerActionId;
-        uint64 revision;
-    }
-
     struct RehearsalAction {
         bytes32 actionId;
         GovernanceCall[] calls;
@@ -106,7 +92,6 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
 
     uint256 private constant _START_BLOCK = 1_000_000;
     uint64 private constant _START_TIME = 2_000_000_000;
-    uint64 private constant _PROBE_MAX_AGE_BLOCKS = 50_400;
     uint64 private constant _GOVERNOR_VOTING_DELAY_BLOCKS = 2;
     uint64 private constant _GOVERNOR_VOTING_PERIOD_BLOCKS = 5;
     uint64 private constant _GOVERNOR_QUORUM = 2;
@@ -116,24 +101,20 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     uint256 private constant _SAFE_RAISED_GAS_VALUE = 75_000;
     uint256 private constant _GOVERNOR_RAISED_GAS_VALUE = 100_000;
     uint256 private constant _GAS_FLOOR = 10_000;
-    uint256 private constant _DEGRADED_SCENARIO_MINIMUM_GAS = 250_000;
+    uint256 private constant _GENESIS_TIME_VALUE = 600;
+    uint256 private constant _TIME_FLOOR_BLOCKS = 300;
+    uint64 private constant _TIME_WALL_CLOCK_FLOOR_SECONDS = 3_600;
     uint256 private constant _NATIVE_REHEARSAL_VALUE = 0.25 ether;
     bytes32 private constant _PARAMETER_ID =
         0x9bae92ab1dd0c5535c65125ea4ee7cff3d55fc31fc2555096c2b5eabceb5bcda;
+    bytes32 private constant _TIME_PARAMETER_ID =
+        keccak256("6529STREAM_GTP_ENTROPY_REQUEST_TIMEOUT_BLOCKS");
     bytes32 private constant _SAFE_RUNTIME_CODE_HASH =
         0x07afc83f9eb3975b6a6a7a8fab7a53792576182a81549974e08d35f43545f9bb;
     bytes32 private constant _GOVERNOR_RUNTIME_CODE_HASH =
         0x2263d7c9f59bc65f3ff00a0437556480bcc2410eef6c448467773c51e8047873;
     bytes32 private constant _TIMELOCK_RUNTIME_CODE_HASH =
         0xc8e7ad494d651bb45b57dfd91f32d158bc5eefebc729b0d72bacd6361c6ed2b4;
-    bytes32 private constant _EMERGENCY_SCOPE_DOMAIN =
-        0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b;
-    bytes32 private constant _EMERGENCY_STATE_DOMAIN =
-        0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae;
-    bytes32 private constant _EMERGENCY_RECORD_DOMAIN =
-        0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004;
-    bytes32 private constant _EMERGENCY_CHAIN_DOMAIN =
-        0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340;
     bytes32 private constant _ROLE_MUTATION_SCOPE_V1 =
         keccak256("6529STREAM_ROLE_MUTATION_SCOPE_V1");
     bytes32 private constant _ROLE_MUTATION_STATE_V1 =
@@ -167,12 +148,9 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     StreamGovernanceV2SafeRehearsal private _vetoSafe;
     StreamReferenceTimelockRehearsal private _timelock;
     StreamReferenceGovernorRehearsal private _governor;
-    StreamGovernanceV2RehearsalCorePointer private _core;
-    StreamGovernanceV2RehearsalModuleRegistry private _moduleRegistry;
-    StreamGovernanceV2RehearsalGasConsumer private _consumer;
     StreamGovernanceV2TerminalFreezeRehearsalTarget private _terminalTarget;
-    StreamForwardingCapProbe private _probe;
     StreamGasParameterStore private _store;
+    StreamTimeParameterStore private _timeStore;
 
     function setUp() public {
         vm.roll(_START_BLOCK);
@@ -207,40 +185,27 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         );
         _timelock.bindGovernor(address(_governor));
 
-        _moduleRegistry = new StreamGovernanceV2RehearsalModuleRegistry();
-        _core = new StreamGovernanceV2RehearsalCorePointer(address(_moduleRegistry));
-        _consumer = new StreamGovernanceV2RehearsalGasConsumer(_DEGRADED_SCENARIO_MINIMUM_GAS);
         _terminalTarget = new StreamGovernanceV2TerminalFreezeRehearsalTarget(_executor);
-        _probe = new StreamForwardingCapProbe(
-            "ROYALTY_RESOLVER_GAS_LIMIT",
-            address(_consumer),
-            abi.encodeCall(StreamGovernanceV2RehearsalGasConsumer.guardedRead, ())
-        );
-        _moduleRegistry.registerGasProbe(address(_probe));
         IStreamGasParameterHost.GasParameterConfig[] memory configs =
             new IStreamGasParameterHost.GasParameterConfig[](1);
         configs[0] = IStreamGasParameterHost.GasParameterConfig({
             name: "ROYALTY_RESOLVER_GAS_LIMIT",
             genesisValue: _GENESIS_GAS_VALUE,
             floor: _GAS_FLOOR,
-            probe: address(_probe),
-            failureClass: 1,
-            probeMaxAgeBlocks: _PROBE_MAX_AGE_BLOCKS,
-            expectedProbeModuleVersion: keccak256("STREAM_GOVERNANCE_V2_REHEARSAL_PROBE_V1"),
-            expectedProbeRuntimeCodeHash: address(_probe).codehash,
-            expectedProbeModuleManifestHash: keccak256(
-                abi.encode("rehearsal-module", address(_probe).codehash)
-            ),
-            expectedProbeDeploymentManifestHash: keccak256(
-                abi.encode("rehearsal-deployment", address(_probe).codehash)
-            )
+            failureClass: 1
         });
-        _store = new StreamGasParameterStore(
-            address(_executor), address(_core), address(_moduleRegistry), configs
-        );
+        _store = new StreamGasParameterStore(address(_executor), configs);
+        IStreamTimeParameterHost.TimeParameterConfig[] memory timeConfigs =
+            new IStreamTimeParameterHost.TimeParameterConfig[](1);
+        timeConfigs[0] = IStreamTimeParameterHost.TimeParameterConfig({
+            name: "ENTROPY_REQUEST_TIMEOUT_BLOCKS",
+            genesisValue: _GENESIS_TIME_VALUE,
+            floorBlocks: _TIME_FLOOR_BLOCKS,
+            wallClockFloorSeconds: _TIME_WALL_CLOCK_FLOOR_SECONDS
+        });
+        _timeStore = new StreamTimeParameterStore(address(_executor), timeConfigs);
 
         _grantTerminalVetoRoleThroughRoot(address(_vetoSafe));
-        _registerEmergencyEligibility();
         _registerProposerThroughRoot(address(_schedulingSafe));
         _registerProposerThroughRoot(address(_timelock));
     }
@@ -394,19 +359,17 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         require(!_executor.isProposer(address(_vetoSafe)), "veto safe gained proposer authority");
     }
 
-    function testSafeAndGovernorExecuteClassSixEndToEnd() public {
-        (bytes32 safeRunId, bool safeProbePassed) = _probe.recordProbeRun(_GENESIS_GAS_VALUE);
-        require(safeRunId != bytes32(0) && !safeProbePassed, "safe failing probe evidence");
-
-        RehearsalAction memory safeAction = _scheduleEmergencyViaSafe(_SAFE_RAISED_GAS_VALUE);
+    function testSafeAndGovernorExecuteDelayedRaisesEndToEnd() public {
+        RehearsalAction memory safeAction = _scheduleRaiseViaSafe(_SAFE_RAISED_GAS_VALUE);
         GovernanceAction memory safeScheduled = _executor.governanceAction(safeAction.actionId);
         require(
             safeScheduled.proposer == address(_schedulingSafe), "safe was not scheduler msg.sender"
         );
         require(
-            safeScheduled.actionClass == StreamGovernanceActionClasses.EMERGENCY_RESTORATION,
+            safeScheduled.actionClass == StreamGovernanceActionClasses.DELAYED_LOOSENING,
             "safe action class"
         );
+        vm.warp(safeScheduled.notBefore);
         _executeViaSafe(safeAction, 0);
         GovernanceAction memory safeExecuted = _executor.governanceAction(safeAction.actionId);
         require(
@@ -415,13 +378,8 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         _assertParameterState(_SAFE_RAISED_GAS_VALUE, 2);
         _assertContextCleared();
 
-        (bytes32 governorRunId, bool governorProbePassed) =
-            _probe.recordProbeRun(_SAFE_RAISED_GAS_VALUE);
-        require(
-            governorRunId != bytes32(0) && !governorProbePassed, "governor failing probe evidence"
-        );
         RehearsalAction memory governorAction =
-            _scheduleEmergencyViaGovernor(_GOVERNOR_RAISED_GAS_VALUE);
+            _scheduleRaiseViaGovernor(_GOVERNOR_RAISED_GAS_VALUE);
         GovernanceAction memory governorScheduled =
             _executor.governanceAction(governorAction.actionId);
         require(
@@ -440,51 +398,29 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         _assertContextCleared();
     }
 
-    function testPassingProbeBlocksClassSixAtTarget() public {
-        _consumer.setMinimumGas(1);
-        (bytes32 runId, bool passed) = _probe.recordProbeRun(_GENESIS_GAS_VALUE);
-        require(runId != bytes32(0) && passed, "passing probe evidence");
-        RehearsalAction memory action = _scheduleEmergencyViaSafe(_SAFE_RAISED_GAS_VALUE);
-        uint256 transactionId = _prepareSafeExecution(action, 0);
+    function testClassSixAndEmergencySelectorAreAbsent() public {
         vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGasParameterHost.GasParameterProbeHealthy.selector,
-                _PARAMETER_ID,
-                _GENESIS_GAS_VALUE
-            )
+            abi.encodeWithSelector(IStreamGovernanceExecutor.UnknownActionClass.selector, uint8(6))
         );
-        vm.prank(_SAFE_OWNER_THREE);
-        _schedulingSafe.executeTransaction(transactionId);
-        _assertParameterState(_GENESIS_GAS_VALUE, 1);
+        _executor.minimumDelay(6);
+
+        (bool ok, bytes memory returnData) = address(_store)
+            .call(
+                abi.encodeWithSignature(
+                    "emergencyRaiseGasParameter(bytes32,uint256)",
+                    _PARAMETER_ID,
+                    _SAFE_RAISED_GAS_VALUE
+                )
+            );
+        require(!ok, "removed emergency selector accepted");
+        require(returnData.length == 0, "removed emergency selector returned custom error");
     }
 
-    function testStaleProbeBlocksClassSixAtTarget() public {
-        (bytes32 runId, bool passed) = _probe.recordProbeRun(_GENESIS_GAS_VALUE);
-        require(runId != bytes32(0) && !passed, "failing probe evidence");
-        (,, uint64 probedAtBlock) = _probe.lastProbeRun(_PARAMETER_ID, _GENESIS_GAS_VALUE);
-        vm.roll(uint256(probedAtBlock) + _PROBE_MAX_AGE_BLOCKS + 1);
-
-        RehearsalAction memory action = _scheduleEmergencyViaSafe(_SAFE_RAISED_GAS_VALUE);
-        uint256 transactionId = _prepareSafeExecution(action, 0);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGasParameterHost.GasParameterProbeRecordStale.selector,
-                _PARAMETER_ID,
-                _GENESIS_GAS_VALUE,
-                probedAtBlock,
-                _PROBE_MAX_AGE_BLOCKS
-            )
-        );
-        vm.prank(_SAFE_OWNER_THREE);
-        _schedulingSafe.executeTransaction(transactionId);
-        _assertParameterState(_GENESIS_GAS_VALUE, 1);
-    }
-
-    function testOverBoundRaiseBlocksClassSixAtTarget() public {
-        (bytes32 runId, bool passed) = _probe.recordProbeRun(_GENESIS_GAS_VALUE);
-        require(runId != bytes32(0) && !passed, "failing probe evidence");
+    function testOverBoundDelayedRaiseBlocksAtTarget() public {
         uint256 overBoundValue = (_GENESIS_GAS_VALUE * 2) + 1;
-        RehearsalAction memory action = _scheduleEmergencyViaSafe(overBoundValue);
+        RehearsalAction memory action = _scheduleRaiseViaSafe(overBoundValue);
+        GovernanceAction memory scheduled = _executor.governanceAction(action.actionId);
+        vm.warp(scheduled.notBefore);
         uint256 transactionId = _prepareSafeExecution(action, 0);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -499,13 +435,67 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         _assertParameterState(_GENESIS_GAS_VALUE, 1);
     }
 
-    function testForgedSixReturnContextBlocksClassSixAtTarget() public {
-        (bytes32 runId, bool passed) = _probe.recordProbeRun(_GENESIS_GAS_VALUE);
-        require(runId != bytes32(0) && !passed, "failing probe evidence");
+    function testOneDelayedActionCannotCompoundGasParameterRaise() public {
+        RehearsalAction memory action =
+            _scheduleAsRoot(_duplicateGasRaiseAction(), keccak256("duplicate-gas-raise-action"));
+        GovernanceAction memory scheduled = _executor.governanceAction(action.actionId);
+        vm.warp(scheduled.notBefore);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamGasParameterHost.GasParameterActionAlreadyApplied.selector,
+                _PARAMETER_ID,
+                action.actionId
+            )
+        );
+        _executor.executeGovernanceBatch(action.actionId, action.calls, action.callDatas);
+
+        _assertParameterState(_GENESIS_GAS_VALUE, 1);
+        require(
+            _executor.governanceAction(action.actionId).status == GovernanceActionStatus.SCHEDULED,
+            "failed gas batch left scheduled state"
+        );
+        _assertContextCleared();
+    }
+
+    function testOneDelayedActionCannotCompoundTimeParameterRaise() public {
+        RehearsalAction memory action = _scheduleAsRoot(
+            _duplicateTimeRaiseAction(), keccak256("duplicate-time-raise-action")
+        );
+        GovernanceAction memory scheduled = _executor.governanceAction(action.actionId);
+        vm.warp(scheduled.notBefore);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IStreamTimeParameterHost.TimeParameterActionAlreadyApplied.selector,
+                _TIME_PARAMETER_ID,
+                action.actionId
+            )
+        );
+        _executor.executeGovernanceBatch(action.actionId, action.calls, action.callDatas);
+
+        (uint256 value, uint256 floorBlocks, uint64 wallClockFloorSeconds, uint64 revision) =
+            _timeStore.timeParameterInfo(_TIME_PARAMETER_ID);
+        require(value == _GENESIS_TIME_VALUE, "failed time batch changed value");
+        require(floorBlocks == _TIME_FLOOR_BLOCKS, "time floor drift");
+        require(
+            wallClockFloorSeconds == _TIME_WALL_CLOCK_FLOOR_SECONDS, "time wall-clock floor drift"
+        );
+        require(revision == 1, "failed time batch changed revision");
+        require(
+            _executor.governanceAction(action.actionId).status == GovernanceActionStatus.SCHEDULED,
+            "failed time batch left scheduled state"
+        );
+        _assertContextCleared();
+    }
+
+    function testForgedSixReturnContextBlocksDelayedRaiseAtTarget() public {
         bytes32 expectedOldStateHash = _stateHash(_GENESIS_GAS_VALUE, 1);
         bytes32 forgedOldStateHash = keccak256("forged-governance-v2-old-state");
         RehearsalAction memory action =
-            _scheduleEmergencyViaSafe(_SAFE_RAISED_GAS_VALUE, forgedOldStateHash);
+            _scheduleRaiseViaSafe(_SAFE_RAISED_GAS_VALUE, forgedOldStateHash);
+        GovernanceAction memory scheduled = _executor.governanceAction(action.actionId);
+        vm.warp(scheduled.notBefore);
         uint256 transactionId = _prepareSafeExecution(action, 0);
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -779,98 +769,18 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         );
     }
 
-    function _registerEmergencyEligibility() private {
-        uint64 index = 0;
-        bytes32 priorChainHash = bytes32(0);
-        bytes4 selector = IStreamGasParameterHost.emergencyRaiseGasParameter.selector;
-        bytes32 scopeHash = keccak256(
-            abi.encode(
-                _EMERGENCY_SCOPE_DOMAIN,
-                block.chainid,
-                address(_executor),
-                address(_store),
-                selector
-            )
-        );
-        bytes32 oldStateHash = keccak256(
-            abi.encode(_EMERGENCY_STATE_DOMAIN, scopeHash, false, bytes32(0), index, priorChainHash)
-        );
-        bytes32 recordHash = keccak256(
-            abi.encode(
-                _EMERGENCY_RECORD_DOMAIN, index, address(_store), selector, address(_store).codehash
-            )
-        );
-        bytes32 nextChainHash = keccak256(
-            abi.encode(
-                _EMERGENCY_CHAIN_DOMAIN,
-                block.chainid,
-                address(_executor),
-                priorChainHash,
-                recordHash,
-                index
-            )
-        );
-        bytes32 newStateHash = keccak256(
-            abi.encode(
-                _EMERGENCY_STATE_DOMAIN,
-                scopeHash,
-                true,
-                address(_store).codehash,
-                uint64(1),
-                nextChainHash
-            )
-        );
-        bytes memory callData = abi.encodeCall(
-            _executor.registerEmergencyRestorationEligibility, (address(_store), selector)
-        );
-        GovernanceCall[] memory calls = new GovernanceCall[](1);
-        calls[0] = GovernanceCall({
-            target: address(_executor),
-            value: 0,
-            selector: _executor.registerEmergencyRestorationEligibility.selector,
-            callDataHash: keccak256(callData),
-            scopeHash: scopeHash,
-            oldValueHash: oldStateHash,
-            newValueHash: newStateHash
-        });
-        bytes[] memory callDatas = new bytes[](1);
-        callDatas[0] = callData;
-        _executor.publishGovernanceCallData(callDatas);
-        (bytes32 aggregateScope, bytes32 aggregateOld, bytes32 aggregateNew) =
-            _aggregateHashes(calls);
-        uint64 notBefore = uint64(block.timestamp)
-            + _executor.minimumDelay(StreamGovernanceActionClasses.TERMINAL_FREEZE);
-        bytes32 actionId = _executor.scheduleGovernanceBatch(
-            StreamGovernanceActionClasses.TERMINAL_FREEZE,
-            calls,
-            aggregateScope,
-            aggregateOld,
-            aggregateNew,
-            notBefore,
-            notBefore + 7 days,
-            keccak256("register-rehearsal-emergency-selector"),
-            "ipfs://local-governance-v2-holder-rehearsal/eligibility",
-            _bootstrap.manifestHash
-        );
-        vm.warp(notBefore);
-        _executor.executeGovernanceBatch(actionId, calls, callDatas);
-        (bool eligible, bytes32 codeHash) =
-            _executor.emergencyRestorationEligibility(address(_store), selector);
-        require(eligible && codeHash == address(_store).codehash, "class six eligibility");
-    }
-
-    function _scheduleEmergencyViaSafe(uint256 newValue)
+    function _scheduleRaiseViaSafe(uint256 newValue)
         private
         returns (RehearsalAction memory action)
     {
-        return _scheduleEmergencyViaSafe(newValue, _stateHash(_GENESIS_GAS_VALUE, 1));
+        return _scheduleRaiseViaSafe(newValue, _stateHash(_GENESIS_GAS_VALUE, 1));
     }
 
-    function _scheduleEmergencyViaSafe(uint256 newValue, bytes32 oldStateHash)
+    function _scheduleRaiseViaSafe(uint256 newValue, bytes32 oldStateHash)
         private
         returns (RehearsalAction memory action)
     {
-        action = _emergencyAction(newValue, oldStateHash);
+        action = _raiseAction(newValue, oldStateHash);
         _safeInvoke(
             address(_executor),
             0,
@@ -878,21 +788,22 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         );
         (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
             _aggregateHashes(action.calls);
-        uint64 notBefore = uint64(block.timestamp);
+        uint64 notBefore = uint64(block.timestamp)
+            + _executor.minimumDelay(StreamGovernanceActionClasses.DELAYED_LOOSENING);
         bytes memory result = _safeInvoke(
             address(_executor),
             0,
             abi.encodeCall(
                 _executor.scheduleGovernanceBatch,
                 (
-                    StreamGovernanceActionClasses.EMERGENCY_RESTORATION,
+                    StreamGovernanceActionClasses.DELAYED_LOOSENING,
                     action.calls,
                     scopeHash,
                     oldValueHash,
                     newValueHash,
                     notBefore,
                     notBefore + 30 days,
-                    keccak256(abi.encode("safe-class-six", newValue)),
+                    keccak256(abi.encode("safe-delayed-raise", newValue)),
                     "ipfs://local-governance-v2-holder-rehearsal/safe",
                     _bootstrap.manifestHash
                 )
@@ -901,56 +812,136 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
         action.actionId = abi.decode(result, (bytes32));
     }
 
-    function _scheduleEmergencyViaGovernor(uint256 newValue)
+    function _scheduleRaiseViaGovernor(uint256 newValue)
         private
         returns (RehearsalAction memory action)
     {
-        action = _emergencyAction(newValue, _stateHash(_SAFE_RAISED_GAS_VALUE, 2));
+        action = _raiseAction(newValue, _stateHash(_SAFE_RAISED_GAS_VALUE, 2));
         _executor.publishGovernanceCallData(action.callDatas);
         (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
             _aggregateHashes(action.calls);
-        uint64 notBefore = uint64(block.timestamp) + _TIMELOCK_DELAY_SECONDS;
+        uint64 notBefore = uint64(block.timestamp) + _TIMELOCK_DELAY_SECONDS
+            + _executor.minimumDelay(StreamGovernanceActionClasses.DELAYED_LOOSENING);
         bytes memory scheduleData = abi.encodeCall(
             _executor.scheduleGovernanceBatch,
             (
-                StreamGovernanceActionClasses.EMERGENCY_RESTORATION,
+                StreamGovernanceActionClasses.DELAYED_LOOSENING,
                 action.calls,
                 scopeHash,
                 oldValueHash,
                 newValueHash,
                 notBefore,
                 notBefore + 30 days,
-                keccak256(abi.encode("governor-class-six", newValue)),
+                keccak256(abi.encode("governor-delayed-raise", newValue)),
                 "ipfs://local-governance-v2-holder-rehearsal/governor",
                 _bootstrap.manifestHash
             )
         );
         bytes memory result;
         (action.holderOperationId, result) = _governorInvoke(
-            address(_executor), 0, scheduleData, keccak256("governor-schedule-class-six")
+            address(_executor), 0, scheduleData, keccak256("governor-schedule-delayed-raise")
         );
         action.actionId = abi.decode(result, (bytes32));
     }
 
-    function _emergencyAction(uint256 newValue, bytes32 oldStateHash)
+    function _raiseAction(uint256 newValue, bytes32 oldStateHash)
         private
         view
         returns (RehearsalAction memory action)
     {
-        bytes memory callData =
-            abi.encodeCall(_store.emergencyRaiseGasParameter, (_PARAMETER_ID, newValue));
+        bytes memory callData = abi.encodeCall(_store.raiseGasParameter, (_PARAMETER_ID, newValue));
         action.callDatas = new bytes[](1);
         action.callDatas[0] = callData;
         action.calls = new GovernanceCall[](1);
         action.calls[0] = GovernanceCall({
             target: address(_store),
             value: 0,
-            selector: IStreamGasParameterHost.emergencyRaiseGasParameter.selector,
+            selector: IStreamGasParameterHost.raiseGasParameter.selector,
             callDataHash: keccak256(callData),
             scopeHash: _scopeHash(),
             oldValueHash: oldStateHash,
             newValueHash: _stateHash(newValue, _currentRevision() + 1)
         });
+    }
+
+    function _duplicateGasRaiseAction() private view returns (RehearsalAction memory action) {
+        uint256 firstValue = _GENESIS_GAS_VALUE * 2;
+        uint256 secondValue = firstValue * 2;
+        action.callDatas = new bytes[](2);
+        action.callDatas[0] = abi.encodeCall(_store.raiseGasParameter, (_PARAMETER_ID, firstValue));
+        action.callDatas[1] = abi.encodeCall(_store.raiseGasParameter, (_PARAMETER_ID, secondValue));
+        action.calls = new GovernanceCall[](2);
+        action.calls[0] = GovernanceCall({
+            target: address(_store),
+            value: 0,
+            selector: IStreamGasParameterHost.raiseGasParameter.selector,
+            callDataHash: keccak256(action.callDatas[0]),
+            scopeHash: _scopeHash(),
+            oldValueHash: _stateHash(_GENESIS_GAS_VALUE, 1),
+            newValueHash: _stateHash(firstValue, 2)
+        });
+        action.calls[1] = GovernanceCall({
+            target: address(_store),
+            value: 0,
+            selector: IStreamGasParameterHost.raiseGasParameter.selector,
+            callDataHash: keccak256(action.callDatas[1]),
+            scopeHash: _scopeHash(),
+            oldValueHash: _stateHash(firstValue, 2),
+            newValueHash: _stateHash(secondValue, 3)
+        });
+    }
+
+    function _duplicateTimeRaiseAction() private view returns (RehearsalAction memory action) {
+        uint256 firstValue = _GENESIS_TIME_VALUE * 2;
+        uint256 secondValue = firstValue * 2;
+        action.callDatas = new bytes[](2);
+        action.callDatas[0] =
+            abi.encodeCall(_timeStore.raiseTimeParameter, (_TIME_PARAMETER_ID, firstValue));
+        action.callDatas[1] =
+            abi.encodeCall(_timeStore.raiseTimeParameter, (_TIME_PARAMETER_ID, secondValue));
+        action.calls = new GovernanceCall[](2);
+        action.calls[0] = GovernanceCall({
+            target: address(_timeStore),
+            value: 0,
+            selector: IStreamTimeParameterHost.raiseTimeParameter.selector,
+            callDataHash: keccak256(action.callDatas[0]),
+            scopeHash: _timeScopeHash(),
+            oldValueHash: _timeStateHash(_GENESIS_TIME_VALUE, 1),
+            newValueHash: _timeStateHash(firstValue, 2)
+        });
+        action.calls[1] = GovernanceCall({
+            target: address(_timeStore),
+            value: 0,
+            selector: IStreamTimeParameterHost.raiseTimeParameter.selector,
+            callDataHash: keccak256(action.callDatas[1]),
+            scopeHash: _timeScopeHash(),
+            oldValueHash: _timeStateHash(firstValue, 2),
+            newValueHash: _timeStateHash(secondValue, 3)
+        });
+    }
+
+    function _scheduleAsRoot(RehearsalAction memory action, bytes32 evidenceHash)
+        private
+        returns (RehearsalAction memory)
+    {
+        _executor.publishGovernanceCallData(action.callDatas);
+        (bytes32 scopeHash, bytes32 oldValueHash, bytes32 newValueHash) =
+            _aggregateHashes(action.calls);
+        uint64 notBefore = uint64(block.timestamp)
+            + _executor.minimumDelay(StreamGovernanceActionClasses.DELAYED_LOOSENING);
+        action.actionId = _executor.scheduleGovernanceBatch(
+            StreamGovernanceActionClasses.DELAYED_LOOSENING,
+            action.calls,
+            scopeHash,
+            oldValueHash,
+            newValueHash,
+            notBefore,
+            notBefore + 30 days,
+            evidenceHash,
+            "ipfs://local-governance-v2-holder-rehearsal/no-compound",
+            _bootstrap.manifestHash
+        );
+        return action;
     }
 
     function _scheduleNativeViaSafe(address receiver, uint256 value, uint64 notBefore)
@@ -1199,7 +1190,7 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     function _scopeHash() private view returns (bytes32) {
         return keccak256(
             abi.encode(
-                keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V1"),
+                keccak256("6529STREAM_GAS_PARAMETER_SCOPE_V2"),
                 block.chainid,
                 address(_store),
                 _PARAMETER_ID
@@ -1208,49 +1199,51 @@ contract StreamGovernanceV2HolderRehearsalTest is StreamGovernanceBootstrapHarne
     }
 
     function _stateHash(uint256 value, uint64 revision) private view returns (bytes32) {
-        StreamGovernanceV2RehearsalModuleRecordV2 memory record =
-            _moduleRegistry.moduleRecord(address(_probe));
-        bytes32 bindingHash = keccak256(
+        return keccak256(
             abi.encode(
-                keccak256("6529STREAM_GGP_PROBE_BINDING_V1"),
-                address(_moduleRegistry),
-                address(_probe),
-                record.moduleType,
-                record.interfaceId,
-                record.moduleVersion,
-                address(_probe).codehash,
-                record.moduleManifestHash,
-                record.deploymentManifestHash
+                keccak256("6529STREAM_GAS_PARAMETER_STATE_V2"),
+                _scopeHash(),
+                value,
+                _GAS_FLOOR,
+                uint8(1),
+                revision
             )
         );
-        (bytes32 conditionalRaiseId, bytes32 conditionalRelowerId) =
-            _store.conditionalGasParameterActions(_PARAMETER_ID);
-        GasParameterStateCommitment memory state = GasParameterStateCommitment({
-            scopeHash: _scopeHash(),
-            value: value,
-            floor: _GAS_FLOOR,
-            probe: address(_probe),
-            probeRuntimeCodeHash: address(_probe).codehash,
-            probeBindingHash: bindingHash,
-            failureClass: 1,
-            probeMaxAgeBlocks: _PROBE_MAX_AGE_BLOCKS,
-            conditionalRaiseActionId: conditionalRaiseId,
-            conditionalRelowerActionId: conditionalRelowerId,
-            revision: revision
-        });
-        return keccak256(abi.encode(keccak256("6529STREAM_GAS_PARAMETER_STATE_V1"), state));
+    }
+
+    function _timeScopeHash() private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_TIME_PARAMETER_SCOPE_V2"),
+                block.chainid,
+                address(_timeStore),
+                _TIME_PARAMETER_ID
+            )
+        );
+    }
+
+    function _timeStateHash(uint256 value, uint64 revision) private view returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                keccak256("6529STREAM_TIME_PARAMETER_STATE_V2"),
+                _timeScopeHash(),
+                value,
+                _TIME_FLOOR_BLOCKS,
+                _TIME_WALL_CLOCK_FLOOR_SECONDS,
+                revision
+            )
+        );
     }
 
     function _currentRevision() private view returns (uint64 revision) {
-        (,,,,, revision) = _store.gasParameterInfo(_PARAMETER_ID);
+        (,,, revision) = _store.gasParameterInfo(_PARAMETER_ID);
     }
 
     function _assertParameterState(uint256 expectedValue, uint64 expectedRevision) private view {
-        (uint256 value, uint256 floor, address probe, uint8 failureClass,, uint64 revision) =
+        (uint256 value, uint256 floor, uint8 failureClass, uint64 revision) =
             _store.gasParameterInfo(_PARAMETER_ID);
         require(value == expectedValue, "parameter value");
         require(floor == _GAS_FLOOR, "parameter floor");
-        require(probe == address(_probe), "parameter probe");
         require(failureClass == 1, "parameter failure class");
         require(revision == expectedRevision, "parameter revision");
     }

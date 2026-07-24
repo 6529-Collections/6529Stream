@@ -23,15 +23,17 @@ DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
 
 VECTOR_SCHEMA = "6529stream.system-manifest-payload-vector.v1"
 FIXTURE_DOMAIN = "6529STREAM_SYSTEM_MANIFEST_TARGET_VECTOR_V1"
-PROFILE_SHA256 = "sha256:46218ca52a9653b2e547b0afb7e67dd29da177d84a22356b6012f0409f360fb0"
-PAYLOAD_BYTE_LENGTH = 117_980
-PAYLOAD_KECCAK = "0x2887af58895fdeb2fd47d7617bb5e6031fe46f98a07948579b0536221b221fc9"
-PAYLOAD_SHA256 = "sha256:f728642f2a784dae88d1a8cfe429fac7bc793542901b49aae11a5742781aac3a"
+PROFILE_SHA256 = "sha256:e02b966c735ed62d717830612a66f759b07c037e1dee49ec2a46946f6b4d1135"
+PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v2"
+PROFILE_NORMATIVE_ANCHOR = "docs/stream-long-term-architecture.md#LTA-MANIFEST"
+PAYLOAD_BYTE_LENGTH = 55_109
+PAYLOAD_KECCAK = "0x23e29269a33db5b039360ff416749b337910d39eaa82c04de7601ad984623d38"
+PAYLOAD_SHA256 = "sha256:a7ed330450881081d9c330d4cce88c6075960ca5fec65ff1206f20c338a87e3e"
 
 IDENTITY_DOMAIN = "0xabba888804ef35beb44d732a5f39abc2609bd065f98a99779289a9e9c2a4059a"
-IDENTITY_VIEW_HASH = "0xd2e4e6fee9d6e85b22c09325035e11abc20d7473645e008aa800875962f946ab"
+IDENTITY_VIEW_HASH = "0x4771bfdb1073d98ed9a969ec4beb32e5ba18eac629a6b1043f00c7828742456a"
 DEPLOYMENT_IDENTITY_HASH = (
-    "0xc35b448ac1a5be9889a3fb597640708ac18286b63bf98d31139892d1ed713641"
+    "0xe372461cbfe0b9c8d89a54aa35ab81ea8a173e89bce196f47f1d7c350ac45b00"
 )
 
 CHUNK_BYTES = 24_575
@@ -42,58 +44,42 @@ SCHEMA_ID = "0x8844b744a67cdcdb84ea3c6e3d686883da175820b9ff07a19cffa14bf62e6e81"
 CANONICALIZATION_ID = (
     "0x886c7c89c308c459ca8a626e0ef36a5ea9f4c7a7b56aaf86c71a2ddf3b4f9044"
 )
-CHUNK_LIST_HASH = "0xe4595941d7e03e31b791f669900c508fc21896241758492d897c3ffae57211c1"
-PAYLOAD_ROOT_HASH = "0x9627cd2700527e8a8c99ad6350e99245971459b0a5c2c3da7e76e49b147feee5"
+CHUNK_LIST_HASH = "0xf680bb0e85aa2bb5848b43dbb2ee1c2f55b68223ca97fa3e1b4ef35ca88f1855"
+PAYLOAD_ROOT_HASH = "0x7409ea442420e4cbbc31d888f48e74ea6a2e1728c8ba433767a572db9e2670e0"
 
 DESCRIPTOR_MAGIC = "0x6c9d2530"
 DESCRIPTOR_DYNAMIC_OFFSET = 224
-DESCRIPTOR_LENGTH = 736
-DESCRIPTOR_KECCAK = "0xa3a7614a40193785e1b36b076a64336a17f1212e91f3618ba513b5f5fb4fb56d"
+DESCRIPTOR_LENGTH = 544
+DESCRIPTOR_KECCAK = "0x697ab9f1b6075cdf5f957e688adb9635de0dcd7be2c4ea8e97fb5500ad3db49e"
 DESCRIPTOR_RUNTIME_HASH = (
-    "0x949b2c0c2252a7037c67eb95f085c11adfb4cfde6491f430d573b9593bee7354"
+    "0x7d117776fa2b116641cacdc3904c00c4b55b25d755d373eec4020f98ad6902ec"
 )
 
 # index, pointer, payload length, payload hash, leaf hash, SSTORE2 runtime hash
 CHUNK_GOLDENS = (
     (
         0,
-        "0x39f3db82158bb9705e6d58007744ad635d8f4249",
+        "0x3323cfaf8192dd4891a01ddd0ad05add50946817",
         24_575,
-        "0x9618285f98458c83c7804f75544458782bb168f77301dda09e817cfcda16f99b",
-        "0xf4b5289402f3961bdea28f7a3963f9ccdec2f59e2764c0d985f4424830939010",
-        "0x91a0a692f047ecf4b41fc5f173828e2d6673dad6dd1612b0cc32d59e42802bb1",
+        "0x2b45351f26b3c15d1fa9bdf1ddfc063c43822621a1534fb9750bd14dae26f722",
+        "0xc8f0457736e149911c8354caf19d7e097b3e4df571cf465de4814f5ca6dea5d3",
+        "0x6e3a62c8f33f16450961e5340314183b3b0d8ab53ab7a6212887f9921480aba9",
     ),
     (
         1,
-        "0xd090ea23dfcb27ce9f8363e6cf68d49b06eea45a",
+        "0x3168c46ba1b3b0e72f9f7eb5951d2794f5adc881",
         24_575,
-        "0xc961c9714d866da5d708cff9ad45e828af0460faa593a56f81e4f8b62303c4f9",
-        "0x6db1dae5d9dd7f238a4d22fc1ae81c180401e9d74d8a33a09e7acfbfd159007c",
-        "0x3978602ad9935512fa083ca24b57e3ff134e4b1c0fc7a0277ee1de261d3f7efc",
+        "0x2fa2ab4aa6e175f14348983ee9d7c6b3540066334154dcd8be3c81f42415537a",
+        "0x6883496d9211c42718f3b447dc7979d83cec894419648588f8c6c06139aecfb9",
+        "0x511722dbede40fb8319cc9760988f5cd6f85928e124dab49608f1850bc48a414",
     ),
     (
         2,
-        "0x2007591c79ab6fedbd8988c0b2e282bbcd8e635f",
-        24_575,
-        "0xa5362feec8e9915a4b8d732969de5abda4507d8f68e80465dacd7c6f9df4a68c",
-        "0x5f291512e8f81e1f7fe703705762c1d4d98d0f476708491ab1c6385e40c988cc",
-        "0xcaf186870171cf9102779114dd36ecbc69d4500c0fd386148625b6922163e102",
-    ),
-    (
-        3,
-        "0xc95fbdf7ee0727f55c26ffaecf8fb2ddb474502b",
-        24_575,
-        "0xdd490a300756199989e7bbda2efdddccb7dbe4a1dd7b339d80dc3c580d324fe9",
-        "0x5689035c71e64d2c011d227d7177eb1eb8302f995262a978380968616f9d8342",
-        "0x3ca0a6417075a40dd8a85ee431d63a3d207af6292e9c1655ab9035cdd341dc23",
-    ),
-    (
-        4,
-        "0xda7617fb1b8db0fb2c1dc666c13facb080c226e0",
-        19_680,
-        "0xc5057b0a9114464d02eab51da174e17a2a6417fe29c8e50fd0665042de49225f",
-        "0xf1182a98aa760cb1f7449dd6883b6f56e3588d6158638bb21bd431909c94c563",
-        "0xc763fc567cb6bfeb6f0db9eb2dbfbba6c2f352c86143cc40891dff09c737bca6",
+        "0x06f7d9cf78b0d834bc89786b2c3bfa9ecd4ad24c",
+        5_959,
+        "0xf4fcc63861a1701907843ad2a0d9c172686d868f8bee662b311e648f62914a3e",
+        "0x943be1d600842f4d311d31ed7f9c5e764815361c903b18bf085625b98ca8e2ca",
+        "0x435d80d94cb2d137e2094123e149c9cefd89d09f6130f8e205cdf37cd5cfeacf",
     ),
 )
 
@@ -153,6 +139,23 @@ STATE_EXPORT_EVENT_INDEXED_MASKS = {
         False,
     ],
 }
+AUTHORITY_MARKER_SIGNATURE = "isStreamGovernedParameterAuthority()"
+AUTHORITY_MARKER_SELECTOR = "0x8d96760d"
+AUTHORITY_CONTEXT_SIGNATURE = "currentAction()"
+AUTHORITY_CONTEXT_SELECTOR = "0x546ea281"
+AUTHORITY_INTERFACE_ID = "0xd9f8d48c"
+AUTHORITY_ABI_SCHEMA = "6529stream.governed-parameter-authority-abi.v1"
+AUTHORITY_ABI_SHA256 = (
+    "sha256:720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"
+)
+AUTHORITY_CONTEXT_RETURNS = [
+    "bool",
+    "bytes32",
+    "uint8",
+    "bytes32",
+    "bytes32",
+    "bytes32",
+]
 
 
 class ReferenceVectorError(RuntimeError):
@@ -296,7 +299,17 @@ def _metadata_audit(vector: dict[str, Any]) -> None:
         "release-artifacts/genesis-deployment-profile.json",
         "profile source path",
     )
-    _expect(vector["source"]["profile_entry_count"], 60, "profile source entry count")
+    _expect(vector["source"]["profile_entry_count"], 37, "profile source entry count")
+    _expect(
+        vector["source"]["profile_schema_version"],
+        PROFILE_SCHEMA,
+        "profile source schema",
+    )
+    _expect(
+        vector["source"]["normative_anchor"],
+        PROFILE_NORMATIVE_ANCHOR,
+        "profile source normative anchor",
+    )
     expected_constants = {
         "schema_version": 1,
         "payload_schema_literal": "STREAM_SYSTEM_MANIFEST_PAYLOAD_V1",
@@ -362,6 +375,79 @@ def _metadata_audit(vector: dict[str, Any]) -> None:
         surface,
         {**surface_without_digest, "surface_sha256": computed_abi_digest},
         "complete state-export ABI surface",
+    )
+
+    derivation = vector["fixture_derivation"]
+    _expect(
+        derivation["state_export_publisher_binding"],
+        "GOVERNANCE_LAYER",
+        "state-export publisher binding",
+    )
+    _expect(
+        derivation["governed_parameter_authority_binding"],
+        "GOVERNANCE_LAYER",
+        "governed-parameter authority binding",
+    )
+    authority_marker_selector = (
+        "0x" + _keccak(AUTHORITY_MARKER_SIGNATURE.encode("ascii"))[:4].hex()
+    )
+    authority_context_selector = (
+        "0x" + _keccak(AUTHORITY_CONTEXT_SIGNATURE.encode("ascii"))[:4].hex()
+    )
+    _expect(
+        authority_marker_selector,
+        AUTHORITY_MARKER_SELECTOR,
+        "governed-parameter authority marker selector golden",
+    )
+    _expect(
+        authority_context_selector,
+        AUTHORITY_CONTEXT_SELECTOR,
+        "governed-parameter authority context selector golden",
+    )
+    authority_interface_id = (
+        int(authority_marker_selector, 16) ^ int(authority_context_selector, 16)
+    )
+    _expect(
+        f"0x{authority_interface_id:08x}",
+        AUTHORITY_INTERFACE_ID,
+        "governed-parameter authority interface ID golden",
+    )
+    authority_surface_without_digest = {
+        "schema": AUTHORITY_ABI_SCHEMA,
+        "required_interface": "IStreamGovernedParameterAuthority",
+        "interface_id": AUTHORITY_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": AUTHORITY_MARKER_SIGNATURE,
+                "selector": authority_marker_selector,
+                "state_mutability": "view",
+                "returns": ["bool"],
+            },
+            {
+                "signature": AUTHORITY_CONTEXT_SIGNATURE,
+                "selector": authority_context_selector,
+                "state_mutability": "view",
+                "returns": AUTHORITY_CONTEXT_RETURNS,
+            },
+        ],
+        "events": [],
+    }
+    computed_authority_digest = (
+        "sha256:"
+        + hashlib.sha256(_reference_jcs(authority_surface_without_digest)).hexdigest()
+    )
+    _expect(
+        computed_authority_digest,
+        AUTHORITY_ABI_SHA256,
+        "governed-parameter authority ABI digest",
+    )
+    _expect(
+        derivation["governed_parameter_authority_surface"],
+        {
+            **authority_surface_without_digest,
+            "surface_sha256": computed_authority_digest,
+        },
+        "complete governed-parameter authority ABI surface",
     )
 
 
@@ -457,8 +543,6 @@ def _identity_audit(vector: dict[str, Any], profile_raw: bytes) -> None:
         occurrences.append(row["deploymentManifestHash"])
     for row in payload["registryEntries"]:
         occurrences.append(row["deploymentManifestHash"])
-    for row in payload["gasParameterProbes"]:
-        occurrences.append(row["probeDeploymentManifestHash"])
     for row in payload["criticalFallbacks"]:
         occurrences.append(row["deploymentManifestHash"])
     if not occurrences or any(value != identity_hash for value in occurrences):
@@ -652,10 +736,10 @@ def audit_vector(vector: dict[str, Any], profile_raw: bytes) -> None:
     _descriptor_audit(vector)
 
     payload_counts = (
-        ("contracts", 60),
+        ("contracts", 37),
         ("pointers", 11),
-        ("registryEntries", 60),
-        ("gasParameterProbes", 40),
+        ("registryEntries", 37),
+        ("gasParameterProbes", 0),
         ("criticalFallbacks", 2),
     )
     for name, expected in payload_counts:

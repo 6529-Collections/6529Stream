@@ -66,8 +66,9 @@ struct GovernanceActionRequest {
     bytes32 manifestHash;
 }
 
-/// @notice Long-term governance action classes (ADR 0004, Future-Proof
-///         Governance Extensions). Numeric IDs follow the pinned list order.
+/// @notice Launch-v1 governance action classes as rebaselined by ADR 0017.
+/// @dev Numeric IDs are append-only. ID 6 is retired pre-genesis, forbidden,
+///      and must never be reassigned.
 library StreamGovernanceActionClasses {
     uint8 internal constant IMMEDIATE_TIGHTENING = 0;
     uint8 internal constant DELAYED_LOOSENING = 1;
@@ -75,7 +76,6 @@ library StreamGovernanceActionClasses {
     uint8 internal constant POINTER_REPLACEMENT = 3;
     uint8 internal constant FUNDS_RECOVERY = 4;
     uint8 internal constant SUCCESSOR_DECLARATION = 5;
-    uint8 internal constant EMERGENCY_RESTORATION = 6;
 }
 
 /// @notice One immutable manifest-tail trigger rule.
@@ -88,12 +88,6 @@ struct ManifestTailTriggerRule {
 struct ManifestTailTriggerEntry {
     address triggerTarget;
     bytes4 triggerSelector;
-}
-
-/// @notice One append-only class-6 eligibility key.
-struct EmergencyRestorationEligibilityEntry {
-    address target;
-    bytes4 selector;
 }
 
 /// @notice One expected genesis manifest-tail trigger.
@@ -212,8 +206,8 @@ interface IStreamGovernanceExecutor {
     error GovernanceTimestampOverflow(uint256 timestamp);
     /// @notice Reverts when `notBefore` is earlier than the class minimum delay.
     error DelayBelowClassMinimum(uint8 actionClass, uint64 notBefore, uint64 earliest);
-    /// @notice Reverts when the open-to-execute window is below its class floor:
-    ///         seven days for delayed classes or four hours for class `6`.
+    /// @notice Reverts when a delayed class has less than seven days in its
+    ///         open-to-execute window.
     error OpenWindowBelowFloor(uint64 notBefore, uint64 expiresAfter);
     /// @notice Reverts when `expiresAfter` is not after `notBefore` or exceeds
     ///         the launch-pinned maximum action lifetime.
@@ -312,16 +306,6 @@ interface IStreamGovernanceExecutor {
     error InvalidManifestTail();
     error ManifestTailCodeHashMismatch(bytes32 expected, bytes32 actual);
     error ManifestTailTriggerIndexOutOfBounds(uint256 index);
-    /// @notice Reverts on invalid immutable class-6 eligibility or use.
-    error InvalidEmergencyRestorationEligibility(address target, bytes4 selector);
-    error EmergencyRestorationEligibilityAlreadyRegistered(address target, bytes4 selector);
-    error EmergencyRestorationRegistrationNotIsolated();
-    error EmergencyRestorationClassRequired(address target, bytes4 selector);
-    error EmergencyRestorationCallNotEligible(address target, bytes4 selector);
-    error EmergencyRestorationCodeHashMismatch(
-        address target, bytes4 selector, bytes32 expected, bytes32 actual
-    );
-    error EmergencyRestorationEligibilityIndexOutOfBounds(uint256 index);
     error GovernanceSelfCallContextRequired();
     error GovernanceTransitionContextMismatch();
     error TerminalFreezeGuardianConfigDrift(
@@ -433,14 +417,6 @@ interface IStreamGovernanceExecutor {
         uint8 allowedActionClassMask,
         address tailTarget,
         bytes4 tailSelector,
-        bytes32 indexed actionId
-    );
-
-    event EmergencyRestorationEligibilityRegistered(
-        uint16 schemaVersion,
-        address indexed target,
-        bytes4 indexed selector,
-        bytes32 targetCodeHash,
         bytes32 indexed actionId
     );
 
@@ -761,25 +737,6 @@ interface IStreamGovernanceExecutor {
 
     /// @notice Reads back the exact scheduled calldata preimages for `actionId`.
     function scheduledCallData(bytes32 actionId) external view returns (bytes[] memory);
-
-    function emergencyRestorationEligibility(address target, bytes4 selector)
-        external
-        view
-        returns (bool eligible, bytes32 targetCodeHash);
-
-    function registerEmergencyRestorationEligibility(address target, bytes4 selector) external;
-
-    function emergencyRestorationEligibilityCount() external view returns (uint256);
-
-    function emergencyRestorationEligibilityAt(uint256 index)
-        external
-        view
-        returns (address target, bytes4 selector, bytes32 targetCodeHash);
-
-    function emergencyRestorationEligibilityChainHash()
-        external
-        view
-        returns (bytes32 chainHash, uint64 recordCount);
 
     function systemManifestBatchTailRule(address triggerTarget, bytes4 triggerSelector)
         external

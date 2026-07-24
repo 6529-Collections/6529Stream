@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "../smart-contracts/IStreamGovernanceExecutor.sol";
-import "../smart-contracts/IStreamGasParameterHost.sol";
 import "../smart-contracts/IStreamModuleRegistry.sol";
 import "../smart-contracts/IStreamRoleRegistry.sol";
 import "../smart-contracts/StreamGovernanceBootstrap.sol";
@@ -17,63 +16,6 @@ contract StreamGovernanceSSTORE2ReadHarness {
     function read(address pointer) external view returns (bytes memory) {
         return SSTORE2.read(pointer);
     }
-}
-
-contract StreamGovernanceEmergencyTargetMock {
-    address public immutable governanceAuthority;
-    uint256 public value;
-
-    constructor(address governanceAuthority_) {
-        governanceAuthority = governanceAuthority_;
-    }
-
-    function emergencyRaiseGasParameter(bytes32, uint256 value_) external {
-        value = value_;
-    }
-}
-
-contract StreamGovernanceGasHeavyEmergencyTargetMock {
-    address private immutable _governanceAuthority;
-    uint256 private immutable _gasToBurn;
-    uint256 public value;
-
-    constructor(address governanceAuthority_, uint256 gasToBurn_) {
-        _governanceAuthority = governanceAuthority_;
-        _gasToBurn = gasToBurn_;
-    }
-
-    function governanceAuthority() external view returns (address) {
-        uint256 initialGas = gasleft();
-        while (initialGas - gasleft() < _gasToBurn) { }
-        return _governanceAuthority;
-    }
-
-    function emergencyRaiseGasParameter(bytes32, uint256 value_) external {
-        value = value_;
-    }
-}
-
-contract StreamGovernanceMalformedAuthorityTargetMock {
-    uint8 private immutable _returnMode;
-
-    constructor(uint8 returnMode) {
-        _returnMode = returnMode;
-    }
-
-    function governanceAuthority() external view returns (address) {
-        if (_returnMode == 0) revert("authority unavailable");
-        if (_returnMode == 1) {
-            assembly ("memory-safe") {
-                return(0, 0)
-            }
-        }
-        assembly ("memory-safe") {
-            mstore(0, address())
-            return(0, 0x40)
-        }
-    }
-
-    function emergencyRaiseGasParameter(bytes32, uint256) external { }
 }
 
 interface VmBootstrapAccess {
@@ -295,8 +237,6 @@ contract StreamGovernanceBootstrapPrimedManifestMock {
 contract StreamGovernanceBootstrapPolicyHarness {
     bytes4 internal constant SEAL_SELECTOR = 0x11111111;
     bytes4 internal constant REGISTER_TAIL_SELECTOR = 0x22222222;
-    bytes4 internal constant REGISTER_EMERGENCY_SELECTOR = 0x33333333;
-    address private constant ROLE_REGISTRY = address(0xA11CE);
 
     StreamGovernanceBootstrap.PolicyState private _policy;
     address private _roleRegistry;
@@ -345,98 +285,7 @@ contract StreamGovernanceBootstrapPolicyHarness {
             _tailTarget,
             _tailCodeHash,
             SEAL_SELECTOR,
-            REGISTER_TAIL_SELECTOR,
-            REGISTER_EMERGENCY_SELECTOR
-        );
-    }
-
-    function registerEmergency(
-        address target,
-        bytes4 selector,
-        bytes32 scopeHash,
-        bytes32 oldValueHash,
-        bytes32 newValueHash,
-        bool bootstrapSealed
-    ) external returns (bytes32) {
-        return StreamGovernanceBootstrap.registerEmergencyEligibility(
-            _policy,
-            target,
-            selector,
-            ROLE_REGISTRY,
-            _tailTarget,
-            scopeHash,
-            oldValueHash,
-            newValueHash,
-            bootstrapSealed
-        );
-    }
-
-    function registerEmergencyCanonical(address target, bytes4 selector)
-        external
-        returns (bytes32)
-    {
-        uint256 index = _policy.emergencyEntries.length;
-        require(index < type(uint64).max, "test emergency index");
-        uint64 index64 = uint64(index);
-        bytes32 codeHash = target.codehash;
-        bytes32 scopeHash = keccak256(
-            abi.encode(
-                bytes32(0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b),
-                block.chainid,
-                address(this),
-                target,
-                selector
-            )
-        );
-        bytes32 oldValueHash = keccak256(
-            abi.encode(
-                bytes32(0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae),
-                scopeHash,
-                false,
-                bytes32(0),
-                index64,
-                _policy.emergencyChainHash
-            )
-        );
-        bytes32 recordHash = keccak256(
-            abi.encode(
-                bytes32(0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004),
-                index64,
-                target,
-                selector,
-                codeHash
-            )
-        );
-        bytes32 nextChainHash = keccak256(
-            abi.encode(
-                bytes32(0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340),
-                block.chainid,
-                address(this),
-                _policy.emergencyChainHash,
-                recordHash,
-                index64
-            )
-        );
-        bytes32 newValueHash = keccak256(
-            abi.encode(
-                bytes32(0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae),
-                scopeHash,
-                true,
-                codeHash,
-                index64 + 1,
-                nextChainHash
-            )
-        );
-        return StreamGovernanceBootstrap.registerEmergencyEligibility(
-            _policy,
-            target,
-            selector,
-            ROLE_REGISTRY,
-            _tailTarget,
-            scopeHash,
-            oldValueHash,
-            newValueHash,
-            true
+            REGISTER_TAIL_SELECTOR
         );
     }
 
@@ -531,13 +380,8 @@ contract StreamGovernanceBootstrapPolicyHarness {
             _tailTarget,
             _tailCodeHash,
             SEAL_SELECTOR,
-            REGISTER_TAIL_SELECTOR,
-            REGISTER_EMERGENCY_SELECTOR
+            REGISTER_TAIL_SELECTOR
         );
-    }
-
-    function emergencyEligibility(address target, bytes4 selector) external view returns (bytes32) {
-        return _policy.emergencyCodeHash[target][selector];
     }
 
     function tailTarget() external view returns (address) {
@@ -905,10 +749,7 @@ contract StreamGovernanceBootstrapPayloadTest is StreamGovernanceBootstrapTestBa
 contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTestBase {
     bytes4 private constant TRIGGER_SELECTOR =
         StreamGovernanceBootstrapTriggerMock.bootstrapWrite.selector;
-    bytes4 private constant EMERGENCY_SELECTOR =
-        IStreamGasParameterHost.emergencyRaiseGasParameter.selector;
     bytes4 private constant REGISTER_TAIL_SELECTOR = 0x22222222;
-    bytes4 private constant REGISTER_EMERGENCY_SELECTOR = 0x33333333;
     bytes4 private constant SEAL_SELECTOR = 0x11111111;
 
     StreamGovernanceBootstrapTriggerMock private coreCode;
@@ -1017,7 +858,7 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
         policy.validateTail(3, calls, false);
     }
 
-    function testTailAndEmergencyRegistrationsAreIsolatedClassTwoSelfCalls() public {
+    function testTailRegistrationIsIsolatedClassTwoSelfCall() public {
         GovernanceCall[] memory calls = new GovernanceCall[](1);
         calls[0] = _call(address(policy), 0, REGISTER_TAIL_SELECTOR);
         vm.expectRevert(
@@ -1027,19 +868,6 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
         );
         policy.validateTail(1, calls, false);
         policy.validateTail(2, calls, false);
-
-        calls[0] = _call(address(policy), 0, REGISTER_EMERGENCY_SELECTOR);
-        policy.validateTail(2, calls, false);
-
-        GovernanceCall[] memory combined = new GovernanceCall[](2);
-        combined[0] = calls[0];
-        combined[1] = _call(address(coreCode), 0, TRIGGER_SELECTOR);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.ManifestTailTriggerRegistrationNotIsolated.selector
-            )
-        );
-        policy.validateTail(2, combined, false);
     }
 
     function testPersistentManifestTailTriggerRejectsEIP7702DelegatedEOA() public {
@@ -1053,83 +881,6 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
             )
         );
         policy.appendTail(delegatedEOA, TRIGGER_SELECTOR, 0x0f);
-    }
-
-    function testPersistentEmergencyEligibilityRejectsEIP7702DelegatedEOA() public {
-        address delegatedEOA = address(0x770202);
-        vm.etch(delegatedEOA, _eip7702Designation(address(trigger)));
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                delegatedEOA,
-                EMERGENCY_SELECTOR
-            )
-        );
-        policy.registerEmergency(
-            delegatedEOA, EMERGENCY_SELECTOR, bytes32(0), bytes32(0), bytes32(0), true
-        );
-    }
-
-    function testEmergencyEligibilityAuthorityProbeForwardsAvailableGas() public {
-        StreamGovernanceGasHeavyEmergencyTargetMock gasHeavyTarget =
-            new StreamGovernanceGasHeavyEmergencyTargetMock(address(policy), 45_000);
-
-        bytes32 codeHash =
-            policy.registerEmergencyCanonical(address(gasHeavyTarget), EMERGENCY_SELECTOR);
-
-        require(codeHash == address(gasHeavyTarget).codehash, "high-gas authority probe rejected");
-    }
-
-    function testEmergencyEligibilityAuthorityProbeFailsClosedOnBadReturndata() public {
-        for (uint8 returnMode = 0; returnMode < 3; returnMode++) {
-            StreamGovernanceMalformedAuthorityTargetMock malformed =
-                new StreamGovernanceMalformedAuthorityTargetMock(returnMode);
-            vm.expectRevert(
-                abi.encodeWithSelector(
-                    IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                    address(malformed),
-                    EMERGENCY_SELECTOR
-                )
-            );
-            policy.registerEmergencyCanonical(address(malformed), EMERGENCY_SELECTOR);
-        }
-    }
-
-    function testTailAndEmergencyEligibilityAreBidirectionallyDisjoint() public {
-        StreamGovernanceEmergencyTargetMock tailFirst =
-            new StreamGovernanceEmergencyTargetMock(address(policy));
-        policy.appendTail(address(tailFirst), EMERGENCY_SELECTOR, 0x0f);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                address(tailFirst),
-                EMERGENCY_SELECTOR
-            )
-        );
-        policy.registerEmergencyCanonical(address(tailFirst), EMERGENCY_SELECTOR);
-
-        StreamGovernanceEmergencyTargetMock emergencyFirst =
-            new StreamGovernanceEmergencyTargetMock(address(policy));
-        policy.registerEmergencyCanonical(address(emergencyFirst), EMERGENCY_SELECTOR);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidManifestTailTrigger.selector,
-                address(emergencyFirst),
-                EMERGENCY_SELECTOR
-            )
-        );
-        policy.appendTail(address(emergencyFirst), EMERGENCY_SELECTOR, 0x0f);
-    }
-
-    function testEmergencyEligibilityRejectsImmutableManifestPublicationPair() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                address(tailCode),
-                MANIFEST_PUBLISH_SELECTOR
-            )
-        );
-        policy.registerEmergencyCanonical(address(tailCode), MANIFEST_PUBLISH_SELECTOR);
     }
 
     function testManifestTailTriggerRejectsExecutorSelfTargets() public {
@@ -1150,32 +901,6 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
             )
         );
         policy.appendTail(address(policy), SEAL_SELECTOR, 0x0f);
-    }
-
-    function testFreezeAndEmergencyEligibilityAreBidirectionallyDisjoint() public {
-        StreamGovernanceEmergencyTargetMock freezeFirst =
-            new StreamGovernanceEmergencyTargetMock(address(policy));
-        policy.forceFreeze(address(freezeFirst), EMERGENCY_SELECTOR, true);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                address(freezeFirst),
-                EMERGENCY_SELECTOR
-            )
-        );
-        policy.registerEmergencyCanonical(address(freezeFirst), EMERGENCY_SELECTOR);
-
-        StreamGovernanceEmergencyTargetMock emergencyFirst =
-            new StreamGovernanceEmergencyTargetMock(address(policy));
-        policy.registerEmergencyCanonical(address(emergencyFirst), EMERGENCY_SELECTOR);
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                address(emergencyFirst),
-                EMERGENCY_SELECTOR
-            )
-        );
-        policy.enableFreeze(address(emergencyFirst), EMERGENCY_SELECTOR);
     }
 
     function testFreezeTailOverlapRequiresTerminalFreezeClassMask() public {
@@ -1233,29 +958,6 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
         policyHarness.enableTightening(delegatedEOA, TRIGGER_SELECTOR);
     }
 
-    function testClassSixRequiresFourHourOpenExecutionWindow() public {
-        uint64 notBefore = uint64(block.timestamp);
-        uint64 belowFloor = notBefore + 4 hours - 1;
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.OpenWindowBelowFloor.selector, notBefore, belowFloor
-            )
-        );
-        StreamGovernanceBootstrap.validateActionWindow(
-            StreamGovernanceActionClasses.EMERGENCY_RESTORATION, notBefore, belowFloor
-        );
-
-        StreamGovernanceBootstrap.validateActionWindow(
-            StreamGovernanceActionClasses.EMERGENCY_RESTORATION, notBefore, notBefore + 4 hours
-        );
-
-        // The emergency coordination floor is class-6-specific; immediate
-        // tightening retains its existing positive-window semantics.
-        StreamGovernanceBootstrap.validateActionWindow(
-            StreamGovernanceActionClasses.IMMEDIATE_TIGHTENING, notBefore, notBefore + 1
-        );
-    }
-
     function testGovernanceActionWindowRejectsUint64TimestampBoundaryAndOverflow() public {
         uint256 maxTimestamp = type(uint64).max;
         vm.warp(maxTimestamp);
@@ -1304,135 +1006,6 @@ contract StreamGovernanceBootstrapCompositionTest is StreamGovernanceBootstrapTe
         StreamGovernanceBootstrap.validateActionWindow(
             StreamGovernanceActionClasses.DELAYED_LOOSENING, notBefore, notBefore + 7 days
         );
-    }
-
-    function testClassSixEligibilityRejectsPresealAndSelfTarget() public {
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.SystemManifestBootstrapNotSealed.selector
-            )
-        );
-        policy.registerEmergency(
-            address(trigger), TRIGGER_SELECTOR, bytes32(0), bytes32(0), bytes32(0), false
-        );
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility.selector,
-                address(policy),
-                TRIGGER_SELECTOR
-            )
-        );
-        policy.registerEmergency(
-            address(policy), TRIGGER_SELECTOR, bytes32(0), bytes32(0), bytes32(0), true
-        );
-    }
-
-    function testClassSixPinsLiveCodeHashAndExcludesOtherClasses() public {
-        StreamGovernanceEmergencyTargetMock emergencyTarget =
-            new StreamGovernanceEmergencyTargetMock(address(policy));
-        bytes32 scopeHash = keccak256(
-            abi.encode(
-                bytes32(0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b),
-                block.chainid,
-                address(policy),
-                address(emergencyTarget),
-                EMERGENCY_SELECTOR
-            )
-        );
-        bytes32 oldValueHash = keccak256(
-            abi.encode(
-                bytes32(0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae),
-                scopeHash,
-                false,
-                bytes32(0),
-                uint64(0),
-                bytes32(0)
-            )
-        );
-        bytes32 codeHash = address(emergencyTarget).codehash;
-        bytes32 recordHash = keccak256(
-            abi.encode(
-                bytes32(0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004),
-                uint64(0),
-                address(emergencyTarget),
-                EMERGENCY_SELECTOR,
-                codeHash
-            )
-        );
-        bytes32 nextChainHash = keccak256(
-            abi.encode(
-                bytes32(0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340),
-                block.chainid,
-                address(policy),
-                bytes32(0),
-                recordHash,
-                uint64(0)
-            )
-        );
-        bytes32 newValueHash = keccak256(
-            abi.encode(
-                bytes32(0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae),
-                scopeHash,
-                true,
-                codeHash,
-                uint64(1),
-                nextChainHash
-            )
-        );
-        require(
-            policy.registerEmergency(
-                address(emergencyTarget),
-                EMERGENCY_SELECTOR,
-                scopeHash,
-                oldValueHash,
-                newValueHash,
-                true
-            ) == codeHash,
-            "registered code hash"
-        );
-        require(
-            policy.emergencyEligibility(address(emergencyTarget), EMERGENCY_SELECTOR) == codeHash,
-            "stored code hash"
-        );
-
-        bytes32 parameterId = keccak256("test-emergency-parameter");
-        bytes memory callData =
-            abi.encodeCall(emergencyTarget.emergencyRaiseGasParameter, (parameterId, uint256(7)));
-        GovernanceCall[] memory calls = new GovernanceCall[](1);
-        calls[0] = GovernanceCall({
-            target: address(emergencyTarget),
-            value: 0,
-            selector: EMERGENCY_SELECTOR,
-            callDataHash: keccak256(callData),
-            scopeHash: bytes32(0),
-            oldValueHash: bytes32(0),
-            newValueHash: bytes32(0)
-        });
-        bytes[] memory callDatas = new bytes[](1);
-        callDatas[0] = callData;
-        policy.validateCalls(6, calls, callDatas);
-
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.EmergencyRestorationClassRequired.selector,
-                address(emergencyTarget),
-                EMERGENCY_SELECTOR
-            )
-        );
-        policy.validateCalls(1, calls, callDatas);
-
-        vm.etch(address(emergencyTarget), hex"60006000f3");
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                IStreamGovernanceExecutor.EmergencyRestorationCodeHashMismatch.selector,
-                address(emergencyTarget),
-                EMERGENCY_SELECTOR,
-                codeHash,
-                address(emergencyTarget).codehash
-            )
-        );
-        policy.validateCalls(6, calls, callDatas);
     }
 }
 

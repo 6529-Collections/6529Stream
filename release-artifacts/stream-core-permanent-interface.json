@@ -78,7 +78,7 @@
     },
     {
       "id": "gas-parameters",
-      "description": "Core-minimal governed gas parameters and bounded conditional repair"
+      "description": "Core-minimal raise-only governed gas parameters"
     },
     {
       "id": "metadata-refresh",
@@ -447,46 +447,6 @@
       "state_mutability": "nonpayable"
     },
     {
-      "id": "core-conditional-raise-gas",
-      "status": "active_target",
-      "bytecode_budget_group": "gas-parameters",
-      "permanence_class": "Permanent",
-      "owner_subsystem": "StreamCore",
-      "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Permissionless standing action for registered forwarding-cap rows only",
-      "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
-      "signature": "conditionalRaiseGasParameter(bytes32,uint256)",
-      "supersedes": [],
-      "replaced_by": [],
-      "retirement_disposition": null,
-      "replacement_owner": null,
-      "replacement_signature": null,
-      "retirement_rationale": null,
-      "selector": "0x0671a369",
-      "returns": [],
-      "state_mutability": "nonpayable"
-    },
-    {
-      "id": "core-conditional-relower-gas",
-      "status": "active_target",
-      "bytecode_budget_group": "gas-parameters",
-      "permanence_class": "Permanent",
-      "owner_subsystem": "StreamCore",
-      "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Permissionless standing action for registered forwarding-cap rows only",
-      "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
-      "signature": "conditionalRelowerGasParameter(bytes32,uint256)",
-      "supersedes": [],
-      "replaced_by": [],
-      "retirement_disposition": null,
-      "replacement_owner": null,
-      "replacement_signature": null,
-      "retirement_rationale": null,
-      "selector": "0x59bf6beb",
-      "returns": [],
-      "state_mutability": "nonpayable"
-    },
-    {
       "id": "erc7572-contract-uri",
       "status": "active_target",
       "bytecode_budget_group": "erc7572-contract-metadata",
@@ -552,26 +512,6 @@
       "returns": [
         "uint256"
       ],
-      "state_mutability": "nonpayable"
-    },
-    {
-      "id": "core-emergency-raise-gas-parameter",
-      "status": "active_target",
-      "bytecode_budget_group": "gas-parameters",
-      "permanence_class": "Permanent",
-      "owner_subsystem": "StreamCore",
-      "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Immutable governance executor during a verified emergency per-call action",
-      "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
-      "signature": "emergencyRaiseGasParameter(bytes32,uint256)",
-      "supersedes": [],
-      "replaced_by": [],
-      "retirement_disposition": null,
-      "replacement_owner": null,
-      "replacement_signature": null,
-      "retirement_rationale": null,
-      "selector": "0x4fa1b5ad",
-      "returns": [],
       "state_mutability": "nonpayable"
     },
     {
@@ -694,9 +634,7 @@
       "returns": [
         "uint256",
         "uint256",
-        "address",
         "uint8",
-        "uint64",
         "uint64"
       ],
       "state_mutability": "view"
@@ -823,26 +761,6 @@
         "uint256"
       ],
       "state_mutability": "view"
-    },
-    {
-      "id": "core-lower-gas-parameter",
-      "status": "active_target",
-      "bytecode_budget_group": "gas-parameters",
-      "permanence_class": "Permanent",
-      "owner_subsystem": "StreamCore",
-      "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Immutable governance executor during a verified per-call action",
-      "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
-      "signature": "lowerGasParameter(bytes32,uint256)",
-      "supersedes": [],
-      "replaced_by": [],
-      "retirement_disposition": null,
-      "replacement_owner": null,
-      "replacement_signature": null,
-      "retirement_rationale": null,
-      "selector": "0x908dc981",
-      "returns": [],
-      "state_mutability": "nonpayable"
     },
     {
       "id": "core-mint-from-manager",
@@ -990,7 +908,7 @@
       "permanence_class": "Permanent",
       "owner_subsystem": "StreamCore",
       "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Immutable governance executor during a verified per-call action",
+      "authorization_model": "Immutable governance executor during an exact delayed-loosening action; strict monotonic raise bounded to at most 2x per action",
       "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
       "signature": "raiseGasParameter(bytes32,uint256)",
       "supersedes": [],
@@ -1000,26 +918,6 @@
       "replacement_signature": null,
       "retirement_rationale": null,
       "selector": "0x5c0df7da",
-      "returns": [],
-      "state_mutability": "nonpayable"
-    },
-    {
-      "id": "core-rebind-gas-probe",
-      "status": "active_target",
-      "bytecode_budget_group": "gas-parameters",
-      "permanence_class": "Permanent",
-      "owner_subsystem": "StreamCore",
-      "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Immutable governance executor during a verified POINTER_REPLACEMENT (3) action with same-batch system-manifest satellite publication",
-      "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
-      "signature": "rebindGasParameterProbe(bytes32,address)",
-      "supersedes": [],
-      "replaced_by": [],
-      "retirement_disposition": null,
-      "replacement_owner": null,
-      "replacement_signature": null,
-      "retirement_rationale": null,
-      "selector": "0xb98f30e0",
       "returns": [],
       "state_mutability": "nonpayable"
     },
@@ -2935,42 +2833,13 @@
       "standard_interface": null
     },
     {
-      "id": "core-gas-probe-rebound-event",
-      "status": "active_target",
-      "bytecode_budget_group": "gas-parameters",
-      "permanence_class": "Permanent",
-      "owner_subsystem": "StreamCore",
-      "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Emitted after every verified Core probe-binding move",
-      "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
-      "signature": "GasParameterProbeRebound(uint16,bytes32,address,bytes32,address,address)",
-      "supersedes": [],
-      "replaced_by": [],
-      "retirement_disposition": null,
-      "replacement_owner": null,
-      "replacement_signature": null,
-      "retirement_rationale": null,
-      "topic0": "0x339eac0706e5da05ad5682ba742c71b7309497f7e138f8db2e1c022c76bfab8c",
-      "anonymous": false,
-      "indexed": [
-        false,
-        true,
-        true,
-        true,
-        false,
-        false
-      ],
-      "schema_version": 1,
-      "standard_interface": null
-    },
-    {
       "id": "core-gas-parameter-updated-event",
       "status": "active_target",
       "bytecode_budget_group": "gas-parameters",
       "permanence_class": "Permanent",
       "owner_subsystem": "StreamCore",
       "interface_name": "IStreamCoreGasParameters",
-      "authorization_model": "Emitted after every Core-hosted gas-parameter value change",
+      "authorization_model": "Emitted after every exact delayed raise of a Core-hosted gas parameter",
       "normative_home": "docs/stream-long-term-architecture.md#LTA-GGP-CORE",
       "signature": "GasParameterUpdated(uint16,bytes32,address,bytes32,uint256,uint256,uint256)",
       "supersedes": [],
@@ -2990,7 +2859,7 @@
         false,
         false
       ],
-      "schema_version": 1,
+      "schema_version": 2,
       "standard_interface": null
     },
     {

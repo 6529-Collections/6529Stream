@@ -32,6 +32,16 @@ GAS_SNAPSHOT_FILENAME = "gas-snapshot.snap"
 GAS_ENVELOPES_FILENAME = "gas-envelopes.json"
 NATSPEC_COVERAGE_FILENAME = "natspec-coverage.json"
 DEFAULT_CONTRACT_CONFIG = Path("release-artifacts/contracts.json")
+DEFAULT_GENESIS_DEPLOYMENT_PROFILE = Path(
+    "release-artifacts/genesis-deployment-profile.json"
+)
+DEFAULT_SYSTEM_MANIFEST_PAYLOAD_VECTOR = Path(
+    "release-artifacts/system-manifest-payload-vector.json"
+)
+DEFAULT_STREAM_CORE_PERMANENT_INTERFACE = Path(
+    "release-artifacts/stream-core-permanent-interface.json"
+)
+DEFAULT_EXTERNAL_CALL_GAS_INVENTORY = Path("ops/EXTERNAL_CALL_GAS_INVENTORY.json")
 PUBLIC_BETA_EVIDENCE_FILENAME = "public-beta-evidence.json"
 PUBLIC_BETA_BLOCKERS_FILENAME = "public-beta-blockers.md"
 PRODUCTION_RELEASE_BLOCKERS_FILENAME = "production-release-blockers.md"
@@ -76,6 +86,7 @@ DEFAULT_SIGNER_CUSTODY_READINESS_DIR = Path(
 DEFAULT_CHANGELOG = Path("CHANGELOG.md")
 DEFAULT_GOVERNANCE_DOCS = [
     Path("README.md"),
+    Path("release-artifacts/README.md"),
     Path(".github/PULL_REQUEST_TEMPLATE.md"),
     Path(".github/ISSUE_TEMPLATE/audit_finding.yml"),
     Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
@@ -92,11 +103,32 @@ DEFAULT_GOVERNANCE_DOCS = [
     Path("docs/public-beta-evidence.md"),
     Path("docs/non-local-release-evidence.md"),
     Path("docs/architecture.md"),
+    Path("docs/adr/README.md"),
+    Path("docs/adr/0004-admin-governance.md"),
+    Path("docs/adr/0008-revenue-splits-and-royalty-resolver.md"),
+    Path("docs/adr/0010-world-class-spec-pass.md"),
+    Path("docs/adr/0011-world-class-pass-round-2.md"),
+    Path("docs/adr/0012-world-class-pass-round-3.md"),
+    Path("docs/adr/0013-world-class-pass-round-4.md"),
+    Path("docs/adr/0014-world-class-pass-round-5.md"),
+    Path("docs/adr/0016-core-native-only-erc721.md"),
     Path("docs/launch-v1-target-architecture.md"),
+    Path("docs/launch-conformance-matrix.md"),
+    Path("docs/adr/0017-raise-only-parameter-governance.md"),
+    Path("docs/revenue-splits-and-royalties.md"),
+    Path("docs/mint-policy-and-accounting.md"),
+    Path("docs/stream-sales-and-auctions.md"),
+    Path("docs/stream-artist-authority.md"),
+    Path("docs/metadata-router-and-renderer.md"),
+    Path("docs/collection-metadata-contract.md"),
+    Path("docs/stream-entropy-coordinator.md"),
+    Path("docs/stream-entropy-providers.md"),
+    Path("docs/stream-long-term-architecture.md"),
     Path("docs/threat-model.md"),
     Path("docs/audit-package.md"),
     Path("docs/audit-finding-workflow.md"),
     Path("docs/incident-response.md"),
+    Path("docs/known-blockers.md"),
     Path("docs/drop-authorization-signing.md"),
     Path("docs/signer-custody-readiness.md"),
     Path("docs/provenance-manifests.md"),
@@ -1105,6 +1137,26 @@ def build_manifest(
         },
         "release_artifacts": {
             "contract_config": file_record(contract_config_path, repo_root, schema_required=True),
+            "genesis_deployment_profile": file_record(
+                repo_root / DEFAULT_GENESIS_DEPLOYMENT_PROFILE,
+                repo_root,
+                schema_required=True,
+            ),
+            "system_manifest_payload_vector": file_record(
+                repo_root / DEFAULT_SYSTEM_MANIFEST_PAYLOAD_VECTOR,
+                repo_root,
+                schema_required=True,
+            ),
+            "stream_core_permanent_interface": file_record(
+                repo_root / DEFAULT_STREAM_CORE_PERMANENT_INTERFACE,
+                repo_root,
+                schema_required=True,
+            ),
+            "external_call_gas_inventory": file_record(
+                repo_root / DEFAULT_EXTERNAL_CALL_GAS_INVENTORY,
+                repo_root,
+                schema_required=True,
+            ),
             "abi_checksums": file_record(
                 release_artifacts_dir / "abi-checksums.json",
                 repo_root,

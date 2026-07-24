@@ -9,7 +9,9 @@ artist-side items of decisions T3, T5, and T9), and
 [ADR 0013](adr/0013-world-class-pass-round-4.md) (decisions U1 and U4,
 plus the artist-side item of decision U8), and
 [ADR 0014](adr/0014-world-class-pass-round-5.md) (decision V3, plus the
-artist-ceremony item of decision V4); it contains no open questions.
+artist-ceremony item of decision V4), as amended by
+[ADR 0017](adr/0017-raise-only-parameter-governance.md) for raise-only
+Governed Gas and Time Parameters; it contains no open questions.
 
 This document is the normative home of the 6529Stream artist authority
 model (ADR 0010 decision D2, single-sourced per ADR 0010 decision D3.1).
@@ -1247,21 +1249,22 @@ Requirements:
    `staticcall` with `ARTIST_ERC1271_VERIFY_GAS`, a Governed Gas Parameter
    under the model home,
    [`stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-GGP] (ADR 0010 decision D1) — floors, governance classes, probes,
-   change events, manifest recording, and the Operational-layer exclusion
-   follow the home unchanged. The floor is sized by measured Safe n-of-m
-   verification (ADR 0010 decision D7.3); initial planning values are a
-   90,000-gas floor and a 150,000-gas genesis value, and deployment
-   records measured values in the release manifest. The parameter's
+   [LTA-GGP] (ADR 0010 decision D1 as superseded by ADR 0017) — the
+   immutable floor, governance class, change events, manifest recording,
+   and Operational-layer exclusion follow the home unchanged. The floor
+   is sized by measured Safe n-of-m verification (ADR 0010 decision D7.3);
+   initial planning values are a 90,000-gas floor and a 150,000-gas
+   genesis value, and deployment records measured values in the release
+   manifest. Mutations are authority-only Governance V2 class-1 actions,
+   delayed at least 48 hours, monotonic, and bounded to at most twice the
+   current value. No lower, emergency, conditional, probe,
+   module-registry, or module-rebinding path exists. The parameter's
    release-manifest failure-direction class is `FAIL_CLOSED_PRECHECK`
    ([LTA-GGP] requirement 10): requirement 3 failures revert the
-   submission, so raises are governance-only with no permissionless
-   conditional raise (ADR 0012 decision T1), and its named
-   Permanent-class probe ([LTA-GGP-PROBES]) proves a
-   maximum-supported-class ([GOV-1271-CLASS]) `isValidSignature`
-   verification completes with the magic value under exactly the probed
-   cap for pinned fixture inputs, with run records hosted on the probe
-   and `evidenceHash` committing to the measurement artifact.
+   submission. Reproducible offchain and fork evidence, rather than a
+   launch probe, demonstrates that the maximum supported wallet class
+   ([GOV-1271-CLASS]) completes `isValidSignature` with the magic value
+   under the configured cap.
 3. The ERC-1271 call must use the EIP-150 63/64 parent-gas precheck against
    the current parameter value, capped returndata copying, and exact
    magic-value comparison. Failure, out-of-gas, malformed returndata, or a
@@ -4048,18 +4051,20 @@ Requirements:
 2. `ARTIST_ERC1271_VERIFY_GAS` follows the full Governed Gas Parameter
    model (ADR 0010 decision D1): named constant, genesis value and floor
    in the release manifest, change events with old and new values,
-   membership in the hard-fork/repricing review checklist, health probes
-   for lowering, and exclusion from finality identity. Its floor and
-   genesis value are sized against the heaviest named wallet class of
-   the one wallet-class home, ADR 0004 [GOV-1271-CLASS] (ADR 0011
-   decision R10).
+   authority-only Governance V2 class-1 raises delayed at least 48 hours
+   and bounded to at most twice the current value, membership in the
+   hard-fork/repricing review checklist, and exclusion from finality
+   identity. It has no lowering, emergency, conditional, probe,
+   module-registry, or module-rebinding surface. Its floor and genesis
+   value are sized against the heaviest named wallet class of the one
+   wallet-class home, ADR 0004 [GOV-1271-CLASS] (ADR 0011 decision R10).
 3. Every seconds-denominated governed window above (dormancy inactivity
    and notice, rotation contest, repudiation contest, prior-address
    standing tail, estate-activation notice,
    unavailability-recovery notice) is owned by this home under the
    [LTA-GTP] closed-world rule — these windows are never Governed Time
-   Parameters and claim none of that pattern's identifier, probe, or
-   mirror obligations (ADR 0013 decision U9) — and
+   Parameters and claim none of that pattern's identifier, state-
+   commitment, or manifest obligations (ADR 0013 decision U9) — and
    follows the same staged change discipline with immutable
    floors; time floors protect artists, so values may be raised freely
    and lowered only through the `DELAYED` class, never below the floor.
@@ -5396,8 +5401,10 @@ These gates enter [`launch-conformance-matrix.md`](launch-conformance-matrix.md)
 5. Signature verification gate: ECDSA nonzero-and-matched plus
    non-canonical rejection negative tests (high-`s`, `v` outside
    `{27, 28}`, per `AA-SIGVER` requirement 1); ERC-1271
-   wrong-magic/out-of-gas/malformed rejection; GGP floor, raise,
-   lower, and probe tests for `ARTIST_ERC1271_VERIFY_GAS`; signature-bytes
+   wrong-magic/out-of-gas/malformed rejection; GGP floor, authority,
+   delayed monotonic raise, per-action `<= 2x` cap, Governance V2 state-
+   commitment, and removed-surface tests for
+   `ARTIST_ERC1271_VERIFY_GAS`; signature-bytes
    storage and oversized-bundle archival-proof path; unordered-nonce
    tests: two outstanding payloads submitted in reverse order both
    verify, and consuming or revoking a nonce value in one identity's

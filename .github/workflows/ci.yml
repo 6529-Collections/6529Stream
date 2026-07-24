@@ -322,6 +322,8 @@ jobs:
             scripts/test_release_readiness.py \
             scripts/check_genesis_deployment_profile.py \
             scripts/test_genesis_deployment_profile.py \
+            scripts/check_governed_parameter_identifiers.py \
+            scripts/test_governed_parameter_identifiers.py \
             scripts/generate_system_manifest_payload_vector.py \
             scripts/check_system_manifest_payload_vector.py \
             scripts/test_system_manifest_payload_vector.py \
@@ -828,6 +830,8 @@ jobs:
           python3 scripts/check_release_readiness.py 2>&1 | tee ci-logs/release-readiness-check.log
           python3 scripts/test_genesis_deployment_profile.py 2>&1 | tee ci-logs/genesis-deployment-profile-tests.log
           python3 scripts/check_genesis_deployment_profile.py 2>&1 | tee ci-logs/genesis-deployment-profile-check.log
+          python3 scripts/test_governed_parameter_identifiers.py 2>&1 | tee ci-logs/governed-parameter-identifiers-tests.log
+          python3 scripts/check_governed_parameter_identifiers.py 2>&1 | tee ci-logs/governed-parameter-identifiers-check.log
           python3 scripts/test_system_manifest_payload_vector.py 2>&1 | tee ci-logs/system-manifest-payload-vector-tests.log
           python3 scripts/check_system_manifest_payload_vector.py 2>&1 | tee ci-logs/system-manifest-payload-vector-check.log
           python3 scripts/test_system_manifest_payload_vector_reference.py 2>&1 | tee ci-logs/system-manifest-payload-vector-reference-tests.log

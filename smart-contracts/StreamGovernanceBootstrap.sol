@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 
 import "./IStreamGovernanceExecutor.sol";
-import "./IStreamGasParameterHost.sol";
 import "./IStreamModuleRegistry.sol";
 import "./IStreamRoleRegistry.sol";
 import "./SSTORE2.sol";
@@ -26,7 +25,6 @@ library StreamGovernanceBootstrap {
     uint256 private constant MAX_LIVE_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 64;
     uint256 private constant MAX_NON_ROOT_TERMINAL_FREEZE_ACTIONS_PER_SCOPE = 48;
     uint256 private constant MAX_TERMINAL_FREEZE_ACTIONS_PER_NON_ROOT_PROPOSER = 8;
-    uint64 private constant EMERGENCY_OPEN_WINDOW_FLOOR = 4 hours;
     uint16 private constant SCHEMA_VERSION = 1;
 
     error InvalidSystemManifestBootstrap();
@@ -59,9 +57,6 @@ library StreamGovernanceBootstrap {
         mapping(address => bool) approvedNativeReceivers;
         mapping(address => mapping(bytes4 => bool)) freezeSelectors;
         mapping(address => mapping(bytes4 => bytes32)) freezeSelectorCodeHashes;
-        mapping(address => mapping(bytes4 => bytes32)) emergencyCodeHash;
-        EmergencyRestorationEligibilityEntry[] emergencyEntries;
-        bytes32 emergencyChainHash;
         mapping(address => mapping(bytes4 => ManifestTailTriggerRule)) tailRules;
         ManifestTailTriggerEntry[] tailEntries;
         bytes32 tailChainHash;
@@ -291,11 +286,7 @@ library StreamGovernanceBootstrap {
             revert IStreamGovernanceExecutor.InvalidActionWindow(notBefore, expiresAfter);
         }
         uint64 openWindow = expiresAfter - notBefore;
-        if (
-            (delayFloor > 0 && openWindow < 7 days)
-                || (actionClass == StreamGovernanceActionClasses.EMERGENCY_RESTORATION
-                    && openWindow < EMERGENCY_OPEN_WINDOW_FLOOR)
-        ) {
+        if (delayFloor > 0 && openWindow < 7 days) {
             revert IStreamGovernanceExecutor.OpenWindowBelowFloor(notBefore, expiresAfter);
         }
         // Governance action lifetimes are intentionally defined in wall-clock seconds.
@@ -306,12 +297,18 @@ library StreamGovernanceBootstrap {
     }
 
     function minimumDelay(uint8 actionClass) public pure returns (uint64) {
-        if (actionClass == 0 || actionClass == 6) return 0;
+        validateActionClass(actionClass);
+        if (actionClass == 0) return 0;
         if (actionClass == 1 || actionClass == 3) return 48 hours;
         if (actionClass == 2) return 72 hours;
         if (actionClass == 4) return 14 days;
-        if (actionClass == 5) return 30 days;
-        revert IStreamGovernanceExecutor.UnknownActionClass(actionClass);
+        return 30 days;
+    }
+
+    function validateActionClass(uint8 actionClass) public pure {
+        if (actionClass > StreamGovernanceActionClasses.SUCCESSOR_DECLARATION) {
+            revert IStreamGovernanceExecutor.UnknownActionClass(actionClass);
+        }
     }
 
     function validateCalls(
@@ -330,7 +327,6 @@ library StreamGovernanceBootstrap {
         }
         bool immediate = actionClass == 0;
         bool terminalFreeze = actionClass == 2;
-        bool emergency = actionClass == 6;
         for (uint256 i = 0; i < calls.length; i++) {
             GovernanceCall memory call_ = calls[i];
             bytes memory callData = callDatas[i];
@@ -351,11 +347,6 @@ library StreamGovernanceBootstrap {
                 }
                 if (call_.value == 0 || !state.approvedNativeReceivers[call_.target]) {
                     revert IStreamGovernanceExecutor.NativeReceiverNotApproved(call_.target);
-                }
-                if (emergency) {
-                    revert IStreamGovernanceExecutor.EmergencyRestorationCallNotEligible(
-                        call_.target, call_.selector
-                    );
                 }
             } else if (callData.length < 4) {
                 revert IStreamGovernanceExecutor.CallDataTooShort(i);
@@ -421,24 +412,6 @@ library StreamGovernanceBootstrap {
                         call_.target, call_.selector
                     );
                 }
-            }
-            bytes32 eligibleCodeHash = state.emergencyCodeHash[call_.target][call_.selector];
-            if (emergency) {
-                if (call_.value != 0 || eligibleCodeHash == bytes32(0)) {
-                    revert IStreamGovernanceExecutor.EmergencyRestorationCallNotEligible(
-                        call_.target, call_.selector
-                    );
-                }
-                bytes32 liveCodeHash = call_.target.codehash;
-                if (liveCodeHash != eligibleCodeHash) {
-                    revert IStreamGovernanceExecutor.EmergencyRestorationCodeHashMismatch(
-                        call_.target, call_.selector, eligibleCodeHash, liveCodeHash
-                    );
-                }
-            } else if (eligibleCodeHash != bytes32(0)) {
-                revert IStreamGovernanceExecutor.EmergencyRestorationClassRequired(
-                    call_.target, call_.selector
-                );
             }
             totalValue += call_.value;
         }
@@ -1019,125 +992,6 @@ library StreamGovernanceBootstrap {
         );
     }
 
-    function registerEmergencyEligibility(
-        PolicyState storage state,
-        address target,
-        bytes4 selector,
-        address roleRegistry,
-        address manifestTailTarget,
-        bytes32 currentScopeHash,
-        bytes32 currentOldValueHash,
-        bytes32 currentNewValueHash,
-        bool bootstrapSealed
-    ) public returns (bytes32 codeHash) {
-        if (!bootstrapSealed) {
-            revert IStreamGovernanceExecutor.SystemManifestBootstrapNotSealed();
-        }
-        if (
-            target == address(0) || target == address(this) || selector == bytes4(0)
-                || target == roleRegistry
-                || selector != IStreamGasParameterHost.emergencyRaiseGasParameter.selector
-                || target.code.length == 0 || _isEip7702DelegatedEOA(target)
-                || state.tailRules[target][selector].triggerCodeHash != bytes32(0)
-                || state.freezeSelectors[target][selector]
-                || (target == manifestTailTarget && selector == MANIFEST_PUBLISH_SELECTOR)
-                || !_hasCanonicalGovernanceAuthority(target)
-        ) {
-            revert IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility(
-                target, selector
-            );
-        }
-        if (state.emergencyCodeHash[target][selector] != bytes32(0)) {
-            revert IStreamGovernanceExecutor.EmergencyRestorationEligibilityAlreadyRegistered(
-                target, selector
-            );
-        }
-        uint256 index = state.emergencyEntries.length;
-        if (index >= type(uint64).max) {
-            revert IStreamGovernanceExecutor.InvalidEmergencyRestorationEligibility(
-                target, selector
-            );
-        }
-        // The strict bound makes both `index` and `index + 1` fit uint64.
-        // forge-lint: disable-next-line(unsafe-typecast)
-        uint64 index64 = uint64(index);
-        codeHash = target.codehash;
-        bytes32 scopeHash = keccak256(
-            abi.encode(
-                bytes32(0xb9085dad05460da2726c7e111c53618efbcaf3fefea1e4d419ce162fe04e8d0b),
-                uint256(block.chainid),
-                address(this),
-                target,
-                selector
-            )
-        );
-        bytes32 oldStateHash = keccak256(
-            abi.encode(
-                bytes32(0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae),
-                scopeHash,
-                false,
-                bytes32(0),
-                index64,
-                state.emergencyChainHash
-            )
-        );
-        bytes32 recordHash = keccak256(
-            abi.encode(
-                bytes32(0xbc91b88f68461f99b3836432e21ee3043827c2937229121ccbb955fee3125004),
-                index64,
-                target,
-                selector,
-                codeHash
-            )
-        );
-        bytes32 nextChainHash = keccak256(
-            abi.encode(
-                bytes32(0xed9c1773f24c613652817d2dc58a04d22ceda9bb51fade48ea848ae5d322f340),
-                uint256(block.chainid),
-                address(this),
-                state.emergencyChainHash,
-                recordHash,
-                index64
-            )
-        );
-        bytes32 newStateHash = keccak256(
-            abi.encode(
-                bytes32(0x9e9da69a2ae8579f9356a29767b060277c495f965d4d7ae73169e241232160ae),
-                scopeHash,
-                true,
-                codeHash,
-                index64 + 1,
-                nextChainHash
-            )
-        );
-        if (
-            currentScopeHash != scopeHash || currentOldValueHash != oldStateHash
-                || currentNewValueHash != newStateHash
-        ) revert IStreamGovernanceExecutor.GovernanceTransitionContextMismatch();
-        state.emergencyCodeHash[target][selector] = codeHash;
-        state.emergencyEntries
-            .push(EmergencyRestorationEligibilityEntry({ target: target, selector: selector }));
-        state.emergencyChainHash = nextChainHash;
-    }
-
-    function _hasCanonicalGovernanceAuthority(address target) private view returns (bool valid) {
-        bytes memory callData =
-            abi.encodeWithSelector(IStreamGasParameterHost.governanceAuthority.selector);
-        bool success;
-        uint256 returnSize;
-        uint256 authorityWord;
-        assembly ("memory-safe") {
-            let pointer := mload(0x40)
-            success := staticcall(gas(), target, add(callData, 0x20), mload(callData), 0, 0)
-            returnSize := returndatasize()
-            if and(success, eq(returnSize, 32)) {
-                returndatacopy(pointer, 0, 32)
-                authorityWord := mload(pointer)
-            }
-        }
-        valid = success && returnSize == 32 && authorityWord == uint256(uint160(address(this)));
-    }
-
     function appendManifestTailTrigger(
         PolicyState storage state,
         address triggerTarget,
@@ -1153,7 +1007,6 @@ library StreamGovernanceBootstrap {
     ) public {
         if (
             triggerTarget == address(this) || _isEip7702DelegatedEOA(triggerTarget)
-                || state.emergencyCodeHash[triggerTarget][triggerSelector] != bytes32(0)
                 || (state.freezeSelectors[triggerTarget][triggerSelector]
                     && (allowedActionClassMask & 0x04) == 0)
         ) {
@@ -1289,8 +1142,7 @@ library StreamGovernanceBootstrap {
         address tailTarget,
         bytes32 tailCodeHash,
         bytes4 sealSelector,
-        bytes4 registerTailSelector,
-        bytes4 registerEmergencySelector
+        bytes4 registerTailSelector
     ) public view {
         bool hasTrigger = false;
         uint256 triggerCount = 0;
@@ -1303,9 +1155,7 @@ library StreamGovernanceBootstrap {
         for (uint256 i = 0; i < calls.length; i++) {
             GovernanceCall memory call_ = calls[i];
             if (
-                call_.target == address(this)
-                    && (call_.selector == registerTailSelector
-                        || call_.selector == registerEmergencySelector)
+                call_.target == address(this) && call_.selector == registerTailSelector
                     && (calls.length != 1 || actionClass != 2)
             ) revert IStreamGovernanceExecutor.ManifestTailTriggerRegistrationNotIsolated();
             if (call_.target == tailTarget && call_.selector == MANIFEST_PUBLISH_SELECTOR) {

@@ -27,7 +27,6 @@ PATH_CLASSES = {
     "live-control-plane",
     "user-path",
     "observability-diagnostic",
-    "observability-probe",
     "mixed-deployment-and-user-path",
     "mixed-control-plane-and-user-path",
     "mixed-user-and-observability",
@@ -59,19 +58,6 @@ OPEN_CALL_FIELDS = frozenset(
         "disposition",
     }
 )
-EXPLICIT_PROBE_FIELDS = frozenset(
-    {
-        "path",
-        "site",
-        "kind",
-        "operation",
-        "expression",
-        "expected_count",
-        "path_class",
-        "authority",
-        "rationale",
-    }
-)
 LITERAL_DECLARATION_FIELDS = frozenset(
     {
         "path",
@@ -84,21 +70,6 @@ LITERAL_DECLARATION_FIELDS = frozenset(
         "disposition",
     }
 )
-APPROVED_PROBE_ROW: dict[str, object] = {
-    "path": "smart-contracts/StreamGasProbe.sol",
-    "site": "_provedStaticcall",
-    "kind": "call-option",
-    "operation": "external-call",
-    "expression": "probedValue",
-    "expected_count": 1,
-    "path_class": "observability-probe",
-    "authority": "docs/stream-long-term-architecture.md [LTA-GGP-PROBES]",
-    "rationale": (
-        "The call cap is the probe input under measurement, not a "
-        "production-path immutable gas policy."
-    ),
-}
-
 NUMERIC_LITERAL_BODY = (
     r"(?:0x[0-9A-Fa-f](?:_?[0-9A-Fa-f])*|"
     r"[0-9](?:_?[0-9])*(?:\.[0-9](?:_?[0-9])*)?"
@@ -859,52 +830,10 @@ def expected_calls(inventory: dict[str, Any]) -> Counter[CallUse]:
 
     probe_group = "explicit_probe_call_gas_expressions"
     probe_rows = require_list(inventory.get(probe_group), probe_group)
-    if len(probe_rows) > 1:
-        raise GasInventoryError(
-            f"{probe_group} may contain only the sole approved StreamGasProbe use"
-        )
     if probe_rows:
-        location = f"{probe_group}[0]"
-        row = require_dict(probe_rows[0], location)
-        require_exact_keys(row, EXPLICIT_PROBE_FIELDS, location)
-        normalized_probe: dict[str, object] = {
-            "path": require_string(row.get("path"), f"{location}.path"),
-            "site": require_string(row.get("site"), f"{location}.site"),
-            "kind": require_string(row.get("kind"), f"{location}.kind"),
-            "operation": require_string(
-                row.get("operation"), f"{location}.operation"
-            ),
-            "expression": require_string(
-                row.get("expression"), f"{location}.expression"
-            ),
-            "expected_count": require_positive_int(
-                row.get("expected_count"), f"{location}.expected_count"
-            ),
-            "path_class": require_string(
-                row.get("path_class"), f"{location}.path_class"
-            ),
-            "authority": require_string(
-                row.get("authority"), f"{location}.authority"
-            ),
-            "rationale": require_string(
-                row.get("rationale"), f"{location}.rationale"
-            ),
-        }
-        if normalized_probe != APPROVED_PROBE_ROW:
-            raise GasInventoryError(
-                f"{location} must exactly match the sole approved "
-                "StreamGasProbe._provedStaticcall exception and normative authority"
-            )
-        use = CallUse(
-            str(normalized_probe["path"]),
-            str(normalized_probe["site"]),
-            str(normalized_probe["kind"]),
-            str(normalized_probe["operation"]),
-            str(normalized_probe["expression"]),
+        raise GasInventoryError(
+            f"{probe_group} is reserved by schema v1 and must remain empty"
         )
-        if use in expected:
-            raise GasInventoryError(f"duplicate call inventory row: {use}")
-        expected[use] = int(normalized_probe["expected_count"])
     return expected
 
 

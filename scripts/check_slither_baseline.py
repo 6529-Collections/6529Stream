@@ -30,8 +30,8 @@ EXPECTED_CRYTIC_COMPILE_VERSION = "0.3.11"
 EXPECTED_SOLC_VERSION = "0.8.19"
 EXPECTED_SOLC_SELECT_VERSION = "1.2.0"
 EXPECTED_FOUNDRY_VERSION = "1.7.1"
-EXPECTED_ANALYZED_COMMIT = "c0be71915bc650569940b249fa9e5c801c0587fc"
-EXPECTED_CAPTURED_AT_UTC = "2026-07-23T23:52:41Z"
+EXPECTED_ANALYZED_COMMIT = "55a2e817876eac754355a14ae3907053e3d3deed"
+EXPECTED_CAPTURED_AT_UTC = "2026-07-24T04:58:03Z"
 EXPECTED_CAPTURE_COMMAND = (
     "python -m slither . --config-file slither.config.json --foundry-compile-all "
     "--json <temp-file>"
@@ -41,38 +41,38 @@ EXPECTED_GATE_COMMAND = (
     "--exclude-low --exclude-informational --exclude-optimization "
     "--json-types detectors --json <temp-file> --fail-none"
 )
-EXPECTED_CAPTURE_NATIVE_EXIT_CODE = -1
-EXPECTED_RAW_JSON_SIZE_BYTES = 319_431_599
+EXPECTED_CAPTURE_NATIVE_EXIT_CODE = 1
+EXPECTED_RAW_JSON_SIZE_BYTES = 300_288_371
 EXPECTED_RAW_JSON_SHA256 = (
-    "sha256:a58f7c87ed81fc8d10a06c91d3d1ffed2f6ced57d83a6301ceb7dbcd00e76d77"
+    "sha256:e9f127cfbaa7b63cfd73991b46720de08e91c1740d5ac1141fef5c8b02c28628"
 )
 
 IMPACTS = ("High", "Medium")
-EXPECTED_COUNTS = {"High": 3, "Medium": 30, "total": 33}
+EXPECTED_COUNTS = {"High": 3, "Medium": 27, "total": 30}
 EXPECTED_CAPTURE_COUNTS = {
     "High": 47,
-    "Medium": 840,
-    "Low": 1208,
-    "Informational": 1008,
+    "Medium": 728,
+    "Low": 1212,
+    "Informational": 990,
     "Optimization": 40,
-    "total": 3143,
+    "total": 3017,
 }
 EXPECTED_SCOPE_COUNTS = {
-    "first_party_production": {"High": 3, "Medium": 30, "total": 33},
+    "first_party_production": {"High": 3, "Medium": 27, "total": 30},
     "vendored": {"High": 1, "Medium": 9, "total": 10},
-    "test": {"High": 43, "Medium": 794, "total": 837},
+    "test": {"High": 43, "Medium": 685, "total": 728},
     "script": {"High": 0, "Medium": 7, "total": 7},
     "other": {"High": 0, "Medium": 0, "total": 0},
 }
 EXPECTED_TRIAGE_COUNTS = {
     "confirmed_gap": 1,
     "design_review": 5,
-    "pending_disposition": 27,
+    "pending_disposition": 24,
 }
 EXPECTED_DETECTOR_COUNTS = {
     ("High", "arbitrary-send-eth"): 1,
     ("High", "uninitialized-state"): 2,
-    ("Medium", "incorrect-equality"): 5,
+    ("Medium", "incorrect-equality"): 2,
     ("Medium", "reentrancy-no-eth"): 4,
     ("Medium", "uninitialized-local"): 9,
     ("Medium", "unused-return"): 12,
@@ -444,7 +444,8 @@ def validate_provenance(repo_root: Path, value: Any) -> Dict[str, Any]:
     )
     if capture_exit != EXPECTED_CAPTURE_NATIVE_EXIT_CODE:
         raise SlitherBaselineError(
-            "provenance.capture_native_exit_code must retain the audited -1 exit"
+            "provenance.capture_native_exit_code must retain the audited "
+            f"{EXPECTED_CAPTURE_NATIVE_EXIT_CODE} exit"
         )
     if provenance["capture_json_success"] is not True:
         raise SlitherBaselineError("provenance.capture_json_success must be true")

@@ -68,7 +68,10 @@ schema with this document as home ([CMC-COLLECTION-IDENTITY-JSON]). ADR 0016
 supersedes ADR 0015's launch facade machinery; the historical facade binding
 family [CMC-FACADE-BINDING] is not a launch input and the acquisition packet
 uses Core's sole ERC-721 identity. OQ-X8 is resolved
-(ADR 0015 decision W6) and no longer blocks this document's entry into
+(ADR 0015 decision W6). [ADR 0017](adr/0017-raise-only-parameter-governance.md)
+supersedes this document's probe, lowering, emergency, conditional, and
+rebinding machinery for Governed Gas Parameters. OQ-X8 no longer blocks
+this document's entry into
 Review, which follows the ordinary conditions of
 [`docs/spec-policy.md`](spec-policy.md).
 
@@ -5004,12 +5007,16 @@ cap:
 1. `METADATA_ERC1271_VERIFY_GAS` is a Governed Gas Parameter under the
    model home,
    [`docs/stream-long-term-architecture.md`](stream-long-term-architecture.md)
-   [LTA-GGP] (ADR 0010 decision D1): floors, raise/lower classes, probes,
+   [LTA-GGP] (ADR 0010 decision D1 as superseded by ADR 0017): immutable
+   floors, authority-only Governance V2 class-1 raises delayed at least
+   48 hours and bounded to at most twice the current value, schema-v2
    change events, release-manifest recording, repricing-checklist
    membership, and the Operational-layer exclusion follow the home
-   unchanged. Each verifying metadata satellite hosts its own
-   storage-backed value of the parameter; the shared immutable floor is
-   `METADATA_ERC1271_VERIFY_GAS_FLOOR`.
+   unchanged. Each verifying metadata satellite hosts its own storage-
+   backed value and revision; the shared immutable floor is
+   `METADATA_ERC1271_VERIFY_GAS_FLOOR`. The common
+   `gasParameterInfo` read returns exactly
+   `(value, floor, failureClass, revision)`.
 2. The floor and genesis value are sized from the measured supported
    wallet class — the one home for that class is
    [GOV-1271-CLASS] in
@@ -5024,8 +5031,9 @@ cap:
    failure, out-of-gas, malformed returndata, or a wrong magic value
    reverts the submission before any state change. EOA verification
    (`ecrecover`, nonzero exact-match) does not consume the parameter.
-4. The health probe for lowering is a recorded verification sweep over
-   the heaviest named wallet classes at the proposed value, per host.
+4. Reproducible offchain and fork evidence records a verification sweep
+   over the heaviest named wallet classes at the configured value, per
+   host. It is release evidence, not a deployed launch probe.
 5. The parameter identifier follows [LTA-GGP]:
 
    ```solidity
@@ -5039,17 +5047,16 @@ cap:
    The parameter joins the [LTA-GGP] inventory (hosts: the three
    verifying metadata satellites; normative home: this section) and the
    protocol v1 domain-constants mirror table, and the matrix GGP gate's
-   floor/raise/lower/probe tests run against every host.
+   floor, authority, delayed monotonic raise, per-action `<= 2x` cap,
+   revision, schema-v2 event, and removed-surface tests run against every
+   host.
 6. The parameter's release-manifest failure-direction class is
    `FAIL_CLOSED_PRECHECK` ([LTA-GGP] requirement 10): rule 3
-   verification failure reverts the submission, so raises are
-   governance-only and registering a permissionless conditional raise
-   is nonconformant (ADR 0012 decision T1). The rule 4 probe is a
-   Permanent-class probe contract ([LTA-GGP-PROBES]) proving a
-   maximum-supported-class ([GOV-1271-CLASS]) verification completes
-   with the magic value under exactly the probed cap for pinned fixture
-   inputs, per host, with run records hosted on the probe and
-   `evidenceHash` committing to the measurement artifact.
+   verification failure reverts the submission. No lowering, emergency,
+   conditional, probe, module-registry, or module-rebinding path exists.
+   Rule 4 demonstrates that the maximum supported class
+   ([GOV-1271-CLASS]) completes verification with the magic value under
+   the configured cap.
 
 ## Validation
 
@@ -6346,7 +6353,8 @@ records by mapping each field group to a `recordType`/`schemaId` pair.
     [CMC-ARTIST-CONTENT-VETO].
 48. Attestation mirror: the checker row comparing this document's artist
     attestation field inventory against [AA-ATTEST] passes, and the
-    metadata GGP tests (floor/raise/lower/probe) run for
+    metadata GGP tests (floor/authority/delayed monotonic raise/`<= 2x`
+    cap/revision/schema-v2 event/removed surfaces) run for
     `METADATA_ERC1271_VERIFY_GAS` on every hosting satellite
     [CMC-SIGVER-GGP].
 49. Record payload carrier: payload-carrying writes store, verify, and

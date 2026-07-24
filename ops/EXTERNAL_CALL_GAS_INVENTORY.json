@@ -137,19 +137,7 @@
       "disposition": "open-remediation-required"
     }
   ],
-  "explicit_probe_call_gas_expressions": [
-    {
-      "path": "smart-contracts/StreamGasProbe.sol",
-      "site": "_provedStaticcall",
-      "kind": "call-option",
-      "operation": "external-call",
-      "expression": "probedValue",
-      "expected_count": 1,
-      "path_class": "observability-probe",
-      "authority": "docs/stream-long-term-architecture.md [LTA-GGP-PROBES]",
-      "rationale": "The call cap is the probe input under measurement, not a production-path immutable gas policy."
-    }
-  ],
+  "explicit_probe_call_gas_expressions": [],
   "open_literal_gas_declarations": [
     {
       "path": "smart-contracts/StreamArtworkFinalityRegistry.sol",

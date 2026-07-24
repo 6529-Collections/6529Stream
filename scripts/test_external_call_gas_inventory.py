@@ -31,7 +31,6 @@ def write_raw_json(path: Path, value: str) -> None:
 def base_inventory(
     *,
     calls: list[dict[str, Any]] | None = None,
-    probes: list[dict[str, Any]] | None = None,
     declarations: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     return {
@@ -40,13 +39,9 @@ def base_inventory(
         "status": "open-remediation-inventory",
         "note": checker.INVENTORY_NOTE,
         "open_call_gas_expressions": calls or [],
-        "explicit_probe_call_gas_expressions": probes or [],
+        "explicit_probe_call_gas_expressions": [],
         "open_literal_gas_declarations": declarations or [],
     }
-
-
-def approved_probe_row() -> dict[str, Any]:
-    return dict(checker.APPROVED_PROBE_ROW)
 
 
 def open_call(
@@ -89,26 +84,6 @@ def write_tree(root: Path, source: str, inventory: dict[str, Any]) -> None:
     source_path.parent.mkdir(parents=True, exist_ok=True)
     source_path.write_text(source, encoding="utf-8", newline="\n")
     write_json(root / checker.DEFAULT_INVENTORY, inventory)
-
-
-def write_approved_probe_source(root: Path) -> None:
-    path = root / "smart-contracts/StreamGasProbe.sol"
-    path.write_text(
-        """
-        contract StreamGasProbe {
-            function _provedStaticcall(
-                address target,
-                bytes memory callData,
-                uint256 probedValue
-            ) internal view returns (bool success, bytes memory returndata) {
-                (success, returndata) =
-                    target.staticcall{gas: probedValue}(callData);
-            }
-        }
-        """,
-        encoding="utf-8",
-        newline="\n",
-    )
 
 
 class ExternalCallGasInventoryTests(unittest.TestCase):
@@ -724,84 +699,22 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
             ):
                 checker.check_repository(root, checker.DEFAULT_INVENTORY)
 
-    def test_sole_approved_probe_exception_passes(self) -> None:
+    def test_explicit_probe_array_is_reserved_and_must_be_empty(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
+            inventory = base_inventory()
+            inventory["explicit_probe_call_gas_expressions"] = [{}]
             write_tree(
                 root,
                 "contract Fixture {}",
-                base_inventory(probes=[approved_probe_row()]),
-            )
-            write_approved_probe_source(root)
-
-            checker.check_repository(root, checker.DEFAULT_INVENTORY)
-
-    def test_probe_identity_fields_are_exact(self) -> None:
-        changes: dict[str, Any] = {
-            "path": "smart-contracts/MovedProbe.sol",
-            "site": "_movedProbe",
-            "kind": "yul-call",
-            "operation": "staticcall",
-            "expression": "movedValue",
-            "expected_count": 2,
-            "path_class": "user-path",
-        }
-        for field, value in changes.items():
-            with self.subTest(field=field), tempfile.TemporaryDirectory() as temp_dir:
-                root = Path(temp_dir)
-                row = approved_probe_row()
-                row[field] = value
-                write_tree(
-                    root,
-                    "contract Fixture {}",
-                    base_inventory(probes=[row]),
-                )
-
-                with self.assertRaisesRegex(
-                    checker.GasInventoryError, "sole approved StreamGasProbe"
-                ):
-                    checker.check_repository(root, checker.DEFAULT_INVENTORY)
-
-    def test_extra_probe_exception_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            invented = approved_probe_row()
-            invented["path"] = "smart-contracts/InventedProbe.sol"
-            invented["rationale"] = "Invented local rationale."
-            write_tree(
-                root,
-                "contract Fixture {}",
-                base_inventory(
-                    probes=[approved_probe_row(), invented],
-                ),
+                inventory,
             )
 
             with self.assertRaisesRegex(
-                checker.GasInventoryError, "only the sole approved StreamGasProbe"
+                checker.GasInventoryError,
+                "reserved by schema v1 and must remain empty",
             ):
                 checker.check_repository(root, checker.DEFAULT_INVENTORY)
-
-    def test_probe_normative_authority_and_rationale_are_exact(self) -> None:
-        changes = {
-            "authority": "docs/invented.md [LOCAL-WAIVER]",
-            "rationale": "A locally invented exception rationale.",
-        }
-        for field, value in changes.items():
-            with self.subTest(field=field), tempfile.TemporaryDirectory() as temp_dir:
-                root = Path(temp_dir)
-                row = approved_probe_row()
-                row[field] = value
-                write_tree(
-                    root,
-                    "contract Fixture {}",
-                    base_inventory(probes=[row]),
-                )
-
-                with self.assertRaisesRegex(
-                    checker.GasInventoryError,
-                    "normative authority",
-                ):
-                    checker.check_repository(root, checker.DEFAULT_INVENTORY)
 
     def test_inventory_rejects_duplicate_top_level_members(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -923,10 +836,6 @@ class ExternalCallGasInventoryTests(unittest.TestCase):
         call = open_call("cap")
         call["local_waiver"] = "ignored ambiguity"
         cases.append(("open call", call, base_inventory(calls=[call])))
-
-        probe = approved_probe_row()
-        probe["local_waiver"] = "ignored ambiguity"
-        cases.append(("probe", probe, base_inventory(probes=[probe])))
 
         declaration = literal_declaration("READ_GAS_LIMIT", 30_000)
         declaration["local_waiver"] = "ignored ambiguity"

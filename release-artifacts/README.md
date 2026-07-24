@@ -23,11 +23,11 @@ groups; retired entries carry no group. The groups do not allocate or sum
 estimated bytes. Only a complete linked via-IR runtime measurement proves Core
 size. The
 ordered active surface is pinned to SHA-256
-`2513151416a7fc01753226120b415de67ba4f1e5ebf79e6e7ae8a1a3e8aefdc4`, while a
+`sha256:8ed0f91ed4f96b18f7b2c1cf4328e0a125cc54d870e6ba49ff30c07dd3e6a701`, while a
 second reviewer-pinned canonical-JSON digest over every target semantic,
 including metadata, coverage, groups, required absence, bootstrap policy, and
 all ordered active/retired rows, is
-`18992066d0c6b22c27d37112b13e6b7d3d7efe5d8e46b4ded9fa25d6d0652f55`.
+`sha256:f008d29d2089098be693c39db018517ba634736298a8b323bb49ea263582ec4d`.
 The implementation check also requires every current-baseline Core
 function/event shape to have exactly one active or retired disposition and every
 retired row to match that baseline. Target, contract-config, and baseline JSON
@@ -37,6 +37,10 @@ values, and integers outside the I-JSON safe range.
 Build and validate the canonical target-isolated release profile first:
 
 ```sh
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --target-only
 python scripts/test_release_build_artifacts.py
 python scripts/build_release_artifacts.py
 python scripts/build_release_artifacts.py --check
@@ -64,9 +68,9 @@ python scripts/check_mint_manager_domain_constants.py
 python scripts/generate_one_of_one_provenance_manifest.py
 python scripts/generate_one_of_one_permanence_manifest.py
 python scripts/check_public_beta_evidence.py
-python scripts/generate_risk_register.py
 python scripts/generate_public_beta_blocker_report.py
 python scripts/generate_production_release_blocker_report.py
+python scripts/generate_risk_register.py
 python scripts/generate_release_evidence_packet_index.py
 python scripts/generate_release_evidence_issue_backlog.py
 python scripts/check_release_evidence_issue_links.py
@@ -90,7 +94,13 @@ python scripts/check_operator_admin_ui.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/generate_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/test_release_mode.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py
@@ -217,6 +227,8 @@ python scripts/test_release_readiness.py
 python scripts/check_release_readiness.py
 python scripts/test_genesis_deployment_profile.py
 python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
 python scripts/test_system_manifest_payload_vector.py
 python scripts/check_system_manifest_payload_vector.py
 python scripts/test_system_manifest_payload_vector_reference.py
@@ -290,12 +302,10 @@ external audit acceptance. Validate it with
 
 `genesis-deployment-profile.json` is the canonical machine-readable mirror of
 the normative `[LCM-GENESIS]` closed world. Its entry count is derived from the
-contiguous numbered entries rather than stored independently. Entries 1-37 are
-deployment roles, with entry 36 the immutable Permanent
+contiguous numbered entries rather than stored independently. All 37 entries are
+contract deployment roles, with entry 36 the immutable Permanent
 `StreamSystemManifest` and entry 37 the immutable
-`StreamCoreFinalityAdapter`; entries 38-59 are the exact per-parameter GGP
-probes, and entry 60 is the one shared entropy cadence probe. The
-system-manifest entry
+`StreamCoreFinalityAdapter`. The system-manifest entry
 pins its module type, full interface ID, immutable Core/executor bindings,
 terminal-frozen Core pointer, append-only payload history, and manifest-tail
 markers. The complete canonical Core, governance, system-manifest, and
@@ -310,10 +320,11 @@ profile and candidate inputs use strict UTF-8, duplicate-free,
 schema-restricted I-JSON. The ordinary checker
 validates this requirement artifact and reports class-level mapping diagnostics
 against the v1 `contracts.json` catalog. That catalog has no deployment
-addresses, instance identity, probe-parameter bindings, or on-chain manifest
-reconciliation, so it is categorically insufficient for production and can
-never clear `--require-complete` or production release mode. Those gates require
-a future checked schema for an instance-aware genesis deployment candidate,
+addresses, instance identity, profile bindings, distinct fallback instances, or
+on-chain manifest reconciliation, so it is categorically insufficient for
+production and can never clear `--require-complete` or production release mode.
+Those gates require a future checked schema for an instance-aware genesis
+deployment candidate,
 tied to deployment manifests, address books, source-verification inputs, the
 on-chain system-manifest payload, retained rehearsal/live evidence, and the
 release candidate lockfile. Until that evidence exists and reconciles every role,
@@ -322,10 +333,13 @@ and the no-authority deployer factory are explicitly outside the numbered
 production inventory.
 
 `system-manifest-payload-vector.json` is the deterministic, non-production
-`target_abi_lock_fixture` derived from all 60 profile entries. It locks the
-RFC8785/I-JSON bytes, fixed 24,575-byte split, chunk/leaf/list/root commitments,
-and canonical ABI root descriptor. Every deployment-manifest field reuses one
-synthetic release-wide, profile-bound target digest under the production outer
+`target_abi_lock_fixture` derived from all 37 profile entries under the
+probe-free `6529stream.genesis-deployment-profile.v2` grammar. Payload schema v1
+retains `gasParameterProbes` as an exactly empty compatibility member. The
+fixture locks the RFC8785/I-JSON bytes, fixed 24,575-byte split,
+chunk/leaf/list/root commitments, and canonical ABI root descriptor. Every
+deployment-manifest field reuses one synthetic release-wide, profile-bound
+target digest under the production outer
 deployment-identity domain instead of inventing a per-entry identity. The file
 keeps both `production_candidate`
 and `readiness_evidence` false. Regenerate it with
@@ -336,7 +350,12 @@ independent fixed-golden
 `python scripts/test_system_manifest_payload_vector_reference.py` and
 `python scripts/check_system_manifest_payload_vector_reference.py` pair, not a
 generator `--check` mode. The reference scripts are required CI and
-checksum-covered release inputs. Production semantic reconciliation remains
+checksum-covered release inputs. `make system-manifest-payload-vector` validates
+the genesis profile and governed-parameter catalog before generation, then runs
+both validator pairs; the non-writing `-check` target follows the same
+prerequisite gates. The corresponding release-manifest targets depend on those
+vector targets, so they cannot consume an unchecked profile-to-vector chain.
+Production semantic reconciliation remains
 blocked by issue `#656` until an instance-aware candidate and live on-chain state
 replace the synthetic fixture facts.
 
@@ -816,6 +835,10 @@ inherited `supportsInterface` or event-only declarations.
 After any covered artifact changes, refresh the checksum bundle with:
 
 ```sh
+python scripts/test_external_call_gas_inventory.py
+python scripts/check_external_call_gas_inventory.py
+python scripts/test_abi_compatibility.py
+python scripts/check_abi_compatibility.py --check
 python scripts/check_contract_size_budget.py
 python scripts/generate_deployment_manifest.py
 python scripts/generate_address_books.py
@@ -844,6 +867,15 @@ python scripts/check_audit_package.py
 python scripts/check_react_next_reference.py
 python scripts/check_mobile_walletconnect.py
 python scripts/check_release_readiness.py
+python scripts/test_genesis_deployment_profile.py
+python scripts/check_genesis_deployment_profile.py
+python scripts/test_governed_parameter_identifiers.py
+python scripts/check_governed_parameter_identifiers.py
+python scripts/generate_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector.py
+python scripts/check_system_manifest_payload_vector.py
+python scripts/test_system_manifest_payload_vector_reference.py
+python scripts/check_system_manifest_payload_vector_reference.py
 python scripts/generate_risk_register.py
 python scripts/generate_release_notes.py
 python scripts/generate_release_manifest.py

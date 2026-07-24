@@ -13,13 +13,13 @@ from pathlib import Path
 from typing import Any
 
 
-PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v1"
+PROFILE_SCHEMA = "6529stream.genesis-deployment-profile.v2"
 CONTRACTS_SCHEMA = "6529stream.release-artifact-contracts.v1"
 CONCRETE_CANDIDATE_MODEL_BLOCKER = (
     "release-artifacts/contracts.json uses "
     f"{CONTRACTS_SCHEMA}, an implementation class catalog that cannot prove concrete "
     "genesis deployment instances, addresses, code hashes, profile bindings, distinct "
-    "fallbacks, or parameter-bound probes; issue #656 requires an instance-aware "
+    "fallbacks, or on-chain manifest reconciliation; issue #656 requires an instance-aware "
     "deployment candidate artifact"
 )
 DEFAULT_PROFILE = Path("release-artifacts/genesis-deployment-profile.json")
@@ -27,19 +27,9 @@ DEFAULT_CONTRACTS = Path("release-artifacts/contracts.json")
 NORMATIVE_SOURCE = "docs/launch-conformance-matrix.md"
 NORMATIVE_ANCHOR = "LCM-GENESIS"
 MAINNET_CHAIN_ID = 1
-GGP_INVENTORY_SOURCE = Path("docs/stream-long-term-architecture.md")
-GTP_MIRROR_SOURCE = Path("docs/launch-v1-target-architecture.md")
 LCM_GENESIS_HEADING = "## Genesis Deployment Profile"
 LCM_GENESIS_ANCHOR = "Requirements [LCM-GENESIS]:"
 MANDATORY_GENESIS_LABEL = "Mandatory genesis contracts:"
-GGP_SECTION_HEADING = "## Governed Gas Parameters [LTA-GGP]"
-GGP_INVENTORY_LABEL = "GGP inventory."
-GGP_INVENTORY_END = "A future guarded path that is not in this inventory"
-PARAMETER_TABLE_HEADER = (
-    "| Constant name | String preimage | Hash value | Owner | Schema version | Inputs |"
-)
-TARGET_PARAMETER_SECTION_HEADING = "### Governed Gas Parameter Identifier Mirror Rows"
-TARGET_PARAMETER_TABLE_END = "### Pinned-Name Glossary"
 
 FIXED_CONTRACT_KEYS = (
     "STREAM_CORE",
@@ -93,17 +83,20 @@ STREAM_CORE_REQUIRED_MARKERS = ("ERC721_ENUMERABLE_NOT_ADVERTISED",)
 STREAM_CORE_NORMATIVE_ANCHORS = (
     "docs/launch-conformance-matrix.md#LCM-GENESIS",
     "docs/launch-v1-target-architecture.md#Core-Hook-Budget",
+    "docs/adr/0017-raise-only-parameter-governance.md",
 )
 STREAM_CORE_EXACT_IMPLEMENTATION = {"mode": "exact", "names": ["StreamCore"]}
 
 GOVERNANCE_REQUIRED_INTERFACES = (
     "IStreamGovernanceExecutor",
+    "IStreamGovernedParameterAuthority",
     "IStreamRoleRegistry",
     "IStreamStateExportPublisher",
 )
 GOVERNANCE_NORMATIVE_ANCHORS = (
     "docs/launch-conformance-matrix.md#LCM-GENESIS",
     "docs/adr/0004-admin-governance.md",
+    "docs/adr/0017-raise-only-parameter-governance.md",
     "docs/stream-long-term-architecture.md#LTA-EXPORT",
 )
 GOVERNANCE_REQUIREMENT = "StreamGovernance or equivalent ADR 0004 timelock/role layer"
@@ -139,6 +132,35 @@ STATE_EXPORT_PUBLISHER_EVENTS = (
         (False, True, True, True, False),
     ),
 )
+GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA = (
+    "6529stream.governed-parameter-authority-abi.v1"
+)
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE = "IStreamGovernedParameterAuthority"
+GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID = "0xd9f8d48c"
+GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256 = (
+    "sha256:720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a"
+)
+GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS = (
+    (
+        "isStreamGovernedParameterAuthority()",
+        "0x8d96760d",
+        "view",
+        ("bool",),
+    ),
+    (
+        "currentAction()",
+        "0x546ea281",
+        "view",
+        ("bool", "bytes32", "uint8", "bytes32", "bytes32", "bytes32"),
+    ),
+)
+GOVERNED_PARAMETER_AUTHORITY_MARKERS = (
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_V1",
+    "GOVERNED_PARAMETER_AUTHORITY_MARKER_SELECTOR_0x8d96760d",
+    "GOVERNED_PARAMETER_AUTHORITY_CONTEXT_SELECTOR_0x546ea281",
+    "GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID_0xd9f8d48c",
+    "GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256_720e3b782672b5720bf4c679f09a20a3de74c4df856e34ad23bfc99a710b827a",
+)
 GOVERNANCE_REQUIRED_MARKERS = (
     "ADR0004_TIMELOCK_ROLE_LAYER",
     "STATE_EXPORT_PUBLISHER_EVENTS_V1",
@@ -147,6 +169,7 @@ GOVERNANCE_REQUIRED_MARKERS = (
     "STATE_EXPORT_CHALLENGED_TOPIC_0x7dcf7c00a2fcd9a11d7b2a1a1c7f49b2ddffe3bb28e97a0efd2e53d2e183a68c",
     "STATE_EXPORT_SUPERSEDED_TOPIC_0xd38e3f1ed11d4a002ed59a6ac2242bb16b6681891fbdbbbf55077edf92bfdc4a",
     "STATE_EXPORT_PUBLISHER_ABI_SHA256_535217fe4e980b1c72bc1a24f0352a7704928a3cd25f4197bdff0604d7645ea7",
+    *GOVERNED_PARAMETER_AUTHORITY_MARKERS,
 )
 
 SYSTEM_MANIFEST_MODULE_TYPE = (
@@ -205,38 +228,6 @@ SYSTEM_MANIFEST_ENTRY_ID = FIXED_CONTRACT_KEYS.index("STREAM_SYSTEM_MANIFEST") +
 CORE_FINALITY_ADAPTER_ENTRY_ID = (
     FIXED_CONTRACT_KEYS.index("STREAM_CORE_FINALITY_ADAPTER") + 1
 )
-
-GGP_PARAMETERS = (
-    "ROYALTY_RESOLVER_GAS_LIMIT",
-    "ROYALTY_RETURN_GAS_BUFFER",
-    "ERC_1271_GAS_LIMIT",
-    "ASSET_POLICY_GAS_LIMIT",
-    "WALLET_DEPOSIT_GAS_LIMIT",
-    "FLUSH_GAS_FLOOR",
-    "MINT_GATE_GAS_LIMIT",
-    "TICKET_ERC1271_GAS_LIMIT",
-    "ARTIST_AUTHORITY_GAS_LIMIT",
-    "SALE_ERC1271_GAS_LIMIT",
-    "DELEGATE_REGISTRY_GAS_LIMIT",
-    "SALE_ARTIST_AUTHORITY_GAS_LIMIT",
-    "REVEAL_ATTEMPT_GAS_LIMIT",
-    "SALE_NFT_DELIVERY_GAS_LIMIT",
-    "METADATA_ROUTER_GAS_LIMIT",
-    "ENTROPY_VIEW_GAS_LIMIT",
-    "ENTROPY_REGISTRATION_GAS_LIMIT",
-    "ENTROPY_RESULT_PROBE_GAS_LIMIT",
-    "VRF_CALLBACK_GAS_LIMIT",
-    "ARTIST_ERC1271_VERIFY_GAS",
-    "METADATA_ERC1271_VERIFY_GAS",
-    "FINALITY_COMPONENT_READ_GAS",
-)
-
-GTP_PARAMETERS = (
-    "ENTROPY_REQUEST_TIMEOUT_BLOCKS",
-    "ENTROPY_REVEAL_SLO_BLOCKS",
-    "ENTROPY_RECOVERY_STEP_DELAY_BLOCKS",
-)
-
 
 class GenesisProfileError(RuntimeError):
     """Raised when the profile or candidate inventory is malformed."""
@@ -430,6 +421,70 @@ def validate_state_export_publisher_abi_proof(value: Any, path: str) -> dict[str
     return proof
 
 
+def governed_parameter_authority_abi_surface() -> dict[str, Any]:
+    """Return the reviewed marker/context authority surface."""
+    return {
+        "schema": GOVERNED_PARAMETER_AUTHORITY_ABI_SCHEMA,
+        "required_interface": GOVERNED_PARAMETER_AUTHORITY_INTERFACE,
+        "interface_id": GOVERNED_PARAMETER_AUTHORITY_INTERFACE_ID,
+        "functions": [
+            {
+                "signature": signature,
+                "selector": selector,
+                "state_mutability": state_mutability,
+                "returns": list(returns),
+            }
+            for signature, selector, state_mutability, returns in GOVERNED_PARAMETER_AUTHORITY_FUNCTIONS
+        ],
+        "events": [],
+    }
+
+
+def governed_parameter_authority_abi_proof() -> dict[str, Any]:
+    """Return the exact structured authority assertion required of governance."""
+    surface = governed_parameter_authority_abi_surface()
+    canonical = canonical_json_bytes(surface, "reviewed governed-parameter authority ABI")
+    digest = "sha256:" + hashlib.sha256(canonical).hexdigest()
+    if digest != GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256:
+        raise GenesisProfileError(
+            "reviewed governed-parameter authority ABI constants disagree with their fixed digest"
+        )
+    return {**surface, "surface_sha256": digest}
+
+
+def validate_governed_parameter_authority_abi_proof(
+    value: Any, path: str
+) -> dict[str, Any]:
+    """Reject partial or string-only claims about the authority ABI."""
+    proof = require_dict(value, path)
+    expected = governed_parameter_authority_abi_proof()
+    require_exact_keys(proof, set(expected), path)
+    candidate_surface = {
+        key: candidate_value
+        for key, candidate_value in proof.items()
+        if key != "surface_sha256"
+    }
+    candidate_canonical = canonical_json_bytes(candidate_surface, path)
+    candidate_digest = "sha256:" + hashlib.sha256(candidate_canonical).hexdigest()
+    if type(proof["surface_sha256"]) is not str or proof["surface_sha256"] != candidate_digest:
+        raise GenesisProfileError(
+            f"{path} must exactly match the reviewed governed-parameter authority ABI; "
+            "surface_sha256 does not match the candidate surface's canonical JSON bytes"
+        )
+    expected_canonical = canonical_json_bytes(
+        governed_parameter_authority_abi_surface(),
+        "reviewed governed-parameter authority ABI",
+    )
+    if (
+        candidate_canonical != expected_canonical
+        or candidate_digest != GOVERNED_PARAMETER_AUTHORITY_ABI_SHA256
+    ):
+        raise GenesisProfileError(
+            f"{path} must exactly match the reviewed governed-parameter authority ABI"
+        )
+    return proof
+
+
 def resolve_path(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
@@ -452,30 +507,8 @@ def require_document_markers(
             raise GenesisProfileError(f"{source} is missing the {label}: {marker!r}")
 
 
-def bounded_document_section(
-    text: str,
-    source: str | Path,
-    start_marker: str,
-    end_marker: str,
-    label: str,
-) -> str:
-    """Extract a parser-owned section after validating its stable boundaries."""
-    start = text.find(start_marker)
-    if start < 0:
-        raise GenesisProfileError(
-            f"{source} is missing the {label} start marker: {start_marker!r}"
-        )
-    content_start = start + len(start_marker)
-    end = text.find(end_marker, content_start)
-    if end < 0:
-        raise GenesisProfileError(
-            f"{source} is missing the {label} end marker: {end_marker!r}"
-        )
-    return text[content_start:end]
-
-
 def validate_document_mirrors(entries: list[dict[str, Any]], repo_root: Path) -> None:
-    """Require the checked profile to match its three normative inventory mirrors."""
+    """Require the checked profile to match the normative genesis inventory mirror."""
     matrix = read_text(repo_root / NORMATIVE_SOURCE)
     require_document_markers(
         matrix,
@@ -514,7 +547,7 @@ def validate_document_mirrors(entries: list[dict[str, Any]], repo_root: Path) ->
         raise GenesisProfileError(
             f"{NORMATIVE_SOURCE} numbered genesis inventory does not match the profile"
         )
-    for entry in entries[: len(FIXED_CONTRACT_KEYS)] + entries[-1:]:
+    for entry in entries:
         normalized_requirement = " ".join(entry["requirement"].split())
         if normalized_requirement not in row_text_by_id[entry["id"]]:
             raise GenesisProfileError(
@@ -522,88 +555,27 @@ def validate_document_mirrors(entries: list[dict[str, Any]], repo_root: Path) ->
                 f"{NORMATIVE_SOURCE}"
             )
 
-    architecture = read_text(repo_root / GGP_INVENTORY_SOURCE)
-    require_document_markers(
-        architecture,
-        GGP_INVENTORY_SOURCE,
-        (
-            (GGP_SECTION_HEADING, "LTA-GGP section heading"),
-            (GGP_INVENTORY_LABEL, "GGP inventory label"),
-            (PARAMETER_TABLE_HEADER, "GGP inventory table header"),
-            (GGP_INVENTORY_END, "GGP inventory end marker"),
-        ),
-    )
-    ggp_section = bounded_document_section(
-        architecture,
-        GGP_INVENTORY_SOURCE,
-        GGP_INVENTORY_LABEL,
-        GGP_INVENTORY_END,
-        "GGP inventory",
-    )
-    ggp_rows = tuple(
-        re.findall(r"^\| `([^`]+)` \|", ggp_section, flags=re.MULTILINE)
-    )
-    if ggp_rows != GGP_PARAMETERS:
-        raise GenesisProfileError(
-            f"{GGP_INVENTORY_SOURCE} GGP rows do not match the profile probe inventory"
-        )
 
-    target_architecture = read_text(repo_root / GTP_MIRROR_SOURCE)
-    require_document_markers(
-        target_architecture,
-        GTP_MIRROR_SOURCE,
-        (
-            (TARGET_PARAMETER_SECTION_HEADING, "target parameter mirror section heading"),
-            (TARGET_PARAMETER_TABLE_END, "target parameter table end heading"),
-        ),
-    )
-    target_parameter_section = bounded_document_section(
-        target_architecture,
-        GTP_MIRROR_SOURCE,
-        TARGET_PARAMETER_SECTION_HEADING,
-        TARGET_PARAMETER_TABLE_END,
-        "target parameter mirror section",
-    )
-    require_document_markers(
-        target_parameter_section,
-        GTP_MIRROR_SOURCE,
-        ((PARAMETER_TABLE_HEADER, "target parameter table header"),),
-    )
-    gtp_rows = tuple(
-        re.findall(r"^\| `GTP_([^`]+)` \|", target_parameter_section, flags=re.MULTILINE)
-    )
-    if gtp_rows != GTP_PARAMETERS:
-        raise GenesisProfileError(
-            f"{GTP_MIRROR_SOURCE} GTP rows do not match the shared cadence-probe inventory"
-        )
-
-
-def validate_implementation(value: Any, path: str, kind: str) -> dict[str, Any]:
+def validate_implementation(value: Any, path: str) -> dict[str, Any]:
     implementation = require_dict(value, path)
     require_exact_keys(implementation, {"mode", "names"}, path)
     mode = require_string(implementation.get("mode"), f"{path}.mode")
     names = require_string_list(implementation.get("names"), f"{path}.names")
     allowed_modes = {
-        "contract": {
-            "exact",
-            "one_of",
-            "manifest_equivalent",
-            "distinct_instance",
-            "role_bound",
-        },
-        "ggp_probe": {"parameter_bound"},
-        "gtp_probe": {"shared_parameter_bound"},
-    }[kind]
+        "exact",
+        "one_of",
+        "manifest_equivalent",
+        "distinct_instance",
+        "role_bound",
+    }
     if mode not in allowed_modes:
         raise GenesisProfileError(
             f"{path}.mode must be one of: {', '.join(sorted(allowed_modes))}"
         )
     if mode in {"exact", "one_of", "distinct_instance"} and not names:
         raise GenesisProfileError(f"{path}.names must not be empty for mode {mode!r}")
-    if mode in {"manifest_equivalent", "role_bound", "parameter_bound"} and names:
+    if mode in {"manifest_equivalent", "role_bound"} and names:
         raise GenesisProfileError(f"{path}.names must be empty for mode {mode!r}")
-    if mode == "shared_parameter_bound" and not names:
-        raise GenesisProfileError(f"{path}.names must not be empty for mode {mode!r}")
     return implementation
 
 
@@ -629,16 +601,14 @@ def validate_entry(value: Any, index: int) -> dict[str, Any]:
     entry_id = require_int(entry.get("id"), f"{path}.id")
     require_string(entry.get("key"), f"{path}.key")
     kind = require_string(entry.get("kind"), f"{path}.kind")
-    if kind not in {"contract", "ggp_probe", "gtp_probe"}:
-        raise GenesisProfileError(f"{path}.kind is unsupported: {kind!r}")
+    if kind != "contract":
+        raise GenesisProfileError(f"{path}.kind must be 'contract'")
     require_string(entry.get("requirement"), f"{path}.requirement")
     scope = require_string(entry.get("deployment_scope"), f"{path}.deployment_scope")
     allowed_scopes = {
         "singleton",
         "implementation",
         "fallback_instance",
-        "per_parameter_probe",
-        "shared_probe",
     }
     if scope not in allowed_scopes:
         raise GenesisProfileError(f"{path}.deployment_scope is unsupported: {scope!r}")
@@ -650,7 +620,7 @@ def validate_entry(value: Any, index: int) -> dict[str, Any]:
     if minimum != 1 or maximum != 1:
         raise GenesisProfileError(f"{path}.multiplicity must require exactly one deployment")
 
-    validate_implementation(entry.get("implementation"), f"{path}.implementation", kind)
+    validate_implementation(entry.get("implementation"), f"{path}.implementation")
     require_string_list(entry.get("required_interfaces"), f"{path}.required_interfaces")
     require_string_list(entry.get("required_markers"), f"{path}.required_markers")
     require_string_list(entry.get("approved_aliases"), f"{path}.approved_aliases")
@@ -663,30 +633,8 @@ def validate_entry(value: Any, index: int) -> dict[str, Any]:
     if len(distinct_ids) != len(set(distinct_ids)) or entry_id in distinct_ids:
         raise GenesisProfileError(f"{path}.distinct_from must contain unique other entry ids")
 
-    if kind == "contract" and parameters:
+    if parameters:
         raise GenesisProfileError(f"{path}.parameters must be empty for contract entries")
-    if kind == "contract" and scope not in {
-        "singleton",
-        "implementation",
-        "fallback_instance",
-    }:
-        raise GenesisProfileError(
-            f"{path}.deployment_scope is invalid for a contract entry: {scope!r}"
-        )
-    if kind == "ggp_probe" and len(parameters) != 1:
-        raise GenesisProfileError(f"{path}.parameters must contain exactly one GGP parameter")
-    if kind == "ggp_probe" and scope != "per_parameter_probe":
-        raise GenesisProfileError(
-            f"{path}.deployment_scope must be 'per_parameter_probe' for GGP probes"
-        )
-    if kind == "gtp_probe" and tuple(parameters) != GTP_PARAMETERS:
-        raise GenesisProfileError(
-            f"{path}.parameters must contain the canonical shared GTP inventory"
-        )
-    if kind == "gtp_probe" and scope != "shared_probe":
-        raise GenesisProfileError(
-            f"{path}.deployment_scope must be 'shared_probe' for GTP probes"
-        )
     return entry
 
 
@@ -753,10 +701,12 @@ def validate_profile_document(data: Any) -> list[dict[str, Any]]:
             "profile.entries approved aliases must not overlap implementation names: "
             + ", ".join(repr(alias) for alias in overlapping_aliases)
         )
-    if tuple(keys[: len(FIXED_CONTRACT_KEYS)]) != FIXED_CONTRACT_KEYS:
-        raise GenesisProfileError("profile.entries 1-37 do not match the canonical contract inventory")
-    if any(entry["kind"] != "contract" for entry in entries[: len(FIXED_CONTRACT_KEYS)]):
-        raise GenesisProfileError("profile.entries 1-37 must be contract requirements")
+    if tuple(keys) != FIXED_CONTRACT_KEYS:
+        raise GenesisProfileError(
+            "profile.entries must be the exact 37-entry canonical contract inventory"
+        )
+    if any(entry["kind"] != "contract" for entry in entries):
+        raise GenesisProfileError("all profile.entries must be contract requirements")
 
     stream_core = entries[0]
     expected_stream_core = {
@@ -840,14 +790,6 @@ def validate_profile_document(data: Any) -> list[dict[str, Any]]:
             "profile entry 37 must preserve the complete canonical Permanent "
             "StreamCoreFinalityAdapter profile row"
         )
-
-    probe_entries = entries[len(FIXED_CONTRACT_KEYS) : -1]
-    if any(entry["kind"] != "ggp_probe" for entry in probe_entries):
-        raise GenesisProfileError("profile.entries 38-59 must be per-parameter GGP probes")
-    if tuple(entry["parameters"][0] for entry in probe_entries) != GGP_PARAMETERS:
-        raise GenesisProfileError("profile.entries 38-59 do not match the canonical GGP inventory")
-    if not entries or entries[-1]["kind"] != "gtp_probe":
-        raise GenesisProfileError("the final profile entry must be the shared GTP cadence probe")
 
     governance = entries[1]
     expected_governance = {
@@ -942,6 +884,15 @@ def validate_contract_config(data: Any) -> list[dict[str, Any]]:
                 f"{path}.state_export_publisher_abi_proof",
             )
         )
+        authority_proof_value = candidate.get("governed_parameter_authority_abi_proof")
+        authority_proof = (
+            None
+            if authority_proof_value is None
+            else validate_governed_parameter_authority_abi_proof(
+                authority_proof_value,
+                f"{path}.governed_parameter_authority_abi_proof",
+            )
+        )
         names.append(name)
         result.append(
             {
@@ -950,6 +901,7 @@ def validate_contract_config(data: Any) -> list[dict[str, Any]]:
                 "verified_interfaces": verified_interfaces,
                 "verified_markers": verified_markers,
                 "state_export_publisher_abi_proof": publisher_proof,
+                "governed_parameter_authority_abi_proof": authority_proof,
             }
         )
     if len(names) != len(set(names)):
@@ -1048,6 +1000,15 @@ def completeness_blockers(
                 f"{target_id} ({entry['key']})"
             )
         if (
+            entry["key"] != "GOVERNANCE_LAYER"
+            and candidate.get("governed_parameter_authority_abi_proof") is not None
+        ):
+            blockers.append(
+                f"candidate contract {name!r} must not claim the governance-only "
+                "governed-parameter authority ABI proof for non-governance profile entry "
+                f"{target_id} ({entry['key']})"
+            )
+        if (
             entry["key"] == "GOVERNANCE_LAYER"
             and candidate.get("state_export_publisher_abi_proof")
             != state_export_publisher_abi_proof()
@@ -1057,6 +1018,17 @@ def completeness_blockers(
                 "state-export publisher ABI proof for profile entry 2; verified "
                 "interface or marker strings do not prove the five return types "
                 "and three event indexed masks or non-anonymous emission"
+            )
+        if (
+            entry["key"] == "GOVERNANCE_LAYER"
+            and candidate.get("governed_parameter_authority_abi_proof")
+            != governed_parameter_authority_abi_proof()
+        ):
+            blockers.append(
+                f"candidate contract {name!r} lacks the exact structured "
+                "governed-parameter authority ABI proof for profile entry 2; "
+                "verified interface or marker strings do not prove the marker "
+                "return or exact six-return currentAction context"
             )
 
     for entry in entries:
