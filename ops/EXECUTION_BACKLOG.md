@@ -1005,9 +1005,10 @@ Dependencies: `GOV-001`.
 
 ### GOV-011: Implement Governance V2 And Bind The Production Cutover
 
-Status: Active issue #665 on branch `codex/governance-v2-foundation`; the
-source/test foundation is validated locally and pending PR publication, while
-deployment, action-policy, non-local rehearsal, and audit evidence remain open.
+Status: Active PR #683 / issue #665 on branch
+`codex/governance-v2-foundation`; the source/test foundation is validated
+locally and under review, while deployment, action-policy, non-local rehearsal,
+and audit evidence remain open.
 
 Gate: C/E/F/G.
 
@@ -4092,7 +4093,7 @@ unless an external dependency changes.
 | `GOV-008` | Add bad metadata/dependency drill retained evidence | F | Merged in PR #517; issue #516 closed completed |
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
-| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | Active issue #665 on branch `codex/governance-v2-foundation`; foundation source/tests are locally green, but raise-only gas/time policy, closed-world action catalog, deployment/rehearsal evidence, and independent review remain |
+| `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | Active PR #683 / issue #665 on branch `codex/governance-v2-foundation`; foundation source/tests are locally green, but raise-only gas/time policy, closed-world action catalog, deployment/rehearsal evidence, and independent review remain |
 
 ### Integration Readiness
 

@@ -38,12 +38,12 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/governance-v2-foundation` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/682` |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/665` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/683` |
 | Next issue | Replace the unsafe probe-dependent gas/time control plane with a reviewed raise-only policy, then bind a closed-world governance action catalog before ownership cutover. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 01:24 UTC` |
+| Last updated | `2026-07-24 01:30 UTC` |
 
 ## Current Run Notes
 
@@ -82,7 +82,7 @@ evidence, and audit/readiness gates.
   suites, and the Windows aggregate check passes end to end. The slice does not
   add instance-aware deployment inputs, production candidates, a closed-world
   action-policy catalog, non-local rehearsal evidence, or audit completion.
-  Its PR is pending publication and review.
+  PR #683 is published for review; CI and CodeRabbit review are pending.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality
