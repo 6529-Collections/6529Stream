@@ -38,12 +38,43 @@ evidence, and audit/readiness gates.
 | Active PR branch | `codex/governed-parameter-inventory` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/686` (`b4af30a58c22f79bafad241c6e4fab7a4a76063b`) |
 | Active issue | `https://github.com/6529-Collections/6529Stream/issues/684` |
-| Active PR | `TBD` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/687` |
 | Next issue | Continue #684 evidence/candidate binding work as implementation becomes available, while prioritizing #654 Core headroom recovery; then enforce the closed-world action/native-value policy under #685. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 09:31 UTC` |
+| Last updated | `2026-07-24 11:35 UTC` |
+
+## Parallel Lane Coordination
+
+The parallel implementation wave launched on 2026-07-24 keeps one isolated
+Codex task and worktree per lane. These worktrees are active integration inputs;
+the coordinator must not delete, repurpose, or import their unmerged state.
+
+| Lane | Ordered issue ownership | Codex task | Isolated worktree |
+| --- | --- | --- | --- |
+| Governance and governed gas | PR #687 / #684, then #685, #669, #671, and #673 as dependencies permit | `019f86dc-11c7-7ad2-8f6a-5125e1fb8de1` | `D:\repos\6529Stream-probe-raise-only` |
+| Core and mint | #688, then #672, then #654 | `019f93e7-21f8-7561-b02c-9e20e1bc7782` | `C:\Users\Administrator\.codex\worktrees\89f1\6529Stream` |
+| Canonical deployment | #677 | `019f93e7-21d9-7f11-84df-54411a27a820` | `C:\Users\Administrator\.codex\worktrees\4b42\6529Stream` |
+| Genesis and release safety | #656, then #609 | `019f93e7-3632-7aa1-b723-9c19be6ee3a1` | `C:\Users\Administrator\.codex\worktrees\b3c9\6529Stream` |
+| Slither dispositions | #658 through coherent small slices | `019f93e7-21eb-76b0-a0c2-25df987cad7f` | `C:\Users\Administrator\.codex\worktrees\7dc4\6529Stream` |
+| PaymentIntent settlement | #664 | `019f93e7-21ee-76a1-913a-feee249bf27a` | `C:\Users\Administrator\.codex\worktrees\d852\6529Stream` |
+| Finality and export | #667, then #668 | `019f93e7-21b6-7aa1-85ce-4eadad0c770b` | `C:\Users\Administrator\.codex\worktrees\e9dd\6529Stream` |
+| Installable targets | #670 | `019f93e7-21e9-7550-aa72-d6572b1bc462` | `C:\Users\Administrator\.codex\worktrees\bdda\6529Stream` |
+
+Workers may implement, validate, push, open review-ready draft PRs, and iterate
+CI/CodeRabbit, but they do not merge, deploy, release, or make readiness claims.
+The coordinator alone applies the existing merge authority after all repository
+gates permit it. Each dependent issue starts only after coordinator-confirmed
+merge of its predecessor and a fresh rebase from current `origin/main`.
+
+Core ABI, governance interfaces, deployment-candidate bindings, generated
+release artifacts, and checksum bundles are serialized integration surfaces.
+Any lane touching them must identify the overlap in its handoff, rebase current
+`origin/main`, rerun the canonical generators in documented order, and prove a
+clean checkout before merge. The 14 external-evidence trackers remain open
+unless their actual non-local reviewed evidence exists; templates and local-only
+artifacts cannot close them.
 
 ## Current Run Notes
 
@@ -90,7 +121,7 @@ evidence, and audit/readiness gates.
   gate completed end to end in 2,107.4 seconds after the canonical non-production
   candidate receipt, target-catalog, and release-config pins were refreshed.
 - Branch `codex/governed-parameter-inventory` now carries the first focused
-  #684 slice: a schemaed 25-row launch inventory and checker that pin exact
+  #684 slice: a schema-validated 25-row launch inventory and checker that pin exact
   policy, multi-host profile coverage, evidence requirements, and
   fixed-stipend review obligations. The committed candidate state remains
   honestly incomplete (`not_available`), and guarded-consumer lists remain
@@ -107,9 +138,12 @@ evidence, and audit/readiness gates.
   rejected until #684 adds candidate-instance-bound measurement/cadence,
   reproduction, and reachable-raise-chain semantics. The shared-buffer text is
   only #671's specification slice; implementation, threshold/raise-chain tests,
-  measurement, and exact-target rehearsal remain open. Next action is
-  generated-tail refresh, combined validation,
-  PR creation, CI/CodeRabbit iteration, and merge only when clean.
+  measurement, and exact-target rehearsal remain open. PR #687 is open. The
+  first CodeRabbit pass reported three minor documentation findings, and a
+  clean-checkout audit found that the checksum bundle had captured five mixed
+  line endings in `scripts/check.ps1`; the current branch addresses those
+  findings and records the required all-CRLF checkout hash. CI and CodeRabbit's
+  incremental review are rerunning, and merge remains gated on both being clean.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality

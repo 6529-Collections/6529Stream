@@ -336,7 +336,7 @@ production remains blocked under issue #656. On-demand split-wallet instances
 and the no-authority deployer factory are explicitly outside the numbered
 production inventory.
 
-`governed-parameter-inventory.json` is the schemaed, machine-readable launch
+`governed-parameter-inventory.json` is the schema-validated, machine-readable launch
 inventory for the exact 22 GGP and three GTP logical rows. It recomputes every
 canonical identifier, fixes the raise-only policy and the absence of standalone
 parameter probe contracts and bindings, maps each row to

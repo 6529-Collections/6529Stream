@@ -101,7 +101,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:ffa73809887dde8690e08f0ba9cba65c4392265fd7f4c3f347e7df53012726fb",
+        "sha256": "sha256:d6e6d8765bb431905d5417fd546ff3932dec4c0c591c7f2b040c4998bf97a7e5",
         "size_bytes": 124564,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -185,7 +185,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:f373cecb6afafe9284f75f5e3dee38af96d1dc3fe8db4e1eaa19d926b8d51ee3",
+      "sha256": "sha256:2ff75eb10a04fb0aa0f2ecdb266bc8eb3df9dc74421f768c0241ce7fc8933cc0",
       "size_bytes": 31293,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2382,8 +2382,8 @@
       },
       {
         "path": "release-artifacts/README.md",
-        "sha256": "sha256:3a17be59187b9c0b6c678be05a275c675abb1a5f65373d75e6a6047526ab1005",
-        "size_bytes": 55153
+        "sha256": "sha256:410e73f9929fc24eb1902123402fbf29a6370c53b8b3741d1b91741ded0cf682",
+        "size_bytes": 55161
       },
       {
         "path": ".github/PULL_REQUEST_TEMPLATE.md",
