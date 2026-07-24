@@ -4097,7 +4097,7 @@ unless an external dependency changes.
 | `GOV-009` | Add monitoring specification for admin, signer, auction, randomness, credits | F/G | Merged in PR #507; issue #506 closed completed |
 | `GOV-010` | Add operator dashboard query model | G | Merged in PR #509; issue #508 closed completed |
 | `GOV-011` | Implement Governance V2 and bind the production cutover | C/E/F/G | PR #683 merged the foundation and #665 closed; ADR 0017's raise-only target is in the current candidate, while #684 parameter bindings, #685 action/native-value policy, deployment/rehearsal evidence, and independent review remain |
-| `GOV-012` | Bind the exact 22-GGP/3-GTP inventory to production hosts and sizing/cadence evidence | C/E/F/G | Open issue #684; generic store hosts exist, but the 37-entry production target and concrete candidate are not bound |
+| `GOV-012` | Bind the exact 22-GGP/3-GTP inventory to production hosts and sizing/cadence evidence | C/E/F/G | Active PR #686 / issue #684 on branch `codex/raise-only-gas-time-governance`; the PR establishes raise-only hosts and fail-closed evidence, but the 37-entry production target and concrete candidate remain unbound |
 | `GOV-013` | Enforce the closed-world Governance V2 target/selector/native-value action policy | C/E/F/G | Open issue #685; `RISK-GOV-003` remains High and non-waivable |
 
 ### Integration Readiness

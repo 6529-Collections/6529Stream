@@ -37,13 +37,13 @@ evidence, and audit/readiness gates.
 | Remote | `https://github.com/6529-Collections/6529Stream.git` |
 | Active PR branch | `codex/raise-only-gas-time-governance` |
 | Last merged PR | `https://github.com/6529-Collections/6529Stream/pull/683` |
-| Active issue | `TBD` |
-| Active PR | `TBD` |
+| Active issue | `https://github.com/6529-Collections/6529Stream/issues/684` |
+| Active PR | `https://github.com/6529-Collections/6529Stream/pull/686` |
 | Next issue | Bind the exact 25 governed parameters under #684, then enforce the closed-world action/native-value policy under #685. |
 | Roadmap file | `ops/ROADMAP.md` |
 | Execution backlog file | `ops/EXECUTION_BACKLOG.md` |
 | State file | `ops/AUTONOMOUS_RUN.md` |
-| Last updated | `2026-07-24 07:20 UTC` |
+| Last updated | `2026-07-24 07:24 UTC` |
 
 ## Current Run Notes
 
@@ -88,6 +88,11 @@ evidence, and audit/readiness gates.
   Windows `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check.ps1`
   gate completed end to end in 2,107.4 seconds after the canonical non-production
   candidate receipt, target-catalog, and release-config pins were refreshed.
+- Ready PR #686 is open from `codex/raise-only-gas-time-governance` at
+  `https://github.com/6529-Collections/6529Stream/pull/686`. It establishes the
+  raise-only foundation and fail-closed evidence boundary for issue #684 but
+  does not close the issue's exact production host/sizing/candidate-binding
+  acceptance criteria. Next action is final-head CI and CodeRabbit iteration.
 - Production and audit readiness remain blocked. The current Core still lacks
   the granular target getters and target one-way freeze semantic consumed by
   the adapter; current collection metadata still lacks the target finality
