@@ -799,6 +799,40 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             with self.subTest(target=target):
                 self.assert_post_snapshot_mutation_uses_bound_bytes(target)
 
+    def test_closed_world_policy_rejects_path_aliases_independently(self) -> None:
+        for path in (
+            "scripts/./x.py",
+            "scripts/a/./x.py",
+            "scripts/../x.py",
+            "scripts/a/../x.py",
+            "scripts//x.py",
+            "scripts/a//x.py",
+            r"scripts\x.py",
+        ):
+            with self.subTest(path_alias=path):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    policy_path = (
+                        root / verifier.RELEASE_TOOL_CALL_POLICY_PATH
+                    )
+                    policy = json.loads(
+                        policy_path.read_text(encoding="utf-8")
+                    )
+                    policy["reviewed_paths"][0]["path"] = path
+                    write_json(policy_path, policy)
+                    refresh_checksum_indexes(root)
+                    bundle = checksum_bundle_snapshot(root)
+                    snapshots = canonical_covered_snapshots(root, bundle)
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        r"normalized scripts/\.\.\./\*\.py path",
+                    ):
+                        verifier.verify_release_tool_call_policy(
+                            bundle,
+                            snapshots,
+                        )
+
     def test_closed_world_policy_rejects_unreviewed_surface_shapes(self) -> None:
         target = Path("scripts/generate_bytecode_release_proof.py")
         mutations = {

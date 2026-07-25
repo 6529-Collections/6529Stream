@@ -268,6 +268,29 @@ class ReleaseChecksumTests(unittest.TestCase):
         )
         validator = Draft202012Validator(schema)
         self.assertEqual(list(validator.iter_errors(policy)), [])
+        path_validator = Draft202012Validator(
+            schema["$defs"]["reviewedPath"]["properties"]["path"]
+        )
+        for path in (
+            "scripts/check_release_signatures.py",
+            "scripts/package/sub_dir/test-file.py",
+        ):
+            with self.subTest(valid_path=path):
+                self.assertEqual(
+                    list(path_validator.iter_errors(path)),
+                    [],
+                )
+        for path in (
+            "scripts/./x.py",
+            "scripts/a/./x.py",
+            "scripts/../x.py",
+            "scripts/a/../x.py",
+            "scripts//x.py",
+            "scripts/a//x.py",
+            r"scripts\x.py",
+        ):
+            with self.subTest(path_alias=path):
+                self.assertTrue(list(path_validator.iter_errors(path)))
         schema_mutations = {}
         duplicate_path = json.loads(json.dumps(policy))
         duplicate_path["reviewed_paths"][-1] = json.loads(
@@ -283,6 +306,25 @@ class ReleaseChecksumTests(unittest.TestCase):
         for label, mutation in schema_mutations.items():
             with self.subTest(schema_mutation=label):
                 self.assertTrue(list(validator.iter_errors(mutation)))
+        for path in (
+            "scripts/./x.py",
+            "scripts/a/../x.py",
+            "scripts/a//x.py",
+            r"scripts\x.py",
+        ):
+            with self.subTest(semantic_path_alias=path):
+                mutation = json.loads(json.dumps(policy))
+                mutation["reviewed_paths"][0]["path"] = path
+                with self.assertRaisesRegex(
+                    generator.ChecksumError,
+                    r"normalized scripts/\.\.\./\*\.py path",
+                ):
+                    generator.validate_release_tool_call_policy(
+                        repo_root,
+                        policy_bytes=generator.json_text(mutation).encode(
+                            "utf-8"
+                        ),
+                    )
         self.assertTrue(
             all(
                 len(record) == 4 and all(record)
@@ -981,6 +1023,30 @@ class ReleaseChecksumTests(unittest.TestCase):
                 repo_root,
                 covered,
                 repo_root / generator.DEFAULT_OUTPUT_DIR,
+            )
+
+    def test_release_tool_source_missing_behavior_is_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            required = Path("scripts/required.py")
+            with self.assertRaisesRegex(
+                generator.ChecksumError,
+                "release-tool checksum closure source is missing",
+            ) as raised:
+                generator.release_tool_runtime_closure(
+                    root,
+                    (required,),
+                )
+            self.assertIsInstance(raised.exception.__cause__, FileNotFoundError)
+
+            optional_root = Path("scripts/root.py")
+            write_text(root / optional_root, "import missing_optional_module\n")
+            self.assertEqual(
+                generator.release_tool_runtime_closure(
+                    root,
+                    (optional_root,),
+                ),
+                (optional_root,),
             )
 
     def test_canonical_build_rejects_each_missing_release_tool_root(

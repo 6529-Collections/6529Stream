@@ -99,6 +99,9 @@ RELEASE_TOOL_CALL_POLICY_SCHEMA = "6529stream.release-tool-call-policy.v1"
 RELEASE_TOOL_CALL_POLICY_SCHEMA_ID = (
     "https://6529.io/schemas/release-tool-call-policy.v1.schema.json"
 )
+RELEASE_TOOL_CALL_POLICY_PATH_PATTERN = (
+    r"^scripts/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.py$"
+)
 CHECKSUM_FILE_NAME = "SHA256SUMS"
 CHECKSUM_MANIFEST_NAME = "release-checksums.json"
 RELEASE_MANIFEST_NAME = "release-manifest.json"
@@ -2481,7 +2484,7 @@ def _validate_policy_schema_document(schema: dict[str, Any]) -> None:
                 "properties": {
                     "path": {
                         "type": "string",
-                        "pattern": r"^scripts/[A-Za-z0-9_./-]+\.py$",
+                        "pattern": RELEASE_TOOL_CALL_POLICY_PATH_PATTERN,
                     },
                     "role": {
                         "enum": ["runtime", "focused-test"],
@@ -2562,6 +2565,27 @@ def _validate_policy_schema_document(schema: dict[str, Any]) -> None:
             "release-tool call policy schema differs from the exact "
             "independent closed-world schema"
         )
+
+
+def _validate_release_tool_call_policy_paths(
+    policy: dict[str, Any],
+) -> None:
+    """Reject non-canonical reviewed script path spellings independently."""
+
+    rows = policy.get("reviewed_paths")
+    if not isinstance(rows, list):
+        return
+    for index, row in enumerate(rows):
+        path = row.get("path") if isinstance(row, dict) else None
+        if (
+            not isinstance(path, str)
+            or re.fullmatch(RELEASE_TOOL_CALL_POLICY_PATH_PATTERN, path)
+            is None
+        ):
+            raise ReleaseArtifactVerificationError(
+                "release-tool call policy reviewed_paths"
+                f"[{index}].path must be a normalized scripts/.../*.py path"
+            )
 
 
 def _require_index_binding(
@@ -2686,6 +2710,7 @@ def verify_release_tool_call_policy(
         raise ReleaseArtifactVerificationError(
             "release-tool call policy must use canonical JSON formatting"
         )
+    _validate_release_tool_call_policy_paths(actual)
     if set(actual) != {
         "schema_version",
         "generator_version",

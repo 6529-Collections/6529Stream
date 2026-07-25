@@ -28733,8 +28733,8 @@
     {
       "path": "scripts/generate_release_checksums.py",
       "role": "runtime",
-      "source_sha256": "44c912eb9401a3fd2e0793f8039ca0241f080e35b1c829825d1c0b8db5d91ded",
-      "size_bytes": 174157,
+      "source_sha256": "27aa19653bceab8aed0271c173523068046cf3116b10d353c45375444e99f555",
+      "size_bytes": 175013,
       "imports": [
         {
           "record": "{\"alias\":\"governed_parameter_inventory_checker\",\"binding\":\"governed_parameter_inventory_checker\",\"kind\":\"import\",\"level\":0,\"member\":null,\"module\":\"check_governed_parameter_inventory\"}",
@@ -28960,7 +28960,7 @@
         },
         {
           "record": "{\"context\":\"Tuple.elts\",\"target\":\"typing.Any\"}",
-          "count": 16
+          "count": 17
         },
         {
           "record": "{\"context\":\"arg.annotation\",\"target\":\"ast.AST\"}",
@@ -29012,7 +29012,7 @@
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"re\"}",
-          "count": 1
+          "count": 2
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"stat\"}",
@@ -29108,6 +29108,10 @@
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"re.compile\"}",
+          "count": 1
+        },
+        {
+          "record": "{\"context\":\"call-target\",\"target\":\"re.fullmatch\"}",
           "count": 1
         },
         {
@@ -29722,6 +29726,12 @@
           "target": "local:ChecksumError",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "514eeaf63d9bbd8840c2e20a49e34bb468dcb255d7fdf5e97d3ac42b31859897",
+          "count": 1
+        },
+        {
+          "target": "local:ChecksumError",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "53d042593004a376f4e256e3cd097541a36d06831ea4beb58643cd2b02ee68df",
           "count": 1
         },
         {
@@ -30541,6 +30551,12 @@
           "count": 2
         },
         {
+          "target": "local:_validate_release_tool_call_policy_paths",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "7bdc763ccecdf6e625e9ce832d42255d908afaa8d246bb11a03585cce6f455f5",
+          "count": 1
+        },
+        {
           "target": "local:_validate_release_tool_call_policy_schema_document",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "10fd33a94e1aa96f85762ee428cba1711a31302574840ee1dbe9e36097712c82",
@@ -31155,6 +31171,12 @@
         {
           "target": "local:enumerate",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "a81cd08fa8119232b06b6f274d0fa0b27f7ee9e88e80e0798117fed06a7cde93",
+          "count": 1
+        },
+        {
+          "target": "local:enumerate",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "ad17e8edee46a57b4692a67f3ac2728e63f865220b0d0fc90a6b2c3590edcd9b",
           "count": 1
         },
@@ -31564,7 +31586,7 @@
           "target": "local:isinstance",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "8b48d7850592867782b6b3166a1c37701e04e5796fd8a384064f2ec2c808648e",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:isinstance",
@@ -31601,6 +31623,12 @@
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "a62fc30024a1b0fc1f53b651481ca1de40cd127c9eae061015775e516a52f828",
           "count": 6
+        },
+        {
+          "target": "local:isinstance",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "ab6dc99fbeec2c67eb0fecae3f46280efc722af95bbd2b81d5956f88362db441",
+          "count": 1
         },
         {
           "target": "local:isinstance",
@@ -31708,6 +31736,12 @@
           "target": "local:isinstance",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "f021e17f295cc33b199089b696891918a3053fb472c4c1a9e14a35a4f71f3e97",
+          "count": 1
+        },
+        {
+          "target": "local:isinstance",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "fc0fee2378744bc8d3f36b0b9ee5be34904daaa9998ec92a411bd006fd8bf864",
           "count": 1
         },
         {
@@ -32461,6 +32495,12 @@
           "count": 3
         },
         {
+          "target": "local:policy.get",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "4aee3bc216e9ce2184be0e53ae843c94ee51bdf77067b32ff0c90ef77b019ea5",
+          "count": 1
+        },
+        {
           "target": "local:policy_group.add_argument",
           "shape": "positional=1;starred=0;keywords=action",
           "ast_sha256": "47b595d0e2d052fed533077dcb1be06c627b92824ee187754b57168a235b2497",
@@ -32968,7 +33008,7 @@
           "target": "local:row.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "127508b3d02f0491263a0466e2fe842ab014b38dbf782f7011b3a5fc5b539222",
-          "count": 2
+          "count": 3
         },
         {
           "target": "local:rules.append",
@@ -35206,6 +35246,12 @@
           "target": "re.compile",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "d757c694d5c862289cf13a9e5dec3f3f37f4e13774585725f2ea9313f6ab96c5",
+          "count": 1
+        },
+        {
+          "target": "re.fullmatch",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "f0ac4a0094dd3648a4e4453f1f0a5ce9456531e7c0139e9aa471fc07edd31abf",
           "count": 1
         },
         {
@@ -48511,8 +48557,8 @@
     {
       "path": "scripts/verify_release_artifacts.py",
       "role": "runtime",
-      "source_sha256": "86001a774e237094c379773a1629a2d72bbb04eaf2076ccac4ba18aae2ee73cd",
-      "size_bytes": 163518,
+      "source_sha256": "9b1b961faaf7b9106b394890830c8c0e06e404cf97b3aaa10d2469e78eb3214e",
+      "size_bytes": 164391,
       "imports": [
         {
           "record": "{\"alias\":null,\"binding\":\"Any\",\"kind\":\"from\",\"level\":0,\"member\":\"Any\",\"module\":\"typing\"}",
@@ -48758,7 +48804,7 @@
         },
         {
           "record": "{\"context\":\"Tuple.elts\",\"target\":\"typing.Any\"}",
-          "count": 31
+          "count": 32
         },
         {
           "record": "{\"context\":\"arg.annotation\",\"target\":\"ast.AST\"}",
@@ -48810,7 +48856,7 @@
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"re\"}",
-          "count": 2
+          "count": 3
         },
         {
           "record": "{\"context\":\"attribute-base\",\"target\":\"stat\"}",
@@ -48899,6 +48945,10 @@
         {
           "record": "{\"context\":\"call-target\",\"target\":\"re.compile\"}",
           "count": 2
+        },
+        {
+          "record": "{\"context\":\"call-target\",\"target\":\"re.fullmatch\"}",
+          "count": 1
         },
         {
           "record": "{\"context\":\"call-target\",\"target\":\"stat.S_ISREG\"}",
@@ -50077,6 +50127,12 @@
         {
           "target": "local:ReleaseArtifactVerificationError",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "a74f80b1386c5a18db41b333fbf305d8c12212c96bb31e67a83f786157370fd3",
+          "count": 1
+        },
+        {
+          "target": "local:ReleaseArtifactVerificationError",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "a9116c67d6ed979de710c1522e839fb950f8251110d614c8c875e9d9ac524b15",
           "count": 1
         },
@@ -50867,6 +50923,12 @@
           "count": 1
         },
         {
+          "target": "local:_validate_release_tool_call_policy_paths",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "7bdc763ccecdf6e625e9ce832d42255d908afaa8d246bb11a03585cce6f455f5",
+          "count": 1
+        },
+        {
           "target": "local:actual.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "1071752679360afd6509afc9866cf26a8b810793cb548aa214144d4af0ce1b3f",
@@ -51373,6 +51435,12 @@
         {
           "target": "local:enumerate",
           "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "a81cd08fa8119232b06b6f274d0fa0b27f7ee9e88e80e0798117fed06a7cde93",
+          "count": 1
+        },
+        {
+          "target": "local:enumerate",
+          "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "ae1627074d5b9b038caa7d5d608f3d7e8879ce993bc8f62c8d216dae2f9a3f7a",
           "count": 1
         },
@@ -51776,7 +51844,7 @@
           "target": "local:isinstance",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "8b48d7850592867782b6b3166a1c37701e04e5796fd8a384064f2ec2c808648e",
-          "count": 1
+          "count": 2
         },
         {
           "target": "local:isinstance",
@@ -51818,7 +51886,7 @@
           "target": "local:isinstance",
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "ab6dc99fbeec2c67eb0fecae3f46280efc722af95bbd2b81d5956f88362db441",
-          "count": 3
+          "count": 4
         },
         {
           "target": "local:isinstance",
@@ -51921,6 +51989,12 @@
           "shape": "positional=2;starred=0;keywords=",
           "ast_sha256": "f409081268c80858030a5051dc473413fd12bbe0d5ee9a64647acb9f1997ddae",
           "count": 4
+        },
+        {
+          "target": "local:isinstance",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "fc0fee2378744bc8d3f36b0b9ee5be34904daaa9998ec92a411bd006fd8bf864",
+          "count": 1
         },
         {
           "target": "local:isinstance",
@@ -52661,6 +52735,12 @@
           "count": 2
         },
         {
+          "target": "local:policy.get",
+          "shape": "positional=1;starred=0;keywords=",
+          "ast_sha256": "4aee3bc216e9ce2184be0e53ae843c94ee51bdf77067b32ff0c90ef77b019ea5",
+          "count": 1
+        },
+        {
           "target": "local:print",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "6c8f3f693e0a8e069e34746bbffd35bb95e3a11524d9d32b8af3efc9bf5e1904",
@@ -53372,7 +53452,7 @@
           "target": "local:row.get",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "127508b3d02f0491263a0466e2fe842ab014b38dbf782f7011b3a5fc5b539222",
-          "count": 2
+          "count": 3
         },
         {
           "target": "local:rules.append",
@@ -54506,6 +54586,12 @@
           "target": "re.compile",
           "shape": "positional=1;starred=0;keywords=",
           "ast_sha256": "d757c694d5c862289cf13a9e5dec3f3f37f4e13774585725f2ea9313f6ab96c5",
+          "count": 1
+        },
+        {
+          "target": "re.fullmatch",
+          "shape": "positional=2;starred=0;keywords=",
+          "ast_sha256": "f0ac4a0094dd3648a4e4453f1f0a5ce9456531e7c0139e9aa471fc07edd31abf",
           "count": 1
         },
         {

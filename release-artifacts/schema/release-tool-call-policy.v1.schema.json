@@ -128,7 +128,7 @@
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^scripts/[A-Za-z0-9_./-]+\\.py$"
+          "pattern": "^scripts/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\\.py$"
         },
         "role": {
           "enum": [

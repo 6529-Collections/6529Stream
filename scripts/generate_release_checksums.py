@@ -33,6 +33,9 @@ RELEASE_TOOL_CALL_POLICY_SCHEMA = "6529stream.release-tool-call-policy.v1"
 RELEASE_TOOL_CALL_POLICY_SCHEMA_ID = (
     "https://6529.io/schemas/release-tool-call-policy.v1.schema.json"
 )
+RELEASE_TOOL_CALL_POLICY_PATH_PATTERN = (
+    r"^scripts/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.py$"
+)
 GIT_BINARY_SNIFF_BYTES = 8_000
 COVERAGE_POLICIES = (
     CANONICAL_COVERAGE_POLICY,
@@ -404,8 +407,8 @@ REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES = {
 }
 REVIEWED_RELEASE_TOOL_SNAPSHOT_LOADER_SOURCES = {
     Path("scripts/verify_release_artifacts.py"): (
-        "86001a774e237094c379773a1629a2d72bbb04eaf2076ccac4ba18aae2ee73cd",
-        163_518,
+        "9b1b961faaf7b9106b394890830c8c0e06e404cf97b3aaa10d2469e78eb3214e",
+        164_391,
     ),
 }
 
@@ -1223,13 +1226,13 @@ def _validated_release_tool_source(
         current = current / part
         try:
             metadata = os.lstat(current)
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             if not required:
                 return None
             raise ChecksumError(
                 "release-tool checksum closure source is missing: "
                 f"{relative_path.as_posix()}"
-            )
+            ) from exc
         except OSError as exc:
             raise ChecksumError(
                 "cannot inspect release-tool checksum closure source: "
@@ -3263,7 +3266,7 @@ def _validate_release_tool_call_policy_schema_document(
                 "properties": {
                     "path": {
                         "type": "string",
-                        "pattern": "^scripts/[A-Za-z0-9_./-]+\\.py$",
+                        "pattern": RELEASE_TOOL_CALL_POLICY_PATH_PATTERN,
                     },
                     "role": {
                         "enum": [
@@ -3356,6 +3359,27 @@ def _validate_release_tool_call_policy_schema_document(
         )
 
 
+def _validate_release_tool_call_policy_paths(
+    policy: dict[str, Any],
+) -> None:
+    """Reject non-canonical reviewed script path spellings."""
+
+    rows = policy.get("reviewed_paths")
+    if not isinstance(rows, list):
+        return
+    for index, row in enumerate(rows):
+        path = row.get("path") if isinstance(row, dict) else None
+        if (
+            not isinstance(path, str)
+            or re.fullmatch(RELEASE_TOOL_CALL_POLICY_PATH_PATTERN, path)
+            is None
+        ):
+            raise ChecksumError(
+                "release-tool call policy reviewed_paths"
+                f"[{index}].path must be a normalized scripts/.../*.py path"
+            )
+
+
 def validate_release_tool_call_policy(
     repo_root: Path,
     *,
@@ -3407,6 +3431,7 @@ def validate_release_tool_call_policy(
         raise ChecksumError(
             "release-tool call policy must use canonical JSON formatting"
         )
+    _validate_release_tool_call_policy_paths(actual)
     expected = build_release_tool_call_policy(
         repo_root,
         source_snapshots=source_snapshots,
