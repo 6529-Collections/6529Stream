@@ -57,6 +57,18 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     governed_parameter_inventory = (
         root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
     )
+    record_family_inventory = (
+        root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
+    )
+    record_family_inventory_schema = (
+        root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+    )
+    record_family_evidence_template = (
+        root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE
+    )
+    record_family_grant_map_schema = (
+        root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+    )
 
     write_json(
         latest / "release-manifest.json",
@@ -136,6 +148,46 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
     write_json(
         governed_parameter_inventory,
         {"schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA},
+    )
+    write_json(
+        record_family_inventory,
+        {
+            "schema_version": (
+                generator.record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
+            )
+        },
+    )
+    write_json(
+        record_family_inventory_schema,
+        {
+            "$schema": generator.JSON_SCHEMA_DRAFT,
+            "$id": generator.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID,
+            "properties": {
+                "schema_version": {
+                    "const": generator.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+                }
+            },
+        },
+    )
+    write_json(
+        record_family_evidence_template,
+        {
+            "schema_version": (
+                generator.record_family_authorization_checker.EVIDENCE_SCHEMA_VERSION
+            )
+        },
+    )
+    write_json(
+        record_family_grant_map_schema,
+        {
+            "$schema": generator.JSON_SCHEMA_DRAFT,
+            "$id": generator.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID,
+            "properties": {
+                "schema_version": {
+                    "const": generator.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+                }
+            },
+        },
     )
     write_json(
         latest / "release-notes.json",
@@ -232,6 +284,10 @@ def seed_release_tree(root: Path) -> dict[str, Path]:
         "release_manifest": latest / "release-manifest.json",
         "bytecode_proof": latest / "bytecode-release-proof.json",
         "governed_parameter_inventory": governed_parameter_inventory,
+        "record_family_inventory": record_family_inventory,
+        "record_family_inventory_schema": record_family_inventory_schema,
+        "record_family_evidence_template": record_family_evidence_template,
+        "record_family_grant_map_schema": record_family_grant_map_schema,
     }
 
 
@@ -246,8 +302,15 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
             },
         )
         self.inventory_validator = self.inventory_validation_patcher.start()
+        self.record_family_validation_patcher = mock.patch.object(
+            generator.record_family_authorization_checker,
+            "validate_package",
+            return_value=({}, {}),
+        )
+        self.record_family_validator = self.record_family_validation_patcher.start()
 
     def tearDown(self) -> None:
+        self.record_family_validation_patcher.stop()
         self.inventory_validation_patcher.stop()
 
     def test_build_lockfile_records_status_artifacts_and_signature_evidence(self) -> None:
@@ -300,6 +363,59 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
                     "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
                 },
             )
+            self.assertEqual(
+                lockfile["locked_inputs"]["record_family_authorization_inventory"],
+                generator.file_record(
+                    paths["record_family_inventory"], root, schema_required=True
+                ),
+            )
+            self.assertEqual(
+                lockfile["locked_inputs"][
+                    "record_family_authorization_inventory_schema"
+                ],
+                {
+                    **generator.file_record(
+                        paths["record_family_inventory_schema"],
+                        root,
+                    ),
+                    "schema_version": generator.JSON_SCHEMA_DRAFT,
+                    "schema_id": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID
+                    ),
+                    "document_schema_version": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+                    ),
+                },
+            )
+            self.assertEqual(
+                lockfile["locked_inputs"][
+                    "record_family_authorization_evidence_template"
+                ],
+                generator.file_record(
+                    paths["record_family_evidence_template"],
+                    root,
+                    schema_required=True,
+                ),
+            )
+            self.assertEqual(
+                lockfile["locked_inputs"][
+                    "record_family_authorization_grant_map_schema"
+                ],
+                {
+                    **generator.file_record(
+                        paths["record_family_grant_map_schema"],
+                        root,
+                    ),
+                    "schema_version": generator.JSON_SCHEMA_DRAFT,
+                    "schema_id": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID
+                    ),
+                    "document_schema_version": (
+                        generator.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+                    ),
+                },
+            )
+            self.record_family_validator.assert_called_once_with(root)
             self.assertEqual(
                 lockfile["release_signature_evidence"][0]["signature_statuses"],
                 {
@@ -432,6 +548,149 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
                     paths["signatures"],
                 )
 
+    def test_generator_rejects_invalid_record_family_authorization_package(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            self.record_family_validator.side_effect = (
+                generator.record_family_authorization_checker.RecordFamilyAuthorizationError(
+                    "candidate binding must remain unavailable"
+                )
+            )
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "candidate binding must remain unavailable",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
+    def test_generator_rejects_record_family_inventory_schema_identity_drift(
+        self,
+    ) -> None:
+        mutations = (
+            ("$schema", "https://json-schema.org/draft/2019-09/schema", "JSON Schema"),
+            ("$id", "https://example.invalid/inventory.json", "schema ID"),
+        )
+        for field, value, expected_error in mutations:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_release_tree(root)
+                    document = json.loads(
+                        paths["record_family_inventory_schema"].read_text(
+                            encoding="utf-8"
+                        )
+                    )
+                    document[field] = value
+                    write_json(paths["record_family_inventory_schema"], document)
+
+                    with self.assertRaisesRegex(
+                        generator.ReleaseCandidateLockfileError,
+                        expected_error,
+                    ):
+                        generator.build_lockfile(
+                            root,
+                            paths["output"],
+                            paths["release_manifest"],
+                            paths["bytecode_proof"],
+                            paths["latest"],
+                            paths["signatures"],
+                        )
+
+    def test_generator_rejects_record_family_inventory_schema_version_drift(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            document = json.loads(
+                paths["record_family_inventory_schema"].read_text(encoding="utf-8")
+            )
+            document["properties"]["schema_version"]["const"] = (
+                "6529stream.record-family-authorization-inventory.v2"
+            )
+            write_json(paths["record_family_inventory_schema"], document)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "must pin document version",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
+    def test_generator_rejects_record_family_grant_schema_identity_drift(
+        self,
+    ) -> None:
+        mutations = (
+            ("$schema", "https://json-schema.org/draft/2019-09/schema", "JSON Schema"),
+            ("$id", "https://example.invalid/grant-map.json", "schema ID"),
+        )
+        for field, value, expected_error in mutations:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    paths = seed_release_tree(root)
+                    document = json.loads(
+                        paths["record_family_grant_map_schema"].read_text(
+                            encoding="utf-8"
+                        )
+                    )
+                    document[field] = value
+                    write_json(paths["record_family_grant_map_schema"], document)
+
+                    with self.assertRaisesRegex(
+                        generator.ReleaseCandidateLockfileError,
+                        expected_error,
+                    ):
+                        generator.build_lockfile(
+                            root,
+                            paths["output"],
+                            paths["release_manifest"],
+                            paths["bytecode_proof"],
+                            paths["latest"],
+                            paths["signatures"],
+                        )
+
+    def test_generator_rejects_record_family_grant_schema_version_drift(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            paths = seed_release_tree(root)
+            document = json.loads(
+                paths["record_family_grant_map_schema"].read_text(encoding="utf-8")
+            )
+            document["properties"]["schema_version"]["const"] = (
+                "6529stream.record-family-authorization-grant-map.v2"
+            )
+            write_json(paths["record_family_grant_map_schema"], document)
+
+            with self.assertRaisesRegex(
+                generator.ReleaseCandidateLockfileError,
+                "must pin document version",
+            ):
+                generator.build_lockfile(
+                    root,
+                    paths["output"],
+                    paths["release_manifest"],
+                    paths["bytecode_proof"],
+                    paths["latest"],
+                    paths["signatures"],
+                )
+
     def test_generator_rejects_escaping_governed_parameter_reference(
         self,
     ) -> None:
@@ -543,6 +802,10 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
             "python scripts/check_governed_parameter_inventory.py",
             lockfile["validation"]["commands"],
         )
+        self.assertIn(
+            "python scripts/check_record_family_authorization.py",
+            lockfile["validation"]["commands"],
+        )
         inventory_path = repo_root / generator.DEFAULT_GOVERNED_PARAMETER_INVENTORY
         self.assertEqual(
             lockfile["locked_inputs"]["governed_parameter_inventory"],
@@ -551,6 +814,71 @@ class ReleaseCandidateLockfileTests(unittest.TestCase):
                 "sha256": generator.file_sha256(inventory_path),
                 "size_bytes": inventory_path.stat().st_size,
                 "schema_version": generator.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+            },
+        )
+        record_family_inventory = (
+            repo_root / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
+        )
+        record_family_inventory_schema = (
+            repo_root
+            / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+        )
+        record_family_template = (
+            repo_root
+            / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE
+        )
+        record_family_grant_map_schema = (
+            repo_root
+            / generator.DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+        )
+        self.assertEqual(
+            lockfile["locked_inputs"]["record_family_authorization_inventory"],
+            generator.file_record(
+                record_family_inventory, repo_root, schema_required=True
+            ),
+        )
+        self.assertEqual(
+            lockfile["locked_inputs"][
+                "record_family_authorization_inventory_schema"
+            ],
+            {
+                **generator.file_record(
+                    record_family_inventory_schema,
+                    repo_root,
+                ),
+                "schema_version": generator.JSON_SCHEMA_DRAFT,
+                "schema_id": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID
+                ),
+                "document_schema_version": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+                ),
+            },
+        )
+        self.assertEqual(
+            lockfile["locked_inputs"][
+                "record_family_authorization_evidence_template"
+            ],
+            generator.file_record(
+                record_family_template, repo_root, schema_required=True
+            ),
+        )
+        self.assertEqual(
+            lockfile["locked_inputs"][
+                "record_family_authorization_grant_map_schema"
+            ],
+            {
+                **generator.file_record(
+                    record_family_grant_map_schema,
+                    repo_root,
+                ),
+                "schema_version": generator.JSON_SCHEMA_DRAFT,
+                "schema_id": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID
+                ),
+                "document_schema_version": (
+                    generator.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+                ),
             },
         )
         self.assertEqual(

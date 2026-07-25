@@ -29,6 +29,7 @@ EXPECTED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
     Path("scripts/check_public_beta_evidence.py"),
+    Path("scripts/check_record_family_authorization.py"),
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/check_release_signatures.py"),
     Path("scripts/check_risk_register.py"),
@@ -49,6 +50,7 @@ EXPECTED_RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_admin_ceremony_evidence.py"),
     Path("scripts/test_drop_authorization_signing_evidence.py"),
     Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_record_family_authorization.py"),
     Path("scripts/test_release_signatures.py"),
     Path("scripts/test_signer_custody_readiness.py"),
     Path("scripts/test_bytecode_release_proof.py"),
@@ -79,7 +81,7 @@ class ReleaseChecksumTests(unittest.TestCase):
     def test_release_tool_trust_policy_has_exact_configured_cardinality(
         self,
     ) -> None:
-        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 232)
+        self.assertEqual(len(generator.DEFAULT_COVERED_PATHS), 236)
         self.assertEqual(
             len(set(generator.DEFAULT_COVERED_PATHS)),
             len(generator.DEFAULT_COVERED_PATHS),
@@ -1281,11 +1283,11 @@ class ReleaseChecksumTests(unittest.TestCase):
             / generator.DEFAULT_OUTPUT_DIR
             / generator.CHECKSUM_FILE_NAME
         ).read_text(encoding="utf-8")
-        self.assertEqual(len(manifest["source"]["covered_paths"]), 232)
-        self.assertEqual(len(manifest["files"]), 394)
+        self.assertEqual(len(manifest["source"]["covered_paths"]), 236)
+        self.assertEqual(len(manifest["files"]), 401)
         self.assertEqual(
             len(generator.parse_checksum_file(checksum_text)),
-            394,
+            401,
         )
 
     def test_committed_checksums_cover_deployment_plan_materializer(self) -> None:
@@ -1447,6 +1449,32 @@ class ReleaseChecksumTests(unittest.TestCase):
             ),
             Path("scripts/check_governed_parameter_inventory.py"),
             Path("scripts/test_governed_parameter_inventory.py"),
+        }
+        self.assert_committed_checksums_cover(expected_paths)
+
+    def test_committed_checksums_cover_record_family_authorization_package(
+        self,
+    ) -> None:
+        expected_paths = {
+            Path("release-artifacts/record-family-authorization-inventory.json"),
+            Path(
+                "release-artifacts/schema/"
+                "record-family-authorization-inventory.v1.schema.json"
+            ),
+            Path(
+                "deployments/record-family-authorization/"
+                "record-family-authorization-evidence-template.json"
+            ),
+            Path(
+                "deployments/schema/"
+                "record-family-authorization-evidence.v1.schema.json"
+            ),
+            Path(
+                "deployments/schema/"
+                "record-family-authorization-grant-map.v1.schema.json"
+            ),
+            Path("scripts/check_record_family_authorization.py"),
+            Path("scripts/test_record_family_authorization.py"),
         }
         self.assert_committed_checksums_cover(expected_paths)
 

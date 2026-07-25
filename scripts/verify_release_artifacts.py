@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any, Iterable, NamedTuple, Sequence
 
 import check_governed_parameter_inventory as governed_parameter_inventory_checker
+import check_record_family_authorization as record_family_authorization_checker
 import generate_release_checksums as release_checksum_generator
 
 
@@ -30,10 +31,41 @@ RELEASE_CANDIDATE_LOCKFILE_SCHEMA = "6529stream.release-candidate-lockfile.v1"
 GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
     governed_parameter_inventory_checker.SCHEMA_VERSION
 )
+RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
+    record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID = (
+    record_family_authorization_checker.INVENTORY_SCHEMA_ID
+)
+RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA = (
+    record_family_authorization_checker.EVIDENCE_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA = (
+    record_family_authorization_checker.GRANT_MAP_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID = (
+    record_family_authorization_checker.GRANT_MAP_SCHEMA_ID
+)
+JSON_SCHEMA_DRAFT = record_family_authorization_checker.JSON_SCHEMA_DRAFT
 
 DEFAULT_RELEASE_DIR = Path("release-artifacts/latest")
 GOVERNED_PARAMETER_INVENTORY_PATH = (
     governed_parameter_inventory_checker.DEFAULT_INVENTORY.as_posix()
+)
+RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH = (
+    record_family_authorization_checker.DEFAULT_INVENTORY.as_posix()
+)
+RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH = (
+    record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA.as_posix()
+)
+RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH = (
+    record_family_authorization_checker.DEFAULT_EVIDENCE_SCHEMA.as_posix()
+)
+RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH = (
+    record_family_authorization_checker.DEFAULT_EVIDENCE_TEMPLATE.as_posix()
+)
+RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH = (
+    record_family_authorization_checker.DEFAULT_GRANT_MAP_SCHEMA.as_posix()
 )
 CHECKSUM_FILE_NAME = "SHA256SUMS"
 CHECKSUM_MANIFEST_NAME = "release-checksums.json"
@@ -53,6 +85,7 @@ REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
     Path("scripts/check_public_beta_evidence.py"),
+    Path("scripts/check_record_family_authorization.py"),
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/check_release_signatures.py"),
     Path("scripts/check_risk_register.py"),
@@ -73,6 +106,7 @@ REVIEWED_RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_admin_ceremony_evidence.py"),
     Path("scripts/test_drop_authorization_signing_evidence.py"),
     Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_record_family_authorization.py"),
     Path("scripts/test_release_signatures.py"),
     Path("scripts/test_signer_custody_readiness.py"),
     Path("scripts/test_bytecode_release_proof.py"),
@@ -455,6 +489,88 @@ def verify_release_tool_trust_bindings(
     return tuple(path.as_posix() for path in required_paths)
 
 
+def verify_record_family_inventory_schema_checksum_bindings(
+    repo_root: Path,
+    checksum_path: Path,
+    checksum_manifest_path: Path,
+) -> None:
+    """Independently require the canonical #690 inventory schema in both indexes."""
+
+    relative_path = RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH
+    resolved = resolve_release_file(
+        repo_root,
+        relative_path,
+        "record-family authorization inventory-schema checksum binding",
+    )
+    require_regular_file(
+        resolved,
+        "record-family authorization inventory-schema checksum binding",
+    )
+    expected_hash = file_sha256(resolved)
+    expected_size = resolved.stat().st_size
+
+    require_regular_file(checksum_path, CHECKSUM_FILE_NAME)
+    checksum_matches = [
+        digest
+        for digest, path in parse_checksum_file(
+            checksum_path.read_text(encoding="utf-8")
+        )
+        if path == relative_path
+    ]
+    if len(checksum_matches) != 1:
+        raise ReleaseArtifactVerificationError(
+            "record-family authorization inventory-schema checksum binding "
+            "requires exactly one SHA256SUMS entry for "
+            f"{relative_path}: got {len(checksum_matches)}"
+        )
+    if checksum_matches[0] != expected_hash.removeprefix("sha256:"):
+        raise ReleaseArtifactVerificationError(
+            "record-family authorization inventory-schema checksum binding "
+            f"SHA256SUMS hash mismatch for {relative_path}"
+        )
+
+    checksum_manifest = require_schema(
+        load_json(checksum_manifest_path),
+        CHECKSUM_SCHEMA,
+        CHECKSUM_MANIFEST_NAME,
+    )
+    raw_files = checksum_manifest.get("files")
+    if not isinstance(raw_files, list):
+        raise ReleaseArtifactVerificationError(
+            "record-family authorization inventory-schema checksum binding "
+            "requires checksum manifest files"
+        )
+    manifest_matches: list[dict[str, Any]] = []
+    for index, raw_entry in enumerate(raw_files):
+        entry = require_dict(
+            raw_entry,
+            f"release-checksums.files[{index}]",
+        )
+        path = require_string(
+            entry.get("path"),
+            f"release-checksums.files[{index}].path",
+        )
+        if path == relative_path:
+            manifest_matches.append(entry)
+    if len(manifest_matches) != 1:
+        raise ReleaseArtifactVerificationError(
+            "record-family authorization inventory-schema checksum binding "
+            "requires exactly one release-checksums.json entry for "
+            f"{relative_path}: got {len(manifest_matches)}"
+        )
+    manifest_entry = manifest_matches[0]
+    if manifest_entry.get("sha256") != expected_hash:
+        raise ReleaseArtifactVerificationError(
+            "record-family authorization inventory-schema checksum binding "
+            f"release-checksums.json hash mismatch for {relative_path}"
+        )
+    if manifest_entry.get("size_bytes") != expected_size:
+        raise ReleaseArtifactVerificationError(
+            "record-family authorization inventory-schema checksum binding "
+            f"release-checksums.json size mismatch for {relative_path}"
+        )
+
+
 def verify_release_directory_checksum_closure(
     repo_root: Path,
     release_dir: Path,
@@ -749,6 +865,216 @@ def validate_governed_parameter_inventory_semantics(
         ) from exc
 
 
+def validate_record_family_authorization_semantics(repo_root: Path) -> None:
+    """Run the canonical planning-package validator for offline consumers."""
+    try:
+        record_family_authorization_checker.validate_package(repo_root)
+    except record_family_authorization_checker.RecordFamilyAuthorizationError as exc:
+        raise ReleaseArtifactVerificationError(
+            f"record-family authorization semantic validation failed: {exc}"
+        ) from exc
+
+
+def _require_exact_file_record(
+    record: dict[str, Any],
+    *,
+    source: str,
+    expected_path: str,
+    expected_schema: str | None,
+    expected_fields: dict[str, str] | None = None,
+) -> None:
+    expected_fields = expected_fields or {}
+    expected_keys = {"path", "sha256", "size_bytes", *expected_fields}
+    if expected_schema is not None:
+        expected_keys.add("schema_version")
+    if set(record) != expected_keys:
+        raise ReleaseArtifactVerificationError(
+            f"{source} keys must be exactly {', '.join(sorted(expected_keys))}"
+        )
+    if record.get("path") != expected_path:
+        raise ReleaseArtifactVerificationError(
+            f"{source} path must be {expected_path}"
+        )
+    if expected_schema is not None and record.get("schema_version") != expected_schema:
+        raise ReleaseArtifactVerificationError(
+            f"{source} must use schema {expected_schema}"
+        )
+    sha256 = require_string(record.get("sha256"), f"{source}.sha256")
+    if not SHA256_PREFIX_RE.fullmatch(sha256):
+        raise ReleaseArtifactVerificationError(
+            f"{source}.sha256 must be a canonical sha256: digest"
+        )
+    size_bytes = record.get("size_bytes")
+    if isinstance(size_bytes, bool) or not isinstance(size_bytes, int) or size_bytes < 0:
+        raise ReleaseArtifactVerificationError(
+            f"{source}.size_bytes must be a non-negative integer"
+        )
+    for field, expected_value in expected_fields.items():
+        if record.get(field) != expected_value:
+            raise ReleaseArtifactVerificationError(
+                f"{source}.{field} must be {expected_value}"
+            )
+
+
+def verify_record_family_authorization_bindings(
+    release_manifest: dict[str, Any],
+    release_candidate_lockfile: dict[str, Any],
+) -> None:
+    """Require the manifest and lockfile to bind the canonical #690 inputs."""
+    release_artifacts = require_dict(
+        release_manifest.get("release_artifacts"),
+        "release-manifest.release_artifacts",
+    )
+    locked_inputs = require_dict(
+        release_candidate_lockfile.get("locked_inputs"),
+        "release-candidate-lockfile.locked_inputs",
+    )
+    manifest_group = require_dict(
+        release_artifacts.get("record_family_authorization"),
+        "release-manifest.release_artifacts.record_family_authorization",
+    )
+    expected_manifest_keys = {
+        "inventory",
+        "inventory_schema",
+        "evidence_schema",
+        "grant_map_schema",
+        "evidence_template",
+    }
+    if set(manifest_group) != expected_manifest_keys:
+        raise ReleaseArtifactVerificationError(
+            "release-manifest record-family authorization keys must be exactly "
+            "inventory, inventory_schema, evidence_schema, grant_map_schema, "
+            "and evidence_template"
+        )
+
+    manifest_inventory = require_dict(
+        manifest_group.get("inventory"),
+        "release-manifest.record_family_authorization.inventory",
+    )
+    manifest_inventory_schema = require_dict(
+        manifest_group.get("inventory_schema"),
+        "release-manifest.record_family_authorization.inventory_schema",
+    )
+    manifest_schema = require_dict(
+        manifest_group.get("evidence_schema"),
+        "release-manifest.record_family_authorization.evidence_schema",
+    )
+    manifest_template = require_dict(
+        manifest_group.get("evidence_template"),
+        "release-manifest.record_family_authorization.evidence_template",
+    )
+    manifest_grant_map_schema = require_dict(
+        manifest_group.get("grant_map_schema"),
+        "release-manifest.record_family_authorization.grant_map_schema",
+    )
+    lock_inventory = require_dict(
+        locked_inputs.get("record_family_authorization_inventory"),
+        "release-candidate-lockfile.record_family_authorization_inventory",
+    )
+    lock_inventory_schema = require_dict(
+        locked_inputs.get("record_family_authorization_inventory_schema"),
+        "release-candidate-lockfile.record_family_authorization_inventory_schema",
+    )
+    lock_template = require_dict(
+        locked_inputs.get("record_family_authorization_evidence_template"),
+        "release-candidate-lockfile.record_family_authorization_evidence_template",
+    )
+    lock_grant_map_schema = require_dict(
+        locked_inputs.get("record_family_authorization_grant_map_schema"),
+        "release-candidate-lockfile.record_family_authorization_grant_map_schema",
+    )
+
+    _require_exact_file_record(
+        manifest_inventory,
+        source="release-manifest record-family authorization inventory",
+        expected_path=RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+        expected_schema=RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA,
+    )
+    _require_exact_file_record(
+        lock_inventory,
+        source="release-candidate-lockfile record-family authorization inventory",
+        expected_path=RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+        expected_schema=RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA,
+    )
+    for source, record in (
+        (
+            "release-manifest record-family authorization inventory schema",
+            manifest_inventory_schema,
+        ),
+        (
+            "release-candidate-lockfile record-family authorization inventory schema",
+            lock_inventory_schema,
+        ),
+    ):
+        _require_exact_file_record(
+            record,
+            source=source,
+            expected_path=RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH,
+            expected_schema=JSON_SCHEMA_DRAFT,
+            expected_fields={
+                "schema_id": RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID,
+                "document_schema_version": (
+                    RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+                ),
+            },
+        )
+    _require_exact_file_record(
+        manifest_schema,
+        source="release-manifest record-family authorization evidence schema",
+        expected_path=RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
+        expected_schema=JSON_SCHEMA_DRAFT,
+    )
+    _require_exact_file_record(
+        manifest_template,
+        source="release-manifest record-family authorization evidence template",
+        expected_path=RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
+        expected_schema=RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA,
+    )
+    _require_exact_file_record(
+        lock_template,
+        source="release-candidate-lockfile record-family authorization evidence template",
+        expected_path=RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
+        expected_schema=RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA,
+    )
+    for source, record in (
+        (
+            "release-manifest record-family authorization grant-map schema",
+            manifest_grant_map_schema,
+        ),
+        (
+            "release-candidate-lockfile record-family authorization grant-map schema",
+            lock_grant_map_schema,
+        ),
+    ):
+        _require_exact_file_record(
+            record,
+            source=source,
+            expected_path=RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH,
+            expected_schema=JSON_SCHEMA_DRAFT,
+            expected_fields={
+                "schema_id": RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID,
+                "document_schema_version": (
+                    RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+                ),
+            },
+        )
+    for label, manifest_record, lock_record in (
+        ("inventory", manifest_inventory, lock_inventory),
+        (
+            "inventory schema",
+            manifest_inventory_schema,
+            lock_inventory_schema,
+        ),
+        ("evidence template", manifest_template, lock_template),
+        ("grant-map schema", manifest_grant_map_schema, lock_grant_map_schema),
+    ):
+        if manifest_record != lock_record:
+            raise ReleaseArtifactVerificationError(
+                "release manifest and release-candidate lockfile record-family "
+                f"authorization {label} records do not match"
+            )
+
+
 def verify_governed_parameter_reference_checksum_coverage(
     repo_root: Path,
     inventory: dict[str, Any],
@@ -818,6 +1144,7 @@ def verify_release_artifacts(
     governed_parameter_inventory = (
         validate_governed_parameter_inventory_semantics(repo_root)
     )
+    validate_record_family_authorization_semantics(repo_root)
     checksum_path = resolved_release_dir / CHECKSUM_FILE_NAME
     checksum_manifest_path = resolved_release_dir / CHECKSUM_MANIFEST_NAME
     release_manifest_path = resolved_release_dir / RELEASE_MANIFEST_NAME
@@ -825,6 +1152,11 @@ def verify_release_artifacts(
     release_candidate_lockfile_path = resolved_release_dir / RELEASE_CANDIDATE_LOCKFILE_NAME
 
     verify_release_tool_trust_bindings(
+        repo_root,
+        checksum_path,
+        checksum_manifest_path,
+    )
+    verify_record_family_inventory_schema_checksum_bindings(
         repo_root,
         checksum_path,
         checksum_manifest_path,
@@ -869,6 +1201,10 @@ def verify_release_artifacts(
         RELEASE_CANDIDATE_LOCKFILE_NAME,
     )
     verify_governed_parameter_inventory_bindings(
+        release_manifest,
+        release_candidate_lockfile,
+    )
+    verify_record_family_authorization_bindings(
         release_manifest,
         release_candidate_lockfile,
     )

@@ -647,13 +647,35 @@ Before a deployment can become public-beta eligible:
 - Confirm the deployer address.
 - Confirm the Safe/multisig address.
 - Configure global admin and function-admin policy.
-- Confirm that `StreamCollectionMetadata` writer grants for
-  `setCollectionRecord`, `setCollectionRecordWithRevision`, and
-  `publishCollectionSnapshot`, plus `StreamPreservationRecords`
-  `recordCollectionRecord`, are intentionally whole-module grants for trusted
-  metadata or preservation operators in protocol v1. Treat those grants as
-  custody-sensitive: a compromised writer can publish any accepted metadata,
-  preservation, C2PA/PREMIS, rights, or snapshot record in the target module.
+- Treat the as-built `StreamCollectionMetadata` selector/global-admin grants for
+  `setCollectionRecord`, `setCollectionRecordWithRevision`,
+  `publishCollectionSnapshot`, and `lockCollectionRecord`, plus the
+  `StreamPreservationRecords.recordCollectionRecord` grant, as nonconformant
+  fail-open surfaces. They do not enforce record-family authority and cannot be
+  used for a public-beta or production deployment.
+- Validate the planning-only record-family package with
+  `python scripts/test_record_family_authorization.py` followed by
+  `python scripts/check_record_family_authorization.py`. The exact inventory is
+  `release-artifacts/record-family-authorization-inventory.json`; its schema is
+  `release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`.
+  The retained-evidence schema is
+  `deployments/schema/record-family-authorization-evidence.v1.schema.json`, the
+  strict grant-map schema is
+  `deployments/schema/record-family-authorization-grant-map.v1.schema.json`, and
+  the planning template is
+  `deployments/record-family-authorization/record-family-authorization-evidence-template.json`.
+  A future complete evidence envelope must bind its `grant_map.path` to the
+  separate phase- and candidate-bound
+  `deployments/record-family-authorization/public-beta-record-family-authorization-grant-map.json`
+  or
+  `deployments/record-family-authorization/production-release-record-family-authorization-grant-map.json`
+  artifact, not to the inventory or template. Production evidence also
+  hash-binds and fully revalidates the canonical public-beta retained envelope.
+- Do not treat the planning inventory, evidence template, admin ceremony, or
+  reviewed ceremony metadata as implementation or retained authorization
+  evidence. `RISK-GOV-002` remains an `open_blocker`, and both public-beta and
+  production release mode retain a hard stop until issue #690's family-scoped
+  contract enforcement and exact candidate-bound reviewed evidence are merged.
 - Configure pause guardians and unpause admins.
 - Configure emergency recipient.
 - Configure signer manager and drop signer.

@@ -39,6 +39,7 @@ RELEASE_TOOL_FOCUSED_TESTS = (
     Path("scripts/test_admin_ceremony_evidence.py"),
     Path("scripts/test_drop_authorization_signing_evidence.py"),
     Path("scripts/test_non_local_release_evidence.py"),
+    Path("scripts/test_record_family_authorization.py"),
     Path("scripts/test_release_signatures.py"),
     Path("scripts/test_signer_custody_readiness.py"),
     Path("scripts/test_bytecode_release_proof.py"),
@@ -51,6 +52,7 @@ REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE = (
     Path("scripts/check_governed_parameter_inventory.py"),
     Path("scripts/check_non_local_release_evidence.py"),
     Path("scripts/check_public_beta_evidence.py"),
+    Path("scripts/check_record_family_authorization.py"),
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/check_release_signatures.py"),
     Path("scripts/check_risk_register.py"),
@@ -104,6 +106,8 @@ DEFAULT_COVERED_PATHS = [
     Path("scripts/generate_risk_register.py"),
     Path("scripts/check_risk_register.py"),
     Path("scripts/test_risk_register.py"),
+    Path("scripts/check_record_family_authorization.py"),
+    Path("scripts/test_record_family_authorization.py"),
     Path("scripts/check_release_evidence_issue_links.py"),
     Path("scripts/test_release_evidence_issue_links.py"),
     Path("scripts/check_public_beta_evidence.py"),
@@ -111,6 +115,7 @@ DEFAULT_COVERED_PATHS = [
     Path("release-artifacts/contracts.json"),
     Path("release-artifacts/genesis-deployment-profile.json"),
     Path("release-artifacts/governed-parameter-inventory.json"),
+    Path("release-artifacts/record-family-authorization-inventory.json"),
     Path("release-artifacts/stream-core-permanent-interface.json"),
     Path("release-artifacts/system-manifest-payload-vector.json"),
     Path("release-artifacts/README.md"),
@@ -219,6 +224,10 @@ DEFAULT_COVERED_PATHS = [
     Path("deployments/examples"),
     Path("deployments/address-books"),
     Path("deployments/schema"),
+    Path(
+        "deployments/record-family-authorization/"
+        "record-family-authorization-evidence-template.json"
+    ),
     Path("deployments/ceremony-evidence"),
     Path("deployments/admin-ceremony"),
     Path("deployments/randomizer-operations"),

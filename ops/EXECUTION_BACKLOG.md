@@ -1772,16 +1772,29 @@ Acceptance criteria:
 3. Both satellites validate Core/Admin dependencies, use existing admin and
    metadata-mutation pause controls, expose module markers, support ERC-165,
    and keep all product metadata outside Core bytecode.
-4. Launch-v1 writer permissions for mutating selectors are whole-module
-   grants, not record-family delegation. The PR must document that custody
-   model while keeping Core/Admin validation, pause controls, ERC-165 markers,
-   and metadata-outside-Core constraints intact.
+4. PR #639 documented its as-built launch-v1 writer permissions as whole-module
+   selector/global-admin grants rather than record-family delegation. That
+   historical implementation fact does not authorize public-beta or production
+   use: `[CMC-AUTHZ]`, ADR 0010 decision D2.8, and issue #690 retire the
+   exception and classify the current metadata and preservation mutation
+   surfaces as nonconformant fail-open behavior.
 5. Focused tests cover happy paths, admin gates, pause gates, missing
    collections, freeze behavior, duplicate/revision/lock behavior, URI/hash
    validation, and event reconstruction.
 6. Rehearsal deployment, deployment manifests, address books, release
    artifacts, changelog, and autonomous run state include the new satellites
    without claiming production readiness.
+
+Follow-up: issue #690 owns the first fail-closed planning slice. Its checked
+inventory pins five mutation selectors, eight authorization classes, fourteen
+record-family groups, and eight known fail-open behaviors, while its inventory,
+retained-evidence, and strict grant-map schemas plus the planning template keep
+classifier, candidate, grant-map, snapshot-intersection, authority-lifecycle,
+phase, and independent-review evidence explicitly missing. `RISK-GOV-002`
+remains `open_blocker`; neither the inventory, template, nor an admin ceremony
+substitutes for family-scoped contract enforcement. Both public-beta and
+production release mode remain hard stopped, and this planning slice does not
+close #690 or change readiness.
 
 ### CON-016: Add Mint Gate Interface And Module Registry Foundation
 

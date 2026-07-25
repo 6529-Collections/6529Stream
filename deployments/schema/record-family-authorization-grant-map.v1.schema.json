@@ -1,0 +1,746 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/record-family-authorization-grant-map.v1.schema.json",
+  "title": "6529Stream Record-Family Authorization Grant Map v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "target_phase",
+    "candidate_binding",
+    "classifier_binding",
+    "authorization_classes",
+    "family_groups",
+    "implementation_bindings",
+    "independent_review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.record-family-authorization-grant-map.v1"
+    },
+    "target_phase": {
+      "enum": [
+        "public_beta",
+        "production_release"
+      ]
+    },
+    "candidate_binding": {
+      "$ref": "#/$defs/candidateBinding"
+    },
+    "classifier_binding": {
+      "$ref": "#/$defs/classifierBinding"
+    },
+    "authorization_classes": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "ARTIST_SIGNER"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "OWNER_SIGNER"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "CURATOR_SIGNER"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "INSTITUTION_SIGNER"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "INDEPENDENT_ATTESTOR"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "PRESERVATION_ADMIN"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "METADATA_ADMIN"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/authorizationClass"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "GLOBAL_ADMIN"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "family_groups": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "uniqueItems": true,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "ARTIST"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "ARTIST_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "OWNER"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "OWNER_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "INDEPENDENT"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "INDEPENDENT_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "CURATOR"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "CURATOR_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "INSTITUTION"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "INSTITUTION_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "RIGHTS"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "RIGHTS_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "ARCHIVE"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "ARCHIVE_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "FIXITY"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "FIXITY_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "C2PA"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "C2PA_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "IIIF"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "IIIF_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "MEDIA_RELATIONSHIP"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "MEDIA_RELATIONSHIP_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "IDENTITY_DISPLAY"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "IDENTITY_*",
+                    "DISPLAY_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "SNAPSHOT"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "SNAPSHOT_*"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/familyGroup"
+            },
+            {
+              "properties": {
+                "name": {
+                  "const": "AGENT"
+                },
+                "normative_patterns": {
+                  "const": [
+                    "AGENT_*"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "implementation_bindings": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/implementationBinding"
+            },
+            {
+              "properties": {
+                "contract": {
+                  "const": "StreamCollectionMetadata"
+                },
+                "source_path": {
+                  "const": "smart-contracts/StreamCollectionMetadata.sol"
+                },
+                "interface_path": {
+                  "const": "smart-contracts/IStreamCollectionMetadata.sol"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/implementationBinding"
+            },
+            {
+              "properties": {
+                "contract": {
+                  "const": "StreamPreservationRecords"
+                },
+                "source_path": {
+                  "const": "smart-contracts/StreamPreservationRecords.sol"
+                },
+                "interface_path": {
+                  "const": "smart-contracts/IStreamPreservationRecords.sol"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": {
+        "$ref": "#/$defs/implementationBinding"
+      }
+    },
+    "independent_review": {
+      "$ref": "#/$defs/independentReview"
+    }
+  },
+  "$defs": {
+    "candidateBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidate_id",
+        "candidate_identity_sha256",
+        "candidate_identity_keccak256",
+        "source_commit",
+        "release_build",
+        "genesis_profile_sha256"
+      ],
+      "properties": {
+        "candidate_id": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "candidate_identity_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "candidate_identity_keccak256": {
+          "$ref": "#/$defs/keccak256"
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^(?!0{40}$)[0-9a-f]{40}$"
+        },
+        "release_build": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "genesis_profile_sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "classifierBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "host_address",
+        "contract_address",
+        "module_type",
+        "interface_id",
+        "marker",
+        "schema",
+        "revision",
+        "runtime_codehash"
+      ],
+      "properties": {
+        "host_address": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "contract_address": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "module_type": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "interface_id": {
+          "$ref": "#/$defs/nonzeroBytes4"
+        },
+        "marker": {
+          "$ref": "#/$defs/nonzeroBytes4"
+        },
+        "schema": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "revision": {
+          "$ref": "#/$defs/safePositiveInteger"
+        },
+        "runtime_codehash": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        }
+      }
+    },
+    "authorizationClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "authorization_class_id"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "authorization_class_id": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        }
+      }
+    },
+    "familyGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "normative_patterns",
+        "declared_record_type_ids",
+        "authorization_class_ids",
+        "grant_subjects"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "normative_patterns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*_\\*$"
+          }
+        },
+        "declared_record_type_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonzeroBytes32"
+          }
+        },
+        "authorization_class_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonzeroBytes32"
+          }
+        },
+        "grant_subjects": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonzeroAddress"
+          }
+        }
+      }
+    },
+    "implementationBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "source_path",
+        "source_sha256",
+        "interface_path",
+        "interface_sha256",
+        "address",
+        "runtime_sha256",
+        "runtime_keccak256",
+        "interface_ids",
+        "marker",
+        "revision"
+      ],
+      "properties": {
+        "contract": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "interface_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "address": {
+          "$ref": "#/$defs/nonzeroAddress"
+        },
+        "runtime_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runtime_keccak256": {
+          "$ref": "#/$defs/nonzeroBytes32"
+        },
+        "interface_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/nonzeroBytes4"
+          }
+        },
+        "marker": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "revision": {
+          "$ref": "#/$defs/safePositiveInteger"
+        }
+      }
+    },
+    "independentReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewer",
+        "reviewed_at",
+        "reference"
+      ],
+      "properties": {
+        "status": {
+          "const": "reviewed"
+        },
+        "reviewer": {
+          "$ref": "#/$defs/nonEmptyText"
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+        },
+        "reference": {
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    },
+    "safePositiveInteger": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^(?!0{64}$)[0-9a-f]{64}$"
+    },
+    "keccak256": {
+      "type": "string",
+      "pattern": "^0x(?!0{64}$)[0-9a-f]{64}$"
+    },
+    "nonzeroBytes32": {
+      "type": "string",
+      "pattern": "^0x(?!0{64}$)[0-9a-f]{64}$"
+    },
+    "nonzeroBytes4": {
+      "type": "string",
+      "pattern": "^0x(?!0{8}$)(?!f{8}$)[0-9a-f]{8}$"
+    },
+    "nonzeroAddress": {
+      "type": "string",
+      "pattern": "^0x(?!0{40}$)[0-9a-f]{40}$"
+    },
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?=.*\\S)[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "repoPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)[^\\u0000-\\u001f\\u007f<>:\"|?*]+$"
+    }
+  }
+}

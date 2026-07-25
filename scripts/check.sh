@@ -48,6 +48,8 @@ forge snapshot --match-path test/StreamGasSnapshot.t.sol --check release-artifac
 "$python_bin" scripts/check_governed_parameter_identifiers.py
 "$python_bin" scripts/test_governed_parameter_inventory.py
 "$python_bin" scripts/check_governed_parameter_inventory.py
+"$python_bin" scripts/test_record_family_authorization.py
+"$python_bin" scripts/check_record_family_authorization.py
 "$python_bin" scripts/test_system_manifest_payload_vector.py
 "$python_bin" scripts/check_system_manifest_payload_vector.py
 "$python_bin" scripts/test_system_manifest_payload_vector_reference.py

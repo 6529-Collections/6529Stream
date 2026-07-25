@@ -7,6 +7,21 @@ the release policy in `docs/release-policy.md`.
 
 ### Changed
 
+- Added the first fail-closed planning slice for record-family authorization
+  under issue #690. A schema-validated inventory now pins the five as-built
+  collection-metadata and preservation mutation selectors, eight authorization
+  classes, fourteen family groups, and eight known fail-open behaviors; a
+  separate retained-evidence schema, strict grant-map schema, and template
+  require candidate, classifier, grant-map, snapshot-intersection, lifecycle,
+  phase, runtime, and independent review bindings without treating template
+  fields as evidence. The checker,
+  hostile tests, release manifest, candidate lockfile, checksum trust set,
+  offline verifier, aggregate gates, and both release-mode phases fail closed
+  around the package. The current whole-selector/global-admin grants remain
+  nonconformant and cannot be used for public beta or production;
+  `RISK-GOV-002` remains `open_blocker`. This slice changes no contract,
+  authorization enforcement, maturity, or readiness claim, and issue #690
+  remains open.
 - Added proposed ADR 0018 and checked target-spec semantics for mint operation
   identity: the proposal defines one manager-scoped ledger operation root and
   one unique operation ID per token; nonpayable asset-agnostic manager ABI,

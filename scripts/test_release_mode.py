@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -33,6 +34,9 @@ REAL_SLITHER_BASELINE_BLOCKERS = checker.slither_baseline_blockers
 REAL_GOVERNANCE_NATIVE_VALUE_BLOCKERS = checker.governance_native_value_blockers
 REAL_GOVERNED_PARAMETER_COMPLETENESS_BLOCKERS = (
     checker.governed_parameter_completeness_blockers
+)
+REAL_RECORD_FAMILY_AUTHORIZATION_BLOCKERS = (
+    checker.record_family_authorization_blockers
 )
 
 
@@ -259,8 +263,15 @@ class ReleaseModeTests(unittest.TestCase):
             return_value={},
         )
         self.parameter_inventory_validator = self.parameter_inventory_patcher.start()
+        self.record_family_patcher = mock.patch.object(
+            checker,
+            "record_family_authorization_blockers",
+            return_value=[],
+        )
+        self.record_family_patcher.start()
 
     def tearDown(self) -> None:
+        self.record_family_patcher.stop()
         self.parameter_inventory_patcher.stop()
         self.parameter_risk_patcher.stop()
         self.risk_register_patcher.stop()
@@ -393,6 +404,69 @@ class ReleaseModeTests(unittest.TestCase):
         self.assertEqual(len(blockers), 1)
         self.assertIn("RISK-GOV-004 remains open_blocker", blockers[0])
         self.assertIn("issue #684", blockers[0])
+
+    def test_record_family_authorization_is_a_hard_two_phase_blocker(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        blockers = REAL_RECORD_FAMILY_AUTHORIZATION_BLOCKERS(repo_root)
+
+        self.assertEqual(
+            blockers,
+            [checker.record_family_authorization_checker.COMPLETION_BLOCKER],
+        )
+        self.assertIn("issue #690", blockers[0])
+        self.assertIn("public-beta and production blocker", blockers[0])
+
+    def test_both_release_modes_consume_the_record_family_hard_stop(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        self.record_family_patcher.stop()
+        try:
+            with mock.patch.object(
+                checker,
+                "release_mode_blockers",
+                return_value=[],
+            ), mock.patch.object(
+                checker,
+                "production_core_headroom_blocker",
+                return_value=None,
+            ), mock.patch.object(
+                checker.genesis_profile_checker,
+                "production_completeness_blockers",
+                return_value=[],
+            ):
+                for phase in ("public-beta", "production-release"):
+                    with self.subTest(phase=phase), self.assertRaisesRegex(
+                        checker.ReleaseModeError,
+                        "implementation_not_supported_in_this_slice",
+                    ):
+                        checker.validate_release_mode(
+                            repo_root / checker.DEFAULT_EVIDENCE,
+                            repo_root,
+                            phase,
+                        )
+        finally:
+            self.record_family_patcher.start()
+
+    def test_record_family_hard_stop_cannot_be_waived_by_env_or_constant(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        old = checker.record_family_authorization_checker.IMPLEMENTATION_COMPLETION_SUPPORTED
+        checker.record_family_authorization_checker.IMPLEMENTATION_COMPLETION_SUPPORTED = True
+        os.environ["RECORD_FAMILY_AUTHORIZATION_COMPLETE"] = "1"
+        try:
+            self.assertEqual(
+                REAL_RECORD_FAMILY_AUTHORIZATION_BLOCKERS(repo_root),
+                [checker.record_family_authorization_checker.COMPLETION_BLOCKER],
+            )
+        finally:
+            checker.record_family_authorization_checker.IMPLEMENTATION_COMPLETION_SUPPORTED = old
+            os.environ.pop("RECORD_FAMILY_AUTHORIZATION_COMPLETE", None)
+
+    def test_missing_record_family_package_fails_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaisesRegex(
+                checker.record_family_authorization_checker.RecordFamilyAuthorizationError,
+                "does not exist",
+            ):
+                REAL_RECORD_FAMILY_AUTHORIZATION_BLOCKERS(Path(temp_dir))
 
     def test_governed_parameter_risk_is_production_only(self) -> None:
         """Public beta does not consume the production parameter-binding gate."""

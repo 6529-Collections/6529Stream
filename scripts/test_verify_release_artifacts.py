@@ -45,6 +45,34 @@ def file_record(root: Path, relative_path: str) -> dict[str, object]:
     }
 
 
+def record_family_grant_map_schema_record(root: Path) -> dict[str, object]:
+    return {
+        **file_record(
+            root,
+            verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH,
+        ),
+        "schema_version": verifier.JSON_SCHEMA_DRAFT,
+        "schema_id": verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID,
+        "document_schema_version": (
+            verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+        ),
+    }
+
+
+def record_family_inventory_schema_record(root: Path) -> dict[str, object]:
+    return {
+        **file_record(
+            root,
+            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH,
+        ),
+        "schema_version": verifier.JSON_SCHEMA_DRAFT,
+        "schema_id": verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID,
+        "document_schema_version": (
+            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+        ),
+    }
+
+
 def seed_release_tool_trust_tree(root: Path) -> None:
     required_paths = set(
         verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
@@ -69,6 +97,15 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     ).as_posix()
     if (root / genesis_profile).is_file():
         effective_paths.add(genesis_profile)
+    for record_family_path in (
+        verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+        verifier.record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA.as_posix(),
+        verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
+        verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
+        verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH,
+    ):
+        if (root / record_family_path).is_file():
+            effective_paths.add(record_family_path)
     required_trust_paths = set(
         verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
     )
@@ -158,11 +195,27 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
         )
 
 
+def seed_record_family_authorization_tree(root: Path) -> None:
+    source_root = SCRIPT_PATH.parent.parent
+    for relative_path in (
+        verifier.record_family_authorization_checker.DEFAULT_INVENTORY,
+        verifier.record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA,
+        verifier.record_family_authorization_checker.DEFAULT_EVIDENCE_TEMPLATE,
+        verifier.record_family_authorization_checker.DEFAULT_EVIDENCE_SCHEMA,
+        verifier.record_family_authorization_checker.DEFAULT_GRANT_MAP_SCHEMA,
+    ):
+        write_text(
+            root / relative_path,
+            (source_root / relative_path).read_text(encoding="utf-8"),
+        )
+
+
 def seed_release_bundle(root: Path) -> None:
     latest = root / "release-artifacts" / "latest"
     seed_release_tool_trust_tree(root)
     write_text(latest / "abi-checksums.json", '{"schema_version":"fixture.abi"}\n')
     seed_governed_parameter_inventory_tree(root)
+    seed_record_family_authorization_tree(root)
     write_text(
         root / "deployments" / "examples" / "anvil.json",
         '{"schema_version":"fixture.deployment"}\n',
@@ -184,6 +237,33 @@ def seed_release_bundle(root: Path) -> None:
                         verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
                     ),
                     "schema_version": verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
+                },
+                "record_family_authorization": {
+                    "inventory": {
+                        **file_record(
+                            root,
+                            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+                        ),
+                        "schema_version": (
+                            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+                        ),
+                    },
+                    "inventory_schema": record_family_inventory_schema_record(root),
+                    "evidence_schema": file_record(
+                        root,
+                        verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
+                    )
+                    | {"schema_version": verifier.JSON_SCHEMA_DRAFT},
+                    "grant_map_schema": record_family_grant_map_schema_record(root),
+                    "evidence_template": {
+                        **file_record(
+                            root,
+                            verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
+                        ),
+                        "schema_version": (
+                            verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
+                        ),
+                    },
                 },
             },
             "deployment_artifacts": {
@@ -238,6 +318,30 @@ def seed_release_bundle(root: Path) -> None:
                     ),
                     "schema_version": verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA,
                 },
+                "record_family_authorization_inventory": {
+                    **file_record(
+                        root,
+                        verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+                    ),
+                    "schema_version": (
+                        verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+                    ),
+                },
+                "record_family_authorization_inventory_schema": (
+                    record_family_inventory_schema_record(root)
+                ),
+                "record_family_authorization_evidence_template": {
+                    **file_record(
+                        root,
+                        verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
+                    ),
+                    "schema_version": (
+                        verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
+                    ),
+                },
+                "record_family_authorization_grant_map_schema": (
+                    record_family_grant_map_schema_record(root)
+                ),
             },
             "checksum_bundle": {
                 "outputs": [
@@ -255,6 +359,11 @@ def seed_release_bundle(root: Path) -> None:
             "deployments/examples/anvil.json",
             verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
             verifier.governed_parameter_inventory_checker.GENESIS_PROFILE.as_posix(),
+            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+            verifier.record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA.as_posix(),
+            verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
+            verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
+            verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH,
             "release-artifacts/latest/abi-checksums.json",
             "release-artifacts/latest/bytecode-release-proof.json",
             "release-artifacts/latest/release-candidate-lockfile.json",
@@ -268,6 +377,14 @@ def seed_release_bundle_with_trust_input(root: Path) -> None:
 
 
 class ReleaseArtifactVerifierTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.record_package_validator = mock.patch.object(
+            verifier.record_family_authorization_checker,
+            "validate_package",
+            return_value=({}, {}),
+        ).start()
+        self.addCleanup(mock.patch.stopall)
+
     def test_verifier_and_generator_reviewed_trust_literals_match(
         self,
     ) -> None:
@@ -301,6 +418,36 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY,
             require_complete=False,
         )
+
+    def test_offline_verifier_invokes_record_family_authorization_validator(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            self.record_package_validator.reset_mock()
+            verifier.verify_release_artifacts(root)
+
+        self.record_package_validator.assert_called_once_with(root.resolve())
+
+    def test_offline_verifier_rejects_record_family_semantic_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            with mock.patch.object(
+                verifier.record_family_authorization_checker,
+                "validate_package",
+                side_effect=(
+                    verifier.record_family_authorization_checker
+                    .RecordFamilyAuthorizationError("invalid retained evidence")
+                ),
+            ):
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "record-family authorization semantic validation failed: "
+                    "invalid retained evidence",
+                ):
+                    verifier.verify_release_artifacts(root)
 
     def test_offline_verifier_rejects_malformed_planning_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -466,12 +613,132 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                     verifier.release_checksum_generator.RELEASE_TOOL_FOCUSED_TESTS
                 )
             )
-            expected_count = 7 + required_trust_count
+            expected_count = 12 + required_trust_count
             self.assertEqual(summary.checksum_entries, expected_count)
             self.assertEqual(
                 summary.checksum_manifest_records,
                 expected_count,
             )
+
+    def assert_record_family_inventory_schema_index_mutation_rejected(
+        self,
+        mutation: str,
+        expected_error: str,
+    ) -> None:
+        target = verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            checksum_path = latest / verifier.CHECKSUM_FILE_NAME
+            checksum_manifest_path = latest / verifier.CHECKSUM_MANIFEST_NAME
+            lines = checksum_path.read_text(encoding="utf-8").splitlines()
+            checksum_manifest = json.loads(
+                checksum_manifest_path.read_text(encoding="utf-8")
+            )
+            target_line_index = next(
+                index
+                for index, line in enumerate(lines)
+                if line.endswith(f"  {target}")
+            )
+            target_entry = next(
+                entry
+                for entry in checksum_manifest["files"]
+                if entry["path"] == target
+            )
+
+            if mutation in {"delete", "substitute"}:
+                lines.pop(target_line_index)
+                checksum_manifest["files"].remove(target_entry)
+                if mutation == "substitute":
+                    substitute = (
+                        "release-artifacts/schema/"
+                        "substituted-record-family-inventory.schema.json"
+                    )
+                    write_text(root / substitute, '{"substituted":true}\n')
+                    substitute_digest = verifier.file_sha256(
+                        root / substitute
+                    ).removeprefix("sha256:")
+                    lines.append(f"{substitute_digest}  {substitute}")
+                    checksum_manifest["files"].append(file_record(root, substitute))
+            elif mutation == "sha_wrong_hash":
+                lines[target_line_index] = "0" * 64 + f"  {target}"
+            elif mutation == "manifest_wrong_hash":
+                target_entry["sha256"] = "sha256:" + "0" * 64
+            elif mutation == "manifest_wrong_size":
+                target_entry["size_bytes"] += 1
+            elif mutation == "post_file_mutation":
+                write_text(
+                    root / target,
+                    (root / target).read_text(encoding="utf-8") + "\n",
+                )
+            else:
+                raise AssertionError(f"unsupported inventory-schema mutation {mutation}")
+
+            lines.sort()
+            checksum_manifest["files"].sort(key=lambda entry: entry["path"])
+            checksum_text = "\n".join(lines) + "\n"
+            write_text(checksum_path, checksum_text)
+            checksum_manifest["text_checksum_file"]["sha256"] = (
+                verifier.sha256_bytes(checksum_text.encode("utf-8"))
+            )
+            write_json(checksum_manifest_path, checksum_manifest)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                expected_error,
+            ):
+                verifier.verify_release_artifacts(root)
+
+    def test_verifier_rejects_coordinated_inventory_schema_index_deletion(
+        self,
+    ) -> None:
+        self.assert_record_family_inventory_schema_index_mutation_rejected(
+            "delete",
+            (
+                "inventory-schema checksum binding requires exactly one "
+                "SHA256SUMS entry.*got 0"
+            ),
+        )
+
+    def test_verifier_rejects_same_cardinality_inventory_schema_substitution(
+        self,
+    ) -> None:
+        self.assert_record_family_inventory_schema_index_mutation_rejected(
+            "substitute",
+            (
+                "inventory-schema checksum binding requires exactly one "
+                "SHA256SUMS entry.*got 0"
+            ),
+        )
+
+    def test_verifier_rejects_inventory_schema_checksum_hash_drift(self) -> None:
+        self.assert_record_family_inventory_schema_index_mutation_rejected(
+            "sha_wrong_hash",
+            "inventory-schema checksum binding SHA256SUMS hash mismatch",
+        )
+        self.assert_record_family_inventory_schema_index_mutation_rejected(
+            "manifest_wrong_hash",
+            (
+                "inventory-schema checksum binding release-checksums.json "
+                "hash mismatch"
+            ),
+        )
+
+    def test_verifier_rejects_inventory_schema_checksum_size_drift(self) -> None:
+        self.assert_record_family_inventory_schema_index_mutation_rejected(
+            "manifest_wrong_size",
+            (
+                "inventory-schema checksum binding release-checksums.json "
+                "size mismatch"
+            ),
+        )
+
+    def test_verifier_rejects_inventory_schema_post_bundle_mutation(self) -> None:
+        self.assert_record_family_inventory_schema_index_mutation_rejected(
+            "post_file_mutation",
+            "inventory-schema checksum binding SHA256SUMS hash mismatch",
+        )
 
     def assert_release_tool_bundle_mutation_rejected(
         self,
@@ -880,6 +1147,445 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 "governed_parameter_inventory",
             ):
                 verifier.verify_governed_parameter_inventory_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_requires_exact_record_family_authorization_bindings(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+
+            verifier.verify_record_family_authorization_bindings(
+                release_manifest,
+                lockfile,
+            )
+
+    def test_verifier_rejects_coordinated_record_family_binding_omission(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            del release_manifest["release_artifacts"]["record_family_authorization"]
+            del lockfile["locked_inputs"]["record_family_authorization_inventory"]
+            del lockfile["locked_inputs"][
+                "record_family_authorization_inventory_schema"
+            ]
+            del lockfile["locked_inputs"][
+                "record_family_authorization_evidence_template"
+            ]
+            del lockfile["locked_inputs"][
+                "record_family_authorization_grant_map_schema"
+            ]
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "record_family_authorization",
+            ):
+                verifier.verify_record_family_authorization_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_rejects_record_family_manifest_key_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            release_manifest["release_artifacts"]["record_family_authorization"][
+                "unreviewed"
+            ] = {}
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "keys must be exactly inventory, inventory_schema, "
+                "evidence_schema, grant_map_schema, and evidence_template",
+            ):
+                verifier.verify_record_family_authorization_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_rejects_record_family_path_and_schema_drift(self) -> None:
+        for field, value, expected_error in (
+            (
+                "path",
+                "release-artifacts/substituted-inventory.json",
+                "inventory path must be",
+            ),
+            (
+                "schema_version",
+                "6529stream.record-family-authorization-inventory.v2",
+                "inventory must use schema",
+            ),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["inventory"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_inventory_schema_omission(self) -> None:
+        for owner, key in (
+            ("manifest", "inventory_schema"),
+            ("lockfile", "record_family_authorization_inventory_schema"),
+        ):
+            with self.subTest(owner=owner):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    if owner == "manifest":
+                        del release_manifest["release_artifacts"][
+                            "record_family_authorization"
+                        ][key]
+                    else:
+                        del lockfile["locked_inputs"][key]
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "inventory_schema|record_family_authorization_inventory_schema",
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_inventory_schema_identity_drift(
+        self,
+    ) -> None:
+        mutations = (
+            (
+                "path",
+                "release-artifacts/schema/substituted-inventory.schema.json",
+                "inventory schema path must be",
+            ),
+            (
+                "schema_version",
+                "https://json-schema.org/draft/2019-09/schema",
+                "inventory schema must use schema",
+            ),
+            (
+                "schema_id",
+                "https://example.invalid/inventory.json",
+                r"inventory schema\.schema_id must be",
+            ),
+            (
+                "document_schema_version",
+                "6529stream.record-family-authorization-inventory.v2",
+                r"inventory schema\.document_schema_version must be",
+            ),
+        )
+        for field, value, expected_error in mutations:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["inventory_schema"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_inventory_schema_record_key_drift(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            release_manifest["release_artifacts"]["record_family_authorization"][
+                "inventory_schema"
+            ]["unreviewed"] = True
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "inventory schema keys must be exactly",
+            ):
+                verifier.verify_record_family_authorization_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_rejects_record_family_inventory_schema_manifest_lock_drift(
+        self,
+    ) -> None:
+        for field, value in (
+            ("sha256", "sha256:" + "0" * 64),
+            ("size_bytes", 1),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["inventory_schema"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "inventory schema records do not match",
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_grant_schema_omission(self) -> None:
+        for owner, key in (
+            ("manifest", "grant_map_schema"),
+            ("lockfile", "record_family_authorization_grant_map_schema"),
+        ):
+            with self.subTest(owner=owner):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    if owner == "manifest":
+                        del release_manifest["release_artifacts"][
+                            "record_family_authorization"
+                        ][key]
+                    else:
+                        del lockfile["locked_inputs"][key]
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "grant_map_schema|grant_map_schema",
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_grant_schema_identity_drift(
+        self,
+    ) -> None:
+        mutations = (
+            (
+                "path",
+                "deployments/schema/substituted-grant-map.schema.json",
+                "grant-map schema path must be",
+            ),
+            (
+                "schema_version",
+                "https://json-schema.org/draft/2019-09/schema",
+                "grant-map schema must use schema",
+            ),
+            (
+                "schema_id",
+                "https://example.invalid/grant-map.json",
+                r"grant-map schema\.schema_id must be",
+            ),
+            (
+                "document_schema_version",
+                "6529stream.record-family-authorization-grant-map.v2",
+                r"grant-map schema\.document_schema_version must be",
+            ),
+        )
+        for field, value, expected_error in mutations:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["grant_map_schema"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_grant_schema_record_key_drift(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            release_manifest["release_artifacts"]["record_family_authorization"][
+                "grant_map_schema"
+            ]["unreviewed"] = True
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "grant-map schema keys must be exactly",
+            ):
+                verifier.verify_record_family_authorization_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_rejects_record_family_grant_schema_hash_or_size_mismatch(
+        self,
+    ) -> None:
+        for field, value in (
+            ("sha256", "sha256:" + "0" * 64),
+            ("size_bytes", 1),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["grant_map_schema"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "grant-map schema records do not match",
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_coordinated_grant_schema_hash_or_size_drift(
+        self,
+    ) -> None:
+        for field, value, expected_error in (
+            ("sha256", "sha256:" + "0" * 64, "hash mismatch"),
+            ("size_bytes", 1, "size mismatch"),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest_record = release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["grant_map_schema"]
+                    lockfile_record = lockfile["locked_inputs"][
+                        "record_family_authorization_grant_map_schema"
+                    ]
+                    release_manifest_record[field] = value
+                    lockfile_record[field] = value
+                    verifier.verify_record_family_authorization_bindings(
+                        release_manifest,
+                        lockfile,
+                    )
+                    checksum_entries = verifier.verify_checksum_file(
+                        root,
+                        latest / verifier.CHECKSUM_FILE_NAME,
+                    )
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        verifier.verify_nested_file_records(
+                            root,
+                            release_manifest,
+                            verifier.RELEASE_MANIFEST_NAME,
+                            checksum_entries,
+                        )
+
+    def test_verifier_rejects_record_family_manifest_lock_mismatch(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            lockfile["locked_inputs"][
+                "record_family_authorization_evidence_template"
+            ]["sha256"] = "sha256:" + "0" * 64
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "evidence template records do not match",
+            ):
+                verifier.verify_record_family_authorization_bindings(
                     release_manifest,
                     lockfile,
                 )

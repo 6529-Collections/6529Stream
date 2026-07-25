@@ -208,15 +208,16 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         "title": "Metadata satellite writer grants are whole-module",
         "area": "governance",
         "severity": "high",
-        "status": "planned_mitigation",
+        "status": "open_blocker",
         "owner": "protocol",
         "target_gate": "Gate E",
         "source": "CON-015 launch metadata and preservation authorization model",
         "mitigation": (
-            "Grant launch generic metadata and preservation writer selectors only "
-            "to fully trusted safe-operator roles, retain ceremony evidence for "
-            "those grants, and move artist, curator, institution, rights, provenance, "
-            "and archive-specific delegation into future typed companion modules."
+            "Implement a fail-closed record-family classifier and exact family-to-"
+            "authority mapping, reject undeclared families, enforce every-family "
+            "snapshot authority, persist the authorization class, and retain "
+            "independently reviewed candidate-bound grant, lifecycle, runtime, and "
+            "deployment evidence."
         ),
         "residual_risk": (
             "A compromised or over-broad metadata/preservation writer can publish "
@@ -224,15 +225,20 @@ RISK_DEFINITIONS: list[dict[str, Any]] = [
         ),
         "evidence_paths": [
             "docs/collection-metadata-contract.md",
-            "docs/deployment.md",
-            "ops/EXECUTION_BACKLOG.md",
+            "release-artifacts/record-family-authorization-inventory.json",
+            "release-artifacts/schema/record-family-authorization-inventory.v1.schema.json",
+            "deployments/schema/record-family-authorization-evidence.v1.schema.json",
+            "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
+            "deployments/record-family-authorization/record-family-authorization-evidence-template.json",
         ],
         "checks": [
-            "forge test --match-path test/StreamCollectionMetadata.t.sol -vvv",
-            "forge test --match-path test/StreamPreservationRecords.t.sol -vvv",
+            "python scripts/test_record_family_authorization.py",
+            "python scripts/check_record_family_authorization.py",
             "python scripts/check_risk_register.py",
         ],
-        "tracking": ["ops/EXECUTION_BACKLOG.md"],
+        "tracking": [
+            "https://github.com/6529-Collections/6529Stream/issues/690"
+        ],
     },
     {
         "id": "RISK-GOV-003",

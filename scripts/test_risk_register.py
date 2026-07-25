@@ -311,6 +311,67 @@ class RiskRegisterTests(unittest.TestCase):
             ):
                 checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
 
+    def test_rejects_missing_record_family_authorization_risk(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            register["risks"] = [
+                risk
+                for risk in register["risks"]
+                if risk["id"] != checker.RECORD_FAMILY_AUTHORIZATION_RISK_ID
+            ]
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(
+                checker.RiskRegisterError,
+                checker.RECORD_FAMILY_AUTHORIZATION_RISK_ID,
+            ):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_record_family_authorization_risk_must_remain_open(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            register = minimal_register(root)
+            risk = next(
+                risk
+                for risk in register["risks"]
+                if risk["id"] == checker.RECORD_FAMILY_AUTHORIZATION_RISK_ID
+            )
+            risk["status"] = "planned_mitigation"
+            write_json(root / checker.DEFAULT_REGISTER, register)
+
+            with self.assertRaisesRegex(
+                checker.RiskRegisterError,
+                "RISK-GOV-002.status must remain 'open_blocker'",
+            ):
+                checker.validate_risk_register(root, root / checker.DEFAULT_REGISTER)
+
+    def test_generator_preserves_record_family_authorization_blocker(self) -> None:
+        risk = next(
+            risk
+            for risk in generator.RISK_DEFINITIONS
+            if risk["id"] == checker.RECORD_FAMILY_AUTHORIZATION_RISK_ID
+        )
+
+        self.assertEqual(risk["severity"], "high")
+        self.assertEqual(risk["status"], "open_blocker")
+        self.assertEqual(
+            risk["tracking"],
+            ["https://github.com/6529-Collections/6529Stream/issues/690"],
+        )
+        self.assertIn(
+            "release-artifacts/record-family-authorization-inventory.json",
+            risk["evidence_paths"],
+        )
+        self.assertIn(
+            "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
+            risk["evidence_paths"],
+        )
+        self.assertIn(
+            "python scripts/check_record_family_authorization.py",
+            risk["checks"],
+        )
+
     def test_rejects_missing_governed_parameter_completeness_risk(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

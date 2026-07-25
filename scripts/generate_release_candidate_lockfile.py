@@ -18,6 +18,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 import check_release_signatures as release_signature_checker
 import check_governed_parameter_inventory as governed_parameter_inventory_checker
+import check_record_family_authorization as record_family_authorization_checker
 import generate_release_checksums as release_checksum_policy
 
 
@@ -34,11 +35,36 @@ DEFAULT_RELEASE_SIGNATURES_DIR = Path("release-artifacts/signatures")
 DEFAULT_GOVERNED_PARAMETER_INVENTORY = Path(
     "release-artifacts/governed-parameter-inventory.json"
 )
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY = (
+    record_family_authorization_checker.DEFAULT_INVENTORY
+)
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
+    record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA
+)
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE = (
+    record_family_authorization_checker.DEFAULT_EVIDENCE_TEMPLATE
+)
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA = (
+    record_family_authorization_checker.DEFAULT_GRANT_MAP_SCHEMA
+)
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
 GOVERNED_PARAMETER_INVENTORY_SCHEMA = (
     "6529stream.governed-parameter-inventory.v1"
 )
+RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA = (
+    record_family_authorization_checker.GRANT_MAP_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
+    record_family_authorization_checker.INVENTORY_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID = (
+    record_family_authorization_checker.INVENTORY_SCHEMA_ID
+)
+RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID = (
+    record_family_authorization_checker.GRANT_MAP_SCHEMA_ID
+)
+JSON_SCHEMA_DRAFT = record_family_authorization_checker.JSON_SCHEMA_DRAFT
 BYTECODE_PROOF_SCHEMA = "6529stream.bytecode-release-proof.v1"
 PUBLIC_BETA_EVIDENCE_SCHEMA = "6529stream.public-beta-evidence.v1"
 RISK_REGISTER_SCHEMA = "6529stream.risk-register.v1"
@@ -333,6 +359,116 @@ def build_lockfile(
         GOVERNED_PARAMETER_INVENTORY_SCHEMA,
         str(governed_parameter_inventory_path),
     )
+    try:
+        record_family_authorization_checker.validate_package(repo_root)
+    except record_family_authorization_checker.RecordFamilyAuthorizationError as exc:
+        raise ReleaseCandidateLockfileError(
+            f"invalid record-family authorization package: {exc}"
+        ) from exc
+    record_family_inventory_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY
+    )
+    record_family_inventory_schema_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+    )
+    record_family_evidence_template_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE
+    )
+    record_family_grant_map_schema_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+    )
+    record_family_inventory_schema_document = require_dict(
+        load_json(record_family_inventory_schema_path),
+        str(record_family_inventory_schema_path),
+    )
+    if record_family_inventory_schema_document.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization inventory schema must use JSON Schema "
+            f"{JSON_SCHEMA_DRAFT}"
+        )
+    if (
+        record_family_inventory_schema_document.get("$id")
+        != RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization inventory schema must use schema ID "
+            f"{RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID}"
+        )
+    record_family_inventory_schema_properties = require_dict(
+        record_family_inventory_schema_document.get("properties"),
+        f"{record_family_inventory_schema_path}.properties",
+    )
+    record_family_inventory_schema_version = require_dict(
+        record_family_inventory_schema_properties.get("schema_version"),
+        f"{record_family_inventory_schema_path}.properties.schema_version",
+    )
+    if (
+        record_family_inventory_schema_version.get("const")
+        != RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization inventory schema must pin document "
+            f"version {RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA}"
+        )
+    record_family_inventory_schema_record = file_record(
+        record_family_inventory_schema_path,
+        repo_root,
+    )
+    record_family_inventory_schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID,
+            "document_schema_version": (
+                RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
+            ),
+        }
+    )
+    record_family_grant_map_schema_document = require_dict(
+        load_json(record_family_grant_map_schema_path),
+        str(record_family_grant_map_schema_path),
+    )
+    if record_family_grant_map_schema_document.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization grant-map schema must use JSON Schema "
+            f"{JSON_SCHEMA_DRAFT}"
+        )
+    if (
+        record_family_grant_map_schema_document.get("$id")
+        != RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization grant-map schema must use schema ID "
+            f"{RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID}"
+        )
+    record_family_grant_map_properties = require_dict(
+        record_family_grant_map_schema_document.get("properties"),
+        f"{record_family_grant_map_schema_path}.properties",
+    )
+    record_family_grant_map_schema_version = require_dict(
+        record_family_grant_map_properties.get("schema_version"),
+        f"{record_family_grant_map_schema_path}.properties.schema_version",
+    )
+    if (
+        record_family_grant_map_schema_version.get("const")
+        != RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization grant-map schema must pin document "
+            f"version {RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA}"
+        )
+    record_family_grant_map_schema_record = file_record(
+        record_family_grant_map_schema_path,
+        repo_root,
+    )
+    record_family_grant_map_schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID,
+            "document_schema_version": (
+                RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA
+            ),
+        }
+    )
     release_notes_json_path = release_artifacts_dir / RELEASE_NOTES_JSON_FILENAME
     require_schema(
         load_json(release_notes_json_path),
@@ -412,6 +548,22 @@ def build_lockfile(
                 governed_parameter_inventory_path,
                 repo_root,
                 schema_required=True,
+            ),
+            "record_family_authorization_inventory": file_record(
+                record_family_inventory_path,
+                repo_root,
+                schema_required=True,
+            ),
+            "record_family_authorization_inventory_schema": (
+                record_family_inventory_schema_record
+            ),
+            "record_family_authorization_evidence_template": file_record(
+                record_family_evidence_template_path,
+                repo_root,
+                schema_required=True,
+            ),
+            "record_family_authorization_grant_map_schema": (
+                record_family_grant_map_schema_record
             ),
             "release_notes": {
                 "json": file_record(
@@ -506,6 +658,8 @@ def build_lockfile(
                 "python scripts/generate_release_manifest.py --check",
                 "python scripts/test_governed_parameter_inventory.py",
                 "python scripts/check_governed_parameter_inventory.py",
+                "python scripts/test_record_family_authorization.py",
+                "python scripts/check_record_family_authorization.py",
                 "python scripts/test_bytecode_release_proof.py",
                 "python scripts/generate_bytecode_release_proof.py --check",
                 "python scripts/test_release_checksums.py",

@@ -670,6 +670,49 @@ The committed local baseline explicitly keeps the final commit/tag/signature
 lock in `not_locked_until_signed_release_tag` status until a real release
 ceremony supplies production signatures and a signed tag.
 
+The record-family authorization planning step validates:
+
+```sh
+python scripts/test_record_family_authorization.py
+python scripts/check_record_family_authorization.py
+```
+
+The checker reads
+`release-artifacts/record-family-authorization-inventory.json` against
+`release-artifacts/schema/record-family-authorization-inventory.v1.schema.json`
+and reads
+`deployments/record-family-authorization/record-family-authorization-evidence-template.json`
+against
+`deployments/schema/record-family-authorization-evidence.v1.schema.json`. A
+future candidate-specific grant map is separately validated against
+`deployments/schema/record-family-authorization-grant-map.v1.schema.json`. The
+inventory pins the five current mutation selectors, eight authorization
+classes, fourteen family groups, eight known fail-open behaviors, and the
+honestly missing classifier/candidate/evidence bindings. A future complete
+evidence envelope must use its schema-governed `grant_map.path` to bind the
+separate phase- and candidate-specific
+`deployments/record-family-authorization/public-beta-record-family-authorization-grant-map.json`
+or
+`deployments/record-family-authorization/production-release-record-family-authorization-grant-map.json`;
+the inventory or template cannot stand in for those artifacts. Production
+evidence additionally hash-binds and fully revalidates the canonical
+public-beta retained envelope.
+
+Release-manifest generation records the inventory, evidence schema, grant-map
+schema, and template; the release-candidate lockfile independently binds the
+inventory, grant-map schema, and template. Canonical checksum generation covers
+the package plus its checker and
+hostile tests, and the offline verifier reconstructs the required trust set,
+reruns semantic validation, and checks exact manifest/lockfile/hash/size
+agreement. Both public-beta and production release mode consume the checker's
+code-owned completion blocker. No CLI flag, environment variable, JSON status,
+risk acceptance, evidence template, or admin ceremony can clear it. The
+as-built selector/global-admin grants remain nonconformant, `RISK-GOV-002`
+remains `open_blocker`, and issue #690 stays open until family-scoped contract
+enforcement and exact candidate-bound reviewed evidence are merged. This
+tooling is fail-closed planning evidence, not an implementation or readiness
+claim.
+
 The production release-signing evidence step validates the dedicated no-secret
 retained artifact template at
 `release-artifacts/evidence/production-release-signing/production-release-signing-retained-artifact-template.md`:
@@ -859,9 +902,11 @@ release readiness. Both phases validate the canonical normalized
 first-party production High/Medium row that remains Open. The current 30-row
 set is a non-waivable technical blocker under issue #658; exact analyzer drift
 parity is not acceptance. Release mode also fails closed on the separately
-tracked High Governance Executor native-value authority in `RISK-GOV-003`,
-which bounded assembly makes invisible to Slither. Production mode then reads
-the checksum-covered
+tracked record-family authorization gap in `RISK-GOV-002` and the High
+Governance Executor native-value authority in `RISK-GOV-003`, which bounded
+assembly makes invisible to Slither. The record-family stop applies to both
+release phases and is not risk-waivable. Production mode then reads the
+checksum-covered
 `release-artifacts/latest/abi-checksums.json` measurement, rejects missing,
 malformed, boolean-as-integer, or arithmetically inconsistent `StreamCore` size
 fields, and requires at least 2,000 bytes of EIP-170 runtime headroom. That
@@ -1322,9 +1367,10 @@ The release-checksum step builds `release-artifacts/latest/SHA256SUMS` and
 artifact, public-beta evidence, release evidence issue backlog, release
 evidence issue-link map, release evidence issue body sync, deployment manifest,
 address-book, schema, ceremony evidence, governed-parameter inventory,
-release-manifest, bytecode proof, and release-candidate lockfile outputs, plus
-the checked governed-parameter inventory checker/tests, mint-manager domain
-constant spec, and Python toolchain provenance. This
+record-family authorization inventory/evidence package, release-manifest,
+bytecode proof, and release-candidate lockfile outputs, plus the checked
+governed-parameter and record-family authorization checker/tests, mint-manager
+domain constant spec, and Python toolchain provenance. This
 gives maintainers a deterministic, signable checksum bundle. The
 release manifest intentionally marks checksum-bundle digests as
 `not_available_self_referential` because the checksum bundle covers
@@ -1333,7 +1379,7 @@ would create a hash cycle. Detached signatures and signed git tags still
 require a release ceremony and are not produced by the local smoke gate.
 
 Canonical checksum generation uses the exact reviewed covered-path inventory
-and independently pins the 20-module release-tool runtime closure plus eight
+and independently pins the 21-module release-tool runtime closure plus nine
 focused trust-policy tests as ordinary, in-repository files. Its deliberately
 narrow Python dependency grammar supports ordinary `Import`/`ImportFrom` and
 direct string-literal `importlib.import_module`, `__import__`, or

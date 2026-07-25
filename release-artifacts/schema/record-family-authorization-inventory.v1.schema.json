@@ -1,0 +1,546 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://6529.io/schemas/record-family-authorization-inventory.v1.schema.json",
+  "title": "6529Stream Record-Family Authorization Inventory v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "tracking_issue",
+    "normative_sources",
+    "current_implementation",
+    "authorization_classes",
+    "family_groups",
+    "snapshot_policy",
+    "classifier_binding",
+    "candidate_binding",
+    "retained_evidence",
+    "blockers"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "6529stream.record-family-authorization-inventory.v1"
+    },
+    "status": {
+      "const": "planning"
+    },
+    "tracking_issue": {
+      "const": "https://github.com/6529-Collections/6529Stream/issues/690"
+    },
+    "normative_sources": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "current_implementation": {
+      "$ref": "#/$defs/currentImplementation"
+    },
+    "authorization_classes": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "$ref": "#/$defs/authorizationClass"
+      }
+    },
+    "family_groups": {
+      "type": "array",
+      "minItems": 14,
+      "maxItems": 14,
+      "items": {
+        "$ref": "#/$defs/familyGroup"
+      }
+    },
+    "snapshot_policy": {
+      "$ref": "#/$defs/snapshotPolicy"
+    },
+    "classifier_binding": {
+      "$ref": "#/$defs/classifierBinding"
+    },
+    "candidate_binding": {
+      "$ref": "#/$defs/candidateBinding"
+    },
+    "retained_evidence": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/retainedEvidence"
+      }
+    },
+    "blockers": {
+      "$ref": "#/$defs/nonEmptyStringArray"
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "anchor"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "anchor": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "source_path",
+        "interface_path",
+        "mutation_surface_count"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "mutation_surface_count": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "mutationSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "source_path",
+        "interface_path",
+        "function",
+        "canonical_signature",
+        "selector",
+        "record_type_source",
+        "authorization_model",
+        "function_admin_authorized",
+        "global_admin_authorized",
+        "family_classifier_enforced",
+        "family_authorization_enforced",
+        "authorization_class_emitted",
+        "normative_status",
+        "blockers"
+      ],
+      "properties": {
+        "contract": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "interface_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "function": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "canonical_signature": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selector": {
+          "type": "string",
+          "pattern": "^0x[0-9a-f]{8}$"
+        },
+        "record_type_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authorization_model": {
+          "const": "selector_or_global_admin"
+        },
+        "function_admin_authorized": {
+          "const": true
+        },
+        "global_admin_authorized": {
+          "const": true
+        },
+        "family_classifier_enforced": {
+          "const": false
+        },
+        "family_authorization_enforced": {
+          "const": false
+        },
+        "authorization_class_emitted": {
+          "const": false
+        },
+        "normative_status": {
+          "const": "nonconformant"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "failOpenBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_path",
+        "source_anchor",
+        "status",
+        "description"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$"
+        },
+        "source_path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "source_anchor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "const": "open_blocker"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "currentImplementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "source_commit",
+        "contracts",
+        "mutation_surfaces",
+        "known_fail_open_behaviors"
+      ],
+      "properties": {
+        "status": {
+          "const": "as_built_fail_open"
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "contracts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/contract"
+          }
+        },
+        "mutation_surfaces": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "$ref": "#/$defs/mutationSurface"
+          }
+        },
+        "known_fail_open_behaviors": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "$ref": "#/$defs/failOpenBehavior"
+          }
+        }
+      }
+    },
+    "authorizationClass": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "normative_source",
+        "onchain_id",
+        "status",
+        "blockers"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "normative_source": {
+          "$ref": "#/$defs/source"
+        },
+        "onchain_id": {
+          "type": "null"
+        },
+        "status": {
+          "const": "planning"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "familyGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "normative_patterns",
+        "normative_source",
+        "declared_record_type_ids",
+        "authorization_classes",
+        "classification_status",
+        "implementation_status",
+        "blockers"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "normative_patterns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*_\\*$"
+          }
+        },
+        "normative_source": {
+          "$ref": "#/$defs/source"
+        },
+        "declared_record_type_ids": {
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string",
+            "pattern": "^0x[0-9a-f]{64}$"
+          }
+        },
+        "authorization_classes": {
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          }
+        },
+        "classification_status": {
+          "const": "unresolved"
+        },
+        "implementation_status": {
+          "const": "not_implemented"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "snapshotPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normative_every_family_authority_required",
+        "runtime_record_type_source",
+        "manifest_family_set_observable",
+        "family_authorization_enforced",
+        "locks_checked",
+        "status",
+        "blockers"
+      ],
+      "properties": {
+        "normative_every_family_authority_required": {
+          "const": true
+        },
+        "runtime_record_type_source": {
+          "const": "snapshot.recordType"
+        },
+        "manifest_family_set_observable": {
+          "const": false
+        },
+        "family_authorization_enforced": {
+          "const": false
+        },
+        "locks_checked": {
+          "const": ["METADATA_ALL", "SNAPSHOTS", "recordType"]
+        },
+        "status": {
+          "const": "planning"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "classifierBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "classifier_host",
+        "classifier_contract",
+        "module_type",
+        "interface_id",
+        "marker",
+        "schema",
+        "revision",
+        "runtime_codehash",
+        "grant_map_binding",
+        "record_type_registry",
+        "unknown_family_disposition",
+        "wildcard_derivation",
+        "blockers"
+      ],
+      "properties": {
+        "status": {
+          "const": "missing"
+        },
+        "classifier_host": {
+          "type": "null"
+        },
+        "classifier_contract": {
+          "type": "null"
+        },
+        "module_type": {
+          "type": "null"
+        },
+        "interface_id": {
+          "type": "null"
+        },
+        "marker": {
+          "type": "null"
+        },
+        "schema": {
+          "type": "null"
+        },
+        "revision": {
+          "type": "null"
+        },
+        "runtime_codehash": {
+          "type": "null"
+        },
+        "grant_map_binding": {
+          "type": "null"
+        },
+        "record_type_registry": {
+          "type": "null"
+        },
+        "unknown_family_disposition": {
+          "const": "currently_accepted"
+        },
+        "wildcard_derivation": {
+          "type": "null"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "candidateBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "candidate_id",
+        "candidate_identity_sha256",
+        "candidate_identity_keccak256",
+        "source_commit",
+        "release_build",
+        "genesis_profile_sha256",
+        "grant_map_sha256",
+        "blockers"
+      ],
+      "properties": {
+        "status": {
+          "const": "not_available"
+        },
+        "candidate_id": {
+          "type": "null"
+        },
+        "candidate_identity_sha256": {
+          "type": "null"
+        },
+        "candidate_identity_keccak256": {
+          "type": "null"
+        },
+        "source_commit": {
+          "type": "null"
+        },
+        "release_build": {
+          "type": "null"
+        },
+        "genesis_profile_sha256": {
+          "type": "null"
+        },
+        "grant_map_sha256": {
+          "type": "null"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "retainedEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase",
+        "status",
+        "path",
+        "schema_version",
+        "template_path",
+        "blockers"
+      ],
+      "properties": {
+        "phase": {
+          "enum": ["public_beta", "production_release"]
+        },
+        "status": {
+          "const": "missing"
+        },
+        "path": {
+          "$ref": "#/$defs/repoPath"
+        },
+        "schema_version": {
+          "const": "6529stream.record-family-authorization-evidence.v1"
+        },
+        "template_path": {
+          "const": "deployments/record-family-authorization/record-family-authorization-evidence-template.json"
+        },
+        "blockers": {
+          "$ref": "#/$defs/nonEmptyStringArray"
+        }
+      }
+    },
+    "repoPath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)[^\\u0000-\\u001f\\u007f<>:\"|?*]+$"
+    },
+    "nonEmptyStringArray": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

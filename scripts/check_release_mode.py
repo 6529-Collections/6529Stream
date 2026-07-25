@@ -12,6 +12,7 @@ from typing import Any
 import check_public_beta_evidence as evidence_checker
 import check_genesis_deployment_profile as genesis_profile_checker
 import check_governed_parameter_inventory as governed_parameter_inventory_checker
+import check_record_family_authorization as record_family_authorization_checker
 import check_risk_register as risk_register_checker
 import check_slither_baseline as slither_baseline_checker
 
@@ -238,6 +239,12 @@ def governed_parameter_completeness_blockers(
     ]
 
 
+def record_family_authorization_blockers(repo_root: Path) -> list[str]:
+    """Validate #690's canonical package and retain its hard release stop."""
+    record_family_authorization_checker.validate_package(repo_root)
+    return [record_family_authorization_checker.COMPLETION_BLOCKER]
+
+
 def accepted_risk_blocker(
     requirement: dict[str, Any], as_of: date
 ) -> str | None:
@@ -327,6 +334,7 @@ def validate_release_mode(
         slither_baseline_blockers(slither_baseline, slither_markdown, repo_root)
     )
     blockers.extend(governance_native_value_blockers(risk_register, repo_root))
+    blockers.extend(record_family_authorization_blockers(repo_root))
     if normalized_phase == PRODUCTION_PHASE:
         governed_parameter_inventory_checker.validate_inventory(
             repo_root,
@@ -433,6 +441,7 @@ def main(argv: list[str] | None = None) -> int:
         evidence_checker.PublicBetaEvidenceError,
         genesis_profile_checker.GenesisProfileError,
         governed_parameter_inventory_checker.GovernedParameterInventoryError,
+        record_family_authorization_checker.RecordFamilyAuthorizationError,
         risk_register_checker.RiskRegisterError,
         slither_baseline_checker.SlitherBaselineError,
         ReleaseModeError,

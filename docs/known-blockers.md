@@ -64,6 +64,22 @@ contributors who start from the README.
   authority is now separated from drop-signing identities through root-managed
   signer managers with exact lifecycle grants on owner-approved drop targets.
   Deployment admin ceremony and richer collection-admin roles remain open.
+- The five as-built collection-metadata and preservation mutation selectors
+  still accept whole-selector or global-admin authority without proving the
+  caller's record-family authorization. The planning-only
+  [`record-family-authorization-inventory.json`](../release-artifacts/record-family-authorization-inventory.json)
+  pins those surfaces, eight authorization classes, fourteen family groups, and
+  eight known fail-open behaviors under
+  [issue #690](https://github.com/6529-Collections/6529Stream/issues/690).
+  Its inventory schema, retained-evidence schema, strict grant-map schema, and
+  evidence template make the missing classifier, candidate-bound grant map,
+  snapshot-family intersection, implementation/runtime, lifecycle, phase, and
+  independent-review evidence explicit. They do not implement authorization,
+  and neither a populated
+  template nor an admin ceremony can substitute for contract enforcement.
+  `RISK-GOV-002` remains `open_blocker`; both public-beta and production release
+  mode fail closed until the family-scoped implementation and exact
+  candidate-bound reviewed evidence are merged.
 - VRF and arRNG randomizer adapters now record request lifecycle state, expose
   request and token-level lifecycle views, and validate request ID, the core
   token-to-collection binding, provider, and collection randomizer epoch before
