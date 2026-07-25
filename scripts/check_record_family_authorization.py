@@ -49,6 +49,16 @@ EXPECTED_GRANT_MAP_PATHS: Final = {
         "production-release-record-family-authorization-grant-map.json"
     ),
 }
+EXPECTED_EVIDENCE_PATHS: Final = {
+    "public_beta": Path(
+        "deployments/record-family-authorization/"
+        "public-beta-record-family-authorization-evidence.json"
+    ),
+    "production_release": Path(
+        "deployments/record-family-authorization/"
+        "production-release-record-family-authorization-evidence.json"
+    ),
+}
 
 INVENTORY_SCHEMA_VERSION: Final = (
     "6529stream.record-family-authorization-inventory.v1"
@@ -250,6 +260,26 @@ EXPECTED_FAMILY_GROUPS: Final = (
     ("SNAPSHOT", ("SNAPSHOT_*",)),
     ("AGENT", ("AGENT_*",)),
 )
+COMMON_FAMILY_GROUP_BLOCKERS: Final = (
+    "record_type_ids_not_pinned",
+    "family_to_authorization_class_mapping_not_pinned",
+)
+# [CMC-AUTHZ] permits the named/global administration paths for most families.
+# ARTIST and OWNER reject administrator substitution, while INDEPENDENT must
+# remain open-entry without administrator blocking or impersonation.
+ADMIN_REJECTION_FAMILY_GROUPS: Final = frozenset(
+    {
+        "ARTIST",
+        "OWNER",
+        "INDEPENDENT",
+    }
+)
+ADMIN_REJECTION_FAMILY_GROUP_BLOCKERS: Final = (
+    "admin_rejection_not_implemented",
+)
+SNAPSHOT_FAMILY_GROUP_EXTRA_BLOCKERS: Final = (
+    "snapshot_family_intersection_not_observable",
+)
 NORMATIVE_FRAGMENT_BINDINGS: Final = (
     (
         "docs/collection-metadata-contract.md",
@@ -353,6 +383,15 @@ FORBIDDEN_PATHS: Final = frozenset(
     }
 )
 FORBIDDEN_PATH_KEYS: Final = frozenset(path.casefold() for path in FORBIDDEN_PATHS)
+RESERVED_ROLE_PATHS: Final = frozenset(
+    {
+        *(path.as_posix() for path in EXPECTED_EVIDENCE_PATHS.values()),
+        *(path.as_posix() for path in EXPECTED_GRANT_MAP_PATHS.values()),
+    }
+)
+RESERVED_ROLE_PATH_KEYS: Final = frozenset(
+    path.casefold() for path in RESERVED_ROLE_PATHS
+)
 FORBIDDEN_CANDIDATE_KEYS: Final = frozenset(
     {
         "candidate_sha256",
@@ -517,6 +556,26 @@ def _path_is_link_or_reparse(path: Path) -> bool:
         return False
     flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
     return bool(flag and attrs & flag)
+
+
+def _lstat_or_missing(path: Path, label: str) -> os.stat_result | None:
+    try:
+        return os.lstat(path)
+    except FileNotFoundError:
+        return None
+    except OSError as exc:
+        raise RecordFamilyAuthorizationError(
+            f"cannot inspect {label}: {exc}"
+        ) from exc
+
+
+def _metadata_is_link_or_reparse(metadata: os.stat_result) -> bool:
+    attrs = getattr(metadata, "st_file_attributes", 0)
+    flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    return (
+        metadata.st_mode & 0o170000 == 0o120000
+        or bool(flag and attrs & flag)
+    )
 
 
 def _normalize_raw_repo_path(raw: Any, label: str) -> tuple[str, ...]:
@@ -841,6 +900,15 @@ def _validate_inventory_semantics(inventory: dict[str, Any], repo_root: Path) ->
         _expect(row["authorization_classes"] == [], f"family_groups[{index}] must not invent the unresolved 14-to-8 mapping")
         _expect(row["classification_status"] == "unresolved", f"family_groups[{index}] classification must remain unresolved")
         _expect(row["implementation_status"] == "not_implemented", f"family_groups[{index}] implementation must remain missing")
+        expected_blockers = COMMON_FAMILY_GROUP_BLOCKERS
+        if row["name"] in ADMIN_REJECTION_FAMILY_GROUPS:
+            expected_blockers += ADMIN_REJECTION_FAMILY_GROUP_BLOCKERS
+        if row["name"] == "SNAPSHOT":
+            expected_blockers += SNAPSHOT_FAMILY_GROUP_EXTRA_BLOCKERS
+        _expect(
+            tuple(row["blockers"]) == expected_blockers,
+            f"family_groups[{index}] blockers mismatch",
+        )
 
     snapshot = inventory["snapshot_policy"]
     _expect(snapshot["normative_every_family_authority_required"] is True, "snapshot policy must retain every-family authority")
@@ -863,9 +931,12 @@ def _validate_inventory_semantics(inventory: dict[str, Any], repo_root: Path) ->
 
     evidence = inventory["retained_evidence"]
     _expect(isinstance(evidence, list) and len(evidence) == 2, "two retained-evidence phase rows required")
-    expected_evidence = (
-        ("public_beta", "deployments/record-family-authorization/public-beta-record-family-authorization-evidence.json"),
-        ("production_release", "deployments/record-family-authorization/production-release-record-family-authorization-evidence.json"),
+    expected_evidence = tuple(
+        (
+            phase,
+            EXPECTED_EVIDENCE_PATHS[phase].as_posix(),
+        )
+        for phase in ("public_beta", "production_release")
     )
     for index, (row, (phase, path)) in enumerate(zip(evidence, expected_evidence, strict=True)):
         _expect(row["phase"] == phase and row["path"] == path, f"retained_evidence[{index}] phase/path mismatch")
@@ -881,6 +952,9 @@ def _reject_forbidden_transit(
     *,
     evidence_input_path: str,
     json_path: tuple[str, ...] = (),
+    allowed_reserved_paths: dict[
+        tuple[str, ...], frozenset[str]
+    ] | None = None,
 ) -> None:
     if isinstance(value, dict):
         for key, item in value.items():
@@ -894,6 +968,8 @@ def _reject_forbidden_transit(
                 "schema_path",
                 "evidence_path",
                 "candidate_identity_path",
+                "source_path",
+                "interface_path",
             } and isinstance(item, str):
                 path_key = _portable_path_key(
                     item,
@@ -907,6 +983,7 @@ def _reject_forbidden_transit(
                         item,
                         evidence_input_path=evidence_input_path,
                         json_path=current,
+                        allowed_reserved_paths=allowed_reserved_paths,
                     )
                     continue
                 forbidden_keys = FORBIDDEN_PATH_KEYS | {
@@ -917,6 +994,24 @@ def _reject_forbidden_transit(
                 _expect(
                     path_key not in forbidden_keys,
                     f"cyclic/downstream evidence path is forbidden: {item}",
+                )
+                _expect(
+                    not path_key.startswith(
+                        "release-artifacts/latest/"
+                    ),
+                    f"generated release-tail evidence path is forbidden: "
+                    f"{item}",
+                )
+                allowed_keys = (
+                    allowed_reserved_paths.get(current, frozenset())
+                    if allowed_reserved_paths is not None
+                    else frozenset()
+                )
+                _expect(
+                    path_key not in RESERVED_ROLE_PATH_KEYS
+                    or path_key in allowed_keys,
+                    f"reserved record-family artifact path is forbidden "
+                    f"for {'.'.join(current)}: {item}",
                 )
                 _expect(
                     current == ("candidate_binding", "candidate_identity_path")
@@ -931,6 +1026,7 @@ def _reject_forbidden_transit(
                 item,
                 evidence_input_path=evidence_input_path,
                 json_path=current,
+                allowed_reserved_paths=allowed_reserved_paths,
             )
     elif isinstance(value, list):
         for item in value:
@@ -938,7 +1034,29 @@ def _reject_forbidden_transit(
                 item,
                 evidence_input_path=evidence_input_path,
                 json_path=json_path,
+                allowed_reserved_paths=allowed_reserved_paths,
             )
+
+
+def _allowed_reserved_transit_paths(
+    evidence: dict[str, Any],
+) -> dict[tuple[str, ...], frozenset[str]]:
+    target_phase = evidence.get("target_phase")
+    allowed: dict[tuple[str, ...], frozenset[str]] = {}
+    if target_phase in EXPECTED_GRANT_MAP_PATHS:
+        allowed[("grant_map", "path")] = frozenset(
+            path.as_posix().casefold()
+            for path in EXPECTED_GRANT_MAP_PATHS.values()
+        )
+    if target_phase == "production_release":
+        allowed[("phases", "evidence_path")] = frozenset(
+            {
+                EXPECTED_EVIDENCE_PATHS["public_beta"]
+                .as_posix()
+                .casefold()
+            }
+        )
+    return allowed
 
 
 def _validate_template_semantics(
@@ -1011,11 +1129,111 @@ def _validate_template_semantics(
     )
 
 
+def _existing_release_tail_files(
+    repo_root: Path,
+) -> tuple[tuple[str, Path], ...]:
+    release_root = repo_root / "release-artifacts"
+    latest_root = release_root / "latest"
+    for label, directory in (
+        ("release-artifacts directory", release_root),
+        ("release-artifacts/latest directory", latest_root),
+    ):
+        metadata = _lstat_or_missing(directory, label)
+        if metadata is None:
+            return ()
+        _expect(
+            not _metadata_is_link_or_reparse(metadata),
+            f"{label} must not be a symlink, junction, or reparse point",
+        )
+        _expect(stat.S_ISDIR(metadata.st_mode), f"{label} must be a directory")
+
+    files: list[tuple[str, Path]] = []
+
+    def visit(directory: Path) -> None:
+        try:
+            with os.scandir(directory) as iterator:
+                entries = sorted(
+                    iterator,
+                    key=lambda entry: entry.name.casefold(),
+                )
+        except OSError as exc:
+            raise RecordFamilyAuthorizationError(
+                f"cannot enumerate release output directory "
+                f"{directory.relative_to(repo_root).as_posix()}: {exc}"
+            ) from exc
+
+        folded_names: set[str] = set()
+        for entry in entries:
+            folded_name = entry.name.casefold()
+            _expect(
+                folded_name not in folded_names,
+                "release-artifacts/latest must not contain "
+                "case-ambiguous filesystem aliases",
+            )
+            folded_names.add(folded_name)
+            candidate = directory / entry.name
+            relative = candidate.relative_to(repo_root).as_posix()
+            try:
+                metadata = entry.stat(follow_symlinks=False)
+            except OSError as exc:
+                raise RecordFamilyAuthorizationError(
+                    f"cannot inspect release output {relative}: {exc}"
+                ) from exc
+            _expect(
+                not _metadata_is_link_or_reparse(metadata),
+                f"release output {relative} must not be a symlink, "
+                "junction, or reparse point",
+            )
+            if stat.S_ISDIR(metadata.st_mode):
+                visit(candidate)
+                continue
+            _expect(
+                stat.S_ISREG(metadata.st_mode),
+                f"release output {relative} must be a regular file",
+            )
+            files.append((relative, candidate))
+
+    visit(latest_root)
+    return tuple(files)
+
+
 def _register_distinct_file(
     registered: list[tuple[str, Path]],
     label: str,
     path: Path,
+    *,
+    repo_root: Path,
+    allowed_reserved_paths: frozenset[str] = frozenset(),
 ) -> None:
+    allowed_reserved_keys = frozenset(
+        value.casefold() for value in allowed_reserved_paths
+    )
+    forbidden_files = list(_existing_release_tail_files(repo_root))
+    for reserved_relative in sorted(RESERVED_ROLE_PATHS):
+        reserved_path = repo_root / reserved_relative
+        metadata = _lstat_or_missing(
+            reserved_path,
+            f"reserved record-family artifact {reserved_relative}",
+        )
+        if metadata is None:
+            continue
+        forbidden_files.append((reserved_relative, reserved_path))
+
+    for forbidden_relative, forbidden_path in forbidden_files:
+        if forbidden_relative.casefold() in allowed_reserved_keys:
+            continue
+        try:
+            aliases_forbidden = os.path.samefile(path, forbidden_path)
+        except OSError as exc:
+            raise RecordFamilyAuthorizationError(
+                f"cannot compare {label} with forbidden release output "
+                f"{forbidden_relative}: {exc}"
+            ) from exc
+        _expect(
+            not aliases_forbidden,
+            f"{label} must not alias forbidden release output "
+            f"{forbidden_relative}",
+        )
     for other_label, other_path in registered:
         try:
             aliases = os.path.samefile(path, other_path)
@@ -1036,6 +1254,8 @@ def _load_bound_support(
     expected_sha256: Any,
     label: str,
     registered: list[tuple[str, Path]],
+    *,
+    allowed_reserved_paths: frozenset[str] = frozenset(),
 ) -> tuple[Path, dict[str, Any]]:
     _expect(
         isinstance(expected_sha256, str)
@@ -1044,7 +1264,21 @@ def _load_bound_support(
         f"{label} SHA-256 must be nonzero",
     )
     path = resolve_repo_file(repo_root, raw_path, f"{label}.path")
-    _register_distinct_file(registered, label, path)
+    relative_path = path.relative_to(repo_root).as_posix()
+    _expect(
+        relative_path.startswith(
+            "deployments/record-family-authorization/"
+        ),
+        f"{label} must remain in the dedicated record-family "
+        f"authorization namespace",
+    )
+    _register_distinct_file(
+        registered,
+        label,
+        path,
+        repo_root=repo_root,
+        allowed_reserved_paths=allowed_reserved_paths,
+    )
     _expect(_sha256(path) == expected_sha256, f"{label} file digest mismatch")
     return path, load_json(path, label)
 
@@ -1162,8 +1396,21 @@ def _validate_complete_evidence_semantics(
     _expect(inventory_binding["sha256"] == _sha256(inventory_path), "retained raw inventory SHA-256 mismatch")
 
     registered_files: list[tuple[str, Path]] = []
-    _register_distinct_file(registered_files, "inventory", inventory_path)
-    _register_distinct_file(registered_files, "evidence envelope", evidence_path)
+    _register_distinct_file(
+        registered_files,
+        "inventory",
+        inventory_path,
+        repo_root=repo_root,
+    )
+    _register_distinct_file(
+        registered_files,
+        "evidence envelope",
+        evidence_path,
+        repo_root=repo_root,
+        allowed_reserved_paths=frozenset(
+            {evidence_path.relative_to(repo_root).as_posix()}
+        ),
+    )
 
     candidate = evidence["candidate_binding"]
     _expect(candidate["status"] == "complete", "retained candidate binding must be complete")
@@ -1178,10 +1425,19 @@ def _validate_complete_evidence_semantics(
         candidate["candidate_identity_path"],
         "candidate_binding.candidate_identity_path",
     )
+    _expect(
+        candidate_identity_path.relative_to(repo_root)
+        .as_posix()
+        .startswith("deployments/record-family-authorization/"),
+        "candidate identity projection must remain in the dedicated "
+        "record-family authorization namespace until #656 pins its exact "
+        "projection path",
+    )
     _register_distinct_file(
         registered_files,
         "candidate identity projection",
         candidate_identity_path,
+        repo_root=repo_root,
     )
     candidate_projection = load_json(
         candidate_identity_path,
@@ -1222,7 +1478,12 @@ def _validate_complete_evidence_semantics(
     _expect(profile["status"] == "complete", "retained profile binding must be complete")
     _expect(profile["sha256"] == candidate["genesis_profile_sha256"], "candidate/profile digest mismatch")
     profile_path = resolve_repo_file(repo_root, profile["path"], "profile_binding.path")
-    _register_distinct_file(registered_files, "genesis profile", profile_path)
+    _register_distinct_file(
+        registered_files,
+        "genesis profile",
+        profile_path,
+        repo_root=repo_root,
+    )
     _expect(_sha256(profile_path) == profile["sha256"], "profile binding file digest mismatch")
 
     grant = evidence["grant_map"]
@@ -1245,6 +1506,13 @@ def _validate_complete_evidence_semantics(
         grant["sha256"],
         "grant map",
         registered_files,
+        allowed_reserved_paths=frozenset(
+            {EXPECTED_GRANT_MAP_PATHS[target_phase].as_posix()}
+        ),
+    )
+    _reject_forbidden_transit(
+        grant_document,
+        evidence_input_path=grant_path.relative_to(repo_root).as_posix(),
     )
     _validate_schema(
         grant_map_schema,
@@ -1437,6 +1705,16 @@ def _validate_complete_evidence_semantics(
                 == expected_source_paths[evidence_row["contract"]],
                 f"grant-map implementation_bindings[{index}] source/interface mismatch",
             )
+        for field in ("source_path", "interface_path"):
+            _expect(
+                re.fullmatch(
+                    r"smart-contracts/[A-Za-z0-9_.-]+\.sol",
+                    grant_row[field],
+                )
+                is not None,
+                f"grant-map implementation_bindings[{index}].{field} "
+                "must remain an exact smart-contracts Solidity source path",
+            )
         source_path = _assert_candidate_source_at_commit(
             repo_root,
             candidate["source_commit"],
@@ -1455,11 +1733,13 @@ def _validate_complete_evidence_semantics(
             registered_files,
             f"implementation source {grant_row['contract']}",
             source_path,
+            repo_root=repo_root,
         )
         _register_distinct_file(
             registered_files,
             f"implementation interface {grant_row['contract']}",
             interface_path,
+            repo_root=repo_root,
         )
 
     classifier_implementation_rows = [
@@ -1536,7 +1816,7 @@ def _validate_complete_evidence_semantics(
         for row in inventory["retained_evidence"]
         if row["phase"] == "public_beta"
     )
-    for index, row in enumerate(phases):
+    for row in phases:
         if row["status"] == "missing":
             continue
         if target_phase == "production_release" and row["phase"] == "public_beta":
@@ -1550,6 +1830,9 @@ def _validate_complete_evidence_semantics(
                 row["evidence_sha256"],
                 "canonical public-beta retained predecessor",
                 registered_files,
+                allowed_reserved_paths=frozenset(
+                    {EXPECTED_EVIDENCE_PATHS["public_beta"].as_posix()}
+                ),
             )
             _validate_schema(
                 evidence_schema,
@@ -1560,6 +1843,9 @@ def _validate_complete_evidence_semantics(
             _reject_forbidden_transit(
                 predecessor,
                 evidence_input_path=predecessor_path.relative_to(repo_root).as_posix(),
+                allowed_reserved_paths=_allowed_reserved_transit_paths(
+                    predecessor
+                ),
             )
             _expect_keys(
                 predecessor,
@@ -1681,6 +1967,7 @@ def validate_package(
     _reject_forbidden_transit(
         evidence,
         evidence_input_path=evidence_relative,
+        allowed_reserved_paths=_allowed_reserved_transit_paths(evidence),
     )
     _validate_schema(inventory_schema, inventory, expected_id=INVENTORY_SCHEMA_ID, label="inventory")
     _validate_schema(evidence_schema, evidence, expected_id=EVIDENCE_SCHEMA_ID, label="evidence")

@@ -7,6 +7,7 @@ import copy
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import tempfile
@@ -830,6 +831,36 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
         finally:
             temporary.cleanup()
 
+    def test_non_interoperable_json_numbers_are_rejected(self) -> None:
+        cases = (
+            ("1.5", "floating-point JSON number"),
+            ("Infinity", "non-finite JSON number"),
+            ("NaN", "non-finite JSON number"),
+            (str(2**53), "outside the interoperable I-JSON range"),
+            (str(-(2**53)), "outside the interoperable I-JSON range"),
+        )
+        for literal, pattern in cases:
+            with self.subTest(literal=literal):
+                temporary, root = self._fixture()
+                try:
+                    path = root / checker.DEFAULT_INVENTORY
+                    text = path.read_text(encoding="utf-8")
+                    path.write_text(
+                        text.replace(
+                            '"status": "planning"',
+                            f'"status": {literal}',
+                            1,
+                        ),
+                        encoding="utf-8",
+                    )
+                    with self.assertRaisesRegex(
+                        checker.RecordFamilyAuthorizationError,
+                        pattern,
+                    ):
+                        checker.validate_package(root)
+                finally:
+                    temporary.cleanup()
+
     def test_schema_ids_are_exact(self) -> None:
         temporary, root = self._fixture()
         try:
@@ -1074,6 +1105,48 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             "blockers/order",
         )
 
+    def test_family_group_blocker_sets_are_exact(self) -> None:
+        inventory = _read(ROOT / checker.DEFAULT_INVENTORY)
+        for index, row in enumerate(inventory["family_groups"]):
+            expected = list(checker.COMMON_FAMILY_GROUP_BLOCKERS)
+            if row["name"] in checker.ADMIN_REJECTION_FAMILY_GROUPS:
+                expected.extend(
+                    checker.ADMIN_REJECTION_FAMILY_GROUP_BLOCKERS
+                )
+            if row["name"] == "SNAPSHOT":
+                expected.extend(checker.SNAPSHOT_FAMILY_GROUP_EXTRA_BLOCKERS)
+            self.assertEqual(row["blockers"], expected)
+
+            mutations = (
+                lambda blockers: blockers.append("unexpected_blocker"),
+                lambda blockers: blockers.pop(),
+                lambda blockers: blockers.reverse(),
+                lambda blockers: blockers.__setitem__(
+                    0, "unexpected_blocker"
+                ),
+            )
+            for mutation_name, mutation in zip(
+                ("add", "remove", "reorder", "substitute"),
+                mutations,
+                strict=True,
+            ):
+                def mutate_blockers(
+                    value: dict[str, Any],
+                    index: int = index,
+                    mutation: Callable[[list[str]], None] = mutation,
+                ) -> None:
+                    mutation(value["family_groups"][index]["blockers"])
+
+                with self.subTest(
+                    index=index,
+                    family=row["name"],
+                    mutation=mutation_name,
+                ):
+                    self._mutate_inventory(
+                        mutate_blockers,
+                        rf"family_groups\[{index}\] blockers mismatch",
+                    )
+
     def test_template_raw_inventory_hash_is_recomputed(self) -> None:
         self._mutate_evidence(
             lambda value: value["inventory_binding"].__setitem__(
@@ -1169,6 +1242,65 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
                     ),
                     pattern,
                 )
+
+    def test_grant_document_transit_paths_are_forbidden(self) -> None:
+        cases = (
+            (
+                "path",
+                "release-artifacts/latest/release-manifest.json",
+                "cyclic/downstream evidence path",
+            ),
+            (
+                "source_path",
+                "release-artifacts/latest/release-manifest.json",
+                "cyclic/downstream evidence path",
+            ),
+            (
+                "interface_path",
+                "release-artifacts/latest/release-manifest.json",
+                "cyclic/downstream evidence path",
+            ),
+            (
+                "path",
+                "deployments/config/mainnet-genesis-candidate.json",
+                "raw candidate artifact path",
+            ),
+            (
+                "source_path",
+                "deployments/config/mainnet-genesis-candidate.json",
+                "raw candidate artifact path",
+            ),
+            (
+                "interface_path",
+                "deployments/config/mainnet-genesis-candidate.json",
+                "raw candidate artifact path",
+            ),
+        )
+        for field, path, pattern in cases:
+            with self.subTest(field=field, path=path):
+                self._mutate_complete(
+                    lambda _root, _evidence, _path, state, field=field, path=path: state[
+                        "grant_document"
+                    ]["implementation_bindings"][0].__setitem__(field, path),
+                    pattern,
+                    rebind_grant=True,
+                )
+
+        def bind_grant_to_itself(
+            root: Path,
+            _evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            state["grant_document"]["implementation_bindings"][0]["path"] = state[
+                "grant_path"
+            ].relative_to(root).as_posix()
+
+        self._mutate_complete(
+            bind_grant_to_itself,
+            "cyclic/downstream evidence path",
+            rebind_grant=True,
+        )
 
     def test_raw_candidate_artifact_hash_key_is_forbidden(self) -> None:
         self._mutate_evidence(
@@ -2069,18 +2201,38 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             ),
             r"review.*reviewer.*does not match",
         )
-        def invalid_review_timestamp(
+        self._mutate_complete(
+            lambda _root, evidence, _path, _state: evidence["review"].__setitem__(
+                "reviewed_at", "2026-07-24T01:00:00+01:00"
+            ),
+            r"evidence does not satisfy its schema.*reviewed_at.*not valid under any",
+        )
+
+        def invalid_evidence_review_timestamp(
             _root: Path,
             evidence: dict[str, Any],
             _path: Path,
-            state: dict[str, Any],
+            _state: dict[str, Any],
         ) -> None:
-            invalid = "2026-99-99T99:99:99Z"
-            evidence["review"]["reviewed_at"] = invalid
-            state["grant_document"]["independent_review"]["reviewed_at"] = invalid
+            evidence["review"]["reviewed_at"] = "2026-99-99T99:99:99Z"
 
         self._mutate_complete(
-            invalid_review_timestamp,
+            invalid_evidence_review_timestamp,
+            r"evidence does not satisfy its schema.*reviewed_at.*not valid under any",
+        )
+
+        def invalid_grant_review_timestamp(
+            _root: Path,
+            _evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+        ) -> None:
+            state["grant_document"]["independent_review"][
+                "reviewed_at"
+            ] = "2026-99-99T99:99:99Z"
+
+        self._mutate_complete(
+            invalid_grant_review_timestamp,
             (
                 r"grant map artifact.*independent_review.*reviewed_at.*"
                 r"does not match"
@@ -2259,6 +2411,338 @@ class RecordFamilyAuthorizationTests(unittest.TestCase):
             )
         finally:
             temporary.cleanup()
+
+    def test_all_complete_bound_files_reject_hardlink_alias_to_release_tail(
+        self,
+    ) -> None:
+        cases = (
+            (
+                "inventory",
+                lambda root, _evidence, _path, _state: (
+                    root / checker.DEFAULT_INVENTORY
+                ),
+            ),
+            (
+                "evidence envelope",
+                lambda _root, _evidence, path, _state: path,
+            ),
+            (
+                "candidate identity projection",
+                lambda _root, _evidence, _path, state: state[
+                    "candidate_path"
+                ],
+            ),
+            (
+                "genesis profile",
+                lambda root, _evidence, _path, _state: (
+                    root / "release-artifacts/genesis-deployment-profile.json"
+                ),
+            ),
+            (
+                "grant map",
+                lambda _root, _evidence, _path, state: state[
+                    "grant_path"
+                ],
+            ),
+            (
+                "implementation support",
+                lambda _root, _evidence, _path, state: state[
+                    "support_paths"
+                ]["implementation_0"],
+            ),
+            (
+                "implementation source",
+                lambda root, evidence, _path, _state: (
+                    root
+                    / evidence["implementation_bindings"]["contracts"][0][
+                        "source_path"
+                    ]
+                ),
+            ),
+            (
+                "implementation interface",
+                lambda root, evidence, _path, _state: (
+                    root
+                    / evidence["implementation_bindings"]["contracts"][0][
+                        "interface_path"
+                    ]
+                ),
+            ),
+            (
+                "snapshot-intersection support",
+                lambda _root, _evidence, _path, state: state[
+                    "support_paths"
+                ]["snapshot"],
+            ),
+            (
+                "authority-lifecycle support",
+                lambda _root, _evidence, _path, state: state[
+                    "support_paths"
+                ]["lifecycle"],
+            ),
+            (
+                "phase support public_beta",
+                lambda _root, _evidence, _path, state: state[
+                    "support_paths"
+                ]["phase_public_beta"],
+            ),
+        )
+        for label, select_path in cases:
+            with self.subTest(label=label):
+                temporary, root, evidence, evidence_path, state = (
+                    self._complete_evidence_fixture()
+                )
+                try:
+                    target = select_path(root, evidence, evidence_path, state)
+                    forbidden = (
+                        root
+                        / "release-artifacts/latest/release-manifest.json"
+                    )
+                    forbidden.parent.mkdir(parents=True, exist_ok=True)
+                    try:
+                        os.link(target, forbidden)
+                    except OSError as exc:
+                        self.skipTest(
+                            f"hardlink creation unavailable: {exc}"
+                        )
+                    self._expect_complete_failure(
+                        root,
+                        evidence,
+                        evidence_path,
+                        (
+                            rf"{re.escape(label)}(?: [A-Za-z0-9_]+)? "
+                            r"must not alias forbidden "
+                            r"release output.*release-manifest\.json"
+                        ),
+                    )
+                finally:
+                    temporary.cleanup()
+
+    def test_complete_bound_file_rejects_hardlink_alias_to_any_release_tail_file(
+        self,
+    ) -> None:
+        temporary, root, evidence, evidence_path, state = (
+            self._complete_evidence_fixture()
+        )
+        try:
+            target = state["support_paths"]["phase_public_beta"]
+            forbidden = root / "release-artifacts/latest/abi-checksums.json"
+            forbidden.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                os.link(target, forbidden)
+            except OSError as exc:
+                self.skipTest(f"hardlink creation unavailable: {exc}")
+            self._expect_complete_failure(
+                root,
+                evidence,
+                evidence_path,
+                (
+                    r"phase support public_beta must not alias forbidden "
+                    r"release output.*abi-checksums\.json"
+                ),
+            )
+        finally:
+            temporary.cleanup()
+
+    def test_release_tail_child_junction_is_rejected_before_recursion(
+        self,
+    ) -> None:
+        if os.name != "nt":
+            self.skipTest("directory junction hostile is Windows-specific")
+        temporary, root, evidence, evidence_path, _state = (
+            self._complete_evidence_fixture()
+        )
+        outside = tempfile.TemporaryDirectory()
+        junction = root / "release-artifacts/latest/junction"
+        try:
+            outside_path = Path(outside.name)
+            _write(outside_path / "outside.json", {"outside": True})
+            junction.parent.mkdir(parents=True, exist_ok=True)
+            completed = subprocess.run(
+                [
+                    "cmd",
+                    "/c",
+                    "mklink",
+                    "/J",
+                    str(junction),
+                    str(outside_path),
+                ],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            if completed.returncode != 0:
+                self.skipTest(
+                    f"junction creation unavailable: {completed.stderr.strip()}"
+                )
+            self._expect_complete_failure(
+                root,
+                evidence,
+                evidence_path,
+                (
+                    r"release output release-artifacts/latest/junction "
+                    r"must not be a symlink, junction, or reparse point"
+                ),
+            )
+        finally:
+            if junction.exists():
+                subprocess.run(
+                    ["cmd", "/c", "rmdir", str(junction)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+            outside.cleanup()
+            temporary.cleanup()
+
+    def test_release_tail_lstat_error_is_rejected(self) -> None:
+        class ErroringPath:
+            def __fspath__(self) -> str:
+                raise PermissionError("hostile reserved-artifact inspection error")
+
+        with self.assertRaisesRegex(
+            checker.RecordFamilyAuthorizationError,
+            r"cannot inspect hostile release-tail path",
+        ):
+            checker._lstat_or_missing(
+                ErroringPath(),  # type: ignore[arg-type]
+                "hostile release-tail path",
+            )
+
+    def test_reserved_envelope_and_grant_paths_are_role_bound(self) -> None:
+        def bind_phase_support_to_reserved(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+            *,
+            phase_index: int,
+            source_key: str,
+            reserved_path: Path,
+        ) -> None:
+            source = state["support_paths"][source_key]
+            target = root / reserved_path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+            evidence["phases"][phase_index]["evidence_path"] = (
+                reserved_path.as_posix()
+            )
+            evidence["phases"][phase_index]["evidence_sha256"] = _sha256(
+                target
+            )
+
+        self._mutate_complete(
+            lambda root, evidence, path, state: bind_phase_support_to_reserved(
+                root,
+                evidence,
+                path,
+                state,
+                phase_index=0,
+                source_key="phase_public_beta",
+                reserved_path=Path(
+                    "deployments/record-family-authorization/"
+                    "production-release-record-family-authorization-"
+                    "evidence.json"
+                ),
+            ),
+            "reserved record-family artifact path is forbidden",
+        )
+        self._mutate_complete(
+            lambda root, evidence, path, state: bind_phase_support_to_reserved(
+                root,
+                evidence,
+                path,
+                state,
+                phase_index=0,
+                source_key="phase_public_beta",
+                reserved_path=Path(
+                    "deployments/record-family-authorization/"
+                    "production-release-record-family-authorization-"
+                    "grant-map.json"
+                ),
+            ),
+            "reserved record-family artifact path is forbidden",
+        )
+        self._mutate_complete(
+            lambda root, evidence, path, state: bind_phase_support_to_reserved(
+                root,
+                evidence,
+                path,
+                state,
+                phase_index=1,
+                source_key="phase_production_release",
+                reserved_path=Path(
+                    "deployments/record-family-authorization/"
+                    "public-beta-record-family-authorization-grant-map.json"
+                ),
+            ),
+            "reserved record-family artifact path is forbidden",
+            target_phase="production_release",
+        )
+
+    def test_reserved_artifact_hardlink_alias_is_rejected(self) -> None:
+        temporary, root, evidence, evidence_path, state = (
+            self._complete_evidence_fixture()
+        )
+        try:
+            reserved = (
+                root
+                / "deployments/record-family-authorization/"
+                "production-release-record-family-authorization-evidence.json"
+            )
+            reserved.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                os.link(state["candidate_path"], reserved)
+            except OSError as exc:
+                self.skipTest(f"hardlink creation unavailable: {exc}")
+            self._expect_complete_failure(
+                root,
+                evidence,
+                evidence_path,
+                (
+                    "candidate identity projection must not alias forbidden "
+                    "release output.*production-release-record-family-"
+                    "authorization-evidence\\.json"
+                ),
+            )
+        finally:
+            temporary.cleanup()
+
+    def test_support_paths_reject_generated_tail_and_wrong_namespace(self) -> None:
+        def move_phase_support(
+            root: Path,
+            evidence: dict[str, Any],
+            _path: Path,
+            state: dict[str, Any],
+            destination: Path,
+        ) -> None:
+            source = state["support_paths"]["phase_public_beta"]
+            target = root / destination
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+            evidence["phases"][0]["evidence_path"] = destination.as_posix()
+            evidence["phases"][0]["evidence_sha256"] = _sha256(target)
+
+        self._mutate_complete(
+            lambda root, evidence, path, state: move_phase_support(
+                root,
+                evidence,
+                path,
+                state,
+                Path("release-artifacts/latest/abi-checksums.json"),
+            ),
+            "generated release-tail evidence path is forbidden",
+        )
+        self._mutate_complete(
+            lambda root, evidence, path, state: move_phase_support(
+                root,
+                evidence,
+                path,
+                state,
+                Path("docs/phase-support.json"),
+            ),
+            "must remain in the dedicated record-family authorization namespace",
+        )
 
 
 if __name__ == "__main__":

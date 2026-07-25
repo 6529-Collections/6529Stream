@@ -67,9 +67,11 @@
       },
       "evidence_schema": {
         "path": "deployments/schema/record-family-authorization-evidence.v1.schema.json",
-        "sha256": "sha256:b00ea53783b11d297f9cab0d62879378535218305efe693ee90fd296338b05c5",
-        "size_bytes": 24398,
-        "schema_version": "https://json-schema.org/draft/2020-12/schema"
+        "sha256": "sha256:1ff4e29d52a3cadda116ac903983fbd274d7988e543fa98d5cec3f5d6f16d163",
+        "size_bytes": 24566,
+        "schema_version": "https://json-schema.org/draft/2020-12/schema",
+        "schema_id": "https://raw.githubusercontent.com/6529-Collections/6529Stream/main/deployments/schema/record-family-authorization-evidence.v1.schema.json",
+        "document_schema_version": "6529stream.record-family-authorization-evidence.v1"
       },
       "grant_map_schema": {
         "path": "deployments/schema/record-family-authorization-grant-map.v1.schema.json",
@@ -84,6 +86,22 @@
         "sha256": "sha256:143055a835695f7e98d0c3da28701d89bf8fcac6f7d7f2841207825ccb9c5a92",
         "size_bytes": 3177,
         "schema_version": "6529stream.record-family-authorization-evidence.v1"
+      }
+    },
+    "release_tool_call_policy": {
+      "policy": {
+        "path": "release-artifacts/release-tool-call-policy.json",
+        "sha256": "sha256:e967697920be35279a5eee52d89f165a5583982bd61935d40c3b1156ea90b86c",
+        "size_bytes": 2129968,
+        "schema_version": "6529stream.release-tool-call-policy.v1"
+      },
+      "schema": {
+        "path": "release-artifacts/schema/release-tool-call-policy.v1.schema.json",
+        "sha256": "sha256:1809799904f0ba5609e21c206aca68e65bafcd1d0af5ffa73f82da5b45798977",
+        "size_bytes": 10295,
+        "schema_version": "https://json-schema.org/draft/2020-12/schema",
+        "schema_id": "https://6529.io/schemas/release-tool-call-policy.v1.schema.json",
+        "document_schema_version": "6529stream.release-tool-call-policy.v1"
       }
     },
     "system_manifest_payload_vector": {
@@ -137,7 +155,7 @@
     "release_notes": {
       "json": {
         "path": "release-artifacts/latest/release-notes.json",
-        "sha256": "sha256:9c01cf91648327fe0feb8ce777266e08c6b973d9206920c556e696d7636f4eec",
+        "sha256": "sha256:8a1566a26b4f17fd9c9ea2ea1b4583da29a89c6face39b1d43da839b116a553b",
         "size_bytes": 127261,
         "schema_version": "6529stream.release-notes.v1"
       },
@@ -221,7 +239,7 @@
     },
     "risk_register": {
       "path": "release-artifacts/latest/risk-register.json",
-      "sha256": "sha256:6a8396f0a6afed405c001db988a7008f82b662c606f9149dc5755e7470b87e0c",
+      "sha256": "sha256:156b646e1f044be55175b855ced9c9a5806adf3521db65513b555b58a5f44714",
       "size_bytes": 32843,
       "schema_version": "6529stream.risk-register.v1",
       "maturity": "pre_audit_local_baseline",
@@ -2299,8 +2317,8 @@
       },
       {
         "path": "deployments/schema/record-family-authorization-evidence.v1.schema.json",
-        "sha256": "sha256:b00ea53783b11d297f9cab0d62879378535218305efe693ee90fd296338b05c5",
-        "size_bytes": 24398,
+        "sha256": "sha256:1ff4e29d52a3cadda116ac903983fbd274d7988e543fa98d5cec3f5d6f16d163",
+        "size_bytes": 24566,
         "schema_version": "https://json-schema.org/draft/2020-12/schema"
       },
       {
@@ -2700,8 +2718,8 @@
       },
       {
         "path": "docs/release-readiness.md",
-        "sha256": "sha256:655474c1e80b94247c9f1fa88f5300468fe4f3b8f8490e039b8fe2a5cedbc764",
-        "size_bytes": 75578
+        "sha256": "sha256:a9c0a4ec67d91ad79f05ae6046dec3535596e47bc6f4a5d20756bf87ebdd6708",
+        "size_bytes": 77554
       },
       {
         "path": "docs/protocol-surface.md",
@@ -2816,8 +2834,8 @@
       },
       {
         "path": "docs/tooling.md",
-        "sha256": "sha256:5df163b424e46d98b8ab79d9c2f87a129d17cd8d850a95529515d53b23537726",
-        "size_bytes": 113689
+        "sha256": "sha256:9853b2b0cb3d8a98ab3a792b14cb1f84f70dc3fde74e317a7f2ee3279e6ed05e",
+        "size_bytes": 117307
       },
       {
         "path": "docs/status.md",

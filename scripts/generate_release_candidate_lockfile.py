@@ -41,11 +41,20 @@ DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY = (
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
     record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA
 )
+DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA = (
+    record_family_authorization_checker.DEFAULT_EVIDENCE_SCHEMA
+)
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE = (
     record_family_authorization_checker.DEFAULT_EVIDENCE_TEMPLATE
 )
 DEFAULT_RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA = (
     record_family_authorization_checker.DEFAULT_GRANT_MAP_SCHEMA
+)
+DEFAULT_RELEASE_TOOL_CALL_POLICY = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_PATH
+)
+DEFAULT_RELEASE_TOOL_CALL_POLICY_SCHEMA = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH
 )
 
 RELEASE_MANIFEST_SCHEMA = "6529stream.release-manifest.v1"
@@ -61,10 +70,22 @@ RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA = (
 RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_ID = (
     record_family_authorization_checker.INVENTORY_SCHEMA_ID
 )
+RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA = (
+    record_family_authorization_checker.EVIDENCE_SCHEMA_VERSION
+)
+RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_ID = (
+    record_family_authorization_checker.EVIDENCE_SCHEMA_ID
+)
 RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_ID = (
     record_family_authorization_checker.GRANT_MAP_SCHEMA_ID
 )
 JSON_SCHEMA_DRAFT = record_family_authorization_checker.JSON_SCHEMA_DRAFT
+RELEASE_TOOL_CALL_POLICY_SCHEMA = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA
+)
+RELEASE_TOOL_CALL_POLICY_SCHEMA_ID = (
+    release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA_ID
+)
 BYTECODE_PROOF_SCHEMA = "6529stream.bytecode-release-proof.v1"
 PUBLIC_BETA_EVIDENCE_SCHEMA = "6529stream.public-beta-evidence.v1"
 RISK_REGISTER_SCHEMA = "6529stream.risk-register.v1"
@@ -181,6 +202,104 @@ def file_record(path: Path, repo_root: Path, *, schema_required: bool = False) -
         if schema is not None:
             record["schema_version"] = schema
     return record
+
+
+def json_snapshot_record(
+    path: Path,
+    repo_root: Path,
+) -> tuple[dict[str, Any], bytes, dict[str, Any]]:
+    """Read one JSON input once and derive its record from those exact bytes."""
+    try:
+        data = path.read_bytes()
+    except FileNotFoundError as exc:
+        raise ReleaseCandidateLockfileError(f"missing required file: {path}") from exc
+    except OSError as exc:
+        raise ReleaseCandidateLockfileError(
+            f"unable to read required file {path}: {exc}"
+        ) from exc
+    try:
+        document = json.loads(data.decode("utf-8"))
+    except UnicodeDecodeError as exc:
+        raise ReleaseCandidateLockfileError(f"invalid UTF-8 in {path}: {exc}") from exc
+    except json.JSONDecodeError as exc:
+        raise ReleaseCandidateLockfileError(f"invalid JSON in {path}: {exc}") from exc
+    return (
+        require_dict(document, str(path)),
+        data,
+        {
+            "path": normalize_path(path, repo_root),
+            "sha256": sha256_bytes(data),
+            "size_bytes": len(data),
+        },
+    )
+
+
+def release_tool_call_policy_records(
+    repo_root: Path,
+) -> dict[str, dict[str, Any]]:
+    """Validate and bind the canonical reviewed release-tool call policy."""
+    policy_path = repo_root / DEFAULT_RELEASE_TOOL_CALL_POLICY
+    schema_path = repo_root / DEFAULT_RELEASE_TOOL_CALL_POLICY_SCHEMA
+    policy, policy_bytes, policy_record = json_snapshot_record(
+        policy_path,
+        repo_root,
+    )
+    schema, schema_bytes, schema_record = json_snapshot_record(
+        schema_path,
+        repo_root,
+    )
+    try:
+        release_checksum_policy.validate_release_tool_call_policy(
+            repo_root,
+            policy_bytes=policy_bytes,
+            schema_bytes=schema_bytes,
+        )
+    except release_checksum_policy.ChecksumError as exc:
+        raise ReleaseCandidateLockfileError(
+            f"invalid release-tool call policy: {exc}"
+        ) from exc
+
+    if policy.get("schema_version") != RELEASE_TOOL_CALL_POLICY_SCHEMA:
+        raise ReleaseCandidateLockfileError(
+            "release-tool call policy must use schema "
+            f"{RELEASE_TOOL_CALL_POLICY_SCHEMA}"
+        )
+    policy_record["schema_version"] = RELEASE_TOOL_CALL_POLICY_SCHEMA
+
+    if schema.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseCandidateLockfileError(
+            "release-tool call policy schema must use JSON Schema "
+            f"{JSON_SCHEMA_DRAFT}"
+        )
+    if schema.get("$id") != RELEASE_TOOL_CALL_POLICY_SCHEMA_ID:
+        raise ReleaseCandidateLockfileError(
+            "release-tool call policy schema must use schema ID "
+            f"{RELEASE_TOOL_CALL_POLICY_SCHEMA_ID}"
+        )
+    schema_properties = require_dict(
+        schema.get("properties"),
+        f"{schema_path}.properties",
+    )
+    schema_version = require_dict(
+        schema_properties.get("schema_version"),
+        f"{schema_path}.properties.schema_version",
+    )
+    if schema_version.get("const") != RELEASE_TOOL_CALL_POLICY_SCHEMA:
+        raise ReleaseCandidateLockfileError(
+            "release-tool call policy schema must pin document version "
+            f"{RELEASE_TOOL_CALL_POLICY_SCHEMA}"
+        )
+    schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": RELEASE_TOOL_CALL_POLICY_SCHEMA_ID,
+            "document_schema_version": RELEASE_TOOL_CALL_POLICY_SCHEMA,
+        }
+    )
+    return {
+        "policy": policy_record,
+        "schema": schema_record,
+    }
 
 
 def self_referential_output(path: Path, repo_root: Path, *, format_name: str) -> dict[str, Any]:
@@ -371,6 +490,9 @@ def build_lockfile(
     record_family_inventory_schema_path = (
         repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA
     )
+    record_family_evidence_schema_path = (
+        repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
+    )
     record_family_evidence_template_path = (
         repo_root / DEFAULT_RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE
     )
@@ -423,6 +545,52 @@ def build_lockfile(
             ),
         }
     )
+    record_family_evidence_schema_document = require_dict(
+        load_json(record_family_evidence_schema_path),
+        str(record_family_evidence_schema_path),
+    )
+    if record_family_evidence_schema_document.get("$schema") != JSON_SCHEMA_DRAFT:
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization evidence schema must use JSON Schema "
+            f"{JSON_SCHEMA_DRAFT}"
+        )
+    if (
+        record_family_evidence_schema_document.get("$id")
+        != RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_ID
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization evidence schema must use schema ID "
+            f"{RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_ID}"
+        )
+    record_family_evidence_schema_properties = require_dict(
+        record_family_evidence_schema_document.get("properties"),
+        f"{record_family_evidence_schema_path}.properties",
+    )
+    record_family_evidence_schema_version = require_dict(
+        record_family_evidence_schema_properties.get("schema_version"),
+        f"{record_family_evidence_schema_path}.properties.schema_version",
+    )
+    if (
+        record_family_evidence_schema_version.get("const")
+        != RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
+    ):
+        raise ReleaseCandidateLockfileError(
+            "record-family authorization evidence schema must pin document "
+            f"version {RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA}"
+        )
+    record_family_evidence_schema_record = file_record(
+        record_family_evidence_schema_path,
+        repo_root,
+    )
+    record_family_evidence_schema_record.update(
+        {
+            "schema_version": JSON_SCHEMA_DRAFT,
+            "schema_id": RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_ID,
+            "document_schema_version": (
+                RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
+            ),
+        }
+    )
     record_family_grant_map_schema_document = require_dict(
         load_json(record_family_grant_map_schema_path),
         str(record_family_grant_map_schema_path),
@@ -469,6 +637,7 @@ def build_lockfile(
             ),
         }
     )
+    release_tool_call_policy = release_tool_call_policy_records(repo_root)
     release_notes_json_path = release_artifacts_dir / RELEASE_NOTES_JSON_FILENAME
     require_schema(
         load_json(release_notes_json_path),
@@ -557,6 +726,9 @@ def build_lockfile(
             "record_family_authorization_inventory_schema": (
                 record_family_inventory_schema_record
             ),
+            "record_family_authorization_evidence_schema": (
+                record_family_evidence_schema_record
+            ),
             "record_family_authorization_evidence_template": file_record(
                 record_family_evidence_template_path,
                 repo_root,
@@ -565,6 +737,8 @@ def build_lockfile(
             "record_family_authorization_grant_map_schema": (
                 record_family_grant_map_schema_record
             ),
+            "release_tool_call_policy": release_tool_call_policy["policy"],
+            "release_tool_call_policy_schema": release_tool_call_policy["schema"],
             "release_notes": {
                 "json": file_record(
                     release_notes_json_path,

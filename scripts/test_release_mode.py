@@ -269,8 +269,17 @@ class ReleaseModeTests(unittest.TestCase):
             return_value=[],
         )
         self.record_family_patcher.start()
+        self.release_tool_policy_patcher = mock.patch.object(
+            checker.release_checksum_policy,
+            "validate_release_tool_call_policy",
+            return_value=None,
+        )
+        self.release_tool_policy_validator = (
+            self.release_tool_policy_patcher.start()
+        )
 
     def tearDown(self) -> None:
+        self.release_tool_policy_patcher.stop()
         self.record_family_patcher.stop()
         self.parameter_inventory_patcher.stop()
         self.parameter_risk_patcher.stop()
@@ -415,6 +424,108 @@ class ReleaseModeTests(unittest.TestCase):
         )
         self.assertIn("issue #690", blockers[0])
         self.assertIn("public-beta and production blocker", blockers[0])
+
+    def test_record_family_blocker_delegates_to_canonical_checker(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        expected = ["canonical blocker one", "canonical blocker two"]
+        with mock.patch.object(
+            checker.record_family_authorization_checker,
+            "completion_blockers",
+            return_value=expected,
+        ) as completion_blockers:
+            self.assertEqual(
+                REAL_RECORD_FAMILY_AUTHORIZATION_BLOCKERS(repo_root),
+                expected,
+            )
+        completion_blockers.assert_called_once_with(repo_root)
+
+    def test_both_release_modes_validate_canonical_release_tool_policy(self) -> None:
+        for phase in ("public-beta", "production-release"):
+            with self.subTest(phase=phase):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    with mock.patch.object(
+                        checker,
+                        "load_validated_evidence",
+                        side_effect=checker.ReleaseModeError(
+                            "stop after policy validation"
+                        ),
+                    ):
+                        with self.assertRaisesRegex(
+                            checker.ReleaseModeError,
+                            "stop after policy validation",
+                        ):
+                            checker.validate_release_mode(
+                                root / checker.DEFAULT_EVIDENCE,
+                                root,
+                                phase,
+                            )
+
+                self.release_tool_policy_validator.assert_called_once_with(root)
+                self.release_tool_policy_validator.reset_mock()
+
+    def test_release_modes_fail_closed_on_invalid_release_tool_policy(self) -> None:
+        for phase in ("public-beta", "production-release"):
+            with self.subTest(phase=phase):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    self.release_tool_policy_validator.side_effect = (
+                        checker.release_checksum_policy.ChecksumError(
+                            "reviewed path set mismatch"
+                        )
+                    )
+
+                    with self.assertRaisesRegex(
+                        checker.release_checksum_policy.ChecksumError,
+                        "reviewed path set mismatch",
+                    ):
+                        checker.validate_release_mode(
+                            root / checker.DEFAULT_EVIDENCE,
+                            root,
+                            phase,
+                        )
+
+                self.release_tool_policy_validator.assert_called_once_with(root)
+                self.release_tool_policy_validator.reset_mock()
+                self.release_tool_policy_validator.side_effect = None
+
+    def test_release_mode_cli_reports_release_tool_policy_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            self.release_tool_policy_validator.side_effect = (
+                checker.release_checksum_policy.ChecksumError(
+                    "release-tool policy fixture failure"
+                )
+            )
+            stderr = StringIO()
+
+            with redirect_stderr(stderr):
+                result = checker.main(
+                    [
+                        "--repo-root",
+                        str(root),
+                        "--phase",
+                        "public-beta",
+                    ]
+                )
+
+        self.assertEqual(result, 1)
+        self.assertIn("release-tool policy fixture failure", stderr.getvalue())
+
+    def test_release_mode_policy_paths_are_canonical_and_not_cli_overridable(
+        self,
+    ) -> None:
+        self.assertEqual(
+            checker.DEFAULT_RELEASE_TOOL_CALL_POLICY,
+            checker.release_checksum_policy.RELEASE_TOOL_CALL_POLICY_PATH,
+        )
+        self.assertEqual(
+            checker.DEFAULT_RELEASE_TOOL_CALL_POLICY_SCHEMA,
+            checker.release_checksum_policy.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH,
+        )
+        arguments = checker.parse_args([])
+        self.assertFalse(hasattr(arguments, "release_tool_call_policy"))
+        self.assertFalse(hasattr(arguments, "release_tool_call_policy_schema"))
 
     def test_both_release_modes_consume_the_record_family_hard_stop(self) -> None:
         repo_root = Path(__file__).resolve().parents[1]

@@ -4,7 +4,9 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
 import json
+import os
 import re
 import tempfile
 import unittest
@@ -22,11 +24,56 @@ SPEC.loader.exec_module(verifier)
 
 SOURCE_REPO_ROOT = SCRIPT_PATH.parent.parent
 RELEASE_TOOL_FIXTURE_PATH = "scripts/generate_bytecode_release_proof.py"
+COMMITTED_COVERED_PATHS = tuple(
+    json.loads(
+        (
+            SOURCE_REPO_ROOT
+            / "release-artifacts/latest/release-checksums.json"
+        ).read_text(encoding="utf-8")
+    )["source"]["covered_paths"]
+)
+REQUIRED_CANONICAL_FIXTURE_PATHS = tuple(
+    Path(path)
+    for path in (
+        verifier.GIT_ATTRIBUTES_PATH,
+        verifier.RELEASE_TOOL_CALL_POLICY_PATH,
+        *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
+    )
+)
+TEST_CANONICAL_COVERED_PATHS = tuple(
+    dict.fromkeys(
+        (
+            *(Path(path) for path in COMMITTED_COVERED_PATHS),
+            *REQUIRED_CANONICAL_FIXTURE_PATHS,
+        )
+    )
+)
+if (
+    len(TEST_CANONICAL_COVERED_PATHS) != 242
+    or len(set(TEST_CANONICAL_COVERED_PATHS)) != 242
+):
+    raise AssertionError(
+        "canonical verifier fixtures require exactly 242 unique coverage roots"
+    )
+TEST_RELEASE_TOOL_ROOTS = (
+    Path("scripts/generate_risk_register.py"),
+    Path("scripts/generate_release_notes.py"),
+    Path("scripts/generate_release_manifest.py"),
+    Path("scripts/generate_bytecode_release_proof.py"),
+    Path("scripts/generate_release_candidate_lockfile.py"),
+    Path("scripts/generate_release_checksums.py"),
+    Path("scripts/verify_release_artifacts.py"),
+)
 
 
 def write_text(path: Path, value: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(value, encoding="utf-8", newline="\n")
+
+
+def write_bytes(path: Path, value: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(value)
 
 
 def write_json(path: Path, value: object) -> None:
@@ -73,6 +120,36 @@ def record_family_inventory_schema_record(root: Path) -> dict[str, object]:
     }
 
 
+def record_family_evidence_schema_record(root: Path) -> dict[str, object]:
+    return {
+        **file_record(
+            root,
+            verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
+        ),
+        "schema_version": verifier.JSON_SCHEMA_DRAFT,
+        "schema_id": verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_ID,
+        "document_schema_version": (
+            verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
+        ),
+    }
+
+
+def release_tool_policy_record(root: Path) -> dict[str, object]:
+    return {
+        **file_record(root, verifier.RELEASE_TOOL_CALL_POLICY_PATH),
+        "schema_version": verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA,
+    }
+
+
+def release_tool_policy_schema_record(root: Path) -> dict[str, object]:
+    return {
+        **file_record(root, verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH),
+        "schema_version": verifier.JSON_SCHEMA_DRAFT,
+        "schema_id": verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_ID,
+        "document_schema_version": verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA,
+    }
+
+
 def seed_release_tool_trust_tree(root: Path) -> None:
     required_paths = set(
         verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
@@ -87,19 +164,89 @@ def seed_release_tool_trust_tree(root: Path) -> None:
         )
 
 
+def seed_release_tool_policy_tree(root: Path) -> None:
+    write_bytes(
+        root / verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH,
+        (
+            SOURCE_REPO_ROOT
+            / verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH
+        ).read_bytes(),
+    )
+    roles = {
+        **{
+            path.as_posix(): "runtime"
+            for path in verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+        },
+        **{
+            path.as_posix(): "focused-test"
+            for path in verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
+        },
+    }
+    snapshots = {}
+    for relative_path in sorted(roles):
+        data = (root / relative_path).read_bytes()
+        snapshots[relative_path] = verifier.CanonicalCoveredFile(
+            data=data,
+            sha256=verifier.sha256_bytes(data),
+            size_bytes=len(data),
+            line_ending="lf",
+        )
+    write_json(
+        root / verifier.RELEASE_TOOL_CALL_POLICY_PATH,
+        {
+            "schema_version": verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA,
+            "generator_version": "1",
+            "runtime_roots": [
+                path.as_posix()
+                for path in verifier.REVIEWED_RELEASE_TOOL_ROOTS
+            ],
+            "external_modules": sorted(
+                verifier.RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES
+            ),
+            "reviewed_paths": [
+                verifier._policy_row_from_snapshot(
+                    Path(relative_path),
+                    roles[relative_path],
+                    snapshots[relative_path],
+                )
+                for relative_path in sorted(roles)
+            ],
+        },
+    )
+
+
+def seed_canonical_coverage_tree(root: Path) -> None:
+    for relative_path in TEST_CANONICAL_COVERED_PATHS:
+        source = SOURCE_REPO_ROOT / relative_path
+        target = root / relative_path
+        if source.is_dir():
+            target.mkdir(parents=True, exist_ok=True)
+        elif source.is_file():
+            write_bytes(
+                target,
+                source.read_bytes(),
+            )
+        elif relative_path.as_posix() == verifier.RELEASE_TOOL_CALL_POLICY_PATH:
+            target.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            raise AssertionError(
+                f"canonical fixture source is missing {relative_path.as_posix()}"
+            )
+
+
 def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     latest = root / "release-artifacts" / "latest"
     checksum_lines = []
     files = []
     effective_paths = set(covered_paths)
     genesis_profile = (
-        verifier.governed_parameter_inventory_checker.GENESIS_PROFILE
-    ).as_posix()
+        verifier.GENESIS_DEPLOYMENT_PROFILE_PATH
+    )
     if (root / genesis_profile).is_file():
         effective_paths.add(genesis_profile)
     for record_family_path in (
         verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
-        verifier.record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA.as_posix(),
+        verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH,
         verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
         verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
         verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH,
@@ -116,6 +263,23 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
         path.as_posix()
         for path in required_trust_paths
     )
+    excluded = {
+        "release-artifacts/latest/SHA256SUMS",
+        "release-artifacts/latest/release-checksums.json",
+    }
+    for configured_path in (
+        TEST_CANONICAL_COVERED_PATHS
+    ):
+        configured = root / configured_path
+        if configured.is_file():
+            effective_paths.add(configured_path.as_posix())
+        elif configured.is_dir():
+            effective_paths.update(
+                path.relative_to(root).as_posix()
+                for path in configured.rglob("*")
+                if path.is_file()
+                and path.relative_to(root).as_posix() not in excluded
+            )
     for relative_path in sorted(effective_paths):
         path = root / relative_path
         digest = verifier.file_sha256(path).removeprefix("sha256:")
@@ -137,13 +301,11 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
             "algorithm": "sha256",
             "source": {
                 "coverage_policy": (
-                    verifier.release_checksum_generator.CANONICAL_COVERAGE_POLICY
+                    verifier.CANONICAL_COVERAGE_POLICY
                 ),
                 "covered_paths": [
                     path.as_posix()
-                    for path in (
-                        verifier.release_checksum_generator.DEFAULT_COVERED_PATHS
-                    )
+                    for path in TEST_CANONICAL_COVERED_PATHS
                 ],
                 "output_dir": "release-artifacts/latest",
             },
@@ -161,16 +323,84 @@ def write_checksum_bundle(root: Path, covered_paths: list[str]) -> None:
     )
 
 
+def write_mutated_checksum_indexes(
+    root: Path,
+    lines: list[str],
+    manifest: dict[str, object],
+) -> None:
+    latest = root / "release-artifacts" / "latest"
+    lines.sort()
+    manifest["files"].sort(key=lambda entry: entry["path"])
+    checksum_text = "\n".join(lines) + "\n"
+    write_text(latest / "SHA256SUMS", checksum_text)
+    manifest["text_checksum_file"]["sha256"] = verifier.sha256_bytes(
+        checksum_text.encode("utf-8")
+    )
+    write_json(latest / "release-checksums.json", manifest)
+
+
+def refresh_checksum_indexes(root: Path) -> None:
+    latest = root / "release-artifacts" / "latest"
+    manifest_path = latest / "release-checksums.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    lines: list[str] = []
+    for entry in manifest["files"]:
+        path = root / entry["path"]
+        entry["sha256"] = verifier.file_sha256(path)
+        entry["size_bytes"] = path.stat().st_size
+        lines.append(
+            f"{entry['sha256'].removeprefix('sha256:')}  {entry['path']}"
+        )
+    write_mutated_checksum_indexes(root, lines, manifest)
+
+
+def checksum_bundle_snapshot(root: Path) -> verifier.ChecksumBundleSnapshot:
+    latest = root / "release-artifacts" / "latest"
+    return verifier.snapshot_checksum_bundle(
+        root,
+        latest / verifier.CHECKSUM_FILE_NAME,
+        latest / verifier.CHECKSUM_MANIFEST_NAME,
+    )
+
+
+def canonical_covered_snapshots(
+    root: Path,
+    checksum_bundle: verifier.ChecksumBundleSnapshot,
+) -> dict[str, verifier.CanonicalCoveredFile]:
+    return verifier.verify_canonical_line_ending_bindings(
+        root,
+        checksum_bundle,
+    )
+
+
+def remove_path_from_checksum_indexes(root: Path, target: str) -> None:
+    latest = root / "release-artifacts" / "latest"
+    checksum_path = latest / "SHA256SUMS"
+    manifest_path = latest / "release-checksums.json"
+    lines = [
+        line
+        for line in checksum_path.read_text(encoding="utf-8").splitlines()
+        if not line.endswith(f"  {target}")
+    ]
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["files"] = [
+        entry
+        for entry in manifest["files"]
+        if entry["path"] != target
+    ]
+    write_mutated_checksum_indexes(root, lines, manifest)
+
+
 def seed_governed_parameter_inventory_tree(root: Path) -> None:
     source_root = SCRIPT_PATH.parent.parent
     inventory = json.loads(
         (
             source_root
-            / verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+            / verifier.GOVERNED_PARAMETER_INVENTORY_PATH
         ).read_text(encoding="utf-8")
     )
     write_json(
-        root / verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY,
+        root / verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
         inventory,
     )
 
@@ -183,10 +413,10 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
         for parameter in inventory["parameters"]
     )
     dependency_paths.add(
-        verifier.governed_parameter_inventory_checker.GENESIS_PROFILE
+        Path(verifier.GENESIS_DEPLOYMENT_PROFILE_PATH)
     )
     dependency_paths.add(
-        verifier.governed_parameter_inventory_checker.DEFAULT_SCHEMA
+        Path(verifier.GOVERNED_PARAMETER_INVENTORY_SCHEMA_PATH)
     )
     for relative_path in dependency_paths:
         write_text(
@@ -198,11 +428,11 @@ def seed_governed_parameter_inventory_tree(root: Path) -> None:
 def seed_record_family_authorization_tree(root: Path) -> None:
     source_root = SCRIPT_PATH.parent.parent
     for relative_path in (
-        verifier.record_family_authorization_checker.DEFAULT_INVENTORY,
-        verifier.record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA,
-        verifier.record_family_authorization_checker.DEFAULT_EVIDENCE_TEMPLATE,
-        verifier.record_family_authorization_checker.DEFAULT_EVIDENCE_SCHEMA,
-        verifier.record_family_authorization_checker.DEFAULT_GRANT_MAP_SCHEMA,
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH),
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH),
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH),
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH),
+        Path(verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH),
     ):
         write_text(
             root / relative_path,
@@ -212,7 +442,9 @@ def seed_record_family_authorization_tree(root: Path) -> None:
 
 def seed_release_bundle(root: Path) -> None:
     latest = root / "release-artifacts" / "latest"
+    seed_canonical_coverage_tree(root)
     seed_release_tool_trust_tree(root)
+    seed_release_tool_policy_tree(root)
     write_text(latest / "abi-checksums.json", '{"schema_version":"fixture.abi"}\n')
     seed_governed_parameter_inventory_tree(root)
     seed_record_family_authorization_tree(root)
@@ -249,11 +481,7 @@ def seed_release_bundle(root: Path) -> None:
                         ),
                     },
                     "inventory_schema": record_family_inventory_schema_record(root),
-                    "evidence_schema": file_record(
-                        root,
-                        verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
-                    )
-                    | {"schema_version": verifier.JSON_SCHEMA_DRAFT},
+                    "evidence_schema": record_family_evidence_schema_record(root),
                     "grant_map_schema": record_family_grant_map_schema_record(root),
                     "evidence_template": {
                         **file_record(
@@ -264,6 +492,10 @@ def seed_release_bundle(root: Path) -> None:
                             verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA
                         ),
                     },
+                },
+                "release_tool_call_policy": {
+                    "policy": release_tool_policy_record(root),
+                    "schema": release_tool_policy_schema_record(root),
                 },
             },
             "deployment_artifacts": {
@@ -330,6 +562,9 @@ def seed_release_bundle(root: Path) -> None:
                 "record_family_authorization_inventory_schema": (
                     record_family_inventory_schema_record(root)
                 ),
+                "record_family_authorization_evidence_schema": (
+                    record_family_evidence_schema_record(root)
+                ),
                 "record_family_authorization_evidence_template": {
                     **file_record(
                         root,
@@ -341,6 +576,10 @@ def seed_release_bundle(root: Path) -> None:
                 },
                 "record_family_authorization_grant_map_schema": (
                     record_family_grant_map_schema_record(root)
+                ),
+                "release_tool_call_policy": release_tool_policy_record(root),
+                "release_tool_call_policy_schema": (
+                    release_tool_policy_schema_record(root)
                 ),
             },
             "checksum_bundle": {
@@ -358,12 +597,14 @@ def seed_release_bundle(root: Path) -> None:
         [
             "deployments/examples/anvil.json",
             verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
-            verifier.governed_parameter_inventory_checker.GENESIS_PROFILE.as_posix(),
+            verifier.GENESIS_DEPLOYMENT_PROFILE_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
-            verifier.record_family_authorization_checker.DEFAULT_INVENTORY_SCHEMA.as_posix(),
+            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_SCHEMA_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_TEMPLATE_PATH,
             verifier.RECORD_FAMILY_AUTHORIZATION_GRANT_MAP_SCHEMA_PATH,
+            verifier.RELEASE_TOOL_CALL_POLICY_PATH,
+            verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH,
             "release-artifacts/latest/abi-checksums.json",
             "release-artifacts/latest/bytecode-release-proof.json",
             "release-artifacts/latest/release-candidate-lockfile.json",
@@ -377,77 +618,1486 @@ def seed_release_bundle_with_trust_input(root: Path) -> None:
 
 
 class ReleaseArtifactVerifierTests(unittest.TestCase):
-    def setUp(self) -> None:
-        self.record_package_validator = mock.patch.object(
-            verifier.record_family_authorization_checker,
-            "validate_package",
-            return_value=({}, {}),
-        ).start()
-        self.addCleanup(mock.patch.stopall)
+    @staticmethod
+    def verify_fixture_release_artifacts(
+        root: Path,
+        release_dir: Path = verifier.DEFAULT_RELEASE_DIR,
+    ) -> verifier.VerificationSummary:
+        def validate_fixture_snapshot(
+            snapshots: dict[str, verifier.CanonicalCoveredFile],
+        ) -> dict[str, object]:
+            return json.loads(
+                snapshots[
+                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH
+                ].data.decode("utf-8")
+            )
 
-    def test_verifier_and_generator_reviewed_trust_literals_match(
+        with mock.patch.object(
+            verifier,
+            "validate_bound_snapshot_semantics",
+            side_effect=validate_fixture_snapshot,
+        ):
+            return verifier.verify_release_artifacts(root, release_dir)
+
+    def test_verifier_reviewed_trust_literals_are_exact(
         self,
     ) -> None:
-        self.assertEqual(
-            verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE,
-            (
-                verifier.release_checksum_generator
-                .REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
-            ),
+        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE), 21)
+        self.assertEqual(len(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS), 9)
+        self.assertFalse(
+            set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE)
+            & set(verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS)
         )
-        self.assertEqual(
-            verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS,
-            verifier.release_checksum_generator.RELEASE_TOOL_FOCUSED_TESTS,
+        self.assertEqual(len(TEST_CANONICAL_COVERED_PATHS), 242)
+        self.assertEqual(len(set(TEST_CANONICAL_COVERED_PATHS)), 242)
+        self.assertTrue(
+            set(REQUIRED_CANONICAL_FIXTURE_PATHS).issubset(
+                TEST_CANONICAL_COVERED_PATHS
+            )
         )
 
-    def test_offline_verifier_invokes_canonical_inventory_validator(self) -> None:
+    def test_verifier_bootstrap_imports_are_standard_library_only(self) -> None:
+        tree = verifier.ast.parse(SCRIPT_PATH.read_text(encoding="utf-8"))
+        top_level_modules: set[str] = set()
+        for node in tree.body:
+            if isinstance(node, verifier.ast.Import):
+                top_level_modules.update(
+                    alias.name.split(".", 1)[0] for alias in node.names
+                )
+            elif isinstance(node, verifier.ast.ImportFrom):
+                top_level_modules.add((node.module or "").split(".", 1)[0])
+        self.assertNotIn("generate_release_checksums", top_level_modules)
+        self.assertNotIn(
+            "check_governed_parameter_inventory",
+            top_level_modules,
+        )
+        self.assertNotIn(
+            "check_record_family_authorization",
+            top_level_modules,
+        )
+        self.assertTrue(
+            {
+                "argparse",
+                "ast",
+                "hashlib",
+                "json",
+                "os",
+                "re",
+                "stat",
+                "sys",
+                "tempfile",
+                "pathlib",
+                "typing",
+                "__future__",
+            }.issuperset(top_level_modules)
+        )
+
+    def test_snapshot_consumers_expose_no_live_path_fallback(self) -> None:
+        consumers = (
+            verifier.verify_file_record,
+            verifier.verify_checksum_file,
+            verifier.verify_release_tool_trust_bindings,
+            verifier.verify_record_family_inventory_schema_checksum_bindings,
+            verifier.verify_checksum_manifest,
+            verifier.verify_nested_file_records,
+            verifier.verify_bytecode_proof_release_manifest_binding,
+        )
+        for consumer in consumers:
+            with self.subTest(consumer=consumer.__name__):
+                parameter = inspect.signature(consumer).parameters[
+                    "covered_file_snapshots"
+                ]
+                self.assertIs(parameter.default, inspect.Parameter.empty)
+                self.assertNotIn("None", str(parameter.annotation))
+                source = inspect.getsource(consumer)
+                self.assertNotIn("file_sha256(", source)
+                self.assertNotIn("resolve_release_file(", source)
+                self.assertNotIn("covered_file_snapshots is not None", source)
+
+    def test_verifier_eol_policy_is_independent_of_generator_helper(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            with mock.patch.object(
-                verifier.governed_parameter_inventory_checker,
-                "validate_inventory",
-                wraps=(
-                    verifier.governed_parameter_inventory_checker.validate_inventory
+            write_bytes(
+                root / "docs/release-readiness.md",
+                b"bad\r\nline\r\n",
+            )
+            refresh_checksum_indexes(root)
+            with (
+                mock.patch.dict(
+                    verifier.sys.modules,
+                    {
+                        "generate_release_checksums": mock.Mock(
+                            validate_covered_file_line_endings=lambda *_a, **_k: {},
+                            CANONICAL_COVERAGE_POLICY="weakened",
+                        )
+                    },
                 ),
-            ) as validate_inventory:
+                self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "violates declared eol=lf: docs/release-readiness.md",
+                ),
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def assert_post_snapshot_mutation_uses_bound_bytes(
+        self,
+        target: str,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            original_snapshot = (
+                verifier.verify_canonical_line_ending_bindings
+            )
+
+            def snapshot_then_mutate(*args, **kwargs):
+                snapshots = original_snapshot(*args, **kwargs)
+                write_bytes(root / target, b"{}\n")
+                return snapshots
+
+            with mock.patch.object(
+                verifier,
+                "verify_canonical_line_ending_bindings",
+                side_effect=snapshot_then_mutate,
+            ):
+                summary = self.verify_fixture_release_artifacts(root)
+            self.assertGreater(summary.checksum_entries, 0)
+
+    def test_release_documents_use_bound_snapshot_bytes(self) -> None:
+        for target in (
+            "release-artifacts/latest/release-manifest.json",
+            "release-artifacts/latest/bytecode-release-proof.json",
+            "release-artifacts/latest/release-candidate-lockfile.json",
+        ):
+            with self.subTest(target=target):
+                self.assert_post_snapshot_mutation_uses_bound_bytes(target)
+
+    def test_semantic_inputs_use_bound_snapshot_bytes(self) -> None:
+        for target in (
+            verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
+            verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH,
+        ):
+            with self.subTest(target=target):
+                self.assert_post_snapshot_mutation_uses_bound_bytes(target)
+
+    def test_release_tool_closure_uses_bound_snapshot_bytes(self) -> None:
+        self.assert_post_snapshot_mutation_uses_bound_bytes(
+            "scripts/generate_release_checksums.py"
+        )
+
+    def test_release_tool_policy_and_semantic_sources_use_bound_snapshot_bytes(
+        self,
+    ) -> None:
+        for target in (
+            verifier.RELEASE_TOOL_CALL_POLICY_PATH,
+            verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH,
+            *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
+        ):
+            with self.subTest(target=target):
+                self.assert_post_snapshot_mutation_uses_bound_bytes(target)
+
+    def test_closed_world_policy_rejects_unreviewed_surface_shapes(self) -> None:
+        target = Path("scripts/generate_bytecode_release_proof.py")
+        mutations = {
+            "unlisted-call": "\nPath.cwd()\n",
+            "unlisted-member": "\nUNLISTED = Path.cwd\n",
+            "alias": "\nimport pathlib as hidden_pathlib\n",
+            "container": "\nESCAPED = [Path]\n",
+            "return": "\ndef escape_import():\n    return Path\n",
+            "conditional": "\nESCAPED = Path if True else None\n",
+            "getattr": "\ngetattr(Path, \"cwd\")()\n",
+            "unknown-descendant": "\nPath.cwd().unexpected()\n",
+        }
+        for label, suffix in mutations.items():
+            with self.subTest(label=label):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    target_path = root / target
+                    write_text(
+                        target_path,
+                        target_path.read_text(encoding="utf-8") + suffix,
+                    )
+                    refresh_checksum_indexes(root)
+                    bundle = checksum_bundle_snapshot(root)
+                    snapshots = canonical_covered_snapshots(root, bundle)
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "release-tool call policy .*"
+                        "generate_bytecode_release_proof",
+                    ):
+                        verifier.verify_release_tool_call_policy(
+                            bundle,
+                            snapshots,
+                        )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            runtime_root = root / "scripts/generate_release_notes.py"
+            write_bytes(
+                runtime_root,
+                runtime_root.read_bytes()
+                + b"\nimport test_changelog_check\n",
+            )
+            seed_release_tool_policy_tree(root)
+            refresh_checksum_indexes(root)
+            bundle = checksum_bundle_snapshot(root)
+            snapshots = canonical_covered_snapshots(root, bundle)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "snapshot runtime closure.*unexpected=.*test_changelog_check",
+            ):
+                verifier.verify_release_tool_call_policy(
+                    bundle,
+                    snapshots,
+                )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            runtime_root = root / "scripts/generate_release_notes.py"
+            write_bytes(
+                runtime_root,
+                runtime_root.read_bytes()
+                + b"\nimport importlib.util\n"
+                + b"_spec = importlib.util.spec_from_file_location("
+                + b"'hidden', 'scripts/test_changelog_check.py')\n"
+                + b"_module = importlib.util.module_from_spec(_spec)\n"
+                + b"_spec.loader.exec_module(_module)\n",
+            )
+            refresh_checksum_indexes(root)
+            bundle = checksum_bundle_snapshot(root)
+            snapshots = canonical_covered_snapshots(root, bundle)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "runtime call policy forbids alternate loader",
+            ):
+                verifier.verify_release_tool_call_policy(
+                    bundle,
+                    snapshots,
+                )
+
+        for field in ("imports", "members", "calls"):
+            with self.subTest(
+                duplicate_semantic_key=field,
+            ), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                seed_release_bundle(root)
+                policy_path = root / verifier.RELEASE_TOOL_CALL_POLICY_PATH
+                policy = json.loads(policy_path.read_text(encoding="utf-8"))
+                row = next(
+                    candidate
+                    for candidate in policy["reviewed_paths"]
+                    if candidate[field]
+                )
+                duplicate_record = json.loads(json.dumps(row[field][0]))
+                duplicate_record["count"] += 1
+                row[field].append(duplicate_record)
+                write_json(policy_path, policy)
+                refresh_checksum_indexes(root)
+                bundle = checksum_bundle_snapshot(root)
+                snapshots = canonical_covered_snapshots(root, bundle)
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "differs from verifier reconstruction",
+                ):
+                    verifier.verify_release_tool_call_policy(
+                        bundle,
+                        snapshots,
+                    )
+
+        for label, mutate_roots in (
+            (
+                "missing-root",
+                lambda roots: roots.pop(),
+            ),
+            (
+                "substituted-root",
+                lambda roots: roots.__setitem__(
+                    -1,
+                    "scripts/check_changelog.py",
+                ),
+            ),
+        ):
+            with self.subTest(label=label), tempfile.TemporaryDirectory() as temp_dir:
+                root = Path(temp_dir)
+                seed_release_bundle(root)
+                policy_path = root / verifier.RELEASE_TOOL_CALL_POLICY_PATH
+                policy = json.loads(policy_path.read_text(encoding="utf-8"))
+                mutate_roots(policy["runtime_roots"])
+                write_json(policy_path, policy)
+                refresh_checksum_indexes(root)
+                bundle = checksum_bundle_snapshot(root)
+                snapshots = canonical_covered_snapshots(root, bundle)
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "runtime roots differ from the independent exact",
+                ):
+                    verifier.verify_release_tool_call_policy(
+                        bundle,
+                        snapshots,
+                    )
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            bundle = checksum_bundle_snapshot(root)
+            snapshots = canonical_covered_snapshots(root, bundle)
+            with mock.patch.object(
+                verifier,
+                "RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES",
+                frozenset(
+                    {
+                        *verifier.RELEASE_TOOL_CALL_POLICY_EXTERNAL_MODULES,
+                        "unused_external_permission",
+                    }
+                ),
+            ), self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "external-module literal differs from the independent pinned digest",
+            ):
+                verifier.verify_release_tool_call_policy(
+                    bundle,
+                    snapshots,
+                )
+
+    def test_closed_world_policy_expression_receiver_boundary(self) -> None:
+        allowed = b"def resolve(root, child):\n    return (root / child).resolve()\n"
+        allowed_snapshot = verifier.CanonicalCoveredFile(
+            data=allowed,
+            sha256=verifier.sha256_bytes(allowed),
+            size_bytes=len(allowed),
+            line_ending="lf",
+        )
+        row = verifier._policy_row_from_snapshot(
+            Path("scripts/allowed_control.py"),
+            "runtime",
+            allowed_snapshot,
+        )
+        self.assertTrue(
+            any(
+                call["target"].startswith("expression:BinOp:")
+                and call["target"].endswith(".resolve")
+                for call in row["calls"]
+            )
+        )
+
+        imported = (
+            b"import json\n"
+            b"def encode(value):\n"
+            b"    return (json.dumps(value) + '\\n').encode('utf-8')\n"
+        )
+        imported_snapshot = verifier.CanonicalCoveredFile(
+            data=imported,
+            sha256=verifier.sha256_bytes(imported),
+            size_bytes=len(imported),
+            line_ending="lf",
+        )
+        with self.assertRaisesRegex(
+            verifier.ReleaseArtifactVerificationError,
+            "forbids computed imported receiver",
+        ):
+            verifier._policy_row_from_snapshot(
+                Path("scripts/imported_receiver.py"),
+                "runtime",
+                imported_snapshot,
+            )
+
+    def test_closed_world_policy_rejects_relative_imports_and_value_escapes(
+        self,
+    ) -> None:
+        mutations = {
+            "relative-current": b"from . import hidden\n",
+            "relative-parent": b"from ..hidden import value\n",
+            "module-assignment": b"import json\nescaped = json\n",
+            "callable-assignment": b"import json\nescaped = json.dumps\n",
+            "function-return": (
+                b"import json\n"
+                b"def expose():\n    return json\n"
+                b"expose().dumps({})\n"
+            ),
+            "argument-callback": (
+                b"import json\n"
+                b"def consume(callback):\n    return callback({})\n"
+                b"consume(json.dumps)\n"
+            ),
+            "assignment-shadow": (
+                b"import json\njson = object()\njson.dumps({})\n"
+            ),
+            "deletion-shadow": b"import json\ndel json\n",
+            "parameter-shadow": (
+                b"import json\ndef encode(json):\n    return json.dumps({})\n"
+            ),
+            "for-shadow": b"import json\nfor json in ():\n    pass\n",
+            "with-shadow": (
+                b"import json\nwith open('unused') as json:\n    pass\n"
+            ),
+            "except-shadow": (
+                b"import json\ntry:\n    pass\n"
+                b"except Exception as json:\n    pass\n"
+            ),
+            "function-shadow": b"import json\ndef json():\n    pass\n",
+            "async-function-shadow": (
+                b"import json\nasync def json():\n    pass\n"
+            ),
+            "class-shadow": b"import json\nclass json:\n    pass\n",
+            "global-shadow": b"import json\ndef use():\n    global json\n",
+            "nonlocal-shadow": (
+                b"def outer():\n"
+                b"    import json\n"
+                b"    def inner():\n"
+                b"        nonlocal json\n"
+            ),
+            "match-as-shadow": (
+                b"import json\n"
+                b"match value:\n"
+                b"    case json:\n"
+                b"        pass\n"
+                b"json.dumps({})\n"
+            ),
+            "match-star-shadow": (
+                b"import json\n"
+                b"match value:\n"
+                b"    case [*json]:\n"
+                b"        pass\n"
+                b"json.dumps({})\n"
+            ),
+            "match-mapping-rest-shadow": (
+                b"import json\n"
+                b"match value:\n"
+                b"    case {**json}:\n"
+                b"        pass\n"
+                b"json.dumps({})\n"
+            ),
+        }
+        for label, source in mutations.items():
+            with self.subTest(label=label):
+                snapshot = verifier.CanonicalCoveredFile(
+                    data=source,
+                    sha256=verifier.sha256_bytes(source),
+                    size_bytes=len(source),
+                    line_ending="lf",
+                )
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    (
+                        "forbids (relative import|unreviewed imported value|"
+                        "imported binding shadow)"
+                    ),
+                ):
+                    verifier._policy_row_from_snapshot(
+                        Path(f"scripts/{label}.py"),
+                        "runtime",
+                        snapshot,
+                    )
+
+        duplicate_fallback = (
+            b"try:\n"
+            b"    from jsonschema import Draft202012Validator\n"
+            b"except ModuleNotFoundError:\n"
+            b"    Draft202012Validator = None\n"
+            b"try:\n"
+            b"    pass\n"
+            b"except ModuleNotFoundError:\n"
+            b"    Draft202012Validator = None\n"
+        )
+        duplicate_snapshot = verifier.CanonicalCoveredFile(
+            data=duplicate_fallback,
+            sha256=verifier.sha256_bytes(duplicate_fallback),
+            size_bytes=len(duplicate_fallback),
+            line_ending="lf",
+        )
+        with self.assertRaisesRegex(
+            verifier.ReleaseArtifactVerificationError,
+            "forbids imported binding shadow",
+        ):
+            verifier._policy_row_from_snapshot(
+                Path("scripts/check_governed_parameter_inventory.py"),
+                "runtime",
+                duplicate_snapshot,
+            )
+
+    def test_closed_world_policy_rejects_hollow_schema(self) -> None:
+        hollow = {
+            "$schema": verifier.JSON_SCHEMA_DRAFT,
+            "$id": verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_ID,
+            "type": "object",
+            "properties": {
+                "schema_version": {
+                    "const": verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA
+                },
+                "reviewed_paths": {
+                    "type": "array",
+                    "minItems": 30,
+                    "maxItems": 30,
+                },
+            },
+        }
+        with self.assertRaisesRegex(
+            verifier.ReleaseArtifactVerificationError,
+            "exact independent closed-world schema",
+        ):
+            verifier._validate_policy_schema_document(hollow)
+
+    def test_release_tool_policy_manifest_lock_bindings_are_exact(self) -> None:
+        mutations = (
+            "manifest-omission",
+            "lock-omission",
+            "policy-path-substitution",
+            "policy-hash",
+            "policy-size",
+            "schema-id",
+            "manifest-lock-drift",
+        )
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts/latest"
+                    manifest = verifier.load_json(
+                        latest / verifier.RELEASE_MANIFEST_NAME
+                    )
+                    lockfile = verifier.load_json(
+                        latest / verifier.RELEASE_CANDIDATE_LOCKFILE_NAME
+                    )
+                    snapshots = canonical_covered_snapshots(
+                        root,
+                        checksum_bundle_snapshot(root),
+                    )
+                    if mutation == "manifest-omission":
+                        del manifest["release_artifacts"][
+                            "release_tool_call_policy"
+                        ]
+                    elif mutation == "lock-omission":
+                        del lockfile["locked_inputs"][
+                            "release_tool_call_policy"
+                        ]
+                    elif mutation == "policy-path-substitution":
+                        for record in (
+                            manifest["release_artifacts"][
+                                "release_tool_call_policy"
+                            ]["policy"],
+                            lockfile["locked_inputs"][
+                                "release_tool_call_policy"
+                            ],
+                        ):
+                            record["path"] = "scripts/substitute.py"
+                    elif mutation == "policy-hash":
+                        for record in (
+                            manifest["release_artifacts"][
+                                "release_tool_call_policy"
+                            ]["policy"],
+                            lockfile["locked_inputs"][
+                                "release_tool_call_policy"
+                            ],
+                        ):
+                            record["sha256"] = "sha256:" + "0" * 64
+                    elif mutation == "policy-size":
+                        for record in (
+                            manifest["release_artifacts"][
+                                "release_tool_call_policy"
+                            ]["policy"],
+                            lockfile["locked_inputs"][
+                                "release_tool_call_policy"
+                            ],
+                        ):
+                            record["size_bytes"] += 1
+                    elif mutation == "schema-id":
+                        for record in (
+                            manifest["release_artifacts"][
+                                "release_tool_call_policy"
+                            ]["schema"],
+                            lockfile["locked_inputs"][
+                                "release_tool_call_policy_schema"
+                            ],
+                        ):
+                            record["schema_id"] = "https://example.invalid"
+                    elif mutation == "manifest-lock-drift":
+                        lockfile["locked_inputs"][
+                            "release_tool_call_policy"
+                        ]["sha256"] = "sha256:" + "1" * 64
+                    else:
+                        raise AssertionError(mutation)
+
+                    with self.assertRaises(
+                        verifier.ReleaseArtifactVerificationError
+                    ):
+                        verifier.verify_release_tool_call_policy_bindings(
+                            manifest,
+                            lockfile,
+                            snapshots,
+                        )
+
+    def test_policy_and_semantic_sources_require_exact_both_index_bindings(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            original = checksum_bundle_snapshot(root)
+            snapshots = canonical_covered_snapshots(root, original)
+            targets = (
+                verifier.RELEASE_TOOL_CALL_POLICY_PATH,
+                verifier.RELEASE_TOOL_CALL_POLICY_SCHEMA_PATH,
+                *verifier.RECORD_FAMILY_AUTHORIZATION_SEMANTIC_SOURCE_PATHS,
+            )
+            for target in targets:
+                for mutation in (
+                    "checksum-omission",
+                    "manifest-omission",
+                    "same-cardinality-substitution",
+                    "checksum-hash",
+                    "manifest-hash",
+                    "manifest-size",
+                ):
+                    with self.subTest(target=target, mutation=mutation):
+                        checksum_entries = list(original.checksum_entries)
+                        manifest = json.loads(
+                            original.checksum_manifest_data.decode("utf-8")
+                        )
+                        if mutation == "checksum-omission":
+                            checksum_entries = [
+                                entry
+                                for entry in checksum_entries
+                                if entry[1] != target
+                            ]
+                        elif mutation == "manifest-omission":
+                            manifest["files"] = [
+                                entry
+                                for entry in manifest["files"]
+                                if entry["path"] != target
+                            ]
+                        elif mutation == "same-cardinality-substitution":
+                            checksum_entries = [
+                                (
+                                    digest,
+                                    "scripts/substitute.py"
+                                    if path == target
+                                    else path,
+                                )
+                                for digest, path in checksum_entries
+                            ]
+                            for entry in manifest["files"]:
+                                if entry["path"] == target:
+                                    entry["path"] = "scripts/substitute.py"
+                        elif mutation == "checksum-hash":
+                            checksum_entries = [
+                                (
+                                    "0" * 64 if path == target else digest,
+                                    path,
+                                )
+                                for digest, path in checksum_entries
+                            ]
+                        else:
+                            for entry in manifest["files"]:
+                                if entry["path"] != target:
+                                    continue
+                                if mutation == "manifest-hash":
+                                    entry["sha256"] = "sha256:" + "0" * 64
+                                else:
+                                    entry["size_bytes"] += 1
+                        mutated = original._replace(
+                            checksum_entries=tuple(checksum_entries),
+                            checksum_manifest=manifest,
+                        )
+                        with self.assertRaises(
+                            verifier.ReleaseArtifactVerificationError
+                        ):
+                            verifier._require_index_binding(
+                                mutated,
+                                snapshots,
+                                target,
+                                label=target,
+                            )
+
+    def test_verifier_independently_pins_reviewed_subprocess_sources(
+        self,
+    ) -> None:
+        expected = {
+            Path("scripts/check_changelog.py"): (
+                "3a1e93aa1b524b54ff492b432dc143afd5ecb1c6b8c4ec42c377d62d70733065",
+                8_999,
+            ),
+            Path("scripts/check_record_family_authorization.py"): (
+                "bff2c28950b224413a9fc5fd7aa3a9008ff4b5023930ad0d593a1666fbc37a66",
+                85_698,
+            ),
+            Path("scripts/check_slither_baseline.py"): (
+                "96c70d8c7e22b29923426112f2c2b4b191ff410722186461b164e6f704845e47",
+                46_534,
+            ),
+        }
+        self.assertEqual(
+            verifier.REVIEWED_RELEASE_TOOL_SUBPROCESS_SOURCES,
+            expected,
+        )
+        self.assertTrue(
+            set(expected).issubset(
+                verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+            )
+        )
+        snapshots: dict[str, verifier.CanonicalCoveredFile] = {}
+        for relative_path, (expected_sha256, expected_size) in expected.items():
+            data = (SOURCE_REPO_ROOT / relative_path).read_bytes()
+            self.assertEqual(len(data), expected_size)
+            self.assertEqual(
+                verifier.hashlib.sha256(data).hexdigest(),
+                expected_sha256,
+            )
+            snapshots[relative_path.as_posix()] = verifier.CanonicalCoveredFile(
+                data=data,
+                sha256=f"sha256:{expected_sha256}",
+                size_bytes=expected_size,
+                line_ending="lf",
+            )
+
+        verifier.verify_reviewed_subprocess_source_bindings(snapshots)
+
+        for target in expected:
+            original = snapshots[target.as_posix()]
+            mutations = (
+                bytes([original.data[0] ^ 1]) + original.data[1:],
+                original.data + b"\n",
+            )
+            for data in mutations:
+                with self.subTest(target=target, size=len(data)):
+                    mutated = dict(snapshots)
+                    mutated[target.as_posix()] = original._replace(data=data)
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "reviewed subprocess source differs from the "
+                        "verifier's exact hash/size binding",
+                    ):
+                        verifier.verify_reviewed_subprocess_source_bindings(
+                            mutated
+                        )
+
+    def test_full_verifier_keeps_subprocess_binding_when_generator_is_weakened(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target = Path("scripts/check_changelog.py")
+            target_path = root / target
+            original = target_path.read_bytes()
+            write_bytes(
+                target_path,
+                bytes([original[0] ^ 1]) + original[1:],
+            )
+            refresh_checksum_indexes(root)
+
+            with mock.patch.dict(
+                verifier.sys.modules,
+                {
+                    "generate_release_checksums": mock.Mock(
+                        validate_canonical_release_checksum_policy=(
+                            lambda *_a, **_k:
+                            verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE
+                        )
+                    )
+                },
+            ):
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "reviewed subprocess source differs from the verifier's "
+                    "exact hash/size binding",
+                ):
+                    self.verify_fixture_release_artifacts(root)
+
+    def test_checksum_indexes_use_one_immutable_snapshot(self) -> None:
+        target = "docs/release-readiness.md"
+        substitute = "docs/status.md"
+        for mutation in (
+            "delete",
+            "substitute",
+            "hash",
+            "size",
+            "eol",
+            "replace_checksum",
+            "replace_manifest",
+            "relink_checksum",
+            "relink_manifest",
+        ):
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    checksum_path = latest / verifier.CHECKSUM_FILE_NAME
+                    manifest_path = latest / verifier.CHECKSUM_MANIFEST_NAME
+                    original_snapshot = verifier.snapshot_checksum_bundle
+
+                    def snapshot_then_mutate(*args, **kwargs):
+                        bundle = original_snapshot(*args, **kwargs)
+                        lines = checksum_path.read_text(
+                            encoding="utf-8"
+                        ).splitlines()
+                        manifest = json.loads(
+                            manifest_path.read_text(encoding="utf-8")
+                        )
+                        if mutation == "delete":
+                            lines = [
+                                line
+                                for line in lines
+                                if not line.endswith(f"  {target}")
+                            ]
+                            manifest["files"] = [
+                                entry
+                                for entry in manifest["files"]
+                                if entry["path"] != target
+                            ]
+                            write_mutated_checksum_indexes(
+                                root,
+                                lines,
+                                manifest,
+                            )
+                        elif mutation == "substitute":
+                            lines = [
+                                (
+                                    line.removesuffix(target) + substitute
+                                    if line.endswith(f"  {target}")
+                                    else line
+                                )
+                                for line in lines
+                            ]
+                            for entry in manifest["files"]:
+                                if entry["path"] == target:
+                                    entry["path"] = substitute
+                            write_mutated_checksum_indexes(
+                                root,
+                                lines,
+                                manifest,
+                            )
+                        elif mutation == "hash":
+                            lines = [
+                                (
+                                    f"{'0' * 64}  {target}"
+                                    if line.endswith(f"  {target}")
+                                    else line
+                                )
+                                for line in lines
+                            ]
+                            for entry in manifest["files"]:
+                                if entry["path"] == target:
+                                    entry["sha256"] = "sha256:" + "0" * 64
+                            write_mutated_checksum_indexes(
+                                root,
+                                lines,
+                                manifest,
+                            )
+                        elif mutation == "size":
+                            for entry in manifest["files"]:
+                                if entry["path"] == target:
+                                    entry["size_bytes"] += 1
+                            write_json(manifest_path, manifest)
+                        elif mutation == "eol":
+                            write_bytes(
+                                checksum_path,
+                                checksum_path.read_bytes().replace(
+                                    b"\n",
+                                    b"\r\n",
+                                ),
+                            )
+                            write_bytes(
+                                manifest_path,
+                                manifest_path.read_bytes().replace(
+                                    b"\n",
+                                    b"\r\n",
+                                ),
+                            )
+                        elif mutation in {
+                            "replace_checksum",
+                            "replace_manifest",
+                        }:
+                            replaced_path = (
+                                checksum_path
+                                if mutation == "replace_checksum"
+                                else manifest_path
+                            )
+                            replaced_path.unlink()
+                            write_bytes(replaced_path, b"replacement\n")
+                        elif mutation in {
+                            "relink_checksum",
+                            "relink_manifest",
+                        }:
+                            relinked_path = (
+                                checksum_path
+                                if mutation == "relink_checksum"
+                                else manifest_path
+                            )
+                            replacement = (
+                                root / "tmp" / f"{mutation}.replacement"
+                            )
+                            write_bytes(replacement, b"replacement\n")
+                            relinked_path.unlink()
+                            os.link(replacement, relinked_path)
+                        else:
+                            raise AssertionError(
+                                f"unsupported index mutation {mutation}"
+                            )
+                        return bundle
+
+                    with mock.patch.object(
+                        verifier,
+                        "snapshot_checksum_bundle",
+                        side_effect=snapshot_then_mutate,
+                    ):
+                        summary = self.verify_fixture_release_artifacts(root)
+                    self.assertEqual(
+                        summary.checksum_entries,
+                        summary.checksum_manifest_records,
+                    )
+                    self.assertGreater(summary.checksum_entries, 0)
+
+    def test_each_checksum_index_is_read_exactly_once(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            tracked = {
+                (latest / verifier.CHECKSUM_FILE_NAME).resolve(): 0,
+                (latest / verifier.CHECKSUM_MANIFEST_NAME).resolve(): 0,
+            }
+            path_class = type(next(iter(tracked)))
+            original_open = path_class.open
+
+            def count_index_reads(path: Path, *args, **kwargs):
+                lexical = path.resolve()
+                if lexical in tracked:
+                    tracked[lexical] += 1
+                    if tracked[lexical] > 1:
+                        raise AssertionError(
+                            f"checksum index reread: {lexical}"
+                        )
+                return original_open(path, *args, **kwargs)
+
+            with mock.patch.object(
+                path_class,
+                "open",
+                new=count_index_reads,
+            ):
+                summary = self.verify_fixture_release_artifacts(root)
+            self.assertGreater(summary.checksum_entries, 0)
+            self.assertEqual(set(tracked.values()), {1})
+
+    def test_checksum_indexes_must_each_have_one_hard_link(self) -> None:
+        for name in (
+            verifier.CHECKSUM_FILE_NAME,
+            verifier.CHECKSUM_MANIFEST_NAME,
+        ):
+            with self.subTest(name=name):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    target = root / "release-artifacts" / "latest" / name
+                    alias = root / "tmp" / name
+                    alias.parent.mkdir(parents=True, exist_ok=True)
+                    try:
+                        os.link(target, alias)
+                    except OSError as exc:
+                        self.skipTest(
+                            f"hardlinks unavailable in this environment: {exc}"
+                        )
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "must have exactly one hard link",
+                    ):
+                        self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_lf_declared_file_with_crlf(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_bytes(
+                root / "docs/release-readiness.md",
+                b"line one\r\nline two\r\n",
+            )
+            refresh_checksum_indexes(root)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "violates declared eol=lf: docs/release-readiness.md",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_crlf_declared_file_with_bare_or_mixed_lf(
+        self,
+    ) -> None:
+        for label, data in (
+            ("bare-lf", b"line one\nline two\n"),
+            ("mixed", b"line one\r\nline two\n"),
+            ("lone-cr", b"line one\rline two\r\n"),
+        ):
+            with self.subTest(label=label):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    write_bytes(root / "scripts/check.ps1", data)
+                    refresh_checksum_indexes(root)
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "violates declared eol=crlf: scripts/check.ps1",
+                    ):
+                        self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_attribute_unspecified_text(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target = "deployments/examples/unclassified.dat"
+            write_bytes(root / target, b"text without a NUL\n")
+            manifest_path = (
+                root / "release-artifacts/latest/release-checksums.json"
+            )
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["files"].append(file_record(root, target))
+            write_json(manifest_path, manifest)
+            refresh_checksum_indexes(root)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "must declare explicit eol=lf or eol=crlf",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_accepts_binary_crlf_bytes_without_normalization(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target = "deployments/examples/binary-payload.dat"
+            payload = b"\x00prefix\r\nbinary\rbytes\n"
+            write_bytes(root / target, payload)
+            manifest_path = (
+                root / "release-artifacts/latest/release-checksums.json"
+            )
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["files"].append(file_record(root, target))
+            write_json(manifest_path, manifest)
+            refresh_checksum_indexes(root)
+            snapshots = verifier.verify_canonical_line_ending_bindings(
+                root,
+                checksum_bundle_snapshot(root),
+            )
+            self.assertEqual(snapshots[target].line_ending, "binary")
+            self.assertEqual(snapshots[target].data, payload)
+            self.verify_fixture_release_artifacts(root)
+
+    def test_canonical_snapshot_is_stable_across_equivalent_checkouts(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            roots = (Path(temp_dir) / "one", Path(temp_dir) / "two")
+            snapshots_by_root = []
+            for root in roots:
+                seed_release_bundle(root)
+                snapshots_by_root.append(
+                    verifier.verify_canonical_line_ending_bindings(
+                        root,
+                        checksum_bundle_snapshot(root),
+                    )
+                )
+            for target in (
+                verifier.GIT_ATTRIBUTES_PATH,
+                "docs/release-readiness.md",
+                "scripts/check.ps1",
+            ):
+                self.assertEqual(
+                    snapshots_by_root[0][target],
+                    snapshots_by_root[1][target],
+                )
+
+    def test_verifier_rejects_nested_gitattributes_override(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target = "release-artifacts/evidence/.gitattributes"
+            write_bytes(root / target, b"* text eol=crlf\n")
+            manifest_path = (
+                root / "release-artifacts/latest/release-checksums.json"
+            )
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["files"].append(file_record(root, target))
+            write_json(manifest_path, manifest)
+            refresh_checksum_indexes(root)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "forbids nested .gitattributes",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_coordinated_nontrust_file_omission(
+        self,
+    ) -> None:
+        target = "docs/release-readiness.md"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts/latest"
+            checksum_path = latest / "SHA256SUMS"
+            manifest_path = latest / "release-checksums.json"
+            lines = [
+                line
+                for line in checksum_path.read_text(
+                    encoding="utf-8"
+                ).splitlines()
+                if not line.endswith(f"  {target}")
+            ]
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["files"] = [
+                entry
+                for entry in manifest["files"]
+                if entry["path"] != target
+            ]
+            (root / target).unlink()
+            write_mutated_checksum_indexes(root, lines, manifest)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "canonical coverage root.*docs/release-readiness.md|"
+                "exact on-disk component spelling",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_checksum_path_aliases(self) -> None:
+        target = "docs/release-readiness.md"
+        aliases = (
+            "docs//release-readiness.md",
+            "docs/./release-readiness.md",
+            r"docs\release-readiness.md",
+            "DOCS/release-readiness.md",
+        )
+        for alias in aliases:
+            with self.subTest(alias=alias):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts/latest"
+                    checksum_path = latest / "SHA256SUMS"
+                    manifest_path = latest / "release-checksums.json"
+                    lines = checksum_path.read_text(
+                        encoding="utf-8"
+                    ).splitlines()
+                    target_index = next(
+                        index
+                        for index, line in enumerate(lines)
+                        if line.endswith(f"  {target}")
+                    )
+                    digest = lines[target_index].split("  ", 1)[0]
+                    lines[target_index] = f"{digest}  {alias}"
+                    manifest = json.loads(
+                        manifest_path.read_text(encoding="utf-8")
+                    )
+                    next(
+                        entry
+                        for entry in manifest["files"]
+                        if entry["path"] == target
+                    )["path"] = alias
+                    write_mutated_checksum_indexes(root, lines, manifest)
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "normalized repository-relative path|invalid path|"
+                        "checksum indexes omit configured files.*"
+                        "docs/release-readiness.md",
+                    ):
+                        self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_on_disk_case_alias(self) -> None:
+        target = Path("docs/release-readiness.md")
+        alias = Path("docs/RELEASE-READINESS.md")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            intermediate = root / "docs/release-readiness.tmp"
+            (root / target).rename(intermediate)
+            intermediate.rename(root / alias)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "exact on-disk component spelling",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_gitattributes_index_mutations(self) -> None:
+        target = verifier.GIT_ATTRIBUTES_PATH
+        for mutation, expected_error in (
+            (
+                "delete",
+                "checksum indexes omit configured files.*.gitattributes",
+            ),
+            (
+                "substitute",
+                "checksum indexes omit configured files.*.gitattributes",
+            ),
+            ("sha_wrong_hash", "checksum indexes disagree.*.gitattributes"),
+            ("manifest_wrong_size", "size mismatch.*.gitattributes"),
+            ("post_mutation", "hash mismatch.*.gitattributes"),
+        ):
+            with self.subTest(mutation=mutation):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts/latest"
+                    checksum_path = latest / "SHA256SUMS"
+                    manifest_path = latest / "release-checksums.json"
+                    lines = checksum_path.read_text(
+                        encoding="utf-8"
+                    ).splitlines()
+                    manifest = json.loads(
+                        manifest_path.read_text(encoding="utf-8")
+                    )
+                    target_index = next(
+                        index
+                        for index, line in enumerate(lines)
+                        if line.endswith(f"  {target}")
+                    )
+                    target_entry = next(
+                        entry
+                        for entry in manifest["files"]
+                        if entry["path"] == target
+                    )
+                    if mutation in {"delete", "substitute"}:
+                        lines.pop(target_index)
+                        manifest["files"].remove(target_entry)
+                        if mutation == "substitute":
+                            substitute = ".attributes-substitute"
+                            write_bytes(root / substitute, b"* text eol=lf\n")
+                            substitute_record = file_record(root, substitute)
+                            lines.append(
+                                substitute_record["sha256"].removeprefix(
+                                    "sha256:"
+                                )
+                                + f"  {substitute}"
+                            )
+                            manifest["files"].append(substitute_record)
+                    elif mutation == "sha_wrong_hash":
+                        lines[target_index] = "0" * 64 + f"  {target}"
+                    elif mutation == "manifest_wrong_size":
+                        target_entry["size_bytes"] += 1
+                    elif mutation == "post_mutation":
+                        attributes = (root / target).read_bytes()
+                        write_bytes(
+                            root / target,
+                            attributes.replace(
+                                b".gitignore",
+                                b".GITIGNORE",
+                                1,
+                            ),
+                        )
+                    write_mutated_checksum_indexes(root, lines, manifest)
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_coordinated_gitattributes_rewrite(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            write_bytes(
+                root / verifier.GIT_ATTRIBUTES_PATH,
+                (
+                    (root / verifier.GIT_ATTRIBUTES_PATH).read_bytes()
+                    + b"*.bad text unsupported\n"
+                ),
+            )
+            refresh_checksum_indexes(root)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "unsupported .gitattributes attribute",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_offline_verifier_loads_checkers_only_after_policy_validation(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            order: list[str] = []
+            original_trust = verifier.verify_release_tool_trust_bindings
+            original_load = verifier._load_snapshot_checker
+
+            def checked_trust(*args, **kwargs):
+                order.append("trust")
+                return original_trust(*args, **kwargs)
+
+            def checked_load(*args, **kwargs):
+                self.assertEqual(order[0], "trust")
+                self.assertNotIn(args[1], order)
+                order.append(args[1])
+                return original_load(*args, **kwargs)
+
+            with (
+                mock.patch.object(
+                    verifier,
+                    "verify_release_tool_trust_bindings",
+                    side_effect=checked_trust,
+                ),
+                mock.patch.object(
+                    verifier,
+                    "_load_snapshot_checker",
+                    side_effect=checked_load,
+                ),
+            ):
                 verifier.verify_release_artifacts(root)
 
-        validate_inventory.assert_called_once_with(
-            root.resolve(),
-            verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY,
-            require_complete=False,
+        self.assertEqual(
+            order,
+            [
+                "trust",
+                "check_governed_parameter_inventory",
+                "check_record_family_authorization",
+            ],
         )
 
-    def test_offline_verifier_invokes_record_family_authorization_validator(
+    def test_offline_verifier_loads_checkers_from_materialized_snapshot(
         self,
     ) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            self.record_package_validator.reset_mock()
-            verifier.verify_release_artifacts(root)
+            observed_roots: list[tuple[Path, bool]] = []
+            original_load = verifier._load_snapshot_checker
 
-        self.record_package_validator.assert_called_once_with(root.resolve())
+            def capture_load(snapshot_root: Path, module_name: str):
+                observed_roots.append(
+                    (snapshot_root, (snapshot_root / "scripts").is_dir())
+                )
+                return original_load(snapshot_root, module_name)
+
+            with mock.patch.object(
+                verifier,
+                "_load_snapshot_checker",
+                side_effect=capture_load,
+            ) as checker_loader:
+                verifier.verify_release_artifacts(repo_root=root)
+
+        self.assertEqual(checker_loader.call_count, 2)
+        for validated_root, scripts_present in observed_roots:
+            self.assertNotEqual(validated_root, root.resolve())
+            self.assertTrue(scripts_present)
+
+    def test_snapshot_checker_loader_uses_snapshot_dependency_and_restores_preloaded_module(
+        self,
+    ) -> None:
+        dependency_name = "check_governed_parameter_identifiers"
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(
+                root / "scripts/check_governed_parameter_identifiers.py",
+                "VALUE = 'snapshot'\n",
+            )
+            checker_path = root / "scripts/check_governed_parameter_inventory.py"
+            write_text(
+                checker_path,
+                "import check_governed_parameter_identifiers as identifier_checker\n"
+                "VALUE = identifier_checker.VALUE\n",
+            )
+            preloaded = type(verifier)(dependency_name)
+            preloaded.VALUE = "live"
+            preloaded.__file__ = str(root.parent / "live_dependency.py")
+            prior = verifier.sys.modules.get(dependency_name)
+            original_path = list(verifier.sys.path)
+            verifier.sys.modules[dependency_name] = preloaded
+            try:
+                loaded = verifier._load_snapshot_checker(
+                    root,
+                    "check_governed_parameter_inventory",
+                )
+                self.assertEqual(loaded.VALUE, "snapshot")
+                self.assertIsNot(loaded.identifier_checker, preloaded)
+                self.assertEqual(
+                    Path(loaded.identifier_checker.__file__).resolve(),
+                    (
+                        root
+                        / "scripts/check_governed_parameter_identifiers.py"
+                    ).resolve(),
+                )
+                self.assertIs(verifier.sys.modules[dependency_name], preloaded)
+                self.assertEqual(verifier.sys.path, original_path)
+
+                write_text(
+                    checker_path,
+                    "import check_governed_parameter_identifiers\n"
+                    "raise RuntimeError('boom')\n",
+                )
+                with self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "cannot execute validated snapshot checker",
+                ):
+                    verifier._load_snapshot_checker(
+                        root,
+                        "check_governed_parameter_inventory",
+                    )
+                self.assertIs(verifier.sys.modules[dependency_name], preloaded)
+                self.assertEqual(verifier.sys.path, original_path)
+            finally:
+                if prior is None:
+                    verifier.sys.modules.pop(dependency_name, None)
+                else:
+                    verifier.sys.modules[dependency_name] = prior
+
+    def test_snapshot_checker_loader_rejects_unreviewed_module(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            write_text(
+                root / "scripts/unreviewed_checker.py",
+                "VALUE = True\n",
+            )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "unreviewed snapshot checker module",
+            ):
+                verifier._load_snapshot_checker(
+                    root,
+                    "unreviewed_checker",
+                )
+
+    def test_failed_policy_validation_never_loads_snapshot_checker(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            with (
+                mock.patch.object(
+                    verifier,
+                    "verify_release_tool_trust_bindings",
+                    side_effect=verifier.ReleaseArtifactVerificationError(
+                        "policy rejected"
+                    ),
+                ),
+                mock.patch.object(
+                    verifier,
+                    "_load_snapshot_checker",
+                ) as checker_loader,
+                self.assertRaisesRegex(
+                    verifier.ReleaseArtifactVerificationError,
+                    "policy rejected",
+                ),
+            ):
+                verifier.verify_release_artifacts(root)
+            checker_loader.assert_not_called()
 
     def test_offline_verifier_rejects_record_family_semantic_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            with mock.patch.object(
-                verifier.record_family_authorization_checker,
-                "validate_package",
-                side_effect=(
-                    verifier.record_family_authorization_checker
-                    .RecordFamilyAuthorizationError("invalid retained evidence")
-                ),
+            inventory_path = (
+                root / verifier.RECORD_FAMILY_AUTHORIZATION_INVENTORY_PATH
+            )
+            inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
+            inventory["schema_version"] = "invalid"
+            write_json(inventory_path, inventory)
+            refresh_checksum_indexes(root)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "record-family authorization semantic validation failed",
             ):
-                with self.assertRaisesRegex(
-                    verifier.ReleaseArtifactVerificationError,
-                    "record-family authorization semantic validation failed: "
-                    "invalid retained evidence",
-                ):
-                    verifier.verify_release_artifacts(root)
+                verifier.verify_release_artifacts(root)
 
     def test_offline_verifier_rejects_malformed_planning_inventory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -455,11 +2105,12 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             seed_release_bundle(root)
             inventory_path = (
                 root
-                / verifier.governed_parameter_inventory_checker.DEFAULT_INVENTORY
+                / verifier.GOVERNED_PARAMETER_INVENTORY_PATH
             )
             inventory = json.loads(inventory_path.read_text(encoding="utf-8"))
             inventory["status"] = "complete"
             write_json(inventory_path, inventory)
+            refresh_checksum_indexes(root)
 
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
@@ -508,10 +2159,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 }
             ],
         }
-        references = (
-            verifier.release_checksum_generator.complete_governed_parameter_references(
-                inventory
-            )
+        references = verifier._independent_complete_reference_bindings(
+            inventory
         )
         all_entries = {
             path.as_posix(): sha256
@@ -560,21 +2209,27 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 },
                 "parameters": [],
             }
+            write_text(
+                root / "release-artifacts/candidate.json",
+                '{"candidate":true}\n',
+            )
             with mock.patch.object(
                 verifier,
-                "validate_governed_parameter_inventory_semantics",
+                "validate_bound_snapshot_semantics",
                 return_value=inventory,
             ):
                 with self.assertRaisesRegex(
                     verifier.ReleaseArtifactVerificationError,
-                    "candidate_binding complete reference is not covered",
+                    "complete reference is not covered.*"
+                    "release-artifacts/candidate.json",
                 ):
                     verifier.verify_release_artifacts(root)
 
     def test_committed_release_bundle_verifies(self) -> None:
         repo_root = SCRIPT_PATH.parent.parent
         summary = verifier.verify_release_artifacts(repo_root)
-        self.assertGreater(summary.checksum_entries, 0)
+        self.assertEqual(summary.checksum_entries, 408)
+        self.assertEqual(summary.checksum_manifest_records, 408)
         self.assertGreater(summary.release_manifest_records, 0)
         self.assertGreater(summary.bytecode_proof_records, 0)
 
@@ -586,7 +2241,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             result = verifier.main(["--repo-root", str(repo_root), "--json"])
         self.assertEqual(result, 0, stderr.getvalue())
         data = json.loads(stdout.getvalue())
-        self.assertGreater(data["checksum_entries"], 0)
+        self.assertEqual(data["checksum_entries"], 408)
+        self.assertEqual(data["checksum_manifest_records"], 408)
 
     def test_main_failure_returns_nonzero_and_stderr(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -597,27 +2253,26 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             with redirect_stdout(StringIO()), redirect_stderr(stderr):
                 result = verifier.main(["--repo-root", str(root)])
             self.assertEqual(result, 1)
-            self.assertIn("error: SHA256SUMS hash mismatch", stderr.getvalue())
+            self.assertIn(
+                "error: canonical line-ending binding size mismatch",
+                stderr.getvalue(),
+            )
 
     def test_minimal_bundle_verifies(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            summary = verifier.verify_release_artifacts(root)
+            summary = self.verify_fixture_release_artifacts(root)
             required_trust_count = len(
-                set(
-                    verifier.release_checksum_generator.release_tool_runtime_closure(
-                        root
-                    )
-                ).union(
-                    verifier.release_checksum_generator.RELEASE_TOOL_FOCUSED_TESTS
+                set(verifier.REVIEWED_RELEASE_TOOL_RUNTIME_CLOSURE).union(
+                    verifier.REVIEWED_RELEASE_TOOL_FOCUSED_TESTS
                 )
             )
             expected_count = 12 + required_trust_count
-            self.assertEqual(summary.checksum_entries, expected_count)
+            self.assertGreaterEqual(summary.checksum_entries, expected_count)
             self.assertEqual(
                 summary.checksum_manifest_records,
-                expected_count,
+                summary.checksum_entries,
             )
 
     def assert_record_family_inventory_schema_index_mutation_rejected(
@@ -688,7 +2343,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 expected_error,
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_coordinated_inventory_schema_index_deletion(
         self,
@@ -696,8 +2351,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_record_family_inventory_schema_index_mutation_rejected(
             "delete",
             (
-                "inventory-schema checksum binding requires exactly one "
-                "SHA256SUMS entry.*got 0"
+                "canonical line-ending checksum indexes omit configured files.*"
+                "record-family-authorization-inventory"
             ),
         )
 
@@ -707,37 +2362,31 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_record_family_inventory_schema_index_mutation_rejected(
             "substitute",
             (
-                "inventory-schema checksum binding requires exactly one "
-                "SHA256SUMS entry.*got 0"
+                "canonical line-ending checksum indexes omit configured files.*"
+                "record-family-authorization-inventory"
             ),
         )
 
     def test_verifier_rejects_inventory_schema_checksum_hash_drift(self) -> None:
         self.assert_record_family_inventory_schema_index_mutation_rejected(
             "sha_wrong_hash",
-            "inventory-schema checksum binding SHA256SUMS hash mismatch",
+            "canonical line-ending binding checksum indexes disagree",
         )
         self.assert_record_family_inventory_schema_index_mutation_rejected(
             "manifest_wrong_hash",
-            (
-                "inventory-schema checksum binding release-checksums.json "
-                "hash mismatch"
-            ),
+            "canonical line-ending binding checksum indexes disagree",
         )
 
     def test_verifier_rejects_inventory_schema_checksum_size_drift(self) -> None:
         self.assert_record_family_inventory_schema_index_mutation_rejected(
             "manifest_wrong_size",
-            (
-                "inventory-schema checksum binding release-checksums.json "
-                "size mismatch"
-            ),
+            "canonical line-ending binding size mismatch",
         )
 
     def test_verifier_rejects_inventory_schema_post_bundle_mutation(self) -> None:
         self.assert_record_family_inventory_schema_index_mutation_rejected(
             "post_file_mutation",
-            "inventory-schema checksum binding SHA256SUMS hash mismatch",
+            "canonical line-ending binding size mismatch",
         )
 
     def assert_release_tool_bundle_mutation_rejected(
@@ -809,7 +2458,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 expected_error,
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_required_trust_file_deleted_from_sha256sums(
         self,
@@ -817,8 +2466,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_release_tool_bundle_mutation_rejected(
             "sha_delete",
             (
-                "release-tool trust binding requires exactly one SHA256SUMS "
-                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+                "canonical line-ending checksum-index file-set mismatch.*"
+                "release-checksums.json-only=.*"
+                "scripts/generate_bytecode_release_proof.py"
             ),
         )
 
@@ -828,9 +2478,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_release_tool_bundle_mutation_rejected(
             "manifest_delete",
             (
-                "release-tool trust binding requires exactly one "
-                "release-checksums.json entry for "
-                "scripts/generate_bytecode_release_proof.py: got 0"
+                "canonical line-ending checksum-index file-set mismatch.*"
+                "SHA256SUMS-only=.*"
+                "scripts/generate_bytecode_release_proof.py"
             ),
         )
 
@@ -840,8 +2490,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_release_tool_bundle_mutation_rejected(
             "sha_substitute",
             (
-                "release-tool trust binding requires exactly one SHA256SUMS "
-                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+                "canonical line-ending checksum-index file-set mismatch.*"
+                "release-checksums.json-only=.*"
+                "scripts/generate_bytecode_release_proof.py"
             ),
         )
 
@@ -851,9 +2502,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_release_tool_bundle_mutation_rejected(
             "manifest_substitute",
             (
-                "release-tool trust binding requires exactly one "
-                "release-checksums.json entry for "
-                "scripts/generate_bytecode_release_proof.py: got 0"
+                "canonical line-ending checksum-index file-set mismatch.*"
+                "SHA256SUMS-only=.*scripts/generate_bytecode_release_proof.py"
             ),
         )
 
@@ -862,10 +2512,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     ) -> None:
         self.assert_release_tool_bundle_mutation_rejected(
             "sha_wrong_hash",
-            (
-                "release-tool trust binding SHA256SUMS hash mismatch for "
-                "scripts/generate_bytecode_release_proof.py"
-            ),
+            "canonical line-ending binding checksum indexes disagree for "
+            "scripts/generate_bytecode_release_proof.py",
         )
 
     def test_verifier_rejects_required_trust_file_wrong_hash_in_checksum_manifest(
@@ -873,11 +2521,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     ) -> None:
         self.assert_release_tool_bundle_mutation_rejected(
             "manifest_wrong_hash",
-            (
-                "release-tool trust binding release-checksums.json hash "
-                "mismatch for "
-                "scripts/generate_bytecode_release_proof.py"
-            ),
+            "canonical line-ending binding checksum indexes disagree for "
+            "scripts/generate_bytecode_release_proof.py",
         )
 
     def test_verifier_rejects_required_trust_file_wrong_size_in_checksum_manifest(
@@ -885,11 +2530,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
     ) -> None:
         self.assert_release_tool_bundle_mutation_rejected(
             "manifest_wrong_size",
-            (
-                "release-tool trust binding release-checksums.json size "
-                "mismatch for "
-                "scripts/generate_bytecode_release_proof.py"
-            ),
+            "canonical line-ending binding size mismatch for "
+            "scripts/generate_bytecode_release_proof.py",
         )
 
     def assert_coordinated_release_tool_bundle_mutation_rejected(
@@ -946,14 +2588,14 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 expected_error,
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_coordinated_trust_file_deletion(self) -> None:
         self.assert_coordinated_release_tool_bundle_mutation_rejected(
             "delete",
             (
-                "release-tool trust binding requires exactly one SHA256SUMS "
-                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+                "canonical line-ending checksum indexes omit configured files.*"
+                "scripts/generate_bytecode_release_proof.py"
             ),
         )
 
@@ -961,8 +2603,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
         self.assert_coordinated_release_tool_bundle_mutation_rejected(
             "substitute",
             (
-                "release-tool trust binding requires exactly one SHA256SUMS "
-                "entry for scripts/generate_bytecode_release_proof.py: got 0"
+                "canonical line-ending checksum indexes omit configured files.*"
+                "scripts/generate_bytecode_release_proof.py"
             ),
         )
 
@@ -1001,7 +2643,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 re.escape(target),
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_coordinated_transitive_source_substitution(
         self,
@@ -1048,7 +2690,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 re.escape(target),
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_symlinked_reviewed_transitive_source(
         self,
@@ -1073,7 +2715,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 re.escape(target.as_posix()),
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_noncanonical_trust_source_policy(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1084,15 +2726,13 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 / "release-artifacts/latest/release-checksums.json"
             )
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            manifest["source"]["coverage_policy"] = (
-                verifier.release_checksum_generator.CUSTOM_SUBSET_COVERAGE_POLICY
-            )
+            manifest["source"]["coverage_policy"] = "custom-subset"
             write_json(manifest_path, manifest)
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
                 "require canonical coverage_policy",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_broad_trust_source_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1103,19 +2743,16 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 / "release-artifacts/latest/release-checksums.json"
             )
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-            removed = (
-                verifier.release_checksum_generator.RELEASE_TOOL_ROOTS[0]
-                .as_posix()
-            )
+            removed = TEST_RELEASE_TOOL_ROOTS[0].as_posix()
             covered_paths = manifest["source"]["covered_paths"]
             covered_paths.remove(removed)
             covered_paths.append("scripts")
             write_json(manifest_path, manifest)
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                re.escape(removed),
+                "coverage roots differ from the independent verifier policy",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_mutated_release_tool_after_bundle_creation(
         self,
@@ -1126,12 +2763,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             write_text(root / RELEASE_TOOL_FIXTURE_PATH, "VALUE = 2\n")
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                (
-                    "release-tool trust binding SHA256SUMS hash mismatch for "
-                    "scripts/generate_bytecode_release_proof.py"
-                ),
+                "canonical line-ending binding size mismatch for "
+                "scripts/generate_bytecode_release_proof.py",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_requires_direct_governed_parameter_inventory_bindings(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1179,6 +2814,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             del lockfile["locked_inputs"]["record_family_authorization_inventory"]
             del lockfile["locked_inputs"][
                 "record_family_authorization_inventory_schema"
+            ]
+            del lockfile["locked_inputs"][
+                "record_family_authorization_evidence_schema"
             ]
             del lockfile["locked_inputs"][
                 "record_family_authorization_evidence_template"
@@ -1386,8 +3024,239 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                     ):
                         verifier.verify_record_family_authorization_bindings(
                             release_manifest,
+                        lockfile,
+                    )
+
+    def test_verifier_rejects_record_family_evidence_schema_omission(self) -> None:
+        for owner, key in (
+            ("manifest", "evidence_schema"),
+            ("lockfile", "record_family_authorization_evidence_schema"),
+        ):
+            with self.subTest(owner=owner):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    if owner == "manifest":
+                        del release_manifest["release_artifacts"][
+                            "record_family_authorization"
+                        ][key]
+                    else:
+                        del lockfile["locked_inputs"][key]
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "evidence_schema|record_family_authorization_evidence_schema",
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
                             lockfile,
                         )
+
+    def test_verifier_rejects_record_family_evidence_schema_identity_drift(
+        self,
+    ) -> None:
+        mutations = (
+            (
+                "path",
+                "deployments/schema/substituted-evidence.schema.json",
+                "evidence schema path must be",
+            ),
+            (
+                "schema_version",
+                "https://json-schema.org/draft/2019-09/schema",
+                "evidence schema must use schema",
+            ),
+            (
+                "schema_id",
+                "https://example.invalid/evidence.json",
+                r"evidence schema\.schema_id must be",
+            ),
+            (
+                "document_schema_version",
+                "6529stream.record-family-authorization-evidence.v2",
+                r"evidence schema\.document_schema_version must be",
+            ),
+        )
+        for field, value, expected_error in mutations:
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["evidence_schema"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_record_family_evidence_schema_record_key_drift(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            release_manifest["release_artifacts"]["record_family_authorization"][
+                "evidence_schema"
+            ]["unreviewed"] = True
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "evidence schema keys must be exactly",
+            ):
+                verifier.verify_record_family_authorization_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_rejects_record_family_evidence_schema_manifest_lock_drift(
+        self,
+    ) -> None:
+        for field, value in (
+            ("sha256", "sha256:" + "0" * 64),
+            ("size_bytes", 1),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["evidence_schema"][field] = value
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        "evidence schema records do not match",
+                    ):
+                        verifier.verify_record_family_authorization_bindings(
+                            release_manifest,
+                            lockfile,
+                        )
+
+    def test_verifier_rejects_coordinated_evidence_schema_substitution(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            latest = root / "release-artifacts" / "latest"
+            release_manifest = verifier.load_json(latest / "release-manifest.json")
+            lockfile = verifier.load_json(latest / "release-candidate-lockfile.json")
+            substituted = record_family_grant_map_schema_record(root)
+            release_manifest["release_artifacts"]["record_family_authorization"][
+                "evidence_schema"
+            ] = dict(substituted)
+            lockfile["locked_inputs"][
+                "record_family_authorization_evidence_schema"
+            ] = dict(substituted)
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "evidence schema path must be",
+            ):
+                verifier.verify_record_family_authorization_bindings(
+                    release_manifest,
+                    lockfile,
+                )
+
+    def test_verifier_rejects_coordinated_evidence_schema_hash_or_size_drift(
+        self,
+    ) -> None:
+        for field, value, expected_error in (
+            ("sha256", "sha256:" + "0" * 64, "hash mismatch"),
+            ("size_bytes", 1, "size mismatch"),
+        ):
+            with self.subTest(field=field):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root = Path(temp_dir)
+                    seed_release_bundle(root)
+                    latest = root / "release-artifacts" / "latest"
+                    release_manifest = verifier.load_json(
+                        latest / "release-manifest.json"
+                    )
+                    lockfile = verifier.load_json(
+                        latest / "release-candidate-lockfile.json"
+                    )
+                    release_manifest_record = release_manifest["release_artifacts"][
+                        "record_family_authorization"
+                    ]["evidence_schema"]
+                    lockfile_record = lockfile["locked_inputs"][
+                        "record_family_authorization_evidence_schema"
+                    ]
+                    release_manifest_record[field] = value
+                    lockfile_record[field] = value
+                    verifier.verify_record_family_authorization_bindings(
+                        release_manifest,
+                        lockfile,
+                    )
+                    checksum_bundle = checksum_bundle_snapshot(root)
+                    snapshots = canonical_covered_snapshots(
+                        root,
+                        checksum_bundle,
+                    )
+                    checksum_entries = verifier.verify_checksum_file(
+                        root,
+                        checksum_bundle,
+                        snapshots,
+                    )
+
+                    with self.assertRaisesRegex(
+                        verifier.ReleaseArtifactVerificationError,
+                        expected_error,
+                    ):
+                        verifier.verify_nested_file_records(
+                            root,
+                            release_manifest,
+                            verifier.RELEASE_MANIFEST_NAME,
+                            checksum_entries,
+                            snapshots,
+                        )
+
+    def test_verifier_rejects_evidence_schema_post_bundle_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            evidence_schema_path = (
+                root / verifier.RECORD_FAMILY_AUTHORIZATION_EVIDENCE_SCHEMA_PATH
+            )
+            write_text(
+                evidence_schema_path,
+                evidence_schema_path.read_text(encoding="utf-8") + "\n",
+            )
+
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "canonical line-ending binding size mismatch|"
+                "canonical line-ending binding SHA256SUMS hash mismatch",
+            ):
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_record_family_grant_schema_omission(self) -> None:
         for owner, key in (
@@ -1414,7 +3283,8 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
 
                     with self.assertRaisesRegex(
                         verifier.ReleaseArtifactVerificationError,
-                        "grant_map_schema|grant_map_schema",
+                        "grant_map_schema|"
+                        "record_family_authorization_grant_map_schema",
                     ):
                         verifier.verify_record_family_authorization_bindings(
                             release_manifest,
@@ -1554,9 +3424,15 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                         release_manifest,
                         lockfile,
                     )
+                    checksum_bundle = checksum_bundle_snapshot(root)
+                    snapshots = canonical_covered_snapshots(
+                        root,
+                        checksum_bundle,
+                    )
                     checksum_entries = verifier.verify_checksum_file(
                         root,
-                        latest / verifier.CHECKSUM_FILE_NAME,
+                        checksum_bundle,
+                        snapshots,
                     )
 
                     with self.assertRaisesRegex(
@@ -1568,6 +3444,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                             release_manifest,
                             verifier.RELEASE_MANIFEST_NAME,
                             checksum_entries,
+                            snapshots,
                         )
 
     def test_verifier_rejects_record_family_manifest_lock_mismatch(self) -> None:
@@ -1597,9 +3474,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             write_text(root / "release-artifacts" / "latest" / "unlisted.json", "{}\n")
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "unchecksummed file",
+                "canonical line-ending checksum indexes omit configured files.*"
+                "release-artifacts/latest/unlisted.json",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_nested_unchecksummed_release_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1613,16 +3491,19 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "release-artifacts/latest/nested/unlisted.json",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_release_directory_closure_allows_checksum_index_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
             latest = root / "release-artifacts" / "latest"
+            checksum_bundle = checksum_bundle_snapshot(root)
+            snapshots = canonical_covered_snapshots(root, checksum_bundle)
             checksum_entries = verifier.verify_checksum_file(
                 root,
-                latest / verifier.CHECKSUM_FILE_NAME,
+                checksum_bundle,
+                snapshots,
             )
             allowed_uncovered = {
                 f"release-artifacts/latest/{name}"
@@ -1654,9 +3535,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "contains symlink",
+                "must not include symlinks or reparse points",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_symlinked_checksum_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1675,7 +3556,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "SHA256SUMS must not be a symlink",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_symlinked_checksum_covered_file(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1694,7 +3575,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "must not include symlinks|must not be a symlink",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_symlinked_checksum_covered_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1712,9 +3593,127 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
 
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "SHA256SUMS.deployments/examples/anvil.json must not include symlinks",
+                "canonical coverage root deployments/examples must not "
+                "include symlinks or reparse points|"
+                "canonical covered path must not include symlinks or "
+                "reparse points",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_nested_checksum_covered_directory_symlink(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target_dir = root / "outside" / "nested-target"
+            write_text(target_dir / "payload.json", "{}\n")
+            link_path = root / "deployments" / "examples" / "nested-link"
+            try:
+                link_path.symlink_to(target_dir, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(
+                    f"directory symlinks unavailable in this environment: {exc}"
+                )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "canonical covered path must not include symlinks or "
+                "reparse points: deployments/examples/nested-link",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_dangling_checksum_covered_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            link_path = root / "deployments" / "examples" / "dangling.json"
+            try:
+                link_path.symlink_to(root / "missing" / "target.json")
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "canonical covered path must not include symlinks or "
+                "reparse points: deployments/examples/dangling.json",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_covered_symlink_to_excluded_checksum_output(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            link_path = root / "deployments" / "examples" / "checksum-link"
+            checksum_path = root / "release-artifacts/latest/SHA256SUMS"
+            try:
+                link_path.symlink_to(checksum_path)
+            except OSError as exc:
+                self.skipTest(f"symlinks unavailable in this environment: {exc}")
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "canonical covered path must not include symlinks or "
+                "reparse points: deployments/examples/checksum-link",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_symlinked_repository_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            real_root = Path(temp_dir) / "real"
+            seed_release_bundle(real_root)
+            linked_root = Path(temp_dir) / "linked"
+            try:
+                linked_root.symlink_to(real_root, target_is_directory=True)
+            except OSError as exc:
+                self.skipTest(
+                    f"directory symlinks unavailable in this environment: {exc}"
+                )
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "repository root must not include symlinks or reparse points",
+            ):
+                self.verify_fixture_release_artifacts(linked_root)
+
+    def test_verifier_rejects_covered_file_hardlinked_to_checksum_output(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            target = root / "docs/release-readiness.md"
+            checksum_path = root / "release-artifacts/latest/SHA256SUMS"
+            target.unlink()
+            try:
+                os.link(checksum_path, target)
+            except OSError as exc:
+                self.skipTest(f"hardlinks unavailable in this environment: {exc}")
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "SHA256SUMS must have exactly one hard link",
+            ):
+                self.verify_fixture_release_artifacts(root)
+
+    def test_verifier_rejects_two_covered_paths_hardlinked_together(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            seed_release_bundle(root)
+            source = root / "docs/tooling.md"
+            target = root / "docs/release-readiness.md"
+            target.unlink()
+            try:
+                os.link(source, target)
+            except OSError as exc:
+                self.skipTest(f"hardlinks unavailable in this environment: {exc}")
+            refresh_checksum_indexes(root)
+            with self.assertRaisesRegex(
+                verifier.ReleaseArtifactVerificationError,
+                "canonical covered files must not alias the same file: "
+                "docs/release-readiness.md, docs/tooling.md|"
+                "docs/tooling.md, docs/release-readiness.md",
+            ):
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_symlinked_release_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1731,7 +3730,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "release directory must not include symlinks",
             ):
-                verifier.verify_release_artifacts(root, Path("release-artifacts/linked-latest"))
+                self.verify_fixture_release_artifacts(
+                    root,
+                    Path("release-artifacts/linked-latest"),
+                )
 
     def test_verifier_rejects_release_directory_outside_repo(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1744,7 +3746,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "release directory must stay inside the repository",
             ):
-                verifier.verify_release_artifacts(root, outside)
+                self.verify_fixture_release_artifacts(root, outside)
 
     def test_checksum_parser_rejects_duplicate_paths(self) -> None:
         line = "0" * 64 + "  release-artifacts/latest/a.json\n"
@@ -1763,9 +3765,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             (root / "release-artifacts" / "latest" / "abi-checksums.json").unlink()
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "SHA256SUMS references missing file",
+                "release-artifacts/latest/abi-checksums.json.*"
+                "must use exact on-disk component spelling",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_stale_checksum_file_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1774,9 +3777,10 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             write_text(root / "release-artifacts" / "latest" / "abi-checksums.json", "changed\n")
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "SHA256SUMS hash mismatch",
+                "canonical line-ending binding size mismatch for "
+                "release-artifacts/latest/abi-checksums.json",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_release_checksum_manifest_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1788,9 +3792,9 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
             write_json(manifest_path, manifest)
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "release-checksums hash mismatch",
+                "canonical line-ending binding checksum indexes disagree",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_release_manifest_file_record_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1815,30 +3819,22 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "release-manifest.json.release_artifacts.abi_checksums hash mismatch",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_requires_nested_release_manifest_checksum_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            write_checksum_bundle(
+            remove_path_from_checksum_indexes(
                 root,
-                [
-                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
-                    "release-artifacts/latest/abi-checksums.json",
-                    "release-artifacts/latest/bytecode-release-proof.json",
-                    "release-artifacts/latest/release-candidate-lockfile.json",
-                    "release-artifacts/latest/release-manifest.json",
-                ],
+                "deployments/examples/anvil.json",
             )
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                (
-                    "release-manifest.json.deployment_artifacts.manifests\\[0\\] "
-                    "references file not covered by SHA256SUMS"
-                ),
+                "canonical line-ending checksum indexes omit configured files.*"
+                "deployments/examples/anvil.json",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_checksum_record_rejects_nested_hash_mismatch(self) -> None:
         with self.assertRaisesRegex(
@@ -1887,7 +3883,7 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "invalid sha256 marker",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_rejects_bytecode_proof_release_manifest_hash_drift(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -1912,46 +3908,37 @@ class ReleaseArtifactVerifierTests(unittest.TestCase):
                 verifier.ReleaseArtifactVerificationError,
                 "bytecode-release-proof.json.source.release_manifest hash mismatch",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_requires_release_manifest_checksum_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            write_checksum_bundle(
+            remove_path_from_checksum_indexes(
                 root,
-                [
-                    "deployments/examples/anvil.json",
-                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
-                    "release-artifacts/latest/abi-checksums.json",
-                    "release-artifacts/latest/bytecode-release-proof.json",
-                ],
+                "release-artifacts/latest/release-manifest.json",
             )
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "required files are not checksum-covered",
+                "canonical line-ending checksum indexes omit configured files.*"
+                "release-artifacts/latest/release-manifest.json",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
     def test_verifier_requires_release_candidate_lockfile_checksum_coverage(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             seed_release_bundle(root)
-            write_checksum_bundle(
+            remove_path_from_checksum_indexes(
                 root,
-                [
-                    "deployments/examples/anvil.json",
-                    verifier.GOVERNED_PARAMETER_INVENTORY_PATH,
-                    "release-artifacts/latest/abi-checksums.json",
-                    "release-artifacts/latest/bytecode-release-proof.json",
-                    "release-artifacts/latest/release-manifest.json",
-                ],
+                "release-artifacts/latest/release-candidate-lockfile.json",
             )
             with self.assertRaisesRegex(
                 verifier.ReleaseArtifactVerificationError,
-                "required files are not checksum-covered",
+                "canonical line-ending checksum indexes omit configured files.*"
+                "release-artifacts/latest/release-candidate-lockfile.json",
             ):
-                verifier.verify_release_artifacts(root)
+                self.verify_fixture_release_artifacts(root)
 
 
 if __name__ == "__main__":

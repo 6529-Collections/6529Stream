@@ -369,6 +369,20 @@ The current local baseline includes:
   ADR 0017 is a direct release-manifest governance document and a direct
   checksum-generator input, so any change to the raise-only target invalidates
   both artifacts until their canonical regeneration;
+- the canonical, non-generated release-tool call policy and schema under
+  `release-artifacts/release-tool-call-policy.json`
+  and
+  [`release-artifacts/schema/release-tool-call-policy.v1.schema.json`](../release-artifacts/schema/release-tool-call-policy.v1.schema.json).
+  The policy binds the exact 21 runtime and nine focused-test source rows by
+  role, hash, size, and reviewed import/member/call multisets. Code separately
+  pins the seven roots, those exact 30 paths, and allowed dangerous-capability
+  membership, so the policy cannot expand its own authority. The release
+  manifest and candidate lockfile bind both files by exact path, SHA-256, byte
+  size, and schema identity/version; both checksum indexes cover them, the
+  offline verifier consumes immutable covered-file snapshots, and public-beta
+  plus production release mode fail closed when validation fails. The revised
+  canonical projection is exactly 242 configured roots and 408 covered-file
+  entries in each checksum index;
 - the schema-validated governed-parameter inventory under
   [`release-artifacts/governed-parameter-inventory.json`](../release-artifacts/governed-parameter-inventory.json),
   its
@@ -392,9 +406,19 @@ The current local baseline includes:
   `production-release-record-family-authorization-grant-map.json` artifact in
   `deployments/record-family-authorization/`; production evidence also
   hash-binds and fully revalidates the canonical public-beta retained envelope.
-  The release manifest and candidate lockfile bind the inventory,
-  grant-map schema, and template records; the manifest also binds the evidence
-  schema. The checksum bundle binds the package plus checker/tests, and the
+  Record-family semantic revalidation binds exactly four contract inputs:
+  `smart-contracts/StreamCollectionMetadata.sol`,
+  `smart-contracts/IStreamCollectionMetadata.sol`,
+  `smart-contracts/StreamPreservationRecords.sol`, and
+  `smart-contracts/IStreamPreservationRecords.sol`. These are four exact
+  checksum roots and entries, not broad `smart-contracts/` coverage. The
+  offline verifier snapshots the complete 408-entry canonical set, materializes
+  it under a temporary root, and loads the checker and all four inputs there;
+  record-family semantic validation has no live-path fallback after snapshot
+  acquisition.
+  The release manifest and candidate lockfile both bind the inventory,
+  inventory schema, evidence schema, grant-map schema, and template records.
+  The checksum bundle binds the package plus checker/tests, and the
   offline verifier revalidates both semantic and cross-artifact bindings. These
   are planning controls, not implementation or readiness evidence;
 - protocol surface report guidance and generated output under
@@ -420,8 +444,9 @@ The current local baseline includes:
   covered by `python scripts/test_release_candidate_lockfile.py` and
   `python scripts/generate_release_candidate_lockfile.py --check`, which ties
   release manifest, bytecode proof, evidence status, risk register, blocker
-  reports, release notes, release-signature evidence, and explicit non-release
-  commit/tag/signature status without claiming launch readiness;
+  reports, release notes, release-signature evidence, the release-tool call
+  policy/schema records, and explicit non-release commit/tag/signature status
+  without claiming launch readiness;
 - generated risk register under
   [`release-artifacts/latest/risk-register.json`](../release-artifacts/latest/risk-register.json),
   backed by
@@ -929,6 +954,11 @@ python scripts/check_non_local_release_evidence.py
 ```
 
 Run the release evidence drift checks:
+
+The release-tool call policy and schema are manually reviewed upstream inputs,
+not generated outputs. Review any required policy update before running the
+canonical generated tail in dependency order: risk register, release notes,
+release manifest, bytecode proof, candidate lockfile, then checksum bundle.
 
 ```sh
 python scripts/audit_release_evidence_issue_snapshots.py --report-json tmp/release-evidence-live-audit-report.json --report-md tmp/release-evidence-live-audit-report.md
